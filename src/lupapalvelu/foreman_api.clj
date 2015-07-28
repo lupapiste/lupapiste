@@ -1,10 +1,11 @@
 (ns lupapalvelu.foreman-api
   (:require [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
+            [lupapalvelu.application :as application]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as application]
             [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.states :as states]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -18,7 +19,7 @@
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole]
    :user-roles #{:applicant :authority}
-   :states action/all-application-states
+   :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{:keys [created user application] :as command}]
   (let [original-open? (util/pos? (:opened application))
@@ -65,7 +66,7 @@
 
 (defcommand update-foreman-other-applications
   {:user-roles #{:applicant :authority}
-   :states action/all-states
+   :states states/all-states
    :parameters [:id foremanHetu]
    :pre-checks [application/validate-authority-in-drafts]}
   [{application :application user :user :as command}]
@@ -85,7 +86,7 @@
 
 (defcommand link-foreman-task
   {:user-roles #{:applicant :authority}
-   :states action/all-states
+   :states states/all-states
    :parameters [id taskId foremanAppId]
    :pre-checks [application/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]
@@ -101,7 +102,7 @@
 
 (defquery foreman-history
   {:user-roles #{:authority :applicant}
-   :states           action/all-states
+   :states           states/all-states
    :user-authz-roles action/all-authz-roles
    :parameters       [:id]
    :pre-checks       [foreman-app-check]}
@@ -112,7 +113,7 @@
 
 (defquery reduced-foreman-history
   {:user-roles #{:authority :applicant}
-   :states           action/all-states
+   :states           states/all-states
    :user-authz-roles action/all-authz-roles
    :parameters       [:id]
    :pre-checks       [foreman-app-check]}
@@ -123,7 +124,7 @@
 
 (defquery foreman-applications
   {:user-roles #{:applicant :authority :oirAuthority}
-   :states           action/all-states
+   :states           states/all-states
    :user-authz-roles action/all-authz-roles
    :parameters       [:id]}
   [{application :application user :user :as command}]

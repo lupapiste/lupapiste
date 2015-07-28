@@ -11,22 +11,24 @@
             [sade.property :as p]
             [lupapalvelu.action :refer [defraw defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as a]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.comment :as comment]
             [lupapalvelu.document.commands :as commands]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.user :as user]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.operations :as operations]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.ktj :as ktj]
-            [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.comment :as comment]))
+            [lupapalvelu.ktj :as ktj]
+            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]))
 
 ;; Notifications
 
@@ -56,7 +58,7 @@
 
 (defquery application
   {:parameters       [:id]
-   :states           action/all-states
+   :states           states/all-states
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-roles
    :org-authz-roles #{:authority :reader}}
@@ -72,7 +74,7 @@
 
 (defquery application-authorities
   {:user-roles #{:authority}
-   :states     (action/all-states-but [:draft :closed :canceled]) ; the same as assign-application
+   :states     (states/all-states-but [:draft :closed :canceled]) ; the same as assign-application
    :parameters [:id]}
   [{application :application}]
   (let [authorities (find-authorities-in-applications-organization application)]
@@ -105,7 +107,7 @@
 (defquery party-document-names
           {:parameters [:id]
            :user-roles #{:applicant :authority}
-           :states     action/all-application-states}
+           :states     states/all-application-states}
           [{application :application}]
           (let [documents (:documents application)
                 initialOp (:name (:primaryOperation application))
@@ -117,7 +119,7 @@
   {:parameters       [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (a/collections-to-be-seen type) (fail :error.unknown-type)))]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :states           action/all-application-states
+   :states           states/all-application-states
    :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [data user created] :as command}]
   (update-application command {$set (a/mark-collection-seen-update user created type)}))
@@ -125,7 +127,7 @@
 (defcommand mark-everything-seen
   {:parameters [:id]
    :user-roles #{:authority :oirAuthority}
-   :states     (action/all-states-but [:draft])}
+   :states     (states/all-states-but [:draft])}
   [{:keys [application user created] :as command}]
   (update-application command {$set (a/mark-indicators-seen-updates application user created)}))
 
@@ -136,7 +138,7 @@
 (defcommand assign-application
   {:parameters [:id assigneeId]
    :user-roles #{:authority}
-   :states     (action/all-states-but [:draft :closed :canceled])}
+   :states     (states/all-states-but [:draft :closed :canceled])}
   [{:keys [user created application] :as command}]
   (let [assignee (util/find-by-id assigneeId (find-authorities-in-applications-organization application))]
     (if (or assignee (ss/blank? assigneeId))
@@ -188,7 +190,7 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           (action/all-states-but [:canceled :closed :answered])
+   :states           (states/all-states-but [:canceled :closed :answered])
    :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]
   (update-application command
@@ -243,8 +245,9 @@
       )))
 
 (defcommand submit-application
-  {:parameters       [id]
-   :input-validators [(partial action/non-blank-parameters [:id])]
+  {:parameters       [id confirm]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      (partial action/boolean-parameters [:confirm])]
    :user-roles       #{:applicant :authority}
    :states           [:draft :open]
    :notified         true
@@ -252,13 +255,16 @@
    :pre-checks       [domain/validate-owner-or-write-access
                       a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
-  (or (a/validate-link-permits application)
-      (do-submit command application created)))
+  (let [application (meta-fields/enrich-with-link-permit-data application)]
+    (or
+      (foreman/validate-notice-submittable application confirm)
+      (a/validate-link-permits application)
+      (do-submit command application created))))
 
 (defcommand refresh-ktj
   {:parameters [:id]
    :user-roles #{:authority}
-   :states     (action/all-states-but [:draft])}
+   :states     (states/all-states-but [:draft])}
   [{:keys [application created]}]
   (autofill-rakennuspaikka application created)
   (ok))
@@ -300,7 +306,7 @@
 (defquery inforequest-markers
           {:parameters       [id lang x y]
            :user-roles       #{:authority :oirAuthority}
-           :states           action/all-inforequest-states
+           :states           states/all-inforequest-states
            :input-validators [(partial action/non-blank-parameters [:id :x :y])]}
           [{:keys [application user]}]
           (let [x (util/->double x)
@@ -417,7 +423,7 @@
 
 (defn authority-if-post-verdict-state [{user :user} {state :state}]
   (when-not (or (user/authority? user)
-                (contains? action/pre-verdict-states (keyword state)))
+                (contains? states/pre-verdict-states (keyword state)))
     (fail :error.unauthorized)))
 
 (defcommand change-location
@@ -458,7 +464,7 @@
 (defquery app-matches-for-link-permits
           {:parameters [id]
            :user-roles #{:applicant :authority}
-           :states     (action/all-application-states-but [:sent :closed :canceled])}
+           :states     (states/all-application-states-but [:sent :closed :canceled])}
           [{{:keys [propertyId] :as application} :application user :user :as command}]
           (let [application (meta-fields/enrich-with-link-permit-data application)
                 ;; exclude from results the current application itself, and the applications that have a link-permit relation to it
@@ -507,7 +513,7 @@
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
    :user-roles       #{:applicant :authority}
-   :states           (action/all-application-states-but [:sent :closed :canceled]) ;; Pitaako olla myos 'sent'-tila?
+   :states           (states/all-application-states-but [:sent :closed :canceled]) ;; Pitaako olla myos 'sent'-tila?
    :pre-checks       [validate-jatkolupa-zero-link-permits
                       validate-link-permit-id
                       a/validate-authority-in-drafts]
@@ -627,7 +633,7 @@
 (defcommand convert-to-application
   {:parameters [id]
    :user-roles #{:applicant :authority}
-   :states     action/all-inforequest-states
+   :states     states/all-inforequest-states
    :pre-checks [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
   (let [op (:primaryOperation application)
@@ -680,7 +686,7 @@
 (defraw redirect-to-vendor-backend
   {:parameters [id]
    :user-roles #{:authority}
-   :states     action/post-submitted-states
+   :states     states/post-submitted-states
    :pre-checks [validate-organization-backend-urls
                 correct-urls-configured]}
   [{{:keys [verdicts organization]} :application}]

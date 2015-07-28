@@ -10,6 +10,7 @@
             [lupapalvelu.comment :as comment]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 
 (defn- application-link [lang role full-path]
@@ -46,7 +47,7 @@
 (defcommand can-target-comment-to-authority
   {:description "Dummy command for UI logic"
    :user-roles #{:authority}
-   :states      (action/all-states-but [:draft :canceled])})
+   :states      (states/all-states-but [:draft :canceled])})
 
 (defcommand can-mark-answered
   {:description "Dummy command for UI logic"
@@ -56,7 +57,7 @@
 (defcommand add-comment
   {:parameters [id text target roles]
    :user-roles #{:applicant :authority :oirAuthority}
-   :states     (action/all-states-but [:canceled])
+   :states     (states/all-states-but [:canceled])
    :user-authz-roles action/all-authz-writer-roles
    :pre-checks [applicant-cant-set-to
                 application/validate-authority-in-drafts]

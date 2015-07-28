@@ -4,12 +4,13 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.states :as states]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
 
 ;; Helpers
@@ -102,6 +103,6 @@
   {:description "Returns a list of allowed schema names for current application and user"
    :parameters [:id]
    :user-roles #{:authority}
-   :states     action/all-states}
+   :states     states/all-states}
   [{application :application}]
   (ok :schemas (map (comp :name :info) (sort-by (comp :order :info) (tasks/task-schemas application)))))
