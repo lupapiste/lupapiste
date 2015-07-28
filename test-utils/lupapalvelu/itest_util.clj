@@ -178,7 +178,7 @@
 (defchecker expected-failure? [expected-text e]
   (cond
     (map? e)                (and (= (:ok e) false) (= (-> e :text name) (name expected-text)))
-    (captured-throwable? e) (= (some-> e throwable bean :data :object :text name) (name expected-text))
+    (captured-throwable? e) (= (some-> e throwable .getData :text name) (name expected-text))
     :else (throw (Exception. (str "'expected-failure?' called with invalid error parameter " e)))))
 
 (def unauthorized? (partial expected-failure? (:text unauthorized)))
@@ -224,6 +224,9 @@
 
 (defn http404? [{:keys [status]}]
   (= status 404))
+
+(defn redirects-to [to {headers :headers :as resp}]
+  (and (http302? resp) (ss/ends-with (headers "location") to)))
 
 ;;
 ;; DSLs
@@ -314,7 +317,7 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (apply create-app-id apikey args)
-        resp  (command apikey :submit-application :id id)]
+        resp  (command apikey :submit-application :id id :confirm false)] ; confirm parameter used only with foreman notice
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
@@ -383,7 +386,7 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (:id (apply create-local-app apikey args))
-        resp  (local-command apikey :submit-application :id id)]
+        resp  (local-command apikey :submit-application :id id :confirm false)]
     resp => ok?
     (query-application local-query apikey id)))
 
@@ -444,7 +447,7 @@
              (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Upload should fail"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.56.html") => 0)))))
+             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.92.html") => 0)))))
 
 (defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
@@ -469,7 +472,7 @@
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Statement upload should fail"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.56.html") => 0)))))
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.92.html") => 0)))))
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
   (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))

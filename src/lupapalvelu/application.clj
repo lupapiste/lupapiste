@@ -7,6 +7,7 @@
             [clojure.zip :as zip]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.company :as c]
             [lupapalvelu.document.model :as model]
@@ -45,9 +46,11 @@
   (or (= :muutoslupa (keyword (:permitSubtype application)))
       (some #(operations/link-permit-required-operations (keyword (:name %))) (get-operations application))))
 
-(defn validate-link-permits [application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)
-        linkPermits (-> application :linkPermitData count)]
+(defn validate-link-permits [{:keys [linkPermitData] :as application}]
+  (let [{:keys [linkPermitData] :as application} (if linkPermitData
+                                                   application
+                                                   (meta-fields/enrich-with-link-permit-data application))
+        linkPermits (count linkPermitData)]
     (when (and (is-link-permit-required application) (zero? linkPermits))
       (fail :error.permit-must-have-link-permit))))
 
@@ -105,7 +108,7 @@
     (update-in application [:documents] (partial map doc-mapper))))
 
 (defn ->location [x y]
-  {:x (util/->double x) :y (util/->double y)})
+  [(util/->double x) (util/->double y)])
 
 (defn get-link-permit-app [{:keys [linkPermitData]}]
   "Return associated (first lupapistetunnus) link-permit application."
@@ -233,7 +236,8 @@
        process-foreman-v2
        (process-documents user)
        process-tasks
-       (enrich-docs-disabled-flag user)))
+       (enrich-docs-disabled-flag user)
+       location->object))
 
 ;;
 ;; Application creation

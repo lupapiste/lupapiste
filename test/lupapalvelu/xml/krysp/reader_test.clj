@@ -4,7 +4,8 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
             [sade.xml :as xml]
-            [lupapalvelu.xml.krysp.reader :refer [property-equals ->verdicts ->buildings-summary ->rakennuksen-tiedot ->buildings  wfs-krysp-url rakval-case-type get-app-info-from-message]]
+            [lupapalvelu.xml.krysp.reader :refer [property-equals ->verdicts ->buildings-summary ->rakennuksen-tiedot ->buildings wfs-krysp-url rakval-case-type get-app-info-from-message]]
+            [sade.common-reader :as cr]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]))
@@ -12,7 +13,16 @@
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
 
-(testable-privates lupapalvelu.xml.krysp.reader ->standard-verdicts standard-verdicts-validator simple-verdicts-validator ->simple-verdicts pysyva-rakennustunnus)
+(testable-privates lupapalvelu.xml.krysp.reader
+  ->standard-verdicts
+  standard-verdicts-validator
+  simple-verdicts-validator
+  ->simple-verdicts
+  pysyva-rakennustunnus
+  tj-suunnittelija-verdicts-validator
+  party-with-paatos-data
+  valid-sijaistustieto?
+  osapuoli-path-key-mapping)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
@@ -180,12 +190,14 @@
         (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
 
 ;;
-;; HUOM: Sanomassa vaara encoding ("iso-8859-1").
-;;       Readerkaan ei osaa lukea, vaan hukkaa skandit!
-;;       Tama Teklan testisanoma saatu QA:lta. Tuotannossa naytti 26.6.2015 viela tulevan "utf-8-enkoodauksella", jota me tuemme.
+;; HUOM: Teklalta saadussa QA:n testisanomassa on vaara encoding ("iso-8859-1").
+;;       Kyseinen file on tallessa nimella "verdict - 2.1.8 - Tekla (iso-8859-1).xml", jolla voi testailla.
+;;       (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml (iso-8859-1)") :encoding "iso-8859-1")
+;;       Readerkaan ei osaa tata lukea, vaan hukkaa skandit.
+;;       Tuotannossa naytti 26.6.2015 viela tulevan "utf-8-enkoodauksella", jota me tuemme.
 ;;
 (facts "KRYSP verdict 2.1.8 - Tekla.xml"
- (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml") :encoding "iso-8859-1")
+ (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml"))
        cases (->verdicts xml ->standard-verdicts)]
 
    (fact "xml is parsed" cases => truthy)
@@ -200,7 +212,7 @@
      ;; Testing here that the reader divides those as different elements properly.
      (fact "vaaditut erityissuunnitelmat Tekla style"
          vaaditut-erityissuunnitelmat => sequential?
-         vaaditut-erityissuunnitelmat => (just ["Rakennesuunnitelmat" "Vesi- ja viemrisuunnitelmat" "Ilmanvaihtosuunnitelmat"] :in-any-order)))))
+         vaaditut-erityissuunnitelmat => (just ["Rakennesuunnitelmat" "Vesi- ja viem\u00e4risuunnitelmat" "Ilmanvaihtosuunnitelmat"] :in-any-order)))))
 
 (facts "CGI sample verdict"
   (let [xml (xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
@@ -463,6 +475,15 @@
     (:rakennusnro building1) => "123"
     (:valtakunnallinenNumero building1) => "1234567892"))
 
+(facts "Maaraykset from verdict message"
+  (let [xml (xml/parse (slurp "resources/krysp/sample/sito-kajaani-LP-205-2015-00069-paatos-tyhja-maarays.xml"))
+        verdicts (->verdicts xml ->standard-verdicts)
+        paatokset (:paatokset (first verdicts))
+        lupamaaraykset (:lupamaaraykset (first paatokset))
+        maaraykset (:maaraykset lupamaaraykset)]
+    maaraykset =not=> (contains [nil])
+    (count maaraykset) => 3))
+
 (facts "wfs-krysp-url works correctly"
   (fact "without ? returns url with ?"
     (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
@@ -499,5 +520,45 @@
         (fact "address" address => "Kylykuja 3-5 D 35b-c")
         (fact "propertyId" propertyId => "18600303560006")))))
 
+
+(facts* "Tests for TJ/suunnittelijan verdicts parsing"
+  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml"))
+        osapuoli {:alkamisPvm "2015-07-07"
+                  :paattymisPvm "2015-07-10"
+                  :sijaistettavaHlo "Pena Panaani"
+                  :paatosPvm 1435708800000 ; 01.07.2015
+                  :paatostyyppi "hyv\u00e4ksytty"}
+        sijaistus {:alkamisPvm "07.07.2015"
+                   :paattymisPvm "10.07.2015"
+                   :sijaistettavaHloEtunimi "Pena"
+                   :sijaistettavaHloSukunimi "Panaani"}]
+
+    (facts "Sijaistus"
+      (valid-sijaistustieto? nil nil) => falsey
+      (valid-sijaistustieto? nil sijaistus) => falsey
+      (valid-sijaistustieto? osapuoli nil) => truthy
+      (fact "True when values match"
+        (valid-sijaistustieto? osapuoli sijaistus) => truthy)
+      (fact "Dates must match"
+        (valid-sijaistustieto? (assoc osapuoli :alkamisPvm "2015-07-06") sijaistus) => falsey
+        (valid-sijaistustieto? osapuoli (assoc sijaistus :paattymisPvm "09.07.2015")) => falsey)
+      (fact "Name must match"
+        (valid-sijaistustieto? (assoc osapuoli :sijaistettavaHlo "Panaani Pena") sijaistus) => falsey
+        (valid-sijaistustieto? osapuoli (assoc sijaistus :sijaistettavaHloEtunimi "Paavo")) => falsey)
+      (fact "Name can have whitespace"
+        (valid-sijaistustieto? osapuoli (assoc sijaistus :sijaistettavaHloSukunimi "  Panaani ")) => truthy))
+
+    (facts "Osapuoli with paatos data"
+      (party-with-paatos-data nil nil) => falsey
+      (party-with-paatos-data [osapuoli] sijaistus) => osapuoli
+      (fact "PaatosPvm must be there"
+        (party-with-paatos-data [(dissoc osapuoli :paatosPvm)] anything) => nil)
+      (fact "Paatostyyppi must be correct"
+        (party-with-paatos-data [(assoc osapuoli :paatostyyppi "test")] anything) => nil
+        (party-with-paatos-data [(assoc osapuoli :paatostyyppi "hyl\u00e4tty")] sijaistus) => truthy)
+      (fact "Sijaistus can be nil"
+        (party-with-paatos-data [osapuoli] nil) => truthy)
+      (fact "Sijaistus can be empty"
+        (party-with-paatos-data [osapuoli] {}) => truthy))))
 
 

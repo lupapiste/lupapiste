@@ -31,6 +31,8 @@ jQuery(document).ready(function() {
     "tags-editor",
     "upload",
     "leaflet-map",
+    "vetuma-init",
+    "vetuma-status",
     "applications-search",
     "applications-search-results",
     "applications-search-filter"

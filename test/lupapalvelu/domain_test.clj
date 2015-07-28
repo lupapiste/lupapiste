@@ -4,7 +4,7 @@
             [lupapalvelu.domain :refer :all]
             [lupapalvelu.document.schemas :as schemas]))
 
-(testable-privates lupapalvelu.domain only-authority-sees-drafts)
+(testable-privates lupapalvelu.domain only-authority-sees-drafts filter-targeted-attachment-comments)
 
 (facts
   (let [application {:auth [{:id :user-x} {:id :user-y}]}]
@@ -80,3 +80,29 @@
   (only-authority-sees-drafts {:role "non-authority"} [{:draft nil}]) => [{:draft nil}]
   (only-authority-sees-drafts {:role "authority"} [{}]) => [{}]
   (only-authority-sees-drafts {:role "nono-authority"} [{}]) => [{}])
+
+(facts "Filtering application data"
+  (facts "Comments"
+    (let [application {:attachments [{:id 1}
+                                     {:id 2}]
+                       :comments [{:text "nice application"
+                                   :target {:type "application"}}
+                                  {:text "attachment for you"
+                                   :target {:type "attachment"
+                                            :id 1}}
+                                  {:text "deleted attachment comment"
+                                   :target {:type "attachment"
+                                            :id 0}}
+                                  {:text nil ; 'insertion' comment of attachment
+                                   :target {:type "attachment"
+                                            :id 0}}]}
+          expected-comments [{:text "nice application"
+                              :target {:type "application"}}
+                             {:text "attachment for you"
+                              :target {:type "attachment"
+                                       :id 1}}
+                             {:text "deleted attachment comment"
+                              :target {:type "attachment"
+                                       :id 0}}]]
+      (fact "even comments for deleted attachments are returned, but not those which are empty"
+        (:comments (filter-targeted-attachment-comments application)) => expected-comments))))

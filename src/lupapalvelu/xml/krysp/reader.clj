@@ -353,12 +353,12 @@
     (#(if (:maarays %)
         (let [maaraykset (cr/convert-keys-to-timestamps (:maarays %) [:maaraysaika :maaraysPvm :toteutusHetki])
               ;; KRYSP 2.1.5+ renamed :maaraysaika -> :maaraysPvm
-              maaraykset (mapv
+              maaraykset (remove nil? (mapv
                            (fn [maar]
                              (if (:maaraysPvm maar)
                                (-> maar (assoc :maaraysaika (:maaraysPvm maar)) (dissoc :maaraysPvm))
                                maar))
-                           maaraykset)]
+                           maaraykset))]
           (assoc % :maaraykset maaraykset))
         %))
     (dissoc :maarays)
@@ -422,6 +422,95 @@
               :poytakirjat    (seq poytakirjat)})))
     (select xml-without-ns [:paatostieto :Paatos])))
 
+
+;; TJ/Suunnittelija verdict
+
+(def- tj-suunnittelija-verdict-statuses-to-loc-keys-mapping
+  {"hyv\u00e4ksytty" "hyvaksytty"
+   "hyl\u00e4tty" "hylatty"
+   "hakemusvaiheessa" "hakemusvaiheessa"
+   "ilmoitus hyv\u00e4ksytty" "ilmoitus-hyvaksytty"})
+
+(def- tj-suunnittelija-verdict-statuses
+  (-> tj-suunnittelija-verdict-statuses-to-loc-keys-mapping keys set))
+
+(defn- ->paatos-osapuoli [path-key osapuoli-xml-without-ns]
+  (-> (cr/all-of osapuoli-xml-without-ns path-key)
+    (cr/convert-keys-to-timestamps [:paatosPvm])))
+
+(defn- valid-sijaistustieto? [osapuoli sijaistus]
+  (when osapuoli
+    (or
+     (empty? sijaistus) ; sijaistus only used with foreman roles
+     (and ; sijaistettava must be empty in both, KRSYP and document
+       (ss/blank? (:sijaistettavaHlo osapuoli))
+       (and
+         (ss/blank? (:sijaistettavaHloEtunimi sijaistus))
+         (ss/blank? (:sijaistettavaHloSukunimi sijaistus))))
+     (and ; .. or dates and input values of KRYSP xml must match document values
+       (= (:alkamisPvm osapuoli) (util/to-xml-date-from-string (:alkamisPvm sijaistus)))
+       (= (:paattymisPvm osapuoli) (util/to-xml-date-from-string (:paattymisPvm sijaistus)))
+       (=
+         (ss/trim (:sijaistettavaHlo osapuoli))
+         (str ; original string build in canonical-common 'get-sijaistustieto'
+           (ss/trim (:sijaistettavaHloEtunimi sijaistus))
+           " "
+           (ss/trim (:sijaistettavaHloSukunimi sijaistus))))))))
+
+(defn- party-with-paatos-data [osapuolet sijaistus]
+  (some
+    #(when (and
+             (:paatosPvm %)
+             (tj-suunnittelija-verdict-statuses (:paatostyyppi %))
+             (valid-sijaistustieto? % sijaistus))
+       %)
+    osapuolet))
+
+(def- osapuoli-path-key-mapping
+  {"tyonjohtaja"   {:path [:tyonjohtajatieto :Tyonjohtaja]
+                    :key :tyonjohtajaRooliKoodi}
+   "suunnittelija" {:path [:suunnittelijatieto :Suunnittelija]
+                    :key :suunnittelijaRoolikoodi}})
+
+(defn- get-tj-suunnittelija-osapuolet
+  "Returns parties which match with given kuntaRoolikoodi and yhteystiedot, and have paatosPvm"
+  [xml-without-ns osapuoli-path osapuoli-key kuntaRoolikoodi-key kuntaRoolikoodi yhteystiedot]
+  (->> (select xml-without-ns osapuoli-path)
+    (map (partial ->paatos-osapuoli osapuoli-key))
+    (filter #(and
+               (= kuntaRoolikoodi (get % kuntaRoolikoodi-key))
+               (:paatosPvm %)
+               (= (:email yhteystiedot) (get-in % [:henkilo :sahkopostiosoite]))))))
+
+(defn tj-suunnittelija-verdicts-validator [{{:keys [yhteystiedot sijaistus]} :data} xml osapuoli-type kuntaRoolikoodi]
+  {:pre [xml (#{"tyonjohtaja" "suunnittelija"} osapuoli-type) kuntaRoolikoodi]}
+  (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
+        osapuoli-key (last osapuoli-path)
+        xml-without-ns (cr/strip-xml-namespaces xml)
+        osapuolet (get-tj-suunnittelija-osapuolet xml-without-ns osapuoli-path osapuoli-key kuntaRoolikoodi-key kuntaRoolikoodi yhteystiedot)
+        osapuoli (party-with-paatos-data osapuolet sijaistus)
+        paatospvm  (:paatosPvm osapuoli)
+        timestamp-1-day-from-now (util/get-timestamp-from-now :day 1)]
+    (cond
+      (not (seq osapuolet))                  (fail :info.no-verdicts-found-from-backend)
+      (not (seq osapuoli))                   (fail :info.tj-suunnittelija-paatos-details-missing)
+      (< timestamp-1-day-from-now paatospvm) (fail :info.paatos-future-date))))
+
+(defn ->tj-suunnittelija-verdicts [{{:keys [yhteystiedot sijaistus]} :data} osapuoli-type kuntaRoolikoodi xml-without-ns]
+  (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
+        osapuoli-key (last osapuoli-path)]
+    (map (fn [osapuolet-xml-without-ns]
+           (let [osapuolet (get-tj-suunnittelija-osapuolet xml-without-ns osapuoli-path osapuoli-key kuntaRoolikoodi-key kuntaRoolikoodi yhteystiedot)
+                 osapuoli (party-with-paatos-data osapuolet sijaistus)]
+           (when (and osapuoli (> (now) (:paatosPvm osapuoli)))
+             {:poytakirjat
+              [{:status (get tj-suunnittelija-verdict-statuses-to-loc-keys-mapping (:paatostyyppi osapuoli))
+                :paatospvm (:paatosPvm osapuoli)
+                :liite (:liite osapuoli)
+                }]
+              })))
+  (select xml-without-ns [:osapuolettieto :Osapuolet]))))
+
 (defn- application-state [xml-without-ns]
   (->> (select xml-without-ns [:Kasittelytieto])
     (map (fn [kasittelytieto] (-> (cr/all-of kasittelytieto) (cr/convert-keys-to-timestamps [:muutosHetki]))))
@@ -471,6 +560,8 @@
 (permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdicts)
 (permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdicts)
 
+(permit/register-function permit/R :tj-suunnittelija-verdict-krysp-reader ->tj-suunnittelija-verdicts)
+
 (permit/register-function permit/R :verdict-krysp-validator standard-verdicts-validator)
 (permit/register-function permit/P :verdict-krysp-validator standard-verdicts-validator)
 (permit/register-function permit/YA :verdict-krysp-validator simple-verdicts-validator)
@@ -494,9 +585,7 @@
                            (->function)
                            (cleanup)
                            (filter seq))]
-        (if (seq verdicts)
-          (assoc verdict-model :paatokset verdicts)
-          verdict-model)))
+        (util/assoc-when verdict-model :paatokset verdicts)))
     (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector)))
 
 (defn- buildings-summary-for-application [xml]

@@ -5,7 +5,7 @@
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [sade.core :refer :all]
             [clj-time.format :as timeformat]
-            [clj-time.core :refer [days weeks months ago]]
+            [clj-time.core :refer [days weeks months years ago]]
             [clj-time.coerce :as tc]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [debugf]])
@@ -268,12 +268,13 @@
       (apply format fmt (map ->int matches)))))
 
 (defn get-timestamp-from-now [time-key amount]
-  "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week or :year."
+  "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
   {:pre [(#{:day :week :month} time-key)]}
   (let [time-fn (case time-key
                   :day days
                   :week weeks
-                  :month months)]
+                  :month months
+                  :years years)]
     (tc/to-long (-> amount time-fn ago))))
 
 (defn to-long [s]
@@ -381,6 +382,22 @@
 
 (defn finnish-zip? [^String zip-code]
   (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
+
+(defn relative-local-url? [^String url]
+  (not (or (not (string? url)) (ss/starts-with url "//") (re-matches #"^\w+://.*" url))))
+
+(defn version-is-greater-or-equal
+  "True if given version string is greater than version defined in target map, else nil"
+  [source target]
+  {:pre [(map? target) (every? #(target %) [:major :minor :micro]) (string? source)]}
+  (let [[source-major source-minor source-micro] (map #(->int %) (ss/split source #"\."))
+        source-major (or source-major 0)
+        source-minor (or source-minor 0)
+        source-micro (or source-micro 0)]
+    (or
+      (> source-major (:major target))
+      (and (= source-major (:major target)) (> source-minor (:minor target)))
+      (and (= source-major (:major target)) (= source-minor (:minor target)) (>= source-micro (:micro target))))))
 
 ;;
 ;; Schema utils:

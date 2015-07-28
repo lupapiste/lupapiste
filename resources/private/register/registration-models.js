@@ -13,7 +13,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
                      "allowDirectMarketing", "rakentajafi",
                      "architect", "degree", "graduatingYear", "fise"];
 
-  var plainModel = function(data, keys) {
+  var PlainModel = function(data, keys) {
     var self = this;
 
     var defaults = {
@@ -34,7 +34,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
       architect: false,
       allowDirectMarketing: false,
       rakentajafi: false,
-      acceptTerms: false,
+      acceptTerms: false
     };
 
     self.showRakentajafiInfo = function() {
@@ -43,13 +43,13 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
 
     function json() {
       return _.pick(ko.mapping.toJS(self), keys);
-    };
+    }
 
     self.setData = function(data) {
       ko.mapping.fromJS(_.defaults(data, defaults), {}, self);
-    }
+    };
 
-    self.reset = function(data) {
+    self.reset = function() {
       self.setData({});
       return false;
     };
@@ -107,7 +107,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
     }).sortBy("name").value();
   };
 
-  self.model = ko.validatedObservable(new plainModel({}, self.keys));
+  self.model = ko.validatedObservable(new PlainModel({}, self.keys));
 
   self.model().disabled = ko.computed(function() {
     return !self.model.isValid() || !self.model().acceptTerms();

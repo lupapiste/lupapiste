@@ -8,7 +8,6 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
-            [cljts.geom :as geo]
             [cljts.io :as jts]
             [sade.env :as env]))
 
@@ -321,11 +320,6 @@
                    default-role)]
       (if (s/blank? code) default-role code))))
 
-
-(defn- get-roolikoodit [kuntaRoolikoodi]
-  {:kuntaRooliKoodi kuntaRoolikoodi ; Note the upper case 'Koodi'
-   :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)})
-
 (defn get-osapuoli-data [osapuoli party-type]
   (let [selected-value (or (-> osapuoli :_selected) (-> osapuoli first key))
         yritys-type-osapuoli? (= "yritys" selected-value)
@@ -459,7 +453,8 @@
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
        :koulutus koulutus
-       :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
+        :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
+       :vaadittuPatevyysluokka (:patevyysvaatimusluokka patevyys)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
@@ -488,6 +483,7 @@
                    "muu"
                    (:koulutusvalinta patevyys))
        :patevyysvaatimusluokka (:patevyysvaatimusluokka tyonjohtaja)
+       :vaadittuPatevyysluokka (:patevyysvaatimusluokka tyonjohtaja)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
@@ -696,6 +692,6 @@
   (let [app-location-info {:Sijainti {:osoite {:yksilointitieto (:id application)
                                                :alkuHetki (util/to-xml-datetime (now))
                                                :osoitenimi {:teksti (:address application)}}
-                                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
+                                      :piste {:Point {:pos (str (first (:location application)) " " (second (:location application)))}}}}
         drawings (drawings-as-krysp (:drawings application))]
     (cons app-location-info drawings)))

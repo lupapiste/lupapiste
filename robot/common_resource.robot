@@ -2,7 +2,7 @@
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
-Library        Selenium2Library   timeout=10  run_on_failure=Log Source
+Library        Selenium2Library   timeout=10
 
 *** Variables ***
 
@@ -91,6 +91,14 @@ Wait for jQuery
 
 Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
+
+Language To
+  [Arguments]  ${lang}
+  Element Should Not Contain  language-select  ${lang}
+  Click Link  xpath=//a[@data-test-id='language-link']
+  Wait Until  Element Should Be Visible  css=div.language-menu
+  Click Element  partial link=${lang}
+  Wait Until  Element Should Contain  language-select  ${lang}
 
 
 #
@@ -322,6 +330,10 @@ Click enabled by test id
   Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
 
+Primary operation is
+  [Arguments]  ${opId}
+  Element should be visible  xpath=//span[@data-test-primary-operation-id="${opId}"]
+
 #
 # Helper for inforequest and application crud operations:
 #
@@ -378,15 +390,16 @@ Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new
-  Do prepare new request
+  Do prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
 
 Prepare first request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new-inforequest
-  Do prepare new request
+  Do prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
 
 Do prepare new request
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Input Text  create-search  ${propertyId}
   Click enabled by test id  create-search-button
   Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
@@ -669,7 +682,7 @@ Mark answered
   Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
 
 Comment count is
-  [Arguments]  ${section}  ${amount}
+  [Arguments]  ${amount}
   Open side panel  conversation
   Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class,'comment-text')]  ${amount}
   Close side panel  conversation

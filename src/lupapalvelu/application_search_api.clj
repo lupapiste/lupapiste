@@ -4,6 +4,7 @@
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery] :as action]
             [lupapalvelu.application-search :as search]
+            [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]))
@@ -48,7 +49,8 @@
         rows (map #(-> %
                      (domain/filter-application-content-for user)
                      (select-keys fields) ; filters empty lists from previous step
-                     localize-application)
+                     localize-application
+                     location->object)
                apps)]
     (ok :applications rows)))
 

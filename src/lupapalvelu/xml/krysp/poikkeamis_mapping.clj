@@ -24,7 +24,7 @@
                                   {:tag :luvanTunnistetiedot
                                    :child [mapping-common/lupatunnus]}
                                   {:tag :osapuolettieto
-                                   :child [mapping-common/osapuolet]}
+                                   :child [mapping-common/osapuolet_210]}
                                   {:tag :rakennuspaikkatieto
                                    :child [mapping-common/rakennuspaikka]}
                                   {:tag :toimenpidetieto :child [{:tag :Toimenpide :child [{:tag :kuvausKoodi }

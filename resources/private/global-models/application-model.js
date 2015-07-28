@@ -41,7 +41,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.statements = ko.observable([]);
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
-  self.metadataList = ko.observableArray();
+  self.metadata = ko.observable();
 
   // Application indicator metadata fields
   self.unseenStatements = ko.observable();
@@ -220,9 +220,12 @@ LUPAPISTE.ApplicationModel = function() {
       if (i.id() === "" && i.invite) {
         i.id(util.getIn(i, ["invite", "user", "id"]));
       }
-      var a = r[i.id()] || (i.roles = [], i);
-      a.roles.push(i.role());
-      r[i.id()] = a;
+      var auth = r[i.id()] || (i.roles = [], i);
+      var role = i.role();
+      if (!_.contains(auth.roles, role)) {
+        auth.roles.push(role);
+      }
+      r[i.id()] = auth;
       return r;
     };
     var pimped = _.reduce(self.auth(), withRoles, {});
@@ -240,24 +243,38 @@ LUPAPISTE.ApplicationModel = function() {
     hub.send("track-click", {category:"Application", label:"map", event:"openOskariMap"});
   };
 
-  self.submitApplication = function() {
+  self.submitApplication = function(confirm) {
     hub.send("track-click", {category:"Application", label:"submit", event:"submitApplication"});
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("application.submit.areyousure.title"),
-      loc("application.submit.areyousure.message"),
-      {title: loc("yes"),
-       fn: function() {
-        ajax.command("submit-application", {id: self.id()})
-          .success(function() {
-            self.reload();
-          })
-          .processing(self.processing)
-          .call();
-        hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
-        return false;
-      }},
-      {title: loc("no")}
-    );
+
+    var submitFn = function() {
+      ajax.command("submit-application", {id: self.id(), confirm: confirm})
+        .success(self.reload)
+        .onError("error.foreman.notice-not-submittable", function() {
+          hub.send("show-dialog", {ltitle: "foreman.dialog.notice-submit-warning.title",
+                                   size: "medium",
+                                   component: "yes-no-dialog",
+                                   componentParams: {ltext: "foreman.dialog.notice-submit-warning.text",
+                                                     lyesTitle: "foreman.dialog.notice-submit-warning.yes",
+                                                     lnoTitle: "foreman.dialog.notice-submit-warning.no",
+                                                     yesFn: _.partial(self.submitApplication, true)}});
+        })
+        .processing(self.processing)
+        .call();
+      hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
+      return false;
+    };
+
+    if ( confirm ) {
+      submitFn();
+    } else {
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("application.submit.areyousure.title"),
+        loc("application.submit.areyousure.message"),
+        {title: loc("yes"),
+         fn: submitFn},
+        {title: loc("no")}
+      );
+    }
     hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
     return false;
   };
