@@ -13,11 +13,29 @@
         <div>
           <table>
             <thead>
-              <tr><th>lol</th></tr>
+              <tr>
+                <th></th>
+                <th data-bind="ltext: 'applications.type'"></th>
+                <th data-bind="ltext: 'applications.location'"></th>
+                <th data-bind="ltext: 'applications.operation'"></th>
+                <th data-bind="ltext: 'applications.applicant'"></th>
+                <th data-bind="ltext: 'applications.sent'"></th>
+                <th data-bind="ltext: 'applications.updated'"></th>
+                <th data-bind="ltext: 'applications.status'"></th>
+                <th data-bind="ltext: 'applications.authority'"></th>
+              </tr>
             </thead>
             <tbody data-bind="foreach: data">
               <tr>
                 <td data-bind="text: _id"></td>
+                <td data-bind="ltext: 'applications.' + kind"></td>
+                <td data-bind="text: address + ', ' + loc(['municipality', municipality])"></td>
+                <td data-bind="ltext: 'operations.' + primaryOperation.name"></td>
+                <td data-bind="text: applicant"></td>
+                <td data-bind="text: sent ? moment(sent).format('D.M.YYYY HH:mm') : ''"></td>
+                <td data-bind="text: modified ? moment(modified).format('D.M.YYYY HH:mm') : ''"></td>
+                <td data-bind="ltext: state"></td>
+                <td data-bind="fullName: authority"></td>
               </tr>
             </tbody>
           </table>
