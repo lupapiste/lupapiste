@@ -6,6 +6,7 @@
             [lupapalvelu.user :as u]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.states :as states]
             [sade.strings :as ss]))
 
 ;;
@@ -109,7 +110,7 @@
 
 (defcommand company-invite
   {:parameters [id company-id]
-   :states (action/all-application-states-but [:closed :canceled])
+   :states (states/all-application-states-but [:closed :canceled])
    :user-roles #{:applicant :authority}
    :pre-checks [application/validate-authority-in-drafts]}
   [{caller :user application :application}]

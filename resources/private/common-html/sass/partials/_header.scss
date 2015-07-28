@@ -3,7 +3,6 @@ $header-height: 60px;
 $brand-width: 188px;
 $language-bg: $gray85;
 $language-padding: 20px;
-$notification-bg: $orange-dark;
 
 @mixin header-padding {
   padding: {
@@ -77,6 +76,19 @@ $notification-bg: $orange-dark;
   width: 100%;
 }
 
+.nav-box {
+  width: 100%;
+  max-width: $application-max-width;
+  min-width: $application-min-width;
+  margin: 0 auto;
+  position: relative;
+    box-sizing: border-box;
+    margin: {
+      left: auto;
+      right: auto;
+    }
+}
+
 nav {
   position: fixed;
   top:0;
@@ -86,89 +98,101 @@ nav {
   .nav-top {
     @include nav-row( $gray51);
   }
-  .nav-box {
-    width: 100%;
-    max-width: $application-max-width;
-    min-width: $application-min-width;
-    margin: 0 auto;
+  .brand {
     position: relative;
-    box-sizing: border-box;
-    margin: {
-      left: auto;
-      right: auto;
-    }
-    .brand {
-      position: relative;
-      width: $brand-width;
-      display: inline-block;
+    width: $brand-width;
+    display: inline-block;
+    float: left;
+    a img {
       float: left;
-      a img {
-        float: left;
-        width: 164px;
-        height: 35px;
-        margin: 12px;
-      }
+      width: 164px;
+      height: 35px;
+      margin: 12px;
     }
-    .language-closed {
-      @include language-select;
+  }
+  .language-closed {
+    @include language-select;
 
-    }
-    .language-open {
-      @include language-select( $link: white, $hover: $orange, $bg: $language-bg );
-    }
-    .header-menu {
+  }
+  .language-open {
+    @include language-select( $link: white, $hover: $orange, $bg: $language-bg );
+  }
+  .header-menu {
+    display: inline-block;
+    position: absolute;
+    right: 0px;
+
+    .header-box {
+      @include nav-link;
+      @include header-padding;
       display: inline-block;
-      position: absolute;
-      right: 0px;
+      height: $header-height;
+      a {
+        max-width: 300px;
+      }
+      a, span {
+        line-height: $header-height;
+      }
+    }
+  }
+}
 
-      .header-box {
-        @include nav-link;
-        @include header-padding;
-        display: inline-block;
-        height: $header-height;
-        a {
-          max-width: 300px;
-        }
-        a, span {
-          line-height: $header-height;
-        }
-      }
-    }
-  }
-  .nav-bottom {
-    @include nav-row( $language-bg );
-    .language-menu {
-      width: 100%;
-      clear: both;
-      padding: {
-        top: 1em;
-        left: $brand-width + $language-padding;
-        bottom: .5em;
-      }
-      background-color: $language-bg;
-      ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-        li {
-          @include nav-link( $link: white, $hover: $orange);
-          margin: {
-            bottom: .5em;
-            top: 0;
-          }
-        }
-      }
-    }
-  }
-  .nav-notification {
-    @include nav-row( $orange-dark );
+.nav-bottom {
+  @include nav-row( $language-bg );
+  .language-menu {
+    width: 100%;
+    clear: both;
     padding: {
-      left: $header-padding;
-      top: $header-padding;
-      bottom: $header-padding;
+      top: 1em;
+      left: $brand-width + $language-padding;
+      bottom: .5em;
     }
-    &:after {
-      clear: both;
+    background-color: $language-bg;
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      li {
+        @include nav-link( $link: white, $hover: $orange);
+        margin: {
+          bottom: .5em;
+          top: 0;
+        }
+      }
     }
+  }
+}
+
+// The margins/paddings may seem arbitrary, but
+// they are due to rendering differences between
+// different browsers.
+$notification-bg: $orange-dark;
+$notification-top: 60px;
+$notification-bottom: -60px;
+
+.nav-notification {
+  @include nav-row( $orange-dark );
+  padding: {
+    left: $header-padding;
+    top: $header-padding + 1px;
+    bottom: $header-padding;
+  }
+  margin: {
+    top: $notification-top;
+    bottom: $notification-bottom;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+// Admin nav is different, so tweaking is needed.
+// See admin.css for details.
+.admin {
+  .nav-notification {
+    margin: {
+    top: $notification-top + 42px + 4px;
+    bottom: $notification-bottom + 12px;
+  }
   }
 }
