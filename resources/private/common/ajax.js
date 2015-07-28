@@ -39,10 +39,13 @@ var ajax = (function($) {
       rawData:   false,
       complete:  self.onComplete,
       success: function(e) {
-        var handler = (self.rawData || e.ok) ? self.successHandler : resolveErrorHandler(e);
-        var res = handler.call(self.savedThis, e);
-        if ( res && !res.ok ) {
-          defaultError(e);
+        if (self.rawData || e.ok) {
+          self.successHandler.call(self.savedThis, e);
+        } else {
+          var res = resolveErrorHandler(e).call(self.savedThis, e);
+          if (res && res.ok === false) {
+            defaultError(e);
+          }
         }
       },
       error: function(jqXHR, textStatus, errorThrown) {
