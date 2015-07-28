@@ -22,7 +22,6 @@ LUPAPISTE.HandlersDataProvider = function() {
     .query("users-in-same-organizations")
     .error(_.noop)
     .success(function(res) {
-      console.log("users", res.users);
       data(_.map(res.users, mapUser));
     })
     .call();
@@ -44,8 +43,12 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   self.dataProvider = params.dataProvider;
 
-  self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
+  self.organizationTagsDataProvider = null;
+  self.handlersDataProvider = null;
 
-  // TODO just search single organization tags for now, later do some grouping stuff in autocomplete component
-  self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(_.last(_.keys(lupapisteApp.models.currentUser.orgAuthz())), self.dataProvider.applicationTags);
+  if ( lupapisteApp.models.currentUser.isAuthority() ) {
+    self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
+    // TODO just search single organization tags for now, later do some grouping stuff in autocomplete component
+    self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(_.last(_.keys(lupapisteApp.models.currentUser.orgAuthz())), self.dataProvider.applicationTags);
+  }
 };
