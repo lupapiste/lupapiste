@@ -72,6 +72,10 @@ var pageutil = (function($) {
     }
   }
 
+  function openApplicationPage(application) {
+    openPage("application/" + application._id);
+  }
+
   $(function() {
     ajaxLoaderContainer = $("<div>").attr("id", "ajax-loader-container")
       .append($("<div>"))
@@ -87,6 +91,7 @@ var pageutil = (function($) {
     showAjaxWait:         showAjaxWait,
     hideAjaxWait:         hideAjaxWait,
     makePendingAjaxWait:  makePendingAjaxWait,
+    openApplicationPage:  openApplicationPage,
     openFrontpage:        openFrontpage,
     openPage:             openPage,
     frontpage:            frontpage
