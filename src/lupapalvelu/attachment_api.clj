@@ -26,7 +26,6 @@
             [sade.util :as util]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application :refer [get-operations]]
-            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.pdf-conversion :as pdf-conversion]
             [sade.env :as env])
   (:import [java.io File]))
@@ -54,8 +53,8 @@
       (let [attachment (attachment/get-attachment-info application attachmentId)
             attachmentApplicationState (keyword (:applicationState attachment))
             currentState (keyword (:state application))]
-        (or (not (meta-fields/post-verdict-states currentState))
-            (meta-fields/post-verdict-states attachmentApplicationState)
+        (or (not (action/post-verdict-states currentState))
+            (action/post-verdict-states attachmentApplicationState)
             (= (keyword userRole) :authority)))))
 
 (defn- validate-meta [{{meta :meta} :data}]
