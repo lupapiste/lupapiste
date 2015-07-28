@@ -159,6 +159,9 @@
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
 
+(defn- enrich-row [app]
+  (assoc app :kind (if (:infoRequest app) "inforequest" "application")))
+
 (defn applications-for-user-v2 [user]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
@@ -171,7 +174,7 @@
                       (query/sort {:modified 1})
                       (query/skip skip)
                       (query/limit limit))
-        rows        (map (comp (partial meta-fields/with-indicators user) #(domain/filter-application-content-for % user) ) apps)] ; Prevent XSS TODO
+        rows        (map (comp enrich-row (partial meta-fields/with-indicators user) #(domain/filter-application-content-for % user) ) apps)] ; Prevent XSS TODO
     rows))
 
 (defn public-fields [{:keys [municipality submitted primaryOperation]}]
