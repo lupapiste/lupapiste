@@ -383,6 +383,9 @@
 (defn finnish-zip? [^String zip-code]
   (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
 
+(defn relative-local-url? [^String url]
+  (not (or (not (string? url)) (ss/starts-with url "//") (re-matches #"^\w+://.*" url))))
+
 (defn version-is-greater-or-equal
   "True if given version string is greater than version defined in target map, else nil"
   [source target]

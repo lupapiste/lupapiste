@@ -60,7 +60,7 @@
                  [org.geotools/gt-referencing "13.1"]
                  [org.geotools/gt-epsg-wkt "13.1"]
                  [org.clojure/data.json "0.2.6"]
-                 [lupapiste/commons "0.5.2-SNAPSHOT"]]
+                 [lupapiste/commons "0.5.3"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
@@ -96,7 +96,7 @@
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "stest"       ["with-profile" "dev,stest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
-  :aot [lupapalvelu.main]
+  :aot [lupapalvelu.main clj-time.core]
   :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
   :pom-plugins [[org.fusesource.mvnplugins/maven-graph-plugin "1.4"]

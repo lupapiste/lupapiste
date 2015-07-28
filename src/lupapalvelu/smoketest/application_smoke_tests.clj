@@ -1,7 +1,7 @@
 (ns lupapalvelu.smoketest.application-smoke-tests
   (:require [lupapalvelu.smoketest.core :refer [defmonster]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.action :as action]
+            [lupapalvelu.states :as states]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.application :as a]
             [lupapalvelu.server] ; ensure all namespaces are loaded
@@ -110,7 +110,7 @@
     {:ok true}))
 
 (defmonster opened-timestamp
-  (timestamp-is-set :opened (action/all-states-but [:draft :canceled])))
+  (timestamp-is-set :opened (states/all-states-but [:draft :canceled])))
 
 ;;
 ;; Skips applications with operation "aiemmalla-luvalla-hakeminen" (previous permit aka paperilupa)
@@ -119,7 +119,7 @@
  (if-let [results (seq (remove nil? (map
                                       (fn [app]
                                         (when (and
-                                                ((action/all-application-states-but [:canceled :draft :open]) (keyword (:state app)))
+                                                ((states/all-application-states-but [:canceled :draft :open]) (keyword (:state app)))
                                                 (when-not (some #(#{"aiemmalla-luvalla-hakeminen"} (:name %)) (resolve-operations app))
                                                   (nil? (:submitted app))))
                                           (:id app)))

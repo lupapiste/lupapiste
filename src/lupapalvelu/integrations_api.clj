@@ -16,6 +16,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
@@ -39,7 +40,7 @@
          (assoc-in [:linkPermitData 0 :lupapisteId] link-permit-app-id)
          (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
          (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))
-      (if (and (foreman/foreman-app? application) (some #{(keyword (:state link-permit-app))} meta-fields/post-submitted-states))
+      (if (and (foreman/foreman-app? application) (some #{(keyword (:state link-permit-app))} states/post-submitted-states))
         application
         (do
           (info "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
@@ -78,8 +79,7 @@
    :states     [:submitted :complement-needed]}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
-        foreman-notice? (when foreman/foreman-app?
-                          (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value)))
+        foreman-notice? (foreman/notice? application)
         app-updates (merge
                       {:modified created
                        :sent created
@@ -162,7 +162,7 @@
                       (partial action/non-blank-parameters [:documentId :path])
                       (partial action/boolean-parameters [:overwrite])]
    :user-roles #{:applicant :authority}
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
+   :states     (states/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
    :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
@@ -212,7 +212,7 @@
 (defcommand get-building-info-from-wfs
   {:parameters [id]
    :user-roles #{:applicant :authority}
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
+   :states     (states/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization propertyId] :as application} :application}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]

@@ -31,7 +31,7 @@ Mikko changes his name and experience
   User should be logged in  Mika Intola
 
 Name and experience should have changed in Swedish page too
-  Click link  xpath=//*[@data-test-id='lang-sv']
+  Language To  SV
   Wait for Page to Load  Mika  Intola
   User should be logged in  Mika Intola
   Checkbox Should Be Selected  allowDirectMarketing
@@ -49,7 +49,7 @@ Mika changes the name and experience back
   Wait until  Page should contain  Sparad
 
 Name and experience should have changed in Finnish page too
-  Click link  xpath=//*[@data-test-id='lang-fi']
+  Language To  FI
   Wait for Page to Load  Mikko  Intonen
   User should be logged in  Mikko Intonen
   Checkbox Should Be Selected  allowDirectMarketing

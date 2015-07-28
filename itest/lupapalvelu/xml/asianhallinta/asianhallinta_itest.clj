@@ -23,14 +23,14 @@
 
 (fl/facts* "Asianhallinta itest"
   (facts "UusiAsia from poikkeamis application"
-    (let [app-id (create-app-id
-                    pena
-                    :propertyId kuopio-property-id
-                    :operation "poikkeamis"
-                    :propertyId "29703401070010"
-                    :y 6965051.2333374 :x 535179.5
-                    :address "Suusaarenkierto 44") => truthy
-          application (query-application pena app-id) => truthy
+    (let [application (create-and-submit-application
+                         pena
+                         :propertyId kuopio-property-id
+                         :operation "poikkeamis"
+                         :propertyId "29703401070010"
+                         :y 6965051.2333374 :x 535179.5
+                         :address "Suusaarenkierto 44") => truthy
+          app-id (:id application) => truthy
           organization (organization/resolve-organization velho-muni (:permitType application)) => truthy
           scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy]
       (keys (:caseManagement scope)) => (just [:ftpUser :version :enabled] :in-any-order)
@@ -38,7 +38,6 @@
       (generate-documents application pena)
       (upload-attachment-to-all-placeholders pena application)
 
-      (command pena :submit-application :id app-id) => ok?
       (fact "Pena can't move application to asianhallinta"
         (command pena :application-to-asianhallinta :id app-id :lang "fi") => unauthorized?)
 
@@ -112,33 +111,32 @@
             (fact "Link permits do not exist" (sxml/select xml [:UusiAsia :Viiteluvat]) => empty?))))))
 
   (facts "UusiAsia with link permits"
-    (let [link-app-id (create-app-id
-                         pena
-                         :propertyId kuopio-property-id
-                         :operation "asuinrakennus"
-                         :propertyId "29703401070010"
-                         :y 6965051.2333374 :x 535179.5
-                         :address "Suusaarenkierto 44") => truthy
-          _ (command pena :submit-application :id link-app-id) => ok?
+    (let [link-app (create-and-submit-application
+                      pena
+                      :propertyId kuopio-property-id
+                      :operation "asuinrakennus"
+                      :propertyId "29703401070010"
+                      :y 6965051.2333374 :x 535179.5
+                      :address "Suusaarenkierto 44") => truthy
+          link-app-id (:id link-app)
           new-verdict-resp (command velho :new-verdict-draft :id link-app-id) => ok?
           verdict-id (:verdictId new-verdict-resp) => truthy
           _ (command velho :save-verdict-draft :id link-app-id :verdictId verdict-id :backendId "KLTunnus1" :status 42 :name "Paatoksen antaja" :given 123 :official 124 :text "" :agreement false :section "") => ok?
           _ (command velho :publish-verdict :id link-app-id :verdictId verdict-id) => ok?
           manual-link "Another kuntalupatunnus"
 
-          app-id (create-app-id ; Actual app for asianhallinta
-                         pena
-                         :propertyId kuopio-property-id
-                         :operation "poikkeamis"
-                         :propertyId "29703401070010"
-                         :y 6965051.2333374 :x 535179.5
-                         :address "Suusaarenkierto 44")
-          application (query-application pena app-id) => truthy
+          application (create-and-submit-application ; Actual app for asianhallinta
+                              pena
+                              :propertyId kuopio-property-id
+                              :operation "poikkeamis"
+                              :propertyId "29703401070010"
+                              :y 6965051.2333374 :x 535179.5
+                              :address "Suusaarenkierto 44") => truthy
+          app-id (:id application)
           organization (organization/resolve-organization velho-muni (:permitType application)) => truthy
           scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy]
 
       (generate-documents application pena)
-      (command pena :submit-application :id app-id) => ok?
       (command pena :add-link-permit :id app-id :linkPermitId link-app-id) ; link-app-id has verdict with kuntalupatunnus
       (command pena :add-link-permit :id app-id :linkPermitId manual-link) ; manual kuntalupatunnus
 
@@ -183,20 +181,19 @@
                   contents) => truthy)))))))
 
   (facts "AsianTaydennys"
-    (let [app-id (create-app-id
-                   pena
-                   :propertyId kuopio-property-id
-                   :operation "poikkeamis"
-                   :propertyId "29703401070010"
-                   :y 6965051.2333374 :x 535179.5
-                   :address "Suusaarenkierto 44") => truthy
-          application (query-application pena app-id) => truthy
+    (let [application (create-and-submit-application
+                        pena
+                        :propertyId kuopio-property-id
+                        :operation "poikkeamis"
+                        :propertyId "29703401070010"
+                        :y 6965051.2333374 :x 535179.5
+                        :address "Suusaarenkierto 44") => truthy
+          app-id (:id application)
           organization (organization/resolve-organization velho-muni (:permitType application)) => truthy
           scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy]
       (keys (:caseManagement scope)) => (just [:ftpUser :version :enabled] :in-any-order)
       (generate-documents application pena)
       (upload-attachment-to-all-placeholders pena application)
-      (command pena :submit-application :id app-id) => ok?
       (fact "Unable to send attachments if application is not yet in asianhallinta"
         (command velho :attachments-to-asianhallinta :id app-id :attachmentIds [] :lang "fi") =not=> ok?)
       (command velho :application-to-asianhallinta :id app-id :lang "fi") => ok?
@@ -256,27 +253,23 @@
                                          (fact "Filename content is correct" attachment-string => "This is test file for file upload in itest.")))))))
 
   (fact "Can't create asianhallinta with non-asianhallinta operation"
-    (let [app-id (create-app-id
-                    pena
-                    :propertyId kuopio-property-id
-                    :operation "asuinrakennus"
-                    :propertyId "29703401070010"
-                    :y 6965051.2333374 :x 535179.5
-                    :address "Suusaarenkierto 44") => truthy
-          app (query-application pena app-id)]
-      (command pena :submit-application :id app-id) => ok?
+    (let [app-id (:id (create-and-submit-application
+                        pena
+                        :propertyId kuopio-property-id
+                        :operation "asuinrakennus"
+                        :propertyId "29703401070010"
+                        :y 6965051.2333374 :x 535179.5
+                        :address "Suusaarenkierto 44")) => truthy]
       (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial expected-failure? "error.operations.asianhallinta-disabled")))
 
   (fact "If asianhallinta is not set error occurs"
-    (let [app-id (create-app-id
-                    pena
-                    :propertyId sipoo-property-id
-                    :operation "poikkeamis"
-                    :propertyId "75312312341234"
-                    :x 444444 :y 6666666
-                    :address "foo 42, bar") => truthy
-          app (query-application pena app-id)]
-      (command pena :submit-application :id app-id) => ok?
+    (let [app-id (:id (create-and-submit-application
+                        pena
+                        :propertyId sipoo-property-id
+                        :operation "poikkeamis"
+                        :propertyId "75312312341234"
+                        :x 444444 :y 6666666
+                        :address "foo 42, bar")) => truthy]
       (command sonja :application-to-asianhallinta :id app-id :lang "fi") => (partial expected-failure? "error.integration.asianhallinta-disabled")))
 
   (facts "Auth admin configs"
@@ -321,30 +314,26 @@
             (:version ah-config) => "lol"))))
 
   (fact "Fail when organization has unsupported version selected"
-    (let [app-id (create-app-id
-                    pena
-                    :propertyId kuopio-property-id
-                    :operation "poikkeamis"
-                    :propertyId "29703401070010"
-                    :y 6965051.2333374 :x 535179.5
-                    :address "Suusaarenkierto 44") => truthy
-          app (query-application pena app-id)]
-      (command pena :submit-application :id app-id) => ok?
+    (let [app-id (:id (create-and-submit-application
+                        pena
+                        :propertyId kuopio-property-id
+                        :operation "poikkeamis"
+                        :propertyId "29703401070010"
+                        :y 6965051.2333374 :x 535179.5
+                        :address "Suusaarenkierto 44")) => truthy]
       (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial
                                                                                expected-failure?
                                                                                "error.integration.asianhallinta-version-wrong-form")))
 
   (fact "Fail when organization has version missing"
     (let [_ (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version false)
-          app-id (create-app-id
-                    pena
-                    :propertyId kuopio-property-id
-                    :operation "poikkeamis"
-                    :propertyId "29703401070010"
-                    :y 6965051.2333374 :x 535179.5
-                    :address "Suusaarenkierto 44") => truthy
-          app (query-application pena app-id)]
-      (command pena :submit-application :id app-id) => ok?
+          app-id (:id (create-and-submit-application
+                        pena
+                        :propertyId kuopio-property-id
+                        :operation "poikkeamis"
+                        :propertyId "29703401070010"
+                        :y 6965051.2333374 :x 535179.5
+                        :address "Suusaarenkierto 44")) => truthy]
       (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial
                                                                                expected-failure?
                                                                                "error.integration.asianhallinta-version-missing"))))

@@ -15,7 +15,7 @@ LUPAPISTE.CompanyEditModel = function(params) {
 
   self.saveCompany = function() {
     var updates = _.pick(ko.mapping.toJS(self.company), ["accountType", "customAccountLimit"]);
-    updates.customAccountLimit = parseInt(updates.customAccountLimit);
+    updates.customAccountLimit = parseInt(updates.customAccountLimit, 10);
     ajax
       .command("company-update",
                {company: self.company.id(),

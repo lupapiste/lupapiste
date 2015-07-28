@@ -21,12 +21,12 @@
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
             [lupapalvelu.statement :as statement]
+            [lupapalvelu.states :as states]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [sade.util :as util]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application :refer [get-operations]]
-            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.pdf-conversion :as pdf-conversion]
             [sade.env :as env])
   (:import [java.io File]))
@@ -54,8 +54,8 @@
       (let [attachment (attachment/get-attachment-info application attachmentId)
             attachmentApplicationState (keyword (:applicationState attachment))
             currentState (keyword (:state application))]
-        (or (not (meta-fields/post-verdict-states currentState))
-            (meta-fields/post-verdict-states attachmentApplicationState)
+        (or (not (states/post-verdict-states currentState))
+            (states/post-verdict-states attachmentApplicationState)
             (= (keyword userRole) :authority)))))
 
 (defn- validate-meta [{{meta :meta} :data}]
@@ -96,7 +96,7 @@
   {:parameters [:id]
    :user-authz-roles action/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
-   :states     action/all-states}
+   :states     states/all-states}
   [{application :application}]
   (ok :attachmentTypes (attachment/get-attachment-types-for-application application)))
 
@@ -105,7 +105,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :states     (action/all-states-but [:answered :sent :closed :canceled])
+   :states     (states/all-states-but [:answered :sent :closed :canceled])
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application user created] :as command}]
 
@@ -126,7 +126,7 @@
   {:parameters [:id]
    :user-authz-roles action/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
-   :states action/all-states}
+   :states states/all-states}
   [{application :application}]
   (ok :operations (get-operations application)))
 
@@ -139,7 +139,7 @@
    :parameters  [id attachmentId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:authority}
-   :states      (action/all-states-but [:answered :sent :closed :canceled])
+   :states      (states/all-states-but [:answered :sent :closed :canceled])
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :state :ok created :set-app-modified? true :set-attachment-modified? false))
@@ -149,7 +149,7 @@
    :parameters  [id attachmentId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:authority}
-   :states      (action/all-states-but [:answered :sent :closed :canceled])
+   :states      (states/all-states-but [:answered :sent :closed :canceled])
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :state :requires_user_action created :set-app-modified? true :set-attachment-modified? false))
@@ -168,7 +168,7 @@
                 a/validate-authority-in-drafts]
    :input-validators [(partial action/vector-parameters [:attachmentTypes])]
    :user-roles #{:authority :oirAuthority}
-   :states      (action/all-states-but [:answered :sent :closed :canceled])}
+   :states      (states/all-states-but [:answered :sent :closed :canceled])}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (attachment/create-attachments application attachmentTypes created false true true)]
     (ok :applicationId id :attachmentIds attachment-ids)
@@ -184,7 +184,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :states      (action/all-states-but [:answered :sent :closed :canceled])
+   :states      (states/all-states-but [:answered :sent :closed :canceled])
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
 
@@ -203,7 +203,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId :fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :states      (action/all-states-but [:answered :sent :closed :canceled])
+   :states      (states/all-states-but [:answered :sent :closed :canceled])
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
 
@@ -246,7 +246,7 @@
 (defraw "download-all-attachments"
   {:parameters [:id]
    :user-roles #{:applicant :authority :oirAuthority}
-   :states     action/all-states
+   :states     states/all-states
    :user-authz-roles action/all-authz-roles}
   [{:keys [application user lang]}]
   (if application
@@ -281,7 +281,7 @@
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
-   :states     (action/all-states-but [:closed :canceled])
+   :states     (states/all-states-but [:closed :canceled])
    :notified   true
    :on-success [(notify :new-comment)
                 open-inforequest/notify-on-comment]
@@ -477,7 +477,7 @@
   {:parameters [id attachmentId meta]
    :user-roles #{:applicant :authority}
    :user-authz-roles action/all-authz-writer-roles
-   :states     (action/all-states-but [:answered :sent :closed :canceled])
+   :states     (states/all-states-but [:answered :sent :closed :canceled])
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation]
    :pre-checks [a/validate-authority-in-drafts]}
@@ -503,7 +503,7 @@
 (defcommand set-attachments-as-verdict-attachment
   {:parameters [:id selectedAttachmentIds unSelectedAttachmentIds]
    :user-roles #{:authority}
-   :states     (action/all-states-but [:draft :closed :canceled])
+   :states     (states/all-states-but [:draft :closed :canceled])
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:selectedAttachmentIds :unSelectedAttachmentIds])
                       (fn [{{:keys [selectedAttachmentIds unSelectedAttachmentIds]} :data}]
                         (when (seq (intersection (set selectedAttachmentIds) (set unSelectedAttachmentIds)))

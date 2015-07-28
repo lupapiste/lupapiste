@@ -98,7 +98,7 @@
         (reject-attachment application-id (first attachment-ids)))
 
       (fact "Pena submits the application"
-        (command pena :submit-application :id application-id) => ok?
+        (command pena :submit-application :id application-id :confirm false) => ok?
         (:state (query-application veikko application-id)) => "submitted")
 
       (fact "Veikko can still approve attachment"

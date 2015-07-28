@@ -5,15 +5,16 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
-            [lupapalvelu.user :refer [with-user-by-email] :as user]
-            [lupapalvelu.user-api :as user-api]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.comment :as comment]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.organization :as organization]
+            [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.statement :refer :all]))
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.statement :refer :all]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :refer [with-user-by-email] :as user]
+            [lupapalvelu.user-api :as user-api]))
 
 ;;
 ;; Authority Admin operations
@@ -75,7 +76,7 @@
    :parameters [:id]
    :user-roles #{:authority}
    :user-authz-roles #{:statementGiver}
-   :states action/all-application-states}
+   :states states/all-application-states}
   [{application :application}]
   (ok :data (possible-statement-statuses application)))
 
@@ -83,7 +84,7 @@
   {:parameters [:id]
    :user-roles #{:authority}
    :user-authz-roles action/default-authz-writer-roles
-   :states action/all-application-states}
+   :states states/all-application-states}
   [{application :application}]
   (let [organization (organization/get-organization (:organization application))
         permitPersons (or (:statementGivers organization) [])]
@@ -92,7 +93,7 @@
 (defquery should-see-unsubmitted-statements
   {:description "Pseudo query for UI authorization logic"
    :parameters [:id]
-   :states (action/all-application-states-but [:draft])
+   :states (states/all-application-states-but [:draft])
    :user-roles #{:authority}
    :user-authz-roles #{:statementGiver}}
   [_])

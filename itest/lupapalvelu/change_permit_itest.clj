@@ -4,13 +4,13 @@
             [lupapalvelu.factlet :refer :all]))
 
 (fact* "A change permit can be created based on current R application after verdict has been given."
-  (let [apikey                 sonja
-        application-id         (create-app-id apikey
-                                 :propertyId sipoo-property-id
-                                 :address "Paatoskuja 12")
-        application            (query-application apikey application-id) => truthy]
+  (let [apikey              sonja
+        application         (create-and-submit-application
+                              apikey
+                              :propertyId sipoo-property-id
+                              :address "Paatoskuja 12")
+        application-id      (:id application)]
     (generate-documents application apikey)
-    (command apikey :submit-application :id application-id) => ok?
     (command apikey :approve-application :id application-id :lang "fi") => ok?
     (command apikey :create-change-permit :id application-id) => (partial expected-failure? "error.command-illegal-state")
     (give-verdict apikey application-id) => ok?

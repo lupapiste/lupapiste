@@ -280,6 +280,14 @@
   (fact (to-long "") => nil)
   (fact (to-long 1234) => nil))
 
+(facts "relative-local-url?"
+  (relative-local-url? nil) => false
+  (relative-local-url? "") => true
+  (relative-local-url? "http://localhost") => false
+  (relative-local-url? "//localhost") => false
+  (relative-local-url? "/localhost") => true
+  (relative-local-url? "../localhost") => true)
+
 (facts "version-is-greater-or-equal"
   (fact "source (evaluated) version"
     (version-is-greater-or-equal "2"     {:major 2 :minor 1 :micro 5}) => false

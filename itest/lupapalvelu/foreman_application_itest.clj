@@ -57,10 +57,13 @@
       (:submittable (query-application apikey foreman-application-id)) => false)
 
     (fact "Submit link-permit app"
-      (command apikey :submit-application :id application-id) => ok?)
+      (command apikey :submit-application :id application-id :confirm false) => ok?)
 
-    (fact "Submit foreman-app"
-      (command apikey :submit-application :id foreman-application-id) => ok?)
+    (facts "Submit foreman-app"
+      (fact "gives error first and warns about foreman notice"
+        (command apikey :submit-application :id foreman-application-id :confirm false) => (partial expected-failure? :error.foreman.notice-not-submittable))
+      (fact "By confirming the foreman notice application can be submitted"
+        (command apikey :submit-application :id foreman-application-id :confirm true) => ok?))
 
     (fact "Link foreman application to task"
       (let [apikey                       mikko

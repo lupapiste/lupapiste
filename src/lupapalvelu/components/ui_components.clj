@@ -15,6 +15,7 @@
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
+            [lupapalvelu.states :as states]
             [scss-compiler.core :as scss]
             [me.raynes.fs :as fs]))
 
@@ -41,7 +42,7 @@
                  :attachmentSizes       attachment-sizes
                  :accountTypes          company/account-types
                  :eInvoiceOperators     schemas/e-invoice-operators
-                 :postVerdictStates     lupapalvelu.application-meta-fields/post-verdict-states
+                 :postVerdictStates     states/post-verdict-states
                  :stampableMimes        (filter identity (map mime/mime-types file-types))
                  :foremanRoles          (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
@@ -99,7 +100,7 @@
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
    :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
-   :leaflet        {:js ["leaflet.js"]
+   :leaflet        {:js ["leaflet.min.js"]
                     :css ["leaflet.css"]}
    :stickyfill     {:js ["stickyfill.min.js"]}
 
@@ -124,12 +125,12 @@
                        :js ["expanded-content.js"]}
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
-                            :expanded-content :mockjax :open-layers :stickyfill :leaflet]
+                            :expanded-content :mockjax :open-layers :stickyfill]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
-                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js" "metadata.js"]}
+                       "statuses.js" "authorization.js" "vetuma.js"]}
 
-   :common-html  {:depends [:selectm-html :leaflet]
+   :common-html  {:depends [:selectm-html]
                   :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
                   :html ["404.html" "footer.html"]}
 
@@ -149,7 +150,7 @@
                   :js ["mypage.js"]
                   :html ["mypage.html"]}
 
-   :user-menu     {:html ["nav.html"]}
+   :header     {:html ["header.html"], :js ["header.js"]}
 
    :modal-datepicker {:depends [:common-html]
                       :html ["modal-datepicker.html"]
@@ -173,6 +174,10 @@
    :signing      {:depends [:common-html]
                   :html ["signing-dialogs.html"]
                   :js ["signing-model.js" "verdict-signing-model.js"]}
+
+   :metadata-editor {:depends [:common-html]
+                     :html ["metadata-editor.html"]
+                     :js ["metadata-editor.js"]}
 
    :stamp        {:depends [:common-html]
                   :html ["stamp-template.html"]
@@ -298,28 +303,28 @@
                    :js ["applicant.js"]}
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
-                             :statement :docgen :create :mypage :user-menu :debug
+                             :statement :docgen :create :mypage :header :debug
                              :company :analytics :register-company]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
    :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
-                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
-                             :company :stamp :integration-error :analytics]}
+                             :statement :verdict :neighbors :docgen :create :mypage :header :debug
+                             :company :stamp :integration-error :analytics :metadata-editor]}
 
    :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :notice :analytics]
+                       :docgen :debug :notice :analytics :header]
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin.js" "register-authority-admin-models.js"]}
-   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :analytics]
+   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :header :debug :analytics :leaflet]
                          :js ["admin.js" schema-versions-by-permit-type]
                          :html ["admin.html"]}
 
    :admin-app {:depends [:ui-components]
                :js ["admin.js" "register-admin-models.js"]}
-   :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug]
+   :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :header :debug]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
                :html ["index.html" "admin.html" "organization.html"
@@ -331,16 +336,16 @@
    :welcome-app {:depends [:ui-components]
                  :js ["welcome.js"]}
 
-   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :user-menu :screenmessages :password-reset :analytics]
+   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
-             
+
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
 
    :neighbor-app {:depends [:ui-components]
                   :js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :user-menu :screenmessages :analytics]
+   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}})
 
