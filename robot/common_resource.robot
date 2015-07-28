@@ -390,15 +390,16 @@ Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new
-  Do prepare new request
+  Do prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
 
 Prepare first request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new-inforequest
-  Do prepare new request
+  Do prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
 
 Do prepare new request
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Input Text  create-search  ${propertyId}
   Click enabled by test id  create-search-button
   Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
