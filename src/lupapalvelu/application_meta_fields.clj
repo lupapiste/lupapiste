@@ -2,18 +2,19 @@
   (:require [taoensso.timbre :as timbre :refer [tracef debug debugf info warn error]]
             [clojure.string :as s]
             [monger.operators :refer :all]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as user]
-            [lupapalvelu.organization :as organization]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.neighbors :as neighbors]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]))
 
 
-(defn in-post-verdict-state? [_ app] (contains? action/post-verdict-states (keyword (:state app))))
+(defn in-post-verdict-state? [_ app] (contains? states/post-verdict-states (keyword (:state app))))
 
 (defn- applicant-name-from-auth [application]
   (let [owner (first (domain/get-auths-by-role application :owner))

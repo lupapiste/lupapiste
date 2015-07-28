@@ -1,12 +1,12 @@
 (ns lupapalvelu.foreman
-  (:require [lupapalvelu.action :as action]
-            [lupapalvelu.domain :as domain]
+  (:require [lupapalvelu.domain :as domain]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.states :as states]
             [monger.operators :refer :all]))
 
 (defn other-project-document [application timestamp]
@@ -119,7 +119,7 @@
 (defn validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application} confirm]
   (when (and (not confirm) (notice? application))
     (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
-      (when-not (action/post-verdict-states (keyword
+      (when-not (states/post-verdict-states (keyword
                                               (get
                                                 (mongo/select-one :applications {:_id (:id link)} {:state 1})
                                                 :state)))

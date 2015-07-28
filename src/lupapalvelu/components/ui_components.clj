@@ -15,6 +15,7 @@
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
+            [lupapalvelu.states :as states]
             [scss-compiler.core :as scss]
             [me.raynes.fs :as fs]))
 
@@ -41,7 +42,7 @@
                  :attachmentSizes       attachment-sizes
                  :accountTypes          company/account-types
                  :eInvoiceOperators     schemas/e-invoice-operators
-                 :postVerdictStates     action/post-verdict-states
+                 :postVerdictStates     states/post-verdict-states
                  :stampableMimes        (filter identity (map mime/mime-types file-types))
                  :foremanRoles          (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]

@@ -17,6 +17,7 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.states :as states]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch])
@@ -86,7 +87,7 @@
             tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)]
         {$set (merge {:verdicts verdicts-with-attachments
                       :modified created}
-                (when-not (action/post-verdict-states (keyword (:state application)))
+                (when-not (states/post-verdict-states (keyword (:state application)))
                   {:state :verdictGiven})
                 (when-not has-old-verdict-tasks {:tasks tasks})
                 (when extras-reader (extras-reader app-xml)))}))))
