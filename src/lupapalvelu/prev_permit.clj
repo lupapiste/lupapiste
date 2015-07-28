@@ -40,7 +40,7 @@
 
 (defn- invite-applicants [{:keys [lang user created application] :as command} applicants]
 
-  (let [applicants-with-no-info (filter #(not (get-applicant-type %)) applicants)
+  (let [applicants-with-no-info (remove get-applicant-type applicants)
         applicants (filter get-applicant-type applicants)]
 
     ;; ensures execution will not throw exception here if hakija in the xml message lacks both "henkilo" and "yritys" fields
@@ -125,7 +125,7 @@
     (when-let [updates (verdict/find-verdicts-from-xml command xml)]
       (action/update-application command updates))
     (invite-applicants command hakijat)
-    (:id created-application)))
+    created-application))
 
 (defn- enough-location-info-from-parameters? [{{:keys [x y address propertyId]} :data}]
   (and
@@ -161,8 +161,10 @@
       (not (:municipality app-info)) (fail :error.previous-permit-no-propertyid)
       (not organizations-match?)   (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       (not location-info)          (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
-      no-proper-applicants?        (fail :error.no-proper-applicants-found-from-previous-permit)
-      :else                        (ok :id (do-create-application-from-previous-permit command operation xml app-info location-info)))))
+      :else                        (let [{id :id} (do-create-application-from-previous-permit command operation xml app-info location-info)]
+                                     (if no-proper-applicants?
+                                       (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
+                                       (ok :id id))))))
 
 
 (def fix-prev-permit-counter (atom 0))
