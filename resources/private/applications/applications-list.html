@@ -26,7 +26,7 @@
         </div>
       </div>
     </div>
-    <!-- ko if: features.enabled('alueellisetOrganisaatiot-search')-->
+    <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.loaded() -->
     <div class="feature" data-bind="component: 'applications-search'">
     </div>
     <!-- /ko -->
