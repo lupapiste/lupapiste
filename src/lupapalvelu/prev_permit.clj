@@ -156,11 +156,11 @@
                                (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))
         no-proper-applicants? (not-any? get-applicant-type (:hakijat app-info))]
     (cond
-      validation-result            validation-result
       (empty? app-info)            (fail :error.no-previous-permit-found-from-backend)
       (not (:municipality app-info)) (fail :error.previous-permit-no-propertyid)
       (not organizations-match?)   (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       (not location-info)          (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+      validation-result            validation-result
       :else                        (let [{id :id} (do-create-application-from-previous-permit command operation xml app-info location-info)]
                                      (if no-proper-applicants?
                                        (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
