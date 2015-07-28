@@ -248,9 +248,7 @@ LUPAPISTE.ApplicationModel = function() {
 
     var submitFn = function() {
       ajax.command("submit-application", {id: self.id(), confirm: confirm})
-        .success(function() {
-          self.reload();
-        })
+        .success(self.reload)
         .onError("error.foreman.notice-not-submittable", function() {
           hub.send("show-dialog", {ltitle: "foreman.dialog.notice-submit-warning.title",
                                    size: "medium",
