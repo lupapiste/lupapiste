@@ -33,4 +33,4 @@ Foreman gets warning message when trying to submit foreman notice before link pe
   Wait Until  Element should be visible  xpath=//div[@id='modal-dialog-content']
   Element should contain  xpath=//div[@id='modal-dialog-content']/div[@class='header']/span[@class="title"]  Työnjohtajan ilmoitus
   Confirm yes no dialog
-  Application state should be  submitted
+  Wait Until  Application state should be  submitted
