@@ -330,6 +330,10 @@ Click enabled by test id
   Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
 
+Primary operation is
+  [Arguments]  ${opId}
+  Element should be visible  xpath=//span[@data-test-primary-operation-id="${opId}"]
+
 #
 # Helper for inforequest and application crud operations:
 #

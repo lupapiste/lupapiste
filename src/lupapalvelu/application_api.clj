@@ -11,22 +11,23 @@
             [sade.property :as p]
             [lupapalvelu.action :refer [defraw defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as a]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.comment :as comment]
             [lupapalvelu.document.commands :as commands]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.user :as user]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.operations :as operations]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.ktj :as ktj]
-            [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.comment :as comment]))
+            [lupapalvelu.ktj :as ktj]
+            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.user :as user]))
 
 ;; Notifications
 
@@ -243,8 +244,9 @@
       )))
 
 (defcommand submit-application
-  {:parameters       [id]
-   :input-validators [(partial action/non-blank-parameters [:id])]
+  {:parameters       [id confirm]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      (partial action/boolean-parameters [:confirm])]
    :user-roles       #{:applicant :authority}
    :states           [:draft :open]
    :notified         true
@@ -252,8 +254,11 @@
    :pre-checks       [domain/validate-owner-or-write-access
                       a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
-  (or (a/validate-link-permits application)
-      (do-submit command application created)))
+  (let [application (meta-fields/enrich-with-link-permit-data application)]
+    (or
+      (foreman/validate-notice-submittable application confirm)
+      (a/validate-link-permits application)
+      (do-submit command application created))))
 
 (defcommand refresh-ktj
   {:parameters [:id]

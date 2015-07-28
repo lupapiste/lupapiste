@@ -59,7 +59,7 @@
 (def all-states             (union all-application-states all-inforequest-states))
 
 (def pre-verdict-states #{:draft :info :answered :open :submitted :complement-needed :sent})
-(def post-verdict-states (difference all-application-states pre-verdict-states))
+(def post-verdict-states (difference all-application-states pre-verdict-states #{:canceled}))
 
 (def post-submitted-states #{:sent :complement-needed :verdictGiven :constructionStarted :closed})
 

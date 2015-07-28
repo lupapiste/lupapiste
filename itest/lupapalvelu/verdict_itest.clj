@@ -7,9 +7,8 @@
 (fact* "Give verdict"
   (last-email) ; Inbox zero
 
-  (let [application-id  (create-app-id pena :propertyId sipoo-property-id :address "Paatoskuja 9")
-        resp            (command pena :submit-application :id application-id) => ok?
-        application     (query-application pena application-id)
+  (let [application    (create-and-submit-application pena :propertyId sipoo-property-id :address "Paatoskuja 9")
+        application-id (:id application)
         email           (last-email) => truthy]
     (:state application) => "submitted"
     (:to email) => (contains (email-for-key pena))

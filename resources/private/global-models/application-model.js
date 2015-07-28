@@ -243,24 +243,38 @@ LUPAPISTE.ApplicationModel = function() {
     hub.send("track-click", {category:"Application", label:"map", event:"openOskariMap"});
   };
 
-  self.submitApplication = function() {
+  self.submitApplication = function(confirm) {
     hub.send("track-click", {category:"Application", label:"submit", event:"submitApplication"});
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("application.submit.areyousure.title"),
-      loc("application.submit.areyousure.message"),
-      {title: loc("yes"),
-       fn: function() {
-        ajax.command("submit-application", {id: self.id()})
-          .success(function() {
-            self.reload();
-          })
-          .processing(self.processing)
-          .call();
-        hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
-        return false;
-      }},
-      {title: loc("no")}
-    );
+
+    var submitFn = function() {
+      ajax.command("submit-application", {id: self.id(), confirm: confirm})
+        .success(self.reload)
+        .onError("error.foreman.notice-not-submittable", function() {
+          hub.send("show-dialog", {ltitle: "foreman.dialog.notice-submit-warning.title",
+                                   size: "medium",
+                                   component: "yes-no-dialog",
+                                   componentParams: {ltext: "foreman.dialog.notice-submit-warning.text",
+                                                     lyesTitle: "foreman.dialog.notice-submit-warning.yes",
+                                                     lnoTitle: "foreman.dialog.notice-submit-warning.no",
+                                                     yesFn: _.partial(self.submitApplication, true)}});
+        })
+        .processing(self.processing)
+        .call();
+      hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
+      return false;
+    };
+
+    if ( confirm ) {
+      submitFn();
+    } else {
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("application.submit.areyousure.title"),
+        loc("application.submit.areyousure.message"),
+        {title: loc("yes"),
+         fn: submitFn},
+        {title: loc("no")}
+      );
+    }
     hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
     return false;
   };
