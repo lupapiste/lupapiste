@@ -26,7 +26,7 @@
               </tr>
             </thead>
             <tbody data-bind="foreach: data">
-              <tr>
+              <tr data-bind="click: pageutil.openPage('application/' + _id)">
                 <td data-bind="text: _id"></td>
                 <td data-bind="ltext: 'applications.' + kind"></td>
                 <td data-bind="text: address + ', ' + loc(['municipality', municipality])"></td>
