@@ -93,7 +93,8 @@
     (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
     :else (make-free-text-query filter-search)))
 
-(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]} user]
+(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user tags]} user]
+  {:pre [(sequential? tags)]}
   {$and
    (filter seq
      [query
@@ -111,7 +112,9 @@
            all))
         (when-not (contains? #{nil "0"} filter-user)
           {$or [{"auth.id" filter-user}
-                {"authority.id" filter-user}]}))])})
+                {"authority.id" filter-user}]})
+        (when-not (empty? tags)
+          {:tags {$in tags}}))])})
 
 (defn- make-sort [params]
   (let [col (get order-by (:iSortCol_0 params))
@@ -172,8 +175,7 @@
                       (rename-keys params {:searchText :filter-search
                                            :applicationType :filter-state
                                            :handler :filter-user
-                                          ;:filter-username
-                                          }))
+                                           :applicationTags :tags}))
         query       (make-query user-query params user)
         query-total (mongo/count :applications query)
         skip        (or 0)
