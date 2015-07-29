@@ -67,14 +67,16 @@
   ko.bindingHandlers.dateString = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      if (value) { $(element).text(moment(value).format("D.M.YYYY")); }
+      var dateStr = value ? moment(value).format("D.M.YYYY") : "";
+      if (value) { $(element).text(dateStr); }
     }
   };
 
   ko.bindingHandlers.dateTimeString = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      $(element).text(moment(value).format("D.M.YYYY HH:mm"));
+      var dateStr = value ? moment(value).format("D.M.YYYY HH:mm") : "";
+      $(element).text(dateStr);
     }
   };
 

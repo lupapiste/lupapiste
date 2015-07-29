@@ -14,7 +14,7 @@
           <table>
             <thead>
               <tr>
-                <th></th>
+                <th data-bind="ltext: 'applications.indicators'"></th>
                 <th data-bind="ltext: 'applications.type'"></th>
                 <th data-bind="ltext: 'applications.location'"></th>
                 <th data-bind="ltext: 'applications.operation'"></th>
@@ -32,8 +32,8 @@
                 <td data-bind="text: address + ', ' + loc(['municipality', municipality])"></td>
                 <td data-bind="ltext: 'operations.' + primaryOperation.name"></td>
                 <td data-bind="text: applicant"></td>
-                <td data-bind="text: sent ? moment(sent).format('D.M.YYYY HH:mm') : ''"></td>
-                <td data-bind="text: modified ? moment(modified).format('D.M.YYYY HH:mm') : ''"></td>
+                <td data-bind="dateTimeString: sent"></td>
+                <td data-bind="dateTimeString: modified"></td>
                 <td data-bind="ltext: state"></td>
                 <td data-bind="fullName: authority"></td>
               </tr>
