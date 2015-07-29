@@ -11,10 +11,10 @@
           </ul>
         </div>
         <div>
-          <table>
+          <table class="applications-table">
             <thead>
               <tr>
-                <th data-bind="ltext: 'applications.indicators'"></th>
+                <th colspan="4" data-bind="ltext: 'applications.indicators'"></th>
                 <th data-bind="ltext: 'applications.type'"></th>
                 <th data-bind="ltext: 'applications.location'"></th>
                 <th data-bind="ltext: 'applications.operation'"></th>
@@ -27,7 +27,22 @@
             </thead>
             <tbody data-bind="foreach: data">
               <tr class="application-row" data-bind="click: pageutil.openApplicationPage">
-                <td data-bind="text: _id"></td>
+                <td data-bind="if: authorityNotice || urgency !== 'normal'" class="indicator-count" data-test-col-name="urgent">
+                  <div data-bind="attr: {title: _.trim(authorityNotice) ? loc('notice.prompt') + ': ' + _.trim(authorityNotice) : loc(['notice', 'urgency', urgency]),
+                                         class: 'urgency ' + urgency}"></div>
+                </td>
+                <td data-bind="if: indicators > 0" class="indicator-count" data-test-col-name="indicators">
+                  <div data-bind="text: indicators > 99 ? '*' : indicators,
+                                  attr: {class: 'unseen-indicators', title: loc('info.title')}"></div>
+                </td>
+                <td data-bind="if: unseenComments > 0" class="indicator-count" data-test-col-name="unseenComments">
+                  <div data-bind="text: unseenComments > 99 ? '*' : unseenComments,
+                                    attr: {class: 'unseen-comments', title: loc('conversation.title')}"></div>
+                </td>
+                <td data-bind="if: attachmentsRequiringAction > 0" class="indicator-count" data-test-col-name="newAttachments">
+                  <div data-bind="text: attachmentsRequiringAction > 99 ? '*' : attachmentsRequiringAction,
+                                    attr: {class: 'unseen-attachments', title: loc('attachments.title')}"></div>
+                </td>
                 <td data-bind="ltext: 'applications.' + kind"></td>
                 <td data-bind="text: address + ', ' + loc(['municipality', municipality])"></td>
                 <td data-bind="ltext: 'operations.' + primaryOperation.name"></td>

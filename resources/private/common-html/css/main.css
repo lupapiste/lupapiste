@@ -4340,27 +4340,6 @@ ul.attachments-list li.mandatory-attachments {
   color: #04c714;
 }
 
-/* line 4, ../sass/partials/_applications_search.scss */
-.search-tabs .tab-buttons ul {
-  display: block;
-  list-style: none;
-  padding: 0;
-}
-/* line 9, ../sass/partials/_applications_search.scss */
-.search-tabs .tab-buttons li {
-  background-color: #f6f6f6;
-  color: #333;
-  cursor: pointer;
-  margin-right: 6px;
-  display: inline-block;
-  line-height: 32px;
-  padding: 0 12px;
-}
-/* line 16, ../sass/partials/_applications_search.scss */
-.search-tabs .tab-buttons li.selected {
-  background-color: #dddddd;
-}
-
 /* line 1, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container {
   margin-top: 15px;
@@ -4475,6 +4454,27 @@ ul.attachments-list li.mandatory-attachments {
 /* line 90, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-buttons .delete {
   float: right;
+}
+
+/* line 4, ../sass/partials/_applications_search.scss */
+.search-tabs .tab-buttons ul {
+  display: block;
+  list-style: none;
+  padding: 0;
+}
+/* line 9, ../sass/partials/_applications_search.scss */
+.search-tabs .tab-buttons li {
+  background-color: #f6f6f6;
+  color: #333;
+  cursor: pointer;
+  margin-right: 6px;
+  display: inline-block;
+  line-height: 32px;
+  padding: 0 12px;
+}
+/* line 16, ../sass/partials/_applications_search.scss */
+.search-tabs .tab-buttons li.selected {
+  background-color: #dddddd;
 }
 
 /* VIEWS
@@ -4721,7 +4721,7 @@ ul.attachments-list li.mandatory-attachments {
 }
 
 /* line 174, ../sass/views/_applications.scss */
-#applications-list .indicator-count {
+#applications-list .indicator-count, .applications-table .indicator-count {
   padding-left: 0;
   padding-right: 0;
   font-weight: bold;
@@ -4731,12 +4731,12 @@ ul.attachments-list li.mandatory-attachments {
   padding: 3px;
 }
 /* line 183, ../sass/views/_applications.scss */
-#applications-list div {
+#applications-list div, .applications-table div {
   padding-top: 3px;
   height: 30px;
 }
 /* line 184, ../sass/views/_applications.scss */
-#applications-list .urgent {
+#applications-list .urgent, .applications-table .urgent {
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0 -5300px;
@@ -4744,7 +4744,7 @@ ul.attachments-list li.mandatory-attachments {
   width: 24px;
 }
 /* line 190, ../sass/views/_applications.scss */
-#applications-list .pending {
+#applications-list .pending, .applications-table .pending {
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0 -5500px;
@@ -4752,7 +4752,7 @@ ul.attachments-list li.mandatory-attachments {
   height: 24px;
 }
 /* line 196, ../sass/views/_applications.scss */
-#applications-list .normal {
+#applications-list .normal, .applications-table .normal {
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0 -5600px;
@@ -4760,21 +4760,21 @@ ul.attachments-list li.mandatory-attachments {
   height: 24px;
 }
 /* line 202, ../sass/views/_applications.scss */
-#applications-list .unseen-comments {
+#applications-list .unseen-comments, .applications-table .unseen-comments {
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0 -4295px;
   width: 21px;
 }
 /* line 207, ../sass/views/_applications.scss */
-#applications-list .unseen-indicators {
+#applications-list .unseen-indicators, .applications-table .unseen-indicators {
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0 -4597px;
   width: 25px;
 }
 /* line 212, ../sass/views/_applications.scss */
-#applications-list .unseen-attachments {
+#applications-list .unseen-attachments, .applications-table .unseen-attachments {
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0 -4496px;
@@ -7331,50 +7331,50 @@ div.attachment-multiselect-content tr.attachment-group-header {
 /*
   Lupapalvelu CSS:
 */
-/* line 151, ../sass/main.scss */
+/* line 152, ../sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 157, ../sass/main.scss */
+/* line 158, ../sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 161, ../sass/main.scss */
+/* line 162, ../sass/main.scss */
 .hidden {
   display: none !important;
 }
 
-/* line 165, ../sass/main.scss */
+/* line 166, ../sass/main.scss */
 .inline {
   display: inline;
 }
 
-/* line 169, ../sass/main.scss */
+/* line 170, ../sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 173, ../sass/main.scss */
+/* line 174, ../sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 177, ../sass/main.scss */
+/* line 178, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 182, ../sass/main.scss */
+/* line 183, ../sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 186, ../sass/main.scss */
+/* line 187, ../sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -7386,27 +7386,27 @@ div.attachment-multiselect-content tr.attachment-group-header {
   display: table-cell;
 }
 
-/* line 197, ../sass/main.scss */
+/* line 198, ../sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 205, ../sass/main.scss */
+/* line 206, ../sass/main.scss */
 .table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 211, ../sass/main.scss */
+/* line 212, ../sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 216, ../sass/main.scss */
+/* line 217, ../sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -7420,47 +7420,47 @@ div.pzbDiv {
   font-size: 0.8em;
   color: #333;
 }
-/* line 229, ../sass/main.scss */
+/* line 230, ../sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 231, ../sass/main.scss */
+/* line 232, ../sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 237, ../sass/main.scss */
+/* line 238, ../sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 242, ../sass/main.scss */
+/* line 243, ../sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 244, ../sass/main.scss */
+/* line 245, ../sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 247, ../sass/main.scss */
+/* line 248, ../sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 248, ../sass/main.scss */
+/* line 249, ../sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 251, ../sass/main.scss */
+/* line 252, ../sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 253, ../sass/main.scss */
+/* line 254, ../sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 255, ../sass/main.scss */
+/* line 256, ../sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }
