@@ -218,6 +218,15 @@
             :response "comments"
             :message "kehno suunta") => ok?)
 
+        (fact "applicant can not see neighbor's person id"
+          (let [application (query-application pena application-id)
+                userids (->> application
+                          :neighbors
+                          (map :status)
+                          flatten
+                          (map (comp :userid :vetuma)))]
+            userids => (partial every? nil?)))
+
         (fact "neighbor can't re-give response 'cos vetuma has expired"
           (command pena :neighbor-response
             :applicationId application-id
