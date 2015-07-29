@@ -94,7 +94,6 @@
     :else (make-free-text-query filter-search)))
 
 (defn make-query [query {:keys [filter-search filter-kind filter-state filter-user tags]} user]
-  {:pre [(sequential? tags)]}
   {$and
    (filter seq
      [query
