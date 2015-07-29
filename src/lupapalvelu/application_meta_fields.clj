@@ -6,7 +6,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [sade.core :refer :all]
@@ -123,7 +122,6 @@
                    {:field :inPostVerdictState :fn in-post-verdict-state?}
                    {:field :applicantPhone :fn get-applicant-phone}
                    {:field :organizationMeta :fn organization-meta}
-                   {:field :neighbors :fn neighbors/normalize-neighbors}
                    {:field :submittable :fn (fn [_ _] true)}))
 
 (defn- enrich-with-meta-fields [fields user app]
