@@ -22,7 +22,9 @@
    :parameters []
    :user-roles #{:applicant :authority}}
   [{user :user data :data}]
-  (ok :data (search/applications-for-user-v2 user (select-keys data [:searchText :applicationTags :handler :applicationType]))))
+  (ok :data (search/applications-for-user-v2
+              user
+              (select-keys data [:applicationTags :applicationType :handler :limit :searchText]))))
 
 (defn- localize-operation [op]
   (assoc op

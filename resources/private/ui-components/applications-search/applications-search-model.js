@@ -18,6 +18,8 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.applicationTags = ko.observableArray([]);
 
+  self.limit = ko.observable(25);
+
   self.onSuccess = function(res) {
         self.data(res.data);
         self.applications(res.data.applications);
@@ -28,7 +30,8 @@ LUPAPISTE.ApplicationsDataProvider = function() {
                {searchText: self.searchField(),
                 applicationTags: self.applicationTags(),
                 handler: self.handler() ? self.handler().id : undefined,
-                applicationType: self.applicationType()})
+                applicationType: self.applicationType(),
+                limit: self.limit()})
       .success(self.onSuccess)
     .call();
   }).extend({throttle: 250});
@@ -73,6 +76,8 @@ LUPAPISTE.ApplicationsSearchModel = function(params) {
   });
 
   self.authorizationModel = lupapisteApp.models.globalAuthModel;
+
+  self.limits = ko.observableArray([10, 25, 50, 100]);
 
   self.create = function() {
     hub.send("track-click", {category:"Applications", label:"create", event:"create"});
