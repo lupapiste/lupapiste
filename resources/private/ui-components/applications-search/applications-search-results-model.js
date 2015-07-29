@@ -12,8 +12,10 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
                                   "canceled"]);
 
   self.totalCount = ko.pureComputed(function() {
-    return self.dataProvider.data() ? self.dataProvider.data().totalCount : 0;
+    return self.dataProvider.data().totalCount;
   });
+
+  self.gotResults = params.gotResults;
 
   self.selectedTab = ko.observable("all");
 
