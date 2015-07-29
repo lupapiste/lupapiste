@@ -4477,6 +4477,11 @@ ul.attachments-list li.mandatory-attachments {
   background-color: #dddddd;
 }
 
+/* line 25, ../sass/partials/_applications_search.scss */
+div.applications-search-component {
+  margin: 6px 0;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

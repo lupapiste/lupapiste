@@ -4,9 +4,8 @@
   <section class="page container">
     <script type="text/html" id="applications-search-template">
       <!-- ko ifnot: noApplications() -->
-      <div data-bind="component: {name: 'applications-search-filter', params: {dataProvider: dataProvider}}"></div>
-      <div data-bind="component: {name: 'applications-search-results',
-                                 params: {dataProvider: dataProvider, gotResults: gotResults}}"></div>
+      <div data-bind="component: {name: 'applications-search-filter', params: {dataProvider: dataProvider}}" class="applications-search-component"></div>
+      <div data-bind="component: {name: 'applications-search-results', params: {dataProvider: dataProvider, gotResults: gotResults}}" class="applications-search-component"></div>
       <!-- /ko -->
 
       <!-- ko if: noResults() || noApplications() -->
