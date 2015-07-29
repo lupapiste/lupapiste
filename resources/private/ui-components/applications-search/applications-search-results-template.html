@@ -27,9 +27,9 @@
             </thead>
             <tbody data-bind="foreach: data">
               <tr class="application-row" data-bind="click: pageutil.openApplicationPage">
-                <td data-bind="if: authorityNotice || urgency !== 'normal'" class="indicator-count" data-test-col-name="urgent">
-                  <div data-bind="attr: {title: _.trim(authorityNotice) ? loc('notice.prompt') + ': ' + _.trim(authorityNotice) : loc(['notice', 'urgency', urgency]),
-                                         class: 'urgency ' + urgency}"></div>
+                <td data-bind="if: $data.authorityNotice || $data.urgency !== 'normal'" class="indicator-count" data-test-col-name="urgent">
+                  <div data-bind="attr: {title: _.trim($data.authorityNotice) ? loc('notice.prompt') + ': ' + _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency]),
+                                         class: 'urgency ' + $data.urgency}"></div>
                 </td>
                 <td data-bind="if: indicators > 0" class="indicator-count" data-test-col-name="indicators">
                   <div data-bind="text: indicators > 99 ? '*' : indicators,
