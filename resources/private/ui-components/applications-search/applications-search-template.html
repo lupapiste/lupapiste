@@ -9,7 +9,8 @@
                                  params: {dataProvider: dataProvider, gotResults: gotResults}}"></div>
       <!-- /ko -->
 
-      <div data-bind="if: noResults() || noApplications()">
+      <!-- ko if: noResults() || noApplications() -->
+      <div class="applications-empty-state">
         <h1 data-bind="ltext: missingTitle"></h1>
         <p data-bind="ltext: missingDesc"></p>
 
@@ -48,6 +49,7 @@
           </div>
         </div>
       </div>
+      <!-- /ko -->
     </script>
   </section>
 </body>
