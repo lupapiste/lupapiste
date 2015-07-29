@@ -1,12 +1,13 @@
 (ns lupapalvelu.neighbor-itest
   (:require [midje.sweet  :refer :all]
+            [clojure.string :as s]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [clojure.string :as s]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
-            [sade.util :refer [find-by-id]]
-            [sade.util :refer [fn->]]))
+            [lupapalvelu.ttl :as ttl]
+            [sade.core :refer [now]]
+            [sade.util :refer [fn->] :as util]))
 
 (defn invalid-token? [resp] (= resp {:ok false, :text "error.token-not-found"}))
 (defn invalid-response? [resp] (= (dissoc resp :response) {:ok false, :text "error.invalid-response"}))
@@ -33,7 +34,7 @@
 
 (facts "create app, add neighbor"
   (let [[application neighborId neighbors] (create-app-with-neighbor)
-        neighbor (find-by-id neighborId neighbors)]
+        neighbor (util/find-by-id neighborId neighbors)]
     (fact neighbor => (contains {:propertyId "p"
                                  :owner {:name "n"
                                          :businessID nil
@@ -50,7 +51,7 @@
         _ (command sonja "neighbor-update" :id application-id :neighborId neighborId :propertyId "p2" :name "n2" :street "s2" :city "c2" :zip "z2" :email "e2")
         application (query-application pena application-id)
         neighbors (:neighbors application)
-        neighbor (find-by-id neighborId neighbors)]
+        neighbor (util/find-by-id neighborId neighbors)]
     (fact (count neighbors) => 1)
     (fact neighbor => (contains {:propertyId "p2"
                                  :owner {:name "n2"
@@ -70,7 +71,7 @@
         neighbors (:neighbors application)]
     (fact (count neighbors) => 0)))
 
-(facts "neighbor invite email has correct link"
+(facts "neighbor invite email has..."
   (let [neighbor-email-addr       "abba@example.com"
         [application neighbor-id] (create-app-with-neighbor :address "Naapurikuja 3")
         application-id            (:id application)
@@ -79,13 +80,17 @@
                                                 :neighborId neighbor-id
                                                 :email neighbor-email-addr)
         email                     (last-email)
-        [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" (get-in email [:body :plain]))]
+        [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" (get-in email [:body :plain]))
+        expiration-date           (util/to-local-date (+ ttl/neighbor-token-ttl (now)))]
 
-    (:to email) => neighbor-email-addr
-    (:subject email) => "Lupapiste.fi: Naapurikuja 3 - naapurin kuuleminen"
-    a-id => application-id
-    n-id => neighbor-id
-    token => #"[A-Za-z0-9]{48}"))
+    (fact "correct to" (:to email) => neighbor-email-addr)
+    (fact "correct subject" (:subject email) => "Lupapiste.fi: Naapurikuja 3 - naapurin kuuleminen")
+    (fact "correnct link"
+      a-id => application-id
+      n-id => neighbor-id
+      token => #"[A-Za-z0-9]{48}")
+    (fact "correct expiration date"
+      (get-in email [:body :plain]) => (contains expiration-date))))
 
 (facts* "neighbor invite & view on application"
   (let [[{application-id :id :as application} neighborId] (create-app-with-neighbor)
