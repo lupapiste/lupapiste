@@ -1,5 +1,5 @@
 (ns lupapalvelu.application-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
@@ -354,7 +354,8 @@
       (open-inforequest/new-open-inforequest! created-application))
     (try
       (autofill-rakennuspaikka created-application created)
-      (catch Exception e (error e "KTJ data was not updated")))
+      (catch java.io.IOException e
+        (error "KTJ data was not updated:" (.getMessage e))))
     (ok :id (:id created-application))))
 
 (defn- add-operation-allowed? [_ application]
