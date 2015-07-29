@@ -13,9 +13,11 @@
             <label class="form-label" for="login-password" data-bind="ltext: 'userinfo.password'"></label>
             <input class="form-input" id="login-password" type="password" data-bind="attr: {placeholder: loc('userinfo.password')}" name="password">
             <label class="form-label" ><input class="form-input" type="checkbox" id="rememberme" data-bind="checked: rememberMe"><span data-bind="ltext: 'userinfo.rememberme'"></span></label>
-            <button id="login-button" class="btn btn-primary" data-bind="disable: processing">
+            <button id="login-button" class="btn positive"
+                    data-bind="css: {waiting: processing},
+                               disable: processing">
               <span data-bind="ltext: 'welcome.login'"></span>
-              <em data-bind="visible: pending" class="button-loader"></em>
+              <i class="wait spin lupicon-refresh"></i>
             </button>
             <span id="login-message" style="display: none; color: red"></span>
             <div class="passwd-reset">
@@ -25,7 +27,7 @@
           <section class="welcome-register-section">
             <h3 data-bind="ltext: 'welcome.notRegistered.title'"></h3>
             <p data-bind="ltext: 'welcome.notRegistered.desc'"></p>
-            <button id="register-button" data-bind="ltext: 'welcome.register'" class="btn btn-success"></button>
+            <button id="register-button" data-bind="ltext: 'welcome.register'" class="function"></button>
           </section>
         </div>
       </div>

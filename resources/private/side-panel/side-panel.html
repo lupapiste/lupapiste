@@ -5,13 +5,16 @@
     <!-- ko if: showSidePanel -->
     <div id="side-panel" data-bind="transition: sidePanelVisible, class: 'show-side-panel'">
       <div class="buttons">
-        <button class="btn-conversation" data-bind="click: toggleConversationPanel, css: {active: showConversationPanel}" id="open-conversation-side-panel">
+          <button class="primary vertical caps btn-conversation"
+                  data-bind="click: toggleConversationPanel, css: {active: showConversationPanel}" id="open-conversation-side-panel">
+              <i class="lupicon-conversation"></i>
           <span data-bind="if: unseenComments">
             <span data-bind="text: unseenComments" id="applicationUnseenComments" class="unseen-comments"></span>
           </span>
           <span class="btn-title" data-bind="ltext: 'conversation.title'"></span>
         </button>
-        <button class="btn-notice" data-bind="click: toggleNoticePanel, visible: authorization.ok('change-urgency'), css: {active: showNoticePanel}" id="open-notice-side-panel">
+        <button class="primary vertical caps btn-notice" data-bind="click: toggleNoticePanel, visible: authorization.ok('change-urgency'), css: {active: showNoticePanel}" id="open-notice-side-panel">
+            <i class="lupicon-list"></i>
           <span class="btn-title" data-bind="ltext: 'notice.title'"></span>
         </button>
       </div>

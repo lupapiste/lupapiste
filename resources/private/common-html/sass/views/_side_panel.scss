@@ -37,29 +37,30 @@
     .btn-conversation, .btn-notice {
       box-shadow: 1px 1px 3px darken($lp-dark-grey, 10%);
       padding: 1em;
-      outline: none;
-      background: fade-out($lp-orange, 0.1);
-      background: lighten($lp-orange, 20%) \9; /* IE 8 and below */
-      width: 40px;
-      text-align: center;
-      text-transform: uppercase;
+      margin-bottom: $marginM;
+      /* outline: none; */
+      /* background: fade-out($lp-orange, 0.1); */
+      /* background: lighten($lp-orange, 20%) \9; /\* IE 8 and below *\/ */
+      //width: 40px;
+      /* text-align: center; */
+      /* text-transform: uppercase; */
       display: block;
-      color: #fff;
-      text-shadow: 0px 1px 0px $lp-dark-grey;
+      /* color: #fff; */
+      /* text-shadow: 0px 1px 0px $lp-dark-grey; */
       font-weight: bold;
-      border: 1px solid darken($lp-orange, 10%);
-      border-right: 0;
-      word-break: break-all;
-      clear: both;
-      float: right;
-      span {
-        display: block;
-      }
+      /* border: 1px solid darken($lp-orange, 10%); */
+      /* border-right: 0; */
+      /* word-break: break-all; */
+      /* clear: both; */
+      /* float: right; */
+      /* span { */
+      /*   display: block; */
+      /* } */
       .btn-title {
-        @include disable-select;
-        word-break: break-all;
-        max-width: 12px;
-        letter-spacing: 2px;
+        //@include disable-select;
+        /* word-break: break-all; */
+        /* max-width: 12px; */
+        //letter-spacing: 2px;
       }
       .unseen-comments {
         @include spite-bg;
@@ -75,21 +76,22 @@
     }
 
     .btn-conversation.active, .btn-notice.active {
-      width: 46px;
-      box-shadow: 0 0 5px lighten($lp-orange, 10%);
-      &:before {
-        border-right: 6px solid darken($lp-orange, 15%);
-        display:block;
-        content:".";
-        color:transparent;
-        font-size:0;
-        height:100%;
-        position:absolute;
-        right:-1px;
-        padding:1px 0;
-        top:-1px;
-        bottom:-1px;
-      }
+      background-color: $orange-hover;
+    /*   width: 46px; */
+    /*   box-shadow: 0 0 5px lighten($lp-orange, 10%); */
+    /*   &:before { */
+    /*     border-right: 6px solid darken($lp-orange, 15%); */
+    /*     display:block; */
+    /*     content:"."; */
+    /*     color:transparent; */
+    /*     font-size:0; */
+    /*     height:100%; */
+    /*     position:absolute; */
+    /*     right:-1px; */
+    /*     padding:1px 0; */
+    /*     top:-1px; */
+    /*     bottom:-1px; */
+    /*   } */
     }
   }
 

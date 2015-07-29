@@ -255,35 +255,35 @@
     $("#applications").applyBindings(model);
 
     var dataTableConfig = {
-        bProcessing:      true, // don't hide this, it brakes layout.
-        bServerSide:      true,
-        sAjaxSource:      "",
-        aoColumnDefs:     [{bSortable: false, aTargets: [0, 1, 2, 3, 6]},
+      bProcessing:      true, // don't hide this, it brakes layout.
+      bServerSide:      true,
+      sAjaxSource:      "",
+      aoColumnDefs:     [{bSortable: false, aTargets: [0, 1, 2, 3, 6]},
                            {sClass: "indicator-count", aTargets: [0, 1, 2, 3]},
-                           {mRender: toApplicationsLoc, aTargets: [4]},
-                           {mRender: toAddress, aTargets: [5]},
-                           {mRender: toOpName, aTargets: [6]},
-                           {mRender: _.escapeHTML, aTargets: [7]},
-                           {mRender: toDateTime, aTargets: [8, 9]},
-                           {mRender: toIndicatorUrgent, aTargets: [0]},
-                           {mRender: toIndicatorSum, aTargets: [1]},
-                           {mRender: toAttachmentCount, aTargets: [2]},
-                           {mRender: toCommentCount, aTargets: [3]},
-                           {mRender: toLoc, aTargets: [10]},
-                           {mRender: toFullName, aTargets: [11]}],
-        aaSorting:        [[9, "desc"]],
-        sDom:             "<t><<r><p><i><l>>", // <'table-filter' f>
-        iDisplayLength:   25,
-        oLanguage:        {"sLengthMenu":   loc("applications.lengthMenu"),
-                           "sProcessing":   "&nbsp;", // I can believe dataTables needs this? If this is empty (or hidden) layout brakes. WTF dataTables?
-                           "sSearch":       loc("search") + ":",
-                           "sZeroRecords":  loc("applications.welcome"),
-                           "oPaginate":     {"sNext": loc("next"), "sPrevious": loc("previous")},
-                           "sInfo":         loc("applications.results"),
-                           "sInfoFiltered": ""},
-        fnCreatedRow:     rowCreated,
-        fnServerData:     fetch
-      };
+                         {mRender: toApplicationsLoc, aTargets: [4]},
+                         {mRender: toAddress, aTargets: [5]},
+                         {mRender: toOpName, aTargets: [6]},
+                         {mRender: _.escapeHTML, aTargets: [7]},
+                         {mRender: toDateTime, aTargets: [8, 9]},
+                         {mRender: toIndicatorUrgent, aTargets: [0]},
+                         {mRender: toIndicatorSum, aTargets: [1]},
+                         {mRender: toAttachmentCount, aTargets: [2]},
+                         {mRender: toCommentCount, aTargets: [3]},
+                         {mRender: toLoc, aTargets: [10]},
+                         {mRender: toFullName, aTargets: [11]}],
+      aaSorting:        [[9, "desc"]],
+      sDom:             "<t><<r><p><i><l>>", // <'table-filter' f>
+      iDisplayLength:   25,
+      oLanguage:        {"sLengthMenu":   loc("applications.lengthMenu"),
+                         "sProcessing":   "&nbsp;", // I can believe dataTables needs this? If this is empty (or hidden) layout brakes. WTF dataTables?
+                         "sSearch":       loc("search") + ":",
+                         "sZeroRecords":  loc("applications.welcome"),
+                         "oPaginate":     {"sNext": loc("next"), "sPrevious": loc("previous")},
+                         "sInfo":         loc("applications.results"),
+                         "sInfoFiltered": ""},
+      fnCreatedRow:     rowCreated,
+      fnServerData:     fetch,
+    };
     dataTable = $("#applications-list").dataTable(dataTableConfig);
     dataTable.find("tbody").click(open);
 

@@ -62,19 +62,19 @@
   display: inline-block;
   width: $cols3;
   float: left;
-  a {
-    border: 1px solid darken($lp-light-grey, 10%);
-    padding: $marginS;
-    cursor: pointer;
-  }
-  .paginate_disabled_previous, .paginate_disabled_next {
-    background: $lp-light-grey;
-    color: lighten($color-text, 30%);
-  }
-  .paginate_enabled_previous, .paginate_enabled_next {
-    background: #ffffff; /* Old browsers */
-    @include background( linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%));
-  }
+  /* a { */
+  /*   border: 1px solid darken($lp-light-grey, 10%); */
+  /*   padding: $marginS; */
+  /*   cursor: pointer; */
+  /* } */
+  /* .paginate_disabled_previous, .paginate_disabled_next { */
+  /*   background: $lp-light-grey; */
+  /*   color: lighten($color-text, 30%); */
+  /* } */
+  /* .paginate_enabled_previous, .paginate_enabled_next { */
+  /*   background: #ffffff; /\* Old browsers *\/ */
+  /*   @include background( linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%)); */
+  /* } */
   .paginate_disabled_previous, .paginate_enabled_previous {
     margin-right: $marginM;
   }
