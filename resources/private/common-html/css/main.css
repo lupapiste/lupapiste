@@ -4482,6 +4482,12 @@ div.applications-search-component {
   margin: 6px 0;
 }
 
+/* line 30, ../sass/partials/_applications_search.scss */
+.paging select {
+  width: 5.625em;
+  margin-right: 6px;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

@@ -5,3 +5,5 @@ upload.success:  Tiedoston lataus onnistui
 applications.filter.inforequest: Neuvontapyynnöt
 applications.indicators: Tapahtumat
 applications.count: Hankkeita yhteensä {0}
+applications.filter.tags: Avainsanat
+applications.lengthMenu: hakemusta sivulla

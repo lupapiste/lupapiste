@@ -25,3 +25,10 @@
 div.applications-search-component {
   margin: $marginS 0
 }
+
+.paging {
+  select {
+    width: $cols1*1.5;
+    margin-right: $marginS;
+  }
+}

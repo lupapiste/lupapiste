@@ -8,6 +8,7 @@
       <div data-bind="component: {name: 'applications-search-results', params: {dataProvider: dataProvider, gotResults: gotResults}}" class="applications-search-component"></div>
       <div class="paging">
         <select data-bind="options: limits, value: dataProvider.limit"></select>
+        <label data-bind="ltext: 'applications.lengthMenu'"></label>
       </div>
       <!-- /ko -->
 
