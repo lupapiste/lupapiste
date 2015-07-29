@@ -47,9 +47,13 @@
           (count (keep :latestVersion attachments)) => 0))
 
       (fact "Sonja sees comment and attachment"
-        (let [{:keys [comments attachments]} (query-application sonja application-id)]
+        (let [{:keys [comments attachments]} (query-application sonja application-id)
+              attachments-with-versions (filter (comp seq :latestVersion) attachments)]
           (count comments) => 2 ; comment and new attachment auto-comment
-          (count (keep :latestVersion attachments)) => 1))
+          (count attachments-with-versions) => 1
+
+          (fact "Attachment application state"
+            (-> attachments-with-versions first :applicationState) => "verdictGiven")))
 
       (fact "Comment verdict, target is Ronja"
         (command sonja :add-comment :id application-id :text "hello" :to ronja-id :target {:type "verdict" :id verdict-id} :openApplication false :roles [:authority]) => ok?
