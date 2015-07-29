@@ -93,7 +93,7 @@
     (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
     :else (make-free-text-query filter-search)))
 
-(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user filter-username]} user]
+(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]} user]
   {$and
    (filter seq
      [query
@@ -109,9 +109,6 @@
            "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
            "canceled"          {:state "canceled"}
            all))
-        (when-not (ss/blank? filter-username)
-          {$or [{"auth.username" filter-username}
-                {"authority.username" filter-username}]})
         (when-not (contains? #{nil "0"} filter-user)
           {$or [{"auth.id" filter-user}
                 {"authority.id" filter-user}]}))])})
@@ -162,10 +159,22 @@
 (defn- enrich-row [app]
   (assoc app :kind (if (:infoRequest app) "inforequest" "application")))
 
-(defn applications-for-user-v2 [user]
+(def kind-mapping {"all" "both"
+                   "inforequest" "inforequests"
+                   "canceled" "both"})
+
+(defn applications-for-user-v2 [user {application-type :applicationType :as params}]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
-        query       (make-query user-query nil user)
+        kind        (get kind-mapping application-type "applications")
+        params      (merge
+                      {:filter-kind kind}
+                      (rename-keys params {:searchText :filter-search
+                                           :applicationType :filter-state
+                                           :handler :filter-user
+                                          ;:filter-username
+                                          }))
+        query       (make-query user-query params user)
         query-total (mongo/count :applications query)
         skip        (or 0)
         limit       (or 10)
@@ -175,7 +184,8 @@
                       (query/skip skip)
                       (query/limit limit))
         rows        (map (comp enrich-row (partial meta-fields/with-indicators user) #(domain/filter-application-content-for % user) ) apps)]
-    {:totalCount query-total
+    {:userTotalCount user-total
+     :totalCount query-total
      :applications rows}))
 
 (defn public-fields [{:keys [municipality submitted primaryOperation]}]

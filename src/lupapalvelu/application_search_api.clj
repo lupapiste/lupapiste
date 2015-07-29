@@ -21,8 +21,8 @@
   {:description "Service point for application search page component"
    :parameters []
    :user-roles #{:applicant :authority}}
-  [{user :user}]
-  (ok :data (search/applications-for-user-v2 user)))
+  [{user :user data :data}]
+  (ok :data (search/applications-for-user-v2 user (select-keys data [:searchText :applicationTags :handler :applicationType]))))
 
 (defn- localize-operation [op]
   (assoc op
