@@ -12,7 +12,7 @@ Huom: linkki vanhentuu kolmessa viikossa, {{expires}}!
 
 # Hej {{name}},
 
-I egenskap av r&aring;granne meddelas Ni att en ans&ouml;kan om bygglov p&aring; adressen {{address}}, {{city-fi}} &auml;r under behandling. N&auml;rmare uppgifter om projektet finns under den bifogade l&auml;nken. H&ouml;randet av grannar undertecknas elektroniskt med bankkoder eller mobilcertifikat. Se till att du har dina bankkoder till hands vid behov.
+I egenskap av r&aring;granne meddelas Ni att en ans&ouml;kan om bygglov p&aring; adressen {{address}}, {{city-sv}} &auml;r under behandling. N&auml;rmare uppgifter om projektet finns under den bifogade l&auml;nken. H&ouml;randet av grannar undertecknas elektroniskt med bankkoder eller mobilcertifikat. Se till att du har dina bankkoder till hands vid behov.
 
 {{link-sv}}
 
