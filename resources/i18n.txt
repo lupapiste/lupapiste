@@ -2,7 +2,4 @@ upload:  Lataa tiedosto
 error.upload-failed:  Tiedoston lataus epäonnistui
 upload.success:  Tiedoston lataus onnistui
 
-applications-search-tab.all:  Kaikki
-applications-search-tab.applications:  Lupahakemukset
-applications-search-tab.postVerdict:  Rakentaminen
-applications-search-tab.infoRequest:  Neuvontapyynnöt
+applications.filter.inforequest: Neuvontapyynnöt

@@ -6,9 +6,10 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
   self.dataProvider = params.dataProvider;
   self.data = self.dataProvider.data;
   self.tabs = ko.observableArray(["all",
-                                  "applications",
-                                  "postVerdict",
-                                  "infoRequest"]);
+                                  "application",
+                                  "construction",
+                                  "inforequest",
+                                  "canceled"]);
 
   self.selectedTab = ko.observable("all");
 

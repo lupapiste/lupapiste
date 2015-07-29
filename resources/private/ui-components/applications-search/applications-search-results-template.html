@@ -6,7 +6,7 @@
       <div class="search-tabs">
         <div class="tab-buttons">
           <ul data-bind="foreach: tabs">
-            <li data-bind="ltext: 'applications-search-tab.' + $data, click: $parent.selectTab,
+            <li data-bind="ltext: 'applications.filter.' + $data, click: $parent.selectTab,
                            css: {selected: $parent.selectedTab() === $data}"></li>
           </ul>
         </div>
