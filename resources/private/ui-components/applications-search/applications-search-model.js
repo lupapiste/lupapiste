@@ -3,7 +3,8 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   var self = this;
 
-  self.data = ko.observableArray([]);
+  self.data = ko.observable();
+  self.applications = ko.observableArray([]);
 
   self.applicationType = ko.observable();
 
@@ -19,9 +20,10 @@ LUPAPISTE.ApplicationsDataProvider = function() {
                 applicationTags: self.applicationTags(),
                 handler: self.handler() ? self.handler().id : undefined,
                 applicationType: self.applicationType()})
-      .success(function(data) {
-        console.log(data);
-        self.data(data.data);
+      .success(function(res) {
+        console.log(res.data);
+        self.data(res.data);
+        self.applications(res.data.applications);
     })
     .call();
   }).extend({throttle: 250});

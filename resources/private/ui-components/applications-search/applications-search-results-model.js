@@ -4,12 +4,16 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
   var self = this;
 
   self.dataProvider = params.dataProvider;
-  self.data = self.dataProvider.data;
+  self.data = self.dataProvider.applications;
   self.tabs = ko.observableArray(["all",
                                   "application",
                                   "construction",
                                   "inforequest",
                                   "canceled"]);
+
+  self.totalCount = ko.pureComputed(function() {
+    return self.dataProvider.data() ? self.dataProvider.data().totalCount : 0;
+  });
 
   self.selectedTab = ko.observable("all");
 

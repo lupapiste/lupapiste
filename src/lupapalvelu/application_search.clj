@@ -174,8 +174,9 @@
                       (query/sort {:modified 1})
                       (query/skip skip)
                       (query/limit limit))
-        rows        (map (comp enrich-row (partial meta-fields/with-indicators user) #(domain/filter-application-content-for % user) ) apps)] ; Prevent XSS TODO
-    rows))
+        rows        (map (comp enrich-row (partial meta-fields/with-indicators user) #(domain/filter-application-content-for % user) ) apps)]
+    {:totalCount query-total
+     :applications rows}))
 
 (defn public-fields [{:keys [municipality submitted primaryOperation]}]
   (let [op-name (:name primaryOperation)]
