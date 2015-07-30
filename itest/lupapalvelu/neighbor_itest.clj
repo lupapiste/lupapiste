@@ -144,7 +144,6 @@
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => "Katuosoite"
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => "040-2345678"))
 
-    (fact "neighbor application query does not return hetu"
       (let [resp        (query pena :neighbor-application
                                     :applicationId application-id
                                     :neighborId neighborId
@@ -157,36 +156,46 @@
         resp => (contains {:ok true})
         application => truthy
 
-        (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
-        (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
-        (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil
-        (-> hakija-doc :data :henkilo :henkilotiedot :turvakieltoKytkin) => false
-        (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => nil
-        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
-        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
-        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => nil
-        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => nil
-        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => nil
-        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => nil
+        (fact "neighbor application query does not return hetu"
+          (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
+          (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
+          (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil
+          (-> hakija-doc :data :henkilo :henkilotiedot :turvakieltoKytkin) => false
+          (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => nil
 
-        (facts "random testing about content"
-          (:comments application) => nil
-          (count (:documents application)) => 5 ; evil
+            )
+        (fact "has no comments"
+          (:comments application) => empty?)
 
-          (fact "attachments"
-            (fact "there are some attachments"
-              (->> application :attachments count) => pos?)
-            (fact "everyone is paapiirustus"
-              (->> application :attachments (some (fn-> :type :type-group (not= "paapiirustus")))) => falsey)
+        (let [document-types (set (map (comp :name :schema-info) (:documents application)))
+              has-doc (fn [doc-schema-name] (document-types doc-schema-name))]
+          (fact "has hakija document" "hakija-r" => has-doc)
+          (fact "has hankkeen-kuvaus document" "hankkeen-kuvaus" => has-doc)
+          (fact "has rakennuspaikka document" "rakennuspaikka" => has-doc)
+          (fact "does not have paatoksen-toimitus-rakval document" "paatoksen-toimitus-rakval" =not=> has-doc))
 
-            (let [file-id (->> application :attachments first :latestVersion :fileId)]
-              (fact "downloading should be possible"
-                (raw nil "neighbor-download-attachment" :neighborId neighborId :token token :fileId file-id) => http200?)
 
-              (fact "downloading with wrong token should not be possible"
-                (raw nil "neighbor-download-attachment" :neighborId neighborId :token "h4x3d token" :fileId file-id) => http401?)))
+        (fact "attachments"
+          (fact "there are some attachments"
+            (->> application :attachments count) => pos?)
+          (fact "everyone is paapiirustus"
+            (->> application :attachments (some (fn-> :type :type-group (not= "paapiirustus")))) => falsey)
 
-          (:auth application) => nil)))
+          (let [file-id (->> application :attachments first :latestVersion :fileId)]
+            (fact "downloading should be possible"
+              (raw nil "neighbor-download-attachment" :neighborId neighborId :token token :fileId file-id) => http200?)
+
+            (fact "downloading with wrong token should not be possible"
+              (raw nil "neighbor-download-attachment" :neighborId neighborId :token "h4x3d token" :fileId file-id) => http401?)))
+
+        (fact "does not have auth information"
+          (:auth application) => empty?))
 
     (fact "without tupas, neighbor can't give response"
       (command pena :neighbor-response
