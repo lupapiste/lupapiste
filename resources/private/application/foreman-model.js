@@ -31,6 +31,8 @@ LUPAPISTE.ForemanModel = function() {
     });
   });
 
+  self.canInvite = ko.pureComputed(_.partial(lupapisteApp.models.applicationAuthModel.ok, "invite-with-role"));
+
   self.indicator = ko.observable();
 
   self.refresh = function(application) {
@@ -103,6 +105,7 @@ LUPAPISTE.ForemanModel = function() {
                      "statusName": linkedForemanApp ? linkedForemanApp.statusName : "missing",
                      "selectedForeman": ko.observable(_.isEmpty(asiointitunnus) ? undefined : asiointitunnus),
                      "selectableForemen": ko.observableArray(),
+                     "canInvite": self.canInvite,
                      "indicator": ko.observable()};
 
         data.selectableForemen(_.filter(self.foremanApplications(), function(app) {
@@ -139,9 +142,7 @@ LUPAPISTE.ForemanModel = function() {
           foremanApplications(data.applications);
           loadForemanTasks();
         })
-        .error(function() {
-          // noop
-        })
+        .error(util.nop)
         .call();
     }
 
