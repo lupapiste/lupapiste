@@ -190,7 +190,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function makeButton(id, label) {
     var button = document.createElement("button");
     button.id = id;
-    button.className = "btn";
+    //button.className = "btn";
     button.innerHTML = label;
     return button;
   }
@@ -396,7 +396,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var allowReject = requiresApproval || (approval && approval.value === "approved");
 
     if (self.authorizationModel.ok("approve-doc")) {
-      approveButton$ = makeApprovalButton("approve", "approved", "btn-primary");
+      approveButton$ = makeApprovalButton("approve", "approved", "positive");
       btnContainer$.append(approveButton$);
 
       if (!allowApprove) {
@@ -404,7 +404,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       }
     }
     if (self.authorizationModel.ok("reject-doc")) {
-      rejectButton$ = makeApprovalButton("reject", "rejected", "btn-secondary");
+      rejectButton$ = makeApprovalButton("reject", "rejected", "secondary");
       btnContainer$.append(rejectButton$);
 
       if (!allowReject) {
@@ -1101,7 +1101,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (authorizationModel.ok("invite-with-role")) {
       var button =
         $("<button>", {
-          "class": "icon-remove btn-primary",
+          "class": "icon-remove positive",
           text: loc("personSelector.invite"),
           click: function () {
             $("#invite-document-name").val(self.schemaName).change();

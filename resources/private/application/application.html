@@ -3,15 +3,8 @@
 <body>
   <section class="page" id="application">
     <div class="application_summary">
-      <div class="container">
-        <div class="application-map-container">
-          <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
-          <div class="application-map-actions" data-bind="with: application">
-            <!-- ko if: location() -->
-              <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
-            <!-- /ko -->
-          </div>
-        </div>
+        <div class="container">
+            <div class="preamble">
         <div class="application_summary_info" data-bind="with: application">
           <h1><!-- <span data-bind="ltext: 'application.address'"></span>:  --><span data-bind="text: address" data-test-id="application-title" class="address"></span>
           <a data-bind="click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
@@ -50,6 +43,12 @@
           <div>
             <p data-bind="ltext: 'application.property'"></p>
             <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
+          </div>
+
+          <!-- Municipality: -->
+          <div>
+            <p data-bind="ltext: 'application.municipality'"></p>
+            <span class="application_summary_text" data-bind="text: loc(['municipality', municipality()])"></span>
           </div>
 
           <!-- Submitted: -->
@@ -181,16 +180,22 @@
             </span>
           </div>
           <!-- /ko -->
-
+        </div>
+        <div class="application-map-container">
+          <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+          <div class="application-map-actions" data-bind="with: application">
+            <!-- ko if: location() -->
+              <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
+            <!-- /ko -->
+          </div>
         </div>
 
-
         <!-- Actions: -->
-        <div class="application_actions" data-bind="with: application">
-          <div class="muncipality-info">
-            <h2 data-bind="ltext: 'application.muncipality'"></h2>
-            <p data-bind="text: loc(['municipality', municipality()])"></p>
-          </div>
+        <div class="application_actions stacked" data-bind="with: application">
+          <!-- <div class="muncipality-info"> -->
+          <!--   <h2 data-bind="ltext: 'application.muncipality'"></h2> -->
+          <!--   <p data-bind="text: loc(['municipality', municipality()])"></p> -->
+          <!-- </div> -->
           <!-- ko if: !hasInvites() -->
           <button data-bind="click: approveApplication,
                               visible: $root.authorization.ok('approve-application'),
@@ -289,6 +294,7 @@
           </button>
           <!-- /ko -->
         </div>
+            </div>
 
         <!-- Tabs: -->
         <div class="tabs-container" data-bind="with: application">
@@ -371,8 +377,9 @@
 
             <div data-bind="if: $root.authorization.ok('add-operation')">
               <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
-              <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="btn-primary">
-               <span data-bind="ltext: 'application.addOperation'"></span> <span class="icon add left-align"></span>
+              <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="positive">
+                  <i class="lupicon-circle-plus"></i>
+                  <span data-bind="ltext: 'application.addOperation'"></span>
               </button>
             </div>
             <div data-bind="if: $root.authorization.ok('link-permit-required')">
@@ -380,8 +387,9 @@
               <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog,
                                  enable: $root.authorization.ok('link-permit-required'),
                                  visible: $root.authorization.ok('add-link-permit')"
-                      class="btn-primary">
-               <span data-bind="ltext: 'application.addLinkPermit'"></span> <span class="icon add left-align"></span>
+                      class="positive">
+                  <i class="lupicon-circle-plus"></i>
+                  <span data-bind="ltext: 'application.addLinkPermit'"></span>
               </button>
             </div>
           </div>
@@ -457,7 +465,7 @@
                     </li>
                   </ul>
 
-                  <button class="btn-primary"
+                  <button class="positive"
                         data-test-id="application-invite-person"
                         data-bind="ltext: 'personSelector.invite',
                                    visible: $root.authorization.ok('invite-with-role'),

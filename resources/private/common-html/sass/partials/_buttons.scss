@@ -276,6 +276,7 @@
 [type=submit], .btn, button {
   border: none;
   min-height: 38px;
+  max-height: 40px;
   box-sizing: border-box;
   display: inline-block;
   vertical-align: middle;
@@ -306,32 +307,34 @@
   text-transform: uppercase;
 }
 
+// You probably still need to tweak
+// the vertical properties case by case, since
+// the combination of center alignment and
+// (automatically) stacking letters is problematic.
+// Especially the letter-spacing breaks the alignment.
+// The most robust approach is to insert spaces between
+// letters.
 .vertical {
   line-height: normal;
   word-break: break-all;
-  //letter-spacing: .5em;
+  max-height: none;
   white-space: normal;
-  //width: 2em;
+  word-spacing: 2em;
   text-align: center;
   vertical-align: default;
     padding: {
     top: 12px;
     bottom: 12px;
   }
-
-  /*   span, i { */
-  /*   vertical-align: middle; */
-  /* } */
-  span {
-    display: block;
-    text-align: center;
-    max-width: 1em;
-    margin: {
-      top: 12px;
-      bottom: 12px;
-    }
+    span {
+      display: block;
+      text-align: center;
+      max-width: 1em;
+      margin: {
+        top: 12px;
+        bottom: 12px;
+      }
   }
-
 }
 
 @mixin disabled( $color: white, $bg: $gray221 ) {
@@ -345,7 +348,13 @@
 
 .disabled {
   // Empty class. Just used for "signaling", but provided
-  // here in order to avoid confusion (What .disabled?).
+  // here in order to avoid confusion ("What .disabled?").
+}
+
+@mixin button-div-a ($name) {
+  button.#{$name} { @content; }
+  div.#{$name} { @content; }
+  a.#{$name} { @content; }
 }
 
 @mixin styled-input ($bg, $hover-bg, $active-bg,
@@ -370,34 +379,24 @@
   }
 }
 
-.primary {
+@include button-div-a ( primary ) {
   @include styled-input( $bg: $orange-link, $hover-bg: $orange-hover, $active-bg: $orange-active );
 }
 
-.secondary {
+@include button-div-a (secondary) {
   @include styled-input( $bg: $gray-link, $hover-bg: $gray-hover, $active-bg: $gray-active );
 }
 
-.positive {
+@include button-div-a (positive) {
   @include styled-input( $bg: $green-link, $hover-bg: $green-hover, $active-bg: $green-active );
 }
 
-.negative {
+@include button-div-a ( negative ) {
   @include styled-input( $bg: $red-link, $hover-bg: $red-hover, $active-bg: $red-active );
 }
 
-.authority {
+@include button-div-a ( authority ) {
   @include styled-input( $bg: $turqo-link, $hover-bg: $turqo-hover, $active-bg: $turqo-active );
-}
-
-// Conflict resolution
-body.authority {
-  background-color: inherit !important;
-  color: inherit !important;
-  &:hover {
-    background-color: inherit !important;
-    color: inherit !important;
-  }
 }
 
 @mixin function ($text, $hover-text, $active-text ) {
@@ -417,7 +416,7 @@ body.authority {
            }
 }
 
-.function {
+@include button-div-a (function) {
   @include function( $orange-link, $orange-hover, $gray51 );
 }
 
@@ -434,7 +433,7 @@ button.function {
                      }
  }
 
-.function.authority {
+@include button-div-a ("function.authority") {
   @include function( $turqo-link, $turqo-hover, $gray51 );
 }
 
@@ -505,4 +504,63 @@ button.function {
     @extend .btn;
     @include disabled;
   }
+}
+
+.stacked {
+  display: table;
+  .btn, button {
+    width: 100%;
+    display: block;
+    margin: 0;
+  }
+  div {
+    overflow-y: hidden;
+  }
+}
+
+
+// Not used in production as such.
+// Can be removed when no longer needed
+// for demo purposes.
+.app-panels {
+  position: relative;
+  //width: 100%;
+  padding: {
+    left: 25%;
+    right: 25%;
+  }
+
+  .map {
+    position: absolute;
+    left: 0;
+    top:0;
+    bottom: 0;
+    width: 24%;
+    height: 200px;
+  }
+  .data {
+    height: 200px;
+    background-color: red;
+  }
+  .actions {
+    position: absolute;
+    right: 0;
+    top:0;
+    bottom: 0;
+    width: 24%;
+  }
+  @media (max-width: $narrow-breakpoint) {
+    padding: 0;
+    .map, .actions {
+      position: static;
+      width: auto;
+      float: left;
+    }
+  }
+}
+
+// Margin betwee form buttons.
+
+.form-buttons button {
+  margin-left: 12px;
 }

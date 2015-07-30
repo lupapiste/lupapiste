@@ -1,14 +1,60 @@
 /* application section styles*/
 
+// Map dimensions are hard-coded in application.html?
+$map-width:  320px;
+$map-height: 200px;
+$side-panel-width: 60px;
+
 /*Summary styles*/
 .application_summary {
   background-color: $lp-dark-grey;
   min-height: 320px + $marginM;
   padding: $marginS 0 0 0;
   position:  relative;
-  z-index: 5;
+  //z-index: 5;
   display: block;
   float: none;
+  // Since flexbox is not supported widely enough,
+  // we make the div ordering with absolute positioning.
+  .preamble {
+    position: relative;
+    /* float: left; */
+    //width: 100%;
+    padding: {
+      left: $map-width;
+      right: 24%;
+    }
+    margin-right: $side-panel-width + 1px;
+    .application-map-container, .application_actions {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+    }
+    .application-map-container {
+      left: 0;
+      width: $map-width;
+    }
+    .application_actions {
+      right: 0;
+      width: 24%;
+    }
+    @media (max-width: $narrow-breakpoint) {
+      padding: 0;
+      .application-map-container, .application_actions {
+        position: relative;
+        width: auto;
+        float: left;
+      }
+      .application-map-container {
+        float: left;
+        margin-left: $marginL; // Align with summary info.
+      }
+      .application_actions {
+        float: right;
+        margin-right: $marginL; // Align with summary info.
+      }
+    }
+  }
   li {
    display: inline;
   }
@@ -18,10 +64,10 @@
     line-height: 24px;
     margin-bottom: $marginS;
   }
-  button {
-    margin: 0;
-    margin-bottom: $marginS;
-  }
+  /* button { */
+  /*   margin: 0; */
+  /*   margin-bottom: $marginS; */
+  /* } */
 
   .application-map-container {
     position: relative;
@@ -34,6 +80,7 @@
       z-index: 1000;
       left: 0;
       top: 256px;
+      //bottom: 0;
       text-align: center;
       display:block;
       background: $lp-green;
@@ -47,8 +94,8 @@
 
   .application_summary_info{
     margin: 0 $marginL $marginL $marginL;
-    float: left;
-    width: 50%;
+    //float: left;
+    //width: 50%;
     h1 {
       width: 100%;
       .address {
@@ -259,11 +306,11 @@
   }
 
   .application_actions {
-    background-color: $lp-dark-grey;
+    //background-color: $lp-dark-grey;
     position: absolute;
     right: 0;
     top: $marginM;
-    width: $cols3;
+    //width: $cols3;
     .muncipality-info {
       background: darken($lp-light-grey, 15%);
       width: 100%;
@@ -288,9 +335,9 @@
        color: rgb(242,242,242);
       }
     }
-    button {
-      width: 100%;
-    }
+    /* button { */
+    /*   width: 100%; */
+    /* } */
   }
 }
 
