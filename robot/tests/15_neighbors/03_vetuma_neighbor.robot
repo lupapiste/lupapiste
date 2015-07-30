@@ -52,6 +52,13 @@ Neighbor clicks on email link and sees application
   Element should contain  xpath=//*[@data-test-id='application-property-id']  753-416-25-22
   Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
 
+Neighbor sees some of the documents
+  Page should contain  Hankkeen kuvaus
+  Page should contain  Rakennuspaikka
+  Page should contain  Rakennuksen tilavuus
+  # LPK-546
+  Page should not contain  Päätöksen toimitus
+
 Neighbor clicks vetuma button to identify herself
   [Tags]  integration
   Authenticate via Nordea via Vetuma
