@@ -48,7 +48,10 @@ LUPAPISTE.ApplicationsDataProvider = function() {
                {searchText: self.searchField(),
                 applicationTags: self.applicationTags(),
                 handler: self.handler() ? self.handler().id : undefined,
-                applicationType: self.applicationType()})
+                applicationType: self.applicationType(),
+                limit: self.limit(),
+                sort: ko.mapping.toJS(self.sort),
+                skip: self.skip()})
       .success(self.onSuccess)
     .call();
   });
