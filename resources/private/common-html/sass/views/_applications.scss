@@ -91,11 +91,11 @@
   }
 }
 
-.sorting, .sorting_asc, .sorting_desc {
+.sorting, .sorting_asc, .sorting_desc, .sorting.asc, .sorting.desc {
   cursor: pointer;
   position: relative;
 }
-.sorting_asc:after {
+.sorting_asc:after, .sorting.asc:after {
   content:"";
   display: block;
   position: absolute;
@@ -106,7 +106,7 @@
   top: 7px;
   right: 2px;
 }
-.sorting_desc:after {
+.sorting_desc:after, .sorting.desc:after {
   content:"";
   display: block;
   position: absolute;
