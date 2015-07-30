@@ -23,4 +23,14 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
     self.dataProvider.applicationType(item);
     self.selectedTab(item);
   };
+
+  self.sortBy = function(target) {
+    var sortObj = self.dataProvider.sort;
+    if ( target === sortObj.field() ) {
+      sortObj.asc(!sortObj.asc()); // toggle direction
+    } else {
+      sortObj.field(target);
+      sortObj.asc(false);
+    }
+  };
 };
