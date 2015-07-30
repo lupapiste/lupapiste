@@ -5,8 +5,12 @@
     <script type="text/html" id="applications-search-paging-template">
       <div class="paging">
         <div>
-          <button class="btn btn-narrow" data-bind="click: prev, enable: dataProvider.data().totalCount > dataProvider.limit(), ltext: 'previous'"></button>
-          <button class="btn btn-narrow" data-bind="click: next, enable: dataProvider.data().totalCount > dataProvider.limit(), ltext: 'next'"></button>
+          <span data-bind="text: loc('applications.results', start(), end())"></span>
+          <span data-bind="text: loc('applications.count', count())"></span>
+        </div>
+        <div>
+          <button class="btn btn-narrow" data-bind="click: prev, enable: count() > dataProvider.limit(), ltext: 'previous'"></button>
+          <button class="btn btn-narrow" data-bind="click: next, enable: count() > dataProvider.limit(), ltext: 'next'"></button>
           <select data-bind="options: limits, value: dataProvider.limit"></select>
           <label data-bind="ltext: 'applications.lengthMenu'"></label>
         </div>

@@ -18,4 +18,13 @@ LUPAPISTE.ApplicationsSearchPagingModel = function(params) {
 
   self.next = _.partial(self.paging, 1);
   self.prev = _.partial(self.paging, -1);
+
+  self.start = ko.pureComputed(function() {
+    return self.dataProvider.skip() + 1;
+  });
+
+  self.end = ko.pureComputed(function() {
+    var endValue = self.dataProvider.skip() + self.dataProvider.limit();
+    return self.count() < endValue ? self.count() : endValue;
+  });
 };
