@@ -20,7 +20,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.limit = ko.observable(25);
 
-  self.sort = ko.observable({field: "location", dir: "asc"});
+  self.sort = {field: ko.observable("modified"), asc: ko.observable(false)};
 
   self.onSuccess = function(res) {
         self.data(res.data);
@@ -34,7 +34,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
                 handler: self.handler() ? self.handler().id : undefined,
                 applicationType: self.applicationType(),
                 limit: self.limit(),
-                sort: self.sort()})
+                sort: ko.mapping.toJS(self.sort)})
       .success(self.onSuccess)
     .call();
   }).extend({throttle: 250});

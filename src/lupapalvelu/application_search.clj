@@ -169,9 +169,13 @@
                           "type" :infoRequest
                           "state" :state})
 
-(defn- make-sort-v2 [{{:keys [field dir]} :sort}]
-  (when-let [sort-field (sort-field-mapping field)]
-    {sort-field (if (= "asc" dir) 1 -1)}))
+(defn- make-sort-v2 [{{:keys [field asc]} :sort}]
+  (let [sort-field (sort-field-mapping field)
+        dir (if asc 1 -1)]
+    (cond
+      (nil? sort-field) {}
+      (sequential? sort-field) (zipmap sort-field (repeat dir))
+      :else {sort-field dir})))
 
 (def kind-mapping {"all" "both"
                    "inforequest" "inforequests"
