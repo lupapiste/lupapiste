@@ -5,8 +5,7 @@
     <script type="text/html" id="applications-search-paging-template">
       <div class="paging">
         <div>
-          <span data-bind="text: loc('applications.results', start(), end())"></span>
-          <span data-bind="text: loc('applications.count', count())"></span>
+          <span data-bind="text: loc('applications.results', start(), end()), count()"></span>
         </div>
         <div>
           <button class="btn btn-narrow" data-bind="click: prev, enable: count() > dataProvider.limit(), ltext: 'previous'"></button>
