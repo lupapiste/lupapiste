@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="archival-summary" style="visibility: hidden; display: block;">
+  <script type="text/html" id="archival-summary-template">
+
+    <div data-bind="if: !_.isEmpty(archivedDocuments())">
+      <h1>Arkistoitavat asiakirjat - <span data-bind="text: $root.application.id"></span></h1>
+      <div>
+      Asiakirjan säilytysaika määrää arkistoidaanko asiakirjaa. Voit muokata asiakirjan arkistointiaikaa ja
+      muita tietoja klikkaamalla asiakirjan riviä.
+      </div>
+
+      <div data-bind="template: {name: 'archival-document-table-template', data: archivedDocuments}"></div>
+    </div>
+
+    <div data-bind="if: !_.isEmpty(notArchivedDocuments())">
+      <h1>Muut asiakirjat (ei arkistoida) - <span data-bind="text: $root.application.id"></span></h1>
+
+      <div data-bind="template: {name: 'archival-document-table-template', data: notArchivedDocuments}"></div>
+    </div>
+
+  </script>
+  <script type="text/html" id="archival-document-table-template">
+    <table class="table archival-summary-table">
+      <tbody data-bind="foreach: $data">
+      <tr class="attachment-group-header">
+        <td data-bind="text: name" colspan="4"></td>
+      </tr>
+      <tr>
+        <th data-bind="ltext: 'application.attachmentType'" class="attachment-type">Tyyppi</th>
+        <th>Säilytysaika</th>
+        <th class="personal-data">Henkilötiedot</th>
+        <th class="will-publish">Julkaistaan</th>
+      </tr>
+
+      <!-- ko foreach: attachments -->
+      <tr class="attachment-row">
+        <td class="attachment-type">
+          <div class="attachment-type-container" data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}">
+            <div class="group-label">
+              <span data-bind="if: type">
+                <span data-bind="text: loc(['attachmentType', type['type-group'](), '_group_label'])"></span>
+              </span>
+              <span data-bind="if: !type">
+                <i data-bind="ltext: 'attachment.noName'"></i>
+              </span>
+            </div>
+            <div class="type-id">
+              <div>
+                <span data-bind="if: type">
+                  <span data-bind="text: loc(['attachmentType', type['type-group'](), type['type-id']()])"></span>
+                </span>
+                <span data-bind="if: !type">
+                  <i data-bind="ltext: 'attachment.noName'"></i>
+                </span>
+              </div>
+              <!-- ko if: $data.contents -->
+              <div class="attachment-content-desc"><span data-bind="text: $data.contents"></span></div>
+              <!-- /ko -->
+            </div>
+          </div>
+
+          <div data-bind="if: !_.isEmpty($data.metadata)">
+            <div data-bind="slider: showMetadataEditor,
+                            component: {name: 'metadata-editor',
+                                        params: {attachmentId: id, metadata: metadata, applicationId: $root.application.id}}"></div>
+          </div>
+        </td>
+
+        <td data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: retentionDescription"></td>
+        <td class="personal-data" data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: personalDataDescription"></td>
+        <td class="will-publish"><input type="checkbox"></td>
+      </tr>
+      <!-- /ko -->
+      </tbody>
+    </table>
+  </script>
+</section>
+</body>
+</html>

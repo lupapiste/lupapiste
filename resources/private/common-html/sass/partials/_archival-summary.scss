@@ -1,0 +1,37 @@
+.archival-summary-table {
+  td {
+    vertical-align: top;
+  }
+  .attachment-type {
+    width: 700px;
+  }
+  .personal-data {
+    width: 170px;
+  }
+  .will-publish {
+    width: 100px;
+  }
+  .attachment-type-container {
+    @include clearfix;
+    .group-label, .type-id {
+      float: left;
+      width: 50%;
+    }
+  }
+  .attachment-row {
+    &:active {
+      background-color: lighten($lp-orange, 40%);
+      color: inherit;
+    }
+  }
+  .attachment-group-header {
+    td {
+      padding-top: 12px;
+    }
+  }
+  .metadata-editor-container {
+    .editor-header {
+      border-collapse: separate;
+    }
+  }
+}

@@ -4456,6 +4456,54 @@ ul.attachments-list li.mandatory-attachments {
   float: right;
 }
 
+/* line 2, ../sass/partials/_archival-summary.scss */
+.archival-summary-table td {
+  vertical-align: top;
+}
+/* line 5, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-type {
+  width: 700px;
+}
+/* line 8, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .personal-data {
+  width: 170px;
+}
+/* line 11, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .will-publish {
+  width: 100px;
+}
+/* line 14, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-type-container {
+  *zoom: 1;
+}
+/* line 22, ../sass/main.scss */
+.archival-summary-table .attachment-type-container:before, .archival-summary-table .attachment-type-container:after {
+  content: "";
+  display: table;
+}
+/* line 26, ../sass/main.scss */
+.archival-summary-table .attachment-type-container:after {
+  clear: both;
+}
+/* line 16, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-type-container .group-label, .archival-summary-table .attachment-type-container .type-id {
+  float: left;
+  width: 50%;
+}
+/* line 22, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-row:active {
+  background-color: #fef4ea;
+  color: inherit;
+}
+/* line 28, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-group-header td {
+  padding-top: 12px;
+}
+/* line 33, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .metadata-editor-container .editor-header {
+  border-collapse: separate;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
@@ -7310,50 +7358,50 @@ div.attachment-multiselect-content tr.attachment-group-header {
 /*
   Lupapalvelu CSS:
 */
-/* line 151, ../sass/main.scss */
+/* line 152, ../sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 157, ../sass/main.scss */
+/* line 158, ../sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 161, ../sass/main.scss */
+/* line 162, ../sass/main.scss */
 .hidden {
   display: none !important;
 }
 
-/* line 165, ../sass/main.scss */
+/* line 166, ../sass/main.scss */
 .inline {
   display: inline;
 }
 
-/* line 169, ../sass/main.scss */
+/* line 170, ../sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 173, ../sass/main.scss */
+/* line 174, ../sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 177, ../sass/main.scss */
+/* line 178, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 182, ../sass/main.scss */
+/* line 183, ../sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 186, ../sass/main.scss */
+/* line 187, ../sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -7365,27 +7413,27 @@ div.attachment-multiselect-content tr.attachment-group-header {
   display: table-cell;
 }
 
-/* line 197, ../sass/main.scss */
+/* line 198, ../sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 205, ../sass/main.scss */
+/* line 206, ../sass/main.scss */
 .table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 211, ../sass/main.scss */
+/* line 212, ../sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 216, ../sass/main.scss */
+/* line 217, ../sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -7399,47 +7447,47 @@ div.pzbDiv {
   font-size: 0.8em;
   color: #333;
 }
-/* line 229, ../sass/main.scss */
+/* line 230, ../sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 231, ../sass/main.scss */
+/* line 232, ../sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 237, ../sass/main.scss */
+/* line 238, ../sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 242, ../sass/main.scss */
+/* line 243, ../sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 244, ../sass/main.scss */
+/* line 245, ../sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 247, ../sass/main.scss */
+/* line 248, ../sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 248, ../sass/main.scss */
+/* line 249, ../sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 251, ../sass/main.scss */
+/* line 252, ../sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 253, ../sass/main.scss */
+/* line 254, ../sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 255, ../sass/main.scss */
+/* line 256, ../sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }
