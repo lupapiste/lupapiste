@@ -144,19 +144,23 @@ var ajax = (function($) {
     };
 
     self.processing = function(listener) {
-      if (!listener) { return self; }
-      if (!_.isFunction(listener)) { throw "Argument must be a function: " + listener; }
-      self.processingListener = listener;
-      self.processingListener(false);
+      if (_.isFunction(listener)) {
+        self.processingListener = listener;
+        self.processingListener(false);
+      } else {
+        error("processing listener must be a function", listener, self.url);
+      }
       return self;
     };
 
     self.pending = function(listener, timeout) {
-      if (!listener) { return self; }
-      if (!_.isFunction(listener)) { throw "Argument must be a function: " + listener; }
-      self.pendingListener = listener;
-      self.pendingTimeout = timeout || 100;
-      self.pendingListener(false);
+      if (_.isFunction(listener)) {
+        self.pendingListener = listener;
+        self.pendingTimeout = timeout || 100;
+        self.pendingListener(false);
+      } else {
+        error("pending listener must be a function", listener, self.url);
+      }
       return self;
     };
 
