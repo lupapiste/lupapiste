@@ -129,6 +129,9 @@
         .success(function() {
           self.metadata(ko.mapping.fromJS(ko.mapping.toJS(self.editedMetadata)));
           self.editable(false);
+          if (_.isFunction(params.saveCallback)) {
+            params.saveCallback();
+          }
         })
         .call();
     }

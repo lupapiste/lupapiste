@@ -64,7 +64,8 @@
           <div data-bind="if: !_.isEmpty($data.metadata)">
             <div data-bind="slider: showMetadataEditor,
                             component: {name: 'metadata-editor',
-                                        params: {attachmentId: id, metadata: metadata, applicationId: $root.application.id}}"></div>
+                                        params: {attachmentId: id, metadata: metadata, applicationId: $root.application.id,
+                                        saveCallback: function(){$data.showMetadataEditor(false);}}}"></div>
           </div>
         </td>
 
