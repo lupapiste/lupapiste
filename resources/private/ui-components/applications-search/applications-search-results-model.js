@@ -11,10 +11,6 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
                                   "inforequest",
                                   "canceled"]);
 
-  self.totalCount = ko.pureComputed(function() {
-    return self.dataProvider.data().totalCount;
-  });
-
   self.gotResults = params.gotResults;
 
   self.selectedTab = ko.observable("all");

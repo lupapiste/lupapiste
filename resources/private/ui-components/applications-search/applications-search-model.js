@@ -63,17 +63,22 @@ LUPAPISTE.ApplicationsSearchModel = function(params) {
     return self.dataProvider.data().userTotalCount <= 0;
   });
 
+  self.totalCount = ko.pureComputed(function() {
+    return self.dataProvider.data().totalCount;
+  });
+
   self.noResults = ko.pureComputed(function(){
-    return self.dataProvider.data().totalCount === 0;
+    return self.totalCount() === 0;
   });
 
   self.gotResults = ko.pureComputed(function(){
-    return self.dataProvider.data().totalCount > 0;
+    return self.totalCount() > 0;
   });
 
   self.missingTitle = ko.pureComputed(function() {
     return self.noApplications() ? "applications.empty.title" : "applications.no-match.title";
   });
+
   self.missingDesc = ko.pureComputed(function() {
     return self.noApplications() ? "applications.empty.desc" : "applications.no-match.desc";
   });
