@@ -161,6 +161,18 @@
 (defn- enrich-row [app]
   (assoc app :kind (if (:infoRequest app) "inforequest" "application")))
 
+(def- sort-field-mapping {"applicant" :applicant
+                          "handler" ["authority.lastName" "authority.firstName"]
+                          "location" :address
+                          "modified" :modified
+                          "submitted" :submitted
+                          "type" :infoRequest
+                          "state" :state})
+
+(defn- make-sort-v2 [{{:keys [field dir]} :sort}]
+  (when-let [sort-field (sort-field-mapping field)]
+    {sort-field (if (= "asc" dir) 1 -1)}))
+
 (def kind-mapping {"all" "both"
                    "inforequest" "inforequests"
                    "canceled" "both"})
@@ -181,7 +193,7 @@
         limit       (or (:limit params) 10)
         apps        (query/with-collection "applications"
                       (query/find query)
-                      (query/sort {:modified 1})
+                      (query/sort (make-sort-v2 params))
                       (query/skip skip)
                       (query/limit limit))
         rows        (map (comp enrich-row (partial meta-fields/with-indicators user) #(domain/filter-application-content-for % user) ) apps)]
