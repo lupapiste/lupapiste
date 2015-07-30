@@ -193,7 +193,7 @@
                                            :applicationTags :tags}))
         query       (make-query user-query params user)
         query-total (mongo/count :applications query)
-        skip        (or 0)
+        skip        (or (:skip params) 0)
         limit       (or (:limit params) 10)
         apps        (query/with-collection "applications"
                       (query/find query)

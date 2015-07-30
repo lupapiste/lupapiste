@@ -24,7 +24,7 @@
   [{user :user data :data}]
   (ok :data (search/applications-for-user-v2
               user
-              (select-keys data [:applicationTags :applicationType :handler :limit :searchText :sort]))))
+              (select-keys data [:applicationTags :applicationType :handler :limit :searchText :skip :sort]))))
 
 (defn- localize-operation [op]
   (assoc op
