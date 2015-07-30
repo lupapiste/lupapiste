@@ -108,7 +108,7 @@
       (if-let [attachment (first (filter #(= (:id %) attachmentId) (:attachments application)))]
         (let [metadata (->> (keywordize-keys-and-some-values metadata [])
                             (tms/sanitize-metadata)
-                            (#(assoc % :tila (get-in attachment [:metadata :tila])))
+                            (#(assoc % :tila (or (get-in attachment [:metadata :tila]) "Valmis")))
                             (s/validate tms/AsiakirjaMetaDataMap))
               updated-attachment (assoc attachment :metadata metadata)
               updated-attachments (-> (remove #(= % attachment) (:attachments application))
@@ -129,7 +129,7 @@
     (try
       (let [metadata (->> (keywordize-keys-and-some-values metadata [])
                           (tms/sanitize-metadata)
-                          (#(assoc % :tila (get-in application [:metadata :tila])))
+                          (#(assoc % :tila (or (get-in application [:metadata :tila]) "Valmis")))
                           (s/validate tms/AsiakirjaMetaDataMap))]
         (action/update-application command {$set {:modified created
                                                   :metadata metadata}}))
