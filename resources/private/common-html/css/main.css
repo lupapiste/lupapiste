@@ -4483,8 +4483,13 @@ div.applications-search-component {
 }
 
 /* line 30, ../sass/partials/_applications_search.scss */
+.paging button:first-child {
+  margin-right: 6px;
+}
+/* line 33, ../sass/partials/_applications_search.scss */
 .paging select {
   width: 5.625em;
+  margin-left: 12px;
   margin-right: 6px;
 }
 

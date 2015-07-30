@@ -27,8 +27,12 @@ div.applications-search-component {
 }
 
 .paging {
+  button:first-child {
+    margin-right: $marginS;
+  }
   select {
     width: $cols1*1.5;
+    margin-left: $marginM;
     margin-right: $marginS;
   }
 }
