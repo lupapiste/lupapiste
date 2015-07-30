@@ -6,7 +6,7 @@
     <input class="form-input text applications-search" type="text" data-bind="attr: {placeholder: loc('application.filter.search')}, textInput: dataProvider.searchField"/>
     <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
     <div>
-    	<label data-bind="ltext: 'applications.filter.desc'" />
+    	<label data-bind="ltext: 'applications.filter.handler'" />
     	<div data-bind="component: {name: 'autocomplete', params: {dataProvider: handlersDataProvider, value: dataProvider.handler, selectedText: 'fullName', nullable: true}}"></div>
   	</div>
   	<div>
