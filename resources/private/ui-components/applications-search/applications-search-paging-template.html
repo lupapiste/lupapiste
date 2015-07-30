@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="applications-search-paging-template">
+      <div class="paging">
+        <div>
+          <button class="btn btn-narrow" data-bind="click: prev, enable: dataProvider.data().totalCount > dataProvider.limit(), ltext: 'previous'"></button>
+          <button class="btn btn-narrow" data-bind="click: next, enable: dataProvider.data().totalCount > dataProvider.limit(), ltext: 'next'"></button>
+          <select data-bind="options: limits, value: dataProvider.limit"></select>
+          <label data-bind="ltext: 'applications.lengthMenu'"></label>
+        </div>
+      </div>
+    </script>
+  </section>
+</body>
+</html>
