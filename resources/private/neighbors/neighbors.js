@@ -99,7 +99,7 @@
     repository.load(applicationId);
   });
 
-  hub.onPageUnload("neighbors", function(e) {
+  hub.onPageUnload("neighbors", function() {
     model.map = null;
   });
 

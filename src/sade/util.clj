@@ -267,8 +267,9 @@
                 4 "%02d:%02d:%02d.%d")]
       (apply format fmt (map ->int matches)))))
 
-(defn get-timestamp-from-now [time-key amount]
+(defn get-timestamp-from-now
   "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
+  [time-key amount]
   {:pre [(#{:day :week :month} time-key)]}
   (let [time-fn (case time-key
                   :day days
@@ -277,8 +278,9 @@
                   :years years)]
     (tc/to-long (-> amount time-fn ago))))
 
-(defn to-long [s]
+(defn to-long
   "Parses string to long. If string is not numeric returns nil."
+  [^String s]
   (when (numeric? s)
     (Long/parseLong s)))
 
@@ -448,8 +450,9 @@
   [pred coll]
   (first (filter pred coll)))
 
-(defn get-files-by-regex [path ^java.util.regex.Pattern regex]
+(defn get-files-by-regex
   "Takes all files (and folders) from given path and filters them by regex. Not recursive. Returns sequence of File objects."
+  [path ^java.util.regex.Pattern regex]
   {:pre [(instance? java.util.regex.Pattern regex) (string? path)]}
   (filter
     #(re-matches regex (.getName %))

@@ -392,8 +392,9 @@
     (ok :tags (:tags (o/get-organization org-id)))
     (fail! :error.organization-not-found)))
 
-(defn- transform-coordinates-to-wgs84 [collection]
+(defn- transform-coordinates-to-wgs84
   "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"
+  [collection]
   (let [schema (.getSchema collection)
         crs (.getCoordinateReferenceSystem schema)
         transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)

@@ -7,7 +7,7 @@
     self.languageMenuVisible = ko.observable(false);
     self.currentLanguage = loc.getCurrentLanguage();
     self.changeLanguage = function( lang ) {
-      if( lang != self.currentLanguage ) {
+      if( lang !== self.currentLanguage ) {
         hub.send("change-lang", { lang: lang });
       }
       self.languageMenuVisible( false );

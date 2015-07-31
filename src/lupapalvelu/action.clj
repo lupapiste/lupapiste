@@ -337,7 +337,7 @@
           (ok))))
     (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
       (do
-        (errorf "fail! in action: \"%s\" [%s:%d]: %s (%s)"
+        (errorf "fail! in action: \"%s\" [%s:%s]: %s (%s)"
           (:action command)
           (:sade.core/file all)
           (:sade.core/line all)

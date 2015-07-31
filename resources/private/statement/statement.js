@@ -62,8 +62,12 @@
         self.data(ko.mapping.fromJS(statement));
 
         if (!self.dirty()) {
-          if (statement.status) self.selectedStatus(statement.status);  // LUPA-482 part II
-          if (statement.text) self.text(statement.text);
+          if (statement.status) {
+            self.selectedStatus(statement.status);  // LUPA-482 part II
+          }
+          if (statement.text) {
+            self.text(statement.text);
+          }
           self.dirty(false);
         }
 
@@ -72,7 +76,7 @@
             .query("get-possible-statement-statuses", {id: applicationId})
             .success(function(resp) {
               var sorted = _(resp.data)
-                .map(function(item) { return {id: item, name: loc(['statement', item])}; })
+                .map(function(item) { return {id: item, name: loc(["statement", item])}; })
                 .sortBy("name")
                 .value();
               self.statuses(sorted);
