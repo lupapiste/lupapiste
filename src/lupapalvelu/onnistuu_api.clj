@@ -32,7 +32,7 @@
 (defcommand init-sign
   {:parameters [company signer lang]
    :user-roles #{:anonymous}}
-  [{:keys [created user]}]
+  [{:keys [^Long created user]}]
   (let [company (merge c/company-skeleton company)]
     (sc/validate c/Company company)
     (sc/validate p/Signer signer)

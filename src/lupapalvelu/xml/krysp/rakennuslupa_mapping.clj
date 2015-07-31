@@ -347,7 +347,7 @@
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application katselmus user lang krysp-version output-dir begin-of-link]
   (let [find-national-id (fn [{:keys [kiinttun rakennusnro]}]
-                           (:nationalId (some #(when (and (= (:propertyId %)) (= rakennusnro (:localShortId %))) %) (:buildings application))))
+                           (:nationalId (some #(when (and (= kiinttun (:propertyId %)) (= rakennusnro (:localShortId %))) %) (:buildings application))))
         data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
