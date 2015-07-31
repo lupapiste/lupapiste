@@ -68,7 +68,7 @@ Authority can view draft foreman application, but can't use commands
   Element should be disabled  xpath=//section[@data-doc-type="hakija-r"]//div[@data-select-one-of="henkilo"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]
   Open tab  attachments
   Xpath Should Match X Times  //div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  1
-  Element text should be  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  Valitse...
+  Element text should be  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  Valitse…
   Open tab  requiredFieldSummary
   Element should not be visible  xpath=//div[@id="application-requiredFieldSummary-tab"]//button[@data-test-id="application-submit-btn"]
   # Application actions only exportPDF is visible

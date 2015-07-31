@@ -110,8 +110,9 @@
 (defn ->location [x y]
   [(util/->double x) (util/->double y)])
 
-(defn get-link-permit-app [{:keys [linkPermitData]}]
+(defn get-link-permit-app
   "Return associated (first lupapistetunnus) link-permit application."
+  [{:keys [linkPermitData]}]
   (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
     (domain/get-application-no-access-checking (:id link))))
 
