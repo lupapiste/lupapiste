@@ -4,7 +4,7 @@
             [lupapalvelu.domain :refer :all]
             [lupapalvelu.document.schemas :as schemas]))
 
-(testable-privates lupapalvelu.domain only-authority-sees-drafts filter-targeted-attachment-comments)
+(testable-privates lupapalvelu.domain only-authority-sees-drafts filter-targeted-attachment-comments normalize-neighbors)
 
 (facts
   (let [application {:auth [{:id :user-x} {:id :user-y}]}]
@@ -82,6 +82,38 @@
   (only-authority-sees-drafts {:role "nono-authority"} [{}]) => [{}])
 
 (facts "Filtering application data"
+
+  (facts "normalize-neighbors"
+    (let [neighbors [{:id "1"
+                      :status [{:state "open"}
+                               {:state "response-given"
+                                :vetuma {:name "foo" :userid "123"}}]}
+                     {:id "2"
+                      :status [{:state "open"}
+                               {:state "response-given"
+                                :vetuma {:name "foo" :userid "123"}}
+                               {:state "forgotten"}]}]]
+
+      (normalize-neighbors {:role "authority"} neighbors) => [{:id "1"
+                                                         :status [{:state "open"}
+                                                                  {:state "response-given"
+                                                                   :vetuma {:name "foo", :userid "123"}}]}
+                                                        {:id "2"
+                                                         :status [{:state "open"}
+                                                                  {:state "response-given"
+                                                                   :vetuma {:name "foo", :userid "123"}}
+                                                                  {:state "forgotten"}]}]
+
+      (normalize-neighbors {:role "other"} neighbors) => [{:id "1"
+                                                     :status [{:state "open"}
+                                                              {:state "response-given"
+                                                               :vetuma {:name "foo", :userid nil}}]}
+                                                    {:id "2"
+                                                     :status [{:state "open"}
+                                                              {:state "response-given"
+                                                               :vetuma {:name "foo", :userid nil}}
+                                                              {:state "forgotten"}]}]))
+
   (facts "Comments"
     (let [application {:attachments [{:id 1}
                                      {:id 2}]
@@ -106,3 +138,4 @@
                                        :id 0}}]]
       (fact "even comments for deleted attachments are returned, but not those which are empty"
         (:comments (filter-targeted-attachment-comments application)) => expected-comments))))
+

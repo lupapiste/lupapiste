@@ -144,6 +144,7 @@
 
             <div data-bind="if: tupasUser">
               <p data-bind="ltext: 'neighbor.show.reply.text'"></p>
+              <h3 data-bind="ltext: 'choose'"></h3>
               <form>
 
                 <input type="radio" id="responseOk" data-bind="checked: response, enable: !done()" value="ok" data-test-id="neighbor-response-ok" />
@@ -158,11 +159,14 @@
                   data-bind="
                     textInput: message,
                     enable: response() === 'comments' && !done(),
+                    visible: response() === 'comments',
                     attr: {placeholder: loc('neighbor.show.message.placeholder')}"
                   data-test-id="neighbor-response-message"
                   class="form-input textarea really-long high"
                   rows=10>
                 </textarea>
+
+                <div class="spacerM"></div>
 
                 <button class="btn-primary"
                   data-bind="

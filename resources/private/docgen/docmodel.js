@@ -841,8 +841,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
             overwrite: overwriteWithBackendData,
             collection: self.getCollection()
           })
-          .success(function () {
-            repository.load(self.appId);
+          .success(_.partial(repository.load, self.appId))
+          .onError("error.no-legacy-available", function(e) {
+            notify.error(loc(e.text));
           })
           .call();
         }
@@ -1811,7 +1812,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
     var docId = util.getIn(self, ["schema", "info", "op", "id"]);
-    var notPrimaryOperation = (!docId || docId != util.getIn(self.application, ["primaryOperation", "id"]))
+    var notPrimaryOperation = (!docId || docId !== util.getIn(self.application, ["primaryOperation", "id"]));
 
     var isSecondaryOperation = (docId && !_.isEmpty(_.where(self.application.secondaryOperations, {id: docId})));
 

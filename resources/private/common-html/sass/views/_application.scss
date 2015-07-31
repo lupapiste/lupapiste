@@ -798,4 +798,8 @@ $side-panel-width: 60px;
 }
 
 
-
+// Can be removed when the buttons are removed
+// from H2 bar.
+h2.sticky {
+  margin-bottom: $marginM;
+}

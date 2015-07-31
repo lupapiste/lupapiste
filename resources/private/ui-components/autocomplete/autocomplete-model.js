@@ -21,7 +21,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.selectedTags = ko.observableArray();
 
   self.showCaption = ko.pureComputed(function() {
-    return !self.selected() && self.selectedTags().length == 0
+    return !self.selected() && self.selectedTags().length === 0;
   });
 
   // set initial value
@@ -96,7 +96,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.removeTag = function(tag) {
     self.selectedTags.remove(tag);
     self.inputSelected(false);
-  }
+  };
 
   self.dispose = function() {
     while(self.subscriptions.length !== 0) {

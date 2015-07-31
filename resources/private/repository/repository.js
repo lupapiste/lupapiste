@@ -59,7 +59,7 @@ var repository = (function() {
     return _.filter([application.primaryOperation].concat(application.secondaryOperations), function(item) {
       return !_.isEmpty(item);
     });
-  };
+  }
 
   function loadingErrorHandler(id, e) {
     currentlyLoadingId = null;
@@ -70,7 +70,7 @@ var repository = (function() {
   function doLoad(id, pending, callback) {
     currentQuery = ajax
       .query("application", {id: id})
-      .pending(pending)
+      .pending(pending || _.noop)
       .error(_.partial(loadingErrorHandler, id))
       .fail(function (jqXHR) {
         if (jqXHR && jqXHR.status > 0) {
@@ -78,6 +78,8 @@ var repository = (function() {
         }
       })
       .call();
+
+
     $.when(loadingSchemas, currentQuery).then(function(schemasResponse, loadingResponse) {
       var schemas = schemasResponse[0].schemas,
           loading = loadingResponse[0],

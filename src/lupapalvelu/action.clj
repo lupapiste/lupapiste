@@ -337,7 +337,7 @@
           (ok))))
     (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
       (do
-        (errorf "fail! in action: \"%s\" [%s:%d]: %s (%s)"
+        (errorf "fail! in action: \"%s\" [%s:%s]: %s (%s)"
           (:action command)
           (:sade.core/file all)
           (:sade.core/line all)
@@ -421,7 +421,9 @@
     (swap! actions assoc
       action-keyword
       (merge
-        {:user-authz-roles (default-user-authz action-type)
+        {:user-authz-roles (if (= #{:authority} user-roles)
+                             #{} ; By default, authority gets authorization fron organization role
+                             (default-user-authz action-type))
          :org-authz-roles (cond
                             (some user-roles [:authority :oirAuthority]) default-org-authz-roles
                             (user-roles :anonymous) all-org-authz-roles)}

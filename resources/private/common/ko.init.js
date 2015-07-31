@@ -103,6 +103,16 @@
     update: _.partial(localized, "text")
   };
 
+  // hello.id -> T e r v e
+  ko.bindingHandlers.lspaced = {
+    update: function( element, valueAccessor) {
+      var value = loc( ko.utils.unwrapObservable( valueAccessor() ) );
+      if( value ) {
+        $(element).text( value.split( "" ).join( " "));
+      }
+    }
+  };
+
   ko.bindingHandlers.lhtml = {
     update: _.partial(localized, "html")
   };

@@ -15,19 +15,15 @@
           </textarea>
           <div class="message-buttons inner-margins">
               <button class="positive caps"
-                      data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: stateOpenApplication,
-                                 css: {waiting: pending}"
+                      data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: stateOpenApplication"
                       data-test-id="application-open-application-btn"
                       type="submit">
-                  <i class="wait spin lupicon-refresh"></i>
                   <span data-bind="ltext: 'application.conversationOpen'"></span>
               </button>
               <button class="positive caps"
-                      data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: submit,
-                                 css: {waiting: pending}"
+                      data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: submit"
                       data-test-id="application-new-comment-btn"
                       type="submit">
-                  <i class="wait spin lupicon-refresh"></i>
                   <span data-bind="ltext: 'application.conversationSend'"></span>
               </button>
           </div>

@@ -504,9 +504,11 @@
             <!-- /ko -->
           </div>
 
-          <button data-bind="click: $parent.addPartyModel.init, ltext: 'application.addParty', visible: $parent.authorization.ok('create-doc')"
-                  class="btn modal"
+          <button data-bind="click: $parent.addPartyModel.init, visible: $parent.authorization.ok('create-doc')"
+                  class="secondary modal"
                   data-test-id="add-party">
+              <i class="lupicon-circle-plus"></i>
+              <span data-bind="ltext: 'application.addParty"></span>
           </button>
 
           <div class="process-nav">

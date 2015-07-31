@@ -43,6 +43,19 @@
 (defn- only-authority-sees-drafts [user verdicts]
   (only-authority-sees user :draft verdicts))
 
+(defn- normalize-neighbors [user neighbors]
+  (mapv
+    (fn [neighbor]
+      (-> neighbor
+        (update-in [:status]
+          #(mapv
+             (fn [{vetuma :vetuma :as state}]
+               (if (and vetuma (not (user/authority? user)))
+                 (assoc-in state [:vetuma :userid] nil)
+                 state))
+             %))))
+    neighbors))
+
 (defn- filter-targeted-attachment-comments
   "If comment target type is attachment, check that attachment exists.
    If not, show only comments with non-blank text related to deleted attachment"
@@ -61,6 +74,7 @@
     application
     (dissoc application :urgency :authorityNotice)))
 
+
 (defn filter-application-content-for [application user]
   (when (seq application)
     (let [draft-verdict-ids (->> application :verdicts (filter :draft) (map :id) set)
@@ -71,6 +85,7 @@
         (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (name (:role user)))) %))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
+        (update-in [:neighbors] (partial normalize-neighbors user))
         filter-targeted-attachment-comments
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
         (filter-notice-from-application user)))))
@@ -170,8 +185,9 @@
   (when (:subtype schema-info)
     (name (:subtype schema-info))))
 
-(defn get-documents-by-subtype [documents subtype]
+(defn get-documents-by-subtype
   "Returns documents of given subtype"
+  [documents subtype]
   {:pre [(sequential? documents)]}
   (filter (comp (partial = (name subtype)) get-subtype) documents))
 

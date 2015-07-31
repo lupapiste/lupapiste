@@ -1,16 +1,16 @@
 function TagModel(label, saveFn) {
+  "use strict";
   this.label = ko.observable(label);
   this.edit = ko.observable(false);
-  this.saveSubscription;
 
-  this.saveSubscription = this.label.subscribe(function(val) {
+  this.saveSubscription = this.label.subscribe(function() {
     saveFn();
-  })
+  });
 
   this.dispose = function() {
     this.saveSubscription.dispose();
-  }
-};
+  };
+}
 
 LUPAPISTE.TagsEditorModel = function(params) {
   "use strict";

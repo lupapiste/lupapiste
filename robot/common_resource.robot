@@ -2,7 +2,7 @@
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
-Library        Selenium2Library   timeout=10  run_on_failure=Log Source
+Library        Selenium2Library   timeout=10
 
 *** Variables ***
 
@@ -390,15 +390,16 @@ Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new
-  Do prepare new request
+  Do prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
 
 Prepare first request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new-inforequest
-  Do prepare new request
+  Do prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
 
 Do prepare new request
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Input Text  create-search  ${propertyId}
   Click enabled by test id  create-search-button
   Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
