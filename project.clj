@@ -60,7 +60,7 @@
                  [org.geotools/gt-referencing "13.1"]
                  [org.geotools/gt-epsg-wkt "13.1"]
                  [org.clojure/data.json "0.2.6"]
-                 [lupapiste/commons "0.5.3"]]
+                 [lupapiste/commons "0.5.4"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
@@ -72,7 +72,10 @@
                              [lein-scss-compiler "0.1.4"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G"]}
+                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G"]
+                   :eastwood {:continue-on-exception true
+                              :source-paths ["src"]
+                              :test-paths []}}
              :uberjar  {:main lupapalvelu.main
                         :jar-exclusions [#"gems/.*"]
                         :uberjar-exclusions [#"gems/.*"]}

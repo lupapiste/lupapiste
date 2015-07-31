@@ -1,6 +1,6 @@
 (ns lupapalvelu.mime-test
-  (:use [lupapalvelu.mime]
-        [midje.sweet]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.mime :refer :all]))
 
 (facts "Facts about mime-type"
   (fact (mime-type "foo.exe") => "application/x-msdownload")

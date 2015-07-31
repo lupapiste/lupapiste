@@ -1,5 +1,5 @@
 (ns lupapalvelu.application-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
@@ -119,7 +119,7 @@
   {:parameters       [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (a/collections-to-be-seen type) (fail :error.unknown-type)))]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :states           states/all-application-states
+   :states           states/all-states
    :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [data user created] :as command}]
   (update-application command {$set (a/mark-collection-seen-update user created type)}))
@@ -354,7 +354,8 @@
       (open-inforequest/new-open-inforequest! created-application))
     (try
       (autofill-rakennuspaikka created-application created)
-      (catch Exception e (error e "KTJ data was not updated")))
+      (catch java.io.IOException e
+        (error "KTJ data was not updated:" (.getMessage e))))
     (ok :id (:id created-application))))
 
 (defn- add-operation-allowed? [_ application]

@@ -125,12 +125,12 @@
                        :js ["expanded-content.js"]}
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
-                            :expanded-content :mockjax :open-layers :stickyfill :leaflet]
+                            :expanded-content :mockjax :open-layers :stickyfill]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "authorization.js" "vetuma.js"]}
 
-   :common-html  {:depends [:selectm-html :leaflet]
+   :common-html  {:depends [:selectm-html]
                   :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
                   :html ["404.html" "footer.html"]}
 
@@ -318,7 +318,7 @@
 
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin.js" "register-authority-admin-models.js"]}
-   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :header :debug :analytics]
+   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :header :debug :analytics :leaflet]
                          :js ["admin.js" schema-versions-by-permit-type]
                          :html ["admin.html"]}
 
