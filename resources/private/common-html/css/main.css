@@ -4457,49 +4457,65 @@ ul.attachments-list li.mandatory-attachments {
   float: right;
 }
 
-/* line 4, ../sass/partials/_applications_search.scss */
+/* line 3, ../sass/partials/_applications_search.scss */
+.search-tabs ul, .search-tabs button, .search-tabs span, .search-tabs li {
+  line-height: 33.6px;
+}
+/* line 7, ../sass/partials/_applications_search.scss */
 .search-tabs .tab-buttons ul {
   display: inline-block;
   list-style: none;
   padding: 0;
+  margin-right: 6px;
 }
-/* line 9, ../sass/partials/_applications_search.scss */
+/* line 13, ../sass/partials/_applications_search.scss */
 .search-tabs .tab-buttons li {
   background-color: #f6f6f6;
   color: #333;
   cursor: pointer;
   margin-right: 6px;
   display: inline-block;
-  line-height: 32px;
-  padding: 0 12px;
+  padding: 0 24px;
 }
-/* line 16, ../sass/partials/_applications_search.scss */
+/* line 20, ../sass/partials/_applications_search.scss */
 .search-tabs .tab-buttons li.selected {
   background-color: #dddddd;
 }
-/* line 23, ../sass/partials/_applications_search.scss */
+/* line 26, ../sass/partials/_applications_search.scss */
 .search-tabs input {
   display: inline-block;
   margin: 0;
 }
+/* line 30, ../sass/partials/_applications_search.scss */
+.search-tabs button {
+  margin: 0 6px;
+  width: initial;
+  padding: 0 24px;
+}
+/* line 34, ../sass/partials/_applications_search.scss */
+.search-tabs button .icon {
+  position: relative;
+  top: 2px;
+  margin-right: 12px;
+}
 
-/* line 29, ../sass/partials/_applications_search.scss */
+/* line 42, ../sass/partials/_applications_search.scss */
 div.applications-search-component {
   margin: 6px 0;
 }
 
-/* line 34, ../sass/partials/_applications_search.scss */
+/* line 47, ../sass/partials/_applications_search.scss */
 .paging button:first-child {
   margin-right: 6px;
 }
-/* line 37, ../sass/partials/_applications_search.scss */
+/* line 50, ../sass/partials/_applications_search.scss */
 .paging select {
   width: 5.625em;
   margin-left: 12px;
   margin-right: 6px;
 }
 
-/* line 45, ../sass/partials/_applications_search.scss */
+/* line 58, ../sass/partials/_applications_search.scss */
 .three-col > div {
   display: inline-block;
 }

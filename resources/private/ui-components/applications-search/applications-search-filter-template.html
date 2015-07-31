@@ -3,6 +3,8 @@
 <body>
   <section class="page container">
     <script type="text/html" id="applications-search-filter-template">
+    <label data-bind="ltext: 'application.filter.search'" />
+    <input class="form-input search text" type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField"/>
     <div class="three-col">
       <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
       <div>

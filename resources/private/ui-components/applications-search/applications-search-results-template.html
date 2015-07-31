@@ -9,12 +9,11 @@
             <li data-bind="ltext: 'applications.filter.' + $data, click: $parent.selectTab,
                            css: {selected: $parent.selectedTab() === $data}"></li>
           </ul>
-          <input class="form-input search text" type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField"/>
           <button
             data-bind="click: $parent.create"
             data-test-id="applications-create-new"
             class="btn-primary application-create">
-            <span class="icon add left-align"></span><span data-bind="ltext: 'request.create'"></span>
+            <span class="icon add"></span><span data-bind="ltext: 'request.create'"></span>
           </button>
 
           <button

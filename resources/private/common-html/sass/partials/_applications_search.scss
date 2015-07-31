@@ -1,10 +1,14 @@
 
 .search-tabs {
+  ul, button, span, li {
+    line-height: $baseline * 1.4;
+  }
   .tab-buttons {
     ul {
       display: inline-block;
       list-style: none;
       padding: 0;
+      margin-right: $marginS;
     }
     li {
       background-color: $lp-light-grey;
@@ -16,13 +20,22 @@
       &.selected {
         background-color: darken($lp-light-grey, 10%);
       }
-      line-height: 32px;
-      padding: 0 $marginM;
+      padding: 0 $marginL;
     }
   }
   input {
     display: inline-block;
     margin: 0;
+  }
+  button {
+    margin: 0 $marginS;
+    width: initial;
+    padding: 0 $marginL;
+    .icon {
+      position: relative;
+      top: 2px;
+      margin-right: $marginM;
+    }
   }
 }
 
@@ -46,3 +59,5 @@ div.applications-search-component {
     display: inline-block;
   }
 }
+
+
