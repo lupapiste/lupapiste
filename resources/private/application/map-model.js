@@ -176,7 +176,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       //   I.e. call "if (inforequestMarkerMap) inforequestMarkerMap.clear().destroy();" (create a forwarding destroy() method to gis.js)
       //   But this is even uglier than the jQuery option.
       //
-      if (authorizationModel.ok('inforequest-markers')) {
+      if (authorizationModel.ok("inforequest-markers")) {
         var irMarkersMap = getOrCreateMap("inforequest-markers");
         irMarkersMap.clear().updateSize().center(x, y, 14);
         setRelevantMarkersOntoMarkerMap(irMarkersMap, currentAppId, x, y);

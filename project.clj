@@ -69,10 +69,14 @@
                              [lein-buildid "0.2.0"]
                              [lein-nitpicker "0.4.0"]
                              [lein-hgnotes "0.2.0-SNAPSHOT"]
+                             [jonase/eastwood "0.2.1" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]
                              [lein-scss-compiler "0.1.4"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G"]}
+                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G"]
+                   :eastwood {:continue-on-exception true
+                              :source-paths ["src"]
+                              :test-paths []}}
              :uberjar  {:main lupapalvelu.main
                         :jar-exclusions [#"gems/.*"]
                         :uberjar-exclusions [#"gems/.*"]}

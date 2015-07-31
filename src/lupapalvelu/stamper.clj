@@ -35,7 +35,7 @@
 ;; Generate stamp:
 ;;
 
-(defn qrcode ^BufferedImage [data size]
+(defn qrcode ^java.awt.image.BufferedImage [data size]
   (MatrixToImageWriter/toBufferedImage
     (.encode (QRCodeWriter.) data BarcodeFormat/QR_CODE size size)))
 

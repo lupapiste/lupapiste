@@ -148,7 +148,7 @@ var ajax = (function($) {
         self.processingListener = listener;
         self.processingListener(false);
       } else {
-        error("processing listener must be a function", listener, self.url);
+        error("processing listener must be a function", listener, self.request.url);
       }
       return self;
     };
@@ -159,7 +159,7 @@ var ajax = (function($) {
         self.pendingTimeout = timeout || 100;
         self.pendingListener(false);
       } else {
-        error("pending listener must be a function", listener, self.url);
+        error("pending listener must be a function", listener, self.request.url);
       }
       return self;
     };

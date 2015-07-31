@@ -185,8 +185,9 @@
   (when (:subtype schema-info)
     (name (:subtype schema-info))))
 
-(defn get-documents-by-subtype [documents subtype]
+(defn get-documents-by-subtype
   "Returns documents of given subtype"
+  [documents subtype]
   {:pre [(sequential? documents)]}
   (filter (comp (partial = (name subtype)) get-subtype) documents))
 
