@@ -15,15 +15,17 @@
 (defn- asianhallinta-enabled? [scope]
   (true? (get-in scope [:caseManagement :enabled])))
 
-(defn is-asianhallinta-version? [version scope]
+(defn is-asianhallinta-version?
   "Check if version is supported. Requires scope to resolve version by permit-type"
-  (let [versions (util/convert-values 
-                     v/supported-asianhallinta-versions-by-permit-type 
+  [version scope]
+  (let [versions (util/convert-values
+                     v/supported-asianhallinta-versions-by-permit-type
                      (partial map #(sade.strings/suffix % "ah-")))] ; remove "ah-" prefixes
     (some #(= version %) (get versions (-> scope :permitType keyword)))))
 
-(defn- resolve-ah-version [scope]
+(defn- resolve-ah-version
   "Resolves asianhallinta version from organization's scope"
+  [scope]
   {:pre [scope]}
 
   (when-not (asianhallinta-enabled? scope)
@@ -44,13 +46,14 @@
   {:pre  [scope]
    :post [%]}
   (if-let [sftp-user (get-in scope [:caseManagement :ftpUser])]
-    (str (env/value :outgoing-directory) "/" sftp-user ah-from-dir)    
+    (str (env/value :outgoing-directory) "/" sftp-user ah-from-dir)
     (do
       (error (str "Asianhallinta SFTP user is not set for municipality " (:municipality scope) " , permit " (:permitType scope)))
       (fail! :error.sftp.user-not-set))))
 
-(defn save-as-asianhallinta [application lang submitted-application organization]
+(defn save-as-asianhallinta
   "Saves application as asianhallinta"
+  [application lang submitted-application organization]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
   (let [permit-type   (permit-type application)
         scope         (organization/resolve-organization-scope (:municipality application) permit-type)
@@ -58,8 +61,9 @@
         output-dir    (resolve-output-directory scope)]
     (ah-mapping/uusi-asia-from-application application lang ah-version submitted-application begin-of-link output-dir)))
 
-(defn save-as-asianhallinta-asian-taydennys [application attachments lang]
+(defn save-as-asianhallinta-asian-taydennys
   "Saves attachments to asianhallinta"
+  [application attachments lang]
   (let [permit-type   (permit-type application)
         scope         (organization/resolve-organization-scope (:municipality application) permit-type)
         ah-version    (resolve-ah-version scope)
