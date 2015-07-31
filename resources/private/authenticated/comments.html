@@ -13,24 +13,24 @@
             rows="3"
             maxlength="4000">
           </textarea>
-          <button
-            data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: stateOpenApplication"
-            data-test-id="application-open-application-btn"
-            type="submit"
-            class="btn btn-primary">
-            <span data-bind="ltext: 'application.conversationOpen'"></span>
-            <em data-bind="visible: pending" class="button-loader"></em>
-          </button>
-          <button
-            data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: submit"
-            data-test-id="application-new-comment-btn"
-            type="submit"
-            class="btn btn-primary">
-            <span data-bind="ltext: 'application.conversationSend'"></span>
-            <em data-bind="visible: pending" class="button-loader"></em>
-          </button>
-
-
+          <div class="message-buttons inner-margins">
+              <button class="positive caps"
+                      data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: stateOpenApplication,
+                                 css: {waiting: pending}"
+                      data-test-id="application-open-application-btn"
+                      type="submit">
+                  <i class="wait spin lupicon-refresh"></i>
+                  <span data-bind="ltext: 'application.conversationOpen'"></span>
+              </button>
+              <button class="positive caps"
+                      data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: submit,
+                                 css: {waiting: pending}"
+                      data-test-id="application-new-comment-btn"
+                      type="submit">
+                  <i class="wait spin lupicon-refresh"></i>
+                  <span data-bind="ltext: 'application.conversationSend'"></span>
+              </button>
+          </div>
 
           <div data-bind="visible: $parent.authorization.ok('can-target-comment-to-authority') || $parent.authorization.ok('can-mark-answered')" class="comment-controls">
             <div class="mark-answered" data-bind="if: $parent.authorization.ok('can-mark-answered')">
@@ -38,7 +38,7 @@
                 data-bind="click: markAnswered"
                 data-test-id="comment-request-mark-answered"
                 type="submit"
-                class="btn btn-primary">
+                class="positive">
                 <span data-bind="ltext: 'comment-request-mark-answered-label'"></span>
               </button>
             </div>

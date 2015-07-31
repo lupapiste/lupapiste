@@ -391,6 +391,13 @@
   @include styled-input( $bg: $green-link, $hover-bg: $green-hover, $active-bg: $green-active );
 }
 
+// btn-primary is now the same as positive.
+// This is used only for legacy support until the old definitions have been rooted out.
+
+@include button-div-a (btn-primary ) {
+  @include styled-input( $bg: $green-link, $hover-bg: $green-hover, $active-bg: $green-active );
+}
+
 @include button-div-a ( negative ) {
   @include styled-input( $bg: $red-link, $hover-bg: $red-hover, $active-bg: $red-active );
 }
@@ -506,7 +513,9 @@ button.function {
   }
 }
 
-.stacked {
+
+
+@mixin stacked {
   display: table;
   .btn, button {
     width: 100%;
@@ -515,6 +524,30 @@ button.function {
   }
   div {
     overflow-y: hidden;
+  }
+}
+
+.stacked {
+  @include stacked;
+}
+
+// Only inner margins
+.inner-margins {
+  .btn, button, div, a {
+    margin-left: 12px;
+  }
+  :first-child {
+    margin-left: 0;
+  }
+}
+
+.inner-margins.stacked {
+  .btn, button, div, a {
+    margin-left: 0;
+    margin-top: 12px;
+  }
+  :first-child {
+    margin-top: 0;
   }
 }
 
@@ -559,8 +592,12 @@ button.function {
   }
 }
 
-// Margin betwee form buttons.
+// Margin between form buttons.
 
 .form-buttons button {
   margin-left: 12px;
+}
+
+#partiesDocgen button {
+  margin-bottom: $marginS;
 }

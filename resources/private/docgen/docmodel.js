@@ -187,11 +187,27 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   // Element constructors
-  function makeButton(id, label) {
+  // Supported options:
+  // icon: icon class -> <button><i class="icon"></i><span>label</span></button>
+  // class: class attribute value -> <button class="class">...
+  function makeButton(id, label, opts) {
+    opts = opts || {};
     var button = document.createElement("button");
     button.id = id;
     //button.className = "btn";
-    button.innerHTML = label;
+    if( opts.icon ) {
+      var i = document.createElement( "i");
+      i.setAttribute( "class", opts.icon );
+      button.appendChild( i );
+      var span = document.createElement( "span" );
+      span.innerHTML = label;
+      button.appendChild( span );
+    } else {
+      button.innerHTML = label;
+    }
+    if( opts.class ) {
+      button.setAttribute( "class", opts.class );
+    }
     return button;
   }
 
@@ -349,9 +365,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     function makeApprovalButton(verb, noun, cssClass) {
       var cmd = verb + "-doc";
       var title = loc(["document", verb]);
+      var opts = {class: cssClass,
+                  icon: verb === "approve" ? "lupicon-check" : null};
       var button =
-        $(makeButton(self.docId + "_" + verb, title))
-          .addClass(cssClass).addClass("btn-auto")
+            $(makeButton(self.docId + "_" + verb, title, opts ))
           .click(function () {
             ajax.command(cmd, cmdArgs)
               .success(function () {
@@ -1300,7 +1317,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         elements = buildElements(models);
       }
 
-      var appendButton = makeButton(myPath.join("_") + "_append", loc([self.schemaI18name, myPath.join("."), "_append_label"]));
+      var appendButton = makeButton(myPath.join("_") + "_append",
+                                    loc([self.schemaI18name, myPath.join("."), "_append_label"]),
+                                    {icon: "lupicon-circle-plus", class: "secondary"});
 
       var appender = function () {
         var parent$ = $(this).closest(".accordion-fields");
@@ -1365,7 +1384,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           if (subSchema.i18nkey) {
             locKey = [subSchema.i18nkey, "copyLabel"];
           }
-          var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey));
+          var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey),
+                                      {icon: "lupicon-circle-plus", class: "secondary"});
           $(copyButton).click(copyElement);
           buttonGroup.appendChild(copyButton);
         }

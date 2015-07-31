@@ -271,6 +271,12 @@
   }
 }
 
+#side-panel .message-buttons {
+  button {
+    margin-bottom: $marginS;
+  }
+}
+
 @media all and (max-width: 1280px) {
   #side-panel {
     .content-wrapper {
@@ -285,6 +291,12 @@
   .comment-controls {
     .comment-request {
       margin-left: 0;
+    }
+  }
+  #side-panel .message-buttons {
+    @include stacked;
+    button {
+      margin-bottom: $marginS;
     }
   }
 }
