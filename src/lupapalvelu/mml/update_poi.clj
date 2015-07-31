@@ -86,7 +86,7 @@
     (mc/drop :poi)
     (println (format "Processing file %s..." filename))
     (let [[rows pois] (process filename)
-          total (mc/count :poi)] 
+          total (mc/count :poi)]
       (if (= pois total)
         (do
           (mc/ensure-index :poi {:name 1 :lang 1 :priority 1})
@@ -109,7 +109,7 @@
       (run filename)
       (catch string? message
         (println "Processing failed: " message))
-      (catch Object e
+      (catch Throwable e
         (println "Unexpected error")
         (.printStackTrace e)
         (throw+)))))

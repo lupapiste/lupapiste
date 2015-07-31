@@ -109,7 +109,7 @@
                      :session-store (session/cookie-store {:key (read-session-key)})
                      :session-cookie-attrs (env/value :cookie)}
           starting  (double (now))
-          jetty-instance (server/start env/port noir-opts)]
+          jetty-instance ^org.eclipse.jetty.server.Server (server/start env/port noir-opts)]
       (.setStopTimeout jetty-instance 10000)
       (reset! jetty jetty-instance)
       (infof "Jetty startup took %.3f seconds" (/ (- (now) starting) 1000))
