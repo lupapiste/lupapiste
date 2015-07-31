@@ -3,19 +3,19 @@
 <body>
   <section class="page container">
     <script type="text/html" id="applications-search-filter-template">
-    <label data-bind="ltext: 'application.filter.search'" />
-    <input class="form-input search text" type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField"/>
-    <div class="three-col">
-      <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
+    <div class="filter-row">
       <div>
+        <label data-bind="ltext: 'application.filter.search'" />
+        <input class="form-input search text" type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField"/>
+      </div>
+      <div data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
         <label data-bind="ltext: 'applications.filter.handler'" />
         <div data-bind="component: {name: 'autocomplete', params: {dataProvider: handlersDataProvider, value: dataProvider.handler, selectedText: 'fullName', nullable: true}}"></div>
       </div>
-      <div>
-        <label data-bind="ltext: 'applications.filter.tags'" />
-        <div data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, tags: true}}"></div>
-      </div>
-      <!-- /ko -->
+    </div>
+    <div data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
+      <label data-bind="ltext: 'applications.filter.tags'" />
+      <div data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, tags: true}}"></div>
     </div>
     </script>
   </section>

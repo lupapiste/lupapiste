@@ -4,7 +4,7 @@ upload.success:  Tiedoston lataus onnistui
 
 applications.filter.inforequest: Neuvontapyynnöt
 applications.indicators: Tapahtumat
-applications.filter.tags: Avainsanat
+applications.filter.tags: Rajaa avainsanoihin
 applications.filter.handler: Henkilön työjono
 applications.results: Omat hankkeet {0} - {1} / {2}
 applications.lengthMenu: hakemusta sivulla
