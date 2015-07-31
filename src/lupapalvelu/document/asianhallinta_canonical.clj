@@ -106,8 +106,9 @@
 (defn- ua-get-sijaintipiste [{:keys [location]}]
   {:Sijaintipiste (str (first location) " " (second location))})
 
-(defn- ua-get-liite [attachment link]
+(defn- ua-get-liite
   "Return attachment in canonical format, with provided link as LinkkiLiitteeseen"
+  [attachment link]
   (util/strip-nils
     {:Kuvaus (get-in attachment [:type :type-id])
      :Tyyppi (get-in attachment [:latestVersion :contentType])
@@ -155,8 +156,9 @@
 ;; AsianTunnusVastaus, prefix: atr-
 
 
-(defn application-to-asianhallinta-canonical [application lang]
+(defn application-to-asianhallinta-canonical
   "Return canonical, does not contain attachments"
+  [application lang]
   (let [documents (tools/unwrapped (common/documents-without-blanks application))]
     (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
@@ -171,6 +173,7 @@
       (assoc-in [:UusiAsia :Kiinteistotunnus] (p/to-human-readable-property-id (:propertyId application)))
       (assoc-in [:UusiAsia :Viiteluvat] (ua-get-viiteluvat application)))))
 
-(defn application-to-asianhallinta-taydennys-asiaan-canonical [application]
+(defn application-to-asianhallinta-taydennys-asiaan-canonical
   "Return TaydennysAsiaan canonical"
+  [application]
   (-> (assoc-in ta-root-element [:TaydennysAsiaan :HakemusTunnus] (:id application))))
