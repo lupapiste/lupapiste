@@ -1,4 +1,5 @@
 LUPAPISTE.TagsDataProvider = function(organization, filtered) {
+  "use strict";
   var self = this;
 
   self.query = ko.observable();

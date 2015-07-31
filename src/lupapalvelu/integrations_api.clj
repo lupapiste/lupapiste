@@ -230,8 +230,9 @@
 ;; Asianhallinta
 ;;
 
-(defn- fetch-linked-kuntalupatunnus [application]
+(defn- fetch-linked-kuntalupatunnus
   "Fetch kuntalupatunnus from application's link permit's verdicts"
+  [application]
   (when-let [link-permit-app (application/get-link-permit-app application)]
     (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
@@ -279,8 +280,8 @@
 
 (defn- application-already-in-asianhallinta [_ application]
   (let [filtered-transfers (filter #(some #{(:type %)} "to-backing-system to-asianhallinta" ) (:transfers application))]
-    (when-not (= (:type (last filtered-transfers)) "to-asianhallinta"))
-    (fail :error.application.not-in-asianhallinta)))
+    (when-not (= (:type (last filtered-transfers)) "to-asianhallinta")
+      (fail :error.application.not-in-asianhallinta))))
 
 (defcommand attachments-to-asianhallinta
   {:parameters [id lang attachmentIds]
