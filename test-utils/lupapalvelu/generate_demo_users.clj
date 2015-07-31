@@ -1,8 +1,8 @@
 (ns lupapalvelu.generate-demo-users
-  (require [lupapalvelu.mongo :as mongo]
-           [lupapalvelu.user :as user]
-           [monger.operators :refer :all]
-           [slingshot.slingshot :refer [try+]]))
+  (:require [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as user]
+            [monger.operators :refer :all]
+            [slingshot.slingshot :refer [try+]]))
 
 
 ;luo testikayttajia
