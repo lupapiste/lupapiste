@@ -6,7 +6,6 @@ $footer-link: #f7ac2e;
 $footer-hover: #fff; // Hover and active
 $footer-bi: #555;
 
-
 footer {
   margin-top: $marginL*3;
   padding-top: $marginL;
@@ -56,6 +55,12 @@ footer {
       .footer-box {
           min-width: 49%;
       }
+  }
+}
+
+@media (max-width:991px) {
+  body {
+    padding-bottom: $footer-max-padding !important; // from _base.scss
   }
 }
 
