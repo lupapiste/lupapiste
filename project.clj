@@ -72,7 +72,10 @@
                              [lein-scss-compiler "0.1.4"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G"]}
+                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G"]
+                   :eastwood {:continue-on-exception true
+                              :source-paths ["src"]
+                              :test-paths []}}
              :uberjar  {:main lupapalvelu.main
                         :jar-exclusions [#"gems/.*"]
                         :uberjar-exclusions [#"gems/.*"]}
