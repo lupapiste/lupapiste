@@ -197,7 +197,7 @@ sub, sup {
 ----------------------------------------------------------------------------- */
 /* breakpoints*/
 /* baseline & margins */
-/* line 30, ../sass/partials/_base.scss */
+/* line 34, ../sass/partials/_base.scss */
 html {
   background: #fff;
   -webkit-font-smoothing: antialiased;
@@ -206,30 +206,30 @@ html {
   -ms-text-size-adjust: 100%;
 }
 
-/* line 38, ../sass/partials/_base.scss */
+/* line 42, ../sass/partials/_base.scss */
 html.no-scroll {
   overflow: hidden;
 }
 
-/* line 42, ../sass/partials/_base.scss */
+/* line 46, ../sass/partials/_base.scss */
 body {
   min-width: 820px;
   min-height: 100%;
   height: 100%;
 }
-/* line 46, ../sass/partials/_base.scss */
+/* line 50, ../sass/partials/_base.scss */
 body.applicant, body.authority, body.authority-admin, body.welcome, body.admin, body.oir, body.neighbor {
   min-height: 100vh;
-  padding-bottom: 270px;
+  padding-bottom: 320px;
   position: relative;
   margin-bottom: 0;
 }
-/* line 53, ../sass/partials/_base.scss */
+/* line 57, ../sass/partials/_base.scss */
 body.admin {
   margin-top: 100px;
 }
 
-/* line 58, ../sass/partials/_base.scss */
+/* line 62, ../sass/partials/_base.scss */
 .container {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -237,29 +237,30 @@ body.admin {
   padding: 12px 6px 0 6px;
   width: 100%;
   max-width: 1280px;
+  min-width: 640px;
   margin: 24px auto 24px auto;
   position: relative;
 }
-/* line 65, ../sass/partials/_base.scss */
+/* line 70, ../sass/partials/_base.scss */
 .container .content {
   width: 100%;
 }
-/* line 68, ../sass/partials/_base.scss */
+/* line 73, ../sass/partials/_base.scss */
 .container .content-narrow {
   width: 68%;
 }
-/* line 72, ../sass/partials/_base.scss */
+/* line 77, ../sass/partials/_base.scss */
 .container .sidebar {
   width: 18%;
 }
 
-/* line 77, ../sass/partials/_base.scss */
+/* line 82, ../sass/partials/_base.scss */
 .page {
   display: none;
   margin-top: 60px;
 }
 
-/* line 82, ../sass/partials/_base.scss */
+/* line 87, ../sass/partials/_base.scss */
 .clear {
   *zoom: 1;
 }
@@ -273,29 +274,29 @@ body.admin {
   clear: both;
 }
 
-/* line 86, ../sass/partials/_base.scss */
+/* line 91, ../sass/partials/_base.scss */
 .spacerM {
   margin-bottom: 12px;
 }
 
-/* line 90, ../sass/partials/_base.scss */
+/* line 95, ../sass/partials/_base.scss */
 .right {
   float: right;
 }
 
-/* line 94, ../sass/partials/_base.scss */
+/* line 99, ../sass/partials/_base.scss */
 .left {
   float: left;
 }
 
-/* line 98, ../sass/partials/_base.scss */
+/* line 103, ../sass/partials/_base.scss */
 .sticky {
   position: -webkit-sticky;
   position: sticky;
   top: 60px;
   z-index: 1;
 }
-/* line 104, ../sass/partials/_base.scss */
+/* line 109, ../sass/partials/_base.scss */
 .sticky:after, .sticky:before {
   content: '';
   display: table;
@@ -1466,7 +1467,7 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   z-index: 2;
 }
 
-/* line 10, ../sass/partials/_footer.scss */
+/* line 9, ../sass/partials/_footer.scss */
 footer {
   margin-top: 72px;
   padding-top: 24px;
@@ -1478,14 +1479,14 @@ footer {
   bottom: 0;
   width: 100%;
 }
-/* line 21, ../sass/partials/_footer.scss */
+/* line 20, ../sass/partials/_footer.scss */
 footer .informations {
   padding: 12px;
   width: 100%;
   max-width: 1280px;
   margin: 0 auto 12px;
 }
-/* line 26, ../sass/partials/_footer.scss */
+/* line 25, ../sass/partials/_footer.scss */
 footer .informations .footer-box {
   font-size: 16px;
   vertical-align: top;
@@ -1495,51 +1496,57 @@ footer .informations .footer-box {
   padding-right: 24px;
   box-sizing: border-box;
 }
-/* line 34, ../sass/partials/_footer.scss */
+/* line 33, ../sass/partials/_footer.scss */
 footer .informations .footer-box h3 {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: .5em;
 }
-/* line 39, ../sass/partials/_footer.scss */
+/* line 38, ../sass/partials/_footer.scss */
 footer .informations .footer-box a:link, footer .informations .footer-box a:visited {
   color: #f7ac2e;
   display: inline-block;
   text-decoration: none;
 }
-/* line 43, ../sass/partials/_footer.scss */
+/* line 42, ../sass/partials/_footer.scss */
 footer .informations .footer-box a:link:hover, footer .informations .footer-box a:link:active, footer .informations .footer-box a:visited:hover, footer .informations .footer-box a:visited:active {
   color: #fff;
 }
-/* line 46, ../sass/partials/_footer.scss */
+/* line 45, ../sass/partials/_footer.scss */
 footer .informations .footer-box.sade-box a {
   display: inline;
 }
 @media (max-width: 991px) {
-  /* line 53, ../sass/partials/_footer.scss */
+  /* line 52, ../sass/partials/_footer.scss */
   footer .footer-box:nth-child(2n+1) {
     clear: left;
   }
-  /* line 56, ../sass/partials/_footer.scss */
+  /* line 55, ../sass/partials/_footer.scss */
   footer .footer-box {
     min-width: 49%;
   }
 }
 
-/* line 62, ../sass/partials/_footer.scss */
+@media (max-width: 991px) {
+  /* line 62, ../sass/partials/_footer.scss */
+  body {
+    padding-bottom: 420px !important;
+  }
+}
+/* line 67, ../sass/partials/_footer.scss */
 footer ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
 }
 
-/* line 68, ../sass/partials/_footer.scss */
+/* line 73, ../sass/partials/_footer.scss */
 footer ul li {
   margin-bottom: .5em;
   margin-top: 0;
 }
 
-/* line 75, ../sass/partials/_footer.scss */
+/* line 80, ../sass/partials/_footer.scss */
 #buildinfo {
   clear: both;
   display: block;
