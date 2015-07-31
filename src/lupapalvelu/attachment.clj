@@ -143,7 +143,7 @@
            :type attachment-type
            :modified now
            :locked locked?
-           :applicationState (if (and (= "verdict" (:type target)) (not (states/post-submitted-states (keyword application-state))))
+           :applicationState (if (and (= "verdict" (:type target)) (not (states/post-verdict-states (keyword application-state))))
                                "verdictGiven"
                                application-state)
            :state :requires_user_action
