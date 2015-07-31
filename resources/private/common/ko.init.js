@@ -104,6 +104,7 @@
   };
 
   // hello.id -> T e r v e
+  // Used typically with vertical buttons.
   ko.bindingHandlers.lspaced = {
     update: function( element, valueAccessor) {
       var value = loc( ko.utils.unwrapObservable( valueAccessor() ) );

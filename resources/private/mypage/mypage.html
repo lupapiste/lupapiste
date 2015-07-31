@@ -283,18 +283,18 @@
                            enable: canStart,
                            ltext: 'userinfo.architect.upload.ok'"
           data-test-id="userinfo-upload-ok"
-          class="btn btn-primary btn-dialog">
+          class="positive btn-dialog">
         </button>
         <button data-bind="visible: state() == stateDone,
                            ltext: 'userinfo.architect.upload.ready'"
           data-test-id="userinfo-upload-ready"
-          class="btn btn-primary btn-dialog close">
+          class="positive btn-dialog close">
         </button>
         <button data-bind="enable: state() < stateSending,
                            visible: state() < stateDone,
                            ltext: 'userinfo.architect.upload.cancel'"
           data-test-id="userinfo-upload-cancel"
-          class="btn btn-dialog close">
+          class="secondary btn-dialog close">
         </button>
 
       </div>

@@ -33,13 +33,13 @@
           </tbody>
         </table>
 
-        <button class="btn btn-primary" data-bind="visible: false, click: companiesModel.create">Luo uusi yritys</button>
+        <button class="positive" data-bind="visible: false, click: companiesModel.create">Luo uusi yritys</button>
 
       </div>
       <div id="dialog-create-company" class="window autosized" data-bind="with: createCompanyModel">
         <div class="dialog-header">
           <p>Uusi yritys</p>
-          <p class="dialog-close close">X</p>
+          <p class="dialog-close close lupicon-remove"></p>
         </div>
 
         <div class="dialog-content">
@@ -77,7 +77,7 @@
 
           <button data-bind="ltext: 'ok', enable: model.isValid, click: save"
                   data-test-id="create-company"
-                  class="btn btn-primary btn-dialog" ></button>
+                  class="positive btn-dialog" ></button>
 
           <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
         </div>

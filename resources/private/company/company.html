@@ -175,7 +175,7 @@
     <div id="dialog-company-user-op" class="window autosized">
       <div class="dialog-header">
         <p data-bind="text: title"></p>
-        <p class="dialog-close close">X</p>
+        <p class="dialog-close close lupicon-remove"></p>
       </div>
       <div class="dialog-content">
 
@@ -191,13 +191,13 @@
         <button data-bind="click: ok,
                            enable: !pending(),
                            ltext: 'yes'"
-                class="btn btn-primary btn-dialog"
+                class="positive btn-dialog"
                 data-test-id="confirm-yes">
         </button>
         <button data-test-id="company-new-user-close-dialog"
                 data-bind="enable: !pending(),
                            ltext: 'no'"
-                class="btn btn-dialog close">
+                class="secondary btn-dialog close">
         </button>
 
       </div>
@@ -214,29 +214,29 @@
           <input data-bind="textInput: email, enable: emailEnabled" class="form-input" type="text" data-test-id="company-new-user-email"/>
 
           <div data-bind="visible: showSearchEmail">
-            <button data-bind="enable: canSearchUser, click: searchUser" type="submit" class="btn btn-dialog btn-primary" data-test-id="company-search-email">
+            <button data-bind="enable: canSearchUser, click: searchUser" type="submit" class="positive btn-dialog" data-test-id="company-search-email">
               <span data-bind="ltext: 'register.company.add-user.searchUser'"></span>
               <em data-bind="visible: pending" class="button-loader" style="position: relative;"></em>
             </button>
-            <button data-bind="ltext: 'cancel'" class="btn btn-dialog close"></button>
+            <button data-bind="ltext: 'cancel'" class="secondary btn-dialog close"></button>
           </div>
         </form>
 
         <div data-bind="visible: showUserInCompany">
           <span data-bind="ltext: 'register.company.add-user.already-in'"></span>
-            <button data-bind="ltext: 'ok'" class="btn btn-dialog close" data-test-id="company-add-user-already-in-close"></button>
+            <button data-bind="ltext: 'ok'" class="secondary btn-dialog close" data-test-id="company-add-user-already-in-close"></button>
           </div>
 
         <div data-bind="visible: showUserAlreadyInvited">
           <span data-bind="ltext: 'register.company.add-user.already-invited'"></span>
-          <button data-bind="ltext: 'ok'" class="btn btn-dialog close"></button>
+          <button data-bind="ltext: 'ok'" class="secondary btn-dialog close"></button>
         </div>
 
         <div data-bind="visible: showUserInvited">
           <h3 data-bind="ltext: 'register.company.add-user.done.header'" data-test-id="company-old-user-invited"></h3>
           <p data-bind="ltext: 'register.company.add-user.done.message'"></p>
           <p data-bind="ltext: 'register.company.add-user.done.canClose'"></p>
-          <button data-bind="ltext: 'ok'" class="btn btn-dialog close" data-test-id="company-old-user-invited-close-dialog"></button>
+          <button data-bind="ltext: 'ok'" class="secondary btn-dialog close" data-test-id="company-old-user-invited-close-dialog"></button>
         </div>
 
         <form data-bind="visible: showUserDetails" id="companyUserDetails">
@@ -264,8 +264,8 @@
           </div>
 
           <div>
-            <button data-bind="enable: canSubmit, click: submit, ltext: 'register.company.add-user.submit'" type="submit" class="btn btn-dialog btn-primary" data-test-id="company-user-submit"></button>
-            <button data-bind="enable: canClose, ltext: 'close'" class="btn btn-dialog close" data-test-id="company-new-user-invited-close-dialog"></button>
+            <button data-bind="enable: canSubmit, click: submit, ltext: 'register.company.add-user.submit'" type="submit" class="positive btn-dialog" data-test-id="company-user-submit"></button>
+            <button data-bind="enable: canClose, ltext: 'close'" class="secondary btn-dialog close" data-test-id="company-new-user-invited-close-dialog"></button>
           </div>
         </form>
       </div>

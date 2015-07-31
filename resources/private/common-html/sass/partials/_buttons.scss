@@ -70,21 +70,22 @@
 /* } */
 
 
-/* .btn-dialog { */
-/*    position: absolute; */
-/*    text-align: center; */
-/*    bottom: 0; */
-/*    right: 6px; */
-/*    width: auto; */
-/*    padding: 4px $marginL; */
-/*    min-width: $cols2; */
-/*    max-width: $cols3;; */
-/*    margin-left: $marginS; */
+button.btn-dialog, .btn-dialog {
+   position: absolute;
+   text-align: center;
+   bottom: 0;
+   right: 6px;
+   width: auto;
+   //padding: 4px $marginL;
+   min-width: $cols2;
+   max-width: $cols3;;
+   margin-left: $marginS;
 
-/*    &.cancel { */
-/*     width: auto; */
-/*    } */
-/* } */
+   &.cancel {
+    width: auto;
+   }
+}
+
 
 /* .btn-link { */
 /*   line-height:$baseline - 1; */
@@ -95,9 +96,12 @@
 /*   overflow: auto; */
 /* } */
 
-/* .btn-dialog.btn-primary { */
-/*   left: 0; */
-/* } */
+.btn-dialog.btn-primary, .btn-dialog.positive {
+  left: 0;
+  text-transform: uppercase;
+}
+
+
 
 /* .btn-wizard { */
 /*   margin-top: $marginM; */
@@ -151,17 +155,21 @@
 /*   text-transform:uppercase; */
 /* } */
 
-/* // ajax loader for buttons */
-/* .button-loader { */
-/*   white-space:nowrap; */
-/*   display:inline-block; */
-/*   width:16px; */
-/*   height:16px; */
-/*   background-image: url("/img/ajax-loader-grey-small.gif"); */
-/*   position: absolute; */
-/*   top: 6px; */
-/*   right: 8px; */
-/* } */
+// ajax loader for buttons
+// Should no longer be used with buttons. See
+// the waiting mechanism below. This class is retained,
+// because it still has some legacy uses. For example,
+// see company.html.
+.button-loader {
+  white-space:nowrap;
+  display:inline-block;
+  width:16px;
+  height:16px;
+  background-image: url("/img/ajax-loader-grey-small.gif");
+  position: absolute;
+  top: 6px;
+  right: 8px;
+}
 
 /* .btn-nav-forward { */
 /*   position: relative; */

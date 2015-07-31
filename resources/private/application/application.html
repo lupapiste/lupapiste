@@ -192,17 +192,13 @@
 
         <!-- Actions: -->
         <div class="application_actions stacked" data-bind="with: application">
-          <!-- <div class="muncipality-info"> -->
-          <!--   <h2 data-bind="ltext: 'application.muncipality'"></h2> -->
-          <!--   <p data-bind="text: loc(['municipality', municipality()])"></p> -->
-          <!-- </div> -->
           <!-- ko if: !hasInvites() -->
           <button data-bind="click: approveApplication,
                               visible: $root.authorization.ok('approve-application'),
                               enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
                   data-test-id="approve-application"
                   class="positive caps">
-              <i class="lupicon-circle-check"></i>
+              <i class="lupicon-circle-arrow-right"></i>
               <span data-bind="ltext: 'application.approveApplication'"></span>
           </button>
           <div data-bind="component: {name: 'export-attachments'}"></div>
@@ -212,7 +208,7 @@
                              enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
                              attr: {'title': loc('tooltip.toAsianhallinta')}"
                   data-test-id="to-asianhallinta">
-              <i class="lupicon-circle-check"></i>
+              <i class="lupicon-circle-arrow-right"></i>
             <span data-bind="ltext: 'application.toAsianhallinta'"></span>
           </button>
           <button class="function"
@@ -277,7 +273,7 @@
           <!-- Link to organization's backing system URL if given and valid -->
           <button class="function"
                   data-bind="click: toBackingSystem, visible: $root.authorization.ok('redirect-to-vendor-backend')">
-              <i class="lupicon-circle-check"></i>
+              <i class="lupicon-circle-arrow-right"></i>
               <span data-bind="ltext: 'application.showInBackingSystem'"></span>
           </button>
           <!-- /ko  -->
@@ -508,7 +504,7 @@
                   class="secondary modal"
                   data-test-id="add-party">
               <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'application.addParty"></span>
+              <span data-bind="ltext: 'application.addParty'"></span>
           </button>
 
           <div class="process-nav">
@@ -637,13 +633,13 @@
             </i>
             <br>
             <!-- /ko -->
-             <button class="btn btn-primary"
+             <button class="positive"
                      data-test-id="application-submit-btn"
                      data-bind="click: function() { submitApplication(false); },
                                 visible: $root.authorization.ok('submit-application'),
                                 enable: submitButtonEnabled">
-               <span data-bind="ltext: 'application.submitApplication'"></span>
-               <span class="icon send left-align"></span>
+                 <i class="lupicon-download"></i>
+                 <span data-bind="ltext: 'application.submitApplication'"></span>
              </button>
 
              <div class="auth-actions">
@@ -651,9 +647,9 @@
                                  visible: $root.authorization.ok('approve-application'),
                                  enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
                       data-test-id="approve-application-summaryTab"
-                      class="btn btn-primary">
-                <span data-bind="ltext: 'application.approveApplication'"></span>
-                <span class="icon approve left-align"></span>
+                      class="positive">
+                  <i class="lupicon-circle-arrow-right"></i>
+                  <span data-bind="ltext: 'application.approveApplication'"></span>
               </button>
 
               <button data-bind="click: toAsianhallinta,
@@ -661,9 +657,9 @@
                                  enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
                                  attr: {'title': loc('tooltip.toAsianhallinta')}"
                       data-test-id="to-asianhallinta-summaryTab"
-                      class="btn btn-primary">
+                      class="positive">
+                  <i class="lupicon-circle-arrow-right"></i>
                 <span data-bind="ltext: 'application.toAsianhallinta'"></span>
-                <span class="icon approve left-align"></span>
               </button>
             </div>
 
@@ -1371,7 +1367,7 @@
       <div id="dialog-valtuutus" class="window autosized">
         <div class="dialog-header">
           <p data-bind="ltext: 'application.addInvite'">Lis&auml;&auml; valtuutus</p>
-          <p class="dialog-close close">X</p>
+          <p class="dialog-close close lupicon-remove"></p>
         </div>
         <div class="dialog-content">
           <p data-bind="ltext: 'invite.desc'" class="dialog-desc"> </p>
@@ -1398,7 +1394,7 @@
       <div id="dialog-request-for-statement" class="window autosized">
         <div class="dialog-header">
          <p data-bind="ltext: 'application.statement.add'"></p>
-         <p class="dialog-close close">X</p>
+         <p class="dialog-close close lupicon-remove"></p>
         </div>
         <div class="dialog-content" data-bind="with: $root.requestForStatementModel">
           <div data-bind="foreach: data()" class="scrolling-content">
@@ -1418,7 +1414,7 @@
       <div id="dialog-add-attachment-templates" class="window autosized selectm-dialog">
         <div class="dialog-header">
           <p data-bind="ltext: 'application.newAttachmentTemplates'"></p>
-          <p class="dialog-close close">X</p>
+          <p class="dialog-close close lupicon-remove"></p>
         </div>
         <div class="dialog-content">
           <div class="attachment-templates"></div>
@@ -1429,7 +1425,7 @@
         <div data-bind="with: $root.sendNeighborEmailModel">
           <div class="dialog-header">
             <p data-bind="ltext: 'neighbors.sendEmail.title'"></p>
-            <p class="dialog-close close">X</p>
+            <p class="dialog-close close lupicon-remove"></p>
           </div>
           <div class="dialog-content">
 
@@ -1449,10 +1445,10 @@
 
             <button data-bind="click: send, ltext: 'neighbors.sendEmail.ok', enable: ok"
                     data-test-id="neighbors-sendemail-send"
-                    class="btn btn-primary btn-dialog">
+                    class="positive btn-dialog">
             </button>
-            <button data-bind="ltext: 'neighbors.sendEmail.cancel'" class="btn btn-dialog close"></button>
-
+            <button data-bind="ltext: 'neighbors.sendEmail.cancel'"
+                    class="secondary btn-dialog close"></button>
           </div>
         </div>
       </div>
@@ -1461,7 +1457,7 @@
         <div data-bind="with: $root.addPartyModel">
           <div class="dialog-header">
             <p data-bind="ltext: 'addParty.heading'"></p>
-            <p class="dialog-close close">X</p>
+            <p class="dialog-close close lupicon-remove"></p>
           </div>
           <div class="dialog-content">
             <div>
@@ -1482,7 +1478,7 @@
       <div id="dialog-neighbor-status" class="window autosized">
         <div class="dialog-header">
           <p data-bind="ltext: 'neighbors.status-dialog.title'"></p>
-          <p class="dialog-close close">X</p>
+          <p class="dialog-close close lupicon-remove"></p>
         </div>
         <div data-bind="with: neighborStatusModel" class="dialog-content">
 
@@ -1524,14 +1520,14 @@
       <div id="dialog-cancel-application" class="window autosized">
         <div class="dialog-header">
           <p data-bind="ltext: 'application.cancelApplication'"></p>
-          <p class="dialog-close close">X</p>
+          <p class="dialog-close close lupicon-remove"></p>
         </div>
         <div class="dialog-content" data-bind="with: application">
           <label data-bind="ltext: 'application.canceled.reason'"></label>
           <textarea rows=10 class="form-input textarea really-long high" data-bind="textInput: cancelText"></textarea>
           <div class='dialog-user-content application-cancel-text-content'></div>
-          <button class='btn btn-primary btn-dialog close' data-test-id='confirm-yes'></button>
-          <button class='btn btn-dialog close' data-test-id='confirm-no'></button>
+          <button class='positive btn-dialog close' data-test-id='confirm-yes'></button>
+          <button class='secondary btn-dialog close' data-test-id='confirm-no'></button>
         </div>
       </div>
 
@@ -1543,7 +1539,7 @@
     <div id="dialog-company-user-op" class="window autosized">
       <div class="dialog-header">
         <p data-bind="text: title"></p>
-        <p class="dialog-close close">X</p>
+        <p class="dialog-close close lupicon-remove"></p>
       </div>
       <div class="dialog-content">
 
@@ -1559,12 +1555,12 @@
         <button data-bind="click: ok,
                            enable: !pending(),
                            ltext: 'yes'"
-                class="btn btn-primary btn-dialog"
+                class="positive btn-dialog"
                 data-test-id="dialog-company-user-op.ok">
         </button>
         <button data-bind="enable: !pending(),
                            ltext: 'no'"
-                class="btn btn-dialog close">
+                class="secondary btn-dialog close">
         </button>
 
       </div>
