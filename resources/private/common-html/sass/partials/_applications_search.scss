@@ -2,7 +2,7 @@
 .search-tabs {
   .tab-buttons {
     ul {
-      display: block;
+      display: inline-block;
       list-style: none;
       padding: 0;
     }
@@ -20,6 +20,10 @@
       padding: 0 $marginM;
     }
   }
+  input {
+    display: inline-block;
+    margin: 0;
+  }
 }
 
 div.applications-search-component {
@@ -34,5 +38,11 @@ div.applications-search-component {
     width: $cols1*1.5;
     margin-left: $marginM;
     margin-right: $marginS;
+  }
+}
+
+.three-col {
+  > div {
+    display: inline-block;
   }
 }
