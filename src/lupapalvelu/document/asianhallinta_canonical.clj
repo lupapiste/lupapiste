@@ -1,14 +1,14 @@
 (ns lupapalvelu.document.asianhallinta_canonical
-  (require [lupapalvelu.document.canonical-common :as common]
-           [lupapalvelu.document.tools :as tools]
-           [lupapalvelu.domain :as domain]
-           [lupapalvelu.xml.disk-writer :as writer]
-           [lupapalvelu.mongo :as mongo]
-           [clojure.string :as s]
-           [sade.core :refer :all]
-           [sade.util :as util]
-           [sade.property :as p]
-           [lupapalvelu.i18n :as i18n]))
+  (:require [clojure.string :as s]
+            [sade.core :refer :all]
+            [sade.util :as util]
+            [sade.property :as p]
+            [lupapalvelu.document.canonical-common :as common]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.xml.disk-writer :as writer]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.i18n :as i18n]))
 
 
 ;; UusiAsia, functions prefixed with ua-
@@ -176,4 +176,4 @@
 (defn application-to-asianhallinta-taydennys-asiaan-canonical
   "Return TaydennysAsiaan canonical"
   [application]
-  (-> (assoc-in ta-root-element [:TaydennysAsiaan :HakemusTunnus] (:id application))))
+  (assoc-in ta-root-element [:TaydennysAsiaan :HakemusTunnus] (:id application)))
