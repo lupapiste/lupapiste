@@ -476,7 +476,7 @@
 ;; Proxy
 ;;
 
-(defpage [:any "/proxy/:srv"] {srv :srv}
+(defpage [:any ["/proxy/:srv" :srv #"[a-z/]+"]] {srv :srv}
   (if @env/proxy-off
     {:status 503}
     ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))))
