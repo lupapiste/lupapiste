@@ -20,7 +20,7 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [sade.session :as ssess]
-            [lupapalvelu.action :as action :refer [defquery]]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application-search-api]
             [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
