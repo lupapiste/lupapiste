@@ -16,7 +16,7 @@
 (defcommand inform-construction-started
   {:parameters ["id" startedTimestampStr]
    :user-roles #{:applicant :authority}
-   :states     [:verdictGiven]
+   :states     #{:verdictGiven}
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
@@ -34,7 +34,7 @@
        {:parameters ["id" buildingIndex startedDate lang]
         ; rakentamisen aikaisen toimminan yhteydessa korjataan oikeae
         ;:user-roles ???
-        :states     [:verdictGiven :constructionStarted]
+        :states     #{:verdictGiven :constructionStarted}
         :notified   true
         :pre-checks [(permit/validate-permit-type-is permit/R)]
         :input-validators [(partial action/non-blank-parameters [:buildingIndex :startedDate :lang])]}
@@ -64,7 +64,7 @@
 (defcommand inform-construction-ready
   {:parameters ["id" readyTimestampStr lang]
    :user-roles #{:applicant :authority}
-   :states     [:constructionStarted]
+   :states     #{:constructionStarted}
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial action/non-blank-parameters [:readyTimestampStr])]}

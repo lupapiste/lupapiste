@@ -14,6 +14,7 @@
             [sade.core :refer :all]
             [sade.session :as ssess]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
+            [lupapalvelu.states :as states]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.security :as security]
@@ -377,6 +378,11 @@
         (user/login-failed username)
         (fail :error.login)))))
 
+(defquery redirect-after-login
+  {:user-roles action/all-authenticated-user-roles}
+  [{session :session}]
+  (ok :url (get session :redirect-after-login "")))
+
 (defcommand impersonate-authority
   {:parameters [organizationId role password]
    :user-roles #{:admin}
@@ -539,7 +545,7 @@
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
    :user-roles #{:applicant}
-   :states     [:draft :open :submitted :complement-needed]
+   :states     #{:draft :open :submitted :complement-needed}
    :pre-checks [(fn [command application] (not (-> command :user :architect)))]}  ;;TODO: lisaa architect? check
   [{application :application user :user}]
   (doseq [attachment (:attachments (mongo/by-id :users (:id user)))]
