@@ -25,7 +25,7 @@
           </span>
           <span data-bind="visible: showCaption" class="autocomplete-selection-arrow icon drill-down-black-smaller"></span>
         </div>
-        <div class="autocomplete-dropdown" data-bind="fader: inputSelected, duration: 100">
+        <div class="autocomplete-dropdown" data-bind="visible: false, fader: inputSelected, duration: 100">
           <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
                  data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate}"></input>
           <!-- ko if: data().length > 0 -->
