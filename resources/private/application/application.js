@@ -219,10 +219,11 @@
 
   function openTab(id) {
     // old conversation tab opens both info tab and side panel
-    if (id === "conversation") {
-      id = "info";
-      if (!$("#conversation-panel").is(":visible")) {
-        $("#open-conversation-side-panel").click();
+    if (_.includes(["conversation", "notice"], id)) {
+      var target = id;
+      id = "info"; // info tab is shown + side-panel
+      if (!$("#" + target + "-panel").is(":visible")) {
+        $("#open-" + target + "-side-panel").click();
       }
     }
     if(tabFlow) {
