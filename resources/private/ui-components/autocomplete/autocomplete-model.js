@@ -15,7 +15,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.query = self.dataProvider.query;
 
   self.inputSelected = ko.observable(false);
-  self.showResult = ko.observable(false);
   self.selected = ko.observable("");
   self.index = ko.observable(0);
   self.selectedTags = ko.observableArray();
@@ -46,7 +45,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.selectInput = function() {
     self.inputSelected(true);
-    self.showResult(true);
   };
 
   self.selectItem = function(item) {
@@ -56,7 +54,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
       self.value(item);
     }
     self.inputSelected(false);
-    self.showResult(false);
     self.query("");
   };
 
