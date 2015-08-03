@@ -61,7 +61,8 @@
             </thead>
             <tbody data-bind="foreach: data">
               <tr class="application-row" data-bind="click: pageutil.openApplicationPage">
-                <td data-bind="if: $data.authorityNotice || $data.urgency !== 'normal'" class="indicator-count" data-test-col-name="urgent">
+                <td data-bind="if: $data.authorityNotice || $data.urgency !== 'normal',
+                               click: _.partialRight($parent.openApplicationTargeted, 'notice'), clickBubble: false" class="indicator-count" data-test-col-name="urgent">
                   <div data-bind="attr: {title: _.trim($data.authorityNotice) ? loc('notice.prompt') + ': ' + _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency]),
                                          class: 'urgency ' + $data.urgency}"></div>
                 </td>
@@ -69,11 +70,13 @@
                   <div data-bind="text: indicators > 99 ? '*' : indicators,
                                   attr: {class: 'unseen-indicators', title: loc('info.title')}"></div>
                 </td>
-                <td data-bind="if: unseenComments > 0" class="indicator-count" data-test-col-name="unseenComments">
+                <td data-bind="if: unseenComments > 0,
+                               click: _.partialRight($parent.openApplicationTargeted, 'conversation'), clickBubble: false" class="indicator-count" data-test-col-name="unseenComments">
                   <div data-bind="text: unseenComments > 99 ? '*' : unseenComments,
                                     attr: {class: 'unseen-comments', title: loc('conversation.title')}"></div>
                 </td>
-                <td data-bind="if: attachmentsRequiringAction > 0" class="indicator-count" data-test-col-name="newAttachments">
+                <td data-bind="if: attachmentsRequiringAction > 0,
+                               click: _.partialRight($parent.openApplicationTargeted, 'attachments'), clickBubble: false" class="indicator-count" data-test-col-name="newAttachments">
                   <div data-bind="text: attachmentsRequiringAction > 99 ? '*' : attachmentsRequiringAction,
                                     attr: {class: 'unseen-attachments', title: loc('attachments.title')}"></div>
                 </td>

@@ -29,4 +29,8 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
       sortObj.asc(false);
     }
   };
+
+  self.openApplicationTargeted = function(model, event, target) {
+    pageutil.openApplicationPage(model, target);
+  };
 };
