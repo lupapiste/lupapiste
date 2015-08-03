@@ -319,7 +319,7 @@
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin.js" "register-authority-admin-models.js"]}
    :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :header :debug :analytics :leaflet]
-                         :js [schema-versions-by-permit-type "organization-user.js" "admin.js"]
+                         :js [schema-versions-by-permit-type "organization-user.js" "edit-roles-dialog-model.js" "admin.js"]
                          :html ["admin.html"]}
 
    :admin-app {:depends [:ui-components]
