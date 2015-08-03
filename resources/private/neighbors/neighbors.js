@@ -86,7 +86,7 @@
     self.removeNeighbor = function() {
       ajax
         .command("neighbor-remove", {id: self.applicationId(), neighborId: self.neighborId()})
-        .complete(_.partial(repository.load, self.applicationId()))
+        .complete(_.partial(repository.load, self.applicationId(), util.nop))
         .call();
       return self;
     };
