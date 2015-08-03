@@ -368,7 +368,7 @@
 (defcommand add-operation
   {:parameters       [id operation]
    :user-roles       #{:applicant :authority}
-   :states           [:draft :open :submitted :complement-needed]
+   :states           states/pre-sent-application-states
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?
                       a/validate-authority-in-drafts]}
@@ -384,7 +384,7 @@
 (defcommand update-op-description
   {:parameters [id op-id desc]
    :user-roles #{:applicant :authority}
-   :states     [:draft :open :submitted :complement-needed]
+   :states     states/pre-sent-application-states
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application] :as command}]
   (if (= (get-in application [:primaryOperation :id]) op-id)
@@ -394,7 +394,7 @@
 (defcommand change-primary-operation
   {:parameters [id secondaryOperationId]
    :user-roles #{:applicant :authority}
-   :states [:draft :open :submitted :complement-needed]
+   :states states/pre-sent-application-states
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application] :as command}]
   (let [old-primary-op (:primaryOperation application)
@@ -412,7 +412,7 @@
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :user-roles #{:applicant :authority}
-   :states     [:draft :open :submitted :complement-needed]
+   :states     states/pre-sent-application-states
    :pre-checks [permit/validate-permit-has-subtypes
                 a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
@@ -457,7 +457,7 @@
           {:description "Dummy command for UI logic: returns falsey if link permit is not required."
            :parameters  [:id]
            :user-roles  #{:applicant :authority}
-           :states      [:draft :open :submitted :complement-needed]
+           :states      states/pre-sent-application-states
            :pre-checks  [(fn [_ application]
                            (when-not (a/validate-link-permits application)
                              (fail :error.link-permit-not-required)))]})
