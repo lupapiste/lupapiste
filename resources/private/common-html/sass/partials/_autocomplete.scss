@@ -15,9 +15,6 @@
 
 .autocomplete-component {
   width: 430px;
-  * {
-    line-height: $baseline;
-  }
   .autocomplete-selection-wrapper {
     position: relative;
     width: inherit;

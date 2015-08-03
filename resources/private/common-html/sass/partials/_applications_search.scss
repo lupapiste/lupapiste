@@ -50,12 +50,8 @@
   }
 }
 
-.filter-row {
+div.filter-row {
   margin-bottom: $marginM;
-
-  * {
-    line-height: $baseline;
-  }
   > div {
     display: inline-block;
   }
@@ -68,12 +64,14 @@
       left: -22px;
       top: 2px;
     }
-    padding: 0 $marginS;
+    line-height: $baseline;
+    padding: $marginS/2 $marginS;
     border: 1px solid #dddddd;
     box-shadow: none;
   }
-  span.autocomplete-selection {
+  .autocomplete-component > .autocomplete-selection-wrapper > span.autocomplete-selection {
     border-radius: 0;
+    padding: $marginS/2 $marginS;
   }
   .filter-item {
     margin-right: $marginM;
