@@ -62,18 +62,19 @@ var pageutil = (function($) {
     window.location = window.location.protocol + "//" + window.location.host + frontpage;
   }
 
-  function openPage(page) {
+  function openPage(page, suffix) {
+    var suffixStr = _.isString(suffix) ? "/" + suffix : "";
     if (!page) {
       openFrontpage();
     } else if (page.indexOf("!/") === 0) {
-      window.location.hash = page;
+      window.location.hash = page + suffixStr;
     } else {
-      window.location.hash = "!/" + page;
+      window.location.hash = "!/" + page + suffixStr;
     }
   }
 
-  function openApplicationPage(application) {
-    openPage("application/" + application._id);
+  function openApplicationPage(application, suffix) {
+    openPage("application/" + application._id, suffix);
   }
 
   $(function() {
