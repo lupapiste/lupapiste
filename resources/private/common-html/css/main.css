@@ -3652,7 +3652,7 @@ table.attachments-template-table td.attachment-version-info {
   height: 100%;
   display: inline-block;
   border: 1px solid #dddddd;
-  padding: 0 0 0 6px;
+  padding: 3px 6px;
   color: black;
   box-sizing: border-box;
   border-radius: 5px;
@@ -4534,13 +4534,12 @@ div.filter-row input.search ~ span.icon {
 /* line 72, ../sass/partials/_applications_search.scss */
 div.filter-row .autocomplete-component > .autocomplete-selection-wrapper > span.autocomplete-selection {
   border-radius: 0;
-  padding: 3px 6px;
 }
-/* line 76, ../sass/partials/_applications_search.scss */
+/* line 75, ../sass/partials/_applications_search.scss */
 div.filter-row .filter-item {
   margin-right: 12px;
 }
-/* line 78, ../sass/partials/_applications_search.scss */
+/* line 77, ../sass/partials/_applications_search.scss */
 div.filter-row .filter-item:last-child {
   margin-right: 0;
 }
