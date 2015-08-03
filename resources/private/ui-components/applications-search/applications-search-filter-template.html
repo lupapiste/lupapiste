@@ -3,20 +3,29 @@
 <body>
   <section class="page container">
     <script type="text/html" id="applications-search-filter-template">
-    <div class="filter-row">
-      <div>
+    <div class="filter-row basic">
+      <div class="filter-item">
         <label data-bind="ltext: 'application.filter.search'" />
-        <input class="form-input search text" type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField"/>
+        <div>
+          <input class="search" type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField"/>
+        </div>
       </div>
-      <div data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
+      <div class="filter-item" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
         <label data-bind="ltext: 'applications.filter.handler'" />
         <div data-bind="component: {name: 'autocomplete', params: {dataProvider: handlersDataProvider, value: dataProvider.handler, selectedText: 'fullName', nullable: true}}"></div>
       </div>
+      <div class="filter-item" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
+        <a class="command" data-bind="ltext: $parent.advancedFiltersText, toggleClick: $parent.showAdvancedFilters"></a>
+      </div>
     </div>
-    <div data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
-      <label data-bind="ltext: 'applications.filter.tags'" />
-      <div data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, tags: true}}"></div>
+    <!-- ko if: $parent.showAdvancedFilters() && lupapisteApp.models.currentUser.isAuthority() -->
+    <div class="filter-row advanced">
+      <div class="filter-item">
+        <label data-bind="ltext: 'applications.filter.tags'" />
+        <div data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, tags: true}}"></div>
+      </div>
     </div>
+    <!-- /ko -->
     </script>
   </section>
 </body>

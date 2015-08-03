@@ -4499,25 +4499,50 @@ ul.attachments-list li.mandatory-attachments {
   margin-right: 12px;
 }
 
-/* line 42, ../sass/partials/_applications_search.scss */
-div.applications-search-component {
-  margin: 6px 0;
-}
-
-/* line 47, ../sass/partials/_applications_search.scss */
+/* line 43, ../sass/partials/_applications_search.scss */
 .paging button:first-child {
   margin-right: 6px;
 }
-/* line 50, ../sass/partials/_applications_search.scss */
+/* line 46, ../sass/partials/_applications_search.scss */
 .paging select {
   width: 5.625em;
   margin-left: 12px;
   margin-right: 6px;
 }
 
-/* line 58, ../sass/partials/_applications_search.scss */
+/* line 53, ../sass/partials/_applications_search.scss */
+.filter-row {
+  margin-bottom: 12px;
+}
+/* line 56, ../sass/partials/_applications_search.scss */
+.filter-row * {
+  line-height: 24px;
+}
+/* line 59, ../sass/partials/_applications_search.scss */
 .filter-row > div {
   display: inline-block;
+}
+/* line 62, ../sass/partials/_applications_search.scss */
+.filter-row label {
+  display: block;
+}
+/* line 65, ../sass/partials/_applications_search.scss */
+.filter-row input.search {
+  padding: 0 6px;
+  border: 1px solid #dddddd;
+  box-shadow: none;
+}
+/* line 70, ../sass/partials/_applications_search.scss */
+.filter-row span.autocomplete-selection {
+  border-radius: 0;
+}
+/* line 73, ../sass/partials/_applications_search.scss */
+.filter-row .filter-item {
+  margin-right: 12px;
+}
+/* line 75, ../sass/partials/_applications_search.scss */
+.filter-row .filter-item:last-child {
+  margin-right: 0;
 }
 
 /* VIEWS

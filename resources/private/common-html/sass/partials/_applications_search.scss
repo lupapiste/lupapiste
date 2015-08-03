@@ -39,10 +39,6 @@
   }
 }
 
-div.applications-search-component {
-  margin: $marginS 0
-}
-
 .paging {
   button:first-child {
     margin-right: $marginS;
@@ -55,8 +51,30 @@ div.applications-search-component {
 }
 
 .filter-row {
+  margin-bottom: $marginM;
+
+  * {
+    line-height: $baseline;
+  }
   > div {
     display: inline-block;
+  }
+  label {
+    display: block
+  }
+  input.search {
+    padding: 0 $marginS;
+    border: 1px solid #dddddd;
+    box-shadow: none;
+  }
+  span.autocomplete-selection {
+    border-radius: 0;
+  }
+  .filter-item {
+    margin-right: $marginM;
+    &:last-child {
+      margin-right: 0;
+    }
   }
 }
 

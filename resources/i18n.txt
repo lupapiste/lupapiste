@@ -10,3 +10,5 @@ applications.results: Omat hankkeet {0} - {1} / {2}
 applications.lengthMenu: hakemusta sivulla
 navigation: Hankkeet
 application.filter.search.placeholder: Etsi hanketta...
+applications.filter.advancedFilter.show: Näytä lisähakuehdot
+applications.filter.advancedFilter.hide: Piilota lisähakuehdot
