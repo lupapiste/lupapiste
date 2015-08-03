@@ -60,9 +60,9 @@
               </tr>
             </thead>
             <tbody data-bind="foreach: data">
-              <tr class="application-row" data-bind="click: pageutil.openApplicationPage">
+              <tr class="application-row" data-bind="click: pageutil.openApplicationPage, attr: {'data-id': $data._id, 'data-test-address': $data.address}">
                 <td data-bind="if: $data.authorityNotice || $data.urgency !== 'normal',
-                               click: _.partialRight($parent.openApplicationTargeted, 'notice'), clickBubble: false" class="indicator-count" data-test-col-name="urgent">
+                               click: _.partialRight($parent.openApplicationTargeted, 'notice'), clickBubble: false," class="indicator-count" data-test-col-name="urgent">
                   <div data-bind="attr: {title: _.trim($data.authorityNotice) ? loc('notice.prompt') + ': ' + _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency]),
                                          class: 'urgency ' + $data.urgency}"></div>
                 </td>
@@ -80,14 +80,14 @@
                   <div data-bind="text: attachmentsRequiringAction > 99 ? '*' : attachmentsRequiringAction,
                                     attr: {class: 'unseen-attachments', title: loc('attachments.title')}"></div>
                 </td>
-                <td data-bind="ltext: 'applications.' + kind"></td>
-                <td data-bind="text: address + ', ' + loc(['municipality', municipality])"></td>
-                <td data-bind="ltext: 'operations.' + primaryOperation.name"></td>
-                <td data-bind="text: applicant"></td>
-                <td data-bind="dateTimeString: sent"></td>
-                <td data-bind="dateTimeString: modified"></td>
-                <td data-bind="ltext: state"></td>
-                <td data-bind="fullName: authority"></td>
+                <td data-bind="ltext: 'applications.' + kind" data-test-col-name="type"></td>
+                <td data-bind="text: address + ', ' + loc(['municipality', municipality])" data-test-col-name="location"></td>
+                <td data-bind="ltext: 'operations.' + primaryOperation.name" data-test-col-name="operation"></td>
+                <td data-bind="text: applicant" data-test-col-name="applicant"></td>
+                <td data-bind="dateTimeString: sent" data-test-col-name="sent"></td>
+                <td data-bind="dateTimeString: modified" data-test-col-name="modified"></td>
+                <td data-bind="ltext: state" data-test-col-name="status"></td>
+                <td data-bind="fullName: authority" data-test-col-name="authority"></td>
               </tr>
             </tbody>
           </table>
