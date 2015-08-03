@@ -1,4 +1,4 @@
-LUPAPISTE.EditRolesDialogModel = function(organization) {
+LUPAPISTE.EditRolesDialogModel = function(organization, usersList) {
   "use strict";
 
   var self = this;
@@ -29,11 +29,7 @@ LUPAPISTE.EditRolesDialogModel = function(organization) {
   self.okPressed = function () {
     ajax
       .command("update-user-roles", {email: self.email(), roles: self.selectedRoles(), organization: organization.organizationId()})
-      .success(function() {
-        if (usersList) {
-          usersList.redraw();
-        }
-      })
+      .success(_.partial(hub.send, "redraw-users-list"))
       .error(function(error) {
         if (error.text === "error.user-not-found") {
           notify.error(loc("error.dialog.title"), loc("error.user-not-found"));

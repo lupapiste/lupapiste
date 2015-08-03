@@ -58,9 +58,8 @@ LUPAPISTE.OrganizationUserModel = function(organization) {
         } else {
           self.userAdded(true);
         }
-        if (usersList) {
-          usersList.redraw();
-        }
+
+        hub.send("redraw-users-list");
       })
       .error(function(e) {
         if (e.text === "error.user-not-found") {
