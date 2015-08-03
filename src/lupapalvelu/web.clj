@@ -39,7 +39,7 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
-            [lupapalvelu.neighbors]
+            [lupapalvelu.neighbors-api]
             [lupapalvelu.idf.idf-api :as idf-api]))
 
 ;;
@@ -633,7 +633,7 @@
 
   (defpage "/dev/public/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
-      (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors/->public r)}))
+      (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors-api/->public r)}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
   (defpage [:get "/api/proxy-ctrl"] []
