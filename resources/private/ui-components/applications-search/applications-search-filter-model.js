@@ -46,6 +46,11 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
   self.organizationTagsDataProvider = null;
   self.handlersDataProvider = null;
 
+  self.showAdvancedFilters = ko.observable(false);
+  self.advancedFiltersText = ko.computed(function() {
+    return self.showAdvancedFilters() ? "applications.filter.advancedFilter.hide" : "applications.filter.advancedFilter.show";
+  });
+
   if ( lupapisteApp.models.currentUser.isAuthority() ) {
     self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
     // TODO just search single organization tags for now, later do some grouping stuff in autocomplete component

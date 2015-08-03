@@ -89,11 +89,6 @@ LUPAPISTE.ApplicationsSearchModel = function(params) {
     return self.noApplications() ? "applications.empty.desc" : "applications.no-match.desc";
   });
 
-  self.showAdvancedFilters = ko.observable(false);
-  self.advancedFiltersText = ko.computed(function() {
-    return self.showAdvancedFilters() ? "applications.filter.advancedFilter.hide" : "applications.filter.advancedFilter.show";
-  });
-
   self.authorizationModel = lupapisteApp.models.globalAuthModel;
 
   self.limits = ko.observableArray([10, 25, 50, 100]);

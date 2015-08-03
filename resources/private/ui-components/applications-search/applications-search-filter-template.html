@@ -16,10 +16,10 @@
         <div data-bind="component: {name: 'autocomplete', params: {dataProvider: handlersDataProvider, value: dataProvider.handler, selectedText: 'fullName', nullable: true}}"></div>
       </div>
       <div class="filter-item" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
-        <a class="command" data-bind="ltext: $parent.advancedFiltersText, toggleClick: $parent.showAdvancedFilters"></a>
+        <a class="command" data-bind="ltext: advancedFiltersText, toggleClick: showAdvancedFilters"></a>
       </div>
     </div>
-    <!-- ko if: $parent.showAdvancedFilters() && lupapisteApp.models.currentUser.isAuthority() -->
+    <!-- ko if: showAdvancedFilters() && lupapisteApp.models.currentUser.isAuthority() -->
     <div class="filter-row advanced">
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.tags'" />
