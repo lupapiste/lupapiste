@@ -16,6 +16,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
   self.selectedTab = self.dataProvider.applicationType;
 
   self.selectTab = function(item) {
+    hub.send("track-click", {category:"Applications", label: item, event:"radioTab"});
     self.selectedTab(item);
   };
 
