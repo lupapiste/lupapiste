@@ -318,11 +318,6 @@
 (defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
   (serve-app app hashbang lang))
 
-(defquery redirect-after-login
-  {:user-roles action/all-authenticated-user-roles}
-  [{session :session}]
-  (ok :url (get session :redirect-after-login "")))
-
 ;;
 ;; Login/logout:
 ;;
