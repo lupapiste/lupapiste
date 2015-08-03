@@ -77,7 +77,7 @@
    :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-state-change)
-   :states     [:submitted :complement-needed]}
+   :states     #{:submitted :complement-needed}}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
         foreman-notice? (foreman/notice? application)
@@ -121,7 +121,7 @@
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)
                 (application-already-exported :exported-to-backing-system)]
-   :states     [:verdictGiven :constructionStarted]
+   :states     #{:verdictGiven :constructionStarted}
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 
@@ -246,7 +246,7 @@
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [has-asianhallinta-operation]
-   :states     [:submitted :complement-needed]}
+   :states     #{:submitted :complement-needed}}
   [{:keys [application created user]:as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
         application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
@@ -287,7 +287,7 @@
   {:parameters [id lang attachmentIds]
    :user-roles #{:authority}
    :pre-checks [has-asianhallinta-operation (application-already-exported :exported-to-asianhallinta)]
-   :states     [:verdictGiven :sent]
+   :states     #{:verdictGiven :sent}
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 

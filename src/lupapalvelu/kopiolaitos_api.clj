@@ -8,7 +8,7 @@
   {:description "Orders prints of marked verdict attachments from copy institute.
                  If the command is run more than once, the already ordered attachment copies are ordered again."
    :parameters [:id :lang :attachmentsWithAmounts :orderInfo]
-   :states     [:verdictGiven :constructionStarted]
+   :states     #{:verdictGiven :constructionStarted}
    :user-roles #{:authority}
    :input-validators [(partial action/non-blank-parameters [:lang])
                       (partial action/map-parameters-with-required-keys [:orderInfo]
