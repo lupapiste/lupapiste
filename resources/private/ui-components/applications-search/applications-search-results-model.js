@@ -13,10 +13,9 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
 
   self.gotResults = params.gotResults;
 
-  self.selectedTab = ko.observable("all");
+  self.selectedTab = self.dataProvider.applicationType;
 
   self.selectTab = function(item) {
-    self.dataProvider.applicationType(item);
     self.selectedTab(item);
   };
 
