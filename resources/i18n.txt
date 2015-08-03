@@ -12,3 +12,4 @@ navigation: Hankkeet
 application.filter.search.placeholder: Etsi hanketta...
 applications.filter.advancedFilter.show: Näytä lisähakuehdot
 applications.filter.advancedFilter.hide: Piilota lisähakuehdot
+applications.filter.search.clear: Tyhjennä

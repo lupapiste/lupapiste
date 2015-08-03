@@ -8,6 +8,7 @@
         <label data-bind="ltext: 'application.filter.search'" />
         <div>
           <input class="search" type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField"/>
+          <span data-bind="visible: dataProvider.searchField, click: _.partial(dataProvider.searchField, ''), attr: {title: loc('applications.filter.search.clear')}" class="icon remove-grey"></span>
         </div>
       </div>
       <div class="filter-item" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">

@@ -4532,15 +4532,21 @@ ul.attachments-list li.mandatory-attachments {
   border: 1px solid #dddddd;
   box-shadow: none;
 }
-/* line 70, ../sass/partials/_applications_search.scss */
+/* line 66, ../sass/partials/_applications_search.scss */
+.filter-row input.search ~ span.icon {
+  position: relative;
+  left: -22px;
+  top: 2px;
+}
+/* line 75, ../sass/partials/_applications_search.scss */
 .filter-row span.autocomplete-selection {
   border-radius: 0;
 }
-/* line 73, ../sass/partials/_applications_search.scss */
+/* line 78, ../sass/partials/_applications_search.scss */
 .filter-row .filter-item {
   margin-right: 12px;
 }
-/* line 75, ../sass/partials/_applications_search.scss */
+/* line 80, ../sass/partials/_applications_search.scss */
 .filter-row .filter-item:last-child {
   margin-right: 0;
 }

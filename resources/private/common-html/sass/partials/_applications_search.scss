@@ -63,6 +63,11 @@
     display: block
   }
   input.search {
+    ~ span.icon {
+      position: relative;
+      left: -22px;
+      top: 2px;
+    }
     padding: 0 $marginS;
     border: 1px solid #dddddd;
     box-shadow: none;
