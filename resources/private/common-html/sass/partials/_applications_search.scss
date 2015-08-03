@@ -1,8 +1,5 @@
 
 .search-tabs {
-  ul, button, span, li {
-    line-height: $baseline * 1.4;
-  }
   .tab-buttons {
     ul {
       display: inline-block;
@@ -20,7 +17,7 @@
       &.selected {
         background-color: darken($lp-light-grey, 10%);
       }
-      padding: 0 $marginL;
+      padding: $marginS $marginL;
     }
   }
   input {
