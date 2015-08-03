@@ -45,6 +45,7 @@ LUPAPISTE.CompanyInviteDialogModel = function(params) {
     self.query = ko.observable();
 
     self.companies = ko.observable();
+    self.pending = ko.observable();
 
     self.data = ko.computed(function() {
       var q = self.query() || "";
