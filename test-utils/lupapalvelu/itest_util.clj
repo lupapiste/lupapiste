@@ -18,7 +18,7 @@
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.commands :as doc-commands]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
@@ -494,7 +494,7 @@
           updates (filter (fn [[path value]]
                             (try
                               (let [splitted-path (ss/split path #"\.")]
-                                (doc-commands/validate-against-whitelist! document [[splitted-path value]] user-role))
+                                (doc-persistence/validate-against-whitelist! document [[splitted-path value]] user-role))
                               true
                               (catch Exception _
                                 false)))

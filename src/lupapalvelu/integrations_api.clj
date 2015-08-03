@@ -6,7 +6,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -159,7 +159,7 @@
 
 (defcommand merge-details-from-krysp
   {:parameters [id documentId path buildingId overwrite collection]
-   :input-validators [commands/validate-collection
+   :input-validators [doc-persistence/validate-collection
                       (partial action/non-blank-parameters [:documentId :path])
                       (partial action/boolean-parameters [:overwrite])]
    :user-roles #{:applicant :authority}
@@ -167,7 +167,7 @@
    :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (let [document     (commands/by-id application collection documentId)
+    (let [document     (doc-persistence/by-id application collection documentId)
           schema       (schemas/get-schema (:schema-info document))
           clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))
           converted-doc (when overwrite ; don't clean data if user doesn't wish to override
@@ -182,12 +182,12 @@
                                    nil))
           cleared-data (dissoc (:data converted-doc) :buildingId) ; buildingId is set below explicitly
 
-          buildingId-updates (commands/->model-updates [[path buildingId]])
-          buildingId-update-map (commands/validated-model-updates application collection document buildingId-updates created :source nil)
+          buildingId-updates (doc-persistence/->model-updates [[path buildingId]])
+          buildingId-update-map (doc-persistence/validated-model-updates application collection document buildingId-updates created :source nil)
 
           clearing-updates (tools/path-vals (tools/unwrapped cleared-data))
           clearing-update-map (when-not (util/empty-or-nil? clearing-updates) ; create updates only when there is data
-                                (commands/validated-model-updates application collection document clearing-updates created :source nil))
+                                (doc-persistence/validated-model-updates application collection document clearing-updates created :source nil))
 
           krysp-updates (filter
                           (fn [[path _]] (model/find-by-name (:body schema) path))
@@ -195,7 +195,7 @@
                             (if clear-ids?
                               krysp-reader/empty-building-ids
                               (load-building-data url propertyId buildingId overwrite))))
-          krysp-update-map (commands/validated-model-updates application collection document krysp-updates created :source "krysp")
+          krysp-update-map (doc-persistence/validated-model-updates application collection document krysp-updates created :source "krysp")
 
           {:keys [mongo-query mongo-updates]} (util/deep-merge
                                                 clearing-update-map

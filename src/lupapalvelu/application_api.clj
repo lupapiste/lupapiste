@@ -14,7 +14,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
@@ -97,7 +97,7 @@
                                                           "")]]
               schema (schemas/get-schema (:schema-info rakennuspaikka))
               updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
-          (commands/persist-model-updates
+          (doc-persistence/persist-model-updates
             application
             "documents"
             rakennuspaikka
