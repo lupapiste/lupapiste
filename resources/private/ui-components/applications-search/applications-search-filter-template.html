@@ -15,7 +15,7 @@
         <label data-bind="ltext: 'applications.filter.handler'" />
         <div data-bind="component: {name: 'autocomplete', params: {dataProvider: handlersDataProvider, value: dataProvider.handler, selectedText: 'fullName', nullable: true}}"></div>
       </div>
-      <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') -->
+      <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.isAuthority() -->
       <div class="feature filter-item" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
         <a class="command" data-bind="ltext: advancedFiltersText, toggleClick: showAdvancedFilters"></a>
       </div>
