@@ -68,7 +68,7 @@
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       var dateStr = value ? moment(value).format("D.M.YYYY") : "";
-      if (value) { $(element).text(dateStr); }
+      $(element).text(dateStr);
     }
   };
 
