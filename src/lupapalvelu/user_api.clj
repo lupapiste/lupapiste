@@ -232,9 +232,7 @@
   (let [organization-id (user/authority-admins-organization-id caller)
         actual-roles    (valid-user-roles-in-organization organization-id roles)
         email           (user/canonize-email email)
-        query           {:email email, :role "authority"}
-        result          (user/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})
-        update-count    (mongo/update-n :users query )]
+        result          (user/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})]
     (if (ok? result)
       (ok :operation "add")
       (if-not (user/get-user-by-email email)
