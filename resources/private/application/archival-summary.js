@@ -80,7 +80,7 @@
           }
           return loc(retentionMode) + additionalDetail.toLowerCase();
         } else {
-          return "<Ei asetettu>";
+          return loc("<Arvo puuttuu>");
         }
       });
       attachment.personalDataDescription = ko.pureComputed(function() {
@@ -88,7 +88,7 @@
         if (_.isFunction(personalData)) {
           return loc(personalData());
         } else {
-          return "<Ei asetettu>";
+          return loc("<Arvo puuttuu>");
         }
       });
       return attachment;
@@ -98,8 +98,10 @@
   var model = function(params) {
     var self = this;
     self.attachments = params.application.attachments;
-    var processedAttachments = addAdditionalFieldsToAttachments(self.attachments());
-    var preAttachments = ko.observableArray(getPreAttachments(processedAttachments));
+    var preAttachments = ko.pureComputed(function() {
+      var preAttachments = getPreAttachments(self.attachments());
+      return addAdditionalFieldsToAttachments(preAttachments);
+    });
     var archivedAttachments = ko.pureComputed(function() {
       return filterByArchiveStatus(preAttachments(), true);
     });
