@@ -24,6 +24,11 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.skip = ko.observable(0);
 
+  self.pending = ko.observable(false);
+  ko.computed(function() {
+    return self.pending() ? pageutil.showAjaxWait() : pageutil.hideAjaxWait();
+  });
+
   self.onSuccess = function(res) {
         self.data(res.data);
         self.applications(res.data.applications);
@@ -39,6 +44,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
                 sort: ko.mapping.toJS(self.sort),
                 skip: self.skip()})
       .success(self.onSuccess)
+      .pending(self.pending)
     .call();
   }).extend({throttle: 250});
 
