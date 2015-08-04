@@ -200,7 +200,13 @@
                       (query/sort (make-sort-v2 params))
                       (query/skip skip)
                       (query/limit limit))
-        rows        (map (comp enrich-row (partial meta-fields/with-indicators user) #(domain/filter-application-content-for % user) ) apps)]
+        rows        (map
+                      (comp
+                        enrich-row
+                        (partial meta-fields/with-indicators user)
+                        #(domain/filter-application-content-for % user)
+                        mongo/with-id)
+                      apps)]
     {:userTotalCount user-total
      :totalCount query-total
      :applications rows}))

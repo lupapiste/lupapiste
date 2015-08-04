@@ -61,7 +61,7 @@
               </tr>
             </thead>
             <tbody data-bind="foreach: data">
-              <tr class="application-row" data-bind="click: pageutil.openApplicationPage, attr: {'data-id': $data._id, 'data-test-address': $data.address}">
+              <tr class="application-row" data-bind="click: pageutil.openApplicationPage, attr: {'data-id': $data.id, 'data-test-address': $data.address}">
                 <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
                 <td data-bind="if: $data.authorityNotice || $data.urgency !== 'normal'" class="indicator-count" data-test-col-name="urgent">
                   <div data-bind="click: _.partialRight($parent.openApplicationTargeted, 'notice'), clickBubble: false,
