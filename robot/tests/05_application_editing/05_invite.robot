@@ -114,7 +114,7 @@ Mikko invites Solita
   Wait Until  Click Element  xpath=//div[@class='parties-list']//button[@data-test-id='company-invite']
   Wait Until  Element should be visible  xpath=//div[@data-test-id='modal-dialog-content']
   Element should not be visible  xpath=//div[@data-test-id='company-invite-confirm-help']
-  Select From Autocomplete  Solita Oy
+  Select From Autocomplete  div[@id="modal-dialog-content-component"]  Solita Oy
   Click enabled by test id  modal-dialog-submit-button
   Wait Until  Element should be visible  xpath=//div[@data-test-id='company-invite-confirm-help']
   Click enabled by test id  modal-dialog-submit-button

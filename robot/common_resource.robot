@@ -302,12 +302,12 @@ Select From List by test id
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
 
 Select From Autocomplete
-  [Arguments]  ${value}
-  Wait until  Element should be visible  xpath=//span[@class='autocomplete-selection']
-  Click Element  xpath=//span[@class='autocomplete-selection']
-  Input text by test id  autocomplete-input  ${value}  ${true}
-  Wait until  Element should be visible  xpath=//li/span[contains(text(), '${value}')]
-  Click Element  xpath=//li/span[contains(text(), '${value}')]
+  [Arguments]  ${container}  ${value}
+  Wait until  Element should be visible  xpath=//${container}//span[@class='autocomplete-selection']
+  Click Element  xpath=//${container}//span[@class='autocomplete-selection']
+  Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
+  Wait until  Element should be visible  xpath=//${container}//ul[@class="autocomplete-result"]//li/span[contains(text(), '${value}')]
+  Click Element  xpath=//${container}//ul[@class="autocomplete-result"]//li/span[contains(text(), '${value}')]
 
 Click by id
   [Arguments]  ${id}
@@ -589,13 +589,13 @@ Confirm notification dialog
 Open the request
   [Arguments]  ${address}
   Go to page  applications
-  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
+  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
   Wait for jQuery
 
 Open the request at index
   [Arguments]  ${address}  ${index}
   Go to page  applications
-  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}'][${index}]/td
+  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}'][${index}]
   Wait for jQuery
 
 Open application

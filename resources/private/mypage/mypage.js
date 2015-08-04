@@ -31,7 +31,7 @@
     var self = this;
 
     self.error = ko.observable();
-    self.saved = ko.observable();
+    self.saved = ko.observable(false);
     self.firstName = ko.observable().extend({ maxLength: 255 });
     self.lastName = ko.observable().extend({ maxLength: 255 });
     self.username = ko.observable();

@@ -21,10 +21,9 @@
     span.autocomplete-selection {
       width: 100%;
       height: 100%;
-      line-height: 32px;
       display: inline-block;
       border: 1px solid darken($lp-light-grey, 10%);
-      padding: 0 0 0 $marginS;
+      padding: $marginS/2 $marginS;
       color: black;
       box-sizing: border-box;
       border-radius: 5px;
@@ -32,37 +31,41 @@
       ul.tags {
         list-style: none;
         padding: $marginS 0 0 0;
-        overflow: auto;
-        li.tag {
-          position: relative;
-          background-color: $lp-orange;
-          font-size: 16px;
-          margin-right: $marginS;
-          white-space: nowrap;
-          float: left;
-          margin-bottom: $marginS;
-          span.tag-label {
-            color: #fff;
-            margin-left: $marginL + $marginS / 2;
-            margin-right: $marginM;
+        //overflow: auto;
+        li {
+          display: inline-block;
+          //padding: 3px;
+          //top: 1px;
+          &.tag {
+            position: relative;
+            background-color: $lp-orange;
+            font-size: 16px;
+            margin-right: $marginS;
+            white-space: nowrap;
+            margin-bottom: $marginS;
+
+            span.tag-label {
+              color: #fff;
+              margin-left: $marginL + $marginS / 2;
+              margin-right: $marginM;
+            }
+
+            span.tag-remove {
+              cursor: pointer;
+              position: absolute;
+              left: $marginS;
+              top: 0;
+              bottom: 0;
+              margin: auto;
+            }
           }
-          span.tag-remove {
+
+          &.tag-ellipsis {
+            color: $lp-orange;
             cursor: pointer;
-            position: absolute;
-            left: $marginS;
-            top: 0;
-            bottom: 0;
-            margin: auto;
+            font-weight: bold;
+            margin-bottom: $marginS;
           }
-        }
-        li.tag:last-child {
-          margin-bottom: 0;
-        }
-        li.tag-ellipsis {
-          color: $lp-orange;
-          cursor: pointer;
-          font-weight: bold;
-          float: left;
         }
       }
     }
@@ -81,18 +84,19 @@
 
   .autocomplete-dropdown {
     width: inherit;
-    position: relative;
+    position: absolute;
     z-index: 1;
     input.autocomplete-input {
       width: 100%;
       height: 28px;
-      line-height: 24px;
+      //line-height: 24px;
       margin: 2px 0;
       display: block;
       box-sizing: border-box;
     }
     ul.autocomplete-result {
-      position: fixed;
+      position: absolute;
+      top: 30px; // autocomplete-input height + margin
       z-index: 1000;
       width: inherit;
       max-height: 300px;

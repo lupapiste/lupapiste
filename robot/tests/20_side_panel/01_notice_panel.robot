@@ -28,7 +28,7 @@ Sonja can see notice button
 
 Sonja can add tags
   Open side panel  notice
-  Select From Autocomplete  ylämaa
+  Select From Autocomplete  div[@id="notice-panel"]  ylämaa
 
 Sonja can leave notice
   Open side panel  notice
