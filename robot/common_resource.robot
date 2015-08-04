@@ -589,13 +589,13 @@ Confirm notification dialog
 Open the request
   [Arguments]  ${address}
   Go to page  applications
-  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
+  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
   Wait for jQuery
 
 Open the request at index
   [Arguments]  ${address}  ${index}
   Go to page  applications
-  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}'][${index}]/td
+  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}'][${index}]
   Wait for jQuery
 
 Open application
