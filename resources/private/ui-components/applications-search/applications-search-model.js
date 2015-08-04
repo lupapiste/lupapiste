@@ -13,6 +13,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   self.applicationType = ko.observable("all");
 
   self.searchField = ko.observable("");
+  self.searchFieldDelayed = ko.pureComputed(self.searchField).extend({rateLimit: {method: "notifyWhenChangesStop", timeout: 750}});
 
   self.handler = ko.observable();
 
@@ -36,7 +37,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   ko.computed(function() {
     ajax.datatables("applications-search",
-               {searchText: self.searchField(),
+               {searchText: self.searchFieldDelayed(),
                 applicationTags: self.applicationTags(),
                 handler: self.handler() ? self.handler().id : undefined,
                 applicationType: self.applicationType(),
@@ -46,7 +47,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
       .success(self.onSuccess)
       .pending(self.pending)
     .call();
-  }).extend({throttle: 250});
+  }).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
 
 
   hub.onPageLoad("applications", function() {
