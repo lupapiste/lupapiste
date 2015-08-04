@@ -103,10 +103,12 @@
   [{user :user}]
   (let [organization (o/get-organization (user/authority-admins-organization-id user))
         ops-with-attachments (organization-operations-with-attachments organization)
-        selected-operations-with-permit-type (selected-operations-with-permit-types organization)]
+        selected-operations-with-permit-type (selected-operations-with-permit-types organization)
+        allowed-roles (o/allowed-roles-in-organization organization)]
     (ok :organization (-> organization
                         (assoc :operationsAttachments ops-with-attachments
-                               :selectedOperations selected-operations-with-permit-type)
+                               :selectedOperations selected-operations-with-permit-type
+                               :allowedRoles allowed-roles)
                         (dissoc :operations-attachments :selected-operations))
         :attachmentTypes (organization-attachments organization))))
 

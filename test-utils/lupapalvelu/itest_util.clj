@@ -70,6 +70,7 @@
 (def velho      (apikey-for "velho"))
 (def velho-muni "297")
 (def velho-id   (id-for "velho"))
+(def jarvenpaa  (apikey-for "admin@jarvenpaa.fi"))
 
 (def sipoo-property-id "75300000000000")
 (def jarvenpaa-property-id "18600000000000")
