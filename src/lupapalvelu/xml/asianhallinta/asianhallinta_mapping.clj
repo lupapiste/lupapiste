@@ -74,8 +74,9 @@
 (defn enrich-application [application]
   (update-in application [:attachments] enrich-attachments-with-operation-data (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
 
-(defn uusi-asia-from-application [application lang ah-version submitted-application begin-of-link output-dir]
+(defn uusi-asia-from-application
   "Construct UusiAsia XML message. Writes XML and attachments to disk (output-dir)"
+  [application lang ah-version submitted-application begin-of-link output-dir]
   (let [application (enrich-application application)
         canonical (canonical/application-to-asianhallinta-canonical application lang)
         attachments-canonical (canonical/get-attachments-as-canonical (:attachments application) begin-of-link)
@@ -89,8 +90,9 @@
         attachments (attachments-for-write (:attachments application))]
     (writer/write-to-disk application attachments xml (str "ah-" ah-version) output-dir submitted-application lang)))
 
-(defn taydennys-asiaan-from-application [application attachments lang ah-version begin-of-link output-dir]
+(defn taydennys-asiaan-from-application
   "Construct AsiaanTaydennys XML message. Writes XML and attachmets to disk (ouput-dir)"
+  [application attachments lang ah-version begin-of-link output-dir]
   (let [canonical (canonical/application-to-asianhallinta-taydennys-asiaan-canonical application)
         attachments (enrich-attachments-with-operation-data attachments (get-operations application))
         attachments-canonical (canonical/get-attachments-as-canonical attachments begin-of-link)

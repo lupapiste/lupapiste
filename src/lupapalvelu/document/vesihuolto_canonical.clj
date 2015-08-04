@@ -1,10 +1,10 @@
 (ns lupapalvelu.document.vesihuolto-canonical
-  (require [lupapalvelu.document.vesihuolto-schemas :as vh-schemas]
-           [lupapalvelu.document.canonical-common :refer :all]
-           [lupapalvelu.document.tools :as tools]
-           [lupapalvelu.i18n :as i18n]
-           [lupapalvelu.permit :as permit]
-           [sade.strings :refer [lower-case]]))
+  (:require [lupapalvelu.document.vesihuolto-schemas :as vh-schemas]
+            [lupapalvelu.document.canonical-common :refer :all]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.permit :as permit]
+            [sade.strings :refer [lower-case]]))
 
 
 (defn- get-talousvedet [talousvedet]

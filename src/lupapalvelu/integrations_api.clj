@@ -6,7 +6,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -77,7 +77,7 @@
    :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-state-change)
-   :states     [:submitted :complement-needed]}
+   :states     #{:submitted :complement-needed}}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
         foreman-notice? (foreman/notice? application)
@@ -121,7 +121,7 @@
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)
                 (application-already-exported :exported-to-backing-system)]
-   :states     [:verdictGiven :constructionStarted]
+   :states     #{:verdictGiven :constructionStarted}
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 
@@ -159,7 +159,7 @@
 
 (defcommand merge-details-from-krysp
   {:parameters [id documentId path buildingId overwrite collection]
-   :input-validators [commands/validate-collection
+   :input-validators [doc-persistence/validate-collection
                       (partial action/non-blank-parameters [:documentId :path])
                       (partial action/boolean-parameters [:overwrite])]
    :user-roles #{:applicant :authority}
@@ -167,7 +167,7 @@
    :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (let [document     (commands/by-id application collection documentId)
+    (let [document     (doc-persistence/by-id application collection documentId)
           schema       (schemas/get-schema (:schema-info document))
           clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))
           converted-doc (when overwrite ; don't clean data if user doesn't wish to override
@@ -182,12 +182,12 @@
                                    nil))
           cleared-data (dissoc (:data converted-doc) :buildingId) ; buildingId is set below explicitly
 
-          buildingId-updates (commands/->model-updates [[path buildingId]])
-          buildingId-update-map (commands/validated-model-updates application collection document buildingId-updates created :source nil)
+          buildingId-updates (doc-persistence/->model-updates [[path buildingId]])
+          buildingId-update-map (doc-persistence/validated-model-updates application collection document buildingId-updates created :source nil)
 
           clearing-updates (tools/path-vals (tools/unwrapped cleared-data))
           clearing-update-map (when-not (util/empty-or-nil? clearing-updates) ; create updates only when there is data
-                                (commands/validated-model-updates application collection document clearing-updates created :source nil))
+                                (doc-persistence/validated-model-updates application collection document clearing-updates created :source nil))
 
           krysp-updates (filter
                           (fn [[path _]] (model/find-by-name (:body schema) path))
@@ -195,7 +195,7 @@
                             (if clear-ids?
                               krysp-reader/empty-building-ids
                               (load-building-data url propertyId buildingId overwrite))))
-          krysp-update-map (commands/validated-model-updates application collection document krysp-updates created :source "krysp")
+          krysp-update-map (doc-persistence/validated-model-updates application collection document krysp-updates created :source "krysp")
 
           {:keys [mongo-query mongo-updates]} (util/deep-merge
                                                 clearing-update-map
@@ -230,8 +230,9 @@
 ;; Asianhallinta
 ;;
 
-(defn- fetch-linked-kuntalupatunnus [application]
+(defn- fetch-linked-kuntalupatunnus
   "Fetch kuntalupatunnus from application's link permit's verdicts"
+  [application]
   (when-let [link-permit-app (application/get-link-permit-app application)]
     (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
@@ -245,7 +246,7 @@
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [has-asianhallinta-operation]
-   :states     [:submitted :complement-needed]}
+   :states     #{:submitted :complement-needed}}
   [{:keys [application created user]:as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
         application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
@@ -279,14 +280,14 @@
 
 (defn- application-already-in-asianhallinta [_ application]
   (let [filtered-transfers (filter #(some #{(:type %)} "to-backing-system to-asianhallinta" ) (:transfers application))]
-    (when-not (= (:type (last filtered-transfers)) "to-asianhallinta"))
-    (fail :error.application.not-in-asianhallinta)))
+    (when-not (= (:type (last filtered-transfers)) "to-asianhallinta")
+      (fail :error.application.not-in-asianhallinta))))
 
 (defcommand attachments-to-asianhallinta
   {:parameters [id lang attachmentIds]
    :user-roles #{:authority}
    :pre-checks [has-asianhallinta-operation (application-already-exported :exported-to-asianhallinta)]
-   :states     [:verdictGiven :sent]
+   :states     #{:verdictGiven :sent}
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 

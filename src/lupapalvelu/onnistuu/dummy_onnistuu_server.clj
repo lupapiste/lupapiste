@@ -68,7 +68,7 @@
         process     (assoc process
                            "return_failure" return_failure
                            "uuid" (str (java.util.UUID/randomUUID)))
-        document    (process "document")
+        document    ^String (process "document")
         ; Only localhost:8000 works as a target in every environment
         url         (str "http://localhost:8000" (subs document (.indexOf document "/" 8)))
         doc-status  (http/get url {:throw-exceptions false})]

@@ -357,13 +357,13 @@
     (with-open [out (io/output-stream temp-file)]
       (stamper/stamp stamp fileId out x-margin y-margin transparency))
     (mongo/upload new-file-id filename contentType temp-file :application (:id application))
-    (let [new-version (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-                        (attachment/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
-                        (attachment/set-attachment-version {:application application :attachment-id attachment-id
-                                                            :file-id new-file-id :filename filename
-                                                            :content-type contentType :size (.length temp-file)
-                                                            :comment-text nil :now now :user user
-                                                            :stamped true :make-comment false :state :ok}))])
+    (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
+      (attachment/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
+      (attachment/set-attachment-version {:application application :attachment-id attachment-id
+                                          :file-id new-file-id :filename filename
+                                          :content-type contentType :size (.length temp-file)
+                                          :comment-text nil :now now :user user
+                                          :stamped true :make-comment false :state :ok}))
     (try (.delete temp-file) (catch Exception _))
     new-file-id))
 
@@ -397,7 +397,7 @@
   {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId kuntalupatunnus section]
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])]
    :user-roles #{:authority}
-   :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
+   :states     #{:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed}
    :description "Stamps all attachments of given application"}
   [{application :application {transparency :transparency} :data :as command}]
   (let [parsed-timestamp (cond
@@ -439,7 +439,7 @@
    :parameters [:id attachmentIds password]
    :input-validators [(partial action/non-blank-parameters [:password])
                       (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
-   :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]
+   :states     (states/all-application-states-but [:canceled :closed])
    :pre-checks [domain/validate-owner-or-write-access
                 (fn [_ application]
                   (when-not (pos? (count (:attachments application)))
@@ -494,7 +494,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       (partial action/boolean-parameters [:notNeeded])]
    :user-roles #{:applicant :authority}
-   :states     [:draft :open :submitted]
+   :states     #{:draft :open :submitted}
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :notNeeded notNeeded created :set-app-modified? true :set-attachment-modified? false)

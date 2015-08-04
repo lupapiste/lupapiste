@@ -1,8 +1,8 @@
 (ns lupapalvelu.document.ymparistolupa-canonical
-  (require [sade.util :as util]
-           [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
-           [lupapalvelu.document.tools :as tools]
-           [lupapalvelu.permit :as permit]))
+  (:require [sade.util :as util]
+            [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.permit :as permit]))
 
 (defn ymparistolupa-canonical [application lang]
   (let [documents (tools/unwrapped (canonical-common/documents-by-type-without-blanks application))

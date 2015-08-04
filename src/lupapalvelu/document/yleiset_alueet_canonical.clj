@@ -294,7 +294,7 @@
                    :yleinenAlueAsiatieto (permits application)}})
 
 
-(defn jatkoaika-to-canonical [application lang]
+(defn jatkoaika-to-canonical
   "Transforms continuation period application mongodb-document to canonical model."
   [application lang]
   (let [application (tools/unwrapped application)
@@ -323,7 +323,7 @@
         vastuuhenkilotieto (vec (filter :Vastuuhenkilo [;hakija
                                                         maksaja]))
         hankkeen-kuvaus (-> documents-by-type :hankkeen-kuvaus-jatkoaika first :data :kuvaus)
-        lisaaikatieto (when alku-pvm loppu-pvm hankkeen-kuvaus
+        lisaaikatieto (when alku-pvm
                         {:Lisaaika {:alkuPvm alku-pvm
                                     :loppuPvm loppu-pvm
                                     :perustelu hankkeen-kuvaus}})

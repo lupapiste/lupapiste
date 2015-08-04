@@ -11,14 +11,21 @@
 
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.string :as s]
+            [clojure.data.json :as json]
             [monger.operators :refer :all]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [noir.request :as request]
+            [camel-snake-kebab :as csk]
+            [me.raynes.fs :as fs]
+            [slingshot.slingshot :refer [try+]]
             [sade.core :refer [ok fail fail! now]]
             [sade.util :as util]
             [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator]]
+            [lupapalvelu.states :as states]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
@@ -27,14 +34,8 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as o]
-            [camel-snake-kebab :as csk]
-            [sade.strings :as ss]
-            [sade.property :as p]
             [lupapalvelu.logging :as logging]
-            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
-            [me.raynes.fs :as fs]
-            [clojure.data.json :as json]
-            [slingshot.slingshot :refer [try+]]))
+            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]))
 ;;
 ;; local api
 ;;
@@ -102,10 +103,12 @@
   [{user :user}]
   (let [organization (o/get-organization (user/authority-admins-organization-id user))
         ops-with-attachments (organization-operations-with-attachments organization)
-        selected-operations-with-permit-type (selected-operations-with-permit-types organization)]
+        selected-operations-with-permit-type (selected-operations-with-permit-types organization)
+        allowed-roles (o/allowed-roles-in-organization organization)]
     (ok :organization (-> organization
                         (assoc :operationsAttachments ops-with-attachments
-                               :selectedOperations selected-operations-with-permit-type)
+                               :selectedOperations selected-operations-with-permit-type
+                               :allowedRoles allowed-roles)
                         (dissoc :operations-attachments :selected-operations))
         :attachmentTypes (organization-attachments organization))))
 
@@ -226,7 +229,7 @@
   {:description "returns operations addable for the application whose id is given as parameter"
    :parameters  [:id]
    :user-roles #{:applicant :authority}
-   :states      [:draft :open :submitted :complement-needed]}
+   :states      states/pre-sent-application-states}
   [{{:keys [organization permitType]} :application}]
   (when-let [org (o/get-organization organization)]
     (let [selected-operations (map keyword (:selected-operations org))]
@@ -392,8 +395,9 @@
     (ok :tags (:tags (o/get-organization org-id)))
     (fail! :error.organization-not-found)))
 
-(defn- transform-coordinates-to-wgs84 [collection]
+(defn- transform-coordinates-to-wgs84
   "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"
+  [collection]
   (let [schema (.getSchema collection)
         crs (.getCoordinateReferenceSystem schema)
         transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)

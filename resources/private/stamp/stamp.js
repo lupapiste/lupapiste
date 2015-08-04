@@ -83,7 +83,7 @@ var stamping = (function() {
         model.stampingMode(false);
 
         var appId = pageutil.subPage();
-        repository.load(appId, null, function(application) {
+        repository.load(appId, _.noop, function(application) {
           lupapisteApp.setTitle(application.title);
 
           model.authorization = lupapisteApp.models.applicationAuthModel;

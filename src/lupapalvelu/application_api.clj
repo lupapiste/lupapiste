@@ -14,7 +14,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
@@ -97,7 +97,7 @@
                                                           "")]]
               schema (schemas/get-schema (:schema-info rakennuspaikka))
               updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
-          (commands/persist-model-updates
+          (doc-persistence/persist-model-updates
             application
             "documents"
             rakennuspaikka
@@ -160,7 +160,7 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           [:info]}
+   :states           #{:info}}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified created
@@ -175,7 +175,7 @@
    :user-roles       #{:applicant}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           [:draft :info :open :submitted]}
+   :states           #{:draft :info :open :submitted}}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified created
@@ -221,7 +221,7 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           [:sent]}
+   :states           #{:sent}}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified         created
@@ -249,7 +249,7 @@
    :input-validators [(partial action/non-blank-parameters [:id])
                       (partial action/boolean-parameters [:confirm])]
    :user-roles       #{:applicant :authority}
-   :states           [:draft :open]
+   :states           #{:draft :open}
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [domain/validate-owner-or-write-access
@@ -273,7 +273,7 @@
   {:parameters       [:id drawings]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :states           [:draft :info :answered :open :submitted :complement-needed]
+   :states           #{:draft :info :answered :open :submitted :complement-needed}
    :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
@@ -368,7 +368,7 @@
 (defcommand add-operation
   {:parameters       [id operation]
    :user-roles       #{:applicant :authority}
-   :states           [:draft :open :submitted :complement-needed]
+   :states           states/pre-sent-application-states
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?
                       a/validate-authority-in-drafts]}
@@ -384,7 +384,7 @@
 (defcommand update-op-description
   {:parameters [id op-id desc]
    :user-roles #{:applicant :authority}
-   :states     [:draft :open :submitted :complement-needed]
+   :states     states/pre-sent-application-states
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application] :as command}]
   (if (= (get-in application [:primaryOperation :id]) op-id)
@@ -394,7 +394,7 @@
 (defcommand change-primary-operation
   {:parameters [id secondaryOperationId]
    :user-roles #{:applicant :authority}
-   :states [:draft :open :submitted :complement-needed]
+   :states states/pre-sent-application-states
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application] :as command}]
   (let [old-primary-op (:primaryOperation application)
@@ -412,7 +412,7 @@
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :user-roles #{:applicant :authority}
-   :states     [:draft :open :submitted :complement-needed]
+   :states     states/pre-sent-application-states
    :pre-checks [permit/validate-permit-has-subtypes
                 a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
@@ -430,7 +430,7 @@
 (defcommand change-location
   {:parameters       [id x y address propertyId]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :states           [:draft :info :answered :open :submitted :complement-needed :verdictGiven :constructionStarted]
+   :states           (states/all-states-but [:sent :canceled :closed])
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial a/property-id-parameters [:propertyId])
                       validate-x validate-y]
@@ -457,7 +457,7 @@
           {:description "Dummy command for UI logic: returns falsey if link permit is not required."
            :parameters  [:id]
            :user-roles  #{:applicant :authority}
-           :states      [:draft :open :submitted :complement-needed]
+           :states      states/pre-sent-application-states
            :pre-checks  [(fn [_ application]
                            (when-not (a/validate-link-permits application)
                              (fail :error.link-permit-not-required)))]})
@@ -527,7 +527,7 @@
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
    :user-roles #{:applicant :authority}
-   :states     [:draft :open :submitted :complement-needed :verdictGiven :constructionStarted]
+   :states     (states/all-application-states-but [:sent :closed :canceled])
    :pre-checks [a/validate-authority-in-drafts]} ;; Pitaako olla myos 'sent'-tila?
   [{application :application}]
   (if (mongo/remove :app-links (a/make-mongo-id-for-link-permit id linkPermitId))
@@ -542,7 +542,7 @@
 (defcommand create-change-permit
   {:parameters ["id"]
    :user-roles #{:applicant :authority}
-   :states     [:verdictGiven :constructionStarted]
+   :states     #{:verdictGiven :constructionStarted}
    :pre-checks [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (a/make-application-id (:municipality application))
@@ -591,7 +591,7 @@
 (defcommand create-continuation-period-permit
   {:parameters ["id"]
    :user-roles #{:applicant :authority}
-   :states     [:verdictGiven :constructionStarted]
+   :states     #{:verdictGiven :constructionStarted}
    :pre-checks [(permit/validate-permit-type-is permit/YA) validate-not-jatkolupa-app]}
   [{:keys [created user application] :as command}]
 

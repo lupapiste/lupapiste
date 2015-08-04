@@ -15,7 +15,7 @@
             [lupapalvelu.user-api :as user-api]
             [lupapalvelu.user :as user]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.states :as states]))
 
 ;;
@@ -125,7 +125,7 @@
         (let [application (domain/get-application-as id user :include-canceled-apps? true)]
           ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
           ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
-          (commands/do-set-user-to-document application document-id (:id user) (:path my-invite) created)))
+          (doc-persistence/do-set-user-to-document application document-id (:id user) (:path my-invite) created)))
       (ok))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]

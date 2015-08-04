@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.poikkeamis-canonical
-  (require [lupapalvelu.document.canonical-common :refer :all]
-           [lupapalvelu.document.tools :as tools]
-           [clojure.string :as s]))
+  (:require [lupapalvelu.document.canonical-common :refer :all]
+            [lupapalvelu.document.tools :as tools]
+            [clojure.string :as s]))
 
 (defn- root-element [application lang]
   {:Popast

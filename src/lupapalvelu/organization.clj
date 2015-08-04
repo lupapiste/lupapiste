@@ -18,6 +18,8 @@
    :open-inforequest-email ""
    :opening nil})
 
+(def authority-roles [:authority :reader :tos-editor :tos-publisher])
+
 (defn- with-scope-defaults [org]
   (when (seq org)
     (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))))
@@ -87,4 +89,15 @@
 
 (defn has-ftp-user? [organization permit-type]
   (not (ss/blank? (get-in organization [:krysp (keyword permit-type) :ftpUser]))))
+
+(defn allowed-roles-in-organization [organization]
+  {:pre [(map? organization)]}
+  (if-not (:permanent-archive-enabled organization)
+    (remove #(ss/starts-with (name %) "tos-") authority-roles)
+    authority-roles)  )
+
+(defn filter-valid-user-roles-in-organization [organization roles]
+  (let [organization  (if (map? organization) organization (get-organization organization))
+        allowed-roles (set (allowed-roles-in-organization organization))]
+    (filter (comp allowed-roles keyword) roles)))
 

@@ -77,7 +77,10 @@ LUPAPISTE.NeighborsEditDialogModel = function(params) {
     ajax
       .command(self.neighborId() ? "neighbor-update" : "neighbor-add", _.zipObject(paramNames, _.map(paramNames, paramValue)))
       .pending(self.pending)
-      .complete(_.partial(repository.load, self.id(), function(v) { if (!v) { hub.send("close-dialog"); }}))
+      .success(function() {
+        repository.load(self.id());
+        hub.send("close-dialog");
+      })
       .call();
     return self;
   };
