@@ -59,27 +59,27 @@
     (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
     :else (make-free-text-query filter-search)))
 
-(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user tags]} user]
+(defn make-query [query {:keys [searchText kind applicationType handler applicationTags]} user]
   {$and
    (filter seq
      [query
-      (when-not (ss/blank? filter-search) (make-text-query (ss/trim filter-search)))
+      (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
       (merge
         (case filter-kind
           "applications" {:infoRequest false}
           "inforequests" {:infoRequest true}
           nil) ; defaults to both
         (let [all (if (applicant? user) {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})]
-          (case filter-state
+          (case applicationType
            "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
            "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
            "canceled"          {:state "canceled"}
            all))
-        (when-not (contains? #{nil "0"} filter-user)
-          {$or [{"auth.id" filter-user}
-                {"authority.id" filter-user}]})
-        (when-not (empty? tags)
-          {:tags {$in tags}}))])})
+        (when-not (contains? #{nil "0"} handler)
+          {$or [{"auth.id" handler}
+                {"authority.id" handler}]})
+        (when-not (empty? applicationTags)
+          {:tags {$in applicationTags}}))])})
 
 
 ;;
@@ -113,12 +113,7 @@
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         kind        (get kind-mapping application-type "applications")
-        params      (merge
-                      {:filter-kind kind}
-                      (rename-keys params {:searchText :filter-search
-                                           :applicationType :filter-state
-                                           :handler :filter-user
-                                           :applicationTags :tags}))
+        params      (merge {:kind kind} params)
         query       (make-query user-query params user)
         query-total (mongo/count :applications query)
         skip        (or (:skip params) 0)
