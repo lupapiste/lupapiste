@@ -39,6 +39,9 @@ LUPAPISTE.NoticeModel = function() {
   var self = this;
 
   self.applicationId = null;
+
+  self.authorization = lupapisteApp.models.applicationAuthModel;
+
   self.authorityNotice = ko.observable();
   self.urgency = ko.observable("normal");
 

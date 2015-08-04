@@ -64,6 +64,7 @@
 (def all-authz-roles (conj all-authz-writer-roles :reader))
 
 (def default-org-authz-roles #{:authority})
+(def reader-org-authz-roles #{:authority :reader})
 (def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin :reader :tos-editor :tos-publisher))
 
 ;; Notificator
