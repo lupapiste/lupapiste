@@ -4525,7 +4525,7 @@ div.filter-row input.search {
 div.filter-row input.search ~ span.icon {
   position: relative;
   left: -22px;
-  top: 2px;
+  top: 4px;
 }
 /* line 69, ../sass/partials/_applications_search.scss */
 div.filter-row .autocomplete-component > .autocomplete-selection-wrapper > span.autocomplete-selection {
