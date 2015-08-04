@@ -14,20 +14,20 @@
   (operation-names "S\u00e4hk\u00f6-, data ja muiden kaapelien sijoittaminen") => ["ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen"])
 
 (facts "sorting parameter parsing"
-  (make-sort {:iSortCol_0 0 :sSortDir_0 "asc"})  => {}
-  (make-sort {:iSortCol_0 1 :sSortDir_0 "asc"})  => {}
-  (make-sort {:iSortCol_0 2 :sSortDir_0 "desc"}) => {}
-  (make-sort {:iSortCol_0 3 :sSortDir_0 "desc"}) => {}
-  (make-sort {:iSortCol_0 4 :sSortDir_0 "asc"})  => {:infoRequest 1}
-  (make-sort {:iSortCol_0 5 :sSortDir_0 "desc"}) => {:address -1}
-  (make-sort {:iSortCol_0 6 :sSortDir_0 "desc"}) => {}
-  (make-sort {:iSortCol_0 7 :sSortDir_0 "desc"}) => {:applicant -1}
-  (make-sort {:iSortCol_0 8 :sSortDir_0 "asc"})  => {:submitted 1}
-  (make-sort {:iSortCol_0 9 :sSortDir_0 "asc"})  => {:modified 1}
-  (make-sort {:iSortCol_0 10 :sSortDir_0 "asc"})  => {:state 1}
-  (make-sort {:iSortCol_0 11 :sSortDir_0 "asc"}) => {"authority.lastName" 1, "authority.firstName" 1}
-  (make-sort {:iSortCol_0 {:injection "attempt"}
-              :sSortDir_0 "; drop database;"})   => {}
+  (make-sort {:sort {:field "unknown" :asc false}})  => {}
+  (make-sort {:sort {:field "unknown" :asc true}})  => {}
+  (make-sort {:sort {:field "id" :asc false}}) => {}
+  (make-sort {:sort {:field "_id" :asc false}}) => {}
+  (make-sort {:sort {:field "type" :asc true }})  => {:infoRequest 1}
+  (make-sort {:sort {:field "type" :asc false }}) => {:infoRequest -1}
+  (make-sort {:sort {:field "location" :asc false }}) => {:address -1}
+  (make-sort {:sort {:field "applicant" :asc false }}) => {:applicant -1}
+  (make-sort {:sort {:field "submitted" :asc true }})  => {:submitted 1}
+  (make-sort {:sort {:field "modified" :asc true }})  => {:modified 1}
+  (make-sort {:sort {:field "state" :asc true }})  => {:state 1}
+  (make-sort {:sort {:field "handler" :asc true }}) => {"authority.lastName" 1, "authority.firstName" 1}
+  (make-sort {:sort {:field {:injection "attempt"}
+              :asc "; drop database;"}})   => {}
   (make-sort {})                                 => {}
   (make-sort nil)                                => {})
 
