@@ -18,6 +18,7 @@
   function OrganizationModel() {
     var self = this;
 
+    self.organizationId = ko.observable();
     self.links = ko.observableArray();
     self.operationsAttachments = ko.observableArray();
     self.attachmentTypes = {};
@@ -27,8 +28,8 @@
     self.tosFunctions = ko.observableArray();
     self.tosFunctionVisible = ko.observable(false);
     self.permanentArchiveEnabled = ko.observable(true);
-    self.organizationId = ko.observable();
     self.features = ko.observableArray();
+    self.allowedRoles = ko.observable([]);
 
     self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };
 
@@ -132,6 +133,8 @@
         .call();
 
       self.features(util.getIn(organization, ["areas", "features"]) || []);
+
+      self.allowedRoles(organization.allowedRoles);
     };
 
     self.editLink = function(indexFn) {

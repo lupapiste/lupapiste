@@ -49,8 +49,7 @@
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
                                           validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))
-                 :degrees               (map :name (:body schemas/koulutusvalinta))
-                 :authorityRoles        action/authority-roles}]
+                 :degrees               (map :name (:body schemas/koulutusvalinta))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []

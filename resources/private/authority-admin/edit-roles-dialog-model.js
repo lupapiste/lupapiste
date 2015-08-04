@@ -3,11 +3,7 @@ LUPAPISTE.EditRolesDialogModel = function(organization, usersList) {
 
   var self = this;
 
-  self.availableRoles = ko.pureComputed(function () {
-    return _.filter(LUPAPISTE.config.authorityRoles, function(role) {
-      return role.indexOf("tos-") < 0 || (organization.permanentArchiveEnabled && organization.permanentArchiveEnabled());
-    });
-  });
+  self.availableRoles = organization.allowedRoles;
 
   self.selectedRoles = ko.observableArray();
   self.email = ko.observable();

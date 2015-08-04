@@ -16,11 +16,7 @@ LUPAPISTE.OrganizationUserModel = function(organization) {
   self.userAdded = ko.observable();
   self.invitationSent = ko.observable();
 
-  self.availableUserRoles = ko.pureComputed(function () {
-    return _.filter(LUPAPISTE.config.authorityRoles, function(role) {
-      return role.indexOf("tos-") < 0 || (organization.permanentArchiveEnabled && organization.permanentArchiveEnabled());
-    });
-  });
+  self.availableUserRoles = organization.allowedRoles;
 
   self.clean = function() {
     return self
