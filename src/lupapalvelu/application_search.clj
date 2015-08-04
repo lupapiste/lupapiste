@@ -65,7 +65,7 @@
      [query
       (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
       (merge
-        (case filter-kind
+        (case kind
           "applications" {:infoRequest false}
           "inforequests" {:infoRequest true}
           nil) ; defaults to both
