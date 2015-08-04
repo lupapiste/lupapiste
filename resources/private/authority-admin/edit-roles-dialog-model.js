@@ -28,7 +28,7 @@ LUPAPISTE.EditRolesDialogModel = function(organization, usersList) {
 
   self.okPressed = function () {
     ajax
-      .command("update-user-roles", {email: self.email(), roles: self.selectedRoles(), organization: organization.organizationId()})
+      .command("update-user-roles", {email: self.email(), roles: self.selectedRoles()})
       .success(_.partial(hub.send, "redraw-users-list"))
       .error(function(error) {
         if (error.text === "error.user-not-found") {

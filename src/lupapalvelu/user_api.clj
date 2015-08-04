@@ -205,40 +205,6 @@
   (when-not (#{"add" "remove"} (:operation data))
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
-(defcommand update-user-organization
-  {:parameters       [email firstName lastName roles]
-   :input-validators [(partial action/non-blank-parameters [:email :firstName :lastName])
-                      (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
-                      action/email-validator]
-   :user-roles #{:authorityAdmin}}
-  [{caller :user}]
-  (let [new-organization (user/authority-admins-organization-id caller)
-        has-archive?     (:permanent-archive-enabled (organization/get-organization new-organization))
-        actual-roles     (if (and (env/feature? :tiedonohjaus) has-archive?) roles ["authority"])
-        email            (user/canonize-email email)
-        query            {:email email, :role "authority"}
-        update-count     (mongo/update-n :users query {$set {(str "orgAuthz." new-organization) actual-roles}})]
-    (debug "update user" email)
-    (if (pos? update-count)
-      (ok :operation "add")
-      (if-not (user/get-user-by-email email)
-        (create-authority-user-with-organization caller new-organization email firstName lastName actual-roles)
-        (fail :error.user-not-found)))))
-
-(defcommand remove-user-organization
-  {:parameters       [email]
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
-   :user-roles       #{:authorityAdmin}}
-  [{caller :user}]
-  (let [email            (user/canonize-email email)
-        organization     (user/authority-admins-organization-id caller)
-        query            {:email email, :role "authority"}
-        update-count     (mongo/update-n :users query {$unset {(str "orgAuthz." organization) ""}})]
-    (if (pos? update-count)
-      (ok :operation "remove")
-      (fail :error.user-not-found))))
-
 (defn allowed-roles [allowed-roles command]
   (let [roles (get-in command [:data :roles])
         filtered-roles (->> roles (map keyword) (filter (into #{} allowed-roles)))
@@ -247,17 +213,54 @@
     (when-not ok
       (fail :invalid.roles))))
 
-(defcommand update-user-roles
-  {:parameters [email roles organization]
-   :input-validators [(partial action/non-blank-parameters [:email :organization])
+(defn valid-user-roles-in-organization [organization-id roles]
+  (if-not (:permanent-archive-enabled (organization/get-organization organization-id))
+    (let [actual-roles (remove #(ss/starts-with % "tos-")  roles)]
+      (if (seq actual-roles)
+        actual-roles
+        ["authority"]))
+    roles))
+
+(defcommand update-user-organization
+  {:parameters       [email firstName lastName roles]
+   :input-validators [(partial action/non-blank-parameters [:email :firstName :lastName])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       action/email-validator
                       (partial allowed-roles action/authority-roles)]
    :user-roles #{:authorityAdmin}}
-  (let [update-count (mongo/update-n :users {:email (user/canonize-email email)} {$set {(str "orgAuthz." organization) roles}})]
-    (if (= 1 update-count)
-      (ok)
-      (fail :error.user-not-found))))
+  [{caller :user}]
+  (let [organization-id (user/authority-admins-organization-id caller)
+        actual-roles    (valid-user-roles-in-organization organization-id roles)
+        email           (user/canonize-email email)
+        query           {:email email, :role "authority"}
+        result          (user/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})
+        update-count    (mongo/update-n :users query )]
+    (if (ok? result)
+      (ok :operation "add")
+      (if-not (user/get-user-by-email email)
+        (create-authority-user-with-organization caller organization-id email firstName lastName actual-roles)
+        (fail :error.user-not-found)))))
+
+(defcommand remove-user-organization
+  {:parameters       [email]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :user-roles       #{:authorityAdmin}}
+  [{caller :user}]
+  (let [organization-id (user/authority-admins-organization-id caller)]
+    (user/update-user-by-email email {:role "authority"} {$unset {(str "orgAuthz." organization-id) ""}})))
+
+(defcommand update-user-roles
+  {:parameters [email roles]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
+                      action/email-validator
+                      (partial allowed-roles action/authority-roles)]
+   :user-roles #{:authorityAdmin}}
+  [{caller :user}]
+  (let [organization-id (user/authority-admins-organization-id caller)
+        actual-roles    (valid-user-roles-in-organization organization-id roles)]
+    (user/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
   (infof "invitation for new authority: email=%s: processing..." email)
