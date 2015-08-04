@@ -65,7 +65,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
 };
 
-LUPAPISTE.ApplicationsSearchModel = function(params) {
+LUPAPISTE.ApplicationsSearchModel = function() {
   "use strict";
 
   var self = this;
