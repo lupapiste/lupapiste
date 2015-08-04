@@ -32,13 +32,13 @@
   (make-sort nil)                                => {})
 
 (fact "make-query (LUPA-519) with filter-user checks both authority and auth.id"
-  (-> (make-query {} {:filter-kind  "both"
-                     :filter-state "all"
-                     :filter-user  "123"}
+  (-> (make-query {} {:kind  "both"
+                     :applicationType "all"
+                     :handler  "123"}
                  {:role "authority"}) (get "$and") last) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
 
 (fact "query contais user query"
   (-> (make-query {:auth.id "123"} {} {}) (get "$and") first) => {:auth.id "123"})
 
 (fact "Tags are present in query"
-  (-> (make-query {} {:tags ["test1" "test2"]} {}) (get "$and") last :tags) => {"$in" ["test1" "test2"]})
+  (-> (make-query {} {:applicationTags ["test1" "test2"]} {}) (get "$and") last :tags) => {"$in" ["test1" "test2"]})
