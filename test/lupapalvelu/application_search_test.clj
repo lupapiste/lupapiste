@@ -39,3 +39,6 @@
 
 (fact "query contais user query"
   (-> (make-query {:auth.id "123"} {} {}) (get "$and") first) => {:auth.id "123"})
+
+(fact "Tags are present in query"
+  (-> (make-query {} {:tags ["test1" "test2"]} {}) (get "$and") last :tags) => {"$in" ["test1" "test2"]})
