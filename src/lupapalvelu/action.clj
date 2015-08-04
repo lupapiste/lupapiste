@@ -64,8 +64,7 @@
 (def all-authz-roles (conj all-authz-writer-roles :reader))
 
 (def default-org-authz-roles #{:authority})
-(def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin :reader)) ; TODO add TOJ roles here
-(def authority-roles [:authority :reader :tos-editor :tos-publisher])
+(def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin :reader :tos-editor :tos-publisher))
 
 ;; Notificator
 

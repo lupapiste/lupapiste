@@ -205,12 +205,10 @@
   (when-not (#{"add" "remove"} (:operation data))
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
-(defn allowed-roles [allowed-roles command]
+(defn- allowed-roles [allowed-roles command]
   (let [roles (get-in command [:data :roles])
-        filtered-roles (->> roles (map keyword) (filter (into #{} allowed-roles)))
-        ok (= (count roles)
-              (count filtered-roles))]
-    (when-not ok
+        pred (set (map name allowed-roles))]
+    (when-not (every? pred roles)
       (fail :invalid.roles))))
 
 (defcommand update-user-organization
@@ -218,7 +216,7 @@
    :input-validators [(partial action/non-blank-parameters [:email :firstName :lastName])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       action/email-validator
-                      (partial allowed-roles action/authority-roles)]
+                      (partial allowed-roles organization/authority-roles)]
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
   (let [organization-id (user/authority-admins-organization-id caller)
@@ -245,7 +243,7 @@
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       action/email-validator
-                      (partial allowed-roles action/authority-roles)]
+                      (partial allowed-roles organization/authority-roles)]
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
   (let [organization-id (user/authority-admins-organization-id caller)

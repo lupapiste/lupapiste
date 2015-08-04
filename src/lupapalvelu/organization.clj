@@ -18,6 +18,8 @@
    :open-inforequest-email ""
    :opening nil})
 
+(def authority-roles [:authority :reader :tos-editor :tos-publisher])
+
 (defn- with-scope-defaults [org]
   (when (seq org)
     (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))))
