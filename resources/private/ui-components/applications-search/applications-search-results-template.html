@@ -28,7 +28,7 @@
             <thead>
               <tr>
                 <th colspan="4" data-bind="ltext: 'applications.indicators',
-                                           attr: {colspan: lupapisteApp.models.currentUser.role() === 'authority' ? '4' : '3'}"></th>
+                                           attr: {colspan: lupapisteApp.models.currentUser.isAuthority() ? '4' : '3'}"></th>
                 <th class="sorting" data-bind="click: _.partial(sortBy, 'type'),
                                                ltext: 'applications.type',
                                                css: {asc: dataProvider.sort.field() === 'type' ? dataProvider.sort.asc() : false,
@@ -62,7 +62,7 @@
             </thead>
             <tbody data-bind="foreach: data">
               <tr class="application-row" data-bind="click: pageutil.openApplicationPage, attr: {'data-id': $data._id, 'data-test-address': $data.address}">
-                <!-- ko if: lupapisteApp.models.currentUser.role() === 'authority' -->
+                <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
                 <td data-bind="if: $data.authorityNotice || $data.urgency !== 'normal'" class="indicator-count" data-test-col-name="urgent">
                   <div data-bind="click: _.partialRight($parent.openApplicationTargeted, 'notice'), clickBubble: false,
                                   attr: {title: _.trim($data.authorityNotice) ? loc('notice.prompt') + ': ' + _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency]),
