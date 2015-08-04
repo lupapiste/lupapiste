@@ -40,40 +40,6 @@
         operation-index))))
 
 ;;
-;; Table definition
-;;
-
-(def- col-sources [(fn [app] (select-keys app [:urgency :authorityNotice]))
-                            :indicators
-                            :attachmentsRequiringAction
-                            :unseenComments
-                            (fn [app] (if (:infoRequest app) "inforequest" "application"))
-                            (juxt :address :municipality)
-                            :primaryOperation
-                            :applicant
-                            :submitted
-                            :modified
-                            :state
-                            :authority])
-
-(def- order-by (assoc col-sources
-                          0 nil
-                          1 nil
-                          2 nil
-                          3 nil
-                          4 :infoRequest
-                          5 :address
-                          6 nil
-                          ; 7 applicant - sorted as is
-                          ; 8 submitted - sorted as is
-                          ; 9 modified - sorted as is
-                          ; 10 state - sorted as is
-                          11 ["authority.lastName" "authority.firstName"]
-                          ))
-
-(def- col-map (zipmap col-sources (map str (range))))
-
-;;
 ;; Query construction
 ;;
 
@@ -115,48 +81,10 @@
         (when-not (empty? tags)
           {:tags {$in tags}}))])})
 
-(defn- make-sort [params]
-  (let [col (get order-by (:iSortCol_0 params))
-        dir (if (= "asc" (:sSortDir_0 params)) 1 -1)]
-    (cond
-      (nil? col) {}
-      (sequential? col) (zipmap col (repeat dir))
-      :else {col dir})))
-
-;;
-;; Result presentation
-;;
-
-(defn- add-field [application data [app-field data-field]]
-  (assoc data data-field (app-field application)))
-
-(defn- make-row [application]
-  (let [base {"id" (:_id application)
-              "kind" (if (:infoRequest application) "inforequest" "application")}]
-    (reduce (partial add-field application) base col-map)))
 
 ;;
 ;; Public API
 ;;
-
-(defn applications-for-user [user params]
-  (let [user-query  (domain/basic-application-query-for user)
-        user-total  (mongo/count :applications user-query)
-        query       (make-query user-query params user)
-        query-total (mongo/count :applications query)
-        skip        (or (:iDisplayStart params) 0)
-        limit       (or (:iDisplayLength params) 10)
-        apps        (query/with-collection "applications"
-                      (query/find query)
-                      (query/sort (make-sort params))
-                      (query/skip skip)
-                      (query/limit limit))
-        rows        (map (comp make-row (partial meta-fields/with-indicators user) #(domain/filter-application-content-for % user) ) apps)
-        echo        (str (util/->int (str (:sEcho params))))] ; Prevent XSS
-    {:aaData                rows
-     :iTotalRecords         user-total
-     :iTotalDisplayRecords  query-total
-     :sEcho                 echo}))
 
 (defn- enrich-row [app]
   (assoc app :kind (if (:infoRequest app) "inforequest" "application")))
@@ -169,7 +97,7 @@
                           "type" :infoRequest
                           "state" :state})
 
-(defn- make-sort-v2 [{{:keys [field asc]} :sort}]
+(defn- make-sort [{{:keys [field asc]} :sort}]
   (let [sort-field (sort-field-mapping field)
         dir (if asc 1 -1)]
     (cond
@@ -181,7 +109,7 @@
                    "inforequest" "inforequests"
                    "canceled" "both"})
 
-(defn applications-for-user-v2 [user {application-type :applicationType :as params}]
+(defn applications-for-user [user {application-type :applicationType :as params}]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         kind        (get kind-mapping application-type "applications")
@@ -197,7 +125,7 @@
         limit       (or (:limit params) 10)
         apps        (query/with-collection "applications"
                       (query/find query)
-                      (query/sort (make-sort-v2 params))
+                      (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
         rows        (map

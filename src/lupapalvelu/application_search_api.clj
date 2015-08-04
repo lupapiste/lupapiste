@@ -9,22 +9,16 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]))
 
-
-(defquery applications-for-datatables
-  {:description "Service point for jQuery dataTables"
-   :parameters [params]
-   :user-roles #{:applicant :authority}}
-  [{user :user}]
-  (ok :data (search/applications-for-user user params)))
-
 (defquery applications-search
-  {:description "Service point for application search page component"
+  {:description "Service point for application search component"
    :parameters []
    :user-roles #{:applicant :authority}}
   [{user :user data :data}]
-  (ok :data (search/applications-for-user-v2
+  (ok :data (search/applications-for-user
               user
-              (select-keys data [:applicationTags :applicationType :handler :limit :searchText :skip :sort]))))
+              (select-keys
+                data
+                [:applicationTags :applicationType :handler :limit :searchText :skip :sort]))))
 
 (defn- localize-operation [op]
   (assoc op
@@ -46,7 +40,8 @@
   [{user :user data :data}]
   (let [user-query (domain/basic-application-query-for user)
         query (search/make-query user-query data user)
-        fields (concat [:id :location :infoRequest :address :municipality :primaryOperation :secondaryOperations :drawings :permitType] (filter keyword? search/col-sources))
+        fields (lazy-seq [:id :location :infoRequest :address :municipality :primaryOperation :secondaryOperations :drawings :permitType :indicators
+                          :attachmentsRequiringAction :unseenComments :primaryOperation :applicant :submitted :modified :state :authority])
         apps (mongo/select :applications query (zipmap fields (repeat 1)))
         rows (map #(-> %
                      (domain/filter-application-content-for user)
