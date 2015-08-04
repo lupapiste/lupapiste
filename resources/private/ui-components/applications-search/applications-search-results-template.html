@@ -26,7 +26,7 @@
         <div>
           <table id="applications-list" class="applications-table" data-bind="if: gotResults()">
             <thead>
-              <tr>
+              <tr> <!-- TODO refactor with foreach and add operation sorter -->
                 <th colspan="4" data-bind="ltext: 'applications.indicators',
                                            attr: {colspan: lupapisteApp.models.currentUser.isAuthority() ? '4' : '3'}"></th>
                 <th class="sorting" data-bind="click: _.partial(sortBy, 'type'),
