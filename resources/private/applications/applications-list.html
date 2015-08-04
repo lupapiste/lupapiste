@@ -26,9 +26,8 @@
     </div>
 
     <h1 data-bind="ltext: 'navigation'" ></h1>
-    <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.loaded() -->
-    <div class="feature" data-bind="component: 'applications-search'">
-    </div>
+    <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
+    <div data-bind="component: 'applications-search'"></div>
     <!-- /ko -->
   </section>
 </body>
