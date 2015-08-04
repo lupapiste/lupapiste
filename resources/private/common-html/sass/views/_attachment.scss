@@ -100,14 +100,15 @@ $previewHeight: 500px;
     width: $cols3;
     float: right;
     margin-top: -60px;
-    button {
-      width: 100%;
-    }
+    vertical-align: top;
   }
 }
 
 .attachment-info-wrapper {
   float: left;
+  vertical-align: top;
+  margin-top: $marginL;
+  position: relative;
   width: 80%;
   .tab-info {
     width: 80%;
@@ -115,7 +116,7 @@ $previewHeight: 500px;
 }
 
 .attachment-info-header {
-  overflow: auto;
+  overflow-y: visble;
   width: 100%;
   display: block;
   h1 {
@@ -125,10 +126,6 @@ $previewHeight: 500px;
   }
   a {
     margin-left: $marginL * 2;
-  }
-  .help {
-    margin-left: $marginM;
-    display: inline-block;
   }
 }
 
@@ -153,16 +150,6 @@ td.comment-text {
   vertical-align:bottom;
   td {
     padding: $marginS 0;
-  }
-}
-
-.attachment-back {
-
-  display: block;
-  height: 60px;
-
-  a {
-    margin-right: $marginM;
   }
 }
 

@@ -7,52 +7,69 @@
       <div class="attachment-info">
         <div class="container">
 
-          <div class="attachment-back">
-            <a class="btn left-align btn-nav-back"
+          <div class="inner-margins">
+            <a class="btn secondary"
                data-bind="click: function() { window.location.hash = '!/application/' + application.id() + '/attachments'; repository.load(application.id()); }"
                data-test-id="back-to-application-from-attachment">
-              <span data-bind =" ltext: 'application.return'"></span>
-              <span class="icon drill-left-black-bigger left-align"></span>
+                <i class="lupicon-chevron-start"></i>
+                <span data-bind =" ltext: 'application.return'"></span>
             </a>
-            <div data-bind="with: $root.approve">
-              <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
-              <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
-            </div>
-          </div>
-
-          <div>
-            <div class="attachment-info-wrapper">
-              <div class="attachment-info-header">
-                <h1>
-                  <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
-                  <span data-bind="if: latestVersion">
-                    <span data-bind="ltext: 'attachment.version'">versio</span>
-                    <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
-                  </span>
-                </h1>
-                <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
-              </div>
-
-              <div class="tab-info" data-bind="slider: showHelp">
-                <p data-bind="lhtml: 'attachment.view.desc'"></p>
-              </div>
-            </div>
-
-            <div class="attachment-actions">
-              <button data-bind="enable: previousAttachmentPresent, click: previousAttachment">
+            <button class="secondary" data-bind="enable: previousAttachmentPresent, click: previousAttachment">
+                <i class="lupicon-chevron-left"></i>
                 <span data-bind="ltext: 'previous'"></span>
-                <span class="icon drill-left-black-bigger left-align"></span>
-              </button>
-              <button data-bind="enable: nextAttachmentPresent, click: nextAttachment">
+            </button>
+            <button class="secondary" data-bind="enable: nextAttachmentPresent, click: nextAttachment">
                 <span data-bind="ltext: 'next'"></span>
-                <span class="icon drill-right-black left-align"></span>
+                <i class="lupicon-chevron-right"></i>
+            </button>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="inner-margins">
+              <!-- ko with: $root.approve -->
+              <button id="test-attachment-approve" data-bind="click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()"
+                      class="positive caps">
+                  <i class="lupicon-check"></i>
+                  <span data-bind="ltext: 'document.approve'"></span>
               </button>
-              <button data-test-id="change-attachment-type"
-                      data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized"></button>
-              <button data-test-id="delete-attachment"
-                      data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable && authorized">Poista liite</button>
+              <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()"
+                      class="negative caps">Tarkennettavaa</button>
+              <!-- /ko -->
+              <button class="secondary" data-test-id="change-attachment-type"
+                      data-bind="click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized">
+                  <span data-bind="ltext: 'attachment.changeType'"></span>
+              </button>
+              <button class="secondary" data-test-id="delete-attachment"
+                      data-bind="click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable && authorized">
+                  <i class="lupicon-remove"></i>
+                  <span data-bind="ltext: 'attachment.delete'"></span>
+              </button>
+          </div>
+
+          <div class="attachment-info-wrapper">
+              <div class="attachment-info-header">
+                  <h1>
+                      <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
+                      <span data-bind="if: latestVersion">
+                          <span data-bind="ltext: 'attachment.version'">versio</span>
+                          <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+                      </span>
+                </h1>
+                <div class="stacked help-toggle">
+                    <span class="lupicon-circle-question" data-bind="click: toggleHelp,
+                                                                     css: {expanded: showHelp}"></span>
+                    <div data-bind="css: {'help-arrow': showHelp}"></div>
+                    
+                </div>
+            </div>
+            
+            <div class="tab-info" data-bind="slider: showHelp">
+                <p data-bind="lhtml: 'attachment.view.desc'"></p>
             </div>
           </div>
+        </div>
+
 
           <div class="clear"></div>
           <div class="col1">
@@ -60,11 +77,11 @@
               <div class="btn-container">
                 <button
                     id="add-new-attachment-version"
-                    class="btn-primary"
+                    class="positive"
                     data-bind="click: newAttachmentVersion, visible: $root.authorization.ok('upload-attachment') && editable">
-                  <span data-bind="ltext: 'attachment.addVersion', visible: latestVersion"></span>
-                  <span data-bind="ltext: 'attachment.addFile', visible: !latestVersion()"></span>
-                  <span class="icon add left-align"></span>
+                    <i class="lupicon-circle-plus"></i>
+                    <span data-bind="ltext: 'attachment.addVersion', visible: latestVersion"></span>
+                    <span data-bind="ltext: 'attachment.addFile', visible: !latestVersion()"></span>
                 </button>
                 <button id="show-attachment-versions"
                         class="btn"
@@ -258,7 +275,7 @@
     <div class="window autosized" id="change-type-dialog" data-bind="with: changeTypeDialogModel">
       <div class="dialog-header">
        <p data-bind="ltext: 'attachment.changeType'"></p>
-       <p class="dialog-close close">X</p>
+       <p class="dialog-close close lupicon-remove"></p>
       </div>
       <div class="form-entry change-type">
         <label for="attachment-type-select" class="form-label">

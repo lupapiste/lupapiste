@@ -149,11 +149,11 @@ button.btn-dialog, .btn-dialog {
 /* // */
 /* // Styleguide 3.1.2 */
 
-/* .btn-decline { */
-/*   background: red; */
-/*   color: white; */
-/*   text-transform:uppercase; */
-/* } */
+.btn-decline {
+  background: red;
+  color: white;
+  text-transform:uppercase;
+}
 
 // ajax loader for buttons
 // Should no longer be used with buttons. See
@@ -283,7 +283,7 @@ button.btn-dialog, .btn-dialog {
 // New buttons
 [type=submit], .btn, button {
   border: none;
-  min-height: 38px;
+  min-height: 40px;
   max-height: 40px;
   box-sizing: border-box;
   display: inline-block;
@@ -292,7 +292,7 @@ button.btn-dialog, .btn-dialog {
   line-height: 40px;
   white-space: nowrap;
   text-align: left;
-  display: inline-block;
+  //display: table;
   cursor: pointer;
   padding: {
     left: 12px;
@@ -302,9 +302,11 @@ button.btn-dialog, .btn-dialog {
   }
   span, i {
     vertical-align: middle;
+    display: table-cell;
+    margin: 0;
   }
   span {
-    margin: {
+    padding: {
       left: 6px;
       right: 6px;
     }
@@ -321,7 +323,7 @@ button.btn-dialog, .btn-dialog {
 // (automatically) stacking letters is problematic.
 // Especially the letter-spacing breaks the alignment.
 // The most robust approach is to insert spaces between
-// letters.
+// letters (see the lspaced binding in ko.init.js).
 .vertical {
   line-height: normal;
   word-break: break-all;
@@ -330,18 +332,21 @@ button.btn-dialog, .btn-dialog {
   word-spacing: 2em;
   text-align: center;
   vertical-align: default;
-    padding: {
+  padding: {
     top: 12px;
+    left: 0;
+    right: 0;
     bottom: 12px;
   }
-    span {
-      display: block;
-      text-align: center;
-      max-width: 1em;
-      margin: {
-        top: 12px;
-        bottom: 12px;
-      }
+  span {
+    padding: 0;
+    display: block;
+    text-align: center;
+    max-width: $lupicon-size;
+    margin: {
+      top: 12px;
+      bottom: 12px;
+    }
   }
 }
 
@@ -502,9 +507,13 @@ button.function {
   display: none;
 }
 
+i.wait {
+  display: none;
+}
+
 .waiting {
   .wait {
-    display: inline;
+    display: table-cell;
   }
 }
 
@@ -609,3 +618,4 @@ button.function {
 #partiesDocgen button {
   margin-bottom: $marginS;
 }
+

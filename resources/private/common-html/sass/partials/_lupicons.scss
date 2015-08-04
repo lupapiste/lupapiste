@@ -1,169 +1,206 @@
+// The contents of this file are the sames IcoMoon style.css with
+// two notable differences:
+//  1. url path starts with /: fonts -> /fonts
+//  2. lupicon-class font-size: 22px
+
+$lupicon-size: 22px;
+
 @font-face {
-	font-family: 'lupapiste';
-        src:url('/fonts/lupapiste.eot?bf4dc9');
-        src:url('/fonts/lupapiste.eot?#iefixbf4dc9') format('embedded-opentype'),
-                url('/fonts/lupapiste.ttf?bf4dc9') format('truetype'),
-                url('/fonts/lupapiste.woff?bf4dc9') format('woff'),
-                url('/fonts/lupapiste.svg?bf4dc9#lupapiste') format('svg');
-	font-weight: normal;
-	font-style: normal;
+        font-family: 'lupapiste';
+        src:url('/fonts/lupapiste.eot?srl0pk');
+        src:url('/fonts/lupapiste.eot?#iefixsrl0pk') format('embedded-opentype'),
+                url('/fonts/lupapiste.ttf?srl0pk') format('truetype'),
+                url('/fonts/lupapiste.woff?srl0pk') format('woff'),
+                url('/fonts/lupapiste.svg?srl0pk#lupapiste') format('svg');
+        font-weight: normal;
+        font-style: normal;
 }
 
 [class^="lupicon-"], [class*=" lupicon-"] {
-    font-family: 'lupapiste';
-    speak: none;
-    font-size: 22px;
-    font-style: normal;
-    font-weight: normal;
-    font-variant: normal;
-    text-transform: none;
-    line-height: 1;
+        font-family: 'lupapiste';
+        speak: none;
+        font-style: normal;
+        font-size: $lupicon-size;
+        font-weight: normal;
+        font-variant: normal;
+        text-transform: none;
+        line-height: 1;
 
-    /* Better Font Rendering =========== */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+        /* Better Font Rendering =========== */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
 }
 
+.lupicon-add-area:before {
+        content: "\e63f";
+}
+.lupicon-add-path:before {
+        content: "\e640";
+}
+.lupicon-add-point:before {
+        content: "\e641";
+}
+.lupicon-arrows:before {
+        content: "\e642";
+}
+.lupicon-file-check:before {
+        content: "\e643";
+}
+.lupicon-layers:before {
+        content: "\e644";
+}
+.lupicon-measure-area:before {
+        content: "\e645";
+}
+.lupicon-measure:before {
+        content: "\e646";
+}
+.lupicon-star:before {
+        content: "\e647";
+}
+.lupicon-zoom-in-area:before {
+        content: "\e648";
+}
 .lupicon-archives:before {
-	content: "\e600";
+        content: "\e600";
 }
 .lupicon-calendar:before {
-	content: "\e601";
+        content: "\e601";
 }
 .lupicon-check:before {
-	content: "\e602";
+        content: "\e602";
 }
 .lupicon-checkbox-off:before {
-	content: "\e603";
+        content: "\e603";
 }
 .lupicon-checkbox-on:before {
-	content: "\e604";
+        content: "\e604";
 }
 .lupicon-chevron-bottom:before {
-	content: "\e605";
+        content: "\e605";
 }
 .lupicon-chevron-down:before {
-	content: "\e606";
+        content: "\e606";
 }
 .lupicon-chevron-end:before {
-	content: "\e607";
+        content: "\e607";
 }
 .lupicon-chevron-left:before {
-	content: "\e608";
+        content: "\e608";
 }
 .lupicon-chevron-right:before {
-	content: "\e609";
+        content: "\e609";
 }
 .lupicon-chevron-small-down:before {
-	content: "\e60a";
+        content: "\e60a";
 }
 .lupicon-chevron-small-left:before {
-	content: "\e60b";
+        content: "\e60b";
 }
 .lupicon-chevron-small-right:before {
-	content: "\e60c";
+        content: "\e60c";
 }
 .lupicon-chevron-small-up:before {
-	content: "\e60d";
+        content: "\e60d";
 }
 .lupicon-chevron-start:before {
-	content: "\e60e";
+        content: "\e60e";
 }
 .lupicon-chevron-top:before {
-	content: "\e60f";
+        content: "\e60f";
 }
 .lupicon-chevron-up:before {
-	content: "\e610";
+        content: "\e610";
 }
 .lupicon-circle-arrow-down:before {
-	content: "\e611";
+        content: "\e611";
 }
 .lupicon-circle-arrow-left:before {
-	content: "\e612";
+        content: "\e612";
 }
 .lupicon-circle-arrow-right:before {
-	content: "\e613";
+        content: "\e613";
 }
 .lupicon-circle-arrow-up:before {
-	content: "\e614";
+        content: "\e614";
 }
 .lupicon-circle-attention:before {
-	content: "\e615";
+        content: "\e615";
 }
 .lupicon-circle-check:before {
-	content: "\e616";
+        content: "\e616";
 }
 .lupicon-circle-info:before {
-	content: "\e617";
+        content: "\e617";
 }
 .lupicon-circle-minus:before {
-	content: "\e618";
+        content: "\e618";
 }
 .lupicon-circle-pen:before {
-	content: "\e619";
+        content: "\e619";
 }
 .lupicon-circle-plus:before {
-	content: "\e61a";
+        content: "\e61a";
 }
 .lupicon-circle-question:before {
-	content: "\e61b";
+        content: "\e61b";
 }
 .lupicon-circle-remove:before {
         content: "\e61c";
 }
 .lupicon-circle-section-sign:before {
-	content: "\e61d";
+        content: "\e61d";
 }
 .lupicon-circle-stamp:before {
-	content: "\e61e";
+        content: "\e61e";
 }
 .lupicon-circle-star:before {
-	content: "\e61f";
+        content: "\e61f";
 }
 .lupicon-circle:before {
-	content: "\e620";
+        content: "\e620";
 }
 .lupicon-clock:before {
-	content: "\e621";
+        content: "\e621";
 }
 .lupicon-collapse:before {
-	content: "\e622";
+        content: "\e622";
 }
 .lupicon-comment:before {
-	content: "\e623";
+        content: "\e623";
 }
 .lupicon-conversation:before {
-	content: "\e624";
+        content: "\e624";
 }
 .lupicon-documents:before {
-	content: "\e625";
+        content: "\e625";
 }
 .lupicon-download:before {
-	content: "\e626";
+        content: "\e626";
 }
 .lupicon-envelope:before {
-	content: "\e627";
+        content: "\e627";
 }
 .lupicon-expand:before {
-	content: "\e628";
+        content: "\e628";
 }
 .lupicon-eye:before {
-	content: "\e629";
+        content: "\e629";
 }
 .lupicon-file:before {
-	content: "\e62a";
+        content: "\e62a";
 }
 .lupicon-folder:before {
-	content: "\e62b";
+        content: "\e62b";
 }
 .lupicon-lightbulb:before {
-	content: "\e62c";
+        content: "\e62c";
 }
 .lupicon-list:before {
-	content: "\e62d";
+        content: "\e62d";
 }
 .lupicon-location:before {
-	content: "\e62e";
+        content: "\e62e";
 }
 .lupicon-log-in:before {
         content: "\e62f";
@@ -172,44 +209,44 @@
         content: "\e630";
 }
 .lupicon-menu:before {
-	content: "\e631";
+        content: "\e631";
 }
 .lupicon-pen:before {
-	content: "\e632";
+        content: "\e632";
 }
 .lupicon-print:before {
-	content: "\e633";
+        content: "\e633";
 }
 .lupicon-radio-off:before {
-	content: "\e634";
+        content: "\e634";
 }
 .lupicon-radio-on:before {
-	content: "\e635";
+        content: "\e635";
 }
 .lupicon-refresh:before {
-	content: "\e636";
+        content: "\e636";
 }
 .lupicon-remove:before {
         content: "\e637";
 }
 .lupicon-save:before {
-	content: "\e638";
+        content: "\e638";
 }
 .lupicon-search:before {
-	content: "\e639";
+        content: "\e639";
 }
 .lupicon-upload:before {
-	content: "\e63a";
+        content: "\e63a";
 }
 .lupicon-user:before {
-	content: "\e63b";
+        content: "\e63b";
 }
 .lupicon-warning:before {
-	content: "\e63c";
+        content: "\e63c";
 }
 .lupicon-zoom-in:before {
-	content: "\e63d";
+        content: "\e63d";
 }
 .lupicon-zoom-out:before {
-	content: "\e63e";
+        content: "\e63e";
 }
