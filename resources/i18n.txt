@@ -1,0 +1,2 @@
+application.tosMetadataWasResetTitle: Metatiedot päivitettiin
+application.tosMetadataWasReset: Menettelyn vaihto palautti kaikkien asiakirjojen arkistointimetatiedot oletusarvoihin, vaikka niitä olisi aiemmin muokattu Lupapisteessä.
