@@ -213,14 +213,6 @@
     (when-not ok
       (fail :invalid.roles))))
 
-(defn valid-user-roles-in-organization [organization-id roles]
-  (if-not (:permanent-archive-enabled (organization/get-organization organization-id))
-    (let [actual-roles (remove #(ss/starts-with % "tos-")  roles)]
-      (if (seq actual-roles)
-        actual-roles
-        ["authority"]))
-    roles))
-
 (defcommand update-user-organization
   {:parameters       [email firstName lastName roles]
    :input-validators [(partial action/non-blank-parameters [:email :firstName :lastName])
@@ -230,7 +222,7 @@
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
   (let [organization-id (user/authority-admins-organization-id caller)
-        actual-roles    (valid-user-roles-in-organization organization-id roles)
+        actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)
         email           (user/canonize-email email)
         result          (user/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})]
     (if (ok? result)
@@ -257,7 +249,7 @@
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
   (let [organization-id (user/authority-admins-organization-id caller)
-        actual-roles    (valid-user-roles-in-organization organization-id roles)]
+        actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)]
     (user/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]

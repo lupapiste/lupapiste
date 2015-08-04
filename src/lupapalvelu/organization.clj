@@ -88,3 +88,10 @@
 (defn has-ftp-user? [organization permit-type]
   (not (ss/blank? (get-in organization [:krysp (keyword permit-type) :ftpUser]))))
 
+(defn filter-valid-user-roles-in-organization [organization-id roles]
+  (if-not (:permanent-archive-enabled (get-organization organization-id))
+    (let [actual-roles (remove #(ss/starts-with % "tos-")  roles)]
+      (if (seq actual-roles)
+        actual-roles
+        ["authority"]))
+    roles))
