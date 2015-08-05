@@ -381,7 +381,7 @@
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [org-id (user/authority-admins-organization-id user)]
-    (o/update-organization org-id {$set {:tags tags}})))
+    (o/update-organization org-id {$set {:tags (o/create-tag-ids tags)}})))
 
 (defquery get-organization-tags
   {:user-authz-roles #{:statementGiver}
