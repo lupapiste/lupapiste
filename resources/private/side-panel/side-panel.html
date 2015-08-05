@@ -11,7 +11,7 @@
           </span>
           <span class="btn-title" data-bind="ltext: 'conversation.title'"></span>
         </button>
-        <button class="btn-notice" data-bind="click: toggleNoticePanel, visible: authorization.ok('change-urgency'), css: {active: showNoticePanel}" id="open-notice-side-panel">
+        <button class="btn-notice" data-bind="click: toggleNoticePanel, visible: authorization.ok('add-authority-notice'), css: {active: showNoticePanel}" id="open-notice-side-panel">
           <span class="btn-title" data-bind="ltext: 'notice.title'"></span>
         </button>
       </div>
@@ -29,7 +29,7 @@
             <div class="process-nav"></div>
           </div>
         </div>
-        <!-- ko if: authorization.ok('change-urgency') -->
+        <!-- ko if: authorization.ok('add-authority-notice') -->
         <div id="notice-panel" data-bind="visible: showNoticePanel">
           <div class="header">
             <h1 data-bind="ltext: 'notice.title'"></h1>

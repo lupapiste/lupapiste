@@ -59,6 +59,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states     (states/all-states-but [:canceled])
    :user-authz-roles action/all-authz-writer-roles
+   :org-authz-roles  action/reader-org-authz-roles
    :pre-checks [applicant-cant-set-to
                 application/validate-authority-in-drafts]
    :input-validators [validate-comment-target

@@ -61,7 +61,7 @@
    :states           states/all-states
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-roles
-   :org-authz-roles #{:authority :reader}}
+   :org-authz-roles  action/reader-org-authz-roles}
   [{app :application user :user}]
   (if app
     (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
