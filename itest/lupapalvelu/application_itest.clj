@@ -4,7 +4,6 @@
             [sade.core :refer [unauthorized]]
             [sade.strings :as ss]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.test-util :refer [doc-result doc-check]]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
@@ -436,9 +435,10 @@
     app => map?
     (doseq [command (ca/foreach-action user {} app)
             :let [action (keyword (:action command))
-                  result (doc-result (a/validate-authority-in-drafts command app) action)]]
-      (when (denied-actions action)
-        result => (doc-check = unauthorized)))))
+                  result (a/validate-authority-in-drafts command app)]]
+      (fact {:midje/description (name action)}
+        (when (denied-actions action)
+          result => unauthorized?)))))
 
 (fact "Primary operation can be changed"
   (let [id (create-app-id pena)]

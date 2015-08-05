@@ -3,7 +3,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.test-util :refer [doc-result doc-check]]
             [lupapalvelu.mongo :as mongo]
             [sade.strings :as ss]))
 
