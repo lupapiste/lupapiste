@@ -8,7 +8,7 @@ Resource        ../../common_resource.robot
 Mikko opens an application
   Mikko logs in
   ${secs} =  Get Time  epoch
-  Set Suite Variable  ${appname}  ${appname}${secs}
+  Set Suite Variable  ${appname}  conversation${secs}
   Set Suite Variable  ${propertyId}  753-423-2-41
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
 
