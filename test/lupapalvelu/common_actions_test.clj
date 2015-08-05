@@ -72,7 +72,7 @@
     (doseq [command (ca/foreach-action user {} application)
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]
-      (when-not (user-roles :anonymous)
+      (when (and user-roles (not (user-roles :anonymous)))
         (let [result (user-is-not-allowed-to-access? command application)]
 
           (fact {:midje/description (name action)}

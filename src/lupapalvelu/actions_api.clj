@@ -11,7 +11,7 @@
   (map
     #(let [{type :type} (action/get-meta %)]
        (action/action % :type type :data data :user user :application application))
-    (keys (action/get-actions))))
+    (remove nil? (keys (action/get-actions)))))
 
 (defn- validated [command]
   {(:action command) (action/validate command)})
