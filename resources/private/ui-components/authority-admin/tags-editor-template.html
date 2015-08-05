@@ -8,7 +8,7 @@
         <ul class="tags">
           <p data-bind="visible: tags().length === 0, ltext: 'tags.no-tags'"></p>
           <!-- ko foreach: tags -->
-          <li class="tag">
+          <li class="tag" data-bind="attr: {'tag-id' : $data.id}">
             <span class="tag-remove icon remove"
                   data-bind="click: $parent.removeTag,
                              attr: {'data-test-id': 'remove-tag-button-' + $index()}"></span>
