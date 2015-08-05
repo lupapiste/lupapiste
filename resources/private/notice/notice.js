@@ -20,13 +20,13 @@ LUPAPISTE.OrganizationTagsDataProvider = function(organization, filtered) {
   }
 
   self.data = ko.pureComputed(function() {
-    var filteredData = _.filter(data(), function(item) {
-      return !_.includes(self.filtered(), item);
+    var filteredData = _.filter(data(), function(tag) {
+      return !_.includes(self.filtered(), tag);
     });
     var q = self.query() || "";
-    filteredData = _.filter(filteredData, function(item) {
+    filteredData = _.filter(filteredData, function(tag) {
       return _.reduce(q.split(" "), function(result, word) {
-        return _.contains(item.toUpperCase(), word.toUpperCase()) && result;
+        return _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
     return filteredData;
