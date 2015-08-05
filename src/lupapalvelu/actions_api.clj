@@ -9,7 +9,8 @@
 
 (defn foreach-action [user data application]
   (map
-    #(assoc (action/make-command % data) :user user :application application)
+    #(let [{type :type} (action/get-meta %)]
+       (action/action % :type type :data data :user user :application application))
     (keys (action/get-actions))))
 
 (defn- validated [command]

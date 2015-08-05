@@ -20,7 +20,7 @@
 ;; construct command, query and raw
 ;;
 
-(defn- action [name & {:keys [user type data] :or {:user nil :type :action :data {}}}]
+(defn action [name & {:keys [user type data] :or {:user nil :type :action :data {}}}]
   {:action name
    :user user
    :type type
