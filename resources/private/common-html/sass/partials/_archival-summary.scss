@@ -10,6 +10,14 @@
   }
   .will-publish {
     width: 100px;
+    .lupicon-check {
+      font-size: 16px;
+      color: $lp-green;
+    }
+    .lupicon-remove {
+      font-size: 16px;
+      color: $lp-purple;
+    }
   }
   .attachment-type-container {
     @include clearfix;

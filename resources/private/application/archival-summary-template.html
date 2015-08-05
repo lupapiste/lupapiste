@@ -11,19 +11,19 @@
       muita tietoja klikkaamalla asiakirjan riviä.
       </div>
 
-      <div data-bind="template: {name: 'archival-document-table-template', data: archivedDocuments}"></div>
+      <div data-bind="template: {name: 'archival-document-table-template', data: {documents: archivedDocuments, showWillPublish: true}}"></div>
     </div>
 
     <div data-bind="if: !_.isEmpty(notArchivedDocuments())">
       <h1>Muut asiakirjat (ei arkistoida) - <span data-bind="text: $root.application.id"></span></h1>
 
-      <div data-bind="template: {name: 'archival-document-table-template', data: notArchivedDocuments}"></div>
+      <div data-bind="template: {name: 'archival-document-table-template', data: {documents: notArchivedDocuments, showWillPublish: false}}"></div>
     </div>
 
   </script>
   <script type="text/html" id="archival-document-table-template">
     <table class="table archival-summary-table">
-      <tbody data-bind="foreach: $data">
+      <tbody data-bind="foreach: documents">
       <tr class="attachment-group-header">
         <td data-bind="text: name" colspan="4"></td>
       </tr>
@@ -31,7 +31,7 @@
         <th data-bind="ltext: 'application.attachmentType'" class="attachment-type">Tyyppi</th>
         <th>Säilytysaika</th>
         <th class="personal-data">Henkilötiedot</th>
-        <th class="will-publish">Julkaistaan</th>
+        <th data-bind="if: $parent.showWillPublish" class="will-publish">Julkaistaan</th>
       </tr>
 
       <!-- ko foreach: attachments -->
@@ -71,7 +71,10 @@
 
         <td data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: retentionDescription"></td>
         <td class="personal-data" data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: personalDataDescription"></td>
-        <td class="will-publish"><input type="checkbox"></td>
+        <td data-bind="if: $parents[1].showWillPublish, click: function(){$data.showMetadataEditor(!showMetadataEditor())}" class="will-publish">
+          <span data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check"></span>
+          <span data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove"></span>
+        </td>
       </tr>
       <!-- /ko -->
       </tbody>
