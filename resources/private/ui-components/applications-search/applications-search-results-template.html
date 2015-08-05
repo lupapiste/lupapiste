@@ -66,22 +66,22 @@
                 <td data-bind="if: $data.authorityNotice || $data.urgency !== 'normal'" class="indicator-count" data-test-col-name="urgent">
                   <div data-bind="click: _.partialRight($parent.openApplicationTargeted, 'notice'), clickBubble: false,
                                   attr: {title: _.trim($data.authorityNotice) ? loc('notice.prompt') + ': ' + _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency]),
-                                         class: 'urgency ' + $data.urgency}"></div>
+                                         'class': 'urgency ' + $data.urgency}"></div>
                 </td>
                 <!-- /ko -->
                 <td data-bind="if: $data.indicators > 0" class="indicator-count" data-test-col-name="indicators">
-                  <div data-bind="text: $data.indicators > 99 ? '*' : $data.indicators,
-                                  attr: {class: 'unseen-indicators', title: loc('info.title')}"></div>
+                  <div class="unseen-indicators" data-bind="text: $data.indicators > 99 ? '*' : $data.indicators,
+                                  attr: {title: loc('info.title')}"></div>
                 </td>
                 <td data-bind="if: $data.unseenComments > 0,
                                click: _.partialRight($parent.openApplicationTargeted, 'conversation'), clickBubble: false" class="indicator-count" data-test-col-name="unseenComments">
-                  <div data-bind="text: $data.unseenComments > 99 ? '*' : $data.unseenComments,
-                                    attr: {class: 'unseen-comments', title: loc('conversation.title')}"></div>
+                  <div class="unseen-comments" data-bind="text: $data.unseenComments > 99 ? '*' : $data.unseenComments,
+                                    attr: {title: loc('conversation.title')}"></div>
                 </td>
                 <td data-bind="if: $data.attachmentsRequiringAction > 0,
                                click: _.partialRight($parent.openApplicationTargeted, 'attachments'), clickBubble: false" class="indicator-count" data-test-col-name="newAttachments">
-                  <div data-bind="text: $data.attachmentsRequiringAction > 99 ? '*' : $data.attachmentsRequiringAction,
-                                    attr: {class: 'unseen-attachments', title: loc('attachments.title')}"></div>
+                  <div class="unseen-attachments" data-bind="text: $data.attachmentsRequiringAction > 99 ? '*' : $data.attachmentsRequiringAction,
+                                    attr: {title: loc('attachments.title')}"></div>
                 </td>
                 <td data-bind="ltext: 'applications.' + $data.kind" data-test-col-name="type"></td>
                 <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
