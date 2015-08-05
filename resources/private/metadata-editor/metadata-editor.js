@@ -52,9 +52,11 @@
   };
 
   var isValid = function(value, requiredType) {
-    if (value) {
+    if (value !== undefined && value !== null) {
       if (requiredType === "number") {
         return !isNaN(value) && _.isFinite(parseInt(value, 10));
+      } else if (requiredType === "text") {
+        return value.length > 0;
       } else {
         return true;
       }

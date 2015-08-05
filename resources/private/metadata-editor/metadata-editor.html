@@ -42,12 +42,19 @@
       </div>
       <div data-bind="if: $data.inputType" class="text-input-container">
         <label data-bind="ltext: type"></label><br>
-        <div data-bind="visible: !$parent.editable(),
-                        text: $parent.values()[type]"></div>
-        <input class="form-input" data-bind="visible: $parent.editable, attr: {type: inputType},
-                                             textInput: $parent.values()[type],
-                                             css: {invalid: $parent.invalidFields().indexOf(type) >= 0}">
-        <div data-bind="visible: inputType === 'number', ltext: 'vuotta'" class="year-label"></div>
+        <span data-bind="if: inputType === 'checkbox'">
+          <input type="checkbox" class="form-input" data-bind="visible: $parent.editable, checked: $parent.values()[type],
+                                                               css: {invalid: $parent.invalidFields().indexOf(type) >= 0}">
+          <span data-bind="visible: !$parent.editable() && $parent.values()[type](), ltext: 'yes'"></span>
+          <span data-bind="visible: !$parent.editable() && !$parent.values()[type](), ltext: 'no'"></span>
+        </span>
+        <span data-bind="if: inputType !== 'checkbox'">
+          <input class="form-input" data-bind="visible: $parent.editable, attr: {type: inputType},
+                                               textInput: $parent.values()[type],
+                                               css: {invalid: $parent.invalidFields().indexOf(type) >= 0}">
+          <span data-bind="visible: !$parent.editable(), text: $parent.values()[type]"></span>
+        </span>
+        <span data-bind="visible: inputType === 'number', ltext: 'vuotta'" class="year-label"></span>
       </div>
       <!-- ko if: $data.subfields -->
       <div class="subtable">

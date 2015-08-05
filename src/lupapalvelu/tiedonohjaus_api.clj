@@ -58,7 +58,8 @@
 (def schema-to-input-type-map
   {s/Str   "text"
    tms/NonEmptyStr "text"
-   tms/Vuodet "number"})
+   tms/Vuodet "number"
+   s/Bool "checkbox"})
 
 (defn metadata-schema-for-ui [field]
   (cond-> field
@@ -72,9 +73,13 @@
     (:schema field) (-> (assoc :inputType (get schema-to-input-type-map (:schema field)))
                         (dissoc :schema))))
 
+(def editable-metadata-fields
+  (->> (remove #(= tms/Tila %) tms/asiakirja-metadata-fields)
+       (concat tms/common-metadata-fields)))
+
 (defquery tos-metadata-schema
   {:user-roles #{:anonymous}}
-  (ok :schema (map metadata-schema-for-ui tms/common-metadata-fields)))
+  (ok :schema (map metadata-schema-for-ui editable-metadata-fields)))
 
 (defn get-in-metadata-map [map ks]
   (let [k (first ks)
@@ -107,9 +112,8 @@
     (try
       (if-let [attachment (first (filter #(= (:id %) attachmentId) (:attachments application)))]
         (let [metadata (->> (keywordize-keys-and-some-values metadata [])
-                            (tms/sanitize-metadata)
                             (#(assoc % :tila (or (get-in attachment [:metadata :tila]) "Valmis")))
-                            (s/validate tms/AsiakirjaMetaDataMap))
+                            (tms/sanitize-metadata))
               updated-attachment (assoc attachment :metadata metadata)
               updated-attachments (-> (remove #(= % attachment) (:attachments application))
                                       (conj updated-attachment))]
@@ -128,9 +132,8 @@
   (when (env/feature? :tiedonohjaus)
     (try
       (let [metadata (->> (keywordize-keys-and-some-values metadata [])
-                          (tms/sanitize-metadata)
                           (#(assoc % :tila (or (get-in application [:metadata :tila]) "Valmis")))
-                          (s/validate tms/AsiakirjaMetaDataMap))]
+                          (tms/sanitize-metadata))]
         (action/update-application command {$set {:modified created
                                                   :metadata metadata}}))
       (catch RuntimeException e
