@@ -360,11 +360,11 @@
 
         <div id="application-info-tab" class="tab-content" data-bind="with: application">
           <div>
-            <h1 data-bind="ltext: 'application.tabInfo'"></h1>
-            <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showApplicationInfoHelp') }, css: {expanded: showApplicationInfoHelp}"></span>
-          </div>
-          <div class="tab-info" data-bind="slider: showApplicationInfoHelp">
-            <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'"></p>
+              <h1 data-bind="ltext: 'application.tabInfo'"></h1>
+              <span data-bind="component: {
+                               name: 'help-toggle',
+                               params: {lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc' }
+                               }"></span>
           </div>
           <div data-bind="if: $root.application.state() == 'draft'">
             <p data-bind="lhtml: 'application.state.draft.help'"></p>
@@ -410,9 +410,9 @@
             </div>
           </div>
           <div class="process-nav">
-            <a class="btn process-next btn-nav-forward" data-bind="click: $root.application.nextTab" href="#" data-target="parties">
+            <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="parties">
               <span data-bind="ltext: 'application.next-tab'"></span>
-              <span class="icon drill-right-orange right-align"></span>
+              <i class="lupicon-chevron-right"></i>
             </a>
           </div>
         </div>
@@ -420,12 +420,12 @@
         <!-- Parties tab -->
 
         <div id="application-parties-tab" class="tab-content" data-bind="with: application">
-          <h1 data-bind="ltext: 'application.tabParties'"></h1>
-          <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showPartiesInfoHelp') }, css: {expanded: showPartiesInfoHelp}"></span>
-          <div class="tab-info" data-bind="slider: showPartiesInfoHelp">
-            <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.PartiesDesc'"></p>
-            <p data-bind="lhtml: 'company-invite.help'"></p>
-          </div>
+            <h1 data-bind="ltext: 'application.tabParties'"></h1>
+            <span data-bind="component: {
+                             name: 'help-toggle',
+                             params: { lhtml: ['help.' + $root.application.permitType() + '.PartiesDesc',
+                                               'company-invite.help']}
+                             }"></span>
           <div class="application_section">
             <div class="application_section_content content_expanded">
               <div>
@@ -508,14 +508,14 @@
           </button>
 
           <div class="process-nav">
-            <a class="btn process-next btn-nav-forward" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
-              <span data-bind="ltext: 'application.next-tab'"></span>
-              <span class="icon drill-right-orange right-align"></span>
-            </a>
-            <a class="btn process-previous btn-nav-back" data-bind="click: $root.application.nextTab" href="#" data-target="info">
-              <span data-bind="ltext: 'application.previous-tab'"></span>
-              <span class="icon drill-left-black-bigger left-align"></span>
-            </a>
+              <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
+                  <span data-bind="ltext: 'application.next-tab'"></span>
+                  <i class="lupicon-chevron-right"></i>
+              </a>
+              <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="info">
+                  <i class="lupicon-chevron-left"></i>
+                  <span data-bind="ltext: 'application.previous-tab'"></span>
+              </a>
           </div>
         </div>
 
@@ -523,10 +523,10 @@
         <!-- ko if: selectedTabName() === 'attachments' -->
         <div id="application-attachments-tab" class="tab-content" data-bind="with: $root.attachmentsTab">
           <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
-          <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
-          <div class="tab-info" data-bind="slider: showHelp">
-            <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc'"></p>
-          </div>
+          <span data-bind="component: {
+                           name: 'help-toggle',
+                           params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
+                           }"></span>
           <div class="clear"></div>
           <div class="attachment-legend">
             <span class="ok icon"></span>
@@ -598,13 +598,13 @@
           <!-- /ko -->
 
           <div class="process-nav">
-            <a class="btn process-next btn-nav-forward" data-bind="click: $root.application.nextTab" href="#" data-target="requiredFieldSummary">
+            <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="requiredFieldSummary">
               <span data-bind="ltext: 'application.next-tab'"></span>
-              <span class="icon drill-right-orange right-align"></span>
+              <i class="lupicon-chevron-right"></i>
             </a>
-            <a class="btn process-previous btn-nav-back" data-bind="click: $root.application.nextTab" href="#" data-target="parties">
-              <span data-bind="ltext: 'application.previous-tab'"></span>
-              <span class="icon drill-left-black-bigger left-align"></span>
+            <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="parties">
+                <i class="lupicon-chevron-left"></i>
+                <span data-bind="ltext: 'application.previous-tab'"></span>
             </a>
           </div>
         </div>
@@ -703,9 +703,9 @@
           </div>
 
           <div class="process-nav">
-            <a class="btn process-previous btn-nav-back" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
-              <span data-bind="ltext: 'application.previous-tab'"></span>
-              <span class="icon drill-left-black-bigger left-align"></span>
+            <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
+                <i class="lupicon-chevron-left"></i>
+                <span data-bind="ltext: 'application.previous-tab'"></span>
             </a>
           </div>
         </div>
@@ -715,9 +715,11 @@
 
         <div id="application-applicationSummary-tab" data-bind="with: $root.application" class="tab-content" >
 
-          <h1 data-bind="ltext: 'application.tabApplicationSummary'"></h1>
-          <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showSummaryInfoHelp') }, css: {expanded: showSummaryInfoHelp}"></span>
-
+            <h1 data-bind="ltext: 'application.tabApplicationSummary'"></h1>
+            <span data-bind="component: {
+                             name: 'help-toggle',
+                             params: {lhtml: 'help.application.summary'}
+                             }"></span>
           <div class="application_section">
             <div class="open-all-accordions">
               <a href="#" data-bind="click: function(data, event) { accordion.toggleAll(event.target); }, ltext: 'accordions.toggle-all'"></a>
@@ -752,9 +754,9 @@
           </section>
 
           <div class="process-nav">
-            <a class="btn process-previous btn-nav-back" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
-              <span data-bind="ltext: 'application.previous-tab'"></span>
-              <span class="icon drill-left-black-bigger left-align"></span>
+              <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
+                  <i class="lupicon-chevron-left"></i>
+                  <span data-bind="ltext: 'application.previous-tab'"></span>
             </a>
           </div>
 
@@ -764,12 +766,11 @@
 
         <!-- ko if: selectedTabName() === 'verdict' -->
         <div id="application-verdict-tab" class="tab-content">
-          <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
-          <span class="icon help" data-bind="click: function(data, event) { application.toggleHelp('showVerdictInfoHelp') }, css: {expanded: application.showVerdictInfoHelp}"></span>
-          <div class="tab-info" data-bind="slider: application.showVerdictInfoHelp">
-            <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.verdictDesc'"></p>
-          </div>
-
+            <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
+            <span data-bind="{component: {
+                             name: 'help-toggle',
+                             params: {lhtml: 'help.' + $root.application.permitType() + '.verdictDesc' }
+                             }}"></span>
 
           <div data-bind="if: $root.verdictModel.verdicts()">
             <div data-bind="ifnot: $root.verdictModel.verdicts().length">
@@ -1035,25 +1036,25 @@
         <div id="application-statement-tab" class="tab-content">
 
           <div data-bind="with: application" class="application-statements">
-            <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
-            <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showStatementsInfoHelp') }, css: {expanded: showStatementsInfoHelp}"></span>
-            <div class="tab-info" data-bind="slider: showStatementsInfoHelp">
-              <p data-bind="lhtml: 'help.' + permitType() + '.statementsDesc'"></p>
-            </div>
+              <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
+              <span data-bind="component: {
+                               name: 'help-toggle',
+                               params: {lhtml: 'help.' + permitType() + '.statementsDesc' }
+                               }"></span>
             <div data-bind="template: {name: 'statements-template', data: {statements: $data.statements, localisationKeys: {missing: 'application.statement.missing'}}}"></div>
             <button data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
-                    class="btn btn-primary modal"
+                    class="positive modal"
                     data-test-id="add-statement">
             </button>
           </div>
 
           <div data-bind="with: application" class="application-neighbors">
 
-            <h1 data-bind="lhtml: 'application.' + $root.application.permitType() + '.neighbors'">Naapurit</h1>
-            <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showNeighborsInfoHelp') }, css: {expanded: showNeighborsInfoHelp}"></span>
-            <div class="tab-info" data-bind="slider: showNeighborsInfoHelp">
-              <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.neighborsDesc'"></p>
-            </div>
+              <h1 data-bind="lhtml: 'application.' + $root.application.permitType() + '.neighbors'">Naapurit</h1>
+              <span data-bind="component: {
+                               name: 'help-toggle',
+                               params: {lhtml: 'help.' + $root.application.permitType() + '.neighborsDesc'}
+                               }"></span>
             <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors, localisationKeys: {missing: 'neighbors.missing'}}}"></div>
 
             <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage', visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
@@ -1177,11 +1178,11 @@
 
         <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
 
-          <h1 data-bind="ltext: 'application.tabConstructionTimeTasks'"></h1>
-          <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showConstructionInfoHelp') }, css: { expanded: showConstructionInfoHelp }"></span>
-          <div class="tab-info" data-bind="slider: showConstructionInfoHelp">
-            <p data-bind="lhtml: 'help.' + permitType() + '.tasksDesc'"></p>
-          </div>
+            <h1 data-bind="ltext: 'application.tabConstructionTimeTasks'"></h1>
+            <span data-bind="component: {
+                             name: 'help-toggle',
+                             params: {lhtml: 'help.' + permitType() + '.tasksDesc'}
+                             }"></span>
           <div data-bind="if: buildings() && buildings().length > 0 && $root.authorization.ok('inform-building-construction-started')">
 
             <table>

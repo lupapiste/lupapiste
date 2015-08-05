@@ -5,16 +5,16 @@
 //  [flag]: (ko.observable Boolean) if given, then the component
 //          syncs its state with it. This is useful if the help
 //          needs to be toggled outside of component.
-//  lhtml:  (String id) identifier for lhtml binding.
+//  lhtml:  (String id) identifier for lhtml binding. Can also be an array
+//          of (paragraph) identifiers.
 
 LUPAPISTE.HelpToggleModel = function( params ) {
   "use strict";
   var self = this;
-  self.params = params;
 
-  self.flag = self.params.flag || ko.observable( self.params.show );
+  self.flag = params.flag || ko.observable( params.show );
   self.toggleHelp = function() {
     self.flag( !self.flag() );
   };
-
+  self.lhtml = _.flatten( [params.lhtml] );
 };

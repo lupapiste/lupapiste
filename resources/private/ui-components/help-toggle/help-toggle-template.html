@@ -8,9 +8,12 @@
                                                              css: {expanded: flag}"></span>
             <div data-bind="css: {'help-arrow': flag}"></div>
         </div>
-        <div class="tab-info" data-bind="slider: flag">
-            <p data-bind="lhtml: params.lhtml"></p>
+        <div class="tab-info"
+             data-bind="slider: flag,
+                        foreach: lhtml">
+            <p data-bind="lhtml: $data"></p>
         </div>
+        <div class="help-reset">&nbsp;</div>
     </script>
   </section>
 </body>

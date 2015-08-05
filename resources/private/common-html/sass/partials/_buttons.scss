@@ -292,6 +292,7 @@ button.btn-dialog, .btn-dialog {
   line-height: 40px;
   white-space: nowrap;
   text-align: left;
+  text-decoration: none;
   //display: table;
   cursor: pointer;
   padding: {
@@ -375,6 +376,7 @@ button.btn-dialog, .btn-dialog {
                      $disabled-text: white, $disabled-bg: $gray221 ) {
   color: $text;
   background-color: $bg;
+
   &:link, &:visited {
             color: $text;
             background-color: $bg;

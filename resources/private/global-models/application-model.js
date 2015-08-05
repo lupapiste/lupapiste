@@ -131,11 +131,11 @@ LUPAPISTE.ApplicationModel = function() {
   self.pending = ko.observable(false);
   self.processing = ko.observable(false);
   self.invites = ko.observableArray([]);
-  self.showApplicationInfoHelp = ko.observable(false);
-  self.showPartiesInfoHelp = ko.observable(false);
-  self.showStatementsInfoHelp = ko.observable(false);
-  self.showNeighborsInfoHelp = ko.observable(false);
-  self.showVerdictInfoHelp = ko.observable(false);
+//  self.showApplicationInfoHelp = ko.observable(false);
+//  self.showPartiesInfoHelp = ko.observable(false);
+  // self.showStatementsInfoHelp = ko.observable(false);
+  // self.showNeighborsInfoHelp = ko.observable(false);
+  // self.showVerdictInfoHelp = ko.observable(false);
   self.showSummaryInfoHelp = ko.observable(false);
   self.showConstructionInfoHelp = ko.observable(false);
 

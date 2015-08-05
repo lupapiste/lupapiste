@@ -1,2 +1,2 @@
 application.municipality: Asiointikunta:
-help.test: Tämä on <em>testi</em>.
+help.application.summary: Tältä välilehdeltä näet luvan perusteena olleen hakemuksen lomaketiedot. Jos tietoihin tulee rakentamisen aikana muutoksia, ota yhteyttä viranomaiseen keskusteluketjun kautta.

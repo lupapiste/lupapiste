@@ -127,6 +127,14 @@
   width: 60%;
 }
 
+// Reset is needed to make sure that the text flow is reset.
+// Without this the first element after (collapsed) help
+// could start with wrong alignment.
+.help-reset {
+  max-height: $marginS;
+}
+
+
 .panel-info {
   width: 100%;
   text-align: justify;

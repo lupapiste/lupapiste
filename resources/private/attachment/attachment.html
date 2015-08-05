@@ -79,9 +79,11 @@
                 <button id="show-attachment-versions"
                         class="btn"
                         data-bind="click: toggleAttachmentVersionHistory, visible: latestVersion">
+                    <i data-bind="css: {'lupicon-chevron-small-right': !showAttachmentVersionHistory(),
+                                  'lupicon-chevron-small-down': showAttachmentVersionHistory}"></i>
                   <span data-bind="ltext: 'attachment.showVersionHistory'"></span>
-                  <span class="left-align"
-                        data-bind="drill: showAttachmentVersionHistory, color: 'black'"></span>
+                  <!-- <span class="left-align" -->
+                  <!--       data-bind="drill: showAttachmentVersionHistory, color: 'black'"></span> -->
                 </button>
               </div>
               <div class="attachment-file-versions-content" data-bind="slider: showAttachmentVersionHistory">
@@ -210,10 +212,10 @@
                     </div>
                     <!-- /ko -->
                 </div>
-                <button data-test-id="signLatestAttachmentVersion" class="btn-primary"
+                <button data-test-id="signLatestAttachmentVersion" class="positive"
                         data-bind="click: sign, visible: $root.authorization.ok('sign-attachments'), visible: versions().length && $root.authorization.ok('sign-attachments')">
-                    <span class="btn-label" data-bind="ltext: 'attachment.signLatest'"></span>
-                    <span class="icon signed-white left-align"></span>
+                    <i class="lupicon-circle-pen"></i>
+                    <span data-bind="ltext: 'attachment.signLatest'"></span>
                 </button>
               </div>
 
