@@ -281,7 +281,7 @@
 (defn- organization-authz? [command-meta-data {organization :organization} user]
   (let [required-authz (:org-authz-roles command-meta-data)
         user-org-authz (get-in user [:orgAuthz (keyword organization)])]
-    (and (user/authority? user) (some required-authz user-org-authz))))
+    (and (user/authority? user) required-authz (some required-authz user-org-authz))))
 
 (defn- company-authz? [command-meta-data application user]
   (domain/has-auth? application (get-in user [:company :id])))
