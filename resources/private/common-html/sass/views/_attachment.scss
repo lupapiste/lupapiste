@@ -108,7 +108,6 @@ $previewHeight: 500px;
   float: left;
   vertical-align: top;
   margin-top: $marginL;
-  position: relative;
   width: 80%;
   .tab-info {
     width: 80%;
@@ -116,7 +115,6 @@ $previewHeight: 500px;
 }
 
 .attachment-info-header {
-  overflow-y: visble;
   width: 100%;
   display: block;
   h1 {

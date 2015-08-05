@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="help-toggle-template">
+        <div class="stacked help-toggle">
+            <span class="lupicon-circle-question" data-bind="click: toggleHelp,
+                                                             css: {expanded: flag}"></span>
+            <div data-bind="css: {'help-arrow': flag}"></div>
+        </div>
+        <div class="tab-info" data-bind="slider: flag">
+            <p data-bind="lhtml: params.lhtml"></p>
+        </div>
+    </script>
+  </section>
+</body>
+</html>

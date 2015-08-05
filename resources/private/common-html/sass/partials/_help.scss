@@ -112,25 +112,20 @@
   padding: $marginM;
   margin-bottom: $marginL;
   border: 1px solid $orange;
-  a {
-    color: white;
-    font-weight: bold;
-  }
-  /* p { */
+  /* a { */
   /*   color: white; */
-  /*   &:last-child { */
-  /*     margin-bottom: 0; */
-  /*   } */
+  /*   font-weight: bold; */
   /* } */
+  p {
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 }
 
 .tab-info-continued {
   width: 60%;
 }
-
-// .tab-info:before {
-//   @include info-icon;
-// }
 
 .panel-info {
   width: 100%;

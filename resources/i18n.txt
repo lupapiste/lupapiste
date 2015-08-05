@@ -1,1 +1,2 @@
 application.municipality: Asiointikunta:
+help.test: Tämä on <em>testi</em>.

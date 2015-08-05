@@ -32,7 +32,8 @@ jQuery(document).ready(function() {
     "upload",
     "leaflet-map",
     "vetuma-init",
-    "vetuma-status"
+    "vetuma-status",
+    "help-toggle"
   ];
 
   _.forEach(components, function(component) {

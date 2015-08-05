@@ -55,18 +55,11 @@
                           <span data-bind="ltext: 'attachment.version'">versio</span>
                           <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
                       </span>
-                </h1>
-                <div class="stacked help-toggle">
-                    <span class="lupicon-circle-question" data-bind="click: toggleHelp,
-                                                                     css: {expanded: showHelp}"></span>
-                    <div data-bind="css: {'help-arrow': showHelp}"></div>
-                    
-                </div>
-            </div>
-            
-            <div class="tab-info" data-bind="slider: showHelp">
-                <p data-bind="lhtml: 'attachment.view.desc'"></p>
-            </div>
+                  </h1>
+                  <span data-bind="component: {
+                                  name: 'help-toggle',
+                                   params: { flag: showHelp, lhtml: 'attachment.view.desc' }}"></span>
+              </div>
           </div>
         </div>
 
