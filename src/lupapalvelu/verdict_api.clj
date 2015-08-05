@@ -41,7 +41,7 @@
                  If the command is run more than once, existing verdicts are
                  replaced by the new ones."
    :parameters [:id]
-   :states     [:submitted :complement-needed :sent :verdictGiven :constructionStarted] ; states reviewed 2015-07-13
+   :states     #{:submitted :complement-needed :sent :verdictGiven :constructionStarted} ; states reviewed 2015-07-13
    :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-verdict)}
@@ -62,7 +62,7 @@
 
 (defcommand new-verdict-draft
   {:parameters [:id]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :states     #{:submitted :complement-needed :sent :verdictGiven}
    :user-roles #{:authority}}
   [command]
   (let [blank-verdict (domain/->paatos {:draft true})]
@@ -81,7 +81,7 @@
    :input-validators [validate-status
                       (partial action/non-blank-parameters [:verdictId])
                       (partial action/boolean-parameters [:agreement])]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :states     #{:submitted :complement-needed :sent :verdictGiven}
    :user-roles #{:authority}
    :pre-checks [(fn [{{:keys [verdictId]} :data} application]
                   (when verdictId
@@ -109,7 +109,7 @@
 
 (defcommand publish-verdict
   {:parameters [id verdictId]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :states     #{:submitted :complement-needed :sent :verdictGiven}
    :notified   true
    :on-success (notify :application-verdict)
    :user-roles #{:authority}}
@@ -121,7 +121,7 @@
 (defcommand delete-verdict
   {:parameters [id verdictId]
    :input-validators [(partial action/non-blank-parameters [:verdictId])]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :states     #{:submitted :complement-needed :sent :verdictGiven}
    :user-roles #{:authority}}
   [{:keys [application created] :as command}]
   (when-let [verdict (find-verdict application verdictId)]
@@ -144,7 +144,7 @@
 (defcommand sign-verdict
   {:description "Applicant/application owner can sign an application's verdict"
    :parameters [id verdictId password]
-   :states     [:verdictGiven :constructionStarted]
+   :states     #{:verdictGiven :constructionStarted}
    :pre-checks [domain/validate-owner-or-write-access]
    :user-roles #{:applicant :authority}}
   [{:keys [application created user] :as command}]

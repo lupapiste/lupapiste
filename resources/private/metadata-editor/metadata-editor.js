@@ -44,7 +44,7 @@
       if (_.isObject(v)) {
         return coerceValuesToSchemaType(v, inputTypeMap[k]);
       } else if(inputTypeMap[k] === "number") {
-        return parseInt(v);
+        return parseInt(v, 10);
       } else {
         return v;
       }
@@ -54,7 +54,7 @@
   var isValid = function(value, requiredType) {
     if (value) {
       if (requiredType === "number") {
-        return !isNaN(value) && _.isFinite(parseInt(value));
+        return !isNaN(value) && _.isFinite(parseInt(value, 10));
       } else {
         return true;
       }
@@ -134,7 +134,7 @@
           }
         })
         .call();
-    }
+    };
   };
 
   ko.components.register("metadata-editor", {

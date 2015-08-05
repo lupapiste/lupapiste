@@ -3,7 +3,7 @@
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.neighbors :as neighbors]
+            [lupapalvelu.neighbors-api :as neighbors]
             [lupapalvelu.open-inforequest :as inforequest]
             [monger.operators :refer :all]
             [clojure.string :as s]

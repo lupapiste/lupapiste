@@ -3,7 +3,7 @@
             [midje.util :refer [testable-privates]]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [lupapalvelu.test-util :refer :all]
+            [lupapalvelu.itest-util :refer [unauthorized?]]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.actions-api :as ca]))
 
@@ -40,10 +40,11 @@
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action user {} application)
             :let [action (keyword (:action command))
-                  result (doc-result (user-is-not-allowed-to-access? command application) action)]]
-      (if (allowed-actions action)
-        result => (doc-check nil?)
-        result => (doc-check = unauthorized)))))
+                  result (user-is-not-allowed-to-access? command application)]]
+      (fact {:midje/description (name action)}
+        (if (allowed-actions action)
+          result => nil?
+          result => unauthorized?)))))
 
 (facts "Actions with id and state 'draft' are not allowed for authority"
   (let [allowed-actions #{:decline-invitation}] ; Authority can always decline his/hers invitation
@@ -55,7 +56,26 @@
                     (some #{:draft} (:states data)))
             :let [pre-checks (:pre-checks data)
                   checker-names (map #(-> % type .getName (ss/suffix "$")) pre-checks)
-                  result (doc-result (some (partial = "validate_authority_in_drafts") checker-names) action)]]
-      (if (allowed-actions action)
-        result => (doc-check nil?)
-        result => (doc-check truthy)))))
+                  result (some (partial = "validate_authority_in_drafts") checker-names)]]
+      (fact {:midje/description (name action)}
+        (if (allowed-actions action)
+          result => nil?
+          result => truthy)))))
+
+(facts "Allowed actions for reader authority"
+  (let [user {:id "user123" :orgAuthz {:999-R #{:reader}} :role "authority"}
+        application {:organization "999-R" :auth [] :id "123" :permitType "YA"}
+        allowed-actions #{:application :validate-doc :fetch-validation-errors ; queries
+                          :add-comment :add-authority-notice ; commands
+                          :preview-attachment :view-attachment :download-attachment :download-all-attachments ; raw
+                          }]
+    (doseq [command (ca/foreach-action user {} application)
+            :let [action (keyword (:action command))
+                  {user-roles :user-roles} (get-meta action)]]
+      (when (and user-roles (not (user-roles :anonymous)))
+        (let [result (user-is-not-allowed-to-access? command application)]
+
+          (fact {:midje/description (name action)}
+            (if (allowed-actions action)
+              result => nil?
+              result => unauthorized?)))))))

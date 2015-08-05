@@ -53,6 +53,7 @@ Neighbor clicks on email link and sees application
   Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
 
 Neighbor sees some of the documents
+  [Tags]  integration
   Page should contain  Hankkeen kuvaus
   Page should contain  Rakennuspaikka
   Page should contain  Rakennuksen tilavuus

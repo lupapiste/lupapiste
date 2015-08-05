@@ -32,7 +32,11 @@ jQuery(document).ready(function() {
     "upload",
     "leaflet-map",
     "vetuma-init",
-    "vetuma-status"
+    "vetuma-status",
+    "applications-search",
+    "applications-search-results",
+    "applications-search-filter",
+    "applications-search-paging"
   ];
 
   _.forEach(components, function(component) {

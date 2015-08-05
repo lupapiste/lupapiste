@@ -11,6 +11,15 @@ var gis = (function() {
     "cluster"       : "/img/map-marker-group.png"
   };
 
+  function withSuffix(strOrArr, suffix) {
+    if (_.isArray(strOrArr)) {
+      return _.map(strOrArr, function(s) {
+        return s + suffix;
+      });
+    }
+    return strOrArr + suffix;
+  }
+
   // Map initialization
 
   function Map(element, zoomWheelEnabled) {
@@ -28,7 +37,7 @@ var gis = (function() {
 
     // Layers
 
-    // use the old proxy server to wms/wmts
+    // In production multiple servers, locally it's just localhost.
     var mapServer = LUPAPISTE.config.maps["proxyserver-wmts"];
     if (mapServer.indexOf(",") > -1) {
       mapServer = mapServer.split(",");
@@ -37,7 +46,7 @@ var gis = (function() {
 
     var taustakartta = new OpenLayers.Layer.WMTS({
       name: "Taustakartta",
-      url: mapServer,
+      url: withSuffix(mapServer, "/maasto"),
       isBaseLayer: false,
       requestEncoding: "KVP",
       layer: "taustakartta",
@@ -52,7 +61,7 @@ var gis = (function() {
 
     var kiinteistorajat = new OpenLayers.Layer.WMTS({
       name: "Kiinteistojaotus",
-      url: mapServer,
+      url: withSuffix(mapServer, "/kiinteisto"),
       isBaseLayer: false,
       requestEncoding: "KVP",
       layer: "kiinteistojaotus",
@@ -67,7 +76,7 @@ var gis = (function() {
 
     var kiinteistotunnukset = new OpenLayers.Layer.WMTS({
       name: "Kiinteistotunnukset",
-      url: mapServer,
+      url: withSuffix(mapServer,"/kiinteisto"),
       isBaseLayer: false,
       requestEncoding: "KVP",
       layer: "kiinteistotunnukset",

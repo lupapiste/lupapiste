@@ -295,8 +295,9 @@
 ;; Approvals
 ;;
 
-(defn ->approved [status user]
+(defn ->approved
   "Approval meta data model. To be used within with-timestamp."
+  [status user]
   {:value status
    :user (select-keys user [:id :firstName :lastName])
    :timestamp (current-timestamp)})

@@ -220,10 +220,11 @@
 
   function openTab(id) {
     // old conversation tab opens both info tab and side panel
-    if (id === "conversation") {
-      id = "info";
-      if (!$("#conversation-panel").is(":visible")) {
-        $("#open-conversation-side-panel").click();
+    if (_.includes(["conversation", "notice"], id)) {
+      var target = id;
+      id = "info"; // info tab is shown + side-panel
+      if (!$("#" + target + "-panel").is(":visible")) {
+        $("#open-" + target + "-side-panel").click();
       }
     }
     if(tabFlow) {
@@ -259,6 +260,13 @@
       selectTab(tab);
     } else {
       pageutil.showAjaxWait();
+      if (newId !== currentId) { // close sidepanel if it's open
+        var sidePanel = $("#side-panel div.content-wrapper > div").filter(":visible");
+        if (!_.isEmpty(sidePanel)) {
+          var target = sidePanel.attr("id").split("-")[0];
+          $("#open-" + target + "-side-panel").click();
+        }
+      }
       currentId = newId;
       repository.load(currentId, applicationModel.pending, function(application) {
         selectTab(tab || (application.inPostVerdictState ? "tasks" : "info"));

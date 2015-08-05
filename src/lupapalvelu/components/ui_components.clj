@@ -49,8 +49,7 @@
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
                                           validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))
-                 :degrees               (map :name (:body schemas/koulutusvalinta))
-                 :authorityRoles        action/authority-roles}]
+                 :degrees               (map :name (:body schemas/koulutusvalinta))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -318,10 +317,10 @@
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]
-                         :js ["authority-admin.js" "register-authority-admin-models.js"]}
+                         :js ["authority-admin-app.js" "register-authority-admin-models.js"]}
    :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :header :debug :analytics :leaflet]
-                         :js ["admin.js" schema-versions-by-permit-type]
-                         :html ["admin.html"]}
+                         :js [schema-versions-by-permit-type "organization-user.js" "edit-roles-dialog-model.js" "authority-admin.js"]
+                         :html ["authority-admin.html"]}
 
    :admin-app {:depends [:ui-components]
                :js ["admin.js" "register-admin-models.js"]}

@@ -1,0 +1,80 @@
+
+.search-tabs {
+  .tab-buttons {
+    ul {
+      display: inline-block;
+      list-style: none;
+      padding: 0;
+      margin-right: $marginS;
+    }
+    li {
+      background-color: $lp-light-grey;
+      color: $color-text;
+
+      cursor: pointer;
+      margin-right: $marginS;
+      display: inline-block;
+      &.selected {
+        background-color: darken($lp-light-grey, 10%);
+      }
+      padding: $marginS $marginL;
+    }
+  }
+  input {
+    display: inline-block;
+    margin: 0;
+  }
+  button {
+    margin: 0 $marginS;
+    width: initial;
+    padding: 0 $marginL;
+    .icon {
+      position: relative;
+      top: 2px;
+      margin-right: $marginM;
+    }
+  }
+}
+
+.paging {
+  button:first-child {
+    margin-right: $marginS;
+  }
+  select {
+    width: $cols1*1.5;
+    margin-left: $marginM;
+    margin-right: $marginS;
+  }
+}
+
+div.filter-row {
+  margin-bottom: $marginM;
+  > div {
+    display: inline-block;
+  }
+  label {
+    display: block
+  }
+  input.search {
+    ~ span.icon {
+      position: relative;
+      left: -22px;
+      top: 4px;
+    }
+    line-height: $baseline;
+    padding: $marginS/2 $marginL $marginS/2 $marginS;
+    border: 1px solid #dddddd;
+    box-shadow: none;
+  }
+  .autocomplete-component > .autocomplete-selection-wrapper > span.autocomplete-selection {
+    border-radius: 0;
+  }
+  .filter-item {
+    margin-right: $marginM;
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+

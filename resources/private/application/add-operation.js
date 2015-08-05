@@ -1,7 +1,7 @@
 ;(function() {
   "use strict";
 
-  var currentId = null;
+  var getVisibleApplicationId = pageutil.subPage;
   var model = null;
   var tree = null;
 
@@ -36,7 +36,7 @@
         .query("addable-operations", {id: lupapisteApp.models.application.id()})
         .pending(self.waitingOperations)
         .success(function(data) {
-          if (lupapisteApp.models.application.id() === currentId) {
+          if (lupapisteApp.models.application.id() === getVisibleApplicationId()) {
             self.operations(data.operations);
           }
         })
@@ -61,10 +61,9 @@
 
   hub.onPageLoad("add-operation", function(e) {
     var newId = e.pagePath[0];
-    if (newId !== currentId) {
-      currentId = newId;
+    if (newId !== lupapisteApp.models.application.id()) {
       model.clear();
-      repository.load(currentId);
+      repository.load(newId);
     } else {
       model.init();
     }
@@ -75,7 +74,7 @@
   });
 
   hub.subscribe("application-model-updated", function() {
-    if (currentId === lupapisteApp.models.application.id() && pageutil.getPage() === "add-operation") {
+    if (getVisibleApplicationId() === lupapisteApp.models.application.id() && pageutil.getPage() === "add-operation") {
       model.init();
     }
   });

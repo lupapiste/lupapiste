@@ -18,7 +18,7 @@
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.commands :as doc-commands]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
@@ -70,6 +70,7 @@
 (def velho      (apikey-for "velho"))
 (def velho-muni "297")
 (def velho-id   (id-for "velho"))
+(def jarvenpaa  (apikey-for "admin@jarvenpaa.fi"))
 
 (def sipoo-property-id "75300000000000")
 (def jarvenpaa-property-id "18600000000000")
@@ -494,7 +495,7 @@
           updates (filter (fn [[path value]]
                             (try
                               (let [splitted-path (ss/split path #"\.")]
-                                (doc-commands/validate-against-whitelist! document [[splitted-path value]] user-role))
+                                (doc-persistence/validate-against-whitelist! document [[splitted-path value]] user-role))
                               true
                               (catch Exception _
                                 false)))

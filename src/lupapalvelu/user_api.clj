@@ -14,6 +14,7 @@
             [sade.core :refer :all]
             [sade.session :as ssess]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
+            [lupapalvelu.states :as states]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.security :as security]
@@ -204,24 +205,28 @@
   (when-not (#{"add" "remove"} (:operation data))
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
+(defn- allowed-roles [allowed-roles command]
+  (let [roles (get-in command [:data :roles])
+        pred (set (map name allowed-roles))]
+    (when-not (every? pred roles)
+      (fail :invalid.roles))))
+
 (defcommand update-user-organization
   {:parameters       [email firstName lastName roles]
    :input-validators [(partial action/non-blank-parameters [:email :firstName :lastName])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
-                      action/email-validator]
+                      action/email-validator
+                      (partial allowed-roles organization/authority-roles)]
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
-  (let [new-organization (user/authority-admins-organization-id caller)
-        has-archive?     (:permanent-archive-enabled (organization/get-organization new-organization))
-        actual-roles     (if (and (env/feature? :tiedonohjaus) has-archive?) roles ["authority"])
-        email            (user/canonize-email email)
-        query            {:email email, :role "authority"}
-        update-count     (mongo/update-n :users query {$set {(str "orgAuthz." new-organization) actual-roles}})]
-    (debug "update user" email)
-    (if (pos? update-count)
+  (let [organization-id (user/authority-admins-organization-id caller)
+        actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)
+        email           (user/canonize-email email)
+        result          (user/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})]
+    (if (ok? result)
       (ok :operation "add")
       (if-not (user/get-user-by-email email)
-        (create-authority-user-with-organization caller new-organization email firstName lastName actual-roles)
+        (create-authority-user-with-organization caller organization-id email firstName lastName actual-roles)
         (fail :error.user-not-found)))))
 
 (defcommand remove-user-organization
@@ -230,33 +235,20 @@
                       action/email-validator]
    :user-roles       #{:authorityAdmin}}
   [{caller :user}]
-  (let [email            (user/canonize-email email)
-        organization     (user/authority-admins-organization-id caller)
-        query            {:email email, :role "authority"}
-        update-count     (mongo/update-n :users query {$unset {(str "orgAuthz." organization) ""}})]
-    (if (pos? update-count)
-      (ok :operation "remove")
-      (fail :error.user-not-found))))
-
-(defn allowed-roles [allowed-roles command]
-  (let [roles (get-in command [:data :roles])
-        filtered-roles (->> roles (map keyword) (filter (into #{} allowed-roles)))
-        ok (= (count roles)
-              (count filtered-roles))]
-    (when-not ok
-      (fail :invalid.roles))))
+  (let [organization-id (user/authority-admins-organization-id caller)]
+    (user/update-user-by-email email {:role "authority"} {$unset {(str "orgAuthz." organization-id) ""}})))
 
 (defcommand update-user-roles
-  {:parameters [email roles organization]
-   :input-validators [(partial action/non-blank-parameters [:email :organization])
+  {:parameters [email roles]
+   :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       action/email-validator
-                      (partial allowed-roles action/authority-roles)]
+                      (partial allowed-roles organization/authority-roles)]
    :user-roles #{:authorityAdmin}}
-  (let [update-count (mongo/update-n :users {:email (user/canonize-email email)} {$set {(str "orgAuthz." organization) roles}})]
-    (if (= 1 update-count)
-      (ok)
-      (fail :error.user-not-found))))
+  [{caller :user}]
+  (let [organization-id (user/authority-admins-organization-id caller)
+        actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)]
+    (user/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
   (infof "invitation for new authority: email=%s: processing..." email)
@@ -376,6 +368,11 @@
         (info "login failed, username:" username)
         (user/login-failed username)
         (fail :error.login)))))
+
+(defquery redirect-after-login
+  {:user-roles action/all-authenticated-user-roles}
+  [{session :session}]
+  (ok :url (get session :redirect-after-login "")))
 
 (defcommand impersonate-authority
   {:parameters [organizationId role password]
@@ -539,7 +536,7 @@
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
    :user-roles #{:applicant}
-   :states     [:draft :open :submitted :complement-needed]
+   :states     #{:draft :open :submitted :complement-needed}
    :pre-checks [(fn [command application] (not (-> command :user :architect)))]}  ;;TODO: lisaa architect? check
   [{application :application user :user}]
   (doseq [attachment (:attachments (mongo/by-id :users (:id user)))]
