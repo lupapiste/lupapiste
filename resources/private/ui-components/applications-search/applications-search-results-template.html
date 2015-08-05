@@ -69,28 +69,28 @@
                                          class: 'urgency ' + $data.urgency}"></div>
                 </td>
                 <!-- /ko -->
-                <td data-bind="if: indicators > 0" class="indicator-count" data-test-col-name="indicators">
-                  <div data-bind="text: indicators > 99 ? '*' : indicators,
+                <td data-bind="if: $data.indicators > 0" class="indicator-count" data-test-col-name="indicators">
+                  <div data-bind="text: $data.indicators > 99 ? '*' : $data.indicators,
                                   attr: {class: 'unseen-indicators', title: loc('info.title')}"></div>
                 </td>
-                <td data-bind="if: unseenComments > 0,
+                <td data-bind="if: $data.unseenComments > 0,
                                click: _.partialRight($parent.openApplicationTargeted, 'conversation'), clickBubble: false" class="indicator-count" data-test-col-name="unseenComments">
-                  <div data-bind="text: unseenComments > 99 ? '*' : unseenComments,
+                  <div data-bind="text: $data.unseenComments > 99 ? '*' : $data.unseenComments,
                                     attr: {class: 'unseen-comments', title: loc('conversation.title')}"></div>
                 </td>
-                <td data-bind="if: attachmentsRequiringAction > 0,
+                <td data-bind="if: $data.attachmentsRequiringAction > 0,
                                click: _.partialRight($parent.openApplicationTargeted, 'attachments'), clickBubble: false" class="indicator-count" data-test-col-name="newAttachments">
-                  <div data-bind="text: attachmentsRequiringAction > 99 ? '*' : attachmentsRequiringAction,
+                  <div data-bind="text: $data.attachmentsRequiringAction > 99 ? '*' : $data.attachmentsRequiringAction,
                                     attr: {class: 'unseen-attachments', title: loc('attachments.title')}"></div>
                 </td>
-                <td data-bind="ltext: 'applications.' + kind" data-test-col-name="type"></td>
-                <td data-bind="text: address + ', ' + loc(['municipality', municipality])" data-test-col-name="location"></td>
-                <td data-bind="ltext: 'operations.' + primaryOperation.name" data-test-col-name="operation"></td>
-                <td data-bind="text: applicant" data-test-col-name="applicant"></td>
-                <td data-bind="dateTimeString: sent" data-test-col-name="sent"></td>
-                <td data-bind="dateTimeString: modified" data-test-col-name="modified"></td>
-                <td data-bind="ltext: state" data-test-col-name="status"></td>
-                <td data-bind="fullName: authority" data-test-col-name="authority"></td>
+                <td data-bind="ltext: 'applications.' + $data.kind" data-test-col-name="type"></td>
+                <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
+                <td data-bind="ltext: 'operations.' + $data.primaryOperation.name" data-test-col-name="operation"></td>
+                <td data-bind="text: $data.applicant" data-test-col-name="applicant"></td>
+                <td data-bind="dateTimeString: $data.sent" data-test-col-name="sent"></td>
+                <td data-bind="dateTimeString: $data.modified" data-test-col-name="modified"></td>
+                <td data-bind="ltext: $data.state" data-test-col-name="status"></td>
+                <td data-bind="fullName: $data.authority" data-test-col-name="authority"></td>
               </tr>
             </tbody>
           </table>
