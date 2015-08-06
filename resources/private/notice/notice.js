@@ -7,12 +7,12 @@ LUPAPISTE.ApplicationTagsDataProvider = function(application, filtered) {
 
   self.filtered = filtered || ko.observableArray([]);
 
-  var data = ko.observable(_.map(application.organizationMeta.tags, function(k, v) {
+  var organizationTags = ko.observable(_.map(application.organizationMeta.tags, function(k, v) {
       return {id: v, label: k};
     }));
 
   self.data = ko.pureComputed(function() {
-    var filteredData = _.filter(data(), function(tag) {
+    var filteredData = _.filter(organizationTags(), function(tag) {
       return !_.some(self.filtered(), tag);
     });
     var q = self.query() || "";
