@@ -519,7 +519,8 @@
                       validate-link-permit-id
                       a/validate-authority-in-drafts]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
-                      (fn [{d :data}] (when-not (mongo/valid-key? (:linkPermitId d)) (fail :error.invalid-db-key)))]}
+                      (fn [{data :data}] (when (= (:id data) (ss/trim (:linkPermitId data))) (fail :error.link-permit-self-reference)))
+                      (fn [{data :data}] (when-not (mongo/valid-key? (:linkPermitId data)) (fail :error.invalid-db-key)))]}
   [{application :application}]
   (a/do-add-link-permit application (ss/trim linkPermitId))
   (ok))
