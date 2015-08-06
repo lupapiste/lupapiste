@@ -575,47 +575,6 @@ i.wait {
   }
 }
 
-
-// Not used in production as such.
-// Can be removed when no longer needed
-// for demo purposes.
-.app-panels {
-  position: relative;
-  //width: 100%;
-  padding: {
-    left: 25%;
-    right: 25%;
-  }
-
-  .map {
-    position: absolute;
-    left: 0;
-    top:0;
-    bottom: 0;
-    width: 24%;
-    height: 200px;
-  }
-  .data {
-    height: 200px;
-    background-color: red;
-  }
-  .actions {
-    position: absolute;
-    right: 0;
-    top:0;
-    bottom: 0;
-    width: 24%;
-  }
-  @media (max-width: $narrow-breakpoint) {
-    padding: 0;
-    .map, .actions {
-      position: static;
-      width: auto;
-      float: left;
-    }
-  }
-}
-
 // Margin between form buttons.
 
 .form-buttons button {

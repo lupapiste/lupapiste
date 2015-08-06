@@ -13,9 +13,11 @@
             rows="3"
             maxlength="4000">
           </textarea>
-          <div class="message-buttons inner-margins">
+          <div class="message-buttons"
+               data-bind="css: {'inner-margins': $parent.authorization.ok('add-comment') && !$parent.infoRequest}">
               <button class="positive caps"
-                      data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: stateOpenApplication"
+                      data-bind="visible: $parent.authorization.ok('add-comment') && !$parent.infoRequest,
+                                 disable: disabled, click: stateOpenApplication"
                       data-test-id="application-open-application-btn"
                       type="submit">
                   <span data-bind="ltext: 'application.conversationOpen'"></span>
