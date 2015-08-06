@@ -444,17 +444,25 @@ Add attachment
 
   Select Frame      uploadFrame
   Wait until        Element should be visible  test-save-new-attachment
-  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
-  Select From List  attachmentType  muut.muu
-  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
-  Select From List  attachmentOperation  ${operation}
+
+  Run Keyword If  '${kind}' == 'application'  Set application attachment details on upload  ${operation}
+
   Input text        text  ${description}
   Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Focus             xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Choose File       xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
   Click element     test-save-new-attachment
   Unselect Frame
-  Wait Until Page Contains  Muu liite
+  Wait until  Element should not be visible  upload-dialog
+  Run Keyword If  '${kind}' == 'application'  Wait Until Page Contains  Muu liite
+  Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
+
+Set application attachment details on upload
+  [Arguments]  ${operation}
+  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
+  Select From List  attachmentType  muut.muu
+  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
+  Select From List  attachmentOperation  ${operation}
 
 Open attachment details
   [Arguments]  ${type}
