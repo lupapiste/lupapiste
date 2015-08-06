@@ -14,10 +14,10 @@
       <div data-bind="ifnot: inError">
         <div class="application_summary">
           <div class="container">
-            <div data-bind="visible: application" class="application-map-container">
+            <div data-bind="visible: application" class="application-map-container neighbor">
               <div id="neighbor-map" class="map map-large" style="width: 320px; height: 280px;"></div>
             </div>
-            <div data-bind="with: application" class="application_summary_info">
+            <div data-bind="with: application" class="application_summary_info neighbor">
               <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span> </h1>
 
               <h2 data-bind="if: $root.primaryOperation">

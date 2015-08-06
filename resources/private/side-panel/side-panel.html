@@ -24,9 +24,13 @@
                 <div class="header">
                     <h1>
                         <span class="title" data-bind="ltext: 'conversation.title'"></span>
-                        <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
+                        <!-- <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span> -->
+ <span data-bind="component: {
+                                     name: 'help-toggle',
+                                     params: {flag: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'}}"></span>
                     </h1>
-                    <p data-bind="slider: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p>
+
+                    <!-- <p data-bind="slider: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p> -->
                 </div>
                 <div class="content" data-bind="event: { scroll: hideHelp }, transition: showHelp, class: 'expanded'">
                     <div data-bind="template: {name: 'comment-template', data: {comment: comment, authorities: authorities, mainConversation: mainConversation, authorization: authorization, infoRequest: infoRequest}}"></div>

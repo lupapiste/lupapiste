@@ -16,6 +16,7 @@ $side-panel-width: 60px;
   float: none;
   // Since flexbox is not supported widely enough,
   // we make the div ordering with absolute positioning.
+  // Preamble is not used in neighbors' view (no actions).
   .preamble {
     position: relative;
     /* float: left; */
@@ -92,7 +93,7 @@ $side-panel-width: 60px;
     }
   }
 
-  .application_summary_info{
+  .application_summary_info {
     margin: 0 $marginL $marginL $marginL;
     //float: left;
     //width: 50%;
