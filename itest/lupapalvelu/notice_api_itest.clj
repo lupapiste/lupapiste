@@ -24,13 +24,15 @@
 
     (facts "Application tags"
       (fact "user can't set application tags"
-        (command pena :add-application-tags :id id :tags ["foo" "bar"]) =not=> ok?)
+        (command pena :add-application-tags :id id :tags ["123" "321"]) =not=> ok?)
       (fact "authority can set application tags"
-        (command sonja :add-application-tags :id id :tags ["foo" "bar"]) => ok?)
+        (command sonja :add-application-tags :id id :tags ["123" "321"]) => ok?)
+      (fact "authority can't set tags that are not defined in organization"
+        (command sonja :add-application-tags :id id :tags ["foo" "bar"]) => (partial expected-failure? "error.unknown-tags"))
 
       (let [query (query-application sonja id)
             org-tags (get-in query [:organizationMeta :tags])]
-        (:tags query) => ["foo" "bar"]
+        (:tags query) => ["123" "321"]
 
         (fact "application's organization meta includes correct tags with ids as keys"
           org-tags => {:123 "foo" :321 "bar"}))
