@@ -154,25 +154,30 @@ LUPAPISTE.SidePanelModel = function() {
 
   var unsentMessage = false;
 
-  var checkUnsent = function(unloadData) {
-    if ( self.comment().text() ) {
+  var refreshSidePanel = function(previousHash) {
+    var currentPage = pageutil.getPage();
+    if (self.previousPage && currentPage !== self.previousPage && self.comment().text()) {
       unsentMessage = true;
       LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("application.conversation.unsentMessage.header"),
         loc("application.conversation.unsentMessage"),
         {title: loc("application.conversation.sendMessage"), fn: function() {
-          if (unloadData.previousHash) {
-            pageutil.openPage(unloadData.previousHash);
+          if (previousHash) {
+            location.hash = previousHash;
           }
           unsentMessage = false;
           self.highlightConversation();
         }},
         {title: loc("application.conversation.clearMessage"), fn: function() {
           self.comment().text(undefined);
-          self.refreshConversations(self.application);
+          self.refresh();
           unsentMessage = false;
+          self.previousPage = currentPage;
         }}
       );
+    } else if (!unsentMessage) {
+      self.refresh();
+      self.previousPage = currentPage;
     }
   };
 
@@ -191,9 +196,9 @@ LUPAPISTE.SidePanelModel = function() {
     }
   });
 
-  hub.subscribe({type: "page-unload"}, function(data) {
-    if (_.contains(pages, data.pageId)) {
-      checkUnsent(data);
+  hub.subscribe({type: "page-load"}, function(data) {
+    if(_.contains(pages.concat("applications"), pageutil.getPage())) {
+      refreshSidePanel(data.previousHash);
     }
   });
 
