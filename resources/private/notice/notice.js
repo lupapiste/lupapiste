@@ -21,7 +21,7 @@ LUPAPISTE.OrganizationTagsDataProvider = function(organization, filtered) {
 
   self.data = ko.pureComputed(function() {
     var filteredData = _.filter(data(), function(tag) {
-      return !_.includes(self.filtered(), tag);
+      return !_.some(self.filtered(), tag);
     });
     var q = self.query() || "";
     filteredData = _.filter(filteredData, function(tag) {
@@ -41,13 +41,14 @@ LUPAPISTE.ApplicationTagsDataProvider = function(application, filtered) {
   self.query = ko.observable();
 
   self.filtered = filtered || ko.observableArray([]);
+
   var data = ko.observable(_.map(application.organizationMeta.tags, function(k, v) {
       return {id: v, label: k};
     }));
 
   self.data = ko.pureComputed(function() {
     var filteredData = _.filter(data(), function(tag) {
-      return !_.includes(self.filtered(), tag);
+      return !_.some(self.filtered(), tag);
     });
     var q = self.query() || "";
     filteredData = _.filter(filteredData, function(tag) {
