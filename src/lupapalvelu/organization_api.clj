@@ -25,7 +25,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.property :as p]
-            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator]]
+            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.states :as states]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mime :as mime]
@@ -386,11 +386,12 @@
         new-tag-ids (set (map :id tags))
         removed-ids (set/difference old-tag-ids new-tag-ids)]
     (when (seq removed-ids)
-      (mongo/update-by-query :applications {:tags {$in removed-ids}} {$pull {:tags {$in removed-ids}}}))
+      (mongo/update-by-query :applications {:tags {$in removed-ids} :organization org-id} {$pull {:tags {$in removed-ids}}}))
     (o/update-organization org-id {$set {:tags (o/create-tag-ids tags)}})))
 
 (defquery get-organization-tags
   {:user-authz-roles #{:statementGiver}
+   :org-authz-roles action/reader-org-authz-roles
    :user-roles #{:authorityAdmin :authority}}
   [{{:keys [organizationId]} :data user :user}]
   (when (and organizationId (not ((keyword organizationId) (:orgAuthz user))))

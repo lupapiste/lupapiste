@@ -30,6 +30,7 @@
 (defcommand add-application-tags
   {:parameters [id tags]
    :states (states/all-states-but [:draft])
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:tags])]
    :user-authz-roles #{:statementGiver}
    :user-roles #{:authority}}
   [{{:keys [organization]} :application :as command}]
