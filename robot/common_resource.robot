@@ -80,7 +80,7 @@ Wait and click
   # for IE8
   Wait until  Focus  ${element}
   Wait until  Element should be visible  ${element}
-  Click element  ${element}
+  Wait until  Click element  ${element}
 
 Wait until
   [Arguments]  ${keyword}  @{varargs}

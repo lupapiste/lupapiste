@@ -101,3 +101,11 @@
         allowed-roles (set (allowed-roles-in-organization organization))]
     (filter (comp allowed-roles keyword) roles)))
 
+(defn create-tag-ids
+  "Creates mongo id for tag if id is not present"
+  [tags]
+  (map
+    #(if (:id %)
+       %
+       (assoc % :id (mongo/create-id)))
+    tags))

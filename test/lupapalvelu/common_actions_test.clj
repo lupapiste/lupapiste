@@ -65,7 +65,7 @@
 (facts "Allowed actions for reader authority"
   (let [user {:id "user123" :orgAuthz {:999-R #{:reader}} :role "authority"}
         application {:organization "999-R" :auth [] :id "123" :permitType "YA"}
-        allowed-actions #{:application :validate-doc :fetch-validation-errors ; queries
+        allowed-actions #{:application :validate-doc :fetch-validation-errors :get-organization-tags ; queries
                           :add-comment :add-authority-notice ; commands
                           :preview-attachment :view-attachment :download-attachment :download-all-attachments ; raw
                           }]

@@ -381,7 +381,7 @@
   {:pre [(mongo/valid-key? link-permit-id)
          (not= id link-permit-id)]}
   (let [db-id (make-mongo-id-for-link-permit id link-permit-id)
-        is-lupapiste-app (.startsWith link-permit-id "LP-")
+        is-lupapiste-app (mongo/any? :applications {:_id link-permit-id})
         linked-app (when is-lupapiste-app
                      (domain/get-application-no-access-checking link-permit-id))]
     (mongo/update-by-id :app-links db-id

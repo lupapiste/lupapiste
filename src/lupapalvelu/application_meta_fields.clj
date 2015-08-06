@@ -97,9 +97,11 @@
   (let [org (organization/get-organization (:organization app))
         muni (:municipality app)
         permit-type (:permitType app)
-        scope (organization/resolve-organization-scope muni permit-type org)]
+        scope (organization/resolve-organization-scope muni permit-type org)
+        tags (:tags org)]
     {:name (organization/get-organization-name org)
      :links (:links org)
+     :tags (zipmap (map :id tags) (map :label tags))
      :requiredFieldsFillingObligatory (:app-required-fields-filling-obligatory org)
      :kopiolaitos {:kopiolaitosEmail (:kopiolaitos-email org)
                    :kopiolaitosOrdererAddress (:kopiolaitos-orderer-address org)
