@@ -99,7 +99,8 @@
    :user-roles       #{:applicant :authority}
    :states           states/all-states
    :input-validators [doc-persistence/validate-collection]
-   :user-authz-roles action/all-authz-roles}
+   :user-authz-roles action/all-authz-roles
+   :org-authz-roles  action/reader-org-authz-roles}
   [{:keys [application]}]
   (debug doc collection)
   (let [document (doc-persistence/by-id application collection doc)]
@@ -110,6 +111,7 @@
   {:parameters       [:id]
    :user-roles       #{:applicant :authority}
    :user-authz-roles action/all-authz-roles
+   :org-authz-roles  action/reader-org-authz-roles
    :states           states/all-states}
   [{app :application}]
   (let [results (for [doc (:documents app)] (model/validate app doc))]

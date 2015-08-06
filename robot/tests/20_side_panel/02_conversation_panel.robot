@@ -2,19 +2,19 @@
 
 Documentation   Mikko creates a new application
 Resource        ../../common_resource.robot
+Suite teardown  Logout
 
 *** Test Cases ***
 
-Mikko creates new application
+Mikko opens an application
   Mikko logs in
-  Go to page  applications
-  Applications page should be open
-  Create application the fast way  create-app  753-416-25-22  kerrostalo-rivitalo
-  Go to page  applications
-  Request should be visible  create-app
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname}  conversation${secs}
+  Set Suite Variable  ${propertyId}  753-423-2-41
+  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
 
 Mikko writes message without sending it
-  Open application  create-app  753-416-25-22
+  Open application  ${appname}  ${propertyId}
   Open side panel  conversation
   Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  Kirjoitan viestin, mutta unohdan lähettää sen... tarkoituksella!
 

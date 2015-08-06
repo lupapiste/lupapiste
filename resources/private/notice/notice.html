@@ -3,7 +3,7 @@
 <body>
   <section class="page container" id="notices">
     <script type="text/html" id="notice-template">
-      <div class="content-row application-tags">
+      <div class="content-row application-tags" data-bind="if: authorization.ok('add-application-tags')">
         <!-- ko if: features.enabled('alueellisetOrganisaatiot') -->
         <div class="feature content-cell">
           <label data-bind="ltext: 'application.tags'"></label>
@@ -12,7 +12,7 @@
         </div>
         <!-- /ko -->
       </div>
-      <div class="content-row">
+      <div class="content-row" data-bind="if: authorization.ok('change-urgency')">
         <div class="content-cell">
           <div class="application-urgency">
             <label data-bind="ltext: 'notice.urgency'"></label>

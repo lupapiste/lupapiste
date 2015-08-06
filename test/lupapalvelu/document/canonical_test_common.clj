@@ -3,7 +3,6 @@
             [lupapalvelu.document.ymparisto-schemas]
             [lupapalvelu.document.yleiset-alueet-schemas]
             [lupapalvelu.document.model :refer [validate get-document-schema]]
-            [lupapalvelu.test-util :refer [doc-result doc-check]]
             [midje.sweet :refer :all]))
 
 ;;
@@ -20,9 +19,8 @@
   (let [documents (:documents application)
         reduced-application (select-keys application [:auth])]
     (doseq [document documents]
-      (let [result (doc-result (validate-against-current-schema reduced-application document) document)]
-        (fact "Meta test: all documents in the application are valid"
-          result => (doc-check empty?))))))
+      (fact {:midje/description document}
+        (validate-against-current-schema reduced-application document) => empty?))))
 
 ;; Fixture
 

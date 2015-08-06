@@ -20,7 +20,7 @@
 ;; construct command, query and raw
 ;;
 
-(defn- action [name & {:keys [user type data] :or {:user nil :type :action :data {}}}]
+(defn action [name & {:keys [user type data] :or {:user nil :type :action :data {}}}]
   {:action name
    :user user
    :type type
@@ -64,6 +64,7 @@
 (def all-authz-roles (conj all-authz-writer-roles :reader))
 
 (def default-org-authz-roles #{:authority})
+(def reader-org-authz-roles #{:authority :reader})
 (def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin :reader :tos-editor :tos-publisher))
 
 ;; Notificator
@@ -280,7 +281,7 @@
 (defn- organization-authz? [command-meta-data {organization :organization} user]
   (let [required-authz (:org-authz-roles command-meta-data)
         user-org-authz (get-in user [:orgAuthz (keyword organization)])]
-    (and (user/authority? user) (some required-authz user-org-authz))))
+    (and (user/authority? user) required-authz (some required-authz user-org-authz))))
 
 (defn- company-authz? [command-meta-data application user]
   (domain/has-auth? application (get-in user [:company :id])))

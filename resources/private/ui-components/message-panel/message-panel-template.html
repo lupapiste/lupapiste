@@ -3,7 +3,7 @@
 <body>
   <section class="page container">
     <script type="text/html" id="message-panel-template" class="form-table">
-    <span data-bind="fader: showMessagePanel, duration: 400, css: params.class">
+    <span data-bind="fader: showMessagePanel, duration: 400, css: params['class']">
       <span class="warn" data-bind="text: params.message"></span>
     </span>
   </script>
