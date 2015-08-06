@@ -53,7 +53,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   hub.onPageLoad("applications", function() {
     ajax.datatables("applications-search",
                {searchText: self.searchField(),
-                applicationTags: self.applicationTags(),
+                applicationTags: _.pluck(self.applicationTags(), "id"),
                 handler: self.handler() ? self.handler().id : undefined,
                 applicationType: self.applicationType(),
                 limit: self.limit(),
