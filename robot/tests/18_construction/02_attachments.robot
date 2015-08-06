@@ -20,6 +20,6 @@ Sonja prepares the application
 Add post-verdict attachment
   Open tab  attachments
   Wait until  Element should not be visible  xpath=//button[@data-test-id='export-attachments-to-backing-system']
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
   Wait until  Element should be visible  xpath=//button[@data-test-id='export-attachments-to-backing-system']
