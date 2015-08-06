@@ -39,4 +39,13 @@
 
       (against-background [(lupapalvelu.organization/get-organization "753-R") => {:tags
                                                                                    [{:id "123" :label "foo"}
-                                                                                    {:id "321" :label "bar"}]}]))))
+                                                                                    {:id "321" :label "bar"}]}]))
+    (fact "When tag is removed, it is also removed from applications"
+      (let [id (create-app-id sonja)]
+        (command sipoo :save-organization-tags :tags [{:id "123" :label "foo"} {:id "321" :label "bar"}]) => ok?
+        (command sonja :add-application-tags :id id :tags ["123" "321"]) => ok?
+        (:tags (query-application sonja id)) => (just ["123" "321"])
+        (command sipoo :save-organization-tags :tags [{:id "123" :label "foo"}]) => ok?
+
+        (fact "only 123 is left as 321 was removed"
+          (:tags (query-application sonja id)) => (just ["123"]))))))
