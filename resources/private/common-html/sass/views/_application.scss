@@ -48,7 +48,10 @@ $side-panel-width: 60px;
       }
       .application-map-container {
         float: left;
-        margin-left: $marginL; // Align with summary info.
+        margin: {
+          left: $marginL; // Align with summary info.
+          bottom: $marginM; // Especially needed when no tabs.
+        }
       }
       .application_actions {
         float: right;

@@ -303,14 +303,19 @@ button.btn-dialog, .btn-dialog {
   }
   span, i {
     vertical-align: middle;
+    // Inline-block would be more intuitive and proper
+    // alternative, but for some reason it results in
+    // one or two pixel vertical gap. This might be somehow
+    // system-related since the the main.css works fine
+    // with inline-block on its own.
     display: table-cell;
     margin: 0;
   }
-  span {
+  :nth-child(2) {
+    // Gap between icon and text.
     padding: {
-      left: 6px;
-      right: 6px;
-    }
+      left: 10px;
+     }
   }
 }
 
