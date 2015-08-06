@@ -22,20 +22,19 @@
       (add-authority-notice sonja id "respect my athority") => ok?
       (:authorityNotice (query-application sonja id)) => "respect my athority")
 
-    (fact "user can't set application tags"
-      (command pena :add-application-tags :id id :tags ["foo" "bar"]) =not=> ok?)
+    (facts "Application tags"
+      (fact "user can't set application tags"
+        (command pena :add-application-tags :id id :tags ["foo" "bar"]) =not=> ok?)
+      (fact "authority can set application tags"
+        (command sonja :add-application-tags :id id :tags ["foo" "bar"]) => ok?)
 
-    (fact "authority can set application tags"
-      (command sonja :add-application-tags :id id :tags ["foo" "bar"]) => ok?
-      (:tags (query-application sonja id)) => ["foo" "bar"])
+      (let [query (query-application sonja id)
+            org-tags (get-in query [:organizationMeta :tags])]
+        (:tags query) => ["foo" "bar"]
 
-    (fact "only auth admin can add new tags"
-      (command sipoo :save-organization-tags :tags [{:id nil :label "makeja"} {:id nil :label "nigireja"}]) => ok?
-      (command sonja :save-organization-tags :tags [{:id nil :label "illegal"}] =not=> ok?)
-      (command pena :save-organization-tags :tags [{:id nil :label "makeja"}] =not=> ok?)
-      (:tags (query sipoo :get-organization-tags)) => (just [(just {:id string? :label "makeja"})
-                                                             (just {:id string? :label "nigireja"})]))
+        (fact "application's organization meta includes correct tags with ids as keys"
+          org-tags => {:123 "foo" :321 "bar"}))
 
-    (fact "only authority can fetch available tags"
-      (query pena :get-organization-tags :organization "753-R") =not=> ok?
-      (map :label (:tags (query sonja :get-organization-tags :organizationId "753-R"))) => ["makeja" "nigireja"])))
+      (against-background [(lupapalvelu.organization/get-organization "753-R") => {:tags
+                                                                                   [{:id "123" :label "foo"}
+                                                                                    {:id "321" :label "bar"}]}]))))
