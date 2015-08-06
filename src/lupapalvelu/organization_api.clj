@@ -396,8 +396,8 @@
   (when (and organizationId (not ((keyword organizationId) (:orgAuthz user))))
     (fail! :error.unknown-organization))
   (if-let [org-id (if (user/authority-admin? user)
-                 (user/authority-admins-organization-id user)
-                 organizationId)]
+                    (user/authority-admins-organization-id user)
+                    organizationId)]
     (ok :tags (:tags (o/get-organization org-id)))
     (fail! :error.organization-not-found)))
 
