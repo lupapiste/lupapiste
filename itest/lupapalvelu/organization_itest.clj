@@ -251,9 +251,10 @@
   (fact "only auth admin can add new tags"
     (command sipoo :save-organization-tags :tags [{:id nil :label "makeja"} {:id nil :label "nigireja"}]) => ok?
     (command sonja :save-organization-tags :tags [{:id nil :label "illegal"}] =not=> ok?)
-    (command pena :save-organization-tags :tags [{:id nil :label "makeja"}] =not=> ok?)
+    (command pena :save-organization-tags :tags [{:id nil :label "makeja"}] =not=> ok?))
+  (fact "tags get ids when saved"
     (:tags (query sipoo :get-organization-tags)) => (just [(just {:id string? :label "makeja"})
-                                                           (just {:id string? :label "nigireja"})]))
+                                                            (just {:id string? :label "nigireja"})]))
 
   (fact "only authority can fetch available tags"
     (query pena :get-organization-tags :organization "753-R") =not=> ok?
