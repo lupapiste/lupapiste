@@ -25,11 +25,11 @@ Mikko creates application and goes to empty attachments tab
   Open tab  attachments
 
 Mikko adds PDF attachment without comment
-  Add attachment  ${PDF_TESTFILE_PATH1}  ${EMPTY}  Uusi asuinrakennus
+  Add attachment  application  ${PDF_TESTFILE_PATH1}  ${EMPTY}  Uusi asuinrakennus
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME1}')]
-  Add attachment  ${PDF_TESTFILE_PATH2}  ${EMPTY}  Uusi asuinrakennus
+  Add attachment  application  ${PDF_TESTFILE_PATH2}  ${EMPTY}  Uusi asuinrakennus
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME2}')]
-  Add attachment  ${PDF_TESTFILE_PATH3}  ${EMPTY}  Yleisesti hankkeeseen
+  Add attachment  application  ${PDF_TESTFILE_PATH3}  ${EMPTY}  Yleisesti hankkeeseen
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME3}')]
 
 Mikko does not see stamping button
