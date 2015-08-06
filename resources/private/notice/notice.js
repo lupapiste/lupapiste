@@ -1,38 +1,3 @@
-LUPAPISTE.OrganizationTagsDataProvider = function(organization, filtered) {
-  "use strict";
-
-  var self = this;
-
-  self.query = ko.observable();
-
-  self.filtered = filtered || ko.observableArray([]);
-
-  var data = ko.observable();
-
-  if (organization && util.getIn(lupapisteApp.models.currentUser, ["orgAuthz", organization])) {
-    ajax
-      .query("get-organization-tags", {organizationId: organization})
-      .error(_.noop)
-      .success(function(res) {
-        data(res.tags);
-      })
-      .call();
-  }
-
-  self.data = ko.pureComputed(function() {
-    var filteredData = _.filter(data(), function(tag) {
-      return !_.some(self.filtered(), tag);
-    });
-    var q = self.query() || "";
-    filteredData = _.filter(filteredData, function(tag) {
-      return _.reduce(q.split(" "), function(result, word) {
-        return _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
-      }, true);
-    });
-    return filteredData;
-  });
-};
-
 LUPAPISTE.ApplicationTagsDataProvider = function(application, filtered) {
   "use strict";
 
