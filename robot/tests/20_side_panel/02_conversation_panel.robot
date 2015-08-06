@@ -2,6 +2,7 @@
 
 Documentation   Mikko creates a new application
 Resource        ../../common_resource.robot
+Suite teardown  Logout
 
 *** Test Cases ***
 
