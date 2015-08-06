@@ -399,7 +399,7 @@
   (if-let [org-id (if (user/authority-admin? user)
                     (user/authority-admins-organization-id user)
                     organizationId)]
-    (ok :tags (:tags (o/get-organization org-id)))
+    (ok :tags (set (:tags (o/get-organization org-id))))
     (fail! :error.organization-not-found)))
 
 (defn- transform-coordinates-to-wgs84

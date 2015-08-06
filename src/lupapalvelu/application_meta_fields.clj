@@ -101,7 +101,7 @@
         tags (:tags org)]
     {:name (organization/get-organization-name org)
      :links (:links org)
-     :tags (zipmap (map :id tags) (map :label tags))
+     :tags (zipmap (set (map :id tags)) (set (map :label tags)))
      :requiredFieldsFillingObligatory (:app-required-fields-filling-obligatory org)
      :kopiolaitos {:kopiolaitosEmail (:kopiolaitos-email org)
                    :kopiolaitosOrdererAddress (:kopiolaitos-orderer-address org)
