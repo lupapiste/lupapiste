@@ -4460,33 +4460,42 @@ ul.attachments-list li.mandatory-attachments {
   float: right;
 }
 
-/* line 2, ../sass/partials/_archival-summary.scss */
+/* line 1, ../sass/partials/_archival-summary.scss */
+.archival-summary-document-set {
+  margin-bottom: 24px;
+}
+
+/* line 5, ../sass/partials/_archival-summary.scss */
+.archival-summary-table {
+  margin-bottom: 12px;
+}
+/* line 7, ../sass/partials/_archival-summary.scss */
 .archival-summary-table td {
   vertical-align: top;
 }
-/* line 5, ../sass/partials/_archival-summary.scss */
+/* line 10, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-type {
   width: 700px;
 }
-/* line 8, ../sass/partials/_archival-summary.scss */
+/* line 13, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .personal-data {
   width: 170px;
 }
-/* line 11, ../sass/partials/_archival-summary.scss */
+/* line 16, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .will-publish {
   width: 100px;
 }
-/* line 13, ../sass/partials/_archival-summary.scss */
+/* line 18, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .will-publish .lupicon-check {
   font-size: 16px;
   color: #04c714;
 }
-/* line 17, ../sass/partials/_archival-summary.scss */
+/* line 22, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .will-publish .lupicon-remove {
   font-size: 16px;
   color: #da6ded;
 }
-/* line 22, ../sass/partials/_archival-summary.scss */
+/* line 27, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-type-container {
   *zoom: 1;
 }
@@ -4499,21 +4508,21 @@ ul.attachments-list li.mandatory-attachments {
 .archival-summary-table .attachment-type-container:after {
   clear: both;
 }
-/* line 24, ../sass/partials/_archival-summary.scss */
+/* line 29, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-type-container .group-label, .archival-summary-table .attachment-type-container .type-id {
   float: left;
   width: 50%;
 }
-/* line 30, ../sass/partials/_archival-summary.scss */
+/* line 35, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-row:active {
   background-color: #fef4ea;
   color: inherit;
 }
-/* line 36, ../sass/partials/_archival-summary.scss */
+/* line 41, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-group-header td {
   padding-top: 12px;
 }
-/* line 41, ../sass/partials/_archival-summary.scss */
+/* line 46, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .metadata-editor-container .editor-header {
   border-collapse: separate;
 }

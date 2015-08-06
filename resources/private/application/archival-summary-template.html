@@ -4,7 +4,7 @@
 <section class="page" id="archival-summary" style="visibility: hidden; display: block;">
   <script type="text/html" id="archival-summary-template">
 
-    <div data-bind="if: !_.isEmpty(archivedDocuments())">
+    <div data-bind="if: !_.isEmpty(archivedDocuments())" class="archival-summary-document-set">
       <h1>Arkistoitavat asiakirjat - <span data-bind="text: $root.application.id"></span></h1>
       <div>
       Asiakirjan säilytysaika määrää arkistoidaanko asiakirjaa. Voit muokata asiakirjan arkistointiaikaa ja
@@ -12,9 +12,11 @@
       </div>
 
       <div data-bind="template: {name: 'archival-document-table-template', data: {documents: archivedDocuments, showWillPublish: true}}"></div>
+
+      <div><button class="btn-primary">Vie arkistoon</button></div>
     </div>
 
-    <div data-bind="if: !_.isEmpty(notArchivedDocuments())">
+    <div data-bind="if: !_.isEmpty(notArchivedDocuments())" class="document-set">
       <h1>Muut asiakirjat (ei arkistoida) - <span data-bind="text: $root.application.id"></span></h1>
 
       <div data-bind="template: {name: 'archival-document-table-template', data: {documents: notArchivedDocuments, showWillPublish: false}}"></div>
