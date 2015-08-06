@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation  Sonja should see only applications from Sipoo
+Suite teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
 
