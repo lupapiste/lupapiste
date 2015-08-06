@@ -540,7 +540,7 @@
                        :kopiolaitos-orderer-phone "0501231234"
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P" "YI" "YL" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
-                       :tags ["yl\u00E4maa"]}
+                       :tags [{:id "111" :label "yl\u00E4maa"} {:id "222" :label "ullakko"}]}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.

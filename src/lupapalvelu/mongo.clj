@@ -330,6 +330,7 @@
   (mc/ensure-index :applications {:organization 1})
   (mc/ensure-index :applications {:auth.id 1})
   (mc/ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
+  (mc/ensure-index :applications {:tags 1})
   (try
     (mc/drop-index :activation "created-at_1") ; no such field "created-at"
     (catch Exception _))
