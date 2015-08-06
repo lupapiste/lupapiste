@@ -10,6 +10,7 @@
            [java.io File])
 
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+            [clojure.set :as set]
             [clojure.string :as s]
             [clojure.data.json :as json]
             [monger.operators :refer :all]
@@ -380,7 +381,12 @@
   {:parameters [tags]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (let [org-id (user/authority-admins-organization-id user)]
+  (let [org-id (user/authority-admins-organization-id user)
+        old-tag-ids (set (map :id (:tags (o/get-organization org-id))))
+        new-tag-ids (set (map :id tags))
+        removed-ids (set/difference old-tag-ids new-tag-ids)]
+    (when (seq removed-ids)
+      (mongo/update-by-query :applications {:tags {$in removed-ids}} {$pull {:tags {$in removed-ids}}}))
     (o/update-organization org-id {$set {:tags (o/create-tag-ids tags)}})))
 
 (defquery get-organization-tags
