@@ -1,6 +1,6 @@
 (ns lupapalvelu.notice-api
   (:require [sade.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand update-application notify]]
+            [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.states :as states]
             [monger.operators :refer :all]))
 
@@ -21,7 +21,8 @@
   {:parameters [id authorityNotice]
    :states (states/all-states-but [:draft])
    :user-authz-roles #{:statementGiver}
-   :user-roles #{:authority}}
+   :user-roles #{:authority}
+   :org-authz-roles action/reader-org-authz-roles}
   [command]
   (update-application command {$set {:authorityNotice authorityNotice}}))
 

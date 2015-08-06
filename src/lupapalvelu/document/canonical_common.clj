@@ -402,7 +402,7 @@
                        (conj r (name k))
                        r))
                    []
-                   (-> (dissoc selections :muuMika))))]
+                   (dissoc selections :muuMika)))]
     (if (-> selections :muuMika s/blank? not)
       (str joined "," (-> selections :muuMika))
       joined)))

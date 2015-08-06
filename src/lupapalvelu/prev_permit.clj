@@ -13,7 +13,7 @@
             [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
@@ -71,7 +71,7 @@
                ;; Set applicants' user info to Hakija documents
                (let [document (if (zero? i)
                                 (domain/get-applicant-document (:documents application))
-                                (commands/do-create-doc
+                                (doc-persistence/do-create-doc
                                   (assoc-in command [:data :schemaName] (permit/get-applicant-doc-schema (permit/permit-type application)))))
                      applicant-type (get-applicant-type applicant)
                      user-info (case applicant-type
@@ -102,7 +102,7 @@
                                             :po (get-in postiosoite [:postitoimipaikannimi])
                                             :turvakieltokytkin (:turvakieltoKytkin applicant)}))]
 
-                (commands/set-subject-to-document application document user-info (name applicant-type) created)))))))))
+                (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
 (defn- do-create-application-from-previous-permit [command operation xml app-info location-info]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info

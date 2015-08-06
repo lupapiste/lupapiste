@@ -223,6 +223,7 @@
          :input-validators [(partial action/non-blank-parameters [:attachment-id])]
          :user-roles #{:applicant :authority :oirAuthority}
          :user-authz-roles action/all-authz-roles
+         :org-authz-roles action/reader-org-authz-roles
          :feature :preview}
         [{{:keys [attachment-id]} :data user :user}]
         (attachment/output-attachment-preview attachment-id (partial attachment/get-attachment-as user)))
@@ -231,7 +232,8 @@
         {:parameters [:attachment-id]
          :input-validators [(partial action/non-blank-parameters [:attachment-id])]
          :user-roles #{:applicant :authority :oirAuthority}
-         :user-authz-roles action/all-authz-roles}
+         :user-authz-roles action/all-authz-roles
+         :org-authz-roles action/reader-org-authz-roles}
         [{{:keys [attachment-id]} :data user :user}]
         (attachment/output-attachment attachment-id false (partial attachment/get-attachment-as user)))
 
@@ -239,7 +241,8 @@
   {:parameters [:attachment-id]
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles action/all-authz-roles}
+   :user-authz-roles action/all-authz-roles
+   :org-authz-roles action/reader-org-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-as user)))
 
@@ -247,7 +250,8 @@
   {:parameters [:id]
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states
-   :user-authz-roles action/all-authz-roles}
+   :user-authz-roles action/all-authz-roles
+   :org-authz-roles action/reader-org-authz-roles}
   [{:keys [application user lang]}]
   (if application
     (let [attachments (:attachments application)
@@ -397,7 +401,7 @@
   {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId kuntalupatunnus section]
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])]
    :user-roles #{:authority}
-   :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
+   :states     #{:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed}
    :description "Stamps all attachments of given application"}
   [{application :application {transparency :transparency} :data :as command}]
   (let [parsed-timestamp (cond
@@ -439,7 +443,7 @@
    :parameters [:id attachmentIds password]
    :input-validators [(partial action/non-blank-parameters [:password])
                       (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
-   :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]
+   :states     (states/all-application-states-but [:canceled :closed])
    :pre-checks [domain/validate-owner-or-write-access
                 (fn [_ application]
                   (when-not (pos? (count (:attachments application)))
@@ -494,7 +498,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       (partial action/boolean-parameters [:notNeeded])]
    :user-roles #{:applicant :authority}
-   :states     [:draft :open :submitted]
+   :states     #{:draft :open :submitted}
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :notNeeded notNeeded created :set-app-modified? true :set-attachment-modified? false)

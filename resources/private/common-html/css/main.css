@@ -4686,38 +4686,39 @@ table.attachments-template-table td.attachment-version-info {
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection {
   width: 100%;
   height: 100%;
-  line-height: 32px;
   display: inline-block;
   border: 1px solid #dddddd;
-  padding: 0 0 0 6px;
+  padding: 3px 6px;
   color: black;
   box-sizing: border-box;
   border-radius: 5px;
   background-color: #fff;
 }
-/* line 32, ../sass/partials/_autocomplete.scss */
+/* line 31, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags {
   list-style: none;
   padding: 6px 0 0 0;
-  overflow: auto;
 }
-/* line 36, ../sass/partials/_autocomplete.scss */
+/* line 35, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li {
+  display: inline-block;
+}
+/* line 39, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag {
   position: relative;
   background-color: #f39129;
   font-size: 16px;
   margin-right: 6px;
   white-space: nowrap;
-  float: left;
   margin-bottom: 6px;
 }
-/* line 44, ../sass/partials/_autocomplete.scss */
+/* line 47, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag span.tag-label {
   color: #fff;
   margin-left: 27px;
   margin-right: 12px;
 }
-/* line 49, ../sass/partials/_autocomplete.scss */
+/* line 53, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag span.tag-remove {
   cursor: pointer;
   position: absolute;
@@ -4726,22 +4727,18 @@ table.attachments-template-table td.attachment-version-info {
   bottom: 0;
   margin: auto;
 }
-/* line 58, ../sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag:last-child {
-  margin-bottom: 0;
-}
-/* line 61, ../sass/partials/_autocomplete.scss */
+/* line 63, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag-ellipsis {
   color: #f39129;
   cursor: pointer;
   font-weight: bold;
-  float: left;
+  margin-bottom: 6px;
 }
-/* line 69, ../sass/partials/_autocomplete.scss */
+/* line 72, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.caption {
   cursor: default;
 }
-/* line 72, ../sass/partials/_autocomplete.scss */
+/* line 75, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection-arrow {
   position: absolute;
   top: 0;
@@ -4750,24 +4747,24 @@ table.attachments-template-table td.attachment-version-info {
   right: 9px;
   cursor: default;
 }
-/* line 82, ../sass/partials/_autocomplete.scss */
+/* line 85, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown {
   width: inherit;
-  position: relative;
+  position: absolute;
   z-index: 1;
 }
-/* line 86, ../sass/partials/_autocomplete.scss */
+/* line 89, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown input.autocomplete-input {
   width: 100%;
   height: 28px;
-  line-height: 24px;
   margin: 2px 0;
   display: block;
   box-sizing: border-box;
 }
-/* line 94, ../sass/partials/_autocomplete.scss */
+/* line 97, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
-  position: fixed;
+  position: absolute;
+  top: 30px;
   z-index: 1000;
   width: inherit;
   max-height: 300px;
@@ -4780,22 +4777,22 @@ table.attachments-template-table td.attachment-version-info {
   background-color: #fff;
   color: black;
 }
-/* line 107, ../sass/partials/_autocomplete.scss */
+/* line 111, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
   cursor: default;
   display: list-item;
   list-style-type: none;
   padding: 6px 6px;
 }
-/* line 113, ../sass/partials/_autocomplete.scss */
+/* line 117, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
 }
-/* line 116, ../sass/partials/_autocomplete.scss */
+/* line 120, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #fef4ea;
 }
-/* line 118, ../sass/partials/_autocomplete.scss */
+/* line 122, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #f8c38a;
   color: black;
@@ -5496,6 +5493,93 @@ ul.attachments-list li.mandatory-attachments {
   float: right;
 }
 
+/* line 4, ../sass/partials/_applications_search.scss */
+.search-tabs .tab-buttons ul {
+  display: inline-block;
+  list-style: none;
+  padding: 0;
+  margin-right: 6px;
+}
+/* line 10, ../sass/partials/_applications_search.scss */
+.search-tabs .tab-buttons li {
+  background-color: #f6f6f6;
+  color: #333;
+  cursor: pointer;
+  margin-right: 6px;
+  display: inline-block;
+  padding: 6px 24px;
+}
+/* line 17, ../sass/partials/_applications_search.scss */
+.search-tabs .tab-buttons li.selected {
+  background-color: #dddddd;
+}
+/* line 23, ../sass/partials/_applications_search.scss */
+.search-tabs input {
+  display: inline-block;
+  margin: 0;
+}
+/* line 27, ../sass/partials/_applications_search.scss */
+.search-tabs button {
+  margin: 0 6px;
+  width: initial;
+  padding: 0 24px;
+}
+/* line 31, ../sass/partials/_applications_search.scss */
+.search-tabs button .icon {
+  position: relative;
+  top: 2px;
+  margin-right: 12px;
+}
+
+/* line 40, ../sass/partials/_applications_search.scss */
+.paging button:first-child {
+  margin-right: 6px;
+}
+/* line 43, ../sass/partials/_applications_search.scss */
+.paging select {
+  width: 5.625em;
+  margin-left: 12px;
+  margin-right: 6px;
+}
+
+/* line 50, ../sass/partials/_applications_search.scss */
+div.filter-row {
+  margin-bottom: 12px;
+}
+/* line 52, ../sass/partials/_applications_search.scss */
+div.filter-row > div {
+  display: inline-block;
+}
+/* line 55, ../sass/partials/_applications_search.scss */
+div.filter-row label {
+  display: block;
+}
+/* line 58, ../sass/partials/_applications_search.scss */
+div.filter-row input.search {
+  line-height: 24px;
+  padding: 3px 24px 3px 6px;
+  border: 1px solid #dddddd;
+  box-shadow: none;
+}
+/* line 59, ../sass/partials/_applications_search.scss */
+div.filter-row input.search ~ span.icon {
+  position: relative;
+  left: -22px;
+  top: 4px;
+}
+/* line 69, ../sass/partials/_applications_search.scss */
+div.filter-row .autocomplete-component > .autocomplete-selection-wrapper > span.autocomplete-selection {
+  border-radius: 0;
+}
+/* line 72, ../sass/partials/_applications_search.scss */
+div.filter-row .filter-item {
+  margin-right: 12px;
+}
+/* line 74, ../sass/partials/_applications_search.scss */
+div.filter-row .filter-item:last-child {
+  margin-right: 0;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
@@ -5635,13 +5719,13 @@ ul.attachments-list li.mandatory-attachments {
 }
 
 /* line 94, ../sass/views/_applications.scss */
-.sorting, .sorting_asc, .sorting_desc {
+.sorting, .sorting_asc, .sorting_desc, .sorting.asc, .sorting.desc {
   cursor: pointer;
   position: relative;
 }
 
 /* line 98, ../sass/views/_applications.scss */
-.sorting_asc:after {
+.sorting_asc:after, .sorting.asc:after {
   content: "";
   display: block;
   position: absolute;
@@ -5655,7 +5739,7 @@ ul.attachments-list li.mandatory-attachments {
 }
 
 /* line 109, ../sass/views/_applications.scss */
-.sorting_desc:after {
+.sorting_desc:after, .sorting.desc:after {
   content: "";
   display: block;
   position: absolute;
@@ -5732,7 +5816,7 @@ ul.attachments-list li.mandatory-attachments {
 }
 
 /* line 174, ../sass/views/_applications.scss */
-#applications-list .indicator-count {
+#applications-list .indicator-count, .applications-table .indicator-count {
   padding-left: 0;
   padding-right: 0;
   font-weight: bold;
@@ -5742,12 +5826,12 @@ ul.attachments-list li.mandatory-attachments {
   padding: 3px;
 }
 /* line 183, ../sass/views/_applications.scss */
-#applications-list div {
+#applications-list div, .applications-table div {
   padding-top: 3px;
   height: 30px;
 }
 /* line 184, ../sass/views/_applications.scss */
-#applications-list .urgent {
+#applications-list .urgent, .applications-table .urgent {
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0 -5300px;
@@ -5755,7 +5839,7 @@ ul.attachments-list li.mandatory-attachments {
   width: 24px;
 }
 /* line 190, ../sass/views/_applications.scss */
-#applications-list .pending {
+#applications-list .pending, .applications-table .pending {
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0 -5500px;
@@ -5763,7 +5847,7 @@ ul.attachments-list li.mandatory-attachments {
   height: 24px;
 }
 /* line 196, ../sass/views/_applications.scss */
-#applications-list .normal {
+#applications-list .normal, .applications-table .normal {
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0 -5600px;
@@ -5771,21 +5855,21 @@ ul.attachments-list li.mandatory-attachments {
   height: 24px;
 }
 /* line 202, ../sass/views/_applications.scss */
-#applications-list .unseen-comments {
+#applications-list .unseen-comments, .applications-table .unseen-comments {
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0 -4295px;
   width: 21px;
 }
 /* line 207, ../sass/views/_applications.scss */
-#applications-list .unseen-indicators {
+#applications-list .unseen-indicators, .applications-table .unseen-indicators {
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0 -4597px;
   width: 25px;
 }
 /* line 212, ../sass/views/_applications.scss */
-#applications-list .unseen-attachments {
+#applications-list .unseen-attachments, .applications-table .unseen-attachments {
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0 -4496px;
@@ -8357,50 +8441,50 @@ div.attachment-multiselect-content tr.attachment-group-header {
 /*
   Lupapalvelu CSS:
 */
-/* line 151, ../sass/main.scss */
+/* line 152, ../sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 157, ../sass/main.scss */
+/* line 158, ../sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 161, ../sass/main.scss */
+/* line 162, ../sass/main.scss */
 .hidden {
   display: none !important;
 }
 
-/* line 165, ../sass/main.scss */
+/* line 166, ../sass/main.scss */
 .inline {
   display: inline;
 }
 
-/* line 169, ../sass/main.scss */
+/* line 170, ../sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 173, ../sass/main.scss */
+/* line 174, ../sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 177, ../sass/main.scss */
+/* line 178, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 182, ../sass/main.scss */
+/* line 183, ../sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 186, ../sass/main.scss */
+/* line 187, ../sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -8412,27 +8496,27 @@ div.attachment-multiselect-content tr.attachment-group-header {
   display: table-cell;
 }
 
-/* line 197, ../sass/main.scss */
+/* line 198, ../sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 205, ../sass/main.scss */
+/* line 206, ../sass/main.scss */
 .table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 211, ../sass/main.scss */
+/* line 212, ../sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 216, ../sass/main.scss */
+/* line 217, ../sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -8446,47 +8530,47 @@ div.pzbDiv {
   font-size: 0.8em;
   color: #333;
 }
-/* line 229, ../sass/main.scss */
+/* line 230, ../sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 231, ../sass/main.scss */
+/* line 232, ../sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 237, ../sass/main.scss */
+/* line 238, ../sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 242, ../sass/main.scss */
+/* line 243, ../sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 244, ../sass/main.scss */
+/* line 245, ../sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 247, ../sass/main.scss */
+/* line 248, ../sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 248, ../sass/main.scss */
+/* line 249, ../sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 251, ../sass/main.scss */
+/* line 252, ../sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 253, ../sass/main.scss */
+/* line 254, ../sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 255, ../sass/main.scss */
+/* line 256, ../sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }

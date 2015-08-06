@@ -3,7 +3,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [sade.core :refer :all]
@@ -61,7 +61,7 @@
     (application/insert-application foreman-app)
     (when task
       (let [updates [[[:asiointitunnus] (:id foreman-app)]]]
-        (commands/persist-model-updates application "tasks" task updates created)))
+        (doc-persistence/persist-model-updates application "tasks" task updates created)))
     (ok :id (:id foreman-app) :auth (:auth foreman-app))))
 
 (defcommand update-foreman-other-applications
@@ -93,7 +93,7 @@
   (let [task (util/find-by-id taskId (:tasks application))]
     (if task
       (let [updates [[[:asiointitunnus] foremanAppId]]]
-        (commands/persist-model-updates application "tasks" task updates created))
+        (doc-persistence/persist-model-updates application "tasks" task updates created))
       (fail :error.not-found))))
 
 (defn foreman-app-check [_ application]

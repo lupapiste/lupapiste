@@ -34,6 +34,10 @@ jQuery(document).ready(function() {
     "vetuma-init",
     "vetuma-status",
     "help-toggle"
+    "applications-search",
+    "applications-search-results",
+    "applications-search-filter",
+    "applications-search-paging"
   ];
 
   _.forEach(components, function(component) {

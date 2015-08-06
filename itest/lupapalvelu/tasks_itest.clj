@@ -5,7 +5,7 @@
             [lupapalvelu.xml.krysp.reader :as reader]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]))
 
 (defn- task-by-type [task-type task] (= (str "task-" task-type) (-> task :schema-info :name)))
@@ -76,7 +76,7 @@
                          (model/modifications-since-approvals (:body schema) [] (:data %) {} true modified)) tasks)) => 0))
 
   (let [task-id (-> tasks first :id)
-        task (commands/by-id application :tasks task-id)]
+        task (doc-persistence/by-id application :tasks task-id)]
 
     (fact "Pena can't approve"
       (command pena :approve-task :id application-id :taskId task-id) => unauthorized?)
@@ -84,14 +84,14 @@
     (facts* "Approve the first task"
       (let [_ (command sonja :approve-task :id application-id :taskId task-id) => ok?
             updated-app (query-application pena application-id)
-            updated-task (commands/by-id updated-app :tasks task-id)]
+            updated-task (doc-persistence/by-id updated-app :tasks task-id)]
         (:state task) => "requires_user_action"
         (:state updated-task) => "ok"))
 
     (facts* "Reject the first task"
       (let [_ (command sonja :reject-task :id application-id :taskId task-id) => ok?
             updated-app (query-application pena application-id)
-            updated-task (commands/by-id updated-app :tasks task-id)]
+            updated-task (doc-persistence/by-id updated-app :tasks task-id)]
         (:state updated-task) => "requires_user_action")))
 
   (facts "create task"

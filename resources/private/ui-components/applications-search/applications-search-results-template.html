@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="applications-search-results-template">
+      <div class="search-tabs">
+        <div class="tab-buttons">
+          <ul data-bind="foreach: tabs">
+            <li data-bind="ltext: 'applications.filter.' + $data, click: $parent.selectTab,
+                           css: {selected: $parent.selectedTab() === $data}"></li>
+          </ul>
+          <button
+            data-bind="click: $parent.create"
+            data-test-id="applications-create-new"
+            class="btn-primary application-create">
+            <span class="icon add"></span><span data-bind="ltext: 'request.create'"></span>
+          </button>
+
+          <button
+            data-bind="click: $parent.createWithPrevPermit, visible: $parent.authorizationModel.ok('create-application-from-previous-permit')"
+            data-test-id="applications-create-new-with-prev-permit"
+            class="btn-primary application-from-previous">
+            <span class="icon add"></span><span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span>
+          </button>
+        </div>
+        <div>
+          <table id="applications-list" class="applications-table" data-bind="if: gotResults()">
+            <thead>
+              <tr> <!-- TODO refactor with foreach and add operation sorter -->
+                <th colspan="4" data-bind="ltext: 'applications.indicators',
+                                           attr: {colspan: lupapisteApp.models.currentUser.isAuthority() ? '4' : '3'}"></th>
+                <th class="sorting" data-bind="click: _.partial(sortBy, 'type'),
+                                               ltext: 'applications.type',
+                                               css: {asc: dataProvider.sort.field() === 'type' ? dataProvider.sort.asc() : false,
+                                                     desc: dataProvider.sort.field() === 'type' ? !dataProvider.sort.asc() : false}"></th>
+                <th class="sorting" data-bind="click: _.partial(sortBy, 'location'),
+                                               ltext: 'applications.location',
+                                               css: {asc: dataProvider.sort.field() === 'location' ? dataProvider.sort.asc() : false,
+                                                     desc: dataProvider.sort.field() === 'location' ? !dataProvider.sort.asc() : false}"></th>
+                <th data-bind="ltext: 'applications.operation'"></th>
+                <th class="sorting" data-bind="click: _.partial(sortBy, 'applicant'),
+                                               ltext: 'applications.applicant',
+                                               css: {asc: dataProvider.sort.field() === 'applicant' ? dataProvider.sort.asc() : false,
+                                                     desc: dataProvider.sort.field() === 'applicant' ? !dataProvider.sort.asc() : false}"></th>
+                <th class="sorting" data-bind="click: _.partial(sortBy, 'submitted'),
+                                               ltext: 'applications.sent',
+                                               css: {asc: dataProvider.sort.field() === 'submitted' ? dataProvider.sort.asc() : false,
+                                                     desc: dataProvider.sort.field() === 'submitted' ? !dataProvider.sort.asc() : false}"></th>
+                <th class="sorting" data-bind="click: _.partial(sortBy, 'modified'),
+                                               ltext: 'applications.updated',
+                                               css: {asc: dataProvider.sort.field() === 'modified' ? dataProvider.sort.asc() : false,
+                                                     desc: dataProvider.sort.field() === 'modified' ? !dataProvider.sort.asc() : false}"></th>
+                <th class="sorting" data-bind="click: _.partial(sortBy, 'state'),
+                                               ltext: 'applications.status',
+                                               css: {asc: dataProvider.sort.field() === 'state' ? dataProvider.sort.asc() : false,
+                                                     desc: dataProvider.sort.field() === 'state' ? !dataProvider.sort.asc() : false}"></th>
+                <th class="sorting" data-bind="click: _.partial(sortBy, 'handler'),
+                                               ltext: 'applications.authority',
+                                               css: {asc: dataProvider.sort.field() === 'handler' ? dataProvider.sort.asc() : false,
+                                                     desc: dataProvider.sort.field() === 'handler' ? !dataProvider.sort.asc() : false}"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: data">
+              <tr class="application-row" data-bind="click: pageutil.openApplicationPage, attr: {'data-id': $data.id, 'data-test-address': $data.address}">
+                <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
+                <td data-bind="if: $data.authorityNotice || $data.urgency !== 'normal'" class="indicator-count" data-test-col-name="urgent">
+                  <div data-bind="click: _.partialRight($parent.openApplicationTargeted, 'notice'), clickBubble: false,
+                                  attr: {title: _.trim($data.authorityNotice) ? loc('notice.prompt') + ': ' + _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency]),
+                                         'class': 'urgency ' + $data.urgency}"></div>
+                </td>
+                <!-- /ko -->
+                <td data-bind="if: $data.indicators > 0" class="indicator-count" data-test-col-name="indicators">
+                  <div class="unseen-indicators" data-bind="text: $data.indicators > 99 ? '*' : $data.indicators,
+                                  attr: {title: loc('info.title')}"></div>
+                </td>
+                <td data-bind="if: $data.unseenComments > 0,
+                               click: _.partialRight($parent.openApplicationTargeted, 'conversation'), clickBubble: false" class="indicator-count" data-test-col-name="unseenComments">
+                  <div class="unseen-comments" data-bind="text: $data.unseenComments > 99 ? '*' : $data.unseenComments,
+                                    attr: {title: loc('conversation.title')}"></div>
+                </td>
+                <td data-bind="if: $data.attachmentsRequiringAction > 0,
+                               click: _.partialRight($parent.openApplicationTargeted, 'attachments'), clickBubble: false" class="indicator-count" data-test-col-name="newAttachments">
+                  <div class="unseen-attachments" data-bind="text: $data.attachmentsRequiringAction > 99 ? '*' : $data.attachmentsRequiringAction,
+                                    attr: {title: loc('attachments.title')}"></div>
+                </td>
+                <td data-bind="ltext: 'applications.' + $data.kind" data-test-col-name="type"></td>
+                <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
+                <td data-bind="ltext: 'operations.' + $data.primaryOperation.name" data-test-col-name="operation"></td>
+                <td data-bind="text: $data.applicant" data-test-col-name="applicant"></td>
+                <td data-bind="dateTimeString: $data.sent" data-test-col-name="sent"></td>
+                <td data-bind="dateTimeString: $data.modified" data-test-col-name="modified"></td>
+                <td data-bind="ltext: $data.state" data-test-col-name="status"></td>
+                <td data-bind="fullName: $data.authority" data-test-col-name="authority"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

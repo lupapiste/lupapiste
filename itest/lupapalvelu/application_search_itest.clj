@@ -12,14 +12,14 @@
 (defn- num-of-results? [n response]
   (and
     (ok? response)
-    (= n (get-in response [:data :iTotalDisplayRecords]))
-    (= n (count (get-in response [:data :aaData])))))
+    (= n (get-in response [:data :totalCount]))
+    (= n (count (get-in response [:data :applications])))))
 
 (def no-results? (partial num-of-results? 0))
 (def one-result? (partial num-of-results? 1))
 
 (defn- search [query-s]
-  (datatables mikko :applications-for-datatables :params {:filter-search query-s}))
+  (datatables mikko :applications-search :searchText query-s))
 
 (facts* "Search"
   (let [property-id (str sonja-muni "-123-0000-1234")
@@ -32,7 +32,7 @@
         id-matches? (fn [response]
                       (and
                         (one-result? response)
-                        (= (get-in response [:data :aaData 0 :id]) application-id)))]
+                        (= (get-in response [:data :applications 0 :id]) application-id)))]
 
     (command mikko :add-operation :id application-id :operation "pientalo") => ok?
     (:secondaryOperations (query-application mikko application-id)) => seq
