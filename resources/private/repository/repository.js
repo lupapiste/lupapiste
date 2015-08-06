@@ -126,6 +126,9 @@ var repository = (function() {
             calculateAttachmentStateIndicators(att, application);
             setAttachmentOperation(application.allOperations, att);
           });
+          application.tags = _.map(application.tags || [], function(tagId) {
+            return {id: tagId, label: util.getIn(application, ["organizationMeta", "tags", tagId])};
+          });
           hub.send("application-loaded", {applicationDetails: loading});
           if (_.isFunction(callback)) {
             callback(application);
