@@ -140,7 +140,10 @@ $lupicon-size: 22px;
         content: "\e619";
 }
 .lupicon-circle-plus:before {
-        content: "\e61a";
+  content: "\e61a";
+}
+.lupicon-circle-question {
+  cursor: pointer;
 }
 .lupicon-circle-question:before {
         content: "\e61b";

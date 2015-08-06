@@ -1,7 +1,6 @@
 *** Settings ***
 
-Documentation  Mikko adds an attachment
-Suite setup     Apply minimal fixture now
+Documentation  Mikko adds an attachment to application
 Suite teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
@@ -26,7 +25,7 @@ Dropdown options for attachment actions should look correct for Mikko
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
@@ -38,7 +37,7 @@ Mikko deletes attachment immediately by using remove icon
 
 Mikko adds again txt attachment with comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  Poistetun liitteen kommentti  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${TXT_TESTFILE_PATH}  Poistetun liitteen kommentti  Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
   Comment count is  1
@@ -73,7 +72,7 @@ Comment is present after delete
 
 Mikko adds txt attachment with comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko opens application to authorities
   Open to authorities  pliip
