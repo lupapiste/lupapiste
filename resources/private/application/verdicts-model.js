@@ -63,7 +63,7 @@ LUPAPISTE.VerdictsModel = function() {
       .success(function(d) {
         repository.load(self.applicationId, self.newPending, function(application) {
           LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(application, self.authorities, d.verdictId);
-          window.location.hash = "!/verdict/" + self.applicationId + "/" + d.verdictId;
+          pageutil.openPage("verdict", self.applicationId + "/" + d.verdictId);
         });})
     .call();
     return false;
@@ -72,7 +72,7 @@ LUPAPISTE.VerdictsModel = function() {
   self.openVerdict = function(bindings, verdict) {
     var applicationId = getApplicationId(bindings);
     LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(bindings.application._js, self.authorities, verdict.id);
-    window.location.hash = "!/verdict/" + applicationId + "/" + verdict.id;
+    pageutil.openPage("verdict", applicationId + "/" + verdict.id);
     return false;
   };
 

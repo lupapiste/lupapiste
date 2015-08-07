@@ -31,7 +31,7 @@
     var self = this;
 
     self.error = ko.observable();
-    self.saved = ko.observable();
+    self.saved = ko.observable(false);
     self.firstName = ko.observable().extend({ maxLength: 255 });
     self.lastName = ko.observable().extend({ maxLength: 255 });
     self.username = ko.observable();
@@ -179,11 +179,12 @@
     };
 
     self.editUsers = function() {
-      window.location.hash = "#!/company/" + self.company.id() + "/users/";
+
+      pageutil.openPage("company", self.company.id() + "/users/");
     };
 
     self.editCompany = function() {
-      window.location.hash = "#!/company/" + self.company.id();
+      pageutil.openPage("company", self.company.id());
     };
 
     self.saved.subscribe(self.updateUserName);

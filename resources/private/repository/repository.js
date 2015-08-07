@@ -126,6 +126,9 @@ var repository = (function() {
             calculateAttachmentStateIndicators(att, application);
             setAttachmentOperation(application.allOperations, att);
           });
+          application.tags = _(application.tags || []).map(function(tagId) {
+            return {id: tagId, label: util.getIn(application, ["organizationMeta", "tags", tagId])};
+          }).filter("label").value();
           hub.send("application-loaded", {applicationDetails: loading});
           if (_.isFunction(callback)) {
             callback(application);
@@ -164,7 +167,7 @@ var repository = (function() {
 
   function showApplicationList() {
     pageutil.hideAjaxWait();
-    window.location.hash = "!/applications";
+    pageutil.openPage("applications");
   }
 
   // Cannot be changed to use LUPAPISTE.ModalDialog.showDynamicYesNo, because the id is registered with hub.subscribe.

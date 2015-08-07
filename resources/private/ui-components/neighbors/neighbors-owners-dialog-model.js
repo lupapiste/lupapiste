@@ -99,10 +99,10 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
 
     ajax
       .command("neighbor-add-owners", parameters)
-      .complete(_.partial(repository.load, applicationId,
-                  function() {
-                    hub.send("close-dialog");
-                  }))
+      .success(function() {
+        repository.load(applicationId);
+        hub.send("close-dialog");
+      })
       .call();
     return self;
   };

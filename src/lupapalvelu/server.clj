@@ -19,7 +19,7 @@
             [lupapalvelu.fixture.fixture-api]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.document.commands]
+            [lupapalvelu.document.document-api]
             [lupapalvelu.prev-permit-api]
             [lupapalvelu.user-api]
             [lupapalvelu.mml.yhteystiedot-api]

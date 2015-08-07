@@ -127,33 +127,33 @@
 
         (facts "reduced"
           (fact "reduced history should contain reduced history"
-            (let [reduced-history (query apikey :reduced-foreman-history :id base-foreman-app-id) => ok?
+            (let [reduced-history (query sonja :reduced-foreman-history :id base-foreman-app-id) => ok?
                   history-ids (map :foremanAppId (:projects reduced-history))]
               history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
               (some #{foreman-app-id4} history-ids) => nil?))
 
           (fact "reduced history should depend on the base application"
-            (let [reduced-history (query apikey :reduced-foreman-history :id foreman-app-id1) => ok?
+            (let [reduced-history (query sonja :reduced-foreman-history :id foreman-app-id1) => ok?
                   history-ids (map :foremanAppId (:projects reduced-history))]
               history-ids =>     (just [foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
               history-ids =not=> (has some #{foreman-app-id4 base-foreman-app-id})))
 
           (fact "Unknown foreman app id"
-            (query apikey :reduced-foreman-history :id "foobar") => fail?))
+            (query sonja :reduced-foreman-history :id "foobar") => fail?))
 
           (fact "Should be queriable only with a foreman application"
-            (let [resp (query apikey :foreman-history :id application-id) => fail?]
+            (let [resp (query sonja :foreman-history :id application-id) => fail?]
               (:text resp) => "error.not-foreman-app"))
 
         (facts "unreduced"
           (fact "unreduced history should not reduce history"
-            (let [unreduced-history (query apikey :foreman-history :id base-foreman-app-id) => ok?
+            (let [unreduced-history (query sonja :foreman-history :id base-foreman-app-id) => ok?
                   history-ids       (map :foremanAppId (:projects unreduced-history))]
               history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id4 foreman-app-id5] :in-any-order)))
 
           (fact "Unknown foreman app id"
-            (query apikey :foreman-history :id "foobar") => fail?)
+            (query sonja :foreman-history :id "foobar") => fail?)
 
           (fact "Should be queriable only with a foreman application"
-            (let [resp (query apikey :reduced-foreman-history :id application-id) => fail?]
+            (let [resp (query sonja :reduced-foreman-history :id application-id) => fail?]
               (:text resp) => "error.not-foreman-app")))))))

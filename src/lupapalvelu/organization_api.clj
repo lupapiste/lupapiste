@@ -10,15 +10,23 @@
            [java.io File])
 
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+            [clojure.set :as set]
             [clojure.string :as s]
+            [clojure.data.json :as json]
             [monger.operators :refer :all]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [noir.request :as request]
+            [camel-snake-kebab :as csk]
+            [me.raynes.fs :as fs]
+            [slingshot.slingshot :refer [try+]]
             [sade.core :refer [ok fail fail! now]]
             [sade.util :as util]
             [sade.env :as env]
-            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator]]
+            [sade.strings :as ss]
+            [sade.property :as p]
+            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
+            [lupapalvelu.states :as states]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
@@ -27,14 +35,8 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as o]
-            [camel-snake-kebab :as csk]
-            [sade.strings :as ss]
-            [sade.property :as p]
             [lupapalvelu.logging :as logging]
-            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
-            [me.raynes.fs :as fs]
-            [clojure.data.json :as json]
-            [slingshot.slingshot :refer [try+]]))
+            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]))
 ;;
 ;; local api
 ;;
@@ -102,10 +104,12 @@
   [{user :user}]
   (let [organization (o/get-organization (user/authority-admins-organization-id user))
         ops-with-attachments (organization-operations-with-attachments organization)
-        selected-operations-with-permit-type (selected-operations-with-permit-types organization)]
+        selected-operations-with-permit-type (selected-operations-with-permit-types organization)
+        allowed-roles (o/allowed-roles-in-organization organization)]
     (ok :organization (-> organization
                         (assoc :operationsAttachments ops-with-attachments
-                               :selectedOperations selected-operations-with-permit-type)
+                               :selectedOperations selected-operations-with-permit-type
+                               :allowedRoles allowed-roles)
                         (dissoc :operations-attachments :selected-operations))
         :attachmentTypes (organization-attachments organization))))
 
@@ -226,7 +230,7 @@
   {:description "returns operations addable for the application whose id is given as parameter"
    :parameters  [:id]
    :user-roles #{:applicant :authority}
-   :states      [:draft :open :submitted :complement-needed]}
+   :states      states/pre-sent-application-states}
   [{{:keys [organization permitType]} :application}]
   (when-let [org (o/get-organization organization)]
     (let [selected-operations (map keyword (:selected-operations org))]
@@ -377,19 +381,25 @@
   {:parameters [tags]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (let [org-id (user/authority-admins-organization-id user)]
-    (o/update-organization org-id {$set {:tags tags}})))
+  (let [org-id (user/authority-admins-organization-id user)
+        old-tag-ids (set (map :id (:tags (o/get-organization org-id))))
+        new-tag-ids (set (map :id tags))
+        removed-ids (set/difference old-tag-ids new-tag-ids)]
+    (when (seq removed-ids)
+      (mongo/update-by-query :applications {:tags {$in removed-ids} :organization org-id} {$pull {:tags {$in removed-ids}}}))
+    (o/update-organization org-id {$set {:tags (o/create-tag-ids tags)}})))
 
 (defquery get-organization-tags
   {:user-authz-roles #{:statementGiver}
+   :org-authz-roles action/reader-org-authz-roles
    :user-roles #{:authorityAdmin :authority}}
   [{{:keys [organizationId]} :data user :user}]
   (when (and organizationId (not ((keyword organizationId) (:orgAuthz user))))
     (fail! :error.unknown-organization))
   (if-let [org-id (if (user/authority-admin? user)
-                 (user/authority-admins-organization-id user)
-                 organizationId)]
-    (ok :tags (:tags (o/get-organization org-id)))
+                    (user/authority-admins-organization-id user)
+                    organizationId)]
+    (ok :tags (distinct (:tags (o/get-organization org-id))))
     (fail! :error.organization-not-found)))
 
 (defn- transform-coordinates-to-wgs84

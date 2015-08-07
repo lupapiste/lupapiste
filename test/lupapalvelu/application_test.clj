@@ -77,10 +77,11 @@
     (doseq [operation lupapalvelu.operations/operations]
       (let [[op {permit-type :permit-type}] operation
             application {:primaryOperation {:name (name op)} :permitSubtype nil}
-            operation-allowed (doc-result (add-operation-allowed? nil application) op)]
-        (if (or (not= permit-type "R") (not-allowed-for op))
-          (fact "Add operation not allowed" operation-allowed => (doc-check = error))
-          (fact "Add operation allowed" operation-allowed => (doc-check nil?)))))
+            operation-allowed (add-operation-allowed? nil application)]
+        (fact {:midje/description (name op)}
+          (if (or (not= permit-type "R") (not-allowed-for op))
+            (fact "Add operation not allowed" operation-allowed => error)
+            (fact "Add operation allowed" operation-allowed => nil?)))))
 
     (fact "Add operation not allowed for :muutoslupa"
       (add-operation-allowed? nil {:primaryOperation {:name "kerrostalo-rivitalo"} :permitSubtype :muutoslupa}) => error)))

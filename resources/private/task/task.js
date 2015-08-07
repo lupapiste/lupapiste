@@ -50,7 +50,7 @@ var taskPageController = (function() {
 
   function returnToApplication() {
     reload();
-    window.location.hash = "!/application/" + currentApplicationId + "/tasks";
+    pageutil.openApplicationPage({id: currentApplicationId}, "tasks");
   }
 
   function deleteTask() {

@@ -14,7 +14,8 @@ LUPAPISTE.Upload = {
   locked: ko.observable(),
   authority: ko.observable(),
   selectableOperations: ko.observableArray(),
-  selectedOperationId: ko.observable()
+  selectedOperationId: ko.observable(),
+  helpVisible: ko.observable(false)
 };
 
 LUPAPISTE.Upload.setModel = function(options) {

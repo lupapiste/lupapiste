@@ -22,13 +22,10 @@ var stamping = (function() {
 
     cancelStamping: function() {
       model.stampingMode(false);
-      var id = model.appModel.id();
+      model.appModel.open("attachments");
       model.appModel = null;
       model.attachments = null;
       model.authorization = null;
-
-      window.location.hash="!/application/" + id + "/attachments";
-      repository.load(id);
     },
 
     resetStamping: function() {
@@ -73,7 +70,7 @@ var stamping = (function() {
 
     setStampFields();
 
-    window.location.hash="!/stamping/" + model.appModel.id();
+    pageutil.openPage("stamping", model.appModel.id());
   }
 
   hub.onPageLoad("stamping", function() {
@@ -83,7 +80,7 @@ var stamping = (function() {
         model.stampingMode(false);
 
         var appId = pageutil.subPage();
-        repository.load(appId, null, function(application) {
+        repository.load(appId, _.noop, function(application) {
           lupapisteApp.setTitle(application.title);
 
           model.authorization = lupapisteApp.models.applicationAuthModel;

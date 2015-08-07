@@ -140,7 +140,8 @@
 
 (def services {"nls" (cache (* 3 60 60 24) (secure wfs/raster-images "nls"))
                "wms" (cache (* 3 60 60 24) (secure wfs/raster-images "wms"))
-               "wmts" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
+               "wmts/maasto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
+               "wmts/kiinteisto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "point-by-property-id" point-by-property-id-proxy
                "property-id-by-point" property-id-by-point-proxy
                "address-by-point" address-by-point-proxy

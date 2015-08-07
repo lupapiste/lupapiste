@@ -38,12 +38,6 @@
           <input type="submit" value="Lataa"/>
         </form>
 
-        <h2>Hae omistajatiedot (MML yhteystiedot rajapinta)</h2>
-        <form action="/api/raw/mml-owners" method="get">
-          <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
-          <input type="text" name="propertyId" placeholder="Kiinteistotunnus"/>
-          <input type="submit" value="Lataa XML"/>
-        </form>
       </div>
     </section>
   </body>

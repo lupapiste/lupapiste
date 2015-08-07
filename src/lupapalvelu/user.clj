@@ -7,7 +7,7 @@
             [monger.operators :refer :all]
             [monger.query :as query]
             [schema.core :as sc]
-            [sade.core :refer [fail fail! now]]
+            [sade.core :refer [ok fail fail! now]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -240,7 +240,7 @@
         organizations        (if (admin? caller) organizations (filter caller-organizations (or organizations caller-organizations)))
         role                 (:filter-role params)
         role                 (if (admin? caller) role :authority)
-        enabled              (if (admin? caller) (:filter-enabled params) true)]
+        enabled              (if (or (admin? caller) (authority-admin? caller)) (:filter-enabled params) true)]
     (merge {}
       (when (seq organizations) {:organizations organizations})
       (when role                {:role role})
@@ -526,8 +526,18 @@
 ;; ==============================================================================
 ;;
 
-(defn update-user-by-email [email data]
-  (mongo/update :users {:email (canonize-email email)} {$set data}))
+(defn update-user-by-email
+  "Returns (ok) or (fail :error.user-not-found)"
+  ([email data] (update-user-by-email email {} data))
+  ([email extra-query data]
+    {:pre [(string? email) (map? extra-query) (map? data)]}
+    (let [query (merge {:email (canonize-email email)} extra-query)
+          updates (condp every? (keys data)
+                    mongo/operator? data
+                    (complement mongo/operator?) {$set data})]
+      (if (pos? (mongo/update-n :users query updates))
+        (ok)
+        (fail :error.user-not-found)))))
 
 ;;
 ;; ==============================================================================

@@ -824,7 +824,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
             overwrite: overwriteWithBackendData,
             collection: self.getCollection()
           })
-          .success(_.partial(repository.load, self.appId))
+          .success(_.partial(repository.load, self.appId, _.noop))
           .onError("error.no-legacy-available", function(e) {
             notify.error(loc(e.text));
           })
