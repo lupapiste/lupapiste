@@ -151,6 +151,7 @@
   white-space: pre-line;
 }
 
+// New comments
 
 @mixin bubble ($text: $gray51, $bg: $gray246, $border: $gray187,
                $left: 5%, $nubbin: 10px ) {
@@ -158,12 +159,14 @@
   color: $text;
   background: $bg;
   width: 100%;
+  border-radius: 2px;
   padding: {
     left: 10px;
     right: 10px;
     bottom: 5px;
     top: 5px;
   }
+  margin-bottom: 1.5 * $nubbin;
   border: 1px solid $border;
   &:after, &:before {
               top: 100%;
@@ -191,7 +194,7 @@
     border-width: $nubbin + 1px;
     margin-left: -$nubbin - 1px;
   }
-  .headerfoobar {
+  .header {
     border-bottom: 2px solid $gray187;
     margin-bottom: 5px;
     padding-bottom: 5px;
@@ -201,17 +204,57 @@
     .sender {
       float: left;
       font-weight: bold;
+      .role {
+        text-transform: lowercase;
+        &:before {
+          content: "(";
+        }
+        &:after {
+          content: ")";
+        }
+      }
+      .to {
+        &:before {
+          margin-left: 12px;
+          margin-right: 12px;
+          content: "\2192"
+            }
+      }
     }
     .timestamp {
       float: right;
     }
   }
+  a {
+    @include link;
+  }
+  .deleted {
+    text-decoration: line-through;
+    //font-style: italic;
+  }
 }
 
-.comment-bubble-left {
+.comment-bubble {
   @include bubble;
 }
 
-.comment-bubble-right {
+.comment-bubble-authority {
   @include bubble( $left: 95% );
+  .header {
+    border-bottom-color: $turqo;
+  }
+}
+
+.comment-bubble.attachment,
+.comment-bubble-authority.attachment {
+  .header {
+    border-bottom-color: $orange;
+  }
+}
+
+.comment-bubble.for-me,
+.comment-bubble-authority.for-me {
+  .header {
+    border-bottom-color: $green;
+  }
 }

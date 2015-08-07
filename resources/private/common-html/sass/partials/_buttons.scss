@@ -372,8 +372,8 @@ button.btn-dialog, .btn-dialog {
 
 @mixin button-div-a ($name) {
   button.#{$name} { @content; }
-  div.#{$name} { @content; }
-  a.#{$name} { @content; }
+  div.btn.#{$name} { @content; }
+  a.btn.#{$name} { @content; }
 }
 
 @mixin styled-input ($bg, $hover-bg, $active-bg,

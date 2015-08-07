@@ -31,6 +31,12 @@ $lupicon-size: 22px;
                        -moz-osx-font-smoothing: grayscale;
                      }
 
+// Convenience modifier for marking icons.
+[class^="lupicon-"].primary,
+[class*=" lupicon-"].primary {
+  color: $orange-dark;
+}
+
 // Hand for help and close icons.
 .lupicon-circle-question, .lupicon-remove {
   cursor: pointer;

@@ -65,10 +65,10 @@
       .unseen-comments {
         @include spite-bg;
         background-position: 1px -5396px;
-        width: 23px;
+        width: $lupicon-size;
         height: 30px;
         padding-top: 3px;
-        margin-left: -6px;
+        //margin-left: -6px;
         margin-bottom: 4px;
         color: $color-text;
         text-shadow: none;
@@ -181,7 +181,7 @@
     clear: both;
   }
 
-  p, h1 {
+  h1 {
     color: #fff;
   }
 

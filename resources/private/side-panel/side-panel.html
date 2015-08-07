@@ -22,13 +22,11 @@
         <div class="content-wrapper">
             <div id="conversation-panel" data-bind="visible: showConversationPanel">
                 <div class="header">
-                    <h1>
-                        <span class="title" data-bind="ltext: 'conversation.title'"></span>
-                        <!-- <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span> -->
- <span data-bind="component: {
+                    <h1 class="inline-block title" data-bind="ltext: 'conversation.title'"></h1>
+                    <span data-bind="component: {
                                      name: 'help-toggle',
                                      params: {flag: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'}}"></span>
-                    </h1>
+
 
                     <!-- <p data-bind="slider: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p> -->
                 </div>
