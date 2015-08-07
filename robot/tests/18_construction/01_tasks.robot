@@ -120,7 +120,8 @@ Verify post-verdict attachments - Aloituskokous
 
 Open task
   [Arguments]  ${name}
-  Click Element  //div[@id='application-tasks-tab']//table//td/a[text()='${name}']
+  Wait until  Element should be visible  xpath=//div[@id='application-tasks-tab']//table[@class="tasks"]//td/a[text()='${name}']
+  Click Element  //div[@id='application-tasks-tab']//table[@class="tasks"]//td/a[text()='${name}']
   Wait Until  Element should be visible  xpath=//section[@id="task"]/h1/span[contains(., "${name}")]
   Wait Until  Element should be visible  taskAttachments
   Wait until  Element should be visible  taskDocgen
