@@ -393,14 +393,14 @@
   {:user-authz-roles #{:statementGiver}
    :org-authz-roles action/reader-org-authz-roles
    :user-roles #{:authorityAdmin :authority}}
-  [{{:keys [organizationId]} :data user :user}]
-  (when (and organizationId (not ((keyword organizationId) (:orgAuthz user))))
-    (fail! :error.unknown-organization))
-  (if-let [org-id (if (user/authority-admin? user)
-                    (user/authority-admins-organization-id user)
-                    organizationId)]
-    (ok :tags (distinct (:tags (o/get-organization org-id))))
-    (fail! :error.organization-not-found)))
+  [{{:keys [orgAuthz] :as user} :user}]
+  (if orgAuthz
+    (let [organisation-tags (mongo/select
+                                  :organizations
+                                  {:_id {$in (keys orgAuthz)} :tags {$exists true}}
+                                  [:tags])]
+      (ok :tags (into {} (mapv (juxt :id :tags) organization-tags))))
+    (fail :error.organization-not-found)))
 
 (defn- transform-coordinates-to-wgs84
   "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"

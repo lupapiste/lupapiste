@@ -253,9 +253,9 @@
     (command sonja :save-organization-tags :tags [{:id nil :label "illegal"}] =not=> ok?)
     (command pena :save-organization-tags :tags [{:id nil :label "makeja"}] =not=> ok?))
   (fact "tags get ids when saved"
-    (:tags (query sipoo :get-organization-tags)) => (just [(just {:id string? :label "makeja"})
-                                                            (just {:id string? :label "nigireja"})]))
+    (:tags (query sipoo :get-organization-tags)) => (just {:753-R (just [(just {:id string? :label "makeja"})
+                                                                         (just {:id string? :label "nigireja"})])}))
 
   (fact "only authority can fetch available tags"
     (query pena :get-organization-tags :organization "753-R") =not=> ok?
-    (map :label (:tags (query sonja :get-organization-tags :organizationId "753-R"))) => ["makeja" "nigireja"]))
+    (map :label (:753-R (:tags (query sonja :get-organization-tags)))) => ["makeja" "nigireja"]))
