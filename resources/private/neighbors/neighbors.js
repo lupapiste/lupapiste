@@ -69,7 +69,7 @@
     };
 
     self.done = function() {
-      pageutil.openApplicationPage({id: applicationId}, "/statement");
+      pageutil.openApplicationPage({id: applicationId}, "statement");
     };
 
     self.remove = function(neighbor) {
