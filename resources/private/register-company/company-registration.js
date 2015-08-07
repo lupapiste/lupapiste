@@ -73,7 +73,7 @@
 
   CompanyRegistration.prototype.init = function() {
     if (_.isEmpty(this.model().accountType())) {
-      window.location.hash = "!/register-company-account-type";
+      pageutil.openPage("register-company-account-type");
       return;
     }
     this.clearModel(this.companyFieldNames.concat(this.signerFieldNames));
@@ -99,16 +99,16 @@
 
     hub.send("company-info-submitted", {company: company, signer: signer});
 
-    window.location.hash = "!/register-company-signing";
+    pageutil.openPage("register-company-signing");
   };
 
   CompanyRegistration.prototype.continueToCompanyInfo  = function() {
-    window.location.hash = "!/register-company";
+    pageutil.openPage("register-company");
   };
 
   CompanyRegistration.prototype.cancelInfo = function() {
     this.clearModel();
-    window.location.hash = "!/register";
+    pageutil.openPage("register");
   };
 
   CompanyRegistration.prototype.cancelSign = function() {
@@ -116,7 +116,7 @@
       .command("cancel-sign", {processId: this.processId()})
       .call();
     this.clearModel();
-    window.location.hash = "!/register";
+    pageutil.openPage("register");
   };
 
   var companyRegistration = new CompanyRegistration();
@@ -125,7 +125,7 @@
 
   hub.onPageLoad("register-company-signing", function() {
     if (_.isEmpty(companyRegistration.model().accountType())) {
-      window.location.hash = "!/register-company-account-type";
+      pageutil.openPage("register-company-account-type");
     }
   });
 

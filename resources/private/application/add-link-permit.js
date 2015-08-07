@@ -110,7 +110,7 @@ LUPAPISTE.AddLinkPermitModel = function() {
   //
 
   self.followAppLink = function(linkId) {
-    window.location.hash = "!/application/" + linkId;
+    pageutil.openPage("application", linkId);
     return false;
   };
 

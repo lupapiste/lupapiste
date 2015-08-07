@@ -95,7 +95,7 @@ LUPAPISTE.verdictPageController = (function($) {
 
     self.returnToApplication = function() {
       repository.load(currentApplicationId);
-      window.location.hash = "!/application/" + currentApplicationId + "/verdict";
+      pageutil.openApplicationPage({id:currentApplicationId}, "verdict");
     };
 
     self.save = function(onSuccess) {
@@ -146,8 +146,7 @@ LUPAPISTE.verdictPageController = (function($) {
       ajax
       .command(cmd, {id: currentApplicationId, verdictId: currentVerdictId})
       .success(function() {
-        repository.load(currentApplicationId);
-        window.location.hash = "!/application/" + currentApplicationId + "/verdict";
+        self.returnToApplication();
       })
       .processing(self.processing)
       .call();

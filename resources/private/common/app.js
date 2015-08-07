@@ -101,7 +101,7 @@ var LUPAPISTE = LUPAPISTE || {};
         if (_.isFunction(window.location.replace)) {
           window.location.replace(startPageHref + "#!/" + self.startPage);
         } else {
-          window.location.hash = "!/" + self.startPage;
+          pageutil.openPage(self.startPage);
         }
         return;
       }
@@ -224,7 +224,7 @@ var LUPAPISTE = LUPAPISTE || {};
             self.openPage([self.startPage]);
           } else {
             // open normally
-            window.location.hash = "!/" + self.startPage;
+            pageutil.openPage(self.startPage);
           }
         } else {
           // fallback

@@ -69,7 +69,7 @@
     };
 
     self.done = function() {
-      window.location.hash = "!/application/" + applicationId + "/statement";
+      pageutil.openApplicationPage({id: applicationId}, "/statement");
     };
 
     self.remove = function(neighbor) {
