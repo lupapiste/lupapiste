@@ -141,10 +141,14 @@
         <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}"
                id="prev-permit-address-search" type="text" class="form-input text" autofocus="autofocus" />
       </div><br>
-      <button data-bind="click: createApplicationWithPrevPermit, enable: creatingAppWithPrevPermitOk"
+      <button data-bind="click: createApplicationWithPrevPermit,
+                         enable: creatingAppWithPrevPermitOk,
+                         css: {waiting: pending}"
               data-test-id="test-prev-permit-create-button" id="prev-permit-create-button" class="btn btn-primary">
-        <em data-bind="visible: pending" class="button-loader"></em>
-        <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span><span class="icon search left-align"></span>
+          <!-- <i class="lupicon-search"></i> -->
+          <i class="spin lupicon-refresh"></i>
+          
+          <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span>
       </button>
     </div>
 

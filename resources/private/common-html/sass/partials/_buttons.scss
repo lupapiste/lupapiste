@@ -311,12 +311,29 @@ button.btn-dialog, .btn-dialog {
     display: table-cell;
     margin: 0;
   }
-  :nth-child(2) {
-    // Gap between icon and text.
+  :first-child {
     padding: {
-      left: 10px;
-     }
+      right: 10px;
+    }
   }
+  :last-child {
+    padding: {
+    right: 0px !important;
+    }
+  }
+  /* :nth-child(2) { */
+  /*   // Gap between icon and text. */
+  /*   padding: { */
+  /*     left: 10px; */
+  /*   } */
+  /* } */
+  /* // precaution for the cases where the */
+  /* // second child is actually a wait icon. */
+  /* :nth-child(3) { */
+  /*   padding: { */
+  /*     left: 10px; */
+  /*   } */
+  /* } */
 }
 
 .caps {
@@ -516,12 +533,24 @@ button.function {
 
 i.wait {
   display: none;
+  padding: 0 !important;
 }
 
 .waiting {
-  .wait {
+  i {
+    display: none;
+  }
+  i.wait {
     display: table-cell;
   }
+}
+
+.waiting .wait + span {
+  padding-left: 10px;
+}
+
+span + .waiting.wait {
+  padding-right: 10px;
 }
 
 // DataTable tweaks.
