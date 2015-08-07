@@ -65,6 +65,7 @@ Return to listing
   Tab should be visible  tasks
 
 Delete Muu tarkastus
+  Wait until  Element should be visible  xpath=//div[@id="application-tasks-tab"]//table[@class="tasks"]//tbody/tr
   Open task  loppukatselmus
   Click enabled by test id  delete-task
   Confirm  dynamic-yes-no-confirm-dialog
@@ -120,5 +121,6 @@ Verify post-verdict attachments - Aloituskokous
 Open task
   [Arguments]  ${name}
   Click Element  //div[@id='application-tasks-tab']//table//td/a[text()='${name}']
+  Wait Until  Element should be visible  xpath=//section[@id="task"]/h1/span[contains(., "${name}")]
   Wait Until  Element should be visible  taskAttachments
   Wait until  Element should be visible  taskDocgen
