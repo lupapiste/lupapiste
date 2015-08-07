@@ -51,10 +51,11 @@ LUPAPISTE.TagsEditorModel = function(params) {
     if (saveSubscription) {
       saveSubscription.dispose();
     }
+    var orgId = _(lupapisteApp.models.currentUser.orgAuthz()).keys().first();
     ajax
       .query("get-organization-tags")
       .success(function(res) {
-        var tags = _.map(res.tags, function(t) {
+        var tags = _.map(res.tags[orgId], function(t) {
           var model = new TagModel(t, self.save);
           return model;
         });
