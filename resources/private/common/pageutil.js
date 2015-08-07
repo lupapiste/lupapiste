@@ -74,9 +74,9 @@ var pageutil = (function($) {
   }
 
   function openApplicationPage(application, suffix) {
-    var kind = application.infoRequest ? "inforequest" : "application";
+    var kind =  ko.unwrap(application.infoRequest) ? "inforequest" : "application";
     hub.send("track-click", {category:"Applications", label: kind, event:"openApplication"});
-    openPage(kind + "/" + application.id, suffix);
+    openPage(kind + "/" +  ko.unwrap(application.id), suffix);
   }
 
   $(function() {

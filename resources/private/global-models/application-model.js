@@ -537,6 +537,11 @@ LUPAPISTE.ApplicationModel = function() {
     }
   }
 
+  self.open = function(tab) {
+    var suffix = self.infoRequest() ? null : tab;
+    pageutil.openApplicationPage(self, suffix);
+  }
+
   self.targetTab.subscribe(function(target) {
     if (target.tab === "requiredFieldSummary") {
       ajax
@@ -547,7 +552,7 @@ LUPAPISTE.ApplicationModel = function() {
         .processing(self.processing)
         .call();
     }
-    window.location.hash = "!/application/" + self.id() + "/" + target.tab;
+    self.open(target.tab);
     if (target.id) {
       var maxRetries = 10; // quite arbitrary, might need to increase for slower browsers
       focusOnElement(target.id, maxRetries);

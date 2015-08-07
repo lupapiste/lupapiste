@@ -16,3 +16,13 @@ Mikko creates an inforequests
 
 Mikko adds an attachment
   Add attachment  inforequest  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Asuinkerrostalon tai rivitalon rakentaminen
+
+Mikko open attachment details
+  Click link  xpath=//span[@class="attachment-details"]//a
+  Wait Until  Element Should Be Visible  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
+  Wait Until  Page Should Contain  ${TXT_TESTFILE_NAME}
+
+Mikko returns to inforequest
+  Click link  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
+  Wait Until  Element Should Not Be Visible  //section[@id="application"]
+  Wait Until  Element Should Be Visible  //section[@id="inforequest"]
