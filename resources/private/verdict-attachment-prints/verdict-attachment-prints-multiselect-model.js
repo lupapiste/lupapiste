@@ -17,8 +17,8 @@
         unSelectedAttachmentIds: unSelectedAttachmentsIds
       })
       .success(function() {
-        window.location.hash = "!/application/" + id + "/attachments";
-        repository.load(id);
+        model.appModel.open("attachments");
+        model.appModel.reload();
       })
       .error(function() {
         notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
@@ -28,14 +28,12 @@
     },
 
     cancelSelecting: function() {
-      var id = model.appModel.id();
       model.selectingMode(false);
-      model.appModel = null;
       model.attachments = null;
       model.authorization = null;
 
-      window.location.hash="!/application/" + id + "/attachments";
-      repository.load(id);
+      model.appModel.open("attachments");
+      model.appModel = null;
     }
   };
 
@@ -52,7 +50,7 @@
     model.filteredAttachments = filterAttachments(ko.mapping.toJS(appModel.attachments()));
     model.authorization = lupapisteApp.models.applicationAuthModel;
 
-    window.location.hash="!/verdict-attachments-select/" + model.appModel.id();
+    pageutil.openPage("verdict-attachments-select", model.appModel.id());
   }
 
   hub.onPageLoad("verdict-attachments-select", function() {

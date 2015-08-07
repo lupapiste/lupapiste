@@ -27,7 +27,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.pending = ko.observable(false);
   ko.computed(function() {
-    return self.pending() ? pageutil.showAjaxWait() : pageutil.hideAjaxWait();
+    return self.pending() ? pageutil.showAjaxWait(loc("applications.loading")) : pageutil.hideAjaxWait();
   });
 
   self.onSuccess = function(res) {

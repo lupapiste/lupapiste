@@ -87,7 +87,7 @@
         }
 
       } else {
-        window.location.hash = "!/404";
+        pageutil.openPage("404");
       }
     };
 
@@ -105,7 +105,7 @@
       ajax
         .command("give-statement", {id: applicationId, statementId: statementId, status: self.selectedStatus(), text: self.text(), lang: loc.getCurrentLanguage()})
         .success(function() {
-          window.location.hash = "!/application/"+applicationId+"/statement";
+          pageutil.openApplicationPage({id: applicationId}, "statement");
           repository.load(applicationId);
           return false;
         })
@@ -124,7 +124,7 @@
       .command("delete-statement", {id: applicationId, statementId: statementId})
       .success(function() {
         repository.load(applicationId);
-        window.location.hash = "!/application/"+applicationId+"/statement";
+        pageutil.openApplicationPage({id: applicationId}, "statement");
         return false;
       })
       .call();

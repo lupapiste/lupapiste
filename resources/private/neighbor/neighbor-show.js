@@ -32,7 +32,9 @@
       var a = e.pagePath[0],
           n = e.pagePath[1],
           t = e.pagePath[2];
-      if (!a || !n || !t) { window.location.hash = "!/404"; }
+      if (!a || !n || !t) {
+        pageutil.openPage("404");
+      }
       self
         .pending(false)
         .application(null)

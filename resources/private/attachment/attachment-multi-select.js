@@ -12,14 +12,12 @@ LUPAPISTE.AttachmentMultiSelect = function() {
     moveAttachmets: undefined,
 
     cancelSelecting: function() {
-      var id = self.model.appModel.id();
       self.model.selectingMode(false);
-      self.model.appModel = undefined;
       self.model.filteredAttachments = undefined;
       self.model.authorization = undefined;
-
-      window.location.hash="!/application/" + id + "/attachments";
-      repository.load(id);
+      self.model.appModel.open("attachments");
+      self.model.appModel.reload();
+      self.model.appModel = undefined;
     }
   };
 

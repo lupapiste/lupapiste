@@ -173,7 +173,7 @@ LUPAPISTE.ForemanModel = function() {
   };
 
   self.openApplication = function(id) {
-    window.location.hash = "!/application/" + id;
+    pageutil.openApplicationPage({id:id});
   };
 
   self.submit = function() {

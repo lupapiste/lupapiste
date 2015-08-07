@@ -454,7 +454,7 @@ Add attachment
   Click element     test-save-new-attachment
   Unselect Frame
   Wait until  Element should not be visible  upload-dialog
-  Run Keyword If  '${kind}' == 'application'  Wait Until Page Contains  Muu liite
+  Wait Until Page Contains  Muu liite
   Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
 
 Set application attachment details on upload
