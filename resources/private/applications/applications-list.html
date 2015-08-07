@@ -26,8 +26,7 @@
         </div>
       </div>
     </div>
-
-    <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
+    <!-- ko if: lupapisteApp.models.currentUser.loaded() && init -->
     <div data-bind="component: 'applications-search'"></div>
     <!-- /ko -->
   </section>
