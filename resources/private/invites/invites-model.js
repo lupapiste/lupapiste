@@ -43,12 +43,12 @@ LUPAPISTE.InvitesModel = function() {
   };
 
   self.declineInvite = function(model) {
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
-              loc("applications.declineInvitation.header"),
-              loc("applications.declineInvitation.message"),
-              {title: loc("yes"), fn: acceptDecline(model.application)},
-              {title: loc("no")}
-            );
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+      loc("applications.declineInvitation.header"),
+      loc("applications.declineInvitation.message"),
+      {title: loc("yes"), fn: acceptDecline(model.application)},
+      {title: loc("no")}
+    );
   };
 
   hub.onPageLoad("applications", function() {
