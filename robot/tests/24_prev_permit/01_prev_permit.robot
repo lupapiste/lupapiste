@@ -71,8 +71,11 @@ Cancel the created application and re-fetch application
   Click button  prev-permit-create-button
 
 A new application is opened, still with same property id
+  Wait until  Element should be visible  application
+  Wait for jQuery
+  Wait until  Element should not contain  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${applicationid}
   Wait until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  186-3-356-6
-  ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
+  ${newApplicationid} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
   Should Not Be Equal As Strings  ${newApplicationid}  ${applicationid}
 
 
