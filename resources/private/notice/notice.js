@@ -44,6 +44,7 @@ LUPAPISTE.NoticeModel = function() {
   self.selectedTags = ko.observableArray([]);
 
   self.applicationTagsProvider = null;
+  self.showTagsComponent = ko.observable(false);
 
   var subscriptions = [];
 
@@ -107,6 +108,7 @@ LUPAPISTE.NoticeModel = function() {
     self.authorityNotice(application.authorityNotice);
     self.selectedTags(application.tags);
     self.applicationTagsProvider = new LUPAPISTE.ApplicationTagsDataProvider(application, self.selectedTags);
+    self.showTagsComponent(true);
     subscribe();
   };
 };
