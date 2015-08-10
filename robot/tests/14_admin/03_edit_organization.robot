@@ -2,7 +2,7 @@
 
 Documentation  Admin edits organization
 Suite setup     SolitaAdmin logs in
-Suite teardown  Logout
+Suite teardown  Apply minimal fixture now
 Resource       ../../common_resource.robot
 
 *** Test Cases ***
@@ -67,6 +67,7 @@ Admin impersonated Sipoo authority
 
 Admin sees Mikko's inforequest
   Request should be visible  ${appname}
+  [Teardown]  Logout
 
 *** Keywords ***
 

@@ -49,11 +49,11 @@
             </div>
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyName'"></label>
-              <input class="form-input text" data-bind="textInput: model().name, enable: edit" type="text" maxlength="64"/>
+              <input class="form-input text" data-bind="textInput: model().name, enable: edit" type="text" maxlength="64" data-test-id="edit-company-name" />
             </div>
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyY'"></label>
-              <input class="form-input text" data-bind="value: model().y, enable: false" type="text" maxlength="9"/>
+              <input class="form-input text" data-bind="value: model().y, enable: false" type="text" maxlength="9" data-test-id="edit-company-y" />
             </div>
 
             <h2 data-bind="ltext: 'register.company.form.billing'"></h2>
