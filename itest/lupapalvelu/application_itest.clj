@@ -94,7 +94,7 @@
          (:id authority-before-assignation) => nil
          authority-after-assignation => (contains {:id ronja-id})
          (fact "Authority is not able to submit"
-           sonja =not=> (allowed? sonja :submit-application :id application-id :confirm false))))
+           sonja =not=> (allowed? sonja :submit-application :id application-id))))
 
 (fact* "Assign application to an authority and then to no-one"
        (let [application-id (create-app-id pena :propertyId sipoo-property-id)
@@ -118,16 +118,16 @@
         (:opened application) => truthy
         (:opened application) => (:created application)))
     (fact "Authority could submit her own application"
-      sonja => (allowed? :submit-application :id application-id :confirm false))
+      sonja => (allowed? :submit-application :id application-id))
     (fact "Application is submitted"
-      (let [resp        (command sonja :submit-application :id application-id :confirm false)
+      (let [resp        (command sonja :submit-application :id application-id)
             application (query-application sonja application-id)]
         resp => ok?
         (:state application) => "submitted"))))
 
 (facts* "Application has opened when submitted from draft"
   (let [{id :id :as app1} (create-application pena) => truthy
-        resp (command pena :submit-application :id id :confirm false) => ok?
+        resp (command pena :submit-application :id id) => ok?
         app2 (query-application pena id) => truthy]
     (:opened app1) => nil
     (:opened app2) => number?))
@@ -403,7 +403,7 @@
                                      :address (:address application) :propertyId (:propertyId application)) => ok?)
 
     ; applicant submits and authority gives verdict
-    (command pena :submit-application :id application-id :confirm false)
+    (command pena :submit-application :id application-id)
     (command sonja :check-for-verdict :id application-id)
 
     (fact "applicant should not be authorized to change location anymore"
