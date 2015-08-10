@@ -15,7 +15,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.query = self.dataProvider.query;
 
   self.inputSelected = ko.observable(false);
-  self.inputSelected.subscribe(function(v) {console.log("inputselected", v);});
   self.dropdownClick = ko.observable(false);
 
   self.dropdownVisible = ko.computed(function() {
