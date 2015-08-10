@@ -15,7 +15,7 @@ var attachment = (function() {
       .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
       .success(function() {
         repository.load(applicationId);
-        window.location.hash = "!/application/"+applicationId+"/attachments";
+        applicationModel.open("attachments");
         model.previewDisabled(false);
         return false;
       })
@@ -185,7 +185,7 @@ var attachment = (function() {
     previousAttachment: function() {
       var previousId = util.getIn(model.groupAttachments(), [model.groupIndex() - 1, "id"]);
       if (previousId) {
-        window.location.hash = "!/attachment/"+applicationId+"/" + previousId;
+        pageutil.openPage("attachment", applicationId + "/" + previousId)
         hub.send("track-click", {category:"Attachments", label: "", event:"previousAttachment"});
       }
     },
@@ -193,7 +193,7 @@ var attachment = (function() {
     nextAttachment: function() {
       var nextId = util.getIn(model.groupAttachments(), [model.groupIndex() + 1, "id"]);
       if (nextId) {
-        window.location.hash = "!/attachment/"+applicationId+"/" + nextId;
+        pageutil.openPage("attachment", applicationId + "/" + nextId)
         hub.send("track-click", {category:"Attachments", label: "", event:"nextAttachment"});
       }
     },

@@ -33,7 +33,7 @@
 
   var afterRegistrationSuccess = function(username, password) {
     // Display ajax loader
-    window.location.hash = "!/link-account-3";
+    pageutil.openPage("link-account-3");
 
     // Auto login
     ajax.postJson("/api/login", {"username": username, "password": password})
@@ -42,7 +42,7 @@
         window.parent.location = "/app/" + loc.getCurrentLanguage() + "/" + e.applicationpage;
       })
       .error(function(e) {
-        window.location.hash = "!/welcome";
+        pageutil.openPage("welcome");
         hub.send("login-failure", e);
       })
       .call();
@@ -56,7 +56,7 @@
   function getToken() {
     var token = pageutil.subPage();
     if (!token) {
-      window.location.hash = "!/register";
+      pageutil.openPage("register");
       return false;
     }
     return token;
@@ -68,7 +68,7 @@
         loc("register.expired-link.message"),
         {title: loc("ok"),
           fn: function() {
-            window.location.hash = "!/register";
+            pageutil.openPage("register");
             LUPAPISTE.ModalDialog.close();}
         });
   }
@@ -109,7 +109,7 @@
                 }
               }).call();
         },
-        _.partial(pageutil.openPage, "!/link-account/" + token),
+        _.partial(pageutil.openPage, "link-account", token),
         function(e){$("#link-account-error2").text(loc(e.text));}
     );
   });

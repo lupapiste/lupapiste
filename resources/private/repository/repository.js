@@ -167,7 +167,7 @@ var repository = (function() {
 
   function showApplicationList() {
     pageutil.hideAjaxWait();
-    window.location.hash = "!/applications";
+    pageutil.openPage("applications");
   }
 
   // Cannot be changed to use LUPAPISTE.ModalDialog.showDynamicYesNo, because the id is registered with hub.subscribe.

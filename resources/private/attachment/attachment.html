@@ -9,7 +9,7 @@
 
           <div class="inner-margins">
             <a class="btn secondary"
-               data-bind="click: function() { window.location.hash = '!/application/' + application.id() + '/attachments'; repository.load(application.id()); }"
+               data-bind="click: _.partial(application.open, 'attachments')"
                data-test-id="back-to-application-from-attachment">
                 <i class="lupicon-chevron-start"></i>
                 <span data-bind =" ltext: 'application.return'"></span>

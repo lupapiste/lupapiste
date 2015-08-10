@@ -82,7 +82,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
                                componentParams: {ltext: "register.confirm-cancel",
                                                  yesFn: function() {
                                                    self.reset();
-                                                   window.location.hash = "";
+                                                   pageutil.openPage("welcome");
                                                  }}});
     };
 

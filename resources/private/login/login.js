@@ -67,7 +67,7 @@
       $("#login").applyBindings({rememberMe: rememberMe, processing: processing, pending: pending});
       $("#login-button").click(login);
       $("#register-button").click(function() {
-        window.location.hash = "!/register";
+        pageutil.openPage("register");
       });
       $("#login-username").keypress(function(e) {
         if (e.which === 13) {
