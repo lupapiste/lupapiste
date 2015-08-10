@@ -395,7 +395,7 @@
    :user-roles #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if orgAuthz
-    (let [organisation-tags (mongo/select
+    (let [organization-tags (mongo/select
                                   :organizations
                                   {:_id {$in (keys orgAuthz)} :tags {$exists true}}
                                   [:tags])]
