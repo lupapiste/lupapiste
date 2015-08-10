@@ -131,6 +131,7 @@
 // Without this the first element after (collapsed) help
 // could start with wrong alignment.
 .help-reset {
+  clear: both;
   max-height: $marginS;
 }
 

@@ -4847,16 +4847,17 @@ table.attachments-template-table td.attachment-version-info {
 
 /* line 133, ../sass/partials/_help.scss */
 .help-reset {
+  clear: both;
   max-height: 6px;
 }
 
-/* line 138, ../sass/partials/_help.scss */
+/* line 139, ../sass/partials/_help.scss */
 .panel-info {
   width: 100%;
   text-align: justify;
 }
 
-/* line 144, ../sass/partials/_help.scss */
+/* line 145, ../sass/partials/_help.scss */
 .instructions:before {
   content: "";
   display: block;
@@ -4869,13 +4870,13 @@ table.attachments-template-table td.attachment-version-info {
   margin-top: -6px;
   float: right;
 }
-/* line 147, ../sass/partials/_help.scss */
+/* line 148, ../sass/partials/_help.scss */
 .instructions h3 {
   display: inline-block;
   margin-right: 6px;
 }
 
-/* line 153, ../sass/partials/_help.scss */
+/* line 154, ../sass/partials/_help.scss */
 .expanded-content {
   max-height: 0;
   overflow: hidden;
@@ -4883,12 +4884,12 @@ table.attachments-template-table td.attachment-version-info {
   -webkit-transition: max-height 400ms;
   /* Safari */
 }
-/* line 158, ../sass/partials/_help.scss */
+/* line 159, ../sass/partials/_help.scss */
 .expanded-content.expand {
   max-height: 1000px;
 }
 
-/* line 163, ../sass/partials/_help.scss */
+/* line 164, ../sass/partials/_help.scss */
 .page-info {
   width: 60%;
   margin: 12px 0;
