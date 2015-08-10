@@ -13,8 +13,8 @@
             <label class="form-label" for="login-password" data-bind="ltext: 'userinfo.password'"></label>
             <input class="form-input" id="login-password" type="password" data-bind="attr: {placeholder: loc('userinfo.password')}" name="password">
             <label class="form-label" ><input class="form-input" type="checkbox" id="rememberme" data-bind="checked: rememberMe"><span data-bind="ltext: 'userinfo.rememberme'"></span></label>
-            <button id="login-button" class="btn positive"
-                    data-bind="css: {waiting: processing},
+            <button id="login-button" class="positive no-icon-pad"
+                    data-bind="css: {waiting: pending},
                                disable: processing">
               <span data-bind="ltext: 'welcome.login'"></span>
               <i class="wait spin lupicon-refresh"></i>

@@ -57,10 +57,10 @@
       .close {
         position: absolute;
         right: $marginM;
-        cursor: pointer;
-        &:after {
-          content: "X";
-        }
+        /* cursor: pointer; */
+        /* &:after { */
+        /*   content: "X"; */
+        /* } */
       }
     }
   }

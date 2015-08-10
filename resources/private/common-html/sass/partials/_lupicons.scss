@@ -42,6 +42,13 @@ $lupicon-size: 22px;
   cursor: pointer;
 }
 
+// Convenience modifier for removing the hand
+// for those rare occasions it is not proper.
+[class^="lupicon-"].no-hand,
+[class*=" lupicon-"].no-hand {
+  cursor: default;
+}
+
 .lupicon-add-area:before {
   content: "\e63f";
 }

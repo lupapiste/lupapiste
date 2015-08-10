@@ -643,7 +643,7 @@
                                 <span data-bind="ltext: 'application.submitApplication'"></span>
                             </button>
 
-                            <div class="auth-actions">
+                            <div class="auth-actions stacked inner-margins">
                                 <button data-bind="click: approveApplication,
                                                    visible: $root.authorization.ok('approve-application'),
                                                    enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"

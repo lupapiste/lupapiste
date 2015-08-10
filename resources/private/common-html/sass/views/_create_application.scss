@@ -32,6 +32,9 @@
     bottom: $marginM;
     width: 80%;
     left: 12px;
+    span {
+      width: 100%;
+    }
   }
   input {
     width: 90%;
@@ -171,4 +174,12 @@
     border-bottom: 25px solid transparent;
     z-index: 2;
   }
+}
+
+.create-help.lupicon-circle-question {
+  &:before {
+    vertical-align: top;
+    font-size: 2 * $lupicon-size;
+  }
+  vertical-align: top;
 }

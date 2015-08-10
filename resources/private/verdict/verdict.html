@@ -12,9 +12,9 @@
         </span>
       </h1>
 
-      <a href="#" data-bind="click: returnToApplication, enable: true" class="btn inline-block btn-nav-back" data-test-id="return-from-verdict">
-        <span data-bind="ltext: 'application.return'"></span>
-        <span class="icon drill-left-black-bigger left-align"></span>
+      <a href="#" data-bind="click: returnToApplication, enable: true" class="btn secondary inline-block" data-test-id="return-from-verdict">
+          <i class="lupicon-chevron-start"></i>
+          <span data-bind="ltext: 'application.return'"></span>
       </a>
 
       <button data-bind="disable: disabled, click: publish, ltext: 'verdict.submit', visible: $data.draft() && $root.authorization.ok('publish-verdict')"
@@ -22,7 +22,8 @@
           type="submit" class="btn btn-primary">
       </button>
 
-      <button data-bind="click: deleteVerdict, enable: $data.draft() && $root.authorization.ok('delete-verdict'), ltext: 'verdict.delete'" class="btn" style="float:right" data-test-id="delete-verdict"></button>
+      <button data-bind="click: deleteVerdict, enable: $data.draft() && $root.authorization.ok('delete-verdict'), ltext: 'verdict.delete'"
+              class="secondary" style="float:right" data-test-id="delete-verdict"></button>
     </div>
 
     <div>

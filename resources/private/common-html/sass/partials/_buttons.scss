@@ -283,6 +283,7 @@ button.btn-dialog, .btn-dialog {
 // New buttons
 
 $btn-spacer: 12px;
+$icon-pad: 10px;
 
 [type=submit], .btn, button {
   border: none;
@@ -316,7 +317,7 @@ $btn-spacer: 12px;
   }
   :first-child {
     padding: {
-      right: 10px;
+      right: $icon-pad;
     }
   }
   :last-child {
@@ -327,14 +328,14 @@ $btn-spacer: 12px;
   /* :nth-child(2) { */
   /*   // Gap between icon and text. */
   /*   padding: { */
-  /*     left: 10px; */
+  /*     left: $icon-pad; */
   /*   } */
   /* } */
   /* // precaution for the cases where the */
   /* // second child is actually a wait icon. */
   /* :nth-child(3) { */
   /*   padding: { */
-  /*     left: 10px; */
+  /*     left: $icon-pad; */
   /*   } */
   /* } */
 }
@@ -342,6 +343,16 @@ $btn-spacer: 12px;
 .caps {
   text-transform: uppercase;
 }
+
+// Sometimes the "automatic" padding for icon
+// causes extra spacing. One typical case:
+// No icon, but waiting icon on the right.
+.no-icon-pad {
+  :first-child {
+    padding-right: 0;
+  }
+}
+
 
 // You probably still need to tweak
 // the vertical properties case by case, since
@@ -553,12 +564,13 @@ i.wait {
 }
 
 .waiting .wait + span {
-  padding-left: 10px;
+  padding-left: $icon-pad;
 }
 
 span + .waiting.wait {
-  padding-right: 10px;
+  padding-right: $icon-pad;
 }
+
 
 // DataTable tweaks.
 
