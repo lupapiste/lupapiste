@@ -18,20 +18,17 @@
   (f/notice? nil) => false)
 
 (facts "validate if notice is submittable"
-  (f/validate-notice-submittable nil nil) => nil
-  (f/validate-notice-submittable nil false) => nil
-  (f/validate-notice-submittable {} false) => nil
-  (fact "If confirm is true, nil is returned (everything ok)"
-    (f/validate-notice-submittable foreman-app true) => nil)
+  (f/validate-notice-submittable nil) => nil
+  (f/validate-notice-submittable {}) => nil
   (fact "Only foreman notice apps are validated"
-    (f/validate-notice-submittable (assoc-in foreman-app [:documents 0 :data :ilmoitusHakemusValitsin :value] "hakemus") false) => nil)
+    (f/validate-notice-submittable (assoc-in foreman-app [:documents 0 :data :ilmoitusHakemusValitsin :value] "hakemus")) => nil)
   (fact "Link permit must exist for validate to run"
-    (f/validate-notice-submittable (dissoc foreman-app :linkPermitData) false) => nil)
+    (f/validate-notice-submittable (dissoc foreman-app :linkPermitData)) => nil)
   (fact "Validator returns nil if state is post-verdict state"
-    (f/validate-notice-submittable foreman-app false) => nil
+    (f/validate-notice-submittable foreman-app) => nil
     (provided
       (mongo/select-one :applications {:_id "LP-123"} {:state 1}) => {:state "verdictGiven"}))
   (fact "Validator returns fail! when state is post-verdict state"
-    (f/validate-notice-submittable foreman-app false) => (partial expected-failure? :error.foreman.notice-not-submittable)
+    (f/validate-notice-submittable foreman-app) => (partial expected-failure? :error.foreman.notice-not-submittable)
     (provided
       (mongo/select-one :applications {:_id "LP-123"} {:state 1}) => {:state "sent"})))

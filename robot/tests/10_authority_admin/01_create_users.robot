@@ -16,7 +16,7 @@ Authority admin creates two users
   Wait Until  Element Should Be Visible  ${userRowXpath}
   ${userCount} =  Get Matching Xpath Count  ${userRowXpath}
   Create user  heikki.virtanen@example.com  Heikki  Virtanen  Lukuoikeus
-  Create user  hessu.kesa@example.com  Hessu  Kesa  Viranomainen
+  Create user  hessu.kesa@example.com  Hessu  Kesa  Muutosoikeus
   ${userCountAfter} =  Evaluate  ${userCount} + 2
   User count is  ${userCountAfter}
 
@@ -77,8 +77,8 @@ Create user
   Input text  auth-admin.admins.add.firstName  ${firstName}
   Input text  auth-admin.admins.add.lastName  ${lastName}
 
-  Run Keyword If      '${role}' == 'Viranomainen'  Select Checkbox  ${authority}
-  Run Keyword Unless  '${role}' == 'Viranomainen'  Unselect Checkbox  ${authority}
+  Run Keyword If      '${role}' == 'Muutosoikeus'  Select Checkbox  ${authority}
+  Run Keyword Unless  '${role}' == 'Muutosoikeus'  Unselect Checkbox  ${authority}
   Run Keyword If      '${role}' == 'Lukuoikeus'  Select Checkbox  ${reader}
   Run Keyword Unless  '${role}' == 'Lukuoikeus'  Unselect Checkbox  ${reader}
 
