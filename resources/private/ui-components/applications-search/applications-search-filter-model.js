@@ -1,26 +1,25 @@
-LUPAPISTE.OrganizationTagsDataProvider = function(organization, filtered) {
+LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
   "use strict";
-
   var self = this;
 
   self.query = ko.observable();
 
   self.filtered = filtered || ko.observableArray([]);
 
-  var data = ko.observable();
+  var tagsData = ko.observable();
 
-  if (organization && util.getIn(lupapisteApp.models.currentUser, ["orgAuthz", organization])) {
-    ajax
-      .query("get-organization-tags", {organizationId: organization})
-      .error(_.noop)
-      .success(function(res) {
-        data(res.tags);
-      })
-      .call();
-  }
+  ajax
+    .query("get-organization-tags")
+    .error(_.noop)
+    .success(function(res) {
+      tagsData(_.map(_.keys(res.tags), function(o) {
+        return {organization: o, tags: res.tags[o]};
+      }));
+    })
+    .call();
 
   self.data = ko.pureComputed(function() {
-    var filteredData = _.filter(data(), function(tag) {
+    var filteredData = _.filter(_.first(tagsData()).tags, function(tag) {
       return !_.some(self.filtered(), tag);
     });
     var q = self.query() || "";
@@ -89,6 +88,6 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
   if ( lupapisteApp.models.currentUser.isAuthority() ) {
     self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
     // TODO just search single organization tags for now, later do some grouping stuff in autocomplete component
-    self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(_.last(_.keys(lupapisteApp.models.currentUser.orgAuthz())), self.dataProvider.applicationTags);
+    self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(self.dataProvider.applicationTags);
   }
 };
