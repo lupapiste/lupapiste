@@ -398,8 +398,9 @@
     (let [organization-tags (mongo/select
                                   :organizations
                                   {:_id {$in (keys orgAuthz)} :tags {$exists true}}
-                                  [:tags])]
-      (ok :tags (into {} (mapv (juxt :id :tags) organization-tags))))
+                                  [:tags :name])
+          result (map (juxt :id #(select-keys % [:tags :name])) organization-tags)]
+      (ok :tags (into {} result)))
     (fail :error.organization-not-found)))
 
 (defn- transform-coordinates-to-wgs84
