@@ -1,12 +1,14 @@
 /* attachments */
 
+$attachment-modal-width: 600px;
+
 #attachment.container {
   padding-right: 0;
 }
 
 .attachment-iframe{
   height: 570px;
-  width: 600px;
+  width: $attachment-modal-width;
   border:0;
   overflow: hidden;
 }
@@ -254,4 +256,8 @@ td.comment-text {
     vertical-align: middle;
     margin-left: 5px;
   }
+}
+
+.modal-body p {
+  max-width: $attachment-modal-width;
 }
