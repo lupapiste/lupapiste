@@ -321,7 +321,7 @@ Click by test id
   ${selector} =   Set Variable  $("[data-test-id='${id}']:visible")
   # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
   Wait For Condition  return ${selector}.length===1;  10
-  Execute Javascript  ${selector}.click();
+  Execute Javascript  ${selector}[0].click();
 
 Click enabled by test id
   [Arguments]  ${id}

@@ -245,9 +245,8 @@
       )))
 
 (defcommand submit-application
-  {:parameters       [id confirm]
-   :input-validators [(partial action/non-blank-parameters [:id])
-                      (partial action/boolean-parameters [:confirm])]
+  {:parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority}
    :states           #{:draft :open}
    :notified         true
@@ -257,7 +256,7 @@
   [{:keys [application created] :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)]
     (or
-      (foreman/validate-notice-submittable application confirm)
+      (foreman/validate-notice-submittable application)
       (a/validate-link-permits application)
       (do-submit command application created))))
 

@@ -57,13 +57,17 @@
       (:submittable (query-application apikey foreman-application-id)) => false)
 
     (fact "Submit link-permit app"
-      (command apikey :submit-application :id application-id :confirm false) => ok?)
+      (command apikey :submit-application :id application-id) => ok?
+      (:submittable (query-application apikey foreman-application-id)) => true)
 
-    (facts "Submit foreman-app"
-      (fact "gives error first and warns about foreman notice"
-        (command apikey :submit-application :id foreman-application-id :confirm false) => (partial expected-failure? :error.foreman.notice-not-submittable))
-      (fact "By confirming the foreman notice application can be submitted"
-        (command apikey :submit-application :id foreman-application-id :confirm true) => ok?))
+    (facts "Can't submit foreman notice app if link permit doesn't have verdict"
+      (fact "gives error about foreman notice"
+        (command apikey :submit-application :id foreman-application-id) => (partial expected-failure? :error.foreman.notice-not-submittable))
+      (command sonja :check-for-verdict :id application-id) => ok?
+      (fact "ok after link-permit has verdict"
+        (command apikey :submit-application :id foreman-application-id) => ok?))
+
+
 
     (fact "Link foreman application to task"
       (let [apikey                       mikko
@@ -78,6 +82,14 @@
               updated-tasks (:tasks app)
               updated-foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") updated-tasks))]
           (get-in updated-foreman-task [:data :asiointitunnus :value]) => foreman-application-id)))
+
+    ; delete verdict for next steps
+    (let [app (query-application mikko application-id)
+          verdict-id (-> app :verdicts first :id)
+          verdict-id2 (-> app :verdicts second :id)]
+     (command sonja :delete-verdict :id application-id :verdictId verdict-id) => ok?
+     (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
+     (fact "is submitted" (:state (query-application mikko application-id)) => "submitted"))
 
     (facts "approve foreman"
       (fact "Can't approve foreman application before actual application"
@@ -127,33 +139,33 @@
 
         (facts "reduced"
           (fact "reduced history should contain reduced history"
-            (let [reduced-history (query apikey :reduced-foreman-history :id base-foreman-app-id) => ok?
+            (let [reduced-history (query sonja :reduced-foreman-history :id base-foreman-app-id) => ok?
                   history-ids (map :foremanAppId (:projects reduced-history))]
               history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
               (some #{foreman-app-id4} history-ids) => nil?))
 
           (fact "reduced history should depend on the base application"
-            (let [reduced-history (query apikey :reduced-foreman-history :id foreman-app-id1) => ok?
+            (let [reduced-history (query sonja :reduced-foreman-history :id foreman-app-id1) => ok?
                   history-ids (map :foremanAppId (:projects reduced-history))]
               history-ids =>     (just [foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
               history-ids =not=> (has some #{foreman-app-id4 base-foreman-app-id})))
 
           (fact "Unknown foreman app id"
-            (query apikey :reduced-foreman-history :id "foobar") => fail?))
+            (query sonja :reduced-foreman-history :id "foobar") => fail?))
 
           (fact "Should be queriable only with a foreman application"
-            (let [resp (query apikey :foreman-history :id application-id) => fail?]
+            (let [resp (query sonja :foreman-history :id application-id) => fail?]
               (:text resp) => "error.not-foreman-app"))
 
         (facts "unreduced"
           (fact "unreduced history should not reduce history"
-            (let [unreduced-history (query apikey :foreman-history :id base-foreman-app-id) => ok?
+            (let [unreduced-history (query sonja :foreman-history :id base-foreman-app-id) => ok?
                   history-ids       (map :foremanAppId (:projects unreduced-history))]
               history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id4 foreman-app-id5] :in-any-order)))
 
           (fact "Unknown foreman app id"
-            (query apikey :foreman-history :id "foobar") => fail?)
+            (query sonja :foreman-history :id "foobar") => fail?)
 
           (fact "Should be queriable only with a foreman application"
-            (let [resp (query apikey :reduced-foreman-history :id application-id) => fail?]
+            (let [resp (query sonja :reduced-foreman-history :id application-id) => fail?]
               (:text resp) => "error.not-foreman-app")))))))

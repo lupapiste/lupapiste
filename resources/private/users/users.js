@@ -8,7 +8,7 @@ var users = (function($) {
     if (_.isObject(data)) {
       return _.map(data, function(roles, org) {
         var localizedRoles = _.map(roles, function(role) {
-          return loc(role);
+          return loc(["authorityrole", role]);
         });
         return "<b>" + org + ":</b> " + localizedRoles.join(", ");
       }).join(", ");

@@ -3,7 +3,7 @@
 <body>
   <section class="page container">
 
-    <script type="text/html" id="application-foreman-template">
+    <script type="text/x-jquery-tmpl" id="application-foreman-template">
       <div>
         <p data-bind="lhtml: 'help.AddForeman'"></p>
         <ul class="invited-foremans" data-bind="foreach: foremanApplications" data-test-id="invited-foremans">
@@ -22,7 +22,7 @@
       </div>
     </script>
 
-    <script type="text/html" id="application-foreman-tasks-template">
+    <script type="text/x-jquery-tmpl" id="application-foreman-tasks-template">
       <div>
         <table data-test-id="tasks-foreman" class="tasks-foreman" data-bind="with: $data.foremanTasks">
           <thead>

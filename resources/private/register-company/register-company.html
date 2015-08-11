@@ -80,25 +80,25 @@
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'register.company.form.firstName'"></label>
             <input class="form-input text"
-                   data-bind="textInput: firstName, attr: {readonly: lupapisteApp.models.currentUser}"
+                   data-bind="textInput: firstName, readonly: $parent.userLoggedIn"
                    data-test-id="register-company-firstName" type="text" placeholder="Etunimi" maxlength="255"/>
           </div>
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'register.company.form.lastName'"></label>
             <input class="form-input text"
-                   data-bind="textInput: lastName, attr: {readonly: lupapisteApp.models.currentUser}"
+                   data-bind="textInput: lastName, readonly: $parent.userLoggedIn"
                    data-test-id="register-company-lastName" type="text" placeholder="Sukunimi" maxlength="255"/>
           </div>
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'register.company.form.email'"></label>
             <input class="form-input text"
-                   data-bind="textInput: email, attr: {readonly: lupapisteApp.models.currentUser}"
+                   data-bind="textInput: email, readonly: $parent.userLoggedIn"
                    data-test-id="register-company-email" type="text" placeholder="etu.suku@yritys.fi" maxlength="255"/>
           </div>
-          <div class="form-entry">
+          <div class="form-entry" data-bind="visible: $parent.userNotLoggedIn">
             <label class="form-label tip" data-bind="ltext: 'register.company.form.personId'"></label>
             <input class="form-input text"
-                   data-bind="textInput: personId, attr: {readonly: lupapisteApp.models.currentUser}"
+                   data-bind="textInput: personId"
                    data-test-id="register-company-personId" type="text" placeholder="112233-123A" maxlength="11"/>
           </div>
         </div>

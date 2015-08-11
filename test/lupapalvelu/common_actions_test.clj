@@ -65,10 +65,14 @@
 (facts "Allowed actions for reader authority"
   (let [user {:id "user123" :orgAuthz {:999-R #{:reader}} :role "authority"}
         application {:organization "999-R" :auth [] :id "123" :permitType "YA"}
-        allowed-actions #{:application :validate-doc :fetch-validation-errors :get-organization-tags ; queries
-                          :add-comment :add-authority-notice ; commands
-                          :preview-attachment :view-attachment :download-attachment :download-all-attachments ; raw
-                          }]
+        allowed-actions #{; queries
+                          :application :validate-doc :fetch-validation-errors :get-organization-tags
+                          :reduced-foreman-history :foreman-history :foreman-applications
+                          ; commands
+                          :add-comment :add-authority-notice
+
+                          ; raw
+                          :preview-attachment :view-attachment :download-attachment :download-all-attachments}]
     (doseq [command (ca/foreach-action user {} application)
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]

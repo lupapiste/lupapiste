@@ -606,7 +606,7 @@
             <!-- /ko -->
              <button class="btn btn-primary"
                      data-test-id="application-submit-btn"
-                     data-bind="click: function() { submitApplication(false); },
+                     data-bind="click: submitApplication,
                                 visible: $root.authorization.ok('submit-application'),
                                 enable: submitButtonEnabled">
                <span data-bind="ltext: 'application.submitApplication'"></span>
@@ -1044,7 +1044,7 @@
         </div>
         <!-- /ko -->
 
-        <script type="text/html" id="statements-template">
+        <script type="text/x-jquery-tmpl" id="statements-template">
           <div data-bind="ifnot: $data.statements && statements().length > 0">
             <p data-bind="ltext: $data.localisationKeys.missing" data-test-id="application-no-statements"></p>
           </div>
@@ -1080,7 +1080,7 @@
           </div>
         </script>
 
-        <script type="text/html" id="neighbors-template">
+        <script type="text/x-jquery-tmpl" id="neighbors-template">
           <div data-bind="ifnot: neighbors() && neighbors().length > 0">
             <p data-bind="ltext: $data.localisationKeys.missing" data-test-id="application-no-neigbors"></p>
           </div>

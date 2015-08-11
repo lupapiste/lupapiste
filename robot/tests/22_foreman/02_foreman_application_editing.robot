@@ -25,12 +25,12 @@ Foreman sees his other foreman jobs
   Foreman applies personal information to the foreman application  1
   Foreman can see the first related construction info on the second foreman application
 
-Foreman gets warning message when trying to submit foreman notice before link permit has verdict
+Foreman gets error message when trying to submit foreman notice before link permit has verdict
   Select from list by value  xpath=//select[@data-test-id="ilmoitusHakemusValitsin"]  ilmoitus
   Open tab  requiredFieldSummary
   Click enabled by test id  application-submit-btn
   Wait Until  Click element  xpath=//div[@id='dynamic-yes-no-confirm-dialog']//button[@data-test-id='confirm-yes']
   Wait Until  Element should be visible  xpath=//div[@id='modal-dialog-content']
   Element should contain  xpath=//div[@id='modal-dialog-content']/div[@class='header']/span[@class="title"]  Työnjohtajan ilmoitus
-  Confirm yes no dialog
-  Wait Until  Application state should be  submitted
+  Confirm notification dialog
+  Wait Until  Application state should be  draft
