@@ -12,22 +12,23 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     .query("get-organization-tags")
     .error(_.noop)
     .success(function(res) {
-      tagsData(_.map(_.keys(res.tags), function(o) {
-        return {organization: o, tags: res.tags[o]};
-      }));
+      tagsData(res.tags);
     })
     .call();
 
   self.data = ko.pureComputed(function() {
-    var filteredData = _.filter(_.first(tagsData()).tags, function(tag) {
-      return !_.some(self.filtered(), tag);
+    var filteredData = _.map(tagsData(), function(tags, org) {
+      return {organization: org, tags: _.filter(tags, function(tag) {
+        return !_.some(self.filtered(), tag);
+      })};
     });
     var q = self.query() || "";
-    filteredData = _.filter(filteredData, function(tag) {
-      return _.reduce(q.split(" "), function(result, word) {
-        return _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
-      }, true);
-    });
+    /*filteredData = _.map(filteredData, function(org) {
+      return _.filter(filteredData, function(tag) {
+        return _.reduce(q.split(" "), function(result, word) {
+          return _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
+        }, true);
+    }});*/
     return filteredData;
   });
 };
