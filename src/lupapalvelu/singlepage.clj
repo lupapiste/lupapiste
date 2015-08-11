@@ -50,6 +50,7 @@
   (-> f str (.replace \$ \/) (.split "@") first))
 
 (defn compose-resource [kind component]
+  (debugf "Kind: %s, Component: %s" kind component)
   (let [stream (ByteArrayOutputStream.)]
     (with-open [out (io/writer stream)]
       (doseq [src (c/get-resources ui-components kind component)]

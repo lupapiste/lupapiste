@@ -340,6 +340,18 @@ $icon-pad: 10px;
   /* } */
 }
 
+// Layout like button, but semantically is not.
+// This is useful when displaying text with icons,
+// for example.
+.like-btn {
+  @extend .btn;
+  cursor: default;
+  padding: 0;
+  min-height: $lupicon-size + 4;
+  max-height: $lupicon-size + 4;
+  line-height: $lupicon-size + 4;
+}
+
 .caps {
   text-transform: uppercase;
 }

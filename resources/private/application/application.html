@@ -529,35 +529,36 @@
                                          params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
                                          }"></span>
                         <div class="clear"></div>
-                        <div class="attachment-legend">
-                            <span class="ok icon"></span>
-                            <span data-bind="ltext: 'ok.title'"></span>
+                        <div class="stacked">
+                            <div class="like-btn">
+                                <i class="lupicon-circle-check"></i>
+                                <span data-bind="ltext: 'ok.title'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-circle-star"></i>
+                                <span data-bind="ltext: 'new.title'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-circle-attention"></i>
+                                <span data-bind="ltext: 'missing.title'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-circle-pen"></i>
+                                <span data-bind="ltext: 'attachment.signed'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-circle-arrow-up"></i>
+                                <span data-bind="ltext: 'application.attachmentSentDate'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-circle-stamp"></i>
+                                <span data-bind="ltext: 'attachment.stamped'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-circle-section-sign"></i>
+                                <span data-bind="ltext: 'attachment.verdict-attachment'"></span>
+                            </div>
                         </div>
-                        <div class="attachment-legend">
-                            <span class="new icon"></span>
-                            <span data-bind="ltext: 'new.title'"></span>
-                        </div>
-                        <div class="attachment-legend">
-                            <span class="missing icon"></span>
-                            <span data-bind="ltext: 'missing.title'"></span>
-                        </div>
-                        <div class="attachment-legend">
-                            <span class="icon signed"></span>
-                            <span data-bind="ltext: 'attachment.signed'"></span>
-                        </div>
-                        <div class="attachment-legend">
-                            <span class="icon transfered"></span>
-                            <span data-bind="ltext: 'application.attachmentSentDate'"></span>
-                        </div>
-                        <div class="attachment-legend">
-                            <span class="icon stamped"></span>
-                            <span data-bind="ltext: 'attachment.stamped'"></span>
-                        </div>
-                        <div class="attachment-legend">
-                            <span class="icon verdict-attachment"></span>
-                            <span data-bind="ltext: 'attachment.verdict-attachment'"></span>
-                        </div>
-
 
                         <div data-bind="if: preAttachmentsByOperation().length == 0 && postAttachmentsByOperation().length == 0">
                             <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
@@ -1280,13 +1281,15 @@
                                     <tr>
                                         <td colspan="3">
                                             <h2 data-bind="text: name" style="padding-top:1em"></h2>
-                                            <div class="task-legend">
-                                                <span class="ok icon"></span>
-                                                <span data-bind="ltext: 'task.ok.title'"></span>
-                                            </div>
-                                            <div class="task-legend">
-                                                <span class="missing icon"></span>
-                                                <span data-bind="ltext: 'task.missing.title'"></span>
+                                            <div class="stacked">
+                                                <div class="like-btn">
+                                                    <i class="lupicon-circle-check"></i>
+                                                    <span data-bind="ltext: 'task.ok.title'"></span>
+                                                </div>
+                                                <div class="like-btn">
+                                                    <i class="lupicon-circle-attention"></i>
+                                                    <span data-bind="ltext: 'task.missing.title'"></span>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
