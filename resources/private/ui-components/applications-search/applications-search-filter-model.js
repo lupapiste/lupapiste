@@ -17,8 +17,8 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     .call();
 
   self.data = ko.pureComputed(function() {
-    var filteredData = _.map(tagsData(), function(tags, org) {
-      return {organization: org, tags: _.filter(tags, function(tag) {
+    var filteredData = _.map(tagsData(), function(orgData) {
+      return {organization: orgData.name[loc.currentLanguage], tags: _.filter(orgData.tags, function(tag) {
         return !_.some(self.filtered(), tag);
       })};
     });
