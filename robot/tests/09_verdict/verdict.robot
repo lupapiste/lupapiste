@@ -30,16 +30,14 @@ Sonja fetches verdict from municipality KRYSP service
   Verdict is given  2013-01  0
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
+  Page Should Contain Element  //div[@data-test-id="given-verdict-id-0-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
+  Page Should Not Contain Element  //div[@data-test-id="given-verdict-id-1-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
 
 Sonja creates verdict with adds comment
   Go to give new verdict
   Title Should Be  ${appname} - Lupapiste
   Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
   Comment verdict  Myönnetään...
-
-Return to application and come back
-  Click by test id  return-from-verdict
-  Click enabled by test id  edit-verdict
 
 Add katselmus
   # 3 tasks from backend
@@ -53,7 +51,14 @@ Add katselmus
   # One on this verdict screen and one hidden in tasks tab
   Task count is  task-katselmus  5
 
+Return to application
+  Click by test id  return-from-verdict
+
+Verdict has tasks
+  Page Should Not Contain Element  //div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
+
 Sonja publishes verdict
+  Click enabled by test id  edit-verdict
   Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  verdictGiven
