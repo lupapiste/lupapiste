@@ -113,6 +113,9 @@
         display: list-item;
         list-style-type: none;
         padding: $marginS $marginS;
+        &.group-indent {
+          padding: 0 0 0 $marginS*2;
+        }
       }
       li.autocomplete-result-item {
         cursor: pointer;
@@ -123,6 +126,10 @@
           background-color: lighten($lp-orange, 20%);
           color: black;
         }
+      }
+      li.autocomplete-group-header {
+        font-weight: 700;
+        padding: $marginS/2 0 0 $marginS;
       }
     }
   }
