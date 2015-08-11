@@ -39,7 +39,7 @@
     (env/feature? :no-minification) (IOUtils/copy in out)
     (= kind :js) (let [c (JavaScriptCompressor. in error-reporter)]
                    ; no linebreaks, obfuscate locals, no verbose,
-                   (.compress c out -1 true true
+                   (.compress c out -1 true false;
                      ; preserve semicolons, disable optimizations
                      true true))
     (= kind :css) (let [c (CssCompressor. in)]
@@ -50,11 +50,9 @@
   (-> f str (.replace \$ \/) (.split "@") first))
 
 (defn compose-resource [kind component]
-  (debugf "Kind: %s, Component: %s" kind component)
   (let [stream (ByteArrayOutputStream.)]
     (with-open [out (io/writer stream)]
       (doseq [src (c/get-resources ui-components kind component)]
-        (println src)
         (if (fn? src)
           (.write (write-header kind out (str "fn: " (fn-name src))) (src))
           (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
