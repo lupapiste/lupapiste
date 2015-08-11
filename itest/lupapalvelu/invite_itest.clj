@@ -83,7 +83,7 @@
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Mikko submits"
-      (command mikko :submit-application :id application-id :confirm false) => ok?)
+      (command mikko :submit-application :id application-id) => ok?)
 
     (last-email) ; Inbox zero
 

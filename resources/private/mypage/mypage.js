@@ -179,11 +179,12 @@
     };
 
     self.editUsers = function() {
-      window.location.hash = "#!/company/" + self.company.id() + "/users/";
+
+      pageutil.openPage("company", self.company.id() + "/users/");
     };
 
     self.editCompany = function() {
-      window.location.hash = "#!/company/" + self.company.id();
+      pageutil.openPage("company", self.company.id());
     };
 
     self.saved.subscribe(self.updateUserName);

@@ -2,7 +2,7 @@
 <html>
 <body>
   <section class="page container" id="comments">
-    <script type="text/html" id="comment-template">
+    <script type="text/x-jquery-tmpl" id="comment-template">
       <div data-bind="with: $data.comment">
         <form>
           <h3 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h3>
@@ -67,7 +67,7 @@
 
         <div class="table table-striped conversation" data-test-id="comments-table">
           <div data-bind="foreach: comments().slice(0).reverse()">
-            <!-- ko if: !($parents[1].infoRequest() && $parent.isForAttachment($data)) -->
+
             <div data-bind="css: {'attachment-comment': $parent.isForAttachment($data),
                                   'comment-for-me':     $parent.isForMe($data),
                                   'authority-comment':  $parent.isAuthorityComment($data),
@@ -98,7 +98,7 @@
                 <span data-bind="text: text" class="comment-message"></span>
               </div>
             </div>
-            <!-- /ko -->
+
           </div>
         </div>
       </div>

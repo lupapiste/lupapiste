@@ -1,12 +1,11 @@
 *** Settings ***
 
-Documentation   User signs company agreement
+Documentation   A new user signs company agreement
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
 Setup
-  Apply minimal fixture now
   Go to  ${LAST EMAIL URL}
   Go to  ${LOGIN URL}
 
@@ -72,6 +71,7 @@ Bob decides to register his company after all, and this time he means it
 
   Wait until  Element should be visible  xpath=//span[@data-test-id='onnistuu-dummy-status']
   Wait until  Element text should be  xpath=//span[@data-test-id='onnistuu-dummy-status']  ready
+  Page Should Contain  131052-308T
   Click enabled by test id  onnistuu-dummy-success
 
 Registrations succeeds, user gets email

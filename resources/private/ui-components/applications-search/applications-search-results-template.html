@@ -2,7 +2,7 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/html" id="applications-search-results-template">
+    <script type="text/x-jquery-tmpl" id="applications-search-results-template">
       <div class="search-tabs">
         <div class="tab-buttons">
           <ul data-bind="foreach: tabs">
@@ -85,7 +85,7 @@
                 </td>
                 <td data-bind="ltext: 'applications.' + $data.kind" data-test-col-name="type"></td>
                 <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
-                <td data-bind="ltext: 'operations.' + $data.primaryOperation.name" data-test-col-name="operation"></td>
+                <td data-bind="text: $data.primaryOperation ? loc('operations.' + $data.primaryOperation.name) : ''" data-test-col-name="operation"></td>
                 <td data-bind="text: $data.applicant" data-test-col-name="applicant"></td>
                 <td data-bind="dateTimeString: $data.sent" data-test-col-name="sent"></td>
                 <td data-bind="dateTimeString: $data.modified" data-test-col-name="modified"></td>

@@ -1,4 +1,4 @@
-LUPAPISTE.OrganizationTagsDataProvider = function(organization, filtered) {
+LUPAPISTE.ApplicationTagsDataProvider = function(application, filtered) {
   "use strict";
 
   var self = this;
@@ -7,26 +7,18 @@ LUPAPISTE.OrganizationTagsDataProvider = function(organization, filtered) {
 
   self.filtered = filtered || ko.observableArray([]);
 
-  var data = ko.observable();
-
-  if (organization && util.getIn(lupapisteApp.models.currentUser, ["orgAuthz", organization])) {
-    ajax
-      .query("get-organization-tags", {organizationId: organization})
-      .error(_.noop)
-      .success(function(res) {
-        data(res.tags);
-      })
-      .call();
-  }
+  var organizationTags = ko.observable(_.map(application.organizationMeta.tags, function(k, v) {
+      return {id: v, label: k};
+    }));
 
   self.data = ko.pureComputed(function() {
-    var filteredData = _.filter(data(), function(item) {
-      return !_.includes(self.filtered(), item);
+    var filteredData = _.filter(organizationTags(), function(tag) {
+      return !_.some(self.filtered(), tag);
     });
     var q = self.query() || "";
-    filteredData = _.filter(filteredData, function(item) {
+    filteredData = _.filter(filteredData, function(tag) {
       return _.reduce(q.split(" "), function(result, word) {
-        return _.contains(item.toUpperCase(), word.toUpperCase()) && result;
+        return _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
     return filteredData;
@@ -51,7 +43,8 @@ LUPAPISTE.NoticeModel = function() {
 
   self.selectedTags = ko.observableArray([]);
 
-  self.applicationTagsProvider = new LUPAPISTE.OrganizationTagsDataProvider(self.applicationId, self.selectedTags);
+  self.applicationTagsProvider = null;
+  self.showTagsComponent = ko.observable(false);
 
   var subscriptions = [];
 
@@ -88,7 +81,7 @@ LUPAPISTE.NoticeModel = function() {
       ajax
         .command("add-application-tags", {
           id: self.applicationId,
-          tags: tags})
+          tags: _.pluck(tags, "id")})
         .success(function() {
           self.indicator({name: "tags", type: "saved"});
         })
@@ -113,8 +106,9 @@ LUPAPISTE.NoticeModel = function() {
     self.applicationId = application.id;
     self.urgency(application.urgency);
     self.authorityNotice(application.authorityNotice);
-    self.selectedTags(application.tags ? application.tags : []);
-    self.applicationTagsProvider = new LUPAPISTE.OrganizationTagsDataProvider(application.organization, self.selectedTags);
+    self.selectedTags(application.tags);
+    self.applicationTagsProvider = new LUPAPISTE.ApplicationTagsDataProvider(application, self.selectedTags);
+    self.showTagsComponent(true);
     subscribe();
   };
 };

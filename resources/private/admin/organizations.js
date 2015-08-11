@@ -15,7 +15,7 @@
       isLoading = true;
       self.permanentArchiveEnabled(organization["permanent-archive-enabled"]);
       isLoading = false;
-      window.location.hash = "!/organization";
+      pageutil.openPage("organization");
       return false;
     };
 

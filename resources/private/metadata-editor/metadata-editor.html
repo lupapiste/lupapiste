@@ -2,7 +2,7 @@
 <html>
 <body>
 <section class="page container" id="metadata-editor">
-  <script type="text/html" id="metadata-editor-template">
+  <script type="text/x-jquery-tmpl" id="metadata-editor-template">
     <div class="metadata-editor-container">
       <div class="editor">
         <div class="editor-header">
@@ -28,7 +28,7 @@
     </div>
   </script>
 
-  <script type="text/html" id="metadata-list-template">
+  <script type="text/x-jquery-tmpl" id="metadata-list-template">
     <div data-bind="foreach: schemaList">
       <div data-bind="if: $data.values">
         <label data-bind="ltext: type"></label><br>

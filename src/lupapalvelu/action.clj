@@ -430,9 +430,8 @@
 
       (throw (AssertionError. (str "Action '" action-name "' has invalid meta data: " invalid-meta)))))
 
-  ; To be changed to assertion!
-  (when-not (or (ss/ends-with ns-str "-api") (ss/starts-with (ss/suffix ns-str ".") "dummy"))
-    (warn "Actions SHOULD be defined in *-api namespaces:" ns-str))
+  (assert (or (ss/ends-with ns-str "-api") (ss/ends-with ns-str "-test") (ss/starts-with (ss/suffix ns-str ".") "dummy"))
+    (str "Please define actions in *-api namespaces. Offending action: " action-name " at " ns-str ":" line))
 
   (assert (if (some #(= % :id) (:parameters meta-data)) (seq (:states meta-data)) true)
     (str "You must define :states meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))

@@ -237,7 +237,7 @@
       (generate-attachment application pena "pena")
       (generate-link-permit application pena)
 
-      (command pena :submit-application :id application-id :confirm false) => ok?
+      (command pena :submit-application :id application-id) => ok?
 
       (let [updated-application (generate-statement application-id)]
 

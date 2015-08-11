@@ -28,6 +28,13 @@ Foreman sets his information to several applications
   Deny yes no dialog
   Open tab  parties
   Foreman accepts invitation and fills info
+
+Foreman history is not visible to applicant
+  Page Should Not Contain Element  xpath=//foreman-history
+  Page Should Not Contain  Työnjohtajan historia
+  Page Should Not Contain  TYÖNJOHTAJAN HISTORIA
+
+Escalate to authorities
   Open to authorities  Apuva
   [Teardown]  logout
 

@@ -24,7 +24,7 @@ Mikko copies his attachments to application
   Open tab  attachments
   Select attachment operation option from dropdown  attachmentsCopyOwn
   Confirm yes no dialog
-  Table Should Contain  css=table.attachments-template-table  ${TXT_TESTFILE_NAME}
+  Wait Until  Table Should Contain  css=table.attachments-template-table  ${TXT_TESTFILE_NAME}
 
 Copy own attachments button is not shown to non-architect
   Click Element  user-name

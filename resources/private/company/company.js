@@ -211,7 +211,7 @@
   }
 
   TabsModel.prototype.click = function(tab) {
-    window.location.hash = "!/company/" + this.companyId() + "/" + tab;
+    pageutil.openPage("company", this.companyId() + "/" + tab);
     return false;
   };
 

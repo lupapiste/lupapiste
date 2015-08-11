@@ -101,9 +101,10 @@
     (fail :error.not-foreman-app)))
 
 (defquery foreman-history
-  {:user-roles #{:authority :applicant}
+  {:user-roles #{:authority}
    :states           states/all-states
    :user-authz-roles action/all-authz-roles
+   :org-authz-roles  action/reader-org-authz-roles
    :parameters       [:id]
    :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
@@ -112,9 +113,10 @@
     (fail :error.not-found)))
 
 (defquery reduced-foreman-history
-  {:user-roles #{:authority :applicant}
+  {:user-roles #{:authority}
    :states           states/all-states
    :user-authz-roles action/all-authz-roles
+   :org-authz-roles  action/reader-org-authz-roles
    :parameters       [:id]
    :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
@@ -126,6 +128,7 @@
   {:user-roles #{:applicant :authority :oirAuthority}
    :states           states/all-states
    :user-authz-roles action/all-authz-roles
+   :org-authz-roles  action/reader-org-authz-roles
    :parameters       [:id]}
   [{application :application user :user :as command}]
   (if application

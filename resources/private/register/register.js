@@ -9,7 +9,7 @@
                       vtj:     urlPrefix + "/error",
                       id:      "vetuma-init"};
 
-  var registrationModel = new LUPAPISTE.RegistrationModel("register-user", _.partial(pageutil.openPage, "!/register3"), "#register-email-error");
+  var registrationModel = new LUPAPISTE.RegistrationModel("register-user", _.partial(pageutil.openPage, "register3"), "#register-email-error");
   var statusModel = ko.observable();
 
   hub.onPageLoad("register", function() {
@@ -19,7 +19,7 @@
   hub.onPageLoad("register2", function() {
     registrationModel.reset();
     vetuma.getUser(registrationModel.setVetumaData,
-                   _.partial(pageutil.openPage, "!/register"),
+                   _.partial(pageutil.openPage, "register"),
                    function(e) {$("#register-email-error").text(loc(e.text));});
   });
 

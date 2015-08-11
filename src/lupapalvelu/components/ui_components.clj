@@ -160,7 +160,7 @@
                    :html ["comments.html"]}
 
    :invites      {:depends [:common-html]
-                  :js ["invites.js"]}
+                  :js ["invites-model.js" "invites.js"]}
 
    :repository   {:depends [:common-html]
                   :js ["repository.js"]}

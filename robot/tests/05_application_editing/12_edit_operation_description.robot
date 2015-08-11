@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation  Sonja should see only applications from Sipoo
+Documentation  Mikko set description for an operation
 Resource       ../../common_resource.robot
 
 *** Test Cases ***
@@ -22,3 +22,4 @@ Mikko can see new operation description
   Mikko logs in
   Open application  application-papplication  753-416-25-30
   Wait until  Element text should be  xpath=//div[@id='application-info-tab']//span[@data-test-id='op-description']  Talo A
+  [Teardown]  logout

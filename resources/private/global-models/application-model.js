@@ -103,7 +103,7 @@ LUPAPISTE.ApplicationModel = function() {
             task.displayName = taskUtil.shortDisplayName(task);
             task.openTask = function() {
               taskPageController.setApplicationModelAndTaskId(self._js, task.id);
-              window.location.hash = "!/task/" + self.id() + "/" + task.id;
+              pageutil.openPage("task",  self.id() + "/" + task.id);
             };
             task.statusName = LUPAPISTE.statuses[task.state] || "unknown";
 
@@ -180,7 +180,7 @@ LUPAPISTE.ApplicationModel = function() {
     return function() {
       ajax
       .command("decline-invitation", {id: applicationId})
-      .success(function() {window.location.hash = "!/applications";})
+      .success(function() {pageutil.openPage("applications");})
       .call();
       return false;
     };
@@ -243,38 +243,28 @@ LUPAPISTE.ApplicationModel = function() {
     hub.send("track-click", {category:"Application", label:"map", event:"openOskariMap"});
   };
 
-  self.submitApplication = function(confirm) {
+  self.submitApplication = function() {
     hub.send("track-click", {category:"Application", label:"submit", event:"submitApplication"});
-
-    var submitFn = function() {
-      ajax.command("submit-application", {id: self.id(), confirm: confirm})
-        .success(self.reload)
-        .onError("error.foreman.notice-not-submittable", function() {
-          hub.send("show-dialog", {ltitle: "foreman.dialog.notice-submit-warning.title",
-                                   size: "medium",
-                                   component: "yes-no-dialog",
-                                   componentParams: {ltext: "foreman.dialog.notice-submit-warning.text",
-                                                     lyesTitle: "foreman.dialog.notice-submit-warning.yes",
-                                                     lnoTitle: "foreman.dialog.notice-submit-warning.no",
-                                                     yesFn: _.partial(self.submitApplication, true)}});
-        })
-        .processing(self.processing)
-        .call();
-      hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
-      return false;
-    };
-
-    if ( confirm ) {
-      submitFn();
-    } else {
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("application.submit.areyousure.title"),
-        loc("application.submit.areyousure.message"),
-        {title: loc("yes"),
-         fn: submitFn},
-        {title: loc("no")}
-      );
-    }
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+      loc("application.submit.areyousure.title"),
+      loc("application.submit.areyousure.message"),
+      {title: loc("yes"),
+       fn: function() {
+            ajax.command("submit-application", {id: self.id()})
+              .success(self.reload)
+              .onError("error.foreman.notice-not-submittable", function() {
+                hub.send("show-dialog", {ltitle: "foreman.dialog.notice-submit-warning.title",
+                                         size: "medium",
+                                         component: "ok-dialog",
+                                         componentParams: {ltext: "foreman.dialog.notice-submit-warning.text"}});
+              })
+              .processing(self.processing)
+              .call();
+            hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
+            return false;
+          }},
+      {title: loc("no")}
+    );
     hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
     return false;
   };
@@ -290,7 +280,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.convertToApplication = function() {
     ajax.command("convert-to-application", {id: self.id()})
       .success(function() {
-        window.location.hash = "!/application/" + self.id();
+        pageutil.openPage("application", self.id());
       })
       .processing(self.processing)
       .call();
@@ -372,7 +362,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.unsubscribeNotifications = _.partial(self.manageSubscription, "unsubscribe-notifications");
 
   self.addOperation = function() {
-    window.location.hash = "!/add-operation/" + self.id();
+    pageutil.openPage("add-operation", self.id());
     hub.send("track-click", {category:"Application", label:"", event:"addOperation"});
     return false;
   };
@@ -386,7 +376,7 @@ LUPAPISTE.ApplicationModel = function() {
        fn: function() {
         ajax
           .command("cancel-inforequest", {id: self.id()})
-          .success(function() {window.location.hash = "!/applications";})
+          .success(function() {pageutil.openPage("applications");})
           .processing(self.processing)
           .call();
         hub.send("track-click", {category:"Inforequest", label:"", event:"infoRequestCanceled"});
@@ -406,7 +396,7 @@ LUPAPISTE.ApplicationModel = function() {
        fn: function() {
         ajax
           .command("cancel-application", {id: self.id()})
-          .success(function() {window.location.hash = "!/applications";})
+          .success(function() {pageutil.openPage("applications");})
           .processing(self.processing)
           .call();
         hub.send("track-click", {category:"Application", label:"", event:"ApplicationCanceled"});
@@ -431,7 +421,7 @@ LUPAPISTE.ApplicationModel = function() {
           .command("cancel-application-authority", {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
           .success(function() {
             self.cancelText("");
-            window.location.hash = "!/applications";
+            pageutil.openPage("applications");
           })
           .processing(self.processing)
           .call();
@@ -468,7 +458,7 @@ LUPAPISTE.ApplicationModel = function() {
         ajax
           .command("create-change-permit", {id: self.id()})
           .success(function(data) {
-            window.location.hash = "!/application/" + data.id;
+            pageutil.openPage("application", data.id);
           })
           .processing(self.processing)
           .call();
@@ -486,7 +476,7 @@ LUPAPISTE.ApplicationModel = function() {
     ajax
       .command("create-continuation-period-permit", {id: self.id()})
       .success(function(data) {
-        window.location.hash = "!/application/" + data.id;
+        pageutil.openPage("application", data.id);
       })
       .processing(self.processing)
       .call();
@@ -537,6 +527,11 @@ LUPAPISTE.ApplicationModel = function() {
     }
   }
 
+  self.open = function(tab) {
+    var suffix = self.infoRequest() ? null : tab;
+    pageutil.openApplicationPage(self, suffix);
+  }
+
   self.targetTab.subscribe(function(target) {
     if (target.tab === "requiredFieldSummary") {
       ajax
@@ -547,7 +542,7 @@ LUPAPISTE.ApplicationModel = function() {
         .processing(self.processing)
         .call();
     }
-    window.location.hash = "!/application/" + self.id() + "/" + target.tab;
+    self.open(target.tab);
     if (target.id) {
       var maxRetries = 10; // quite arbitrary, might need to increase for slower browsers
       focusOnElement(target.id, maxRetries);

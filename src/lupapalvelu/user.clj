@@ -240,7 +240,7 @@
         organizations        (if (admin? caller) organizations (filter caller-organizations (or organizations caller-organizations)))
         role                 (:filter-role params)
         role                 (if (admin? caller) role :authority)
-        enabled              (if (admin? caller) (:filter-enabled params) true)]
+        enabled              (if (or (admin? caller) (authority-admin? caller)) (:filter-enabled params) true)]
     (merge {}
       (when (seq organizations) {:organizations organizations})
       (when role                {:role role})

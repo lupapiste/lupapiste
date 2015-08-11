@@ -2,6 +2,8 @@
   (require [midje.sweet :refer :all]
            [lupapalvelu.itest-util :refer :all]))
 
+(apply-remote-minimal) ; minimal ensures wanted organization tags exist
+
 (fact "adding notice"
   (let [{id :id} (create-and-submit-application pena)]
     (fact "user can't set application urgency"
@@ -22,19 +24,27 @@
       (add-authority-notice sonja id "respect my athority") => ok?
       (:authorityNotice (query-application sonja id)) => "respect my athority")
 
-    (fact "user can't set application tags"
-      (command pena :add-application-tags :id id :tags ["foo" "bar"]) =not=> ok?)
+    (facts "Application tags" ; tags are in minimal fixture
+      (fact "user can't set application tags"
+        (command pena :add-application-tags :id id :tags ["111" "222"]) =not=> ok?)
+      (fact "authority can set application tags"
+        (command sonja :add-application-tags :id id :tags ["111" "222"]) => ok?)
+      (fact "authority can't set tags that are not defined in organization"
+        (command sonja :add-application-tags :id id :tags ["foo" "bar"]) => (partial expected-failure? "error.unknown-tags"))
 
-    (fact "authority can set application tags"
-      (command sonja :add-application-tags :id id :tags ["foo" "bar"]) => ok?
-      (:tags (query-application sonja id)) => ["foo" "bar"])
+      (let [query (query-application sonja id)
+            org-tags (get-in query [:organizationMeta :tags])]
+        (:tags query) => ["111" "222"]
 
-    (fact "only auth admin can add new tags"
-      (command sipoo :save-organization-tags :tags ["makeja" "nigireja"]) => ok?
-      (command sonja :save-organization-tags :tags ["illegal"] =not=> ok?)
-      (command pena :save-organization-tags :tags ["illegal"] =not=> ok?)
-      (:tags (query sipoo :get-organization-tags)) => ["makeja" "nigireja"])
+        (fact "application's organization meta includes correct tags with ids as keys"
+          org-tags => {:111 "yl\u00E4maa", :222 "ullakko"}))
 
-    (fact "only authority can fetch available tags"
-      (query pena :get-organization-tags :organization "753-R") =not=> ok?
-      (:tags (query sonja :get-organization-tags :organizationId "753-R")) => ["makeja" "nigireja"])))
+      (fact "When tag is removed, it is also removed from applications"
+        (let [id (create-app-id sonja)]
+          (command sipoo :save-organization-tags :tags [{:id "123" :label "foo"} {:id "321" :label "bar"}]) => ok?
+          (command sonja :add-application-tags :id id :tags ["123" "321"]) => ok?
+          (:tags (query-application sonja id)) => (just ["123" "321"])
+          (command sipoo :save-organization-tags :tags [{:id "123" :label "foo"}]) => ok?
+
+          (fact "only 123 is left as 321 was removed"
+            (:tags (query-application sonja id)) => (just ["123"])))))))

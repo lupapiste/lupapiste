@@ -4,8 +4,12 @@
   function CompanyRegistration() {
     var self = this;
 
+    self.userLoggedIn = ko.pureComputed(function() {
+      return lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.id();
+    });
+
     self.userNotLoggedIn = ko.pureComputed(function() {
-      return !(lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.id());
+      return !self.userLoggedIn();
     });
 
     self.model = ko.validatedObservable({
@@ -26,7 +30,7 @@
       lastName:     ko.observable("").extend({required: true}),
       email:        ko.observable("").extend({required: true, email: true,
                                               usernameAsync: self.userNotLoggedIn}),
-      personId:     ko.observable("").extend({required: true, personId: true})
+      personId:     ko.observable("").extend({conditional_required: self.userNotLoggedIn, personId: true})
     });
 
     self.accountFieldNames = ["accountType"];
@@ -73,7 +77,7 @@
 
   CompanyRegistration.prototype.init = function() {
     if (_.isEmpty(this.model().accountType())) {
-      window.location.hash = "!/register-company-account-type";
+      pageutil.openPage("register-company-account-type");
       return;
     }
     this.clearModel(this.companyFieldNames.concat(this.signerFieldNames));
@@ -99,16 +103,16 @@
 
     hub.send("company-info-submitted", {company: company, signer: signer});
 
-    window.location.hash = "!/register-company-signing";
+    pageutil.openPage("register-company-signing");
   };
 
   CompanyRegistration.prototype.continueToCompanyInfo  = function() {
-    window.location.hash = "!/register-company";
+    pageutil.openPage("register-company");
   };
 
   CompanyRegistration.prototype.cancelInfo = function() {
     this.clearModel();
-    window.location.hash = "!/register";
+    pageutil.openPage("register");
   };
 
   CompanyRegistration.prototype.cancelSign = function() {
@@ -116,7 +120,7 @@
       .command("cancel-sign", {processId: this.processId()})
       .call();
     this.clearModel();
-    window.location.hash = "!/register";
+    pageutil.openPage("register");
   };
 
   var companyRegistration = new CompanyRegistration();
@@ -125,7 +129,7 @@
 
   hub.onPageLoad("register-company-signing", function() {
     if (_.isEmpty(companyRegistration.model().accountType())) {
-      window.location.hash = "!/register-company-account-type";
+      pageutil.openPage("register-company-account-type");
     }
   });
 

@@ -1,6 +1,7 @@
-function TagModel(label, saveFn) {
+function TagModel(tag, saveFn) {
   "use strict";
-  this.label = ko.observable(label);
+  this.id = tag.id;
+  this.label = ko.observable(tag.label);
   this.edit = ko.observable(false);
 
   this.saveSubscription = this.label.subscribe(function() {
@@ -25,11 +26,12 @@ LUPAPISTE.TagsEditorModel = function(params) {
     self.tags.remove(function(item) {
       return _.isEmpty(ko.unwrap(item.label));
     });
-    var tags = _(self.tags()).map(function(t) { return ko.unwrap(t.label); }).uniq().value();
+    var tags = _(self.tags()).map(function(t) { return _.pick(ko.toJS(t), "id", "label"); }).uniq("label").value();
     ajax
       .command("save-organization-tags", {tags: tags})
       .success(function() {
         self.indicator({type: "saved"});
+        self.refresh();
       })
       .error(function() {
         self.indicator({type: "err"});
@@ -43,22 +45,28 @@ LUPAPISTE.TagsEditorModel = function(params) {
     saveSubscription = self.tags.subscribe(function() {
       self.save();
     });
-  };
+  }
 
-  ajax
-    .query("get-organization-tags")
-    .success(function(res) {
-      var tags = _.map(res.tags, function(t) {
-        var model = new TagModel(t, self.save);
-        return model;
-      });
-      self.tags(tags);
-      onSave();
-    })
-    .call();
+  self.refresh = function() {
+    if (saveSubscription) {
+      saveSubscription.dispose();
+    }
+    ajax
+      .query("get-organization-tags")
+      .success(function(res) {
+        var tags = _.map(res.tags, function(t) {
+          var model = new TagModel(t, self.save);
+          return model;
+        });
+        self.tags(tags);
+        onSave();
+      })
+      .call();
+  };
+  self.refresh();
 
   self.addTag = function() {
-    var model = new TagModel(undefined, self.save);
+    var model = new TagModel({id: null, label: ""}, self.save);
     model.edit(true);
     saveSubscription.dispose();
     self.tags.push(model);

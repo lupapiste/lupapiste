@@ -318,7 +318,7 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (apply create-app-id apikey args)
-        resp  (command apikey :submit-application :id id :confirm false)] ; confirm parameter used only with foreman notice
+        resp  (command apikey :submit-application :id id)] ; confirm parameter used only with foreman notice
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
@@ -387,7 +387,7 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (:id (apply create-local-app apikey args))
-        resp  (local-command apikey :submit-application :id id :confirm false)]
+        resp  (local-command apikey :submit-application :id id)]
     resp => ok?
     (query-application local-query apikey id)))
 
@@ -448,7 +448,7 @@
              (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Upload should fail"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.95.html") => 0)))))
+             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.98.html") => 0)))))
 
 (defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
@@ -473,7 +473,7 @@
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Statement upload should fail"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.95.html") => 0)))))
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.98.html") => 0)))))
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
   (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))

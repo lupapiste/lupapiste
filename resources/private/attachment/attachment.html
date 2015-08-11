@@ -9,9 +9,9 @@
 
           <div class="attachment-back">
             <a class="btn left-align btn-nav-back"
-               data-bind="click: function() { window.location.hash = '!/application/' + application.id() + '/attachments'; repository.load(application.id()); }"
+               data-bind="click: _.partial(application.open, 'attachments')"
                data-test-id="back-to-application-from-attachment">
-              <span data-bind =" ltext: 'application.return'"></span>
+              <span data-bind ="ltext: 'application.return'"></span>
               <span class="icon drill-left-black-bigger left-align"></span>
             </a>
             <div data-bind="with: $root.approve">

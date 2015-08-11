@@ -317,7 +317,7 @@
 
   var neighborActions = {
     manage: function(application) {
-      window.location.hash = "!/neighbors/" + application.id();
+      pageutil.openPage("neighbors", application.id());
       return false;
     },
     markDone: function(neighbor) {

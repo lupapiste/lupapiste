@@ -22,13 +22,10 @@ var stamping = (function() {
 
     cancelStamping: function() {
       model.stampingMode(false);
-      var id = model.appModel.id();
+      model.appModel.open("attachments");
       model.appModel = null;
       model.attachments = null;
       model.authorization = null;
-
-      window.location.hash="!/application/" + id + "/attachments";
-      repository.load(id);
     },
 
     resetStamping: function() {
@@ -73,7 +70,7 @@ var stamping = (function() {
 
     setStampFields();
 
-    window.location.hash="!/stamping/" + model.appModel.id();
+    pageutil.openPage("stamping", model.appModel.id());
   }
 
   hub.onPageLoad("stamping", function() {

@@ -27,7 +27,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.pending = ko.observable(false);
   ko.computed(function() {
-    return self.pending() ? pageutil.showAjaxWait() : pageutil.hideAjaxWait();
+    return self.pending() ? pageutil.showAjaxWait(loc("applications.loading")) : pageutil.hideAjaxWait();
   });
 
   self.onSuccess = function(res) {
@@ -38,7 +38,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   ko.computed(function() {
     ajax.datatables("applications-search",
                {searchText: self.searchFieldDelayed(),
-                applicationTags: self.applicationTags(),
+                applicationTags: _.pluck(self.applicationTags(), "id"),
                 handler: self.handler() ? self.handler().id : undefined,
                 applicationType: self.applicationType(),
                 limit: self.limit(),
@@ -53,7 +53,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   hub.onPageLoad("applications", function() {
     ajax.datatables("applications-search",
                {searchText: self.searchField(),
-                applicationTags: self.applicationTags(),
+                applicationTags: _.pluck(self.applicationTags(), "id"),
                 handler: self.handler() ? self.handler().id : undefined,
                 applicationType: self.applicationType(),
                 limit: self.limit(),

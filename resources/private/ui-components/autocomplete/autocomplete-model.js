@@ -15,6 +15,12 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.query = self.dataProvider.query;
 
   self.inputSelected = ko.observable(false);
+  self.dropdownClick = ko.observable(false);
+
+  self.dropdownVisible = ko.computed(function() {
+    return self.inputSelected() || self.dropdownClick(); // works in IE when scrollbar is clicked
+  });
+
   self.selected = ko.observable("");
   self.index = ko.observable(0);
   self.selectedTags = ko.observableArray();
@@ -46,6 +52,20 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.selectInput = function() {
     self.inputSelected(true);
   };
+  self.retainFocus = function() {
+    // set to true so input blur knows if ul container (scrollbar) was clicked
+    self.dropdownClick(true);
+  };
+  self.blur = function() {
+    if (self.dropdownClick()) {
+      // IE hax, return focus to input when user click scrollbar
+      $(event.target || event.srcElement).focus(); // IE9 event.srcElement
+      self.dropdownClick(false);
+      return false;
+    } else {
+      return true;
+    }
+  };
 
   self.selectItem = function(item) {
     if (self.tags) {
@@ -53,6 +73,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
     } else {
       self.value(item);
     }
+    self.dropdownClick(false); // set to false so dropdown closes
     self.inputSelected(false);
     self.query("");
   };

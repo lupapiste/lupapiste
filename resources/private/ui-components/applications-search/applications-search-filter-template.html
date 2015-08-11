@@ -2,7 +2,7 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/html" id="applications-search-filter-template">
+    <script type="text/x-jquery-tmpl" id="applications-search-filter-template">
     <div class="filter-row basic">
       <div class="filter-item">
         <label data-bind="ltext: 'application.filter.search'" />
@@ -17,15 +17,15 @@
       </div>
       <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.isAuthority() -->
       <div class="feature filter-item" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
-        <a class="command" data-bind="ltext: advancedFiltersText, toggleClick: showAdvancedFilters"></a>
+        <a class="command" data-test-id="toggle-advanced-filters" data-bind="ltext: advancedFiltersText, toggleClick: showAdvancedFilters"></a>
       </div>
       <!-- /ko -->
     </div>
     <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && showAdvancedFilters() && lupapisteApp.models.currentUser.isAuthority() -->
-    <div class="feature filter-row advanced">
+    <div class="feature filter-row advanced" data-test-id="advanced-filters-row">
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.tags'" />
-        <div data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, tags: true}}"></div>
+        <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, selectedText: 'label', tags: true}}"></div>
       </div>
     </div>
     <!-- /ko -->

@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation  Sonja should see only applications from Sipoo
+Suite teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
 
@@ -45,7 +46,7 @@ Mikko edits operation B description
 Mikko adds txt attachment without comment
   [Tags]  attachments
   Open tab  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen - Talo A
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen - Talo A
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 

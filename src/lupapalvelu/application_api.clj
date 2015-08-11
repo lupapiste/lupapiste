@@ -245,9 +245,8 @@
       )))
 
 (defcommand submit-application
-  {:parameters       [id confirm]
-   :input-validators [(partial action/non-blank-parameters [:id])
-                      (partial action/boolean-parameters [:confirm])]
+  {:parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority}
    :states           #{:draft :open}
    :notified         true
@@ -257,7 +256,7 @@
   [{:keys [application created] :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)]
     (or
-      (foreman/validate-notice-submittable application confirm)
+      (foreman/validate-notice-submittable application)
       (a/validate-link-permits application)
       (do-submit command application created))))
 
@@ -519,7 +518,8 @@
                       validate-link-permit-id
                       a/validate-authority-in-drafts]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
-                      (fn [{d :data}] (when-not (mongo/valid-key? (:linkPermitId d)) (fail :error.invalid-db-key)))]}
+                      (fn [{data :data}] (when (= (:id data) (ss/trim (:linkPermitId data))) (fail :error.link-permit-self-reference)))
+                      (fn [{data :data}] (when-not (mongo/valid-key? (:linkPermitId data)) (fail :error.invalid-db-key)))]}
   [{application :application}]
   (a/do-add-link-permit application (ss/trim linkPermitId))
   (ok))
