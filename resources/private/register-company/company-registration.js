@@ -4,8 +4,12 @@
   function CompanyRegistration() {
     var self = this;
 
+    self.userLoggedIn = ko.pureComputed(function() {
+      return lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.id();
+    });
+
     self.userNotLoggedIn = ko.pureComputed(function() {
-      return !(lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.id());
+      return !self.userLoggedIn();
     });
 
     self.model = ko.validatedObservable({
@@ -26,7 +30,7 @@
       lastName:     ko.observable("").extend({required: true}),
       email:        ko.observable("").extend({required: true, email: true,
                                               usernameAsync: self.userNotLoggedIn}),
-      personId:     ko.observable("").extend({required: true, personId: true})
+      personId:     ko.observable("").extend({conditional_required: self.userNotLoggedIn, personId: true})
     });
 
     self.accountFieldNames = ["accountType"];

@@ -57,13 +57,17 @@
       (:submittable (query-application apikey foreman-application-id)) => false)
 
     (fact "Submit link-permit app"
-      (command apikey :submit-application :id application-id :confirm false) => ok?)
+      (command apikey :submit-application :id application-id) => ok?
+      (:submittable (query-application apikey foreman-application-id)) => true)
 
-    (facts "Submit foreman-app"
-      (fact "gives error first and warns about foreman notice"
-        (command apikey :submit-application :id foreman-application-id :confirm false) => (partial expected-failure? :error.foreman.notice-not-submittable))
-      (fact "By confirming the foreman notice application can be submitted"
-        (command apikey :submit-application :id foreman-application-id :confirm true) => ok?))
+    (facts "Can't submit foreman notice app if link permit doesn't have verdict"
+      (fact "gives error about foreman notice"
+        (command apikey :submit-application :id foreman-application-id) => (partial expected-failure? :error.foreman.notice-not-submittable))
+      (command sonja :check-for-verdict :id application-id) => ok?
+      (fact "ok after link-permit has verdict"
+        (command apikey :submit-application :id foreman-application-id) => ok?))
+
+
 
     (fact "Link foreman application to task"
       (let [apikey                       mikko
@@ -78,6 +82,14 @@
               updated-tasks (:tasks app)
               updated-foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") updated-tasks))]
           (get-in updated-foreman-task [:data :asiointitunnus :value]) => foreman-application-id)))
+
+    ; delete verdict for next steps
+    (let [app (query-application mikko application-id)
+          verdict-id (-> app :verdicts first :id)
+          verdict-id2 (-> app :verdicts second :id)]
+     (command sonja :delete-verdict :id application-id :verdictId verdict-id) => ok?
+     (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
+     (fact "is submitted" (:state (query-application mikko application-id)) => "submitted"))
 
     (facts "approve foreman"
       (fact "Can't approve foreman application before actual application"
