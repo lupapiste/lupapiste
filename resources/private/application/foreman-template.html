@@ -30,18 +30,21 @@
               <td colspan="4">
                 <h2 data-bind="ltext: 'foreman.requiredForemen'" style="padding-top:1em"></h2>
                 <span data-bind="saveIndicator: $parent.indicator"></span>
-                <div class="task-legend">
-                  <span class="ok icon"></span>
-                  <span data-bind="ltext: 'foreman.task.ok.title'"></span>
-                </div>
-                <div class="task-legend">
-                  <span class="new icon"></span>
-                  <span data-bind="ltext: 'foreman.task.new.title'"></span>
-                </div>
-                <div class="task-legend">
-                  <span class="missing icon"></span>
-                  <span data-bind="ltext: 'foreman.task.missing.title'"></span>
-                </div>
+                <div>
+                  <div class="stacked">
+                    <div class="like-btn">
+                      <i class="lupicon-circle-check"></i>
+                      <span data-bind="ltext: 'foreman.task.ok.title'"></span>
+                    </div>
+                    <div class="like-btn">
+                      <i class="lupicon-circle-star"></i>
+                      <span data-bind="ltext: 'foreman.task.new.title'"></span>
+                    </div>
+                    <div class="like-btn">
+                      <i class="lupicon-circle-attention"></i>
+                      <span data-bind="ltext: 'foreman.task.missing.title'"></span>
+                    </div>
+                  </div>
               </td>
             </tr>
             <tr>
@@ -52,7 +55,10 @@
           <tbody data-bind="foreach: $data.foremen">
             <tr data-bind="attr: {'data-test-name': $data.name}">
               <td class="task-state">
-                <span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['foreman', 'task', statusName, 'title'])}"></span>
+                <i data-bind="attr: {
+                              'class': LUPAPISTE.statusIcon(statusName),
+                              'data-test-state': $data.state,
+                              'title': loc(['foreman', 'task', statusName, 'title'])}"></i>
               </td>
               <td>
                 <span data-bind="text: $data.name"></span>

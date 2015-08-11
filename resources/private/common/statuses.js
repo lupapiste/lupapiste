@@ -12,7 +12,7 @@ LUPAPISTE.statuses = {
   sent: "ok"
 };
 
-LUPAPISTE.lupicon = function( status ) {
+LUPAPISTE.statusIcon = function( status ) {
   var cls = {
     missing: "attention",
     "new": "star",

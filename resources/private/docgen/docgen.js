@@ -25,7 +25,7 @@ var docgen = (function () {
       }
 
       if (schema.info.repeating && !isDisabled && authorizationModel.ok("create-doc")) {
-        var icon = $("<i>", {'class': "lupicon-circle-plus"});
+        var icon = $("<i>", {"class": "lupicon-circle-plus"});
         var span = $("<span>").text( loc(schema.info.name + "._append_label"));
         var btn = $("<button>",
                     {"data-test-id": schema.info.name + "_append_btn", "class": "secondary"})

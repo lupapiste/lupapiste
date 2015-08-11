@@ -1301,7 +1301,10 @@
                                 </thead>
                                 <tbody data-bind="foreach: tasks">
                                     <tr data-bind="attr: {'data-test-type': schema.info.name}">
-                                        <td><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
+                                        <td><i data-bind="attr: {
+                                                             'class': LUPAPISTE.statusIcon(statusName),
+                                                             'data-test-state': $data.state,
+                                                             'title': loc(['task', statusName, 'title'])}"></i></td>
                                         <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
                                         <td data-bind="dateString: $data.closed"></td>
                                     </tr>
