@@ -28,7 +28,7 @@
 
   var filterByArchiveStatus = function(attachments, keepArchived) {
     return _.filter(attachments, function(attachment) {
-      if (!attachment.metadata()["sailytysaika"] || !attachment.metadata()["sailytysaika"]["arkistointi"]()
+      if (!attachment.metadata() || !attachment.metadata()["sailytysaika"] || !attachment.metadata()["sailytysaika"]["arkistointi"]()
         || attachment.metadata()["sailytysaika"]["arkistointi"]() === 'ei') {
         return !keepArchived;
       } else {
@@ -66,7 +66,7 @@
       attachment.metadata = ko.observable(attachment.metadata);
       attachment.showMetadataEditor = ko.observable(false);
       attachment.retentionDescription = ko.pureComputed(function() {
-        var retention = attachment.metadata()["sailytysaika"];
+        var retention = attachment.metadata() ? attachment.metadata()["sailytysaika"] : null;
         if (retention && retention["arkistointi"]()) {
           var retentionMode = retention["arkistointi"]();
           var additionalDetail = "";
@@ -84,7 +84,7 @@
         }
       });
       attachment.personalDataDescription = ko.pureComputed(function() {
-        var personalData = attachment.metadata()['henkilotiedot'];
+        var personalData = attachment.metadata() ? attachment.metadata()['henkilotiedot'] : null;
         if (_.isFunction(personalData)) {
           return loc(personalData());
         } else {

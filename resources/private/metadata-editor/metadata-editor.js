@@ -12,7 +12,7 @@
         });
       }
       if (v.subfields) {
-        newMap[v.type] = ko.mapping.fromJS(constructEditableMetadata(actualMetadata[v.type], v.subfields));
+        newMap[v.type] = ko.mapping.fromJS(constructEditableMetadata(actualMetadata ? actualMetadata[v.type] : null, v.subfields));
       } else {
         newMap[v.type] = ko.observable(actualMetadata && actualMetadata[v.type] ? actualMetadata[v.type] : null);
       }
