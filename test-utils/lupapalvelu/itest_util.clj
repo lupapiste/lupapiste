@@ -318,7 +318,7 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (apply create-app-id apikey args)
-        resp  (command apikey :submit-application :id id :confirm false)] ; confirm parameter used only with foreman notice
+        resp  (command apikey :submit-application :id id)] ; confirm parameter used only with foreman notice
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
@@ -387,7 +387,7 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (:id (apply create-local-app apikey args))
-        resp  (local-command apikey :submit-application :id id :confirm false)]
+        resp  (local-command apikey :submit-application :id id)]
     resp => ok?
     (query-application local-query apikey id)))
 

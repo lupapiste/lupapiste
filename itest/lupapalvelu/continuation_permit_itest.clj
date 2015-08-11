@@ -37,7 +37,7 @@
     (let [create-jatkoaika-resp     (command apikey :create-continuation-period-permit :id verdict-given-application-ya-id) => ok?
           jatkoaika-application-id  (:id create-jatkoaika-resp)
           jatkoaika-application     (query-application apikey jatkoaika-application-id) => truthy
-          _                         (command apikey :submit-application :id jatkoaika-application-id :confirm false) => ok?
+          _                         (command apikey :submit-application :id jatkoaika-application-id) => ok?
           _                         (generate-documents jatkoaika-application apikey)
           _                         (command apikey :create-continuation-period-permit :id jatkoaika-application-id)
                                       => (partial expected-failure? "error.command-illegal-state")

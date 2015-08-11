@@ -44,11 +44,10 @@
                            :zip "33100"
                            :po "Tampere"
                            :customAccountLimit nil}
-                 :signer {:firstName   "Pena"
-                          :lastName    "Panaani"
-                          :email       "in@va.lid"
-                          :currentUser "777777777777777777000000"
-                          :personId    "131052-308T"}
+                 :signer {:firstName   ""
+                          :lastName    ""
+                          :email       "pena@example.com"
+                          :personId    nil}
                  :lang "fi")
       :process-id
       get-process))
@@ -103,7 +102,7 @@
                                                        :lastName    "Panaani"
                                                        :email       "pena@example.com"
                                                        :currentUser "777777777777777777000020"
-                                                       :personId    "131052-308T"}
+                                                       :personId    "010203-040A"}
                                              :status  "created"
                                              :lang    "fi"}))
 

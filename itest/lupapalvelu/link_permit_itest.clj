@@ -59,7 +59,7 @@
         (query apikey :link-permit-required :id jatkoaika-application-id) => fail?))
 
     (fact "approving ya-jatkoaika leads to closed state"
-      (command apikey :submit-application :id jatkoaika-application-id :confirm false) => ok?
+      (command apikey :submit-application :id jatkoaika-application-id) => ok?
       (generate-documents jatkoaika-application apikey)
       (command apikey :approve-application :id jatkoaika-application-id :lang "fi") => ok?
       (:state (query-application apikey jatkoaika-application-id)) => "closed")

@@ -636,7 +636,7 @@
                             <!-- /ko -->
                             <button class="positive"
                                     data-test-id="application-submit-btn"
-                                    data-bind="click: function() { submitApplication(false); },
+                                    data-bind="click: submitApplication,
                                                visible: $root.authorization.ok('submit-application'),
                                                enable: submitButtonEnabled">
                                 <i class="lupicon-download"></i>
