@@ -189,7 +189,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   // Element constructors
   // Supported options:
   // icon: icon class -> <button><i class="icon"></i><span>label</span></button>
-  // class: class attribute value -> <button class="class">...
+  // className: class attribute value -> <button class="className">...
   function makeButton(id, label, opts) {
     opts = opts || {};
     var button = document.createElement("button");
@@ -205,8 +205,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else {
       button.innerHTML = label;
     }
-    if( opts.class ) {
-      button.setAttribute( "class", opts.class );
+    if( opts.className ) {
+      button.setAttribute( "class", opts.className );
     }
     return button;
   }
@@ -365,7 +365,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     function makeApprovalButton(verb, noun, cssClass) {
       var cmd = verb + "-doc";
       var title = loc(["document", verb]);
-      var opts = {class: cssClass,
+      var opts = {className: cssClass,
                   icon: verb === "approve" ? "lupicon-check" : null};
       var button =
             $(makeButton(self.docId + "_" + verb, title, opts ))
@@ -1320,7 +1320,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
       var appendButton = makeButton(myPath.join("_") + "_append",
                                     loc([self.schemaI18name, myPath.join("."), "_append_label"]),
-                                    {icon: "lupicon-circle-plus", class: "secondary"});
+                                    {icon: "lupicon-circle-plus", className: "secondary"});
 
       var appender = function () {
         var parent$ = $(this).closest(".accordion-fields");
@@ -1386,7 +1386,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
             locKey = [subSchema.i18nkey, "copyLabel"];
           }
           var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey),
-                                      {icon: "lupicon-circle-plus", class: "secondary"});
+                                      {icon: "lupicon-circle-plus", className: "secondary"});
           $(copyButton).click(copyElement);
           buttonGroup.appendChild(copyButton);
         }
