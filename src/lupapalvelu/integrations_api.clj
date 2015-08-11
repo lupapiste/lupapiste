@@ -121,7 +121,7 @@
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)
                 (application-already-exported :exported-to-backing-system)]
-   :states     #{:verdictGiven :constructionStarted}
+   :states     #{:sent :verdictGiven :constructionStarted}
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 

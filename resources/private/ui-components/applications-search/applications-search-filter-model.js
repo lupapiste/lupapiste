@@ -57,7 +57,7 @@ LUPAPISTE.HandlersDataProvider = function() {
     .query("users-in-same-organizations")
     .error(_.noop)
     .success(function(res) {
-      data(_.map(res.users, mapUser));
+      data(_(res.users).map(mapUser).sortBy("fullName").value());
     })
     .call();
 
