@@ -530,7 +530,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.open = function(tab) {
     var suffix = self.infoRequest() ? null : tab;
     pageutil.openApplicationPage(self, suffix);
-  }
+  };
 
   self.targetTab.subscribe(function(target) {
     if (target.tab === "requiredFieldSummary") {
