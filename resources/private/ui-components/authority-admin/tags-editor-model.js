@@ -85,23 +85,27 @@ LUPAPISTE.TagsEditorModel = function(params) {
       .onError("warning.tags.removing-from-applications", function(data) {
         var applications = _.pluck(data.applications, "id");
         var dialogTextPrefix = loc("tags.removing-from-applications.prefix", item.label());
+
         var dialogBody = _.reduce(applications, function(resultStr, idStr) {
           return resultStr + "<div><i>" + idStr + "</i></div>";
         }, "<div class='spacerM'>");
         dialogBody = dialogBody + "</div>";
+
         var dialogTextSuffix = loc("tags.removing-from-applications.suffix");
-        hub.send("show-dialog", {ltitle: "tags.deleting",
-                                 size: "medium",
-                                 component: "yes-no-dialog",
-                                 componentParams: {text: dialogTextPrefix + dialogBody + dialogTextSuffix,
-                                                   yesFn: removeFn}});
+
+        hub.send("show-dialog",
+                 {ltitle: "tags.deleting",
+                  size: "medium",
+                  component: "yes-no-dialog",
+                  componentParams: {text: dialogTextPrefix + dialogBody + dialogTextSuffix,
+                                    yesFn: removeFn}});
       })
       .success(function() {
-        hub.send("show-dialog",{ltitle: "tags.deleting",
-                                 size: "medium",
-                                 component: "yes-no-dialog",
-                                 componentParams: {ltext: "tags.deleting.confirmation",
-                                                   yesFn: removeFn}});
+        hub.send("show-dialog",
+                 {ltitle: "tags.deleting",
+                  size: "medium",
+                  component: "yes-no-dialog",
+                  componentParams: {text: loc("tags.deleting.confirmation", item.label()), yesFn: removeFn}});
       })
       .call();
   };
