@@ -7016,131 +7016,134 @@ span.icon_clear:before {
 
 /* line 716, ../sass/views/_application.scss */
 .requiredField-line {
-  margin-bottom: 6px;
-  vertical-align: top;
+  /* margin-bottom: $marginS; */
+  /* vertical-align: top; */
   display: table-row;
-  padding: 6px;
-  height: 24px;
+  /* padding: $marginS; */
+  /* height: 24px; */
 }
 /* line 722, ../sass/views/_application.scss */
 .requiredField-line span, .requiredField-line a {
-  vertical-align: top;
-  line-height: 14px;
-  max-height: 16px;
+  /*   vertical-align: top; */
+  /*   line-height: 14px; */
+  /*   max-height: 16px; */
   display: table-cell;
 }
 /* line 728, ../sass/views/_application.scss */
 .requiredField-line a {
   padding-left: 12px;
-  font-size: 14px;
 }
 /* line 733, ../sass/views/_application.scss */
 .requiredField-line .required-field-error-element-name {
   padding-left: 6px;
 }
+/* line 736, ../sass/views/_application.scss */
+.requiredField-line .lupicon-circle-attention {
+  color: #e34319;
+}
 
-/* line 738, ../sass/views/_application.scss */
+/* line 741, ../sass/views/_application.scss */
 .invited-foremans {
   margin-bottom: 24px;
 }
-/* line 740, ../sass/views/_application.scss */
+/* line 743, ../sass/views/_application.scss */
 .invited-foremans .foreman {
   display: table-row;
 }
-/* line 742, ../sass/views/_application.scss */
+/* line 745, ../sass/views/_application.scss */
 .invited-foremans .foreman span {
   display: table-cell;
   padding-right: 6px;
 }
-/* line 750, ../sass/views/_application.scss */
+/* line 753, ../sass/views/_application.scss */
 .invited-foremans .foreman-state:before {
   content: "(";
 }
-/* line 753, ../sass/views/_application.scss */
+/* line 756, ../sass/views/_application.scss */
 .invited-foremans .foreman-state:after {
   content: ")";
 }
 
-/* line 759, ../sass/views/_application.scss */
+/* line 762, ../sass/views/_application.scss */
 .tasks-foreman {
   position: relative;
 }
-/* line 762, ../sass/views/_application.scss */
+/* line 765, ../sass/views/_application.scss */
 .tasks-foreman .form-input {
   display: inline-block;
   margin: 0 6px 0 0;
 }
-/* line 768, ../sass/views/_application.scss */
+/* line 771, ../sass/views/_application.scss */
 .tasks-foreman .form-input.combobox.long, .tasks-foreman select.long {
   width: 41.25em;
 }
-/* line 773, ../sass/views/_application.scss */
+/* line 776, ../sass/views/_application.scss */
 .tasks-foreman thead tr:first-child td {
   padding-left: 0;
 }
-/* line 778, ../sass/views/_application.scss */
+/* line 781, ../sass/views/_application.scss */
 .tasks-foreman .foreman-state:before {
   content: "(";
 }
-/* line 781, ../sass/views/_application.scss */
+/* line 784, ../sass/views/_application.scss */
 .tasks-foreman .foreman-state:after {
   content: ")";
 }
-/* line 786, ../sass/views/_application.scss */
+/* line 789, ../sass/views/_application.scss */
 .tasks-foreman .add-foreman:before {
   content: "[";
 }
-/* line 789, ../sass/views/_application.scss */
+/* line 792, ../sass/views/_application.scss */
 .tasks-foreman .add-foreman:after {
   content: "]";
 }
 
-/* line 795, ../sass/views/_application.scss */
+/* line 798, ../sass/views/_application.scss */
 .operation-info {
   width: 55%;
   display: inline-block;
   vertical-align: top;
 }
 
-/* line 800, ../sass/views/_application.scss */
+/* line 803, ../sass/views/_application.scss */
 .organizationLinks {
   vertical-align: top;
   width: 39%;
   padding-left: 48px;
   display: inline-block;
 }
-/* line 805, ../sass/views/_application.scss */
+/* line 808, ../sass/views/_application.scss */
 .organizationLinks .organization-links {
   margin-bottom: 12px;
 }
-/* line 807, ../sass/views/_application.scss */
+/* line 810, ../sass/views/_application.scss */
 .organizationLinks .organization-links a {
   color: #333;
 }
-/* line 809, ../sass/views/_application.scss */
+/* line 812, ../sass/views/_application.scss */
 .organizationLinks .organization-links a:active, .organizationLinks .organization-links a:visited, .organizationLinks .organization-links a:hover {
   color: #333;
 }
 
-/* line 817, ../sass/views/_application.scss */
+/* line 820, ../sass/views/_application.scss */
 #application-metadata-tab h1 {
   float: none;
 }
-/* line 820, ../sass/views/_application.scss */
+/* line 823, ../sass/views/_application.scss */
 #application-metadata-tab .table-metadata {
   max-width: 875px;
 }
-/* line 822, ../sass/views/_application.scss */
+/* line 825, ../sass/views/_application.scss */
 #application-metadata-tab .table-metadata .metadata-key {
   width: 175px;
 }
 
-/* line 829, ../sass/views/_application.scss */
+/* line 832, ../sass/views/_application.scss */
 #application-requiredFieldSummary-tab .auth-actions button {
   display: block;
 }
 
-/* line 837, ../sass/views/_application.scss */
+/* line 840, ../sass/views/_application.scss */
 h2.sticky {
   margin-bottom: 12px;
 }

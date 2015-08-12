@@ -714,24 +714,27 @@ $side-panel-width: 60px;
 }
 
 .requiredField-line {
-  margin-bottom: $marginS;
-  vertical-align: top;
+  /* margin-bottom: $marginS; */
+  /* vertical-align: top; */
   display: table-row;
-  padding: $marginS;
-  height: 24px;
+  /* padding: $marginS; */
+  /* height: 24px; */
   span, a {
-    vertical-align: top;
-    line-height: 14px;
-    max-height: 16px;
+  /*   vertical-align: top; */
+  /*   line-height: 14px; */
+  /*   max-height: 16px; */
     display: table-cell;
   }
   a {
     padding-left: $marginM;
-    font-size: 14px;
+//    font-size: 14px;
 
   }
   .required-field-error-element-name {
     padding-left: $marginS;
+  }
+  .lupicon-circle-attention {
+    color: $red;
   }
 }
 
