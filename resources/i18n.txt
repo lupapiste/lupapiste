@@ -1,5 +1,0 @@
-warning.tags.removing-from-applications: Avainsana käytössä hakemuksilla
-tags.removing-from-applications.prefix: <div class="spacerM">Olet poistamassa avainsanaa <strong>{0}</strong>. Avainsana on jo käytössä seuraavilla hakemuksilla:</div>
-tags.removing-from-applications.suffix: <div>Jos poistat avainsanan, se poistetaan myös hakemuksilta. Haluatko varmasti poistaa avainsanan käytöstä?</div>
-tags.deleting: Avainsanan poistaminen
-tags.deleting.confirmation: Haluatko varmasti poistaa avaisanan '{0}'?
