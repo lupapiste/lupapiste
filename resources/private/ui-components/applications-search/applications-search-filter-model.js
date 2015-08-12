@@ -16,7 +16,7 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     })
     .call();
 
-  self.groupData = ko.pureComputed(function() {
+  self.groupData = ko.pureComputed(function() { // when user belongs to more than one organization
     return _.keys(tagsData()).length > 1 ? {header: "organization", dataProperty: "tags"} : null;
   });
 
@@ -30,11 +30,11 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     var q = self.query() || "";
     // then filter tags that don't match query
     filteredData = _.map(filteredData, function(orgData) {
-      return {organization: orgData.organization, tags: _.filter(orgData.tags, function(tag) {
+      return _.assign(orgData, {tags: _.filter(orgData.tags, function(tag) {
         return _.reduce(q.split(" "), function(result, word) {
           return _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
         }, true);
-      })};
+      })});
     });
     // last filter out organization objects whose tags are empty
     filteredData = _.filter(filteredData, function(orgData) {
@@ -43,12 +43,12 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     return filteredData;
   });
 
-  function getFirstTags() {
+  function getFirstTags() { // returns tags of first organization
     return _.isEmpty(self.groupedFilter()) ? [] : _.first(self.groupedFilter()).tags;
   }
 
   self.data = ko.pureComputed(function() {
-     return _.keys(tagsData()).length > 1 ? self.groupedFilter() : getFirstTags();
+    return _.keys(tagsData()).length > 1 ? self.groupedFilter() : getFirstTags();
   });
 };
 
