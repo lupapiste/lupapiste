@@ -18,7 +18,7 @@ Mikko adds an attachment
   Add attachment  inforequest  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko open attachment details
-  Click link  xpath=//span[@class="attachment-details"]//a
+  Click link  xpath=//div[@class="comment-bubble attachment"]//a
   Wait Until  Element Should Be Visible  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
   Wait Until  Page Should Contain  ${TXT_TESTFILE_NAME}
 
