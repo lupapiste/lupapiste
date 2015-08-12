@@ -75,7 +75,7 @@
    *
    * Source: https://github.com/Knockout-Contrib/Knockout-Validation/wiki/User-Contributed-Rules
   */
-  ko.validation.rules["conditional_required"] = {
+  ko.validation.rules.conditional_required = {
     validator: function (val, condition) {
       var required = false;
       if (typeof condition === "function") {
@@ -91,7 +91,7 @@
       }
     },
     message: ko.validation.rules.required.message
-  }
+  };
 
   ko.validation.registerExtenders();
 
