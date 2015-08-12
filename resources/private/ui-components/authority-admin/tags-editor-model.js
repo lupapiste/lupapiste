@@ -74,7 +74,7 @@ LUPAPISTE.TagsEditorModel = function(params) {
   };
 
   self.removeTag = function(item) {
-    var removeFn = function(d) {
+    var removeFn = function() {
       item.edit(false);
       item.dispose();
       self.tags.remove(item);
@@ -96,7 +96,13 @@ LUPAPISTE.TagsEditorModel = function(params) {
                                  componentParams: {text: dialogTextPrefix + dialogBody + dialogTextSuffix,
                                                    yesFn: removeFn}});
       })
-      .success(removeFn)
+      .success(function() {
+        hub.send("show-dialog",{ltitle: "tags.deleting",
+                                 size: "medium",
+                                 component: "yes-no-dialog",
+                                 componentParams: {ltext: "tags.deleting.confirmation",
+                                                   yesFn: removeFn}});
+      })
       .call();
   };
 
