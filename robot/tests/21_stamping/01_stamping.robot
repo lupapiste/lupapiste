@@ -45,6 +45,9 @@ Sonja goes to attachments tab
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
 
+Attachment is not stamped
+  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]
+
 Sonja sees stamping button
   Wait until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='stampAttachments']
 
@@ -119,3 +122,8 @@ Reset stamping, stamping page should be refreshed
 Return from stamping to attachments tab
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="cancel-stamping"]
   Element should be visible  application-attachments-tab
+
+Attachment has stamped icon
+  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]
+  Xpath Should Match X Times  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]  3
+
