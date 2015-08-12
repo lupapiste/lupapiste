@@ -115,6 +115,9 @@
         padding: $marginS $marginS;
         &.group-indent {
           padding: 0 0 0 $marginS*2;
+          &:hover {
+            background-color: lighten($lp-orange, 40%);
+          }
         }
       }
       li.autocomplete-result-item {
