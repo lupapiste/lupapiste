@@ -79,7 +79,7 @@ var repository = (function() {
         return task.source && task.source.type === "verdict" && task.source.id === verdict.id;
       });
 
-      var lupamaaraukset = _(verdict.paatokset || []).map(_.property("lupamaaraykset")).filter().value();
+      var lupamaaraukset = _(verdict.paatokset || []).pluck("lupamaaraykset").filter().value();
 
       if (lupamaaraukset.length === 0 && myTasks.length > 0) {
         var katselmukset = tasksDataBySchemaName(myTasks, "task-katselmus", function(task) {
