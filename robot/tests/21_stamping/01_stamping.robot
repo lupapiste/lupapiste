@@ -125,5 +125,5 @@ Return from stamping to attachments tab
 
 Attachment has stamped icon
   Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]
-  Xpath Should Match X Times  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]  3
+  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]  3
 
