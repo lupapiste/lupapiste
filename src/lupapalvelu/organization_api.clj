@@ -394,7 +394,7 @@
    :org-authz-roles action/reader-org-authz-roles
    :user-roles #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
-  (if orgAuthz
+  (if (seq orgAuthz)
     (let [organization-tags (mongo/select
                                   :organizations
                                   {:_id {$in (keys orgAuthz)} :tags {$exists true}}
