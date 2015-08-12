@@ -42,21 +42,32 @@ Sonja creates verdict with adds comment
 Add katselmus
   # 3 tasks from backend
   Task count is  task-katselmus  3
-  Click enabled by test id  verdict-new-task
-  Wait until  Element should be visible  dialog-create-task
-  Wait until  Select From List By Value  choose-task-type   task-katselmus
-  Input text  create-task-name  uus lupaehto
-  Click enabled by test id  create-task-save
-  Wait until  Element should not be visible  dialog-create-task
+  Create task  task-katselmus  Lopullinen loppukatselmus
   # One on this verdict screen and one hidden in tasks tab
   Task count is  task-katselmus  5
+
+Add foreman
+  # 3 tasks from backend
+  Task count is  task-vaadittu-tyonjohtaja  3
+  Create task  task-vaadittu-tyonjohtaja  TJ0
+  # One on this verdict screen and one hidden in tasks tab
+  Task count is  task-vaadittu-tyonjohtaja  5
+
+Add other task
+  # 3 tasks from backend
+  Task count is  task-lupamaarays  3
+  Create task  task-lupamaarays  Bajamajoja oltava riittävästi
+  # One on this verdict screen and one hidden in tasks tab
+  Task count is  task-lupamaarays  5
 
 Return to application
   Click by test id  return-from-verdict
 
 Verdict has tasks
   Page Should Not Contain Element  xpath=//div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
-  Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"]  uus lupaehto
+  Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"]  Lopullinen loppukatselmus
+  Element Text Should Be  xpath=//ul[@data-bind="foreach: lupamaaraykset.muutMaaraykset"]/li  Bajamajoja oltava riittävästi
+  Element Text Should Be  xpath=//span[@data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"]  TJ0
 
 Sonja publishes verdict
   Click enabled by test id  edit-verdict
@@ -157,3 +168,11 @@ Comment verdict
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
   Close side panel  conversation
 
+Create task
+  [Arguments]  ${type}  ${message}
+  Click enabled by test id  verdict-new-task
+  Wait until  Element should be visible  dialog-create-task
+  Wait until  Select From List By Value  choose-task-type   ${type}
+  Input text  create-task-name  ${message}
+  Click enabled by test id  create-task-save
+  Wait until  Element should not be visible  dialog-create-task
