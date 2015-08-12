@@ -16,20 +16,39 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     })
     .call();
 
-  self.data = ko.pureComputed(function() {
+  self.groupData = ko.pureComputed(function() {
+    return _.keys(tagsData()).length > 1 ? {header: "organization", dataProperty: "tags"} : null;
+  });
+
+  self.groupedFilter = ko.pureComputed(function() {
+    // first filter out those tags who are not selected
     var filteredData = _.map(tagsData(), function(orgData) {
       return {organization: orgData.name[loc.currentLanguage], tags: _.filter(orgData.tags, function(tag) {
         return !_.some(self.filtered(), tag);
       })};
     });
     var q = self.query() || "";
-    /*filteredData = _.map(filteredData, function(org) {
-      return _.filter(filteredData, function(tag) {
+    // then filter tags that don't match query
+    filteredData = _.map(filteredData, function(orgData) {
+      return {organization: orgData.organization, tags: _.filter(orgData.tags, function(tag) {
         return _.reduce(q.split(" "), function(result, word) {
           return _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
         }, true);
-    }});*/
+      })};
+    });
+    // last filter out organization objects whose tags are empty
+    filteredData = _.filter(filteredData, function(orgData) {
+      return !_.isEmpty(orgData.tags);
+    });
     return filteredData;
+  });
+
+  function getFirstTags() {
+    return _.isEmpty(self.groupedFilter()) ? [] : _.first(self.groupedFilter()).tags;
+  }
+
+  self.data = ko.pureComputed(function() {
+     return _.keys(tagsData()).length > 1 ? self.groupedFilter() : getFirstTags();
   });
 };
 

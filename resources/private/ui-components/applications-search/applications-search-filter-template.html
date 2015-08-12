@@ -25,7 +25,7 @@
     <div class="feature filter-row advanced" data-test-id="advanced-filters-row">
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.tags'" />
-        <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, selectedText: 'label', tags: true, group: {header: 'organization', dataProperty: 'tags'}}}"></div>
+        <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, selectedText: 'label', tags: true, group: organizationTagsDataProvider.groupData()}}"></div>
       </div>
     </div>
     <!-- /ko -->
