@@ -48,10 +48,11 @@ Add katselmus
 
 Add foreman
   # 3 tasks from backend
-  Task count is  task-vaadittu-tyonjohtaja  3
+  Foreman count is  3
   Create task  task-vaadittu-tyonjohtaja  TJ0
   # One on this verdict screen and one hidden in tasks tab
-  Task count is  task-vaadittu-tyonjohtaja  5
+  Task count is  task-vaadittu-tyonjohtaja  1
+  Foreman count is  4
 
 Add other task
   # 3 tasks from backend
@@ -66,8 +67,8 @@ Return to application
 Verdict has tasks
   Page Should Not Contain Element  xpath=//div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
   Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"]  Lopullinen loppukatselmus
-  Element Text Should Be  xpath=//ul[@data-bind="foreach: lupamaaraykset.muutMaaraykset"]/li  Bajamajoja oltava riittävästi
-  Element Text Should Be  xpath=//span[@data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"]  TJ0
+  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//ul[@data-bind="foreach: lupamaaraykset.muutMaaraykset"]/li  Bajamajoja oltava riittävästi
+  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"]  TJ0
 
 Sonja publishes verdict
   Click enabled by test id  edit-verdict

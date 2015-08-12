@@ -710,6 +710,10 @@ Task count is
   [Arguments]  ${type}  ${amount}
   Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr[@data-test-type="${type}"]  ${amount}
 
+Foreman count is
+  [Arguments]  ${amount}
+  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  ${amount}
+
 #
 # Quick, jettison the db...
 #
