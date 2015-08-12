@@ -65,7 +65,8 @@
 
           <div data-bind="foreach: comments().slice(0).reverse()" data-test-id="comments-table">
 
-            <div data-bind="css: {
+           <div class="is-comment"
+                data-bind="css: {
                             'comment-bubble-authority':  $parent.isAuthorityComment($data),
                             'comment-bubble':            !$parent.isAuthorityComment($data),
                             'attachment': $parent.isForAttachment($data),
@@ -97,42 +98,6 @@
             </div>
 
           </div>
-        <!-- <div class="table table-striped conversation" data-test-id="comments-table"> -->
-        <!--   <div data-bind="foreach: comments().slice(0).reverse()"> -->
-
-        <!--     <div data-bind="css: {'attachment-comment': $parent.isForAttachment($data), -->
-        <!--                           'comment-for-me':     $parent.isForMe($data), -->
-        <!--                           'authority-comment':  $parent.isAuthorityComment($data), -->
-        <!--                           'comment':            true}, -->
-        <!--                    visible: $parent.isVisible($data)"> -->
-        <!--       <div class="comment-party commenttd"> -->
-        <!--         <span class="date" data-bind="dateTimeString: created"></span> -->
-        <!--         <span class="author" data-bind="fullName: user"></span> -->
-        <!--         <\!-- ko with: $data.to -\-> -->
-        <!--           <span class="arrow"></span> -->
-        <!--           <span class="author" data-bind="fullName: $data"></span> -->
-        <!--         <\!-- /ko -\-> -->
-        <!--         <span class="role" data-bind="ltext: user.role"></span> -->
-        <!--       </div> -->
-        <!--       <div class="comment-text"> -->
-        <!--         <span data-bind="if: $parent.isForAttachment($data)" class="attachment-details"> -->
-        <!--           <span data-bind="if: target.id()"> -->
-        <!--             <\!-- ko if: target.attachmentType -\-> -->
-        <!--             <a data-bind="attr: {href: '#!/attachment/' + $parent.applicationId + '/' + target.id()}"> -->
-        <!--               <span data-bind="text: target.attachmentType"></span> -->
-        <!--             </a> -->
-        <!--             <\!-- /ko -\-> -->
-        <!--             <\!-- ko ifnot: target.attachmentType -\-> -->
-        <!--             <span class="deleted-attachment" data-bind="ltext: 'attachment.removed'"></span> -->
-        <!--             <\!-- /ko -\-> -->
-        <!--           </span> -->
-        <!--         </span> -->
-        <!--         <span data-bind="text: text" class="comment-message"></span> -->
-        <!--       </div> -->
-        <!--     </div> -->
-
-        <!--   </div> -->
-        <!-- </div> -->
       </div>
     </script>
   </section>
