@@ -33,6 +33,15 @@ LUPAPISTE.OrganizationTagsDataProvider = function(organization, filtered) {
   });
 };
 
+LUPAPISTE.OperationsDataProvider = function() {
+  "use strict";
+
+  var self = this;
+
+  self.data = ko.observableArray([{}]);
+  self.query = ko.observable();
+};
+
 LUPAPISTE.HandlersDataProvider = function() {
   "use strict";
 
@@ -79,6 +88,7 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
   self.dataProvider = params.dataProvider;
 
   self.organizationTagsDataProvider = null;
+  self.operationsDataProvider = null;
   self.handlersDataProvider = null;
 
   self.showAdvancedFilters = ko.observable(false);
@@ -88,6 +98,7 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   if ( lupapisteApp.models.currentUser.isAuthority() ) {
     self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
+    self.operationsDataProvider = new LUPAPISTE.OperationsDataProvider();
     // TODO just search single organization tags for now, later do some grouping stuff in autocomplete component
     self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(_.last(_.keys(lupapisteApp.models.currentUser.orgAuthz())), self.dataProvider.applicationTags);
   }
