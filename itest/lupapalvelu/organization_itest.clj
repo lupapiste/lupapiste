@@ -264,7 +264,7 @@
   (fact "Check tag deletion query"
     (let [id (create-app-id sonja)
           tag-id (-> (query sonja :get-organization-tags)
-                   :tags :753-R :tags first id)]
+                   :tags :753-R :tags first :id)]
       (command sonja :add-application-tags :id id :tags [tag-id]) => ok?
 
       (fact "when tag is used, application id is returned"
