@@ -131,9 +131,9 @@ var attachment = (function() {
     metadata:                     ko.observable(),
     showTosMetadata:              ko.observable(false),
 
-    toggleHelp: function() {
-      model.showHelp(!model.showHelp());
-    },
+    // toggleHelp: function() {
+    //   model.showHelp(!model.showHelp());
+    // },
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());

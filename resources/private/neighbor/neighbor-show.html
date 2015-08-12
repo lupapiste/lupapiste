@@ -14,10 +14,10 @@
       <div data-bind="ifnot: inError">
         <div class="application_summary">
           <div class="container">
-            <div data-bind="visible: application" class="application-map-container">
+            <div data-bind="visible: application" class="application-map-container neighbor">
               <div id="neighbor-map" class="map map-large" style="width: 320px; height: 280px;"></div>
             </div>
-            <div data-bind="with: application" class="application_summary_info">
+            <div data-bind="with: application" class="application_summary_info neighbor">
               <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span> </h1>
 
               <h2 data-bind="if: $root.primaryOperation">
@@ -75,10 +75,12 @@
         </div>
         <div class="container">
 
-          <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
-          <p data-bind="ltext: 'neighbor.show.welcome.desc1'" class="tab-info"></p>
-          <p data-bind="ltext: 'neighbor.show.welcome.desc2'" class="tab-info-continued"></p>
-          <p data-bind="ltext: 'neighbor.show.welcome.desc3'" class="tab-info-continued"></p>
+            <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
+            <div class="tab-info">
+                <p data-bind="ltext: 'neighbor.show.welcome.desc1'"></p>
+                <p data-bind="ltext: 'neighbor.show.welcome.desc2'"></p>
+                <p data-bind="ltext: 'neighbor.show.welcome.desc3'"></p>
+            </div>
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
 
           <!-- docgen generated content: -->

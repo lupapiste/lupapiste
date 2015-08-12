@@ -16,11 +16,11 @@
               data-bind="ltext: 'statement.delete', click: $root.statementModel.openDeleteDialog, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')"
               data-test-id="delete-statement">Poista lausunto</button>
       <div data-bind="with: application">
-        <a class="btn btn-nav-back inline-block"
+        <a class="btn secondary inline-block"
            data-test-id="statement-return"
            data-bind="attr: {href: '#!/application/' + id() + (lupapisteApp.models.application.inPostVerdictState() ? '/applicationSummary' : '/statement') }">
+            <i class="lupicon-chevron-start"></i>
           <span data-bind ="ltext: 'application.return'"></span>
-          <span class="icon drill-left-black-bigger left-align"></span>
         </a>
       </div>
     </div>

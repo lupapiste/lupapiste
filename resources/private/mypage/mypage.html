@@ -5,9 +5,9 @@
 
     <div class="">
       <form id="own-info-form">
-        <a href="#" onclick="javascript:history.go(-1);return false;" class="btn left-align btn-nav-back">
-          <span data-bind="ltext: 'back'"></span>
-          <span class="icon drill-left-black-bigger left-align"></span>
+        <a href="#" onclick="javascript:history.go(-1);return false;" class="btn left-align secondary">
+            <i class="lupicon-chevron-start"></i>
+            <span data-bind="ltext: 'back'"></span>
         </a>
         <div class="clear"></div>
         <h1 data-bind="ltext: 'mypage.title'"></h1>
@@ -248,7 +248,7 @@
     <div id="dialog-userinfo-architect-upload" class="window autosized">
       <div class="dialog-header">
         <p data-bind="ltext: 'userinfo.architect.upload.title'"></p>
-        <p class="dialog-close close">X</p>
+        <p class="dialog-close close lupicon-remove"></p>
       </div>
       <div class="dialog-content">
 
@@ -283,18 +283,18 @@
                            enable: canStart,
                            ltext: 'userinfo.architect.upload.ok'"
           data-test-id="userinfo-upload-ok"
-          class="btn btn-primary btn-dialog">
+          class="positive btn-dialog">
         </button>
         <button data-bind="visible: state() == stateDone,
                            ltext: 'userinfo.architect.upload.ready'"
           data-test-id="userinfo-upload-ready"
-          class="btn btn-primary btn-dialog close">
+          class="positive btn-dialog close">
         </button>
         <button data-bind="enable: state() < stateSending,
                            visible: state() < stateDone,
                            ltext: 'userinfo.architect.upload.cancel'"
           data-test-id="userinfo-upload-cancel"
-          class="btn btn-dialog close">
+          class="secondary btn-dialog close">
         </button>
 
       </div>

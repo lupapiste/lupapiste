@@ -4,40 +4,46 @@
   <section class="page container" id="side-panel-template">
     <!-- ko if: showSidePanel -->
     <div id="side-panel" data-bind="transition: sidePanelVisible, class: 'show-side-panel'">
-      <div class="buttons">
-        <button class="btn-conversation" data-bind="click: toggleConversationPanel, css: {active: showConversationPanel}" id="open-conversation-side-panel">
-          <span data-bind="if: unseenComments">
-            <span data-bind="text: unseenComments" id="applicationUnseenComments" class="unseen-comments"></span>
-          </span>
-          <span class="btn-title" data-bind="ltext: 'conversation.title'"></span>
-        </button>
-        <button class="btn-notice" data-bind="click: toggleNoticePanel, visible: authorization.ok('add-authority-notice'), css: {active: showNoticePanel}" id="open-notice-side-panel">
-          <span class="btn-title" data-bind="ltext: 'notice.title'"></span>
-        </button>
-      </div>
-      <div class="content-wrapper">
-        <div id="conversation-panel" data-bind="visible: showConversationPanel">
-          <div class="header">
-            <h1>
-              <span class="title" data-bind="ltext: 'conversation.title'"></span>
-              <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
-            </h1>
-            <p data-bind="slider: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p>
-          </div>
-          <div class="content" data-bind="event: { scroll: hideHelp }, transition: showHelp, class: 'expanded'">
-            <div data-bind="template: {name: 'comment-template', data: {comment: comment, authorities: authorities, mainConversation: mainConversation, authorization: authorization, infoRequest: infoRequest}}"></div>
-            <div class="process-nav"></div>
-          </div>
+        <div class="buttons">
+            <button class="primary vertical caps btn-conversation"
+                    data-bind="click: toggleConversationPanel, css: {active: showConversationPanel}" id="open-conversation-side-panel">
+                <i class="lupicon-conversation"></i>
+                <span data-bind="if: unseenComments,
+                                 visible: unseenComments">
+                    <span data-bind="text: unseenComments" id="applicationUnseenComments" class="unseen-comments"></span>
+                </span>
+                <span class="btn-title" data-bind="lspaced: 'conversation.title'"></span>
+            </button>
+            <button class="primary vertical caps btn-notice" data-bind="click: toggleNoticePanel, visible: authorization.ok('add-authority-notice'), css: {active: showNoticePanel}" id="open-notice-side-panel">
+                <i class="lupicon-list"></i>
+                <span class="btn-title" data-bind="lspaced: 'notice.title'"></span>
+            </button>
         </div>
-        <!-- ko if: authorization.ok('add-authority-notice') -->
-        <div id="notice-panel" data-bind="visible: showNoticePanel">
-          <div class="header">
-            <h1 data-bind="ltext: 'notice.title'"></h1>
-          </div>
-          <div class="content-table" data-bind="template: {name: 'notice-template', data: notice}"></div>
+        <div class="content-wrapper">
+            <div id="conversation-panel" data-bind="visible: showConversationPanel">
+                <div class="header">
+                    <h1 class="inline-block title" data-bind="ltext: 'conversation.title'"></h1>
+                    <span data-bind="component: {
+                                     name: 'help-toggle',
+                                     params: {flag: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'}}"></span>
+
+
+                    <!-- <p data-bind="slider: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p> -->
+                </div>
+                <div class="content" data-bind="event: { scroll: hideHelp }, transition: showHelp, class: 'expanded'">
+                    <div data-bind="template: {name: 'comment-template', data: {comment: comment, authorities: authorities, mainConversation: mainConversation, authorization: authorization, infoRequest: infoRequest}}"></div>
+                    <div class="process-nav"></div>
+                </div>
+            </div>
+            <!-- ko if: authorization.ok('add-authority-notice') -->
+            <div id="notice-panel" data-bind="visible: showNoticePanel">
+                <div class="header">
+                    <h1 data-bind="ltext: 'notice.title'"></h1>
+                </div>
+                <div class="content-table" data-bind="template: {name: 'notice-template', data: notice}"></div>
+            </div>
+            <!-- /ko -->
         </div>
-        <!-- /ko -->
-      </div>
     </div>
     <!-- /ko -->
   </section>

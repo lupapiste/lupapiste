@@ -33,6 +33,7 @@ jQuery(document).ready(function() {
     "leaflet-map",
     "vetuma-init",
     "vetuma-status",
+    "help-toggle",
     "applications-search",
     "applications-search-results",
     "applications-search-filter",

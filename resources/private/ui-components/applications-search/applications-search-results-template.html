@@ -12,15 +12,17 @@
           <button
             data-bind="click: $parent.create"
             data-test-id="applications-create-new"
-            class="btn-primary application-create">
-            <span class="icon add"></span><span data-bind="ltext: 'request.create'"></span>
+            class="positive application-create">
+              <i class="lupicon-circle-plus"></i>
+              </span><span data-bind="ltext: 'request.create'"></span>
           </button>
 
           <button
             data-bind="click: $parent.createWithPrevPermit, visible: $parent.authorizationModel.ok('create-application-from-previous-permit')"
             data-test-id="applications-create-new-with-prev-permit"
-            class="btn-primary application-from-previous">
-            <span class="icon add"></span><span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span>
+            class="positive application-from-previous">
+              <i class="lupicon-circle-plus"></i>
+              <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span>
           </button>
         </div>
         <div>
