@@ -378,6 +378,15 @@ $side-panel-width: 60px;
 @include icon-colorizer( application-attachments-tab );
 @include icon-colorizer( application-tasks-tab );
 
+#application-tasks-tab {
+  .stacked.legends {
+    margin-bottom: $marginM;
+    margin-left: $marginM;
+  }
+  table {
+    margin-bottom: $marginS;
+  }
+}
 /* .task-legend { */
 /*   span { */
 /*     display: inline-block; */

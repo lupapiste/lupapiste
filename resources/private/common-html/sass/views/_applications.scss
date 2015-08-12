@@ -53,12 +53,16 @@
   }
 }
 
-.applications-empty-state.wide > .app-type-box {
-  width: 45%;
-}
-
-.applications-empty-state.wide > .missing-application-box {
-  border-right: none;
+.applications-empty-state.wide {
+  .app-type-box {
+    width: 45%;
+  }
+  .missing-application-box {
+    border-right: none;
+  }
+  .missing-prev-permit-box {
+    display: none;
+  }
 }
 
 .missing-inforequest-box.app-type-button,

@@ -1276,43 +1276,41 @@
                         <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
 
                         <div>
-                            <table data-bind="foreach: taskGroups" class="tasks">
-                                <thead>
-                                    <tr>
-                                        <td colspan="3">
-                                            <h2 data-bind="text: name" style="padding-top:1em"></h2>
-                                            <div class="stacked">
-                                                <div class="like-btn">
-                                                    <i class="lupicon-circle-check"></i>
-                                                    <span data-bind="ltext: 'task.ok.title'"></span>
-                                                </div>
-                                                <div class="like-btn">
-                                                    <i class="lupicon-circle-attention"></i>
-                                                    <span data-bind="ltext: 'task.missing.title'"></span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th data-bind="ltext: 'application.taskState'"></th>
-                                        <th data-bind="ltext: 'application.taskDisplayName'"></th>
-                                        <th data-bind="ltext: 'application.taskClosed'"></th>
-                                    </tr>
-                                </thead>
-                                <tbody data-bind="foreach: tasks">
-                                    <tr data-bind="attr: {'data-test-type': schema.info.name}">
-                                        <td><i data-bind="attr: {
-                                                             'class': LUPAPISTE.statusIcon(statusName),
-                                                             'data-test-state': $data.state,
-                                                             'title': loc(['task', statusName, 'title'])}"></i></td>
-                                        <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
-                                        <td data-bind="dateString: $data.closed"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div data-bind="foreach: taskGroups">
+                                <h2 data-bind="text: name" style="padding-top:1em"></h2>
+                                <div class="stacked legends">
+                                    <div class="like-btn">
+                                        <i class="lupicon-circle-check"></i>
+                                        <span data-bind="ltext: 'task.ok.title'"></span>
+                                    </div>
+                                    <div class="like-btn">
+                                        <i class="lupicon-circle-attention"></i>
+                                        <span data-bind="ltext: 'task.missing.title'"></span>
+                                    </div>
+                                </div>
+                                <table class="tasks">
+                                    <thead>
+                                        <tr>
+                                            <th data-bind="ltext: 'application.taskState'"></th>
+                                            <th data-bind="ltext: 'application.taskDisplayName'"></th>
+                                            <th data-bind="ltext: 'application.taskClosed'"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody data-bind="foreach: tasks">
+                                        <tr data-bind="attr: {'data-test-type': schema.info.name}">
+                                            <td><i data-bind="attr: {
+                                                              'class': LUPAPISTE.statusIcon(statusName),
+                                                              'data-test-state': $data.state,
+                                                              'title': loc(['task', statusName, 'title'])}"></i></td>
+                                            <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
+                                            <td data-bind="dateString: $data.closed"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
-                        <button class="btn btn-primary"
+                        <button class="positive"
                                 data-test-id="application-new-task"
                                 data-bind="click: $root.createTask.createTask,
                                            ltext: 'task.create',
