@@ -389,6 +389,17 @@
       (mongo/update-by-query :applications {:tags {$in removed-ids} :organization org-id} {$pull {:tags {$in removed-ids}}}))
     (o/update-organization org-id {$set {:tags (o/create-tag-ids tags)}})))
 
+(defquery remove-tag-ok
+  {:parameters [tagId]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (let [org-id (user/authority-admins-organization-id user)]
+    (when-let [tag-applications (seq (mongo/select
+                                       :applications
+                                       {:tags tagId :organization org-id}
+                                       [:_id]))]
+      (fail :warning.tags.removing-from-applications :applications tag-applications))))
+
 (defquery get-organization-tags
   {:user-authz-roles #{:statementGiver}
    :org-authz-roles action/reader-org-authz-roles
