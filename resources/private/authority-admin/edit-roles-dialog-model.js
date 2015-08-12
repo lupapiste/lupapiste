@@ -1,4 +1,4 @@
-LUPAPISTE.EditRolesDialogModel = function(organization, usersList) {
+LUPAPISTE.EditRolesDialogModel = function(organization) {
   "use strict";
 
   var self = this;
@@ -35,4 +35,4 @@ LUPAPISTE.EditRolesDialogModel = function(organization, usersList) {
       })
       .call();
   };
-}
+};

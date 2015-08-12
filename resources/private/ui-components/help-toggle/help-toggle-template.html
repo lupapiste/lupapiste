@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="help-toggle-template">
+        <div class="stacked help-toggle">
+            <span class="lupicon-circle-question" data-bind="click: toggleHelp,
+                                                             css: {expanded: flag}"></span>
+            <div data-bind="css: {'help-arrow': flag}"></div>
+        </div>
+        <div class="help-text"
+             data-bind="slider: flag,
+                        foreach: lhtml">
+            <p data-bind="lhtml: $data"></p>
+        </div>
+        <div class="help-reset">&nbsp;</div>
+    </script>
+  </section>
+</body>
+</html>

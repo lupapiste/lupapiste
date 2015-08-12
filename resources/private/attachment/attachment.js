@@ -131,9 +131,9 @@ var attachment = (function() {
     metadata:                     ko.observable(),
     showTosMetadata:              ko.observable(false),
 
-    toggleHelp: function() {
-      model.showHelp(!model.showHelp());
-    },
+    // toggleHelp: function() {
+    //   model.showHelp(!model.showHelp());
+    // },
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -185,7 +185,7 @@ var attachment = (function() {
     previousAttachment: function() {
       var previousId = util.getIn(model.groupAttachments(), [model.groupIndex() - 1, "id"]);
       if (previousId) {
-        pageutil.openPage("attachment", applicationId + "/" + previousId)
+        pageutil.openPage("attachment", applicationId + "/" + previousId);
         hub.send("track-click", {category:"Attachments", label: "", event:"previousAttachment"});
       }
     },
@@ -193,7 +193,7 @@ var attachment = (function() {
     nextAttachment: function() {
       var nextId = util.getIn(model.groupAttachments(), [model.groupIndex() + 1, "id"]);
       if (nextId) {
-        pageutil.openPage("attachment", applicationId + "/" + nextId)
+        pageutil.openPage("attachment", applicationId + "/" + nextId);
         hub.send("track-click", {category:"Attachments", label: "", event:"nextAttachment"});
       }
     },

@@ -16,19 +16,19 @@
         <div class="tree-content"></div>
         
         <div class="tree-nav">
-          <button class="tree-back btn-nav-back" data-bind="click: goBack, enable: stack().length > 0">
-            <span data-bind="ltext: 'tree.back'"></span>
-            <span class="icon left-align drill-left-black-bigger"></span>
+          <button class="tree-back secondary" data-bind="click: goBack, enable: stack().length > 0">
+              <i class="lupicon-chevron-left"></i>
+              <span data-bind="ltext: 'tree.back'"></span>
           </button>
-          <button class="tree-start btn-nav-back" data-bind="click: goStart, enable: stack().length > 1">
-            <span data-bind="ltext: 'tree.start'"></span>
-            <span class="icon left-align drill-left-all-black"></span>
+          <button class="tree-start secondary" data-bind="click: goStart, enable: stack().length > 1">
+              <i class="lupicon-chevron-start"></i>
+              <span data-bind="ltext: 'tree.start'"></span>
           </button>
         </div>
         
-        <div class="tree-link">
+        <div class="tree-link btn function">
           <span data-bind="text: text"></span>
-          <span class="icon drill-right-orange inline-right"></span>
+          <i class="lupicon-chevron-right"></i>
         </div>
         
         <div class="tree-last">

@@ -30,6 +30,8 @@ Sonja fetches verdict from municipality KRYSP service
   Verdict is given  2013-01  0
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
+  Page Should Contain Element  //div[@data-test-id="given-verdict-id-0-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
+  Page Should Not Contain Element  //div[@data-test-id="given-verdict-id-1-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
 
 Sonja creates verdict with adds comment
   Go to give new verdict
@@ -37,23 +39,39 @@ Sonja creates verdict with adds comment
   Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
   Comment verdict  Myönnetään...
 
-Return to application and come back
-  Click by test id  return-from-verdict
-  Click enabled by test id  edit-verdict
-
 Add katselmus
   # 3 tasks from backend
   Task count is  task-katselmus  3
-  Click enabled by test id  verdict-new-task
-  Wait until  Element should be visible  dialog-create-task
-  Wait until  Select From List By Value  choose-task-type   task-katselmus
-  Input text  create-task-name  uus lupaehto
-  Click enabled by test id  create-task-save
-  Wait until  Element should not be visible  dialog-create-task
+  Create task  task-katselmus  Lopullinen loppukatselmus
   # One on this verdict screen and one hidden in tasks tab
   Task count is  task-katselmus  5
 
+Add foreman
+  # 3 tasks from backend
+  Foreman count is  3
+  Create task  task-vaadittu-tyonjohtaja  TJ0
+  # One on this verdict screen and one hidden in tasks tab
+  Task count is  task-vaadittu-tyonjohtaja  1
+  Foreman count is  4
+
+Add other task
+  # 3 tasks from backend
+  Task count is  task-lupamaarays  3
+  Create task  task-lupamaarays  Bajamajoja oltava riittävästi
+  # One on this verdict screen and one hidden in tasks tab
+  Task count is  task-lupamaarays  5
+
+Return to application
+  Click by test id  return-from-verdict
+
+Verdict has tasks
+  Page Should Not Contain Element  xpath=//div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
+  Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"]  Lopullinen loppukatselmus
+  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//ul[@data-bind="foreach: lupamaaraykset.muutMaaraykset"]/li  Bajamajoja oltava riittävästi
+  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"]  TJ0
+
 Sonja publishes verdict
+  Click enabled by test id  edit-verdict
   Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  verdictGiven
@@ -151,3 +169,11 @@ Comment verdict
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
   Close side panel  conversation
 
+Create task
+  [Arguments]  ${type}  ${message}
+  Click enabled by test id  verdict-new-task
+  Wait until  Element should be visible  dialog-create-task
+  Wait until  Select From List By Value  choose-task-type   ${type}
+  Input text  create-task-name  ${message}
+  Click enabled by test id  create-task-save
+  Wait until  Element should not be visible  dialog-create-task

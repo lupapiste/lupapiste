@@ -20,7 +20,7 @@ LUPAPISTE.AddLinkPermitModel = function() {
     var onlyOtherSelected = (self.kuntalupatunnus() || self.selectedLinkPermit()) &&
                             !(self.kuntalupatunnus() && self.selectedLinkPermit());
 
-    return onlyOtherSelected && !lpRegex.test(self.kuntalupatunnus())
+    return onlyOtherSelected && !lpRegex.test(self.kuntalupatunnus());
   });
 
   self.onError = function(resp) {
