@@ -55,7 +55,8 @@ Return to application
   Click by test id  return-from-verdict
 
 Verdict has tasks
-  Page Should Not Contain Element  //div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
+  Page Should Not Contain Element  xpath=//div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
+  Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"]  uus lupaehto
 
 Sonja publishes verdict
   Click enabled by test id  edit-verdict
