@@ -345,6 +345,7 @@
    :notified         true                                   ; OIR
    :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
                       (partial a/property-id-parameters [:propertyId])
+                      validate-x validate-y
                       operation-validator]}
   [{{:keys [infoRequest]} :data :keys [created] :as command}]
   (let [created-application (a/do-create-application command)]
