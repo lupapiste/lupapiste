@@ -90,7 +90,7 @@ LUPAPISTE.TagsEditorModel = function(params) {
         }, "<div class='spacerM'>");
         dialogBody = dialogBody + "</div>";
         var dialogTextSuffix = loc("tags.removing-from-applications.suffix");
-        hub.send("show-dialog", {ltitle: "tags.updating",
+        hub.send("show-dialog", {ltitle: "tags.deleting",
                                  size: "medium",
                                  component: "yes-no-dialog",
                                  componentParams: {text: dialogTextPrefix + dialogBody + dialogTextSuffix,
