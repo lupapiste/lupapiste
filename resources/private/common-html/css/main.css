@@ -3762,7 +3762,7 @@ table.attachments-template-table td.attachment-version-info {
 }
 /* line 116, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.group-indent, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty.group-indent {
-  padding: 0 0 0 12px;
+  padding: 3px 12px;
 }
 /* line 118, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.group-indent:hover, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty.group-indent:hover {
@@ -3785,6 +3785,7 @@ table.attachments-template-table td.attachment-version-info {
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-group-header {
   font-weight: 700;
   padding: 3px 0 0 6px;
+  margin-top: 3px;
 }
 
 /* line 4, ../sass/partials/_tree.scss */
