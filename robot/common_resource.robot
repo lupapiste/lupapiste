@@ -656,21 +656,21 @@ Input comment
   Open side panel  conversation
   Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
-  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'is-comment')]//span[text()='${message}']
   Close side panel  conversation
 
 Input inforequest comment
   [Arguments]  ${message}
   Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='inforequest']//button[@data-test-id='application-new-comment-btn']
-  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'is-comment')]//span[text()='${message}']
 
 Input comment and open to authorities
   [Arguments]  ${message}
   Open side panel  conversation
   Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-open-application-btn']
-  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'is-comment')]//span[text()='${message}']
   Close side panel  conversation
 
 Input comment and mark answered
@@ -680,7 +680,7 @@ Input comment and mark answered
   Wait until  element should be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
-  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'is-comment')]//span[text()='${message}']
 
 Mark answered
   Click element  xpath=//section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
@@ -691,7 +691,7 @@ Mark answered
 Comment count is
   [Arguments]  ${amount}
   Open side panel  conversation
-  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class,'comment-text')]  ${amount}
+  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class,'is-comment')]  ${amount}
   Close side panel  conversation
 
 #
