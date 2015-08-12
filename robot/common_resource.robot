@@ -708,11 +708,11 @@ Invite count is
 
 Task count is
   [Arguments]  ${type}  ${amount}
-  Wait until  Xpath Should Match X Times  //div[@data-bind="foreach: taskGroups"]//tbody/tr[@data-test-type="${type}"]  ${amount}
+  Wait until  Xpath Should Match X Times  //*[@data-bind="foreach: taskGroups"]//tbody/tr[@data-test-type="${type}"]  ${amount}
 
 Foreman count is
   [Arguments]  ${amount}
-  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  ${amount}
+  Wait until  Xpath Should Match X Times  //table[@class="tasks-foreman"]/tbody/tr  ${amount}
 
 #
 # Quick, jettison the db...
