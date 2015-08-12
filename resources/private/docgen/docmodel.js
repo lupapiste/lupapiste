@@ -187,11 +187,27 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   // Element constructors
-  function makeButton(id, label) {
+  // Supported options:
+  // icon: icon class -> <button><i class="icon"></i><span>label</span></button>
+  // className: class attribute value -> <button class="className">...
+  function makeButton(id, label, opts) {
+    opts = opts || {};
     var button = document.createElement("button");
     button.id = id;
-    button.className = "btn";
-    button.innerHTML = label;
+    //button.className = "btn";
+    if( opts.icon ) {
+      var i = document.createElement( "i");
+      i.setAttribute( "class", opts.icon );
+      button.appendChild( i );
+      var span = document.createElement( "span" );
+      span.innerHTML = label;
+      button.appendChild( span );
+    } else {
+      button.innerHTML = label;
+    }
+    if( opts.className ) {
+      button.setAttribute( "class", opts.className );
+    }
     return button;
   }
 
@@ -349,9 +365,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     function makeApprovalButton(verb, noun, cssClass) {
       var cmd = verb + "-doc";
       var title = loc(["document", verb]);
+      var opts = {className: cssClass,
+                  icon: verb === "approve" ? "lupicon-check" : null};
       var button =
-        $(makeButton(self.docId + "_" + verb, title))
-          .addClass(cssClass).addClass("btn-auto")
+            $(makeButton(self.docId + "_" + verb, title, opts ))
           .click(function () {
             ajax.command(cmd, cmdArgs)
               .success(function () {
@@ -396,7 +413,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var allowReject = requiresApproval || (approval && approval.value === "approved");
 
     if (self.authorizationModel.ok("approve-doc")) {
-      approveButton$ = makeApprovalButton("approve", "approved", "btn-primary");
+      approveButton$ = makeApprovalButton("approve", "approved", "positive");
       btnContainer$.append(approveButton$);
 
       if (!allowApprove) {
@@ -404,7 +421,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       }
     }
     if (self.authorizationModel.ok("reject-doc")) {
-      rejectButton$ = makeApprovalButton("reject", "rejected", "btn-secondary");
+      rejectButton$ = makeApprovalButton("reject", "rejected", "secondary");
       btnContainer$.append(rejectButton$);
 
       if (!allowReject) {
@@ -1102,7 +1119,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (authorizationModel.ok("invite-with-role")) {
       var button =
         $("<button>", {
-          "class": "icon-remove btn-primary",
+          "class": "icon-remove positive",
           text: loc("personSelector.invite"),
           click: function () {
             $("#invite-document-name").val(self.schemaName).change();
@@ -1301,7 +1318,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         elements = buildElements(models);
       }
 
-      var appendButton = makeButton(myPath.join("_") + "_append", loc([self.schemaI18name, myPath.join("."), "_append_label"]));
+      var appendButton = makeButton(myPath.join("_") + "_append",
+                                    loc([self.schemaI18name, myPath.join("."), "_append_label"]),
+                                    {icon: "lupicon-circle-plus", className: "secondary"});
 
       var appender = function () {
         var parent$ = $(this).closest(".accordion-fields");
@@ -1366,7 +1385,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           if (subSchema.i18nkey) {
             locKey = [subSchema.i18nkey, "copyLabel"];
           }
-          var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey));
+          var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey),
+                                      {icon: "lupicon-circle-plus", className: "secondary"});
           $(copyButton).click(copyElement);
           buttonGroup.appendChild(copyButton);
         }

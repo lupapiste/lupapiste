@@ -5,78 +5,78 @@
 //
 // Styleguide 3.1
 
-[type=submit], .btn, button {
-  background: darken($lp-light-grey, 15%);
-  text-align: center;
-  cursor: pointer;
-  display:inline-block;
-  font-family:inherit;
-  font-size: 0.9em;
-  line-height:1.8em;
-  font-weight:400;
-  width: $cols3;
-  margin:0 0 $marginS;
-  padding:.25em 1.125em;
-  text-decoration:none;
-  text-shadow:0px 1px 0px #fff;
-  border: none;
-  color: rgb(48,48,48);
-  position: relative;
-  min-height: 30px;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
+/* [type=submit], .btn, button { */
+/*   background: darken($lp-light-grey, 15%); */
+/*   text-align: center; */
+/*   cursor: pointer; */
+/*   display:inline-block; */
+/*   font-family:inherit; */
+/*   font-size: 0.9em; */
+/*   line-height:1.8em; */
+/*   font-weight:400; */
+/*   width: $cols3; */
+/*   margin:0 0 $marginS; */
+/*   padding:.25em 1.125em; */
+/*   text-decoration:none; */
+/*   text-shadow:0px 1px 0px #fff; */
+/*   border: none; */
+/*   color: rgb(48,48,48); */
+/*   position: relative; */
+/*   min-height: 30px; */
+/*   -moz-box-sizing: border-box; */
+/*   box-sizing: border-box; */
+/*   -webkit-font-smoothing: antialiased; */
 
-  &:hover {
-    background: darken($lp-light-grey, 10%);
-  }
-  &:active, &.act {
+/*   &:hover { */
+/*     background: darken($lp-light-grey, 10%); */
+/*   } */
+/*   &:active, &.act { */
 
-  }
+/*   } */
 
-  &:disabled, &[disabled=disabled], &.disabled,
-  &:disabled:hover, &[disabled=disabled]:hover, &.disabled:hover,
-  &:disabled:active, &[disabled=disabled]:active, &.disabled:active {
-    color: darken($lp-light-grey, 30%);
-    -webkit-box-shadow:none;
-    box-shadow:none;
-    background: $lp-light-grey;
-  }
+/*   &:disabled, &[disabled=disabled], &.disabled, */
+/*   &:disabled:hover, &[disabled=disabled]:hover, &.disabled:hover, */
+/*   &:disabled:active, &[disabled=disabled]:active, &.disabled:active { */
+/*     color: darken($lp-light-grey, 30%); */
+/*     -webkit-box-shadow:none; */
+/*     box-shadow:none; */
+/*     background: $lp-light-grey; */
+/*   } */
 
-  &.block{
-    display: block;
-  }
+/*   &.block{ */
+/*     display: block; */
+/*   } */
 
-  span:nth-child(1){
-    max-width: 100px;
-    height: auto;
-  }
+/*   span:nth-child(1){ */
+/*     max-width: 100px; */
+/*     height: auto; */
+/*   } */
 
-  span.btn-label {
-    margin-left: 12px;
-  }
-}
+/*   span.btn-label { */
+/*     margin-left: 12px; */
+/*   } */
+/* } */
 
-// IE 8
-button[disabled] {
-    color: darken($lp-light-grey, 30%);
-    -webkit-box-shadow:none;
-    box-shadow:none;
-    background: $lp-light-grey;
-}
+/* // IE 8 */
+/* button[disabled] { */
+/*     color: darken($lp-light-grey, 30%); */
+/*     -webkit-box-shadow:none; */
+/*     box-shadow:none; */
+/*     background: $lp-light-grey; */
+/* } */
 
-.btn.left-align {
-  float: left;
-}
+/* .btn.left-align { */
+/*   float: left; */
+/* } */
 
 
-.btn-dialog {
+button.btn-dialog, .btn-dialog {
    position: absolute;
    text-align: center;
    bottom: 0;
    right: 6px;
    width: auto;
-   padding: 4px $marginL;
+   //padding: 4px $marginL;
    min-width: $cols2;
    max-width: $cols3;;
    margin-left: $marginS;
@@ -86,64 +86,68 @@ button[disabled] {
    }
 }
 
-.btn-link {
-  line-height:$baseline - 1;
-  margin:$baseline;
-  padding:1.125em;
-  font-size:0.875em;
-  font-weight:700;
-  overflow: auto;
-}
 
-.btn-dialog.btn-primary {
+/* .btn-link { */
+/*   line-height:$baseline - 1; */
+/*   margin:$baseline; */
+/*   padding:1.125em; */
+/*   font-size:0.875em; */
+/*   font-weight:700; */
+/*   overflow: auto; */
+/* } */
+
+.btn-dialog.btn-primary, .btn-dialog.positive {
   left: 0;
+  text-transform: uppercase;
 }
 
-.btn-wizard {
-  margin-top: $marginM;
-}
 
-.btn-wizard.btn-primary{
-  float: right;
-  margin-right: $marginL;
-}
 
-.btn-narrow {
-  width: $cols2;
-  text-align: center;
-}
+/* .btn-wizard { */
+/*   margin-top: $marginM; */
+/* } */
 
-.btn-auto {
-  width: auto;
-  text-align: center;
-}
+/* .btn-wizard.btn-primary{ */
+/*   float: right; */
+/*   margin-right: $marginL; */
+/* } */
 
-// Primary action button
-//
-//
-// Styleguide 3.1.1
+/* .btn-narrow { */
+/*   width: $cols2; */
+/*   text-align: center; */
+/* } */
 
-.btn-primary {
-  background: $lp-green;
-  text-transform:uppercase;
-  color: white;
-  text-shadow: none;
-  font-weight: normal;
-   &:hover {
-    background: darken($lp-green, 10%);
-    -webkit-box-shadow:0 1px 2px darken($lp-light-grey, 20%);
-    box-shadow:0 1px 2px darken($lp-light-grey, 20%);
-  }
-  &:visited, &:active {
-    color: white;
-  }
+/* .btn-auto { */
+/*   width: auto; */
+/*   text-align: center; */
+/* } */
 
-}
+/* // Primary action button */
+/* // */
+/* // */
+/* // Styleguide 3.1.1 */
 
-// Decline button
-//
-//
-// Styleguide 3.1.2
+/* .btn-primary { */
+/*   background: $lp-green; */
+/*   text-transform:uppercase; */
+/*   color: white; */
+/*   text-shadow: none; */
+/*   font-weight: normal; */
+/*    &:hover { */
+/*     background: darken($lp-green, 10%); */
+/*     -webkit-box-shadow:0 1px 2px darken($lp-light-grey, 20%); */
+/*     box-shadow:0 1px 2px darken($lp-light-grey, 20%); */
+/*   } */
+/*   &:visited, &:active { */
+/*     color: white; */
+/*   } */
+
+/* } */
+
+/* // Decline button */
+/* // */
+/* // */
+/* // Styleguide 3.1.2 */
 
 .btn-decline {
   background: red;
@@ -152,6 +156,10 @@ button[disabled] {
 }
 
 // ajax loader for buttons
+// Should no longer be used with buttons. See
+// the waiting mechanism below. This class is retained,
+// because it still has some legacy uses. For example,
+// see company.html.
 .button-loader {
   white-space:nowrap;
   display:inline-block;
@@ -163,111 +171,481 @@ button[disabled] {
   right: 8px;
 }
 
-.btn-nav-forward {
-  position: relative;
-  max-height: 30px;
-  overflow: visible;
-  margin-right: 20px;
-  text-align: center;
+/* .btn-nav-forward { */
+/*   position: relative; */
+/*   max-height: 30px; */
+/*   overflow: visible; */
+/*   margin-right: 20px; */
+/*   text-align: center; */
 
-  &:after{
-    content: " ";
-    width: 0;
-    height: 0;
-    border-top: 15px solid transparent;
-    border-left: 22px solid darken($lp-light-grey, 15%);
-    border-bottom: 15px solid transparent;
-    position: absolute;
-    top: 0;
-    right: -22px;
-  }
-  &:disabled, &[disabled=disabled], &.disabled,
-  &:disabled:hover, &[disabled=disabled]:hover, &.disabled:hover,
-  &:disabled:active, &[disabled=disabled]:active, &.disabled:active {
-    &:after{
-      border-left: 22px solid $lp-light-grey;
-    }
-  }
+/*   &:after{ */
+/*     content: " "; */
+/*     width: 0; */
+/*     height: 0; */
+/*     border-top: 15px solid transparent; */
+/*     border-left: 22px solid darken($lp-light-grey, 15%); */
+/*     border-bottom: 15px solid transparent; */
+/*     position: absolute; */
+/*     top: 0; */
+/*     right: -22px; */
+/*   } */
+/*   &:disabled, &[disabled=disabled], &.disabled, */
+/*   &:disabled:hover, &[disabled=disabled]:hover, &.disabled:hover, */
+/*   &:disabled:active, &[disabled=disabled]:active, &.disabled:active { */
+/*     &:after{ */
+/*       border-left: 22px solid $lp-light-grey; */
+/*     } */
+/*   } */
 
-  &:hover {
-    &:after{
-      border-left: 22px solid darken($lp-light-grey, 10%);
-    }
-  }
-  &.btn-primary {
-    &:after{
-      border-left: 22px solid $lp-green;
-    }
-    &:disabled, &[disabled=disabled], &.disabled,
-    &:disabled:hover, &[disabled=disabled]:hover, &.disabled:hover,
-    &:disabled:active, &[disabled=disabled]:active, &.disabled:active {
-      &:after{
-        border-left: 22px solid $lp-light-grey;
-      }
-    }
-    &:hover {
-      &:after{
-        border-left: 22px solid darken($lp-green, 10%);
-      }
-    }
-  }
-  .icon.right-align {
-    right: -12px;
-    z-index: 3;
-  }
-}
+/*   &:hover { */
+/*     &:after{ */
+/*       border-left: 22px solid darken($lp-light-grey, 10%); */
+/*     } */
+/*   } */
+/*   &.btn-primary { */
+/*     &:after{ */
+/*       border-left: 22px solid $lp-green; */
+/*     } */
+/*     &:disabled, &[disabled=disabled], &.disabled, */
+/*     &:disabled:hover, &[disabled=disabled]:hover, &.disabled:hover, */
+/*     &:disabled:active, &[disabled=disabled]:active, &.disabled:active { */
+/*       &:after{ */
+/*         border-left: 22px solid $lp-light-grey; */
+/*       } */
+/*     } */
+/*     &:hover { */
+/*       &:after{ */
+/*         border-left: 22px solid darken($lp-green, 10%); */
+/*       } */
+/*     } */
+/*   } */
+/*   .icon.right-align { */
+/*     right: -12px; */
+/*     z-index: 3; */
+/*   } */
+/* } */
 
-.btn-nav-back {
-  text-align: center;
-  position: relative;
-  max-height: 30px;
-  margin-left: 22px;
-  overflow: visible;
+/* .btn-nav-back { */
+/*   text-align: center; */
+/*   position: relative; */
+/*   max-height: 30px; */
+/*   margin-left: 22px; */
+/*   overflow: visible; */
 
-  &:before {
-    content: " ";
-    width: 0;
-    height: 0;
-    border-top: 15px solid transparent;
-    border-right: 22px solid darken($lp-light-grey, 15%);
-    border-bottom: 15px solid transparent;
-    position: absolute;
-    top: 0;
-    left: -22px;
-  }
-  &:disabled, &[disabled=disabled], &.disabled,
-  &:disabled:hover, &[disabled=disabled]:hover, &.disabled:hover,
-  &:disabled:active, &[disabled=disabled]:active, &.disabled:active {
-    &:before {
-      border-right: 22px solid $lp-light-grey;
-    }
-  }
-  &:hover {
-    &:before{
-      border-right: 22px solid darken($lp-light-grey, 10%);
-    }
-  }
-  .icon.left-align {
-    left: -9px;
-    z-index: 3;
-  }
-}
+/*   &:before { */
+/*     content: " "; */
+/*     width: 0; */
+/*     height: 0; */
+/*     border-top: 15px solid transparent; */
+/*     border-right: 22px solid darken($lp-light-grey, 15%); */
+/*     border-bottom: 15px solid transparent; */
+/*     position: absolute; */
+/*     top: 0; */
+/*     left: -22px; */
+/*   } */
+/*   &:disabled, &[disabled=disabled], &.disabled, */
+/*   &:disabled:hover, &[disabled=disabled]:hover, &.disabled:hover, */
+/*   &:disabled:active, &[disabled=disabled]:active, &.disabled:active { */
+/*     &:before { */
+/*       border-right: 22px solid $lp-light-grey; */
+/*     } */
+/*   } */
+/*   &:hover { */
+/*     &:before{ */
+/*       border-right: 22px solid darken($lp-light-grey, 10%); */
+/*     } */
+/*   } */
+/*   .icon.left-align { */
+/*     left: -9px; */
+/*     z-index: 3; */
+/*   } */
+/* } */
 
-.btn-container {
-  button {
-    margin-right: $marginS;
-  }
-  button:last-child {
-    margin-right: 0;
-  }
-}
+/* .btn-container { */
+/*   button { */
+/*     margin-right: $marginS; */
+/*   } */
+/*   button:last-child { */
+/*     margin-right: 0; */
+/*   } */
+/* } */
 
-.btn-container.right-align {
-  float: right;
-}
+/* .btn-container.right-align { */
+/*   float: right; */
+/* } */
 
-a.command {
-  &:before { content: "["; }
-  &:after { content: "]"; }
+/* a.command { */
+/*   &:before { content: "["; } */
+/*   &:after { content: "]"; } */
+/*   white-space: nowrap; */
+/* } */
+
+// New buttons
+
+$btn-spacer: 12px;
+$icon-pad: 10px;
+
+[type=submit], .btn, button {
+  border: none;
+  min-height: 40px;
+  max-height: 40px;
+  box-sizing: border-box;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: $font-size;  // _typography.scss
+  line-height: 40px;
   white-space: nowrap;
+  text-align: left;
+  text-decoration: none;
+  //display: table;
+  cursor: pointer;
+  padding: {
+    left: $btn-spacer;
+    top: 0;
+    bottom: 0;
+    right: $btn-spacer;
+  }
+  span, i {
+    vertical-align: middle;
+    // Inline-block would be more intuitive and proper
+    // alternative, but for some reason it results in
+    // one or two pixel vertical gap. This might be somehow
+    // system-related since the the main.css works fine
+    // with inline-block on its own.
+    display: table-cell;
+    margin: 0;
+  }
+  :first-child {
+    padding: {
+      right: $icon-pad;
+    }
+  }
+  :last-child {
+    padding: {
+    right: 0px !important;
+    }
+  }
+  /* :nth-child(2) { */
+  /*   // Gap between icon and text. */
+  /*   padding: { */
+  /*     left: $icon-pad; */
+  /*   } */
+  /* } */
+  /* // precaution for the cases where the */
+  /* // second child is actually a wait icon. */
+  /* :nth-child(3) { */
+  /*   padding: { */
+  /*     left: $icon-pad; */
+  /*   } */
+  /* } */
+}
+
+// Layout like button, but semantically is not.
+// This is useful when displaying text with icons,
+// for example.
+.like-btn {
+  @extend .btn;
+  cursor: default;
+  padding: 0;
+  min-height: $lupicon-size + 4;
+  max-height: $lupicon-size + 4;
+  line-height: $lupicon-size + 4;
+}
+
+.caps {
+  text-transform: uppercase;
+}
+
+// Sometimes the "automatic" padding for icon
+// causes extra spacing. One typical case:
+// No icon, but waiting icon on the right.
+.no-icon-pad {
+  :first-child {
+    padding-right: 0;
+  }
+}
+
+
+// You probably still need to tweak
+// the vertical properties case by case, since
+// the combination of center alignment and
+// (automatically) stacking letters is problematic.
+// Especially the letter-spacing breaks the alignment.
+// The most robust approach is to insert spaces between
+// letters (see the lspaced binding in ko.init.js).
+.vertical {
+  line-height: normal;
+  word-break: break-all;
+  max-height: none;
+  white-space: normal;
+  word-spacing: 2em;
+  text-align: center;
+  vertical-align: default;
+  padding: {
+    top: $btn-spacer;
+    left: 0;
+    right: 0;
+    bottom: $btn-spacer;
+  }
+  :first-child {
+    // Undo the icon spacing.
+    padding-right: 0;
+  }
+  span {
+    padding: 0;
+    display: block;
+    text-align: center;
+    max-width: $lupicon-size;
+    margin: {
+      top: $btn-spacer;
+      bottom: $btn-spacer;
+    }
+  }
+}
+
+@mixin disabled( $color: white, $bg: $gray221 ) {
+  // !importants are needed in order to make sure
+  // that sibling classes are overriden.
+  // For example, <div class="btn primary disabled">
+  cursor: default !important;
+  color: $color !important;
+  background-color: $bg !important;
+}
+
+.disabled {
+  // Empty class. Just used for "signaling", but provided
+  // here in order to avoid confusion ("What .disabled?").
+}
+
+@mixin button-div-a ($name) {
+  button.#{$name} { @content; }
+  div.btn.#{$name} { @content; }
+  a.btn.#{$name} { @content; }
+}
+
+@mixin styled-input ($bg, $hover-bg, $active-bg,
+                     $text: white, $hover-text: white, $active-text: white,
+                     $disabled-text: white, $disabled-bg: $gray221 ) {
+  color: $text;
+  background-color: $bg;
+
+  &:link, &:visited {
+            color: $text;
+            background-color: $bg;
+          }
+  &:hover {
+    color: $hover-text;
+    background-color: $hover-bg
+  }
+  &:active {
+    color: $active-text;
+    background-color: $active-bg
+  }
+  &:disabled, &.disabled, &.waiting {
+    @include disabled( $disabled-text, $disabled-bg );
+  }
+}
+
+@include button-div-a ( primary ) {
+  @include styled-input( $bg: $orange-link, $hover-bg: $orange-hover, $active-bg: $orange-active );
+}
+
+@include button-div-a (secondary) {
+  @include styled-input( $bg: $gray-link, $hover-bg: $gray-hover, $active-bg: $gray-active );
+}
+
+@include button-div-a (positive) {
+  @include styled-input( $bg: $green-link, $hover-bg: $green-hover, $active-bg: $green-active );
+}
+
+// btn-primary is now the same as positive.
+// This is used only for legacy support until the old definitions have been rooted out.
+
+@include button-div-a (btn-primary ) {
+  @include styled-input( $bg: $green-link, $hover-bg: $green-hover, $active-bg: $green-active );
+}
+
+@include button-div-a ( negative ) {
+  @include styled-input( $bg: $red-link, $hover-bg: $red-hover, $active-bg: $red-active );
+}
+
+@include button-div-a ( authority ) {
+  @include styled-input( $bg: $turqo-link, $hover-bg: $turqo-hover, $active-bg: $turqo-active );
+}
+
+@mixin function ($text, $hover-text, $active-text ) {
+  @include styled-input($bg: white, $hover-bg: white, $active-bg: white,
+                        $text: $text, $hover-text: $hover-text, $active-text: $active-text,
+                        $disabled-text: $gray187, $disabled-bg: $gray246);
+  border: {
+    style: solid;
+    width: 1px;
+    color: $gray221;
+  }
+  &:link, &:visited {
+            border-color: $gray221;
+          }
+  &:hover, &:active {
+            border-color: $gray187;
+           }
+}
+
+@include button-div-a (function) {
+  @include function( $orange-link, $orange-hover, $gray51 );
+}
+
+.function.disabled {
+  @include disabled( $gray187, $gray246 );
+  &:hover, &:active, &:disabled {
+                       border-color: $gray221 !important;
+                     }
+ }
+
+button.function {
+  &:disabled {
+    border-color: $gray221 !important;
+                     }
+ }
+
+@include button-div-a ("function.authority") {
+  @include function( $turqo-link, $turqo-hover, $gray51 );
+}
+
+
+// Waiting animation
+
+// Example:
+// <button class="primary">
+//    <i class="wait spin lupicon.refresh"></i>
+//    <span>Not waiting</span>
+// </button>
+
+// The waiting is started with waiting class.
+// <button class="primary waiting">
+//    <i class="wait spin lupicon.refresh"></i>
+//    <span>Waiting</span>
+// </button>
+//
+// Note: the icon element needs to have wait class.
+//       The class just hides the element when not waiting.
+//       Here the waiting shows spin animation (see below).
+@mixin rotate-frames( $name ) {
+  @-webkit-keyframes #{$name} {
+    100% {
+      -webkit-transform: rotate(360deg);
+    }
+  }
+  @-moz-keyframes #{$name} {
+    100% {
+      -moz-transform: rotate(360deg);
+    }
+  }
+  @keyframes #{$name}  {
+    100% {
+      -webkit-transform: rotate(360deg);
+      transform:rotate(360deg);
+    }
+  }
+}
+
+@mixin rotate( $name, $speed: 4s ) {
+  -webkit-animation: $name $speed linear infinite;
+  -moz-animation: $name $speed linear infinite;
+  animation: $name $speed linear infinite;
+}
+
+@include rotate-frames( spin );
+
+.spin {
+  @include rotate( spin );
+  display: none;
+}
+
+i.wait {
+  display: none;
+  padding: 0 !important;
+}
+
+.waiting {
+  i {
+    display: none;
+  }
+  i.wait {
+    display: table-cell;
+  }
+}
+
+.waiting .wait + span {
+  padding-left: $icon-pad;
+}
+
+span + .waiting.wait {
+  padding-right: $icon-pad;
+}
+
+
+// DataTable tweaks.
+
+.dataTables_paginate {
+  .paginate_disabled_previous, .paginate_disabled_next {
+    @extend .btn;
+    @extend .secondary;
+  }
+  .paginate_disabled_previous, .paginate_disabled_next {
+    @extend .btn;
+    @include disabled;
+  }
+}
+
+
+
+@mixin stacked {
+  display: table;
+  .btn, button {
+    width: 100%;
+    display: block;
+    margin: 0;
+  }
+  div {
+    overflow-y: hidden;
+  }
+}
+
+.stacked {
+  @include stacked;
+}
+
+// Only inner margins
+.inner-margins {
+  .btn, button, div, a {
+    margin-left: $btn-spacer;
+  }
+  :first-child {
+    margin-left: 0;
+  }
+}
+
+.inner-margins.stacked {
+  .btn, button, div, a {
+    margin-left: 0;
+    margin-top: $btn-spacer;
+  }
+  :first-child {
+    margin-top: 0;
+  }
+}
+
+// Margin between form buttons.
+
+.form-buttons button {
+  margin-left: $btn-spacer;
+}
+
+#partiesDocgen button {
+  margin-bottom: $marginS;
+}
+
+#login-button span {
+  text-align: center;
+  width: 200px;
 }

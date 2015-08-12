@@ -4,3 +4,22 @@ a {
     color: $color-text;
   }
 }
+
+@mixin link ($link: $orange-link,
+             $hover: $orange-hover,
+             $active: $orange-active) {
+  color: $link;
+  text-decoration: none;
+  // Reminder: ordering is link, visited, hover, active.
+  &:link, &:visited {
+            color: $link;
+          }
+  &:hover {
+    color: $hover;
+    text-decoration: underline;
+  }
+  &:active {
+    color: $active;
+    text-decoration: underline;
+  }
+}

@@ -1,29 +1,84 @@
+// The contents of this file are the sames IcoMoon style.css with
+// two notable differences:
+//  1. url path starts with /: fonts -> /fonts
+//  2. lupicon-class font-size: 22px
+
+$lupicon-size: 22px;
+
 @font-face {
   font-family: 'lupapiste';
-        src:url('/fonts/lupapiste.eot?bf4dc9');
-        src:url('/fonts/lupapiste.eot?#iefixbf4dc9') format('embedded-opentype'),
-                url('/fonts/lupapiste.ttf?bf4dc9') format('truetype'),
-                url('/fonts/lupapiste.woff?bf4dc9') format('woff'),
-                url('/fonts/lupapiste.svg?bf4dc9#lupapiste') format('svg');
+  src:url('/fonts/lupapiste.eot?srl0pk');
+  src:url('/fonts/lupapiste.eot?#iefixsrl0pk') format('embedded-opentype'),
+  url('/fonts/lupapiste.ttf?srl0pk') format('truetype'),
+  url('/fonts/lupapiste.woff?srl0pk') format('woff'),
+  url('/fonts/lupapiste.svg?srl0pk#lupapiste') format('svg');
   font-weight: normal;
   font-style: normal;
 }
 
 [class^="lupicon-"], [class*=" lupicon-"] {
-    font-family: 'lupapiste';
-    speak: none;
-    font-size: 22px;
-    font-style: normal;
-    font-weight: normal;
-    font-variant: normal;
-    text-transform: none;
-    line-height: 1;
+                       font-family: 'lupapiste';
+                       speak: none;
+                       font-style: normal;
+                       font-size: $lupicon-size;
+                       font-weight: normal;
+                       font-variant: normal;
+                       text-transform: none;
+                       line-height: 1;
 
-    /* Better Font Rendering =========== */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+                       /* Better Font Rendering =========== */
+                       -webkit-font-smoothing: antialiased;
+                       -moz-osx-font-smoothing: grayscale;
+                     }
+
+// Convenience modifier for marking icons.
+[class^="lupicon-"].primary,
+[class*=" lupicon-"].primary {
+  color: $orange-dark;
 }
 
+// Hand for help and close icons.
+.lupicon-circle-question, .lupicon-remove {
+  cursor: pointer;
+}
+
+// Convenience modifier for removing the hand
+// for those rare occasions it is not proper.
+[class^="lupicon-"].no-hand,
+[class*=" lupicon-"].no-hand {
+  cursor: default;
+}
+
+.lupicon-add-area:before {
+  content: "\e63f";
+}
+.lupicon-add-path:before {
+  content: "\e640";
+}
+.lupicon-add-point:before {
+  content: "\e641";
+}
+.lupicon-arrows:before {
+  content: "\e642";
+}
+.lupicon-file-check:before {
+  content: "\e643";
+}
+.lupicon-layers:before {
+  content: "\e644";
+}
+.lupicon-measure-area:before {
+  content: "\e645";
+}
+.lupicon-measure:before {
+  content: "\e646";
+}
+.lupicon-star:before {
+  content: "\e647";
+}
+.lupicon-zoom-in-area:before {
+  content: "\e648";
+}
 .lupicon-archives:before {
   content: "\e600";
 }
@@ -105,9 +160,6 @@
 .lupicon-circle-plus:before {
   content: "\e61a";
 }
-.lupicon-circle-question {
-  cursor: pointer;
-}
 .lupicon-circle-question:before {
   content: "\e61b";
 }
@@ -169,10 +221,10 @@
   content: "\e62e";
 }
 .lupicon-log-in:before {
-        content: "\e62f";
+  content: "\e62f";
 }
 .lupicon-log-out:before {
-        content: "\e630";
+  content: "\e630";
 }
 .lupicon-menu:before {
   content: "\e631";
