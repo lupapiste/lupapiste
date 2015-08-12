@@ -257,5 +257,20 @@
                                                                          (just {:id string? :label "nigireja"})])}))
 
   (fact "only authority can fetch available tags"
-    (query pena :get-organization-tags :organization "753-R") =not=> ok?
-    (map :label (:753-R (:tags (query sonja :get-organization-tags)))) => ["makeja" "nigireja"]))
+    (query pena :get-organization-tags) =not=> ok?
+    (map :label (:753-R (:tags (query sonja :get-organization-tags)))) => ["makeja" "nigireja"])
+
+  (fact "Check tag deletion query"
+    (let [id (create-app-id sonja)
+          tag-id (-> (query sonja :get-organization-tags)
+                   :tags :753-R first id)]
+      (command sonja :add-application-tags :id id :tags [tag-id]) => ok?
+
+      (fact "when tag is used, application id is returned"
+        (let [res (query sipoo :remove-tag-ok :tagId tag-id)]
+          res =not=> ok?
+          (-> res :applications first :id) => id))
+
+      (fact "when tag is not used in applications, ok is returned"
+        (command sonja :add-application-tags :id id :tags []) => ok?
+        (query sipoo :remove-tag-ok :tagId tag-id) => ok?))))
