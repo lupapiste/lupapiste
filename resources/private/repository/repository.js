@@ -61,6 +61,40 @@ var repository = (function() {
     });
   }
 
+  function bySchemaName(schemaName) {
+    return function(task) {
+      return util.getIn(task, ["schema-info", "name"]) === schemaName;
+    };
+  }
+
+  function tasksDataBySchemaName(tasks, schemaName, mapper) {
+    return _(tasks).filter(bySchemaName(schemaName)).map(mapper).value();
+  }
+
+  function calculateVerdictTasks(verdict, tasks) {
+    // Manual verdicts have one paatokset item
+    if (verdict.paatokset && verdict.paatokset.length === 1) {
+
+      var myTasks = _.filter(tasks, function(task) {
+        return task.source && task.source.type === "verdict" && task.source.id === verdict.id;
+      });
+
+      var lupamaaraukset = _(verdict.paatokset || []).map(_.property("lupamaaraykset")).filter().value();
+
+      if (lupamaaraukset.length === 0 && myTasks.length > 0) {
+        var katselmukset = tasksDataBySchemaName(myTasks, "task-katselmus", function(task) {
+          return {katselmuksenLaji: util.getIn(task, ["data", "katselmuksenLaji", "value"], "muu katselmus"), tarkastuksenTaiKatselmuksenNimi: task.taskname};
+        });
+        var tyonjohtajat = tasksDataBySchemaName(myTasks, "task-vaadittu-tyonjohtaja", _.property("taskname"));
+        var muut = tasksDataBySchemaName(myTasks, "task-lupamaarays", _.property("taskname"));
+
+        verdict.paatokset[0].lupamaaraykset = {vaaditutTyonjohtajat: tyonjohtajat,
+                                               muutMaaraykset: muut,
+                                               vaaditutKatselmukset: katselmukset};
+      }
+    }
+  }
+
   function loadingErrorHandler(id, e) {
     currentlyLoadingId = null;
     error("Application " + id + " not found", e);
@@ -106,11 +140,14 @@ var repository = (function() {
         if (application.id === currentlyLoadingId) {
           currentlyLoadingId = null;
           application.allOperations = getAllOperations(application);
+
           _.each(application.documents || [], function(doc) {
             setOperation(application, doc);
             setSchema(doc);
           });
+
           _.each(application.tasks || [], setSchema);
+
           _.each(application.comments || [], function(comment) {
             if (comment.target && comment.target.type === "attachment" && comment.target.id) {
               var targetAttachment = _.find(application.attachments || [], function(attachment) {
@@ -122,13 +159,20 @@ var repository = (function() {
               }
             }
           });
+
           _.each(application.attachments ||[], function(att) {
             calculateAttachmentStateIndicators(att, application);
             setAttachmentOperation(application.allOperations, att);
           });
+
+          _.each(application.verdicts ||[], function(verdict) {
+            calculateVerdictTasks(verdict, application.tasks);
+          });
+
           application.tags = _(application.tags || []).map(function(tagId) {
             return {id: tagId, label: util.getIn(application, ["organizationMeta", "tags", tagId])};
           }).filter("label").value();
+
           hub.send("application-loaded", {applicationDetails: loading});
           if (_.isFunction(callback)) {
             callback(application);
