@@ -253,17 +253,18 @@
     (command sonja :save-organization-tags :tags [{:id nil :label "illegal"}] =not=> ok?)
     (command pena :save-organization-tags :tags [{:id nil :label "makeja"}] =not=> ok?))
   (fact "tags get ids when saved"
-    (:tags (query sipoo :get-organization-tags)) => (just {:753-R (just [(just {:id string? :label "makeja"})
-                                                                         (just {:id string? :label "nigireja"})])}))
+    (:tags (query sipoo :get-organization-tags)) => (just {:753-R (just {:name (just {:fi string? :sv string?})
+                                                                         :tags (just [(just {:id string? :label "makeja"})
+                                                                                      (just {:id string? :label "nigireja"})])})}))
 
   (fact "only authority can fetch available tags"
     (query pena :get-organization-tags) =not=> ok?
-    (map :label (:753-R (:tags (query sonja :get-organization-tags)))) => ["makeja" "nigireja"])
+    (map :label (:tags (:753-R (:tags (query sonja :get-organization-tags))))) => ["makeja" "nigireja"])
 
   (fact "Check tag deletion query"
     (let [id (create-app-id sonja)
           tag-id (-> (query sonja :get-organization-tags)
-                   :tags :753-R first id)]
+                   :tags :753-R :tags first id)]
       (command sonja :add-application-tags :id id :tags [tag-id]) => ok?
 
       (fact "when tag is used, application id is returned"
