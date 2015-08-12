@@ -5103,39 +5103,53 @@ table.attachments-template-table td.attachment-version-info {
   -o-transition-duration: 200ms;
   -webkit-transition-duration: 200ms;
   transition-duration: 200ms;
+  /* &:HOVER { */
+  /*   background: $lp-light-grey; */
+  /* } */
   /* span.icon { */
   /*   width: 20px; */
   /* } */
-}
-/* line 36, ../sass/partials/_tree.scss */
-.operation-tree .tree-link:HOVER {
-  background: #f6f6f6;
 }
 /* line 39, ../sass/partials/_tree.scss */
 .operation-tree .tree-link span {
   /* width: $tree-width - 22px; */
   width: 100%;
 }
-/* line 48, ../sass/partials/_tree.scss */
+/* line 47, ../sass/partials/_tree.scss */
+.operation-tree .tree-link.btn, .operation-tree .tree-link.like-btn, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_previous, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_previous, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_next, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_next {
+  overflow-y: hidden;
+  max-height: none;
+  min-height: none;
+  line-height: initial;
+  vertical-align: middle;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+/* line 53, ../sass/partials/_tree.scss */
+.operation-tree .tree-link.btn span, .operation-tree .tree-link.like-btn span, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_previous span, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_previous span, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_next span, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_next span, .operation-tree .tree-link.btn i, .operation-tree .tree-link.like-btn i, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_previous i, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_previous i, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_next i, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_next i {
+  vertical-align: middle;
+  white-space: initial;
+}
+/* line 63, ../sass/partials/_tree.scss */
 .operation-tree .tree-nav .tree-back {
   min-width: 5.625em;
   display: inline-block;
   margin: 24px 24px 0 30px;
   height: 30px;
 }
-/* line 54, ../sass/partials/_tree.scss */
+/* line 69, ../sass/partials/_tree.scss */
 .operation-tree .tree-nav .tree-start {
   min-width: 5.625em;
   display: inline-block;
   margin: 24px 24px 0 30px;
   height: 30px;
 }
-/* line 61, ../sass/partials/_tree.scss */
+/* line 76, ../sass/partials/_tree.scss */
 .operation-tree .tree-page {
   position: relative;
   float: left;
 }
-/* line 65, ../sass/partials/_tree.scss */
+/* line 80, ../sass/partials/_tree.scss */
 .operation-tree .tree-last {
   width: 90%;
   padding: 24px 24px;
@@ -5143,37 +5157,37 @@ table.attachments-template-table td.attachment-version-info {
   float: left;
   text-align: left;
 }
-/* line 71, ../sass/partials/_tree.scss */
+/* line 86, ../sass/partials/_tree.scss */
 .operation-tree .tree-last li {
   list-style-type: none;
 }
-/* line 73, ../sass/partials/_tree.scss */
+/* line 88, ../sass/partials/_tree.scss */
 .operation-tree .tree-last li a {
   color: #333;
 }
-/* line 77, ../sass/partials/_tree.scss */
+/* line 92, ../sass/partials/_tree.scss */
 .operation-tree .tree-last div {
   width: 90%;
   margin-top: 6px;
 }
-/* line 81, ../sass/partials/_tree.scss */
+/* line 96, ../sass/partials/_tree.scss */
 .operation-tree .tree-last button {
   margin-top: 24px;
   /* font-size:14px; */
   width: 18em;
 }
 
-/* line 89, ../sass/partials/_tree.scss */
+/* line 104, ../sass/partials/_tree.scss */
 .tree-width {
   width: 800px;
   height: 120px;
 }
 
-/* line 93, ../sass/partials/_tree.scss */
+/* line 108, ../sass/partials/_tree.scss */
 ul.attachments-list {
   list-style-type: circle;
 }
-/* line 95, ../sass/partials/_tree.scss */
+/* line 110, ../sass/partials/_tree.scss */
 ul.attachments-list li.mandatory-attachments {
   list-style-type: circle;
 }
@@ -8572,12 +8586,12 @@ td.comment-text {
 @media all and (max-width: 1280px) {
   /* line 282, ../sass/views/_side_panel.scss */
   #side-panel .content-wrapper {
-    width: 300px;
+    width: 400px;
   }
 
   /* line 287, ../sass/views/_side_panel.scss */
   #side-panel {
-    right: -300px;
+    right: -400px;
   }
 
   /* line 292, ../sass/views/_side_panel.scss */
