@@ -33,9 +33,9 @@ $tree-height: 320px;
     @include user-select(none);
     @include transition-property(font-size);
     @include transition-duration(200ms);
-    &:HOVER {
-      background: $lp-light-grey;
-    }
+    /* &:HOVER { */
+    /*   background: $lp-light-grey; */
+    /* } */
     span {
       /* width: $tree-width - 22px; */
       width: 100%;
@@ -43,6 +43,21 @@ $tree-height: 320px;
     /* span.icon { */
     /*   width: 20px; */
     /* } */
+  }
+  .tree-link.btn {
+    overflow-y: hidden;
+    max-height: none;
+    min-height: none;
+    line-height: initial;
+    vertical-align: middle;
+    span, i {
+      vertical-align: middle;
+      white-space: initial;
+    }
+    padding: {
+      top: $marginM;
+      bottom: $marginM;
+    }
   }
   .tree-nav {
     .tree-back {
