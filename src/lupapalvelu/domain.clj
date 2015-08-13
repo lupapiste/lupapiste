@@ -126,10 +126,10 @@
 (defn has-auth-role? [{auth :auth} user-id role]
   (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
 
+(def owner-or-write-roles ["owner" "writer" "foreman"])
+
 (defn owner-or-write-access? [application user-id]
-  (or (has-auth-role? application user-id "owner")
-      (has-auth-role? application user-id "writer")
-      (has-auth-role? application user-id "foreman")))
+  (boolean (some (partial has-auth-role? application user-id) owner-or-write-roles)))
 
 (defn validate-owner-or-write-access
   "Validator: current user must be owner or have write access.
