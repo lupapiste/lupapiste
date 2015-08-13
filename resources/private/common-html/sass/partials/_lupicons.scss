@@ -31,10 +31,20 @@ $lupicon-size: 22px;
                        -moz-osx-font-smoothing: grayscale;
                      }
 
-// Convenience modifier for marking icons.
+// Convenience modifiers for marking icons.
 [class^="lupicon-"].primary,
 [class*=" lupicon-"].primary {
   color: $orange-dark;
+}
+
+[class^="lupicon-"].positive,
+[class*=" lupicon-"].positive {
+  color: $green;
+}
+
+[class^="lupicon-"].negative,
+[class*=" lupicon-"].negative {
+  color: $red;
 }
 
 // Hand for help and close icons.

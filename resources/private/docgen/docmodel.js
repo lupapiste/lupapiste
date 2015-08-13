@@ -330,9 +330,20 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  self.makeApprovalButtons = function (path, model, title) {
+  self.barStatusHandler = function( barDiv$, approval, text ) {
+    barDiv$.removeClass( "approved rejected" );
+
+  };
+
+  self.makeApprovalButtons = function (path, model, statusHandler ) {
     var btnContainer$ = $("<span>").addClass("form-buttons");
-    var statusContainer$ = $("<span>");
+    var statusContainer$ = null;
+    if( !statusHandler ) {
+      statusContainer$ = $("<div>").addClass( "like-btn is-status");
+      statusContainer$.append( $("<i>").addClass( "lupicon-circle-attention rejected"));
+      statusContainer$.append( $("<i>").addClass( "lupicon-circle-check approved"));
+      statusContainer$.append( $("<span>"));
+    }
     var approvalContainer$ = $("<span>").addClass("form-approval-status empty").append(statusContainer$).append(btnContainer$);
     var approveButton$ = null;
     var rejectButton$ = null;
@@ -349,16 +360,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           text += " (" + approval.user.lastName + " " + approval.user.firstName;
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
-        if (title) {
-          statusContainer$.attr("title", text);
+        if( statusHandler ) {
+          statusHandler( approval, text );
         } else {
-          statusContainer$.text(text);
+          $(statusContainer$).children("span").text(text);
+          statusContainer$.removeClass( "approved rejected");
+          statusContainer$.addClass( approval.value );
+          // statusContainer$.removeClass (function(index, css) {
+          //   return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
+          // });
+          // statusContainer$.addClass ("approval-" + approval.value);
+          // approvalContainer$.removeClass ("empty");
         }
-        statusContainer$.removeClass(function(index, css) {
-          return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
-        });
-        statusContainer$.addClass("approval-" + approval.value);
-        approvalContainer$.removeClass("empty");
       }
     }
 
@@ -763,7 +776,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     div.appendChild(groupHelpText);
 
     if (subSchema.approvable) {
-      label.appendChild(self.makeApprovalButtons(path, myModel, false));
+      label.appendChild(self.makeApprovalButtons(path, myModel));
     }
     div.appendChild(partsDiv);
 
@@ -1309,7 +1322,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         div.appendChild(groupHelpText);
 
         if (subSchema.approvable) {
-          div.appendChild(self.makeApprovalButtons(path, models, false));
+          div.appendChild(self.makeApprovalButtons(path, models));
         }
         div.appendChild(table);
 
@@ -1792,8 +1805,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var op = self.schema.info.op;
 
     var section = document.createElement("section");
-    var icon = document.createElement("span");
-    var title = document.createElement("h2");
+    var iconUp = document.createElement("i");
+    var iconDown = document.createElement("i");
+    var toggle = document.createElement("button");
+    var title = document.createElement( "span");
+    var iconRejected = $("<span>").addClass( "lupicon-circle-attention rejected");
+    var iconApproved = $("<span>").addClass( "lupicon-circle-check approved");
 
     var sectionContainer = document.createElement("div");
     var elements = document.createElement("div");
@@ -1804,13 +1821,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     section.setAttribute("data-doc-type", self.schemaName);
     elements.className = "accordion-fields";
 
-    icon.className = "icon toggle-icon " + (accordionCollapsed ? "drill-right-white" : "drill-down-white");
-    title.appendChild(icon);
+    iconUp.className = "lupicon-chevron-up toggle";
+    iconDown.className = "lupicon-chevron-down";
+    toggle.appendChild( iconDown );
+    toggle.appendChild( iconUp );
+    toggle.className = "sticky secondary";
+    toggle.appendChild( title );
+    $(toggle).append( iconRejected ).append( iconApproved );
 
-    title.className = "sticky";
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
-    title.onclick = accordion.click;
+    toggle.onclick = accordion.click;
     var docId = util.getIn(self, ["schema", "info", "op", "id"]);
     var notPrimaryOperation = (!docId || docId !== util.getIn(self.application, ["primaryOperation", "id"]));
 
@@ -1832,7 +1853,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       operationType.className = "icon star-selected";
       operationType.title = loc("operations.primary");
       operationType.setAttribute("data-op-name", op.name);
-      title.appendChild(operationType);
+      elements.appendChild(operationType);
     }
 
     if (isSecondaryOperation) {
@@ -1848,16 +1869,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         return false;
       });
       operationType.setAttribute("data-op-name", op.name);
-      title.appendChild(operationType);
+      elements.appendChild(operationType);
     }
 
     if (self.schema.info.approvable) {
-      title.appendChild(self.makeApprovalButtons([], self.model, true));
+      elements.appendChild(self.makeApprovalButtons([], self.model, _.noop));
     }
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      title.appendChild(buildDescriptionElement(op));
+      elements.appendChild(buildDescriptionElement(op));
     } else {
       title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
@@ -1872,7 +1893,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     appendElements(elements, self.schema, self.model, []);
 
     sectionContainer.appendChild(elements);
-    section.appendChild(title);
+    section.appendChild(toggle);
     section.appendChild(sectionContainer);
     return section;
   }

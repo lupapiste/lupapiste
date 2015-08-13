@@ -826,378 +826,390 @@ h1 .icon {
   color: #f39129;
 }
 
-/* line 41, ../sass/partials/_lupicons.scss */
+/* line 40, ../sass/partials/_lupicons.scss */
+[class^="lupicon-"].positive,
+[class*=" lupicon-"].positive {
+  color: #46b02d;
+}
+
+/* line 45, ../sass/partials/_lupicons.scss */
+[class^="lupicon-"].negative,
+[class*=" lupicon-"].negative {
+  color: #e34319;
+}
+
+/* line 51, ../sass/partials/_lupicons.scss */
 .lupicon-circle-question, .lupicon-remove {
   cursor: pointer;
 }
 
-/* line 47, ../sass/partials/_lupicons.scss */
+/* line 57, ../sass/partials/_lupicons.scss */
 [class^="lupicon-"].no-hand,
 [class*=" lupicon-"].no-hand {
   cursor: default;
 }
 
-/* line 52, ../sass/partials/_lupicons.scss */
+/* line 62, ../sass/partials/_lupicons.scss */
 .lupicon-add-area:before {
   content: "\e63f";
 }
 
-/* line 55, ../sass/partials/_lupicons.scss */
+/* line 65, ../sass/partials/_lupicons.scss */
 .lupicon-add-path:before {
   content: "\e640";
 }
 
-/* line 58, ../sass/partials/_lupicons.scss */
+/* line 68, ../sass/partials/_lupicons.scss */
 .lupicon-add-point:before {
   content: "\e641";
 }
 
-/* line 61, ../sass/partials/_lupicons.scss */
+/* line 71, ../sass/partials/_lupicons.scss */
 .lupicon-arrows:before {
   content: "\e642";
 }
 
-/* line 64, ../sass/partials/_lupicons.scss */
+/* line 74, ../sass/partials/_lupicons.scss */
 .lupicon-file-check:before {
   content: "\e643";
 }
 
-/* line 67, ../sass/partials/_lupicons.scss */
+/* line 77, ../sass/partials/_lupicons.scss */
 .lupicon-layers:before {
   content: "\e644";
 }
 
-/* line 70, ../sass/partials/_lupicons.scss */
+/* line 80, ../sass/partials/_lupicons.scss */
 .lupicon-measure-area:before {
   content: "\e645";
 }
 
-/* line 73, ../sass/partials/_lupicons.scss */
+/* line 83, ../sass/partials/_lupicons.scss */
 .lupicon-measure:before {
   content: "\e646";
 }
 
-/* line 76, ../sass/partials/_lupicons.scss */
+/* line 86, ../sass/partials/_lupicons.scss */
 .lupicon-star:before {
   content: "\e647";
 }
 
-/* line 79, ../sass/partials/_lupicons.scss */
+/* line 89, ../sass/partials/_lupicons.scss */
 .lupicon-zoom-in-area:before {
   content: "\e648";
 }
 
-/* line 82, ../sass/partials/_lupicons.scss */
+/* line 92, ../sass/partials/_lupicons.scss */
 .lupicon-archives:before {
   content: "\e600";
 }
 
-/* line 85, ../sass/partials/_lupicons.scss */
+/* line 95, ../sass/partials/_lupicons.scss */
 .lupicon-calendar:before {
   content: "\e601";
 }
 
-/* line 88, ../sass/partials/_lupicons.scss */
+/* line 98, ../sass/partials/_lupicons.scss */
 .lupicon-check:before {
   content: "\e602";
 }
 
-/* line 91, ../sass/partials/_lupicons.scss */
+/* line 101, ../sass/partials/_lupicons.scss */
 .lupicon-checkbox-off:before {
   content: "\e603";
 }
 
-/* line 94, ../sass/partials/_lupicons.scss */
+/* line 104, ../sass/partials/_lupicons.scss */
 .lupicon-checkbox-on:before {
   content: "\e604";
 }
 
-/* line 97, ../sass/partials/_lupicons.scss */
+/* line 107, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-bottom:before {
   content: "\e605";
 }
 
-/* line 100, ../sass/partials/_lupicons.scss */
+/* line 110, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-down:before {
   content: "\e606";
 }
 
-/* line 103, ../sass/partials/_lupicons.scss */
+/* line 113, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-end:before {
   content: "\e607";
 }
 
-/* line 106, ../sass/partials/_lupicons.scss */
+/* line 116, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-left:before {
   content: "\e608";
 }
 
-/* line 109, ../sass/partials/_lupicons.scss */
+/* line 119, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-right:before {
   content: "\e609";
 }
 
-/* line 112, ../sass/partials/_lupicons.scss */
+/* line 122, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-small-down:before {
   content: "\e60a";
 }
 
-/* line 115, ../sass/partials/_lupicons.scss */
+/* line 125, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-small-left:before {
   content: "\e60b";
 }
 
-/* line 118, ../sass/partials/_lupicons.scss */
+/* line 128, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-small-right:before {
   content: "\e60c";
 }
 
-/* line 121, ../sass/partials/_lupicons.scss */
+/* line 131, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-small-up:before {
   content: "\e60d";
 }
 
-/* line 124, ../sass/partials/_lupicons.scss */
+/* line 134, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-start:before {
   content: "\e60e";
 }
 
-/* line 127, ../sass/partials/_lupicons.scss */
+/* line 137, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-top:before {
   content: "\e60f";
 }
 
-/* line 130, ../sass/partials/_lupicons.scss */
+/* line 140, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-up:before {
   content: "\e610";
 }
 
-/* line 133, ../sass/partials/_lupicons.scss */
+/* line 143, ../sass/partials/_lupicons.scss */
 .lupicon-circle-arrow-down:before {
   content: "\e611";
 }
 
-/* line 136, ../sass/partials/_lupicons.scss */
+/* line 146, ../sass/partials/_lupicons.scss */
 .lupicon-circle-arrow-left:before {
   content: "\e612";
 }
 
-/* line 139, ../sass/partials/_lupicons.scss */
+/* line 149, ../sass/partials/_lupicons.scss */
 .lupicon-circle-arrow-right:before {
   content: "\e613";
 }
 
-/* line 142, ../sass/partials/_lupicons.scss */
+/* line 152, ../sass/partials/_lupicons.scss */
 .lupicon-circle-arrow-up:before {
   content: "\e614";
 }
 
-/* line 145, ../sass/partials/_lupicons.scss */
+/* line 155, ../sass/partials/_lupicons.scss */
 .lupicon-circle-attention:before {
   content: "\e615";
 }
 
-/* line 148, ../sass/partials/_lupicons.scss */
+/* line 158, ../sass/partials/_lupicons.scss */
 .lupicon-circle-check:before {
   content: "\e616";
 }
 
-/* line 151, ../sass/partials/_lupicons.scss */
+/* line 161, ../sass/partials/_lupicons.scss */
 .lupicon-circle-info:before {
   content: "\e617";
 }
 
-/* line 154, ../sass/partials/_lupicons.scss */
+/* line 164, ../sass/partials/_lupicons.scss */
 .lupicon-circle-minus:before {
   content: "\e618";
 }
 
-/* line 157, ../sass/partials/_lupicons.scss */
+/* line 167, ../sass/partials/_lupicons.scss */
 .lupicon-circle-pen:before {
   content: "\e619";
 }
 
-/* line 160, ../sass/partials/_lupicons.scss */
+/* line 170, ../sass/partials/_lupicons.scss */
 .lupicon-circle-plus:before {
   content: "\e61a";
 }
 
-/* line 163, ../sass/partials/_lupicons.scss */
+/* line 173, ../sass/partials/_lupicons.scss */
 .lupicon-circle-question:before {
   content: "\e61b";
 }
 
-/* line 166, ../sass/partials/_lupicons.scss */
+/* line 176, ../sass/partials/_lupicons.scss */
 .lupicon-circle-remove:before {
   content: "\e61c";
 }
 
-/* line 169, ../sass/partials/_lupicons.scss */
+/* line 179, ../sass/partials/_lupicons.scss */
 .lupicon-circle-section-sign:before {
   content: "\e61d";
 }
 
-/* line 172, ../sass/partials/_lupicons.scss */
+/* line 182, ../sass/partials/_lupicons.scss */
 .lupicon-circle-stamp:before {
   content: "\e61e";
 }
 
-/* line 175, ../sass/partials/_lupicons.scss */
+/* line 185, ../sass/partials/_lupicons.scss */
 .lupicon-circle-star:before {
   content: "\e61f";
 }
 
-/* line 178, ../sass/partials/_lupicons.scss */
+/* line 188, ../sass/partials/_lupicons.scss */
 .lupicon-circle:before {
   content: "\e620";
 }
 
-/* line 181, ../sass/partials/_lupicons.scss */
+/* line 191, ../sass/partials/_lupicons.scss */
 .lupicon-clock:before {
   content: "\e621";
 }
 
-/* line 184, ../sass/partials/_lupicons.scss */
+/* line 194, ../sass/partials/_lupicons.scss */
 .lupicon-collapse:before {
   content: "\e622";
 }
 
-/* line 187, ../sass/partials/_lupicons.scss */
+/* line 197, ../sass/partials/_lupicons.scss */
 .lupicon-comment:before {
   content: "\e623";
 }
 
-/* line 190, ../sass/partials/_lupicons.scss */
+/* line 200, ../sass/partials/_lupicons.scss */
 .lupicon-conversation:before {
   content: "\e624";
 }
 
-/* line 193, ../sass/partials/_lupicons.scss */
+/* line 203, ../sass/partials/_lupicons.scss */
 .lupicon-documents:before {
   content: "\e625";
 }
 
-/* line 196, ../sass/partials/_lupicons.scss */
+/* line 206, ../sass/partials/_lupicons.scss */
 .lupicon-download:before {
   content: "\e626";
 }
 
-/* line 199, ../sass/partials/_lupicons.scss */
+/* line 209, ../sass/partials/_lupicons.scss */
 .lupicon-envelope:before {
   content: "\e627";
 }
 
-/* line 202, ../sass/partials/_lupicons.scss */
+/* line 212, ../sass/partials/_lupicons.scss */
 .lupicon-expand:before {
   content: "\e628";
 }
 
-/* line 205, ../sass/partials/_lupicons.scss */
+/* line 215, ../sass/partials/_lupicons.scss */
 .lupicon-eye:before {
   content: "\e629";
 }
 
-/* line 208, ../sass/partials/_lupicons.scss */
+/* line 218, ../sass/partials/_lupicons.scss */
 .lupicon-file:before {
   content: "\e62a";
 }
 
-/* line 211, ../sass/partials/_lupicons.scss */
+/* line 221, ../sass/partials/_lupicons.scss */
 .lupicon-folder:before {
   content: "\e62b";
 }
 
-/* line 214, ../sass/partials/_lupicons.scss */
+/* line 224, ../sass/partials/_lupicons.scss */
 .lupicon-lightbulb:before {
   content: "\e62c";
 }
 
-/* line 217, ../sass/partials/_lupicons.scss */
+/* line 227, ../sass/partials/_lupicons.scss */
 .lupicon-list:before {
   content: "\e62d";
 }
 
-/* line 220, ../sass/partials/_lupicons.scss */
+/* line 230, ../sass/partials/_lupicons.scss */
 .lupicon-location:before {
   content: "\e62e";
 }
 
-/* line 223, ../sass/partials/_lupicons.scss */
+/* line 233, ../sass/partials/_lupicons.scss */
 .lupicon-log-in:before {
   content: "\e62f";
 }
 
-/* line 226, ../sass/partials/_lupicons.scss */
+/* line 236, ../sass/partials/_lupicons.scss */
 .lupicon-log-out:before {
   content: "\e630";
 }
 
-/* line 229, ../sass/partials/_lupicons.scss */
+/* line 239, ../sass/partials/_lupicons.scss */
 .lupicon-menu:before {
   content: "\e631";
 }
 
-/* line 232, ../sass/partials/_lupicons.scss */
+/* line 242, ../sass/partials/_lupicons.scss */
 .lupicon-pen:before {
   content: "\e632";
 }
 
-/* line 235, ../sass/partials/_lupicons.scss */
+/* line 245, ../sass/partials/_lupicons.scss */
 .lupicon-print:before {
   content: "\e633";
 }
 
-/* line 238, ../sass/partials/_lupicons.scss */
+/* line 248, ../sass/partials/_lupicons.scss */
 .lupicon-radio-off:before {
   content: "\e634";
 }
 
-/* line 241, ../sass/partials/_lupicons.scss */
+/* line 251, ../sass/partials/_lupicons.scss */
 .lupicon-radio-on:before {
   content: "\e635";
 }
 
-/* line 244, ../sass/partials/_lupicons.scss */
+/* line 254, ../sass/partials/_lupicons.scss */
 .lupicon-refresh:before {
   content: "\e636";
 }
 
-/* line 247, ../sass/partials/_lupicons.scss */
+/* line 257, ../sass/partials/_lupicons.scss */
 .lupicon-remove:before {
   content: "\e637";
 }
 
-/* line 250, ../sass/partials/_lupicons.scss */
+/* line 260, ../sass/partials/_lupicons.scss */
 .lupicon-save:before {
   content: "\e638";
 }
 
-/* line 253, ../sass/partials/_lupicons.scss */
+/* line 263, ../sass/partials/_lupicons.scss */
 .lupicon-search:before {
   content: "\e639";
 }
 
-/* line 256, ../sass/partials/_lupicons.scss */
+/* line 266, ../sass/partials/_lupicons.scss */
 .lupicon-upload:before {
   content: "\e63a";
 }
 
-/* line 259, ../sass/partials/_lupicons.scss */
+/* line 269, ../sass/partials/_lupicons.scss */
 .lupicon-user:before {
   content: "\e63b";
 }
 
-/* line 262, ../sass/partials/_lupicons.scss */
+/* line 272, ../sass/partials/_lupicons.scss */
 .lupicon-warning:before {
   content: "\e63c";
 }
 
-/* line 265, ../sass/partials/_lupicons.scss */
+/* line 275, ../sass/partials/_lupicons.scss */
 .lupicon-zoom-in:before {
   content: "\e63d";
 }
 
-/* line 268, ../sass/partials/_lupicons.scss */
+/* line 278, ../sass/partials/_lupicons.scss */
 .lupicon-zoom-out:before {
   content: "\e63e";
 }
@@ -2746,58 +2758,78 @@ span + .waiting.wait {
   padding-right: 10px;
 }
 
-/* line 594, ../sass/partials/_buttons.scss */
+/* line 589, ../sass/partials/_buttons.scss */
+i.toggle {
+  display: none;
+  padding: 0 !important;
+}
+
+/* line 595, ../sass/partials/_buttons.scss */
+.toggled i {
+  display: none;
+}
+/* line 598, ../sass/partials/_buttons.scss */
+.toggled i.toggle {
+  display: table-cell;
+}
+
+/* line 603, ../sass/partials/_buttons.scss */
+.toggled .toggle + span {
+  padding-left: 10px;
+}
+
+/* line 616, ../sass/partials/_buttons.scss */
 .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 614, ../sass/partials/_buttons.scss */
+/* line 636, ../sass/partials/_buttons.scss */
 .stacked {
   display: table;
 }
-/* line 604, ../sass/partials/_buttons.scss */
+/* line 626, ../sass/partials/_buttons.scss */
 .stacked .btn, .stacked .like-btn, .stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked .paginate_disabled_previous, .stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked .paginate_disabled_next, .stacked button {
   width: 100%;
   display: block;
   margin: 0;
 }
-/* line 609, ../sass/partials/_buttons.scss */
+/* line 631, ../sass/partials/_buttons.scss */
 .stacked div {
   overflow-y: hidden;
 }
 
-/* line 620, ../sass/partials/_buttons.scss */
+/* line 642, ../sass/partials/_buttons.scss */
 .inner-margins .btn, .inner-margins .like-btn, .inner-margins .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins .paginate_disabled_previous, .inner-margins .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins .paginate_disabled_next, .inner-margins button, .inner-margins div, .inner-margins a {
   margin-left: 12px;
 }
-/* line 623, ../sass/partials/_buttons.scss */
+/* line 645, ../sass/partials/_buttons.scss */
 .inner-margins :first-child {
   margin-left: 0;
 }
 
-/* line 629, ../sass/partials/_buttons.scss */
+/* line 651, ../sass/partials/_buttons.scss */
 .inner-margins.stacked .btn, .inner-margins.stacked .like-btn, .inner-margins.stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins.stacked .paginate_disabled_previous, .inner-margins.stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins.stacked .paginate_disabled_next, .inner-margins.stacked button, .inner-margins.stacked div, .inner-margins.stacked a {
   margin-left: 0;
   margin-top: 12px;
 }
-/* line 633, ../sass/partials/_buttons.scss */
+/* line 655, ../sass/partials/_buttons.scss */
 .inner-margins.stacked :first-child {
   margin-top: 0;
 }
 
-/* line 640, ../sass/partials/_buttons.scss */
+/* line 662, ../sass/partials/_buttons.scss */
 .form-buttons button {
   margin-left: 12px;
 }
 
-/* line 644, ../sass/partials/_buttons.scss */
+/* line 666, ../sass/partials/_buttons.scss */
 #partiesDocgen button {
   margin-bottom: 6px;
 }
 
-/* line 648, ../sass/partials/_buttons.scss */
+/* line 670, ../sass/partials/_buttons.scss */
 #login-button span {
   text-align: center;
   width: 200px;
@@ -3507,38 +3539,79 @@ input.form-input.long {
   right: 6px;
 }
 
-/* line 666, ../sass/partials/_forms.scss */
-.approval-approved:after {
-  content: " ";
-  background-image: url("/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
-  background-position: 0px -2500px;
-  display: inline-block;
-  margin-left: 6px;
-  vertical-align: text-bottom;
+/* .approval-approved { */
+/*   &:after { */
+/*     content: " "; */
+/*     @include spite-bg; */
+/*     width: 16px; */
+/*     height: 16px; */
+/*     background-position: 0px -2500px; */
+/*     display: inline-block; */
+/*     margin-left: $marginS; */
+/*     vertical-align: text-bottom; */
+/*   } */
+/* } */
+/* .approval-rejected { */
+/*   &:after { */
+/*     content: " "; */
+/*     @include spite-bg; */
+/*     width: 16px; */
+/*     height: 16px; */
+/*     background-position: 0px -2400px; */
+/*     display: inline-block; */
+/*     margin-left: $marginS; */
+/*     vertical-align: text-bottom; */
+/*   } */
+/* } */
+/* line 690, ../sass/partials/_forms.scss */
+.form-approval-status .is-status {
+  display: none;
+}
+/* line 692, ../sass/partials/_forms.scss */
+.form-approval-status .is-status span {
+  color: #bbbbbb;
+}
+/* line 695, ../sass/partials/_forms.scss */
+.form-approval-status .is-status .lupicon-circle-attention {
+  color: #e34319;
+}
+/* line 698, ../sass/partials/_forms.scss */
+.form-approval-status .is-status .lupicon-circle-check {
+  color: #46b02d;
+}
+/* line 701, ../sass/partials/_forms.scss */
+.form-approval-status .is-status .rejected, .form-approval-status .is-status .approved, .form-approval-status .is-status span {
+  display: none;
+}
+/* line 704, ../sass/partials/_forms.scss */
+.form-approval-status .is-status .approved {
+  padding-right: 10px;
 }
 
-/* line 678, ../sass/partials/_forms.scss */
-.approval-rejected:after {
-  content: " ";
-  background-image: url("/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
-  background-position: 0px -2400px;
-  display: inline-block;
-  margin-left: 6px;
-  vertical-align: text-bottom;
+/* line 709, ../sass/partials/_forms.scss */
+.form-approval-status .is-status.approved {
+  display: initial;
+}
+/* line 711, ../sass/partials/_forms.scss */
+.form-approval-status .is-status.approved .approved, .form-approval-status .is-status.approved span {
+  display: initial;
 }
 
-/* line 694, ../sass/partials/_forms.scss */
+/* line 716, ../sass/partials/_forms.scss */
+.form-approval-status .is-status.rejected {
+  display: initial;
+}
+/* line 718, ../sass/partials/_forms.scss */
+.form-approval-status .is-status.rejected .rejected, .form-approval-status .is-status.rejected span {
+  display: initial;
+}
+
+/* line 727, ../sass/partials/_forms.scss */
 #neighbor-show [type="checkbox"]:disabled {
   position: relative;
   visibility: hidden;
 }
-/* line 697, ../sass/partials/_forms.scss */
+/* line 730, ../sass/partials/_forms.scss */
 #neighbor-show [type="checkbox"]:disabled:checked {
   visibility: visible;
   opacity: 1;
@@ -3552,75 +3625,75 @@ input.form-input.long {
   background: #f6f6f6 url(https://cdn2.iconfinder.com/data/icons/flat-ui-icons-24-px/24/checkmark-24-512.png) center center no-repeat;
   background-size: 12px 12px;
 }
-/* line 714, ../sass/partials/_forms.scss */
+/* line 747, ../sass/partials/_forms.scss */
 #neighbor-show [type="radio"]:disabled {
   position: relative;
   visibility: hidden;
 }
-/* line 717, ../sass/partials/_forms.scss */
+/* line 750, ../sass/partials/_forms.scss */
 #neighbor-show [type="radio"]:disabled:checked {
   visibility: visible;
   opacity: 1;
 }
 
-/* line 725, ../sass/partials/_forms.scss */
+/* line 758, ../sass/partials/_forms.scss */
 .three-col {
   width: 100%;
 }
-/* line 728, ../sass/partials/_forms.scss */
+/* line 761, ../sass/partials/_forms.scss */
 .three-col .form-input {
   width: 17.25em;
 }
-/* line 732, ../sass/partials/_forms.scss */
+/* line 765, ../sass/partials/_forms.scss */
 .three-col .col1 {
   float: left;
   padding-right: 12px;
 }
-/* line 737, ../sass/partials/_forms.scss */
+/* line 770, ../sass/partials/_forms.scss */
 .three-col .col2 {
   float: left;
   padding-left: 12px;
   padding-right: 12px;
 }
-/* line 742, ../sass/partials/_forms.scss */
+/* line 775, ../sass/partials/_forms.scss */
 .three-col .col3 {
   float: left;
   padding-left: 12px;
 }
 
-/* line 749, ../sass/partials/_forms.scss */
+/* line 782, ../sass/partials/_forms.scss */
 foreman-history h2 {
   background-color: #f6f6f6 !important;
 }
-/* line 752, ../sass/partials/_forms.scss */
+/* line 785, ../sass/partials/_forms.scss */
 foreman-history th.first {
   width: 10%;
 }
-/* line 755, ../sass/partials/_forms.scss */
+/* line 788, ../sass/partials/_forms.scss */
 foreman-history th.second {
   width: 15%;
 }
-/* line 758, ../sass/partials/_forms.scss */
+/* line 791, ../sass/partials/_forms.scss */
 foreman-history th.third {
   width: 10%;
 }
-/* line 761, ../sass/partials/_forms.scss */
+/* line 794, ../sass/partials/_forms.scss */
 foreman-history th.fourth {
   width: 20%;
 }
-/* line 764, ../sass/partials/_forms.scss */
+/* line 797, ../sass/partials/_forms.scss */
 foreman-history th.fifth {
   width: 45%;
 }
 
-/* line 769, ../sass/partials/_forms.scss */
+/* line 802, ../sass/partials/_forms.scss */
 .indicator-wrapper {
   position: relative;
   display: inline-block;
   width: 100%;
 }
 
-/* line 775, ../sass/partials/_forms.scss */
+/* line 808, ../sass/partials/_forms.scss */
 div.alleYli-radioGroup {
   display: inline-block;
   margin-top: 24px;
@@ -4725,50 +4798,44 @@ table.attachments-template-table td.attachment-version-info {
   color: red;
 }
 
-/* line 13, ../sass/partials/_help.scss */
-.icon.help {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  position: relative;
-  cursor: pointer;
-}
-
-/* line 19, ../sass/partials/_help.scss */
-.help {
-  margin-left: 12px;
-  margin-bottom: 12px;
-}
-
-/* line 24, ../sass/partials/_help.scss */
-.icon.help.expanded {
-  margin-bottom: 15px;
-}
-/* line 26, ../sass/partials/_help.scss */
-.icon.help.expanded:after {
-  content: " ";
-  border-left: 16px solid transparent;
-  border-bottom: 16px solid #4f4f4f;
-  border-right: 16px solid transparent;
-  position: absolute;
-  top: 38px;
-}
-
-/* .help-expanded { */
-/*   border-left: 16px solid transparent; */
-/*   border-bottom: 16px solid $orange; */
-/*   border-right: 16px solid transparent; */
+/* @mixin info-icon { */
+/*   content:""; */
+/*   display: block; */
+/*   @include spite-bg; */
+/*   background-position: 0px -2900px; */
+/*   height:32px; */
+/*   width: 30px; */
+/*   margin-right: -$marginM; */
+/*   margin-top: -$marginS; */
+/*   float: right; */
 /* } */
-/* line 43, ../sass/partials/_help.scss */
+/* .icon.help { */
+/*   @include disable-select; */
+/*   position: relative; */
+/*   cursor: pointer; */
+/* } */
+/* .help { */
+/*   margin-left: $marginM; */
+/*   margin-bottom: $marginM; */
+/* } */
+/* .icon.help.expanded { */
+/*   margin-bottom: 15px; */
+/*   &:after { */
+/*     content: " "; */
+/*     border-left: 16px solid transparent; */
+/*     border-bottom: 16px solid $lp-dark-grey; */
+/*     border-right: 16px solid transparent; */
+/*     position: absolute; */
+/*     top: 38px; */
+/*   } */
+/* } */
+/* line 37, ../sass/partials/_help.scss */
 .help-arrow {
   position: relative;
   z-index: 100;
 }
 
-/* line 47, ../sass/partials/_help.scss */
+/* line 41, ../sass/partials/_help.scss */
 .help-arrow:after, .help-arrow:before {
   bottom: 100%;
   left: 50%;
@@ -4782,7 +4849,7 @@ table.attachments-template-table td.attachment-version-info {
   overflow-y: visible;
 }
 
-/* line 60, ../sass/partials/_help.scss */
+/* line 54, ../sass/partials/_help.scss */
 .help-arrow:after {
   border-color: rgba(246, 246, 246, 0);
   border-bottom-color: #f6f6f6;
@@ -4790,7 +4857,7 @@ table.attachments-template-table td.attachment-version-info {
   margin-left: -14px;
 }
 
-/* line 66, ../sass/partials/_help.scss */
+/* line 60, ../sass/partials/_help.scss */
 .help-arrow:before {
   border-color: rgba(247, 172, 46, 0);
   border-bottom-color: #f7ac2e;
@@ -4798,41 +4865,40 @@ table.attachments-template-table td.attachment-version-info {
   margin-left: -15px;
 }
 
-/* line 73, ../sass/partials/_help.scss */
+/* line 67, ../sass/partials/_help.scss */
 .help-toggle {
   margin-left: 12px;
   display: inline-block;
   color: #f39129;
   text-align: center;
 }
-/* line 81, ../sass/partials/_help.scss */
+/* line 75, ../sass/partials/_help.scss */
 .help-toggle .lupicon-circle-question {
   margin-top: 5px;
   margin-bottom: 10px;
   cursor: pointer;
 }
-/* line 88, ../sass/partials/_help.scss */
+/* line 82, ../sass/partials/_help.scss */
 .help-toggle .lupicon-circle-question.expanded {
   color: #f7ac2e;
 }
 
-/* line 93, ../sass/partials/_help.scss */
+/* line 87, ../sass/partials/_help.scss */
 .stacked .help-arrow {
   overflow-y: visible;
   margin-top: 20px;
   margin-bottom: -1px;
 }
 
-/* line 100, ../sass/partials/_help.scss */
+/* line 94, ../sass/partials/_help.scss */
 .stacked.help-toggle {
   overflow-y: visible;
 }
 
-/* line 105, ../sass/partials/_help.scss */
+/* line 99, ../sass/partials/_help.scss */
 .help-text {
   display: none;
   position: relative;
-  width: 60%;
   /* text-align: justify; */
   background: #f6f6f6;
   color: #333333;
@@ -4844,48 +4910,38 @@ table.attachments-template-table td.attachment-version-info {
   /*   font-weight: bold; */
   /* } */
 }
-/* line 120, ../sass/partials/_help.scss */
+/* line 114, ../sass/partials/_help.scss */
 .help-text p:last-child {
   margin-bottom: 0;
 }
 
-/* line 126, ../sass/partials/_help.scss */
+/* line 120, ../sass/partials/_help.scss */
 .tab-info {
   width: 80%;
 }
 
-/* line 133, ../sass/partials/_help.scss */
+/* line 127, ../sass/partials/_help.scss */
 .help-reset {
   clear: both;
   max-height: 6px;
 }
 
-/* line 139, ../sass/partials/_help.scss */
+/* line 133, ../sass/partials/_help.scss */
 .panel-info {
   width: 100%;
   text-align: justify;
 }
 
-/* line 145, ../sass/partials/_help.scss */
-.instructions:before {
-  content: "";
-  display: block;
-  background-image: url("/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-  background-position: 0px -2900px;
-  height: 32px;
-  width: 30px;
-  margin-right: -12px;
-  margin-top: -6px;
-  float: right;
-}
+/* .instructions { */
+/*   &:before { */
+/*     @include info-icon; */
+/*   } */
+/*   h3 { */
+/*     display: inline-block; */
+/*     margin-right: $marginS; */
+/*   } */
+/* } */
 /* line 148, ../sass/partials/_help.scss */
-.instructions h3 {
-  display: inline-block;
-  margin-right: 6px;
-}
-
-/* line 154, ../sass/partials/_help.scss */
 .expanded-content {
   max-height: 0;
   overflow: hidden;
@@ -4893,12 +4949,12 @@ table.attachments-template-table td.attachment-version-info {
   -webkit-transition: max-height 400ms;
   /* Safari */
 }
-/* line 159, ../sass/partials/_help.scss */
+/* line 153, ../sass/partials/_help.scss */
 .expanded-content.expand {
   max-height: 1000px;
 }
 
-/* line 164, ../sass/partials/_help.scss */
+/* line 158, ../sass/partials/_help.scss */
 .page-info {
   width: 60%;
   margin: 12px 0;
@@ -5202,157 +5258,163 @@ ul.attachments-list li.mandatory-attachments {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
+  /* h2 { */
+  /*   padding:  $marginS $marginM; */
+  /*   background: $lp-dark-grey; */
+  /*   vertical-align: middle; */
+  /*   color: white; */
+  /*   font-size: 18px; */
+  /*   line-height: 27px; */
+  /*   cursor: pointer; */
+  /*   font-weight: normal; */
+  /*   margin-bottom: 0; */
+  /*   width: 100%; */
+  /*   padding-right:0; */
+  /*   max-width: $application-max-width - $marginS * 2; */
+  /*   @include box-sizing(border-box); */
+  /*   // span { */
+  /*   //   margin-right: $marginM; */
+  /*   // } */
+  /*   .icon { */
+  /*     margin-right: $marginL; */
+  /*     vertical-align: middle; */
+  /*   } */
+  /*   .icon.remove { */
+  /*     border-right: none; */
+  /*     padding-right: 0; */
+  /*   } */
+  /*   .icon.edit { */
+  /*     border-right: none; */
+  /*     padding-right: 0; */
+  /*     padding-left: 25px; */
+  /*     margin-left: $marginM; */
+  /*     width: auto; */
+  /*   } */
+  /*   .icon.drill-right-white { */
+  /*     height: 16px; */
+  /*   } */
+  /*   .icon.star-selected, .icon.star-unselected { */
+  /*     height: 23px; */
+  /*   } */
+  /*   .op-description-wrapper { */
+  /*     display: inline-block; */
+  /*     max-width: 700px; */
+  /*     white-space: nowrap; */
+  /*     line-height: 20px; */
+  /*     span { */
+  /*       margin-right: 0; */
+  /*       vertical-align: bottom; */
+  /*     } */
+  /*     .accordion-input { */
+  /*       width: 600px; */
+  /*       margin-left: $marginS; */
+  /*     } */
+  /*     .op-description { */
+  /*       overflow: hidden; */
+  /*       text-overflow: ellipsis; */
+  /*       &:before { */
+  /*         content: "-"; */
+  /*         margin: 0 $marginS; */
+  /*       } */
+  /*       &:empty { */
+  /*         display: none; */
+  /*       } */
+  /*     } */
+  /*   } */
+  /*   .form-approval-status { */
+  /*     text-transform: none; */
+  /*     width: auto; */
+  /*     display: inline; */
+  /*     min-height: 28px; */
+  /*     &.empty { */
+  /*       display: none; */
+  /*       height: 0; */
+  /*     } */
+  /*     .form-buttons { */
+  /*       display:inline-block; */
+  /*       text-align: right; */
+  /*       float: right; */
+  /*       .btn { */
+  /*         margin: 0 $marginS 0 0; */
+  /*         line-height: 19px; */
+  /*         min-height: 19px; */
+  /*         vertical-align: top; */
+  /*       } */
+  /*     } */
+  /*     .approval-rejected, .approval-approved { */
+  /*       margin-right: 0; */
+  /*       padding-right: $marginL; */
+  /*       &:after { */
+  /*         vertical-align: baseline; */
+  /*       } */
+  /*     } */
+  /*   } */
+  /* } */
 }
 /* line 9, ../sass/partials/_accordion.scss */
-.accordion h2 {
-  padding: 6px 12px;
-  background: #4f4f4f;
-  vertical-align: middle;
-  color: white;
-  font-size: 18px;
-  line-height: 27px;
-  cursor: pointer;
-  font-weight: normal;
-  margin-bottom: 0;
+.accordion button.sticky {
   width: 100%;
-  padding-right: 0;
-  max-width: 1268px;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
 }
-/* line 26, ../sass/partials/_accordion.scss */
-.accordion h2 .icon {
-  margin-right: 24px;
-  vertical-align: middle;
+/* line 11, ../sass/partials/_accordion.scss */
+.accordion button.sticky span {
+  width: 100%;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
 }
-/* line 30, ../sass/partials/_accordion.scss */
-.accordion h2 .icon.remove {
-  border-right: none;
-  padding-right: 0;
-}
-/* line 34, ../sass/partials/_accordion.scss */
-.accordion h2 .icon.edit {
-  border-right: none;
-  padding-right: 0;
-  padding-left: 25px;
-  margin-left: 12px;
-  width: auto;
-}
-/* line 41, ../sass/partials/_accordion.scss */
-.accordion h2 .icon.drill-right-white {
-  height: 16px;
-}
-/* line 44, ../sass/partials/_accordion.scss */
-.accordion h2 .icon.star-selected, .accordion h2 .icon.star-unselected {
-  height: 23px;
-}
-/* line 48, ../sass/partials/_accordion.scss */
-.accordion h2 .op-description-wrapper {
-  display: inline-block;
-  max-width: 700px;
-  white-space: nowrap;
-  line-height: 20px;
-}
-/* line 53, ../sass/partials/_accordion.scss */
-.accordion h2 .op-description-wrapper span {
-  margin-right: 0;
-  vertical-align: bottom;
-}
-/* line 57, ../sass/partials/_accordion.scss */
-.accordion h2 .op-description-wrapper .accordion-input {
-  width: 600px;
-  margin-left: 6px;
-}
-/* line 61, ../sass/partials/_accordion.scss */
-.accordion h2 .op-description-wrapper .op-description {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-/* line 64, ../sass/partials/_accordion.scss */
-.accordion h2 .op-description-wrapper .op-description:before {
-  content: "-";
-  margin: 0 6px;
-}
-/* line 68, ../sass/partials/_accordion.scss */
-.accordion h2 .op-description-wrapper .op-description:empty {
+/* line 19, ../sass/partials/_accordion.scss */
+.accordion button.sticky .approved, .accordion button.sticky .rejected {
   display: none;
 }
-/* line 73, ../sass/partials/_accordion.scss */
-.accordion h2 .form-approval-status {
-  text-transform: none;
-  width: auto;
-  display: inline;
-  min-height: 28px;
+/* line 24, ../sass/partials/_accordion.scss */
+.accordion button.sticky.approved > .approved {
+  display: initial;
 }
-/* line 79, ../sass/partials/_accordion.scss */
-.accordion h2 .form-approval-status.empty {
-  display: none;
-  height: 0;
+/* line 27, ../sass/partials/_accordion.scss */
+.accordion button.sticky.rejected > .rejected {
+  display: initial;
 }
-/* line 84, ../sass/partials/_accordion.scss */
-.accordion h2 .form-approval-status .form-buttons {
-  display: inline-block;
-  text-align: right;
-  float: right;
-}
-/* line 88, ../sass/partials/_accordion.scss */
-.accordion h2 .form-approval-status .form-buttons .btn, .accordion h2 .form-approval-status .form-buttons .like-btn, .accordion h2 .form-approval-status .form-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .accordion h2 .form-approval-status .form-buttons .paginate_disabled_previous, .accordion h2 .form-approval-status .form-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .accordion h2 .form-approval-status .form-buttons .paginate_disabled_next {
-  margin: 0 6px 0 0;
-  line-height: 19px;
-  min-height: 19px;
-  vertical-align: top;
-}
-/* line 95, ../sass/partials/_accordion.scss */
-.accordion h2 .form-approval-status .approval-rejected, .accordion h2 .form-approval-status .approval-approved {
-  margin-right: 0;
-  padding-right: 24px;
-}
-/* line 98, ../sass/partials/_accordion.scss */
-.accordion h2 .form-approval-status .approval-rejected:after, .accordion h2 .form-approval-status .approval-approved:after {
-  vertical-align: baseline;
-}
-/* line 105, ../sass/partials/_accordion.scss */
+/* line 128, ../sass/partials/_accordion.scss */
 .accordion .accordion_content {
   display: none;
   padding: 6px;
   position: relative;
   background: #e9e9e9;
 }
-/* line 110, ../sass/partials/_accordion.scss */
+/* line 133, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-content-part {
   margin-left: 12px;
   margin-bottom: 12px;
 }
-/* line 114, ../sass/partials/_accordion.scss */
+/* line 137, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields {
   width: 100%;
 }
-/* line 116, ../sass/partials/_accordion.scss */
+/* line 139, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields h2 {
   background: #e9e9e9;
   color: black;
   margin: 12px 0;
   padding-left: 0;
 }
-/* line 123, ../sass/partials/_accordion.scss */
+/* line 146, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields .authority-accept-fields h2 {
   background: #f6f6f6;
 }
-/* line 127, ../sass/partials/_accordion.scss */
+/* line 150, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields h3 {
   margin-top: 12px;
 }
-/* line 130, ../sass/partials/_accordion.scss */
+/* line 153, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields .form-group {
   margin-top: 6px;
 }
-/* line 136, ../sass/partials/_accordion.scss */
+/* line 159, ../sass/partials/_accordion.scss */
 .accordion .accordion_content.expanded {
   display: block;
 }
 
-/* line 141, ../sass/partials/_accordion.scss */
+/* line 164, ../sass/partials/_accordion.scss */
 .accordion-indicator {
   z-index: 12000;
   width: 112px;
@@ -5361,32 +5423,32 @@ ul.attachments-list li.mandatory-attachments {
   padding: 0 24px 0 0;
   margin-left: 12px;
 }
-/* line 149, ../sass/partials/_accordion.scss */
+/* line 172, ../sass/partials/_accordion.scss */
 .accordion-indicator .icon {
   display: none;
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
 }
-/* line 154, ../sass/partials/_accordion.scss */
+/* line 177, ../sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-saved .icon {
   display: inline-block;
   background-position: 4px -2499px;
   border-right: none;
 }
-/* line 161, ../sass/partials/_accordion.scss */
+/* line 184, ../sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-warn .icon {
   display: inline-block;
   background-position: 4px -3199px;
   border-right: none;
 }
-/* line 168, ../sass/partials/_accordion.scss */
+/* line 191, ../sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-err .icon {
   display: inline-block;
   background-position: 4px -2399px;
   border-right: none;
 }
 
-/* line 176, ../sass/partials/_accordion.scss */
+/* line 199, ../sass/partials/_accordion.scss */
 .open-all-accordions {
   width: 100%;
   text-align: right;
@@ -8576,13 +8638,13 @@ td.comment-text {
   #side-panel .message-buttons {
     display: table;
   }
-  /* line 604, ../sass/partials/_buttons.scss */
+  /* line 626, ../sass/partials/_buttons.scss */
   #side-panel .message-buttons .btn, #side-panel .message-buttons .like-btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
     width: 100%;
     display: block;
     margin: 0;
   }
-  /* line 609, ../sass/partials/_buttons.scss */
+  /* line 631, ../sass/partials/_buttons.scss */
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }

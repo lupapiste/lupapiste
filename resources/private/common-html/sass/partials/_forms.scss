@@ -662,28 +662,61 @@ input.form-input.long {
   }
 }
 
-.approval-approved {
-  &:after {
-    content: " ";
-    @include spite-bg;
-    width: 16px;
-    height: 16px;
-    background-position: 0px -2500px;
-    display: inline-block;
-    margin-left: $marginS;
-    vertical-align: text-bottom;
+/* .approval-approved { */
+/*   &:after { */
+/*     content: " "; */
+/*     @include spite-bg; */
+/*     width: 16px; */
+/*     height: 16px; */
+/*     background-position: 0px -2500px; */
+/*     display: inline-block; */
+/*     margin-left: $marginS; */
+/*     vertical-align: text-bottom; */
+/*   } */
+/* } */
+/* .approval-rejected { */
+/*   &:after { */
+/*     content: " "; */
+/*     @include spite-bg; */
+/*     width: 16px; */
+/*     height: 16px; */
+/*     background-position: 0px -2400px; */
+/*     display: inline-block; */
+/*     margin-left: $marginS; */
+/*     vertical-align: text-bottom; */
+/*   } */
+/* } */
+
+.form-approval-status .is-status {
+  display: none;
+  span {
+    color: $gray187;
+  }
+  .lupicon-circle-attention {
+    color: $red;
+  }
+  .lupicon-circle-check {
+    color: $green;
+}
+  .rejected, .approved, span {
+    display: none;
+  }
+  .approved {
+    padding-right: $icon-pad;
   }
 }
-.approval-rejected {
-  &:after {
-    content: " ";
-    @include spite-bg;
-    width: 16px;
-    height: 16px;
-    background-position: 0px -2400px;
-    display: inline-block;
-    margin-left: $marginS;
-    vertical-align: text-bottom;
+
+.form-approval-status .is-status.approved {
+  display: initial;
+  .approved, span {
+    display: initial;
+  }
+}
+
+.form-approval-status .is-status.rejected {
+  display: initial;
+  .rejected, span {
+    display: initial;
   }
 }
 

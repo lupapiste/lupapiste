@@ -583,6 +583,28 @@ span + .waiting.wait {
   padding-right: $icon-pad;
 }
 
+// Toggle support
+// Very similar to waiting.
+
+i.toggle {
+  display: none;
+  padding: 0 !important;
+}
+
+.toggled {
+  i {
+    display: none;
+  }
+  i.toggle {
+    display: table-cell
+  }
+}
+
+.toggled .toggle + span {
+  padding-left: $icon-pad;
+}
+
+
 
 // DataTable tweaks.
 
