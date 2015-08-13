@@ -10,21 +10,28 @@
     width: 100%;
     span {
       width: 100%;
-      margin: {
-        top: $marginM;
-        bottom: $marginM;
-      }
+    }
+    span.title {
       text-transform: uppercase;
+    }
+    span.icons {
+      min-width: $lupicon-size;
     }
     .approved, .rejected {
       display: none;
     }
+    .rejected {
+      // Buttons are not used to having complex
+      // contents.
+      padding-right: 0;
+    }
   }
 
-  button.sticky.approved > .approved {
+  button.sticky.approved > .icons > .approved {
     display: initial;
   }
-  button.sticky.rejected > .rejected {
+
+  button.sticky.rejected > .icons >  .rejected {
     display: initial;
   }
 

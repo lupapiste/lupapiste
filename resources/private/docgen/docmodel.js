@@ -332,7 +332,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   self.barStatusHandler = function( barDiv$, approval, text ) {
     barDiv$.removeClass( "approved rejected" );
-
+    barDiv$.addClass( approval.value );
+    barDiv$.toggleClass( "positive", approval.value === "approved");
+    barDiv$.children( "." + approval.value ).attr( "title", text );
   };
 
   self.makeApprovalButtons = function (path, model, statusHandler ) {
@@ -1809,8 +1811,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var iconDown = document.createElement("i");
     var toggle = document.createElement("button");
     var title = document.createElement( "span");
-    var iconRejected = $("<span>").addClass( "lupicon-circle-attention rejected");
-    var iconApproved = $("<span>").addClass( "lupicon-circle-check approved");
+    var iconRejected = $("<i>").addClass( "lupicon-circle-attention rejected");
+    var iconApproved = $("<i>").addClass( "lupicon-circle-check approved");
 
     var sectionContainer = document.createElement("div");
     var elements = document.createElement("div");
@@ -1827,10 +1829,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     toggle.appendChild( iconUp );
     toggle.className = "sticky secondary";
     toggle.appendChild( title );
-    $(toggle).append( iconRejected ).append( iconApproved );
+    var icons = $("<span>").addClass( "icons").append( iconRejected ).append( iconApproved );
+    $(toggle).append( icons );
 
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
+    title.className = "title";
     toggle.onclick = accordion.click;
     var docId = util.getIn(self, ["schema", "info", "op", "id"]);
     var notPrimaryOperation = (!docId || docId !== util.getIn(self.application, ["primaryOperation", "id"]));
@@ -1873,7 +1877,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     if (self.schema.info.approvable) {
-      elements.appendChild(self.makeApprovalButtons([], self.model, _.noop));
+      elements.appendChild(self.makeApprovalButtons([], self.model, _.partial( self.barStatusHandler, $(toggle))));
     }
 
     if (op) {

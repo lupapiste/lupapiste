@@ -283,17 +283,18 @@ button.btn-dialog, .btn-dialog {
 // New buttons
 
 $btn-spacer: 12px;
+$btn-height: 40px;
 $icon-pad: 10px;
 
 [type=submit], .btn, button {
   border: none;
-  min-height: 40px;
-  max-height: 40px;
+  min-height: $btn-height;
+  max-height: $btn-height;
   box-sizing: border-box;
   display: inline-block;
   vertical-align: middle;
   font-size: $font-size;  // _typography.scss
-  line-height: 40px;
+  line-height: $btn-height;
   white-space: nowrap;
   text-align: left;
   text-decoration: none;
@@ -325,20 +326,11 @@ $icon-pad: 10px;
     right: 0px !important;
     }
   }
-  /* :nth-child(2) { */
-  /*   // Gap between icon and text. */
-  /*   padding: { */
-  /*     left: $icon-pad; */
-  /*   } */
-  /* } */
-  /* // precaution for the cases where the */
-  /* // second child is actually a wait icon. */
-  /* :nth-child(3) { */
-  /*   padding: { */
-  /*     left: $icon-pad; */
-  /*   } */
-  /* } */
 }
+
+
+
+
 
 // Layout like button, but semantically is not.
 // This is useful when displaying text with icons,
