@@ -173,12 +173,10 @@ $side-panel-width: 60px;
       overflow: hidden;
       white-space: nowrap;
       height: 32px;
-      @mixin past-state {
-          background-color: white;
-          color: darken($lp-light-grey, 60%);
-          &:after {
-            border-left: 11px solid white;
-          }
+      @mixin past-state{
+        // The passed states are hidden in order to
+        // make sure that the future steps are all visible.
+        display: none;
       }
       @mixin active-state {
         color: white;
