@@ -166,45 +166,45 @@
    :states     (states/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
    :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
-  (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (let [document     (doc-persistence/by-id application collection documentId)
-          schema       (schemas/get-schema (:schema-info document))
-          clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))
-          converted-doc (when overwrite ; don't clean data if user doesn't wish to override
-                          (model/convert-document-data ; remove old krysp data
-                                   (fn [_ value] ; pred
-                                     (= "krysp" (:source value)))
-                                   (fn [schema value] ; emitter sets default values
-                                     (-> value
-                                       (dissoc :source :sourceValue :modified)
-                                       (assoc :value (tools/default-values schema))))
-                                   document
-                                   nil))
-          cleared-data (dissoc (:data converted-doc) :buildingId) ; buildingId is set below explicitly
+  (let [{url :url} (organization/get-krysp-wfs application)
+        clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
+    (if (or clear-ids? url)
+      (let [document     (doc-persistence/by-id application collection documentId)
+            schema       (schemas/get-schema (:schema-info document))
+            converted-doc (when overwrite ; don't clean data if user doesn't wish to override
+                            (model/convert-document-data ; remove old krysp data
+                                     (fn [_ value] ; pred
+                                       (= "krysp" (:source value)))
+                                     (fn [schema value] ; emitter sets default values
+                                       (-> value
+                                         (dissoc :source :sourceValue :modified)
+                                         (assoc :value (tools/default-values schema))))
+                                     document
+                                     nil))
+            cleared-data (dissoc (:data converted-doc) :buildingId) ; buildingId is set below explicitly
 
-          buildingId-updates (doc-persistence/->model-updates [[path buildingId]])
-          buildingId-update-map (doc-persistence/validated-model-updates application collection document buildingId-updates created :source nil)
+            buildingId-updates (doc-persistence/->model-updates [[path buildingId]])
+            buildingId-update-map (doc-persistence/validated-model-updates application collection document buildingId-updates created :source nil)
 
-          clearing-updates (tools/path-vals (tools/unwrapped cleared-data))
-          clearing-update-map (when-not (util/empty-or-nil? clearing-updates) ; create updates only when there is data
-                                (doc-persistence/validated-model-updates application collection document clearing-updates created :source nil))
+            clearing-updates (tools/path-vals (tools/unwrapped cleared-data))
+            clearing-update-map (when-not (util/empty-or-nil? clearing-updates) ; create updates only when there is data
+                                  (doc-persistence/validated-model-updates application collection document clearing-updates created :source nil))
 
-          krysp-updates (filter
-                          (fn [[path _]] (model/find-by-name (:body schema) path))
-                          (tools/path-vals
-                            (if clear-ids?
-                              krysp-reader/empty-building-ids
-                              (load-building-data url propertyId buildingId overwrite))))
-          krysp-update-map (doc-persistence/validated-model-updates application collection document krysp-updates created :source "krysp")
+            krysp-updates (filter
+                            (fn [[path _]] (model/find-by-name (:body schema) path))
+                            (tools/path-vals
+                              (if clear-ids?
+                                krysp-reader/empty-building-ids
+                                (load-building-data url propertyId buildingId overwrite))))
+            krysp-update-map (doc-persistence/validated-model-updates application collection document krysp-updates created :source "krysp")
 
-          {:keys [mongo-query mongo-updates]} (util/deep-merge
-                                                clearing-update-map
-                                                buildingId-update-map
-                                                krysp-update-map)]
-      (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
-      (update-application command mongo-query mongo-updates)
-      (ok))
-    (fail :error.no-legacy-available)))
+            {:keys [mongo-query mongo-updates]} (util/deep-merge
+                                                  clearing-update-map
+                                                  buildingId-update-map
+                                                  krysp-update-map)]
+        (update-application command mongo-query mongo-updates)
+        (ok))
+      (fail :error.no-legacy-available))))
 
 ;;
 ;; Building info
