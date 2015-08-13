@@ -34,6 +34,7 @@
         //overflow: auto;
         li {
           display: inline-block;
+          max-width: 100%;
           //padding: 3px;
           //top: 1px;
           &.tag {
@@ -48,6 +49,9 @@
               color: #fff;
               margin-left: $marginL + $marginS / 2;
               margin-right: $marginM;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              display: block;
             }
 
             span.tag-remove {
@@ -116,6 +120,13 @@
       }
       li.autocomplete-result-item {
         cursor: pointer;
+        position: relative;
+        span {
+          display: inline-block;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          max-width: 360px;
+        }
       }
       li.autocomplete-result-item.active {
         background-color: lighten($lp-orange, 40%);

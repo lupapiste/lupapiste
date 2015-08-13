@@ -37,8 +37,8 @@
                            mousedownBubble: false,
                            css: {active: $index() === $parent.index()}">
               <span data-bind="text:
-                                $data === null ? loc('choose'):
-                                $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
+                                $data === null ? loc('choose') :
+                                  $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
             </li>
             <!-- /ko -->
           </ul>
