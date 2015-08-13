@@ -8070,58 +8070,50 @@ td.comment-text {
   color: white;
   position: relative;
 }
-/* line 213, ../sass/views/_register.scss */
+/* line 211, ../sass/views/_register.scss */
+.company-account-register button span, .company-account-register .btn span, .company-account-register .like-btn span, .company-account-register .dataTables_paginate .paginate_disabled_previous span, .dataTables_paginate .company-account-register .paginate_disabled_previous span, .company-account-register .dataTables_paginate .paginate_disabled_next span, .dataTables_paginate .company-account-register .paginate_disabled_next span, .register-contentbox button span, .register-contentbox .btn span, .register-contentbox .like-btn span, .register-contentbox .dataTables_paginate .paginate_disabled_previous span, .dataTables_paginate .register-contentbox .paginate_disabled_previous span, .register-contentbox .dataTables_paginate .paginate_disabled_next span, .dataTables_paginate .register-contentbox .paginate_disabled_next span {
+  width: 100%;
+}
+/* line 216, ../sass/views/_register.scss */
 .company-account-register .btn-primary, .register-contentbox .btn-primary {
   background-color: #da6ded;
 }
-/* line 215, ../sass/views/_register.scss */
+/* line 218, ../sass/views/_register.scss */
 .company-account-register .btn-primary:hover, .register-contentbox .btn-primary:hover {
   background-color: #ce40e7;
 }
-/* line 218, ../sass/views/_register.scss */
-.company-account-register .btn-primary:after, .register-contentbox .btn-primary:after {
-  content: " ";
-  position: absolute;
-  width: 0;
-  height: 0;
-  right: 12px;
-  top: 15px;
-  border-top: 15px solid transparent;
-  border-left: 30px solid white;
-  border-bottom: 15px solid transparent;
-}
-/* line 229, ../sass/views/_register.scss */
+/* line 221, ../sass/views/_register.scss */
 .company-account-register .btn-primary:disabled, .register-contentbox .btn-primary:disabled {
   background-color: #f6f6f6;
   color: #888a8c;
 }
-/* line 232, ../sass/views/_register.scss */
+/* line 224, ../sass/views/_register.scss */
 .company-account-register .btn-primary:disabled:after, .register-contentbox .btn-primary:disabled:after {
   border-left: 30px solid #888a8c;
   color: #888a8c;
 }
 
-/* line 240, ../sass/views/_register.scss */
+/* line 232, ../sass/views/_register.scss */
 .register-contentbox {
   background-color: #f1c8f8;
   padding: 24px;
 }
-/* line 243, ../sass/views/_register.scss */
+/* line 235, ../sass/views/_register.scss */
 .register-contentbox p, .register-contentbox h1 {
   color: black;
   width: 60%;
 }
-/* line 247, ../sass/views/_register.scss */
+/* line 239, ../sass/views/_register.scss */
 .register-contentbox .register-terms {
   margin: auto;
   padding-bottom: 14px;
 }
-/* line 250, ../sass/views/_register.scss */
+/* line 242, ../sass/views/_register.scss */
 .register-contentbox .register-terms label {
   cursor: pointer;
   color: black;
 }
-/* line 254, ../sass/views/_register.scss */
+/* line 246, ../sass/views/_register.scss */
 .register-contentbox .register-terms input[type="checkbox"] {
   cursor: pointer;
   -moz-transform: scale(1.5);
@@ -8131,45 +8123,45 @@ td.comment-text {
   transform: scale(1.5);
   vertical-align: middle;
 }
-/* line 264, ../sass/views/_register.scss */
+/* line 256, ../sass/views/_register.scss */
 .register-contentbox button:disabled {
   cursor: not-allowed;
 }
 
-/* line 270, ../sass/views/_register.scss */
+/* line 262, ../sass/views/_register.scss */
 #register-company .register-form, #new-company-user .register-form {
   background-color: #f1c8f8;
   padding: 6px;
 }
-/* line 273, ../sass/views/_register.scss */
+/* line 265, ../sass/views/_register.scss */
 #register-company .register-form .form-group, #new-company-user .register-form .form-group {
   background-color: inherit;
   display: block;
   border: none;
   padding: 0;
 }
-/* line 278, ../sass/views/_register.scss */
+/* line 270, ../sass/views/_register.scss */
 #register-company .register-form .form-group h2, #new-company-user .register-form .form-group h2 {
   text-transform: uppercase;
   font-weight: 400;
   color: black;
 }
-/* line 283, ../sass/views/_register.scss */
+/* line 275, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry, #new-company-user .register-form .form-group .form-entry {
   width: 32%;
   box-sizing: border-box;
   padding-right: 24px;
   display: inline-block;
 }
-/* line 288, ../sass/views/_register.scss */
+/* line 280, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry .form-label, #new-company-user .register-form .form-group .form-entry .form-label {
   color: black;
 }
-/* line 290, ../sass/views/_register.scss */
+/* line 282, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry .form-label.tip, #new-company-user .register-form .form-group .form-entry .form-label.tip {
   color: black;
 }
-/* line 294, ../sass/views/_register.scss */
+/* line 286, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry .form-input, #new-company-user .register-form .form-group .form-entry .form-input {
   height: 40px;
   width: 100%;
@@ -8177,7 +8169,7 @@ td.comment-text {
   box-shadow: none;
 }
 
-/* line 306, ../sass/views/_register.scss */
+/* line 298, ../sass/views/_register.scss */
 #onnistuu-start-form {
   display: inline-block;
 }
