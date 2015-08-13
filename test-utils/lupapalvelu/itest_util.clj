@@ -77,7 +77,7 @@
 (def tampere-property-id "83700000000000")
 (def kuopio-property-id "29700000000000")
 (def oir-property-id "43300000000000")
-
+(def no-backend-property-id "56400000000000") ; Oulu
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
