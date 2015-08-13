@@ -308,6 +308,7 @@ Select From Autocomplete
   Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
   Wait until  Element should be visible  xpath=//${container}//ul[@class="autocomplete-result"]//li/span[contains(text(), '${value}')]
   Click Element  xpath=//${container}//ul[@class="autocomplete-result"]//li/span[contains(text(), '${value}')]
+  Wait for jQuery
 
 Click by id
   [Arguments]  ${id}
