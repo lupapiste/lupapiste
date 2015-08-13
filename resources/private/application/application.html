@@ -678,8 +678,10 @@
                             </div>
                             <!-- ko foreach: $data -->
                             <div class="requiredField-line">
-                                <span class="missing icon"></span>
-                                <span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span>
+                                <div class="like-btn">
+                                    <i class="lupicon-circle-attention"></i>
+                                    <span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span>
+                                </div>
                                 <a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>
                             </div>
                             <!-- /ko -->
@@ -694,9 +696,11 @@
                                 data-bind="text: loc(['attachmentType', $data[0], '_group_label'])"></h3>
                             <!-- ko foreach: $data[1] -->
                             <div class="requiredField-line">
-                                <span class="missing icon"></span>
-                                <span class="required-field-error-element-name"
-                                      data-bind="text: loc(['attachmentType', type['type-group'](), type['type-id']()])"></span>
+                                <div class="like-btn">
+                                    <i class="lupicon-circle-attention"></i>
+                                    <span class="required-field-error-element-name"
+                                          data-bind="text: loc(['attachmentType', type['type-group'](), type['type-id']()])"></span>
+                                </div>
                                 <a data-bind="click: $root.application.moveToMissingRequiredAttachment, ltext: 'view'" href="#"></a>
                             </div>
                             <!-- /ko -->
