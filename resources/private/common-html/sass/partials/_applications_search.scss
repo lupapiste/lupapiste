@@ -1,24 +1,24 @@
 
 .search-tabs {
-  .tab-buttons {
-    ul {
-      display: inline-block;
-      list-style: none;
-      padding: 0;
-      margin-right: $marginS;
-    }
-    li {
-      background-color: $lp-light-grey;
-      color: $color-text;
+  ul {
+    display: inline-block;
+    list-style: none;
+    padding: 0;
+    margin-right: $marginS;
+    line-height: 40px; // buttons next to tabs are 40px
+    vertical-align: middle;
+  }
+  li {
+    background-color: $lp-light-grey;
+    color: $color-text;
 
-      cursor: pointer;
-      margin-right: $marginS;
-      display: inline-block;
-      &.selected {
-        background-color: darken($lp-light-grey, 10%);
-      }
-      padding: $marginS $marginL;
+    cursor: pointer;
+    margin-right: $marginS;
+    display: inline-block;
+    &.selected {
+      background-color: darken($lp-light-grey, 10%);
     }
+    padding: 0 $marginL;
   }
   input {
     display: inline-block;

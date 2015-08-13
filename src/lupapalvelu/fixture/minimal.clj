@@ -563,7 +563,8 @@
                                              :ya-kayttolupa-mainostus-ja-viitoitus
                                              :ya-kayttolupa-terassit]
                        :operations-attachments ya-default-attachments-for-operations
-                       :permanent-archive-enabled false}
+                       :permanent-archive-enabled false
+                       :tags [{:id "735YA001" :label "YA kadut"} {:id "735YA002" :label "YA ojat"}]}
 
                       ;; Kuopio YA
                       {:id "297-YA"

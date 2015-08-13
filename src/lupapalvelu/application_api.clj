@@ -256,7 +256,7 @@
   [{:keys [application created] :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)]
     (or
-      (foreman/validate-notice-submittable application)
+      (foreman/validate-application application)
       (a/validate-link-permits application)
       (do-submit command application created))))
 

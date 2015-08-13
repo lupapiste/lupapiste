@@ -67,7 +67,7 @@ Mikko deletes attachment
 Comment is present after delete
   [Tags]  attachments
   Open side panel  conversation
-  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[@class='comment-text']//span[@class='deleted-attachment']  1
+  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class, 'is-comment')]//span[@class='deleted']  1
   Close side panel  conversation
 
 Mikko adds txt attachment with comment
@@ -102,7 +102,7 @@ Change attachment type
   Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
 Signature icon is not visible
-  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
+  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
 
 Sign all attachments
   [Tags]  attachments
@@ -115,7 +115,7 @@ Sign all attachments
   Confirm  dynamic-ok-confirm-dialog
 
 Signature icon is visible
-  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
+  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
 
 Signature is visible
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta

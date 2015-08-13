@@ -31,7 +31,7 @@ LUPAPISTE.VerdictsModel = function() {
                 idMatch = target.urlHash === pk.urlHash;
               } else {
                 idMatch = target.id === verdict.id;
-              };
+              }
             }
             return idMatch;
           }) || [];

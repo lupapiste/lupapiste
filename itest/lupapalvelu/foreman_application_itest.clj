@@ -20,6 +20,9 @@
         link-to-application          (first (application :appsLinkingToUs))
         foreman-applications         (query apikey :foreman-applications :id application-id) => truthy]
 
+    (fact "Can't submit before ilmoitus or hakemus is selected"
+      (command apikey :submit-application :id foreman-application-id) => (partial expected-failure? :error.foreman.type-not-selected))
+
     (fact "Update ilmoitusHakemusValitsin to 'ilmoitus'"
       (command apikey :update-doc :id foreman-application-id :doc (:id foreman-doc) :updates [["ilmoitusHakemusValitsin" "ilmoitus"]]) => ok?)
 

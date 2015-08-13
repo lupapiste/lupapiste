@@ -4,27 +4,26 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="applications-search-results-template">
       <div class="search-tabs">
-        <div class="tab-buttons">
-          <ul data-bind="foreach: tabs">
-            <li data-bind="ltext: 'applications.filter.' + $data, click: $parent.selectTab,
-                           css: {selected: $parent.selectedTab() === $data}"></li>
-          </ul>
-          <button
-            data-bind="click: $parent.create"
-            data-test-id="applications-create-new"
-            class="positive application-create">
-              <i class="lupicon-circle-plus"></i>
-              </span><span data-bind="ltext: 'request.create'"></span>
-          </button>
+        <ul data-bind="foreach: tabs">
+          <li data-bind="ltext: 'applications.filter.' + $data, click: $parent.selectTab,
+                         css: {selected: $parent.selectedTab() === $data}"></li>
+        </ul>
+        <button
+          data-bind="click: $parent.create"
+          data-test-id="applications-create-new"
+          class="positive application-create">
+            <i class="lupicon-circle-plus"></i>
+            </span><span data-bind="ltext: 'request.create'"></span>
+        </button>
 
-          <button
-            data-bind="click: $parent.createWithPrevPermit, visible: $parent.authorizationModel.ok('create-application-from-previous-permit')"
-            data-test-id="applications-create-new-with-prev-permit"
-            class="positive application-from-previous">
-              <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span>
-          </button>
-        </div>
+        <button
+          data-bind="click: $parent.createWithPrevPermit, visible: $parent.authorizationModel.ok('create-application-from-previous-permit')"
+          data-test-id="applications-create-new-with-prev-permit"
+          class="positive application-from-previous">
+            <i class="lupicon-circle-plus"></i>
+            <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span>
+        </button>
+      </div>
         <div>
           <table id="applications-list" class="applications-table" data-bind="if: gotResults()">
             <thead>
