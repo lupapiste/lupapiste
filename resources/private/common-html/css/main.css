@@ -5767,24 +5767,26 @@ ul.attachments-list li.mandatory-attachments {
   float: right;
 }
 
-/* line 4, ../sass/partials/_applications_search.scss */
-.search-tabs .tab-buttons ul {
+/* line 3, ../sass/partials/_applications_search.scss */
+.search-tabs ul {
   display: inline-block;
   list-style: none;
   padding: 0;
   margin-right: 6px;
+  line-height: 40px;
+  vertical-align: middle;
 }
-/* line 10, ../sass/partials/_applications_search.scss */
-.search-tabs .tab-buttons li {
+/* line 11, ../sass/partials/_applications_search.scss */
+.search-tabs li {
   background-color: #f6f6f6;
   color: #333;
   cursor: pointer;
   margin-right: 6px;
   display: inline-block;
-  padding: 6px 24px;
+  padding: 0 24px;
 }
-/* line 17, ../sass/partials/_applications_search.scss */
-.search-tabs .tab-buttons li.selected {
+/* line 18, ../sass/partials/_applications_search.scss */
+.search-tabs li.selected {
   background-color: #dddddd;
 }
 /* line 23, ../sass/partials/_applications_search.scss */
