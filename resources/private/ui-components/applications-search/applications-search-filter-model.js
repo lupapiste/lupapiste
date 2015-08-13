@@ -1,6 +1,5 @@
 LUPAPISTE.OrganizationTagsDataProvider = function(organization, filtered) {
   "use strict";
-
   var self = this;
 
   self.query = ko.observable();
@@ -35,16 +34,31 @@ LUPAPISTE.OrganizationTagsDataProvider = function(organization, filtered) {
 
 LUPAPISTE.OperationsDataProvider = function() {
   "use strict";
-
   var self = this;
 
-  self.data = ko.observableArray([{}]);
+  var operations = ko.observable();
+
+  ajax
+    .query("get-application-operations")
+    .error(_.noop)
+    .success(function(res) {
+      console.log(res);
+      operations(res.operations);
+    })
+    .call();
+
+  self.data = ko.pureComputed(function() {
+    var operationItems = _.map(operations(), function(operation) {
+      return {label: loc("operations." + operation)};
+    });
+    return operationItems;
+  });
+
   self.query = ko.observable();
 };
 
 LUPAPISTE.HandlersDataProvider = function() {
   "use strict";
-
   var self = this;
 
   self.query = ko.observable();
@@ -82,7 +96,6 @@ LUPAPISTE.HandlersDataProvider = function() {
 
 LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
   "use strict";
-
   var self = this;
 
   self.dataProvider = params.dataProvider;
