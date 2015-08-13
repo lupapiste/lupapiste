@@ -337,7 +337,7 @@
           {:name "ei tiedossa"}]})
 
 (def patevyys-tyonjohtaja [koulutusvalinta
-                           {:name "koulutus" :type :string :required true :i18nkey "muukoulutus"}
+                           {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
                            patevyysvaatimusluokka ; Actually vaadittuPatevyysluokka in KRYSP
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
