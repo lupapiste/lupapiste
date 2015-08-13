@@ -189,6 +189,7 @@ LUPAPISTE.StampModel = function(params) {
 
       if (update.status === "done") {
         _(self.selectedFiles()).each(function(f) { f.stamped(true); }).value();
+        lupapisteApp.models.application.reload();
         return self.status(self.statusDone);
       }
     }

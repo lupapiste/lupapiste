@@ -67,8 +67,8 @@ Return to application
 Verdict has tasks
   Page Should Not Contain Element  xpath=//div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
   Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"]  Lopullinen loppukatselmus
-  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//ul[@data-bind="foreach: lupamaaraykset.muutMaaraykset"]/li  Bajamajoja oltava riittävästi
-  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"]  TJ0
+  Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//ul[@data-bind="foreach: lupamaaraykset.muutMaaraykset"]/li  Bajamajoja oltava riittävästi
+  Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"]  TJ0
 
 Sonja publishes verdict
   Click enabled by test id  edit-verdict

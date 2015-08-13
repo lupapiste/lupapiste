@@ -37,7 +37,8 @@ jQuery(document).ready(function() {
     "applications-search",
     "applications-search-results",
     "applications-search-filter",
-    "applications-search-paging"
+    "applications-search-paging",
+    "autocomplete-grouping"
   ];
 
   _.forEach(components, function(component) {

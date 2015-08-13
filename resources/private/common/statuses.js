@@ -13,6 +13,7 @@ LUPAPISTE.statuses = {
 };
 
 LUPAPISTE.statusIcon = function( status ) {
+  "use strict";
   var cls = {
     missing: "attention",
     "new": "star",
