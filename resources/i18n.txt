@@ -1,0 +1,1 @@
+error.foreman.type-not-selected: Valitse Osapuolet-välilehden Työnjohtajan nimeäminen-lomakkeelta onko kyseessä hakemus vai ilmoitus
