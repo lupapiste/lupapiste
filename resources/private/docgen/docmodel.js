@@ -330,17 +330,61 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  self.statusOrder = function() {
+    var stats = {};
+
+    function update( name, selector, statusFun, approval ) {
+      stats[name] = {fun: _.wrap(approval, statusFun),
+                     approval: approval,
+                     selector: selector
+                    };
+    }
+    function setOrdered() {
+      _( stats )
+      .sortBy( _.partialRight( _.get, "approval.timestamp") )
+      .pluck( 'fun' )
+      .each( function( f ) {f()} )
+      .value()
+    }
+    //  If name is null, every item's class is changed.
+    // If cls is null, the approval class is used.
+    function setStatusClass( name, cls ) {
+      var items = name ? [stats[name]] : stats;
+      _.each( items, function( item ) {
+        item.selector.removeClass( "approved rejected" );
+        item.selector.addClass( cls ? cls : item.approval.value );
+      })
+    }
+
+    return {
+      update: update,
+      setOrdered: setOrdered,
+      setStatusClass: setStatusClass
+    }
+  }();
+
   self.barStatusHandler = function( barDiv$, approval, text ) {
-    barDiv$.removeClass( "approved rejected" );
-    barDiv$.addClass( approval.value );
+    var cls = approval.value;
+    // Approving the whole approves the details.
+    // Rejecting the whole resets the details. In other words
+    // details should be intact after approving and immediately
+    // rejecting the whole.
+    self.statusOrder.setStatusClass( null,
+                                     cls == 'approved' ? cls : null );
     barDiv$.toggleClass( "positive", approval.value === "approved");
     barDiv$.children( "." + approval.value ).attr( "title", text );
   };
 
-  self.makeApprovalButtons = function (path, model, statusHandler ) {
+  // Bar denotes the accordion horizontal bar.
+  // It is an object with two properties:
+  //  selector: jQuery selector for bar.
+  //  fun: function to be called when status changes.
+  // Note: The bar's order name (see above) is fixed, because
+  // it needs to be known by the detail status indicators.
+  self.makeApprovalButtons = function (path, model, bar ) {
     var btnContainer$ = $("<span>").addClass("form-buttons");
     var statusContainer$ = null;
-    if( !statusHandler ) {
+    if( !bar ) {
       statusContainer$ = $("<div>").addClass( "like-btn is-status");
       statusContainer$.append( $("<i>").addClass( "lupicon-circle-attention rejected"));
       statusContainer$.append( $("<i>").addClass( "lupicon-circle-check approved"));
@@ -362,12 +406,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           text += " (" + approval.user.lastName + " " + approval.user.firstName;
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
-        if( statusHandler ) {
-          statusHandler( approval, text );
+        if( bar ) {
+          bar.fun( approval, text );
+          self.statusOrder.update( 'bar', bar.selector, setStatus, approval );
         } else {
-          $(statusContainer$).children("span").text(text);
+          statusContainer$.children("span").text(text);
           statusContainer$.removeClass( "approved rejected");
           statusContainer$.addClass( approval.value );
+          self.statusOrder.update( statusContainer$, statusContainer$, setStatus, approval );
           // statusContainer$.removeClass (function(index, css) {
           //   return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
           // });
@@ -1827,7 +1873,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     iconDown.className = "lupicon-chevron-down";
     toggle.appendChild( iconDown );
     toggle.appendChild( iconUp );
-    toggle.className = "sticky secondary";
+    toggle.className = "sticky secondary accordion-toggle is-status";
     toggle.appendChild( title );
     var icons = $("<span>").addClass( "icons").append( iconRejected ).append( iconApproved );
     $(toggle).append( icons );
@@ -1877,7 +1923,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     if (self.schema.info.approvable) {
-      elements.appendChild(self.makeApprovalButtons([], self.model, _.partial( self.barStatusHandler, $(toggle))));
+      elements.appendChild(self.makeApprovalButtons([],
+                                                    self.model,
+                                                    {fun:  _.partial( self.barStatusHandler, $(toggle)),
+                                                     selector: $(toggle)
+                                                    }));
     }
 
     if (op) {
@@ -1899,6 +1949,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     sectionContainer.appendChild(elements);
     section.appendChild(toggle);
     section.appendChild(sectionContainer);
+    self.statusOrder.setOrdered();
     return section;
   }
 

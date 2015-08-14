@@ -5,8 +5,7 @@ var accordion = (function() {
       animationEasing = "easeInOutCubic";
 
   function set(t, toState, done) {
-    var target = t;
-    if (target.not("button")) { target = target.parent(); }
+    var target = t.closest( ".accordion-toggle");
 
     var content = target.siblings(".accordion_content");
 
@@ -41,7 +40,6 @@ var accordion = (function() {
   function toggle(t, done) { return set(t, "toggle", done); }
 
   function click(event) {
-    console.log( "Target:" , getEvent(e).target);
     var e = getEvent(event);
     e.preventDefault();
     e.stopPropagation();
@@ -50,7 +48,7 @@ var accordion = (function() {
   }
 
   function toggleAll(target) {
-    $(target).closest(".application_section").find("section.accordion button").click();
+    $(target).closest(".application_section").find("section.accordion .accordion-toggle").click();
   }
 
   $.fn.accordionOpen   = function(done) { return open(this, done); };
