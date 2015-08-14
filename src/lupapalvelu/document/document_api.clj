@@ -48,7 +48,7 @@
   [{:keys [application created] :as command}]
   (let [document (domain/get-document-by-id application docId)]
     (when (deny-remove-of-primary-operation document application)
-      (fail! :removal-of-primary-document-denied))
+      (fail! :error.removal-of-primary-document-denied))
     (when (deny-remove-of-last-document document (:documents application))
       (fail! :error.removal-of-last-document-denied))
     (when-not document
