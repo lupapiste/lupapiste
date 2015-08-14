@@ -16,7 +16,7 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     })
     .call();
 
-  self.groupData = ko.pureComputed(function() { // when user belongs to more than one organization
+  self.groupDataProvider = ko.pureComputed(function() { // when user belongs to more than one organization
     return _.keys(tagsData()).length > 1 ? {header: "organization", dataProperty: "tags"} : null;
   });
 
@@ -62,7 +62,6 @@ LUPAPISTE.OperationsDataProvider = function() {
     .query("get-application-operations")
     .error(_.noop)
     .success(function(res) {
-      console.log(res);
       operationsByPermitType(res.operationsByPermitType);
     })
     .call();
@@ -74,8 +73,11 @@ LUPAPISTE.OperationsDataProvider = function() {
         return result;
       }, [{label: loc(obj["permit-type"])}]);
     });
-    console.log(_.flatten(operationDropdownItems));
     return _.flatten(operationDropdownItems);
+  });
+
+  self.groupDataProvider = ko.pureComputed(function() {
+    _.keys(operationsByPermitType())
   });
 
   self.query = ko.observable();
