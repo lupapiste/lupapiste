@@ -50,7 +50,7 @@
 (defn get-yht-version [permit-type ns-version]
   {:pre [(permit/valid-permit-type? (name permit-type))
          ((-> yht-version keys set) (keyword permit-type))]}
-  (get-in yht-version [(keyword permit-type) ns-version]))
+  (get-in yht-version [(keyword permit-type) ns-version] "0.0.0"))
 
 (defn xsd-filename [ns-name]
   (case ns-name
