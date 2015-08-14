@@ -21,8 +21,12 @@ var repository = (function() {
   }
 
   function calculateAttachmentStateIndicators(attachment, application) {
+    var auths = _(application.auth).filter(function(a) {return _.contains(LUPAPISTE.config.writerRoles, a.role);}).pluck("id").value();
+    var versionsByApplicants = _.filter(attachment.versions || [], function(v) {
+      return v.user.role === "applicant" ||  _.contains(auths, v.user.id);
+    });
+
     attachment.signed = false;
-    var versionsByApplicants = _(attachment.versions || []).filter(function(v) {return v.user.role === "applicant";}).value();
     if (versionsByApplicants && versionsByApplicants.length) {
       var lastVersionByApplicant = _.last(versionsByApplicants).version;
       if (_.find(attachment.signatures || [], function(s) {return _.isEqual(lastVersionByApplicant, s.version);})) {

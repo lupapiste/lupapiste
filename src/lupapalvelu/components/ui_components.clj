@@ -3,6 +3,7 @@
             [swiss.arrows :refer [-<>>]]
             [clojure.java.io :as io]
             [clojure.string :as s]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.action :as action]
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
@@ -43,6 +44,7 @@
                  :accountTypes          company/account-types
                  :eInvoiceOperators     schemas/e-invoice-operators
                  :postVerdictStates     states/post-verdict-states
+                 :writerRoles           domain/owner-or-write-roles
                  :stampableMimes        (filter identity (map mime/mime-types file-types))
                  :foremanRoles          (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]

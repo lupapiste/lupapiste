@@ -50,7 +50,12 @@
           <input type="radio" id="account30" name="account-selection" value="account30" data-bind="checked: model().accountType"></input>
         </div>
       </form>
-      <button class="btn-primary" data-bind="click: continueToCompanyInfo, ltext: 'continue', enable: model().accountType" id="continueToCompanyInfo" data-test-id="account-type-submit"></button>
+      <button class="btn-primary"
+              data-bind="click: continueToCompanyInfo, enable: model().accountType"
+              id="continueToCompanyInfo" data-test-id="account-type-submit">
+          <span data-bind="ltext: 'continue'"></span>
+          <i class="lupicon-chevron-right"></i>
+      </button>
       <button data-bind="enable: canCancelInfo, click: cancelInfo, ltext: 'cancel'" data-test-id="account-type-cancel"></button>
     </div>
   </section>
