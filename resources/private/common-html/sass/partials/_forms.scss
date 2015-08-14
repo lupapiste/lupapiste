@@ -572,20 +572,6 @@ input.form-input.long {
 
 }
 
-@mixin thin-hide {
-  visibility: hidden;
-  width: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-@mixin undo-hide {
-  visibility: initial;
-  width: initial !important;
-  padding: initial !important;
-  margin: initial !important;
-}
-
 .form-approval-status {
   text-transform: none;
   width: 100%;
@@ -598,12 +584,13 @@ input.form-input.long {
   }
 
   .form-buttons {
-    display:inline-block;
+    //display:inline-block;
     text-align: right;
     float: right;
-    button {
-      margin: 0 $marginS $marginS 0;
-    }
+    min-width: 200px;
+    /* button { */
+    /*   margin: 0 $marginS $marginS 0; */
+    /* } */
   }
   /* .approved, .rejected, .like-btn  { */
   /*   display: none; */
@@ -613,7 +600,7 @@ input.form-input.long {
     /*   display: inline; */
     /* } */
     button.approved {
-      @include thin-hide;
+      display: none;
     }
     i.rejected {
       display: none;
@@ -624,7 +611,7 @@ input.form-input.long {
     /*   display: inline; */
     /* } */
     button.rejected {
-      @include thin-hide;
+      display: none;
     }
     i.approved {
       display: none;
@@ -637,20 +624,22 @@ section.approved .form-approval-status  {
     /*   display: inline; */
     /* } */
     button.approved {
-      @include thin-hide;
+      display: none;
     }
     i.rejected {
       display: none;
     }
-    button.rejected {
-      @include undo-hide;
+    i.approved {
+      display: table-cell;
     }
-    i.rejected {
-      display: initial;
+    button.rejected {
+      display: table-cell;
     }
 }
 
 .is-status > .like-btn {
+  @include btn-height;
+  min-width: 500px;
   span {
     color: $gray187;
   }

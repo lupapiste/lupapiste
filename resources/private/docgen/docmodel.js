@@ -356,8 +356,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       })
     }
 
-    function setSectionStatus( name, flag ) {
-      stats[name].selector.closest( "section").toggleClass( "approved", flag );
+    function setSectionStatus( name, cls ) {
+      var isApproved = cls === 'approved';
+      var section = stats[name].selector.closest( "section");
+      // Section is never rejected.
+      section.toggleClass( "approved", isApproved );
+      var bar = stats["bar"].selector;
+      bar.removeClass( "approved rejected");
+      bar.addClass( cls );
+      bar.toggleClass( "positive", isApproved );
     }
 
     return {
@@ -376,10 +383,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     // Rejecting the whole resets the details. In other words
     // details should be intact after approving and immediately
     // rejecting the whole.
-    self.statusOrder.setStatusClass( 'bar',
-                                     cls === 'approved' ? cls : null );
-    self.statusOrder.setSectionStatus( 'bar', cls === 'approved' );
-    barDiv$.toggleClass( "positive", approval.value === "approved");
+    self.statusOrder.setSectionStatus( 'bar', cls );
+    // self.statusOrder.setStatusClass( 'bar',
+    //                                  cls === 'approved' ? cls : null );
+
+    //barDiv$.toggleClass( "positive", approval.value === "approved");
     barDiv$.children( "." + approval.value ).attr( "title", text );
   };
 
@@ -422,10 +430,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           // statusContainer$.removeClass( "approved rejected");
           // statusContainer$.addClass( approval.value );
           var statusParent$ = statusContainer$.closest( ".is-status");
-          console.log( "statusParent$:", statusParent$);
-
           self.statusOrder.update( statusParent$, statusParent$, setStatus, approval );
           self.statusOrder.setStatusClass( statusParent$, approval.value );
+          if( approval.value === 'rejected') {
+            self.statusOrder.setSectionStatus( statusParent$, 'rejected' );
+          }
           // statusContainer$.removeClass (function(index, css) {
           //   return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
           // });

@@ -286,15 +286,19 @@ $btn-spacer: 12px;
 $btn-height: 40px;
 $icon-pad: 10px;
 
+@mixin btn-height( $height: $btn-height ) {
+  min-height: $height;
+  max-height: $height;
+  line-height: $height;
+}
+
 [type=submit], .btn, button {
+  @include btn-height;
   border: none;
-  min-height: $btn-height;
-  max-height: $btn-height;
   box-sizing: border-box;
   display: inline-block;
   vertical-align: middle;
   font-size: $font-size;  // _typography.scss
-  line-height: $btn-height;
   white-space: nowrap;
   text-align: left;
   text-decoration: none;
