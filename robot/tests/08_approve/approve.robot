@@ -67,7 +67,7 @@ Party tab indicators have been reset
 
 Sonja sees that attachment has transferred indicator icon
   Open tab  attachments
-  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="transfered-muut.muu"]
+  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="transfered-muut.muu"]
 
 Sonja sees that some completion is needed
   Click enabled by test id  request-for-complement

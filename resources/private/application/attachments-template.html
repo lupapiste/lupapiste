@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
-  <body>
-    <section class="page" id="attachments-template" style="visibility: hidden; display: block;">
-      <script type="text/x-jquery-tmpl" id="attachments-template-op">
-        <table class="table attachments-template-table" data-test-id="attachments-template-table">
-          <tbody data-bind="foreach: $data">
+    <body>
+        <section class="page" id="attachments-template" style="visibility: hidden; display: block;">
+        <script type="text/x-jquery-tmpl"
+                id="attachments-template-op">
+         <table class="table attachments-template-table" data-test-id="attachments-template-table">
+           <tbody data-bind="foreach: $data">
             <tr class="attachment-group-header">
-              <td data-bind="text: name" colspan="8" data-test-id="attachment-group-header-text"></td>
+             <td data-bind="text: name" colspan="8" data-test-id="attachment-group-header-text"></td>
             </tr>
             <tr>
               <th data-bind="ltext: 'application.attachmentState'">Tila</th>
@@ -15,7 +16,7 @@
               <th data-bind="ltext: 'application.attachmentNotNeeded'" class="center">Ei tarpeellinen</th>
               <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
               <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
-              <th></th>
+             <th></th>
             </tr>
 
             <!-- ko foreach: attachments -->
@@ -23,37 +24,37 @@
                 data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; },
                            attr: {'id': 'attachment-row-' + type['type-group'] + '-' + type['type-id']}">
               <td class="attachmentState">
-                <span data-bind="attr: {'class': statusName + ' icon',
+         <i data-bind="attr: {'class': LUPAPISTE.statusIcon(statusName),
                                         'data-test-state': state,
                                         'data-test-type': type['type-group'] + '.' + type['type-id'],
-                                        'title': loc(statusName + '.title')}">
-                </span>
-                <span data-bind="visible: $data.signed,
-                                 attr: {'class': 'icon signed',
+                                        'title': loc (statusName + '.title')}"
+                  </i>
+                <i data-bind="visible: $data.signed,
+                                 attr: {'class': 'lupicon-circle-pen',
                                         'title': loc('attachment.signed'),
                                         'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
-                </span>
-                <span data-bind="visible: $data.isSent && !$data.isSentToAsianhallinta,
-                                 attr: {'class': 'icon transfered',
+                </i>
+                <i data-bind="visible: $data.isSent && !$data.isSentToAsianhallinta,
+                                 attr: {'class': 'lupicon-circle-arrow-up',
                                         'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
                                         'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">
-                </span>
-                <span data-bind="visible: $data.isSentToAsianhallinta,
-                                 attr: {'class': 'icon transfered',
+                </i>
+                <i data-bind="visible: $data.isSentToAsianhallinta,
+                                 attr: {'class': 'lupicon-circle-arrow-up',
                                         'title': loc('application.attachmentSentToAsianhallintaDate') + ' ' + $data.sentDateString,
                                         'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">
-                </span>
+                </i>
 
-                <span data-bind="visible: $data.stamped,
-                                 attr: {'class': 'icon stamped',
+                <i data-bind="visible: $data.stamped,
+                                 attr: {'class': 'lupicon-circle-stamp',
                                         'title': loc('attachment.stamped'),
                                         'data-test-icon': 'stamped-' + type['type-group'] + '.' + type['type-id']}">
-                </span>
-                <span data-bind="visible: $data.forPrinting,
-                                 attr: {'class': 'icon verdict-attachment',
+                </i>
+                <i data-bind="visible: $data.forPrinting,
+                                 attr: {'class': 'lupicon-circle-section-sign',
                                         'title': loc('attachment.verdict-attachment'),
                                         'data-test-icon': 'verdict-attachment-' + type['type-group'] + '.' + type['type-id']}">
-                </span>
+                </i>
               </td>
               <td class="attachment-type-group">
                 <span data-bind="if: type">
@@ -112,7 +113,7 @@
                                  clickBubble: false,
                                  visible: $root.authorization.ok('delete-attachment') && $parent.editable && authorized,
                                  enable: $root.authorization.ok('delete-attachment') && $parent.editable && authorized,
-                                 attr: {'class': 'icon remove-grey',
+                                 attr: {'class': 'lupicon-remove primary',
                                         'title': loc('attachment.delete'),
                                         'data-test-icon': 'delete-' + type['type-group'] + '.' + type['type-id']}"></span>
               </td>

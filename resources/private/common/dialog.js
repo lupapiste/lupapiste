@@ -92,12 +92,12 @@ var LUPAPISTE = LUPAPISTE || {};
   LUPAPISTE.Modal.YesNoTemplate = "<div class='window autosized-yes-no'>" +
     "<div class='dialog-header'><p class='dialog-title'></p><p class='dialog-close close'>X</p></div>" +
     "<div class='dialog-content'><div class='dialog-user-content'></div>" +
-    "<button class='btn btn-primary btn-dialog close' data-test-id='confirm-yes'></button>" +
-    "<button class='btn btn-dialog close' data-test-id='confirm-no'></button></div></div>";
+    "<button class='positive btn-dialog close' data-test-id='confirm-yes'></button>" +
+    "<button class='secondary btn-dialog close' data-test-id='confirm-no'></button></div></div>";
   LUPAPISTE.Modal.OkTemplate = "<div class='window autosized-ok'>" +
-  "<div class='dialog-header'><p class='dialog-title'></p><p class='dialog-close close'>X</p></div>" +
+  "<div class='dialog-header'><p class='dialog-title'></p><p class='dialog-close close lupicon-remove'></p></div>" +
   "<div class='dialog-content dialog-content-low'><div class='dialog-user-content'></div>" +
-  "<div style='text-align:center'><button class='btn btn-primary btn-dialog' data-test-id='confirm-yes' style='position:relative'></button></div>" +
+  "<div style='text-align:center'><button class='positive btn-dialog' data-test-id='confirm-yes' style='position:relative'></button></div>" +
   "</div></div>";
 
   /**

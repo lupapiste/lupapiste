@@ -390,7 +390,7 @@
 
 (defn version-is-greater-or-equal
   "True if given version string is greater than version defined in target map, else nil"
-  [source target]
+  [^String source, ^clojure.lang.IPersistentMap target]
   {:pre [(map? target) (every? #(target %) [:major :minor :micro]) (string? source)]}
   (let [[source-major source-minor source-micro] (map #(->int %) (ss/split source #"\."))
         source-major (or source-major 0)

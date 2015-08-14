@@ -116,7 +116,13 @@
     (foreman-app? application)
     (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value))))
 
-(defn validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application}]
+(defn- validate-notice-or-application [application]
+  (let [foreman-doc (domain/get-document-by-name application "tyonjohtaja-v2")
+        type (get-in foreman-doc [:data :ilmoitusHakemusValitsin :value])]
+    (when (ss/blank? type)
+      (fail! :error.foreman.type-not-selected))))
+
+(defn- validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application}]
   (when (notice? application)
     (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
       (when-not (states/post-verdict-states (keyword
@@ -124,3 +130,11 @@
                                                 (mongo/select-one :applications {:_id (:id link)} {:state 1})
                                                 :state)))
         (fail! :error.foreman.notice-not-submittable)))))
+
+(defn validate-application
+  "Validates foreman applications"
+  [application]
+  (when (foreman-app? application)
+    (or
+      (validate-notice-or-application application)
+      (validate-notice-submittable application))))

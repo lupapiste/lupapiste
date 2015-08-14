@@ -4,7 +4,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.itest-util :as util]
-            [lupapalvelu.i18n :refer [with-lang loc]]
+            [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
             [midje.sweet :refer :all]
             [pdfboxing.text :as pdfbox]))
 
@@ -29,24 +29,22 @@
                                                          :municipality "444"
                                                          :state "draft"})
 
-        file         (java.io.File/createTempFile "test" ".pdf")
-        langs        ["fi" "sv"]]
+        file         (java.io.File/createTempFile "test" ".pdf")]
 
-    ; Iterate over all languages
-    (doseq [lang langs]
-      (pdf-export/generate application lang file)
+    (doseq [lang i18n/languages]
+      (facts {:midje/description (name lang)}
+        (pdf-export/generate application lang file)
+        (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
+              rows        (remove str/blank? (str/split pdf-content #"\n"))]
 
-      (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
-            rows        (remove str/blank? (str/split pdf-content #"\n"))]
+          (fact "All localized document headers are present in the PDF"
+            (with-lang lang
+              (doseq [heading (localized-doc-headings schema-names)]
+                pdf-content => (contains heading :gaps-ok))))
 
-        (fact "All localized document headers are present in the PDF"
-          (with-lang lang
-            (doseq [heading (localized-doc-headings schema-names)]
-              pdf-content => (contains heading :gaps-ok))))
-
-        (fact "PDF does not contain unlocalized strings"
-          (doseq [row rows]
-            row =not=> (contains "???")))))
+          (fact "PDF does not contain unlocalized strings"
+            (doseq [row rows]
+              row =not=> (contains "???"))))))
 
     (.delete file)))
 
