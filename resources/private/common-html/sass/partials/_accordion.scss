@@ -28,11 +28,11 @@
   }
 
   button.sticky.approved > .icons > .approved {
-    display: initial;
+    display: table-cell;
   }
 
   button.sticky.rejected > .icons >  .rejected {
-    display: initial;
+    display: table-cell;
   }
 
 

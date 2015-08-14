@@ -572,6 +572,20 @@ input.form-input.long {
 
 }
 
+@mixin thin-hide {
+  visibility: hidden;
+  width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+@mixin undo-hide {
+  visibility: initial;
+  width: initial !important;
+  padding: initial !important;
+  margin: initial !important;
+}
+
 .form-approval-status {
   text-transform: none;
   width: 100%;
@@ -587,12 +601,87 @@ input.form-input.long {
     display:inline-block;
     text-align: right;
     float: right;
-    .btn {
+    button {
       margin: 0 $marginS $marginS 0;
     }
   }
-
+  /* .approved, .rejected, .like-btn  { */
+  /*   display: none; */
+  /* } */
+  &.approved {
+    /* .like-btn { */
+    /*   display: inline; */
+    /* } */
+    button.approved {
+      @include thin-hide;
+    }
+    i.rejected {
+      display: none;
+    }
+  }
+  &.rejected {
+    /* .like-btn { */
+    /*   display: inline; */
+    /* } */
+    button.rejected {
+      @include thin-hide;
+    }
+    i.approved {
+      display: none;
+    }
+  }
 }
+
+section.approved .form-approval-status  {
+    /* .like-btn { */
+    /*   display: inline; */
+    /* } */
+    button.approved {
+      @include thin-hide;
+    }
+    i.rejected {
+      display: none;
+    }
+    button.rejected {
+      @include undo-hide;
+    }
+    i.rejected {
+      display: initial;
+    }
+}
+
+.is-status > .like-btn {
+  span {
+    color: $gray187;
+  }
+  .lupicon-circle-attention {
+    color: $red;
+  }
+  .lupicon-circle-check {
+    color: $green;
+  }
+  /* .rejected, .approved, span { */
+  /*   display: none; */
+  /* } */
+  .approved {
+    padding-right: $icon-pad;
+  }
+}
+
+/* .form-approval-status .is-status.approved { */
+/*   display: initial; */
+/*   .approved, span { */
+/*     display: initial; */
+/*   } */
+/* } */
+
+/* .form-approval-status .is-status.rejected { */
+/*   display: initial; */
+/*   .rejected, span { */
+/*     display: initial; */
+/*   } */
+/* } */
+
 
 .form-help {
   min-height: 100px;
@@ -687,38 +776,6 @@ input.form-input.long {
 /*   } */
 /* } */
 
-.form-approval-status .is-status {
-  display: none;
-  span {
-    color: $gray187;
-  }
-  .lupicon-circle-attention {
-    color: $red;
-  }
-  .lupicon-circle-check {
-    color: $green;
-}
-  .rejected, .approved, span {
-    display: none;
-  }
-  .approved {
-    padding-right: $icon-pad;
-  }
-}
-
-.form-approval-status .is-status.approved {
-  display: initial;
-  .approved, span {
-    display: initial;
-  }
-}
-
-.form-approval-status .is-status.rejected {
-  display: initial;
-  .rejected, span {
-    display: initial;
-  }
-}
 
 
 #neighbor-show {

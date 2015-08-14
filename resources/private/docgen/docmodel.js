@@ -347,7 +347,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       .value()
     }
     //  If name is null, every item's class is changed.
-    // If cls is null, the approval class is used.
+    // If cls is null, the approval class is used
     function setStatusClass( name, cls ) {
       var items = name ? [stats[name]] : stats;
       _.each( items, function( item ) {
@@ -356,21 +356,29 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       })
     }
 
+    function setSectionStatus( name, flag ) {
+      stats[name].selector.closest( "section").toggleClass( "approved", flag );
+    }
+
     return {
       update: update,
       setOrdered: setOrdered,
-      setStatusClass: setStatusClass
+      setStatusClass: setStatusClass,
+      setSectionStatus: setSectionStatus
     }
   }();
 
   self.barStatusHandler = function( barDiv$, approval, text ) {
+    self.statusOrder.update( 'bar', barDiv$, self.barStatusHandler, approval );
     var cls = approval.value;
+
     // Approving the whole approves the details.
     // Rejecting the whole resets the details. In other words
     // details should be intact after approving and immediately
     // rejecting the whole.
-    self.statusOrder.setStatusClass( null,
-                                     cls == 'approved' ? cls : null );
+    self.statusOrder.setStatusClass( 'bar',
+                                     cls === 'approved' ? cls : null );
+    self.statusOrder.setSectionStatus( 'bar', cls === 'approved' );
     barDiv$.toggleClass( "positive", approval.value === "approved");
     barDiv$.children( "." + approval.value ).attr( "title", text );
   };
@@ -385,12 +393,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var btnContainer$ = $("<span>").addClass("form-buttons");
     var statusContainer$ = null;
     if( !bar ) {
-      statusContainer$ = $("<div>").addClass( "like-btn is-status");
+      statusContainer$ = $("<div>").addClass( "like-btn");
       statusContainer$.append( $("<i>").addClass( "lupicon-circle-attention rejected"));
       statusContainer$.append( $("<i>").addClass( "lupicon-circle-check approved"));
       statusContainer$.append( $("<span>"));
     }
-    var approvalContainer$ = $("<span>").addClass("form-approval-status empty").append(statusContainer$).append(btnContainer$);
+    var approvalContainer$ = $("<span>").addClass("form-approval-status is-status empty").append(statusContainer$).append(btnContainer$);
     var approveButton$ = null;
     var rejectButton$ = null;
     var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: self.getCollection() };
@@ -411,9 +419,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           self.statusOrder.update( 'bar', bar.selector, setStatus, approval );
         } else {
           statusContainer$.children("span").text(text);
-          statusContainer$.removeClass( "approved rejected");
-          statusContainer$.addClass( approval.value );
-          self.statusOrder.update( statusContainer$, statusContainer$, setStatus, approval );
+          // statusContainer$.removeClass( "approved rejected");
+          // statusContainer$.addClass( approval.value );
+          var statusParent$ = statusContainer$.closest( ".is-status");
+          console.log( "statusParent$:", statusParent$);
+
+          self.statusOrder.update( statusParent$, statusParent$, setStatus, approval );
+          self.statusOrder.setStatusClass( statusParent$, approval.value );
           // statusContainer$.removeClass (function(index, css) {
           //   return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
           // });
@@ -426,20 +438,20 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     function makeApprovalButton(verb, noun, cssClass) {
       var cmd = verb + "-doc";
       var title = loc(["document", verb]);
-      var opts = {className: cssClass,
+      var opts = {className: cssClass + " " + (verb === "approve" ? "approved" : "rejected"),
                   icon: verb === "approve" ? "lupicon-check" : null};
       var button =
             $(makeButton(self.docId + "_" + verb, title, opts ))
           .click(function () {
             ajax.command(cmd, cmdArgs)
               .success(function () {
-                if (noun === "approved") {
-                  approveButton$.hide();
-                  rejectButton$.show();
-                } else {
-                  approveButton$.show();
-                  rejectButton$.hide();
-                }
+                // if (noun === "approved") {
+                //   approveButton$.hide();
+                //   rejectButton$.show();
+                // } else {
+                //   approveButton$.show();
+                //   rejectButton$.hide();
+                // }
                 setStatus({ value: noun });
               })
               .call();
@@ -470,30 +482,34 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var meta = self.getMeta(path);
     var approval = meta ? meta._approved : null;
     var requiresApproval = !approval || modelModifiedSince(model, approval.timestamp);
-    var allowApprove = requiresApproval || (approval && approval.value === "rejected");
-    var allowReject = requiresApproval || (approval && approval.value === "approved");
+    // var allowApprove = requiresApproval || (approval && approval.value === "rejected");
+    // var allowReject = requiresApproval || (approval && approval.value === "approved");
+
 
     if (self.authorizationModel.ok("approve-doc")) {
       approveButton$ = makeApprovalButton("approve", "approved", "positive");
       btnContainer$.append(approveButton$);
 
-      if (!allowApprove) {
-          approveButton$.hide();
-      }
+      // if (!allowApprove) {
+      //     approveButton$.hide();
+      // }
     }
     if (self.authorizationModel.ok("reject-doc")) {
       rejectButton$ = makeApprovalButton("reject", "rejected", "secondary");
       btnContainer$.append(rejectButton$);
 
-      if (!allowReject) {
-          rejectButton$.hide();
-      }
+    //   if (!allowReject) {
+    //       rejectButton$.hide();
+    //   }
     }
 
-    if (allowApprove || allowReject) {
-        approvalContainer$.removeClass("empty");
-    }
+    // if (allowApprove || allowReject) {
+    //     approvalContainer$.removeClass("empty");
+    // }
 
+    if( requiresApproval || approval ) {
+      approvalContainer$.removeClass( "empty");
+    }
     if (!requiresApproval) {
       setStatus(approval);
     }
