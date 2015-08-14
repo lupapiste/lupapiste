@@ -16,10 +16,6 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     })
     .call();
 
-  self.groupDataProvider = ko.pureComputed(function() { // when user belongs to more than one organization
-    return _.keys(tagsData()).length > 1 ? {header: "organization", dataProperty: "tags"} : null;
-  });
-
   self.groupedFilter = ko.pureComputed(function() {
     // first filter out those tags who are not selected
     var filteredData = _.map(tagsData(), function(orgData) {
@@ -47,8 +43,12 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     return _.isEmpty(self.groupedFilter()) ? [] : _.first(self.groupedFilter()).tags;
   }
 
+  self.hasGroups = ko.pureComputed(function() {
+    return _.keys(tagsData()).length > 1
+  });
+
   self.data = ko.pureComputed(function() {
-    return _.keys(tagsData()).length > 1 ? self.groupedFilter() : getFirstTags();
+    return self.hasGroups() ? self.groupedFilter() : getFirstTags();
   });
 };
 

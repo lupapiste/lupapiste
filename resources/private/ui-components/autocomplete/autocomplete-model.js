@@ -9,7 +9,9 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   // tagging support
   self.tags = params.tags;
-  self.group = params.groupDataProvider;
+  self.groups = params.groups || false;
+
+  self.groupFields = params.groupFields;
 
   self.selectedText = ko.observable(params.selectedText);
 
