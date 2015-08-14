@@ -27,12 +27,11 @@
         <label data-bind="ltext: 'applications.filter.tags'" />
         <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, selectedText: 'label', tags: true, groups: organizationTagsDataProvider.hasGroups, groupFields: {header: 'organization', dataProperty: 'tags'}}}"></div>
       </div>
-      <!-- ko if: false -->
+
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.operations'" />
-        <div data-test-id="operations-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: operationsDataProvider, value: dataProvider.applicationOperations, selectedText: 'label', tags: true, groups: true, groupDataProvider: operationsDataProvider.groupDataProvider()}}"></div>
+        <div data-test-id="operations-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: operationsDataProvider, value: dataProvider.applicationOperations, selectedText: 'label', tags: true, groups: operationsDataProvider.hasGroups, groupFields: {header: 'permitType', dataProperty: 'operations'}}}"></div>
       </div>
-      <!-- /ko -->
     </div>
     <!-- /ko -->
     </script>

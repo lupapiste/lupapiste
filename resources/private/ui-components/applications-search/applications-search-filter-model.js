@@ -16,7 +16,7 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     })
     .call();
 
-  self.groupedFilter = ko.pureComputed(function() {
+  self.groupedData = ko.pureComputed(function() {
     // first filter out those tags who are not selected
     var filteredData = _.map(tagsData(), function(orgData) {
       return {organization: orgData.name[loc.currentLanguage], tags: _.filter(orgData.tags, function(tag) {
@@ -39,8 +39,8 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     return filteredData;
   });
 
-  function getFirstTags() { // returns tags of first organization
-    return _.isEmpty(self.groupedFilter()) ? [] : _.first(self.groupedFilter()).tags;
+  function firstGroupData() { // returns tags of first organization
+    return _.first(self.groupedData()).tags || []
   }
 
   self.hasGroups = ko.pureComputed(function() {
@@ -48,7 +48,7 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
   });
 
   self.data = ko.pureComputed(function() {
-    return self.hasGroups() ? self.groupedFilter() : getFirstTags();
+    return self.hasGroups() ? self.groupedData() : firstGroupData();
   });
 };
 
@@ -66,18 +66,30 @@ LUPAPISTE.OperationsDataProvider = function() {
     })
     .call();
 
-  self.data = ko.pureComputed(function() {
-    var operationDropdownItems = _.map(operationsByPermitType(), function(obj) {
-      return _.reduce(obj.operations, function(result, operation) {
-        result.push({label: loc("operations." + operation)});
-        return result;
-      }, [{label: loc(obj["permit-type"])}]);
+  function localizeOperations(operations) {
+    return _.map(operations, function(op) {
+      return loc("operations." + op)
     });
-    return _.flatten(operationDropdownItems);
+  }
+
+  function wrapInObject(operations) {
+    return _.map(operations, function(op) {
+      return {label: op}
+    });
+  }
+
+  self.data = ko.pureComputed(function() {
+    var result = _.map(operationsByPermitType(), function(operations, permitType) {
+      return {
+        permitType: loc(permitType),
+        operations: _.flow(localizeOperations, wrapInObject)(operations)
+      }
+    })
+    return result;
   });
 
-  self.groupDataProvider = ko.pureComputed(function() {
-    _.keys(operationsByPermitType())
+  self.hasGroups = ko.pureComputed(function() {
+    return _.keys(operationsByPermitType()).length > 1
   });
 
   self.query = ko.observable();

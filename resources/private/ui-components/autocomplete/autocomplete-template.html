@@ -31,7 +31,7 @@
           <!-- ko if: data().length > 0 -->
           <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}">
             <!-- ko if: groups -->
-            <div data-bind="component: {name: 'autocomplete-grouping', params: {group: groupFields, data: data, selectedText: selectedText, selectItem: selectItem}}"></div>
+            <div data-bind="component: {name: 'autocomplete-grouping', params: {groupFields: groupFields, data: data, selectedText: selectedText, selectItem: selectItem}}"></div>
             <!-- /ko -->
             <!-- ko ifnot: groups -->
             <!-- ko foreach: data -->
