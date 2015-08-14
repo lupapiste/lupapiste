@@ -164,7 +164,9 @@
    :invites      {:depends [:common-html]
                   :js ["invites-model.js" "invites.js"]}
 
-   :repository   {:depends [:common-html]
+   :attachment-utils   {:js ["attachment-utils.js"]}
+
+   :repository   {:depends [:common-html :attachment-utils]
                   :js ["repository.js"]}
 
    :tree         {:js ["tree.js"]
@@ -192,12 +194,11 @@
                                     "verdict-attachment-prints-order-history-model.js"
                                     "verdict-attachment-prints-multiselect-model.js"]}
 
+
    :attachment   {:depends [:common-html :repository :signing :side-panel]
                   :js ["attachment-multi-select.js"
                        "targeted-attachments-model.js"
-                       "attachment-utils.js"
                        "attachment.js"
-                       "attachmentTypeSelect.js"
                        "move-attachment-to-backing-system.js"
                        "move-attachment-to-case-management.js"]
                   :html ["targetted-attachments-template.html"
@@ -296,7 +297,7 @@
    :hashbang     {:depends [:common-html]
                   :html ["index.html"]}
 
-   :upload       {:depends [:iframe]
+   :upload       {:depends [:iframe :attachment-utils]
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
