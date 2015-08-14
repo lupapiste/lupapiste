@@ -1,7 +1,7 @@
 // TODO knockout dialog to share same styles with legacy dialog
 #modal-dialog {
   .small {
-    width: 320px;
+    width: 360px;
   }
   .medium {
     width: 480px;
@@ -57,10 +57,10 @@
       .close {
         position: absolute;
         right: $marginM;
-        cursor: pointer;
-        &:after {
-          content: "X";
-        }
+        /* cursor: pointer; */
+        /* &:after { */
+        /*   content: "X"; */
+        /* } */
       }
     }
   }
@@ -156,7 +156,7 @@
   }
 
   [type=submit], .btn, button {
-    padding: 4px $marginL;
+    //padding: 4px $marginL;
     min-width: $cols2;
     max-width: $cols3;
 

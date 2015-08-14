@@ -11,11 +11,13 @@ Mikko goes to empty attachments tab
   [Tags]  attachments
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
+  Set Suite Variable  ${propertyId}  753-416-6-1
   Mikko logs in
-  Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Open tab  attachments
 
 "Download all attachments" should not be visible in the attachment actions dropdown
+  [Tags]  attachments
   Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='downloadAll']
 
 Dropdown options for attachment actions should look correct for Mikko
@@ -43,6 +45,7 @@ Mikko adds again txt attachment with comment
   Comment count is  1
 
 "Download all attachments" should be visible in the attachment actions dropdown
+  [Tags]  attachments
   Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='downloadAll']
 
 Mikko opens attachment details
@@ -61,13 +64,13 @@ Mikko deletes attachment
   [Tags]  attachments
   Click enabled by test id  delete-attachment
   Confirm yes no dialog
-  Wait Until Page Contains  753-416-25-30
+  Wait Until Page Contains  ${propertyId}
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
 Comment is present after delete
   [Tags]  attachments
   Open side panel  conversation
-  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[@class='comment-text']//span[@class='deleted-attachment']  1
+  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class, 'is-comment')]//span[@class='deleted']  1
   Close side panel  conversation
 
 Mikko adds txt attachment with comment
@@ -75,6 +78,7 @@ Mikko adds txt attachment with comment
   Add attachment  application  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko opens application to authorities
+  [Tags]  attachments
   Open to authorities  pliip
   Wait Until  Application state should be  open
 
@@ -102,7 +106,8 @@ Change attachment type
   Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
 Signature icon is not visible
-  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
+  [Tags]  attachments
+  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
 
 Sign all attachments
   [Tags]  attachments
@@ -115,9 +120,11 @@ Sign all attachments
   Confirm  dynamic-ok-confirm-dialog
 
 Signature icon is visible
-  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
+  [Tags]  attachments
+  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
 
 Signature is visible
+  [Tags]  attachments
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
   Assert file latest version  ${TXT_TESTFILE_NAME}  1.0
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  1
@@ -126,6 +133,7 @@ Signature is visible
   Element should be visible  xpath=//section[@id="attachment"]//*/div[@data-bind="dateTimeString: created"]
 
 Sign single attachment
+  [Tags]  attachments
   Click enabled by test id  signLatestAttachmentVersion
   Wait Until   Element should be visible  signSingleAttachmentPassword
   Input text by test id  signSingleAttachmentPassword  mikko123
@@ -133,16 +141,17 @@ Sign single attachment
   Wait Until   Element should not be visible  signSingleAttachmentPassword
 
 Two signatures are visible
+  [Tags]  attachments
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  2
 
-Switch user
+Switch to authority
   [Tags]  attachments
   Logout
   Sonja logs in
 
 Sonja goes to conversation tab
   [Tags]  attachments
-  Open application  ${appname}  753-416-25-30
+  Open application  ${appname}  ${propertyId}
   Open side panel  conversation
   Click Element  link=Ote alueen peruskartasta
   Wait Until  Element text should be  xpath=//section[@id="attachment"]//span[@id="test-attachment-file-name"]/a  ${TXT_TESTFILE_NAME}
@@ -155,12 +164,15 @@ Sonja goes to attachments tab
   Open tab  attachments
 
 Sonja adds new attachment template
+  [Tags]  attachments
   Add empty attachment template  Muu liite  muut  muu
 
 Sonja sees that new attachment template is visible in attachments list
+  [Tags]  attachments
   Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
 
 Sonja deletes the newly created attachment template
+  [Tags]  attachments
   Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
   Confirm yes no dialog
   Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[@data-test-type="muut.muu"]
@@ -202,9 +214,43 @@ Approve-button should be disabled
   Wait until  Element should be disabled  test-attachment-approve
 
 Attachment state should be ok
+  [Tags]  attachments
   Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Tab should be visible  attachments
   Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  ok
+
+"Sign attachments" should not be visible in the attachment actions dropdown
+  [Tags]  attachments
+  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='signAttachments']
+
+Create new application
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname2}  authAtt${secs}
+  Set Suite Variable  ${propertyId2}  753-416-6-12
+  Create application the fast way  ${appname2}  ${propertyId2}  kerrostalo-rivitalo
+  Open tab  attachments
+
+Authority adds png attachment without comment
+  [Tags]  attachments
+  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
+
+Signature icon is not visible to authority
+  [Tags]  attachments
+  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="signed-muut.muu"]
+
+Authority signs the attachment
+  [Tags]  attachments
+  Select attachment operation option from dropdown  signAttachments
+  Wait Until   Element should be visible  signAttachmentPassword
+  Input text by test id  signAttachmentPassword  sonja
+  Click enabled by test id  do-sign-attachments
+  Wait Until   Element should not be visible  signAttachmentPassword
+  Confirm  dynamic-ok-confirm-dialog
+
+Signature icon is visible to authority
+  [Tags]  attachments
+  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="signed-muut.muu"]
 
 *** Keywords ***
 

@@ -75,7 +75,7 @@
    *
    * Source: https://github.com/Knockout-Contrib/Knockout-Validation/wiki/User-Contributed-Rules
   */
-  ko.validation.rules["conditional_required"] = {
+  ko.validation.rules.conditional_required = {
     validator: function (val, condition) {
       var required = false;
       if (typeof condition === "function") {
@@ -91,7 +91,7 @@
       }
     },
     message: ko.validation.rules.required.message
-  }
+  };
 
   ko.validation.registerExtenders();
 
@@ -134,6 +134,17 @@
 
   ko.bindingHandlers.ltext = {
     update: _.partial(localized, "text")
+  };
+
+  // hello.id -> T e r v e
+  // Used typically with vertical buttons.
+  ko.bindingHandlers.lspaced = {
+    update: function( element, valueAccessor) {
+      var value = loc( ko.utils.unwrapObservable( valueAccessor() ) );
+      if( value ) {
+        $(element).text( value.split( "" ).join( " "));
+      }
+    }
   };
 
   ko.bindingHandlers.lhtml = {

@@ -48,10 +48,10 @@ Check invitees
 
 Open Rakentaminen tab, and check it contains 13 tasks
   Open tab  tasks
-  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//table[@data-bind="foreach: taskGroups"]/tbody/tr  10
+  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//div[@data-bind="foreach: taskGroups"]//tbody/tr  10
   Task count is  task-katselmus  8
   Task count is  task-lupamaarays  2
-  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  3
+  Wait until  Xpath Should Match X Times  //div[@data-test-id="tasks-foreman"]//tbody/tr  3
 
 Re-fetch application with same kuntalupatunnus
   Go to page  applications

@@ -30,6 +30,10 @@
                  data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, blur: blur}"></input>
           <!-- ko if: data().length > 0 -->
           <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}">
+            <!-- ko if: group -->
+            <div data-bind="component: {name: 'autocomplete-grouping', params: {group: group, data: data, selectedText: selectedText, selectItem: selectItem}}"></div>
+            <!-- /ko -->
+            <!-- ko ifnot: group -->
             <!-- ko foreach: data -->
             <li class="autocomplete-result-item"
                 data-bind="event: {mouseover: $parent.changeIndex.bind($data, $index()),
@@ -40,6 +44,7 @@
                                 $data === null ? loc('choose') :
                                   $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
             </li>
+            <!-- /ko -->
             <!-- /ko -->
           </ul>
           <!-- /ko -->

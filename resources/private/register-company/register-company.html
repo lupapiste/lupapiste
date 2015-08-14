@@ -104,11 +104,18 @@
         </div>
 
         <div>
-          <button data-bind="enable: canSubmitInfo, click: submitInfo" data-test-id="register-company-submit" type="submit" class="btn btn-primary">
-            <span data-bind="ltext: 'continue'"></span>
-            <em data-bind="visible: pending" class="button-loader"></em>
+            <button data-bind="enable: canSubmitInfo,
+                               click: submitInfo,
+                               css: {waiting: pending}"
+                    data-test-id="register-company-submit"
+                    type="submit"
+                    class="btn-primary">
+                <span data-bind="ltext: 'continue'"></span>
+                <i class="wait spin lupicon-refresh"></i>
+                <i class="lupicon-chevron-right"></i>
           </button>
-          <button data-bind="enable: canCancelInfo, click: cancelInfo, ltext: 'cancel'" data-test-id="register-company-cancel"  type="button" class="btn"></button>
+          <button data-bind="enable: canCancelInfo, click: cancelInfo, ltext: 'cancel'" data-test-id="register-company-cancel"  type="button"
+                  class="btn"></button>
         </div>
 
       </form>

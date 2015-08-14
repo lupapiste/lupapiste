@@ -13,24 +13,22 @@
             rows="3"
             maxlength="4000">
           </textarea>
-          <button
-            data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: stateOpenApplication"
-            data-test-id="application-open-application-btn"
-            type="submit"
-            class="btn btn-primary">
-            <span data-bind="ltext: 'application.conversationOpen'"></span>
-            <em data-bind="visible: pending" class="button-loader"></em>
-          </button>
-          <button
-            data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: submit"
-            data-test-id="application-new-comment-btn"
-            type="submit"
-            class="btn btn-primary">
-            <span data-bind="ltext: 'application.conversationSend'"></span>
-            <em data-bind="visible: pending" class="button-loader"></em>
-          </button>
-
-
+          <div class="message-buttons"
+               data-bind="css: {'inner-margins': $parent.authorization.ok('add-comment') && !$parent.infoRequest()}">
+              <button class="positive caps"
+                      data-bind="visible: $parent.authorization.ok('add-comment') && !$parent.infoRequest(),
+                                 disable: disabled, click: stateOpenApplication"
+                      data-test-id="application-open-application-btn"
+                      type="submit">
+                  <span data-bind="ltext: 'application.conversationOpen'"></span>
+              </button>
+              <button class="positive caps"
+                      data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: submit"
+                      data-test-id="application-new-comment-btn"
+                      type="submit">
+                  <span data-bind="ltext: 'application.conversationSend'"></span>
+              </button>
+          </div>
 
           <div data-bind="visible: $parent.authorization.ok('can-target-comment-to-authority') || $parent.authorization.ok('can-mark-answered')" class="comment-controls">
             <div class="mark-answered" data-bind="if: $parent.authorization.ok('can-mark-answered')">
@@ -38,7 +36,7 @@
                 data-bind="click: markAnswered"
                 data-test-id="comment-request-mark-answered"
                 type="submit"
-                class="btn btn-primary">
+                class="positive">
                 <span data-bind="ltext: 'comment-request-mark-answered-label'"></span>
               </button>
             </div>
@@ -65,42 +63,41 @@
           </div>
         </div>
 
-        <div class="table table-striped conversation" data-test-id="comments-table">
-          <div data-bind="foreach: comments().slice(0).reverse()">
+          <div data-bind="foreach: comments().slice(0).reverse()" data-test-id="comments-table">
 
-            <div data-bind="css: {'attachment-comment': $parent.isForAttachment($data),
-                                  'comment-for-me':     $parent.isForMe($data),
-                                  'authority-comment':  $parent.isAuthorityComment($data),
-                                  'comment':            true},
-                           visible: $parent.isVisible($data)">
-              <div class="comment-party commenttd">
-                <span class="date" data-bind="dateTimeString: created"></span>
-                <span class="author" data-bind="fullName: user"></span>
+           <div class="is-comment"
+                data-bind="css: {
+                            'comment-bubble-authority':  $parent.isAuthorityComment($data),
+                            'comment-bubble':            !$parent.isAuthorityComment($data),
+                            'attachment': $parent.isForAttachment($data),
+                            'for-me':     $parent.isForMe($data),
+                            },
+                            visible: $parent.isVisible($data)">
+              <div class="header">
+                  <span class="sender">
+                      <span data-bind="fullName: user"></span>
+                      <span class="role" data-bind="ltext: user.role"></span>
                 <!-- ko with: $data.to -->
-                  <span class="arrow"></span>
-                  <span class="author" data-bind="fullName: $data"></span>
-                <!-- /ko -->
-                <span class="role" data-bind="ltext: user.role"></span>
+                  <span class="to" data-bind="fullName: $data"></span>
+                  <!-- /ko -->
+                  </span>
+                  <span class="timestamp" data-bind="dateTimeString: created"></span>
               </div>
-              <div class="comment-text">
-                <span data-bind="if: $parent.isForAttachment($data)" class="attachment-details">
+                <span data-bind="if: $parent.isForAttachment($data)">
                   <span data-bind="if: target.id()">
                     <!-- ko if: target.attachmentType -->
-                    <a data-bind="attr: {href: '#!/attachment/' + $parent.applicationId + '/' + target.id()}">
-                      <span data-bind="text: target.attachmentType"></span>
-                    </a>
+                    <a data-bind="attr: {href: '#!/attachment/' + $parent.applicationId + '/' + target.id()},
+                                  text: target.attachmentType"></a>
                     <!-- /ko -->
                     <!-- ko ifnot: target.attachmentType -->
-                    <span class="deleted-attachment" data-bind="ltext: 'attachment.removed'"></span>
+                    <span class="deleted" data-bind="ltext: 'attachment.removed'"></span>
                     <!-- /ko -->
                   </span>
                 </span>
-                <span data-bind="text: text" class="comment-message"></span>
-              </div>
+                <span data-bind="text: text"></span>
             </div>
 
           </div>
-        </div>
       </div>
     </script>
   </section>

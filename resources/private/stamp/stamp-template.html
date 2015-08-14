@@ -4,11 +4,11 @@
     <section class="page container" id="stamping">
       <div id="stamping-container" >
         <div class="nav-back-container">
-          <a class="btn left-align btn-nav-back"
+          <a class="btn secondary"
              data-bind="click: cancelStamping"
              data-test-id="back-to-application-from-stamping">
+              <i class="lupicon-chevron-start"></i>
             <span data-bind =" ltext: 'application.return'"></span>
-            <span class="icon drill-left-black-bigger left-align"></span>
           </a>
         </div>
         <div class="attachment-multiselect-content" data-bind="if: stampingMode">
@@ -135,26 +135,26 @@
         </div>
 
         <div class="attachment-multiselect-buttons">
-          <button data-bind="
-              click: start,
-              ltext: 'stamp.start',
-              enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
-              visible: status() <= statusReady && $parent.authorization.ok('stamp-attachments')"
-            class="btn btn-primary"
-            data-test-id="start-stamping">
+            <button data-bind="click: start,
+                               enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
+                               visible: status() <= statusReady && $parent.authorization.ok('stamp-attachments')"
+                    class="positive"
+                    data-test-id="start-stamping">
+                <i class="lupicon-circle-stamp"></i>
+                <span data-bind="ltext: 'stamp.start'"></span>
           </button>
           <button data-bind="
               ltext: 'stamp.reset',
               visible: status() > statusRunning,
               click: $parent.resetStamping"
-            class="btn btn-primary close"
+            class="positive close"
             data-test-id="stamp-reset">
           </button>
           <button data-bind="
               ltext: 'application.return',
               enable: status() !== statusStarting && status() !== statusRunning,
               click: $parent.cancelStamping"
-            class="btn close"
+            class="secondary close"
             data-test-id="cancel-stamping">
           </button>
         </div>

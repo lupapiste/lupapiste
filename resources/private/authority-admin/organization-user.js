@@ -1,4 +1,6 @@
 LUPAPISTE.OrganizationUserModel = function(organization) {
+  "use strict";
+
   var self = this;
 
   self.phase = ko.observable(0);
@@ -67,4 +69,4 @@ LUPAPISTE.OrganizationUserModel = function(organization) {
       })
       .call();
   };
-}
+};
