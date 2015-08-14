@@ -36,22 +36,26 @@ LUPAPISTE.OperationsDataProvider = function() {
   "use strict";
   var self = this;
 
-  var operations = ko.observable();
+  var operationsByPermitType = ko.observable();
 
   ajax
     .query("get-application-operations")
     .error(_.noop)
     .success(function(res) {
       console.log(res);
-      operations(res.operations);
+      operationsByPermitType(res.operationsByPermitType);
     })
     .call();
 
   self.data = ko.pureComputed(function() {
-    var operationItems = _.map(operations(), function(operation) {
-      return {label: loc("operations." + operation)};
+    var operationDropdownItems = _.map(operationsByPermitType(), function(obj) {
+      return _.reduce(obj.operations, function(result, operation) {
+        result.push({label: loc("operations." + operation)});
+        return result;
+      }, [{label: loc(obj["permit-type"])}]);
     });
-    return operationItems;
+    console.log(_.flatten(operationDropdownItems));
+    return _.flatten(operationDropdownItems);
   });
 
   self.query = ko.observable();

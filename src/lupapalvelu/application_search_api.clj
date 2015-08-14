@@ -29,7 +29,8 @@
               {:op op :permit-type permit-type}))
        (group-by :permit-type)
        (map (fn [[permit-type ops]]
-              [permit-type (map :op ops)]))))
+              {:permit-type permit-type
+               :operations (map :op ops)}))))
 
 (defquery get-application-operations
   {:user-roles #{:authority}}
@@ -39,7 +40,7 @@
         organizations      (map lupapalvelu.organization/get-organization orgIds)
         selected-ops       (mapcat :selected-operations organizations)
         ops-by-permit-type (selected-ops-by-permit-type selected-ops)]
-    (ok :operations ops-by-permit-type)))
+    (ok :operationsByPermitType ops-by-permit-type)))
 
 (defn- localize-operation [op]
   (assoc op
