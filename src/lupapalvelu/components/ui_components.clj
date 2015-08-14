@@ -197,7 +197,6 @@
                        "targeted-attachments-model.js"
                        "attachment-utils.js"
                        "attachment.js"
-                       "attachmentTypeSelect.js"
                        "move-attachment-to-backing-system.js"
                        "move-attachment-to-case-management.js"]
                   :html ["targetted-attachments-template.html"
