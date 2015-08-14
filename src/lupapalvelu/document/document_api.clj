@@ -50,7 +50,7 @@
     (when (deny-remove-of-primary-operation document application)
       (fail! :removal-of-primary-document-denied))
     (when (deny-remove-of-last-document document (:documents application))
-      (fail! :removal-of-last-document-denied))
+      (fail! :error.removal-of-last-document-denied))
     (when-not document
       (fail! :error.document-not-found))
 
