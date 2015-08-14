@@ -29,8 +29,8 @@
               {:op op :permit-type permit-type}))
        (group-by :permit-type)
        (map (fn [[permit-type ops]]
-              {:permit-type permit-type
-               :operations (map :op ops)}))))
+              {permit-type (map :op ops)}))
+       (apply merge)))
 
 (defquery get-application-operations
   {:user-roles #{:authority}}
