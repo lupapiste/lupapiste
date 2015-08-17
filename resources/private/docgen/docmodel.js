@@ -1319,8 +1319,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
         if (subSchema.repeating && !self.isDisabled && authorizationModel.ok("remove-document-data")) {
-          var removeButton = document.createElement("span");
-          removeButton.className = "icon remove-grey inline-right";
+          var removeButton = document.createElement("i");
+          removeButton.className = "icon remove-grey inline-right bar";
           removeButton.onclick = function () {
             LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
                 { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, myPath.concat([id])); } },
@@ -1915,7 +1915,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok("remove-doc") && notPrimaryOperation) {
       var removeSpan =
         $("<span>")
-          .addClass("icon remove inline-right")
+          .addClass("icon remove inline-right foo")
           .click(removeDoc);
       if (options && options.dataTestSpecifiers) {
         removeSpan.attr("data-test-class", "delete-schemas." + self.schemaName);
