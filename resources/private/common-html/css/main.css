@@ -3434,9 +3434,6 @@ input.form-input.long {
   width: 100%;
   display: block;
   min-height: 32px;
-  /* .approved, .rejected, .like-btn  { */
-  /*   display: none; */
-  /* } */
 }
 /* line 581, ../sass/partials/_forms.scss */
 .form-approval-status.empty {
@@ -3452,6 +3449,10 @@ input.form-input.long {
   /*   margin: 0 $marginS $marginS 0; */
   /* } */
 }
+/* line 595, ../sass/partials/_forms.scss */
+.form-approval-status i.approved, .form-approval-status i.rejected {
+  display: none;
+}
 /* line 598, ../sass/partials/_forms.scss */
 .form-approval-status.approved {
   /* .like-btn { */
@@ -3463,8 +3464,8 @@ input.form-input.long {
   display: none;
 }
 /* line 605, ../sass/partials/_forms.scss */
-.form-approval-status.approved i.rejected {
-  display: none;
+.form-approval-status.approved i.approved {
+  display: table-cell;
 }
 /* line 609, ../sass/partials/_forms.scss */
 .form-approval-status.rejected {
@@ -3477,8 +3478,8 @@ input.form-input.long {
   display: none;
 }
 /* line 616, ../sass/partials/_forms.scss */
-.form-approval-status.rejected i.approved {
-  display: none;
+.form-approval-status.rejected i.rejected {
+  display: table-cell;
 }
 
 /* line 622, ../sass/partials/_forms.scss */

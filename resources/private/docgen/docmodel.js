@@ -356,15 +356,50 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       })
     }
 
+    // Updates the section and the bar classes with some
+    // deduction. The idea is to provide the user immediate
+    // feedback if either the whole is approved or any is rejected.
+    //  name: key for stats (element)
+    //  cls: Class to be applied. There are three variants:
+    //       approved: both section and bar to approved and bar to positive.
+    //       rejected: removal of approved from section (but no adding rejected.)
+    //                 rejected to bar.
+    //       null: If section is approved then do nothing. Otherwise, add rejected
+    //             to bar if any of the stats is rejected. However, if every stat is
+    //             approved, call setSectionStatus( "bar", "approved")
     function setSectionStatus( name, cls ) {
-      var isApproved = cls === 'approved';
+      var bar = stats["bar"] ? stats["bar"].selector : null;
       var section = stats[name].selector.closest( "section");
-      // Section is never rejected.
-      section.toggleClass( "approved", isApproved );
-      var bar = stats["bar"].selector;
-      bar.removeClass( "approved rejected");
-      bar.addClass( cls );
-      bar.toggleClass( "positive", isApproved );
+      if( cls ) {
+        var isApproved = cls === 'approved';
+        // Section is never rejected.
+        section.toggleClass( "approved", isApproved );
+        if( bar ) {
+          bar.removeClass( "approved rejected");
+          bar.addClass( cls );
+          bar.toggleClass( "positive", isApproved );
+        }
+      } else {
+        if( !section.hasClass( "approved") && bar ) {
+          bar.removeClass( "approved rejected");
+          var goods = 0;
+          _.each(  _.pluck( stats, "approval"), function( a ) {
+            switch( a.value ) {
+              case "rejected":
+              bar.addClass( "rejected");
+              return false;
+              break;
+              case "approved":
+              goods++;
+              break;
+            }
+          });
+          if( goods == _.size( stats )) {
+            // Everything is approved.
+            setSectionStatus( "bar", "approved");
+          }
+        }
+      }
     }
 
     return {
@@ -384,10 +419,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     // details should be intact after approving and immediately
     // rejecting the whole.
     self.statusOrder.setSectionStatus( 'bar', cls );
-    // self.statusOrder.setStatusClass( 'bar',
-    //                                  cls === 'approved' ? cls : null );
-
-    //barDiv$.toggleClass( "positive", approval.value === "approved");
     barDiv$.children( "." + approval.value ).attr( "title", text );
   };
 
@@ -400,6 +431,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.makeApprovalButtons = function (path, model, bar ) {
     var btnContainer$ = $("<span>").addClass("form-buttons");
     var statusContainer$ = null;
+    var statusKey = _.uniqueId( "status");
     if( !bar ) {
       statusContainer$ = $("<div>").addClass( "like-btn");
       statusContainer$.append( $("<i>").addClass( "lupicon-circle-attention rejected"));
@@ -427,19 +459,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           self.statusOrder.update( 'bar', bar.selector, setStatus, approval );
         } else {
           statusContainer$.children("span").text(text);
-          // statusContainer$.removeClass( "approved rejected");
-          // statusContainer$.addClass( approval.value );
           var statusParent$ = statusContainer$.closest( ".is-status");
-          self.statusOrder.update( statusParent$, statusParent$, setStatus, approval );
-          self.statusOrder.setStatusClass( statusParent$, approval.value );
-          if( approval.value === 'rejected') {
-            self.statusOrder.setSectionStatus( statusParent$, 'rejected' );
-          }
-          // statusContainer$.removeClass (function(index, css) {
-          //   return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
-          // });
-          // statusContainer$.addClass ("approval-" + approval.value);
-          // approvalContainer$.removeClass ("empty");
+          self.statusOrder.update( statusKey, statusParent$, setStatus, approval );
+          self.statusOrder.setStatusClass( statusKey, approval.value );
+          self.statusOrder.setSectionStatus( statusKey, approval.value === "rejected" ? "rejected" : null );
         }
       }
     }
@@ -454,13 +477,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           .click(function () {
             ajax.command(cmd, cmdArgs)
               .success(function () {
-                // if (noun === "approved") {
-                //   approveButton$.hide();
-                //   rejectButton$.show();
-                // } else {
-                //   approveButton$.show();
-                //   rejectButton$.hide();
-                // }
                 setStatus({ value: noun });
               })
               .call();

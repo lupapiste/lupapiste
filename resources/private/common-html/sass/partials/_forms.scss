@@ -592,9 +592,9 @@ input.form-input.long {
     /*   margin: 0 $marginS $marginS 0; */
     /* } */
   }
-  /* .approved, .rejected, .like-btn  { */
-  /*   display: none; */
-  /* } */
+  i.approved, i.rejected  {
+    display: none;
+  }
   &.approved {
     /* .like-btn { */
     /*   display: inline; */
@@ -602,8 +602,8 @@ input.form-input.long {
     button.approved {
       display: none;
     }
-    i.rejected {
-      display: none;
+    i.approved {
+      display: table-cell;
     }
   }
   &.rejected {
@@ -613,8 +613,8 @@ input.form-input.long {
     button.rejected {
       display: none;
     }
-    i.approved {
-      display: none;
+    i.rejected {
+      display: table-cell;
     }
   }
 }
