@@ -177,6 +177,9 @@ var repository = (function() {
             return {id: tagId, label: util.getIn(application, ["organizationMeta", "tags", tagId])};
           }).filter("label").value();
 
+          var sortedAttachmentTypes = attachmentUtils.sortAttachmentTypes(application.allowedAttachmentTypes);
+          application.allowedAttachmentTypes = sortedAttachmentTypes;
+
           hub.send("application-loaded", {applicationDetails: loading});
           if (_.isFunction(callback)) {
             callback(application);
