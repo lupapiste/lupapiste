@@ -414,24 +414,21 @@
       (ok :tags (into {} result)))
     (fail :error.organization-not-found)))
 
-(defn- transform-coordinates-to-wgs84
-  "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"
+(defn- transform-crs-to-wgs84
+  "Convert feature crs in collection to WGS84"
   [collection]
-  (let [schema (.getSchema collection)
-        crs (.getCoordinateReferenceSystem schema)
-        transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)
-        iterator (.features collection)
+  (let [iterator (.features collection)
         feature (when (.hasNext iterator)
                   (.next iterator))
         list (ArrayList.)
         _ (loop [feature (cast SimpleFeature feature)]
             (when feature
-              (let [transformed-geometry (JTS/transform (.getDefaultGeometry feature) transform)
-                    feature-type (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84) ; copy feature type with new crs
+              ; Set CRS to WGS84 to bypass problems when converting to GeoJSON (CRS detection is skipped with WGS84).
+              ; Atm we assume only CRS EPSG:3067 is used.
+              (let [feature-type (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84)
                     builder (SimpleFeatureBuilder. feature-type) ; build new feature with changed crs
                     _ (.init builder feature) ; init builder with original feature
-                    transformed-feature (.buildFeature builder (.getID feature))
-                    _ (.setDefaultGeometry transformed-feature transformed-geometry)]
+                    transformed-feature (.buildFeature builder (.getID feature))]
                 (.add list transformed-feature)))
             (when (.hasNext iterator)
               (recur (.next iterator))))]
@@ -458,7 +455,8 @@
             data-store (FileDataStoreFinder/getDataStore shape-file)
             source (.getFeatureSource data-store)
             collection (.getFeatures source)
-            areas (json/read-str (.toString (FeatureJSON.) collection))]
+            new-collection (transform-crs-to-wgs84 collection)
+            areas (json/read-str (.toString (FeatureJSON.) new-collection))]
         (o/update-organization org-id {$set {:areas areas}})
         (.dispose data-store)
         (->> (assoc file-info :areas areas :ok true)
