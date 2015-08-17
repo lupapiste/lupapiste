@@ -350,7 +350,7 @@
   (mc/ensure-index :companies {:y 1} {:name "company-y"})
   (mc/ensure-index :perf-mon {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
   (mc/ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
-  (mc/ensure-index :organizations {:areas.features.geometry :2dsphere}))
+  (mc/ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32}))
 
 (defn clear! []
   (if-let [mode (db-mode)]
