@@ -458,8 +458,7 @@
             data-store (FileDataStoreFinder/getDataStore shape-file)
             source (.getFeatureSource data-store)
             collection (.getFeatures source)
-            new-collection (transform-coordinates-to-wgs84 collection)
-            areas (json/read-str (.toString (FeatureJSON.) new-collection))]
+            areas (json/read-str (.toString (FeatureJSON.) collection))]
         (o/update-organization org-id {$set {:areas areas}})
         (.dispose data-store)
         (->> (assoc file-info :areas areas :ok true)
