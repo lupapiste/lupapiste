@@ -1356,7 +1356,7 @@
                         <form>
                             <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
                             <label for="foreman-role" data-bind="ltext: 'foreman.role'"></label>
-                            <select name="foreman-role" class="form-input combobox long"
+                            <select name="foreman-role" id="foreman-role" class="form-input combobox long"
                                     data-bind="options: foremanRoles,
                                                optionsText: function(item) { return loc(item.i18nkey); },
                                                optionsValue: 'name',
@@ -1364,7 +1364,7 @@
                                                optionsCaption: loc('choose')"></select>
 
                             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-foreman-email"></label>
-                            <input class="form-input text long" id="invite-foreman-email" type="text" data-bind="textInput: email" autofocus></input>
+                            <input class="form-input text long" id="invite-foreman-email" type="text" data-bind="textInput: email" autofocus>
                             <div data-bind="visible: error" >
                                 <div data-bind="ltext: error" class="context-error"></div>
                             </div>
