@@ -41,7 +41,7 @@
 (defn possible-statement-statuses [application]
   (let [{permit-type :permitType municipality :municipality} application
         organization (organization/resolve-organization municipality permit-type)
-        version (get-in organization [:krysp (keyword permit-type) :version])
+        version (get-in organization [:krysp (keyword permit-type) :version] "0.0.0")
         yht-version (mapping-common/get-yht-version permit-type version)]
     (if (util/version-is-greater-or-equal yht-version {:major 2 :minor 1 :micro 5})
       statement-statuses-more-options

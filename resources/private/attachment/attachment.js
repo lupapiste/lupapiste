@@ -109,7 +109,6 @@ var attachment = (function() {
     signatures:                   ko.observableArray([]),
     type:                         ko.observable(),
     attachmentType:               ko.observable(),
-    allowedAttachmentTypes:       ko.observableArray([]),
     previewDisabled:              ko.observable(false),
     operation:                    ko.observable(),
     selectedOperationId:          ko.observable(),
@@ -131,9 +130,9 @@ var attachment = (function() {
     metadata:                     ko.observable(),
     showTosMetadata:              ko.observable(false),
 
-    toggleHelp: function() {
-      model.showHelp(!model.showHelp());
-    },
+    // toggleHelp: function() {
+    //   model.showHelp(!model.showHelp());
+    // },
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -185,7 +184,7 @@ var attachment = (function() {
     previousAttachment: function() {
       var previousId = util.getIn(model.groupAttachments(), [model.groupIndex() - 1, "id"]);
       if (previousId) {
-        pageutil.openPage("attachment", applicationId + "/" + previousId)
+        pageutil.openPage("attachment", applicationId + "/" + previousId);
         hub.send("track-click", {category:"Attachments", label: "", event:"previousAttachment"});
       }
     },
@@ -193,7 +192,7 @@ var attachment = (function() {
     nextAttachment: function() {
       var nextId = util.getIn(model.groupAttachments(), [model.groupIndex() + 1, "id"]);
       if (nextId) {
-        pageutil.openPage("attachment", applicationId + "/" + nextId)
+        pageutil.openPage("attachment", applicationId + "/" + nextId);
         hub.send("track-click", {category:"Attachments", label: "", event:"nextAttachment"});
       }
     },
@@ -421,7 +420,6 @@ var attachment = (function() {
     model.size(attachment.size);
     model.isVerdictAttachment(attachment.forPrinting);
     model.applicationState(attachment.applicationState);
-    model.allowedAttachmentTypes(application.allowedAttachmentTypes);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
     model.metadata(attachment.metadata);
 

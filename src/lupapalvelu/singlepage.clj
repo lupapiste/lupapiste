@@ -39,7 +39,7 @@
     (env/feature? :no-minification) (IOUtils/copy in out)
     (= kind :js) (let [c (JavaScriptCompressor. in error-reporter)]
                    ; no linebreaks, obfuscate locals, no verbose,
-                   (.compress c out -1 true false
+                   (.compress c out -1 true false;
                      ; preserve semicolons, disable optimizations
                      true true))
     (= kind :css) (let [c (CssCompressor. in)]

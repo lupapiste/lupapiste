@@ -71,9 +71,6 @@ LUPAPISTE.NoticeModel = function() {
         .success(function() {
           self.indicator({name: "notice", type: "saved"});
         })
-        .error(function() {
-          self.indicator({name: "urgency", type: "err"});
-        })
         .call();
     }, 500)));
 

@@ -182,9 +182,9 @@ var LUPAPISTE = LUPAPISTE || {};
 
     hub.subscribe({type: "connection", status: "session-dead"}, function () {
       if (wasLoggedIn) {
-        LUPAPISTE.ModalDialog.mask.unbind("click");
         LUPAPISTE.ModalDialog.showDynamicOk(loc("session-dead.title"), loc("session-dead.message"),
             {title: loc("session-dead.logout"), fn: self.redirectToHashbang});
+        hub.subscribe("dialog-close", self.redirectToHashbang, true);
       }
     });
 

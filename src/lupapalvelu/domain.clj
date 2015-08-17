@@ -126,10 +126,10 @@
 (defn has-auth-role? [{auth :auth} user-id role]
   (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
 
+(def owner-or-write-roles ["owner" "writer" "foreman"])
+
 (defn owner-or-write-access? [application user-id]
-  (or (has-auth-role? application user-id "owner")
-      (has-auth-role? application user-id "writer")
-      (has-auth-role? application user-id "foreman")))
+  (boolean (some (partial has-auth-role? application user-id) owner-or-write-roles)))
 
 (defn validate-owner-or-write-access
   "Validator: current user must be owner or have write access.
@@ -150,35 +150,45 @@
 ;; documents
 ;;
 
+(defn- docs-from [application-or-documents]
+  {:post [(sequential? %)]}
+  (if (map? application-or-documents) (:documents application-or-documents) application-or-documents))
+
 (defn get-document-by-id
   "returns first document from application with the document-id"
-  [{documents :documents} document-id]
-  (first (filter #(= document-id (:id %)) documents)))
+  [application-or-documents document-id]
+  (let [documents (docs-from application-or-documents)]
+    (util/find-by-id document-id documents)))
+
+(defn- documents-by-schema-info [application-or-documents k v]
+  (let [documents (docs-from application-or-documents)]
+    (filter (comp (partial = (keyword v)) keyword k :schema-info) documents)))
 
 (defn get-documents-by-name
   "returns document from application by schema name"
-  [{documents :documents} schema-name]
-  (filter (comp (partial = (keyword schema-name)) keyword :name :schema-info) documents))
+  [application-or-documents schema-name]
+  (documents-by-schema-info application-or-documents :name schema-name))
 
 (defn get-documents-by-type
   "returns document from application by schema type"
-  [{documents :documents} schema-type]
-  (filter (comp (partial = (keyword schema-type)) keyword :type :schema-info) documents))
+  [application-or-documents schema-type]
+  (documents-by-schema-info application-or-documents :type schema-type))
 
 (defn get-document-by-name
   "returns first document from application by schema name"
-  [application schema-name]
-  (first (get-documents-by-name application schema-name)))
+  [application-or-documents schema-name]
+  (first (documents-by-schema-info application-or-documents :name schema-name)))
 
 (defn get-document-by-type
-  "returns first document from application by schema name"
-  [application type-to-find]
-  (first (get-documents-by-type application type-to-find)))
+  "returns first document from application by schema type"
+  [application-or-documents schema-type]
+  (first (documents-by-schema-info application-or-documents :type schema-type)))
 
 (defn get-document-by-operation
   "returns first document from application that is associated with the operation"
-  [{documents :documents} operation]
-  (let [op-id (if (map? operation) (:id operation) operation)]
+  [application-or-documents operation]
+  (let [op-id (if (map? operation) (:id operation) operation)
+        documents (docs-from application-or-documents)]
     (first (filter #(= op-id (get-in % [:schema-info :op :id])) documents))))
 
 (defn get-subtype [{schema-info :schema-info :as doc}]

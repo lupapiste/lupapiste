@@ -2,7 +2,7 @@
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
-Library        Selenium2Library   timeout=10
+Library        Selenium2Library   timeout=10  run_on_failure=Nothing
 
 *** Variables ***
 
@@ -308,6 +308,7 @@ Select From Autocomplete
   Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
   Wait until  Element should be visible  xpath=//${container}//ul[@class="autocomplete-result"]//li/span[contains(text(), '${value}')]
   Click Element  xpath=//${container}//ul[@class="autocomplete-result"]//li/span[contains(text(), '${value}')]
+  Wait for jQuery
 
 Click by id
   [Arguments]  ${id}
@@ -656,21 +657,21 @@ Input comment
   Open side panel  conversation
   Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
-  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'is-comment')]//span[text()='${message}']
   Close side panel  conversation
 
 Input inforequest comment
   [Arguments]  ${message}
   Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='inforequest']//button[@data-test-id='application-new-comment-btn']
-  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'is-comment')]//span[text()='${message}']
 
 Input comment and open to authorities
   [Arguments]  ${message}
   Open side panel  conversation
   Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-open-application-btn']
-  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'is-comment')]//span[text()='${message}']
   Close side panel  conversation
 
 Input comment and mark answered
@@ -680,7 +681,7 @@ Input comment and mark answered
   Wait until  element should be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
-  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'is-comment')]//span[text()='${message}']
 
 Mark answered
   Click element  xpath=//section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
@@ -691,7 +692,7 @@ Mark answered
 Comment count is
   [Arguments]  ${amount}
   Open side panel  conversation
-  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class,'comment-text')]  ${amount}
+  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class,'is-comment')]  ${amount}
   Close side panel  conversation
 
 #
@@ -708,7 +709,11 @@ Invite count is
 
 Task count is
   [Arguments]  ${type}  ${amount}
-  Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr[@data-test-type="${type}"]  ${amount}
+  Wait until  Xpath Should Match X Times  //*[@data-bind="foreach: taskGroups"]//tbody/tr[@data-test-type="${type}"]  ${amount}
+
+Foreman count is
+  [Arguments]  ${amount}
+  Wait until  Xpath Should Match X Times  //table[@class="tasks-foreman"]/tbody/tr  ${amount}
 
 #
 # Quick, jettison the db...

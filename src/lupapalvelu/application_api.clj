@@ -256,7 +256,7 @@
   [{:keys [application created] :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)]
     (or
-      (foreman/validate-notice-submittable application)
+      (foreman/validate-application application)
       (a/validate-link-permits application)
       (do-submit command application created))))
 
@@ -345,6 +345,7 @@
    :notified         true                                   ; OIR
    :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
                       (partial a/property-id-parameters [:propertyId])
+                      validate-x validate-y
                       operation-validator]}
   [{{:keys [infoRequest]} :data :keys [created] :as command}]
   (let [created-application (a/do-create-application command)]
