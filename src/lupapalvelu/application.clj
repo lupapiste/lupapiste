@@ -101,11 +101,15 @@
     (update-in application [:documents] (partial map mask-person-ids))))
 
 ; Process
+(defn- with-current-schema-info [document]
+  (let [current-info (-> document :schema-info schemas/get-schema :info (select-keys schemas/immutable-keys))]
+    (update document :schema-info merge current-info)))
+
 (defn- process-documents [user {authority :authority :as application}]
   (let [validate (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
         mask-person-ids (person-id-masker-for-user user application)
-        doc-mapper (comp mask-person-ids validate)]
-    (update-in application [:documents] (partial map doc-mapper))))
+        doc-mapper (comp with-current-schema-info mask-person-ids validate)]
+    (update application :documents (partial map doc-mapper))))
 
 (defn ->location [x y]
   [(util/->double x) (util/->double y)])
