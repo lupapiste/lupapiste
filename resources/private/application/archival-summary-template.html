@@ -4,37 +4,41 @@
 <section class="page" id="archival-summary" style="visibility: hidden; display: block;">
   <script type="text/html" id="archival-summary-template">
 
-    <div data-bind="if: !_.isEmpty(archivedDocuments())" class="archival-summary-document-set">
+    <div data-bind="if: showArchived" class="archival-summary-document-set">
       <h1>Arkistoitavat asiakirjat - <span data-bind="text: $root.application.id"></span></h1>
       <div>
       Asiakirjan säilytysaika määrää arkistoidaanko asiakirjaa. Voit muokata asiakirjan arkistointiaikaa ja
       muita tietoja klikkaamalla asiakirjan riviä.
       </div>
 
-      <div data-bind="template: {name: 'archival-document-table-template', data: {documents: archivedDocuments, showWillPublish: true}}"></div>
+      <div data-bind="if: !_.isEmpty(archivedDocuments())">
+        <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: archivedDocuments, showWillPublish: true}}"></div>
+      </div>
+
+      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true}}"></div>
 
       <div><button class="btn-primary">Vie arkistoon</button></div>
     </div>
 
-    <div data-bind="if: !_.isEmpty(notArchivedDocuments())" class="document-set">
+    <div data-bind="if: showNotArchived" class="document-set">
       <h1>Muut asiakirjat (ei arkistoida) - <span data-bind="text: $root.application.id"></span></h1>
 
-      <div data-bind="template: {name: 'archival-document-table-template', data: {documents: notArchivedDocuments, showWillPublish: false}}"></div>
+      <div data-bind="if: !_.isEmpty(notArchivedDocuments())">
+        <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: notArchivedDocuments, showWillPublish: false}}"></div>
+      </div>
+
+      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedGroups, showWillPublish: false}}"></div>
     </div>
 
   </script>
-  <script type="text/html" id="archival-document-table-template">
+  <script type="text/html" id="archival-summary-attachment-table">
     <table class="table archival-summary-table">
-      <tbody data-bind="foreach: documents">
+      <tbody data-bind="foreach: groups">
       <tr class="attachment-group-header">
         <td data-bind="text: name" colspan="4"></td>
       </tr>
-      <tr>
-        <th data-bind="ltext: 'application.attachmentType'" class="attachment-type">Tyyppi</th>
-        <th>Säilytysaika</th>
-        <th class="personal-data">Henkilötiedot</th>
-        <th data-bind="if: $parent.showWillPublish" class="will-publish">Julkaistaan</th>
-      </tr>
+      <!-- ko template: {name: 'archival-summary-table-header'} -->
+      <!-- /ko -->
 
       <!-- ko foreach: attachments -->
       <tr class="attachment-row">
@@ -64,10 +68,10 @@
           </div>
 
           <div data-bind="if: !_.isEmpty($data.metadata)">
-            <div data-bind="slider: showMetadataEditor,
-                            component: {name: 'metadata-editor',
-                                        params: {attachmentId: id, metadata: metadata, applicationId: $root.application.id,
-                                        saveCallback: function(){$data.showMetadataEditor(false);}}}"></div>
+            <div data-bind="slider: $data.showMetadataEditor,
+                          component: {name: 'metadata-editor',
+                                      params: {attachmentId: id, metadata: metadata, applicationId: $root.application.id,
+                                      saveCallback: function(){$data.showMetadataEditor(false);}}}"></div>
           </div>
         </td>
 
@@ -81,6 +85,52 @@
       <!-- /ko -->
       </tbody>
     </table>
+  </script>
+
+  <script type="text/html" id="archival-summary-document-table">
+    <table class="table archival-summary-table">
+      <tbody>
+      <tr class="attachment-group-header">
+        <td colspan="4">Hankkeen pääasiakirjat</td>
+      </tr>
+
+      <!-- ko template: {name: 'archival-summary-table-header'} -->
+      <!-- /ko -->
+
+      <!-- ko foreach: documents -->
+      <tr class="attachment-row">
+        <td class="attachment-type">
+          <div class="attachment-type-container" data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}">
+            <div data-bind="ltext: documentNameKey"></div>
+          </div>
+
+          <div data-bind="if: !_.isEmpty($data.metadata)">
+            <div data-bind="slider: $data.showMetadataEditor,
+                          component: {name: 'metadata-editor',
+                                      params: {metadata: metadata, applicationId: $root.application.id,
+                                      saveCallback: function(){$data.showMetadataEditor(false);}}}"></div>
+          </div>
+        </td>
+
+        <td data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: retentionDescription"></td>
+        <td class="personal-data" data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: personalDataDescription"></td>
+        <td data-bind="if: $parent.showWillPublish, click: function(){$data.showMetadataEditor(!showMetadataEditor())}" class="will-publish">
+          <span data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check"></span>
+          <span data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove"></span>
+        </td>
+      </tr>
+      <!-- /ko -->
+      </tbody>
+    </table>
+  </script>
+
+  <script type="text/html" id="archival-summary-table-header">
+    <tr>
+      <th data-bind="ltext: 'application.attachmentType'" class="attachment-type">Tyyppi</th>
+      <th>Säilytysaika</th>
+      <th class="personal-data">Henkilötiedot</th>
+      <th data-bind="if: $parent.showWillPublish" class="will-publish">Julkaistaan</th>
+    </tr>
   </script>
 </section>
 </body>

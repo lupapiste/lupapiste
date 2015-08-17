@@ -63,7 +63,9 @@
 
   var addAdditionalFieldsToAttachments = function(attachments) {
     return _.map(attachments, function(attachment) {
-      attachment.metadata = ko.observable(attachment.metadata);
+      if (!_.isFunction(attachment.metadata)) {
+        attachment.metadata = ko.observable(attachment.metadata);
+      }
       attachment.showMetadataEditor = ko.observable(false);
       attachment.retentionDescription = ko.pureComputed(function() {
         var retention = attachment.metadata() ? attachment.metadata()["sailytysaika"] : null;
@@ -95,6 +97,10 @@
     });
   };
 
+  var collectMainDocuments = function(application) {
+    return [{documentNameKey: 'applications.application', metadata: application.metadata}];
+  };
+
   var model = function(params) {
     var self = this;
     self.attachments = params.application.attachments;
@@ -108,11 +114,26 @@
     var notArchivedAttachments = ko.pureComputed(function() {
       return filterByArchiveStatus(preAttachments(), false);
     });
-    self.archivedDocuments = ko.pureComputed(function() {
+    self.archivedGroups = ko.pureComputed(function() {
       return getGroupList(archivedAttachments());
     });
-    self.notArchivedDocuments = ko.pureComputed(function() {
+    self.notArchivedGroups = ko.pureComputed(function() {
       return getGroupList(notArchivedAttachments());
+    });
+    var mainDocuments = ko.pureComputed(function() {
+      return addAdditionalFieldsToAttachments(collectMainDocuments(params.application));
+    });
+    self.archivedDocuments = ko.pureComputed(function() {
+      return filterByArchiveStatus(mainDocuments(), true);
+    });
+    self.notArchivedDocuments = ko.pureComputed(function() {
+      return filterByArchiveStatus(mainDocuments(), false);
+    });
+    self.showArchived = ko.pureComputed(function() {
+      return !_.isEmpty(self.archivedDocuments()) || !_.isEmpty(self.archivedGroups());
+    });
+    self.showNotArchived = ko.pureComputed(function() {
+      return !_.isEmpty(self.notArchivedDocuments()) || !_.isEmpty(self.notArchivedGroups());
     });
   };
 
