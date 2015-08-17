@@ -281,26 +281,11 @@
 }
 
 
-/* .with-map-top { */
-/*   /\* float: right; *\/ */
-/*   /\* width: 200px; *\/ */
-/*   overflow: hidden; */
-/*   vertical-align: top; */
-/*   &:after { */
-/*     content: ""; */
-/*     display: table; */
-/*     clear: right; */
-/*   } */
-/* } */
-
-/* .with-map-bottom { */
-/*   float: right; */
-/*   width: 200px; */
-/*   overflow: hidden; */
-/*   vertical-align: bottom; */
-/*   &:after { */
-/*     content: ""; */
-/*     display: table; */
-/*     clear: both; */
-/*   } */
-/* } */
+.with-map-top {
+  margin: {
+    top: $marginS;
+    bottom: 0;
+    left: $marginS;
+    right: $marginS;
+  }
+}

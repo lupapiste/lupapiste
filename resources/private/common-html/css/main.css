@@ -4678,28 +4678,14 @@ table.attachments-template-table td.attachment-version-info {
   width: 100%;
 }
 
-/* .with-map-top { */
-/*   /\* float: right; *\/ */
-/*   /\* width: 200px; *\/ */
-/*   overflow: hidden; */
-/*   vertical-align: top; */
-/*   &:after { */
-/*     content: ""; */
-/*     display: table; */
-/*     clear: right; */
-/*   } */
-/* } */
-/* .with-map-bottom { */
-/*   float: right; */
-/*   width: 200px; */
-/*   overflow: hidden; */
-/*   vertical-align: bottom; */
-/*   &:after { */
-/*     content: ""; */
-/*     display: table; */
-/*     clear: both; */
-/*   } */
-/* } */
+/* line 284, ../sass/partials/_modal.scss */
+.with-map-top {
+  margin-top: 6px;
+  margin-bottom: 0;
+  margin-left: 6px;
+  margin-right: 6px;
+}
+
 /*
   Bootstrap sets img width to 100% and that messes GoogleMaps and OpenLayers.
 */
@@ -6326,10 +6312,6 @@ span.icon_clear:before {
 /* line 103, ../sass/views/_application.scss */
 .application_summary .application_summary_info h1 {
   width: 100%;
-}
-/* line 105, ../sass/views/_application.scss */
-.application_summary .application_summary_info h1 .address {
-  white-space: nowrap;
 }
 /* line 108, ../sass/views/_application.scss */
 .application_summary .application_summary_info h1 a {
