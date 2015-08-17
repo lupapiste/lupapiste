@@ -71,7 +71,8 @@
 
 
 button.btn-dialog, .btn-dialog {
-   position: absolute;
+  position: absolute;
+  display: table;
    text-align: center;
    bottom: 0;
    right: 6px;
@@ -80,10 +81,18 @@ button.btn-dialog, .btn-dialog {
    min-width: $cols2;
    max-width: $cols3;;
    margin-left: $marginS;
+   min-height: 40px;
+   max-height: 40px;
+   line-height: 40px;
 
    &.cancel {
     width: auto;
    }
+}
+
+.btn-dialog > span {
+   min-width: $cols2;
+   max-width: $cols3;
 }
 
 
