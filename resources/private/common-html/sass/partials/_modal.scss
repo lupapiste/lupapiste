@@ -211,29 +211,40 @@
   padding-bottom:0;
 }
 
+// This seems to be used only in change-location.html
 .with-map {
-  display: table-row;
+  //min-width: 680px !important;
+  //display: table-row;
+  //display: inline-block;
 
-  .map-container {
-    padding: 0;
-  }
+  /* .map-container { */
+  /*   //padding: 0; */
+  /*   /\* float: left; *\/ */
+  /*   /\* width: 480px; *\/ */
+  /*   display: inline-block; */
+  /* } */
 
-  .btn-primary {
-    left: auto; right: 260px;
-    bottom: 5px;
-  }
-  a.btn-dialog {
-    right:-70px;
-    bottom: 10px;
-    width: 100px;
-  }
+  /* form { */
+  /*   /\* float: left; *\/ */
+  /*   /\* width: 200px; *\/ */
+  /*   display: inline-block; */
+  /* } */
+  /* .btn-primary { */
+  /*   left: auto; right: 260px; */
+  /*   bottom: 5px; */
+  /* } */
+  /* a.btn-dialog { */
+  /*   right:-70px; */
+  /*   bottom: 10px; */
+  /*   width: 100px; */
+  /* } */
 }
 
-.with-map > div {
-  display: table-cell;
-  vertical-align: top;
-  padding-left: $marginM;
-}
+/* .with-map > div { */
+/*   display: table-cell; */
+/*   vertical-align: top; */
+/*   padding-left: $marginM; */
+/* } */
 
 .neighbors-message {
   margin: $marginM;
@@ -268,3 +279,28 @@
     width: 100%;
   }
 }
+
+
+/* .with-map-top { */
+/*   /\* float: right; *\/ */
+/*   /\* width: 200px; *\/ */
+/*   overflow: hidden; */
+/*   vertical-align: top; */
+/*   &:after { */
+/*     content: ""; */
+/*     display: table; */
+/*     clear: right; */
+/*   } */
+/* } */
+
+/* .with-map-bottom { */
+/*   float: right; */
+/*   width: 200px; */
+/*   overflow: hidden; */
+/*   vertical-align: bottom; */
+/*   &:after { */
+/*     content: ""; */
+/*     display: table; */
+/*     clear: both; */
+/*   } */
+/* } */
