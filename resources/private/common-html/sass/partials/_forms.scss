@@ -572,10 +572,24 @@ input.form-input.long {
 
 }
 
-.form-approval-status {
-  text-transform: none;
+label.group-buttons, .group-buttons {
   width: 100%;
   display: block;
+  .is-right {
+    float: right;
+    margin-left: $marginS;
+  }
+  padding-right: $marginS;
+}
+
+.button-group button.is-right {
+  margin-right: 0;
+}
+
+.form-approval-status {
+  text-transform: none;
+  //width: 100%;
+  display: inline-block;
   min-height: 32px;
 
   &.empty {
@@ -599,9 +613,9 @@ input.form-input.long {
     /* .like-btn { */
     /*   display: inline; */
     /* } */
-    button.approved {
-      display: none;
-    }
+    /* button.approved { */
+    /*   display: none; */
+    /* } */
     i.approved {
       display: table-cell;
     }
@@ -610,16 +624,24 @@ input.form-input.long {
     /* .like-btn { */
     /*   display: inline; */
     /* } */
-    button.rejected {
-      display: none;
-    }
+    /* button.rejected { */
+    /*   display: none; */
+    /* } */
     i.rejected {
       display: table-cell;
     }
   }
 }
 
-section.approved .form-approval-status  {
+.form-approval-status.approved ~ button.approved {
+  display: none;
+}
+
+.form-approval-status.rejected ~ button.rejected {
+  display: none;
+}
+
+section.approved .group-buttons  {
     /* .like-btn { */
     /*   display: inline; */
     /* } */
@@ -649,27 +671,10 @@ section.approved .form-approval-status  {
   .lupicon-circle-check {
     color: $green;
   }
-  /* .rejected, .approved, span { */
-  /*   display: none; */
-  /* } */
   .approved {
     padding-right: $icon-pad;
   }
 }
-
-/* .form-approval-status .is-status.approved { */
-/*   display: initial; */
-/*   .approved, span { */
-/*     display: initial; */
-/*   } */
-/* } */
-
-/* .form-approval-status .is-status.rejected { */
-/*   display: initial; */
-/*   .rejected, span { */
-/*     display: initial; */
-/*   } */
-/* } */
 
 
 .form-help {

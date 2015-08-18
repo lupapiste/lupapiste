@@ -429,12 +429,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   //        fun: function to be called when status changes.
   //        Note: The bar's order name (see above) is fixed, because
   //        it needs to be known by the detail status indicators.
-  //  remove: Object modeling the remove button
-  //          fun: Function to be bound on the remove button.
-  //          attr: Extra attributes object.
+  // Returns an array of elements: icons, reject button, approve button.
   self.makeApprovalButtons = function (path, model, opts ) {
     opts = opts || {};
-    var btnContainer$ = $("<span>").addClass("form-buttons");
     var statusContainer$ = null;
     var statusKey = _.uniqueId( "status");
     if( !opts.bar ) {
@@ -445,14 +442,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     var approvalContainer$ = $("<span>")
                              .addClass("form-approval-status is-status empty")
-                             .append(statusContainer$)
-                             .append(btnContainer$);
+                             .append(statusContainer$);
     var approveButton$ = null;
     var rejectButton$ = null;
     var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: self.getCollection() };
 
     if (_.isEmpty(model)) {
-      return approvalContainer$[0];
+      return approvalContainer$;
     }
 
     function setStatus(approval) {
@@ -517,36 +513,24 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var requiresApproval = !approval || modelModifiedSince(model, approval.timestamp);
     // var allowApprove = requiresApproval || (approval && approval.value === "rejected");
     // var allowReject = requiresApproval || (approval && approval.value === "approved");
+    var result = [approvalContainer$];
 
-
-    if (self.authorizationModel.ok("approve-doc")) {
-      approveButton$ = makeApprovalButton("approve", "approved", "positive");
-      btnContainer$.append(approveButton$);
-
-      // if (!allowApprove) {
-      //     approveButton$.hide();
-      // }
-    }
     if (self.authorizationModel.ok("reject-doc")) {
-      rejectButton$ = makeApprovalButton("reject", "rejected", "secondary");
-      btnContainer$.append(rejectButton$);
-
+      rejectButton$ = makeApprovalButton("reject", "rejected", "secondary").addClass( "is-right");
+      //btnContainer$.append(rejectButton$);
+      result.push( rejectButton$ );
     //   if (!allowReject) {
     //       rejectButton$.hide();
     //   }
     }
-
-    if( opts.remove ) {
-      var rm$ = $("<button>").addClass( "secondary").click( opts.remove.fun);
-      _.each( opts.remove.attr || {}, function( v, k ) {
-        rm$.attr( k, v );
-      });
-      rm$.append( $("<i>").addClass("lupicon-remove"));
-      rm$.append( $("<span>").text( loc( "remove")));
-      btnContainer$.append( rm$ );
+    if (self.authorizationModel.ok("approve-doc")) {
+      approveButton$ = makeApprovalButton("approve", "approved", "positive").addClass( "is-right");
+      //btnContainer$.append(approveButton$);
+      result.push( approveButton$);
+      // if (!allowApprove) {
+      //     approveButton$.hide();
+      // }
     }
-
-
     // if (allowApprove || allowReject) {
     //     approvalContainer$.removeClass("empty");
     // }
@@ -557,8 +541,34 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (!requiresApproval) {
       setStatus(approval);
     }
-    return approvalContainer$[0];
+    return result; //approvalContainer$;
   };
+
+  // Opts can have approval property that denotes the opts for
+  // makeApprovalButtons. Note that opts.approval must by truthy
+  // (at least empty object) for approval buttons to be created.
+  // Other options:
+  //  remove: Object modeling the remove button
+  //          fun: Function to be bound on the remove button.
+  //          attr: Extra attributes object.
+  self.makeGroupButtons = function(path, model, opts ) {
+    var buttons$ = $("<div>").addClass( "group-buttons" );
+    if ( opts.remove ) {
+      var rm$ = $("<button>").addClass( "secondary is-right").click( opts.remove.fun);
+      _.each( opts.remove.attr || {}, function( v, k ) {
+        rm$.attr( k, v );
+      });
+      rm$.append( $("<i>").addClass("lupicon-remove"));
+      rm$.append( $("<span>").text( loc( "remove")));
+      buttons$.append( rm$ );
+    }
+    if( opts.approval ) {
+      _.each( self.makeApprovalButtons( path, model, opts.approval ), function( elem ) {
+        buttons$.append( elem );
+      });
+    }
+    return buttons$;
+  }
 
   // Form field builders
 
@@ -865,23 +875,20 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  // Returns object with remove property (see makeApprovalButtons for details) or null,
+  // Returns object with fun and attr properties (see makeGroupButtons for details) or null,
   // if the given subSchema/path does not support/require remove functionality.
-  // The return value can be given as the opts argument to makeApprovalButtons.
   function resolveRemoveOptions( subSchema, path ) {
     var opts = null;
     if(subSchema.repeating && !self.isDisabled && authorizationModel.ok("remove-document-data")) {
       opts = {
-        remove: {
-          fun: function () {
-            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
-                                                   { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, path); } },
-                                                   { title: loc("no") });
-          }
+        fun: function () {
+          LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
+                                                 { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, path); } },
+                                                 { title: loc("no") });
         }
-      };
+      }
       if( options && options.dataTestSpecifiers ) {
-        opts.remove.attr =  {"data-test-class": "delete-schemas." + subSchema. name};
+        opts.attr =  {"data-test-class": "delete-schemas." + subSchema. name};
       }
     }
     return opts;
@@ -905,9 +912,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var groupHelpText = makeGroupHelpTextSpan(subSchema);
     div.appendChild(groupHelpText);
 
+    var opts = {};
     if (subSchema.approvable) {
-      label.appendChild(self.makeApprovalButtons(path, myModel, resolveRemoveOptions( subSchema, path)));
+      opts.approval = {};
     }
+    opts.remove = resolveRemoveOptions( subSchema, path);
+    $(label).append(self.makeGroupButtons(path, myModel, opts ));
+
     div.appendChild(partsDiv);
 
     listen(subSchema, myPath, div);
@@ -1452,7 +1463,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         div.appendChild(groupHelpText);
 
         if (subSchema.approvable) {
-          div.appendChild(self.makeApprovalButtons(path, models));
+          $(div).append(self.makeGroupButtons(path, models, {approval: {}}));
         }
         div.appendChild(table);
 
@@ -2001,14 +2012,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       elements.appendChild(operationType);
     }
 
+    var opts = {};
+
     if (self.schema.info.approvable) {
-      elements.appendChild(self.makeApprovalButtons([],
-                                                    self.model,
-                                                    {bar: {fun:  _.partial( self.barStatusHandler, $(toggle)),
-                                                           selector: $(toggle)
-                                                          },
-                                                    remove: removeOpts}));
+      opts.approval = {bar: {fun:  _.partial( self.barStatusHandler, $(toggle)),
+                             selector: $(toggle)
+                            }};
     }
+    opts.remove = removeOpts;
+
+    $(elements).append(self.makeGroupButtons([], self.model, opts));
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
