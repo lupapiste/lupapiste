@@ -1,6 +1,8 @@
 (function($) {
   "use strict";
 
+  var self = this;
+
   var rememberMeCookieName = "my-email";
 
   var rememberMe = ko.observable(false);
@@ -61,33 +63,24 @@
 
   hub.onPageLoad("login", recallMe);
 
-  function checkIE8() {
-    return true;
+  function IE8OrOlder() {
+    return $('span.old-ie').length !== 0
   }
 
-  $(function() {
-    if (checkIE8()) {
+  var handleLoginSubmit = function() {
+    if (IE8OrOlder()) {
       alert("Lupapiste ei tue käyttämääsi selainta, kokeile uudelleen toisella selaimella. (Esim. Mozilla Firefox, Google Chrome, Apple Safari)")
+    } else {
+      login();
     }
+  };
 
+  $(function() {
     recallMe();
     if (document.getElementById("login")) {
-      $("#login").applyBindings({rememberMe: rememberMe, processing: processing, pending: pending});
-      $("#login-button").click(login);
+      $("#login").applyBindings({rememberMe: rememberMe, processing: processing, pending: pending, handleLoginSubmit: handleLoginSubmit});
       $("#register-button").click(function() {
         pageutil.openPage("register");
-      });
-      $("#login-username").keypress(function(e) {
-        if (e.which === 13) {
-          $("#login-password").focus();
-          return false;
-        }
-      });
-      $("#login-password").keypress(function(e) {
-        if (e.which === 13) {
-          login();
-          return false;
-        }
       });
     }
   });
