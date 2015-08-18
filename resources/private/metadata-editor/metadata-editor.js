@@ -7,14 +7,14 @@
       if (v.dependencies) {
         _.forEach(v.dependencies, function (depArray) {
           _.forEach(depArray, function (depVal) {
-            newMap[depVal.type] = ko.observable(actualMetadata && actualMetadata[depVal.type] ? actualMetadata[depVal.type] : null);
+            newMap[depVal.type] = ko.observable(actualMetadata && actualMetadata[depVal.type] !== undefined ? actualMetadata[depVal.type] : null);
           });
         });
       }
       if (v.subfields) {
         newMap[v.type] = ko.mapping.fromJS(constructEditableMetadata(actualMetadata ? actualMetadata[v.type] : null, v.subfields));
       } else {
-        newMap[v.type] = ko.observable(actualMetadata && actualMetadata[v.type] ? actualMetadata[v.type] : null);
+        newMap[v.type] = ko.observable(actualMetadata && actualMetadata[v.type] !== undefined ? actualMetadata[v.type] : null);
       }
     });
     return newMap;
