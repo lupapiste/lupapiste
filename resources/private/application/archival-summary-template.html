@@ -32,52 +32,64 @@
 
   </script>
   <script type="text/html" id="archival-summary-attachment-table">
-    <table class="table archival-summary-table">
-      <tbody data-bind="foreach: groups">
-      <tr class="attachment-group-header">
-        <td data-bind="text: name" colspan="5"></td>
-      </tr>
+    <div class="table archival-summary-table" data-bind="foreach: groups">
+      <div class="attachment-group-header" data-bind="text: name"></div>
 
-      <tr>
-        <th data-bind="ltext: 'application.attachmentType'" class="attachment-type">Tyyppi</th>
-        <th>Säilytysaika</th>
-        <th class="personal-data">Henkilötiedot</th>
-        <th class="stamped">Leimattu</th>
-        <th data-bind="if: $parent.showWillPublish" class="will-publish">Julkaistaan</th>
-      </tr>
+      <div class="column-header-row">
+        <div data-bind="ltext: 'application.attachmentType'" class="attachment-type">Tyyppi</div>
+        <div class="retention-period">Säilytysaika</div>
+        <div class="personal-data">Henkilötiedot</div>
+        <div class="stamped">Leimattu</div>
+        <div data-bind="if: $parent.showWillPublish" class="will-publish">Julkaistaan</div>
+      </div>
 
       <!-- ko foreach: attachments -->
-      <tr class="attachment-row">
-        <td class="attachment-type">
-          <div class="attachment-type-container" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
-            <div class="group-label">
-              <span data-bind="if: type">
-                <span data-bind="text: loc(['attachmentType', type['type-group'](), '_group_label'])"></span>
-              </span>
-              <span data-bind="if: !type">
-                <i data-bind="ltext: 'attachment.noName'"></i>
-              </span>
-            </div>
-            <div class="type-id">
-              <div>
+      <div class="attachment-row">
+        <div class="attachment-row-top">
+          <div class="attachment-type">
+            <div class="attachment-type-container" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
+              <div class="group-label">
                 <span data-bind="if: type">
-                  <span data-bind="text: loc(['attachmentType', type['type-group'](), type['type-id']()])"></span>
+                  <span data-bind="text: loc(['attachmentType', type['type-group'](), '_group_label'])"></span>
                 </span>
                 <span data-bind="if: !type">
                   <i data-bind="ltext: 'attachment.noName'"></i>
                 </span>
               </div>
-              <!-- ko if: $data.contents -->
-              <div class="attachment-content-desc"><span data-bind="text: $data.contents"></span></div>
-              <!-- /ko -->
+              <div class="type-id">
+                <div>
+                  <span data-bind="if: type">
+                    <span data-bind="text: loc(['attachmentType', type['type-group'](), type['type-id']()])"></span>
+                  </span>
+                  <span data-bind="if: !type">
+                    <i data-bind="ltext: 'attachment.noName'"></i>
+                  </span>
+                </div>
+                <!-- ko if: $data.contents -->
+                <div class="attachment-content-desc"><span data-bind="text: $data.contents"></span></div>
+                <!-- /ko -->
+              </div>
             </div>
           </div>
 
-          <div data-bind="slider: $data.showAdditionalControls" class="additional-controls">
+          <div class="retention-period" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}, text: retentionDescription"></div>
+          <div class="personal-data" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}, text: personalDataDescription"></div>
+          <div class="stamped">
+            <i class="lupicon-circle-stamp enabled" data-bind="visible: stamped, attr: {title: loc('attachment.stamped')}"></i>
+            <i class="lupicon-remove disabled" data-bind="visible: !stamped(), attr: {title: loc('attachment.stamped')}"></i>
+          </div>
+          <div data-bind="if: $parents[1].showWillPublish, click: function(){$data.showAdditionalControls(!showAdditionalControls())}" class="will-publish">
+            <i data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check enabled"></i>
+            <i data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove disabled"></i>
+          </div>
+        </div>
+
+        <div data-bind="slider: $data.showAdditionalControls" class="additional-controls">
+          <div class="left">
             <div>
               <label>
                 <h4>Vaihda liitteen tyyppi</h4>
-                <select id="attachment-type-select" class="long" data-bind="foreach: $parents[1].attachmentTypes, value: attachmentType">
+                <select class="attachment-type-select" class="long" data-bind="foreach: $parents[1].attachmentTypes, value: attachmentType">
                   <optgroup data-bind="attr: {label: groupLabel}, foreach: types">
                     <option data-bind="text: typeLabel, value: typeValue"></option>
                   </optgroup>
@@ -86,26 +98,17 @@
             </div>
             <div data-bind="if: !_.isEmpty($data.metadata)">
               <div data-bind="component: {name: 'metadata-editor',
-                                          params: {attachmentId: id, metadata: metadata, applicationId: $root.application.id,
-                                          saveCallback: function(){$data.showAdditionalControls(false);}}}"></div>
+                                            params: {attachmentId: id, metadata: metadata, applicationId: $root.application.id,
+                                            saveCallback: function(){$data.showAdditionalControls(false);}}}"></div>
             </div>
           </div>
-        </td>
-
-        <td data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}, text: retentionDescription"></td>
-        <td class="personal-data" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}, text: personalDataDescription"></td>
-        <td class="stamped">
-          <i class="lupicon-circle-stamp enabled" data-bind="visible: stamped, attr: {title: loc('attachment.stamped')}"></i>
-          <i class="lupicon-remove disabled" data-bind="visible: !stamped(), attr: {title: loc('attachment.stamped')}"></i>
-        </td>
-        <td data-bind="if: $parents[1].showWillPublish, click: function(){$data.showAdditionalControls(!showAdditionalControls())}" class="will-publish">
-          <i data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check enabled"></i>
-          <i data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove disabled"></i>
-        </td>
-      </tr>
+          <div class="left">
+            <img data-bind="attr: {src: '/api/raw/preview-attachment?attachment-id=' + id()}">
+          </div>
+        </div>
+      </div>
       <!-- /ko -->
-      </tbody>
-    </table>
+    </div>
   </script>
 
   <script type="text/html" id="archival-summary-document-table">

@@ -7,19 +7,6 @@
   td {
     vertical-align: top;
   }
-  .attachment-type {
-    width: 700px;
-  }
-  .personal-data {
-    width: 170px;
-  }
-  .will-publish {
-    width: 111px;
-  }
-  .stamped {
-    width: 92px;
-    text-align: center;
-  }
   i {
     font-size: 22px;
     &.enabled {
@@ -36,11 +23,68 @@
       width: 50%;
     }
   }
+  .column-header-row {
+    background-color: #dddddd;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.125em;
+    div {
+      display: inline-block;
+      padding: 6px 16px;
+    }
+  }
   .attachment-row {
-    &:active {
+    font-size: 14px;
+    &:active, &:hover {
       background-color: lighten($lp-orange, 40%);
       color: inherit;
     }
+    .attachment-row-top {
+      div {
+        vertical-align: top;
+        display: inline-block;
+        padding: 6px 16px;
+      }
+      .attachment-type {
+        div {
+          padding: 0;
+          display: block;
+        }
+      }
+    }
+    .additional-controls {
+      @include clearfix;
+      padding: 6px 16px;
+      .left {
+        width: 50%;
+      }
+      .attachment-type-select {
+        margin-bottom: 0;
+      }
+    }
+  }
+  .attachment-type {
+    width: 700px;
+    div {
+      padding: 0;
+      display: block;
+    }
+  }
+  .retention-period {
+    width: 160px;
+  }
+  .personal-data {
+    width: 170px;
+    padding: 6px 16px;
+  }
+  .will-publish {
+    width: 111px;
+    padding: 6px 16px;
+    text-align: right;
+  }
+  .stamped {
+    width: 92px;
+    text-align: center;
   }
   .attachment-group-header {
     td {

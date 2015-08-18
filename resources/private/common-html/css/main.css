@@ -5800,35 +5800,18 @@ ul.attachments-list li.mandatory-attachments {
   vertical-align: top;
 }
 /* line 10, ../sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-type {
-  width: 700px;
-}
-/* line 13, ../sass/partials/_archival-summary.scss */
-.archival-summary-table .personal-data {
-  width: 170px;
-}
-/* line 16, ../sass/partials/_archival-summary.scss */
-.archival-summary-table .will-publish {
-  width: 111px;
-}
-/* line 19, ../sass/partials/_archival-summary.scss */
-.archival-summary-table .stamped {
-  width: 92px;
-  text-align: center;
-}
-/* line 23, ../sass/partials/_archival-summary.scss */
 .archival-summary-table i {
   font-size: 22px;
 }
-/* line 25, ../sass/partials/_archival-summary.scss */
+/* line 12, ../sass/partials/_archival-summary.scss */
 .archival-summary-table i.enabled {
   color: #04c714;
 }
-/* line 28, ../sass/partials/_archival-summary.scss */
+/* line 15, ../sass/partials/_archival-summary.scss */
 .archival-summary-table i.disabled {
   color: #da6ded;
 }
-/* line 32, ../sass/partials/_archival-summary.scss */
+/* line 19, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-type-container {
   *zoom: 1;
 }
@@ -5841,21 +5824,99 @@ ul.attachments-list li.mandatory-attachments {
 .archival-summary-table .attachment-type-container:after {
   clear: both;
 }
-/* line 34, ../sass/partials/_archival-summary.scss */
+/* line 21, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-type-container .group-label, .archival-summary-table .attachment-type-container .type-id {
   float: left;
   width: 50%;
 }
-/* line 40, ../sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row:active {
+/* line 26, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .column-header-row {
+  background-color: #dddddd;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.125em;
+}
+/* line 31, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .column-header-row div {
+  display: inline-block;
+  padding: 6px 16px;
+}
+/* line 36, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-row {
+  font-size: 14px;
+}
+/* line 38, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-row:active, .archival-summary-table .attachment-row:hover {
   background-color: #fef4ea;
   color: inherit;
 }
-/* line 46, ../sass/partials/_archival-summary.scss */
+/* line 43, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-row .attachment-row-top div {
+  vertical-align: top;
+  display: inline-block;
+  padding: 6px 16px;
+}
+/* line 49, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-row .attachment-row-top .attachment-type div {
+  padding: 0;
+  display: block;
+}
+/* line 55, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-row .additional-controls {
+  *zoom: 1;
+  padding: 6px 16px;
+}
+/* line 22, ../sass/main.scss */
+.archival-summary-table .attachment-row .additional-controls:before, .archival-summary-table .attachment-row .additional-controls:after {
+  content: "";
+  display: table;
+}
+/* line 26, ../sass/main.scss */
+.archival-summary-table .attachment-row .additional-controls:after {
+  clear: both;
+}
+/* line 58, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-row .additional-controls .left {
+  width: 50%;
+}
+/* line 61, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-row .additional-controls .attachment-type-select {
+  margin-bottom: 0;
+}
+/* line 66, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-type {
+  width: 700px;
+}
+/* line 68, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-type div {
+  padding: 0;
+  display: block;
+}
+/* line 73, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .retention-period {
+  width: 160px;
+}
+/* line 76, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .personal-data {
+  width: 170px;
+  padding: 6px 16px;
+}
+/* line 80, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .will-publish {
+  width: 111px;
+  padding: 6px 16px;
+  text-align: right;
+}
+/* line 85, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .stamped {
+  width: 92px;
+  text-align: center;
+}
+/* line 90, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-group-header td {
   padding-top: 12px;
 }
-/* line 51, ../sass/partials/_archival-summary.scss */
+/* line 95, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .metadata-editor-container .editor-header {
   border-collapse: separate;
 }
