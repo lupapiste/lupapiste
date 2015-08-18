@@ -3,7 +3,12 @@
 
 
 (def all-application-states #{:draft :open :submitted :sent :complement-needed
-                              :verdictGiven :constructionStarted :closed :canceled})
+                              :verdictGiven :constructionStarted :closed :canceled
+                              :extinct
+                              :hearing :proposal :proposalApproved
+                              :survey :sessionProposal :sessionHeld :registered
+                              :appealed :final
+                              })
 (def all-inforequest-states #{:info :answered})
 (def all-states             (union all-application-states all-inforequest-states))
 
