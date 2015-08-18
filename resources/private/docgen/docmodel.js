@@ -554,16 +554,43 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   //  remove: Object modeling the remove button
   //          fun: Function to be bound on the remove button.
   //          attr: Extra attributes object.
+  //  star: Set/signal primary operation
+  //          attr: Extra attibutes object
+  //          text: Button text
+  //          fun: If given, button is enabled and fun is the click handler.
   self.makeGroupButtons = function(path, model, opts ) {
-    var buttons$ = $("<div>").addClass( "group-buttons" );
-    if ( opts.remove ) {
-      var rm$ = $("<button>").addClass( "secondary is-right").click( opts.remove.fun);
-      _.each( opts.remove.attr || {}, function( v, k ) {
-        rm$.attr( k, v );
+
+    function btnHelper( subOpts, cls, icon, text ) {
+      var b = $("<button>").addClass( cls );
+      _.each( subOpts.attr || {}, function( v, k ) {
+        b.attr( k, v );
       });
-      rm$.append( $("<i>").addClass("lupicon-remove"));
-      rm$.append( $("<span>").text( loc( "remove")));
-      buttons$.append( rm$ );
+      var span = b;
+      if( icon ) {
+        b.append( $("<i>").addClass( icon ));
+        span = $("<span>");
+        b.append( span );
+      }
+      span.text( text );
+      if( subOpts.fun ) {
+        b.click( subOpts.fun );
+      } else {
+        b.prop( "disabled", true );
+      }
+      return b;
+    }
+    var buttons$ = $("<div>").addClass( "group-buttons" );
+    if( opts.star ) {
+      buttons$.append( btnHelper( opts.star,
+                                  "secondary is-left",
+                                  "lupicon-star",
+                                  opts.star.text))
+    }
+    if ( opts.remove ) {
+      buttons$.append( btnHelper( opts.remove,
+                                  "secondary is-right",
+                                  "lupicon-remove",
+                                  loc( "remove")));
     }
     if( opts.approval ) {
       _.each( self.makeApprovalButtons( path, model, opts.approval ), function( elem ) {
@@ -1981,31 +2008,26 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       }
     }
 
-    var operationType = document.createElement("span");
+    var opts = {};
+
     if (!notPrimaryOperation) {
-      operationType.className = "icon star-selected";
-      operationType.title = loc("operations.primary");
-      operationType.setAttribute("data-op-name", op.name);
-      elements.appendChild(operationType);
+      opts.star = {attr: {"data-op-name": op.name},
+                   text: loc( "operations.primary")}// operationType.className = "icon star-selected";
     }
 
     if (isSecondaryOperation) {
-      operationType.className = "icon star-unselected";
-      operationType.title = loc("operations.primary.select");
-      $(operationType)
-      .click(function() {
-        ajax.command("change-primary-operation", {id: self.appId, secondaryOperationId: docId})
-        .success(function() {
-          repository.load(self.appId);
-        })
-        .call();
-        return false;
-      });
-      operationType.setAttribute("data-op-name", op.name);
-      elements.appendChild(operationType);
+      opts.star = {attr: {"data-op-name": op.name},
+                   text: loc( "operations.primary.select"),
+                   fun: function() {
+                     ajax.command("change-primary-operation", {id: self.appId, secondaryOperationId: docId})
+                     .success(function() {
+                       repository.load(self.appId);
+                     })
+                     .call();
+                     return false;
+                   }
+                  };
     }
-
-    var opts = {};
 
     if (self.schema.info.approvable) {
       opts.approval = {bar: {fun:  _.partial( self.barStatusHandler, $(toggle)),

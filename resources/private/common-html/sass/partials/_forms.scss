@@ -575,9 +575,13 @@ input.form-input.long {
 label.group-buttons, .group-buttons {
   width: 100%;
   display: block;
+  overflow-y: hidden;
   .is-right {
     float: right;
     margin-left: $marginS;
+  }
+  .is-left {
+    float: left;
   }
   padding-right: $marginS;
   margin: {
