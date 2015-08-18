@@ -25,7 +25,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.property :as p]
-            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.states :as states]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mime :as mime]
@@ -435,9 +435,10 @@
     (.close iterator)
     (DataUtilities/collection list)))
 
-(defpage [:post "/api/upload/organization-area"] {[{:keys [tempfile filename content-type size]}] :files}
-  (let [user (user/current-user (request/ring-request))
-        org-id (user/authority-admins-organization-id user)
+(defraw organization-area
+  {:user-roles #{:authorityAdmin}}
+  [{user :user {[{:keys [tempfile filename content-type size]}] :files} :data :as action}]
+  (let [org-id (user/authority-admins-organization-id user)
         filename (mime/sanitize-filename filename)
         file-info {:file-name    filename
                    :content-type content-type
@@ -460,9 +461,9 @@
         (o/update-organization org-id {$set {:areas areas}})
         (.dispose data-store)
         (->> (assoc file-info :areas areas :ok true)
-             (resp/json)
-             (resp/content-type "application/json")
-             (resp/status 200)))
+          (resp/json)
+          (resp/content-type "application/json")
+          (resp/status 200)))
       (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
         (resp/status 400 text))
       (catch Object _

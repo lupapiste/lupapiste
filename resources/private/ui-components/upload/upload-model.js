@@ -15,7 +15,7 @@ LUPAPISTE.UploadModel = function(params) {
     var formData = new FormData(form);
     $.ajax({
       type: "POST",
-      url: "/api/upload/organization-area",
+      url: "/api/raw/organization-area",
       enctype: "multipart/form-data",
       data: formData,
       cache: false,
