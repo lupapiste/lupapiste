@@ -17,16 +17,16 @@
 (def terminal-states #{:canceled :closed :final :extinct :registered})
 
 (def all-but-draft-or-terminal (difference all-states #{:draft} terminal-states))
-(def all-application-statens-but-draft-or-terminal (difference all-application-states #{:draft} terminal-states))
+(def all-application-states-but-draft-or-terminal (difference all-application-states #{:draft} terminal-states))
 
-(defn all-states-but [drop-states-array]
-  (difference all-states (set drop-states-array)))
+(defn all-states-but [drop-states]
+  (difference all-states (set drop-states)))
 
-(defn all-application-states-but [drop-states-array]
-  (difference all-application-states (set drop-states-array)))
+(defn all-application-states-but [drop-states]
+  (difference all-application-states (set drop-states)))
 
-(defn all-inforequest-states-but [drop-states-array]
-  (difference all-inforequest-states (set drop-states-array)))
+(defn all-inforequest-states-but [drop-states]
+  (difference all-inforequest-states (set drop-states)))
 
 (def
   ^{:doc "Possible state transitions for inforequests.
