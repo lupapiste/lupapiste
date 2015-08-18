@@ -1315,6 +1315,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildTableRow(subSchema, model, path, partOfChoice) {
+    console.log( "subSchema:", subSchema );
     var myPath = path.join(".");
     var name = subSchema.name;
     var myModel = model[name] || {};
@@ -1322,6 +1323,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     appendElements(row, subSchema, myModel, path, save, partOfChoice);
 
     row.id = pathStrToGroupID(myPath);
+    var rm = resolveRemoveOptions( subSchema, path );
+    if( rm ) {
+      var icon$ = $("<i>").addClass( "lupicon-remove primary is-middle");
+      icon$.click( rm.fun );
+      _.each( rm.attr || {}, function( v, k ) {
+        icon$.attr( k, v );
+      });
+      $(row).append( $("<td>").append( icon$ ))
+    }
     return row;
   }
 
@@ -1388,26 +1398,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (elem) {
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
-
-        // if (subSchema.repeating && !self.isDisabled && authorizationModel.ok("remove-document-data")) {
-        //   var removeButton = document.createElement("i");
-        //   removeButton.className = "icon remove-grey inline-right bar";
-        //   removeButton.onclick = function () {
-        //     LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
-        //                                            { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, myPath.concat([id])); } },
-        //                                            { title: loc("no") });
-        //   };
-        //   if (options && options.dataTestSpecifiers) {
-        //     removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
-        //   }
-        //   if (subSchema.type === "table") {
-        //     var td = document.createElement("td");
-        //     td.appendChild(removeButton);
-        //     elem.appendChild(td, elem.childNodes[0]);
-        //   } else {
-        //     elem.insertBefore(removeButton, elem.childNodes[0]);
-        //   }
-        // }
       }
       return elem;
     }

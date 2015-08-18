@@ -580,6 +580,11 @@ label.group-buttons, .group-buttons {
     margin-left: $marginS;
   }
   padding-right: $marginS;
+  margin: {
+    top: $marginS;
+    bottom: $marginS;
+
+  }
 }
 
 .button-group button.is-right {
@@ -602,31 +607,16 @@ label.group-buttons, .group-buttons {
     text-align: right;
     float: right;
     min-width: 200px;
-    /* button { */
-    /*   margin: 0 $marginS $marginS 0; */
-    /* } */
   }
   i.approved, i.rejected  {
     display: none;
   }
   &.approved {
-    /* .like-btn { */
-    /*   display: inline; */
-    /* } */
-    /* button.approved { */
-    /*   display: none; */
-    /* } */
     i.approved {
       display: table-cell;
     }
   }
   &.rejected {
-    /* .like-btn { */
-    /*   display: inline; */
-    /* } */
-    /* button.rejected { */
-    /*   display: none; */
-    /* } */
     i.rejected {
       display: table-cell;
     }
@@ -642,9 +632,6 @@ label.group-buttons, .group-buttons {
 }
 
 section.approved .group-buttons  {
-    /* .like-btn { */
-    /*   display: inline; */
-    /* } */
     button.approved {
       display: none;
     }
@@ -680,6 +667,10 @@ section.approved .group-buttons  {
 // when the bar is in rejected mode.
 button.sticky.rejected ~ .accordion_content .is-top.rejected {
   display: none;
+}
+
+.is-middle {
+  vertical-align: middle;
 }
 
 .form-help {
