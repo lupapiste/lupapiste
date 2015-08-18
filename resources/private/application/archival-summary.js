@@ -61,12 +61,12 @@
     });
   };
 
-  var addAdditionalFieldsToAttachments = function(attachments) {
+  var addAdditionalFieldsToAttachments = function(attachments, applicationId) {
     return _.map(attachments, function(attachment) {
       if (!_.isFunction(attachment.metadata)) {
         attachment.metadata = ko.observable(attachment.metadata);
       }
-      attachment.showMetadataEditor = ko.observable(false);
+      attachment.showAdditionalControls = ko.observable(false);
       attachment.retentionDescription = ko.pureComputed(function() {
         var retention = attachment.metadata() ? attachment.metadata()["sailytysaika"] : null;
         if (retention && retention["arkistointi"]()) {
@@ -93,6 +93,22 @@
           return loc("<Arvo puuttuu>");
         }
       });
+      if (attachment.type) {
+        attachment.attachmentType = ko.observable([attachment.type['type-group'](), attachment.type['type-id']()].join('.'));
+        attachment.attachmentType.subscribe(function (value) {
+          ajax
+            .command("set-attachment-type",
+            {id: applicationId, attachmentId: attachment.id(), attachmentType: value})
+            .success(function() {
+              repository.load(applicationId);
+            })
+            .error(function(e) {
+              repository.load(applicationId);
+              error(e.text);
+            })
+            .call();
+        });
+      }
       return attachment;
     });
   };
@@ -106,7 +122,7 @@
     self.attachments = params.application.attachments;
     var preAttachments = ko.pureComputed(function() {
       var preAttachments = getPreAttachments(self.attachments());
-      return addAdditionalFieldsToAttachments(preAttachments);
+      return addAdditionalFieldsToAttachments(preAttachments, params.application.id());
     });
     var archivedAttachments = ko.pureComputed(function() {
       return filterByArchiveStatus(preAttachments(), true);
@@ -134,6 +150,28 @@
     });
     self.showNotArchived = ko.pureComputed(function() {
       return !_.isEmpty(self.notArchivedDocuments()) || !_.isEmpty(self.notArchivedGroups());
+    });
+
+    var attachmentGroupLabel = function(groupName) {
+      return loc(["attachmentType", groupName, "_group_label"].join("."));
+    };
+
+    var attachmentTypeLabel = function(groupName, typeName) {
+      return loc(["attachmentType", [groupName, typeName].join('.')].join("."));
+    };
+
+    self.selectableAttachmentTypes = ko.pureComputed(function () {
+      return _.map(lupapisteApp.models.application.allowedAttachmentTypes(), function (typeGroup) {
+        return {
+          groupLabel: attachmentGroupLabel(typeGroup[0]),
+          types: _.map(typeGroup[1], function (type) {
+            return {
+              typeLabel: attachmentTypeLabel(typeGroup[0], type),
+              typeValue: [typeGroup[0], type].join('.')
+            };
+          })
+        };
+      });
     });
   };
 

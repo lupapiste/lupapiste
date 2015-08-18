@@ -15,7 +15,7 @@
         <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: archivedDocuments, showWillPublish: true}}"></div>
       </div>
 
-      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true}}"></div>
+      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true, attachmentTypes: selectableAttachmentTypes}}"></div>
 
       <div><button class="btn-primary">Vie arkistoon</button></div>
     </div>
@@ -27,7 +27,7 @@
         <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: notArchivedDocuments, showWillPublish: false}}"></div>
       </div>
 
-      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedGroups, showWillPublish: false}}"></div>
+      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedGroups, showWillPublish: false, attachmentTypes: selectableAttachmentTypes}}"></div>
     </div>
 
   </script>
@@ -49,7 +49,7 @@
       <!-- ko foreach: attachments -->
       <tr class="attachment-row">
         <td class="attachment-type">
-          <div class="attachment-type-container" data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}">
+          <div class="attachment-type-container" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
             <div class="group-label">
               <span data-bind="if: type">
                 <span data-bind="text: loc(['attachmentType', type['type-group'](), '_group_label'])"></span>
@@ -73,21 +73,32 @@
             </div>
           </div>
 
-          <div data-bind="if: !_.isEmpty($data.metadata)">
-            <div data-bind="slider: $data.showMetadataEditor,
-                          component: {name: 'metadata-editor',
-                                      params: {attachmentId: id, metadata: metadata, applicationId: $root.application.id,
-                                      saveCallback: function(){$data.showMetadataEditor(false);}}}"></div>
+          <div data-bind="slider: $data.showAdditionalControls" class="additional-controls">
+            <div>
+              <label>
+                <h4>Vaihda liitteen tyyppi</h4>
+                <select id="attachment-type-select" class="long" data-bind="foreach: $parents[1].attachmentTypes, value: attachmentType">
+                  <optgroup data-bind="attr: {label: groupLabel}, foreach: types">
+                    <option data-bind="text: typeLabel, value: typeValue"></option>
+                  </optgroup>
+                </select>
+              </label>
+            </div>
+            <div data-bind="if: !_.isEmpty($data.metadata)">
+              <div data-bind="component: {name: 'metadata-editor',
+                                          params: {attachmentId: id, metadata: metadata, applicationId: $root.application.id,
+                                          saveCallback: function(){$data.showAdditionalControls(false);}}}"></div>
+            </div>
           </div>
         </td>
 
-        <td data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: retentionDescription"></td>
-        <td class="personal-data" data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: personalDataDescription"></td>
+        <td data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}, text: retentionDescription"></td>
+        <td class="personal-data" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}, text: personalDataDescription"></td>
         <td class="stamped">
           <i class="lupicon-circle-stamp enabled" data-bind="visible: stamped, attr: {title: loc('attachment.stamped')}"></i>
           <i class="lupicon-remove disabled" data-bind="visible: !stamped(), attr: {title: loc('attachment.stamped')}"></i>
         </td>
-        <td data-bind="if: $parents[1].showWillPublish, click: function(){$data.showMetadataEditor(!showMetadataEditor())}" class="will-publish">
+        <td data-bind="if: $parents[1].showWillPublish, click: function(){$data.showAdditionalControls(!showAdditionalControls())}" class="will-publish">
           <i data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check enabled"></i>
           <i data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove disabled"></i>
         </td>
@@ -115,22 +126,22 @@
       <!-- ko foreach: documents -->
       <tr class="attachment-row">
         <td class="attachment-type">
-          <div class="attachment-type-container" data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}">
+          <div class="attachment-type-container" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
             <div data-bind="ltext: documentNameKey"></div>
           </div>
 
           <div data-bind="if: !_.isEmpty($data.metadata)">
-            <div data-bind="slider: $data.showMetadataEditor,
+            <div data-bind="slider: $data.showAdditionalControls,
                           component: {name: 'metadata-editor',
                                       params: {metadata: metadata, applicationId: $root.application.id,
-                                      saveCallback: function(){$data.showMetadataEditor(false);}}}"></div>
+                                      saveCallback: function(){$data.showAdditionalControls(false);}}}"></div>
           </div>
         </td>
 
-        <td data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: retentionDescription"></td>
-        <td class="personal-data" data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: personalDataDescription"></td>
+        <td data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}, text: retentionDescription"></td>
+        <td class="personal-data" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}, text: personalDataDescription"></td>
         <td class="stamped"></td>
-        <td data-bind="if: $parent.showWillPublish, click: function(){$data.showMetadataEditor(!showMetadataEditor())}" class="will-publish">
+        <td data-bind="if: $parent.showWillPublish, click: function(){$data.showAdditionalControls(!showAdditionalControls())}" class="will-publish">
           <i data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check enabled"></i>
           <i data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove disabled"></i>
         </td>
