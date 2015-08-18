@@ -451,8 +451,7 @@
         (fail! :error.illegal-shapefile))
 
       (let [target-dir (ah-verdict/unzip (.getPath tempfile) (fs/temp-dir "area"))
-            shape-filename (str (first (ss/split filename #".zip")) ".shp")
-            shape-file (new File (str target-dir env/file-separator shape-filename))
+            shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
             data-store (FileDataStoreFinder/getDataStore shape-file)
             source (.getFeatureSource data-store)
             collection (.getFeatures source)
