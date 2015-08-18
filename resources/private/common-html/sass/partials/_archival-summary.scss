@@ -14,13 +14,18 @@
     width: 170px;
   }
   .will-publish {
-    width: 100px;
-    .lupicon-check {
-      font-size: 16px;
+    width: 111px;
+  }
+  .stamped {
+    width: 92px;
+    text-align: center;
+  }
+  i {
+    font-size: 22px;
+    &.enabled {
       color: $lp-green;
     }
-    .lupicon-remove {
-      font-size: 16px;
+    &.disabled {
       color: $lp-purple;
     }
   }

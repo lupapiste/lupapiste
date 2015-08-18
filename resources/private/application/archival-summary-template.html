@@ -35,10 +35,16 @@
     <table class="table archival-summary-table">
       <tbody data-bind="foreach: groups">
       <tr class="attachment-group-header">
-        <td data-bind="text: name" colspan="4"></td>
+        <td data-bind="text: name" colspan="5"></td>
       </tr>
-      <!-- ko template: {name: 'archival-summary-table-header'} -->
-      <!-- /ko -->
+
+      <tr>
+        <th data-bind="ltext: 'application.attachmentType'" class="attachment-type">Tyyppi</th>
+        <th>Säilytysaika</th>
+        <th class="personal-data">Henkilötiedot</th>
+        <th class="stamped">Leimattu</th>
+        <th data-bind="if: $parent.showWillPublish" class="will-publish">Julkaistaan</th>
+      </tr>
 
       <!-- ko foreach: attachments -->
       <tr class="attachment-row">
@@ -77,9 +83,13 @@
 
         <td data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: retentionDescription"></td>
         <td class="personal-data" data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: personalDataDescription"></td>
+        <td class="stamped">
+          <i class="lupicon-circle-stamp enabled" data-bind="visible: stamped, attr: {title: loc('attachment.stamped')}"></i>
+          <i class="lupicon-remove disabled" data-bind="visible: !stamped(), attr: {title: loc('attachment.stamped')}"></i>
+        </td>
         <td data-bind="if: $parents[1].showWillPublish, click: function(){$data.showMetadataEditor(!showMetadataEditor())}" class="will-publish">
-          <span data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check"></span>
-          <span data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove"></span>
+          <i data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check enabled"></i>
+          <i data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove disabled"></i>
         </td>
       </tr>
       <!-- /ko -->
@@ -91,11 +101,16 @@
     <table class="table archival-summary-table">
       <tbody>
       <tr class="attachment-group-header">
-        <td colspan="4">Hankkeen pääasiakirjat</td>
+        <td colspan="5">Hankkeen pääasiakirjat</td>
       </tr>
 
-      <!-- ko template: {name: 'archival-summary-table-header'} -->
-      <!-- /ko -->
+      <tr>
+        <th data-bind="ltext: 'application.attachmentType'" class="attachment-type">Tyyppi</th>
+        <th>Säilytysaika</th>
+        <th class="personal-data">Henkilötiedot</th>
+        <th class="stamped"></th>
+        <th data-bind="if: $data.showWillPublish" class="will-publish">Julkaistaan</th>
+      </tr>
 
       <!-- ko foreach: documents -->
       <tr class="attachment-row">
@@ -114,9 +129,10 @@
 
         <td data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: retentionDescription"></td>
         <td class="personal-data" data-bind="click: function(){$data.showMetadataEditor(!showMetadataEditor())}, text: personalDataDescription"></td>
+        <td class="stamped"></td>
         <td data-bind="if: $parent.showWillPublish, click: function(){$data.showMetadataEditor(!showMetadataEditor())}" class="will-publish">
-          <span data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check"></span>
-          <span data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove"></span>
+          <i data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check enabled"></i>
+          <i data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove disabled"></i>
         </td>
       </tr>
       <!-- /ko -->
@@ -124,14 +140,6 @@
     </table>
   </script>
 
-  <script type="text/html" id="archival-summary-table-header">
-    <tr>
-      <th data-bind="ltext: 'application.attachmentType'" class="attachment-type">Tyyppi</th>
-      <th>Säilytysaika</th>
-      <th class="personal-data">Henkilötiedot</th>
-      <th data-bind="if: $parent.showWillPublish" class="will-publish">Julkaistaan</th>
-    </tr>
-  </script>
 </section>
 </body>
 </html>

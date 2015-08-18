@@ -5809,19 +5809,26 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 16, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .will-publish {
-  width: 100px;
+  width: 111px;
 }
-/* line 18, ../sass/partials/_archival-summary.scss */
-.archival-summary-table .will-publish .lupicon-check {
-  font-size: 16px;
+/* line 19, ../sass/partials/_archival-summary.scss */
+.archival-summary-table .stamped {
+  width: 92px;
+  text-align: center;
+}
+/* line 23, ../sass/partials/_archival-summary.scss */
+.archival-summary-table i {
+  font-size: 22px;
+}
+/* line 25, ../sass/partials/_archival-summary.scss */
+.archival-summary-table i.enabled {
   color: #04c714;
 }
-/* line 22, ../sass/partials/_archival-summary.scss */
-.archival-summary-table .will-publish .lupicon-remove {
-  font-size: 16px;
+/* line 28, ../sass/partials/_archival-summary.scss */
+.archival-summary-table i.disabled {
   color: #da6ded;
 }
-/* line 27, ../sass/partials/_archival-summary.scss */
+/* line 32, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-type-container {
   *zoom: 1;
 }
@@ -5834,21 +5841,21 @@ ul.attachments-list li.mandatory-attachments {
 .archival-summary-table .attachment-type-container:after {
   clear: both;
 }
-/* line 29, ../sass/partials/_archival-summary.scss */
+/* line 34, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-type-container .group-label, .archival-summary-table .attachment-type-container .type-id {
   float: left;
   width: 50%;
 }
-/* line 35, ../sass/partials/_archival-summary.scss */
+/* line 40, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-row:active {
   background-color: #fef4ea;
   color: inherit;
 }
-/* line 41, ../sass/partials/_archival-summary.scss */
+/* line 46, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-group-header td {
   padding-top: 12px;
 }
-/* line 46, ../sass/partials/_archival-summary.scss */
+/* line 51, ../sass/partials/_archival-summary.scss */
 .archival-summary-table .metadata-editor-container .editor-header {
   border-collapse: separate;
 }
