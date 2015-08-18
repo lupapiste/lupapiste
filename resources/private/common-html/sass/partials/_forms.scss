@@ -676,6 +676,11 @@ section.approved .group-buttons  {
   }
 }
 
+// Top-level reject button should be invisible
+// when the bar is in rejected mode.
+button.sticky.rejected ~ .accordion_content .is-top.rejected {
+  display: none;
+}
 
 .form-help {
   min-height: 100px;

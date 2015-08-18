@@ -517,6 +517,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (self.authorizationModel.ok("reject-doc")) {
       rejectButton$ = makeApprovalButton("reject", "rejected", "secondary").addClass( "is-right");
+      if( opts.bar ) {
+        rejectButton$.addClass( "is-top");
+      }
       //btnContainer$.append(rejectButton$);
       result.push( rejectButton$ );
     //   if (!allowReject) {
