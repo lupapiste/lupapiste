@@ -61,7 +61,15 @@
 
   hub.onPageLoad("login", recallMe);
 
+  function checkIE8() {
+    return true;
+  }
+
   $(function() {
+    if (checkIE8()) {
+      alert("Lupapiste ei tue käyttämääsi selainta, kokeile uudelleen toisella selaimella. (Esim. Mozilla Firefox, Google Chrome, Apple Safari)")
+    }
+
     recallMe();
     if (document.getElementById("login")) {
       $("#login").applyBindings({rememberMe: rememberMe, processing: processing, pending: pending});
