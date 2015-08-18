@@ -443,7 +443,7 @@
    :parameters [:id attachmentIds password]
    :input-validators [(partial action/non-blank-parameters [:password])
                       (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
-   :states     (states/all-application-states-but [:canceled :closed])
+   :states     (states/all-application-states-but states/terminal-states)
    :pre-checks [domain/validate-owner-or-write-access
                 (fn [_ application]
                   (when-not (pos? (count (:attachments application)))
@@ -507,7 +507,7 @@
 (defcommand set-attachments-as-verdict-attachment
   {:parameters [:id selectedAttachmentIds unSelectedAttachmentIds]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled])
+   :states     states/all-but-draft-or-terminal
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:selectedAttachmentIds :unSelectedAttachmentIds])
                       (fn [{{:keys [selectedAttachmentIds unSelectedAttachmentIds]} :data}]
                         (when (seq (intersection (set selectedAttachmentIds) (set unSelectedAttachmentIds)))

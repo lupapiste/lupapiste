@@ -74,7 +74,7 @@
 
 (defquery application-authorities
   {:user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled]) ; the same as assign-application
+   :states     states/all-but-draft-or-terminal ; the same as assign-application
    :parameters [:id]}
   [{application :application}]
   (let [authorities (find-authorities-in-applications-organization application)]
@@ -138,7 +138,7 @@
 (defcommand assign-application
   {:parameters [:id assigneeId]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled])}
+   :states     states/all-but-draft-or-terminal}
   [{:keys [user created application] :as command}]
   (let [assignee (util/find-by-id assigneeId (find-authorities-in-applications-organization application))]
     (if (or assignee (ss/blank? assigneeId))
