@@ -18,7 +18,8 @@
               user
               (select-keys
                 data
-                [:applicationTags :applicationType :handler :limit :searchText :skip :sort]))))
+                [:applicationTags :applicationType :handler
+                 :limit :searchText :skip :sort :areas]))))
 
 (defn- localize-operation [op]
   (assoc op
