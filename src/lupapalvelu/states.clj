@@ -14,6 +14,11 @@
 
 (def post-submitted-states #{:sent :complement-needed :verdictGiven :constructionStarted :closed})
 
+(def terminal-states #{:canceled :closed :final :extinct :registered})
+
+(def all-but-draft-or-terminal (difference all-states #{:draft} terminal-states))
+(def all-application-statens-but-draft-or-terminal (difference all-application-states #{:draft} terminal-states))
+
 (defn all-states-but [drop-states-array]
   (difference all-states (set drop-states-array)))
 
