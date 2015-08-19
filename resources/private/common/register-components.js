@@ -31,6 +31,7 @@ jQuery(document).ready(function() {
     "tags-editor",
     "upload",
     "leaflet-map",
+    "openlayers-map",
     "vetuma-init",
     "vetuma-status",
     "help-toggle",

@@ -200,6 +200,15 @@ var util = (function($) {
     return id;
   }
 
+  function withSuffix(strOrArr, suffix) {
+    if (_.isArray(strOrArr)) {
+      return _.map(strOrArr, function(s) {
+        return s + suffix;
+      });
+    }
+    return [strOrArr + suffix];
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -229,7 +238,8 @@ var util = (function($) {
     isNotPartyDoc: isNotPartyDoc,
     extractRequiredErrors: extractRequiredErrors,
     dissoc: dissoc,
-    randomElementId: randomElementId
+    randomElementId: randomElementId,
+    withSuffix: withSuffix
   };
 
 })(jQuery);
