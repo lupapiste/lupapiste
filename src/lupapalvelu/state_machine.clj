@@ -10,7 +10,7 @@
   {:pre  [(map? application)]
    :post [(map? %)]}
   (let [operation (get-in application [:primaryOperation :name])
-        state-machine-resolver (operations/get-operation-metadata operation :state-machine-resolver)]
+        state-machine-resolver (operations/get-operation-metadata operation :state-graph-resolver)]
     (if (:infoRequest application)
       states/default-inforequest-state-graph
       (if (fn? state-machine-resolver)
