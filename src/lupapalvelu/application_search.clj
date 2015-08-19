@@ -12,7 +12,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.user :refer [applicant?]]
+            [lupapalvelu.user :refer [applicant?] :as user]
             [lupapalvelu.application-meta-fields :as meta-fields]))
 
 ;; Operations
@@ -59,7 +59,25 @@
     (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
     :else (make-free-text-query filter-search)))
 
-(defn make-query [query {:keys [searchText kind applicationType handler applicationTags]} user]
+(defmulti resolve-coordinates (comp :type :geometry))
+
+(defmethod resolve-coordinates "Polygon" [feature]
+  (get-in feature [:geometry :coordinates]))
+
+(defmethod resolve-coordinates "MultiPolygon" [feature]
+  (map (partial apply concat) (get-in feature [:geometry :coordinates])))
+
+(defn- make-area-query [areas user]
+  {:pre [(sequential? areas)]}
+  (let [orgs (user/organization-ids-by-roles user #{:authority})
+        orgs-with-areas (mongo/select :organizations {:_id {$in orgs} :areas.features.id {$in areas}} [:areas])
+        features (flatten (map (comp :features :areas) orgs-with-areas))
+        filtered-features (filter #(not (nil? (some #{(:id %)} areas))) features)
+        coordinates (apply concat (map resolve-coordinates filtered-features))]
+    (when (seq coordinates)
+      {$or (mapv (fn [c] {:location {$geoWithin {"$polygon" c}}}) coordinates)})))
+
+(defn make-query [query {:keys [searchText kind applicationType handler applicationTags areas]} user]
   {$and
    (filter seq
      [query
@@ -79,7 +97,9 @@
           {$or [{"auth.id" handler}
                 {"authority.id" handler}]})
         (when-not (empty? applicationTags)
-          {:tags {$in applicationTags}}))])})
+          {:tags {$in applicationTags}})
+        (when-not (empty? areas)
+          (make-area-query areas user)))])})
 
 
 ;;
