@@ -362,13 +362,13 @@ $side-panel-width: 60px;
   i.lupicon-circle-arrow-up,
   i.lupicon-circle-stamp,
   i.lupicon-circle-section-sign {
-    color: $green;
+    color: $positive;
   }
   i.lupicon-circle-star {
-    color: $orange;
+    color: $primary;
   }
   i.lupicon-circle-attention {
-    color: $red
+    color: $negative
   }
 }
 }

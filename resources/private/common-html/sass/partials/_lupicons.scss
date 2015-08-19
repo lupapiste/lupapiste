@@ -34,17 +34,17 @@ $lupicon-size: 22px;
 // Convenience modifiers for marking icons.
 [class^="lupicon-"].primary,
 [class*=" lupicon-"].primary {
-  color: $orange-dark;
+  color: $primary;
 }
 
 [class^="lupicon-"].positive,
 [class*=" lupicon-"].positive {
-  color: $green;
+  color: $positive;
 }
 
 [class^="lupicon-"].negative,
 [class*=" lupicon-"].negative {
-  color: $red;
+  color: $negative;
 }
 
 // Hand for help and close icons.

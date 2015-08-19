@@ -8,11 +8,11 @@
 
   button.sticky {
     width: 100%;
-    span {
+    span.bar-text {
       width: 100%;
-    }
-    span.title {
       text-transform: uppercase;
+    }
+    span.description {
     }
     span.icons {
       min-width: $lupicon-size;

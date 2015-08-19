@@ -580,13 +580,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       return b;
     }
     var buttons$ = $("<div>").addClass( "group-buttons" );
+    if( opts.description ) {
+      buttons$.append( btnHelper( opts.description,
+                                  "secondary is-left",
+                                  "lupicon-pen",
+                                  loc( "op-description.edit")))
+    }
     if( opts.star ) {
       buttons$.append( btnHelper( opts.star,
                                   "secondary is-left",
                                   "lupicon-star",
                                   opts.star.text))
-    }
-    if ( opts.remove ) {
+    }if ( opts.remove ) {
       buttons$.append( btnHelper( opts.remove,
                                   "secondary is-right",
                                   "lupicon-remove",
@@ -1342,7 +1347,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildTableRow(subSchema, model, path, partOfChoice) {
-    console.log( "subSchema:", subSchema );
     var myPath = path.join(".");
     var name = subSchema.name;
     var myModel = model[name] || {};
@@ -1858,108 +1862,134 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return false;
   }
 
-  function buildDescriptionElement(operation) {
-    var wrapper = document.createElement("span");
-    var descriptionSpan = document.createElement("span");
-    var description = document.createTextNode("");
-    var descriptionInput = document.createElement("input");
-    var iconSpanWrapper = document.createElement("span");
-    var iconSpan = document.createElement("span");
-    var iconTextSpan = document.createElement("span");
-    iconTextSpan.appendChild(document.createTextNode(loc("op-description.edit")));
+
+  function descriptionSupport(operation, descId ) {
+    // var wrapper = document.createElement("span");
+    // var descriptionSpan = document.createElement("span");
+    // var description = document.createTextNode("");
+    // var descriptionInput = document.createElement("input");
+    // var iconSpanWrapper = document.createElement("span");
+    // var iconSpan = document.createElement("span");
+    // var iconTextSpan = document.createElement("span");
+    // iconTextSpan.appendChild(document.createTextNode(loc("op-description.edit")));
 
     // test ids
-    if (options && options.dataTestSpecifiers) {
-      descriptionSpan.setAttribute("data-test-id", "op-description");
-      iconSpanWrapper.setAttribute("data-test-id", "edit-op-description");
-      descriptionInput.setAttribute("data-test-id", "op-description-editor");
+    // if (options && options.dataTestSpecifiers) {
+    //   descriptionSpan.setAttribute("data-test-id", "op-description");
+    //   iconSpanWrapper.setAttribute("data-test-id", "edit-op-description");
+    //   descriptionInput.setAttribute("data-test-id", "op-description-editor");
+    // }
+
+    // wrapper.className = "op-description-wrapper";
+    // descriptionSpan.className = "op-description";
+    // if (operation.description) {
+    //   description.nodeValue = operation.description;
+    //   descriptionInput.value = operation.description;
+    //   $(iconTextSpan).addClass("hidden");
+    // } else if (authorizationModel.ok("update-op-description")) {
+    //   iconSpanWrapper.appendChild(iconTextSpan);
+    // }
+    // wrapper.onclick = function(e) {
+    //   var event = getEvent(e);
+    //   // Prevent collapsing accordion when input is clicked
+    //   event.stopPropagation();
+    // };
+
+    // descriptionInput.type = "text";
+    // descriptionInput.className = "accordion-input text hidden";
+
+    function descIdSelector( prefix ) {
+      return $( prefix + "[" + descId + "]");
     }
 
-    wrapper.className = "op-description-wrapper";
-    descriptionSpan.className = "op-description";
-    if (operation.description) {
-      description.nodeValue = operation.description;
-      descriptionInput.value = operation.description;
-      $(iconTextSpan).addClass("hidden");
-    } else if (authorizationModel.ok("update-op-description")) {
-      iconSpanWrapper.appendChild(iconTextSpan);
+    function updateBarDescription( text ) {
+     descIdSelector("span.description", descId).text( _.size( text ) ? " - " + text : "" );
     }
 
-    wrapper.onclick = function(e) {
-      var event = getEvent(e);
-      // Prevent collapsing accordion when input is clicked
-      event.stopPropagation();
-    };
+    var descriptionInput = $("<input>").prop( "type", "text").val( operation.description );
+    var bubble = $("<div>").addClass( "description-bubble" ).attr( descId, "1");
+    bubble.append( descriptionInput );
+    var descOpts = {
+        fun: function() {
+          bubble.toggle();
+          descriptionInput.focus();
 
-    descriptionInput.type = "text";
-    descriptionInput.className = "accordion-input text hidden";
+        },
+        bubble: bubble
+    }
 
     var saveInput = _.debounce(function() {
-      $(descriptionInput).off("blur");
-      var value = _.trim(descriptionInput.value);
+      //$(descriptionInput).off("blur");
+      var value = _.trim(descriptionInput.val());
       if (value === "") {
         value = null;
-        iconSpanWrapper.appendChild(iconTextSpan);
-        $(iconTextSpan).removeClass("hidden");
+        // iconSpanWrapper.appendChild(iconTextSpan);
+        // $(iconTextSpan).removeClass("hidden");
       }
 
       ajax.command("update-op-description", {id: self.appId, "op-id": operation.id, desc: value })
         .success(function() {
-          var indicator = createIndicator(descriptionInput, "accordion-indicator");
-          showIndicator(indicator, "accordion-input-saved", "form.saved");
+          // TODO: Show indicator in a reasonable position, where?
+          // var indicator = createIndicator(descriptionInput, "accordion-indicator" );
+          // showIndicator(indicator, "accordion-input-saved", "form.saved");
           hub.send("op-description-changed", {appId: self.appId, "op-id": operation.id, "op-desc": value});
         })
         .call();
 
-      description.nodeValue = descriptionInput.value;
-      $(descriptionInput).addClass("hidden");
-      $(iconSpanWrapper).removeClass("hidden");
-      $(descriptionSpan).removeClass("hidden");
+      bubble.hide();
+      updateBarDescription( value );
+      // description.nodeValue = descriptionInput.value;
+      // $(descriptionInput).addClass("hidden");
+      // $(iconSpanWrapper).removeClass("hidden");
+      // $(descriptionSpan).removeClass("hidden");
     }, 250);
 
-    descriptionInput.onfocus = function() {
-      descriptionInput.onblur = function() {
-        saveInput();
-      };
-    };
+    // descriptionInput.onfocus = function() {
+    //   descriptionInput.onblur = function() {
+    //     saveInput();
+    //   };
+    // };
 
-    descriptionInput.onkeyup = function(e) {
+    descriptionInput.blur( saveInput );
+
+    descriptionInput.keyup( function(e) {
       // trigger save on enter and esc keypress
       var event = getEvent(e);
       event.stopPropagation();
       if (event.keyCode === 13 || event.keyCode === 27) {
-        $(descriptionInput).off("blur");
-        descriptionInput.blur();
+        // $(descriptionInput).off("blur");
+        // descriptionInput.blur();
         saveInput();
       }
-    };
+    });
 
-    if (authorizationModel.ok("update-op-description")) { // don't provide edit icon
+    return descOpts;
+    // if (authorizationModel.ok("update-op-description")) { // don't provide edit icon
 
-      iconSpan.className = "icon edit";
-      iconSpanWrapper.onclick = function(e) {
-        var event = getEvent(e);
-        event.stopPropagation();
+    //   iconSpan.className = "icon edit";
+    //   iconSpanWrapper.onclick = function(e) {
+    //     var event = getEvent(e);
+    //     event.stopPropagation();
 
-        if (iconSpanWrapper.contains(iconTextSpan)) {
-          $(iconTextSpan).addClass("hidden");
-        }
+    //     if (iconSpanWrapper.contains(iconTextSpan)) {
+    //       $(iconTextSpan).addClass("hidden");
+    //     }
 
-        $(iconSpanWrapper).addClass("hidden");
-        $(descriptionSpan).addClass("hidden");
-        $(descriptionInput).removeClass("hidden");
-        descriptionInput.focus();
-      };
+    //     $(iconSpanWrapper).addClass("hidden");
+    //     $(descriptionSpan).addClass("hidden");
+    //     $(descriptionInput).removeClass("hidden");
+    //     descriptionInput.focus();
+    //   };
 
-      iconSpanWrapper.appendChild(iconSpan);
-      iconSpanWrapper.appendChild(iconTextSpan);
-    }
+    //   iconSpanWrapper.appendChild(iconSpan);
+    //   iconSpanWrapper.appendChild(iconTextSpan);
+    // }
 
-    descriptionSpan.appendChild(description);
-    wrapper.appendChild(descriptionSpan);
-    wrapper.appendChild(descriptionInput);
-    wrapper.appendChild(iconSpanWrapper);
-    return wrapper;
+    // descriptionSpan.appendChild(description);
+    // wrapper.appendChild(descriptionSpan);
+    // wrapper.appendChild(descriptionInput);
+    // wrapper.appendChild(iconSpanWrapper);
+    // return wrapper;
   }
 
   function buildElement() {
@@ -1970,6 +2000,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var iconDown = document.createElement("i");
     var toggle = document.createElement("button");
     var title = document.createElement( "span");
+    var barText = $("<span>").addClass( "bar-text");
     var iconRejected = $("<i>").addClass( "lupicon-circle-attention rejected");
     var iconApproved = $("<i>").addClass( "lupicon-circle-check approved");
 
@@ -1987,7 +2018,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     toggle.appendChild( iconDown );
     toggle.appendChild( iconUp );
     toggle.className = "sticky secondary accordion-toggle is-status";
-    toggle.appendChild( title );
+    var descId = _.uniqueId( "data-desc-");
+    var barDesc = $("<span>").addClass( "description").attr( descId, "1")
+    if( op && _.size(  op.description ) ) {
+      barDesc.text( " - " + op.description );
+    }
+    barText.append( $(title)).append(barDesc);
+    $(toggle).append( barText )
     var icons = $("<span>").addClass( "icons").append( iconRejected ).append( iconApproved );
     $(toggle).append( icons );
 
@@ -2010,23 +2047,25 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var opts = {};
 
-    if (!notPrimaryOperation) {
-      opts.star = {attr: {"data-op-name": op.name},
-                   text: loc( "operations.primary")}// operationType.className = "icon star-selected";
-    }
+    if( authorizationModel.ok("change-primary-operation")) {
+      if (!notPrimaryOperation) {
+        opts.star = {attr: {"data-op-name": op.name},
+                     text: loc( "operations.primary")}
+      }
 
-    if (isSecondaryOperation) {
-      opts.star = {attr: {"data-op-name": op.name},
-                   text: loc( "operations.primary.select"),
-                   fun: function() {
-                     ajax.command("change-primary-operation", {id: self.appId, secondaryOperationId: docId})
-                     .success(function() {
-                       repository.load(self.appId);
-                     })
-                     .call();
-                     return false;
-                   }
-                  };
+      if (isSecondaryOperation) {
+        opts.star = {attr: {"data-op-name": op.name},
+                     text: loc( "operations.primary.select"),
+                     fun: function() {
+                       ajax.command("change-primary-operation", {id: self.appId, secondaryOperationId: docId})
+                       .success(function() {
+                         repository.load(self.appId);
+                       })
+                       .call();
+                       return false;
+                     }
+                    };
+      }
     }
 
     if (self.schema.info.approvable) {
@@ -2036,13 +2075,19 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     opts.remove = removeOpts;
 
-    $(elements).append(self.makeGroupButtons([], self.model, opts));
-
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      elements.appendChild(buildDescriptionElement(op));
+      if( authorizationModel.ok("update-op-description") ) {
+        opts.description = descriptionSupport( op, descId );
+      }
+      //elements.appendChild(buildDescriptionElement(op));
     } else {
       title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
+    }
+
+    $(elements).append(self.makeGroupButtons([], self.model, opts));
+    if( opts.description ) {
+      $(elements).append( opts.description.bubble );
     }
 
     sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
