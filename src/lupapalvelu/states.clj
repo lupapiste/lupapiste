@@ -114,6 +114,7 @@
 
 (comment
   (require ['rhizome.viz :as 'viz])
+  (require ['lupapalvelu.i18n :as 'i18n])
   (doseq [sym ['default-inforequest-state-graph
                'default-application-state-graph
                'tj-hakemus-state-graph
@@ -123,5 +124,4 @@
                'kt-application-state-graph]
           :let [g (var-get (resolve sym))
                 filename (str "target/" (name sym) ".png")]]
-
-    (viz/save-graph (keys g) g :node->descriptor (fn [n] {:label (name n)}) :filename filename)))
+    (viz/save-graph (keys g) g :node->descriptor (fn [n] {:label (str (i18n/localize "fi" (name n)) "\n(" (name n) ")")}) :filename filename)))
