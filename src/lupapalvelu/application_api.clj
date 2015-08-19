@@ -28,6 +28,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
+            [lupapalvelu.state-machine :as state-machine]
             [lupapalvelu.user :as user]))
 
 ;; Notifications
@@ -160,7 +161,7 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           #{:info}}
+   :pre-checks       [(partial state-machine/validate-state-transition :canceled)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified created
@@ -175,7 +176,7 @@
    :user-roles       #{:applicant}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           #{:draft :info :open :submitted}}
+   :pre-checks       [(partial state-machine/validate-state-transition :canceled)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified created

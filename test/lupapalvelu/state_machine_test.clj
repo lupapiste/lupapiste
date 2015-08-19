@@ -36,4 +36,8 @@
 
 (facts "validate-state-transition"
   (validate-state-transition :info ..anything.. {:infoRequest true :state "answered"}) => nil
-  (validate-state-transition :info ..anything.. {:infoRequest true :state "canceled"}) => (contains {:ok false}))
+  (validate-state-transition :info ..anything.. {:infoRequest true :state "canceled"}) => (contains {:ok false})
+  (validate-state-transition :canceled ..anything.. {:infoRequest true :state "answered"}) => (contains {:ok false})
+  (validate-state-transition :canceled ..anything.. {:infoRequest true :state "canceled"}) => (contains {:ok false})
+  (validate-state-transition :canceled ..anything.. {:infoRequest true :state "info"}) => nil
+  )
