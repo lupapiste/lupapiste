@@ -132,7 +132,7 @@
         })
         .call();
 
-      self.features(util.getIn(organization, ["areas", "features"]) || []);
+      self.features(util.getIn(organization, ["areas"]));
 
       self.allowedRoles(organization.allowedRoles);
     };
