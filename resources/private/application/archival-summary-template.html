@@ -5,11 +5,8 @@
   <script type="text/html" id="archival-summary-template">
 
     <div data-bind="if: showArchived" class="archival-summary-document-set">
-      <h1>Arkistoitavat asiakirjat - <span data-bind="text: $root.application.id"></span></h1>
-      <div>
-      Asiakirjan säilytysaika määrää arkistoidaanko asiakirjaa. Voit muokata asiakirjan arkistointiaikaa ja
-      muita tietoja klikkaamalla asiakirjan riviä.
-      </div>
+      <h1><span data-bind="ltext: 'archivalSummary.archivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
+      <div data-bind="ltext: 'archivalSummary.guide'"></div>
 
       <div data-bind="if: !_.isEmpty(archivedDocuments())">
         <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: archivedDocuments, showWillPublish: true}}"></div>
@@ -17,11 +14,11 @@
 
       <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true, attachmentTypes: selectableAttachmentTypes}}"></div>
 
-      <div><button class="btn-primary">Vie arkistoon</button></div>
+      <div><button class="btn-primary" data-bind="ltext: 'archivalSummary.archive'"></button></div>
     </div>
 
     <div data-bind="if: showNotArchived" class="document-set">
-      <h1>Muut asiakirjat (ei arkistoida) - <span data-bind="text: $root.application.id"></span></h1>
+      <h1><span data-bind="ltext: 'archivalSummary.notArchivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
 
       <div data-bind="if: !_.isEmpty(notArchivedDocuments())">
         <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: notArchivedDocuments, showWillPublish: false}}"></div>
@@ -37,12 +34,12 @@
 
       <div class="column-header-row">
         <div class="small-columns">
-          <div class="retention-period">Säilytysaika</div>
-          <div class="personal-data">Henkilötiedot</div>
-          <div class="stamped">Leimattu</div>
-          <div data-bind="if: $parent.showWillPublish" class="will-publish">Julkaistaan</div>
+          <div class="retention-period" data-bind="ltext: 'sailytysaika'"></div>
+          <div class="personal-data" data-bind="ltext: 'henkilotiedot'"></div>
+          <div class="stamped" data-bind="ltext: 'attachment.stamped'"></div>
+          <div data-bind="if: $parent.showWillPublish" class="will-publish"><span data-bind="ltext: 'julkaistaan'"></span></div>
         </div>
-        <div data-bind="ltext: 'application.attachmentType'" class="attachment-type">Tyyppi</div>
+        <div data-bind="ltext: 'application.attachmentType'" class="attachment-type"></div>
       </div>
 
       <!-- ko foreach: attachments -->
@@ -90,7 +87,7 @@
         <div data-bind="slider: $data.showAdditionalControls" class="additional-controls">
           <div class="left">
             <div class="additional-data-container">
-              <div class="header">Vaihda liitteen tyyppi</div>
+              <div class="header" data-bind="ltext: 'attachment.changeType'"></div>
               <div class="contents">
                 <select class="attachment-type-select" class="long" data-bind="foreach: $parents[1].attachmentTypes, value: attachmentType">
                   <optgroup data-bind="attr: {label: groupLabel}, foreach: types">
@@ -107,7 +104,7 @@
           </div>
           <div class="left" data-bind="if: !_.isEmpty($data.latestVersion)">
             <div class="additional-data-container">
-              <div class="header">Esikatselu</div>
+              <div class="header" data-bind="ltext: 'esikatselu'"></div>
               <div class="contents preview-image">
                 <a data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion['fileId']()}" target="_blank">
                   <img data-bind="attr: {src: '/api/raw/preview-attachment?attachment-id=' + latestVersion['fileId']()}">
@@ -124,16 +121,16 @@
   <script type="text/html" id="archival-summary-document-table">
 
     <div class="table archival-summary-table">
-      <div class="attachment-group-header">Hankkeen pääasiakirjat</div>
+      <div class="attachment-group-header" data-bind="ltext: 'archivalSummary.mainDocuments'"></div>
 
       <div class="column-header-row">
         <div class="small-columns">
-          <div class="retention-period">Säilytysaika</div>
-          <div class="personal-data">Henkilötiedot</div>
-          <div class="stamped"></div>
-          <div data-bind="if: showWillPublish" class="will-publish">Julkaistaan</div>
+          <div class="retention-period" data-bind="ltext: 'sailytysaika'"></div>
+          <div class="personal-data" data-bind="ltext: 'henkilotiedot'"></div>
+          <div class="stamped" data-bind="ltext: 'attachment.stamped'"></div>
+          <div data-bind="if: showWillPublish" class="will-publish"><span data-bind="ltext: 'julkaistaan'"></span></div>
         </div>
-        <div data-bind="ltext: 'application.attachmentType'" class="attachment-type">Tyyppi</div>
+        <div data-bind="ltext: 'application.attachmentType'" class="attachment-type"></div>
       </div>
 
       <!-- ko foreach: documents -->
@@ -165,10 +162,10 @@
           </div>
           <div class="left">
             <div class="additional-data-container">
-              <div class="header">Esikatselu</div>
+              <div class="header" data-bind="ltext: 'esikatselu'"></div>
               <div class="contents preview-image">
                 <a data-bind="attr: {href: '/api/raw/pdf-export?lang=fi&id=' + $root.application.id()}" target="_blank">
-                  Avaa hakemuksen PDF-versio
+                  <span data-bind="ltext: 'attachment.pdf'"></span>
                 </a>
               </div>
             </div>

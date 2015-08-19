@@ -1,2 +1,9 @@
 application.tosMetadataWasResetTitle: Metatiedot päivitettiin
 application.tosMetadataWasReset: Menettelyn vaihto palautti kaikkien asiakirjojen arkistointimetatiedot oletusarvoihin, vaikka niitä olisi aiemmin muokattu Lupapisteessä.
+julkaistaan: Julkaistaan
+esikatselu: Esikatselu
+archivalSummary.mainDocuments: Hankkeen pääasiakirjat
+archivalSummary.guide: Asiakirjan säilytysaika määrää arkistoidaanko asiakirjaa. Voit muokata asiakirjan arkistointiaikaa ja muita tietoja klikkaamalla asiakirjan riviä.
+archivalSummary.archivedDocuments: Arkistoitavat asiakirjat
+archivalSummary.notArchivedDocuments: Muut asiakirjat (ei arkistoida)
+archivalSummary.archive: Vie arkistoon
