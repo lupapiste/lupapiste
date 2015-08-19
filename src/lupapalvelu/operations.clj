@@ -2,14 +2,17 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [schema.core :as sc]
             [sade.env :as env]
+            [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery]]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.poikkeamis-schemas]
             [lupapalvelu.document.ymparisto-schemas]
             [lupapalvelu.document.yleiset-alueet-schemas]
             [lupapalvelu.document.vesihuolto-schemas]
+            [lupapalvelu.states :as states]
             [lupapiste-commons.usage-types :as usages]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
@@ -310,6 +313,13 @@
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
    :yl-toiminnan-muutos ymparistolupa-operation})
 
+(defn- tyonjohtaja-state-machine-resolver [application]
+  (let [doc (domain/get-document-by-name application "tyonjohtaja-v2")
+        val (get-in doc [:data :ilmoitusHakemusValitsin :value])]
+    (if (= "ilmoitus" val)
+      states/tj-ilmoitus-state-graph
+      states/tj-hakemus-state-graph)))
+
 (def Operation
   {:schema sc/Str
    :permit-type (sc/pred permit/valid-permit-type?)
@@ -319,6 +329,7 @@
    :link-permit-verdict-required sc/Bool
    :add-operation-allowed sc/Bool
    :required [sc/Str]
+   (sc/optional-key :state-machine-resolver) util/Fn
    (sc/optional-key :schema-data) [sc/Any]})
 
 (def operations
@@ -847,6 +858,7 @@
 
     :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
                                   :permit-type permit/R
+                                  :state-machine-resolver tyonjohtaja-state-machine-resolver
                                   :required ["hankkeen-kuvaus-minimum"]
                                   :attachments []
                                   :add-operation-allowed false

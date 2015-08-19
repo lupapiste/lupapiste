@@ -1,12 +1,23 @@
 (ns lupapalvelu.state-machine-test
   (:require [midje.sweet :refer :all]
+            [lupapalvelu.operations]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :refer :all]))
 
 (facts "state-graph"
   (fact "defaults"
     (state-graph {}) => states/default-application-state-graph
-    (state-graph {:infoRequest true}) => states/default-inforequest-state-graph))
+    (state-graph {:infoRequest true}) => states/default-inforequest-state-graph
+
+
+    (state-graph {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
+                  :documents [{:schema-info {:name "tyonjohtaja-v2"}}]}) => states/tj-hakemus-state-graph
+    (state-graph {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
+                  :documents [{:data {:ilmoitusHakemusValitsin {:value "hakemus"}}
+                               :schema-info {:name "tyonjohtaja-v2"}}]}) => states/tj-hakemus-state-graph
+    (state-graph {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
+                  :documents [{:data {:ilmoitusHakemusValitsin {:value "ilmoitus"}}
+                               :schema-info {:name "tyonjohtaja-v2"}}]}) => states/tj-ilmoitus-state-graph))
 
 (facts "can-proceed?"
   (can-proceed? {:infoRequest true :state "info"} :answered) => true
