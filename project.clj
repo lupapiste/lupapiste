@@ -87,7 +87,7 @@
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
-              :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html" #"\/email-templates\/"]}
+              :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]
                  ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
