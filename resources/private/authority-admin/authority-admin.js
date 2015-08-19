@@ -28,7 +28,7 @@
     self.tosFunctions = ko.observableArray();
     self.tosFunctionVisible = ko.observable(false);
     self.permanentArchiveEnabled = ko.observable(true);
-    self.features = ko.observableArray();
+    self.features = ko.observable();
     self.allowedRoles = ko.observable([]);
 
     self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };

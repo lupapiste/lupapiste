@@ -5,13 +5,13 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
 
   self.id = params.id || util.randomElementId("map-component");
 
-  var data = params.geoJsonFeatures;
+  var features = params.geoJsonFeatures;
 
   var map;
 
   // fit viewport to feature layer extent
   function updateView() {
-    if (map && !ol.extent.isEmpty(vectorLayer.getSource().getExtent())) {
+    if (map && map.getSize() && !ol.extent.isEmpty(vectorLayer.getSource().getExtent())) {
       view.fit(vectorLayer.getSource().getExtent(), map.getSize());
     }
   }
@@ -46,14 +46,18 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
 
   var popup = new ol.Overlay.Popup();
 
-  data.subscribe(function(val) {
+  function updateMap(data) {
     vectorSource.clear();
-    if (val) {
-      var features = (new ol.format.GeoJSON()).readFeatures(val);
-      vectorSource.addFeatures(features);
+    if (data) {
+      vectorSource.addFeatures((new ol.format.GeoJSON()).readFeatures(data));
     }
     updateView();
-  });
+  }
+
+  // update map when features change
+  ko.computed(function() {
+    updateMap(features());
+  }).extend({throttle: 250});
 
   var xhr = new XMLHttpRequest();
   var mapServer = LUPAPISTE.config.maps["proxyserver-wmts"];
@@ -95,39 +99,40 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
     var source = new ol.source.WMTS(options);
 
     map = new ol.Map({
-        layers: [
-            new ol.layer.Tile({
-                title: "Taustakartta",
-                type: "base",
-                visible: true,
-                source: source
-            }),
-            vectorLayer
-        ],
-        target: self.id,
-        view: view
+      layers: [
+        new ol.layer.Tile({
+          title: "Taustakartta",
+          type: "base",
+          visible: true,
+          source: source
+        }),
+        vectorLayer
+      ],
+      target: self.id,
+      view: view
     });
+
     updateView();
 
     map.addOverlay(popup);
 
     map.on("singleclick", function(evt) {
-        popup.hide();
+      popup.hide();
 
-        // try to find feature from all visible layers under the cursor
-        var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-          return feature;
-        });
+      // try to find feature from all visible layers under the cursor
+      var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+        return feature;
+      });
 
-        if (feature) {
-          var props = feature.getProperties();
-          // convert properties to lowercase i.e. NIMI -> nimi
-          for(var key in props) {
-            props[key.toLowerCase()] = props[key];
-          }
-
-          popup.show(evt.coordinate, props.nimi);
+      if (feature) {
+        var props = feature.getProperties();
+        // convert properties to lowercase i.e. NIMI -> nimi
+        for(var key in props) {
+          props[key.toLowerCase()] = props[key];
         }
+
+        popup.show(evt.coordinate, props.nimi);
+      }
     });
   }
 };
