@@ -47,7 +47,7 @@
           Key is the starting state, first in the value vector is the default next state and
           the rest are other possible next states."}
   default-application-state-graph
-  {:draft      [:open :canceled]
+  {:draft      [:open :submitted :canceled]
    :open       [:submitted :canceled]
    :submitted  [:sent :verdictGiven :canceled]
    :sent       [:verdictGiven :complement-needed :canceled]
