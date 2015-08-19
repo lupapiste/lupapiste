@@ -76,7 +76,7 @@
             case "toistaiseksi":
               additionalDetail = ", " + loc("laskentaperuste") + " " + loc(retention["laskentaperuste"]());
               break;
-            case "määräajan":
+            case "m\u00E4\u00E4r\u00E4ajan":
               additionalDetail = ", " + retention["pituus"]() + " " + loc("vuotta");
               break;
           }
