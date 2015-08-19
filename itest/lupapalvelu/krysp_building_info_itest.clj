@@ -133,3 +133,13 @@
         doc-after (domain/get-document-by-name merged-app "purkaminen")]
     (get-in doc-after [:data :mitat :kokonaisala :source]) => "krysp"
     (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
+
+(fact* "Building id can be 'other' even if there is no backend (LPK-274)"
+  (let [application-id (create-app-id pena :propertyId no-backend-property-id :operation "purkaminen")
+        app (query-application pena application-id)
+        doc (domain/get-document-by-name app "purkaminen")
+        building-info (command pena :get-building-info-from-wfs :id application-id) => {:ok true}
+        resp (command pena :merge-details-from-krysp :id application-id :documentId (:id doc) :collection "documents" :buildingId "other" :path "buildingId" :overwrite true) => ok?
+        merged-app (query-application pena application-id)
+        doc-after (domain/get-document-by-name merged-app "purkaminen")]
+    (get-in doc-after [:data :buildingId :value]) => "other"))

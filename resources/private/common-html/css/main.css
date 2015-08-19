@@ -1700,6 +1700,7 @@ footer ul li {
 /* line 73, ../sass/partials/_buttons.scss */
 button.btn-dialog, .btn-dialog {
   position: absolute;
+  display: table;
   text-align: center;
   bottom: 0;
   right: 6px;
@@ -1707,10 +1708,19 @@ button.btn-dialog, .btn-dialog {
   min-width: 10em;
   max-width: 16.25em;
   margin-left: 6px;
+  min-height: 40px;
+  max-height: 40px;
+  line-height: 40px;
 }
-/* line 84, ../sass/partials/_buttons.scss */
+/* line 88, ../sass/partials/_buttons.scss */
 button.btn-dialog.cancel, .btn-dialog.cancel {
   width: auto;
+}
+
+/* line 93, ../sass/partials/_buttons.scss */
+.btn-dialog > span {
+  min-width: 10em;
+  max-width: 16.25em;
 }
 
 /* .btn-link { */
@@ -1721,7 +1731,7 @@ button.btn-dialog.cancel, .btn-dialog.cancel {
 /*   font-weight:700; */
 /*   overflow: auto; */
 /* } */
-/* line 99, ../sass/partials/_buttons.scss */
+/* line 108, ../sass/partials/_buttons.scss */
 .btn-dialog.btn-primary, .btn-dialog.positive {
   left: 0;
   text-transform: uppercase;
@@ -1765,14 +1775,14 @@ button.btn-dialog.cancel, .btn-dialog.cancel {
 /* // */
 /* // */
 /* // Styleguide 3.1.2 */
-/* line 152, ../sass/partials/_buttons.scss */
+/* line 161, ../sass/partials/_buttons.scss */
 .btn-decline {
   background: red;
   color: white;
   text-transform: uppercase;
 }
 
-/* line 163, ../sass/partials/_buttons.scss */
+/* line 172, ../sass/partials/_buttons.scss */
 .button-loader {
   white-space: nowrap;
   display: inline-block;
@@ -1885,7 +1895,7 @@ button.btn-dialog.cancel, .btn-dialog.cancel {
 /*   &:after { content: "]"; } */
 /*   white-space: nowrap; */
 /* } */
-/* line 295, ../sass/partials/_buttons.scss */
+/* line 304, ../sass/partials/_buttons.scss */
 [type=submit], .btn, .like-btn, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_disabled_next, button {
   min-height: 40px;
   max-height: 40px;
@@ -1904,22 +1914,22 @@ button.btn-dialog.cancel, .btn-dialog.cancel {
   padding-bottom: 0;
   padding-right: 12px;
 }
-/* line 313, ../sass/partials/_buttons.scss */
+/* line 322, ../sass/partials/_buttons.scss */
 [type=submit] span, [type=submit] i, .btn span, .like-btn span, .dataTables_paginate .paginate_disabled_previous span, .dataTables_paginate .paginate_disabled_next span, .btn i, .like-btn i, .dataTables_paginate .paginate_disabled_previous i, .dataTables_paginate .paginate_disabled_next i, button span, button i {
   vertical-align: middle;
   display: table-cell;
   margin: 0;
 }
-/* line 323, ../sass/partials/_buttons.scss */
+/* line 332, ../sass/partials/_buttons.scss */
 [type=submit] :first-child, .btn :first-child, .like-btn :first-child, .dataTables_paginate .paginate_disabled_previous :first-child, .dataTables_paginate .paginate_disabled_next :first-child, button :first-child {
   padding-right: 10px;
 }
-/* line 328, ../sass/partials/_buttons.scss */
+/* line 337, ../sass/partials/_buttons.scss */
 [type=submit] :last-child, .btn :last-child, .like-btn :last-child, .dataTables_paginate .paginate_disabled_previous :last-child, .dataTables_paginate .paginate_disabled_next :last-child, button :last-child {
   padding-right: 0px !important;
 }
 
-/* line 342, ../sass/partials/_buttons.scss */
+/* line 351, ../sass/partials/_buttons.scss */
 .like-btn {
   cursor: default;
   padding: 0;
@@ -1928,17 +1938,17 @@ button.btn-dialog.cancel, .btn-dialog.cancel {
   line-height: 26px;
 }
 
-/* line 351, ../sass/partials/_buttons.scss */
+/* line 360, ../sass/partials/_buttons.scss */
 .caps {
   text-transform: uppercase;
 }
 
-/* line 359, ../sass/partials/_buttons.scss */
+/* line 368, ../sass/partials/_buttons.scss */
 .no-icon-pad :first-child {
   padding-right: 0;
 }
 
-/* line 372, ../sass/partials/_buttons.scss */
+/* line 381, ../sass/partials/_buttons.scss */
 .vertical {
   line-height: normal;
   word-break: break-all;
@@ -1952,11 +1962,11 @@ button.btn-dialog.cancel, .btn-dialog.cancel {
   padding-right: 0;
   padding-bottom: 12px;
 }
-/* line 386, ../sass/partials/_buttons.scss */
+/* line 395, ../sass/partials/_buttons.scss */
 .vertical :first-child {
   padding-right: 0;
 }
-/* line 390, ../sass/partials/_buttons.scss */
+/* line 399, ../sass/partials/_buttons.scss */
 .vertical span {
   padding: 0;
   display: block;
@@ -1966,493 +1976,493 @@ button.btn-dialog.cancel, .btn-dialog.cancel {
   margin-bottom: 12px;
 }
 
-/* line 417, ../sass/partials/_buttons.scss */
+/* line 426, ../sass/partials/_buttons.scss */
 button.primary {
   color: white;
   background-color: #f39129;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 button.primary:link, button.primary:visited {
   color: white;
   background-color: #f39129;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 button.primary:hover {
   color: white;
   background-color: #f7ac2e;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 button.primary:active {
   color: white;
   background-color: #fbc732;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 button.primary:disabled, button.primary.disabled, button.primary.waiting {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 418, ../sass/partials/_buttons.scss */
+/* line 427, ../sass/partials/_buttons.scss */
 div.btn.primary, div.primary.like-btn, .dataTables_paginate div.primary.paginate_disabled_previous, .dataTables_paginate div.primary.paginate_disabled_next {
   color: white;
   background-color: #f39129;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 div.btn.primary:link, div.primary.like-btn:link, .dataTables_paginate div.primary.paginate_disabled_previous:link, .dataTables_paginate div.primary.paginate_disabled_next:link, div.btn.primary:visited, div.primary.like-btn:visited, .dataTables_paginate div.primary.paginate_disabled_previous:visited, .dataTables_paginate div.primary.paginate_disabled_next:visited {
   color: white;
   background-color: #f39129;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 div.btn.primary:hover, div.primary.like-btn:hover, .dataTables_paginate div.primary.paginate_disabled_previous:hover, .dataTables_paginate div.primary.paginate_disabled_next:hover {
   color: white;
   background-color: #f7ac2e;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 div.btn.primary:active, div.primary.like-btn:active, .dataTables_paginate div.primary.paginate_disabled_previous:active, .dataTables_paginate div.primary.paginate_disabled_next:active {
   color: white;
   background-color: #fbc732;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 div.btn.primary:disabled, div.primary.like-btn:disabled, .dataTables_paginate div.primary.paginate_disabled_previous:disabled, .dataTables_paginate div.primary.paginate_disabled_next:disabled, div.btn.primary.disabled, div.primary.disabled.like-btn, .dataTables_paginate div.primary.disabled.paginate_disabled_previous, .dataTables_paginate div.primary.disabled.paginate_disabled_next, div.btn.primary.waiting, div.primary.waiting.like-btn, .dataTables_paginate div.primary.waiting.paginate_disabled_previous, .dataTables_paginate div.primary.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 419, ../sass/partials/_buttons.scss */
+/* line 428, ../sass/partials/_buttons.scss */
 a.btn.primary, a.primary.like-btn, .dataTables_paginate a.primary.paginate_disabled_previous, .dataTables_paginate a.primary.paginate_disabled_next {
   color: white;
   background-color: #f39129;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 a.btn.primary:link, a.primary.like-btn:link, .dataTables_paginate a.primary.paginate_disabled_previous:link, .dataTables_paginate a.primary.paginate_disabled_next:link, a.btn.primary:visited, a.primary.like-btn:visited, .dataTables_paginate a.primary.paginate_disabled_previous:visited, .dataTables_paginate a.primary.paginate_disabled_next:visited {
   color: white;
   background-color: #f39129;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 a.btn.primary:hover, a.primary.like-btn:hover, .dataTables_paginate a.primary.paginate_disabled_previous:hover, .dataTables_paginate a.primary.paginate_disabled_next:hover {
   color: white;
   background-color: #f7ac2e;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 a.btn.primary:active, a.primary.like-btn:active, .dataTables_paginate a.primary.paginate_disabled_previous:active, .dataTables_paginate a.primary.paginate_disabled_next:active {
   color: white;
   background-color: #fbc732;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 a.btn.primary:disabled, a.primary.like-btn:disabled, .dataTables_paginate a.primary.paginate_disabled_previous:disabled, .dataTables_paginate a.primary.paginate_disabled_next:disabled, a.btn.primary.disabled, a.primary.disabled.like-btn, .dataTables_paginate a.primary.disabled.paginate_disabled_previous, .dataTables_paginate a.primary.disabled.paginate_disabled_next, a.btn.primary.waiting, a.primary.waiting.like-btn, .dataTables_paginate a.primary.waiting.paginate_disabled_previous, .dataTables_paginate a.primary.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 417, ../sass/partials/_buttons.scss */
+/* line 426, ../sass/partials/_buttons.scss */
 button.secondary, .dataTables_paginate button.paginate_disabled_previous, .dataTables_paginate button.paginate_disabled_next {
   color: white;
   background-color: #555555;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 button.secondary:link, .dataTables_paginate button.paginate_disabled_previous:link, .dataTables_paginate button.paginate_disabled_next:link, button.secondary:visited, .dataTables_paginate button.paginate_disabled_previous:visited, .dataTables_paginate button.paginate_disabled_next:visited {
   color: white;
   background-color: #555555;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 button.secondary:hover, .dataTables_paginate button.paginate_disabled_previous:hover, .dataTables_paginate button.paginate_disabled_next:hover {
   color: white;
   background-color: #777777;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 button.secondary:active, .dataTables_paginate button.paginate_disabled_previous:active, .dataTables_paginate button.paginate_disabled_next:active {
   color: white;
   background-color: #999999;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 button.secondary:disabled, .dataTables_paginate button.paginate_disabled_previous:disabled, .dataTables_paginate button.paginate_disabled_next:disabled, button.secondary.disabled, .dataTables_paginate button.disabled.paginate_disabled_previous, .dataTables_paginate button.disabled.paginate_disabled_next, button.secondary.waiting, .dataTables_paginate button.waiting.paginate_disabled_previous, .dataTables_paginate button.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 418, ../sass/partials/_buttons.scss */
+/* line 427, ../sass/partials/_buttons.scss */
 div.btn.secondary, div.secondary.like-btn, .dataTables_paginate div.paginate_disabled_previous, .dataTables_paginate div.paginate_disabled_next {
   color: white;
   background-color: #555555;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 div.btn.secondary:link, div.secondary.like-btn:link, .dataTables_paginate div.paginate_disabled_previous:link, .dataTables_paginate div.paginate_disabled_next:link, div.btn.secondary:visited, div.secondary.like-btn:visited, .dataTables_paginate div.paginate_disabled_previous:visited, .dataTables_paginate div.paginate_disabled_next:visited {
   color: white;
   background-color: #555555;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 div.btn.secondary:hover, div.secondary.like-btn:hover, .dataTables_paginate div.paginate_disabled_previous:hover, .dataTables_paginate div.paginate_disabled_next:hover {
   color: white;
   background-color: #777777;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 div.btn.secondary:active, div.secondary.like-btn:active, .dataTables_paginate div.paginate_disabled_previous:active, .dataTables_paginate div.paginate_disabled_next:active {
   color: white;
   background-color: #999999;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 div.btn.secondary:disabled, div.secondary.like-btn:disabled, .dataTables_paginate div.paginate_disabled_previous:disabled, .dataTables_paginate div.paginate_disabled_next:disabled, div.btn.secondary.disabled, div.secondary.disabled.like-btn, .dataTables_paginate div.disabled.paginate_disabled_previous, .dataTables_paginate div.disabled.paginate_disabled_next, div.btn.secondary.waiting, div.secondary.waiting.like-btn, .dataTables_paginate div.waiting.paginate_disabled_previous, .dataTables_paginate div.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 419, ../sass/partials/_buttons.scss */
+/* line 428, ../sass/partials/_buttons.scss */
 a.btn.secondary, a.secondary.like-btn, .dataTables_paginate a.paginate_disabled_previous, .dataTables_paginate a.paginate_disabled_next {
   color: white;
   background-color: #555555;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 a.btn.secondary:link, a.secondary.like-btn:link, .dataTables_paginate a.paginate_disabled_previous:link, .dataTables_paginate a.paginate_disabled_next:link, a.btn.secondary:visited, a.secondary.like-btn:visited, .dataTables_paginate a.paginate_disabled_previous:visited, .dataTables_paginate a.paginate_disabled_next:visited {
   color: white;
   background-color: #555555;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 a.btn.secondary:hover, a.secondary.like-btn:hover, .dataTables_paginate a.paginate_disabled_previous:hover, .dataTables_paginate a.paginate_disabled_next:hover {
   color: white;
   background-color: #777777;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 a.btn.secondary:active, a.secondary.like-btn:active, .dataTables_paginate a.paginate_disabled_previous:active, .dataTables_paginate a.paginate_disabled_next:active {
   color: white;
   background-color: #999999;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 a.btn.secondary:disabled, a.secondary.like-btn:disabled, .dataTables_paginate a.paginate_disabled_previous:disabled, .dataTables_paginate a.paginate_disabled_next:disabled, a.btn.secondary.disabled, a.secondary.disabled.like-btn, .dataTables_paginate a.disabled.paginate_disabled_previous, .dataTables_paginate a.disabled.paginate_disabled_next, a.btn.secondary.waiting, a.secondary.waiting.like-btn, .dataTables_paginate a.waiting.paginate_disabled_previous, .dataTables_paginate a.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 417, ../sass/partials/_buttons.scss */
+/* line 426, ../sass/partials/_buttons.scss */
 button.positive {
   color: white;
   background-color: #2ca92c;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 button.positive:link, button.positive:visited {
   color: white;
   background-color: #2ca92c;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 button.positive:hover {
   color: white;
   background-color: #46b02d;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 button.positive:active {
   color: white;
   background-color: #61b72f;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 button.positive:disabled, button.positive.disabled, button.positive.waiting {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 418, ../sass/partials/_buttons.scss */
+/* line 427, ../sass/partials/_buttons.scss */
 div.btn.positive, div.positive.like-btn, .dataTables_paginate div.positive.paginate_disabled_previous, .dataTables_paginate div.positive.paginate_disabled_next {
   color: white;
   background-color: #2ca92c;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 div.btn.positive:link, div.positive.like-btn:link, .dataTables_paginate div.positive.paginate_disabled_previous:link, .dataTables_paginate div.positive.paginate_disabled_next:link, div.btn.positive:visited, div.positive.like-btn:visited, .dataTables_paginate div.positive.paginate_disabled_previous:visited, .dataTables_paginate div.positive.paginate_disabled_next:visited {
   color: white;
   background-color: #2ca92c;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 div.btn.positive:hover, div.positive.like-btn:hover, .dataTables_paginate div.positive.paginate_disabled_previous:hover, .dataTables_paginate div.positive.paginate_disabled_next:hover {
   color: white;
   background-color: #46b02d;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 div.btn.positive:active, div.positive.like-btn:active, .dataTables_paginate div.positive.paginate_disabled_previous:active, .dataTables_paginate div.positive.paginate_disabled_next:active {
   color: white;
   background-color: #61b72f;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 div.btn.positive:disabled, div.positive.like-btn:disabled, .dataTables_paginate div.positive.paginate_disabled_previous:disabled, .dataTables_paginate div.positive.paginate_disabled_next:disabled, div.btn.positive.disabled, div.positive.disabled.like-btn, .dataTables_paginate div.positive.disabled.paginate_disabled_previous, .dataTables_paginate div.positive.disabled.paginate_disabled_next, div.btn.positive.waiting, div.positive.waiting.like-btn, .dataTables_paginate div.positive.waiting.paginate_disabled_previous, .dataTables_paginate div.positive.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 419, ../sass/partials/_buttons.scss */
+/* line 428, ../sass/partials/_buttons.scss */
 a.btn.positive, a.positive.like-btn, .dataTables_paginate a.positive.paginate_disabled_previous, .dataTables_paginate a.positive.paginate_disabled_next {
   color: white;
   background-color: #2ca92c;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 a.btn.positive:link, a.positive.like-btn:link, .dataTables_paginate a.positive.paginate_disabled_previous:link, .dataTables_paginate a.positive.paginate_disabled_next:link, a.btn.positive:visited, a.positive.like-btn:visited, .dataTables_paginate a.positive.paginate_disabled_previous:visited, .dataTables_paginate a.positive.paginate_disabled_next:visited {
   color: white;
   background-color: #2ca92c;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 a.btn.positive:hover, a.positive.like-btn:hover, .dataTables_paginate a.positive.paginate_disabled_previous:hover, .dataTables_paginate a.positive.paginate_disabled_next:hover {
   color: white;
   background-color: #46b02d;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 a.btn.positive:active, a.positive.like-btn:active, .dataTables_paginate a.positive.paginate_disabled_previous:active, .dataTables_paginate a.positive.paginate_disabled_next:active {
   color: white;
   background-color: #61b72f;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 a.btn.positive:disabled, a.positive.like-btn:disabled, .dataTables_paginate a.positive.paginate_disabled_previous:disabled, .dataTables_paginate a.positive.paginate_disabled_next:disabled, a.btn.positive.disabled, a.positive.disabled.like-btn, .dataTables_paginate a.positive.disabled.paginate_disabled_previous, .dataTables_paginate a.positive.disabled.paginate_disabled_next, a.btn.positive.waiting, a.positive.waiting.like-btn, .dataTables_paginate a.positive.waiting.paginate_disabled_previous, .dataTables_paginate a.positive.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 417, ../sass/partials/_buttons.scss */
+/* line 426, ../sass/partials/_buttons.scss */
 button.btn-primary {
   color: white;
   background-color: #2ca92c;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 button.btn-primary:link, button.btn-primary:visited {
   color: white;
   background-color: #2ca92c;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 button.btn-primary:hover {
   color: white;
   background-color: #46b02d;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 button.btn-primary:active {
   color: white;
   background-color: #61b72f;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 button.btn-primary:disabled, button.btn-primary.disabled, button.btn-primary.waiting {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 418, ../sass/partials/_buttons.scss */
+/* line 427, ../sass/partials/_buttons.scss */
 div.btn.btn-primary, div.btn-primary.like-btn, .dataTables_paginate div.btn-primary.paginate_disabled_previous, .dataTables_paginate div.btn-primary.paginate_disabled_next {
   color: white;
   background-color: #2ca92c;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 div.btn.btn-primary:link, div.btn-primary.like-btn:link, .dataTables_paginate div.btn-primary.paginate_disabled_previous:link, .dataTables_paginate div.btn-primary.paginate_disabled_next:link, div.btn.btn-primary:visited, div.btn-primary.like-btn:visited, .dataTables_paginate div.btn-primary.paginate_disabled_previous:visited, .dataTables_paginate div.btn-primary.paginate_disabled_next:visited {
   color: white;
   background-color: #2ca92c;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 div.btn.btn-primary:hover, div.btn-primary.like-btn:hover, .dataTables_paginate div.btn-primary.paginate_disabled_previous:hover, .dataTables_paginate div.btn-primary.paginate_disabled_next:hover {
   color: white;
   background-color: #46b02d;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 div.btn.btn-primary:active, div.btn-primary.like-btn:active, .dataTables_paginate div.btn-primary.paginate_disabled_previous:active, .dataTables_paginate div.btn-primary.paginate_disabled_next:active {
   color: white;
   background-color: #61b72f;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 div.btn.btn-primary:disabled, div.btn-primary.like-btn:disabled, .dataTables_paginate div.btn-primary.paginate_disabled_previous:disabled, .dataTables_paginate div.btn-primary.paginate_disabled_next:disabled, div.btn.btn-primary.disabled, div.btn-primary.disabled.like-btn, .dataTables_paginate div.btn-primary.disabled.paginate_disabled_previous, .dataTables_paginate div.btn-primary.disabled.paginate_disabled_next, div.btn.btn-primary.waiting, div.btn-primary.waiting.like-btn, .dataTables_paginate div.btn-primary.waiting.paginate_disabled_previous, .dataTables_paginate div.btn-primary.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 419, ../sass/partials/_buttons.scss */
+/* line 428, ../sass/partials/_buttons.scss */
 a.btn.btn-primary, a.btn-primary.like-btn, .dataTables_paginate a.btn-primary.paginate_disabled_previous, .dataTables_paginate a.btn-primary.paginate_disabled_next {
   color: white;
   background-color: #2ca92c;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 a.btn.btn-primary:link, a.btn-primary.like-btn:link, .dataTables_paginate a.btn-primary.paginate_disabled_previous:link, .dataTables_paginate a.btn-primary.paginate_disabled_next:link, a.btn.btn-primary:visited, a.btn-primary.like-btn:visited, .dataTables_paginate a.btn-primary.paginate_disabled_previous:visited, .dataTables_paginate a.btn-primary.paginate_disabled_next:visited {
   color: white;
   background-color: #2ca92c;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 a.btn.btn-primary:hover, a.btn-primary.like-btn:hover, .dataTables_paginate a.btn-primary.paginate_disabled_previous:hover, .dataTables_paginate a.btn-primary.paginate_disabled_next:hover {
   color: white;
   background-color: #46b02d;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 a.btn.btn-primary:active, a.btn-primary.like-btn:active, .dataTables_paginate a.btn-primary.paginate_disabled_previous:active, .dataTables_paginate a.btn-primary.paginate_disabled_next:active {
   color: white;
   background-color: #61b72f;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 a.btn.btn-primary:disabled, a.btn-primary.like-btn:disabled, .dataTables_paginate a.btn-primary.paginate_disabled_previous:disabled, .dataTables_paginate a.btn-primary.paginate_disabled_next:disabled, a.btn.btn-primary.disabled, a.btn-primary.disabled.like-btn, .dataTables_paginate a.btn-primary.disabled.paginate_disabled_previous, .dataTables_paginate a.btn-primary.disabled.paginate_disabled_next, a.btn.btn-primary.waiting, a.btn-primary.waiting.like-btn, .dataTables_paginate a.btn-primary.waiting.paginate_disabled_previous, .dataTables_paginate a.btn-primary.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 417, ../sass/partials/_buttons.scss */
+/* line 426, ../sass/partials/_buttons.scss */
 button.negative {
   color: white;
   background-color: #df3215;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 button.negative:link, button.negative:visited {
   color: white;
   background-color: #df3215;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 button.negative:hover {
   color: white;
   background-color: #e34319;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 button.negative:active {
   color: white;
   background-color: #e7541d;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 button.negative:disabled, button.negative.disabled, button.negative.waiting {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 418, ../sass/partials/_buttons.scss */
+/* line 427, ../sass/partials/_buttons.scss */
 div.btn.negative, div.negative.like-btn, .dataTables_paginate div.negative.paginate_disabled_previous, .dataTables_paginate div.negative.paginate_disabled_next {
   color: white;
   background-color: #df3215;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 div.btn.negative:link, div.negative.like-btn:link, .dataTables_paginate div.negative.paginate_disabled_previous:link, .dataTables_paginate div.negative.paginate_disabled_next:link, div.btn.negative:visited, div.negative.like-btn:visited, .dataTables_paginate div.negative.paginate_disabled_previous:visited, .dataTables_paginate div.negative.paginate_disabled_next:visited {
   color: white;
   background-color: #df3215;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 div.btn.negative:hover, div.negative.like-btn:hover, .dataTables_paginate div.negative.paginate_disabled_previous:hover, .dataTables_paginate div.negative.paginate_disabled_next:hover {
   color: white;
   background-color: #e34319;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 div.btn.negative:active, div.negative.like-btn:active, .dataTables_paginate div.negative.paginate_disabled_previous:active, .dataTables_paginate div.negative.paginate_disabled_next:active {
   color: white;
   background-color: #e7541d;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 div.btn.negative:disabled, div.negative.like-btn:disabled, .dataTables_paginate div.negative.paginate_disabled_previous:disabled, .dataTables_paginate div.negative.paginate_disabled_next:disabled, div.btn.negative.disabled, div.negative.disabled.like-btn, .dataTables_paginate div.negative.disabled.paginate_disabled_previous, .dataTables_paginate div.negative.disabled.paginate_disabled_next, div.btn.negative.waiting, div.negative.waiting.like-btn, .dataTables_paginate div.negative.waiting.paginate_disabled_previous, .dataTables_paginate div.negative.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 419, ../sass/partials/_buttons.scss */
+/* line 428, ../sass/partials/_buttons.scss */
 a.btn.negative, a.negative.like-btn, .dataTables_paginate a.negative.paginate_disabled_previous, .dataTables_paginate a.negative.paginate_disabled_next {
   color: white;
   background-color: #df3215;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 a.btn.negative:link, a.negative.like-btn:link, .dataTables_paginate a.negative.paginate_disabled_previous:link, .dataTables_paginate a.negative.paginate_disabled_next:link, a.btn.negative:visited, a.negative.like-btn:visited, .dataTables_paginate a.negative.paginate_disabled_previous:visited, .dataTables_paginate a.negative.paginate_disabled_next:visited {
   color: white;
   background-color: #df3215;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 a.btn.negative:hover, a.negative.like-btn:hover, .dataTables_paginate a.negative.paginate_disabled_previous:hover, .dataTables_paginate a.negative.paginate_disabled_next:hover {
   color: white;
   background-color: #e34319;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 a.btn.negative:active, a.negative.like-btn:active, .dataTables_paginate a.negative.paginate_disabled_previous:active, .dataTables_paginate a.negative.paginate_disabled_next:active {
   color: white;
   background-color: #e7541d;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 a.btn.negative:disabled, a.negative.like-btn:disabled, .dataTables_paginate a.negative.paginate_disabled_previous:disabled, .dataTables_paginate a.negative.paginate_disabled_next:disabled, a.btn.negative.disabled, a.negative.disabled.like-btn, .dataTables_paginate a.negative.disabled.paginate_disabled_previous, .dataTables_paginate a.negative.disabled.paginate_disabled_next, a.btn.negative.waiting, a.negative.waiting.like-btn, .dataTables_paginate a.negative.waiting.paginate_disabled_previous, .dataTables_paginate a.negative.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 417, ../sass/partials/_buttons.scss */
+/* line 426, ../sass/partials/_buttons.scss */
 button.authority {
   color: white;
   background-color: #04c3af;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 button.authority:link, button.authority:visited {
   color: white;
   background-color: #04c3af;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 button.authority:hover {
   color: white;
   background-color: #05d3b9;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 button.authority:active {
   color: white;
   background-color: #07e3c2;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 button.authority:disabled, button.authority.disabled, button.authority.waiting {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 418, ../sass/partials/_buttons.scss */
+/* line 427, ../sass/partials/_buttons.scss */
 div.btn.authority, div.authority.like-btn, .dataTables_paginate div.authority.paginate_disabled_previous, .dataTables_paginate div.authority.paginate_disabled_next {
   color: white;
   background-color: #04c3af;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 div.btn.authority:link, div.authority.like-btn:link, .dataTables_paginate div.authority.paginate_disabled_previous:link, .dataTables_paginate div.authority.paginate_disabled_next:link, div.btn.authority:visited, div.authority.like-btn:visited, .dataTables_paginate div.authority.paginate_disabled_previous:visited, .dataTables_paginate div.authority.paginate_disabled_next:visited {
   color: white;
   background-color: #04c3af;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 div.btn.authority:hover, div.authority.like-btn:hover, .dataTables_paginate div.authority.paginate_disabled_previous:hover, .dataTables_paginate div.authority.paginate_disabled_next:hover {
   color: white;
   background-color: #05d3b9;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 div.btn.authority:active, div.authority.like-btn:active, .dataTables_paginate div.authority.paginate_disabled_previous:active, .dataTables_paginate div.authority.paginate_disabled_next:active {
   color: white;
   background-color: #07e3c2;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 div.btn.authority:disabled, div.authority.like-btn:disabled, .dataTables_paginate div.authority.paginate_disabled_previous:disabled, .dataTables_paginate div.authority.paginate_disabled_next:disabled, div.btn.authority.disabled, div.authority.disabled.like-btn, .dataTables_paginate div.authority.disabled.paginate_disabled_previous, .dataTables_paginate div.authority.disabled.paginate_disabled_next, div.btn.authority.waiting, div.authority.waiting.like-btn, .dataTables_paginate div.authority.waiting.paginate_disabled_previous, .dataTables_paginate div.authority.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 419, ../sass/partials/_buttons.scss */
+/* line 428, ../sass/partials/_buttons.scss */
 a.btn.authority, a.authority.like-btn, .dataTables_paginate a.authority.paginate_disabled_previous, .dataTables_paginate a.authority.paginate_disabled_next {
   color: white;
   background-color: #04c3af;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 a.btn.authority:link, a.authority.like-btn:link, .dataTables_paginate a.authority.paginate_disabled_previous:link, .dataTables_paginate a.authority.paginate_disabled_next:link, a.btn.authority:visited, a.authority.like-btn:visited, .dataTables_paginate a.authority.paginate_disabled_previous:visited, .dataTables_paginate a.authority.paginate_disabled_next:visited {
   color: white;
   background-color: #04c3af;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 a.btn.authority:hover, a.authority.like-btn:hover, .dataTables_paginate a.authority.paginate_disabled_previous:hover, .dataTables_paginate a.authority.paginate_disabled_next:hover {
   color: white;
   background-color: #05d3b9;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 a.btn.authority:active, a.authority.like-btn:active, .dataTables_paginate a.authority.paginate_disabled_previous:active, .dataTables_paginate a.authority.paginate_disabled_next:active {
   color: white;
   background-color: #07e3c2;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 a.btn.authority:disabled, a.authority.like-btn:disabled, .dataTables_paginate a.authority.paginate_disabled_previous:disabled, .dataTables_paginate a.authority.paginate_disabled_next:disabled, a.btn.authority.disabled, a.authority.disabled.like-btn, .dataTables_paginate a.authority.disabled.paginate_disabled_previous, .dataTables_paginate a.authority.disabled.paginate_disabled_next, a.btn.authority.waiting, a.authority.waiting.like-btn, .dataTables_paginate a.authority.waiting.paginate_disabled_previous, .dataTables_paginate a.authority.waiting.paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 417, ../sass/partials/_buttons.scss */
+/* line 426, ../sass/partials/_buttons.scss */
 button.function {
   color: #f39129;
   background-color: white;
@@ -2460,37 +2470,37 @@ button.function {
   border-width: 1px;
   border-color: #dddddd;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 button.function:link, button.function:visited {
   color: #f39129;
   background-color: white;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 button.function:hover {
   color: #f7ac2e;
   background-color: white;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 button.function:active {
   color: #333333;
   background-color: white;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 button.function:disabled, button.function.disabled, button.function.waiting {
   cursor: default !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 481, ../sass/partials/_buttons.scss */
+/* line 490, ../sass/partials/_buttons.scss */
 button.function:link, button.function:visited {
   border-color: #dddddd;
 }
-/* line 484, ../sass/partials/_buttons.scss */
+/* line 493, ../sass/partials/_buttons.scss */
 button.function:hover, button.function:active {
   border-color: #bbbbbb;
 }
 
-/* line 418, ../sass/partials/_buttons.scss */
+/* line 427, ../sass/partials/_buttons.scss */
 div.btn.function, div.function.like-btn, .dataTables_paginate div.function.paginate_disabled_previous, .dataTables_paginate div.function.paginate_disabled_next {
   color: #f39129;
   background-color: white;
@@ -2498,37 +2508,37 @@ div.btn.function, div.function.like-btn, .dataTables_paginate div.function.pagin
   border-width: 1px;
   border-color: #dddddd;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 div.btn.function:link, div.function.like-btn:link, .dataTables_paginate div.function.paginate_disabled_previous:link, .dataTables_paginate div.function.paginate_disabled_next:link, div.btn.function:visited, div.function.like-btn:visited, .dataTables_paginate div.function.paginate_disabled_previous:visited, .dataTables_paginate div.function.paginate_disabled_next:visited {
   color: #f39129;
   background-color: white;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 div.btn.function:hover, div.function.like-btn:hover, .dataTables_paginate div.function.paginate_disabled_previous:hover, .dataTables_paginate div.function.paginate_disabled_next:hover {
   color: #f7ac2e;
   background-color: white;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 div.btn.function:active, div.function.like-btn:active, .dataTables_paginate div.function.paginate_disabled_previous:active, .dataTables_paginate div.function.paginate_disabled_next:active {
   color: #333333;
   background-color: white;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 div.btn.function:disabled, div.function.like-btn:disabled, .dataTables_paginate div.function.paginate_disabled_previous:disabled, .dataTables_paginate div.function.paginate_disabled_next:disabled, div.btn.function.disabled, div.function.disabled.like-btn, .dataTables_paginate div.function.disabled.paginate_disabled_previous, .dataTables_paginate div.function.disabled.paginate_disabled_next, div.btn.function.waiting, div.function.waiting.like-btn, .dataTables_paginate div.function.waiting.paginate_disabled_previous, .dataTables_paginate div.function.waiting.paginate_disabled_next {
   cursor: default !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 481, ../sass/partials/_buttons.scss */
+/* line 490, ../sass/partials/_buttons.scss */
 div.btn.function:link, div.function.like-btn:link, .dataTables_paginate div.function.paginate_disabled_previous:link, .dataTables_paginate div.function.paginate_disabled_next:link, div.btn.function:visited, div.function.like-btn:visited, .dataTables_paginate div.function.paginate_disabled_previous:visited, .dataTables_paginate div.function.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 484, ../sass/partials/_buttons.scss */
+/* line 493, ../sass/partials/_buttons.scss */
 div.btn.function:hover, div.function.like-btn:hover, .dataTables_paginate div.function.paginate_disabled_previous:hover, .dataTables_paginate div.function.paginate_disabled_next:hover, div.btn.function:active, div.function.like-btn:active, .dataTables_paginate div.function.paginate_disabled_previous:active, .dataTables_paginate div.function.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
-/* line 419, ../sass/partials/_buttons.scss */
+/* line 428, ../sass/partials/_buttons.scss */
 a.btn.function, a.function.like-btn, .dataTables_paginate a.function.paginate_disabled_previous, .dataTables_paginate a.function.paginate_disabled_next {
   color: #f39129;
   background-color: white;
@@ -2536,53 +2546,53 @@ a.btn.function, a.function.like-btn, .dataTables_paginate a.function.paginate_di
   border-width: 1px;
   border-color: #dddddd;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 a.btn.function:link, a.function.like-btn:link, .dataTables_paginate a.function.paginate_disabled_previous:link, .dataTables_paginate a.function.paginate_disabled_next:link, a.btn.function:visited, a.function.like-btn:visited, .dataTables_paginate a.function.paginate_disabled_previous:visited, .dataTables_paginate a.function.paginate_disabled_next:visited {
   color: #f39129;
   background-color: white;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 a.btn.function:hover, a.function.like-btn:hover, .dataTables_paginate a.function.paginate_disabled_previous:hover, .dataTables_paginate a.function.paginate_disabled_next:hover {
   color: #f7ac2e;
   background-color: white;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 a.btn.function:active, a.function.like-btn:active, .dataTables_paginate a.function.paginate_disabled_previous:active, .dataTables_paginate a.function.paginate_disabled_next:active {
   color: #333333;
   background-color: white;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 a.btn.function:disabled, a.function.like-btn:disabled, .dataTables_paginate a.function.paginate_disabled_previous:disabled, .dataTables_paginate a.function.paginate_disabled_next:disabled, a.btn.function.disabled, a.function.disabled.like-btn, .dataTables_paginate a.function.disabled.paginate_disabled_previous, .dataTables_paginate a.function.disabled.paginate_disabled_next, a.btn.function.waiting, a.function.waiting.like-btn, .dataTables_paginate a.function.waiting.paginate_disabled_previous, .dataTables_paginate a.function.waiting.paginate_disabled_next {
   cursor: default !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 481, ../sass/partials/_buttons.scss */
+/* line 490, ../sass/partials/_buttons.scss */
 a.btn.function:link, a.function.like-btn:link, .dataTables_paginate a.function.paginate_disabled_previous:link, .dataTables_paginate a.function.paginate_disabled_next:link, a.btn.function:visited, a.function.like-btn:visited, .dataTables_paginate a.function.paginate_disabled_previous:visited, .dataTables_paginate a.function.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 484, ../sass/partials/_buttons.scss */
+/* line 493, ../sass/partials/_buttons.scss */
 a.btn.function:hover, a.function.like-btn:hover, .dataTables_paginate a.function.paginate_disabled_previous:hover, .dataTables_paginate a.function.paginate_disabled_next:hover, a.btn.function:active, a.function.like-btn:active, .dataTables_paginate a.function.paginate_disabled_previous:active, .dataTables_paginate a.function.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
-/* line 493, ../sass/partials/_buttons.scss */
+/* line 502, ../sass/partials/_buttons.scss */
 .function.disabled {
   cursor: default !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 495, ../sass/partials/_buttons.scss */
+/* line 504, ../sass/partials/_buttons.scss */
 .function.disabled:hover, .function.disabled:active, .function.disabled:disabled {
   border-color: #dddddd !important;
 }
 
-/* line 501, ../sass/partials/_buttons.scss */
+/* line 510, ../sass/partials/_buttons.scss */
 button.function:disabled {
   border-color: #dddddd !important;
 }
 
-/* line 417, ../sass/partials/_buttons.scss */
+/* line 426, ../sass/partials/_buttons.scss */
 button.function.authority {
   color: #04c3af;
   background-color: white;
@@ -2590,37 +2600,37 @@ button.function.authority {
   border-width: 1px;
   border-color: #dddddd;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 button.function.authority:link, button.function.authority:visited {
   color: #04c3af;
   background-color: white;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 button.function.authority:hover {
   color: #05d3b9;
   background-color: white;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 button.function.authority:active {
   color: #333333;
   background-color: white;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 button.function.authority:disabled, button.function.authority.disabled, button.function.authority.waiting {
   cursor: default !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 481, ../sass/partials/_buttons.scss */
+/* line 490, ../sass/partials/_buttons.scss */
 button.function.authority:link, button.function.authority:visited {
   border-color: #dddddd;
 }
-/* line 484, ../sass/partials/_buttons.scss */
+/* line 493, ../sass/partials/_buttons.scss */
 button.function.authority:hover, button.function.authority:active {
   border-color: #bbbbbb;
 }
 
-/* line 418, ../sass/partials/_buttons.scss */
+/* line 427, ../sass/partials/_buttons.scss */
 div.btn.function.authority, div.function.authority.like-btn, .dataTables_paginate div.function.authority.paginate_disabled_previous, .dataTables_paginate div.function.authority.paginate_disabled_next {
   color: #04c3af;
   background-color: white;
@@ -2628,37 +2638,37 @@ div.btn.function.authority, div.function.authority.like-btn, .dataTables_paginat
   border-width: 1px;
   border-color: #dddddd;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 div.btn.function.authority:link, div.function.authority.like-btn:link, .dataTables_paginate div.function.authority.paginate_disabled_previous:link, .dataTables_paginate div.function.authority.paginate_disabled_next:link, div.btn.function.authority:visited, div.function.authority.like-btn:visited, .dataTables_paginate div.function.authority.paginate_disabled_previous:visited, .dataTables_paginate div.function.authority.paginate_disabled_next:visited {
   color: #04c3af;
   background-color: white;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 div.btn.function.authority:hover, div.function.authority.like-btn:hover, .dataTables_paginate div.function.authority.paginate_disabled_previous:hover, .dataTables_paginate div.function.authority.paginate_disabled_next:hover {
   color: #05d3b9;
   background-color: white;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 div.btn.function.authority:active, div.function.authority.like-btn:active, .dataTables_paginate div.function.authority.paginate_disabled_previous:active, .dataTables_paginate div.function.authority.paginate_disabled_next:active {
   color: #333333;
   background-color: white;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 div.btn.function.authority:disabled, div.function.authority.like-btn:disabled, .dataTables_paginate div.function.authority.paginate_disabled_previous:disabled, .dataTables_paginate div.function.authority.paginate_disabled_next:disabled, div.btn.function.authority.disabled, div.function.authority.disabled.like-btn, .dataTables_paginate div.function.authority.disabled.paginate_disabled_previous, .dataTables_paginate div.function.authority.disabled.paginate_disabled_next, div.btn.function.authority.waiting, div.function.authority.waiting.like-btn, .dataTables_paginate div.function.authority.waiting.paginate_disabled_previous, .dataTables_paginate div.function.authority.waiting.paginate_disabled_next {
   cursor: default !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 481, ../sass/partials/_buttons.scss */
+/* line 490, ../sass/partials/_buttons.scss */
 div.btn.function.authority:link, div.function.authority.like-btn:link, .dataTables_paginate div.function.authority.paginate_disabled_previous:link, .dataTables_paginate div.function.authority.paginate_disabled_next:link, div.btn.function.authority:visited, div.function.authority.like-btn:visited, .dataTables_paginate div.function.authority.paginate_disabled_previous:visited, .dataTables_paginate div.function.authority.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 484, ../sass/partials/_buttons.scss */
+/* line 493, ../sass/partials/_buttons.scss */
 div.btn.function.authority:hover, div.function.authority.like-btn:hover, .dataTables_paginate div.function.authority.paginate_disabled_previous:hover, .dataTables_paginate div.function.authority.paginate_disabled_next:hover, div.btn.function.authority:active, div.function.authority.like-btn:active, .dataTables_paginate div.function.authority.paginate_disabled_previous:active, .dataTables_paginate div.function.authority.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
-/* line 419, ../sass/partials/_buttons.scss */
+/* line 428, ../sass/partials/_buttons.scss */
 a.btn.function.authority, a.function.authority.like-btn, .dataTables_paginate a.function.authority.paginate_disabled_previous, .dataTables_paginate a.function.authority.paginate_disabled_next {
   color: #04c3af;
   background-color: white;
@@ -2666,32 +2676,32 @@ a.btn.function.authority, a.function.authority.like-btn, .dataTables_paginate a.
   border-width: 1px;
   border-color: #dddddd;
 }
-/* line 428, ../sass/partials/_buttons.scss */
+/* line 437, ../sass/partials/_buttons.scss */
 a.btn.function.authority:link, a.function.authority.like-btn:link, .dataTables_paginate a.function.authority.paginate_disabled_previous:link, .dataTables_paginate a.function.authority.paginate_disabled_next:link, a.btn.function.authority:visited, a.function.authority.like-btn:visited, .dataTables_paginate a.function.authority.paginate_disabled_previous:visited, .dataTables_paginate a.function.authority.paginate_disabled_next:visited {
   color: #04c3af;
   background-color: white;
 }
-/* line 432, ../sass/partials/_buttons.scss */
+/* line 441, ../sass/partials/_buttons.scss */
 a.btn.function.authority:hover, a.function.authority.like-btn:hover, .dataTables_paginate a.function.authority.paginate_disabled_previous:hover, .dataTables_paginate a.function.authority.paginate_disabled_next:hover {
   color: #05d3b9;
   background-color: white;
 }
-/* line 436, ../sass/partials/_buttons.scss */
+/* line 445, ../sass/partials/_buttons.scss */
 a.btn.function.authority:active, a.function.authority.like-btn:active, .dataTables_paginate a.function.authority.paginate_disabled_previous:active, .dataTables_paginate a.function.authority.paginate_disabled_next:active {
   color: #333333;
   background-color: white;
 }
-/* line 440, ../sass/partials/_buttons.scss */
+/* line 449, ../sass/partials/_buttons.scss */
 a.btn.function.authority:disabled, a.function.authority.like-btn:disabled, .dataTables_paginate a.function.authority.paginate_disabled_previous:disabled, .dataTables_paginate a.function.authority.paginate_disabled_next:disabled, a.btn.function.authority.disabled, a.function.authority.disabled.like-btn, .dataTables_paginate a.function.authority.disabled.paginate_disabled_previous, .dataTables_paginate a.function.authority.disabled.paginate_disabled_next, a.btn.function.authority.waiting, a.function.authority.waiting.like-btn, .dataTables_paginate a.function.authority.waiting.paginate_disabled_previous, .dataTables_paginate a.function.authority.waiting.paginate_disabled_next {
   cursor: default !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 481, ../sass/partials/_buttons.scss */
+/* line 490, ../sass/partials/_buttons.scss */
 a.btn.function.authority:link, a.function.authority.like-btn:link, .dataTables_paginate a.function.authority.paginate_disabled_previous:link, .dataTables_paginate a.function.authority.paginate_disabled_next:link, a.btn.function.authority:visited, a.function.authority.like-btn:visited, .dataTables_paginate a.function.authority.paginate_disabled_previous:visited, .dataTables_paginate a.function.authority.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 484, ../sass/partials/_buttons.scss */
+/* line 493, ../sass/partials/_buttons.scss */
 a.btn.function.authority:hover, a.function.authority.like-btn:hover, .dataTables_paginate a.function.authority.paginate_disabled_previous:hover, .dataTables_paginate a.function.authority.paginate_disabled_next:hover, a.btn.function.authority:active, a.function.authority.like-btn:active, .dataTables_paginate a.function.authority.paginate_disabled_previous:active, .dataTables_paginate a.function.authority.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -2712,7 +2722,7 @@ a.btn.function.authority:hover, a.function.authority.like-btn:hover, .dataTables
     transform: rotate(360deg);
   }
 }
-/* line 555, ../sass/partials/_buttons.scss */
+/* line 564, ../sass/partials/_buttons.scss */
 .spin {
   -webkit-animation: spin 4s linear infinite;
   -moz-animation: spin 4s linear infinite;
@@ -2720,103 +2730,103 @@ a.btn.function.authority:hover, a.function.authority.like-btn:hover, .dataTables
   display: none;
 }
 
-/* line 560, ../sass/partials/_buttons.scss */
+/* line 569, ../sass/partials/_buttons.scss */
 i.wait {
   display: none;
   padding: 0 !important;
 }
 
-/* line 566, ../sass/partials/_buttons.scss */
+/* line 575, ../sass/partials/_buttons.scss */
 .waiting i {
   display: none;
 }
-/* line 569, ../sass/partials/_buttons.scss */
+/* line 578, ../sass/partials/_buttons.scss */
 .waiting i.wait {
   display: table-cell;
 }
 
-/* line 574, ../sass/partials/_buttons.scss */
+/* line 583, ../sass/partials/_buttons.scss */
 .waiting .wait + span {
   padding-left: 10px;
 }
 
-/* line 578, ../sass/partials/_buttons.scss */
+/* line 587, ../sass/partials/_buttons.scss */
 span + .waiting.wait {
   padding-right: 10px;
 }
 
-/* line 585, ../sass/partials/_buttons.scss */
+/* line 594, ../sass/partials/_buttons.scss */
 i.toggle {
   display: none;
   padding: 0 !important;
 }
 
-/* line 591, ../sass/partials/_buttons.scss */
+/* line 600, ../sass/partials/_buttons.scss */
 .toggled i {
   display: none;
 }
-/* line 594, ../sass/partials/_buttons.scss */
+/* line 603, ../sass/partials/_buttons.scss */
 .toggled i.toggle {
   display: table-cell;
 }
 
-/* line 599, ../sass/partials/_buttons.scss */
+/* line 608, ../sass/partials/_buttons.scss */
 .toggled .toggle + span {
   padding-left: 10px;
 }
 
-/* line 612, ../sass/partials/_buttons.scss */
+/* line 621, ../sass/partials/_buttons.scss */
 .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 632, ../sass/partials/_buttons.scss */
+/* line 641, ../sass/partials/_buttons.scss */
 .stacked {
   display: table;
 }
-/* line 622, ../sass/partials/_buttons.scss */
+/* line 631, ../sass/partials/_buttons.scss */
 .stacked .btn, .stacked .like-btn, .stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked .paginate_disabled_previous, .stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked .paginate_disabled_next, .stacked button {
   width: 100%;
   display: block;
   margin: 0;
 }
-/* line 627, ../sass/partials/_buttons.scss */
+/* line 636, ../sass/partials/_buttons.scss */
 .stacked div {
   overflow-y: hidden;
 }
 
-/* line 638, ../sass/partials/_buttons.scss */
+/* line 647, ../sass/partials/_buttons.scss */
 .inner-margins .btn, .inner-margins .like-btn, .inner-margins .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins .paginate_disabled_previous, .inner-margins .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins .paginate_disabled_next, .inner-margins button, .inner-margins div, .inner-margins a {
   margin-left: 12px;
 }
-/* line 641, ../sass/partials/_buttons.scss */
+/* line 650, ../sass/partials/_buttons.scss */
 .inner-margins :first-child {
   margin-left: 0;
 }
 
-/* line 647, ../sass/partials/_buttons.scss */
+/* line 656, ../sass/partials/_buttons.scss */
 .inner-margins.stacked .btn, .inner-margins.stacked .like-btn, .inner-margins.stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins.stacked .paginate_disabled_previous, .inner-margins.stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins.stacked .paginate_disabled_next, .inner-margins.stacked button, .inner-margins.stacked div, .inner-margins.stacked a {
   margin-left: 0;
   margin-top: 12px;
 }
-/* line 651, ../sass/partials/_buttons.scss */
+/* line 660, ../sass/partials/_buttons.scss */
 .inner-margins.stacked :first-child {
   margin-top: 0;
 }
 
-/* line 658, ../sass/partials/_buttons.scss */
+/* line 667, ../sass/partials/_buttons.scss */
 .form-buttons button {
   margin-left: 12px;
 }
 
-/* line 662, ../sass/partials/_buttons.scss */
+/* line 671, ../sass/partials/_buttons.scss */
 #partiesDocgen button {
   margin-bottom: 6px;
 }
 
-/* line 666, ../sass/partials/_buttons.scss */
+/* line 675, ../sass/partials/_buttons.scss */
 #login-button span {
   text-align: center;
   width: 200px;
@@ -4746,62 +4756,71 @@ table.attachments-template-table td.attachment-version-info {
   padding-bottom: 0;
 }
 
-/* line 214, ../sass/partials/_modal.scss */
+/* line 215, ../sass/partials/_modal.scss */
 .with-map {
-  display: table-row;
-}
-/* line 217, ../sass/partials/_modal.scss */
-.with-map .map-container {
-  padding: 0;
-}
-/* line 221, ../sass/partials/_modal.scss */
-.with-map .btn-primary {
-  left: auto;
-  right: 260px;
-  bottom: 5px;
-}
-/* line 225, ../sass/partials/_modal.scss */
-.with-map a.btn-dialog {
-  right: -70px;
-  bottom: 10px;
-  width: 100px;
-}
-
-/* line 232, ../sass/partials/_modal.scss */
-.with-map > div {
-  display: table-cell;
-  vertical-align: top;
-  padding-left: 12px;
+  /* .map-container { */
+  /*   //padding: 0; */
+  /*   /\* float: left; *\/ */
+  /*   /\* width: 480px; *\/ */
+  /*   display: inline-block; */
+  /* } */
+  /* form { */
+  /*   /\* float: left; *\/ */
+  /*   /\* width: 200px; *\/ */
+  /*   display: inline-block; */
+  /* } */
+  /* .btn-primary { */
+  /*   left: auto; right: 260px; */
+  /*   bottom: 5px; */
+  /* } */
+  /* a.btn-dialog { */
+  /*   right:-70px; */
+  /*   bottom: 10px; */
+  /*   width: 100px; */
+  /* } */
 }
 
-/* line 238, ../sass/partials/_modal.scss */
+/* .with-map > div { */
+/*   display: table-cell; */
+/*   vertical-align: top; */
+/*   padding-left: $marginM; */
+/* } */
+/* line 249, ../sass/partials/_modal.scss */
 .neighbors-message {
   margin: 12px;
 }
 
-/* line 243, ../sass/partials/_modal.scss */
+/* line 254, ../sass/partials/_modal.scss */
 #dialog-add-link-permit .combobox {
   margin-bottom: 8px;
 }
 
-/* line 249, ../sass/partials/_modal.scss */
+/* line 260, ../sass/partials/_modal.scss */
 #upload-dialog .dialog-content {
   padding-bottom: 0;
 }
 
-/* line 255, ../sass/partials/_modal.scss */
+/* line 266, ../sass/partials/_modal.scss */
 #dialog-cancel-application div.application-cancel-text-content p {
   margin-bottom: 0;
 }
 
-/* line 261, ../sass/partials/_modal.scss */
+/* line 272, ../sass/partials/_modal.scss */
 .authority-select-dialog select {
   width: 100%;
 }
 
-/* line 267, ../sass/partials/_modal.scss */
+/* line 278, ../sass/partials/_modal.scss */
 .company-invite-dialog select {
   width: 100%;
+}
+
+/* line 284, ../sass/partials/_modal.scss */
+.with-map-top {
+  margin-top: 6px;
+  margin-bottom: 0;
+  margin-left: 6px;
+  margin-right: 6px;
 }
 
 /*
@@ -5899,24 +5918,26 @@ ul.attachments-list li.mandatory-attachments {
   float: right;
 }
 
-/* line 4, ../sass/partials/_applications_search.scss */
-.search-tabs .tab-buttons ul {
+/* line 3, ../sass/partials/_applications_search.scss */
+.search-tabs ul {
   display: inline-block;
   list-style: none;
   padding: 0;
   margin-right: 6px;
+  line-height: 40px;
+  vertical-align: middle;
 }
-/* line 10, ../sass/partials/_applications_search.scss */
-.search-tabs .tab-buttons li {
+/* line 11, ../sass/partials/_applications_search.scss */
+.search-tabs li {
   background-color: #f6f6f6;
   color: #333;
   cursor: pointer;
   margin-right: 6px;
   display: inline-block;
-  padding: 6px 24px;
+  padding: 0 24px;
 }
-/* line 17, ../sass/partials/_applications_search.scss */
-.search-tabs .tab-buttons li.selected {
+/* line 18, ../sass/partials/_applications_search.scss */
+.search-tabs li.selected {
   background-color: #dddddd;
 }
 /* line 23, ../sass/partials/_applications_search.scss */
@@ -6423,10 +6444,6 @@ span.icon_clear:before {
 /* line 103, ../sass/views/_application.scss */
 .application_summary .application_summary_info h1 {
   width: 100%;
-}
-/* line 105, ../sass/views/_application.scss */
-.application_summary .application_summary_info h1 .address {
-  white-space: nowrap;
 }
 /* line 108, ../sass/views/_application.scss */
 .application_summary .application_summary_info h1 a {
@@ -8200,58 +8217,50 @@ td.comment-text {
   color: white;
   position: relative;
 }
-/* line 213, ../sass/views/_register.scss */
+/* line 211, ../sass/views/_register.scss */
+.company-account-register button span, .company-account-register .btn span, .company-account-register .like-btn span, .company-account-register .dataTables_paginate .paginate_disabled_previous span, .dataTables_paginate .company-account-register .paginate_disabled_previous span, .company-account-register .dataTables_paginate .paginate_disabled_next span, .dataTables_paginate .company-account-register .paginate_disabled_next span, .register-contentbox button span, .register-contentbox .btn span, .register-contentbox .like-btn span, .register-contentbox .dataTables_paginate .paginate_disabled_previous span, .dataTables_paginate .register-contentbox .paginate_disabled_previous span, .register-contentbox .dataTables_paginate .paginate_disabled_next span, .dataTables_paginate .register-contentbox .paginate_disabled_next span {
+  width: 100%;
+}
+/* line 216, ../sass/views/_register.scss */
 .company-account-register .btn-primary, .register-contentbox .btn-primary {
   background-color: #da6ded;
 }
-/* line 215, ../sass/views/_register.scss */
+/* line 218, ../sass/views/_register.scss */
 .company-account-register .btn-primary:hover, .register-contentbox .btn-primary:hover {
   background-color: #ce40e7;
 }
-/* line 218, ../sass/views/_register.scss */
-.company-account-register .btn-primary:after, .register-contentbox .btn-primary:after {
-  content: " ";
-  position: absolute;
-  width: 0;
-  height: 0;
-  right: 12px;
-  top: 15px;
-  border-top: 15px solid transparent;
-  border-left: 30px solid white;
-  border-bottom: 15px solid transparent;
-}
-/* line 229, ../sass/views/_register.scss */
+/* line 221, ../sass/views/_register.scss */
 .company-account-register .btn-primary:disabled, .register-contentbox .btn-primary:disabled {
   background-color: #f6f6f6;
   color: #888a8c;
 }
-/* line 232, ../sass/views/_register.scss */
+/* line 224, ../sass/views/_register.scss */
 .company-account-register .btn-primary:disabled:after, .register-contentbox .btn-primary:disabled:after {
   border-left: 30px solid #888a8c;
   color: #888a8c;
 }
 
-/* line 240, ../sass/views/_register.scss */
+/* line 232, ../sass/views/_register.scss */
 .register-contentbox {
   background-color: #f1c8f8;
   padding: 24px;
 }
-/* line 243, ../sass/views/_register.scss */
+/* line 235, ../sass/views/_register.scss */
 .register-contentbox p, .register-contentbox h1 {
   color: black;
   width: 60%;
 }
-/* line 247, ../sass/views/_register.scss */
+/* line 239, ../sass/views/_register.scss */
 .register-contentbox .register-terms {
   margin: auto;
   padding-bottom: 14px;
 }
-/* line 250, ../sass/views/_register.scss */
+/* line 242, ../sass/views/_register.scss */
 .register-contentbox .register-terms label {
   cursor: pointer;
   color: black;
 }
-/* line 254, ../sass/views/_register.scss */
+/* line 246, ../sass/views/_register.scss */
 .register-contentbox .register-terms input[type="checkbox"] {
   cursor: pointer;
   -moz-transform: scale(1.5);
@@ -8261,45 +8270,45 @@ td.comment-text {
   transform: scale(1.5);
   vertical-align: middle;
 }
-/* line 264, ../sass/views/_register.scss */
+/* line 256, ../sass/views/_register.scss */
 .register-contentbox button:disabled {
   cursor: not-allowed;
 }
 
-/* line 270, ../sass/views/_register.scss */
+/* line 262, ../sass/views/_register.scss */
 #register-company .register-form, #new-company-user .register-form {
   background-color: #f1c8f8;
   padding: 6px;
 }
-/* line 273, ../sass/views/_register.scss */
+/* line 265, ../sass/views/_register.scss */
 #register-company .register-form .form-group, #new-company-user .register-form .form-group {
   background-color: inherit;
   display: block;
   border: none;
   padding: 0;
 }
-/* line 278, ../sass/views/_register.scss */
+/* line 270, ../sass/views/_register.scss */
 #register-company .register-form .form-group h2, #new-company-user .register-form .form-group h2 {
   text-transform: uppercase;
   font-weight: 400;
   color: black;
 }
-/* line 283, ../sass/views/_register.scss */
+/* line 275, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry, #new-company-user .register-form .form-group .form-entry {
   width: 32%;
   box-sizing: border-box;
   padding-right: 24px;
   display: inline-block;
 }
-/* line 288, ../sass/views/_register.scss */
+/* line 280, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry .form-label, #new-company-user .register-form .form-group .form-entry .form-label {
   color: black;
 }
-/* line 290, ../sass/views/_register.scss */
+/* line 282, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry .form-label.tip, #new-company-user .register-form .form-group .form-entry .form-label.tip {
   color: black;
 }
-/* line 294, ../sass/views/_register.scss */
+/* line 286, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry .form-input, #new-company-user .register-form .form-group .form-entry .form-input {
   height: 40px;
   width: 100%;
@@ -8307,7 +8316,7 @@ td.comment-text {
   box-shadow: none;
 }
 
-/* line 306, ../sass/views/_register.scss */
+/* line 298, ../sass/views/_register.scss */
 #onnistuu-start-form {
   display: inline-block;
 }
@@ -8708,13 +8717,13 @@ td.comment-text {
   #side-panel .message-buttons {
     display: table;
   }
-  /* line 622, ../sass/partials/_buttons.scss */
+  /* line 631, ../sass/partials/_buttons.scss */
   #side-panel .message-buttons .btn, #side-panel .message-buttons .like-btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
     width: 100%;
     display: block;
     margin: 0;
   }
-  /* line 627, ../sass/partials/_buttons.scss */
+  /* line 636, ../sass/partials/_buttons.scss */
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }

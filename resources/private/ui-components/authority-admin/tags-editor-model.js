@@ -55,9 +55,12 @@ LUPAPISTE.TagsEditorModel = function(params) {
     ajax
       .query("get-organization-tags")
       .success(function(res) {
-        var tags = _.map(res.tags[orgId].tags, function(t) {
-          return new TagModel(t, self.save);
-        });
+        var tags = [];
+        if (!_.isEmpty(res.tags)) {
+          tags = _.map(res.tags[orgId].tags, function(t) {
+            return new TagModel(t, self.save);
+          });
+        }
         self.tags(tags);
         onSave();
       })

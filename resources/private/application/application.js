@@ -292,11 +292,6 @@
     updateWindowTitle(e.applicationDetails.application.title);
   });
 
-  hub.subscribe("application-model-updated", function(e) {
-    if (pageutil.getPage() === "inforequest"  && authorizationModel.ok("mark-seen")) {
-      ajax.command("mark-seen", {id: e.applicationId, type: "comments"}).call();
-    }
-  });
 
   function NeighborStatusModel() {
     var self = this;
