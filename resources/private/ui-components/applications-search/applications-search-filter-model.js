@@ -90,12 +90,13 @@ LUPAPISTE.HandlersDataProvider = function() {
   });
 };
 
-LUPAPISTE.OrganizationsFilterDataProvider = function() {
+LUPAPISTE.OrganizationsFilterDataProvider = function(savedOrgFilters) {
   "use strict";
 
   var self = this;
 
   self.query = ko.observable();
+  self.savedOrgFilters = savedOrgFilters || ko.observableArray([]);
 
   var data = ko.observable();
   var usersOwnOrganizations = _.keys(lupapisteApp.models.currentUser.orgAuthz());
@@ -115,7 +116,9 @@ LUPAPISTE.OrganizationsFilterDataProvider = function() {
     var q = self.query() || "";
     return _.filter(data(), function(item) {
       return _.reduce(q.split(" "), function(result, word) {
-        return _.contains(item.name.toUpperCase(), word.toUpperCase()) && result;
+        return _.contains(item.name.toUpperCase(), word.toUpperCase())
+               && !_.some(self.savedOrgFilters(), function(orgFilter) { return item.id === orgFilter.id; })
+               && result;
       }, true);
     });
   });
@@ -139,7 +142,7 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   if ( lupapisteApp.models.currentUser.isAuthority() ) {
     self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
-    self.organizationsFilterDataProvider = new LUPAPISTE.OrganizationsFilterDataProvider();
+    self.organizationsFilterDataProvider = new LUPAPISTE.OrganizationsFilterDataProvider(self.dataProvider.applicationOrganizations);
     // TODO just search single organization tags for now, later do some grouping stuff in autocomplete component
     self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(self.dataProvider.applicationTags);
   }
