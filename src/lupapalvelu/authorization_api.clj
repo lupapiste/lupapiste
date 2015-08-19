@@ -101,7 +101,7 @@
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator
                       role-validator]
-   :states     (states/all-application-states-but [:closed :canceled])
+   :states     (states/all-application-states-but states/terminal-states)
    :user-roles #{:applicant :authority}
    :pre-checks  [application/validate-authority-in-drafts]
    :notified   true}

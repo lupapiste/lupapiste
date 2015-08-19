@@ -41,7 +41,7 @@
 (defcommand set-tos-function-for-application
   {:parameters [:id functionCode]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled])}
+   :states     states/all-but-draft-or-terminal}
   [{:keys [application created] :as command}]
   (let [orgId (:organization application)
         code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]
@@ -101,7 +101,7 @@
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled])}
+   :states     states/all-but-draft-or-terminal}
   [{:keys [application created] :as command}]
   (when (env/feature? :tiedonohjaus)
     (try
@@ -123,7 +123,7 @@
 (defcommand store-tos-metadata-for-application
   {:parameters [:id metadata]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled])}
+   :states     states/all-but-draft-or-terminal}
   [{:keys [application created] :as command}]
   (when (env/feature? :tiedonohjaus)
     (try

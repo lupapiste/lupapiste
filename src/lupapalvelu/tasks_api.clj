@@ -34,7 +34,7 @@
 ;; API
 (def valid-source-types #{"verdict"})
 
-(def valid-states (states/all-application-states-but [:draft :canceled :closed]))
+(def valid-states states/all-application-states-but-draft-or-terminal)
 
 (defn- valid-source [{:keys [id type]}]
   (when (and (string? id) (valid-source-types type))
