@@ -63,7 +63,7 @@
   ^{:doc "See default-application-state-graph"}
   tj-ilmoitus-state-graph
   (merge
-    (select-keys default-application-state-graph [:draft :open :canceled])
+    (select-keys default-application-state-graph [:draft :open :closed :canceled])
     {:submitted    [:closed :canceled]}))
 
 (def
@@ -73,7 +73,7 @@
     (select-keys default-application-state-graph [:draft :open :canceled])
     {:submitted    [:sent :canceled]
      :sent         [:closed :complement-needed :canceled]
-     :complement-needed [:closed]}))
+     :complement-needed [:closed :canceled]}))
 
 ; TODO draft versions this forward
 
@@ -93,10 +93,10 @@
   (merge
     (select-keys default-application-state-graph [:draft :open :canceled])
     {:submitted [:hearing :canceled]
-     :hearing [:proposa :canceledl]
+     :hearing [:proposal :canceledl]
      :proposal [:proposalApproved :canceled]
      :proposalApproved [:final :appealed :canceled]
-     :appealed [:final :canceled] ; Valitettu
+     :appealed [:final :canceled] ; Oikaisuvaatimus
      :final    [] ; Lain voimainen
      }))
 
