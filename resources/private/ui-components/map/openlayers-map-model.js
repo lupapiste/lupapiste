@@ -9,7 +9,8 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
 
   var map;
 
-  function updateLayer() {
+  // fit viewport to feature layer extent
+  function updateView() {
     if (map && !ol.extent.isEmpty(vectorLayer.getSource().getExtent())) {
       view.fit(vectorLayer.getSource().getExtent(), map.getSize());
     }
@@ -17,7 +18,7 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
 
   proj4.defs("EPSG:3067","+proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
 
-  // Shape styles
+  // style for multipolygon
   var styles = {
     "MultiPolygon": [new ol.style.Style({
       stroke: new ol.style.Stroke({
@@ -43,17 +44,16 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
     }
   });
 
+  var popup = new ol.Overlay.Popup();
+
   data.subscribe(function(val) {
     vectorSource.clear();
-    var features = (new ol.format.GeoJSON()).readFeatures(val);
-    vectorSource.addFeatures(features);
-    updateLayer();
+    if (val) {
+      var features = (new ol.format.GeoJSON()).readFeatures(val);
+      vectorSource.addFeatures(features);
+    }
+    updateView();
   });
-
-  // function onEachFeature(feature, layer) {
-  //   var name = util.getIn(feature, ["properties", "nimi"]) || "";
-  //   layer.bindPopup(name);
-  // }
 
   var xhr = new XMLHttpRequest();
   var mapServer = LUPAPISTE.config.maps["proxyserver-wmts"];
@@ -107,6 +107,27 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
         target: self.id,
         view: view
     });
-    updateLayer();
+    updateView();
+
+    map.addOverlay(popup);
+
+    map.on("singleclick", function(evt) {
+        popup.hide();
+
+        // try to find feature from all visible layers under the cursor
+        var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+          return feature;
+        });
+
+        if (feature) {
+          var props = feature.getProperties();
+          // convert properties to lowercase i.e. NIMI -> nimi
+          for(var key in props) {
+            props[key.toLowerCase()] = props[key];
+          }
+
+          popup.show(evt.coordinate, props.nimi);
+        }
+    });
   }
 };
