@@ -433,7 +433,10 @@
   (assert (or (ss/ends-with ns-str "-api") (ss/ends-with ns-str "-test") (ss/starts-with (ss/suffix ns-str ".") "dummy"))
     (str "Please define actions in *-api namespaces. Offending action: " action-name " at " ns-str ":" line))
 
-  (assert (if (some #(= % :id) (:parameters meta-data)) (or (seq (:states meta-data)) (seq (:pre-checks meta-data))) true)
+  (assert
+    (if (some #(= % :id) (:parameters meta-data))
+      (or (seq (:states meta-data)) (seq (:pre-checks meta-data)))
+      true)
     (str "You must define :states or :pre-checks meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
 
   (let [action-keyword (keyword action-name)
