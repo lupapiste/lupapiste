@@ -1,6 +1,7 @@
 (ns lupapalvelu.state-machine
   (:require [lupapalvelu.operations :as operations]
             [lupapalvelu.states :as states]
+            [sade.core :refer [fail]]
             [sade.util :as util]))
 
 (defn state-graph
@@ -28,10 +29,9 @@
     (util/contains-value? transitions next-state)))
 
 (defn next-state
-  "Returns the default next state"
+  "Returns the default next state or nil if application is in terminal state"
   [application]
-  {:pre  [(map? application)]
-   :post [(keyword? %)]}
+  {:pre  [(map? application)]}
   (let [transitions (state-transitions application)]
     (first transitions)))
 
@@ -41,3 +41,10 @@
   {:pre  [(map? application)]}
   (let [graph (state-graph application)]
     (util/contains-value? (keys graph) (keyword state))))
+
+(defn validate-state-transition
+  "Function for composing action pre-checs.
+   E.g. :pre-checks [(partial state-machine/validate-state-transition :canceled)]"
+  [next-state _ application]
+  (when-not (can-proceed? application next-state)
+    (fail :error.command-illegal-state)))
