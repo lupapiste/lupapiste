@@ -111,3 +111,17 @@
      :sessionHeld [:registered :canceled] ; Kokous pidetty
      :registered [] ; Kiinteistorekisterissa
      }))
+
+(comment
+  (require ['rhizome.viz :as 'viz])
+  (doseq [sym ['default-inforequest-state-graph
+               'default-application-state-graph
+               'tj-hakemus-state-graph
+               'tj-ilmoitus-state-graph
+               'ymp-application-state-graph
+               'tonttijako-application-state-graph
+               'kt-application-state-graph]
+          :let [g (var-get (resolve sym))
+                filename (str "target/" (name sym) ".png")]]
+
+    (viz/save-graph (keys g) g :node->descriptor (fn [n] {:label (name n)}) :filename filename)))
