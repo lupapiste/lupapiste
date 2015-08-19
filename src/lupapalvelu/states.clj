@@ -59,6 +59,22 @@
    :extinct  [] ; Rauennut
    })
 
+(def
+  ^{:doc "See default-application-state-graph"}
+  tj-ilmoitus-state-graph
+  (merge
+    (select-keys default-application-state-graph [:draft :open :canceled])
+    {:submitted    [:closed :canceled]}))
+
+(def
+  ^{:doc "See default-application-state-graph"}
+  tj-hakemus-state-graph
+  (merge
+    (select-keys default-application-state-graph [:draft :open :canceled])
+    {:submitted    [:sent :canceled]
+     :sent         [:closed :complement-needed :canceled]
+     :complement-needed [:closed]}))
+
 ; TODO draft versions this forward
 
 (def
@@ -66,8 +82,8 @@
   ymp-application-state-graph
   (merge
     (select-keys default-application-state-graph [:draft :open :submitted :sent :complement-needed :canceled])
-    {:verdictGiven [:final :appealed]
-     :appealed     [:complement-needed :verdictGiven :final] ; Valitettu
+    {:verdictGiven [:final :appealed :canceled]
+     :appealed     [:complement-needed :verdictGiven :final :canceled] ; Valitettu
      :final        [] ; Lain voimainen
      }))
 
@@ -75,12 +91,12 @@
   ^{:doc "See default-application-state-graph"}
   tonttijako-application-state-graph
   (merge
-    (select-keys default-application-state-graph [:draft :open])
-    {:submitted [:hearing]
-     :hearing [:proposal]
-     :proposal [:proposalApproved]
-     :proposalApproved [:final :appealed]
-     :appealed [:final] ; Valitettu
+    (select-keys default-application-state-graph [:draft :open :canceled])
+    {:submitted [:hearing :canceled]
+     :hearing [:proposa :canceledl]
+     :proposal [:proposalApproved :canceled]
+     :proposalApproved [:final :appealed :canceled]
+     :appealed [:final :canceled] ; Valitettu
      :final    [] ; Lain voimainen
      }))
 
@@ -88,10 +104,10 @@
   ^{:doc "See default-application-state-graph"}
   kt-application-state-graph
   (merge
-    (select-keys default-application-state-graph [:draft :open]) ; is open needed?
-    {:submitted [:survey]
-     :survey [:sessionProposal] ; Maastotyot
-     :sessionProposal [:sessionHeld] ; Kokouskutsu
-     :sessionHeld [:registered] ; Kokous pidetty
+    (select-keys default-application-state-graph [:draft :open :canceled]) ; is open needed?
+    {:submitted [:survey :canceled]
+     :survey [:sessionProposal :canceled] ; Maastotyot
+     :sessionProposal [:sessionHeld :canceled] ; Kokouskutsu
+     :sessionHeld [:registered :canceled] ; Kokous pidetty
      :registered [] ; Kiinteistorekisterissa
      }))
