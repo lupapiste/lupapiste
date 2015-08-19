@@ -15,7 +15,6 @@
   }
   .attachment-type-container {
     @include clearfix;
-    height: 28px;
     .group-label, .type-id {
       float: left;
       width: 50%;
@@ -26,6 +25,7 @@
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.125em;
+    padding: 6px 0;
   }
   .attachment-row {
     font-size: 14px;
@@ -38,7 +38,9 @@
       color: inherit;
     }
     .attachment-row-top {
+      @include clearfix;
       cursor: pointer;
+      padding: 6px 0 5px 0;
       div {
         vertical-align: top;
       }
@@ -93,14 +95,14 @@
   }
   .attachment-type {
     margin-right: 545px;
-    padding: 6px 16px;
+    padding: 0 6px;
   }
   .small-columns {
     width: 545px;
     float: right;
     div {
       display: inline-block;
-      padding: 6px 16px;
+      padding: 0 6px;
     }
   }
   .retention-period {
