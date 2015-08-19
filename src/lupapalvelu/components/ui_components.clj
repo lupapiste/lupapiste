@@ -100,8 +100,8 @@
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
-   :open-layers    {:js ["openlayers-2.13.1_20150817.min.lupapiste.js"]}
-   :ol             {:js ["openlayers-3.8.2.debug.js"]
+   :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+   :ol             {:js ["openlayers-3.8.2.js"]
                     :css ["openlayers-3.8.2.css"]}
    :proj4          {:js ["proj4.js"]}
    :leaflet        {:js ["leaflet.min.js"]
