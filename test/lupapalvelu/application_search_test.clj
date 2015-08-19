@@ -42,3 +42,6 @@
 
 (fact "Tags are present in query"
   (-> (make-query {} {:applicationTags ["test1" "test2"]} {}) (get "$and") last :tags) => {"$in" ["test1" "test2"]})
+
+(fact "Organization are present in query"
+  (-> (make-query {} {:applicationOrganizations ["753-R" "753-YA"]} {}) (get "$and") last :organization) => {"$in" ["753-R" "753-YA"]})
