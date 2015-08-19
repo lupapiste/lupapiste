@@ -59,7 +59,7 @@
     (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
     :else (make-free-text-query filter-search)))
 
-(defn make-query [query {:keys [searchText kind applicationType handler applicationTags]} user]
+(defn make-query [query {:keys [searchText kind applicationType handler applicationTags applicationOrganizations]} user]
   {$and
    (filter seq
      [query
@@ -71,15 +71,17 @@
           nil) ; defaults to both
         (let [all (if (applicant? user) {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})]
           (case applicationType
-           "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
-           "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
-           "canceled"          {:state "canceled"}
-           all))
+            "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
+            "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
+            "canceled"          {:state "canceled"}
+            all))
         (when-not (contains? #{nil "0"} handler)
           {$or [{"auth.id" handler}
                 {"authority.id" handler}]})
         (when-not (empty? applicationTags)
-          {:tags {$in applicationTags}}))])})
+          {:tags {$in applicationTags}})
+        (when-not (empty? applicationOrganizations)
+          {:organization {$in applicationOrganizations}}))])})
 
 
 ;;
