@@ -176,6 +176,7 @@
    :user-roles       #{:applicant}
    :notified         true
    :on-success       (notify :application-state-change)
+   :states           #{:draft :info :open :submitted}
    :pre-checks       [(partial state-machine/validate-state-transition :canceled)]}
   [{:keys [created] :as command}]
   (update-application command
@@ -191,8 +192,8 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           (states/all-states-but (conj states/terminal-states :answered))
-   :pre-checks       [a/validate-authority-in-drafts]}
+   :pre-checks       [a/validate-authority-in-drafts
+                      (partial state-machine/validate-state-transition :canceled)]}
   [{:keys [created application] :as command}]
   (update-application command
     (util/deep-merge
