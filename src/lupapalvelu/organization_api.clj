@@ -414,6 +414,20 @@
       (ok :tags (into {} result)))
     (fail :error.organization-not-found)))
 
+(defquery get-organization-areas
+  {:user-authz-roles #{:statementGiver}
+   :org-authz-roles  action/reader-org-authz-roles
+   :user-roles       #{:authorityAdmin :authority}}
+  [{{:keys [orgAuthz] :as user} :user}]
+  (if (seq orgAuthz)
+    (let [organization-areas (mongo/select
+                               :organizations
+                               {:_id {$in (keys orgAuthz)} :areas {$exists true}}
+                               [:areas :name])
+          result (map (juxt :id #(select-keys % [:areas :name])) organization-areas)]
+      (ok :areas (into {} result)))
+    (fail :error.organization-not-found)))
+
 (defn- transform-crs-to-wgs84
   "Convert feature crs in collection to WGS84"
   [collection]
@@ -470,3 +484,4 @@
       (finally
         ;TODO dispose shape-file here
         ))))
+
