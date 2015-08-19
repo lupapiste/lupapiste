@@ -145,8 +145,10 @@
         command: function(url, nameFi, nameSv) {
           ajax
             .command("update-organization-link", {index: index, url: url, nameFi: nameFi, nameSv: nameSv})
-            .success(self.load)
-            .complete(LUPAPISTE.ModalDialog.close)
+            .success(function() {
+              self.load();
+              LUPAPISTE.ModalDialog.close();
+            })
             .call();
         }
       });
@@ -159,8 +161,10 @@
         command: function(url, nameFi, nameSv) {
           ajax
             .command("add-organization-link", {url: url, nameFi: nameFi, nameSv: nameSv})
-            .success(self.load)
-            .complete(LUPAPISTE.ModalDialog.close)
+            .success(function() {
+              self.load();
+              LUPAPISTE.ModalDialog.close();
+            })
             .call();
         }
       });
