@@ -1,5 +1,6 @@
 (ns lupapalvelu.operations
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [schema.core :as sc]
             [sade.env :as env]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery]]
@@ -308,6 +309,17 @@
   {:yl-uusi-toiminta ymparistolupa-operation
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
    :yl-toiminnan-muutos ymparistolupa-operation})
+
+(def Operation
+  {:schema sc/Str
+   :permit-type (sc/pred permit/valid-permit-type?)
+   :attachments [sc/Any]
+   :asianhallinta sc/Bool
+   :link-permit-required sc/Bool
+   :link-permit-verdict-required sc/Bool
+   :add-operation-allowed sc/Bool
+   :required [sc/Str]
+   (sc/optional-key :schema-data) [sc/Any]})
 
 (def operations
   (merge
@@ -787,6 +799,7 @@
                                   :permit-type permit/MAL
                                   :required ["ymp-maksaja" "rakennuspaikka"]
                                   :attachments []
+                                  :add-operation-allowed false
                                   :link-permit-required false
                                   :link-permit-verdict-required false
                                   :asianhallinta true}
@@ -949,9 +962,12 @@
 ;; Functions
 ;;
 
-(doseq [[op {:keys [permit-type]}] operations]
-  (when-not permit-type
-    (throw (Exception. (format "Operation %s does not have permit-type set." op)))))
+(doseq [[k op] operations]
+  (let [v (sc/check Operation op)]
+    (assert (nil? v) (str k v))
+    )
+
+  )
 
 (def link-permit-required-operations
   (reduce (fn [result [operation metadata]]
