@@ -2,7 +2,7 @@
 <html>
 <body>
 <section class="page" id="archival-summary" style="visibility: hidden; display: block;">
-  <script type="text/html" id="archival-summary-template">
+  <script type="text/x-jquery-tmpl" id="archival-summary-template">
 
     <div data-bind="if: showArchived" class="archival-summary-document-set">
       <h1><span data-bind="ltext: 'archivalSummary.archivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
@@ -28,7 +28,7 @@
     </div>
 
   </script>
-  <script type="text/html" id="archival-summary-attachment-table">
+  <script type="text/x-jquery-tmpl" id="archival-summary-attachment-table">
     <div class="table archival-summary-table" data-bind="foreach: groups">
       <div class="attachment-group-header" data-bind="text: name"></div>
 
@@ -118,7 +118,7 @@
     </div>
   </script>
 
-  <script type="text/html" id="archival-summary-document-table">
+  <script type="text/x-jquery-tmpl" id="archival-summary-document-table">
 
     <div class="table archival-summary-table">
       <div class="attachment-group-header" data-bind="ltext: 'archivalSummary.mainDocuments'"></div>
