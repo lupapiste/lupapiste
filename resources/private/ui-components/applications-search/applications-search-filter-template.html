@@ -28,6 +28,12 @@
         <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, selectedText: 'label', tags: true, group: organizationTagsDataProvider.groupData()}}"></div>
       </div>
     </div>
+    <div class="feature filter-row advanced" data-test-id="advanced-filters-row">
+      <div class="filter-item">
+        <label data-bind="ltext: 'applications.filter.organizations'" />
+        <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationsFilterDataProvider, value: dataProvider.applicationOrganizations, selectedText: 'name', tags: true}}"></div>
+      </div>
+    </div>
     <!-- /ko -->
     </script>
   </section>
