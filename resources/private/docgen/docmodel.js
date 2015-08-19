@@ -1994,6 +1994,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildElement() {
     var op = self.schema.info.op;
+    console.log( op );
 
     var section = document.createElement("section");
     var iconUp = document.createElement("i");
@@ -2031,7 +2032,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
     title.className = "title";
-    toggle.onclick = accordion.click;
+    $(toggle).attr( "data-accordion-id", (op && op.id) || self.schema.info.name );
+    $(toggle).click(accordion.click);
     var docId = util.getIn(self, ["schema", "info", "op", "id"]);
     var notPrimaryOperation = (!docId || docId !== util.getIn(self.application, ["primaryOperation", "id"]));
 
@@ -2103,6 +2105,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     section.appendChild(toggle);
     section.appendChild(sectionContainer);
     self.statusOrder.setOrdered();
+    accordion.reset( $(toggle) );
     return section;
   }
 

@@ -4,13 +4,24 @@ var accordion = (function() {
   var animationTime = 200,
       animationEasing = "easeInOutCubic";
 
-  function set(t, toState, done) {
-    var target = t.closest( ".accordion-toggle");
+  var memory = {};
 
+  function selectors( t ) {
+    var target = t.closest( ".accordion-toggle");
     var content = target.siblings(".accordion_content");
+    return {
+      target: target,
+      content: content
+    };
+  }
+
+  function set(t, toState, done, force ) {
+    var sels = selectors( t );
+    var target = sels.target;
+    var content = sels.content;
 
     var state = content.attr("data-accordion-state");
-    if (toState != state) {
+    if (toState != state || force ) {
       if (toState === "toggle") {
         toState = (state !== "closed") ? "closed" : "open";
       }
@@ -20,6 +31,7 @@ var accordion = (function() {
         content.css("overflow", "visible");
         target.trigger("accordion-" + state);
         target.toggleClass( "toggled", state === "open");
+        memory[content.prop( "id" )] = state;
         if (done) {
           done(target);
         }
@@ -38,6 +50,13 @@ var accordion = (function() {
   function open(t, done)   { return set(t, "open", done); }
   function close(t, done)  { return set(t, "closed", done); }
   function toggle(t, done) { return set(t, "toggle", done); }
+  function reset( t, done ) {
+    var key = selectors( t ).content.prop( "id");
+    var state = memory[key];
+    if( state ) {
+      set( t, state, done, true );
+    }
+  }
 
   function click(event) {
     var e = getEvent(event);
@@ -59,8 +78,10 @@ var accordion = (function() {
     open:   open,
     close:  close,
     toggle: toggle,
+    reset: reset,
     click:  click,
     toggleAll: toggleAll
+
   };
 
 })();
