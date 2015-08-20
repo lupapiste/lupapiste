@@ -43,7 +43,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
                 applicationTags: _.pluck(self.applicationTags(), "id"),
                 handler: self.handler() ? self.handler().id : undefined,
                 applicationType: self.applicationType(),
-                areas: self.areas(),
+                areas: _.pluck(self.areas(), "id"),
                 limit: self.limit(),
                 sort: ko.mapping.toJS(self.sort),
                 skip: self.skip()})
@@ -59,7 +59,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
                 applicationTags: _.pluck(self.applicationTags(), "id"),
                 handler: self.handler() ? self.handler().id : undefined,
                 applicationType: self.applicationType(),
-                areas: self.areas(),
+                areas: _.pluck(self.areas(), "id"),
                 limit: self.limit(),
                 sort: ko.mapping.toJS(self.sort),
                 skip: self.skip()})

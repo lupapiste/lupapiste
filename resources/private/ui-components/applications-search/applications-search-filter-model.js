@@ -97,7 +97,7 @@ LUPAPISTE.AreasDataProvider = function() {
 
   self.query = ko.observable();
 
-  var tagsData = ko.observable();
+  var areas = ko.observable();
 
   ajax
     .query("get-organization-areas")
@@ -106,13 +106,17 @@ LUPAPISTE.AreasDataProvider = function() {
       // TODO for now fetch features from the first organization only
       var firstOrganizationId = _.first(_.keys(res.areas));
       var features = util.getIn(res, ["areas", firstOrganizationId, "areas", "features"]);
-      tagsData(_.map(features, function(f) {
+      areas(_.map(features, function(f) {
         var nimi = util.getIn(f, ["properties", "nimi"]);
         var id = f.id;
         return {name: nimi, id: id};
       }));
     })
     .call();
+
+  self.data = ko.computed(function() {
+    return areas();
+  });
 };
 
 
@@ -125,7 +129,7 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   self.organizationTagsDataProvider = null;
   self.handlersDataProvider = null;
-  self.areasDataProvider = null;
+  self.organizationAreasDataProvider = null;
 
   self.showAdvancedFilters = ko.observable(false);
   self.advancedFiltersText = ko.computed(function() {
@@ -136,6 +140,6 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
     self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
     // TODO just search single organization tags for now, later do some grouping stuff in autocomplete component
     self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(self.dataProvider.applicationTags);
-    self.areasDataProvider = new LUPAPISTE.AreasDataProvider();
+    self.organizationAreasDataProvider = new LUPAPISTE.AreasDataProvider();
   }
 };
