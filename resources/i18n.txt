@@ -1,1 +1,1 @@
-applications.filter.areas:  Rajaa alueisiin
+applications.filter.areas:  Rajaa alueeseen
