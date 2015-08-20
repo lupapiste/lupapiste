@@ -109,7 +109,6 @@ var attachment = (function() {
     signatures:                   ko.observableArray([]),
     type:                         ko.observable(),
     attachmentType:               ko.observable(),
-    allowedAttachmentTypes:       ko.observableArray([]),
     previewDisabled:              ko.observable(false),
     operation:                    ko.observable(),
     selectedOperationId:          ko.observable(),
@@ -421,7 +420,6 @@ var attachment = (function() {
     model.size(attachment.size);
     model.isVerdictAttachment(attachment.forPrinting);
     model.applicationState(attachment.applicationState);
-    model.allowedAttachmentTypes(application.allowedAttachmentTypes);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
     model.metadata(attachment.metadata);
 

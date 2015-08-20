@@ -141,10 +141,12 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     var x = application.location.x;
     var y = application.location.y;
 
-    if (x === 0 && y === 0) {
+    if (!x && !y) {
       $("#application-map").css("display", "none");
+      $("#inforequest-map").css("display", "none");
     } else {
       $("#application-map").css("display", "inline-block");
+      $("#inforequest-map").css("display", "inline-block");
     }
 
     drawings = application.drawings;

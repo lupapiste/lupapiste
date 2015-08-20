@@ -22,16 +22,31 @@ var repository = (function() {
 
   function calculateAttachmentStateIndicators(attachment, application) {
     var auths = _(application.auth).filter(function(a) {return _.contains(LUPAPISTE.config.writerRoles, a.role);}).pluck("id").value();
-    var versionsByApplicants = _.filter(attachment.versions || [], function(v) {
-      return v.user.role === "applicant" ||  _.contains(auths, v.user.id);
-    });
 
     attachment.signed = false;
-    if (versionsByApplicants && versionsByApplicants.length) {
-      var lastVersionByApplicant = _.last(versionsByApplicants).version;
-      if (_.find(attachment.signatures || [], function(s) {return _.isEqual(lastVersionByApplicant, s.version);})) {
-        attachment.signed = true;
-      }
+    var lastSignature = _.last(attachment.signatures || []);
+    if (lastSignature && attachment.versions.length > 0) {
+
+      var signedVersion = _.find(attachment.versions, function(v) {
+        // Check that signed version was created before the signature
+        return v.created < lastSignature.created &&
+           v.version.major === lastSignature.version.major &&
+           v.version.minor === lastSignature.version.minor;
+      });
+
+      var unsignedVersions = _(attachment.versions)
+        // Drop previous, signed versions
+        .dropWhile(function(v) {
+          return v.version.major !== lastSignature.version.major && v.version.minor !== lastSignature.version.minor;
+        })
+        // Drop current, signed versions
+        .rest()
+        // Keep new versions added by applicants
+        .filter(function(v) {
+          return v.user.role === "applicant" ||  _.contains(auths, v.user.id);
+        })
+        .value();
+      attachment.signed = signedVersion && unsignedVersions.length === 0;
     }
 
     attachment.isSent = false;
@@ -176,6 +191,9 @@ var repository = (function() {
           application.tags = _(application.tags || []).map(function(tagId) {
             return {id: tagId, label: util.getIn(application, ["organizationMeta", "tags", tagId])};
           }).filter("label").value();
+
+          var sortedAttachmentTypes = attachmentUtils.sortAttachmentTypes(application.allowedAttachmentTypes);
+          application.allowedAttachmentTypes = sortedAttachmentTypes;
 
           hub.send("application-loaded", {applicationDetails: loading});
           if (_.isFunction(callback)) {

@@ -105,7 +105,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :states     (states/all-states-but [:answered :sent :closed :canceled])
+   :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application user created] :as command}]
 
@@ -139,7 +139,7 @@
    :parameters  [id attachmentId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:authority}
-   :states      (states/all-states-but [:answered :sent :closed :canceled])
+   :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :state :ok created :set-app-modified? true :set-attachment-modified? false))
@@ -149,7 +149,7 @@
    :parameters  [id attachmentId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:authority}
-   :states      (states/all-states-but [:answered :sent :closed :canceled])
+   :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :state :requires_user_action created :set-app-modified? true :set-attachment-modified? false))
@@ -168,7 +168,7 @@
                 a/validate-authority-in-drafts]
    :input-validators [(partial action/vector-parameters [:attachmentTypes])]
    :user-roles #{:authority :oirAuthority}
-   :states      (states/all-states-but [:answered :sent :closed :canceled])}
+   :states      (states/all-states-but (conj states/terminal-states :answered :sent))}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (attachment/create-attachments application attachmentTypes created false true true)]
     (ok :applicationId id :attachmentIds attachment-ids)
@@ -184,7 +184,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :states      (states/all-states-but [:answered :sent :closed :canceled])
+   :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
 
@@ -203,7 +203,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId :fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :states      (states/all-states-but [:answered :sent :closed :canceled])
+   :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
 
@@ -285,7 +285,7 @@
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
-   :states     (states/all-states-but [:closed :canceled])
+   :states     (states/all-states-but states/terminal-states)
    :notified   true
    :on-success [(notify :new-comment)
                 open-inforequest/notify-on-comment]
@@ -443,7 +443,7 @@
    :parameters [:id attachmentIds password]
    :input-validators [(partial action/non-blank-parameters [:password])
                       (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
-   :states     (states/all-application-states-but [:canceled :closed])
+   :states     (states/all-application-states-but states/terminal-states)
    :pre-checks [domain/validate-owner-or-write-access
                 (fn [_ application]
                   (when-not (pos? (count (:attachments application)))
@@ -481,7 +481,7 @@
   {:parameters [id attachmentId meta]
    :user-roles #{:applicant :authority}
    :user-authz-roles action/all-authz-writer-roles
-   :states     (states/all-states-but [:answered :sent :closed :canceled])
+   :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation]
    :pre-checks [a/validate-authority-in-drafts]}
@@ -507,7 +507,7 @@
 (defcommand set-attachments-as-verdict-attachment
   {:parameters [:id selectedAttachmentIds unSelectedAttachmentIds]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled])
+   :states     states/all-but-draft-or-terminal
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:selectedAttachmentIds :unSelectedAttachmentIds])
                       (fn [{{:keys [selectedAttachmentIds unSelectedAttachmentIds]} :data}]
                         (when (seq (intersection (set selectedAttachmentIds) (set unSelectedAttachmentIds)))

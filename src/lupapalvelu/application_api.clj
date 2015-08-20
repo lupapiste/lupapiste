@@ -74,7 +74,7 @@
 
 (defquery application-authorities
   {:user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled]) ; the same as assign-application
+   :states     states/all-but-draft-or-terminal ; the same as assign-application
    :parameters [:id]}
   [{application :application}]
   (let [authorities (find-authorities-in-applications-organization application)]
@@ -138,7 +138,7 @@
 (defcommand assign-application
   {:parameters [:id assigneeId]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled])}
+   :states     states/all-but-draft-or-terminal}
   [{:keys [user created application] :as command}]
   (let [assignee (util/find-by-id assigneeId (find-authorities-in-applications-organization application))]
     (if (or assignee (ss/blank? assigneeId))
@@ -190,7 +190,7 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           (states/all-states-but [:canceled :closed :answered])
+   :states           (states/all-states-but (conj states/terminal-states :answered))
    :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]
   (update-application command
@@ -430,7 +430,7 @@
 (defcommand change-location
   {:parameters       [id x y address propertyId]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :states           (states/all-states-but [:sent :canceled :closed])
+   :states           (states/all-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial a/property-id-parameters [:propertyId])
                       validate-x validate-y]
@@ -465,7 +465,7 @@
 (defquery app-matches-for-link-permits
           {:parameters [id]
            :user-roles #{:applicant :authority}
-           :states     (states/all-application-states-but [:sent :closed :canceled])}
+           :states     (states/all-application-states-but (conj states/terminal-states :sent))}
           [{{:keys [propertyId] :as application} :application user :user :as command}]
           (let [application (meta-fields/enrich-with-link-permit-data application)
                 ;; exclude from results the current application itself, and the applications that have a link-permit relation to it
@@ -514,7 +514,7 @@
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
    :user-roles       #{:applicant :authority}
-   :states           (states/all-application-states-but [:sent :closed :canceled]) ;; Pitaako olla myos 'sent'-tila?
+   :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
    :pre-checks       [validate-jatkolupa-zero-link-permits
                       validate-link-permit-id
                       a/validate-authority-in-drafts]
@@ -528,7 +528,7 @@
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
    :user-roles #{:applicant :authority}
-   :states     (states/all-application-states-but [:sent :closed :canceled])
+   :states     (states/all-application-states-but (conj states/terminal-states :sent))
    :pre-checks [a/validate-authority-in-drafts]} ;; Pitaako olla myos 'sent'-tila?
   [{application :application}]
   (if (mongo/remove :app-links (a/make-mongo-id-for-link-permit id linkPermitId))
@@ -547,18 +547,29 @@
    :pre-checks [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (a/make-application-id (:municipality application))
+        primary-op (:primaryOperation application)
+        secondary-ops (:secondaryOperations application)
+        op-id-mapping (into {} (map
+                                 #(vector (:id %) (mongo/create-id))
+                                 (conj secondary-ops primary-op)))
         muutoslupa-app (merge application
                               {:id            muutoslupa-app-id
                                :created       created
                                :opened        created
                                :modified      created
                                :documents     (into [] (map
-                                                         #(assoc % :id (mongo/create-id))
+                                                         (fn [doc]
+                                                           (let [doc (assoc doc :id (mongo/create-id))]
+                                                             (if (-> doc :schema-info :op)
+                                                               (update-in doc [:schema-info :op :id] op-id-mapping)
+                                                               doc)))
                                                          (:documents application)))
                                :state         (cond
                                                 (user/authority? user) :open
                                                 :else :draft)
-                               :permitSubtype :muutoslupa}
+                               :permitSubtype :muutoslupa
+                               :primaryOperation (assoc primary-op :id (op-id-mapping (:id primary-op)))
+                               :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops) }
                               (select-keys
                                 domain/application-skeleton
                                 [:attachments :statements :verdicts :comments :submitted :sent :neighbors
