@@ -89,17 +89,17 @@
           nil) ; defaults to both
         (let [all (if (applicant? user) {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})]
           (case applicationType
-           "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
-           "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
-           "canceled"          {:state "canceled"}
-           all))
-        (when-not (contains? #{nil "0"} handler)
-          {$or [{"auth.id" handler}
-                {"authority.id" handler}]})
-        (when-not (empty? applicationTags)
-          {:tags {$in applicationTags}})
-        (when-not (empty? areas)
-          (make-area-query areas user)))])})
+            "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
+            "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
+            "canceled"          {:state "canceled"}
+            all)))
+      (when-not (contains? #{nil "0"} handler)
+        {$or [{"auth.id" handler}
+              {"authority.id" handler}]})
+      (when-not (empty? applicationTags)
+        {:tags {$in applicationTags}})
+      (when-not (empty? areas)
+        (make-area-query areas user))])})
 
 
 ;;
@@ -135,6 +135,7 @@
         kind        (get kind-mapping application-type "applications")
         params      (merge {:kind kind} params)
         query       (make-query user-query params user)
+        _ (clojure.pprint/pprint query)
         query-total (mongo/count :applications query)
         skip        (or (:skip params) 0)
         limit       (or (:limit params) 10)
