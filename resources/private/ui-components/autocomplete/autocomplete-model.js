@@ -9,15 +9,13 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   // tagging support
   self.tags = params.tags;
-  self.groups = params.groups || false;
-
-  self.groupFields = params.groupFields;
 
   self.selectedText = ko.observable(params.selectedText);
 
   self.query = self.dataProvider.query;
 
   self.inputSelected = ko.observable(false);
+
   self.dropdownClick = ko.observable(false);
 
   self.dropdownVisible = ko.computed(function() {
@@ -25,7 +23,9 @@ LUPAPISTE.AutocompleteModel = function(params) {
   });
 
   self.selected = ko.observable("");
+
   self.index = ko.observable(0);
+
   self.selectedTags = ko.observableArray();
 
   self.data = ko.observableArray(self.dataProvider.data());
@@ -55,10 +55,12 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.selectInput = function() {
     self.inputSelected(true);
   };
+
   self.retainFocus = function() {
     // set to true so input blur knows if ul container (scrollbar) was clicked
     self.dropdownClick(true);
   };
+
   self.blur = function() {
     if (self.dropdownClick()) {
       // IE hax, return focus to input when user click scrollbar
@@ -104,12 +106,24 @@ LUPAPISTE.AutocompleteModel = function(params) {
     if (event.keyCode === 13) {
       self.selectItem(self.data()[self.index()]);
     }
+
     else if (event.keyCode === 38) {
-      self.index(self.index() > 0 ? self.index() - 1 : 0);
+      var firstItem = self.index() <= 0;
+      self.index(firstItem ? 0 : self.index() - 1);
+      // skip groupheader
+      if (self.data()[self.index()].groupHeader && !firstItem) {
+        self.index(self.index() - 1);
+      }
       scrollToActiveItem(self.index());
     }
+
     else if (event.keyCode === 40) {
-      self.index(self.index() + 1 < self.data().length ? self.index() + 1 : self.index());
+      var lastItem = self.index() + 1 >= self.data().length;
+      self.index(lastItem ? self.index() : self.index() + 1);
+      // skip groupheader
+      if (self.data()[self.index()].groupHeader && !lastItem) {
+        self.index(self.index() + 1);
+      }
       scrollToActiveItem(self.index());
     }
     return true;

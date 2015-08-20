@@ -16,47 +16,37 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     })
     .call();
 
-  self.groupedData = ko.pureComputed(function() {
-    // first filter out those tags who are not selected
-    var filteredData = _.map(tagsData(), function(orgData) {
-      return {organization: orgData.name[loc.currentLanguage], tags: _.filter(orgData.tags, function(tag) {
-        return !_.some(self.filtered(), tag);
-      })};
-    });
-    var q = self.query() || "";
-    // then filter tags that don't match query
-    filteredData = _.map(filteredData, function(orgData) {
-      return _.assign(orgData, {tags: _.filter(orgData.tags, function(tag) {
-        return _.reduce(q.split(" "), function(result, word) {
-          return _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
-        }, true);
-      })});
-    });
-    // last filter out organization objects whose tags are empty
-    filteredData = _.filter(filteredData, function(orgData) {
-      return !_.isEmpty(orgData.tags);
-    });
-    return filteredData;
-  });
-
-  function firstGroupData() { // returns tags of first organization
-    return _.first(self.groupedData()).tags || []
-  }
-
-  self.hasGroups = ko.pureComputed(function() {
-    return _.keys(tagsData()).length > 1
-  });
-
   self.data = ko.pureComputed(function() {
-    return self.hasGroups() ? self.groupedData() : firstGroupData();
+    var result = [];
+    var data = tagsData();
+
+    for (var key in data) {
+      var header = {label: key, groupHeader: true};
+
+      var filteredData = util.filterDataByQuery(data[key].tags, self.query() || "", self.filtered());
+      // append group header and group items to result data
+      if (filteredData.length > 0) {
+        if (_.keys(data).length > 1) {
+          result = result.concat(header);
+        }
+        result = result.concat(filteredData);
+      }
+    }
+
+    return result;
   });
+
 };
 
-LUPAPISTE.OperationsDataProvider = function() {
+LUPAPISTE.OperationsDataProvider = function(filtered) {
   "use strict";
   var self = this;
 
   var operationsByPermitType = ko.observable();
+
+  self.query = ko.observable();
+
+  self.filtered = filtered || ko.observableArray([]);
 
   ajax
     .query("get-application-operations")
@@ -74,20 +64,30 @@ LUPAPISTE.OperationsDataProvider = function() {
   }
 
   self.data = ko.pureComputed(function() {
-    var result = _.map(operationsByPermitType(), function(operations, permitType) {
+    var result = [];
+
+    var data = _.map(operationsByPermitType(), function(operations, permitType) {
       return {
         permitType: loc(permitType),
         operations: wrapInObject(operations)
       };
     });
+
+
+    _.forEach(data, function(item) {
+      var header = {label: item.permitType, groupHeader: true};
+
+      var filteredData = util.filterDataByQuery(item.operations, self.query() || "", self.filtered());
+
+      // append group header and group items to result data
+      if (filteredData.length > 0) {
+        result = result.concat(header).concat(filteredData);
+      }
+    });
+
     return result;
   });
 
-  self.hasGroups = ko.pureComputed(function() {
-    return _.keys(operationsByPermitType()).length > 1;
-  });
-
-  self.query = ko.observable();
 };
 
 LUPAPISTE.HandlersDataProvider = function() {
@@ -144,7 +144,7 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   if ( lupapisteApp.models.currentUser.isAuthority() ) {
     self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
-    self.operationsDataProvider = new LUPAPISTE.OperationsDataProvider();
+    self.operationsDataProvider = new LUPAPISTE.OperationsDataProvider(self.dataProvider.applicationOperations);
     // TODO just search single organization tags for now, later do some grouping stuff in autocomplete component
     self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(self.dataProvider.applicationTags);
   }

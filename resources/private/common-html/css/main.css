@@ -5067,28 +5067,26 @@ table.attachments-template-table td.attachment-version-info {
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
   position: relative;
-}
-/* line 130, ../sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item span {
-  display: inline-block;
   text-overflow: ellipsis;
   overflow: hidden;
-  max-width: 360px;
+  padding-right: 6px;
 }
-/* line 137, ../sass/partials/_autocomplete.scss */
+/* line 134, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #fef4ea;
 }
-/* line 139, ../sass/partials/_autocomplete.scss */
+/* line 136, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #f8c38a;
   color: black;
 }
-/* line 144, ../sass/partials/_autocomplete.scss */
+/* line 141, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-group-header {
   font-weight: 700;
-  padding: 3px 0 0 6px;
+  padding: 3px 6px 0 6px;
   margin-top: 3px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 /* line 4, ../sass/partials/_tree.scss */

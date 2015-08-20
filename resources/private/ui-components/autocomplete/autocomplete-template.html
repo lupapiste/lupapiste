@@ -30,21 +30,22 @@
                  data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, blur: blur}"></input>
           <!-- ko if: data().length > 0 -->
           <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}">
-            <!-- ko if: groups -->
-            <div data-bind="component: {name: 'autocomplete-grouping', params: {groupFields: groupFields, data: data, selectedText: selectedText, selectItem: selectItem}}"></div>
-            <!-- /ko -->
-            <!-- ko ifnot: groups -->
             <!-- ko foreach: data -->
-            <li class="autocomplete-result-item"
-                data-bind="event: {mouseover: $parent.changeIndex.bind($data, $index()),
-                                   mousedown: $parent.selectItem.bind($data)},
-                           mousedownBubble: false,
-                           css: {active: $index() === $parent.index()}">
-              <span data-bind="text:
-                                $data === null ? loc('choose') :
-                                  $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
-            </li>
-            <!-- /ko -->
+              <!-- ko if: $data.groupHeader -->
+              <li class="autocomplete-group-header" data-bind="text: $parent.selectedText() ? $data[$parent.selectedText()] : $data"></li>
+              <!-- /ko -->
+              <!-- ko ifnot: $data.groupHeader -->
+              <li class="autocomplete-result-item"
+                  data-bind="event: {mouseover: $parent.changeIndex.bind($data, $index()),
+                                     mousedown: $parent.selectItem.bind($data)},
+                             mousedownBubble: false,
+                             css: {active: $index() === $parent.index()}">
+                <span data-bind="text:
+                                  $data === null ? loc('choose') :
+                                    $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
+              </li>
+              <!-- /ko -->
+              <!-- /ko -->
             <!-- /ko -->
           </ul>
           <!-- /ko -->

@@ -127,12 +127,9 @@
       li.autocomplete-result-item {
         cursor: pointer;
         position: relative;
-        span {
-          display: inline-block;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          max-width: 360px;
-        }
+        text-overflow: ellipsis;
+        overflow: hidden;
+        padding-right: $marginS;
       }
       li.autocomplete-result-item.active {
         background-color: lighten($lp-orange, 40%);
@@ -143,8 +140,10 @@
       }
       li.autocomplete-group-header {
         font-weight: 700;
-        padding: $marginS/2 0 0 $marginS;
+        padding: $marginS/2 $marginS 0 $marginS;
         margin-top: $marginS/2;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
     }
   }
