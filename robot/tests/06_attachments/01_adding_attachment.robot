@@ -109,15 +109,9 @@ Signature icon is not visible
   [Tags]  attachments
   Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
 
-Sign all attachments
+Mikko signs all attachments
   [Tags]  attachments
-  Tab should be visible  attachments
-  Select attachment operation option from dropdown  signAttachments
-  Wait Until   Element should be visible  signAttachmentPassword
-  Input text by test id  signAttachmentPassword  mikko123
-  Click enabled by test id  do-sign-attachments
-  Wait Until   Element should not be visible  signAttachmentPassword
-  Confirm  dynamic-ok-confirm-dialog
+  Sign all attachments  mikko123
 
 Signature icon is visible
   [Tags]  attachments
@@ -223,7 +217,13 @@ Attachment state should be ok
   [Tags]  attachments
   Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='signAttachments']
 
+Sonja adds an attachment for Mikko to sign (LPK-517)
+  [Tags]  attachments
+  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
+
 Create new application
+  [Tags]  attachments
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname2}  authAtt${secs}
   Set Suite Variable  ${propertyId2}  753-416-6-12
@@ -241,16 +241,25 @@ Signature icon is not visible to authority
 
 Authority signs the attachment
   [Tags]  attachments
-  Select attachment operation option from dropdown  signAttachments
-  Wait Until   Element should be visible  signAttachmentPassword
-  Input text by test id  signAttachmentPassword  sonja
-  Click enabled by test id  do-sign-attachments
-  Wait Until   Element should not be visible  signAttachmentPassword
-  Confirm  dynamic-ok-confirm-dialog
+  Sign all attachments  sonja
 
 Signature icon is visible to authority
   [Tags]  attachments
-  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="signed-muut.muu"]
+  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="signed-muut.muu"]
+  Logout
+
+Mikko signs the final attachment
+  [Tags]  attachments
+  Mikko logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  attachments
+
+Mikko signs everything blindly
+  [Tags]  attachments
+  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="signed-muut.muu"]
+  Sign all attachments  mikko123
+  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="signed-muut.muu"]
+
 
 *** Keywords ***
 
@@ -260,3 +269,13 @@ Attachment state should be
   ${STATE_ATTR_VALUE} =  Get Element Attribute  xpath=//*[@data-test-state and @data-test-type="${type}"]@data-test-state
   Log  ${STATE_ATTR_VALUE}
   Should Be Equal  ${STATE_ATTR_VALUE}  ${state}
+
+Sign all attachments
+  [Arguments]  ${password}
+  Tab should be visible  attachments
+  Select attachment operation option from dropdown  signAttachments
+  Wait Until   Element should be visible  signAttachmentPassword
+  Input text by test id  signAttachmentPassword  ${password}
+  Click enabled by test id  do-sign-attachments
+  Wait Until   Element should not be visible  signAttachmentPassword
+  Confirm  dynamic-ok-confirm-dialog

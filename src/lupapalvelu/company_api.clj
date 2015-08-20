@@ -110,7 +110,7 @@
 
 (defcommand company-invite
   {:parameters [id company-id]
-   :states (states/all-application-states-but [:closed :canceled])
+   :states (states/all-application-states-but states/terminal-states)
    :user-roles #{:applicant :authority}
    :pre-checks [application/validate-authority-in-drafts]}
   [{caller :user application :application}]

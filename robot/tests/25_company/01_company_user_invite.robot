@@ -102,8 +102,8 @@ New user logs in
 
 User sees herself as company admin
   Open company user listing
-  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-user2@solita.fi']/td[@data-test-id='company-user-role']  Ylläpitäjä
-  Logout
+  Wait Until  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-user2@solita.fi']/td[@data-test-id='company-user-role']  Ylläpitäjä
+  [Teardown]  Logout
 
 # Custom account
 

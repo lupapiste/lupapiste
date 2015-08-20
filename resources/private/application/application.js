@@ -92,6 +92,7 @@
 
   function updateTosFunction(value) {
     if (!isInitializing) {
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
@@ -281,11 +282,6 @@
     updateWindowTitle(e.applicationDetails.application.title);
   });
 
-  hub.subscribe("application-model-updated", function(e) {
-    if (pageutil.getPage() === "inforequest"  && authorizationModel.ok("mark-seen")) {
-      ajax.command("mark-seen", {id: e.applicationId, type: "comments"}).call();
-    }
-  });
 
   function NeighborStatusModel() {
     var self = this;
