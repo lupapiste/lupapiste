@@ -941,18 +941,19 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     div.id = pathStrToGroupID(myPath);
     div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
 
+    var opts = {};
+    if (subSchema.approvable) {
+      opts.approval = {};
+    }
+    opts.remove = resolveRemoveOptions( subSchema, path);
+    $(div).append(self.makeGroupButtons(path, myModel, opts ));
+
     var label = makeLabel(subSchema, "group", myPath, true);
     div.appendChild(label);
 
     var groupHelpText = makeGroupHelpTextSpan(subSchema);
     div.appendChild(groupHelpText);
 
-    var opts = {};
-    if (subSchema.approvable) {
-      opts.approval = {};
-    }
-    opts.remove = resolveRemoveOptions( subSchema, path);
-    $(label).append(self.makeGroupButtons(path, myModel, opts ));
 
     div.appendChild(partsDiv);
 
@@ -1480,15 +1481,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         });
         table.appendChild(tbody);
 
+        if (subSchema.approvable) {
+          $(div).append(self.makeGroupButtons(path, models, {approval: {}}));
+        }
+
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
         div.appendChild(label);
 
         var groupHelpText = makeGroupHelpTextSpan(subSchema);
         div.appendChild(groupHelpText);
 
-        if (subSchema.approvable) {
-          $(div).append(self.makeGroupButtons(path, models, {approval: {}}));
-        }
         div.appendChild(table);
 
         elements = [div];
@@ -1930,7 +1932,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildElement() {
     var op = self.schema.info.op;
-    console.log( op );
 
     var section = document.createElement("section");
     var iconUp = document.createElement("i");
