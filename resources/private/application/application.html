@@ -1064,11 +1064,16 @@
                     <!-- ko if: selectedTabName() === 'metadata' && $root.authorization.ok("store-tos-metadata-for-application") -->
                     <div id="application-metadata-tab" class="tab-content">
                         <div data-bind="if: features.enabled('arkistointi')">
-                            <div class="feature" data-bind="component: {name: 'metadata-editor',
-                                                            params: {metadata: application.metadata, applicationId: application.id}}">
+                            <div class="feature">
+                                <!-- ko if: $root.application.inPostVerdictState() -->
+
+                                <!-- /ko -->
+                                <div data-bind="component: {name: 'archival-summary',
+                                            params: {application: application}}"></div>
                             </div>
                         </div>
                     </div>
+
                     <!-- /ko -->
 
                     <script type="text/x-jquery-tmpl" id="statements-template">

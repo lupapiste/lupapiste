@@ -92,6 +92,7 @@
 
   function updateTosFunction(value) {
     if (!isInitializing) {
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
