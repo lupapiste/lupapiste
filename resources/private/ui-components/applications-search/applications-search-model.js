@@ -18,6 +18,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   self.handler = ko.observable();
 
   self.applicationTags = ko.observableArray([]);
+  self.applicationOrganizations = ko.observableArray([]);
 
   self.limit = ko.observable(25);
 
@@ -39,6 +40,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     ajax.datatables("applications-search",
                {searchText: self.searchFieldDelayed(),
                 applicationTags: _.pluck(self.applicationTags(), "id"),
+                applicationOrganizations: _.pluck(self.applicationOrganizations(), "id"),
                 handler: self.handler() ? self.handler().id : undefined,
                 applicationType: self.applicationType(),
                 limit: self.limit(),
@@ -54,6 +56,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     ajax.datatables("applications-search",
                {searchText: self.searchField(),
                 applicationTags: _.pluck(self.applicationTags(), "id"),
+                applicationOrganizations: _.pluck(self.applicationOrganizations(), "id"),
                 handler: self.handler() ? self.handler().id : undefined,
                 applicationType: self.applicationType(),
                 limit: self.limit(),

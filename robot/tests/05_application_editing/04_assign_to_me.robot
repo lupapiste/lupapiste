@@ -17,6 +17,7 @@ Mikko creates an application
 
 Mikko sets himself as the applicant
   Open tab  parties
+  Open accordions  parties
   Select From List  henkilo.userId  Intonen Mikko
 
 Person ID is fully masked
@@ -37,6 +38,7 @@ Application is not assigned
 
 Sonja sees Mikko's person ID masked
   Open tab  parties
+  Open accordions  parties
   Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  210281-****
 
 Sonja sees comment indicator on application
@@ -58,6 +60,7 @@ Assignee has changed
 
 Sonja sees Mikko's full person ID
   Open tab  parties
+  Open accordions  parties
   Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  210281-0002
 
 # LUPA-23

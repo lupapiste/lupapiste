@@ -550,18 +550,29 @@
    :pre-checks [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (a/make-application-id (:municipality application))
+        primary-op (:primaryOperation application)
+        secondary-ops (:secondaryOperations application)
+        op-id-mapping (into {} (map
+                                 #(vector (:id %) (mongo/create-id))
+                                 (conj secondary-ops primary-op)))
         muutoslupa-app (merge application
                               {:id            muutoslupa-app-id
                                :created       created
                                :opened        created
                                :modified      created
                                :documents     (into [] (map
-                                                         #(assoc % :id (mongo/create-id))
+                                                         (fn [doc]
+                                                           (let [doc (assoc doc :id (mongo/create-id))]
+                                                             (if (-> doc :schema-info :op)
+                                                               (update-in doc [:schema-info :op :id] op-id-mapping)
+                                                               doc)))
                                                          (:documents application)))
                                :state         (cond
                                                 (user/authority? user) :open
                                                 :else :draft)
-                               :permitSubtype :muutoslupa}
+                               :permitSubtype :muutoslupa
+                               :primaryOperation (assoc primary-op :id (op-id-mapping (:id primary-op)))
+                               :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops) }
                               (select-keys
                                 domain/application-skeleton
                                 [:attachments :statements :verdicts :comments :submitted :sent :neighbors
