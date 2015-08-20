@@ -117,7 +117,7 @@ LUPAPISTE.OrganizationsFilterDataProvider = function(savedOrgFilters) {
     return _.filter(data(), function(item) {
       return _.reduce(q.split(" "), function(result, word) {
         return _.contains(item.name.toUpperCase(), word.toUpperCase())
-               && !_.some(self.savedOrgFilters(), function(orgFilter) { return item.id === orgFilter.id; })
+               && !_.some(self.savedOrgFilters(), item)
                && result;
       }, true);
     });
