@@ -576,6 +576,7 @@ input.form-input.long {
   width: 100%;
   display: block;
   overflow-y: hidden;
+  text-transform: none;
   .is-right {
     float: right;
     margin-left: $marginS;

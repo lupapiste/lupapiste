@@ -13,8 +13,10 @@ Sonja prepares the application
   Create application the fast way   ${appname}  753-423-2-162  ya-katulupa-vesi-ja-viemarityot
 
 Sonja fills in the application fields required by krysp
+  Open accordions  info
   Fill tyoaika fields
   Open tab  parties
+  Open accordions  parties
   Fill required fields for the parties
 
 Sonja submits the application, approves it and gives it a verdict

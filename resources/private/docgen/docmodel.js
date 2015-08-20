@@ -1863,40 +1863,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
 
-  function descriptionSupport(operation, descId ) {
-    // var wrapper = document.createElement("span");
-    // var descriptionSpan = document.createElement("span");
-    // var description = document.createTextNode("");
-    // var descriptionInput = document.createElement("input");
-    // var iconSpanWrapper = document.createElement("span");
-    // var iconSpan = document.createElement("span");
-    // var iconTextSpan = document.createElement("span");
-    // iconTextSpan.appendChild(document.createTextNode(loc("op-description.edit")));
-
-    // test ids
-    // if (options && options.dataTestSpecifiers) {
-    //   descriptionSpan.setAttribute("data-test-id", "op-description");
-    //   iconSpanWrapper.setAttribute("data-test-id", "edit-op-description");
-    //   descriptionInput.setAttribute("data-test-id", "op-description-editor");
-    // }
-
-    // wrapper.className = "op-description-wrapper";
-    // descriptionSpan.className = "op-description";
-    // if (operation.description) {
-    //   description.nodeValue = operation.description;
-    //   descriptionInput.value = operation.description;
-    //   $(iconTextSpan).addClass("hidden");
-    // } else if (authorizationModel.ok("update-op-description")) {
-    //   iconSpanWrapper.appendChild(iconTextSpan);
-    // }
-    // wrapper.onclick = function(e) {
-    //   var event = getEvent(e);
-    //   // Prevent collapsing accordion when input is clicked
-    //   event.stopPropagation();
-    // };
-
-    // descriptionInput.type = "text";
-    // descriptionInput.className = "accordion-input text hidden";
+  // operation: operation that contains the description
+  // descId: identifier attribute that binds the bubble and bar description together.
+  // barDesc: span that shows the description on the accordion bar.
+  function descriptionSupport(operation, descId, barDesc ) {
 
     function descIdSelector( prefix ) {
       return $( prefix + "[" + descId + "]");
@@ -1918,13 +1888,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         bubble: bubble
     }
 
+    // test ids
+    if (options && options.dataTestSpecifiers) {
+      barDesc.attr("data-test-id", "op-description");
+      descOpts.attr = {"data-test-id": "edit-op-description"};
+      descriptionInput.attr("data-test-id", "op-description-editor");
+    }
+
     var saveInput = _.debounce(function() {
-      //$(descriptionInput).off("blur");
       var value = _.trim(descriptionInput.val());
       if (value === "") {
         value = null;
-        // iconSpanWrapper.appendChild(iconTextSpan);
-        // $(iconTextSpan).removeClass("hidden");
       }
 
       ajax.command("update-op-description", {id: self.appId, "op-id": operation.id, desc: value })
@@ -1938,17 +1912,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
       bubble.hide();
       updateBarDescription( value );
-      // description.nodeValue = descriptionInput.value;
-      // $(descriptionInput).addClass("hidden");
-      // $(iconSpanWrapper).removeClass("hidden");
-      // $(descriptionSpan).removeClass("hidden");
     }, 250);
-
-    // descriptionInput.onfocus = function() {
-    //   descriptionInput.onblur = function() {
-    //     saveInput();
-    //   };
-    // };
 
     descriptionInput.blur( saveInput );
 
@@ -1957,39 +1921,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var event = getEvent(e);
       event.stopPropagation();
       if (event.keyCode === 13 || event.keyCode === 27) {
-        // $(descriptionInput).off("blur");
-        // descriptionInput.blur();
         saveInput();
       }
     });
 
     return descOpts;
-    // if (authorizationModel.ok("update-op-description")) { // don't provide edit icon
-
-    //   iconSpan.className = "icon edit";
-    //   iconSpanWrapper.onclick = function(e) {
-    //     var event = getEvent(e);
-    //     event.stopPropagation();
-
-    //     if (iconSpanWrapper.contains(iconTextSpan)) {
-    //       $(iconTextSpan).addClass("hidden");
-    //     }
-
-    //     $(iconSpanWrapper).addClass("hidden");
-    //     $(descriptionSpan).addClass("hidden");
-    //     $(descriptionInput).removeClass("hidden");
-    //     descriptionInput.focus();
-    //   };
-
-    //   iconSpanWrapper.appendChild(iconSpan);
-    //   iconSpanWrapper.appendChild(iconTextSpan);
-    // }
-
-    // descriptionSpan.appendChild(description);
-    // wrapper.appendChild(descriptionSpan);
-    // wrapper.appendChild(descriptionInput);
-    // wrapper.appendChild(iconSpanWrapper);
-    // return wrapper;
   }
 
   function buildElement() {
@@ -2053,6 +1989,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (!notPrimaryOperation) {
         opts.star = {attr: {"data-op-name": op.name},
                      text: loc( "operations.primary")}
+        barText.append( $("<span>").addClass( "lupicon-star"));
       }
 
       if (isSecondaryOperation) {
@@ -2080,7 +2017,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
       if( authorizationModel.ok("update-op-description") ) {
-        opts.description = descriptionSupport( op, descId );
+        opts.description = descriptionSupport( op, descId, barDesc );
       }
       //elements.appendChild(buildDescriptionElement(op));
     } else {

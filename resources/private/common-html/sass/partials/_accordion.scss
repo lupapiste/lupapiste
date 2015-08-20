@@ -13,6 +13,7 @@
       text-transform: uppercase;
     }
     span.description {
+      padding-right: $icon-pad;
     }
     span.icons {
       min-width: $lupicon-size;
@@ -208,6 +209,3 @@
   text-align: right;
   margin-bottom: 6px;
 }
-
-
-
