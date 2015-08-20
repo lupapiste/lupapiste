@@ -66,15 +66,10 @@ LUPAPISTE.OperationsDataProvider = function() {
     })
     .call();
 
-  function localizeOperations(operations) {
-    return _.map(operations, function(op) {
-      return loc("operations." + op)
-    });
-  }
-
   function wrapInObject(operations) {
     return _.map(operations, function(op) {
-      return {label: op}
+      return {label: loc("operations." + op),
+              id: op};
     });
   }
 
@@ -82,14 +77,14 @@ LUPAPISTE.OperationsDataProvider = function() {
     var result = _.map(operationsByPermitType(), function(operations, permitType) {
       return {
         permitType: loc(permitType),
-        operations: _.flow(localizeOperations, wrapInObject)(operations)
-      }
-    })
+        operations: wrapInObject(operations)
+      };
+    });
     return result;
   });
 
   self.hasGroups = ko.pureComputed(function() {
-    return _.keys(operationsByPermitType()).length > 1
+    return _.keys(operationsByPermitType()).length > 1;
   });
 
   self.query = ko.observable();

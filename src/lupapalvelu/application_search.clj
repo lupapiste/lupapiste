@@ -59,7 +59,7 @@
     (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
     :else (make-free-text-query filter-search)))
 
-(defn make-query [query {:keys [searchText kind applicationType handler applicationTags]} user]
+(defn make-query [query {:keys [searchText kind applicationType handler applicationTags applicationOperations]} user]
   {$and
    (filter seq
      [query
@@ -79,8 +79,9 @@
           {$or [{"auth.id" handler}
                 {"authority.id" handler}]})
         (when-not (empty? applicationTags)
-          {:tags {$in applicationTags}}))])})
-
+          {:tags {$in applicationTags}}))
+      (when-not (empty? applicationOperations)
+        {:primaryOperation.name {$in applicationOperations}})])})
 
 ;;
 ;; Public API
