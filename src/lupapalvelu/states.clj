@@ -70,10 +70,10 @@
   ^{:doc "See default-application-state-graph"}
   tj-hakemus-state-graph
   (merge
-    (select-keys default-application-state-graph [:draft :open :canceled])
+    (select-keys default-application-state-graph [:draft :open :canceled :closed])
     {:submitted    [:sent :canceled]
      :sent         [:closed :complement-needed :canceled]
-     :complement-needed [:closed :canceled]}))
+     :complement-needed [:sent :canceled]}))
 
 ; TODO draft versions this forward
 
