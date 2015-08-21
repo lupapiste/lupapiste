@@ -15,6 +15,7 @@ Mikko wants to build a water slide
 
 Mikko sets turvakielto for himself
   Open tab  parties
+  Open accordions  parties
   Wait and click  xpath=//div[@id="application-parties-tab"]//input[@data-docgen-path="henkilo.henkilotiedot.turvakieltoKytkin"]
   Wait Until  Page Should Contain  Tallennettu
   [Teardown]  Logout

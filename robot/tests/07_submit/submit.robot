@@ -115,6 +115,7 @@ Mikko adds txt attachment to the attachment template added by Sonja
 
 Mikko fills up first name for the hakija party in the parties tab
   Open tab  parties
+  Open accordions  parties
   ${hakija-etunimi-path} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']
   Wait until  Element should be visible  xpath=${hakija-etunimi-path}
   Execute Javascript  $('#application-parties-tab').find('section[data-doc-type="hakija-r"]').find('input[data-docgen-path="henkilo.henkilotiedot.etunimi"]').val("Elmeri").change().blur();
