@@ -21,7 +21,7 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     var data = tagsData();
 
     for (var key in data) {
-      var header = {label: key, groupHeader: true};
+      var header = {label: data[key].name[loc.currentLanguage], groupHeader: true};
 
       var filteredData = util.filterDataByQuery(data[key].tags, self.query() || "", self.filtered());
       // append group header and group items to result data
