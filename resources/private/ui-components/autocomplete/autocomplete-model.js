@@ -34,6 +34,14 @@ LUPAPISTE.AutocompleteModel = function(params) {
     return !self.selected() && self.selectedTags().length === 0;
   });
 
+  self.groupedResults = ko.pureComputed(function() {
+    return _.some(self.data(), function(item) {
+      if (item && item.groupHeader) {
+        return true;
+      }
+    });
+  });
+
   // set initial value
   if (self.tags) {
     self.selectedTags = self.value;

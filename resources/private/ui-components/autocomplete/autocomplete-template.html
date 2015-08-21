@@ -29,7 +29,7 @@
           <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
                  data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, blur: blur}"></input>
           <!-- ko if: data().length > 0 -->
-          <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}">
+          <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}, css: {'autocomplete-result-grouped': groupedResults}">
             <!-- ko foreach: data -->
               <!-- ko if: $data && $data.groupHeader -->
               <li class="autocomplete-group-header" data-bind="text: $parent.selectedText() ? $data[$parent.selectedText()] : $data"></li>

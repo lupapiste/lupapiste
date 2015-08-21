@@ -112,17 +112,18 @@
       box-sizing: border-box;
       background-color: #fff;
       color: black;
+
+      &.autocomplete-result-grouped {
+        li.autocomplete-result-item {
+          padding: $marginS/2 $marginS*2;
+        }
+      }
+
       li.autocomplete-result-item, li.autocomplete-result-empty {
         cursor: default;
         display: list-item;
         list-style-type: none;
         padding: $marginS $marginS;
-        &.group-indent {
-          padding: $marginS/2 $marginS*2;
-          &:hover {
-            background-color: lighten($lp-orange, 40%);
-          }
-        }
       }
       li.autocomplete-result-item {
         cursor: pointer;
