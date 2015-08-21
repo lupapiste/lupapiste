@@ -69,7 +69,7 @@
 
   var handleLoginSubmit = function() {
     if (IE8OrOlder()) {
-      alert("Lupapiste ei tue käyttämääsi selainta, kokeile uudelleen toisella selaimella. (Esim. Mozilla Firefox, Google Chrome, Apple Safari)")
+      alert(loc("error.old-ie"))
     } else {
       login();
     }
