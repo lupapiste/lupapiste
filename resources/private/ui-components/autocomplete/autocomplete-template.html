@@ -31,10 +31,10 @@
           <!-- ko if: data().length > 0 -->
           <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}">
             <!-- ko foreach: data -->
-              <!-- ko if: $data.groupHeader -->
+              <!-- ko if: $data && $data.groupHeader -->
               <li class="autocomplete-group-header" data-bind="text: $parent.selectedText() ? $data[$parent.selectedText()] : $data"></li>
               <!-- /ko -->
-              <!-- ko ifnot: $data.groupHeader -->
+              <!-- ko ifnot: $data && $data.groupHeader -->
               <li class="autocomplete-result-item"
                   data-bind="event: {mouseover: $parent.changeIndex.bind($data, $index()),
                                      mousedown: $parent.selectItem.bind($data)},
