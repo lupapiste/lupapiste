@@ -51,13 +51,28 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.subscriptions = [];
 
+  function getCurrentItem() {
+    return self.data()[self.index()];
+  }
+
+  function initIndex() {
+    self.index(0);
+    // skip goup header when setting initial index
+    if (getCurrentItem() && getCurrentItem().groupHeader) {
+      self.index(1);
+    }
+  }
+
+  // set initial index
+  initIndex();
+
   self.subscriptions.push(self.dataProvider.data.subscribe(function() {
     if (params.nullable) {
       self.data([null].concat(self.dataProvider.data()));
     } else {
       self.data(self.dataProvider.data());
     }
-    self.index(0);
+    initIndex();
   }));
 
   self.selectInput = function() {
@@ -92,10 +107,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.navigate = function(data, event) {
-    function getCurrentItem() {
-      return self.data()[self.index()];
-    }
-
     function scrollToActiveItem(index) {
       var $container = $(event.target).siblings("ul");
       var $activeItem = $container.find("li:nth-child(" + index + ")");
@@ -122,8 +133,13 @@ LUPAPISTE.AutocompleteModel = function(params) {
     else if (event.keyCode === 38) {
       var firstItem = self.index() <= 0;
       self.index(firstItem ? 0 : self.index() - 1);
+
+      if (getCurrentItem() && getCurrentItem().groupHeader && self.index() <= 0) {
+        self.index(self.index() + 1);
+      }
+
       // skip group header
-      if (getCurrentItem() /* is not nullable */ && getCurrentItem().groupHeader && !firstItem) {
+      else if (getCurrentItem() /* is not nullable */ && getCurrentItem().groupHeader && !firstItem) {
         self.index(self.index() - 1);
       }
       scrollToActiveItem(self.index());
