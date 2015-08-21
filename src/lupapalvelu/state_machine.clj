@@ -1,7 +1,7 @@
 (ns lupapalvelu.state-machine
   (:require [lupapalvelu.operations :as operations]
             [lupapalvelu.states :as states]
-            [sade.core :refer [fail]]
+            [sade.core :refer [fail unauthorized]]
             [sade.util :as util]))
 
 (defn state-graph
@@ -46,5 +46,7 @@
   "Function for composing action pre-checs.
    E.g. :pre-checks [(partial state-machine/validate-state-transition :canceled)]"
   [next-state _ application]
-  (when-not (can-proceed? application next-state)
-    (fail :error.command-illegal-state)))
+  (if (map? application)
+    (when-not (can-proceed? application next-state)
+      (fail :error.command-illegal-state))
+    unauthorized))
