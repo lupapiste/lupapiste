@@ -28,6 +28,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
+            [lupapalvelu.state-machine :as state-machine]
             [lupapalvelu.user :as user]))
 
 ;; Notifications
@@ -160,7 +161,7 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           #{:info}}
+   :pre-checks       [(partial state-machine/validate-state-transition :canceled)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified created
@@ -175,7 +176,8 @@
    :user-roles       #{:applicant}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           #{:draft :info :open :submitted}}
+   :states           #{:draft :info :open :submitted}
+   :pre-checks       [(partial state-machine/validate-state-transition :canceled)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified created
@@ -190,8 +192,8 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           (states/all-states-but (conj states/terminal-states :answered))
-   :pre-checks       [a/validate-authority-in-drafts]}
+   :pre-checks       [a/validate-authority-in-drafts
+                      (partial state-machine/validate-state-transition :canceled)]}
   [{:keys [created application] :as command}]
   (update-application command
     (util/deep-merge
@@ -221,7 +223,7 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           #{:sent}}
+   :pre-checks       [(partial state-machine/validate-state-transition :complement-needed)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified         created
@@ -252,7 +254,8 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [domain/validate-owner-or-write-access
-                      a/validate-authority-in-drafts]}
+                      a/validate-authority-in-drafts
+                      (partial state-machine/validate-state-transition :submitted)]}
   [{:keys [application created] :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)]
     (or

@@ -47,7 +47,7 @@
           Key is the starting state, first in the value vector is the default next state and
           the rest are other possible next states."}
   default-application-state-graph
-  {:draft      [:open :canceled]
+  {:draft      [:open :submitted :canceled]
    :open       [:submitted :canceled]
    :submitted  [:sent :verdictGiven :canceled]
    :sent       [:verdictGiven :complement-needed :canceled]
@@ -63,17 +63,19 @@
   ^{:doc "See default-application-state-graph"}
   tj-ilmoitus-state-graph
   (merge
-    (select-keys default-application-state-graph [:draft :open :closed :canceled])
-    {:submitted    [:closed :canceled]}))
+    (select-keys default-application-state-graph [:draft :open :canceled])
+    {:submitted         [:closed  :canceled]
+     :complement-needed [:closed]
+     :closed            [:complement-needed]}))
 
 (def
   ^{:doc "See default-application-state-graph"}
   tj-hakemus-state-graph
   (merge
-    (select-keys default-application-state-graph [:draft :open :canceled])
+    (select-keys default-application-state-graph [:draft :open :canceled :closed])
     {:submitted    [:sent :canceled]
      :sent         [:closed :complement-needed :canceled]
-     :complement-needed [:closed :canceled]}))
+     :complement-needed [:sent :canceled]}))
 
 ; TODO draft versions this forward
 
@@ -124,4 +126,5 @@
                'kt-application-state-graph]
           :let [g (var-get (resolve sym))
                 filename (str "target/" (name sym) ".png")]]
-    (viz/save-graph (keys g) g :node->descriptor (fn [n] {:label (str (i18n/localize "fi" (name n)) "\n(" (name n) ")")}) :filename filename)))
+    (viz/save-graph (keys g) g :node->descriptor (fn [n] {:label (str (i18n/localize "fi" (name n)) "\n(" (name n) ")")}) :filename filename))
+  )
