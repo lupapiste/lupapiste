@@ -47,7 +47,7 @@
           Key is the starting state, first in the value vector is the default next state and
           the rest are other possible next states."}
   default-application-state-graph
-  {:draft      [:open :canceled]
+  {:draft      [:open :submitted :canceled]
    :open       [:submitted :canceled]
    :submitted  [:sent :verdictGiven :canceled]
    :sent       [:verdictGiven :complement-needed :canceled]
@@ -70,10 +70,10 @@
   ^{:doc "See default-application-state-graph"}
   tj-hakemus-state-graph
   (merge
-    (select-keys default-application-state-graph [:draft :open :canceled])
+    (select-keys default-application-state-graph [:draft :open :canceled :closed])
     {:submitted    [:sent :canceled]
      :sent         [:closed :complement-needed :canceled]
-     :complement-needed [:closed :canceled]}))
+     :complement-needed [:sent :canceled]}))
 
 ; TODO draft versions this forward
 

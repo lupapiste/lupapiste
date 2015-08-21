@@ -1,14 +1,18 @@
 (ns lupapalvelu.operations
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [schema.core :as sc]
             [sade.env :as env]
+            [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery]]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.poikkeamis-schemas]
             [lupapalvelu.document.ymparisto-schemas]
             [lupapalvelu.document.yleiset-alueet-schemas]
             [lupapalvelu.document.vesihuolto-schemas]
+            [lupapalvelu.states :as states]
             [lupapiste-commons.usage-types :as usages]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
@@ -308,6 +312,25 @@
   {:yl-uusi-toiminta ymparistolupa-operation
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
    :yl-toiminnan-muutos ymparistolupa-operation})
+
+(defn- tyonjohtaja-state-machine-resolver [application]
+  (let [doc (domain/get-document-by-name application "tyonjohtaja-v2")
+        val (get-in doc [:data :ilmoitusHakemusValitsin :value])]
+    (if (= "ilmoitus" val)
+      states/tj-ilmoitus-state-graph
+      states/tj-hakemus-state-graph)))
+
+(def Operation
+  {:schema sc/Str
+   :permit-type (sc/pred permit/valid-permit-type?)
+   :attachments [sc/Any]
+   :asianhallinta sc/Bool
+   :link-permit-required sc/Bool
+   :link-permit-verdict-required sc/Bool
+   :add-operation-allowed sc/Bool
+   :required [sc/Str]
+   (sc/optional-key :state-graph-resolver) util/Fn
+   (sc/optional-key :schema-data) [sc/Any]})
 
 (def operations
   (merge
@@ -787,6 +810,7 @@
                                   :permit-type permit/MAL
                                   :required ["ymp-maksaja" "rakennuspaikka"]
                                   :attachments []
+                                  :add-operation-allowed false
                                   :link-permit-required false
                                   :link-permit-verdict-required false
                                   :asianhallinta true}
@@ -834,6 +858,7 @@
 
     :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
                                   :permit-type permit/R
+                                  :state-graph-resolver tyonjohtaja-state-machine-resolver
                                   :required ["hankkeen-kuvaus-minimum"]
                                   :attachments []
                                   :add-operation-allowed false
@@ -945,13 +970,13 @@
     ya-operations
     yl-operations))
 
+;; Validate operations
+(doseq [[k op] operations]
+  (let [v (sc/check Operation op)]
+    (assert (nil? v) (str k v))))
 ;;
 ;; Functions
 ;;
-
-(doseq [[op {:keys [permit-type]}] operations]
-  (when-not permit-type
-    (throw (Exception. (format "Operation %s does not have permit-type set." op)))))
 
 (def link-permit-required-operations
   (reduce (fn [result [operation metadata]]
