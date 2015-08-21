@@ -174,6 +174,7 @@ Login
   Input text  login-password  ${password}
   # for IE8
   Wait and click  login-button
+  Run Keyword And Ignore Error  Confirm Action
 
 Login fails
   [Arguments]  ${username}  ${password}
