@@ -148,9 +148,9 @@ Close side panel
 
 Open accordions
   [Arguments]  ${tab}
-  Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'sticky')]
-  Execute Javascript  $("div[id=application-${tab}-tab] button.sticky.toggled").click();
-  Execute Javascript  $("div[id=application-${tab}-tab] button.sticky").click();
+  Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'accordion-toggle')]
+  Execute Javascript  $("#application-${tab}-tab button.accordion-toggle.toggled").click();
+  Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
   Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'toggled')]
 
 #
@@ -179,6 +179,7 @@ Login
 Login fails
   [Arguments]  ${username}  ${password}
   Login  ${username}  ${password}
+  Run Keyword And Ignore Error  Confirm Action
   User should not be logged in
 
 User should be logged in
