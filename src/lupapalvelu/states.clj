@@ -63,8 +63,10 @@
   ^{:doc "See default-application-state-graph"}
   tj-ilmoitus-state-graph
   (merge
-    (select-keys default-application-state-graph [:draft :open :closed :canceled])
-    {:submitted    [:closed :canceled]}))
+    (select-keys default-application-state-graph [:draft :open :canceled])
+    {:submitted         [:closed  :canceled]
+     :complement-needed [:closed]
+     :closed            [:complement-needed]}))
 
 (def
   ^{:doc "See default-application-state-graph"}
@@ -124,4 +126,5 @@
                'kt-application-state-graph]
           :let [g (var-get (resolve sym))
                 filename (str "target/" (name sym) ".png")]]
-    (viz/save-graph (keys g) g :node->descriptor (fn [n] {:label (str (i18n/localize "fi" (name n)) "\n(" (name n) ")")}) :filename filename)))
+    (viz/save-graph (keys g) g :node->descriptor (fn [n] {:label (str (i18n/localize "fi" (name n)) "\n(" (name n) ")")}) :filename filename))
+  )
