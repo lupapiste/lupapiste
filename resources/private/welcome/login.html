@@ -2,23 +2,26 @@
 <html>
 <body>
   <section class="page welcome_page" id="login">
+    <!--[if lt IE 9 ]> <span class="old-ie"/> <![endif]-->
     <div class="container">
       <div class="welcome_sections">
         <div id="login-form" class="welcome_section">
           <section class="welcome-login-section">
             <h3 data-bind="ltext: 'welcome.login.title'"></h3>
             <p data-bind="ltext: 'welcome.login.desc'"></p>
-            <label class="form-label" for="login-username" data-bind="ltext: 'userinfo.email'"></label>
-            <input class="form-input" id="login-username" type="text" data-bind="attr: {placeholder: loc('userinfo.username')}" name="username">
-            <label class="form-label" for="login-password" data-bind="ltext: 'userinfo.password'"></label>
-            <input class="form-input" id="login-password" type="password" data-bind="attr: {placeholder: loc('userinfo.password')}" name="password">
-            <label class="form-label" ><input class="form-input" type="checkbox" id="rememberme" data-bind="checked: rememberMe"><span data-bind="ltext: 'userinfo.rememberme'"></span></label>
-            <button id="login-button" class="positive no-icon-pad"
-                    data-bind="css: {waiting: pending},
-                               disable: processing">
-              <span data-bind="ltext: 'welcome.login'"></span>
-              <i class="wait spin lupicon-refresh"></i>
-            </button>
+            <form data-bind="submit: handleLoginSubmit">
+              <label class="form-label" for="login-username" data-bind="ltext: 'userinfo.email'"></label>
+              <input class="form-input" id="login-username" type="text" data-bind="attr: {placeholder: loc('userinfo.username')}" name="username">
+              <label class="form-label" for="login-password" data-bind="ltext: 'userinfo.password'"></label>
+              <input class="form-input" id="login-password" type="password" data-bind="attr: {placeholder: loc('userinfo.password')}" name="password">
+              <label class="form-label" ><input class="form-input" type="checkbox" id="rememberme" data-bind="checked: rememberMe"><span data-bind="ltext: 'userinfo.rememberme'"></span></label>
+              <button id="login-button" type="submit" class="positive no-icon-pad"
+                      data-bind="css: {waiting: pending},
+                                 disable: processing">
+                <span data-bind="ltext: 'welcome.login'"></span>
+                <i class="wait spin lupicon-refresh"></i>
+              </button>
+            </form>
             <span id="login-message" style="display: none; color: red"></span>
             <div class="passwd-reset">
               <a href="#!/reset" data-bind="ltext: 'login.reset-question'"></a>
