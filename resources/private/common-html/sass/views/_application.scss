@@ -838,3 +838,7 @@ $side-panel-width: 60px;
 h2.sticky {
   margin-bottom: $marginM;
 }
+
+h2 > i.is-right {
+  float: right;
+}

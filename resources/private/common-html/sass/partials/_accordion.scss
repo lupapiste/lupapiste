@@ -7,11 +7,6 @@
   @include box-sizing(border-box);
 
   button.sticky {
-    width: 100%;
-    span.bar-text {
-      width: 100%;
-      text-transform: uppercase;
-    }
     span.description {
       padding-right: $icon-pad;
     }
@@ -27,6 +22,15 @@
       padding-right: 0;
     }
   }
+
+  button.accordion-toggle {
+    width: 100%;
+    span.bar-text {
+      width: 100%;
+      text-transform: uppercase;
+    }
+  }
+
 
   button.sticky.approved > .icons > .approved {
     display: table-cell;
@@ -168,6 +172,7 @@
     display: block;
   }
 }
+
 
 .accordion-indicator {
   z-index: 12000;
