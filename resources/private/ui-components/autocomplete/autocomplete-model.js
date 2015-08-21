@@ -84,7 +84,11 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.navigate = function(data, event) {
-    var scrollToActiveItem = function(index) {
+    function getCurrentItem() {
+      return self.data()[self.index()];
+    }
+
+    function scrollToActiveItem(index) {
       var $container = $(event.target).siblings("ul");
       var $activeItem = $container.find("li:nth-child(" + index + ")");
 
@@ -101,17 +105,17 @@ LUPAPISTE.AutocompleteModel = function(params) {
       if ((itemBottom > containerBottom) || (itemTop < containerTop)) {
         $container.scrollTop($container.scrollTop() + $activeItem.position().top);
       }
-    };
+    }
 
     if (event.keyCode === 13) {
-      self.selectItem(self.data()[self.index()]);
+      self.selectItem(getCurrentItem());
     }
 
     else if (event.keyCode === 38) {
       var firstItem = self.index() <= 0;
       self.index(firstItem ? 0 : self.index() - 1);
-      // skip groupheader
-      if (self.data()[self.index()].groupHeader && !firstItem) {
+      // skip group header
+      if (getCurrentItem() /* is not nullable */ && getCurrentItem().groupHeader && !firstItem) {
         self.index(self.index() - 1);
       }
       scrollToActiveItem(self.index());
@@ -121,7 +125,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
       var lastItem = self.index() + 1 >= self.data().length;
       self.index(lastItem ? self.index() : self.index() + 1);
       // skip groupheader
-      if (self.data()[self.index()].groupHeader && !lastItem) {
+      if (getCurrentItem().groupHeader && !lastItem) {
         self.index(self.index() + 1);
       }
       scrollToActiveItem(self.index());
