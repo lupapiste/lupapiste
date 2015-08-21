@@ -42,6 +42,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
       {
         searchText: self.searchFieldDelayed(),
         applicationTags: _.pluck(self.applicationTags(), "id"),
+        applicationOrganizations: _.pluck(self.applicationOrganizations(), "id"),
         applicationOperations: _.pluck(self.applicationOperations(), "id"),
         handler: self.handler() ? self.handler().id : undefined,
         applicationType: self.applicationType(),
@@ -60,6 +61,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
       {
         searchText: self.searchField(),
         applicationTags: _.pluck(self.applicationTags(), "id"),
+        applicationOrganizations: _.pluck(self.applicationOrganizations(), "id"),
         applicationOperations: _.pluck(self.applicationOperations(), "id"),
         handler: self.handler() ? self.handler().id : undefined,
         applicationType: self.applicationType(),
