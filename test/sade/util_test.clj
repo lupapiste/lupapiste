@@ -85,8 +85,12 @@
     (assoc-in {} [:a :b :d] 5)) => {:a {:b {:c 2 :d 5}}}))
 
 (facts "Contains value"
-  (fact (contains-value? nil nil) => false)
   (fact (contains-value? [] nil) => false)
+  (fact (contains-value? nil nil) => true)
+  (fact (contains-value? [nil] nil) => true)
+  (fact (contains-value? :a :a) => true)
+  (fact (contains-value? #{:a} :a) => true)
+  (fact (contains-value? #{:a} :b) => false)
   (fact (contains-value? nil true?) => false)
   (fact (contains-value? [] true?) => false)
   (fact (contains-value? [nil] true?) => false)

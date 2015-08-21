@@ -92,6 +92,7 @@
 
   function updateTosFunction(value) {
     if (!isInitializing) {
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
@@ -186,9 +187,20 @@
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
 
       var devMode = LUPAPISTE.config.mode === "dev";
-      docgen.displayDocuments("#applicationDocgen", app, applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
-      docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
-      docgen.displayDocuments("#applicationAndPartiesDocgen", app, applicationModel.summaryAvailable() ? sortedNonpartyDocs : [], authorizationModel, {dataTestSpecifiers: false, accordionCollapsed: true});
+      docgen.displayDocuments("#applicationDocgen",
+                              app,
+                              applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
+                              authorizationModel,
+                              {dataTestSpecifiers: devMode, accordionCollapsed: true});
+      docgen.displayDocuments("#partiesDocgen",
+                              app,
+                              sortedPartyDocs,
+                              authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: true});
+      docgen.displayDocuments("#applicationAndPartiesDocgen",
+                              app,
+                              applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
+                              authorizationModel,
+                              {dataTestSpecifiers: false, accordionCollapsed: true});
 
       // Indicators
       function sumDocIndicators(sum, doc) {
@@ -281,11 +293,6 @@
     updateWindowTitle(e.applicationDetails.application.title);
   });
 
-  hub.subscribe("application-model-updated", function(e) {
-    if (pageutil.getPage() === "inforequest"  && authorizationModel.ok("mark-seen")) {
-      ajax.command("mark-seen", {id: e.applicationId, type: "comments"}).call();
-    }
-  });
 
   function NeighborStatusModel() {
     var self = this;

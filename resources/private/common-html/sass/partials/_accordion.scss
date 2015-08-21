@@ -6,101 +6,132 @@
   margin-bottom: $marginS;
   @include box-sizing(border-box);
 
-  h2 {
-    padding:  $marginS $marginM;
-    background: $lp-dark-grey;
-    vertical-align: middle;
-    color: white;
-    font-size: 18px;
-    line-height: 27px;
-    cursor: pointer;
-    font-weight: normal;
-    margin-bottom: 0;
+  button.sticky {
     width: 100%;
-    padding-right:0;
-    max-width: $application-max-width - $marginS * 2;
-    @include box-sizing(border-box);
-    // span {
-    //   margin-right: $marginM;
-    // }
-    .icon {
-      margin-right: $marginL;
-      vertical-align: middle;
+    span.bar-text {
+      width: 100%;
+      text-transform: uppercase;
     }
-    .icon.remove {
-      border-right: none;
+    span.description {
+      padding-right: $icon-pad;
+    }
+    span.icons {
+      min-width: $lupicon-size;
+    }
+    .approved, .rejected {
+      display: none;
+    }
+    .rejected {
+      // Buttons are not used to having complex
+      // contents.
       padding-right: 0;
-    }
-    .icon.edit {
-      border-right: none;
-      padding-right: 0;
-      padding-left: 25px;
-      margin-left: $marginM;
-      width: auto;
-    }
-    .icon.drill-right-white {
-      height: 16px;
-    }
-    .icon.star-selected, .icon.star-unselected {
-      height: 23px;
-    }
-
-    .op-description-wrapper {
-      display: inline-block;
-      max-width: 700px;
-      white-space: nowrap;
-      line-height: 20px;
-      span {
-        margin-right: 0;
-        vertical-align: bottom;
-      }
-      .accordion-input {
-        width: 600px;
-        margin-left: $marginS;
-      }
-      .op-description {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        &:before {
-          content: "-";
-          margin: 0 $marginS;
-        }
-        &:empty {
-          display: none;
-        }
-      }
-    }
-    .form-approval-status {
-      text-transform: none;
-      width: auto;
-      display: inline;
-      min-height: 28px;
-
-      &.empty {
-        display: none;
-        height: 0;
-      }
-
-      .form-buttons {
-        display:inline-block;
-        text-align: right;
-        float: right;
-        .btn {
-          margin: 0 $marginS 0 0;
-          line-height: 19px;
-          min-height: 19px;
-          vertical-align: top;
-        }
-      }
-      .approval-rejected, .approval-approved {
-        margin-right: 0;
-        padding-right: $marginL;
-        &:after {
-          vertical-align: baseline;
-        }
-      }
     }
   }
+
+  button.sticky.approved > .icons > .approved {
+    display: table-cell;
+  }
+
+  button.sticky.rejected > .icons >  .rejected {
+    display: table-cell;
+  }
+
+
+  /* h2 { */
+  /*   padding:  $marginS $marginM; */
+  /*   background: $lp-dark-grey; */
+  /*   vertical-align: middle; */
+  /*   color: white; */
+  /*   font-size: 18px; */
+  /*   line-height: 27px; */
+  /*   cursor: pointer; */
+  /*   font-weight: normal; */
+  /*   margin-bottom: 0; */
+  /*   width: 100%; */
+  /*   padding-right:0; */
+  /*   max-width: $application-max-width - $marginS * 2; */
+  /*   @include box-sizing(border-box); */
+  /*   // span { */
+  /*   //   margin-right: $marginM; */
+  /*   // } */
+  /*   .icon { */
+  /*     margin-right: $marginL; */
+  /*     vertical-align: middle; */
+  /*   } */
+  /*   .icon.remove { */
+  /*     border-right: none; */
+  /*     padding-right: 0; */
+  /*   } */
+  /*   .icon.edit { */
+  /*     border-right: none; */
+  /*     padding-right: 0; */
+  /*     padding-left: 25px; */
+  /*     margin-left: $marginM; */
+  /*     width: auto; */
+  /*   } */
+  /*   .icon.drill-right-white { */
+  /*     height: 16px; */
+  /*   } */
+  /*   .icon.star-selected, .icon.star-unselected { */
+  /*     height: 23px; */
+  /*   } */
+
+  /*   .op-description-wrapper { */
+  /*     display: inline-block; */
+  /*     max-width: 700px; */
+  /*     white-space: nowrap; */
+  /*     line-height: 20px; */
+  /*     span { */
+  /*       margin-right: 0; */
+  /*       vertical-align: bottom; */
+  /*     } */
+  /*     .accordion-input { */
+  /*       width: 600px; */
+  /*       margin-left: $marginS; */
+  /*     } */
+  /*     .op-description { */
+  /*       overflow: hidden; */
+  /*       text-overflow: ellipsis; */
+  /*       &:before { */
+  /*         content: "-"; */
+  /*         margin: 0 $marginS; */
+  /*       } */
+  /*       &:empty { */
+  /*         display: none; */
+  /*       } */
+  /*     } */
+  /*   } */
+  /*   .form-approval-status { */
+  /*     text-transform: none; */
+  /*     width: auto; */
+  /*     display: inline; */
+  /*     min-height: 28px; */
+
+  /*     &.empty { */
+  /*       display: none; */
+  /*       height: 0; */
+  /*     } */
+
+  /*     .form-buttons { */
+  /*       display:inline-block; */
+  /*       text-align: right; */
+  /*       float: right; */
+  /*       .btn { */
+  /*         margin: 0 $marginS 0 0; */
+  /*         line-height: 19px; */
+  /*         min-height: 19px; */
+  /*         vertical-align: top; */
+  /*       } */
+  /*     } */
+  /*     .approval-rejected, .approval-approved { */
+  /*       margin-right: 0; */
+  /*       padding-right: $marginL; */
+  /*       &:after { */
+  /*         vertical-align: baseline; */
+  /*       } */
+  /*     } */
+  /*   } */
+  /* } */
 
   .accordion_content {
     display: none;
@@ -178,6 +209,3 @@
   text-align: right;
   margin-bottom: 6px;
 }
-
-
-

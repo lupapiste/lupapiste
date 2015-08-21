@@ -64,6 +64,7 @@
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
+                                  [rhizome "0.2.5"]
                                   [pdfboxing "0.1.5"]]
                    :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.2.0"]
