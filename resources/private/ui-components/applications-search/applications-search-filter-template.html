@@ -26,7 +26,8 @@
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.tags'" />
         <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, selectedText: 'label', tags: true, group: organizationTagsDataProvider.groupData()}}"></div>
-
+      </div>
+      <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.areas'" />
         <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationAreasDataProvider, value: dataProvider.areas, selectedText: 'name', tags: true}}"></div>
       </div>
