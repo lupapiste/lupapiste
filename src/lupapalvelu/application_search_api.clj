@@ -63,4 +63,5 @@
                (query/sort {:submitted -1})
                (query/limit limit))]
     (ok :applications (->> apps
+                           (filter :primaryOperation)
                            (map search/public-fields)))))
