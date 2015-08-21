@@ -174,6 +174,7 @@ Login
   Input text  login-password  ${password}
   # for IE8
   Wait and click  login-button
+  Run Keyword And Ignore Error  Confirm Action
 
 Login fails
   [Arguments]  ${username}  ${password}
@@ -312,8 +313,8 @@ Select From Autocomplete
   Wait until  Element should be visible  xpath=//${container}//span[@class='autocomplete-selection']
   Click Element  xpath=//${container}//span[@class='autocomplete-selection']
   Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
-  Wait until  Element should be visible  xpath=//${container}//ul[@class="autocomplete-result"]//li/span[contains(text(), '${value}')]
-  Click Element  xpath=//${container}//ul[@class="autocomplete-result"]//li/span[contains(text(), '${value}')]
+  Wait until  Element should be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
+  Click Element  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
   Wait for jQuery
 
 Click by id

@@ -1707,14 +1707,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }
 
-  function disableBasedOnOptions() {
-    if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
-      $(self.element).find("input, textarea").attr("readonly", true).unbind("focus");
-      $(self.element).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
-      $(self.element).find("button").hide();
-    }
-  }
-
   function createIndicator(eventTarget, className) {
     className = className || "form-indicator";
     var parent$ = $(eventTarget.parentNode);
@@ -2044,6 +2036,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     section.appendChild(sectionContainer);
     self.statusOrder.setOrdered();
     accordion.reset( $(toggle) );
+
+    // Disable fields and hide if the form is not editable
+    if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
+      $(elements).find("input, textarea").attr("readonly", true).unbind("focus");
+      $(elements).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
+      // TODO a better way would be to hide each individual button based on authorizationModel.ok
+      $(elements).find("button").hide();
+    }
+
     return section;
   }
 
@@ -2060,6 +2061,5 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   if (!doc.validationErrors) {
     validate();
   }
-  disableBasedOnOptions();
 
 };

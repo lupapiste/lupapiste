@@ -1,0 +1,1 @@
+applications.filter.operations: Rajaa toimenpiteittäin
