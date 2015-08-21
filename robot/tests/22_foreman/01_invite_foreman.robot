@@ -16,6 +16,7 @@ Mikko creates new application
 
 Mikko invites foreman to application
   Open tab  parties
+  Open accordions  parties
   Click by test id  invite-foreman-button
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
