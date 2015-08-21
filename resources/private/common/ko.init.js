@@ -415,4 +415,16 @@
       });
     }
   };
+
+  ko.bindingHandlers.titleWhenOverflow = {
+    init: function(element, valueAccessor) {
+      $(element).bind("mouseenter", function(){
+        var $this = $(this);
+        if(this.offsetWidth < this.scrollWidth) {
+          $this.attr("title", ko.utils.unwrapObservable(valueAccessor()));
+        }
+      });
+    }
+  };
+
 })(jQuery);

@@ -16,45 +16,82 @@ LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
     })
     .call();
 
-  self.groupData = ko.pureComputed(function() { // when user belongs to more than one organization
-    return _.keys(tagsData()).length > 1 ? {header: "organization", dataProperty: "tags"} : null;
+  self.data = ko.pureComputed(function() {
+    var result = [];
+    var data = tagsData();
+
+    for (var key in data) {
+      var header = {label: data[key].name[loc.currentLanguage], groupHeader: true};
+
+      var filteredData = util.filterDataByQuery(data[key].tags, self.query() || "", self.filtered());
+      // append group header and group items to result data
+      if (filteredData.length > 0) {
+        if (_.keys(data).length > 1) {
+          result = result.concat(header);
+        }
+        result = result.concat(filteredData);
+      }
+    }
+
+    return result;
   });
 
-  self.groupedFilter = ko.pureComputed(function() {
-    // first filter out those tags who are not selected
-    var filteredData = _.map(tagsData(), function(orgData) {
-      return {organization: orgData.name[loc.currentLanguage], tags: _.filter(orgData.tags, function(tag) {
-        return !_.some(self.filtered(), tag);
-      })};
-    });
-    var q = self.query() || "";
-    // then filter tags that don't match query
-    filteredData = _.map(filteredData, function(orgData) {
-      return _.assign(orgData, {tags: _.filter(orgData.tags, function(tag) {
-        return _.reduce(q.split(" "), function(result, word) {
-          return _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
-        }, true);
-      })});
-    });
-    // last filter out organization objects whose tags are empty
-    filteredData = _.filter(filteredData, function(orgData) {
-      return !_.isEmpty(orgData.tags);
-    });
-    return filteredData;
-  });
+};
 
-  function getFirstTags() { // returns tags of first organization
-    return _.isEmpty(self.groupedFilter()) ? [] : _.first(self.groupedFilter()).tags;
+LUPAPISTE.OperationsDataProvider = function(filtered) {
+  "use strict";
+  var self = this;
+
+  var operationsByPermitType = ko.observable();
+
+  self.query = ko.observable();
+
+  self.filtered = filtered || ko.observableArray([]);
+
+  ajax
+    .query("get-application-operations")
+    .error(_.noop)
+    .success(function(res) {
+      operationsByPermitType(res.operationsByPermitType);
+    })
+    .call();
+
+  function wrapInObject(operations) {
+    return _.map(operations, function(op) {
+      return {label: loc("operations." + op),
+              id: op};
+    });
   }
 
   self.data = ko.pureComputed(function() {
-    return _.keys(tagsData()).length > 1 ? self.groupedFilter() : getFirstTags();
+    var result = [];
+
+    var data = _.map(operationsByPermitType(), function(operations, permitType) {
+      return {
+        permitType: loc(permitType),
+        operations: wrapInObject(operations)
+      };
+    });
+
+
+    _.forEach(data, function(item) {
+      var header = {label: item.permitType, groupHeader: true};
+
+      var filteredData = util.filterDataByQuery(item.operations, self.query() || "", self.filtered());
+
+      // append group header and group items to result data
+      if (filteredData.length > 0) {
+        result = result.concat(header).concat(filteredData);
+      }
+    });
+
+    return result;
   });
+
 };
 
 LUPAPISTE.HandlersDataProvider = function() {
   "use strict";
-
   var self = this;
 
   self.query = ko.observable();
@@ -119,15 +156,49 @@ LUPAPISTE.AreasDataProvider = function() {
   });
 };
 
+LUPAPISTE.OrganizationsFilterDataProvider = function(savedOrgFilters) {
+  "use strict";
+
+  var self = this;
+
+  self.query = ko.observable();
+  self.savedOrgFilters = savedOrgFilters || ko.observableArray([]);
+
+  var data = ko.observable();
+  var usersOwnOrganizations = _.keys(lupapisteApp.models.currentUser.orgAuthz());
+
+  ajax
+  .query("get-organization-names")
+  .error(_.noop)
+  .success(function(res) {
+    var ownOrgsWithNames = _.map(usersOwnOrganizations, function(org) {
+      return {id: org, name: res.names[org][loc.currentLanguage]};
+    });
+    data(ownOrgsWithNames);
+  })
+  .call();
+
+  self.data = ko.pureComputed(function() {
+    var q = self.query() || "";
+    return _.filter(data(), function(item) {
+      return _.reduce(q.split(" "), function(result, word) {
+        return _.contains(item.name.toUpperCase(), word.toUpperCase())
+               && !_.some(self.savedOrgFilters(), item)
+               && result;
+      }, true);
+    });
+  });
+
+};
 
 LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
   "use strict";
-
   var self = this;
 
   self.dataProvider = params.dataProvider;
 
   self.organizationTagsDataProvider = null;
+  self.operationsDataProvider = null;
   self.handlersDataProvider = null;
   self.organizationAreasDataProvider = null;
 
@@ -138,7 +209,8 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   if ( lupapisteApp.models.currentUser.isAuthority() ) {
     self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
-    // TODO just search single organization tags for now, later do some grouping stuff in autocomplete component
+    self.operationsDataProvider = new LUPAPISTE.OperationsDataProvider(self.dataProvider.applicationOperations);
+    self.organizationsFilterDataProvider = new LUPAPISTE.OrganizationsFilterDataProvider(self.dataProvider.applicationOrganizations);
     self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(self.dataProvider.applicationTags);
     self.organizationAreasDataProvider = new LUPAPISTE.AreasDataProvider();
   }

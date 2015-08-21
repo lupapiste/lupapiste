@@ -18,6 +18,8 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   self.handler = ko.observable();
 
   self.applicationTags = ko.observableArray([]);
+  self.applicationOperations = ko.observableArray([]);
+  self.applicationOrganizations = ko.observableArray([]);
 
   self.areas = ko.observableArray([]);
 
@@ -33,20 +35,24 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   });
 
   self.onSuccess = function(res) {
-        self.data(res.data);
-        self.applications(res.data.applications);
+    self.data(res.data);
+    self.applications(res.data.applications);
   };
 
   ko.computed(function() {
     ajax.datatables("applications-search",
-               {searchText: self.searchFieldDelayed(),
-                applicationTags: _.pluck(self.applicationTags(), "id"),
-                handler: self.handler() ? self.handler().id : undefined,
-                applicationType: self.applicationType(),
-                areas: _.pluck(self.areas(), "id"),
-                limit: self.limit(),
-                sort: ko.mapping.toJS(self.sort),
-                skip: self.skip()})
+      {
+        searchText: self.searchFieldDelayed(),
+        applicationTags: _.pluck(self.applicationTags(), "id"),
+        applicationOrganizations: _.pluck(self.applicationOrganizations(), "id"),
+        applicationOperations: _.pluck(self.applicationOperations(), "id"),
+        handler: self.handler() ? self.handler().id : undefined,
+        applicationType: self.applicationType(),
+        areas: _.pluck(self.areas(), "id"),
+        limit: self.limit(),
+        sort: ko.mapping.toJS(self.sort),
+        skip: self.skip()
+      })
       .success(self.onSuccess)
       .pending(self.pending)
     .call();
@@ -55,14 +61,18 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   hub.onPageLoad("applications", function() {
     ajax.datatables("applications-search",
-               {searchText: self.searchField(),
-                applicationTags: _.pluck(self.applicationTags(), "id"),
-                handler: self.handler() ? self.handler().id : undefined,
-                applicationType: self.applicationType(),
-                areas: _.pluck(self.areas(), "id"),
-                limit: self.limit(),
-                sort: ko.mapping.toJS(self.sort),
-                skip: self.skip()})
+      {
+        searchText: self.searchField(),
+        applicationTags: _.pluck(self.applicationTags(), "id"),
+        applicationOrganizations: _.pluck(self.applicationOrganizations(), "id"),
+        applicationOperations: _.pluck(self.applicationOperations(), "id"),
+        handler: self.handler() ? self.handler().id : undefined,
+        applicationType: self.applicationType(),
+        areas: _.pluck(self.areas(), "id"),
+        limit: self.limit(),
+        sort: ko.mapping.toJS(self.sort),
+        skip: self.skip()
+      })
       .success(self.onSuccess)
     .call();
   });

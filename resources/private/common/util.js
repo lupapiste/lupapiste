@@ -209,6 +209,14 @@ var util = (function($) {
     return [strOrArr + suffix];
   }
 
+  function filterDataByQuery(data, q, selected) {
+    return _.filter(data, function(item) {
+      return _.reduce(q.split(" "), function(result, word) {
+        return !_.some(selected, item) && _.contains(item.label.toUpperCase(), word.toUpperCase()) && result;
+      }, true);
+    });
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -239,7 +247,8 @@ var util = (function($) {
     extractRequiredErrors: extractRequiredErrors,
     dissoc: dissoc,
     randomElementId: randomElementId,
-    withSuffix: withSuffix
+    withSuffix: withSuffix,
+    filterDataByQuery: filterDataByQuery
   };
 
 })(jQuery);

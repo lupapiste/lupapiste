@@ -153,3 +153,5 @@
       {:_id {$in #{"753-R"}} :areas.features.id {$in ["polygon" "multi-polygon"]}} [:areas]) => [{:id "753-R"
                                                                                                  :areas {:type "FeatureCollection"
                                                                                                          :features [multi-feature polygon-feature]}}]))
+(fact "Organization are present in query"
+  (-> (make-query {} {:applicationOrganizations ["753-R" "753-YA"]} {}) (get "$and") last :organization) => {"$in" ["753-R" "753-YA"]})

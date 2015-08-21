@@ -160,8 +160,7 @@
 (defcommand remove-organization-link
   {:description "Removes organization link."
    :parameters [url nameFi nameSv]
-   :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))

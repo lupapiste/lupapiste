@@ -13,6 +13,7 @@ Mikko creates a new application
 
 Mikko can see the general invite button and opens invite dialog with it
   Open tab  parties
+  Open accordions  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-person']
   Click by test id  application-invite-person
   Wait until  Element should be visible  invite-email
@@ -56,6 +57,7 @@ Mikko reinvites Teppo
   Mikko logs in
   Open application  invite-app  753-423-2-159
   Open tab  parties
+  Open accordions  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
   Invite Teppo
   [Teardown]  logout
@@ -77,6 +79,7 @@ Teppo accepts invitation
 
 Teppo can edit Mikko's application
   Open application  invite-app  753-423-2-159
+  Open accordions  info
   # OnChange event does not seem to get triggered. Do it manually.
   Execute Javascript  $("input[id$='kiinteisto-maaraalaTunnus']").val("1024").change();
   Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
@@ -89,6 +92,7 @@ Mikko comes back and can see Teppos modification
 
 Mikko can see that Teppo has accepted invitation
   Open tab  parties
+  Open accordions  parties
   # Check that invite accepted timestamp span is present
   Element should be visible  xpath=//*[@data-test-id='invite-accepted-span']
 
@@ -145,6 +149,7 @@ Mikko invites previously unknown user Oskari as paasuunnittelija
   Mikko logs in
   Open application  invite-app  753-423-2-159
   Open tab  parties
+  Open accordions  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
@@ -166,6 +171,7 @@ Mikko creates a new tyonjohtaja application
 
 Mikko can see invite tyonjohtaja button in parties tab
   Open tab  parties
+  Open accordions  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-tyonjohtaja']
 
 Mikko invites previously unknown user Unto as tyonjohtaja

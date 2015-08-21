@@ -41,7 +41,7 @@
 (defcommand set-tos-function-for-application
   {:parameters [:id functionCode]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled])}
+   :states     states/all-but-draft-or-terminal}
   [{:keys [application created] :as command}]
   (let [orgId (:organization application)
         code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]
@@ -58,7 +58,8 @@
 (def schema-to-input-type-map
   {s/Str   "text"
    tms/NonEmptyStr "text"
-   tms/Vuodet "number"})
+   tms/Vuodet "number"
+   s/Bool "checkbox"})
 
 (defn metadata-schema-for-ui [field]
   (cond-> field
@@ -72,9 +73,13 @@
     (:schema field) (-> (assoc :inputType (get schema-to-input-type-map (:schema field)))
                         (dissoc :schema))))
 
+(def editable-metadata-fields
+  (->> (remove #(= tms/Tila %) tms/asiakirja-metadata-fields)
+       (concat tms/common-metadata-fields)))
+
 (defquery tos-metadata-schema
   {:user-roles #{:anonymous}}
-  (ok :schema (map metadata-schema-for-ui tms/common-metadata-fields)))
+  (ok :schema (map metadata-schema-for-ui editable-metadata-fields)))
 
 (defn get-in-metadata-map [map ks]
   (let [k (first ks)
@@ -101,15 +106,14 @@
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled])}
+   :states     states/all-but-draft-or-terminal}
   [{:keys [application created] :as command}]
   (when (env/feature? :tiedonohjaus)
     (try
       (if-let [attachment (first (filter #(= (:id %) attachmentId) (:attachments application)))]
         (let [metadata (->> (keywordize-keys-and-some-values metadata [])
-                            (tms/sanitize-metadata)
-                            (#(assoc % :tila (get-in attachment [:metadata :tila])))
-                            (s/validate tms/AsiakirjaMetaDataMap))
+                            (#(assoc % :tila (or (get-in attachment [:metadata :tila]) "Valmis")))
+                            (tms/sanitize-metadata))
               updated-attachment (assoc attachment :metadata metadata)
               updated-attachments (-> (remove #(= % attachment) (:attachments application))
                                       (conj updated-attachment))]
@@ -123,14 +127,13 @@
 (defcommand store-tos-metadata-for-application
   {:parameters [:id metadata]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled])}
+   :states     states/all-but-draft-or-terminal}
   [{:keys [application created] :as command}]
   (when (env/feature? :tiedonohjaus)
     (try
       (let [metadata (->> (keywordize-keys-and-some-values metadata [])
-                          (tms/sanitize-metadata)
-                          (#(assoc % :tila (get-in application [:metadata :tila])))
-                          (s/validate tms/AsiakirjaMetaDataMap))]
+                          (#(assoc % :tila (or (get-in application [:metadata :tila]) "Valmis")))
+                          (tms/sanitize-metadata))]
         (action/update-application command {$set {:modified created
                                                   :metadata metadata}}))
       (catch RuntimeException e

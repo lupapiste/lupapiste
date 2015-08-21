@@ -2,7 +2,7 @@
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
-Library        Selenium2Library   timeout=10
+Library        Selenium2Library   timeout=10  run_on_failure=Nothing
 
 *** Variables ***
 
@@ -146,6 +146,12 @@ Close side panel
   Run keyword If  ${sidePanelOpen}  Click by id  open-${name}-side-panel
   Side panel should not be visible  ${name}
 
+Open accordions
+  [Arguments]  ${tab}
+  Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'sticky')]
+  Execute Javascript  $("div[id=application-${tab}-tab] button.sticky.toggled").click();
+  Execute Javascript  $("div[id=application-${tab}-tab] button.sticky").click();
+  Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'toggled')]
 
 #
 # Login stuff
@@ -306,8 +312,8 @@ Select From Autocomplete
   Wait until  Element should be visible  xpath=//${container}//span[@class='autocomplete-selection']
   Click Element  xpath=//${container}//span[@class='autocomplete-selection']
   Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
-  Wait until  Element should be visible  xpath=//${container}//ul[@class="autocomplete-result"]//li/span[contains(text(), '${value}')]
-  Click Element  xpath=//${container}//ul[@class="autocomplete-result"]//li/span[contains(text(), '${value}')]
+  Wait until  Element should be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
+  Click Element  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
   Wait for jQuery
 
 Click by id
