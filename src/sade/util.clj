@@ -146,9 +146,9 @@
         (or
           (contains-value? (first values) checker)
           (contains-value? (rest values) checker))))
-    (if checker
+    (if (fn? checker)
       (checker coll)
-      false)))
+      (= coll checker))))
 
 (defn ->int
   "Reads a integer from input. Returns default if not an integer.

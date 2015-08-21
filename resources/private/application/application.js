@@ -73,21 +73,21 @@
     lupapisteApp.setTitle(newTitle || util.getIn(applicationModel, ["_js", "title"]));
   }
 
-  function updatePermitSubtype(value){
-    if (isInitializing) { return; }
+  function updatePermitSubtype(value) {
+    if (isInitializing || !authorizationModel.ok("change-permit-sub-type")) { return; }
 
     var element = $("#permitSubtypeSaveIndicator");
     element.stop().hide();
 
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
-    .success(function() {
-      authorizationModel.refresh(currentId);
-      element.stop().show();
-      setTimeout(function() {
-        element.fadeOut("slow");
-      }, 2000);
-    })
-    .call();
+      .success(function() {
+        authorizationModel.refresh(currentId);
+        element.stop().show();
+        setTimeout(function() {
+          element.fadeOut("slow");
+        }, 2000);
+      })
+      .call();
   }
 
   function updateTosFunction(value) {
@@ -104,7 +104,8 @@
     }
   }
 
-  applicationModel.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
+  applicationModel.permitSubtype.subscribe(function(v) { updatePermitSubtype(v); });
+
   applicationModel.tosFunction.subscribe(updateTosFunction);
 
   function initAuthoritiesSelectList(data) {
@@ -187,9 +188,20 @@
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
 
       var devMode = LUPAPISTE.config.mode === "dev";
-      docgen.displayDocuments("#applicationDocgen", app, applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
-      docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
-      docgen.displayDocuments("#applicationAndPartiesDocgen", app, applicationModel.summaryAvailable() ? sortedNonpartyDocs : [], authorizationModel, {dataTestSpecifiers: false, accordionCollapsed: true});
+      docgen.displayDocuments("#applicationDocgen",
+                              app,
+                              applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
+                              authorizationModel,
+                              {dataTestSpecifiers: devMode, accordionCollapsed: true});
+      docgen.displayDocuments("#partiesDocgen",
+                              app,
+                              sortedPartyDocs,
+                              authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: true});
+      docgen.displayDocuments("#applicationAndPartiesDocgen",
+                              app,
+                              applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
+                              authorizationModel,
+                              {dataTestSpecifiers: false, accordionCollapsed: true});
 
       // Indicators
       function sumDocIndicators(sum, doc) {

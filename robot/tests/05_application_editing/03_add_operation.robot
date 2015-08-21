@@ -39,20 +39,21 @@ Add another operation
   Click enabled by test id  add-operation-to-application
 
 Application contains three operations
+  Open accordions  info
   Wait Until  Element should Contain  xpath=//span[@data-test-id="test-application-primary-operation"]  Asuinkerrostalon tai rivitalon rakentaminen
   Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
   Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Vapaa-ajan asunnon tai saunarakennuksen rakentaminen
 
 Primary operation can be changed
-  Wait Until  Element Should Be Visible  xpath=//span[@data-op-name="kerrostalo-rivitalo" and @class="icon star-selected"]
-  Wait Until  Element Should Be Visible  xpath=//span[@data-op-name="muu-uusi-rakentaminen" and @class="icon star-unselected"]
-  Wait Until  Element Should Be Visible  xpath=//span[@data-op-name="vapaa-ajan-asuinrakennus" and @class="icon star-unselected"]
+  Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="kerrostalo-rivitalo"]/i[@class="lupicon-star"]
+  Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="muu-uusi-rakentaminen"]/i[@class="lupicon-star"]
+  Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="vapaa-ajan-asuinrakennus"]/i[@class="lupicon-star"]
 
-  Click Element  xpath=//span[@data-op-name="muu-uusi-rakentaminen" and @class="icon star-unselected"]
+  Click Element  //button[@data-op-name="muu-uusi-rakentaminen"]
 
-  Wait Until  Element Should Be Visible  xpath=//span[@data-op-name="kerrostalo-rivitalo" and @class="icon star-unselected"]
-  Wait Until  Element Should Be Visible  xpath=//span[@data-op-name="muu-uusi-rakentaminen" and @class="icon star-selected"]
-  Wait Until  Element Should Be Visible  xpath=//span[@data-op-name="vapaa-ajan-asuinrakennus" and @class="icon star-unselected"]
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-op-name="kerrostalo-rivitalo"]
+  Wait Until  Element Should Be Disabled  xpath=//button[@data-op-name="muu-uusi-rakentaminen"]
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-op-name="vapaa-ajan-asuinrakennus"]
 
   Wait Until  Element should Contain  xpath=//span[@data-test-id="test-application-primary-operation"]  Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
   Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Asuinkerrostalon tai rivitalon rakentaminen

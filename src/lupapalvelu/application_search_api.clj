@@ -19,7 +19,7 @@
               user
               (select-keys
                 data
-                [:applicationTags :applicationType :handler :limit :searchText :skip :sort :applicationOperations]))))
+                [:applicationTags :applicationOrganizations :applicationType :handler :limit :searchText :skip :sort :applicationOperations]))))
 
 (defn- selected-ops-by-permit-type [selected-ops]
   (->> operations/operations
@@ -87,4 +87,5 @@
                (query/sort {:submitted -1})
                (query/limit limit))]
     (ok :applications (->> apps
+                           (filter :primaryOperation)
                            (map search/public-fields)))))

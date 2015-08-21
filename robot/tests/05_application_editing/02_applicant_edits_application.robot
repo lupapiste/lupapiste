@@ -16,7 +16,9 @@ Mikko opens an application
 
 # Testing the case that was fixed with hotfix/repeating-element-saving
 # and later regression LUPA-1784
+# Note: The test browser must be active or the case will fail.
 Mikko adds three owners to the Uusirakennus document, and all owners are visible after page refresh
+  Open accordions  info
   Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  1
   Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
   Wait Until  Element Should Be Visible  //button[@id="rakennuksenOmistajat_append"]
@@ -31,6 +33,7 @@ Mikko adds three owners to the Uusirakennus document, and all owners are visible
   Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi']  ISO3
   Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  4
   Reload Page
+  Open accordions  info
   Wait Until  Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  4
   Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
   Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO1
@@ -51,14 +54,16 @@ Huoneistot info for Uusirakennus is correct
   Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  0
   Huoneisto row items disabled except muutostapa
   Reload Page
+  Wait Until  Element should be visible  //div[@id="application-info-tab"]
+  Open accordions  info
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
   Xpath Should Match X Times  //div[@id='application-info-tab']//tr[@data-repeating-id="huoneistot"]  2
   Huoneisto row items disabled except muutostapa
 
 Mikko removes apartment
-  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//span[@data-test-class="delete-schemas.huoneistot"]
+  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//i[@data-test-class="delete-schemas.huoneistot"]
   Wait Until  Element Should Be Visible  xpath=//tr[@data-repeating-id-huoneistot='0']
-  Execute Javascript  $("tr[data-repeating-id-huoneistot='0']").find("span[data-test-class='delete-schemas.huoneistot']").click();
+  Execute Javascript  $("tr[data-repeating-id-huoneistot='0']").find("i[data-test-class='delete-schemas.huoneistot']").click();
   Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element Should Not Be Visible  xpath=//tr[@data-repeating-id-huoneistot='0']
   Xpath Should Match X Times  //div[@id='application-info-tab']//tr[@data-repeating-id="huoneistot"]  1
@@ -78,6 +83,7 @@ On the second thought, set material to 'puu':
 
 Mikko goes to parties tab of an application
   Open tab  parties
+  Open accordions  parties
 
 Mikko unsubscribes notifications
   Xpath Should Match X Times  //div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']  1
@@ -94,8 +100,8 @@ Mikko subscribes notifications
 Mikko decides to delete maksaja
   Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
-  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//span[@data-test-class='delete-schemas.maksaja']
-  Execute Javascript  $("span[data-test-class='delete-schemas.maksaja']").click();
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
+  Execute Javascript  $("button[data-test-class='delete-schemas.maksaja']").click();
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  0
 
@@ -106,7 +112,8 @@ Mikko adds party maksaja using dialog
   List Selection Should Be  xpath=//select[@data-test-id="select-party-document"]  maksaja
   Click enabled by test id  add-party-button
   Wait Until  Element Should Not Be Visible  dialog-add-party
-  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//span[@data-test-class='delete-schemas.maksaja']
+  Open accordions  parties
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
 
 Mikko adds party hakija-r using button

@@ -146,6 +146,12 @@ Close side panel
   Run keyword If  ${sidePanelOpen}  Click by id  open-${name}-side-panel
   Side panel should not be visible  ${name}
 
+Open accordions
+  [Arguments]  ${tab}
+  Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'sticky')]
+  Execute Javascript  $("div[id=application-${tab}-tab] button.sticky.toggled").click();
+  Execute Javascript  $("div[id=application-${tab}-tab] button.sticky").click();
+  Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'toggled')]
 
 #
 # Login stuff

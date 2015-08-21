@@ -19,6 +19,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.applicationTags = ko.observableArray([]);
   self.applicationOperations = ko.observableArray([]);
+  self.applicationOrganizations = ko.observableArray([]);
 
   self.limit = ko.observable(25);
 

@@ -292,17 +292,22 @@ button.btn-dialog, .btn-dialog {
 // New buttons
 
 $btn-spacer: 12px;
+$btn-height: 40px;
 $icon-pad: 10px;
 
+@mixin btn-height( $height: $btn-height ) {
+  min-height: $height;
+  max-height: $height;
+  line-height: $height;
+}
+
 [type=submit], .btn, button {
+  @include btn-height;
   border: none;
-  min-height: 40px;
-  max-height: 40px;
   box-sizing: border-box;
   display: inline-block;
   vertical-align: middle;
   font-size: $font-size;  // _typography.scss
-  line-height: 40px;
   white-space: nowrap;
   text-align: left;
   text-decoration: none;
@@ -334,20 +339,11 @@ $icon-pad: 10px;
     right: 0px !important;
     }
   }
-  /* :nth-child(2) { */
-  /*   // Gap between icon and text. */
-  /*   padding: { */
-  /*     left: $icon-pad; */
-  /*   } */
-  /* } */
-  /* // precaution for the cases where the */
-  /* // second child is actually a wait icon. */
-  /* :nth-child(3) { */
-  /*   padding: { */
-  /*     left: $icon-pad; */
-  /*   } */
-  /* } */
 }
+
+
+
+
 
 // Layout like button, but semantically is not.
 // This is useful when displaying text with icons,
@@ -591,6 +587,28 @@ i.wait {
 span + .waiting.wait {
   padding-right: $icon-pad;
 }
+
+// Toggle support
+// Very similar to waiting.
+
+i.toggle {
+  display: none;
+  padding: 0 !important;
+}
+
+.toggled {
+  i {
+    display: none;
+  }
+  i.toggle {
+    display: table-cell
+  }
+}
+
+.toggled .toggle + span {
+  padding-left: $icon-pad;
+}
+
 
 
 // DataTable tweaks.
