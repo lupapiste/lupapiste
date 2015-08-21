@@ -1879,13 +1879,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     var descriptionInput = $("<input>").prop( "type", "text").val( operation.description );
-    var bubble = $("<div>").addClass( "description-bubble" ).attr( descId, "1");
+    var bubble = $("<div>").addClass( "description-bubble is-closed" ).attr( descId, "1");
     bubble.append( descriptionInput );
     var descOpts = {
         fun: function() {
-          bubble.toggle();
+          bubble.toggleClass( "is-closed");
           descriptionInput.focus();
-
         },
         bubble: bubble
     }
@@ -1912,7 +1911,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         })
         .call();
 
-      bubble.hide();
+      bubble.addClass( "is-closed");
       updateBarDescription( value );
     }, 250);
 
@@ -1934,6 +1933,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var op = self.schema.info.op;
 
     var section = document.createElement("section");
+    var sticky = $("<div>").addClass( "sticky accordion-toggle");
     var iconUp = document.createElement("i");
     var iconDown = document.createElement("i");
     var toggle = document.createElement("button");
@@ -1947,7 +1947,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var accordionCollapsed = (options && options.accordionCollapsed) ? true : false;
 
-    section.className = "accordion";
+    section.className = "accordion is-status";
     section.setAttribute("data-doc-type", self.schemaName);
     elements.className = "accordion-fields";
 
@@ -1955,7 +1955,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     iconDown.className = "lupicon-chevron-down";
     toggle.appendChild( iconDown );
     toggle.appendChild( iconUp );
-    toggle.className = "sticky secondary accordion-toggle is-status";
+    toggle.className = "secondary ";
     var descId = _.uniqueId( "data-desc-");
     var barDesc = $("<span>").addClass( "description").attr( descId, "1")
     if( op && _.size(  op.description ) ) {
@@ -1971,6 +1971,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.className = "title";
     $(toggle).attr( "data-accordion-id", (op && op.id) || self.schema.info.name );
     $(toggle).click(accordion.click);
+    sticky.append( $(toggle));
     var docId = util.getIn(self, ["schema", "info", "op", "id"]);
     var notPrimaryOperation = (!docId || docId !== util.getIn(self.application, ["primaryOperation", "id"]));
 
@@ -2020,14 +2021,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if( authorizationModel.ok("update-op-description") ) {
         opts.description = descriptionSupport( op, descId, barDesc );
       }
-      //elements.appendChild(buildDescriptionElement(op));
     } else {
       title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
 
-    $(elements).append(self.makeGroupButtons([], self.model, opts));
+    sticky.append(self.makeGroupButtons([], self.model, opts));
     if( opts.description ) {
-      $(elements).append( opts.description.bubble );
+      sticky.append( opts.description.bubble );
     }
 
     sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
@@ -2040,7 +2040,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     appendElements(elements, self.schema, self.model, []);
 
     sectionContainer.appendChild(elements);
-    section.appendChild(toggle);
+    $(section).append(sticky);
     section.appendChild(sectionContainer);
     self.statusOrder.setOrdered();
     accordion.reset( $(toggle) );

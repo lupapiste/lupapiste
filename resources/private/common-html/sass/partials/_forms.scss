@@ -575,7 +575,8 @@ input.form-input.long {
 .group-buttons {
   width: 100%;
   display: block;
-  overflow-y: hidden;
+
+  //overflow-y: hidden;
   text-transform: none;
   .is-right {
     float: right;
@@ -652,7 +653,7 @@ section.approved .group-buttons  {
     }
 }
 
-.is-status > .like-btn {
+.is-status .like-btn {
   @include btn-height;
   min-width: 500px;
   span {
@@ -671,7 +672,7 @@ section.approved .group-buttons  {
 
 // Top-level reject button should be invisible
 // when the bar is in rejected mode.
-button.sticky.rejected ~ .accordion_content .is-top.rejected {
+div.sticky.rejected ~ .accordion_content .is-top.rejected {
   display: none;
 }
 
@@ -680,8 +681,11 @@ button.sticky.rejected ~ .accordion_content .is-top.rejected {
 }
 
 .description-bubble {
-  display: none;
+  //display: none;
+  display: block;
+  //overflow-y: visible;
   position: relative;
+  box-sizing: border-box;
   background-color: white;
   width: 100%;
   border-radius: 2px;
@@ -725,6 +729,9 @@ button.sticky.rejected ~ .accordion_content .is-top.rejected {
   }
 }
 
+.description-bubble.is-closed {
+  display: none;
+}
 
 .form-help {
   min-height: 100px;

@@ -6,33 +6,38 @@
   margin-bottom: $marginS;
   @include box-sizing(border-box);
 
-  button.sticky {
+  div.sticky {
     width: 100%;
+    overflow: visible;
+    background-color: $gray246;
+    border: 1px solid $gray221;
+
     span.bar-text {
       width: 100%;
       text-transform: uppercase;
     }
     span.description {
       padding-right: $icon-pad;
+      text-transform: none;
     }
     span.icons {
       min-width: $lupicon-size;
-    }
-    .approved, .rejected {
-      display: none;
-    }
-    .rejected {
-      // Buttons are not used to having complex
-      // contents.
-      padding-right: 0;
+      .approved, .rejected {
+        display: none;
+      }
+      .rejected {
+        // Buttons are not used to having complex
+        // contents.
+        padding-right: 0;
+      }
     }
   }
 
-  button.sticky.approved > .icons > .approved {
+  button.approved > span.icons > i.approved {
     display: table-cell;
   }
 
-  button.sticky.rejected > .icons >  .rejected {
+  button.rejected > span.icons >  i.rejected {
     display: table-cell;
   }
 
@@ -204,8 +209,8 @@
   }
 }
 
-.open-all-accordions {
-  width: 100%;
-  text-align: right;
-  margin-bottom: 6px;
-}
+/* .open-all-accordions { */
+/*   width: 100%; */
+/*   text-align: right; */
+/*   margin-bottom: 6px; */
+/* } */
