@@ -970,16 +970,13 @@
     ya-operations
     yl-operations))
 
+;; Validate operations
+(doseq [[k op] operations]
+  (let [v (sc/check Operation op)]
+    (assert (nil? v) (str k v))))
 ;;
 ;; Functions
 ;;
-
-(doseq [[k op] operations]
-  (let [v (sc/check Operation op)]
-    (assert (nil? v) (str k v))
-    )
-
-  )
 
 (def link-permit-required-operations
   (reduce (fn [result [operation metadata]]
