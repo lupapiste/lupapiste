@@ -18,7 +18,7 @@ LUPAPISTE.ApplicationTagsDataProvider = function(application, filtered) {
     var q = self.query() || "";
     filteredData = _.filter(filteredData, function(tag) {
       return _.reduce(q.split(" "), function(result, word) {
-        return _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
+        return tag.label && _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
     return filteredData;
@@ -70,9 +70,6 @@ LUPAPISTE.NoticeModel = function() {
           authorityNotice: value})
         .success(function() {
           self.indicator({name: "notice", type: "saved"});
-        })
-        .error(function() {
-          self.indicator({name: "urgency", type: "err"});
         })
         .call();
     }, 500)));

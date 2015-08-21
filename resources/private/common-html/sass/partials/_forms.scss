@@ -554,7 +554,7 @@ input.form-input.long {
   }
 
   .button-group {
-    .btn {
+    .btn, button {
       margin-right: 10px
     }
   }
@@ -572,10 +572,35 @@ input.form-input.long {
 
 }
 
-.form-approval-status {
-  text-transform: none;
+.group-buttons {
   width: 100%;
   display: block;
+  overflow-y: hidden;
+  text-transform: none;
+  .is-right {
+    float: right;
+    margin-left: $marginS;
+  }
+  .is-left {
+    float: left;
+    margin-right: $marginS;
+  }
+  padding-right: $marginS;
+  margin: {
+    top: $marginS;
+    bottom: $marginS;
+
+  }
+}
+
+.button-group button.is-right {
+  margin-right: 0;
+}
+
+.form-approval-status {
+  text-transform: none;
+  //width: 100%;
+  display: inline-block;
   min-height: 32px;
 
   &.empty {
@@ -584,15 +609,122 @@ input.form-input.long {
   }
 
   .form-buttons {
-    display:inline-block;
+    //display:inline-block;
     text-align: right;
     float: right;
-    .btn {
-      margin: 0 $marginS $marginS 0;
+    min-width: 200px;
+  }
+  i.approved, i.rejected  {
+    display: none;
+  }
+  &.approved {
+    i.approved {
+      display: table-cell;
     }
   }
-
+  &.rejected {
+    i.rejected {
+      display: table-cell;
+    }
+  }
 }
+
+.form-approval-status.approved ~ button.approved {
+  display: none;
+}
+
+.form-approval-status.rejected ~ button.rejected {
+  display: none;
+}
+
+section.approved .group-buttons  {
+    button.approved {
+      display: none;
+    }
+    i.rejected {
+      display: none;
+    }
+    i.approved {
+      display: table-cell;
+    }
+    button.rejected {
+      display: table-cell;
+    }
+}
+
+.is-status > .like-btn {
+  @include btn-height;
+  min-width: 500px;
+  span {
+    color: $gray187;
+  }
+  .lupicon-circle-attention {
+    color: $red;
+  }
+  .lupicon-circle-check {
+    color: $green;
+  }
+  .approved {
+    padding-right: $icon-pad;
+  }
+}
+
+// Top-level reject button should be invisible
+// when the bar is in rejected mode.
+button.sticky.rejected ~ .accordion_content .is-top.rejected {
+  display: none;
+}
+
+.is-middle {
+  vertical-align: middle;
+}
+
+.description-bubble {
+  display: none;
+  position: relative;
+  background-color: white;
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid $orange-light;
+  padding: $marginS $marginS $marginS $marginS;
+  margin-top: 15px;
+  &:after, &:before {
+             bottom: 100%;
+             left: 5%;
+             border: solid transparent;
+             content: " ";
+             height: 0;
+             width: 0;
+             position: absolute;
+             pointer-events: none;
+           }
+
+  &:after {
+    border-color: rgba(255, 255, 255, 0);
+    border-bottom-color: #fff;
+    border-width: 10px;
+    margin-left: -10px;
+  }
+  &:before {
+    border-color: transparentize( $orange-light, 1 );
+    border-bottom-color: $orange-light;
+    border-width: 11px;
+    margin-left: -11px;
+  }
+  input {
+    box-sizing: border-box;
+    border: none;
+    font-size: 16px;
+    width: 100%;
+    box-shadow: none;
+    color: $gray51;
+    &:focus {
+      border: none;
+      box-shadow: none;
+    }
+  }
+}
+
 
 .form-help {
   min-height: 100px;
@@ -662,30 +794,6 @@ input.form-input.long {
   }
 }
 
-.approval-approved {
-  &:after {
-    content: " ";
-    @include spite-bg;
-    width: 16px;
-    height: 16px;
-    background-position: 0px -2500px;
-    display: inline-block;
-    margin-left: $marginS;
-    vertical-align: text-bottom;
-  }
-}
-.approval-rejected {
-  &:after {
-    content: " ";
-    @include spite-bg;
-    width: 16px;
-    height: 16px;
-    background-position: 0px -2400px;
-    display: inline-block;
-    margin-left: $marginS;
-    vertical-align: text-bottom;
-  }
-}
 
 
 #neighbor-show {

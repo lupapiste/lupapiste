@@ -146,9 +146,9 @@
         (or
           (contains-value? (first values) checker)
           (contains-value? (rest values) checker))))
-    (if checker
+    (if (fn? checker)
       (checker coll)
-      false)))
+      (= coll checker))))
 
 (defn ->int
   "Reads a integer from input. Returns default if not an integer.
@@ -390,7 +390,7 @@
 
 (defn version-is-greater-or-equal
   "True if given version string is greater than version defined in target map, else nil"
-  [source target]
+  [^String source, ^clojure.lang.IPersistentMap target]
   {:pre [(map? target) (every? #(target %) [:major :minor :micro]) (string? source)]}
   (let [[source-major source-minor source-micro] (map #(->int %) (ss/split source #"\."))
         source-major (or source-major 0)

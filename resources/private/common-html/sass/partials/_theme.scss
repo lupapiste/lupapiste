@@ -82,3 +82,14 @@ $gray221: make-gray( 221 );
 $gray238: make-gray( 238 );
 $gray246: make-gray( 246 );
 $gray255: make-gray( 255 );
+
+$gray-link:   $gray85;
+$gray-hover:  $gray119;
+$gray-active: $gray153;
+
+// Somewhat semantic colors.
+// These are used in "normal" circumstances.
+
+$primary:   $orange-dark;
+$positive:  $green-dark;
+$negative:  $red-dark;

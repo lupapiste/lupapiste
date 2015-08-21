@@ -1,14 +1,64 @@
 /* application section styles*/
 
+// Map dimensions are hard-coded in application.html?
+$map-width:  320px;
+$map-height: 200px;
+$side-panel-width: 60px;
+
 /*Summary styles*/
 .application_summary {
   background-color: $lp-dark-grey;
   min-height: 320px + $marginM;
   padding: $marginS 0 0 0;
   position:  relative;
-  z-index: 5;
+  //z-index: 5;
   display: block;
   float: none;
+  // Since flexbox is not supported widely enough,
+  // we make the div ordering with absolute positioning.
+  // Preamble is not used in neighbors' view (no actions).
+  .preamble {
+    position: relative;
+    /* float: left; */
+    //width: 100%;
+    padding: {
+      left: $map-width;
+      right: 24%;
+    }
+    margin-right: $side-panel-width + 1px;
+    .application-map-container, .application_actions {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+    }
+    .application-map-container {
+      left: 0;
+      width: $map-width;
+    }
+    .application_actions {
+      right: 0;
+      width: 24%;
+    }
+    @media (max-width: $narrow-breakpoint) {
+      padding: 0;
+      .application-map-container, .application_actions {
+        position: relative;
+        width: auto;
+        float: left;
+      }
+      .application-map-container {
+        float: left;
+        margin: {
+          left: $marginL; // Align with summary info.
+          bottom: $marginM; // Especially needed when no tabs.
+        }
+      }
+      .application_actions {
+        float: right;
+        margin-right: $marginL; // Align with summary info.
+      }
+    }
+  }
   li {
    display: inline;
   }
@@ -18,10 +68,10 @@
     line-height: 24px;
     margin-bottom: $marginS;
   }
-  button {
-    margin: 0;
-    margin-bottom: $marginS;
-  }
+  /* button { */
+  /*   margin: 0; */
+  /*   margin-bottom: $marginS; */
+  /* } */
 
   .application-map-container {
     position: relative;
@@ -34,6 +84,7 @@
       z-index: 1000;
       left: 0;
       top: 256px;
+      //bottom: 0;
       text-align: center;
       display:block;
       background: $lp-green;
@@ -45,14 +96,14 @@
     }
   }
 
-  .application_summary_info{
+  .application_summary_info {
     margin: 0 $marginL $marginL $marginL;
-    float: left;
-    width: 50%;
+    //float: left;
+    //width: 50%;
     h1 {
       width: 100%;
       .address {
-        white-space: nowrap;
+        //white-space: nowrap;
       }
       a {
         padding-left: 32px;
@@ -122,12 +173,10 @@
       overflow: hidden;
       white-space: nowrap;
       height: 32px;
-      @mixin past-state {
-          background-color: white;
-          color: darken($lp-light-grey, 60%);
-          &:after {
-            border-left: 11px solid white;
-          }
+      @mixin past-state{
+        // The passed states are hidden in order to
+        // make sure that the future steps are all visible.
+        display: none;
       }
       @mixin active-state {
         color: white;
@@ -259,11 +308,11 @@
   }
 
   .application_actions {
-    background-color: $lp-dark-grey;
+    //background-color: $lp-dark-grey;
     position: absolute;
     right: 0;
     top: $marginM;
-    width: $cols3;
+    //width: $cols3;
     .muncipality-info {
       background: darken($lp-light-grey, 15%);
       width: 100%;
@@ -288,33 +337,63 @@
        color: rgb(242,242,242);
       }
     }
-    button {
-      width: 100%;
-    }
+    /* button { */
+    /*   width: 100%; */
+    /* } */
   }
 }
 
-.attachment-legend {
-  position: relative;
-  span {
-    height: 20px;
+/* .attachment-legend { */
+/*   position: relative; */
+/*   span { */
+/*     height: 20px; */
+/*   } */
+/*   span + span { */
+/*       position: absolute; */
+/*       top:-3px; */
+/*       left: 30px; */
+/*   } */
+/* } */
+
+@mixin icon-colorizer( $id ) {
+  ##{$id} {
+  i.lupicon-circle-check,
+  i.lupicon-circle-pen,
+  i.lupicon-circle-arrow-up,
+  i.lupicon-circle-stamp,
+  i.lupicon-circle-section-sign {
+    color: $positive;
   }
-  span + span {
-      position: absolute;
-      top:-3px;
-      left: 30px;
+  i.lupicon-circle-star {
+    color: $primary;
   }
+  i.lupicon-circle-attention {
+    color: $negative
+  }
+}
 }
 
-.task-legend {
-  span {
-    display: inline-block;
+@include icon-colorizer( application-attachments-tab );
+@include icon-colorizer( application-tasks-tab );
+
+#application-tasks-tab {
+  .stacked.legends {
+    margin-bottom: $marginM;
+    margin-left: $marginM;
   }
-  span + span {
-      margin-top: 9px;
-      vertical-align: top;
+  table {
+    margin-bottom: $marginS;
   }
 }
+/* .task-legend { */
+/*   span { */
+/*     display: inline-block; */
+/*   } */
+/*   span + span { */
+/*       margin-top: 9px; */
+/*       vertical-align: top; */
+/*   } */
+/* } */
 
 .ajax-loading-mask {
   display: none;
@@ -342,9 +421,9 @@
   margin-top: $baseline;
   .process-next {
     float: right;
-    span {
-      margin-right: -$marginS;
-    }
+    /* span { */
+    /*   margin-right: -$marginS; */
+    /* } */
   }
   .process-previous {
   }
@@ -633,24 +712,27 @@
 }
 
 .requiredField-line {
-  margin-bottom: $marginS;
-  vertical-align: top;
+  /* margin-bottom: $marginS; */
+  /* vertical-align: top; */
   display: table-row;
-  padding: $marginS;
-  height: 24px;
+  /* padding: $marginS; */
+  /* height: 24px; */
   span, a {
-    vertical-align: top;
-    line-height: 14px;
-    max-height: 16px;
+  /*   vertical-align: top; */
+  /*   line-height: 14px; */
+  /*   max-height: 16px; */
     display: table-cell;
   }
   a {
     padding-left: $marginM;
-    font-size: 14px;
+//    font-size: 14px;
 
   }
   .required-field-error-element-name {
     padding-left: $marginS;
+  }
+  .lupicon-circle-attention {
+    color: $red;
   }
 }
 
@@ -751,4 +833,12 @@
 }
 
 
+// Can be removed when the buttons are removed
+// from H2 bar.
+h2.sticky {
+  margin-bottom: $marginM;
+}
 
+h2 > i.is-right {
+  float: right;
+}

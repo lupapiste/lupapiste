@@ -16,6 +16,7 @@ Mikko creates an application
 
 Mikko sets himself the applicant
   Open tab  parties
+  Open accordions  parties
   Select From List  //section[@data-doc-type="hakija-r"]//select[@name="henkilo.userId"]  Intonen Mikko
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
 
@@ -39,6 +40,8 @@ Sonja logs in for approval
   Open application  ${appname}  753-416-25-30
 
 Sonja rejects hankkeen-kuvaus
+  Wait Until  Element should be visible  //div[@id="application-info-tab"]
+  Open accordions  info
   Wait Until  Element should be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
   Wait Until  Element should be visible  xpath=//button[@data-test-id='approve-doc-hankkeen-kuvaus']
   Click enabled by test id  reject-doc-hankkeen-kuvaus
@@ -67,7 +70,7 @@ Party tab indicators have been reset
 
 Sonja sees that attachment has transferred indicator icon
   Open tab  attachments
-  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="transfered-muut.muu"]
+  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="transfered-muut.muu"]
 
 Sonja sees that some completion is needed
   Click enabled by test id  request-for-complement
@@ -77,5 +80,6 @@ Sonja sees that some completion is needed
 Mikko comes back, fills in missing parts and no submit button enabled
   Mikko logs in
   Open application  ${appname}  753-416-25-30
+  Open accordions  info
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
   [Teardown]  logout

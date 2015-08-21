@@ -16,6 +16,7 @@ Mikko creates new application
 
 Mikko invites foreman to application
   Open tab  parties
+  Open accordions  parties
   Click by test id  invite-foreman-button
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
@@ -90,7 +91,7 @@ Original application is approved and given a verdict
 Add työnjohtaja task to original application
   Add työnjohtaja task to current application  Ylitarkastaja
   Add työnjohtaja task to current application  Alitarkastaja
-  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  2
+  Wait until  Xpath Should Match X Times  //div[@data-test-id="tasks-foreman"]//tbody/tr  2
   [Teardown]  logout
 
 Mikko can link existing foreman application to foreman task
@@ -114,7 +115,7 @@ Mikko can start invite flow from tasks tab
   Click by test id  cancel-foreman-dialog
 
 Mikko can invite additional foremans to application with verdict
-  Wait and click   xpath=//table[@data-test-id='tasks-foreman']//tr[@data-test-name='Alitarkastaja']/td[@data-test-col-name='foreman-name-or-invite']/a
+  Wait and click   xpath=//div[@data-test-id='tasks-foreman']//tr[@data-test-name='Alitarkastaja']/td[@data-test-col-name='foreman-name-or-invite']/a
   Wait until  Element should be visible  invite-foreman-email
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman

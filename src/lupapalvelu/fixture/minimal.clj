@@ -145,7 +145,7 @@
 
    ;; Sipoo
 
-   ;; Simo Sippo - Sipoon R paakayttaja:  sipoo / sipoo
+   ;; Simo Suurvisiiri - Sipoon R paakayttaja:  sipoo / sipoo
    {:id "50ac77ecc2e6c2ea6e73f83e"
     :email "admin@sipoo.fi"
     :enabled true
@@ -156,6 +156,18 @@
     :username "sipoo"
     :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
               :apikey "50ac788ec2e6c2ea6e73f83f"}}
+
+   ;; Simo YA-Suurvisiiri - Sipoon YA paakayttaja:  sipoo-ya / sipoo
+   {:id "50ac77eaf2e6c2ea6e73f81e"
+    :email "admin-ya@sipoo.fi"
+    :enabled true
+    :role "authorityAdmin"
+    :orgAuthz {:753-YA #{:authorityAdmin}}
+    :firstName "Simo"
+    :lastName "YA-Suurvisiiri"
+    :username "sipoo-ya"
+    :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
+              :apikey "55cdafd8abc1d91e7ccd60b2"}}
 
    ;; Sonja Sibbo - Sipoon lupa-arkkitehti:  sonja / sonja
    {:id "777777777777777777000023"
@@ -563,7 +575,8 @@
                                              :ya-kayttolupa-mainostus-ja-viitoitus
                                              :ya-kayttolupa-terassit]
                        :operations-attachments ya-default-attachments-for-operations
-                       :permanent-archive-enabled false}
+                       :permanent-archive-enabled false
+                       :tags [{:id "735YA001" :label "YA kadut"} {:id "735YA002" :label "YA ojat"}]}
 
                       ;; Kuopio YA
                       {:id "297-YA"

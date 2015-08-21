@@ -21,26 +21,42 @@ $tree-height: 320px;
     margin: 0;
     width: $tree-width;
     float: left;
-    border: 1px solid darken($lp-light-grey, 10%);
-    display: block;
-    @include box-sizing(border-box);
-    padding: 4px 0px 4px 12px;
-    text-decoration: none;
-    background: white;
-    color: $color-text;
+    /* border: 1px solid darken($lp-light-grey, 10%); */
+    /* display: block; */
+    /* @include box-sizing(border-box); */
+    /* padding: 4px 0px 4px 12px; */
+    /* text-decoration: none; */
+    /* background: white; */
+    /* color: $color-text; */
     width: $tree-width;
-    cursor: pointer;
+    /* cursor: pointer; */
     @include user-select(none);
     @include transition-property(font-size);
     @include transition-duration(200ms);
-    &:HOVER {
-      background: $lp-light-grey;
-    }
+    /* &:HOVER { */
+    /*   background: $lp-light-grey; */
+    /* } */
     span {
-      width: $tree-width - 22px;
+      /* width: $tree-width - 22px; */
+      width: 100%;
     }
-    span.icon {
-      width: 20px;
+    /* span.icon { */
+    /*   width: 20px; */
+    /* } */
+  }
+  .tree-link.btn {
+    overflow-y: hidden;
+    max-height: none;
+    min-height: none;
+    line-height: initial;
+    vertical-align: middle;
+    span, i {
+      vertical-align: middle;
+      white-space: initial;
+    }
+    padding: {
+      top: $marginM;
+      bottom: $marginM;
     }
   }
   .tree-nav {
@@ -79,7 +95,7 @@ $tree-height: 320px;
     }
     button {
       margin-top: $baseline;
-      font-size:14px;
+      /* font-size:14px; */
       width: 18em;
     }
   }

@@ -200,6 +200,14 @@ var util = (function($) {
     return id;
   }
 
+  function filterDataByQuery(data, q, selected) {
+    return _.filter(data, function(item) {
+      return _.reduce(q.split(" "), function(result, word) {
+        return !_.some(selected, item) && _.contains(item.label.toUpperCase(), word.toUpperCase()) && result;
+      }, true);
+    });
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -229,7 +237,8 @@ var util = (function($) {
     isNotPartyDoc: isNotPartyDoc,
     extractRequiredErrors: extractRequiredErrors,
     dissoc: dissoc,
-    randomElementId: randomElementId
+    randomElementId: randomElementId,
+    filterDataByQuery: filterDataByQuery
   };
 
 })(jQuery);

@@ -160,8 +160,7 @@
 (defcommand remove-organization-link
   {:description "Removes organization link."
    :parameters [url nameFi nameSv]
-   :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
@@ -389,18 +388,30 @@
       (mongo/update-by-query :applications {:tags {$in removed-ids} :organization org-id} {$pull {:tags {$in removed-ids}}}))
     (o/update-organization org-id {$set {:tags (o/create-tag-ids tags)}})))
 
+(defquery remove-tag-ok
+  {:parameters [tagId]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (let [org-id (user/authority-admins-organization-id user)]
+    (when-let [tag-applications (seq (mongo/select
+                                       :applications
+                                       {:tags tagId :organization org-id}
+                                       [:_id]))]
+      (fail :warning.tags.removing-from-applications :applications tag-applications))))
+
 (defquery get-organization-tags
   {:user-authz-roles #{:statementGiver}
    :org-authz-roles action/reader-org-authz-roles
    :user-roles #{:authorityAdmin :authority}}
-  [{{:keys [organizationId]} :data user :user}]
-  (when (and organizationId (not ((keyword organizationId) (:orgAuthz user))))
-    (fail! :error.unknown-organization))
-  (if-let [org-id (if (user/authority-admin? user)
-                    (user/authority-admins-organization-id user)
-                    organizationId)]
-    (ok :tags (distinct (:tags (o/get-organization org-id))))
-    (fail! :error.organization-not-found)))
+  [{{:keys [orgAuthz] :as user} :user}]
+  (if (seq orgAuthz)
+    (let [organization-tags (mongo/select
+                                  :organizations
+                                  {:_id {$in (keys orgAuthz)} :tags {$exists true}}
+                                  [:tags :name])
+          result (map (juxt :id #(select-keys % [:tags :name])) organization-tags)]
+      (ok :tags (into {} result)))
+    (fail :error.organization-not-found)))
 
 (defn- transform-coordinates-to-wgs84
   "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"

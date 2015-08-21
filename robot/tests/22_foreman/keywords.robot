@@ -50,6 +50,7 @@ Foreman applies personal information to the foreman application
   Foreman opens application  ${index}
   Wait until  Confirm yes no dialog
   Open tab  parties
+  Open accordions  parties
   Wait until  Click by test id  fill-info-button
 
 Foreman accepts invitation and fills info
@@ -62,6 +63,7 @@ Foreman sets role and difficulty to foreman application
   Foreman opens application  ${index}
   Deny yes no dialog
   Open tab  parties
+  Open accordions  parties
   Foreman accepts invitation and fills info
   Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
   Wait until  Select From List by test id  patevyysvaatimusluokka  ${difficulty}

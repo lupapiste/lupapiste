@@ -7,7 +7,8 @@
             [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as operations]))
 
 (defquery applications-search
   {:description "Service point for application search component"
@@ -18,7 +19,28 @@
               user
               (select-keys
                 data
-                [:applicationTags :applicationType :handler :limit :searchText :skip :sort]))))
+                [:applicationTags :applicationOrganizations :applicationType :handler :limit :searchText :skip :sort :applicationOperations]))))
+
+(defn- selected-ops-by-permit-type [selected-ops]
+  (->> operations/operations
+       (filter (fn [[opname _]]
+                 (some #(= opname (keyword %)) selected-ops)))
+       (map (fn [[op {permit-type :permit-type}]]
+              {:op op :permit-type permit-type}))
+       (group-by :permit-type)
+       (map (fn [[permit-type ops]]
+              {permit-type (map :op ops)}))
+       (apply merge)))
+
+(defquery get-application-operations
+  {:user-roles #{:authority}}
+  [{user :user}]
+
+  (let [orgIds             (map name (-> user :orgAuthz keys))
+        organizations      (map lupapalvelu.organization/get-organization orgIds)
+        selected-ops       (mapcat :selected-operations organizations)
+        ops-by-permit-type (selected-ops-by-permit-type selected-ops)]
+    (ok :operationsByPermitType ops-by-permit-type)))
 
 (defn- localize-operation [op]
   (assoc op
@@ -65,4 +87,5 @@
                (query/sort {:submitted -1})
                (query/limit limit))]
     (ok :applications (->> apps
+                           (filter :primaryOperation)
                            (map search/public-fields)))))

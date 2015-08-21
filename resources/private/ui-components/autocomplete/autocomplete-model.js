@@ -15,6 +15,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.query = self.dataProvider.query;
 
   self.inputSelected = ko.observable(false);
+
   self.dropdownClick = ko.observable(false);
 
   self.dropdownVisible = ko.computed(function() {
@@ -22,13 +23,23 @@ LUPAPISTE.AutocompleteModel = function(params) {
   });
 
   self.selected = ko.observable("");
+
   self.index = ko.observable(0);
+
   self.selectedTags = ko.observableArray();
 
   self.data = ko.observableArray(self.dataProvider.data());
 
   self.showCaption = ko.pureComputed(function() {
     return !self.selected() && self.selectedTags().length === 0;
+  });
+
+  self.groupedResults = ko.pureComputed(function() {
+    return _.some(self.data(), function(item) {
+      if (item && item.groupHeader) {
+        return true;
+      }
+    });
   });
 
   // set initial value
@@ -40,22 +51,39 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.subscriptions = [];
 
+  function getCurrentItem() {
+    return self.data()[self.index()];
+  }
+
+  function initIndex() {
+    self.index(0);
+    // skip goup header when setting initial index
+    if (getCurrentItem() && getCurrentItem().groupHeader) {
+      self.index(1);
+    }
+  }
+
+  // set initial index
+  initIndex();
+
   self.subscriptions.push(self.dataProvider.data.subscribe(function() {
     if (params.nullable) {
       self.data([null].concat(self.dataProvider.data()));
     } else {
       self.data(self.dataProvider.data());
     }
-    self.index(0);
+    initIndex();
   }));
 
   self.selectInput = function() {
     self.inputSelected(true);
   };
+
   self.retainFocus = function() {
     // set to true so input blur knows if ul container (scrollbar) was clicked
     self.dropdownClick(true);
   };
+
   self.blur = function() {
     if (self.dropdownClick()) {
       // IE hax, return focus to input when user click scrollbar
@@ -79,7 +107,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.navigate = function(data, event) {
-    var scrollToActiveItem = function(index) {
+    function scrollToActiveItem(index) {
       var $container = $(event.target).siblings("ul");
       var $activeItem = $container.find("li:nth-child(" + index + ")");
 
@@ -96,17 +124,34 @@ LUPAPISTE.AutocompleteModel = function(params) {
       if ((itemBottom > containerBottom) || (itemTop < containerTop)) {
         $container.scrollTop($container.scrollTop() + $activeItem.position().top);
       }
-    };
+    }
 
     if (event.keyCode === 13) {
-      self.selectItem(self.data()[self.index()]);
+      self.selectItem(getCurrentItem());
     }
+
     else if (event.keyCode === 38) {
-      self.index(self.index() > 0 ? self.index() - 1 : 0);
+      var firstItem = self.index() <= 0;
+      self.index(firstItem ? 0 : self.index() - 1);
+
+      if (getCurrentItem() && getCurrentItem().groupHeader && self.index() <= 0) {
+        self.index(self.index() + 1);
+      }
+
+      // skip group header
+      else if (getCurrentItem() /* is not nullable */ && getCurrentItem().groupHeader && !firstItem) {
+        self.index(self.index() - 1);
+      }
       scrollToActiveItem(self.index());
     }
+
     else if (event.keyCode === 40) {
-      self.index(self.index() + 1 < self.data().length ? self.index() + 1 : self.index());
+      var lastItem = self.index() + 1 >= self.data().length;
+      self.index(lastItem ? self.index() : self.index() + 1);
+      // skip groupheader
+      if (getCurrentItem().groupHeader && !lastItem) {
+        self.index(self.index() + 1);
+      }
       scrollToActiveItem(self.index());
     }
     return true;

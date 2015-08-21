@@ -1,41 +1,97 @@
-LUPAPISTE.OrganizationTagsDataProvider = function(organization, filtered) {
+LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
   "use strict";
-
   var self = this;
 
   self.query = ko.observable();
 
   self.filtered = filtered || ko.observableArray([]);
 
-  var data = ko.observable();
+  var tagsData = ko.observable();
 
-  if (organization && util.getIn(lupapisteApp.models.currentUser, ["orgAuthz", organization])) {
-    ajax
-      .query("get-organization-tags", {organizationId: organization})
-      .error(_.noop)
-      .success(function(res) {
-        data(res.tags);
-      })
-      .call();
+  ajax
+    .query("get-organization-tags")
+    .error(_.noop)
+    .success(function(res) {
+      tagsData(res.tags);
+    })
+    .call();
+
+  self.data = ko.pureComputed(function() {
+    var result = [];
+    var data = tagsData();
+
+    for (var key in data) {
+      var header = {label: data[key].name[loc.currentLanguage], groupHeader: true};
+
+      var filteredData = util.filterDataByQuery(data[key].tags, self.query() || "", self.filtered());
+      // append group header and group items to result data
+      if (filteredData.length > 0) {
+        if (_.keys(data).length > 1) {
+          result = result.concat(header);
+        }
+        result = result.concat(filteredData);
+      }
+    }
+
+    return result;
+  });
+
+};
+
+LUPAPISTE.OperationsDataProvider = function(filtered) {
+  "use strict";
+  var self = this;
+
+  var operationsByPermitType = ko.observable();
+
+  self.query = ko.observable();
+
+  self.filtered = filtered || ko.observableArray([]);
+
+  ajax
+    .query("get-application-operations")
+    .error(_.noop)
+    .success(function(res) {
+      operationsByPermitType(res.operationsByPermitType);
+    })
+    .call();
+
+  function wrapInObject(operations) {
+    return _.map(operations, function(op) {
+      return {label: loc("operations." + op),
+              id: op};
+    });
   }
 
   self.data = ko.pureComputed(function() {
-    var filteredData = _.filter(data(), function(tag) {
-      return !_.some(self.filtered(), tag);
+    var result = [];
+
+    var data = _.map(operationsByPermitType(), function(operations, permitType) {
+      return {
+        permitType: loc(permitType),
+        operations: wrapInObject(operations)
+      };
     });
-    var q = self.query() || "";
-    filteredData = _.filter(filteredData, function(tag) {
-      return _.reduce(q.split(" "), function(result, word) {
-        return _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
-      }, true);
+
+
+    _.forEach(data, function(item) {
+      var header = {label: item.permitType, groupHeader: true};
+
+      var filteredData = util.filterDataByQuery(item.operations, self.query() || "", self.filtered());
+
+      // append group header and group items to result data
+      if (filteredData.length > 0) {
+        result = result.concat(header).concat(filteredData);
+      }
     });
-    return filteredData;
+
+    return result;
   });
+
 };
 
 LUPAPISTE.HandlersDataProvider = function() {
   "use strict";
-
   var self = this;
 
   self.query = ko.observable();
@@ -71,14 +127,49 @@ LUPAPISTE.HandlersDataProvider = function() {
   });
 };
 
-LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
+LUPAPISTE.OrganizationsFilterDataProvider = function(savedOrgFilters) {
   "use strict";
 
+  var self = this;
+
+  self.query = ko.observable();
+  self.savedOrgFilters = savedOrgFilters || ko.observableArray([]);
+
+  var data = ko.observable();
+  var usersOwnOrganizations = _.keys(lupapisteApp.models.currentUser.orgAuthz());
+
+  ajax
+  .query("get-organization-names")
+  .error(_.noop)
+  .success(function(res) {
+    var ownOrgsWithNames = _.map(usersOwnOrganizations, function(org) {
+      return {id: org, name: res.names[org][loc.currentLanguage]};
+    });
+    data(ownOrgsWithNames);
+  })
+  .call();
+
+  self.data = ko.pureComputed(function() {
+    var q = self.query() || "";
+    return _.filter(data(), function(item) {
+      return _.reduce(q.split(" "), function(result, word) {
+        return _.contains(item.name.toUpperCase(), word.toUpperCase())
+               && !_.some(self.savedOrgFilters(), item)
+               && result;
+      }, true);
+    });
+  });
+
+};
+
+LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
+  "use strict";
   var self = this;
 
   self.dataProvider = params.dataProvider;
 
   self.organizationTagsDataProvider = null;
+  self.operationsDataProvider = null;
   self.handlersDataProvider = null;
 
   self.showAdvancedFilters = ko.observable(false);
@@ -88,7 +179,8 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   if ( lupapisteApp.models.currentUser.isAuthority() ) {
     self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
-    // TODO just search single organization tags for now, later do some grouping stuff in autocomplete component
-    self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(_.last(_.keys(lupapisteApp.models.currentUser.orgAuthz())), self.dataProvider.applicationTags);
+    self.operationsDataProvider = new LUPAPISTE.OperationsDataProvider(self.dataProvider.applicationOperations);
+    self.organizationsFilterDataProvider = new LUPAPISTE.OrganizationsFilterDataProvider(self.dataProvider.applicationOrganizations);
+    self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(self.dataProvider.applicationTags);
   }
 };

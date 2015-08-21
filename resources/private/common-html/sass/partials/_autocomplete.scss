@@ -34,6 +34,7 @@
         //overflow: auto;
         li {
           display: inline-block;
+          max-width: 100%;
           //padding: 3px;
           //top: 1px;
           &.tag {
@@ -48,6 +49,9 @@
               color: #fff;
               margin-left: $marginL + $marginS / 2;
               margin-right: $marginM;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              display: block;
             }
 
             span.tag-remove {
@@ -108,6 +112,13 @@
       box-sizing: border-box;
       background-color: #fff;
       color: black;
+
+      &.autocomplete-result-grouped {
+        li.autocomplete-result-item {
+          padding: $marginS/2 $marginS*2;
+        }
+      }
+
       li.autocomplete-result-item, li.autocomplete-result-empty {
         cursor: default;
         display: list-item;
@@ -116,6 +127,10 @@
       }
       li.autocomplete-result-item {
         cursor: pointer;
+        position: relative;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        padding-right: $marginS;
       }
       li.autocomplete-result-item.active {
         background-color: lighten($lp-orange, 40%);
@@ -123,6 +138,13 @@
           background-color: lighten($lp-orange, 20%);
           color: black;
         }
+      }
+      li.autocomplete-group-header {
+        font-weight: 700;
+        padding: $marginS/2 $marginS 0 $marginS;
+        margin-top: $marginS/2;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
     }
   }

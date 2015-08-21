@@ -27,6 +27,7 @@ Foreman sets his information to several applications
   Foreman opens application  4
   Deny yes no dialog
   Open tab  parties
+  Open accordions  parties
   Foreman accepts invitation and fills info
 
 Foreman history is not visible to applicant
@@ -42,6 +43,7 @@ Authority sees foreman history
   Sonja logs in
   Foreman opens application  4
   Open tab  parties
+  Open accordions  parties
 
   Wait until  Foreman history should have text X times  Sipoo  3
   Foreman history should have text X times  Tavanomainen  2
