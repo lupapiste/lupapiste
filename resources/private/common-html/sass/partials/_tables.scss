@@ -69,7 +69,7 @@ th.action-column, td.action-column {
   }
 }
 
-tbody {
+tbody, tfoot {
   color: #555;
   font-size: 0.875em;
   td {
@@ -158,3 +158,39 @@ table.attachments-template-table {
   }
 }
 
+// Percentage width and px scroll height convenience
+// classes.
+@for $w from 1 through 21 {
+  .width-#{$w * 5} {
+    min-width: $w * 5%;
+    max-width: $w * 5%;
+    width:  $w * 5%;
+}
+  .scroll-#{$w * 50}px {
+    max-height: $w * 50px;
+    overflow-y: auto;
+  }
+}
+
+// Em scroll height convenience classes.
+@for $h from 1 through 101 {
+  .scroll-#{$h}em {
+    max-height: #{$h}em;
+    overflow-y: auto;
+  }
+}
+
+.header-table {
+  margin: 0;
+  table {
+    margin: 0;
+  }
+}
+
+.header-table > tbody > tr > td {
+  padding: 0;
+}
+
+.header-table > tfoot > tr:hover {
+  background-color: transparent;
+}

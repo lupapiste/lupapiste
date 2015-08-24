@@ -482,11 +482,14 @@
                             </div>
                             <!-- ko if: $root.foreman.isVisible -->
                             <section class="accordion" id="accordion-application-foreman">
-                                <h2 onclick="accordion.click(this)" data-test-id="accordion-application-foreman-header">
-                                    <span class="icon toggle-icon drill-down-white"></span>
-                                    <span data-bind="ltext: 'application.parties.foreman'"></span>
-                                </h2>
-                                <div class="accordion_content expanded" data-accordion-state="open">
+                                <button onclick="accordion.click(this)"
+                                        data-test-id="accordion-application-foreman-header"
+                                        class="accordion-toggle secondary">
+                                    <i class="lupicon-chevron-down"></i>
+                                    <i class="lupicon-chevron-up toggle"></i>
+                                    <span class="bar-text" data-bind="ltext: 'application.parties.foreman'"></span>
+                                </button>
+                                <div class="accordion_content" data-accordion-state="closed">
                                     <div class="accordion-fields">
                                         <div data-bind="template: {name: 'application-foreman-template', data: $root.foreman}"></div>
                                     </div>
@@ -727,10 +730,13 @@
                         </div>
 
                         <section class="accordion" id="accordion-application-summary-statements">
-                            <h2 onclick="accordion.click(this)" data-test-id="accordion-application-summary-statements-header">
-                                <span class="icon toggle-icon drill-right-white"></span>
-                                <span data-bind="ltext: 'application.statements'" style="margin-right: 0">Lausunnot</span>
-                            </h2>
+                            <button onclick="accordion.click(this)"
+                                    data-test-id="accordion-application-summary-statements-header"
+                                    class="secondary accordion-toggle">
+                                <i class="lupicon-chevron-down"></i>
+                                <i class="lupicon-chevron-up toggle"></i>
+                                <span class="bar-text" data-bind="ltext: 'application.statements'" style="margin-right: 0">Lausunnot</span>
+                            </button>
                             <div class="accordion_content" data-accordion-state="closed">
                                 <div class="accordion-fields">
                                     <div data-bind="template: {name: 'statements-template', data: {statements: $data.statements, localisationKeys: {missing: 'application.statement.missing-from-prev-permit'}}}"></div>
@@ -739,10 +745,11 @@
                         </section>
 
                         <section class="accordion">
-                            <h2 onclick="accordion.click(this)">
-                                <span class="icon toggle-icon drill-right-white"></span>
-                                <span data-bind="lhtml: 'application.neighbors.hearings'" style="margin-right: 0">Kuulemiset</span>
-                            </h2>
+                            <button onclick="accordion.click(this)" class="accordion-toggle secondary">
+                                <i class="lupicon-chevron-down"></i>
+                                <i class="lupicon-chevron-up toggle"></i>
+                                <span class="bar-text" data-bind="lhtml: 'application.neighbors.hearings'" style="margin-right: 0">Kuulemiset</span>
+                            </button>
                             <div class="accordion_content" data-accordion-state="closed">
                                 <div class="accordion-fields">
                                     <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors, localisationKeys: {missing: 'neighbors.missing-from-prev-permit'}}}"></div>
@@ -780,21 +787,26 @@
                                     <span data-bind="text: $data.kuntalupatunnus, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></span>
                                     <span data-bind="visible: $data.draft" style="text-transform: lowercase;">(<span data-bind="ltext: 'draft'"></span>)</span>
 
-                                    <span class="icon remove-grey"
-                                          data-bind="click: $root.verdictModel.deleteVerdict,
-                                                     visible: $root.authorization.ok('delete-verdict'),
-                                                     enable: $root.authorization.ok('delete-verdict'),
-                                                     attr: {'title': loc('remove')}"></span>
+                                    <i class="primary lupicon-remove is-right"
+                                        data-bind="click: $root.verdictModel.deleteVerdict,
+                                        visible: $root.authorization.ok('delete-verdict'),
+                                        enable: $root.authorization.ok('delete-verdict'),
+                                                   attr: {'title': loc('remove')}">
+                                    </i>
                                 </h2>
 
                                 <!--  ko if:  $data.paatokset -->
                                 <div data-bind="foreach: paatokset, attr: {'data-test-id' : 'given-verdict-id-' + $index() + '-content'}">
                                     <div class="accordion">
-                                        <h2 onclick="accordion.click(this)">
-                                            <span class="icon toggle-icon drill-down-white"></span>
-                                            <span data-bind="ltext: 'application.verdict.title'" style="margin-right: 0"></span>
-                                            <span data-bind="text: $index() + 1"></span>
-                                        </h2>
+                                        <button onclick="accordion.click(this)"
+                                                class="accordion-toggle secondary toggled">
+                                            <i class="lupicon-chevron-down"></i>
+                                            <i class="lupicon-chevron-up toggle"></i>
+                                            <span class="bar-text">
+                                                <span data-bind="ltext: 'application.verdict.title'" style="margin-right: 0"></span>
+                                                <span data-bind="text: $index() + 1"></span>
+                                            </span>
+                                        </button>
                                         <div class="accordion_content expanded">
 
                                             <div data-bind="with: $parent" style="overflow: auto;">

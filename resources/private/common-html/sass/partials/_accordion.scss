@@ -33,11 +33,20 @@
     }
   }
 
-  button.approved > span.icons > i.approved {
+  button.accordion-toggle {
+    width: 100%;
+    span.bar-text {
+      width: 100%;
+      text-transform: uppercase;
+    }
+  }
+
+
+  button.sticky.approved > .icons > .approved {
     display: table-cell;
   }
 
-  button.rejected > span.icons >  i.rejected {
+  button.sticky.rejected > .icons >  .rejected {
     display: table-cell;
   }
 
@@ -173,6 +182,7 @@
     display: block;
   }
 }
+
 
 .accordion-indicator {
   z-index: 12000;
