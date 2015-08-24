@@ -250,7 +250,7 @@
 
               <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
                 <div class="file-preview-content">
-                  <a class="btn secondary" data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}, toggleClick: previewVisible" target="file-preview-iframe-name">
+                  <a class="btn secondary" data-bind="attr: {href: previewUrl}, toggleClick: previewVisible" target="file-preview-iframe-name">
                     <i data-bind="css: {'lupicon-chevron-small-right': !previewVisible(), 'lupicon-chevron-small-down': previewVisible}"></i>
                     <span data-bind="ltext: 'attachment.pdf.preview.link'"></span>
                   </a>

@@ -230,6 +230,10 @@ var attachment = (function() {
       model.showTosMetadata(!model.showTosMetadata());
     },
 
+    previewUrl: ko.pureComputed(function() {
+      return "/api/raw/view-attachment?attachment-id=" + model.latestVersion().fileId;
+    }),
+
     rotete: function(rotation) {
       var iframe$ = $("#file-preview-iframe");
       iframe$.attr("src","/img/ajax-loader.gif");
@@ -238,7 +242,7 @@ var attachment = (function() {
           applicationModel.reload();
           hub.subscribe("attachment-loaded", function() {
             model.previewVisible(true);
-            iframe$.attr("src","/api/raw/view-attachment?attachment-id=" + model.latestVersion().fileId);
+            iframe$.attr("src", model.previewUrl());
           }, true);
         })
         .call();
