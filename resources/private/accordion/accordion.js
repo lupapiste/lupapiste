@@ -16,7 +16,6 @@ var accordion = (function() {
   }
 
   function set(t, toState, done, force ) {
-    console.log( t, toState, done, force );
     var sels = selectors( t );
     var target = sels.target;
     var content = sels.content;

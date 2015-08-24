@@ -8,10 +8,9 @@
 
   div.sticky {
     width: 100%;
-    //overflow: hidden;
+    overflow-y: hidden;
     background-color: $gray246;
     border: 1px solid $gray221;
-
     span.bar-text {
       width: 100%;
       text-transform: uppercase;
@@ -42,11 +41,11 @@
   }
 
 
-  button.sticky.approved > .icons > .approved {
+  div.sticky > button.approved > .icons > .approved {
     display: table-cell;
   }
 
-  button.sticky.rejected > .icons >  .rejected {
+  div.sticky > button.rejected > .icons >  .rejected {
     display: table-cell;
   }
 
@@ -149,9 +148,14 @@
 
   .accordion_content {
     display: none;
-    padding: $marginS;
+    padding: {
+      top: $marginS;
+      bottom: $marginS;
+    }
     position: relative;
-    background: darken($lp-light-grey, 5%);
+    //background: darken($lp-light-grey, 5%);
+    border: 1px solid $gray221;
+    border-top: none;
     .accordion-content-part {
       margin-left: $marginM;
       margin-bottom: $marginM;

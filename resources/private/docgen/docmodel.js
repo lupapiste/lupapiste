@@ -448,7 +448,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: self.getCollection() };
 
     if (_.isEmpty(model)) {
-      return approvalContainer$;
+      return [];
     }
 
     function setStatus(approval) {
@@ -547,6 +547,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return result; //approvalContainer$;
   };
 
+  // Appends group buttons (description, primary, approve, reject, remove)
+  // and approval icons. The particular set of elements depends of authorization
+  // and options (opts).
   // Opts can have approval property that denotes the opts for
   // makeApprovalButtons. Note that opts.approval must by truthy
   // (at least empty object) for approval buttons to be created.
@@ -558,7 +561,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   //          attr: Extra attibutes object
   //          text: Button text
   //          fun: If given, button is enabled and fun is the click handler.
-  self.makeGroupButtons = function(path, model, opts ) {
+  //
+  // Note: function does not append (unneeded) elements to container$.
+  function appendGroupButtons(container$, path, model, opts ) {
 
     function btnHelper( subOpts, cls, icon, text ) {
       var b = $("<button>").addClass( cls );
@@ -598,11 +603,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                   loc( "remove")));
     }
     if( opts.approval ) {
-      _.each( self.makeApprovalButtons( path, model, opts.approval ), function( elem ) {
-        buttons$.append( elem );
-      });
+      var approvalElements = self.makeApprovalButtons(path, model, opts.approval);
+      // We only proceed if elements is not just an empty tag.
+      if( _.size( approvalElements ) > 1 || _.first( approvalElements ).children().length ) {
+        _.each(( approvalElements ), function( elem ) {
+          buttons$.append( elem );
+        });
+      }
     }
-    return buttons$;
+    if( buttons$.children().length ) {
+      container$.append( buttons$ );
+    }
   }
 
   // Form field builders
@@ -946,7 +957,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       opts.approval = {};
     }
     opts.remove = resolveRemoveOptions( subSchema, path);
-    $(div).append(self.makeGroupButtons(path, myModel, opts ));
+    appendGroupButtons( $(div), path, myModel, opts );
+    //$(div).append(self.makeGroupButtons(path, myModel, opts ));
 
     var label = makeLabel(subSchema, "group", myPath, true);
     div.appendChild(label);
@@ -1482,7 +1494,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         table.appendChild(tbody);
 
         if (subSchema.approvable) {
-          $(div).append(self.makeGroupButtons(path, models, {approval: {}}));
+          appendGroupButtons( $(div), path, models, {approval: {}});
+          //$(div).append(self.makeGroupButtons(path, models, {approval: {}}));
         }
 
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
@@ -1877,7 +1890,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         fun: function() {
           bubble.toggleClass( "is-closed");
           descriptionInput.focus();
-          window.Sticky
+          window.Stickyfill.rebuild();
         },
         bubble: bubble
     }
@@ -1905,6 +1918,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         .call();
 
       bubble.addClass( "is-closed");
+      window.Stickyfill.rebuild();
       updateBarDescription( value );
     }, 250);
 
@@ -2018,7 +2032,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
 
-    sticky.append(self.makeGroupButtons([], self.model, opts));
+    appendGroupButtons( sticky, [], self.model, opts );
+    //sticky.append(self.makeGroupButtons([], self.model, opts));
     if( opts.description ) {
       sticky.append( opts.description.bubble );
     }

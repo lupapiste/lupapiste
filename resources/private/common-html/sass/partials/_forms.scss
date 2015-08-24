@@ -290,12 +290,17 @@ input.form-input.long {
 }
 .form-group, .form-choice, .form-table {
   overflow:visible;
-  border-radius: 3px;
+  //border-radius: 3px;
   display: block;
-  margin: 0 $marginS $marginS 0;
-  padding: $marginS $marginS 0 $marginS;
-  background: $lp-light-grey;
-  border-bottom: 1px solid darken($lp-light-grey, 5%);
+  //margin: 0 $marginS $marginS 0;
+  //padding: $marginS $marginS 0 $marginS;
+  //background: $lp-light-grey;
+  padding: {
+    left: $marginS;
+    right: $marginS;
+  }
+  box-sizing: border-box;
+  border-bottom: 1px solid $gray221;
   &:last-child
   {
     border-bottom: none;
@@ -576,7 +581,7 @@ input.form-input.long {
   width: 100%;
   display: block;
 
-  //overflow-y: hidden;
+  overflow-y: hidden;
   text-transform: none;
   .is-right {
     float: right;
@@ -587,6 +592,7 @@ input.form-input.long {
     margin-right: $marginS;
   }
   padding-right: $marginS;
+  padding-left: $marginS;
   margin: {
     top: $marginS;
     bottom: $marginS;
