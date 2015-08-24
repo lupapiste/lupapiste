@@ -148,9 +148,10 @@ Close side panel
 
 Open accordions
   [Arguments]  ${tab}
-  Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'sticky')]
-  Execute Javascript  $("div[id=application-${tab}-tab] button.sticky.toggled").click();
-  Execute Javascript  $("div[id=application-${tab}-tab] button.sticky").click();
+  Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'accordion-toggle')]
+  Execute Javascript  $("#application-${tab}-tab button.accordion-toggle.toggled").click();
+  Wait Until  Element should not be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'toggled')]
+  Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
   Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'toggled')]
 
 #
@@ -174,10 +175,12 @@ Login
   Input text  login-password  ${password}
   # for IE8
   Wait and click  login-button
+  Run Keyword And Ignore Error  Confirm Action
 
 Login fails
   [Arguments]  ${username}  ${password}
   Login  ${username}  ${password}
+  Run Keyword And Ignore Error  Confirm Action
   User should not be logged in
 
 User should be logged in

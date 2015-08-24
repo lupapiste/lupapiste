@@ -63,14 +63,12 @@
 
   hub.onPageLoad("login", recallMe);
 
-  function IE8OrOlder() {
-    return $('span.old-ie').length !== 0
+  function ie8OrOlder() {
+    return $("span.old-ie").length !== 0;
   }
 
   var handleLoginSubmit = function() {
-    if (IE8OrOlder()) {
-      alert(loc("error.old-ie"))
-    } else {
+    if (!ie8OrOlder() || confirm(loc("error.old-ie"))) {
       login();
     }
   };
