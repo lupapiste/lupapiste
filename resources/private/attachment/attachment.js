@@ -412,6 +412,7 @@ var attachment = (function() {
     }
 
     $("#file-preview-iframe").attr("src","");
+    model.previewVisible(false);
 
     var isUserAuthorizedForAttachment = attachment.required ? lupapisteApp.models.currentUser.role() === "authority" : true;
     model.authorized(isUserAuthorizedForAttachment);
