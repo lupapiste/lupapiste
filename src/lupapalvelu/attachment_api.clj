@@ -37,7 +37,7 @@
   (when (-> (attachment/get-attachment-info application attachmentId) :locked (= true))
     (fail :error.attachment-is-locked)))
 
-(defn- if-not-authority-states-must-match [state-set {user :user} {state :state}]
+(defn- if-not-authority-state-must-not-be [state-set {user :user} {state :state}]
   (when (and
           (not (user/authority? user))
           (state-set (keyword state)))
@@ -49,7 +49,7 @@
       (= (keyword userRole) :authority)
       true)))
 
-(defn- attachment-editable-by-applicationState? [application attachmentId userRole]
+(defn- attachment-editable-by-application-state? [application attachmentId userRole]
   (or (ss/blank? attachmentId)
       (let [attachment (attachment/get-attachment-info application attachmentId)
             attachmentApplicationState (keyword (:applicationState attachment))
@@ -109,7 +109,7 @@
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application user created] :as command}]
 
-  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+  (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
   (let [attachment-type (attachment/parse-attachment-type attachmentType)]
@@ -191,7 +191,7 @@
   (when-not (attachment-deletable application attachmentId (:role user))
     (fail! :error.unauthorized :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))
 
-  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+  (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
   (attachment/delete-attachment application attachmentId)
@@ -207,7 +207,7 @@
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
 
-  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+  (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
   (if (attachment/file-id-in-application? application attachmentId fileId)
@@ -268,19 +268,21 @@
 ;; Upload
 ;;
 
+(def attachment-modification-precheks
+  [attachment-is-not-locked
+   (partial if-not-authority-state-must-not-be #{:sent})
+   (fn [{{attachment-id :attachmentId} :data, user :user} application]
+     (when attachment-id
+       (when-not (attachment-editable-by-application-state? application attachment-id (:role user))
+         (fail :error.pre-verdict-attachment))))
+   validate-attachment-type
+   a/validate-authority-in-drafts])
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :pre-checks [attachment-is-not-locked
-                (partial if-not-authority-states-must-match #{:sent})
-                (fn [{{attachment-id :attachmentId} :data, user :user} application]
-                  (when attachment-id
-                    (when-not (attachment-editable-by-applicationState? application attachment-id (:role user))
-                      (fail :error.pre-verdict-attachment))))
-                validate-attachment-type
-                a/validate-authority-in-drafts]
+   :pre-checks attachment-modification-precheks
    :input-validators [(partial action/non-blank-parameters [:id :attachmentType :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
@@ -328,6 +330,21 @@
       (when-not (attachment/attach-file! attachment-data)
         (fail :error.unknown)))))
 
+;;
+;; Rotate
+;;
+
+(defcommand rotate-pdf
+  {:parameters  [id attachmentId rotation]
+   :user-roles  #{:applicant :authority}
+   :user-authz-roles action/all-authz-writer-roles
+   :pre-checks  attachment-modification-precheks
+   :states      (states/all-states-but states/terminal-states)
+   :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."
+   :feature     :pdfrotate
+   }
+  (fail :error.unknown)
+  )
 
 ;;
 ;; Stamping:
@@ -486,7 +503,7 @@
                       validate-meta validate-scale validate-size validate-operation]
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application user created] :as command}]
-  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+  (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
   ; FIXME yhdella updatella!
   (doseq [[k v] meta]
