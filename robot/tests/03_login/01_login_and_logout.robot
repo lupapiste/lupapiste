@@ -53,6 +53,7 @@ Mikko logs in and wants us to remember him
   Checkbox Should Not Be Selected  rememberme
   Select Checkbox  rememberme
   Login  ${LOGIN}  ${PASSWORD}
+  Run Keyword And Ignore Error  Confirm Action
   User should be logged in  ${USERNAME}
   User role should be  applicant
   Applications page should be open
@@ -85,7 +86,6 @@ Mikko logs in with username that has capital letters and wants to be forgotten
   Checkbox Should Not Be Selected  rememberme
 
 Solita Admin can log in
-  [Tags]  ie8
   SolitaAdmin logs in
   [Teardown]  logout
 
