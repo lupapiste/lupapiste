@@ -604,8 +604,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     if( opts.approval ) {
       var approvalElements = self.makeApprovalButtons(path, model, opts.approval);
+      var elemCount = _.size( approvalElements );
       // We only proceed if elements is not just an empty tag.
-      if( _.size( approvalElements ) > 1 || _.first( approvalElements ).children().length ) {
+      if( elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ).children().length )) {
         _.each(( approvalElements ), function( elem ) {
           buttons$.append( elem );
         });
@@ -1940,7 +1941,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var op = self.schema.info.op;
 
     var section = document.createElement("section");
-    var sticky = $("<div>").addClass( "sticky");
+    var sticky = $("<div>").addClass( "sticky accordion-toggle");
     var iconUp = document.createElement("i");
     var iconDown = document.createElement("i");
     var toggle = document.createElement("button");
@@ -1962,7 +1963,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     iconDown.className = "lupicon-chevron-down";
     toggle.appendChild( iconDown );
     toggle.appendChild( iconUp );
-    toggle.className = "secondary accordion-toggle";
+    toggle.className = "secondary";
     var descId = _.uniqueId( "data-desc-");
     var barDesc = $("<span>").addClass( "description").attr( descId, "1")
     if( op && _.size(  op.description ) ) {
@@ -1998,7 +1999,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (!notPrimaryOperation) {
         opts.star = {attr: {"data-op-name": op.name},
                      text: loc( "operations.primary")}
-        barText.append( $("<span>").addClass( "lupicon-star"));
+        //barText.append( $("<span>").addClass( "lupicon-star"));
       }
 
       if (isSecondaryOperation) {

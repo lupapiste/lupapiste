@@ -559,9 +559,18 @@ input.form-input.long {
   }
 
   .button-group {
-    .btn, button {
-      margin-right: 10px
+    width: 100%;
+    padding: {
+      left: 10px;
+      right: 10px;
+      top: 10px;
+      bottom: 10px;
     }
+    background-color: $gray246;
+    border-bottom: 1px solid $gray221;
+    /* .btn, button { */
+    /*   margin-right: 10px */
+    /* } */
   }
 }
 
