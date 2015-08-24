@@ -254,9 +254,9 @@
                     <i data-bind="css: {'lupicon-chevron-small-right': !previewVisible(), 'lupicon-chevron-small-down': previewVisible}"></i>
                     <span data-bind="ltext: 'attachment.pdf.preview.link'"></span>
                   </a>
-                  <div data-bind="visible: previewVisible() && features.enabled('pdfrotate')">
-                    <div class="feature">
-                      <!-- ko if: isPdf -->
+                  <div data-bind="visible: previewVisible">
+                    <div data-bind="visible: $root.authorization.ok('rotate-pdf') && isPdf()">
+<!-- authorization.ok checks the feature flag too in this case --><div class="feature">
                       <button data-bind="click: _.partial(rotete, -90)">
                         <i class="lupicon-rotate-left"></i>
                         <span data-bind="ltext: 'rotate-left'"></span>
@@ -269,7 +269,7 @@
                         <i class="lupicon-rotate-right"></i>
                         <span data-bind="ltext: 'rotate-right'"></span>
                       </button>
-                      <!-- /ko -->
+</div>
                     </div>
                     <iframe id="file-preview-iframe" name="file-preview-iframe-name"></iframe>
                   </div>
@@ -278,7 +278,7 @@
             </div>
 
             <div id="test-txt-file-preview" class="file-preview" data-bind="visible: !hasPreview()">
-              <p data-bind="ltext: 'attachment.noPreview'">Esikatselua ei saatavilla.</p>
+              <p data-bind="ltext: 'attachment.noPreview'"></p>
             </div>
           </div>
         </div>
