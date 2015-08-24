@@ -157,7 +157,6 @@
                $left: 5%, $nubbin: 10px ) {
   position: relative;
   color: $text;
-  white-space: pre-wrap;
   background: $bg;
   width: 100%;
   border-radius: 2px;
@@ -239,12 +238,19 @@
   @include bubble;
 }
 
+
 .comment-bubble-authority {
   @include bubble( $left: 95% );
   .header {
     border-bottom-color: $turqo;
   }
 }
+
+.comment-bubble > span,
+.comment-bubble-authority > span {
+  white-space: pre-wrap;
+}
+
 
 .comment-bubble.attachment,
 .comment-bubble-authority.attachment {
