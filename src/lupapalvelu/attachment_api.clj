@@ -280,11 +280,18 @@
    validate-attachment-type
    a/validate-authority-in-drafts])
 
-(defn- convert-pdf-and-upload! [processing-result {:keys [application filename] :as attachment-data}]
+(def- base-upload-options
+  {:comment-text nil
+   :required false
+   :valid-pdfa false
+   :upload-pdfa-only false
+   :missing-fonts []})
+
+(defn- convert-pdf-and-upload! [processing-result {:keys [attachment-id application filename upload-pdfa-only] :as attachment-data}]
   (if (:pdfa? processing-result)
-    (let [attach-file-result (attachment/attach-file! attachment-data)
-          new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")
-          new-id (:id attach-file-result)
+    (let [attach-file-result (or upload-pdfa-only (attachment/attach-file! attachment-data) (fail! :error.unknown))
+          new-filename (ss/replace filename #"(-PDFA)?\.pdf$" "-PDFA.pdf" )
+          new-id       (or (:id attach-file-result) attachment-id)
           pdfa-attachment-data (assoc attachment-data
                                  :application (domain/get-application-no-access-checking (:id application)) ; Refresh attachment versions
                                  :attachment-id new-id
@@ -306,12 +313,6 @@
         (convert-pdf-and-upload! processing-result attachment-data)))
       (when-not (attachment/attach-file! attachment-data)
         (fail :error.unknown))))
-
-(def- base-upload-options
-  {:comment-text nil
-   :required false
-   :valid-pdfa false
-   :missing-fonts []})
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
@@ -371,6 +372,7 @@
                            base-upload-options
                            {:application application
                             :content temp-pdf
+                            :upload-pdfa-only true
                             :attachment-id attachmentId
                             :filename filename
                             :content-type contentType
