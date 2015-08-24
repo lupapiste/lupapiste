@@ -685,6 +685,7 @@ div.sticky.rejected ~ .accordion_content .is-top.rejected {
   display: block;
   //overflow-y: visible;
   position: relative;
+  float: left;
   box-sizing: border-box;
   background-color: white;
   width: 100%;
