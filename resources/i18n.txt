@@ -1,1 +1,2 @@
 applications.filter.operations: Rajaa toimenpiteittäin
+authority-notification.title: Ilmoitus käyttäjätilin liittämisestä organisaation viranomaiskäyttäjäksi
