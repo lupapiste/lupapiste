@@ -5316,7 +5316,7 @@ table.attachments-template-table td.attachment-version-info {
   text-decoration: line-through;
 }
 
-/* line 241, ../sass/partials/_conversation.scss */
+/* line 242, ../sass/partials/_conversation.scss */
 .comment-bubble-authority {
   position: relative;
   color: #333333;
@@ -5418,18 +5418,24 @@ table.attachments-template-table td.attachment-version-info {
 .comment-bubble-authority .deleted {
   text-decoration: line-through;
 }
-/* line 243, ../sass/partials/_conversation.scss */
+/* line 244, ../sass/partials/_conversation.scss */
 .comment-bubble-authority .header {
   border-bottom-color: #05d3b9;
 }
 
-/* line 250, ../sass/partials/_conversation.scss */
+/* line 249, ../sass/partials/_conversation.scss */
+.comment-bubble > span,
+.comment-bubble-authority > span {
+  white-space: pre-wrap;
+}
+
+/* line 257, ../sass/partials/_conversation.scss */
 .comment-bubble.attachment .header,
 .comment-bubble-authority.attachment .header {
   border-bottom-color: #f7ac2e;
 }
 
-/* line 257, ../sass/partials/_conversation.scss */
+/* line 264, ../sass/partials/_conversation.scss */
 .comment-bubble.for-me .header,
 .comment-bubble-authority.for-me .header {
   border-bottom-color: #46b02d;
