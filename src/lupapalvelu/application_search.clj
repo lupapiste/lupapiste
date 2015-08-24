@@ -139,7 +139,6 @@
         kind        (get kind-mapping application-type "applications")
         params      (merge {:kind kind} params)
         query       (make-query user-query params user)
-        _ (clojure.pprint/pprint query)
         query-total (mongo/count :applications query)
         skip        (or (:skip params) 0)
         limit       (or (:limit params) 10)
