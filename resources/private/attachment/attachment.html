@@ -65,7 +65,7 @@
           <div class="clear"></div>
           <div class="col1">
             <div class="attachment-file-versions">
-              <div class="btn-container">
+              <div>
                 <button
                     id="add-new-attachment-version"
                     class="positive"
@@ -86,7 +86,7 @@
               </div>
               <div class="attachment-file-versions-content" data-bind="slider: showAttachmentVersionHistory">
                 <h3 data-bind="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
-                <table class="table table-striped">
+                <table class="table">
                   <thead>
                     <tr>
                       <th data-bind="ltext: 'attachment.file'">Tiedosto</th>
@@ -107,7 +107,7 @@
                         <span data-bind="fullName: user"></span>
                       </td>
                       <td>
-                        <a class="link-action" data-bind="click: $root.attachment.deleteVersion,
+                        <a data-bind="click: $root.attachment.deleteVersion,
                                                           ltext: 'remove',
                                                           visible: $root.authorization.ok('delete-attachment-version') && $parent.editable"></a>
                       </td>
@@ -129,7 +129,7 @@
                   <span class="attachment-label-header-item" data-bind="fullName: $data.user"></span>
                 </h4>
 
-                <div class="attachment-info-fields">
+                <div>
                   <div class="col1 attachment-info-field">
                     <label data-bind="ltext: 'attachment.label.contents'"></label>
                     <span data-bind="saveIndicator: indicator, name: 'contents'"></span>
@@ -250,10 +250,25 @@
 
               <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
                 <div class="file-preview-content">
-                  <a class="filre-preview-btn btn btn-auto" data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}" target="file-preview-iframe-name">
-                    <span class="btn-label" data-bind="text: loc('attachment.pdf.preview.link')"></span>
+                  <a class="btn secondary" data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}, toggleClick: previewVisible" target="file-preview-iframe-name">
+                    <i data-bind="css: {'lupicon-chevron-small-right': !previewVisible(), 'lupicon-chevron-small-down': previewVisible}"></i>
+                    <span data-bind="ltext: 'attachment.pdf.preview.link'"></span>
                   </a>
-                  <iframe id="file-preview-iframe" name="file-preview-iframe-name"></iframe>
+                  <div data-bind="visible: previewVisible">
+                    <button data-bind="">
+                      <i class="lupicon-rotate-left"></i>
+                      <span data-bind="ltext: 'rotate-left'"></span>
+                    </button>
+                    <button data-bind="">
+                      <i class="lupicon-refresh"></i>
+                      <span data-bind="ltext: 'rotate-over'"></span>
+                    </button>
+                    <button data-bind="">
+                      <i class="lupicon-rotate-right"></i>
+                      <span data-bind="ltext: 'rotate-right'"></span>
+                    </button>
+                    <iframe id="file-preview-iframe" name="file-preview-iframe-name"></iframe>
+                  </div>
                 </div>
               </div>
             </div>

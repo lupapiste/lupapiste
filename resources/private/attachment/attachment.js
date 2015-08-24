@@ -110,6 +110,7 @@ var attachment = (function() {
     type:                         ko.observable(),
     attachmentType:               ko.observable(),
     previewDisabled:              ko.observable(false),
+    previewVisible:               ko.observable(false),
     operation:                    ko.observable(),
     selectedOperationId:          ko.observable(),
     selectableOperations:         ko.observableArray(),
