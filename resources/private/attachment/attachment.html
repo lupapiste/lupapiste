@@ -61,8 +61,6 @@
                                    params: { flag: showHelp, lhtml: 'attachment.view.desc' }}"></span>
               </div>
           </div>
-        </div>
-
 
           <div class="clear"></div>
           <div class="col1">
@@ -249,6 +247,7 @@
                   </a>
                 </div>
               </div>
+
               <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
                 <div class="file-preview-content">
                   <a class="filre-preview-btn btn btn-auto" data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}" target="file-preview-iframe-name">
