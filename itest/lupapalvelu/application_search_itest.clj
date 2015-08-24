@@ -142,6 +142,6 @@
       (let [res (datatables sonja :applications-search
                   :areas ["sipoo_keskusta"]
                   :handler sonja-id
-                  :tags ["222" "111"])]
+                  :applicationTags ["222" "111"])]
         (count (get-in res [:data :applications])) => 1
         (get-in res [:data :applications 0 :id]) => application-id))))
