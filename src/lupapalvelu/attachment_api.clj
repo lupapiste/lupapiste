@@ -280,21 +280,24 @@
    validate-attachment-type
    a/validate-authority-in-drafts])
 
-(defn upload! [{:keys [filename content] :as attachment-data}]
+(defn- convert-pdf-and-upload! [processing-result {:keys [filename] :as attachment-data}]
+  (if (:pdfa? processing-result)
+    (let [attach-file-result (attachment/attach-file! attachment-data)
+          new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")
+          new-id (:id attach-file-result)]
+      (when-not (attachment/attach-file! (assoc attachment-data :attachment-id new-id :content (:output-file processing-result) :filename new-filename :valid-pdfa true))
+        (fail :error.unknown)))
+    (let [missing-fonts (or (:missing-fonts processing-result) [])]
+      (when-not (attachment/attach-file! (assoc attachment-data :missing-fonts missing-fonts))
+        (fail :error.unknown)))))
+
+(defn- upload! [{:keys [filename content] :as attachment-data}]
   (if (and (env/feature? :arkistointi) (= (mime/mime-type filename) "application/pdf"))
     (let [processing-result (pdf-conversion/convert-to-pdf-a content)]
       (if (:already-valid-pdfa? processing-result)
         (when-not (attachment/attach-file! (assoc attachment-data :valid-pdfa true))
           (fail :error.unknown))
-        (if (:pdfa? processing-result)
-          (let [attach-file-result (attachment/attach-file! attachment-data)
-                new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")
-                new-id (:id attach-file-result)]
-            (when-not (attachment/attach-file! (assoc attachment-data :attachment-id new-id :content (:output-file processing-result) :filename new-filename :valid-pdfa true))
-              (fail :error.unknown)))
-          (let [missing-fonts (or (:missing-fonts processing-result) [])]
-            (when-not (attachment/attach-file! (assoc attachment-data :missing-fonts missing-fonts))
-              (fail :error.unknown))))))
+        (convert-pdf-and-upload! processing-result attachment-data)))
       (when-not (attachment/attach-file! attachment-data)
         (fail :error.unknown))))
 
