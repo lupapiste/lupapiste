@@ -238,12 +238,19 @@
   @include bubble;
 }
 
+
 .comment-bubble-authority {
   @include bubble( $left: 95% );
   .header {
     border-bottom-color: $turqo;
   }
 }
+
+.comment-bubble > span,
+.comment-bubble-authority > span {
+  white-space: pre-wrap;
+}
+
 
 .comment-bubble.attachment,
 .comment-bubble-authority.attachment {

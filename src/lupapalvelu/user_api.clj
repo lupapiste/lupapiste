@@ -97,12 +97,22 @@
 (notifications/defemail :invite-authority
   (assoc base-email-conf :subject-key "authority-invite.title" :recipients-fn notifications/from-user))
 
+(notifications/defemail :notify-authority-added
+  {:model-fn (fn [{name :data} conf recipient] {:org-fi (:fi name), :org-sv (:sv name)}),
+   :subject-key "authority-notification.title",
+   :recipients-fn notifications/from-user})
+
 (notifications/defemail :reset-password
   (assoc base-email-conf :subject-key "reset.email.title" :recipients-fn notifications/from-data))
 
 (defn- notify-new-authority [new-user created-by]
   (let [token (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))]
     (notifications/notify! :invite-authority {:user new-user, :data {:token token}})))
+
+(defn- notify-authority-added [email organization-id]
+  (let [user (user/get-user-by-email email)
+        org-name (:name (organization/get-organization organization-id))]
+    (notifications/notify! :notify-authority-added {:user user, :data org-name})))
 
 (defn- create-authority-user-with-organization [caller new-organization email firstName lastName roles]
   (let [org-authz {new-organization (into #{} roles)}
@@ -224,7 +234,9 @@
         email           (user/canonize-email email)
         result          (user/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})]
     (if (ok? result)
-      (ok :operation "add")
+      (do
+        (notify-authority-added email organization-id)
+        (ok :operation "add"))
       (if-not (user/get-user-by-email email)
         (create-authority-user-with-organization caller organization-id email firstName lastName actual-roles)
         (fail :error.user-not-found)))))

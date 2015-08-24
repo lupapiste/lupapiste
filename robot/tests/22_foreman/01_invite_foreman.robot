@@ -29,6 +29,7 @@ Mikko sees sent invitation on the original application
   Click by test id  test-application-link-permit-lupapistetunnus
   Wait until  Element text should be  xpath=//span[@data-test-id='application-id']  ${newApplicationid}
   Open tab  parties
+  Open accordions  parties
   Wait until  Element text should be  xpath=//ul[@data-test-id='invited-foremans']//span[@data-test-id='foreman-email']  (teppo@example.com)
   [Teardown]  logout
 
