@@ -100,9 +100,9 @@
 
   (let [property-id (str sonja-muni "-123-0000-1234")
         application (create-and-submit-application sonja
-                      :propertyId sipoo-property-id
-                      :address "Hakukuja 123"
-                      :propertyId (p/to-property-id property-id)
+                      :address "Latokuja"
+                      :propertyId "75341600550007"
+                      :x 404369.304 :y 6693806.957
                       :operation "muu-uusi-rakentaminen") => truthy
         application-id (:id application)
         id-matches? (fn [response]
@@ -110,10 +110,9 @@
                         (one-result? response)
                         (= (get-in response [:data :applications 0 :id]) application-id)))
         application2 (create-and-submit-application sonja
-                                   :propertyId sipoo-property-id
-                                   :address "Hakukuja 10"
-                                   :propertyId (p/to-property-id property-id)
-                                   :operation "purkaminen")
+                       :address "Hakukuja 10"
+                       :propertyId (p/to-property-id property-id)
+                       :operation "purkaminen")
         application-id2 (:id application2)]
 
     (count (get-in (datatables sonja :applications-search :handler sonja-id) [:data :applications])) => 2
@@ -123,15 +122,26 @@
       (count (get-in (datatables sonja :applications-search :handler ronja-id) [:data :applications])) => 1
       (get-in (datatables sonja :applications-search :handler ronja-id) [:data :applications 0 :id]) => application-id)
 
-    ; Change assignee to Sonja and add tags to application
-    (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
-    (command sonja :add-application-tags :id application-id2 :tags ["222"]) => ok?
+    (command sonja :add-application-tags :id application-id :tags ["222"]) => ok?
+    (fact "$and query returns 1"
+      (count (get-in (datatables sonja :applications-search :handler ronja-id :applicationTags ["222"]) [:data :applications])) => 1)
 
-    (fact "$and query returns 0"
-      (count (get-in (datatables sonja :applications-search :handler ronja-id :tags ["222"]) [:data :applications])) => 0)
+    (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
+    (fact "$and query returns 0 when handler is returning 0 matches"
+      (count (get-in (datatables sonja :applications-search :handler ronja-id :applicationTags ["222"]) [:data :applications])) => 0)
 
     (fact "Tags filter"
-      (get-in (datatables sonja :applications-search :tags ["222"]) [:data :applications 0 :id]) => application-id2)
+      (get-in (datatables sonja :applications-search :applicationTags ["222"]) [:data :applications 0 :id]) => application-id)
 
+    (fact "Area filter"
+      (let [res (datatables sonja :applications-search :areas ["sipoo_keskusta"])]
+        (count (get-in res [:data :applications])) => 1
+        (get-in res [:data :applications 0 :id]) => application-id))
 
-    ))
+    (fact "Combined"
+      (let [res (datatables sonja :applications-search
+                  :areas ["sipoo_keskusta"]
+                  :handler sonja-id
+                  :tags ["222" "111"])]
+        (count (get-in res [:data :applications])) => 1
+        (get-in res [:data :applications 0 :id]) => application-id))))
