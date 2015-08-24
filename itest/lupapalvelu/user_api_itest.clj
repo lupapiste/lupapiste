@@ -102,7 +102,15 @@
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
       (:subject email) => "Lupapiste.fi: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
-      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
+      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))
+
+  (fact "add existing authority to new organization"
+
+    (command naantali :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add"  :roles ["authority"]) => ok?
+    (let [email (last-email)]
+      (:to email) => (contains "tonja.sibbo@sipoo.fi")
+      (:subject email) => "Lupapiste.fi: Ilmoitus k\u00e4ytt\u00e4j\u00e4tilin liitt\u00e4misest\u00e4 organisaation viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (get-in email [:body :plain]) => (contains "Naantalin rakennusvalvonta"))))
 
 (facts remove-user-organization
   (apply-remote-minimal)
