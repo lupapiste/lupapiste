@@ -250,12 +250,12 @@
 
               <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
                 <div class="file-preview-content">
-                  <a class="btn secondary" data-bind="attr: {href: previewUrl}, toggleClick: previewVisible" target="file-preview-iframe-name">
+                  <a class="btn secondary" data-bind="attr: {href: previewUrl}, toggleClick: previewVisible" target="file-preview-iframe-name" data-test-id="file-preview">
                     <i data-bind="css: {'lupicon-chevron-small-right': !previewVisible(), 'lupicon-chevron-small-down': previewVisible}"></i>
                     <span data-bind="ltext: 'attachment.pdf.preview.link'"></span>
                   </a>
                   <div data-bind="visible: previewVisible">
-                    <div data-bind="visible: $root.authorization.ok('rotate-pdf') && isPdf()">
+                    <div data-bind="if: $root.authorization.ok('rotate-pdf') && isPdf()" data-test-id="pdf-rotation-buttons">
 <!-- authorization.ok checks the feature flag too in this case --><div class="feature">
                       <button data-bind="click: _.partial(rotete, -90)">
                         <i class="lupicon-rotate-left"></i>
