@@ -255,15 +255,15 @@
                     <span data-bind="ltext: 'attachment.pdf.preview.link'"></span>
                   </a>
                   <div data-bind="visible: previewVisible">
-                    <button data-bind="">
+                    <button data-bind="click: _.partial(rotete, -90)">
                       <i class="lupicon-rotate-left"></i>
                       <span data-bind="ltext: 'rotate-left'"></span>
                     </button>
-                    <button data-bind="">
+                    <button data-bind="click: _.partial(rotete, 180)">
                       <i class="lupicon-refresh"></i>
                       <span data-bind="ltext: 'rotate-over'"></span>
                     </button>
-                    <button data-bind="">
+                    <button data-bind="click: _.partial(rotete, 90)">
                       <i class="lupicon-rotate-right"></i>
                       <span data-bind="ltext: 'rotate-right'"></span>
                     </button>

@@ -338,6 +338,8 @@
   {:parameters  [id attachmentId rotation]
    :user-roles  #{:applicant :authority}
    :user-authz-roles action/all-authz-writer-roles
+   :input-validators [(partial action/number-parameters [:rotation])
+                      (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
    :pre-checks  attachment-modification-precheks
    :states      (states/all-states-but states/terminal-states)
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."

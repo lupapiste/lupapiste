@@ -14,7 +14,7 @@ var attachment = (function() {
     ajax
       .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
       .success(function() {
-        repository.load(applicationId);
+        applicationModel.reload();
         applicationModel.open("attachments");
         model.previewDisabled(false);
         return false;
@@ -228,6 +228,14 @@ var attachment = (function() {
 
     toggleTosMetadata: function() {
       model.showTosMetadata(!model.showTosMetadata());
+    },
+
+    rotete: function(rotation) {
+      ajax.command("rotate-pdf", {id: applicationId, attachmentId: attachmentId, rotation: rotation})
+        .success(function() {
+          applicationModel.reload();
+        })
+        .call();
     }
   };
 
