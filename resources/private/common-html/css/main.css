@@ -5213,10 +5213,11 @@ table.attachments-template-table td.attachment-version-info {
   white-space: pre-line;
 }
 
-/* line 237, ../sass/partials/_conversation.scss */
+/* line 238, ../sass/partials/_conversation.scss */
 .comment-bubble {
   position: relative;
   color: #333333;
+  white-space: pre-wrap;
   background: #f6f6f6;
   width: 100%;
   border-radius: 2px;
@@ -5227,7 +5228,7 @@ table.attachments-template-table td.attachment-version-info {
   margin-bottom: 15px;
   border: 1px solid #bbbbbb;
 }
-/* line 171, ../sass/partials/_conversation.scss */
+/* line 172, ../sass/partials/_conversation.scss */
 .comment-bubble:after, .comment-bubble:before {
   top: 100%;
   left: 5%;
@@ -5238,25 +5239,25 @@ table.attachments-template-table td.attachment-version-info {
   position: absolute;
   pointer-events: none;
 }
-/* line 182, ../sass/partials/_conversation.scss */
+/* line 183, ../sass/partials/_conversation.scss */
 .comment-bubble:after, .comment-bubble:before {
   left: 5%;
 }
-/* line 185, ../sass/partials/_conversation.scss */
+/* line 186, ../sass/partials/_conversation.scss */
 .comment-bubble:after {
   border-color: rgba(246, 246, 246, 0);
   border-top-color: #f6f6f6;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 191, ../sass/partials/_conversation.scss */
+/* line 192, ../sass/partials/_conversation.scss */
 .comment-bubble:before {
   border-color: rgba(187, 187, 187, 0);
   border-top-color: #bbbbbb;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 197, ../sass/partials/_conversation.scss */
+/* line 198, ../sass/partials/_conversation.scss */
 .comment-bubble .header {
   border-bottom: 2px solid #bbbbbb;
   margin-bottom: 5px;
@@ -5265,34 +5266,34 @@ table.attachments-template-table td.attachment-version-info {
   overflow-y: hidden;
   vertical-align: top;
 }
-/* line 204, ../sass/partials/_conversation.scss */
+/* line 205, ../sass/partials/_conversation.scss */
 .comment-bubble .header .sender {
   float: left;
   font-weight: bold;
 }
-/* line 207, ../sass/partials/_conversation.scss */
+/* line 208, ../sass/partials/_conversation.scss */
 .comment-bubble .header .sender .role {
   text-transform: lowercase;
 }
-/* line 209, ../sass/partials/_conversation.scss */
+/* line 210, ../sass/partials/_conversation.scss */
 .comment-bubble .header .sender .role:before {
   content: "(";
 }
-/* line 212, ../sass/partials/_conversation.scss */
+/* line 213, ../sass/partials/_conversation.scss */
 .comment-bubble .header .sender .role:after {
   content: ")";
 }
-/* line 217, ../sass/partials/_conversation.scss */
+/* line 218, ../sass/partials/_conversation.scss */
 .comment-bubble .header .sender .to:before {
   margin-left: 12px;
   margin-right: 12px;
   content: "→";
 }
-/* line 224, ../sass/partials/_conversation.scss */
+/* line 225, ../sass/partials/_conversation.scss */
 .comment-bubble .header .timestamp {
   float: right;
 }
-/* line 228, ../sass/partials/_conversation.scss */
+/* line 229, ../sass/partials/_conversation.scss */
 .comment-bubble a {
   color: #f39129;
   text-decoration: none;
@@ -5311,15 +5312,16 @@ table.attachments-template-table td.attachment-version-info {
   color: #fbc732;
   text-decoration: underline;
 }
-/* line 231, ../sass/partials/_conversation.scss */
+/* line 232, ../sass/partials/_conversation.scss */
 .comment-bubble .deleted {
   text-decoration: line-through;
 }
 
-/* line 241, ../sass/partials/_conversation.scss */
+/* line 242, ../sass/partials/_conversation.scss */
 .comment-bubble-authority {
   position: relative;
   color: #333333;
+  white-space: pre-wrap;
   background: #f6f6f6;
   width: 100%;
   border-radius: 2px;
@@ -5330,7 +5332,7 @@ table.attachments-template-table td.attachment-version-info {
   margin-bottom: 15px;
   border: 1px solid #bbbbbb;
 }
-/* line 171, ../sass/partials/_conversation.scss */
+/* line 172, ../sass/partials/_conversation.scss */
 .comment-bubble-authority:after, .comment-bubble-authority:before {
   top: 100%;
   left: 95%;
@@ -5341,25 +5343,25 @@ table.attachments-template-table td.attachment-version-info {
   position: absolute;
   pointer-events: none;
 }
-/* line 182, ../sass/partials/_conversation.scss */
+/* line 183, ../sass/partials/_conversation.scss */
 .comment-bubble-authority:after, .comment-bubble-authority:before {
   left: 95%;
 }
-/* line 185, ../sass/partials/_conversation.scss */
+/* line 186, ../sass/partials/_conversation.scss */
 .comment-bubble-authority:after {
   border-color: rgba(246, 246, 246, 0);
   border-top-color: #f6f6f6;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 191, ../sass/partials/_conversation.scss */
+/* line 192, ../sass/partials/_conversation.scss */
 .comment-bubble-authority:before {
   border-color: rgba(187, 187, 187, 0);
   border-top-color: #bbbbbb;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 197, ../sass/partials/_conversation.scss */
+/* line 198, ../sass/partials/_conversation.scss */
 .comment-bubble-authority .header {
   border-bottom: 2px solid #bbbbbb;
   margin-bottom: 5px;
@@ -5368,34 +5370,34 @@ table.attachments-template-table td.attachment-version-info {
   overflow-y: hidden;
   vertical-align: top;
 }
-/* line 204, ../sass/partials/_conversation.scss */
+/* line 205, ../sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender {
   float: left;
   font-weight: bold;
 }
-/* line 207, ../sass/partials/_conversation.scss */
+/* line 208, ../sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender .role {
   text-transform: lowercase;
 }
-/* line 209, ../sass/partials/_conversation.scss */
+/* line 210, ../sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender .role:before {
   content: "(";
 }
-/* line 212, ../sass/partials/_conversation.scss */
+/* line 213, ../sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender .role:after {
   content: ")";
 }
-/* line 217, ../sass/partials/_conversation.scss */
+/* line 218, ../sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender .to:before {
   margin-left: 12px;
   margin-right: 12px;
   content: "→";
 }
-/* line 224, ../sass/partials/_conversation.scss */
+/* line 225, ../sass/partials/_conversation.scss */
 .comment-bubble-authority .header .timestamp {
   float: right;
 }
-/* line 228, ../sass/partials/_conversation.scss */
+/* line 229, ../sass/partials/_conversation.scss */
 .comment-bubble-authority a {
   color: #f39129;
   text-decoration: none;
@@ -5414,22 +5416,22 @@ table.attachments-template-table td.attachment-version-info {
   color: #fbc732;
   text-decoration: underline;
 }
-/* line 231, ../sass/partials/_conversation.scss */
+/* line 232, ../sass/partials/_conversation.scss */
 .comment-bubble-authority .deleted {
   text-decoration: line-through;
 }
-/* line 243, ../sass/partials/_conversation.scss */
+/* line 244, ../sass/partials/_conversation.scss */
 .comment-bubble-authority .header {
   border-bottom-color: #05d3b9;
 }
 
-/* line 250, ../sass/partials/_conversation.scss */
+/* line 251, ../sass/partials/_conversation.scss */
 .comment-bubble.attachment .header,
 .comment-bubble-authority.attachment .header {
   border-bottom-color: #f7ac2e;
 }
 
-/* line 257, ../sass/partials/_conversation.scss */
+/* line 258, ../sass/partials/_conversation.scss */
 .comment-bubble.for-me .header,
 .comment-bubble-authority.for-me .header {
   border-bottom-color: #46b02d;
