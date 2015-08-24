@@ -280,12 +280,18 @@
    validate-attachment-type
    a/validate-authority-in-drafts])
 
-(defn- convert-pdf-and-upload! [processing-result {:keys [filename] :as attachment-data}]
+(defn- convert-pdf-and-upload! [processing-result {:keys [application filename] :as attachment-data}]
   (if (:pdfa? processing-result)
     (let [attach-file-result (attachment/attach-file! attachment-data)
           new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")
-          new-id (:id attach-file-result)]
-      (when-not (attachment/attach-file! (assoc attachment-data :attachment-id new-id :content (:output-file processing-result) :filename new-filename :valid-pdfa true))
+          new-id (:id attach-file-result)
+          pdfa-attachment-data (assoc attachment-data
+                                 :application (domain/get-application-no-access-checking (:id application)) ; Refresh attachment versions
+                                 :attachment-id new-id
+                                 :content (:output-file processing-result)
+                                 :filename new-filename
+                                 :valid-pdfa true)]
+      (when-not (attachment/attach-file! pdfa-attachment-data)
         (fail :error.unknown)))
     (let [missing-fonts (or (:missing-fonts processing-result) [])]
       (when-not (attachment/attach-file! (assoc attachment-data :missing-fonts missing-fonts))
