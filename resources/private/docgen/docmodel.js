@@ -1877,6 +1877,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         fun: function() {
           bubble.toggleClass( "is-closed");
           descriptionInput.focus();
+          window.Sticky
         },
         bubble: bubble
     }
