@@ -157,6 +157,7 @@
                $left: 5%, $nubbin: 10px ) {
   position: relative;
   color: $text;
+  white-space: pre-wrap;
   background: $bg;
   width: 100%;
   border-radius: 2px;
