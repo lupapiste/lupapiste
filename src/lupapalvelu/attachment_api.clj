@@ -4,9 +4,10 @@
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
+            [sade.core :refer [ok fail fail! now def-]]
+            [sade.env :as env]
             [sade.strings :as ss]
-            [sade.util :refer [future*]]
-            [sade.core :refer [ok fail fail! now]]
+            [sade.util :as util :refer [future*]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
@@ -24,12 +25,13 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
-            [sade.util :as util]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.pdf-conversion :as pdf-conversion]
-            [sade.env :as env])
+            [lupapalvelu.pdftk :as pdftk])
   (:import [java.io File]))
+
+(defn- delete-file! [^java.io.File file] (try (.delete file) (catch Exception _)))
 
 ;; Validators
 
@@ -278,6 +280,30 @@
    validate-attachment-type
    a/validate-authority-in-drafts])
 
+(defn upload! [{:keys [filename content] :as attachment-data}]
+  (if (and (env/feature? :arkistointi) (= (mime/mime-type filename) "application/pdf"))
+    (let [processing-result (pdf-conversion/convert-to-pdf-a content)]
+      (if (:already-valid-pdfa? processing-result)
+        (when-not (attachment/attach-file! (assoc attachment-data :valid-pdfa true))
+          (fail :error.unknown))
+        (if (:pdfa? processing-result)
+          (let [attach-file-result (attachment/attach-file! attachment-data)
+                new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")
+                new-id (:id attach-file-result)]
+            (when-not (attachment/attach-file! (assoc attachment-data :attachment-id new-id :content (:output-file processing-result) :filename new-filename :valid-pdfa true))
+              (fail :error.unknown)))
+          (let [missing-fonts (or (:missing-fonts processing-result) [])]
+            (when-not (attachment/attach-file! (assoc attachment-data :missing-fonts missing-fonts))
+              (fail :error.unknown))))))
+      (when-not (attachment/attach-file! attachment-data)
+        (fail :error.unknown))))
+
+(def- base-upload-options
+  {:comment-text nil
+   :required false
+   :valid-pdfa false
+   :missing-fonts []})
+
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
    :user-roles #{:applicant :authority :oirAuthority}
@@ -298,37 +324,20 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
 
-  (let [attachment-data {:application application
-                         :filename filename
-                         :size size
-                         :content tempfile
-                         :attachment-id attachmentId
-                         :attachment-type attachmentType
-                         :op op
-                         :comment-text text
-                         :target target
-                         :locked locked
-                         :required false
-                         :user user
-                         :created created
-                         :valid-pdfa false
-                         :missing-fonts []}]
-    (if (and (env/feature? :arkistointi) (= (mime/mime-type filename) "application/pdf"))
-      (let [processing-result (pdf-conversion/convert-to-pdf-a tempfile)]
-        (if (:already-valid-pdfa? processing-result)
-          (when-not (attachment/attach-file! (assoc attachment-data :valid-pdfa true))
-            (fail :error.unknown))
-          (if (:pdfa? processing-result)
-            (let [attach-file-result (attachment/attach-file! attachment-data)
-                  new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")
-                  new-id (:id attach-file-result)]
-              (when-not (attachment/attach-file! (assoc attachment-data :attachment-id new-id :content (:output-file processing-result) :filename new-filename :valid-pdfa true))
-                (fail :error.unknown)))
-            (let [missing-fonts (or (:missing-fonts processing-result) [])]
-              (when-not (attachment/attach-file! (assoc attachment-data :missing-fonts missing-fonts))
-                (fail :error.unknown))))))
-      (when-not (attachment/attach-file! attachment-data)
-        (fail :error.unknown)))))
+  (upload! (merge
+             base-upload-options
+             {:application application
+              :filename filename
+              :size size
+              :content tempfile
+              :attachment-id attachmentId
+              :attachment-type attachmentType
+              :op op
+              :comment-text text
+              :target target
+              :locked locked
+              :user user
+              :created created})))
 
 ;;
 ;; Rotate
@@ -345,8 +354,29 @@
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."
    :feature     :pdfrotate
    }
-  (fail :error.unknown)
-  )
+  [{:keys [application user created]}]
+  (if-let [attachment (attachment/get-attachment-info application attachmentId)]
+    (let [{:keys [contentType fileId filename] :as latest-version} (last (:versions attachment))
+          temp-pdf (File/createTempFile fileId ".tmp")
+          upload-options (merge
+                           base-upload-options
+                           {:application application
+                            :content temp-pdf
+                            :attachment-id attachmentId
+                            :filename filename
+                            :content-type contentType
+                            :created created
+                            :user user
+                            }
+                           )]
+      (try
+        (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
+        (with-open [content ((:content (mongo/download fileId)))]
+          (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
+          (upload! (assoc upload-options :size (.length temp-pdf))))
+        (finally
+          (delete-file! temp-pdf))))
+    (fail :error.unknown)))
 
 ;;
 ;; Stamping:
@@ -387,7 +417,7 @@
                                           :content-type contentType :size (.length temp-file)
                                           :comment-text nil :now now :user user
                                           :stamped true :make-comment false :state :ok}))
-    (try (.delete temp-file) (catch Exception _))
+    (delete-file! temp-file)
     new-file-id))
 
 (defn- stamp-attachments!
