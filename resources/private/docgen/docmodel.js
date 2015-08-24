@@ -1940,7 +1940,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var op = self.schema.info.op;
 
     var section = document.createElement("section");
-    var sticky = $("<div>").addClass( "sticky accordion-toggle");
+    var sticky = $("<div>").addClass( "sticky");
     var iconUp = document.createElement("i");
     var iconDown = document.createElement("i");
     var toggle = document.createElement("button");
@@ -1962,7 +1962,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     iconDown.className = "lupicon-chevron-down";
     toggle.appendChild( iconDown );
     toggle.appendChild( iconUp );
-    toggle.className = "secondary ";
+    toggle.className = "secondary accordion-toggle";
     var descId = _.uniqueId( "data-desc-");
     var barDesc = $("<span>").addClass( "description").attr( descId, "1")
     if( op && _.size(  op.description ) ) {
