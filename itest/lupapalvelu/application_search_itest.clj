@@ -96,6 +96,42 @@
 
         (fact "Sonja gave verdict"
           state-fi => "P\u00e4\u00e4t\u00f6s annettu"
-          state-sv => "Beslut givet")))
+          state-sv => "Beslut givet"))))
+
+  (let [property-id (str sonja-muni "-123-0000-1234")
+        application (create-and-submit-application sonja
+                      :propertyId sipoo-property-id
+                      :address "Hakukuja 123"
+                      :propertyId (p/to-property-id property-id)
+                      :operation "muu-uusi-rakentaminen") => truthy
+        application-id (:id application)
+        id-matches? (fn [response]
+                      (and
+                        (one-result? response)
+                        (= (get-in response [:data :applications 0 :id]) application-id)))
+        application2 (create-and-submit-application sonja
+                                   :propertyId sipoo-property-id
+                                   :address "Hakukuja 10"
+                                   :propertyId (p/to-property-id property-id)
+                                   :operation "purkaminen")
+        application-id2 (:id application2)]
+
+    (count (get-in (datatables sonja :applications-search :handler sonja-id) [:data :applications])) => 2
+    (command sonja :assign-application :id application-id :assigneeId ronja-id) => ok?
+
+    (fact "Handler filter"
+      (count (get-in (datatables sonja :applications-search :handler ronja-id) [:data :applications])) => 1
+      (get-in (datatables sonja :applications-search :handler ronja-id) [:data :applications 0 :id]) => application-id)
+
+    ; Change assignee to Sonja and add tags to application
+    (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
+    (command sonja :add-application-tags :id application-id2 :tags ["222"]) => ok?
+
+    (fact "$and query returns 0"
+      (count (get-in (datatables sonja :applications-search :handler ronja-id :tags ["222"]) [:data :applications])) => 0)
+
+    (fact "Tags filter"
+      (get-in (datatables sonja :applications-search :tags ["222"]) [:data :applications 0 :id]) => application-id2)
+
 
     ))

@@ -56,6 +56,9 @@
                                                  {"$or" [{"auth.id" "321"} {"authority.id" "321"}]}
                                                  {:tags {"$in" ["test1" "test2"]}}])}))
 
+(fact "Organization are present in query"
+  (-> (make-query {} {:applicationOrganizations ["753-R" "753-YA"]} {}) (get "$and") last :organization) => {"$in" ["753-R" "753-YA"]})
+
 
 (def multi-feature-simple {:id "multi-simple",
                            :properties {:nimi "simple multi"},
@@ -110,7 +113,7 @@
 (fact "Multimethod for features' MultiPolygon/Polygon coordinates"
   (fact "Returns Polygon from MultiPolygon when only one Polygon is present"
     (resolve-coordinates multi-feature-simple) => (resolve-coordinates polygon-feature))
-  (fact "For , returns two Polygons"
+  (fact "returns two Polygons"
     (count (resolve-coordinates multi-feature)) => 2))
 
 (facts "Area query is in correct form"
@@ -153,5 +156,4 @@
       {:_id {$in #{"753-R"}} :areas.features.id {$in ["polygon" "multi-polygon"]}} [:areas]) => [{:id "753-R"
                                                                                                  :areas {:type "FeatureCollection"
                                                                                                          :features [multi-feature polygon-feature]}}]))
-(fact "Organization are present in query"
-  (-> (make-query {} {:applicationOrganizations ["753-R" "753-YA"]} {}) (get "$and") last :organization) => {"$in" ["753-R" "753-YA"]})
+
