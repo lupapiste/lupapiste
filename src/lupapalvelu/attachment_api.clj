@@ -366,9 +366,7 @@
                             :filename filename
                             :content-type contentType
                             :created created
-                            :user user
-                            }
-                           )]
+                            :user user})]
       (try
         (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
         (with-open [content ((:content (mongo/download fileId)))]
