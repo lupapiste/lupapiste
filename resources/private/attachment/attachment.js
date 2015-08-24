@@ -231,9 +231,15 @@ var attachment = (function() {
     },
 
     rotete: function(rotation) {
+      var iframe$ = $("#file-preview-iframe");
+      iframe$.attr("src","/img/ajax-loader.gif");
       ajax.command("rotate-pdf", {id: applicationId, attachmentId: attachmentId, rotation: rotation})
         .success(function() {
           applicationModel.reload();
+          hub.subscribe("attachment-loaded", function() {
+            model.previewVisible(true);
+            iframe$.attr("src","/api/raw/view-attachment?attachment-id=" + model.latestVersion().fileId);
+          }, true);
         })
         .call();
     }
@@ -471,8 +477,10 @@ var attachment = (function() {
       return att.id === model.id();
     }));
 
-    subscribe();
+    hub.send("attachment-loaded");
   }
+
+  hub.subscribe("attachment-loaded", subscribe);
 
   hub.onPageLoad("attachment", function() {
     pageutil.showAjaxWait();
