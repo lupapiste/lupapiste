@@ -255,6 +255,7 @@
                     <span data-bind="ltext: 'attachment.pdf.preview.link'"></span>
                   </a>
                   <div data-bind="visible: previewVisible">
+                    <!-- ko if: isPdf -->
                     <button data-bind="click: _.partial(rotete, -90)">
                       <i class="lupicon-rotate-left"></i>
                       <span data-bind="ltext: 'rotate-left'"></span>
@@ -267,6 +268,7 @@
                       <i class="lupicon-rotate-right"></i>
                       <span data-bind="ltext: 'rotate-right'"></span>
                     </button>
+                    <!-- /ko -->
                     <iframe id="file-preview-iframe" name="file-preview-iframe-name"></iframe>
                   </div>
                 </div>
