@@ -30,7 +30,6 @@ jQuery(document).ready(function() {
     "company-edit",
     "tags-editor",
     "upload",
-    "leaflet-map",
     "openlayers-map",
     "vetuma-init",
     "vetuma-status",
