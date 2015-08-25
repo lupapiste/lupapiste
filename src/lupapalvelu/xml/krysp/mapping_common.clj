@@ -158,21 +158,23 @@
 
 (def alkuHetki {:tag :alkuHetki :ns "yht"})
 
+(def rakennuspaikanKiinteistotieto {:tag :rakennuspaikanKiinteistotieto :ns "yht"
+                                    :child [{:tag :RakennuspaikanKiinteisto
+                                             :child [{:tag :kiinteistotieto
+                                                      :child [{:tag :Kiinteisto
+                                                               :child [{:tag :kylanimi}
+                                                                       {:tag :tilannimi}
+                                                                       {:tag :kiinteistotunnus}
+                                                                       {:tag :maaraAlaTunnus}]}]}
+                                                     {:tag :palsta}
+                                                     {:tag :kokotilaKytkin}
+                                                     {:tag :hallintaperuste}
+                                                     {:tag :vuokraAluetunnus}]}]})
+
 (def rakennuspaikka {:tag :Rakennuspaikka
                      :child [yksilointitieto
                              alkuHetki
-                             {:tag :rakennuspaikanKiinteistotieto :ns "yht"
-                              :child [{:tag :RakennuspaikanKiinteisto
-                                       :child [{:tag :kiinteistotieto
-                                                :child [{:tag :Kiinteisto
-                                                         :child [{:tag :kylanimi}
-                                                                 {:tag :tilannimi}
-                                                                 {:tag :kiinteistotunnus}
-                                                                 {:tag :maaraAlaTunnus}]}]}
-                                               {:tag :palsta}
-                                               {:tag :kokotilaKytkin}
-                                               {:tag :hallintaperuste}
-                                               {:tag :vuokraAluetunnus}]}]}
+                             rakennuspaikanKiinteistotieto
                              {:tag :kaavanaste :ns "yht"}
                              {:tag :kerrosala :ns "yht"}
                              {:tag :tasosijainti :ns "yht" }
