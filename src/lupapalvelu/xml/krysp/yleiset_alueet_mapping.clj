@@ -46,6 +46,11 @@
                          :child yritys-child-modified_211}]}
                {:tag :rooliKoodi}])
 
+(def osapuoli-215
+  (-> osapuoli
+    (mapping-common/update-child-element [:henkilotieto :Henkilo] [{:tag :Henkilo :child mapping-common/henkilo-child-ns-yht-215}])
+    (mapping-common/update-child-element [:yritystieto :Yritys]  [{:tag :Yritys :child mapping-common/yritys-child-ns-yht_215}])))
+
 (def vastuuhenkilo [{:tag :Vastuuhenkilo
                      :child [{:tag :sukunimi}
                              {:tag :etunimi}
@@ -55,6 +60,11 @@
                              {:tag :puhelinnumero}
                              {:tag :sahkopostiosoite}
                              {:tag :rooliKoodi}]}])
+
+(def vastuuhenkilo-215
+  (mapping-common/update-child-element vastuuhenkilo
+    [:osoitetieto :osoite]
+    {:tag :osoite :child mapping-common/postiosoite-children-ns-yht-215}))
 
 (def liitetieto [{:tag :Liite
                   :child [{:tag :kuvaus :ns "yht"}
@@ -69,6 +79,11 @@
                                     :child [{:tag :metatietoArvo}
                                             {:tag :metatietoNimi}]}]}]}])
 
+(def liitetieto-215
+  (mapping-common/update-child-element liitetieto
+    [:Liite :tekija]
+    {:tag :tekija :child osapuoli-215}))
+
 (def lausunto [{:tag :Lausunto
                 :child [{:tag :viranomainen}
                         {:tag :pyyntoPvm }
@@ -82,6 +97,11 @@
                                           {:tag :puoltotieto
                                            :child [{:tag :Puolto
                                                     :child [{:tag :puolto}]}]}]}]}]}])
+
+(def lausunto-215
+  (mapping-common/update-child-element lausunto
+    [:Lausunto :lausuntotieto :Lausunto :liitetieto]
+    {:tag :liitetieto :child liitetieto-215}))
 
 (def kasittelytieto [{:tag :Kasittelytieto
                       :child [{:tag :muutosHetki :ns "yht"}
@@ -168,7 +188,22 @@
                                                   (mapping-common/schemalocation :YA "2.2.0"))
                             (update-in [:child] mapping-common/update-child-element
                                        [:yleinenAlueAsiatieto lupa-name-key :sijaintitieto]
-                                       {:tag :sijaintitieto :child [mapping-common/sijantiType_215]}))
+                                       {:tag :sijaintitieto :child [mapping-common/sijantiType_215]})
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :maksajatieto :Maksaja]
+                                       {:tag :Maksaja :child mapping-common/maksajatype-children_215})
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :osapuolitieto :Osapuoli]
+                                       {:tag :Osapuoli :child osapuoli-215})
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :lausuntotieto]
+                                       {:tag :lausuntotieto :child lausunto-215})
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :liitetieto]
+                                       {:tag :liitetieto :child liitetieto-215})
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :vastuuhenkilotieto]
+                                       {:tag :vastuuhenkilotieto :child vastuuhenkilo-215}))
         ya_to_krysp_2_2_1 (-> ya_to_krysp_2_2_0
                             (assoc-in [:attr :xsi:schemaLocation]
                               (mapping-common/schemalocation :YA "2.2.1")))]
