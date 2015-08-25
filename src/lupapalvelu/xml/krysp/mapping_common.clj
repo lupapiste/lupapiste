@@ -109,10 +109,18 @@
                             {:tag :postinumero}
                             {:tag :postitoimipaikannimi}])
 
+(def- postiosoite-children-215 [{:tag :kunta}
+                                {:tag :valtioSuomeksi}
+                                {:tag :valtioKansainvalinen}
+                                {:tag :osoitenimi :child [{:tag :teksti}]}
+                                {:tag :ulkomainenLahiosoite}
+                                {:tag :postinumero}
+                                {:tag :postitoimipaikannimi}
+                                {:tag :ulkomainenPostitoimipaikka}])
+
 ;; henkilo-child is used also in "yleiset alueet" but it needs the namespace to be defined again to "yht")
 (def postiosoite-children-ns-yht (in-yhteiset-ns postiosoite-children))
-
-(def- osoite {:tag :osoite :ns "yht" :child postiosoite-children})
+(def postiosoite-children-ns-yht-215 (in-yhteiset-ns postiosoite-children-215))
 
 (def gml-point {:tag :Point :ns "gml" :child [{:tag :pos}]})
 
@@ -196,8 +204,12 @@
                      {:tag :puhelin}
                      {:tag :henkilotunnus}])
 
+(def- henkilo-child-215
+  (update-child-element henkilo-child [:osoite] {:tag :osoite :child postiosoite-children-215}))
+
 ;; henkilo-child is used also in "yleiset alueet" but it needs the namespace to be defined again to "yht")
 (def henkilo-child-ns-yht (in-yhteiset-ns henkilo-child))
+(def henkilo-child-ns-yht-215 (in-yhteiset-ns henkilo-child-215))
 
 (def yritys-child_211 [{:tag :nimi}
                        {:tag :liikeJaYhteisotunnus}
@@ -218,9 +230,14 @@
 
 (def yritys-child_213
   (in-yhteiset-ns (-> yritys-child_211
-    (conj {:tag :verkkolaskutustieto :child [verkkolaskutus_213]})
-    (update-child-element [:kayntiosoite] {:tag :kayntiosoitetieto :child [{:tag :kayntiosoite :child postiosoite-children}]})
-    (update-child-element [:postiosoite]  {:tag :postiosoitetieto  :child [{:tag :postiosoite  :child postiosoite-children}]}))))
+                    (conj {:tag :verkkolaskutustieto :child [verkkolaskutus_213]})
+                    (update-child-element [:kayntiosoite] {:tag :kayntiosoitetieto :child [{:tag :kayntiosoite :child postiosoite-children}]})
+                    (update-child-element [:postiosoite]  {:tag :postiosoitetieto  :child [{:tag :postiosoite  :child postiosoite-children}]}))))
+
+(def yritys-child_215
+  (-> yritys-child_213
+    (update-child-element [:kayntiosoitetieto :kayntiosoite] [{:tag :kayntiosoite :child postiosoite-children-215}])
+    (update-child-element [:postiosoitetieto :postiosoite] [{:tag :postiosoite :child postiosoite-children-215}])))
 
 (def yritys-child-ns-yht_211 [{:tag :nimi}
                               {:tag :liikeJaYhteisotunnus}
@@ -238,10 +255,17 @@
     (update-child-element [:kayntiosoite] {:tag :kayntiosoitetieto :child [{:tag :kayntiosoite :child postiosoite-children-ns-yht}]})
     (update-child-element [:postiosoite]  {:tag :postiosoitetieto  :child [{:tag :postiosoite  :child postiosoite-children-ns-yht}]})))
 
+(def yritys-child-ns-yht_215
+  (-> yritys-child-ns-yht_213
+    (update-child-element [:kayntiosoitetieto :kayntiosoite] [{:tag :kayntiosoite :child postiosoite-children-ns-yht-215}])
+    (update-child-element [:postiosoitetieto :postiosoite] [{:tag :postiosoite :child postiosoite-children-ns-yht-215}])))
+
 (def henkilo {:tag :henkilo :ns "yht" :child henkilo-child})
+(def henkilo_215 {:tag :henkilo :ns "yht" :child henkilo-child-215})
 
 (def yritys_211 {:tag :yritys :ns "yht" :child yritys-child_211})
 (def yritys_213 {:tag :yritys :ns "yht" :child yritys-child_213})
+(def yritys_215 {:tag :yritys :ns "yht" :child yritys-child_215})
 
 (def osapuoli-body_211 {:tag :Osapuoli :child [{:tag :kuntaRooliKoodi}
                                                {:tag :VRKrooliKoodi}
@@ -250,6 +274,11 @@
                                                {:tag :turvakieltoKytkin}]})
 
 (def osapuoli-body_213 (update-in osapuoli-body_211 [:child] update-child-element [:yritys] yritys_213))
+
+(def osapuoli-body_215
+  (-> osapuoli-body_213
+    (update-in [:child] update-child-element [:henkilo] henkilo_215)
+    (update-in [:child] update-child-element [:yritys] yritys_215)))
 
 (def- naapuri {:tag :naapuritieto
                :child [{:tag :Naapuri
@@ -367,6 +396,9 @@
 (def suunnittelijatieto_213
   (update-in suunnittelijatieto_211 [:child] update-child-element [:Suunnittelija :yritys] yritys_213))
 
+(def suunnittelijatieto_215
+  (update-in suunnittelijatieto_213 [:child] update-child-element [:Suunnittelija :yritys] yritys_215))
+
 (def osapuolet_211
   {:tag :Osapuolet :ns "yht"
    :child [{:tag :osapuolitieto :child [osapuoli-body_211]}
@@ -475,6 +507,11 @@
 
 (def maksajatype-children_213
   (conj yhteystietotype-children_213 {:tag :laskuviite :ns "yht"}))
+
+(def maksajatype-children_215
+  (update-child-element maksajatype-children_213
+    [:osoitetieto :Osoite]
+    {:tag :Osoite :child postiosoite-children-ns-yht-215}))
 
 (defn get-child-element [mapping path]
   (let [children (if (map? mapping) (:child mapping) mapping)]
