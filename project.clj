@@ -54,11 +54,11 @@
                  [org.clojure/core.memoize "0.5.7"]
                  [org.apache.pdfbox/pdfbox "1.8.9" :exclusions [commons-logging]]
                  [com.levigo.jbig2/levigo-jbig2-imageio "1.6.3"]
-                 [org.geotools/gt-main "13.1"]
-                 [org.geotools/gt-shapefile "13.1"]
-                 [org.geotools/gt-geojson "13.1"]
-                 [org.geotools/gt-referencing "13.1"]
-                 [org.geotools/gt-epsg-wkt "13.1"]
+                 [org.geotools/gt-main "12.4"]
+                 [org.geotools/gt-shapefile "12.4"]
+                 [org.geotools/gt-geojson "12.4"]
+                 [org.geotools/gt-referencing "12.4"]
+                 [org.geotools/gt-epsg-wkt "12.4"]
                  [org.clojure/data.json "0.2.6"]
                  [lupapiste/commons "0.5.7"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
@@ -88,7 +88,7 @@
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
-              :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html" #"\/email-templates\/"]}
+              :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]
                  ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"

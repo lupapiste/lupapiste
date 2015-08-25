@@ -36,6 +36,7 @@
                           :reduced-foreman-history
                           :add-application-tags
                           :get-organization-tags
+                          :get-organization-areas
                           :preview-attachment}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
@@ -67,7 +68,8 @@
   (let [user {:id "user123" :orgAuthz {:999-R #{:reader}} :role "authority"}
         application {:organization "999-R" :auth [] :id "123" :permitType "YA"}
         allowed-actions #{; queries
-                          :application :validate-doc :fetch-validation-errors :get-organization-tags
+                          :application :validate-doc :fetch-validation-errors
+                          :get-organization-tags :get-organization-areas
                           :reduced-foreman-history :foreman-history :foreman-applications
                           ; commands
                           :add-comment :add-authority-notice

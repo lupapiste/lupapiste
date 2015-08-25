@@ -1,0 +1,5 @@
+applications.filter.areas:  Rajaa alueeseen
+applications.filter.operations: Rajaa toimenpiteittäin
+error.coordinates-not-epsg3067: Lataus epäonnistui. Tiedoston koordinaatit ovat väärässä muodossa, tarkista että koordinaatit ovat EPSG:3067 koordinaatistossa.
+error.shapefile-parsing-failed: Tiedoston lataus epäonnistui. Tarkista että lähettämäsi tiedosto on zip-pakattu Shape-tiedosto. Jos tiedoston lataaminen ei onnistu toimivalla Shape-tiedostolla, ota yhteyttä Lupapisteen tukeen ja lisää ongelmallinen tiedosto sähköpostin liitteeksi.
+error.illegal-shapefile: Vain pakattu zip-tiedosto on sallittu. Ole hyvä ja toimita alueet zip-tiedoston sisällä.
