@@ -92,14 +92,6 @@
   [id col]
   (some (fn [m] (when (= id (:id m)) m)) col))
 
-(defn update-in-repeating
-  ([m [k & ks] f & args]
-    (if (every? (comp ss/numeric? name) (keys m))
-      (apply hash-map (mapcat (fn [[repeat-k v]] [repeat-k (apply update-in-repeating v (conj ks k) f args)] ) m))
-      (if ks
-        (assoc m k (apply update-in-repeating (get m k) ks f args))
-        (assoc m k (apply f (get m k) args))))))
-
 ; From clojure.contrib/seq
 
 (defn indexed

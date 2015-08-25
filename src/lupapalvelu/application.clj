@@ -110,7 +110,7 @@
         whitelisted-paths (tools/whitelistify-schema zip-root)]
     (reduce (fn [new-doc [path whitelist]]
               (if-not ((set (:roles whitelist)) (keyword user-role))
-                (util/update-in-repeating new-doc (prefix-with :data path) merge {:whitelist-action (:otherwise whitelist)})
+                (tools/update-in-repeating new-doc (prefix-with :data path) merge {:whitelist-action (:otherwise whitelist)})
                 new-doc))
             doc
             whitelisted-paths)))

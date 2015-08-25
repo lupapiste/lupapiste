@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.tools
   (:require [clojure.walk :as walk]
-            [clojure.zip :as zip]))
+            [clojure.zip :as zip]
+            [sade.strings :as ss]))
 
 (defn nil-values [_] nil)
 
@@ -177,6 +178,14 @@
                          (when (map? v) (if-not (contains? v :value)
                                           (concat result (deep-find v target (conj current-location k) result))
                                           result))))))))
+
+(defn update-in-repeating
+  ([m [k & ks] f & args]
+    (if (every? (comp ss/numeric? name) (keys m))
+      (apply hash-map (mapcat (fn [[repeat-k v]] [repeat-k (apply update-in-repeating v (conj ks k) f args)] ) m))
+      (if ks
+        (assoc m k (apply update-in-repeating (get m k) ks f args))
+        (assoc m k (apply f (get m k) args))))))
 
 (defn- schema-branch? [node]
   (or
