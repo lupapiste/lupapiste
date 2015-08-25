@@ -5,15 +5,26 @@ $map-width:  320px;
 $map-height: 200px;
 $side-panel-width: 60px;
 
+// Convenience grays. Please, do not use
+// outside this file.
+$app-gray-bg:    $gray238;
+$app-gray-light: $gray246;
+$app-gray-dark:  $gray221;
+$app-gray-darkest: $gray187;
+
 /*Summary styles*/
 .application_summary {
-  background-color: $lp-dark-grey;
+  background-color: $app-gray-bg;
+  border-bottom: 2px solid $app-gray-darkest;
   min-height: 320px + $marginM;
   padding: $marginS 0 0 0;
   position:  relative;
   //z-index: 5;
   display: block;
   float: none;
+  .container {
+    margin-bottom: 0;
+  }
   // Since flexbox is not supported widely enough,
   // we make the div ordering with absolute positioning.
   // Preamble is not used in neighbors' view (no actions).
@@ -34,6 +45,9 @@ $side-panel-width: 60px;
     .application-map-container {
       left: 0;
       width: $map-width;
+      // To prevent accidental map clicks for some
+      // browsers/resolutions.
+      margin-bottom: $marginM;
     }
     .application_actions {
       right: 0;
@@ -50,7 +64,7 @@ $side-panel-width: 60px;
         float: left;
         margin: {
           left: $marginL; // Align with summary info.
-          bottom: $marginM; // Especially needed when no tabs.
+          //bottom: $marginM; // Especially needed when no tabs.
         }
       }
       .application_actions {
@@ -98,10 +112,12 @@ $side-panel-width: 60px;
 
   .application_summary_info {
     margin: 0 $marginL $marginL $marginL;
+    color: $gray51;
     //float: left;
     //width: 50%;
     h1 {
       width: 100%;
+      color: $gray51;
       .address {
         //white-space: nowrap;
       }
@@ -111,10 +127,10 @@ $side-panel-width: 60px;
       }
     }
     h2 {
-      color: #fff;
+      color: $gray51;
     }
     a {
-        color: white;
+        //color: white;
         font-size: $font-size-body;
         text-transform: none;
         height: auto;
@@ -122,7 +138,7 @@ $side-panel-width: 60px;
     }
     .summary-help {
       width: 100%;
-      background-color: $lp-dark-grey;
+      background-color: $app-gray-bg;
       font-size: 0.8em;
       font-style: italic;
 
@@ -136,24 +152,24 @@ $side-panel-width: 60px;
     }
 
     .remove-link-permit {
-      color: rgb(242,242,242);
+      //color: rgb(242,242,242);
     }
 
     .link-permit-item {
-      color: rgb(242,242,242);
+      //color: rgb(242,242,242);
       text-decoration: none;
     }
 
-    div:nth-child(even) {
-      background:rgb(127,127,127);
-    }
+    /* div:nth-child(even) { */
+    /*   background:rgb(127,127,127); */
+    /* } */
     p, .application_summary_text, ul {
       vertical-align: top;
       display: inline-block;
       width: 30%;
       margin-bottom: 0;
       padding: 6px;
-      color: rgb(242,242,242);
+      //color: rgb(242,242,242);
     }
     .application_summary_text, ul {
       width: 69%;
@@ -168,7 +184,7 @@ $side-panel-width: 60px;
       }
     }
     .state-indication {
-      background-color: $lp-dark-grey;
+      background-color: $app-gray-light;
       margin: 0 0 0 0;
       overflow: hidden;
       white-space: nowrap;
@@ -180,19 +196,19 @@ $side-panel-width: 60px;
       }
       @mixin active-state {
         color: white;
-        background-color: $lp-green;
+        background-color: $green-dark;
         display: inline-block;
         &:after {
-            border-left: 11px solid $lp-green;
+            border-left: 11px solid $green-dark;
           }
 
       }
 
       div {
-        background-color: $lp-dark-grey;
+        //background-color: $lp-dark-grey;
         height: 24px;
         span {
-          color: darken($lp-light-grey, 10%);
+          //color: darken($lp-light-grey, 10%);
           position: relative;
           padding: 4px 8px 4px 24px;
           display: inline-block;
@@ -210,7 +226,7 @@ $side-panel-width: 60px;
             top: -1px;
             right: -10px;
             border-top: 17px solid transparent;
-            border-left: 11px solid $lp-dark-grey;
+            border-left: 11px solid $app-gray-light;
             border-bottom: 17px solid transparent;
             z-index: 1;
           }
@@ -343,17 +359,14 @@ $side-panel-width: 60px;
   }
 }
 
-/* .attachment-legend { */
-/*   position: relative; */
-/*   span { */
-/*     height: 20px; */
-/*   } */
-/*   span + span { */
-/*       position: absolute; */
-/*       top:-3px; */
-/*       left: 30px; */
-/*   } */
-/* } */
+.application_summary_info > div {
+  border-bottom: 1px solid $app-gray-dark;
+}
+
+.application_summary_info > div.state-indication,
+.application_summary_info > div.summary-help {
+  border-bottom: none;
+}
 
 @mixin icon-colorizer( $id ) {
   ##{$id} {
@@ -385,15 +398,6 @@ $side-panel-width: 60px;
     margin-bottom: $marginS;
   }
 }
-/* .task-legend { */
-/*   span { */
-/*     display: inline-block; */
-/*   } */
-/*   span + span { */
-/*       margin-top: 9px; */
-/*       vertical-align: top; */
-/*   } */
-/* } */
 
 .ajax-loading-mask {
   display: none;
