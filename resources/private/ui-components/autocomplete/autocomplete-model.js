@@ -84,10 +84,10 @@ LUPAPISTE.AutocompleteModel = function(params) {
     self.dropdownClick(true);
   };
 
-  self.blur = function() {
+  self.blur = function(_, event) {
     if (self.dropdownClick()) {
       // IE hax, return focus to input when user click scrollbar
-      $(event.target || event.srcElement).focus(); // IE9 event.srcElement
+      (event.target || event.srcElement).focus(); // IE9 event.srcElement
       self.dropdownClick(false);
       return false;
     } else {
