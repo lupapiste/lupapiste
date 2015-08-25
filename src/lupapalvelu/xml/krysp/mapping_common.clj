@@ -267,11 +267,12 @@
 (def yritys_213 {:tag :yritys :ns "yht" :child yritys-child_213})
 (def yritys_215 {:tag :yritys :ns "yht" :child yritys-child_215})
 
-(def osapuoli-body_211 {:tag :Osapuoli :child [{:tag :kuntaRooliKoodi}
-                                               {:tag :VRKrooliKoodi}
-                                               henkilo
-                                               yritys_211
-                                               {:tag :turvakieltoKytkin}]})
+(def osapuoli-body_211 {:tag :Osapuoli
+                        :child [{:tag :kuntaRooliKoodi}
+                                {:tag :VRKrooliKoodi}
+                                henkilo
+                                yritys_211
+                                {:tag :turvakieltoKytkin}]})
 
 (def osapuoli-body_213 (update-in osapuoli-body_211 [:child] update-child-element [:yritys] yritys_213))
 
@@ -346,24 +347,19 @@
 (def tyonjohtaja_215 (update-in tyonjohtaja_213 [:child] conj {:tag :vainTamaHankeKytkin}))
 
 (def tyonjohtajatieto_210
-  {:tag :tyonjohtajatieto
-   :child [tyonjohtaja_210]})
+  {:tag :tyonjohtajatieto :child [tyonjohtaja_210]})
 
 (def tyonjohtajatieto_211
-  {:tag :tyonjohtajatieto
-   :child [tyonjohtaja_211]})
+  {:tag :tyonjohtajatieto :child [tyonjohtaja_211]})
 
 (def tyonjohtajatieto_212
-  {:tag :tyonjohtajatieto
-   :child [tyonjohtaja_212]})
+  {:tag :tyonjohtajatieto :child [tyonjohtaja_212]})
 
 (def tyonjohtajatieto_213
-  {:tag :tyonjohtajatieto
-   :child [tyonjohtaja_213]})
+  {:tag :tyonjohtajatieto :child [tyonjohtaja_213]})
 
 (def tyonjohtajatieto_215
-  {:tag :tyonjohtajatieto
-   :child [tyonjohtaja_215]})
+  {:tag :tyonjohtajatieto :child [tyonjohtaja_215]})
 
 (def osapuolet_210
   {:tag :Osapuolet :ns "yht"
@@ -444,36 +440,36 @@
                         {:tag :kielitieto :ns "yht"}])
 
 (def liite-children_211 [{:tag :kuvaus :ns "yht"}
-                     {:tag :linkkiliitteeseen :ns "yht"}
-                     {:tag :muokkausHetki :ns "yht"}
-                     {:tag :versionumero :ns "yht"}
-                     {:tag :tekija :ns "yht"
-                      :child [{:tag :kuntaRooliKoodi}
-                              {:tag :VRKrooliKoodi}
-                              henkilo
-                              yritys_211]}
-                     {:tag :tyyppi :ns "yht"}
-                     {:tag :metatietotieto :ns "yht"
-                      :child [{:tag :metatieto
-                               :child [{:tag :metatietoArvo}
-                                       {:tag :metatietoNimi}]}]}])
+                         {:tag :linkkiliitteeseen :ns "yht"}
+                         {:tag :muokkausHetki :ns "yht"}
+                         {:tag :versionumero :ns "yht"}
+                         {:tag :tekija :ns "yht"
+                          :child [{:tag :kuntaRooliKoodi}
+                                  {:tag :VRKrooliKoodi}
+                                  henkilo
+                                  yritys_211]}
+                         {:tag :tyyppi :ns "yht"}
+                         {:tag :metatietotieto :ns "yht"
+                          :child [{:tag :metatieto
+                                   :child [{:tag :metatietoArvo}
+                                           {:tag :metatietoNimi}]}]}])
 
 (def liite-children_213 (update-child-element liite-children_211 [:tekija :yritys] yritys_213))
 
 ; yht:LausuntoRvPType or yak:LausuntoType
 (def lausunto_211 {:tag :Lausunto
-               :child [{:tag :viranomainen :ns "yht"}
-                       {:tag :pyyntoPvm :ns "yht"}
-                       {:tag :lausuntotieto :ns "yht"
-                        :child [{:tag :Lausunto
-                                 :child [{:tag :viranomainen}
-                                         {:tag :lausunto}
-                                         {:tag :liitetieto
-                                          :child [{:tag :Liite :child liite-children_211}]}
-                                         {:tag :lausuntoPvm}
-                                         {:tag :puoltotieto
-                                          :child [{:tag :Puolto
-                                                   :child [{:tag :puolto}]}]}]}]}]})
+                   :child [{:tag :viranomainen :ns "yht"}
+                           {:tag :pyyntoPvm :ns "yht"}
+                           {:tag :lausuntotieto :ns "yht"
+                            :child [{:tag :Lausunto
+                                     :child [{:tag :viranomainen}
+                                             {:tag :lausunto}
+                                             {:tag :liitetieto
+                                              :child [{:tag :Liite :child liite-children_211}]}
+                                             {:tag :lausuntoPvm}
+                                             {:tag :puoltotieto
+                                              :child [{:tag :Puolto
+                                                       :child [{:tag :puolto}]}]}]}]}]})
 
 (def lausunto_213
   (update-in lausunto_211 [:child]
