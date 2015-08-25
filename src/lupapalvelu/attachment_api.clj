@@ -413,28 +413,25 @@
 
 
 (defn- ensure-pdf-a [temp-file valid-pdfa]
-  (debug "  ensuring PDF/A for temp-file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
+  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
   (if (not valid-pdfa)
-    (do (debugf "original not PDF/A, skipping") {:file temp-file :pdfa false})
+    (do (debugf "    no PDF/A required, no conversion") {:file temp-file :pdfa false})
     (let [a-temp-file (File/createTempFile "lupapiste.stamp.a." ".tmp")
           conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath temp-file) (.getAbsolutePath a-temp-file))]
-      (debug "    original:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
-      (debug "    pdf/a:" (.getAbsolutePath a-temp-file))
       (cond
-        (:already-valid-pdfa? conversion-result) (do (debugf "      Still PDF/A after stamping, no conversion needed.") {:file temp-file :pdfa true})
-        (:pdfa? conversion-result) (do (debug "      re-converting to file: " (.getAbsolutePath a-temp-file)) (.delete temp-file) {:file a-temp-file :pdfa true})
-        :else (do (errorf "Maintaining PDF/A on stamping failed, stamped file is not PDF/A") {:file temp-file :pdfa false})))))
+        (:already-valid-pdfa? conversion-result) (do (debugf "      file valid PDF/A, no conversion") {:file temp-file :pdfa true})
+        (:pdfa? conversion-result) (do (debug "      converting to PDF/A file: " (.getAbsolutePath a-temp-file)) (delete-file! temp-file) {:file a-temp-file :pdfa true})
+        :else (do (errorf "Esuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
 
 (defn- stamp-attachment! [stamp file-info {:keys [application user now x-margin y-margin transparency]}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp? valid-pdfa]} file-info
         temp-file (File/createTempFile "lupapiste.stamp." ".tmp")
         new-file-id (mongo/create-id)]
-    (debug "created temp file for stamp job:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
     (with-open [out (io/output-stream temp-file)]
       (stamper/stamp stamp fileId out x-margin y-margin transparency))
     (let [ensured-file (ensure-pdf-a temp-file valid-pdfa)
           {:keys [file pdfa]} ensured-file]
-      (debug "uoloading ensured file: " (.getAbsolutePath file))
+      (debug "uploading stamped file: " (.getAbsolutePath file))
       (mongo/upload new-file-id filename contentType file :application (:id application))
       (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
         (attachment/update-latest-version-content application attachment-id new-file-id (.length file) now)
@@ -444,7 +441,7 @@
                                             :comment-text nil :now now :user user
                                             :valid-pdfa pdfa
                                             :stamped true :make-comment false :state :ok}))
-      (try (.delete file) (catch Exception _)))
+      (delete-file! file))
     new-file-id))
 
 (defn- stamp-attachments!
