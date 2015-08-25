@@ -26,7 +26,7 @@ LUPAPISTE.StampModel = function(params) {
     a.filename = selected.filename;
     a.version = {major: selected.version.major, minor: selected.version.minor};
     a.size = selected.size;
-    a.selected = ko.observable(a.forPrinting);
+    a.selected = ko.observable(a.forPrinting && !a.stamped);
     a.status = ko.observable("");
     a.restamp = _(a.versions).last().stamped;
     a.stamped = ko.observable(a.stamped);
@@ -134,7 +134,7 @@ LUPAPISTE.StampModel = function(params) {
     return self.section() === "\u00a7" ? "" : self.section();
   }
 
-  self.start = function() {
+  var doStart = function() {
     self.status(self.statusStarting);
     ajax
       .command("stamp-attachments", {
@@ -161,6 +161,18 @@ LUPAPISTE.StampModel = function(params) {
     self.jobVersion = 0;
     self.status(self.statusRunning).queryUpdate();
     return false;
+  };
+
+  self.start = function() {
+    if (_.some(self.selectedFiles(), 'latestVersion.stamped')) {
+      hub.send("show-dialog", {ltitle: "application.restamp",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "application.restamp.confirmationMessage",
+                                                 yesFn: doStart}});
+    } else {
+      doStart();
+    }
   };
 
   self.queryUpdate = function() {

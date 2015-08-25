@@ -34,15 +34,22 @@
 
   window.setLogLimit = function(l) { limit = l; };
 
-  if (LUPAPISTE.config.mode !== "dev") {
-    window.onerror = function(msg, url, line, col, error) {
-      if (url) {
-        var sourcePosition = (col === undefined) ? line : line + ":" + col;
-        var message = (error === undefined || !error.stack) ? msg : msg + " -- Stack: " + error.stack;
-        window.error(url + ":" + sourcePosition + " " + message);
-      }
-      return true;
-    };
-  }
+  window.onerror = function(msg, url, line, col, error) {
+    ajax.query("newest-version", {frontendBuild: "LUPAPISTE.config.build"})
+      .onError("frontend-too-old", function() {
+        if (confirm(loc("error.frontend-outdated"))) {
+          window.location.reload();
+        }
+      })
+      .success(_.noop)
+      .call();
+
+    if (url) {
+      var sourcePosition = (col === undefined) ? line : line + ":" + col;
+      var message = (error === undefined || !error.stack) ? msg : msg + " -- Stack: " + error.stack;
+      window.error(url + ":" + sourcePosition + " " + message);
+    }
+    return true;
+  };
 
 })();

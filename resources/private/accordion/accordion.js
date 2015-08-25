@@ -37,7 +37,7 @@ var accordion = (function() {
         }
       };
 
-      content. attr ("data-accordion-state", state);
+      content.attr("data-accordion-state", state);
       if (state !== "closed") {
         content.slideDown(animationTime, animationEasing, complete);
       } else {
