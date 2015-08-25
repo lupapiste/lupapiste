@@ -17,6 +17,7 @@
     :body [{:name "katselmuksenLaji"
             :type :select :sortBy :displayname
             :required true
+            :whitelist {:roles [:authority] :otherwise :disabled}
             :body [{:name "muu katselmus"}
                    {:name "muu tarkastus"}
                    {:name "aloituskokous"}
@@ -28,15 +29,20 @@
                    {:name "osittainen loppukatselmus"}
                    {:name "loppukatselmus"}
                    {:name "ei tiedossa"}]}
-           {:name "vaadittuLupaehtona" :type :checkbox :i18nkey "vaadittuLupaehtona"}
+           {:name "vaadittuLupaehtona"
+            :type :checkbox
+            :whitelist {:roles [:authority] :otherwise :disabled}
+            :i18nkey "vaadittuLupaehtona"}
            {:name "rakennus"
             :type :group
+            :whitelist {:roles [:authority] :otherwise :disabled}
             :repeating true
             :body [{:name "rakennus" :type :group :body schemas/uusi-rakennuksen-valitsin}
                    {:name "tila" :type :group
                     :body [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
                            {:name "kayttoonottava" :type :checkbox}]}]}
            {:name "katselmus" :type :group
+            :whitelist {:roles [:authority] :otherwise :disabled}
             :body
             [{:name "pitoPvm" :type :date :required true}
              {:name "pitaja" :type :string}
