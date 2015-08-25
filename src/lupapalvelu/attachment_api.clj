@@ -407,26 +407,41 @@
   (let [versions   (-> attachment :versions reverse)
         re-stamp?  (:stamped (first versions))
         source     (if re-stamp? (second versions) (first versions))]
-    (assoc (select-keys source [:contentType :fileId :filename :size])
+    (assoc (select-keys source [:contentType :fileId :filename :size :valid-pdfa])
            :re-stamp? re-stamp?
            :attachment-id (:id attachment))))
 
+
+(defn- ensure-pdf-a [temp-file valid-pdfa]
+  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
+  (if (not valid-pdfa)
+    (do (debugf "    no PDF/A required, no conversion") {:file temp-file :pdfa false})
+    (let [a-temp-file (File/createTempFile "lupapiste.stamp.a." ".tmp")
+          conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath temp-file) (.getAbsolutePath a-temp-file))]
+      (cond
+        (:already-valid-pdfa? conversion-result) (do (debugf "      file valid PDF/A, no conversion") {:file temp-file :pdfa true})
+        (:pdfa? conversion-result) (do (debug "      converting to PDF/A file: " (.getAbsolutePath a-temp-file)) (delete-file! temp-file) {:file a-temp-file :pdfa true})
+        :else (do (errorf "Esuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
+
 (defn- stamp-attachment! [stamp file-info {:keys [application user now x-margin y-margin transparency]}]
-  (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
+  (let [{:keys [attachment-id contentType fileId filename re-stamp? valid-pdfa]} file-info
         temp-file (File/createTempFile "lupapiste.stamp." ".tmp")
         new-file-id (mongo/create-id)]
-    (debug "created temp file for stamp job:" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
       (stamper/stamp stamp fileId out x-margin y-margin transparency))
-    (mongo/upload new-file-id filename contentType temp-file :application (:id application))
-    (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-      (attachment/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
-      (attachment/set-attachment-version {:application application :attachment-id attachment-id
-                                          :file-id new-file-id :filename filename
-                                          :content-type contentType :size (.length temp-file)
-                                          :comment-text nil :now now :user user
-                                          :stamped true :make-comment false :state :ok}))
-    (delete-file! temp-file)
+    (let [ensured-file (ensure-pdf-a temp-file valid-pdfa)
+          {:keys [file pdfa]} ensured-file]
+      (debug "uploading stamped file: " (.getAbsolutePath file))
+      (mongo/upload new-file-id filename contentType file :application (:id application))
+      (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
+        (attachment/update-latest-version-content application attachment-id new-file-id (.length file) now)
+        (attachment/set-attachment-version {:application application :attachment-id attachment-id
+                                            :file-id new-file-id :filename filename
+                                            :content-type contentType :size (.length file)
+                                            :comment-text nil :now now :user user
+                                            :valid-pdfa pdfa
+                                            :stamped true :make-comment false :state :ok}))
+      (delete-file! file))
     new-file-id))
 
 (defn- stamp-attachments!
