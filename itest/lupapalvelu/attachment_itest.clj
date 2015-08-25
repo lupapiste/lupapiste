@@ -212,7 +212,7 @@
     (fact "Can rotate PDF"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 90) => ok?)
 
-    (fact "Can rotate PDF 0 degrees"
+    (fact "Can not rotate PDF 0 degrees"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 0) => fail?)
 
     (fact "Can not rotate txt"
