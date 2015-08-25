@@ -13,7 +13,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.user :refer [applicant?] :as user]
-            [lupapalvelu.application-meta-fields :as meta-fields]))
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.geojson :as geo]))
 
 ;; Operations
 
@@ -59,14 +60,6 @@
     (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
     :else (make-free-text-query filter-search)))
 
-(defmulti resolve-coordinates (comp :type :geometry))
-
-(defmethod resolve-coordinates "Polygon" [feature]
-  (get-in feature [:geometry :coordinates]))
-
-(defmethod resolve-coordinates "MultiPolygon" [feature]
-  (map (partial apply concat) (get-in feature [:geometry :coordinates])))
-
 (defn- make-area-query [areas user]
   {:pre [(sequential? areas)]}
   (let [orgs (user/organization-ids-by-roles user #{:authority})
@@ -74,7 +67,7 @@
         features (flatten (map (comp :features :areas) orgs-with-areas))
         selected-areas (set areas)
         filtered-features (filter (comp selected-areas :id) features)
-        coordinates (apply concat (map resolve-coordinates filtered-features))]
+        coordinates (apply concat (map geo/resolve-polygons filtered-features))]
     (when (seq coordinates)
       {$or (map (fn [c] {:location {$geoWithin {"$polygon" c}}}) coordinates)})))
 
