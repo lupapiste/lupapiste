@@ -3,6 +3,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
 
   var self = this;
 
+
   self.dataProvider = params.dataProvider;
   self.data = self.dataProvider.applications;
   self.tabs = ko.observableArray(["all",
@@ -32,7 +33,19 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
     }
   };
 
-  self.openApplicationTargeted = function(model, event, target) {
+  self.offset = 0;
+  self.onPageLoad = hub.onPageLoad(pageutil.getPage(), function() {
+    // Offset is not supported in IE8
+    if (self.offset) {
+      window.scrollTo(0, self.offset);
+    }
+  });
+
+  self.openApplication = function(model, event, target) {
+    self.offset = window.pageYOffset;
     pageutil.openApplicationPage(model, target);
   };
+
+  self.dispose = _.partial(hub.unsubscribe, self.onPageLoad);
+
 };
