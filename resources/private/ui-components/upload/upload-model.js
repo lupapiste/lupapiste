@@ -34,8 +34,8 @@ LUPAPISTE.UploadModel = function(params) {
           params.onSuccess(res);
         }
       },
-      error: function() {
-        self.errorMessage("error.upload-failed");
+      error: function(res) {
+        self.errorMessage(res.responseText || "error.upload-failed");
       },
       complete: function() {
         self.pending(false);
