@@ -46,8 +46,8 @@
 
 (def osapuoli-215
   (-> osapuoli
-    (mapping-common/update-child-element [:henkilotieto :Henkilo] [{:tag :Henkilo :child mapping-common/henkilo-child-ns-yht-215}])
-    (mapping-common/update-child-element [:yritystieto :Yritys]  [{:tag :Yritys :child mapping-common/yritys-child-ns-yht_215}])))
+    (mapping-common/update-child-element [:henkilotieto :Henkilo] {:tag :Henkilo :child mapping-common/henkilo-child-ns-yht-215})
+    (mapping-common/update-child-element [:yritystieto :Yritys]   {:tag :Yritys :child mapping-common/yritys-child_215})))
 
 (def vastuuhenkilo [{:tag :Vastuuhenkilo
                      :child [{:tag :sukunimi}
@@ -177,8 +177,7 @@
                                                           (mapping-common/schemalocation :YA "2.1.3"))
                             (update-in [:child] mapping-common/update-child-element
                                        [:yleinenAlueAsiatieto lupa-name-key :maksajatieto :Maksaja]
-                                       {:tag :Maksaja
-                                        :child mapping-common/maksajatype-children_213})
+                                       {:tag :Maksaja :child mapping-common/maksajatype-children_213})
                             (update-in [:child] mapping-common/update-child-element
                                        [:yleinenAlueAsiatieto lupa-name-key :osapuolitieto :Osapuoli :yritystieto :Yritys]
                                        {:tag :Yritys :child mapping-common/yritys-child_213}))
