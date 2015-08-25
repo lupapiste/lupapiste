@@ -68,10 +68,10 @@ var hub = (function() {
 
   // Helpers for page change events:
   function onPageLoad(pageId, listener, oneshot) {
-    hub.subscribe({type: "page-load", pageId: pageId}, listener, oneshot);
+    return hub.subscribe({type: "page-load", pageId: pageId}, listener, oneshot);
   }
   function onPageUnload(pageId, listener, oneshot) {
-    hub.subscribe({type: "page-unload", pageId: pageId}, listener, oneshot);
+    return hub.subscribe({type: "page-unload", pageId: pageId}, listener, oneshot);
   }
 
   return {
