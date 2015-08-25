@@ -196,9 +196,12 @@
       (resp/json (execute-export name (from-query request) (assoc request :user user)))
       basic-401)))
 
-(defpage "/api/raw/:name" {name :name}
+(defpage [:any "/api/raw/:name"] {name :name :as params}
   (let [request (request/ring-request)
-        response (execute (enriched (action/make-raw name (from-query request)) request))]
+        data (if (= :post (:request-method request))
+               (:params request)
+               (from-query request))
+        response (execute (enriched (action/make-raw name data) request))]
     (cond
       (= response core/unauthorized) (resp/status 401 "unauthorized")
       (false? (:ok response)) (resp/status 404 (resp/json response))

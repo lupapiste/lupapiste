@@ -4,10 +4,11 @@
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
             [monger.operators :refer :all]
+            [sade.coordinate :as coord]
+            [sade.core :refer :all]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
-            [sade.core :refer :all]
             [sade.property :as p]
             [lupapalvelu.action :refer [defraw defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as a]
@@ -40,11 +41,11 @@
 ;; Validators
 
 (defn- validate-x [{{:keys [x]} :data}]
-  (when (and x (not (< 10000 (util/->double x) 800000)))
+  (when (and x (not (coord/valid-x? x)))
     (fail :error.illegal-coordinates)))
 
 (defn- validate-y [{{:keys [y]} :data}]
-  (when (and y (not (<= 6610000 (util/->double y) 7779999)))
+  (when (and y (not (coord/valid-y? y)))
     (fail :error.illegal-coordinates)))
 
 (defn operation-validator [{{operation :operation} :data}]
