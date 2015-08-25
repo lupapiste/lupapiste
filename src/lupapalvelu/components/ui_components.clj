@@ -101,9 +101,9 @@
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
    :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
-   :ol             {:js ["openlayers-3.8.2.debug.js" "ol3-popup.js"]
+   :ol             {:js ["openlayers-3.8.2.min.js" "ol3-popup.js"]
                     :css ["openlayers-3.8.2.css" "ol3-popup.css"]}
-   :proj4          {:js ["proj4.js"]}
+   :proj4          {:js ["proj4-2.3.3.min.js"]}
    :leaflet        {:js ["leaflet.min.js"]
                     :css ["leaflet.css"]}
    :stickyfill     {:js ["stickyfill.min.js"]}
