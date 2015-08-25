@@ -355,17 +355,12 @@
 
 (defn unsent-attachments-to-canonical [application lang]
   (let [application (tools/unwrapped application)
-        documents (documents-by-type-without-blanks application)
-        hakija-info (-> (filter #(= (-> % :Osapuoli :VRKrooliKoodi) "hakija") (get-parties documents))
-                      first
-                      (assoc-in [:Osapuoli :kuntaRooliKoodi] "ei tiedossa"))
-        canonical {:Rakennusvalvonta
-                   {:toimituksenTiedot (toimituksen-tiedot application lang)
-                    :rakennusvalvontaAsiatieto
-                    {:RakennusvalvontaAsia
-                     {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus application)
-                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
-                      :kayttotapaus "Liitetiedoston lis\u00e4ys"
-                      }}}}]
-    canonical))
+        documents (documents-by-type-without-blanks application)]
+    {:Rakennusvalvonta
+     {:toimituksenTiedot (toimituksen-tiedot application lang)
+      :rakennusvalvontaAsiatieto
+      {:RakennusvalvontaAsia
+       {:kasittelynTilatieto (get-state application)
+        :luvanTunnisteTiedot (lupatunnus application)
+        :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
+        :kayttotapaus "Liitetiedoston lis\u00e4ys"}}}}))
