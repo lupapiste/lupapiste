@@ -262,9 +262,9 @@
                     (update-child-element [:postiosoite]  {:tag :postiosoitetieto  :child [{:tag :postiosoite  :child postiosoite-children}]}))))
 
 (def yritys-child_215
-  (-> yritys-child_213
-    (update-child-element [:kayntiosoitetieto :kayntiosoite] [{:tag :kayntiosoite :child postiosoite-children-215}])
-    (update-child-element [:postiosoitetieto :postiosoite] [{:tag :postiosoite :child postiosoite-children-215}])))
+  (in-yhteiset-ns (-> yritys-child_213
+                    (update-child-element [:kayntiosoitetieto :kayntiosoite] {:tag :kayntiosoite :child postiosoite-children-215})
+                    (update-child-element [:postiosoitetieto :postiosoite]   {:tag :postiosoite  :child postiosoite-children-215}))))
 
 (def yritys-child-ns-yht_211 [{:tag :nimi}
                               {:tag :liikeJaYhteisotunnus}
@@ -289,8 +289,8 @@
 
 (def yritys-child-ns-yht_215
   (-> yritys-child-ns-yht_213
-    (update-child-element [:kayntiosoitetieto :kayntiosoite] [{:tag :kayntiosoite :child postiosoite-children-ns-yht-215}])
-    (update-child-element [:postiosoitetieto :postiosoite] [{:tag :postiosoite :child postiosoite-children-ns-yht-215}])))
+    (update-child-element [:kayntiosoitetieto :kayntiosoite] {:tag :kayntiosoite :child postiosoite-children-ns-yht-215})
+    (update-child-element [:postiosoitetieto :postiosoite]   {:tag :postiosoite  :child postiosoite-children-ns-yht-215})))
 
 (def henkilo {:tag :henkilo :ns "yht" :child henkilo-child})
 (def henkilo_215 {:tag :henkilo :ns "yht" :child henkilo-child-215})
