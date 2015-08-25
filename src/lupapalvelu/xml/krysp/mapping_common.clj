@@ -104,6 +104,17 @@
                       {:tag :rakennusnro}
                       {:tag :aanestysalue}])
 
+(def tunnus-children-216 [{:tag :valtakunnallinenNumero}
+                          {:tag :kunnanSisainenPysyvaRakennusnumero}
+                          {:tag :jarjestysnumero}
+                          {:tag :kiinttun}
+                          {:tag :rakennusnro}
+                          {:tag :aanestysalue}
+                          {:tag :katselmusOsittainen}
+                          {:tag :kayttoonottoKytkin}
+                          {:tag :muuTunnus}
+                          {:tag :rakennuksenSelite}])
+
 (def- postiosoite-children [{:tag :kunta}
                             {:tag :osoitenimi :child [{:tag :teksti}]}
                             {:tag :postinumero}
@@ -456,6 +467,11 @@
 
 (def liite-children_213 (update-child-element liite-children_211 [:tekija :yritys] yritys_213))
 
+(def liite-children_216 (conj liite-children_213
+                          {:tag :rakennustunnustieto :ns "yht"
+                           :child [{:tag :Rakennustunnus
+                                    :child tunnus-children-216}]}))
+
 ; yht:LausuntoRvPType or yak:LausuntoType
 (def lausunto_211 {:tag :Lausunto
                    :child [{:tag :viranomainen :ns "yht"}
@@ -476,6 +492,12 @@
     update-child-element
     [:lausuntotieto :Lausunto :liitetieto :Liite]
     {:tag :Liite :child liite-children_213}))
+
+(def lausunto_216
+  (update-in lausunto_213 [:child]
+    update-child-element
+    [:lausuntotieto :Lausunto :liitetieto :Liite]
+    {:tag :Liite :child liite-children_216}))
 
 (def ymp-kasittelytieto-children [{:tag :muutosHetki :ns "yht"}
                                   {:tag :hakemuksenTila :ns "yht"}
