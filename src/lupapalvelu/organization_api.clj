@@ -8,6 +8,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.set :as set]
             [clojure.string :as s]
+            [clojure.walk :refer [keywordize-keys]]
             [cheshire.core :as cheshire]
             [monger.operators :refer :all]
             [noir.core :refer [defpage]]
@@ -16,6 +17,7 @@
             [camel-snake-kebab :as csk]
             [me.raynes.fs :as fs]
             [slingshot.slingshot :refer [try+]]
+            [sade.coordinate :as coord]
             [sade.core :refer [ok fail fail! now]]
             [sade.util :as util]
             [sade.env :as env]
@@ -31,7 +33,8 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.logging :as logging]))
+            [lupapalvelu.logging :as logging]
+            [lupapalvelu.geojson :as geo]))
 ;;
 ;; local api
 ;;
@@ -444,6 +447,16 @@
     (.close iterator)
     (DataUtilities/collection list)))
 
+(defn- validate-feature [feature]
+  (reduce
+    (fn [res polygon]
+      (or res (coord/validate-coordinates polygon)))
+    nil
+    (apply concat (geo/resolve-polygons feature))))
+
+(defn- validate-features [features]
+  (reduce (fn [res feature] (or res (validate-feature feature))) nil features))
+
 (defraw organization-area
   {:user-roles #{:authorityAdmin}}
   [{user :user {[{:keys [tempfile filename size]}] :files created :created} :data :as action}]
@@ -468,6 +481,8 @@
                              .getFeatures
                              transform-crs-to-wgs84)
             areas (cheshire/parse-string (.toString (FeatureJSON.) new-collection))]
+        (when (validate-features (:features (keywordize-keys areas)))
+          (fail! :error.coordinates-not-epsg3067))
         (o/update-organization org-id {$set {:areas areas}})
         (.dispose data-store)
         (->> (assoc file-info :areas areas :ok true)
@@ -478,8 +493,5 @@
         (resp/status 400 text))
       (catch Throwable t
         (error "Failed to parse shapefile" t)
-        (resp/status 400 :error.shapefile-parsing-failed))
-      (finally
-        ;TODO dispose shape-file here
-        ))))
+        (resp/status 400 :error.shapefile-parsing-failed)))))
 
