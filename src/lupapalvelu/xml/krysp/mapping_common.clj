@@ -276,11 +276,16 @@
                               {:tag :www}
                               {:tag :sahkopostiosoite}])
 
-
-(def yritys-child-ns-yht_213
-  (-> yritys-child-ns-yht_211
-    (update-child-element [:kayntiosoite] {:tag :kayntiosoitetieto :child [{:tag :kayntiosoite :child postiosoite-children-ns-yht}]})
-    (update-child-element [:postiosoite]  {:tag :postiosoitetieto  :child [{:tag :postiosoite  :child postiosoite-children-ns-yht}]})))
+(def yritys-child-ns-yht_213 [{:tag :nimi}
+                              {:tag :liikeJaYhteisotunnus}
+                              {:tag :kayntiosoitetieto :child [{:tag :kayntiosoite :child postiosoite-children-ns-yht}]}
+                              {:tag :postiosoitetieto  :child [{:tag :postiosoite  :child postiosoite-children-ns-yht}]}
+                              {:tag :kotipaikka}
+                              {:tag :faksinumero}
+                              {:tag :puhelin}
+                              {:tag :www}
+                              {:tag :sahkopostiosoite}
+                              {:tag :verkkolaskutustieto :child [verkkolaskutus_213]}])
 
 (def yritys-child-ns-yht_215
   (-> yritys-child-ns-yht_213
