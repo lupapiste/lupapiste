@@ -62,16 +62,18 @@
     "taskUtil" : true,
     "taskPageController" : true,
     "attachmentUtils" : true,
-    "DocModel" : true
+    "DocModel" : true,
+    "ol" : true,
+    "proj4" : true
   },
-  "exported": 
+  "exported":
      ["accordion","ajax","attachment",
       "attachmentUtils","attachmentTypeSelect",
        "authorization","comments","currentUser",
        "DocModel","docgen","expand", "features",
        "ga","gis","getEvent","hub","invites","loc",
        "locationSearch","vetuma","notify",
-       "trace","debug","info","warn","error",    
+       "trace","debug","info","warn","error",
        "LUPAPISTE","municipalities","organizations",
        "pageutil","repository","RequestContext",
        "stamping","taskUtil","taskPageController",

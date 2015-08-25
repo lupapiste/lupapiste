@@ -21,6 +21,8 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   self.applicationOperations = ko.observableArray([]);
   self.applicationOrganizations = ko.observableArray([]);
 
+  self.areas = ko.observableArray([]);
+
   self.limit = ko.observable(25);
 
   self.sort = {field: ko.observable("modified"), asc: ko.observable(false)};
@@ -46,6 +48,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
         applicationOperations: _.pluck(self.applicationOperations(), "id"),
         handler: self.handler() ? self.handler().id : undefined,
         applicationType: self.applicationType(),
+        areas: _.pluck(self.areas(), "id"),
         limit: self.limit(),
         sort: ko.mapping.toJS(self.sort),
         skip: self.skip()
@@ -65,6 +68,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
         applicationOperations: _.pluck(self.applicationOperations(), "id"),
         handler: self.handler() ? self.handler().id : undefined,
         applicationType: self.applicationType(),
+        areas: _.pluck(self.areas(), "id"),
         limit: self.limit(),
         sort: ko.mapping.toJS(self.sort),
         skip: self.skip()

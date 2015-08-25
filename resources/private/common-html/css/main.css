@@ -5836,6 +5836,18 @@ table.attachments-template-table td.attachment-version-info {
   height: 400px;
 }
 
+/* line 37, ../sass/partials/_map.scss */
+.ol-popup .ol-popup-closer {
+  color: #595959;
+  font-size: 12px;
+  font-weight: bold;
+  top: 6px;
+}
+/* line 42, ../sass/partials/_map.scss */
+.ol-popup .ol-popup-closer:after {
+  content: " ";
+}
+
 /* line 1, ../sass/partials/_errors.scss */
 .context-error {
   color: #f00;
