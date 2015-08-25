@@ -326,8 +326,10 @@ input.form-input.long {
   .form-label-group, .form-label-table {
     width: 100%;
     display: block;
-    text-transform: uppercase;
+    //text-transform: uppercase;
     font-family: $font-heading;
+    font-weight: bold;
+    margin-bottom: $marginS;
   }
   .form-entry {
     display: inline-block;
@@ -574,6 +576,32 @@ input.form-input.long {
   }
 }
 
+
+// Padding tweaks for special cases.
+.accordion-fields > .form-entry,
+.accordion-fields > .verdict-info-fields,
+.accordion-fields > div p {
+  padding: {
+    left: $marginS;
+    right: $marginS;
+  }
+}
+
+
+
+
+.accordion-fields button.margins-s {
+  margin-bottom: 0;
+}
+
+.accordion_content > .group-help-text {
+  display: block;
+  margin: {
+    left: $marginS;
+    right: $marginS;
+  }
+}
+
 .kiintun-and-maaraalatunnus {
   .form-maaraala {
     display: inline;
@@ -589,7 +617,6 @@ input.form-input.long {
 .group-buttons {
   width: 100%;
   display: block;
-
   overflow-y: hidden;
   text-transform: none;
   .is-right {
@@ -607,6 +634,17 @@ input.form-input.long {
     bottom: $marginS;
 
   }
+}
+
+// Top-level group buttons tweaks
+.accordion-toggle > .group-buttons {
+  background-color: $gray246;
+  border: 1px solid $gray221;
+  padding: {
+    top: $marginS;
+    bottom: $marginS;
+  }
+  margin: 0;
 }
 
 .button-group button.is-right {

@@ -149,13 +149,10 @@ Close side panel
 Open accordions
   [Arguments]  ${tab}
   # The accordion-toggle class can either be in button or its container.
-  #Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//[contains(@class, 'accordion-toggle')]
   Execute Javascript  $("#application-${tab}-tab button.accordion-toggle.toggled").click();
-  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle.toggled button").click();
-  #Wait Until  Element should not be visible  //div[@id='application-${tab}-tab']//[contains(@class, 'toggled')]
+  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle.toggled [data-accordion-id]").click();
   Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
-  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle button").click();
-  #Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//[contains(@class, 'toggled')]
+  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
 
 #
 # Login stuff

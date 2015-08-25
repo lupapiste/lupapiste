@@ -612,6 +612,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         });
       }
     }
+    if( opts.description ) {
+      buttons$.append( opts.description.bubble );
+    }
+
     if( buttons$.children().length ) {
       container$.append( buttons$ );
     }
@@ -2035,9 +2039,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     appendGroupButtons( sticky, [], self.model, opts );
     //sticky.append(self.makeGroupButtons([], self.model, opts));
-    if( opts.description ) {
-      sticky.append( opts.description.bubble );
-    }
+    // if( opts.description ) {
+    //   sticky.append( opts.description.bubble );
+    // }
 
     sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
     sectionContainer.setAttribute("data-accordion-state", (accordionCollapsed ? "closed" : "open"));

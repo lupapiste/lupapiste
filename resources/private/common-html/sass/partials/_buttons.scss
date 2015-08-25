@@ -665,6 +665,11 @@ i.toggle {
   }
 }
 
+// Generic margins support
+.margins-s {
+  margin: $marginS $marginS $marginS $marginS;
+}
+
 // Margin between form buttons.
 
 .form-buttons button {
