@@ -8,7 +8,8 @@
             [clj-time.core :refer [days weeks months years ago]]
             [clj-time.coerce :as tc]
             [schema.core :as sc]
-            [taoensso.timbre :as timbre :refer [debugf]])
+            [taoensso.timbre :as timbre :refer [debugf]]
+            [me.raynes.fs :as fs])
   (:import [org.joda.time LocalDateTime]
            [java.util.jar JarFile]))
 
@@ -489,3 +490,20 @@
          end# (System/currentTimeMillis)]
      (debugf (str ~msg ": %dms") (- end# start#))
      result#))
+
+
+; Patched from me.raynes.fs.compression
+(defn unzip
+  "Takes the path to a zipfile source and unzips it to target-dir."
+  ([source]
+    (unzip source (name source)))
+  ([source target-dir]
+    (with-open [zip (java.util.zip.ZipFile. (fs/file source))]
+      (let [entries (enumeration-seq (.entries zip))
+            target-file #(fs/file target-dir (str %))]
+        (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
+                :let [f (target-file entry)]]
+          (fs/mkdirs (fs/parent f))
+          (io/copy (.getInputStream zip entry) f))))
+    target-dir))
+
