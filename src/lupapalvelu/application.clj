@@ -99,16 +99,35 @@
   (let [mask-person-ids (person-id-masker-for-user user application)]
     (update-in application [:documents] (partial map mask-person-ids))))
 
+
+; whitelist-action
+(defn- prefix-with [prefix coll]
+  (conj (seq coll) prefix))
+
+(defn- enrich-single-doc-disabled-flag [{user-role :role} doc]
+  (let [doc-schema (model/get-document-schema doc)
+        zip-root (tools/schema-zipper doc-schema)
+        whitelisted-paths (tools/whitelistify-schema zip-root)]
+    (reduce (fn [new-doc [path whitelist]]
+              (if-not ((set (:roles whitelist)) (keyword user-role))
+                (util/update-in-repeating new-doc (prefix-with :data path) merge {:whitelist-action (:otherwise whitelist)})
+                new-doc))
+            doc
+            whitelisted-paths)))
+
 ; Process
 (defn- with-current-schema-info [document]
   (let [current-info (-> document :schema-info schemas/get-schema :info (select-keys schemas/immutable-keys))]
     (update document :schema-info merge current-info)))
 
-(defn- process-documents [user {authority :authority :as application}]
-  (let [validate (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
+(defn- process-documents-and-tasks [user {authority :authority :as application}]
+  (let [validate        (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
         mask-person-ids (person-id-masker-for-user user application)
-        doc-mapper (comp with-current-schema-info mask-person-ids validate)]
-    (update application :documents (partial map doc-mapper))))
+        disabled-flag   (partial enrich-single-doc-disabled-flag user)
+        mapper          (comp disabled-flag with-current-schema-info mask-person-ids validate)]
+    (-> application
+      (update :documents (partial map mapper))
+      (update :tasks (partial map mapper)))))
 
 (defn ->location [x y]
   [(util/->double x) (util/->double y)])
@@ -141,19 +160,13 @@
     (assoc application :submittable (foreman-submittable? application))
     application))
 
-
-(defn- process-tasks [application]
-  (update-in application [:tasks] (partial map #(assoc % :validationErrors (model/validate application %)))))
-
 (defn post-process-app [app user]
   (->> app
        meta-fields/enrich-with-link-permit-data
        (meta-fields/with-meta-fields user)
        action/without-system-keys
        process-foreman-v2
-       (process-documents user)
-       process-tasks
-       (enrich-docs-disabled-flag user)
+       (process-documents-and-tasks user)
        location->object))
 
 ;;
