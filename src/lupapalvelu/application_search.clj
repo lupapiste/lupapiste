@@ -72,10 +72,11 @@
   (let [orgs (user/organization-ids-by-roles user #{:authority})
         orgs-with-areas (mongo/select :organizations {:_id {$in orgs} :areas.features.id {$in areas}} [:areas])
         features (flatten (map (comp :features :areas) orgs-with-areas))
-        filtered-features (filter #(not (nil? (some #{(:id %)} areas))) features)
+        selected-areas (set areas)
+        filtered-features (filter (comp selected-areas :id) features)
         coordinates (apply concat (map resolve-coordinates filtered-features))]
     (when (seq coordinates)
-      {$or (mapv (fn [c] {:location {$geoWithin {"$polygon" c}}}) coordinates)})))
+      {$or (map (fn [c] {:location {$geoWithin {"$polygon" c}}}) coordinates)})))
 
 (defn make-query [query {:keys [searchText kind applicationType handler applicationTags applicationOrganizations applicationOperations areas]} user]
   {$and

@@ -2,17 +2,13 @@
   (:import [org.geotools.data FileDataStoreFinder DataUtilities]
            [org.geotools.geojson.feature FeatureJSON]
            [org.geotools.feature.simple SimpleFeatureBuilder]
-           [org.opengis.feature.simple SimpleFeature]
-           [org.geotools.geometry.jts JTS]
-           [org.geotools.referencing CRS]
            [org.geotools.referencing.crs DefaultGeographicCRS]
-           [java.util ArrayList]
-           [java.io File])
+           [java.util ArrayList])
 
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.set :as set]
             [clojure.string :as s]
-            [clojure.data.json :as json]
+            [cheshire.core :as cheshire]
             [monger.operators :refer :all]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
@@ -35,8 +31,7 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.logging :as logging]
-            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]))
+            [lupapalvelu.logging :as logging]))
 ;;
 ;; local api
 ;;
@@ -427,21 +422,22 @@
       (ok :areas (into {} result)))
     (fail :error.organization-not-found)))
 
-(defn- transform-crs-to-wgs84
+(defn-
+  ^org.geotools.data.simple.SimpleFeatureCollection
+  transform-crs-to-wgs84
   "Convert feature crs in collection to WGS84"
-  [collection]
+  [^org.geotools.feature.FeatureCollection collection]
   (let [iterator (.features collection)
-        feature (when (.hasNext iterator)
-                  (.next iterator))
         list (ArrayList.)
-        _ (loop [feature (cast SimpleFeature feature)]
+        _ (loop [feature (when (.hasNext iterator)
+                           (.next iterator))]
             (when feature
               ; Set CRS to WGS84 to bypass problems when converting to GeoJSON (CRS detection is skipped with WGS84).
               ; Atm we assume only CRS EPSG:3067 is used.
               (let [feature-type (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84)
                     builder (SimpleFeatureBuilder. feature-type) ; build new feature with changed crs
                     _ (.init builder feature) ; init builder with original feature
-                    transformed-feature (.buildFeature builder (.getID feature))]
+                    transformed-feature (.buildFeature builder (mongo/create-id))]
                 (.add list transformed-feature)))
             (when (.hasNext iterator)
               (recur (.next iterator))))]
@@ -450,26 +446,28 @@
 
 (defraw organization-area
   {:user-roles #{:authorityAdmin}}
-  [{user :user {[{:keys [tempfile filename content-type size]}] :files} :data :as action}]
+  [{user :user {[{:keys [tempfile filename size]}] :files created :created} :data :as action}]
   (let [org-id (user/authority-admins-organization-id user)
         filename (mime/sanitize-filename filename)
+        content-type (mime/mime-type filename)
         file-info {:file-name    filename
                    :content-type content-type
                    :size         size
                    :organization org-id
-                   :created      (now)}]
+                   :created      created}]
 
     (try+
       (when-not (= content-type "application/zip")
         (fail! :error.illegal-shapefile))
 
-      (let [target-dir (ah-verdict/unzip (.getPath tempfile) (fs/temp-dir "area"))
+      (let [target-dir (util/unzip (.getPath tempfile) (fs/temp-dir "area"))
             shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
             data-store (FileDataStoreFinder/getDataStore shape-file)
-            source (.getFeatureSource data-store)
-            collection (.getFeatures source)
-            new-collection (transform-crs-to-wgs84 collection)
-            areas (json/read-str (.toString (FeatureJSON.) new-collection))]
+            new-collection (some-> data-store
+                             .getFeatureSource
+                             .getFeatures
+                             transform-crs-to-wgs84)
+            areas (cheshire/parse-string (.toString (FeatureJSON.) new-collection))]
         (o/update-organization org-id {$set {:areas areas}})
         (.dispose data-store)
         (->> (assoc file-info :areas areas :ok true)
@@ -478,7 +476,8 @@
           (resp/status 200)))
       (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
         (resp/status 400 text))
-      (catch Object _
+      (catch Throwable t
+        (error "Failed to parse shapefile" t)
         (resp/status 400 :error.shapefile-parsing-failed))
       (finally
         ;TODO dispose shape-file here
