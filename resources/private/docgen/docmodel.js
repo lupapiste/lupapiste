@@ -1021,6 +1021,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.name = myPath;
     select.className = "form-input combobox long";
 
+    $(select).prop("disabled", getModelDisabled(model, subSchema.name));
+
     var otherKey = subSchema["other-key"];
     if (otherKey) {
       var pathToOther = path.slice(0, -1);
@@ -1135,6 +1137,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     select.name = myPath;
     select.className = "form-input combobox long";
+
+    $(select).prop("disabled", getModelDisabled(model, subSchema.name));
 
     if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
       select.readOnly = true;
