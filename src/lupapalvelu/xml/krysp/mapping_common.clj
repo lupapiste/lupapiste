@@ -314,6 +314,17 @@
                                 {:tag :kiinteistotunnus}
                                 {:tag :hallintasuhde}]}]})
 
+(def- naapuri-216 {:tag :naapuritieto
+                   :child [{:tag :Naapuri
+                            :child [{:tag :henkilo}
+                                    {:tag :osoite}
+                                    {:tag :kiinteistotunnus}
+                                    {:tag :hallintasuhde}
+                                    {:tag :saanutTiedoksiannonKytkin}
+                                    {:tag :huomautettavaaKytkin}
+                                    {:tag :haluaaPaatoksenKytkin}
+                                    {:tag :huomautus}]}]})
+
 (def tyonjohtaja_210
   {:tag :Tyonjohtaja
    :child [{:tag :tyonjohtajaRooliKoodi}
@@ -450,6 +461,8 @@
            tyonjohtajatieto_215
            naapuri]})
 
+(def osapuolet_216
+  (update-in osapuolet_215 [:child] update-child-element [:naapuritieto] naapuri-216))
 
 
 (def tilamuutos
