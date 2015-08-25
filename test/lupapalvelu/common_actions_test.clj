@@ -25,6 +25,7 @@
                           :set-attachment-type
                           :set-attachment-meta
                           :upload-attachment
+                          :rotate-pdf
                           :download-all-attachments
                           :download-attachment
                           :delete-attachment-version
