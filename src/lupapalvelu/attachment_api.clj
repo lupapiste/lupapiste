@@ -421,7 +421,7 @@
       (cond
         (:already-valid-pdfa? conversion-result) (do (debugf "      file valid PDF/A, no conversion") {:file temp-file :pdfa true})
         (:pdfa? conversion-result) (do (debug "      converting to PDF/A file: " (.getAbsolutePath a-temp-file)) (delete-file! temp-file) {:file a-temp-file :pdfa true})
-        :else (do (errorf "Esuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
+        :else (do (errorf "Ensuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
 
 (defn- stamp-attachment! [stamp file-info {:keys [application user now x-margin y-margin transparency]}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp? valid-pdfa]} file-info
