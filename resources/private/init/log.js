@@ -37,7 +37,7 @@
   window.onerror = function(msg, url, line, col, error) {
     ajax.query("newest-version", {frontendBuild: "LUPAPISTE.config.build"})
       .onError("frontend-too-old", function() {
-        if (confirm("Lupis build too old, reloading page in browser")) {
+        if (confirm(loc("error.frontend-outdated"))) {
           window.location.reload();
         }
       })
