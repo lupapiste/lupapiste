@@ -444,8 +444,13 @@
            naapuri]})
 
 (def osapuolet_215
-  (-> osapuolet_213
-      (update-in [:child] update-child-element [:tyonjohtajatieto :Tyonjohtaja] tyonjohtaja_215)))
+  {:tag :Osapuolet :ns "yht"
+   :child [{:tag :osapuolitieto :child [osapuoli-body_215]}
+           suunnittelijatieto_215
+           tyonjohtajatieto_215
+           naapuri]})
+
+
 
 (def tilamuutos
   {:tag :Tilamuutos :ns "yht"
