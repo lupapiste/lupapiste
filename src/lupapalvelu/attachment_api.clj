@@ -311,8 +311,8 @@
         (when-not (attachment/attach-file! (assoc attachment-data :valid-pdfa true))
           (fail :error.unknown))
         (convert-pdf-and-upload! processing-result attachment-data)))
-      (when-not (attachment/attach-file! attachment-data)
-        (fail :error.unknown))))
+    (when-not (attachment/attach-file! attachment-data)
+      (fail :error.unknown))))
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
