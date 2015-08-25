@@ -16,17 +16,15 @@
 (def- yritys-child-modified_211
   (walk/prewalk
     (fn [m] (if (= (:tag m) :kayntiosoite)
-              (assoc
-                (assoc m :tag :kayntiosoitetieto)
-                :child
-                [{:tag :Kayntiosoite :child mapping-common/postiosoite-children-ns-yht}])
+              (assoc m
+                :tag :kayntiosoitetieto
+                :child [{:tag :Kayntiosoite :child mapping-common/postiosoite-children-ns-yht}])
               m))
     (walk/prewalk
       (fn [m] (if (= (:tag m) :postiosoite)
-                (assoc
-                  (assoc m :tag :postiosoitetieto)
-                  :child
-                  [{:tag :Postiosoite :child mapping-common/postiosoite-children-ns-yht}])
+                (assoc m
+                  :tag :postiosoitetieto
+                  :child [{:tag :Postiosoite :child mapping-common/postiosoite-children-ns-yht}])
                 m))
       mapping-common/yritys-child_211)))
 
