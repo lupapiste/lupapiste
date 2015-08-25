@@ -206,6 +206,22 @@
 
 (def rakennuspaikka_211 (update-in rakennuspaikka [:child] conj {:tag :kaavatilanne :ns "yht"}))
 
+(def rakennuspaikka_216 {:tag :Rakennuspaikka
+                         :child [yksilointitieto
+                                 alkuHetki
+                                 rakennuspaikanKiinteistotieto
+                                 {:tag :kaavanaste :ns "yht"}
+                                 {:tag :kerrosala :ns "yht"}
+                                 {:tag :rakennusoikeudellinenKerrosala :ns "yht"}
+                                 {:tag :tasosijainti :ns "yht" }
+                                 {:tag :rakennusoikeudet  :ns "yht"
+                                  :child [{:tag :kayttotarkoitus
+                                           :child [{:tag :pintaAla}
+                                                   {:tag :kayttotarkoitusKoodi}]}]}
+                                 {:tag :rakennusoikeusYhteensa :ns "yht" }
+                                 {:tag :uusiKytkin :ns "yht"}
+                                 {:tag :kaavatilanne :ns "yht"}]})
+
 (def- henkilo-child [{:tag :nimi
                       :child [{:tag :etunimi}
                               {:tag :sukunimi}]}
