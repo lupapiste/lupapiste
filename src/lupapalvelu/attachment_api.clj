@@ -4,9 +4,10 @@
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
+            [sade.core :refer [ok fail fail! now def-]]
+            [sade.env :as env]
             [sade.strings :as ss]
-            [sade.util :refer [future*]]
-            [sade.core :refer [ok fail fail! now]]
+            [sade.util :as util :refer [future*]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
@@ -24,12 +25,13 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
-            [sade.util :as util]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.pdf-conversion :as pdf-conversion]
-            [sade.env :as env])
+            [lupapalvelu.pdftk :as pdftk])
   (:import [java.io File]))
+
+(defn- delete-file! [^java.io.File file] (try (.delete file) (catch Exception _)))
 
 ;; Validators
 
@@ -37,7 +39,7 @@
   (when (-> (attachment/get-attachment-info application attachmentId) :locked (= true))
     (fail :error.attachment-is-locked)))
 
-(defn- if-not-authority-states-must-match [state-set {user :user} {state :state}]
+(defn- if-not-authority-state-must-not-be [state-set {user :user} {state :state}]
   (when (and
           (not (user/authority? user))
           (state-set (keyword state)))
@@ -49,7 +51,7 @@
       (= (keyword userRole) :authority)
       true)))
 
-(defn- attachment-editable-by-applicationState? [application attachmentId userRole]
+(defn- attachment-editable-by-application-state? [application attachmentId userRole]
   (or (ss/blank? attachmentId)
       (let [attachment (attachment/get-attachment-info application attachmentId)
             attachmentApplicationState (keyword (:applicationState attachment))
@@ -109,7 +111,7 @@
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application user created] :as command}]
 
-  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+  (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
   (let [attachment-type (attachment/parse-attachment-type attachmentType)]
@@ -191,7 +193,7 @@
   (when-not (attachment-deletable application attachmentId (:role user))
     (fail! :error.unauthorized :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))
 
-  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+  (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
   (attachment/delete-attachment application attachmentId)
@@ -207,7 +209,7 @@
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
 
-  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+  (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
   (if (attachment/file-id-in-application? application attachmentId fileId)
@@ -268,19 +270,55 @@
 ;; Upload
 ;;
 
+(def attachment-modification-precheks
+  [attachment-is-not-locked
+   (partial if-not-authority-state-must-not-be #{:sent})
+   (fn [{{attachment-id :attachmentId} :data, user :user} application]
+     (when attachment-id
+       (when-not (attachment-editable-by-application-state? application attachment-id (:role user))
+         (fail :error.pre-verdict-attachment))))
+   validate-attachment-type
+   a/validate-authority-in-drafts])
+
+(def- base-upload-options
+  {:comment-text nil
+   :required false
+   :valid-pdfa false
+   :upload-pdfa-only false
+   :missing-fonts []})
+
+(defn- convert-pdf-and-upload! [processing-result {:keys [attachment-id application filename upload-pdfa-only] :as attachment-data}]
+  (if (:pdfa? processing-result)
+    (let [attach-file-result (or upload-pdfa-only (attachment/attach-file! attachment-data) (fail! :error.unknown))
+          new-filename (ss/replace filename #"(-PDFA)?\.pdf$" "-PDFA.pdf" )
+          new-id       (or (:id attach-file-result) attachment-id)
+          pdfa-attachment-data (assoc attachment-data
+                                 :application (domain/get-application-no-access-checking (:id application)) ; Refresh attachment versions
+                                 :attachment-id new-id
+                                 :content (:output-file processing-result)
+                                 :filename new-filename
+                                 :valid-pdfa true)]
+      (when-not (attachment/attach-file! pdfa-attachment-data)
+        (fail :error.unknown)))
+    (let [missing-fonts (or (:missing-fonts processing-result) [])]
+      (when-not (attachment/attach-file! (assoc attachment-data :missing-fonts missing-fonts))
+        (fail :error.unknown)))))
+
+(defn- upload! [{:keys [filename content] :as attachment-data}]
+  (if (and (env/feature? :arkistointi) (= (mime/mime-type filename) "application/pdf"))
+    (let [processing-result (pdf-conversion/convert-to-pdf-a content)]
+      (if (:already-valid-pdfa? processing-result)
+        (when-not (attachment/attach-file! (assoc attachment-data :valid-pdfa true))
+          (fail :error.unknown))
+        (convert-pdf-and-upload! processing-result attachment-data)))
+    (when-not (attachment/attach-file! attachment-data)
+      (fail :error.unknown))))
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :pre-checks [attachment-is-not-locked
-                (partial if-not-authority-states-must-match #{:sent})
-                (fn [{{attachment-id :attachmentId} :data, user :user} application]
-                  (when attachment-id
-                    (when-not (attachment-editable-by-applicationState? application attachment-id (:role user))
-                      (fail :error.pre-verdict-attachment))))
-                validate-attachment-type
-                a/validate-authority-in-drafts]
+   :pre-checks attachment-modification-precheks
    :input-validators [(partial action/non-blank-parameters [:id :attachmentType :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
@@ -296,38 +334,58 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
 
-  (let [attachment-data {:application application
-                         :filename filename
-                         :size size
-                         :content tempfile
-                         :attachment-id attachmentId
-                         :attachment-type attachmentType
-                         :op op
-                         :comment-text text
-                         :target target
-                         :locked locked
-                         :required false
-                         :user user
-                         :created created
-                         :valid-pdfa false
-                         :missing-fonts []}]
-    (if (and (env/feature? :arkistointi) (= (mime/mime-type filename) "application/pdf"))
-      (let [processing-result (pdf-conversion/convert-to-pdf-a tempfile)]
-        (if (:already-valid-pdfa? processing-result)
-          (when-not (attachment/attach-file! (assoc attachment-data :valid-pdfa true))
-            (fail :error.unknown))
-          (if (:pdfa? processing-result)
-            (let [attach-file-result (attachment/attach-file! attachment-data)
-                  new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")
-                  new-id (:id attach-file-result)]
-              (when-not (attachment/attach-file! (assoc attachment-data :attachment-id new-id :content (:output-file processing-result) :filename new-filename :valid-pdfa true))
-                (fail :error.unknown)))
-            (let [missing-fonts (or (:missing-fonts processing-result) [])]
-              (when-not (attachment/attach-file! (assoc attachment-data :missing-fonts missing-fonts))
-                (fail :error.unknown))))))
-      (when-not (attachment/attach-file! attachment-data)
-        (fail :error.unknown)))))
+  (upload! (merge
+             base-upload-options
+             {:application application
+              :filename filename
+              :size size
+              :content tempfile
+              :attachment-id attachmentId
+              :attachment-type attachmentType
+              :op op
+              :comment-text text
+              :target target
+              :locked locked
+              :user user
+              :created created})))
 
+;;
+;; Rotate
+;;
+
+(defcommand rotate-pdf
+  {:parameters  [id attachmentId rotation]
+   :user-roles  #{:applicant :authority}
+   :user-authz-roles action/all-authz-writer-roles
+   :input-validators [(partial action/number-parameters [:rotation])
+                      (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
+   :pre-checks  attachment-modification-precheks
+   :states      (states/all-states-but states/terminal-states)
+   :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."
+   :feature     :pdfrotate
+   }
+  [{:keys [application user created]}]
+  (if-let [attachment (attachment/get-attachment-info application attachmentId)]
+    (let [{:keys [contentType fileId filename] :as latest-version} (last (:versions attachment))
+          temp-pdf (File/createTempFile fileId ".tmp")
+          upload-options (merge
+                           base-upload-options
+                           {:application application
+                            :content temp-pdf
+                            :upload-pdfa-only true
+                            :attachment-id attachmentId
+                            :filename filename
+                            :content-type contentType
+                            :created created
+                            :user user})]
+      (try
+        (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
+        (with-open [content ((:content (mongo/download fileId)))]
+          (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
+          (upload! (assoc upload-options :size (.length temp-pdf))))
+        (finally
+          (delete-file! temp-pdf))))
+    (fail :error.unknown)))
 
 ;;
 ;; Stamping:
@@ -368,7 +426,7 @@
                                           :content-type contentType :size (.length temp-file)
                                           :comment-text nil :now now :user user
                                           :stamped true :make-comment false :state :ok}))
-    (try (.delete temp-file) (catch Exception _))
+    (delete-file! temp-file)
     new-file-id))
 
 (defn- stamp-attachments!
@@ -486,7 +544,7 @@
                       validate-meta validate-scale validate-size validate-operation]
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application user created] :as command}]
-  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+  (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
   ; FIXME yhdella updatella!
   (doseq [[k v] meta]
