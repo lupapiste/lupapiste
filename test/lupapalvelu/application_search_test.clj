@@ -3,7 +3,8 @@
              [midje.util :refer [testable-privates]]
              [monger.operators :refer [$in]]
              [lupapalvelu.test-util :refer :all]
-             [lupapalvelu.application-search :refer :all]))
+             [lupapalvelu.application-search :refer :all]
+             [lupapalvelu.geojson :as geo]))
 
 (testable-privates lupapalvelu.application-search make-sort operation-names make-area-query)
 
@@ -112,9 +113,9 @@
 
 (fact "Multimethod for features' MultiPolygon/Polygon coordinates"
   (fact "Returns Polygon from MultiPolygon when only one Polygon is present"
-    (resolve-coordinates multi-feature-simple) => (resolve-coordinates polygon-feature))
+    (geo/resolve-polygons multi-feature-simple) => (geo/resolve-polygons polygon-feature))
   (fact "returns two Polygons"
-    (count (resolve-coordinates multi-feature)) => 2))
+    (count (geo/resolve-polygons multi-feature)) => 2))
 
 (facts "Area query is in correct form"
   (make-area-query ["polygon" "multi-polygon"] {:orgAuthz {:753-R #{:authority}}}) =>
