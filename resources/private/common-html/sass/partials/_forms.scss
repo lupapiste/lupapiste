@@ -725,7 +725,7 @@ section.approved .group-buttons  {
 
 // Top-level reject button should be invisible
 // when the bar is in rejected mode.
-div.sticky.rejected ~ .accordion_content .is-top.rejected {
+button.rejected ~ .group-buttons .is-top.rejected {
   display: none;
 }
 

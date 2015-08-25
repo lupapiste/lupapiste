@@ -3606,7 +3606,7 @@ section.approved .group-buttons button.rejected {
 }
 
 /* line 728, ../sass/partials/_forms.scss */
-div.sticky.rejected ~ .accordion_content .is-top.rejected {
+button.rejected ~ .group-buttons .is-top.rejected {
   display: none;
 }
 
