@@ -1,0 +1,2 @@
+application.restamp: Leimaa uudelleen
+application.restamp.confirmationMessage: Sivulla on valittuna aiemmin leimattuja liitteitä. Haluatko leimata liitteet uudelleen?
