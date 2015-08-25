@@ -448,7 +448,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: self.getCollection() };
 
     if (_.isEmpty(model)) {
-      return approvalContainer$;
+      return [];
     }
 
     function setStatus(approval) {
@@ -547,6 +547,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return result; //approvalContainer$;
   };
 
+  // Appends group buttons (description, primary, approve, reject, remove)
+  // and approval icons. The particular set of elements depends of authorization
+  // and options (opts).
   // Opts can have approval property that denotes the opts for
   // makeApprovalButtons. Note that opts.approval must by truthy
   // (at least empty object) for approval buttons to be created.
@@ -558,7 +561,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   //          attr: Extra attibutes object
   //          text: Button text
   //          fun: If given, button is enabled and fun is the click handler.
-  self.makeGroupButtons = function(path, model, opts ) {
+  //
+  // Note: function does not append (unneeded) elements to container$.
+  function appendGroupButtons(container$, path, model, opts ) {
 
     function btnHelper( subOpts, cls, icon, text ) {
       var b = $("<button>").addClass( cls );
@@ -598,11 +603,22 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                   loc( "remove")));
     }
     if( opts.approval ) {
-      _.each( self.makeApprovalButtons( path, model, opts.approval ), function( elem ) {
-        buttons$.append( elem );
-      });
+      var approvalElements = self.makeApprovalButtons(path, model, opts.approval);
+      var elemCount = _.size( approvalElements );
+      // We only proceed if elements is not just an empty tag.
+      if( elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ).children().length )) {
+        _.each(( approvalElements ), function( elem ) {
+          buttons$.append( elem );
+        });
+      }
     }
-    return buttons$;
+    if( opts.description ) {
+      buttons$.append( opts.description.bubble );
+    }
+
+    if( buttons$.children().length ) {
+      container$.append( buttons$ );
+    }
   }
 
   // Form field builders
@@ -946,7 +962,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       opts.approval = {};
     }
     opts.remove = resolveRemoveOptions( subSchema, path);
-    $(div).append(self.makeGroupButtons(path, myModel, opts ));
+    appendGroupButtons( $(div), path, myModel, opts );
+    //$(div).append(self.makeGroupButtons(path, myModel, opts ));
 
     var label = makeLabel(subSchema, "group", myPath, true);
     div.appendChild(label);
@@ -1482,7 +1499,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         table.appendChild(tbody);
 
         if (subSchema.approvable) {
-          $(div).append(self.makeGroupButtons(path, models, {approval: {}}));
+          appendGroupButtons( $(div), path, models, {approval: {}});
+          //$(div).append(self.makeGroupButtons(path, models, {approval: {}}));
         }
 
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
@@ -1871,13 +1889,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     var descriptionInput = $("<input>").prop( "type", "text").val( operation.description );
-    var bubble = $("<div>").addClass( "description-bubble" ).attr( descId, "1");
+    var bubble = $("<div>").addClass( "description-bubble is-closed" ).attr( descId, "1");
     bubble.append( descriptionInput );
     var descOpts = {
         fun: function() {
-          bubble.toggle();
+          bubble.toggleClass( "is-closed");
           descriptionInput.focus();
-
+          window.Stickyfill.rebuild();
         },
         bubble: bubble
     }
@@ -1904,7 +1922,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         })
         .call();
 
-      bubble.hide();
+      bubble.addClass( "is-closed");
+      window.Stickyfill.rebuild();
       updateBarDescription( value );
     }, 250);
 
@@ -1926,6 +1945,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var op = self.schema.info.op;
 
     var section = document.createElement("section");
+    var sticky = $("<div>").addClass( "sticky accordion-toggle");
     var iconUp = document.createElement("i");
     var iconDown = document.createElement("i");
     var toggle = document.createElement("button");
@@ -1939,7 +1959,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var accordionCollapsed = (options && options.accordionCollapsed) ? true : false;
 
-    section.className = "accordion";
+    section.className = "accordion is-status";
     section.setAttribute("data-doc-type", self.schemaName);
     elements.className = "accordion-fields";
 
@@ -1947,7 +1967,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     iconDown.className = "lupicon-chevron-down";
     toggle.appendChild( iconDown );
     toggle.appendChild( iconUp );
-    toggle.className = "sticky secondary accordion-toggle is-status";
+    toggle.className = "secondary";
     var descId = _.uniqueId( "data-desc-");
     var barDesc = $("<span>").addClass( "description").attr( descId, "1")
     if( op && _.size(  op.description ) ) {
@@ -1963,6 +1983,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.className = "title";
     $(toggle).attr( "data-accordion-id", (op && op.id) || self.schema.info.name );
     $(toggle).click(accordion.click);
+    sticky.append( $(toggle));
     var docId = util.getIn(self, ["schema", "info", "op", "id"]);
     var notPrimaryOperation = (!docId || docId !== util.getIn(self.application, ["primaryOperation", "id"]));
 
@@ -1982,7 +2003,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (!notPrimaryOperation) {
         opts.star = {attr: {"data-op-name": op.name},
                      text: loc( "operations.primary")}
-        barText.append( $("<span>").addClass( "lupicon-star"));
+        //barText.append( $("<span>").addClass( "lupicon-star"));
       }
 
       if (isSecondaryOperation) {
@@ -2012,15 +2033,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if( authorizationModel.ok("update-op-description") ) {
         opts.description = descriptionSupport( op, descId, barDesc );
       }
-      //elements.appendChild(buildDescriptionElement(op));
     } else {
       title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
 
-    $(elements).append(self.makeGroupButtons([], self.model, opts));
-    if( opts.description ) {
-      $(elements).append( opts.description.bubble );
-    }
+    appendGroupButtons( sticky, [], self.model, opts );
+    //sticky.append(self.makeGroupButtons([], self.model, opts));
+    // if( opts.description ) {
+    //   sticky.append( opts.description.bubble );
+    // }
 
     sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
     sectionContainer.setAttribute("data-accordion-state", (accordionCollapsed ? "closed" : "open"));
@@ -2032,7 +2053,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     appendElements(elements, self.schema, self.model, []);
 
     sectionContainer.appendChild(elements);
-    section.appendChild(toggle);
+    $(section).append(sticky);
     section.appendChild(sectionContainer);
     self.statusOrder.setOrdered();
     accordion.reset( $(toggle) );
