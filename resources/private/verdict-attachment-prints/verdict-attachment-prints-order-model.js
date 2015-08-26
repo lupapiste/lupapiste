@@ -17,6 +17,15 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   self.applicantName = ko.observable("");
   self.kuntalupatunnus = ko.observable("");
   self.propertyId = ko.observable("");
+  self.propertyIdHumanReadable = ko.pureComputed({
+    read: function(){
+      return self.propertyId() ? util.prop.toHumanFormat(self.propertyId()) : "";
+    },
+    write: function(value) {
+      self.propertyId(util.prop.toDbFormat(value));
+    },
+    owner: self
+  });
   self.lupapisteId = ko.observable("");
   self.address = ko.observable("");
 
@@ -124,7 +133,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
         ordererPhone: self.ordererPhone(),
         applicantName: self.applicantName(),
         kuntalupatunnus: self.kuntalupatunnus(),
-        propertyId: self.propertyId(),
+        propertyId: self.propertyIdHumanReadable(),
         lupapisteId: self.lupapisteId(),
         address: self.address()
       }
