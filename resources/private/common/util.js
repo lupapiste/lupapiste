@@ -200,6 +200,15 @@ var util = (function($) {
     return id;
   }
 
+  function withSuffix(strOrArr, suffix) {
+    if (_.isArray(strOrArr)) {
+      return _.map(strOrArr, function(s) {
+        return s + suffix;
+      });
+    }
+    return [strOrArr + suffix];
+  }
+
   function filterDataByQuery(data, q, selected) {
     return _.filter(data, function(item) {
       return _.reduce(q.split(" "), function(result, word) {
@@ -238,6 +247,7 @@ var util = (function($) {
     extractRequiredErrors: extractRequiredErrors,
     dissoc: dissoc,
     randomElementId: randomElementId,
+    withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery
   };
 

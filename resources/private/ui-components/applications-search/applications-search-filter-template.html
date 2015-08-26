@@ -25,18 +25,22 @@
     <div class="feature filter-row advanced" data-test-id="tag-filter-row">
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.tags'" />
-        <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, selectedText: 'label', tags: true, groups: organizationTagsDataProvider.hasGroups, groupFields: {header: 'organization', dataProperty: 'tags'}}}"></div>
+        <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationTagsDataProvider, value: dataProvider.applicationTags, selectedText: 'label', tags: true}}"></div>
       </div>
 
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.operations'" />
-        <div data-test-id="operations-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: operationsDataProvider, value: dataProvider.applicationOperations, selectedText: 'label', tags: true, groups: operationsDataProvider.hasGroups, groupFields: {header: 'permitType', dataProperty: 'operations'}}}"></div>
+        <div data-test-id="operations-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: operationsDataProvider, value: dataProvider.applicationOperations, selectedText: 'label', tags: true}}"></div>
       </div>
-    </div>
-    <div class="feature filter-row advanced" data-test-id="organization-filter-row">
+
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.organizations'" />
         <div data-test-id="organization-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationsFilterDataProvider, value: dataProvider.applicationOrganizations, selectedText: 'name', tags: true}}"></div>
+      </div>
+
+      <div class="filter-item">
+        <label data-bind="ltext: 'applications.filter.areas'" />
+        <div data-test-id="areas-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationAreasDataProvider, value: dataProvider.areas, selectedText: 'label', tags: true}}"></div>
       </div>
     </div>
     <!-- /ko -->

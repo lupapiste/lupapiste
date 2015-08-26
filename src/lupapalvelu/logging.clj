@@ -53,7 +53,10 @@
 (defn log-event [level event]
   (let [stripped (-> event
                    (dissoc :application)
-                   (util/dissoc-in [:data :tempfile])) ; Temporary java.io.File set by ring
+                   (util/dissoc-in [:data :tempfile]) ; Temporary java.io.File set by ring
+                   (update-in [:data :files] (partial map #(if (:tempfile %)
+                                                             (dissoc % :tempfile)
+                                                             %)))) ; data in multipart/form-data w/ POST
         jsoned   (json/generate-string stripped)]
     (try
       (unsecure-log-event level jsoned)

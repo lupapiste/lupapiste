@@ -3606,7 +3606,7 @@ section.approved .group-buttons button.rejected {
 }
 
 /* line 728, ../sass/partials/_forms.scss */
-div.sticky.rejected ~ .accordion_content .is-top.rejected {
+button.rejected ~ .group-buttons .is-top.rejected {
   display: none;
 }
 
@@ -5834,6 +5834,18 @@ table.attachments-template-table td.attachment-version-info {
 /* line 32, ../sass/partials/_map.scss */
 .map-component {
   height: 400px;
+}
+
+/* line 37, ../sass/partials/_map.scss */
+.ol-popup .ol-popup-closer {
+  color: #595959;
+  font-size: 12px;
+  font-weight: bold;
+  top: 6px;
+}
+/* line 42, ../sass/partials/_map.scss */
+.ol-popup .ol-popup-closer:after {
+  content: " ";
 }
 
 /* line 1, ../sass/partials/_errors.scss */
