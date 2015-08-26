@@ -3,6 +3,7 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.i18n :refer [with-lang loc localize]]
             [lupapalvelu.xml.disk-writer :as writer]))
 
 (def- rakval-yht {"2.1.2" "2.1.0"
@@ -543,14 +544,17 @@
                            (not= "statement" (-> attachment :target :type))
                            (not= "verdict" (-> attachment :target :type))
                            (or (nil? target) (= target (:target attachment))))
-                   :let [type (get-in attachment [:type :type-id])
-                         attachment-title (str title ": " type "-" (:id attachment))
+                   :let [type-group (get-in attachment [:type :type-group])
+                         type-id (get-in attachment [:type :type-id])
+                         contents (:contents attachment)
+                         attachment-localized-name (localize "fi" (ss/join "." ["attachmentType" type-group type-id]))
+                         attachment-title (str attachment-localized-name ": " contents)
                          file-id (get-in attachment [:latestVersion :fileId])
                          attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                          link (str begin-of-link attachment-file-name)
                          meta (get-attachment-meta attachment)
                          _ (clojure.pprint/pprint meta)]]
-               {:Liite (get-Liite attachment-title link attachment type file-id attachment-file-name meta)})))
+               {:Liite (get-Liite attachment-title link attachment type-id file-id attachment-file-name meta)})))
 
 (defn add-statement-attachments [canonical statement-attachments lausunto-path]
   (if (empty? statement-attachments)
