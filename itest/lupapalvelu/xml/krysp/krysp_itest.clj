@@ -30,6 +30,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.i18n :refer [with-lang loc localize]]
             [lupapalvelu.tasks] ; ensure task schemas are loaded
             [sade.env :as env]
             [sade.xml :as xml]
@@ -198,7 +199,11 @@
                              last)
             liite          (-> liitetieto take-liite-fn (xml/select1 [:Liite]))
             kuvaus         (xml/get-text liite [:kuvaus])
-            app-attachment (some #(when (.contains kuvaus (:id %)) %) app-attachments)
+            app-attachment (some
+                             #(let [attachment-localized-name (localize "fi" (s/join "." ["attachmentType" (get-in % [:type :type-group]) (get-in % [:type :type-id])]))
+                                    attachment-title (str attachment-localized-name ": " (:contents %))]
+                                (when (= kuvaus attachment-title) %))
+                             app-attachments)
             expected-type  (get-in app-attachment [:type :type-id])]
 
         (fact "XML has corresponding attachment in app" app-attachment => truthy)
