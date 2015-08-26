@@ -7,12 +7,18 @@ Variables      ../06_attachments/variables.py
 
 *** Test Cases ***
 
-Sonja prepares the application
-  Sonja logs in
+Mikko prepares the application
+  Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Taskitesti${secs}
-  Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
+  Set Suite Variable  ${propertyId}  753-416-18-1
+  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Submit application
+  Logout
+
+Sonja gives verdict
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
   Open tab  verdict
   Fetch verdict
   Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-0']  2013-01
@@ -59,6 +65,13 @@ Reject Aloituskokous
 Approve Aloituskokous
   Click enabled by test id  approve-task
   Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
+
+Aloituskokous form is still editable (LPK-494)
+  Page Should Contain Element  xpath=//section[@data-doc-type="task-katselmus"]//input
+  Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//input[@readonly]  0
+
+  Page Should Contain Element  xpath=//section[@data-doc-type="task-katselmus"]//select
+  Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//select[@disabled]  0
 
 Return to listing
   Click link  xpath=//section[@id="task"]//a[@data-test-id='back-to-application-from-task']
@@ -115,6 +128,21 @@ Verify post-verdict attachments - Aloituskokous
   Wait until  Element should be visible  xpath=//a[@data-test-id='application-open-attachments-tab']
   Open tab  attachments
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  [Teardown]  Logout
+
+Mikko is unable to edit Aloituskokous (LPK-494)
+  Mikko logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  tasks
+  Open task  Aloituskokous
+
+  Page Should Contain Element  xpath=//section[@data-doc-type="task-katselmus"]//input
+  ${inputCount} =  Get Matching Xpath Count  //section[@data-doc-type="task-katselmus"]//input
+  Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//input[@readonly]  ${inputCount}
+
+  Page Should Contain Element  xpath=//section[@data-doc-type="task-katselmus"]//select
+  ${selectCount} =  Get Matching Xpath Count  //section[@data-doc-type="task-katselmus"]//select
+  Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//select[@disabled]  ${selectCount}
 
 *** Keywords ***
 
