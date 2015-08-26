@@ -113,12 +113,6 @@ Stamping page opens, verdict details can be seen
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]  2013-01
   Page should contain element  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-buildingid-list"]
   Should not be empty  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
-
-Stamp attachments
-  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="stamp-select-all"]
-  Click enabled by test id   start-stamping
-  Click enabled by test id   cancel-stamping
-  Wait Until  Element should not be visible  stamping-container
   [Teardown]  Logout
 
 Mikko sees that the application has verdicts

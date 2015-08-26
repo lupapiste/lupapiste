@@ -246,7 +246,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var value = _.isObject(modelOrValue) ? getModelValue(modelOrValue, subSchema.name) : modelOrValue;
     var sourceValue = _.isObject(modelOrValue) ? getModelSourceValue(modelOrValue, subSchema.name) : undefined;
     var extraClass = self.sizeClasses[subSchema.size] || "";
-    var readonly = subSchema.readonly;
+    var readonly = subSchema.readonly || getModelDisabled(modelOrValue, subSchema.name);
 
     var input = document.createElement("input");
     input.id = pathStrToID(pathStr);
@@ -655,12 +655,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var span = makeEntrySpan(subSchema, myPath);
 
     var supportedInputSubtypes = ["email", "time"];
-    var inputType = (_.indexOf(supportedInputSubtypes, subSchema.subtype) > -1) ? subSchema.subtype : "text";
+    var inputType = _.contains(supportedInputSubtypes, subSchema.subtype) ? subSchema.subtype : "text";
 
     var input = makeInput(inputType, myPath, model, subSchema);
     setMaxLen(input, subSchema);
-
-    $(input).prop("disabled", getModelDisabled(model, subSchema.name));
 
     listen(subSchema, myPath, input);
 
@@ -752,7 +750,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     sourceValueChanged(input, value, sourceValue);
 
-    if (subSchema.readonly) {
+    if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
       input.readOnly = true;
     } else {
       input.onchange = function(e) {
@@ -792,7 +790,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     sourceValueChanged(input.get(0), value, sourceValue);
 
-    if (subSchema.readonly) {
+    if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
       input.attr("readonly", true);
     } else {
       input.datepicker($.datepicker.regional[lang]).change(function(e) {
@@ -1023,6 +1021,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.name = myPath;
     select.className = "form-input combobox long";
 
+    $(select).prop("disabled", getModelDisabled(model, subSchema.name));
+
     var otherKey = subSchema["other-key"];
     if (otherKey) {
       var pathToOther = path.slice(0, -1);
@@ -1030,7 +1030,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       select.setAttribute("data-select-other-id", pathStrToID(pathToOther.join(".")));
     }
 
-    if (subSchema.readonly) {
+    if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
       select.readOnly = true;
     } else {
       select.onchange = function (e) {
@@ -1138,7 +1138,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.name = myPath;
     select.className = "form-input combobox long";
 
-    if (subSchema.readonly) {
+    $(select).prop("disabled", getModelDisabled(model, subSchema.name));
+
+    if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
       select.readOnly = true;
     } else {
       select.onchange = function() {

@@ -5,6 +5,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [lupapalvelu.state-machine :as state-machine]
             [sade.core :refer :all]
             [sade.util :as util]))
 
@@ -63,10 +64,11 @@
 
 (defcommand inform-construction-ready
   {:parameters ["id" readyTimestampStr lang]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:authority}
    :states     #{:constructionStarted}
    :on-success (notify :application-state-change)
-   :pre-checks [(permit/validate-permit-type-is permit/YA)]
+   :pre-checks [(permit/validate-permit-type-is permit/YA)
+                (partial state-machine/validate-state-transition :closed)]
    :input-validators [(partial action/non-blank-parameters [:readyTimestampStr])]}
   [{:keys [user created application] :as command}]
   (let [timestamp     (util/to-millis-from-local-date-string readyTimestampStr)
