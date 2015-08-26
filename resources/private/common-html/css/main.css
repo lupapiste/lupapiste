@@ -4939,39 +4939,23 @@ table.attachments-template-table td.attachment-version-info {
 }
 
 /*Tab styles*/
-/* line 43, ../sass/partials/_tabs.scss */
+/* line 50, ../sass/partials/_tabs.scss */
 .tab-wrapper {
   padding: 30px;
 }
 
-/* line 47, ../sass/partials/_tabs.scss */
+/* line 54, ../sass/partials/_tabs.scss */
 .tabs-container {
   width: 100%;
-  padding-top: 12px;
   display: block;
   clear: both;
   box-sizing: border-box;
-  /* .btn{ */
-  /*   float: right; */
-  /*   margin-left: $marginL; */
-  /* } */
 }
 
-/* line 59, ../sass/partials/_tabs.scss */
+/* line 63, ../sass/partials/_tabs.scss */
 .tabs {
   list-style: none;
   margin: 0;
-  padding: 5px 0 0 0;
-  display: inline;
-}
-/* line 64, ../sass/partials/_tabs.scss */
-.tabs li {
-  display: inline-block;
-  /* &:first-child { */
-  /*   a { */
-  /*     padding-left: 0; */
-  /*   } */
-  /* } */
 }
 /* line 67, ../sass/partials/_tabs.scss */
 .tabs li a {
@@ -4981,49 +4965,27 @@ table.attachments-template-table td.attachment-version-info {
   color: #333333;
   padding-left: 6px;
   padding-right: 6px;
-  padding-top: 6px;
-  padding-bottom: 6px;
+  padding-top: 3px;
+  /* top: $marginS; */
+  /* bottom: $marginS; */
+  min-height: 40px;
+  max-height: 40px;
+  line-height: 40px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #dddddd;
+  border-bottom: none;
   /* Note: IE filters and border-radius don't mix */
   position: relative;
-  /* &:after { */
-  /*   content: " "; */
-  /*   display: inline-block; */
-  /*   border-right: 2px solid  lighten($lp-dark-grey, 20%); */
-  /*    @include skew(30deg); */
-  /*   width: 10px; */
-  /*   height: 13px; */
-  /*   position: absolute; */
-  /*   top: 8px; */
-  /*   right: 0px; */
-  /* } */
-  /* &:before { */
-  /*   content: " "; */
-  /*   display: inline-block; */
-  /*   border-right: 2px solid  lighten($lp-dark-grey, 20%); */
-  /*   @include skew(-30deg); */
-  /*   width: 10px; */
-  /*   height: 13px; */
-  /*   position: absolute; */
-  /*   bottom: 6px; */
-  /*   right: 0px; */
-  /* } */
 }
-/* line 70, ../sass/partials/_tabs.scss */
-.tabs li a .indicator {
-  background-color: #f39129;
-  border-radius: 2px;
-  font-weight: bold;
-  padding: 2px 6px;
-  margin-right: 14px;
-}
-/* line 100, ../sass/partials/_tabs.scss */
+/* line 72, ../sass/partials/_tabs.scss */
 .tabs li.active a {
   border-style: solid;
   border-width: 2px;
   border-color: #bbbbbb;
   border-bottom: none;
 }
-/* line 33, ../sass/partials/_tabs.scss */
+/* line 40, ../sass/partials/_tabs.scss */
 .tabs li.active a:before {
   content: " ";
   border-bottom: 2px solid white;
@@ -5033,7 +4995,41 @@ table.attachments-template-table td.attachment-version-info {
   width: 100%;
 }
 
-/* line 111, ../sass/partials/_tabs.scss */
+/* line 78, ../sass/partials/_tabs.scss */
+ul.tabs {
+  font-size: 0;
+}
+
+/* line 82, ../sass/partials/_tabs.scss */
+.tabs span.indicator {
+  display: table-cell;
+  float: right;
+  line-height: 22px;
+  font-size: 12px;
+  border: 2px solid #f39129;
+  min-height: 24px;
+  max-height: 24px;
+  text-align: center;
+  box-sizing: border-box;
+  padding-bottom: 2px;
+  vertical-align: middle;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+/* line 102, ../sass/partials/_tabs.scss */
+.tabs a.link-btn :last-child {
+  padding-right: 2px !important;
+}
+
+/* line 107, ../sass/partials/_tabs.scss */
+.tabs li.active > a.link-btn {
+  cursor: default;
+  color: #333333;
+  pointer-events: none;
+}
+
+/* line 113, ../sass/partials/_tabs.scss */
 .tabs-content-container {
   border: 1px solid #ccc;
   border-top: none;
@@ -5041,21 +5037,21 @@ table.attachments-template-table td.attachment-version-info {
   width: 400px;
 }
 
-/* line 118, ../sass/partials/_tabs.scss */
+/* line 120, ../sass/partials/_tabs.scss */
 .tab-content {
   padding: 0;
 }
-/* line 120, ../sass/partials/_tabs.scss */
+/* line 122, ../sass/partials/_tabs.scss */
 .tab-content h1 {
   line-height: normal;
   float: left;
 }
 
-/* line 126, ../sass/partials/_tabs.scss */
+/* line 128, ../sass/partials/_tabs.scss */
 .radio-tabs {
   display: inline;
 }
-/* line 129, ../sass/partials/_tabs.scss */
+/* line 131, ../sass/partials/_tabs.scss */
 .radio-tabs input[type=radio] {
   display: none;
   width: 0px;
@@ -5066,7 +5062,7 @@ table.attachments-template-table td.attachment-version-info {
   position: absolute;
   z-index: -1;
 }
-/* line 139, ../sass/partials/_tabs.scss */
+/* line 141, ../sass/partials/_tabs.scss */
 .radio-tabs input[type="radio"] + label {
   display: inline-block;
   padding: 8px 10px;
@@ -5077,42 +5073,42 @@ table.attachments-template-table td.attachment-version-info {
   /* Note: IE filters and border-radius don't mix */
   filter: none;
 }
-/* line 148, ../sass/partials/_tabs.scss */
+/* line 150, ../sass/partials/_tabs.scss */
 .radio-tabs input[type="radio"] + label:hover {
   cursor: pointer;
 }
-/* line 152, ../sass/partials/_tabs.scss */
+/* line 154, ../sass/partials/_tabs.scss */
 .radio-tabs input[type="radio"]:checked + label {
   background: #dddddd;
 }
-/* line 156, ../sass/partials/_tabs.scss */
+/* line 158, ../sass/partials/_tabs.scss */
 .radio-tabs [type="radio"] + label.checked {
   background: #dddddd;
 }
-/* line 159, ../sass/partials/_tabs.scss */
+/* line 161, ../sass/partials/_tabs.scss */
 .radio-tabs .form-input {
   margin-bottom: 7px;
 }
-/* line 162, ../sass/partials/_tabs.scss */
+/* line 164, ../sass/partials/_tabs.scss */
 .radio-tabs button.application-create, .radio-tabs button.application-from-previous {
   display: inline;
   margin-bottom: 0;
   width: 330px;
 }
 @media all and (max-width: 1000px) {
-  /* line 162, ../sass/partials/_tabs.scss */
+  /* line 164, ../sass/partials/_tabs.scss */
   .radio-tabs button.application-create, .radio-tabs button.application-from-previous {
     position: absolute;
     left: 8px;
     top: 54px;
   }
 }
-/* line 172, ../sass/partials/_tabs.scss */
+/* line 174, ../sass/partials/_tabs.scss */
 .radio-tabs button.application-from-previous {
   margin: 0 5px;
 }
 
-/* line 178, ../sass/partials/_tabs.scss */
+/* line 180, ../sass/partials/_tabs.scss */
 .missing-info-title {
   margin-bottom: 6px;
   margin-top: 24px;
