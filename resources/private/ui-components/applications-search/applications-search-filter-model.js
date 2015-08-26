@@ -1,4 +1,4 @@
-LUPAPISTE.OrganizationTagsDataProvider = function(filtered) {
+LUPAPISTE.TagsDataProvider = function(filtered) {
   "use strict";
   var self = this;
 
@@ -178,7 +178,7 @@ LUPAPISTE.AreasDataProvider = function(filtered) {
   });
 };
 
-LUPAPISTE.OrganizationsFilterDataProvider = function(savedOrgFilters) {
+LUPAPISTE.OrganizationsDataProvider = function(savedOrgFilters) {
   "use strict";
 
   var self = this;
@@ -231,9 +231,9 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   if ( lupapisteApp.models.currentUser.isAuthority() ) {
     self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
-    self.operationsDataProvider = new LUPAPISTE.OperationsDataProvider(self.dataProvider.applicationOperations);
-    self.organizationsFilterDataProvider = new LUPAPISTE.OrganizationsFilterDataProvider(self.dataProvider.applicationOrganizations);
-    self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(self.dataProvider.applicationTags);
-    self.organizationAreasDataProvider = new LUPAPISTE.AreasDataProvider(self.dataProvider.areas);
+    self.operationsDataProvider = new LUPAPISTE.OperationsDataProvider(self.dataProvider.operations);
+    self.organizationsDataProvider = new LUPAPISTE.OrganizationsDataProvider(self.dataProvider.organizations);
+    self.tagsDataProvider = new LUPAPISTE.TagsDataProvider(self.dataProvider.tags);
+    self.areasDataProvider = new LUPAPISTE.AreasDataProvider(self.dataProvider.areas);
   }
 };

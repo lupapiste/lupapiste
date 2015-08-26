@@ -17,9 +17,9 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.handler = ko.observable();
 
-  self.applicationTags = ko.observableArray([]);
-  self.applicationOperations = ko.observableArray([]);
-  self.applicationOrganizations = ko.observableArray([]);
+  self.tags = ko.observableArray([]);
+  self.operations = ko.observableArray([]);
+  self.organizations = ko.observableArray([]);
 
   self.areas = ko.observableArray([]);
 
@@ -43,9 +43,9 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     ajax.datatables("applications-search",
       {
         searchText: self.searchFieldDelayed(),
-        applicationTags: _.pluck(self.applicationTags(), "id"),
-        applicationOrganizations: _.pluck(self.applicationOrganizations(), "id"),
-        applicationOperations: _.pluck(self.applicationOperations(), "id"),
+        tags: _.pluck(self.tags(), "id"),
+        organizations: _.pluck(self.organizations(), "id"),
+        operations: _.pluck(self.operations(), "id"),
         handler: self.handler() ? self.handler().id : undefined,
         applicationType: self.applicationType(),
         areas: _.pluck(self.areas(), "id"),
@@ -63,9 +63,9 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     ajax.datatables("applications-search",
       {
         searchText: self.searchField(),
-        applicationTags: _.pluck(self.applicationTags(), "id"),
-        applicationOrganizations: _.pluck(self.applicationOrganizations(), "id"),
-        applicationOperations: _.pluck(self.applicationOperations(), "id"),
+        tags: _.pluck(self.tags(), "id"),
+        organizations: _.pluck(self.organizations(), "id"),
+        operations: _.pluck(self.operations(), "id"),
         handler: self.handler() ? self.handler().id : undefined,
         applicationType: self.applicationType(),
         areas: _.pluck(self.areas(), "id"),
