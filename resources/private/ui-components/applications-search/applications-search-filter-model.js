@@ -229,6 +229,22 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
     return self.showAdvancedFilters() ? "applications.filter.advancedFilter.hide" : "applications.filter.advancedFilter.show";
   });
 
+  self.saveAdvancedFilters = function() {
+    var filters = {
+      tags: ko.unwrap(self.dataProvider.tags),
+      operations: ko.unwrap(self.dataProvider.operations),
+      organizations: ko.unwrap(self.dataProvider.organizations),
+      areas: ko.unwrap(self.dataProvider.areas)
+    };
+
+    ajax
+    .command("update-default-application-filter")
+    .error(_.noop)
+    .success(function() {
+    })
+    .call();
+  };
+
   if ( lupapisteApp.models.currentUser.isAuthority() ) {
     self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
     self.operationsDataProvider = new LUPAPISTE.OperationsDataProvider(self.dataProvider.operations);
