@@ -230,15 +230,15 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
   });
 
   self.saveAdvancedFilters = function() {
-    var filters = {
-      tags: ko.unwrap(self.dataProvider.tags),
-      operations: ko.unwrap(self.dataProvider.operations),
-      organizations: ko.unwrap(self.dataProvider.organizations),
-      areas: ko.unwrap(self.dataProvider.areas)
+    var filter = {
+      tags:          _.map(ko.unwrap(self.dataProvider.tags), "id"),
+      operations:    _.map(ko.unwrap(self.dataProvider.operations), "id"),
+      organizations: _.map(ko.unwrap(self.dataProvider.organizations), "id"),
+      areas:         _.map(ko.unwrap(self.dataProvider.areas), "id")
     };
 
     ajax
-    .command("update-default-application-filter")
+    .command("update-default-application-filter", {filter: filter})
     .error(_.noop)
     .success(function() {
     })
