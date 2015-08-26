@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation  Sonja should see only applications from Sipoo
+Suite teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
 
@@ -13,11 +14,8 @@ Mikko creates application
   Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
 
 Mikko edits operation description
-  Open application  ${appname}  753-416-25-30
-
-  ${span} =  Set Variable  $("div[id='application-info-tab'] span[data-test-id='edit-op-description']:first")
-  Execute Javascript  ${span}.click();
-
+  Open accordions  info
+  Wait and click  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//button[@data-test-id='edit-op-description']
   Input text by test id  op-description-editor  Talo A
   Wait until  Page should contain  Tallennettu
 
@@ -33,19 +31,20 @@ Mikko adds an operation
   Wait until  Page should contain element  xpath=//section[@data-doc-type="uusiRakennus"][2]
 
 Mikko edits operation B description
-  ${span} =  Set Variable  $("div[id='application-info-tab'] span[data-test-id='edit-op-description']:last")
-  Execute Javascript  ${span}.click();
+  Open accordions  info
+  ${button} =  Set Variable  $("#application-info-tab button[data-test-id='edit-op-description']:last")
+  Execute Javascript  ${button}.click();
 
   ${selector} =   Set Variable  $("input[data-test-id='op-description-editor']:visible")
   Wait For Condition  return ${selector}.length===1;  10
 
   Execute Javascript  ${selector}.val("Talo B").change().blur();
-  Wait until  Element should be visible  xpath=//span[@class="op-description-wrapper"]//span[contains(@class,'accordion-input-saved')]
+  Wait for jQuery
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
   Open tab  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen - Talo A
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen - Talo A
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 

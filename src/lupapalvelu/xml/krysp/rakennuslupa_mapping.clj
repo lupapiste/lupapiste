@@ -149,7 +149,7 @@
                               :child [mapping-common/lupatunnus]}
                              {:tag :viitelupatieto :child [mapping-common/lupatunnus]}
                              {:tag :osapuolettieto
-                              :child [mapping-common/osapuolet]}
+                              :child [mapping-common/osapuolet_210]}
                              {:tag :rakennuspaikkatieto
                               :child [mapping-common/rakennuspaikka]}
                              {:tag :toimenpidetieto
@@ -347,7 +347,7 @@
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application katselmus user lang krysp-version output-dir begin-of-link]
   (let [find-national-id (fn [{:keys [kiinttun rakennusnro]}]
-                           (:nationalId (some #(when (and (= (:propertyId %)) (= rakennusnro (:localShortId %))) %) (:buildings application))))
+                           (:nationalId (some #(when (and (= kiinttun (:propertyId %)) (= rakennusnro (:localShortId %))) %) (:buildings application))))
         data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
@@ -403,14 +403,17 @@
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
 
+(defn- patevyysvaatimusluokka212 [luokka]
+  (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
+    "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
+    luokka))
+
 (defn- map-tyonjohtaja-patevyysvaatimusluokka [canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
     #(map (fn [tj]
-            (update-in tj [:Tyonjohtaja :patevyysvaatimusluokka]
-              (fn [luokka]
-                (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
-                  "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
-                  luokka))))
+            (-> tj
+              (update-in [:Tyonjohtaja :patevyysvaatimusluokka] patevyysvaatimusluokka212)
+              (update-in [:Tyonjohtaja :vaadittuPatevyysluokka] patevyysvaatimusluokka212)))
        %)))
 
 (defn- map-enums-212 [canonical]

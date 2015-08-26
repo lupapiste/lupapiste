@@ -62,8 +62,12 @@
         self.data(ko.mapping.fromJS(statement));
 
         if (!self.dirty()) {
-          if (statement.status) self.selectedStatus(statement.status);  // LUPA-482 part II
-          if (statement.text) self.text(statement.text);
+          if (statement.status) {
+            self.selectedStatus(statement.status);  // LUPA-482 part II
+          }
+          if (statement.text) {
+            self.text(statement.text);
+          }
           self.dirty(false);
         }
 
@@ -72,7 +76,7 @@
             .query("get-possible-statement-statuses", {id: applicationId})
             .success(function(resp) {
               var sorted = _(resp.data)
-                .map(function(item) { return {id: item, name: loc(['statement', item])}; })
+                .map(function(item) { return {id: item, name: loc(["statement", item])}; })
                 .sortBy("name")
                 .value();
               self.statuses(sorted);
@@ -83,7 +87,7 @@
         }
 
       } else {
-        window.location.hash = "!/404";
+        pageutil.openPage("404");
       }
     };
 
@@ -101,7 +105,7 @@
       ajax
         .command("give-statement", {id: applicationId, statementId: statementId, status: self.selectedStatus(), text: self.text(), lang: loc.getCurrentLanguage()})
         .success(function() {
-          window.location.hash = "!/application/"+applicationId+"/statement";
+          pageutil.openApplicationPage({id: applicationId}, "statement");
           repository.load(applicationId);
           return false;
         })
@@ -120,7 +124,7 @@
       .command("delete-statement", {id: applicationId, statementId: statementId})
       .success(function() {
         repository.load(applicationId);
-        window.location.hash = "!/application/"+applicationId+"/statement";
+        pageutil.openApplicationPage({id: applicationId}, "statement");
         return false;
       })
       .call();

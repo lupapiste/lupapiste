@@ -20,7 +20,7 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [sade.session :as ssess]
-            [lupapalvelu.action :as action :refer [defquery]]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application-search-api]
             [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
@@ -39,7 +39,7 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
-            [lupapalvelu.neighbors]
+            [lupapalvelu.neighbors-api]
             [lupapalvelu.idf.idf-api :as idf-api]))
 
 ;;
@@ -196,9 +196,12 @@
       (resp/json (execute-export name (from-query request) (assoc request :user user)))
       basic-401)))
 
-(defpage "/api/raw/:name" {name :name}
+(defpage [:any "/api/raw/:name"] {name :name :as params}
   (let [request (request/ring-request)
-        response (execute (enriched (action/make-raw name (from-query request)) request))]
+        data (if (= :post (:request-method request))
+               (:params request)
+               (from-query request))
+        response (execute (enriched (action/make-raw name data) request))]
     (cond
       (= response core/unauthorized) (resp/status 401 "unauthorized")
       (false? (:ok response)) (resp/status 404 (resp/json response))
@@ -317,11 +320,6 @@
 ; Same as above, but with an extra path.
 (defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
   (serve-app app hashbang lang))
-
-(defquery redirect-after-login
-  {:user-roles action/all-authenticated-user-roles}
-  [{session :session}]
-  (ok :url (get session :redirect-after-login "")))
 
 ;;
 ;; Login/logout:
@@ -449,7 +447,7 @@
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.56.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.98.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)
@@ -476,7 +474,7 @@
 ;; Proxy
 ;;
 
-(defpage [:any "/proxy/:srv"] {srv :srv}
+(defpage [:any ["/proxy/:srv" :srv #"[a-z/\-]+"]] {srv :srv}
   (if @env/proxy-off
     {:status 503}
     ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))))
@@ -638,7 +636,7 @@
 
   (defpage "/dev/public/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
-      (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors/->public r)}))
+      (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors-api/->public r)}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
   (defpage [:get "/api/proxy-ctrl"] []

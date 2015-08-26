@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.schemas
-  (:require [lupapalvelu.document.tools :refer :all]
+  (:require [clojure.set :as set]
+            [lupapalvelu.document.tools :refer :all]
             [lupapiste-commons.usage-types :as usages]))
 
 ;;
@@ -11,8 +12,19 @@
 (defn get-all-schemas [] @registered-schemas)
 (defn get-schemas [version] (get @registered-schemas version))
 
+(def info-keys #{:name :type :subtype :version
+                 :i18name :i18nprefix
+                 :approvable :removable :deny-removing-last-document
+                 :group-help :section-help
+                 :after-update
+                 :repeating :order})
+
+(def updateable-keys #{:removable})
+(def immutable-keys (set/difference info-keys updateable-keys) )
+
 (defn defschema [version data]
   (let [schema-name (name (get-in data [:info :name]))]
+    (assert (every? info-keys (keys (:info data))))
     (swap! registered-schemas
       assoc-in
       [version schema-name]
@@ -25,7 +37,7 @@
     (defschema version schema)))
 
 (defn get-schema
-  ([{:keys [version name]}] (get-schema version name))
+  ([{:keys [version name] :or {version 1}}] (get-schema version name))
   ([schema-version schema-name]
     {:pre [schema-version schema-name]}
     (get-in @registered-schemas [schema-version (name schema-name)])))
@@ -337,8 +349,8 @@
           {:name "ei tiedossa"}]})
 
 (def patevyys-tyonjohtaja [koulutusvalinta
-                           {:name "koulutus" :type :string :required true :i18nkey "muukoulutus"}
-                           patevyysvaatimusluokka
+                           {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
+                           patevyysvaatimusluokka ; Actually vaadittuPatevyysluokka in KRYSP
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
                            {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}
@@ -447,7 +459,7 @@
                       designer-basic
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
-                      patevyysvaatimusluokka
+                      patevyysvaatimusluokka ; Actually vaadittuPatevyysluokka in KRYSP
                       vastattavat-tyotehtavat-tyonjohtaja-v2
                       tyonjohtaja-hanketieto
                       sijaisuus-tyonjohtaja
@@ -897,7 +909,6 @@
      :body (approvable-top-level-groups (body kuvaus))}
 
     {:info {:name "hakija"
-            :group-help "hakija.group.help"
             :i18name "osapuoli"
             :order 3
             :removable true
@@ -905,13 +916,13 @@
             :approvable true
             :type :party
             :subtype "hakija"
-            :section-help "party.section.help"
+            :group-help nil
+            :section-help nil
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
             }
      :body party}
 
     {:info {:name "hakija-r"
-            :group-help "hakija.group.help"
             :i18name "osapuoli"
             :order 3
             :removable true
@@ -919,6 +930,7 @@
             :approvable true
             :type :party
             :subtype "hakija"
+            :group-help "hakija.group.help"
             :section-help "party.section.help"
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
             }
@@ -932,7 +944,8 @@
             :approvable true
             :type :party
             :subtype "hakija"
-            :section-help "party.section.help"
+            :group-help nil
+            :section-help nil
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
      :body (schema-body-without-element-by-name ya-party turvakielto)}
 

@@ -16,6 +16,7 @@ Mikko creates new application
 
 Mikko invites foreman to application
   Open tab  parties
+  Open accordions  parties
   Click by test id  invite-foreman-button
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
@@ -28,6 +29,7 @@ Mikko sees sent invitation on the original application
   Click by test id  test-application-link-permit-lupapistetunnus
   Wait until  Element text should be  xpath=//span[@data-test-id='application-id']  ${newApplicationid}
   Open tab  parties
+  Open accordions  parties
   Wait until  Element text should be  xpath=//ul[@data-test-id='invited-foremans']//span[@data-test-id='foreman-email']  (teppo@example.com)
   [Teardown]  logout
 
@@ -68,7 +70,7 @@ Authority can view draft foreman application, but can't use commands
   Element should be disabled  xpath=//section[@data-doc-type="hakija-r"]//div[@data-select-one-of="henkilo"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]
   Open tab  attachments
   Xpath Should Match X Times  //div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  1
-  Element text should be  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  Valitse..
+  Element text should be  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  Valitse…
   Open tab  requiredFieldSummary
   Element should not be visible  xpath=//div[@id="application-requiredFieldSummary-tab"]//button[@data-test-id="application-submit-btn"]
   # Application actions only exportPDF is visible
@@ -90,7 +92,7 @@ Original application is approved and given a verdict
 Add työnjohtaja task to original application
   Add työnjohtaja task to current application  Ylitarkastaja
   Add työnjohtaja task to current application  Alitarkastaja
-  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  2
+  Wait until  Xpath Should Match X Times  //div[@data-test-id="tasks-foreman"]//tbody/tr  2
   [Teardown]  logout
 
 Mikko can link existing foreman application to foreman task
@@ -114,7 +116,7 @@ Mikko can start invite flow from tasks tab
   Click by test id  cancel-foreman-dialog
 
 Mikko can invite additional foremans to application with verdict
-  Wait and click   xpath=//table[@data-test-id='tasks-foreman']//tr[@data-test-name='Alitarkastaja']/td[@data-test-col-name='foreman-name-or-invite']/a
+  Wait and click   xpath=//div[@data-test-id='tasks-foreman']//tr[@data-test-name='Alitarkastaja']/td[@data-test-col-name='foreman-name-or-invite']/a
   Wait until  Element should be visible  invite-foreman-email
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman

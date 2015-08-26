@@ -102,7 +102,15 @@
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
       (:subject email) => "Lupapiste.fi: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
-      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
+      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))
+
+  (fact "add existing authority to new organization"
+
+    (command naantali :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add"  :roles ["authority"]) => ok?
+    (let [email (last-email)]
+      (:to email) => (contains "tonja.sibbo@sipoo.fi")
+      (:subject email) => "Lupapiste.fi: Ilmoitus k\u00e4ytt\u00e4j\u00e4tilin liitt\u00e4misest\u00e4 organisaation viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (get-in email [:body :plain]) => (contains "Naantalin rakennusvalvonta"))))
 
 (facts remove-user-organization
   (apply-remote-minimal)
@@ -115,12 +123,18 @@
 
 (fact update-user-roles
   (apply-remote-minimal)
-  (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority"])
-  (fact (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "foobar"] :organization "753-R") => fail?)
+  (fact "Meta: check current roles" (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority"])
+  (fact (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "foobar"]) => fail?)
   (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority"])
 
-  (fact (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "tos-editor" "tos-publisher"] :organization "753-R") => ok?)
-  (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority" "tos-editor" "tos-publisher"]))
+  (fact "Sipoo does not have permanent achive, can not set TOS roles but reader is OK"
+    (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "tos-editor" "tos-publisher" "reader"]) => ok?
+    (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority" "reader"])
+
+  (fact "Jarvenpaa has permanent achive, can set TOS roles"
+    (fact "Meta: check current roles" (-> (query admin :user-by-email :email "rakennustarkastaja@jarvenpaa.fi") :user :orgAuthz :186-R) => ["authority"])
+    (command jarvenpaa :update-user-roles :email "rakennustarkastaja@jarvenpaa.fi" :roles ["authority" "tos-editor" "tos-publisher"]) => ok?
+    (-> (query admin :user-by-email :email "rakennustarkastaja@jarvenpaa.fi") :user :orgAuthz :186-R) => ["authority" "tos-editor" "tos-publisher"]))
 
 (fact "changing user info"
   (apply-remote-minimal)

@@ -4,45 +4,59 @@ var accordion = (function() {
   var animationTime = 200,
       animationEasing = "easeInOutCubic";
 
-  function set(t, toState, done) {
-    var target = t;
-    if (target.is("span")) { target = target.parent(); }
+  var memory = {};
 
+  function selectors( t ) {
+    var target = t.closest( ".accordion-toggle");
     var content = target.siblings(".accordion_content");
+    return {
+      target: target,
+      content: content
+    };
+  }
+
+  function set(t, toState, done, force ) {
+    var sels = selectors( t );
+    var target = sels.target;
+    var content = sels.content;
 
     var state = content.attr("data-accordion-state");
-    if (toState === state) { return; }
-    if (toState === "toggle") {
-      toState = (state !== "closed") ? "closed" : "open";
-    }
-    state = toState;
-
-    target
-      .children(".toggle-icon")
-      .removeClass(state === "closed" ? "drill-down-white" : "drill-right-white")
-      .addClass(state === "closed" ? "drill-right-white" : "drill-down-white");
-
-    var complete = function() {
-      content.css("overflow", "visible");
-      target.trigger("accordion-" + state);
-      if (done) {
-        done(target);
+    if (toState != state || force ) {
+      if (toState === "toggle") {
+        toState = (state !== "closed") ? "closed" : "open";
       }
-    };
+      state = toState;
 
-    content.attr("data-accordion-state", state);
-    if (state !== "closed") {
-      content.slideDown(animationTime, animationEasing, complete);
-    } else {
-      content.slideUp(animationTime, animationEasing, complete);
+      var complete = function () {
+        content.css("overflow", "visible");
+        target.trigger("accordion-" + state);
+        target.toggleClass( "toggled", state === "open");
+        memory[content.prop( "id" )] = state;
+        if (done) {
+          done(target);
+        }
+      };
+
+      content.attr("data-accordion-state", state);
+      if (state !== "closed") {
+        content.slideDown(animationTime, animationEasing, complete);
+      } else {
+        content.slideUp(animationTime, animationEasing, complete);
+      }
     }
-
     return t;
   }
 
-  function open(t, done)   { set(t, "open", done);   return t; }
-  function close(t, done)  { set(t, "closed", done); return t; }
-  function toggle(t, done) { set(t, "toggle", done); return t; }
+  function open(t, done)   { return set(t, "open", done); }
+  function close(t, done)  { return set(t, "closed", done); }
+  function toggle(t, done) { return set(t, "toggle", done); }
+  function reset( t, done ) {
+    var key = selectors( t ).content.prop( "id");
+    var state = memory[key];
+    if( state ) {
+      set( t, state, done, true );
+    }
+  }
 
   function click(event) {
     var e = getEvent(event);
@@ -53,7 +67,7 @@ var accordion = (function() {
   }
 
   function toggleAll(target) {
-    $(target).closest(".application_section").find("section.accordion h2").click();
+    $(target).closest(".application_section").find("section.accordion .accordion-toggle").click();
   }
 
   $.fn.accordionOpen   = function(done) { return open(this, done); };
@@ -64,8 +78,10 @@ var accordion = (function() {
     open:   open,
     close:  close,
     toggle: toggle,
+    reset: reset,
     click:  click,
     toggleAll: toggleAll
+
   };
 
 })();

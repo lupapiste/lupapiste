@@ -1,0 +1,12 @@
+// Various utilities for rudimentary responsiveness support.
+
+// No need to support narrower displays.
+$minimum-breakpoint: 768px;
+$narrow-breakpoint:  991px;
+
+.narrow-hide {
+    @media (max-width: $narrow-breakpoint) {
+        display: none;
+    }
+}
+

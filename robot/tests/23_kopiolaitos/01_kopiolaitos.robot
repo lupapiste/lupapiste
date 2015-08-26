@@ -16,7 +16,7 @@ Mikko creates an application
 
 Mikko adds an attachment
   Open tab  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//td[@class='attachment-file-info']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
 Mikko submits application
@@ -49,7 +49,7 @@ Sonja disables verdict attachment using multiselect view
   Click by test id  multiselect-action-button
 
 There should be no verdict attachments
-  Wait until  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="verdict-attachment-muut.muu"]
+  Wait until  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="verdict-attachment-muut.muu"]
 
 Sonja marks one attachment as verdict attachment using multiselect view
   Select attachment operation option from dropdown  markVerdictAttachments
@@ -59,7 +59,7 @@ Sonja marks one attachment as verdict attachment using multiselect view
   Click by test id  multiselect-action-button
 
 There should be now one verdict attachment
-  Wait until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="verdict-attachment-muut.muu"]
+  Wait until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="verdict-attachment-muut.muu"]
 
 Sonja gives verdict
   Open tab  verdict

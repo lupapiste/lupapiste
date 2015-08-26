@@ -102,8 +102,8 @@ New user logs in
 
 User sees herself as company admin
   Open company user listing
-  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-user2@solita.fi']/td[@data-test-id='company-user-role']  Ylläpitäjä
-  Logout
+  Wait Until  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-user2@solita.fi']/td[@data-test-id='company-user-role']  Ylläpitäjä
+  [Teardown]  Logout
 
 # Custom account
 
@@ -111,7 +111,7 @@ Solita admin sets custom account for company 'Solita Oy', max users 2
   SolitaAdmin logs in
   Click element  xpath=//li/a[contains(text(), "Yritykset")]
   Click element  xpath=//table[@data-test-id="corporations-table"]//tr[@data-test-id="company-row-solita"]//a[@data-test-id="company-edit"]
-  Element text should be  xpath=//div[@data-test-id="modal-dialog-content"]/div[@class="header"]/span[@class="title"]  Muokkaa yritysta
+  Wait until  Element text should be  xpath=//div[@data-test-id="modal-dialog-content"]/div[@class="header"]/span[@class="title"]  Muokkaa yritysta
   Select from list by value  xpath=//select[@name="account-type"]  custom
   Input text  xpath=//input[@name="customAccountLimit"]  2
   Focus  xpath=//button[@data-test-id="modal-dialog-submit-button"]

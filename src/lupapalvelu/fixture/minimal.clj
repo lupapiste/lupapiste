@@ -145,7 +145,7 @@
 
    ;; Sipoo
 
-   ;; Simo Sippo - Sipoon R paakayttaja:  sipoo / sipoo
+   ;; Simo Suurvisiiri - Sipoon R paakayttaja:  sipoo / sipoo
    {:id "50ac77ecc2e6c2ea6e73f83e"
     :email "admin@sipoo.fi"
     :enabled true
@@ -156,6 +156,18 @@
     :username "sipoo"
     :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
               :apikey "50ac788ec2e6c2ea6e73f83f"}}
+
+   ;; Simo YA-Suurvisiiri - Sipoon YA paakayttaja:  sipoo-ya / sipoo
+   {:id "50ac77eaf2e6c2ea6e73f81e"
+    :email "admin-ya@sipoo.fi"
+    :enabled true
+    :role "authorityAdmin"
+    :orgAuthz {:753-YA #{:authorityAdmin}}
+    :firstName "Simo"
+    :lastName "YA-Suurvisiiri"
+    :username "sipoo-ya"
+    :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
+              :apikey "55cdafd8abc1d91e7ccd60b2"}}
 
    ;; Sonja Sibbo - Sipoon lupa-arkkitehti:  sonja / sonja
    {:id "777777777777777777000023"
@@ -492,7 +504,7 @@
                                 :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]
                        :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
-                       :permanent-archive-enabled false}
+                       :permanent-archive-enabled true}
 
                       ;; Sipoo R
                       {:id "753-R"
@@ -540,7 +552,21 @@
                        :kopiolaitos-orderer-phone "0501231234"
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P" "YI" "YL" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
-                       :tags ["yl\u00E4maa"]}
+                       :tags [{:id "111" :label "yl\u00E4maa"} {:id "222" :label "ullakko"}]
+                       :areas {:type "FeatureCollection"
+                               :features [{:id "sipoo_keskusta",
+                                           :properties {:nimi "Keskusta", :id 3},
+                                           :geometry
+                                           {:coordinates
+                                            [[[[402644.2941 6693912.6002]
+                                               [401799.0131 6696356.5649]
+                                               [406135.6722 6695272.4001]
+                                               [406245.9263 6693673.7164]
+                                               [404059.221 6693545.0867]
+                                               [404059.221 6693545.0867]
+                                               [402644.2941 6693912.6002]]]],
+                                            :type "MultiPolygon"},
+                                           :type "Feature"}]}}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.
@@ -563,7 +589,8 @@
                                              :ya-kayttolupa-mainostus-ja-viitoitus
                                              :ya-kayttolupa-terassit]
                        :operations-attachments ya-default-attachments-for-operations
-                       :permanent-archive-enabled false}
+                       :permanent-archive-enabled false
+                       :tags [{:id "735YA001" :label "YA kadut"} {:id "735YA002" :label "YA ojat"}]}
 
                       ;; Kuopio YA
                       {:id "297-YA"

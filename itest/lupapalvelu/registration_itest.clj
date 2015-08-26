@@ -11,14 +11,13 @@
             [lupapalvelu.itest-util :refer [->cookie-store server-address decode-response
                                             admin query command
                                             last-email apply-remote-minimal
-                                            ok? fail? http200? http302?
+                                            ok? fail? http200? redirects-to
                                             ]]
             [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.vetuma-itest-util :refer :all]
             ))
 
 (testable-privates lupapalvelu.vetuma mac-of keys-as-keywords)
-
-(def vetuma-endpoint (str (server-address) "/api/vetuma"))
 
 (apply-remote-minimal)
 
@@ -28,22 +27,13 @@
                                  :cancel "/cancel"
                                  :error "/error"}})
 
-(defn- vetuma-init [request-opts]
-  ; Request welcome page and query features to init session
-  (http/get (str (server-address) "/app/wi/welcome") request-opts)
-  (http/get (str (server-address) "/api/query/features") request-opts)
-  (http/get vetuma-endpoint (merge request-opts token-query)))
-
 (defn- vetuma-finish [request-opts trid]
-  (let [base-post (assoc (zipmap (map (comp ss/upper-case name) vetuma/response-mac-keys) (repeat "0"))
-                    "TRID" trid
-                    "SUBJECTDATA" "ETUNIMI=Jukka, SUKUNIMI=Palmu"
-                    "EXTRADATA" "HETU=123456-7890"
-                    "USERID" "123456-7890"
-                    "VTJDATA" "<VTJHenkiloVastaussanoma/>")
-         mac (mac-of (assoc (keys-as-keywords base-post) :key (:key (vetuma/config))) vetuma/response-mac-keys)
-         vetuma-post (assoc base-post :mac mac)]
-    (http/post vetuma-endpoint (assoc request-opts :form-params vetuma-post))))
+  (vetuma-fake-respose request-opts {"TRID" trid
+                                     "STATUS" "SUCCESSFUL"
+                                     "SUBJECTDATA" "ETUNIMI=Jukka, SUKUNIMI=Palmu"
+                                     "EXTRADATA" "HETU=123456-7890"
+                                     "USERID" "123456-7890"
+                                     "VTJDATA" "<VTJHenkiloVastaussanoma/>"}))
 
 (defn- register [base-opts user]
   (decode-body
@@ -67,18 +57,13 @@
        params {:cookie-store (->cookie-store store)
                :follow-redirects false
                :throw-exceptions false}
-       resp (vetuma-init params) => http200?
-       body (:body resp) => (contains "***REMOVED***1")
-       form (xml/parse body)
-       trid (xml/select1-attribute-value form [(e/attr= :id "TRID")] :value)]
+       trid (vetuma-init params token-query)]
 
-   (fact "Form contains transaction ID" trid =not=> ss/blank?)
-   (fact "Form contains standard error url" (xml/select1-attribute-value form [(e/attr= :id "ERRURL")] :value) => (contains "/api/vetuma/error"))
-   (fact "Form contains standard cancel url" (xml/select1-attribute-value form [(e/attr= :id "CANURL")] :value) => (contains "/api/vetuma/cancel"))
+   (fact "trid" trid =not=> ss/blank?)
 
    (fact "Vetuma redirect"
-     (let [resp (vetuma-finish params trid)  => http302?]
-         (get-in resp [:headers "location"]) => (contains (get-in token-query [:query-params :success]))))
+     (let [resp (vetuma-finish params trid)]
+       resp => (partial redirects-to (get-in token-query [:query-params :success]))))
 
    (last-email) ; Inbox zero
 
@@ -146,9 +131,8 @@
 
      (fact "Register again with the same email"
        (last-email) ; Inbox zero
-       (swap! store (constantly {})) ; clear cookies
-       (let [resp (vetuma-init params)
-             trid (-> resp :body xml/parse (xml/select1-attribute-value [(e/attr= :id "TRID")] :value))]
+       (reset! store {}) ; clear cookies
+       (let [trid (vetuma-init params token-query)]
          (vetuma-finish params trid))
 
        (let [stamp (:stamp (decode-body (http/get (str (server-address) "/api/vetuma/user") params))) => string?
@@ -190,13 +174,11 @@
 
            (fact "Activate account"
              (let [resp (http/get first-href {:follow-redirects false})]
-               resp => http302?
-               (get-in resp [:headers "location"]) => (contains "/app/fi/applicant")))
+               resp => (partial redirects-to "/app/fi/applicant")))
 
            (fact "Second activation attempt leads to login page"
              (let [resp (http/get first-href {:follow-redirects false})]
-               resp => http302?
-               (get-in resp [:headers "location"]) => (contains "/app/fi/welcome")))
+               resp => (partial redirects-to "/app/fi/welcome")))
 
            (fact "Log in"
              (login new-user-email new-user-pw) => ok?)))))))

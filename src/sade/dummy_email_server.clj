@@ -84,7 +84,7 @@
 
   (defpage "/api/last-email" {reset :reset}
     (if-let [msg (last (messages :reset reset))]
-      (enlive/emit* (-> (enlive/html-resource (io/input-stream (.getBytes (get-in msg [:body :html]) "UTF-8")))
+      (enlive/emit* (-> (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8")))
                       (enlive/transform [:head] (enlive/append {:tag :title :content (:subject msg)}))
                       (enlive/transform [:body] (enlive/prepend [(msg-header msg)
                                                                  {:tag :hr}]))))
@@ -105,7 +105,7 @@
                                      :content
                                      (vector
                                        (msg-header msg)
-                                       (first (enlive/select (enlive/html-resource (io/input-stream (.getBytes (get-in msg [:body :html]) "UTF-8"))) [:body])))}
+                                       (first (enlive/select (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8"))) [:body])))}
                                    ) msgs)}]
          })
       {:status 404 :body "No emails"}))

@@ -3,7 +3,7 @@
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.neighbors :as neighbors]
+            [lupapalvelu.neighbors-api :as neighbors]
             [lupapalvelu.open-inforequest :as inforequest]
             [monger.operators :refer :all]
             [clojure.string :as s]
@@ -196,7 +196,8 @@
                   (logging/log-event :info {:run-by "Automatic verdicts checking"
                                             :event "No Krysp WFS url defined for organization"
                                             :organization {:id organization :permit-type permitType}}))))
-            (catch Exception e (error e))))
+            (catch Throwable t
+              (errorf "Unable to get verdict for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t)))))
         apps))))
 
 (defn check-for-verdicts [& args]

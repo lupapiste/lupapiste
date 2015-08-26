@@ -14,7 +14,8 @@ LUPAPISTE.Upload = {
   locked: ko.observable(),
   authority: ko.observable(),
   selectableOperations: ko.observableArray(),
-  selectedOperationId: ko.observable()
+  selectedOperationId: ko.observable(),
+  helpVisible: ko.observable(false)
 };
 
 LUPAPISTE.Upload.setModel = function(options) {
@@ -40,12 +41,8 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
     ajax
       .query("attachment-types",{id: applicationId})
       .success(function(d) {
-        // fix for IE9 not showing the last option
-        if($.browser.msie) {
-          d.attachmentTypes.push(["empty", []]);
-        }
-        LUPAPISTE.Upload.attachmentTypeGroups(_.map(d.attachmentTypes, function(v) {
-          return {group: v[0], types: _.map(v[1], function(t) { return {name: t}; })};
+        LUPAPISTE.Upload.attachmentTypeGroups(_.map(attachmentUtils.sortAttachmentTypes(d.attachmentTypes), function(v) {
+          return {group: v[0], types: _.map(v[1], function(t) {return {name: t};})};
         }));
         var uploadForm$ = $("#attachmentUploadForm");
         uploadForm$.applyBindings(LUPAPISTE.Upload);

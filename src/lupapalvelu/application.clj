@@ -4,7 +4,6 @@
             [clj-time.local :refer [local-now]]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
-            [clojure.zip :as zip]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
@@ -46,9 +45,11 @@
   (or (= :muutoslupa (keyword (:permitSubtype application)))
       (some #(operations/link-permit-required-operations (keyword (:name %))) (get-operations application))))
 
-(defn validate-link-permits [application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)
-        linkPermits (-> application :linkPermitData count)]
+(defn validate-link-permits [{:keys [linkPermitData] :as application}]
+  (let [{:keys [linkPermitData] :as application} (if linkPermitData
+                                                   application
+                                                   (meta-fields/enrich-with-link-permit-data application))
+        linkPermits (count linkPermitData)]
     (when (and (is-link-permit-required application) (zero? linkPermits))
       (fail :error.permit-must-have-link-permit))))
 
@@ -98,18 +99,42 @@
   (let [mask-person-ids (person-id-masker-for-user user application)]
     (update-in application [:documents] (partial map mask-person-ids))))
 
+
+; whitelist-action
+(defn- prefix-with [prefix coll]
+  (conj (seq coll) prefix))
+
+(defn- enrich-single-doc-disabled-flag [{user-role :role} doc]
+  (let [doc-schema (model/get-document-schema doc)
+        zip-root (tools/schema-zipper doc-schema)
+        whitelisted-paths (tools/whitelistify-schema zip-root)]
+    (reduce (fn [new-doc [path whitelist]]
+              (if-not ((set (:roles whitelist)) (keyword user-role))
+                (tools/update-in-repeating new-doc (prefix-with :data path) merge {:whitelist-action (:otherwise whitelist)})
+                new-doc))
+            doc
+            whitelisted-paths)))
+
 ; Process
-(defn- process-documents [user {authority :authority :as application}]
-  (let [validate (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
+(defn- with-current-schema-info [document]
+  (let [current-info (-> document :schema-info schemas/get-schema :info (select-keys schemas/immutable-keys))]
+    (update document :schema-info merge current-info)))
+
+(defn- process-documents-and-tasks [user {authority :authority :as application}]
+  (let [validate        (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
         mask-person-ids (person-id-masker-for-user user application)
-        doc-mapper (comp mask-person-ids validate)]
-    (update-in application [:documents] (partial map doc-mapper))))
+        disabled-flag   (partial enrich-single-doc-disabled-flag user)
+        mapper          (comp disabled-flag with-current-schema-info mask-person-ids validate)]
+    (-> application
+      (update :documents (partial map mapper))
+      (update :tasks (partial map mapper)))))
 
 (defn ->location [x y]
   [(util/->double x) (util/->double y)])
 
-(defn get-link-permit-app [{:keys [linkPermitData]}]
+(defn get-link-permit-app
   "Return associated (first lupapistetunnus) link-permit application."
+  [{:keys [linkPermitData]}]
   (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
     (domain/get-application-no-access-checking (:id link))))
 
@@ -135,106 +160,13 @@
     (assoc application :submittable (foreman-submittable? application))
     application))
 
-
-(defn- process-tasks [application]
-  (update-in application [:tasks] (partial map #(assoc % :validationErrors (model/validate application %)))))
-
-;; For enrich-docs-disabled-flag --> ; TODO should these be moved to own namespace, or to document related namespace?
-
-(defn- schema-branch? [node]
-  (or
-    (seq? node)
-    (and
-      (map? node)
-      (contains? node :body))))
-
-(def- schema-leaf?
-      (complement schema-branch?))
-
-(defn- schema-zipper [doc-schema]
-  (let [branch? (fn [node]
-                  (and (map? node)
-                       (contains? node :body)))
-        children (fn [{body :body :as branch-node}]
-                   (assert (map? branch-node) (str "Assertion failed in schema-zipper/children, expected node to be a map:" branch-node))
-                   (assert (not (empty? body)) (str "Assertion failed in schema-zipper/children, branch node to have children:" branch-node))
-                   body)
-        make-node (fn [node, children]
-                    (assert (map? node) (str "Assertion failed in schema-zipper/make-node, expected node to be a map:" node))
-                    (assoc node :body children))]
-    (zip/zipper branch? children make-node doc-schema)))
-
-(defn- iterate-siblings-to-right [loc f]
-  (if (nil? (zip/right loc))
-    (-> (f loc)
-        zip/up)
-    (-> (f loc)
-        zip/right
-        (recur f))))
-
-(defn- get-root-path [loc]
-  (let [keyword-name (comp keyword :name)
-        root-path (->> (zip/path loc)
-                       (mapv keyword-name)
-                       (filterv identity))
-        node-name (-> (zip/node loc)
-                      keyword-name)]
-    (seq (conj root-path node-name))))
-
-(defn- add-whitelist-property [node new-whitelist]
-  (if-not (and (seq? node) (:whitelist node))
-    (assoc node :whitelist new-whitelist)
-    node))
-
-(defn- walk-schema
-  ([loc] (walk-schema loc nil))
-  ([loc disabled-paths]
-   (if (zip/end? loc)
-     disabled-paths
-     (let [current-node (zip/node loc)
-           current-whitelist (:whitelist current-node)
-           propagate-wl? (and (schema-branch? current-node) current-whitelist)
-           loc (if propagate-wl?
-                 (iterate-siblings-to-right
-                   (zip/down loc)                           ;leftmost-child, starting point
-                   #(zip/edit % add-whitelist-property current-whitelist))
-                 loc)
-           whitelisted-leaf? (and
-                               (schema-leaf? current-node)
-                               current-whitelist)
-           disabled-paths (if whitelisted-leaf?
-                            (conj disabled-paths [(get-root-path loc) current-whitelist])
-                            disabled-paths)]
-       (recur (zip/next loc) disabled-paths)))))
-
-(defn- prefix-with [prefix coll]
-  (conj (seq coll) prefix))
-
-(defn- enrich-single-doc-disabled-flag [user-role doc]
-  (let [doc-schema (model/get-document-schema doc)
-        zip-root (schema-zipper doc-schema)
-        whitelisted-paths (walk-schema zip-root)]
-    (reduce (fn [new-doc [path whitelist]]
-              (if-not ((set (:roles whitelist)) (keyword user-role))
-                (util/update-in-repeating new-doc (prefix-with :data path) merge {:whitelist-action (:otherwise whitelist)})
-                new-doc))
-            doc
-            whitelisted-paths)))
-
-;; <-- For enrich-docs-disabled-flag
-
-(defn- enrich-docs-disabled-flag [{user-role :role} app]
-  (update-in app [:documents] (partial map (partial enrich-single-doc-disabled-flag user-role))))
-
 (defn post-process-app [app user]
   (->> app
        meta-fields/enrich-with-link-permit-data
        (meta-fields/with-meta-fields user)
        action/without-system-keys
        process-foreman-v2
-       (process-documents user)
-       process-tasks
-       (enrich-docs-disabled-flag user)
+       (process-documents-and-tasks user)
        location->object))
 
 ;;
@@ -378,7 +310,7 @@
   {:pre [(mongo/valid-key? link-permit-id)
          (not= id link-permit-id)]}
   (let [db-id (make-mongo-id-for-link-permit id link-permit-id)
-        is-lupapiste-app (.startsWith link-permit-id "LP-")
+        is-lupapiste-app (mongo/any? :applications {:_id link-permit-id})
         linked-app (when is-lupapiste-app
                      (domain/get-application-no-access-checking link-permit-id))]
     (mongo/update-by-id :app-links db-id

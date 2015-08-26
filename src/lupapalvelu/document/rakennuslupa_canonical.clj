@@ -203,11 +203,9 @@
 
 
 (defn- get-lisatiedot [documents lang]
-  (let [lisatiedot (:data (first (:lisatiedot documents)))
-        aloitusoikeus (:data (first (:aloitusoikeus documents)))]
-    {:Lisatiedot {:asioimiskieli (if (= lang "sv")
-                                   "ruotsi"
-                                   "suomi")}}))
+  {:Lisatiedot {:asioimiskieli (case lang
+                                 "sv" "ruotsi"
+                                 "suomi")}})
 
 (defn- get-asian-tiedot [documents]
   (let [maisematyo_documents (:maisematyo documents)

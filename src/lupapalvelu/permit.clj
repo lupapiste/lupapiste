@@ -32,6 +32,7 @@
    :sftp-directory   "/rakennus"
    :applicant-doc-schema "hakija-r"
    :multiple-parties-allowed true
+   :extra-statement-selection-values true
    :wfs-krysp-ns-name "rakennusvalvonta"
    :wfs-krysp-url-asia-prefix "rakval:luvanTunnisteTiedot/"})
 
@@ -40,6 +41,7 @@
    :sftp-directory       "/yleiset_alueet"
    :applicant-doc-schema "hakija-ya"
    :multiple-parties-allowed false
+   :extra-statement-selection-values false
    :wfs-krysp-ns-name "yleisenalueenkaytonlupahakemus"
    :wfs-krysp-url-asia-prefix "yak:luvanTunnisteTiedot/"})
 
@@ -48,6 +50,7 @@
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/ilmoitukset"})
 
 (defpermit YL  "Ymparistolupa"
@@ -55,6 +58,7 @@
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/ymparistoluvat"
    :wfs-krysp-url-asia-prefix "ymy:luvanTunnistetiedot/"})
 
@@ -63,6 +67,7 @@
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/vesihuoltolaki"
    :wfs-krysp-url-asia-prefix "ymv:luvanTunnistetiedot/"})
 
@@ -71,6 +76,7 @@
    :sftp-directory   "/poikkeusasiat"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :extra-statement-selection-values true
    :wfs-krysp-ns-name "poikkeamispaatos_ja_suunnittelutarveratkaisu"
    :wfs-krysp-url-asia-prefix "ppst:luvanTunnistetiedot/"})
 
@@ -79,6 +85,7 @@
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/maa_ainesluvat"
    :wfs-krysp-url-asia-prefix "ymm:luvanTunnistetiedot/"})
 
@@ -86,13 +93,15 @@
   {:subtypes       []
    :sftp-directory "/rakennus"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :extra-statement-selection-values false})
 
 (defpermit MM "Maankayton muutos"
   {:subtypes       []
    :sftp-directory "/kaavat"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :extra-statement-selection-values false})
 
 ;;
 ;; Helpers
@@ -116,33 +125,45 @@
   [permit-type]
   (get-metadata permit-type :app-krysp-mapper))
 
-(defn get-review-mapper [permit-type]
+(defn get-review-mapper
   "Returns a function that maps reviews (katselmus) into KRYSP XML and saves the XML to disk."
+  [permit-type]
   (get-metadata permit-type :review-krysp-mapper))
 
-(defn get-verdict-reader [permit-type]
+(defn get-verdict-reader
   "Returns a function that reads verdicts (sequence) from KRYSP xml.
    Function takes xml as parameter.
    Use get-application-xml-getter to fetch the XML."
+  [permit-type]
   (get-metadata permit-type :verdict-krysp-reader))
 
-(defn get-verdict-validator [permit-type]
+(defn get-verdict-validator
   "Returns a function that validates verdicts from KRYSP xml.
    Function takes xml as parameter.
    Use get-application-xml-getter to fetch the XML."
+  [permit-type]
   (get-metadata permit-type :verdict-krysp-validator))
 
-(defn get-verdict-extras-reader [permit-type]
+(defn get-verdict-extras-reader
   "Returns a function that reads some extras from verdict KRYSP xml.
    Function takes xml as parameter and returns a map that should be merged into the application."
+  [permit-type]
   (get-metadata permit-type :verdict-extras-krysp-reader))
 
-(defn get-application-xml-getter [permit-type]
+(defn get-tj-suunnittelija-verdict-reader
+  "Returns a function that reads tj/suunnittelija verdicts from KRYSP xml.
+   Function takes xml, party type and party's kuntaRoolikoodi as parameter.
+   Use get-application-xml-getter to fetch the XML."
+  [permit-type]
+  (get-metadata permit-type :tj-suunnittelija-verdict-krysp-reader))
+
+(defn get-application-xml-getter
   "Returns a function that fetches KRYSP XML from municipality backend.
    Function parameters: 1) url,
                         2) id,
                         3) keyword parameter: search-type (e.g. :application-id or :kuntalupatunnus)
                         4) optional boolean parameter: raw form."
+  [permit-type]
   (get-metadata permit-type :xml-from-krysp))
 
 (defn multiple-parties-allowed? [permit-type]

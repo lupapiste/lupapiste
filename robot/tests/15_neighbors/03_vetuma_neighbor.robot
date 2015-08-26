@@ -3,6 +3,7 @@
 Documentation   Neighbor logs in with Vetuma and comments the application
 Suite teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../02_register/keywords.robot
 
 *** Test Cases ***
 
@@ -51,14 +52,17 @@ Neighbor clicks on email link and sees application
   Element should contain  xpath=//*[@data-test-id='application-property-id']  753-416-25-22
   Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
 
+Neighbor sees some of the documents
+  [Tags]  integration
+  Page should contain  Hankkeen kuvaus
+  Page should contain  Rakennuspaikka
+  Page should contain  Rakennuksen tilavuus
+  # LPK-546
+  Page should not contain  Päätöksen toimitus
+
 Neighbor clicks vetuma button to identify herself
   [Tags]  integration
-  Wait and click  xpath=//*[@data-test-id='vetuma-init']
-  Wait and click  xpath=//img[@alt='Pankkitunnistus']
-  Wait and click  xpath=//a[@class='nordea']
-  Wait and click  xpath=//input[@name='Ok']
-  Wait and click  xpath=//input[@type='submit']
-  Wait and click  xpath=//button[@type='submit']
+  Authenticate via Nordea via Vetuma
 
 Neighbor is back and leaves a comment
   [Tags]  integration

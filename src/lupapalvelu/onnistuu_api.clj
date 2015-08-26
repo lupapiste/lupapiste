@@ -29,27 +29,33 @@
 ;       * return a HTML form with sign data in hidden fields
 ;
 
+(defn- get-signer [current-user signer]
+  {:post [(sc/validate p/Signer %)]}
+  (if (= (:email signer) (:email current-user))
+    (merge
+      (assoc signer :currentUser (:id current-user))
+      (select-keys (u/get-user-by-id (:id current-user)) [:firstName :lastName :personId]))
+    signer))
+
 (defcommand init-sign
   {:parameters [company signer lang]
-   :user-roles #{:anonymous}}
-  [{:keys [created user]}]
-  (let [company (merge c/company-skeleton company)]
+   :user-roles #{:anonymous}
+   :input-validators [(fn [{{signer :signer} :data user :user}]
+                        (when (and (not= (:email signer) (:email user)) (u/get-user-by-email (:email signer)))
+                          (fail :email-in-use)))
+                      (fn [{{lang :lang} :data}]
+                        (when-not ((set (map name i18n/languages)) lang)
+                          (fail :bad-lang)))]}
+  [{:keys [^Long created user]}]
+  (let [company (merge c/company-skeleton company)
+        signer (get-signer user signer)]
     (sc/validate c/Company company)
-    (sc/validate p/Signer signer)
-    (if-not ((set (map name i18n/languages)) lang) (fail! :bad-lang))
-    (if (and (nil? (:currentUser signer)) (u/get-user-by-email (:email signer))) (fail! :email-in-use))
     (let [config       (env/value :onnistuu)
           base-url     (or (:return-base-url config) (env/value :host))
           document-url (str base-url "/api/sign/document")
           success-url  (str base-url "/api/sign/success")
-          signer       (if (:currentUser signer)
-                         (-> signer
-                           (assoc :email (:email user))
-                           (assoc :currentUser (:id user)))
-                         signer)
           process-data (p/init-sign-process (java.util.Date. created) (:crypto-key config) success-url document-url company signer lang)
           failure-url  (str base-url "/api/sign/fail/" (:process-id process-data))]
-
 
       (ok (merge {:failure-url failure-url}
                  (select-keys config [:post-to

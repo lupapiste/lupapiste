@@ -12,14 +12,14 @@
 (defn- num-of-results? [n response]
   (and
     (ok? response)
-    (= n (get-in response [:data :iTotalDisplayRecords]))
-    (= n (count (get-in response [:data :aaData])))))
+    (= n (get-in response [:data :totalCount]))
+    (= n (count (get-in response [:data :applications])))))
 
 (def no-results? (partial num-of-results? 0))
 (def one-result? (partial num-of-results? 1))
 
 (defn- search [query-s]
-  (datatables mikko :applications-for-datatables :params {:filter-search query-s}))
+  (datatables mikko :applications-search :searchText query-s))
 
 (facts* "Search"
   (let [property-id (str sonja-muni "-123-0000-1234")
@@ -32,7 +32,7 @@
         id-matches? (fn [response]
                       (and
                         (one-result? response)
-                        (= (get-in response [:data :aaData 0 :id]) application-id)))]
+                        (= (get-in response [:data :applications 0 :id]) application-id)))]
 
     (command mikko :add-operation :id application-id :operation "pientalo") => ok?
     (:secondaryOperations (query-application mikko application-id)) => seq
@@ -96,6 +96,52 @@
 
         (fact "Sonja gave verdict"
           state-fi => "P\u00e4\u00e4t\u00f6s annettu"
-          state-sv => "Beslut givet")))
+          state-sv => "Beslut givet"))))
 
-    ))
+  (let [property-id (str sonja-muni "-123-0000-1234")
+        application (create-and-submit-application sonja
+                      :address "Latokuja"
+                      :propertyId "75341600550007"
+                      :x 404369.304 :y 6693806.957
+                      :operation "muu-uusi-rakentaminen") => truthy
+        application-id (:id application)
+        id-matches? (fn [response]
+                      (and
+                        (one-result? response)
+                        (= (get-in response [:data :applications 0 :id]) application-id)))
+        application2 (create-and-submit-application sonja
+                       :address "Hakukuja 10"
+                       :propertyId (p/to-property-id property-id)
+                       :operation "purkaminen")
+        application-id2 (:id application2)]
+
+    (count (get-in (datatables sonja :applications-search :handler sonja-id) [:data :applications])) => 2
+    (command sonja :assign-application :id application-id :assigneeId ronja-id) => ok?
+
+    (fact "Handler filter"
+      (count (get-in (datatables sonja :applications-search :handler ronja-id) [:data :applications])) => 1
+      (get-in (datatables sonja :applications-search :handler ronja-id) [:data :applications 0 :id]) => application-id)
+
+    (command sonja :add-application-tags :id application-id :tags ["222"]) => ok?
+    (fact "$and query returns 1"
+      (count (get-in (datatables sonja :applications-search :handler ronja-id :applicationTags ["222"]) [:data :applications])) => 1)
+
+    (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
+    (fact "$and query returns 0 when handler is returning 0 matches"
+      (count (get-in (datatables sonja :applications-search :handler ronja-id :applicationTags ["222"]) [:data :applications])) => 0)
+
+    (fact "Tags filter"
+      (get-in (datatables sonja :applications-search :applicationTags ["222"]) [:data :applications 0 :id]) => application-id)
+
+    (fact "Area filter"
+      (let [res (datatables sonja :applications-search :areas ["sipoo_keskusta"])]
+        (count (get-in res [:data :applications])) => 1
+        (get-in res [:data :applications 0 :id]) => application-id))
+
+    (fact "Combined"
+      (let [res (datatables sonja :applications-search
+                  :areas ["sipoo_keskusta"]
+                  :handler sonja-id
+                  :applicationTags ["222" "111"])]
+        (count (get-in res [:data :applications])) => 1
+        (get-in res [:data :applications 0 :id]) => application-id))))

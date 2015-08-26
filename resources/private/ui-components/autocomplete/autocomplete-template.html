@@ -2,42 +2,54 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/html" id="autocomplete-template">
-      <div class="autocomplete-component">
-        <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}">
+    <script type="text/x-jquery-tmpl" id="autocomplete-template">
+      <div class="autocomplete-component" data-bind="css: {'has-tags': tags}">
+        <div class="autocomplete-selection-wrapper" data-bind="event: {click: selectInput}">
           <span class="autocomplete-selection">
             <!-- ko if: selected -->
             <span data-bind="text: selectedText() ? selected()[selectedText()] : selected()"></span>
             <!-- /ko -->
             <span class="caption" data-bind="visible: showCaption, ltext: 'choose'"></span>
-            <ul data-bind="visible: tags && selectedTags().length > 0" class="tags">
+            <!-- ko if: tags -->
+            <ul data-bind="visible: selectedTags().length > 0" class="tags">
               <!-- ko foreach: selectedTags -->
               <li class="tag">
                 <span class="tag-remove icon remove"
                       data-bind="click: $parent.removeTag, clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false"></span>
-                <span class="tag-label" data-bind="text: $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
+                <span class="tag-label" data-bind="text: $parent.selectedText() ? $data[$parent.selectedText()] : $data,
+                                                   titleWhenOverflow: $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
               </li>
               <!-- /ko -->
-              <li class="tag-ellipsis" data-bind="visible: !showCaption() && tags">...</li>
             </ul>
+            <!-- /ko -->
           </span>
           <span data-bind="visible: showCaption" class="autocomplete-selection-arrow icon drill-down-black-smaller"></span>
         </div>
-        <div class="autocomplete-dropdown" data-bind="fader: inputSelected, duration: 100">
+        <div class="autocomplete-dropdown" data-bind="visible: false, fader: dropdownVisible, duration: 100">
           <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
-                 data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate}"></input>
-          <!-- ko if: dataProvider.data().length > 0 -->
-          <ul class="autocomplete-result"
-              data-bind="foreach: dataProvider.data">
-            <li class="autocomplete-result-item"
-                data-bind="click: $parent.selectItem,
-                           event: {mouseover: $parent.changeIndex.bind($data, $index())},
-                           css: {active: $index() === $parent.index()}">
-              <span data-bind="text: $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
-            </li>
+                 data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, blur: blur}"></input>
+          <!-- ko if: data().length > 0 -->
+          <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}, css: {'autocomplete-result-grouped': groupedResults}">
+            <!-- ko foreach: data -->
+              <!-- ko if: $data && $data.groupHeader -->
+              <li class="autocomplete-group-header" data-bind="text: $parent.selectedText() ? $data[$parent.selectedText()] : $data,
+                                                               titleWhenOverflow: $parent.selectedText() ? $data[$parent.selectedText()] : $data"></li>
+              <!-- /ko -->
+              <!-- ko ifnot: $data && $data.groupHeader -->
+              <li class="autocomplete-result-item"
+                  data-bind="event: {mouseover: $parent.changeIndex.bind($data, $index()),
+                                     mousedown: $parent.selectItem.bind($data)},
+                             mousedownBubble: false,
+                             css: {active: $index() === $parent.index()},
+                             titleWhenOverflow: $data === null ? loc('choose') : $parent.selectedText() ? $data[$parent.selectedText()] : $data">
+                <span data-bind="text: $data === null ? loc('choose') : $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
+              </li>
+              <!-- /ko -->
+              <!-- /ko -->
+            <!-- /ko -->
           </ul>
           <!-- /ko -->
-          <!-- ko if: dataProvider.data().length === 0 -->
+          <!-- ko if: data().length === 0 -->
           <ul class="autocomplete-result">
             <li class="autocomplete-result-empty" data-bind="ltext: 'autocomplete.no-results'"></li>
           </ul>

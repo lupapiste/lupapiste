@@ -246,3 +246,32 @@
     resp => ok?
     (count names) => pos?
     (-> names :753-R :fi) => "Sipoon rakennusvalvonta"))
+
+(facts "Organization tags"
+  (fact "only auth admin can add new tags"
+    (command sipoo :save-organization-tags :tags [{:id nil :label "makeja"} {:id nil :label "nigireja"}]) => ok?
+    (command sonja :save-organization-tags :tags [{:id nil :label "illegal"}] =not=> ok?)
+    (command pena :save-organization-tags :tags [{:id nil :label "makeja"}] =not=> ok?))
+  (fact "tags get ids when saved"
+    (:tags (query sipoo :get-organization-tags)) => (just {:753-R (just {:name (just {:fi string? :sv string?})
+                                                                         :tags (just [(just {:id string? :label "makeja"})
+                                                                                      (just {:id string? :label "nigireja"})])})}))
+
+  (fact "only authority can fetch available tags"
+    (query pena :get-organization-tags) =not=> ok?
+    (map :label (:tags (:753-R (:tags (query sonja :get-organization-tags))))) => ["makeja" "nigireja"])
+
+  (fact "Check tag deletion query"
+    (let [id (create-app-id sonja)
+          tag-id (-> (query sonja :get-organization-tags)
+                   :tags :753-R :tags first :id)]
+      (command sonja :add-application-tags :id id :tags [tag-id]) => ok?
+
+      (fact "when tag is used, application id is returned"
+        (let [res (query sipoo :remove-tag-ok :tagId tag-id)]
+          res =not=> ok?
+          (-> res :applications first :id) => id))
+
+      (fact "when tag is not used in applications, ok is returned"
+        (command sonja :add-application-tags :id id :tags []) => ok?
+        (query sipoo :remove-tag-ok :tagId tag-id) => ok?))))

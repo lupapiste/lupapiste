@@ -64,8 +64,6 @@ Check displayed screenmessage in both languages
   Wait until page contains element  xpath=//li[@data-test-id="test-screenmessage"]
   Wait until  Element should be visible  xpath=//li[@data-test-id="test-screenmessage"]
   Wait For Condition  return $("[data-test-id='test-screenmessage']").text() == ${fi};
-  Click link  xpath=//*[@data-test-id='lang-sv']
-  Wait Until  Page Should Contain  Suomeksi
+  Language To  SV
   Wait For Condition  return $("[data-test-id='test-screenmessage']").text() == ${sv};
-  Click link  xpath=//*[@data-test-id='lang-fi']
-  Wait Until  Page Should Contain  På svenska
+  Language to  FI

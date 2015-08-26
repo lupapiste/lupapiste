@@ -7,6 +7,7 @@
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
             [sade.util :as util]
+            [sade.strings :as ss]
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
@@ -19,9 +20,12 @@
            [com.mongodb WriteConcern MongoClientOptions MongoClientOptions$Builder]
            [com.mongodb.gridfs GridFS GridFSInputFile]))
 
+
 ;; $each is missing from monger.operations.
 ;; https://github.com/michaelklishin/monger/pull/84
 (def $each "$each")
+
+(def operators (conj (set (map name (keys (ns-publics 'monger.operators)))) $each))
 
 ;;
 ;; Utils
@@ -54,6 +58,9 @@
       (let [key (name k)]
         (boolean (and (re-matches key-pattern key) (< (clojure.core/count key) 800)))))
     false))
+
+(defn operator? [s]
+  (contains? operators s))
 
 (defn generate-array-updates
   "Returns a map of mongodb array update paths to be used as a value for $set or $unset operation.
@@ -291,7 +298,7 @@
       (if @connected
        (debug "Already connected!")
        (do
-         (debug "Connecting to MongoDB:" servers (if ssl "using ssl" "without encryption"))
+         (debug "Connecting to MongoDB:" (s/join (map str servers)) (if ssl "using ssl" "without encryption"))
          (m/connect! servers (mongo-options :ssl ssl))
          (reset! connected true)
          (m/set-default-write-concern! WriteConcern/JOURNALED)
@@ -323,6 +330,8 @@
   (mc/ensure-index :applications {:organization 1})
   (mc/ensure-index :applications {:auth.id 1})
   (mc/ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
+  (mc/ensure-index :applications {:address 1})
+  (mc/ensure-index :applications {:tags 1})
   (try
     (mc/drop-index :activation "created-at_1") ; no such field "created-at"
     (catch Exception _))
@@ -341,7 +350,10 @@
   (mc/ensure-index :companies {:y 1} {:name "company-y"})
   (mc/ensure-index :perf-mon {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
   (mc/ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
-  (mc/ensure-index :organizations {:areas.features.geometry :2dsphere}))
+  (try
+    (mc/drop-index :organizations "areas.features.geometry_2dsphere")
+    (catch Exception _))
+  (mc/ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

@@ -6,16 +6,18 @@
   <body>
     <section id="neighbor-show" class="page">
       <div data-bind="if: inError">
-        <h1 data-bind="ltext: errorText"></h1>
-        <p data-bind="ltext: 'neighbor.invite.failed.long'"></p>
+        <div class="container">
+          <h1 data-bind="ltext: errorText"></h1>
+          <p data-bind="ltext: 'neighbor.invite.failed.long'"></p>
+        </div>
       </div>
       <div data-bind="ifnot: inError">
         <div class="application_summary">
           <div class="container">
-            <div data-bind="visible: application" class="application-map-container">
+            <div data-bind="visible: application" class="application-map-container neighbor">
               <div id="neighbor-map" class="map map-large" style="width: 320px; height: 280px;"></div>
             </div>
-            <div data-bind="with: application" class="application_summary_info">
+            <div data-bind="with: application" class="application_summary_info neighbor">
               <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span> </h1>
 
               <h2 data-bind="if: $root.primaryOperation">
@@ -73,10 +75,12 @@
         </div>
         <div class="container">
 
-          <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
-          <p data-bind="ltext: 'neighbor.show.welcome.desc1'" class="tab-info"></p>
-          <p data-bind="ltext: 'neighbor.show.welcome.desc2'" class="tab-info-continued"></p>
-          <p data-bind="ltext: 'neighbor.show.welcome.desc3'" class="tab-info-continued"></p>
+            <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
+            <div class="tab-info">
+                <p data-bind="ltext: 'neighbor.show.welcome.desc1'"></p>
+                <p data-bind="ltext: 'neighbor.show.welcome.desc2'"></p>
+                <p data-bind="ltext: 'neighbor.show.welcome.desc3'"></p>
+            </div>
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
 
           <!-- docgen generated content: -->
@@ -133,35 +137,38 @@
           </div>
 
           <div data-bind="visible: pending" class="pending"></div>
-          <h1 data-bind="ltext: 'neighbor.show.form'"></h1>
+          <h1 data-bind="ltext: 'neighbor.show.form'" id="responseHeading"></h1>
           <p data-bind="ltext: 'neighbor.show.responce.desc'" class="tab-info"></p>
           <div class="neighbor-reply-form">
-            <div data-bind="ifnot: tupasUser">
-              <!-- generated vetuma-form comes here -->
-              <div id="vetuma-neighbor"></div>
-            </div>
+
+            <div data-bind="component: {name: 'vetuma-init', params: vetuma}"></div>
+            <div data-bind="component: {name: 'vetuma-status', params: {status: status, idPrefix: 'link-account-', errorLocPrefix: 'neighbor-vetuma'}}"></div>
+
             <div data-bind="if: tupasUser">
-              <div id="vetuma-neighbor2"></div>
               <p data-bind="ltext: 'neighbor.show.reply.text'"></p>
+              <h3 data-bind="ltext: 'choose'"></h3>
               <form>
 
-                <input type="radio" name="response" data-bind="checked: response, enable: !done()" value="ok" data-test-id="neighbor-response-ok" />
-                <label data-bind="ltext: 'neighbor.show.responce.ok'" for="response"></label>
+                <input type="radio" id="responseOk" data-bind="checked: response, enable: !done()" value="ok" data-test-id="neighbor-response-ok" />
+                <label data-bind="ltext: 'neighbor.show.responce.ok'" for="responseOk"></label>
 
                 <br>
 
-                <input type="radio" name="response" data-bind="checked: response, enable: !done()" value="comments" data-test-id="neighbor-response-comments" />
-                <label data-bind="ltext: 'neighbor.show.responce.comments'" for="response"></label>
+                <input type="radio" id="responseNo" data-bind="checked: response, enable: !done()" value="comments" data-test-id="neighbor-response-comments" />
+                <label data-bind="ltext: 'neighbor.show.responce.comments'" for="responseNo"></label>
 
                 <textarea
                   data-bind="
                     textInput: message,
                     enable: response() === 'comments' && !done(),
+                    visible: response() === 'comments',
                     attr: {placeholder: loc('neighbor.show.message.placeholder')}"
                   data-test-id="neighbor-response-message"
                   class="form-input textarea really-long high"
                   rows=10>
                 </textarea>
+
+                <div class="spacerM"></div>
 
                 <button class="btn-primary"
                   data-bind="

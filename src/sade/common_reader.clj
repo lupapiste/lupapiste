@@ -108,8 +108,10 @@
   "transform a form with replacing all sequential collections with keyword-indexed maps."
   [m] (postwalk-map (partial map (fn [[k v]] [k (if (sequential? v) (map-index v) v)])) m))
 
-(defn- do-get-xml [http-fn url options raw?]
-  (let [raw (:body (if options (http-fn url options) (http-fn url)))]
+(defn- do-get-xml [http-fn url opts raw?]
+  ; Set default timeout to 120 s
+  (let [options (merge {:socket-timeout 120000, :conn-timeout 120000} opts)
+        raw (:body (http-fn url options))]
     (if-not (s/blank? raw)
       (if raw? raw (parse raw))
       (do

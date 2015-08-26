@@ -62,19 +62,52 @@
     message: loc("email-in-use")
   };
 
+  /*
+   * Determines if a field is required or not based on a function or value
+   * Parameter: boolean function, or boolean value
+   * Example
+   *
+   * viewModel = {
+   *   var vm = this;
+   *   vm.isRequired = ko.observable(false);
+   *   vm.requiredField = ko.observable().extend({ conditional_required: vm.isRequired});
+   * }
+   *
+   * Source: https://github.com/Knockout-Contrib/Knockout-Validation/wiki/User-Contributed-Rules
+  */
+  ko.validation.rules.conditional_required = {
+    validator: function (val, condition) {
+      var required = false;
+      if (typeof condition === "function") {
+        required = condition();
+      } else {
+        required = condition;
+      }
+
+      if (required) {
+        return !(val === undefined || val === null || val.length === 0);
+      } else {
+        return true;
+      }
+    },
+    message: ko.validation.rules.required.message
+  };
+
   ko.validation.registerExtenders();
 
   ko.bindingHandlers.dateString = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      if (value) { $(element).text(moment(value).format("D.M.YYYY")); }
+      var dateStr = value ? moment(value).format("D.M.YYYY") : "";
+      $(element).text(dateStr);
     }
   };
 
   ko.bindingHandlers.dateTimeString = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      $(element).text(moment(value).format("D.M.YYYY HH:mm"));
+      var dateStr = value ? moment(value).format("D.M.YYYY HH:mm") : "";
+      $(element).text(dateStr);
     }
   };
 
@@ -101,6 +134,17 @@
 
   ko.bindingHandlers.ltext = {
     update: _.partial(localized, "text")
+  };
+
+  // hello.id -> T e r v e
+  // Used typically with vertical buttons.
+  ko.bindingHandlers.lspaced = {
+    update: function( element, valueAccessor) {
+      var value = loc( ko.utils.unwrapObservable( valueAccessor() ) );
+      if( value ) {
+        $(element).text( value.split( "" ).join( " "));
+      }
+    }
   };
 
   ko.bindingHandlers.lhtml = {
@@ -371,4 +415,16 @@
       });
     }
   };
+
+  ko.bindingHandlers.titleWhenOverflow = {
+    init: function(element, valueAccessor) {
+      $(element).bind("mouseenter", function(){
+        var $this = $(this);
+        if(this.offsetWidth < this.scrollWidth) {
+          $this.attr("title", ko.utils.unwrapObservable(valueAccessor()));
+        }
+      });
+    }
+  };
+
 })(jQuery);

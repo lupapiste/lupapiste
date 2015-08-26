@@ -69,7 +69,7 @@
     };
 
     self.done = function() {
-      window.location.hash = "!/application/" + applicationId + "/statement";
+      pageutil.openApplicationPage({id: applicationId}, "statement");
     };
 
     self.remove = function(neighbor) {
@@ -99,7 +99,7 @@
     repository.load(applicationId);
   });
 
-  hub.onPageUnload("neighbors", function(e) {
+  hub.onPageUnload("neighbors", function() {
     model.map = null;
   });
 

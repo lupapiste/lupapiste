@@ -4,7 +4,7 @@
             [lupapalvelu.domain :refer :all]
             [lupapalvelu.document.schemas :as schemas]))
 
-(testable-privates lupapalvelu.domain only-authority-sees-drafts filter-targeted-attachment-comments)
+(testable-privates lupapalvelu.domain only-authority-sees-drafts filter-targeted-attachment-comments normalize-neighbors)
 
 (facts
   (let [application {:auth [{:id :user-x} {:id :user-y}]}]
@@ -64,6 +64,18 @@
     (fact "'1' is owner" (has-auth-role? app 1 :owner) => true)
     (fact "'2' is not owner" (has-auth-role? app 2 :owner) => false)))
 
+(facts "owner-or-write-access?"
+  (let [owner   {:id 1 :role "owner"}
+        writer  {:id 2 :role "writer"}
+        foreman {:id 3 :role "foreman"}
+        reader  {:id 4 :role "reader"}
+        app     {:auth [owner writer foreman reader]}]
+    (fact "owner has accesss"   (owner-or-write-access? app (:id owner)) => true)
+    (fact "writer has accesss" (owner-or-write-access? app (:id writer)) => true)
+    (fact "foreman has accesss" (owner-or-write-access? app (:id foreman)) => true)
+    (fact "reader doesn't have accesss" (owner-or-write-access? app (:id reader)) => false)
+    (fact "someone else doesn't have accesss" (owner-or-write-access? app 5) => false)))
+
 (facts "only-authority-sees-drafts"
   (only-authority-sees-drafts {:role "authority"} [{:draft true}]) => [{:draft true}]
   (only-authority-sees-drafts {:role "not-authority"} [{:draft true}]) => []
@@ -82,6 +94,38 @@
   (only-authority-sees-drafts {:role "nono-authority"} [{}]) => [{}])
 
 (facts "Filtering application data"
+
+  (facts "normalize-neighbors"
+    (let [neighbors [{:id "1"
+                      :status [{:state "open"}
+                               {:state "response-given"
+                                :vetuma {:name "foo" :userid "123"}}]}
+                     {:id "2"
+                      :status [{:state "open"}
+                               {:state "response-given"
+                                :vetuma {:name "foo" :userid "123"}}
+                               {:state "forgotten"}]}]]
+
+      (normalize-neighbors {:role "authority"} neighbors) => [{:id "1"
+                                                         :status [{:state "open"}
+                                                                  {:state "response-given"
+                                                                   :vetuma {:name "foo", :userid "123"}}]}
+                                                        {:id "2"
+                                                         :status [{:state "open"}
+                                                                  {:state "response-given"
+                                                                   :vetuma {:name "foo", :userid "123"}}
+                                                                  {:state "forgotten"}]}]
+
+      (normalize-neighbors {:role "other"} neighbors) => [{:id "1"
+                                                     :status [{:state "open"}
+                                                              {:state "response-given"
+                                                               :vetuma {:name "foo", :userid nil}}]}
+                                                    {:id "2"
+                                                     :status [{:state "open"}
+                                                              {:state "response-given"
+                                                               :vetuma {:name "foo", :userid nil}}
+                                                              {:state "forgotten"}]}]))
+
   (facts "Comments"
     (let [application {:attachments [{:id 1}
                                      {:id 2}]
@@ -106,3 +150,4 @@
                                        :id 0}}]]
       (fact "even comments for deleted attachments are returned, but not those which are empty"
         (:comments (filter-targeted-attachment-comments application)) => expected-comments))))
+

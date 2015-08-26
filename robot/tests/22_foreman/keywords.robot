@@ -30,8 +30,14 @@ Mikko goes back to project application
   Click by test id  test-application-link-permit-lupapistetunnus
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='kerrostalo-rivitalo']
 
+Foreman opens application
+  [Arguments]  ${index}
+  ${foremanAppId} =  Get From List  ${foremanApps}  ${index}
+  Open application by id  ${foremanAppId}
+
 Mikko invites foreman to application
   Open tab  parties
+  Open accordions  parties
   Click by test id  invite-foreman-button
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
@@ -42,16 +48,11 @@ Mikko invites foreman to application
 
 Foreman applies personal information to the foreman application
   [Arguments]  ${index}
-  ${name} =  Get From List  ${applications}  ${index}
-  Open application at index  ${name}  753-416-25-22  1
-  Wait until  Click by test id  accept-invite-button
+  Foreman opens application  ${index}
+  Wait until  Confirm yes no dialog
   Open tab  parties
+  Open accordions  parties
   Wait until  Click by test id  fill-info-button
-
-Foreman opens application
-  [Arguments]  ${index}
-  ${foremanAppId} =  Get From List  ${foremanApps}  ${index}
-  Open application by id  ${foremanAppId}
 
 Foreman accepts invitation and fills info
   Wait until  Click by test id  accept-invite-button
@@ -63,6 +64,7 @@ Foreman sets role and difficulty to foreman application
   Foreman opens application  ${index}
   Deny yes no dialog
   Open tab  parties
+  Open accordions  parties
   Foreman accepts invitation and fills info
   Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
   Wait until  Select From List by test id  patevyysvaatimusluokka  ${difficulty}

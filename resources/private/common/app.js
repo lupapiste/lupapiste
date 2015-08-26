@@ -101,7 +101,7 @@ var LUPAPISTE = LUPAPISTE || {};
         if (_.isFunction(window.location.replace)) {
           window.location.replace(startPageHref + "#!/" + self.startPage);
         } else {
-          window.location.hash = "!/" + self.startPage;
+          pageutil.openPage(self.startPage);
         }
         return;
       }
@@ -182,9 +182,9 @@ var LUPAPISTE = LUPAPISTE || {};
 
     hub.subscribe({type: "connection", status: "session-dead"}, function () {
       if (wasLoggedIn) {
-        LUPAPISTE.ModalDialog.mask.unbind("click");
         LUPAPISTE.ModalDialog.showDynamicOk(loc("session-dead.title"), loc("session-dead.message"),
             {title: loc("session-dead.logout"), fn: self.redirectToHashbang});
+        hub.subscribe("dialog-close", self.redirectToHashbang, true);
       }
     });
 
@@ -214,7 +214,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
       $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
-      function openStartPage() {
+        function openStartPage() {
         if (self.logoPath) {
           window.location = window.location.protocol + "//" + window.location.host + self.logoPath;
         } else if (self.startPage && self.startPage.charAt(0) !== "/") {
@@ -224,7 +224,7 @@ var LUPAPISTE = LUPAPISTE || {};
             self.openPage([self.startPage]);
           } else {
             // open normally
-            window.location.hash = "!/" + self.startPage;
+            pageutil.openPage(self.startPage);
           }
         } else {
           // fallback
@@ -233,20 +233,20 @@ var LUPAPISTE = LUPAPISTE || {};
       }
 
       var model = {
-        languages: loc.getSupportedLanguages(),
         currentLanguage: loc.getCurrentLanguage(),
-        changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
         openStartPage: openStartPage,
         showUserMenu: self.showUserMenu
       };
 
-      if (LUPAPISTE.Screenmessage) {
-        LUPAPISTE.Screenmessage.refresh();
-        model.screenMessage = LUPAPISTE.Screenmessage;
-      }
-
       $("#app").applyBindings(lupapisteApp.models.rootVMO);
-      $("nav").applyBindings(model).css("visibility", "visible");
+
+      if (LUPAPISTE.Screenmessage) {
+          LUPAPISTE.Screenmessage.refresh();
+          model.screenMessage = LUPAPISTE.Screenmessage;
+      }
+      $(".brand").applyBindings( model );
+      $(".header-menu").applyBindings( model ).css( "visibility", "visible");
+      $("#sys-notification").applyBindings( model );
       $("footer").applyBindings(model).css("visibility", "visible");
     };
   };

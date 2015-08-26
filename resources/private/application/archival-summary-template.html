@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="archival-summary" style="visibility: hidden; display: block;">
+  <script type="text/x-jquery-tmpl" id="archival-summary-template">
+
+    <div data-bind="if: showArchived" class="archival-summary-document-set">
+      <h1><span data-bind="ltext: 'archivalSummary.archivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
+      <div data-bind="ltext: 'archivalSummary.guide'"></div>
+
+      <div data-bind="if: !_.isEmpty(archivedDocuments())">
+        <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: archivedDocuments, showWillPublish: true}}"></div>
+      </div>
+
+      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true, attachmentTypes: selectableAttachmentTypes}}"></div>
+
+      <div><button class="btn-primary" data-bind="ltext: 'archivalSummary.archive'"></button></div>
+    </div>
+
+    <div data-bind="if: showNotArchived" class="document-set">
+      <h1><span data-bind="ltext: 'archivalSummary.notArchivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
+
+      <div data-bind="if: !_.isEmpty(notArchivedDocuments())">
+        <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: notArchivedDocuments, showWillPublish: false}}"></div>
+      </div>
+
+      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedGroups, showWillPublish: false, attachmentTypes: selectableAttachmentTypes}}"></div>
+    </div>
+
+  </script>
+  <script type="text/x-jquery-tmpl" id="archival-summary-attachment-table">
+    <div class="table archival-summary-table" data-bind="foreach: groups">
+      <div class="attachment-group-header" data-bind="text: name"></div>
+
+      <div class="column-header-row">
+        <div class="small-columns">
+          <div class="retention-period" data-bind="ltext: 'sailytysaika'"></div>
+          <div class="personal-data" data-bind="ltext: 'henkilotiedot'"></div>
+          <div class="stamped" data-bind="ltext: 'attachment.stamped'"></div>
+          <div data-bind="if: $parent.showWillPublish" class="will-publish"><span data-bind="ltext: 'julkaistaan'"></span></div>
+        </div>
+        <div data-bind="ltext: 'application.attachmentType'" class="attachment-type"></div>
+      </div>
+
+      <!-- ko foreach: attachments -->
+      <div class="attachment-row">
+        <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
+          <div class="small-columns">
+            <div class="retention-period" data-bind="text: retentionDescription"></div>
+            <div class="personal-data" data-bind="text: personalDataDescription"></div>
+            <div class="stamped">
+              <i class="lupicon-circle-stamp enabled" data-bind="visible: stamped, attr: {title: loc('attachment.stamped')}"></i>
+              <i class="lupicon-remove disabled" data-bind="visible: !stamped(), attr: {title: loc('attachment.stamped')}"></i>
+            </div>
+            <div data-bind="if: $parents[1].showWillPublish" class="will-publish">
+              <i data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check enabled"></i>
+              <i data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove disabled"></i>
+            </div>
+          </div>
+          <div class="attachment-type">
+            <div class="attachment-type-container">
+              <div class="group-label">
+                <span data-bind="if: type">
+                  <span data-bind="text: loc(['attachmentType', type['type-group'](), '_group_label'])"></span>
+                </span>
+                <span data-bind="if: !type">
+                  <i data-bind="ltext: 'attachment.noName'"></i>
+                </span>
+              </div>
+              <div class="type-id">
+                <div>
+                  <span data-bind="if: type">
+                    <span data-bind="text: loc(['attachmentType', type['type-group'](), type['type-id']()])"></span>
+                  </span>
+                  <span data-bind="if: !type">
+                    <i data-bind="ltext: 'attachment.noName'"></i>
+                  </span>
+                </div>
+                <!-- ko if: $data.contents -->
+                <div class="attachment-content-desc"><span data-bind="text: $data.contents"></span></div>
+                <!-- /ko -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div data-bind="slider: $data.showAdditionalControls" class="additional-controls">
+          <div class="left">
+            <div class="additional-data-container">
+              <div class="header" data-bind="ltext: 'attachment.changeType'"></div>
+              <div class="contents">
+                <select class="attachment-type-select" class="long" data-bind="foreach: $parents[1].attachmentTypes, value: attachmentType">
+                  <optgroup data-bind="attr: {label: groupLabel}, foreach: types">
+                    <option data-bind="text: typeLabel, value: typeValue"></option>
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+            <div data-bind="if: !_.isEmpty($data.metadata)">
+              <div data-bind="component: {name: 'metadata-editor',
+                                            params: {attachmentId: id, metadata: metadata, applicationId: $root.application.id,
+                                            saveCallback: function(){$data.showAdditionalControls(false);}}}"></div>
+            </div>
+          </div>
+          <div class="left" data-bind="if: !_.isEmpty($data.latestVersion)">
+            <div class="additional-data-container">
+              <div class="header" data-bind="ltext: 'esikatselu'"></div>
+              <div class="contents preview-image">
+                <a data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion['fileId']()}" target="_blank">
+                  <img data-bind="attr: {src: '/api/raw/preview-attachment?attachment-id=' + latestVersion['fileId']()}">
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /ko -->
+    </div>
+  </script>
+
+  <script type="text/x-jquery-tmpl" id="archival-summary-document-table">
+
+    <div class="table archival-summary-table">
+      <div class="attachment-group-header" data-bind="ltext: 'archivalSummary.mainDocuments'"></div>
+
+      <div class="column-header-row">
+        <div class="small-columns">
+          <div class="retention-period" data-bind="ltext: 'sailytysaika'"></div>
+          <div class="personal-data" data-bind="ltext: 'henkilotiedot'"></div>
+          <div class="stamped" data-bind="ltext: 'attachment.stamped'"></div>
+          <div data-bind="if: showWillPublish" class="will-publish"><span data-bind="ltext: 'julkaistaan'"></span></div>
+        </div>
+        <div data-bind="ltext: 'application.attachmentType'" class="attachment-type"></div>
+      </div>
+
+      <!-- ko foreach: documents -->
+      <div class="attachment-row">
+        <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
+          <div class="small-columns">
+            <div class="retention-period" data-bind="text: retentionDescription"></div>
+            <div class="personal-data" data-bind="text: personalDataDescription"></div>
+            <div class="stamped"></div>
+            <div data-bind="if: $parent.showWillPublish" class="will-publish">
+              <i data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check enabled"></i>
+              <i data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove disabled"></i>
+            </div>
+          </div>
+          <div class="attachment-type">
+            <div class="attachment-type-container">
+              <div data-bind="ltext: documentNameKey"></div>
+            </div>
+          </div>
+        </div>
+
+        <div data-bind="slider: $data.showAdditionalControls" class="additional-controls">
+          <div class="left">
+            <div data-bind="if: !_.isEmpty($data.metadata)">
+              <div data-bind="component: {name: 'metadata-editor',
+                                          params: {metadata: metadata, applicationId: $root.application.id,
+                                          saveCallback: function(){$data.showAdditionalControls(false);}}}"></div>
+            </div>
+          </div>
+          <div class="left">
+            <div class="additional-data-container">
+              <div class="header" data-bind="ltext: 'esikatselu'"></div>
+              <div class="contents preview-image">
+                <a data-bind="attr: {href: '/api/raw/pdf-export?lang=fi&id=' + $root.application.id()}" target="_blank">
+                  <span data-bind="ltext: 'attachment.pdf'"></span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /ko -->
+    </div>
+
+  </script>
+
+</section>
+</body>
+</html>

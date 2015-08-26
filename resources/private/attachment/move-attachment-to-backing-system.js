@@ -16,7 +16,7 @@
       attachmentIds: selectedAttachmentsIds
     })
     .success(function() {
-      window.location.hash = "!/application/" + id + "/attachments";
+      multiSelect.model.appModel.open("attachments");
       repository.load(id);
     })
     .error(function() {

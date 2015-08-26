@@ -10,7 +10,7 @@ legend {
 // :focus   - Tell the user "Hello, you've selected me!"
 //
 // Styleguide 2.1
-[type="text"], [type="email"], [type="tel"], [type="url"], [type="password"], [type="time"], select, textarea {
+[type="text"], [type="email"], [type="tel"], [type="url"], [type="password"], [type="time"], [type="number"], select, textarea {
   background: #fff;
   border: 1px solid #c9c9c9;
   font-size: 0.875em;
@@ -290,12 +290,17 @@ input.form-input.long {
 }
 .form-group, .form-choice, .form-table {
   overflow:visible;
-  border-radius: 3px;
+  //border-radius: 3px;
   display: block;
-  margin: 0 $marginS $marginS 0;
-  padding: $marginS $marginS 0 $marginS;
-  background: $lp-light-grey;
-  border-bottom: 1px solid darken($lp-light-grey, 5%);
+  //margin: 0 $marginS $marginS 0;
+  //padding: $marginS $marginS 0 $marginS;
+  //background: $lp-light-grey;
+  padding: {
+    left: $marginS;
+    right: $marginS;
+  }
+  box-sizing: border-box;
+  border-bottom: 1px solid $gray221;
   &:last-child
   {
     border-bottom: none;
@@ -321,8 +326,10 @@ input.form-input.long {
   .form-label-group, .form-label-table {
     width: 100%;
     display: block;
-    text-transform: uppercase;
+    //text-transform: uppercase;
     font-family: $font-heading;
+    font-weight: bold;
+    margin-bottom: $marginS;
   }
   .form-entry {
     display: inline-block;
@@ -554,9 +561,44 @@ input.form-input.long {
   }
 
   .button-group {
-    .btn {
-      margin-right: 10px
+    width: 100%;
+    padding: {
+      left: 10px;
+      right: 10px;
+      top: 10px;
+      bottom: 10px;
     }
+    background-color: $gray246;
+    border-bottom: 1px solid $gray221;
+    /* .btn, button { */
+    /*   margin-right: 10px */
+    /* } */
+  }
+}
+
+
+// Padding tweaks for special cases.
+.accordion-fields > .form-entry,
+.accordion-fields > .verdict-info-fields,
+.accordion-fields > div p {
+  padding: {
+    left: $marginS;
+    right: $marginS;
+  }
+}
+
+
+
+
+.accordion-fields button.margins-s {
+  margin-bottom: 0;
+}
+
+.accordion_content > .group-help-text {
+  display: block;
+  margin: {
+    left: $marginS;
+    right: $marginS;
   }
 }
 
@@ -572,10 +614,47 @@ input.form-input.long {
 
 }
 
-.form-approval-status {
-  text-transform: none;
+.group-buttons {
   width: 100%;
   display: block;
+  overflow-y: hidden;
+  text-transform: none;
+  .is-right {
+    float: right;
+    margin-left: $marginS;
+  }
+  .is-left {
+    float: left;
+    margin-right: $marginS;
+  }
+  padding-right: $marginS;
+  padding-left: $marginS;
+  margin: {
+    top: $marginS;
+    bottom: $marginS;
+
+  }
+}
+
+// Top-level group buttons tweaks
+.accordion-toggle > .group-buttons {
+  background-color: $gray246;
+  border: 1px solid $gray221;
+  padding: {
+    top: $marginS;
+    bottom: $marginS;
+  }
+  margin: 0;
+}
+
+.button-group button.is-right {
+  margin-right: 0;
+}
+
+.form-approval-status {
+  text-transform: none;
+  //width: 100%;
+  display: inline-block;
   min-height: 32px;
 
   &.empty {
@@ -584,14 +663,128 @@ input.form-input.long {
   }
 
   .form-buttons {
-    display:inline-block;
+    //display:inline-block;
     text-align: right;
     float: right;
-    .btn {
-      margin: 0 $marginS $marginS 0;
+    min-width: 200px;
+  }
+  i.approved, i.rejected  {
+    display: none;
+  }
+  &.approved {
+    i.approved {
+      display: table-cell;
     }
   }
+  &.rejected {
+    i.rejected {
+      display: table-cell;
+    }
+  }
+}
 
+.form-approval-status.approved ~ button.approved {
+  display: none;
+}
+
+.form-approval-status.rejected ~ button.rejected {
+  display: none;
+}
+
+section.approved .group-buttons  {
+    button.approved {
+      display: none;
+    }
+    i.rejected {
+      display: none;
+    }
+    i.approved {
+      display: table-cell;
+    }
+    button.rejected {
+      display: table-cell;
+    }
+}
+
+.is-status .like-btn {
+  @include btn-height;
+  min-width: 500px;
+  span {
+    color: $gray187;
+  }
+  .lupicon-circle-attention {
+    color: $red;
+  }
+  .lupicon-circle-check {
+    color: $green;
+  }
+  .approved {
+    padding-right: $icon-pad;
+  }
+}
+
+// Top-level reject button should be invisible
+// when the bar is in rejected mode.
+button.rejected ~ .group-buttons .is-top.rejected {
+  display: none;
+}
+
+.is-middle {
+  vertical-align: middle;
+}
+
+.description-bubble {
+  //display: none;
+  display: block;
+  //overflow-y: visible;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid $orange-light;
+  padding: $marginS $marginS $marginS $marginS;
+  margin-top: 15px;
+  &:after, &:before {
+             bottom: 100%;
+             left: 5%;
+             border: solid transparent;
+             content: " ";
+             height: 0;
+             width: 0;
+             position: absolute;
+             pointer-events: none;
+           }
+
+  &:after {
+    border-color: rgba(255, 255, 255, 0);
+    border-bottom-color: #fff;
+    border-width: 10px;
+    margin-left: -10px;
+  }
+  &:before {
+    border-color: transparentize( $orange-light, 1 );
+    border-bottom-color: $orange-light;
+    border-width: 11px;
+    margin-left: -11px;
+  }
+  input {
+    box-sizing: border-box;
+    border: none;
+    font-size: 16px;
+    width: 100%;
+    box-shadow: none;
+    color: $gray51;
+    &:focus {
+      border: none;
+      box-shadow: none;
+    }
+  }
+}
+
+.description-bubble.is-closed {
+  display: none;
 }
 
 .form-help {
@@ -662,30 +855,6 @@ input.form-input.long {
   }
 }
 
-.approval-approved {
-  &:after {
-    content: " ";
-    @include spite-bg;
-    width: 16px;
-    height: 16px;
-    background-position: 0px -2500px;
-    display: inline-block;
-    margin-left: $marginS;
-    vertical-align: text-bottom;
-  }
-}
-.approval-rejected {
-  &:after {
-    content: " ";
-    @include spite-bg;
-    width: 16px;
-    height: 16px;
-    background-position: 0px -2400px;
-    display: inline-block;
-    margin-left: $marginS;
-    vertical-align: text-bottom;
-  }
-}
 
 
 #neighbor-show {

@@ -7,15 +7,41 @@
             [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as operations]))
 
-
-(defquery applications-for-datatables
-  {:description "Service point for jQuery dataTables"
-   :parameters [params]
+(defquery applications-search
+  {:description "Service point for application search component"
+   :parameters []
    :user-roles #{:applicant :authority}}
+  [{user :user data :data}]
+  (ok :data (search/applications-for-user
+              user
+              (select-keys
+                data
+                [:applicationTags :applicationOrganizations :applicationType :handler
+                 :limit :searchText :skip :sort :applicationOperations :areas]))))
+
+(defn- selected-ops-by-permit-type [selected-ops]
+  (->> operations/operations
+       (filter (fn [[opname _]]
+                 (some #(= opname (keyword %)) selected-ops)))
+       (map (fn [[op {permit-type :permit-type}]]
+              {:op op :permit-type permit-type}))
+       (group-by :permit-type)
+       (map (fn [[permit-type ops]]
+              {permit-type (map :op ops)}))
+       (apply merge)))
+
+(defquery get-application-operations
+  {:user-roles #{:authority}}
   [{user :user}]
-  (ok :data (search/applications-for-user user params)))
+
+  (let [orgIds             (map name (-> user :orgAuthz keys))
+        organizations      (map lupapalvelu.organization/get-organization orgIds)
+        selected-ops       (mapcat :selected-operations organizations)
+        ops-by-permit-type (selected-ops-by-permit-type selected-ops)]
+    (ok :operationsByPermitType ops-by-permit-type)))
 
 (defn- localize-operation [op]
   (assoc op
@@ -37,7 +63,8 @@
   [{user :user data :data}]
   (let [user-query (domain/basic-application-query-for user)
         query (search/make-query user-query data user)
-        fields (concat [:id :location :infoRequest :address :municipality :primaryOperation :secondaryOperations :drawings :permitType] (filter keyword? search/col-sources))
+        fields [:id :location :infoRequest :address :municipality :primaryOperation :secondaryOperations :drawings :permitType :indicators
+                :attachmentsRequiringAction :unseenComments :primaryOperation :applicant :submitted :modified :state :authority]
         apps (mongo/select :applications query (zipmap fields (repeat 1)))
         rows (map #(-> %
                      (domain/filter-application-content-for user)
@@ -61,4 +88,5 @@
                (query/sort {:submitted -1})
                (query/limit limit))]
     (ok :applications (->> apps
+                           (filter :primaryOperation)
                            (map search/public-fields)))))

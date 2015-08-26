@@ -26,8 +26,9 @@
       "<th>" (loc "application.attachmentFile") "</th>"
       "<th>" (loc "verdict-attachment-prints-order.order-dialog.orderCount") "</th>")))
 
-(defn- get-kopiolaitos-html-table-content [lang attachments]
+(defn- get-kopiolaitos-html-table-content
   "Return attachments' type, content and amount as HTML table rows string."
+  [lang attachments]
   (reduce
     (fn [s att]
       (let [att-map (merge att (:type att))

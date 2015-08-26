@@ -14,10 +14,13 @@ var attachment = (function() {
     ajax
       .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
       .success(function() {
-        repository.load(applicationId);
-        window.location.hash = "!/application/"+applicationId+"/attachments";
+        applicationModel.reload();
+        applicationModel.open("attachments");
         model.previewDisabled(false);
         return false;
+      })
+      .onError("error.pre-verdict-attachment", function(e) {
+        notify.error(loc(e.text));
       })
       .call();
       hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachment"});
@@ -106,8 +109,8 @@ var attachment = (function() {
     signatures:                   ko.observableArray([]),
     type:                         ko.observable(),
     attachmentType:               ko.observable(),
-    allowedAttachmentTypes:       ko.observableArray([]),
     previewDisabled:              ko.observable(false),
+    previewVisible:               ko.observable(false),
     operation:                    ko.observable(),
     selectedOperationId:          ko.observable(),
     selectableOperations:         ko.observableArray(),
@@ -125,12 +128,12 @@ var attachment = (function() {
     groupAttachments:             ko.observableArray(),
     groupIndex:                   ko.observable(),
     changeTypeDialogModel:        undefined,
-    metadata:                     ko.observableArray(),
+    metadata:                     ko.observable(),
     showTosMetadata:              ko.observable(false),
 
-    toggleHelp: function() {
-      model.showHelp(!model.showHelp());
-    },
+    // toggleHelp: function() {
+    //   model.showHelp(!model.showHelp());
+    // },
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -182,7 +185,7 @@ var attachment = (function() {
     previousAttachment: function() {
       var previousId = util.getIn(model.groupAttachments(), [model.groupIndex() - 1, "id"]);
       if (previousId) {
-        window.location.hash = "!/attachment/"+applicationId+"/" + previousId;
+        pageutil.openPage("attachment", applicationId + "/" + previousId);
         hub.send("track-click", {category:"Attachments", label: "", event:"previousAttachment"});
       }
     },
@@ -190,7 +193,7 @@ var attachment = (function() {
     nextAttachment: function() {
       var nextId = util.getIn(model.groupAttachments(), [model.groupIndex() + 1, "id"]);
       if (nextId) {
-        window.location.hash = "!/attachment/"+applicationId+"/" + nextId;
+        pageutil.openPage("attachment", applicationId + "/" + nextId);
         hub.send("track-click", {category:"Attachments", label: "", event:"nextAttachment"});
       }
     },
@@ -225,6 +228,24 @@ var attachment = (function() {
 
     toggleTosMetadata: function() {
       model.showTosMetadata(!model.showTosMetadata());
+    },
+
+    previewUrl: ko.pureComputed(function() {
+      return "/api/raw/view-attachment?attachment-id=" + model.latestVersion().fileId;
+    }),
+
+    rotete: function(rotation) {
+      var iframe$ = $("#file-preview-iframe");
+      iframe$.attr("src","/img/ajax-loader.gif");
+      ajax.command("rotate-pdf", {id: applicationId, attachmentId: attachmentId, rotation: rotation})
+        .success(function() {
+          applicationModel.reload();
+          hub.subscribe("attachment-loaded", function() {
+            model.previewVisible(true);
+            iframe$.attr("src", model.previewUrl());
+          }, true);
+        })
+        .call();
     }
   };
 
@@ -261,6 +282,7 @@ var attachment = (function() {
       .command("set-attachment-meta", data)
       .success(function() {
         model.indicator({name: name, type: "saved"});
+        applicationModel.reload();
       })
       .error(function(e) {
         error(e.text);
@@ -401,6 +423,7 @@ var attachment = (function() {
     }
 
     $("#file-preview-iframe").attr("src","");
+    model.previewVisible(false);
 
     var isUserAuthorizedForAttachment = attachment.required ? lupapisteApp.models.currentUser.role() === "authority" : true;
     model.authorized(isUserAuthorizedForAttachment);
@@ -418,12 +441,8 @@ var attachment = (function() {
     model.size(attachment.size);
     model.isVerdictAttachment(attachment.forPrinting);
     model.applicationState(attachment.applicationState);
-    model.allowedAttachmentTypes(application.allowedAttachmentTypes);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
-
-    model.metadata(_.sortBy(_.map(attachment.metadata, function(value, key) {
-      return metadata.translateMetaData(key, value);
-    }), "name"));
+    model.metadata(attachment.metadata);
 
     model.id(attachmentId);
 
@@ -463,8 +482,10 @@ var attachment = (function() {
       return att.id === model.id();
     }));
 
-    subscribe();
+    hub.send("attachment-loaded");
   }
+
+  hub.subscribe("attachment-loaded", subscribe);
 
   hub.onPageLoad("attachment", function() {
     pageutil.showAjaxWait();

@@ -43,7 +43,7 @@
 (def- yht-2_1_0
   (conj public-schema-sources
     "krysp/yhteiset-2.1.0.xsd"
-    "krysp/rakennusvalvonta.xsd"
+    "krysp/rakennusvalvonta-2.1.2.xsd"
     "krysp/YleisenAlueenKaytonLupahakemus.xsd"
     "krysp/poikkeamispaatos_ja_suunnittelutarveratkaisu.xsd"))
 
@@ -141,6 +141,8 @@
    "2.1.3" common-validator-2_1_1
    "2.1.4" common-validator-2_1_2
    "2.1.5" common-validator-2_1_3
+   "2.2.0" common-validator-2_1_5
+   "2.2.1" common-validator-2_1_6
    "ah-1.1" asianhallinta-validator})
 
 (def- ymp-validators

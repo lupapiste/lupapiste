@@ -13,7 +13,7 @@
             [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
@@ -40,7 +40,7 @@
 
 (defn- invite-applicants [{:keys [lang user created application] :as command} applicants]
 
-  (let [applicants-with-no-info (filter #(not (get-applicant-type %)) applicants)
+  (let [applicants-with-no-info (remove get-applicant-type applicants)
         applicants (filter get-applicant-type applicants)]
 
     ;; ensures execution will not throw exception here if hakija in the xml message lacks both "henkilo" and "yritys" fields
@@ -71,7 +71,7 @@
                ;; Set applicants' user info to Hakija documents
                (let [document (if (zero? i)
                                 (domain/get-applicant-document (:documents application))
-                                (commands/do-create-doc
+                                (doc-persistence/do-create-doc
                                   (assoc-in command [:data :schemaName] (permit/get-applicant-doc-schema (permit/permit-type application)))))
                      applicant-type (get-applicant-type applicant)
                      user-info (case applicant-type
@@ -102,7 +102,7 @@
                                             :po (get-in postiosoite [:postitoimipaikannimi])
                                             :turvakieltokytkin (:turvakieltoKytkin applicant)}))]
 
-                (commands/set-subject-to-document application document user-info (name applicant-type) created)))))))))
+                (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
 (defn- do-create-application-from-previous-permit [command operation xml app-info location-info]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
@@ -125,7 +125,7 @@
     (when-let [updates (verdict/find-verdicts-from-xml command xml)]
       (action/update-application command updates))
     (invite-applicants command hakijat)
-    (:id created-application)))
+    created-application))
 
 (defn- enough-location-info-from-parameters? [{{:keys [x y address propertyId]} :data}]
   (and
@@ -156,13 +156,15 @@
                                (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))
         no-proper-applicants? (not-any? get-applicant-type (:hakijat app-info))]
     (cond
-      validation-result            validation-result
       (empty? app-info)            (fail :error.no-previous-permit-found-from-backend)
       (not (:municipality app-info)) (fail :error.previous-permit-no-propertyid)
       (not organizations-match?)   (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       (not location-info)          (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
-      no-proper-applicants?        (fail :error.no-proper-applicants-found-from-previous-permit)
-      :else                        (ok :id (do-create-application-from-previous-permit command operation xml app-info location-info)))))
+      validation-result            validation-result
+      :else                        (let [{id :id} (do-create-application-from-previous-permit command operation xml app-info location-info)]
+                                     (if no-proper-applicants?
+                                       (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
+                                       (ok :id id))))))
 
 
 (def fix-prev-permit-counter (atom 0))

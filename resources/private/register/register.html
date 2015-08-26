@@ -6,26 +6,17 @@
 
       <h1 data-bind="ltext: 'register.header1'"></h1>
       <p data-bind="html: loc('register.info')" class="register-info"></p>
-      <div id="vetuma-register"></div>
-      <div data-bind="if: isCancel">
-        <div id="register-cancel" data-bind="ltext: 'register.cancel'" class="context-error"></div>
-      </div>
-      <div data-bind="if: isError">
-        <div id="register-error" data-bind="ltext: 'register.error'" class="context-error"></div>
-      </div>
 
-      <div data-bind="if: features.enabled('companyRegistration')">
-        <div class="feature">
-          <h1 data-bind="ltext: 'register.company.header'"></h1>
-          <p data-bind="lhtml: 'register.company.info'" class="register-info"></p>
-          <p data-bind="ltext: 'register.company.create.help'" class="register-info"></p>
-          <a data-bind="attr: {href: '#!/register-company-account-type'}, ltext: 'register.company.register'"
-             href="#"
-             class="btn btn-primary"
-             data-test-id="register-company-start">
-          </a>
-        </div>
-      </div>
+      <div data-bind="component: {name: 'vetuma-init', params: vetuma}"></div>
+
+      <div data-bind="component: {name: 'vetuma-status', params: {status: status, idPrefix: 'register-', errorLocPrefix: 'register'}}"></div>
+
+      <h1 data-bind="ltext: 'register.company.header'"></h1>
+      <p data-bind="lhtml: 'register.company.info'" class="register-info"></p>
+      <p data-bind="ltext: 'register.company.create.help'" class="register-info"></p>
+
+      <a href="#" class="btn btn-primary" data-test-id="register-company-start" data-bind="attr: {href: '#!/register-company-account-type'}, ltext: 'register.company.register'"></a>
+
     </div>
   </section>
 </body>

@@ -1,5 +1,6 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
+            [clojure.java.io :as io]
             [monger.operators :refer :all]
             [sade.util :as util]
             [sade.env :as env]
@@ -7,6 +8,7 @@
             [sade.core :refer :all]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
+            [lupapalvelu.states :as states]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.user :as user]
@@ -15,7 +17,6 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapiste-commons.attachment-types :as attachment-types]
-            [clojure.java.io :as io]
             [lupapalvelu.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
@@ -142,7 +143,9 @@
            :type attachment-type
            :modified now
            :locked locked?
-           :applicationState application-state
+           :applicationState (if (and (= "verdict" (:type target)) (not (states/post-verdict-states (keyword application-state))))
+                               "verdictGiven"
+                               application-state)
            :state :requires_user_action
            :target target
            :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority

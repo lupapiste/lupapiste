@@ -153,8 +153,9 @@
 (defn find-company-admins [company-id]
   (u/get-users {:company.id company-id, :company.role "admin"}))
 
-(defn ensure-custom-limit [company-id {account-type :accountType custom-limit :customAccountLimit :as data}]
+(defn ensure-custom-limit
   "Checks that custom account's customAccountLimit is set and allowed. Nullifies customAcconutLimit with normal accounts."
+  [company-id {account-type :accountType custom-limit :customAccountLimit :as data}]
   (if (= :custom (keyword account-type))
    (if custom-limit
      (if (<= (company-users-count company-id) custom-limit)

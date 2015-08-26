@@ -32,3 +32,15 @@
 .map-component {
   height: 400px;
 }
+
+.ol-popup {
+  .ol-popup-closer {
+    color: $grey-text;
+    font-size: 12px;
+    font-weight: bold;
+    top: $marginS;
+    &:after {
+      content: " ";
+    }
+  }
+}

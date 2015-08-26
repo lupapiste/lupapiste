@@ -2,10 +2,11 @@
   (:require [lupapalvelu.domain :as domain]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.core :refer [fail]]
+            [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.states :as states]
             [monger.operators :refer :all]))
 
 (defn other-project-document [application timestamp]
@@ -107,3 +108,33 @@
       (update-in [:documents] (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs)))))
 
 (defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword)))
+
+(defn notice?
+  "True if application is foreman application and of type notice (ilmoitus)"
+  [application]
+  (and
+    (foreman-app? application)
+    (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value))))
+
+(defn- validate-notice-or-application [application]
+  (let [foreman-doc (domain/get-document-by-name application "tyonjohtaja-v2")
+        type (get-in foreman-doc [:data :ilmoitusHakemusValitsin :value])]
+    (when (ss/blank? type)
+      (fail! :error.foreman.type-not-selected))))
+
+(defn- validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application}]
+  (when (notice? application)
+    (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
+      (when-not (states/post-verdict-states (keyword
+                                              (get
+                                                (mongo/select-one :applications {:_id (:id link)} {:state 1})
+                                                :state)))
+        (fail! :error.foreman.notice-not-submittable)))))
+
+(defn validate-application
+  "Validates foreman applications"
+  [application]
+  (when (foreman-app? application)
+    (or
+      (validate-notice-or-application application)
+      (validate-notice-submittable application))))

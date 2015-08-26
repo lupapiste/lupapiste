@@ -18,6 +18,11 @@ $marginM: $baseline/2;
 $marginS: $baseline/4;
 
 $application-max-width: 1280px;
+$application-min-width:  640px;
+
+$footer-min-padding: 320px;
+$footer-max-padding: 420px;
+
 
 @mixin width-wrapper {
   margin:0 auto;
@@ -44,7 +49,7 @@ body {
   height: 100%;
   &.applicant, &.authority, &.authority-admin, &.welcome, &.admin, &.oir, &.neighbor {
     min-height: 100vh;
-    padding-bottom: 270px;
+    padding-bottom: $footer-min-padding;
     position: relative;
     margin-bottom: 0;
   }
@@ -59,6 +64,7 @@ body {
   padding: $marginM $marginS 0 $marginS;
   width: 100%;
   max-width: $application-max-width;
+  min-width: $application-min-width;
   margin: $baseline auto $baseline auto;
   position: relative;
   .content {

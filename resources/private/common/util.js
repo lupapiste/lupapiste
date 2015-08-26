@@ -161,7 +161,7 @@ var util = (function($) {
 
   var personIdCn = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D",
     "E","F","H","J","K","L","M","N","P","R","S","T","U","V",
-    "W","X","Y"]
+    "W","X","Y"];
 
   function isValidPersonId(personId) {
     var m = /^(\d{6})[aA+-]([0-9]{3})([0-9A-Z])$/.exec(personId || ""),
@@ -200,6 +200,23 @@ var util = (function($) {
     return id;
   }
 
+  function withSuffix(strOrArr, suffix) {
+    if (_.isArray(strOrArr)) {
+      return _.map(strOrArr, function(s) {
+        return s + suffix;
+      });
+    }
+    return [strOrArr + suffix];
+  }
+
+  function filterDataByQuery(data, q, selected) {
+    return _.filter(data, function(item) {
+      return _.reduce(q.split(" "), function(result, word) {
+        return !_.some(selected, item) && _.contains(item.label.toUpperCase(), word.toUpperCase()) && result;
+      }, true);
+    });
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -209,6 +226,8 @@ var util = (function($) {
     isValidY:            isValidY,
     isValidOVT:          isValidOVT,
     isValidPersonId:     isValidPersonId,
+    lowerCase: function(s) {return _.isString(s) ? s.toLowerCase() : s;},
+    upperCase: function(s) {return _.isString(s) ? s.toUpperCase() : s;},
     prop: {
       isPropertyId:           isPropertyId,
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,
@@ -227,7 +246,9 @@ var util = (function($) {
     isNotPartyDoc: isNotPartyDoc,
     extractRequiredErrors: extractRequiredErrors,
     dissoc: dissoc,
-    randomElementId: randomElementId
+    randomElementId: randomElementId,
+    withSuffix: withSuffix,
+    filterDataByQuery: filterDataByQuery
   };
 
 })(jQuery);

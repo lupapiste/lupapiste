@@ -30,7 +30,15 @@ jQuery(document).ready(function() {
     "company-edit",
     "tags-editor",
     "upload",
-    "leaflet-map"
+    "openlayers-map",
+    "vetuma-init",
+    "vetuma-status",
+    "help-toggle",
+    "applications-search",
+    "applications-search-results",
+    "applications-search-filter",
+    "applications-search-paging",
+    "autocomplete-grouping"
   ];
 
   _.forEach(components, function(component) {
