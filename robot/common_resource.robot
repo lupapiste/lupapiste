@@ -319,6 +319,18 @@ Select From Autocomplete
   Click Element  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
   Wait for jQuery
 
+Autocomplete selectable values should not contain
+  [Arguments]  ${container}  ${value}
+  # Open dropdown if it is not open
+  ${autocompleteListNotOpen} =  Element should not be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[@class="autocomplete-dropdown"]
+  Run Keyword If  '${autocompleteListNotOpen}' == 'PASS'  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//span[@class='autocomplete-selection']
+  Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
+
+Autocomplete option list should contain
+  [Arguments]  @{options}
+  :FOR  ${element}  IN  @{options}
+  \  Element should contain  xpath=//div[@data-test-id="operations-filter-component"]//ul[@class="autocomplete-result autocomplete-result-grouped"]  ${element}
+
 Click by id
   [Arguments]  ${id}
   ${selector} =   Set Variable  $("[id='${id}']:visible")
