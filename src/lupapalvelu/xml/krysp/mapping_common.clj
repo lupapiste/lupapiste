@@ -387,7 +387,10 @@
 
 (def tyonjohtaja_213 (update-in tyonjohtaja_212 [:child] (comp vec update-child-element) [:yritys] yritys_213))
 
-(def tyonjohtaja_215 (update-in tyonjohtaja_213 [:child] conj {:tag :vainTamaHankeKytkin}))
+(def tyonjohtaja_215 (-> tyonjohtaja_213
+                       (update-in [:child] conj {:tag :vainTamaHankeKytkin})
+                       (update-in [:child] update-child-element [:yritys] yritys_215)
+                       (update-in [:child] update-child-element [:henkilo] henkilo_215)))
 
 (def tyonjohtajatieto_210
   {:tag :tyonjohtajatieto :child [tyonjohtaja_210]})
@@ -436,7 +439,9 @@
   (update-in suunnittelijatieto_211 [:child] update-child-element [:Suunnittelija :yritys] yritys_213))
 
 (def suunnittelijatieto_215
-  (update-in suunnittelijatieto_213 [:child] update-child-element [:Suunnittelija :yritys] yritys_215))
+  (-> suunnittelijatieto_213
+    (update-in [:child] update-child-element [:Suunnittelija :yritys] yritys_215)
+    (update-in [:child] update-child-element [:Suunnittelija :henkilo] henkilo_215)))
 
 (def osapuolet_211
   {:tag :Osapuolet :ns "yht"
