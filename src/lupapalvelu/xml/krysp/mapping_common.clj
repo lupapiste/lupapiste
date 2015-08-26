@@ -552,8 +552,7 @@
                          file-id (get-in attachment [:latestVersion :fileId])
                          attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                          link (str begin-of-link attachment-file-name)
-                         meta (get-attachment-meta attachment)
-                         _ (clojure.pprint/pprint meta)]]
+                         meta (get-attachment-meta attachment)]]
                {:Liite (get-Liite attachment-title link attachment type-id file-id attachment-file-name meta)})))
 
 (defn add-statement-attachments [canonical statement-attachments lausunto-path]

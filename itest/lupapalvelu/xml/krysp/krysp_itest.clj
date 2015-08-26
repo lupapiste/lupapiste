@@ -114,7 +114,6 @@
         output-dir  (str "target/" sftp-user permit-type-dir "/")
 
         linkkiliitteeseen  (xml/get-text liite [:linkkiliitteeseen])
-        kuvaus  (xml/get-text liite [:kuvaus])
         tyyppi (xml/get-text liite [:tyyppi])
         linkki-as-uri (when linkkiliitteeseen (URI. linkkiliitteeseen))
         attachment-file-name  (last (s/split linkkiliitteeseen #"/"))
