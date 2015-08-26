@@ -103,9 +103,8 @@ $app-gray-darkest: $gray187;
       display:block;
       background: $lp-green;
       .map-search-button {
-        margin: $marginS;
         color: white;
-        padding: $marginL;
+        padding: 0 $marginL;
       }
     }
   }

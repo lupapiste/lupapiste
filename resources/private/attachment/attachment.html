@@ -221,9 +221,9 @@
               <div class="feature" style="margin-top: 15px;">
                 <button id="show-tos-metadata" class="btn"
                         data-bind="click: toggleTosMetadata, visible: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application')">
+                  <i data-bind="css: {'lupicon-chevron-small-right': !showTosMetadata(),
+                                      'lupicon-chevron-small-down': showTosMetadata}"></i>
                   <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
-                  <span class="left-align"
-                        data-bind="drill: showTosMetadata, color: 'black'"></span>
                 </button>
 
                 <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: !_.isEmpty(metadata())">

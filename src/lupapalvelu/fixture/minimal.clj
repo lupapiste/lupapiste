@@ -552,7 +552,21 @@
                        :kopiolaitos-orderer-phone "0501231234"
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P" "YI" "YL" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
-                       :tags [{:id "111" :label "yl\u00E4maa"} {:id "222" :label "ullakko"}]}
+                       :tags [{:id "111" :label "yl\u00E4maa"} {:id "222" :label "ullakko"}]
+                       :areas {:type "FeatureCollection"
+                               :features [{:id "sipoo_keskusta",
+                                           :properties {:nimi "Keskusta", :id 3},
+                                           :geometry
+                                           {:coordinates
+                                            [[[[402644.2941 6693912.6002]
+                                               [401799.0131 6696356.5649]
+                                               [406135.6722 6695272.4001]
+                                               [406245.9263 6693673.7164]
+                                               [404059.221 6693545.0867]
+                                               [404059.221 6693545.0867]
+                                               [402644.2941 6693912.6002]]]],
+                                            :type "MultiPolygon"},
+                                           :type "Feature"}]}}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.

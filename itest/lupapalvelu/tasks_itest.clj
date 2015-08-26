@@ -52,7 +52,7 @@
   (facts "tyonjohtajat"
     (count tyonjohtajat) => 3
     (map :taskname tyonjohtajat) => ["Vastaava ty\u00f6njohtaja" "Vastaava IV-ty\u00f6njohtaja" "Ty\u00f6njohtaja"]
-    (map :data tyonjohtajat) => (partial every? empty?))
+    (map :data tyonjohtajat) => (partial not-any? empty?))
 
   (fact "totally 9 tasks in fixture"
     (count tasks) => 9)
