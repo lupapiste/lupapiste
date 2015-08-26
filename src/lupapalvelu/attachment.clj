@@ -17,7 +17,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapiste-commons.attachment-types :as attachment-types]
-            [lupapalvelu.preview :as preview])
+            [lupapalvelu.preview :as preview]
+            [lupapalvelu.pdf-conversion :as pdf-conversion])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
            [org.apache.commons.io FilenameUtils]
@@ -482,3 +483,26 @@
         (proxy-super close)
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
+
+(defn delete-file! [^File file] (try (.delete file) (catch Exception _)))
+
+(defn ensure-pdf-a
+  "Ensures PDF file PDF/A compatibility status based on original attachment status"
+  [temp-file valid-pdfa]
+  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
+  (if (not valid-pdfa)
+    (do (debugf "    no PDF/A required, no conversion") {:file temp-file :pdfa false})
+    (let [a-temp-file (File/createTempFile "lupapiste.stamp.a." ".tmp")
+          conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath temp-file) (.getAbsolutePath a-temp-file))]
+      (cond
+        (:already-valid-pdfa? conversion-result) (do (debugf "      file valid PDF/A, no conversion") {:file temp-file :pdfa true})
+        (:pdfa? conversion-result) (do (debug "      converting to PDF/A file: " (.getAbsolutePath a-temp-file)) (delete-file! temp-file) {:file a-temp-file :pdfa true})
+        :else (do (errorf "Ensuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
+
+(defn application-to-pdf-a
+  "Returns application data in PDF/A temp file"
+  [application lang]
+  (let [file (File/createTempFile "application-pdf-a-" ".tmp")
+        stream (pdf-export/generate application lang)]
+    (io/copy stream file)
+  (ensure-pdf-a file true)))
