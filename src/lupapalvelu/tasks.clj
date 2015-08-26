@@ -20,6 +20,7 @@
             :type :select :sortBy :displayname
             :required true
             :whitelist {:roles [:authority] :otherwise :disabled}
+            :default "muu katselmus"
             :body [{:name "muu katselmus"}
                    {:name "muu tarkastus"}
                    {:name "aloituskokous"}
