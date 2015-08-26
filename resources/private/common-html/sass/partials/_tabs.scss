@@ -5,11 +5,17 @@ $tab-size: 2px;
 
 @mixin tab-style {
   display: inline-block;
-  padding: 8px 10px;
   text-decoration: none;
   background: white;
   color: $gray51;
-  border-bottom: $tab-size solid $gray187
+  padding: {
+    left: $marginS;
+    right: $marginS;
+    top: $marginS;
+    bottom: $marginS;
+  }
+
+  //border-bottom: $tab-size solid $gray187
   //outline: none;
   /* Note: IE filters and border-radius don't mix */
   //filter: none;
@@ -22,8 +28,16 @@ $tab-size: 2px;
     color: $gray187;
     bottom: none;
 }
-  margin-bottom: -2 * $tab-size;
+  //margin-bottom: -2 * $tab-size;
   //  margin-bottom: 0;
+  &:before {
+    content: " ";
+    border-bottom: $tab-size solid white;
+    position: absolute;
+    bottom: -2px;
+    left: 0%;
+    width: 100%;
+  }
 }
 
 .tab-wrapper {
@@ -49,6 +63,7 @@ $tab-size: 2px;
   display: inline;
   li {
     display: inline-block;
+
     a {
       @include tab-style;
       position: relative;
@@ -85,11 +100,11 @@ $tab-size: 2px;
     &.active a {
       @include active-tab-style;
     }
-    &:first-child {
-      a {
-        padding-left: 0;
-      }
-    }
+    /* &:first-child { */
+    /*   a { */
+    /*     padding-left: 0; */
+    /*   } */
+    /* } */
   }
 }
 
