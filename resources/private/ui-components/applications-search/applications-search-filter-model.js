@@ -1,43 +1,3 @@
-LUPAPISTE.TagsDataProvider = function(filtered) {
-  "use strict";
-  var self = this;
-
-  self.query = ko.observable();
-
-  self.filtered = filtered || ko.observableArray([]);
-
-  var tagsData = ko.observable();
-
-  ajax
-    .query("get-organization-tags")
-    .error(_.noop)
-    .success(function(res) {
-      tagsData(res.tags);
-    })
-    .call();
-
-  self.data = ko.pureComputed(function() {
-    var result = [];
-    var data = tagsData();
-
-    for (var key in data) {
-      var header = {label: data[key].name[loc.currentLanguage], groupHeader: true};
-
-      var filteredData = util.filterDataByQuery(data[key].tags, self.query() || "", self.filtered());
-      // append group header and group items to result data
-      if (filteredData.length > 0) {
-        if (_.keys(data).length > 1) {
-          result = result.concat(header);
-        }
-        result = result.concat(filteredData);
-      }
-    }
-
-    return result;
-  });
-
-};
-
 LUPAPISTE.OperationsDataProvider = function(filtered) {
   "use strict";
   var self = this;
@@ -204,9 +164,8 @@ LUPAPISTE.OrganizationsDataProvider = function(savedOrgFilters) {
     var q = self.query() || "";
     return _.filter(data(), function(item) {
       return _.reduce(q.split(" "), function(result, word) {
-        return _.contains(item.name.toUpperCase(), word.toUpperCase())
-               && !_.some(self.savedOrgFilters(), item)
-               && result;
+        return _.contains(item.name.toUpperCase(), word.toUpperCase()) &&
+          !_.some(self.savedOrgFilters(), item) && result;
       }, true);
     });
   });
@@ -219,8 +178,6 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   self.dataProvider = params.dataProvider;
 
-  self.tagsDataProvider = null;
-  self.operationsDataProvider = null;
   self.handlersDataProvider = null;
   self.areasDataProvider = null;
 
@@ -248,9 +205,9 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   if ( lupapisteApp.models.currentUser.isAuthority() ) {
     self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
-    self.operationsDataProvider = new LUPAPISTE.OperationsDataProvider(self.dataProvider.operations);
+    // self.operationsDataProvider = new LUPAPISTE.OperationsDataProvider(self.dataProvider.operations);
     self.organizationsDataProvider = new LUPAPISTE.OrganizationsDataProvider(self.dataProvider.organizations);
-    self.tagsDataProvider = new LUPAPISTE.TagsDataProvider(self.dataProvider.tags);
+    // self.tagsDataProvider = new LUPAPISTE.TagsDataProvider(self.dataProvider.tags);
     self.areasDataProvider = new LUPAPISTE.AreasDataProvider(self.dataProvider.areas);
   }
 };

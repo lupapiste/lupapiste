@@ -38,7 +38,7 @@ jQuery(document).ready(function() {
     {name: "applications-search-results"},
     {name: "applications-search-filter"},
     {name: "applications-search-paging"},
-    {name: "autocomplete-tags", template: "autocomplete"}
+    {name: "autocomplete-tags"}
   ];
 
   _.forEach(components, function(component) {

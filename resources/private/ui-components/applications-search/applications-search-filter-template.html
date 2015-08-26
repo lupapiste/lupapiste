@@ -13,7 +13,7 @@
       </div>
       <div class="filter-item" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
         <label data-bind="ltext: 'applications.filter.handler'" />
-        <div data-bind="component: {name: 'autocomplete', params: {dataProvider: handlersDataProvider, value: dataProvider.handler, selectedText: 'fullName', nullable: true}}"></div>
+        <!-- <div data-bind="component: {name: 'autocomplete', params: {dataProvider: handlersDataProvider, value: dataProvider.handler, selectedText: 'fullName', nullable: true}}"></div> -->
       </div>
       <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.isAuthority() -->
       <div class="feature filter-item" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
@@ -29,22 +29,23 @@
     <div class="feature filter-row advanced" data-test-id="tag-filter-row">
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.tags'" />
-        <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: tagsDataProvider, value: dataProvider.tags, selectedText: 'label', tags: true}}"></div>
+        <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete-tags', params: {selectedValues: dataProvider.tags}}"></div>
+        <!-- <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: tagsDataProvider, value: dataProvider.tags, selectedText: 'label', tags: true}}"></div> -->
       </div>
 
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.operations'" />
-        <div data-test-id="operations-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: operationsDataProvider, value: dataProvider.operations, selectedText: 'label', tags: true}}"></div>
+        <!-- <div data-test-id="operations-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: operationsDataProvider, value: dataProvider.operations, selectedText: 'label', tags: true}}"></div> -->
       </div>
 
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.organizations'" />
-        <div data-test-id="organization-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationsDataProvider, value: dataProvider.organizations, selectedText: 'name', tags: true}}"></div>
+        <!-- <div data-test-id="organization-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationsDataProvider, value: dataProvider.organizations, selectedText: 'name', tags: true}}"></div> -->
       </div>
 
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.areas'" />
-        <div data-test-id="areas-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: areasDataProvider, value: dataProvider.areas, selectedText: 'label', tags: true}}"></div>
+        <!-- <div data-test-id="areas-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: areasDataProvider, value: dataProvider.areas, selectedText: 'label', tags: true}}"></div> -->
       </div>
     </div>
     <!-- /ko -->
