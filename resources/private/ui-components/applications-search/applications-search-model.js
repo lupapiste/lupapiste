@@ -18,7 +18,9 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   self.handler = ko.observable();
 
   self.tags = ko.observableArray([]);
+
   self.operations = ko.observableArray([]);
+
   self.organizations = ko.observableArray([]);
 
   self.areas = ko.observableArray([]);
