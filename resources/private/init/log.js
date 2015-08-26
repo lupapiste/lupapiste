@@ -35,7 +35,7 @@
   window.setLogLimit = function(l) { limit = l; };
 
   window.onerror = function(msg, url, line, col, error) {
-    ajax.query("newest-version", {frontendBuild: "LUPAPISTE.config.build"})
+    ajax.query("newest-version", {frontendBuild: LUPAPISTE.config.build})
       .onError("frontend-too-old", function() {
         if (confirm(loc("error.frontend-outdated"))) {
           window.location.reload();

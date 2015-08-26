@@ -152,11 +152,16 @@ LUPAPISTE.AreasDataProvider = function(filtered) {
       if (org.areas && org.areas.features) {
         var header = {label: org.name[loc.currentLanguage], groupHeader: true};
 
+
         var features = _.map(org.areas.features, function(feature) {
+          for(var key in feature.properties) { // properties to lower case
+            feature.properties[key.toLowerCase()] = feature.properties[key];
+          }
           var nimi = util.getIn(feature, ["properties", "nimi"]);
           var id = feature.id;
           return {label: nimi, id: id};
         });
+        features = _.filter(features, "label");
 
         var filteredData = util.filterDataByQuery(features, self.query() || "", self.filtered());
         // append group header and group items to result data
