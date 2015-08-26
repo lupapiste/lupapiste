@@ -89,9 +89,8 @@ $side-panel-width: 60px;
       display:block;
       background: $lp-green;
       .map-search-button {
-        margin: $marginS;
         color: white;
-        padding: $marginL;
+        padding: 0 $marginL;
       }
     }
   }
