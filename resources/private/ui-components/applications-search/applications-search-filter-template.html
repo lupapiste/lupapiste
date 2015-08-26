@@ -30,16 +30,16 @@
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.tags'" />
         <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete-tags', params: {selectedValues: dataProvider.tags}}"></div>
-        <!-- <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: tagsDataProvider, value: dataProvider.tags, selectedText: 'label', tags: true}}"></div> -->
       </div>
 
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.operations'" />
-        <!-- <div data-test-id="operations-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: operationsDataProvider, value: dataProvider.operations, selectedText: 'label', tags: true}}"></div> -->
+        <div data-test-id="operations-filter-component" data-bind="component: {name: 'autocomplete-operations', params: {selectedValues: dataProvider.operations}}"></div>
       </div>
 
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.organizations'" />
+        <div data-test-id="organization-filter-component" data-bind="component: {name: 'autocomplete-organizations', params: {selectedValues: dataProvider.organizations}}"></div>
         <!-- <div data-test-id="organization-filter-component" data-bind="component: {name: 'autocomplete', params: {dataProvider: organizationsDataProvider, value: dataProvider.organizations, selectedText: 'name', tags: true}}"></div> -->
       </div>
 

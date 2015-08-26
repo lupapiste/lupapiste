@@ -1,54 +1,4 @@
-LUPAPISTE.OperationsDataProvider = function(filtered) {
-  "use strict";
-  var self = this;
 
-  var operationsByPermitType = ko.observable();
-
-  self.query = ko.observable();
-
-  self.filtered = filtered || ko.observableArray([]);
-
-  ajax
-    .query("get-application-operations")
-    .error(_.noop)
-    .success(function(res) {
-      operationsByPermitType(res.operationsByPermitType);
-    })
-    .call();
-
-  function wrapInObject(operations) {
-    return _.map(operations, function(op) {
-      return {label: loc("operations." + op),
-              id: op};
-    });
-  }
-
-  self.data = ko.pureComputed(function() {
-    var result = [];
-
-    var data = _.map(operationsByPermitType(), function(operations, permitType) {
-      return {
-        permitType: loc(permitType),
-        operations: wrapInObject(operations)
-      };
-    });
-
-
-    _.forEach(data, function(item) {
-      var header = {label: item.permitType, groupHeader: true};
-
-      var filteredData = util.filterDataByQuery(item.operations, self.query() || "", self.filtered());
-
-      // append group header and group items to result data
-      if (filteredData.length > 0) {
-        result = result.concat(header).concat(filteredData);
-      }
-    });
-
-    return result;
-  });
-
-};
 
 LUPAPISTE.HandlersDataProvider = function() {
   "use strict";
@@ -138,40 +88,6 @@ LUPAPISTE.AreasDataProvider = function(filtered) {
   });
 };
 
-LUPAPISTE.OrganizationsDataProvider = function(savedOrgFilters) {
-  "use strict";
-
-  var self = this;
-
-  self.query = ko.observable();
-  self.savedOrgFilters = savedOrgFilters || ko.observableArray([]);
-
-  var data = ko.observable();
-  var usersOwnOrganizations = _.keys(lupapisteApp.models.currentUser.orgAuthz());
-
-  ajax
-  .query("get-organization-names")
-  .error(_.noop)
-  .success(function(res) {
-    var ownOrgsWithNames = _.map(usersOwnOrganizations, function(org) {
-      return {id: org, name: res.names[org][loc.currentLanguage]};
-    });
-    data(ownOrgsWithNames);
-  })
-  .call();
-
-  self.data = ko.pureComputed(function() {
-    var q = self.query() || "";
-    return _.filter(data(), function(item) {
-      return _.reduce(q.split(" "), function(result, word) {
-        return _.contains(item.name.toUpperCase(), word.toUpperCase()) &&
-          !_.some(self.savedOrgFilters(), item) && result;
-      }, true);
-    });
-  });
-
-};
-
 LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
   "use strict";
   var self = this;
@@ -205,9 +121,6 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   if ( lupapisteApp.models.currentUser.isAuthority() ) {
     self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
-    // self.operationsDataProvider = new LUPAPISTE.OperationsDataProvider(self.dataProvider.operations);
-    self.organizationsDataProvider = new LUPAPISTE.OrganizationsDataProvider(self.dataProvider.organizations);
-    // self.tagsDataProvider = new LUPAPISTE.TagsDataProvider(self.dataProvider.tags);
     self.areasDataProvider = new LUPAPISTE.AreasDataProvider(self.dataProvider.areas);
   }
 };
