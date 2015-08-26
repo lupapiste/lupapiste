@@ -494,14 +494,14 @@
    :fileId file-id
    :filename filename})
 
-(defn- get-metatieto [k v]
+(defn- create-metatieto [k v]
   {:metatieto {:metatietoNimi k :metatietoArvo v}
    :Metatieto {:metatietoNimi k :metatietoArvo v}})
 
 (defn- get-attachment-meta [attachment]
   (let [signatures (:signatures attachment)
         latestVersion (:latestVersion attachment)
-        liitepohja [(get-metatieto "liiteId" (:id attachment))]
+        liitepohja [(create-metatieto "liiteId" (:id attachment))]
         signatures (->> signatures
                            (filter #(and
                                      (= (get-in % [:version :major]) (get-in latestVersion [:version :major]))
@@ -510,8 +510,8 @@
                                        lastName (get-in %2 [:user :lastName])
                                        created (util/to-xml-datetime (:created %2))
                                        count %1]
-                                  [(get-metatieto (str "allekirjoittaja_" count) (str firstName " " lastName))
-                                   (get-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
+                                  [(create-metatieto (str "allekirjoittaja_" count) (str firstName " " lastName))
+                                   (create-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
                            (flatten)
                            (vec))]
     (if (empty? signatures)
