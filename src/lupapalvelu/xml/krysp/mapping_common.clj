@@ -671,7 +671,7 @@
       (fn [c a]
         (let [lausuntotieto (get-in c lausunto-path)
               lausunto-id (name (first (keys a)))
-              paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
+              paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id) %) lausuntotieto)
               index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
               paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
               paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
