@@ -219,10 +219,10 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   self.dataProvider = params.dataProvider;
 
-  self.organizationTagsDataProvider = null;
+  self.tagsDataProvider = null;
   self.operationsDataProvider = null;
   self.handlersDataProvider = null;
-  self.organizationAreasDataProvider = null;
+  self.areasDataProvider = null;
 
   self.showAdvancedFilters = ko.observable(false);
   self.advancedFiltersText = ko.computed(function() {
@@ -241,6 +241,7 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
     .command("update-default-application-filter", {filter: filter})
     .error(_.noop)
     .success(function() {
+      // TODO show indicator for success
     })
     .call();
   };
