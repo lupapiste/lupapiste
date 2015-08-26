@@ -69,7 +69,7 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
   var urls = util.withSuffix(mapServer, "/maasto?");
 
   // get WMTS server capabilities
-  xhr.open("GET", _.first(urls) + "service=wmts&request=getcapabilities&version=1.0.0&layer=taustakartta", true);
+  xhr.open("GET", "/proxy/wmts/maasto?service=wmts&request=getcapabilities&version=1.0.0&layer=taustakartta", true);
 
   xhr.onload = function() {
     if (xhr.status === 200) {
