@@ -640,12 +640,19 @@ input.form-input.long {
 .accordion-toggle > .group-buttons {
   background-color: $gray246;
   border: 1px solid $gray221;
+  border-top: none;
   padding: {
     top: $marginS;
     bottom: $marginS;
   }
   margin: 0;
 }
+
+div.sticky {
+  background-color: $gray246;
+}
+
+
 
 .button-group button.is-right {
   margin-right: 0;
@@ -697,6 +704,7 @@ input.form-input.long {
   display: none;
 }
 
+
 section.approved .group-buttons  {
     button.approved {
       display: none;
@@ -728,6 +736,20 @@ section.approved .group-buttons  {
     padding-right: $icon-pad;
   }
 }
+
+// Top-level form-approval-status
+div.sticky > .form-approval-status > .like-btn {
+  padding: {
+    left: 10px;
+    top: 4px;
+  }
+  min-height: initial;
+  line-height: initial;
+  span {
+    color: $gray153;
+  }
+}
+
 
 // Top-level reject button should be invisible
 // when the bar is in rejected mode.

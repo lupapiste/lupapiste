@@ -334,15 +334,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.statusOrder = function() {
     var stats = {};
 
+    function statusSelector( name ) {
+      var sel = self.section$.find("[data-status-key=" + name + "]");
+      return sel.length ? sel : null;
+    }
+
     function update( name, statusFun, approval ) {
       stats[name] = {fun: _.wrap(approval, statusFun),
                      approval: approval,
                      name: name
                     };
-    }
-    function statusSelector( name ) {
-      var sel = self.section$.find("[data-status-key=" + name + "]");
-      return sel.length ? sel : null;
     }
     function setOrdered() {
       _( stats )
@@ -351,6 +352,21 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       .each( function( f ) {f()} )
       .value()
     }
+    function setText( name ) {
+      var sel = statusSelector( name );
+      if( sel ) {
+        sel = sel.find( "span.is-details");
+        var approval = stats[name].approval;
+        var text = loc(["document", approval.value]);
+        if(approval && approval.user && approval.timestamp) {
+          text += " (" + approval.user.lastName + " "
+                + approval.user.firstName
+                + " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
+        }
+        sel.text( text );
+      }
+    }
+
     //  If name is null, every item's class is changed.
     // If cls is null, the approval class is used
     function setStatusClass( name, cls ) {
@@ -360,6 +376,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         if( sel ) {
           sel.removeClass( "approved rejected" );
           sel.addClass( cls ? cls : item.approval.value );
+          setText( item.name);
         }
       })
     }
@@ -376,7 +393,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     //             to bar if any of the stats is rejected. However, if every stat is
     //             approved, call setSectionStatus( self.sectionId, "approved")
     function setSectionStatus( name, cls ) {
-      var bar = statusSelector( self.sectionId );
+      var bar = self.section$.find("button[data-status-key=" + self.sectionId + "]");
       //var section = $("[data-section-id=" + self.sectionId + "]");
       if( cls ) {
         var isApproved = cls === 'approved';
@@ -386,6 +403,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           bar.removeClass( "approved rejected");
           bar.addClass( cls );
           bar.toggleClass( "positive", isApproved );
+          setText( self.sectionId );
         }
       } else {
         if( !self.section$.hasClass( "approved") && bar ) {
@@ -418,15 +436,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }();
 
-    function barStatusHandler( approval, text ) {
-    self.statusOrder.update( self.sectionId, self.barStatusHandler, approval );
-    var cls = approval.value;
+    function barStatusHandler( approval ) {
+      self.statusOrder.update( self.sectionId, self.barStatusHandler, approval );
+      var cls = approval.value;
 
-    // Approving the whole approves the details.
-    // Rejecting the whole resets the details. In other words
-    // details should be intact after approving and immediately
-    // rejecting the whole.
-    self.statusOrder.setSectionStatus( self.sectionId, cls );
+      // Approving the whole approves the details.
+      // Rejecting the whole resets the details. In other words
+      // details should be intact after approving and immediately
+      // rejecting the whole.
+      self.statusOrder.setSectionStatus( self.sectionId, cls );
+      self.statusOrder.setStatusClass( self.sectionId, cls );
   };
 
   function makeApprovalContainer( statusKey ) {
@@ -467,16 +486,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     function setStatus(approval) {
       if (approval) {
-        var text = loc(["document", approval.value]);
-        if (approval.user && approval.timestamp) {
-          text += " (" + approval.user.lastName + " " + approval.user.firstName;
-          text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
-        }
         if( opts[self.sectionId] ) {
-          opts[self.sectionId].fun( approval, text );
+          opts[self.sectionId].fun( approval );
           self.statusOrder.update( self.sectionId, setStatus, approval );
         } else {
-          approvalContainer$.find("span.is-details").text(text);
           self.statusOrder.update( statusKey, setStatus, approval );
           self.statusOrder.setStatusClass( statusKey, approval.value );
           self.statusOrder.setSectionStatus( statusKey, approval.value === "rejected" ? "rejected" : null );
@@ -495,6 +508,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
             ajax.command(cmd, cmdArgs)
               .success(function () {
                 setStatus({ value: noun });
+                window.Stickyfill.rebuild();
               })
               .call();
           });
@@ -2023,7 +2037,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(toggle).attr( "data-status-key", self.sectionId);
       opts.approval = {};
       opts.approval[self.sectionId] = {fun: barStatusHandler};
-
+      sticky.append( makeApprovalContainer( self.sectionId ));
     }
     opts.remove = removeOpts;
 
@@ -2050,7 +2064,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     sectionContainer.appendChild(elements);
     $(section).append(sticky);
     section.appendChild(sectionContainer);
-    self.statusOrder.setOrdered( $(section));
+    self.statusOrder.setOrdered();
     accordion.reset( $(toggle) );
 
     // Disable fields and hide if the form is not editable
