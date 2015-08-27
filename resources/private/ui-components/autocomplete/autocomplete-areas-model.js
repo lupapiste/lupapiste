@@ -1,4 +1,4 @@
-LUPAPISTE.AutocompleteAreasModel = function(params) {
+LUPAPISTE.AutocompleteAreasModel = function() {
   "use strict";
   var self = this;
 
