@@ -80,10 +80,11 @@
                                                                  :origin sc/Bool}}
            (sc/optional-key :notification)        {:messageI18nkey sc/Str
                                                    :titleI18nkey   sc/Str}
-           (sc/optional-key :applicationFilter)   {(sc/optional-key :tags) (sc/pred vector? "Default filters should have values in a vector")
-                                                   (sc/optional-key :operations) (sc/pred vector? "Default filters should have values in a vector")
-                                                   (sc/optional-key :organizations) (sc/pred vector? "Default filters should have values in a vector")
-                                                   (sc/optional-key :areas) (sc/pred vector? "Default filters should have values in a vector")}})
+           (sc/optional-key :applicationFilter)   [{(sc/optional-key :title) sc/Str
+                                                    :filter                  {(sc/optional-key :tags) (sc/pred vector? "Tag filter should have ids in a vector")
+                                                                              (sc/optional-key :operations) (sc/pred vector? "Op filter should have ids in a vector")
+                                                                              (sc/optional-key :organizations) (sc/pred vector? "Org filter should have ids in a vector")
+                                                                              (sc/optional-key :areas) (sc/pred vector? "Area filter should have ids in a vector")}}]})
 
 (def RegisterUser {:email     (sc/both
                                 (sc/pred util/valid-email? "Not valid email")
