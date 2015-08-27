@@ -8,11 +8,11 @@ LUPAPISTE.AutocompleteAreasModel = function(params) {
   var orgsAreas = ko.observable();
 
   var defaultFilter = ko.pureComputed(function() {
-    var currentUser = lupapisteApp.models.currentUser;
-    if (currentUser.applicationFilters && currentUser.applicationFilters()[0].filter.areas) {
-      return currentUser.applicationFilters()[0].filter.areas();
-    }
-    return [];
+    var applicationFilters = lupapisteApp.models.currentUser.applicationFilters;
+    return applicationFilters && 
+           applicationFilters()[0].filter.areas &&
+           applicationFilters()[0].filter.areas() ||
+           [];
   });
 
   ajax
@@ -30,7 +30,6 @@ LUPAPISTE.AutocompleteAreasModel = function(params) {
             return _.contains(defaultFilter(), feature.id);
           })
           .map(function(feature) {
-            console.log(feature);
             return {id: feature.id, label: util.getFeatureName(feature)};
           })
           .value());

@@ -9,6 +9,14 @@ LUPAPISTE.AutocompleteOrganizationsModel = function(params) {
 
   var usersOwnOrganizations = _.keys(lupapisteApp.models.currentUser.orgAuthz());
 
+  var defaultFilter = ko.pureComputed(function() {
+    var applicationFilters = lupapisteApp.models.currentUser.applicationFilters;
+    return applicationFilters && 
+           applicationFilters()[0].filter.organizations &&
+           applicationFilters()[0].filter.organizations() ||
+           [];
+  });
+
   ajax
   .query("get-organization-names")
   .error(_.noop)
@@ -17,6 +25,12 @@ LUPAPISTE.AutocompleteOrganizationsModel = function(params) {
       return {id: org, label: res.names[org][loc.currentLanguage]};
     });
     orgData(ownOrgsWithNames);
+
+
+    ko.utils.arrayPushAll(self.selected,
+      _.filter(ownOrgsWithNames, function(org) {
+        return _.contains(defaultFilter(), org.id);
+      }));
   })
   .call();
 

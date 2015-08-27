@@ -7,13 +7,13 @@ LUPAPISTE.AutocompleteOperationsModel = function(params) {
 
   var operationsByPermitType = ko.observable();
 
-  ajax
-    .query("get-application-operations")
-    .error(_.noop)
-    .success(function(res) {
-      operationsByPermitType(res.operationsByPermitType);
-    })
-    .call();
+  var defaultFilter = ko.pureComputed(function() {
+    var applicationFilters = lupapisteApp.models.currentUser.applicationFilters;
+    return applicationFilters && 
+           applicationFilters()[0].filter.operations &&
+           applicationFilters()[0].filter.operations() ||
+           [];
+  });
 
   function wrapInObject(operations) {
     return _.map(operations, function(op) {
@@ -21,6 +21,16 @@ LUPAPISTE.AutocompleteOperationsModel = function(params) {
               id: op};
     });
   }
+
+  ajax
+    .query("get-application-operations")
+    .error(_.noop)
+    .success(function(res) {
+      operationsByPermitType(res.operationsByPermitType);
+
+      ko.utils.arrayPushAll(self.selected, wrapInObject(defaultFilter()));
+    })
+    .call();
 
   self.data = ko.pureComputed(function() {
     var result = [];

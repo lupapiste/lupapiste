@@ -7,11 +7,28 @@ LUPAPISTE.AutocompleteTagsModel = function(params) {
 
   var tagsData = ko.observable();
 
+  var defaultFilter = ko.pureComputed(function() {
+    var applicationFilters = lupapisteApp.models.currentUser.applicationFilters;
+    return applicationFilters && 
+           applicationFilters()[0].filter.tags &&
+           applicationFilters()[0].filter.tags() ||
+           [];
+  });
+
   ajax
     .query("get-organization-tags")
     .error(_.noop)
     .success(function(res) {
       tagsData(res.tags);
+      
+      ko.utils.arrayPushAll(self.selected,
+        _(res.tags)
+          .map('tags')
+          .flatten()
+          .filter(function(tag) {
+            return _.contains(defaultFilter(), tag.id);
+          })
+          .value());
     })
     .call();
 
