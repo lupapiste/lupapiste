@@ -7,7 +7,6 @@ LUPAPISTE.AutocompleteOrganizationsModel = function() {
   self.query = ko.observable("");
 
   self.data = ko.pureComputed(function() {
-    console.log('pure');
     var q = self.query() || "";
     return _.filter(lupapisteApp.models.organizationFilterService.data(), function(item) {
       return _.reduce(q.split(" "), function(result, word) {
