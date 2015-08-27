@@ -134,7 +134,7 @@
 
 (defn- final-xml-validation [application expected-attachment-count expected-sent-attachment-count & [additional-validator]]
   (let [permit-type (keyword (permit/permit-type application))
-        app-attachments (filter #(:latestVersion %) (:attachments application))
+        app-attachments (filter :latestVersion (:attachments application))
         organization (organization-from-minimal-by-id (:organization application))
         sftp-user  (get-in organization [:krysp permit-type :ftpUser])
         krysp-version (get-in organization [:krysp permit-type :version])
@@ -200,11 +200,14 @@
                              last)
             liite          (-> liitetieto take-liite-fn (xml/select1 [:Liite]))
             kuvaus         (xml/get-text liite [:kuvaus])
-            app-attachment (some
-                             #(let [attachment-localized-name (localize "fi" (s/join "." ["attachmentType" (get-in % [:type :type-group]) (get-in % [:type :type-id])]))
-                                    attachment-title (str attachment-localized-name ": " (:contents %))]
-                                (when (= kuvaus attachment-title) %))
-                             app-attachments)
+            metatiedot     (xml/select liite [:metatietotieto])
+            metatiedot-edn (map
+                             (comp
+                               #(or (get-in % [:metatietotieto :metatieto]) (get-in % [:metatietotieto :Metatieto]))
+                               xml/xml->edn)
+                             metatiedot)
+            liite-id       (some #(when (= "liiteId" (:metatietoNimi %)) (:metatietoArvo %)) metatiedot-edn)
+            app-attachment (some #(when (= liite-id (:id %)) %) app-attachments)
             expected-type  (get-in app-attachment [:type :type-id])]
 
         (fact "XML has corresponding attachment in app" app-attachment => truthy)
