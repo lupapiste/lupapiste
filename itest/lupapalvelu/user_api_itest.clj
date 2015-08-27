@@ -78,6 +78,17 @@
   (fact (command veikko :update-user :firstName "f" :lastName "l") => ok?)
   (fact (-> (query veikko :user) :user) => (contains {:firstName "f" :lastName "l"})))
 
+(facts update-default-application-filter
+  (apply-remote-minimal)
+
+  (fact (->> (command sonja :update-default-application-filter :filter {:tags ["foo"]})) => ok?)
+
+  (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter)) => [{:tags ["foo"]}])
+
+  (fact (->> (command sonja :update-default-application-filter :filter {:tags ["bar" "buzz"] :operations [] :organizations [] :areas ["1"]})) => ok?)
+
+  (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter) first :tags) => ["bar" "buzz"]))
+
 (facts update-user-organization
   (apply-remote-minimal)
 
