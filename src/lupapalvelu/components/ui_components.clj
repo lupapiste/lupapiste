@@ -140,7 +140,7 @@
 
    :analytics    {:js ["analytics.js"]}
 
-   :services {:js ["areaFilterService.js" "tagFilterService.js"]}
+   :services {:js ["areaFilterService.js" "tagFilterService.js" "operationFilterService.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js"]}

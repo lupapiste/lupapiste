@@ -1,19 +1,10 @@
-LUPAPISTE.AutocompleteOperationsModel = function(params) {
+LUPAPISTE.AutocompleteOperationsModel = function() {
   "use strict";
   var self = this;
 
-  self.selected = params.selectedValues;
+  self.selected = lupapisteApp.models.operationFilterService.selected;
+
   self.query = ko.observable("");
-
-  var operationsByPermitType = ko.observable();
-
-  var defaultFilter = ko.pureComputed(function() {
-    var applicationFilters = lupapisteApp.models.currentUser.applicationFilters;
-    return applicationFilters && 
-           applicationFilters()[0].filter.operations &&
-           applicationFilters()[0].filter.operations() ||
-           [];
-  });
 
   function wrapInObject(operations) {
     return _.map(operations, function(op) {
@@ -22,20 +13,10 @@ LUPAPISTE.AutocompleteOperationsModel = function(params) {
     });
   }
 
-  ajax
-    .query("get-application-operations")
-    .error(_.noop)
-    .success(function(res) {
-      operationsByPermitType(res.operationsByPermitType);
-
-      ko.utils.arrayPushAll(self.selected, wrapInObject(defaultFilter()));
-    })
-    .call();
-
   self.data = ko.pureComputed(function() {
     var result = [];
 
-    var data = _.map(operationsByPermitType(), function(operations, permitType) {
+    var data = _.map(lupapisteApp.models.operationFilterService.data(), function(operations, permitType) {
       return {
         permitType: loc(permitType),
         operations: wrapInObject(operations)

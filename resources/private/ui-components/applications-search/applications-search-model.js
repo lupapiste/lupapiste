@@ -19,7 +19,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.tags = lupapisteApp.models.tagFilterService.selected;
 
-  self.operations = ko.observableArray([]);
+  self.operations = lupapisteApp.models.operationFilterService.selected;
 
   self.organizations = ko.observableArray([]);
 
