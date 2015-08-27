@@ -341,7 +341,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                     };
     }
     function statusSelector( name ) {
-      var sel = $("[data-status-key=" + name + "]");
+      var sel = self.section$.find("[data-status-key=" + name + "]");
       return sel.length ? sel : null;
     }
     function setOrdered() {
@@ -377,18 +377,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     //             approved, call setSectionStatus( self.sectionId, "approved")
     function setSectionStatus( name, cls ) {
       var bar = statusSelector( self.sectionId );
-      var section = $("[data-section-id=" + self.sectionId + "]");
+      //var section = $("[data-section-id=" + self.sectionId + "]");
       if( cls ) {
         var isApproved = cls === 'approved';
         // Section is never rejected.
-        section.toggleClass( "approved", isApproved );
+        self.section$.toggleClass( "approved", isApproved );
         if( bar ) {
           bar.removeClass( "approved rejected");
           bar.addClass( cls );
           bar.toggleClass( "positive", isApproved );
         }
       } else {
-        if( !section.hasClass( "approved") && bar ) {
+        if( !self.section$.hasClass( "approved") && bar ) {
           bar.removeClass( "approved rejected");
           var goods = 0;
           _.each(  _.pluck( stats, "approval"), function( a ) {
@@ -1968,6 +1968,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var op = self.schema.info.op;
 
     var section = document.createElement("section");
+    self.section$ = $(section);
     var sticky = $("<div>").addClass( "sticky accordion-toggle");
     var iconUp = document.createElement("i");
     var iconDown = document.createElement("i");
@@ -2027,7 +2028,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (!notPrimaryOperation) {
         opts.star = {attr: {"data-op-name": op.name},
                      text: loc( "operations.primary")}
-        //barText.append( $("<span>").addClass( "lupicon-star"));
       }
 
       if (isSecondaryOperation) {
@@ -2076,7 +2076,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     sectionContainer.appendChild(elements);
     $(section).append(sticky);
     section.appendChild(sectionContainer);
-    self.statusOrder.setOrdered();
+    self.statusOrder.setOrdered( $(section));
     accordion.reset( $(toggle) );
 
     // Disable fields and hide if the form is not editable
