@@ -21,7 +21,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.operations = lupapisteApp.models.operationFilterService.selected;
 
-  self.organizations = ko.observableArray([]);
+  self.organizations = lupapisteApp.models.organizationFilterService.selected;
 
   self.areas = lupapisteApp.models.areaFilterService.selected;
 

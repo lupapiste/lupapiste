@@ -14,4 +14,5 @@
   lupapisteApp.models.areaFilterService = new LUPAPISTE.AreaFilterService();
   lupapisteApp.models.tagFilterService = new LUPAPISTE.TagFilterService();
   lupapisteApp.models.operationFilterService = new LUPAPISTE.OperationFilterService();
+  lupapisteApp.models.organizationFilterService = new LUPAPISTE.OrganizationFilterService();
 })();
