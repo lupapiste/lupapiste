@@ -1,48 +1,21 @@
-LUPAPISTE.AutocompleteTagsModel = function(params) {
+LUPAPISTE.AutocompleteTagsModel = function() {
   "use strict";
   var self = this;
 
-  self.selected = params.selectedValues;
+  self.selected = lupapisteApp.models.tagFilterService.selected;
+
   self.query = ko.observable("");
-
-  var tagsData = ko.observable();
-
-  var defaultFilter = ko.pureComputed(function() {
-    var applicationFilters = lupapisteApp.models.currentUser.applicationFilters;
-    return applicationFilters && 
-           applicationFilters()[0].filter.tags &&
-           applicationFilters()[0].filter.tags() ||
-           [];
-  });
-
-  ajax
-    .query("get-organization-tags")
-    .error(_.noop)
-    .success(function(res) {
-      tagsData(res.tags);
-      
-      ko.utils.arrayPushAll(self.selected,
-        _(res.tags)
-          .map('tags')
-          .flatten()
-          .filter(function(tag) {
-            return _.contains(defaultFilter(), tag.id);
-          })
-          .value());
-    })
-    .call();
 
   self.data = ko.pureComputed(function() {
     var result = [];
-    var data = tagsData();
 
-    for (var key in data) {
-      var header = {label: data[key].name[loc.currentLanguage], groupHeader: true};
+    for (var key in lupapisteApp.models.tagFilterService.data()) {
+      var header = {label: lupapisteApp.models.tagFilterService.data()[key].name[loc.currentLanguage], groupHeader: true};
 
-      var filteredData = util.filterDataByQuery(data[key].tags, self.query() || "", self.selected());
+      var filteredData = util.filterDataByQuery(lupapisteApp.models.tagFilterService.data()[key].tags, self.query() || "", self.selected());
       // append group header and group items to result data
       if (filteredData.length > 0) {
-        if (_.keys(data).length > 1) {
+        if (_.keys(lupapisteApp.models.tagFilterService.data()).length > 1) {
           result = result.concat(header);
         }
         result = result.concat(filteredData);

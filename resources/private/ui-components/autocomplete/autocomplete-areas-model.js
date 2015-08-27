@@ -2,44 +2,14 @@ LUPAPISTE.AutocompleteAreasModel = function(params) {
   "use strict";
   var self = this;
 
-  self.selected = params.selectedValues;
+  self.selected = lupapisteApp.models.areaFilterService.selected;
+
   self.query = ko.observable("");
-
-  var orgsAreas = ko.observable();
-
-  var defaultFilter = ko.pureComputed(function() {
-    var applicationFilters = lupapisteApp.models.currentUser.applicationFilters;
-    return applicationFilters && 
-           applicationFilters()[0].filter.areas &&
-           applicationFilters()[0].filter.areas() ||
-           [];
-  });
-
-  ajax
-    .query("get-organization-areas")
-    .error(_.noop)
-    .success(function(res) {
-      orgsAreas(res.areas);
-
-      ko.utils.arrayPushAll(self.selected,
-        _(res.areas)
-          .map('areas')
-          .pluck('features')
-          .flatten()
-          .filter(function(feature) {
-            return _.contains(defaultFilter(), feature.id);
-          })
-          .map(function(feature) {
-            return {id: feature.id, label: util.getFeatureName(feature)};
-          })
-          .value());
-    })
-    .call();
 
   self.data = ko.computed(function() {
     var result = [];
 
-    _.forEach(orgsAreas(), function(org) {
+    _.forEach(lupapisteApp.models.areaFilterService.data(), function(org) {
       if (org.areas && org.areas.features) {
         var header = {label: org.name[loc.currentLanguage], groupHeader: true};
 
@@ -53,7 +23,7 @@ LUPAPISTE.AutocompleteAreasModel = function(params) {
         var filteredData = util.filterDataByQuery(features, self.query() || "", self.selected());
         // append group header and group items to result data
         if (filteredData.length > 0) {
-          if (_.keys(orgsAreas()).length > 1) {
+          if (_.keys(lupapisteApp.models.areaFilterService.data()).length > 1) {
             result = result.concat(header);
           }
           result = result.concat(filteredData);

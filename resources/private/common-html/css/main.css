@@ -7229,6 +7229,11 @@ div.filter-row .filter-item:last-child {
   margin-right: 0;
 }
 
+/* line 81, ../sass/partials/_applications_search.scss */
+div.filter-row.advanced .autocomplete-component {
+  width: 610px;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
