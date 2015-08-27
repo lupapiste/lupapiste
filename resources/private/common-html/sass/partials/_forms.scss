@@ -654,7 +654,7 @@ input.form-input.long {
 .form-approval-status {
   text-transform: none;
   //width: 100%;
-  display: inline-block;
+  display: none;
   min-height: 32px;
 
   &.empty {
@@ -683,6 +683,12 @@ input.form-input.long {
   }
 }
 
+.form-approval-status.approved,
+.form-approval-status.rejected {
+  display: inline-block;
+}
+
+
 .form-approval-status.approved ~ button.approved {
   display: none;
 }
@@ -706,7 +712,7 @@ section.approved .group-buttons  {
     }
 }
 
-.is-status .like-btn {
+.is-status > .like-btn {
   @include btn-height;
   min-width: 500px;
   span {

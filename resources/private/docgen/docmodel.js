@@ -436,7 +436,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     statusContainer$.append( $("<span>").addClass( "is-details"));
     return $("<span>")
            .attr( "data-status-key", statusKey)
-           .addClass("form-approval-status is-status empty")
+           .addClass("form-approval-status is-status")
            .append(statusContainer$);
   }
 
@@ -456,14 +456,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var approvalContainer$ = null;
     if( !opts[self.sectionId] ) {
       approvalContainer$ = makeApprovalContainer( statusKey);
-      // statusContainer$ = $("<div>").addClass( "like-btn");
-      // statusContainer$.append( $("<i>").addClass( "lupicon-circle-attention rejected"));
-      // statusContainer$.append( $("<i>").addClass( "lupicon-circle-check approved"));
-      // statusContainer$.append( $("<span>"));
     }
-    // var approvalContainer$ = $("<span>")
-    //                          .addClass("form-approval-status is-status empty")
-    //                          .append(statusContainer$);
     var approveButton$ = null;
     var rejectButton$ = null;
     var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: self.getCollection() };
@@ -484,7 +477,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           self.statusOrder.update( self.sectionId, setStatus, approval );
         } else {
           approvalContainer$.find("span.is-details").text(text);
-          //var statusParent$ = approvalContainer$; //approvalContainer$.find( ".is-status");
           self.statusOrder.update( statusKey, setStatus, approval );
           self.statusOrder.setStatusClass( statusKey, approval.value );
           self.statusOrder.setSectionStatus( statusKey, approval.value === "rejected" ? "rejected" : null );
@@ -532,8 +524,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var meta = self.getMeta(path);
     var approval = meta ? meta._approved : null;
     var requiresApproval = !approval || modelModifiedSince(model, approval.timestamp);
-    // var allowApprove = requiresApproval || (approval && approval.value === "rejected");
-    // var allowReject = requiresApproval || (approval && approval.value === "approved");
     var result = [approvalContainer$];
 
     if (self.authorizationModel.ok("reject-doc")) {
@@ -541,26 +531,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if( opts.bar ) {
         rejectButton$.addClass( "is-top");
       }
-      //btnContainer$.append(rejectButton$);
       result.push( rejectButton$ );
-    //   if (!allowReject) {
-    //       rejectButton$.hide();
-    //   }
     }
     if (self.authorizationModel.ok("approve-doc")) {
       approveButton$ = makeApprovalButton("approve", "approved", "positive").addClass( "is-right");
-      //btnContainer$.append(approveButton$);
       result.push( approveButton$);
-      // if (!allowApprove) {
-      //     approveButton$.hide();
-      // }
-    }
-    // if (allowApprove || allowReject) {
-    //     approvalContainer$.removeClass("empty");
-    // }
-
-    if( approvalContainer$ && ( requiresApproval || approval) ) {
-      approvalContainer$.removeClass( "empty");
     }
     if (!requiresApproval) {
       setStatus(approval);
@@ -626,8 +601,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if( opts.approval ) {
       var approvalElements = self.makeApprovalButtons(path, model, opts.approval);
       var elemCount = _.size( approvalElements );
-      // We only proceed if elements is not just an empty tag.
-      if( elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ) /*.children().length*/ )) {
+      if( elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ))) {
         _.each(( approvalElements ), function( elem ) {
           buttons$.append( elem );
         });
