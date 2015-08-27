@@ -256,7 +256,6 @@
                   </a>
                   <div data-bind="visible: previewVisible">
                     <div data-bind="if: $root.authorization.ok('rotate-pdf') && isPdf()" data-test-id="pdf-rotation-buttons">
-<!-- authorization.ok checks the feature flag too in this case --><div class="feature">
                       <button data-bind="click: _.partial(rotete, -90)">
                         <i class="lupicon-rotate-left"></i>
                         <span data-bind="ltext: 'rotate-left'"></span>
@@ -269,7 +268,6 @@
                         <i class="lupicon-rotate-right"></i>
                         <span data-bind="ltext: 'rotate-right'"></span>
                       </button>
-</div>
                     </div>
                     <iframe id="file-preview-iframe" name="file-preview-iframe-name"></iframe>
                   </div>
