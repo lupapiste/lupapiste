@@ -23,6 +23,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.propertyId = application.propertyId;
   self.isDisabled = options && options.disabled;
   self.events = [];
+  self.sectionId = _.uniqueId( "section");
 
   self.subscriptions = [];
 
@@ -333,11 +334,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.statusOrder = function() {
     var stats = {};
 
-    function update( name, selector, statusFun, approval ) {
+    function update( name, statusFun, approval ) {
       stats[name] = {fun: _.wrap(approval, statusFun),
                      approval: approval,
-                     selector: selector
+                     name: name
                     };
+    }
+    function statusSelector( name ) {
+      var sel = $("[data-status-key=" + name + "]");
+      return sel.length ? sel : null;
     }
     function setOrdered() {
       _( stats )
@@ -351,8 +356,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     function setStatusClass( name, cls ) {
       var items = name ? [stats[name]] : stats;
       _.each( items, function( item ) {
-        item.selector.removeClass( "approved rejected" );
-        item.selector.addClass( cls ? cls : item.approval.value );
+        var sel = statusSelector( item.name )
+        if( sel ) {
+          sel.removeClass( "approved rejected" );
+          sel.addClass( cls ? cls : item.approval.value );
+        }
       })
     }
 
@@ -362,14 +370,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     //  name: key for stats (element)
     //  cls: Class to be applied. There are three variants:
     //       approved: both section and bar to approved and bar to positive.
-    //       rejected: removal of approved from section (but no adding rejected.)
+    //       rejected: removal of approved from section (but no adding rejected)
     //                 rejected to bar.
     //       null: If section is approved then do nothing. Otherwise, add rejected
     //             to bar if any of the stats is rejected. However, if every stat is
-    //             approved, call setSectionStatus( "bar", "approved")
+    //             approved, call setSectionStatus( self.sectionId, "approved")
     function setSectionStatus( name, cls ) {
-      var bar = stats["bar"] ? stats["bar"].selector : null;
-      var section = stats[name].selector.closest( "section");
+      var bar = statusSelector( self.sectionId );
+      var section = $("[data-section-id=" + self.sectionId + "]");
       if( cls ) {
         var isApproved = cls === 'approved';
         // Section is never rejected.
@@ -396,7 +404,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           });
           if( goods == _.size( stats )) {
             // Everything is approved.
-            setSectionStatus( "bar", "approved");
+            setSectionStatus( self.sectionId, "approved");
           }
         }
       }
@@ -410,39 +418,52 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }();
 
-  self.barStatusHandler = function( barDiv$, approval, text ) {
-    self.statusOrder.update( 'bar', barDiv$, self.barStatusHandler, approval );
+    function barStatusHandler( approval, text ) {
+    self.statusOrder.update( self.sectionId, self.barStatusHandler, approval );
     var cls = approval.value;
 
     // Approving the whole approves the details.
     // Rejecting the whole resets the details. In other words
     // details should be intact after approving and immediately
     // rejecting the whole.
-    self.statusOrder.setSectionStatus( 'bar', cls );
-    barDiv$.children( "." + approval.value ).attr( "title", text );
+    self.statusOrder.setSectionStatus( self.sectionId, cls );
   };
+
+  function makeApprovalContainer( statusKey ) {
+    var statusContainer$ = $("<div>").addClass( "like-btn");
+    statusContainer$.append( $("<i>").addClass( "lupicon-circle-attention rejected"));
+    statusContainer$.append( $("<i>").addClass( "lupicon-circle-check approved"));
+    statusContainer$.append( $("<span>").addClass( "is-details"));
+    return $("<span>")
+           .attr( "data-status-key", statusKey)
+           .addClass("form-approval-status is-status empty")
+           .append(statusContainer$);
+  }
+
 
   // Opts can have the following (optional) properties:
   //   bar: denotes the accordion horizontal bar.
   //        It is an object with two properties:
   //        selector: jQuery selector for bar.
   //        fun: function to be called when status changes.
-  //        Note: The bar's order name (see above) is fixed, because
+  //        Note: The bar's order name (see above) is self.sectionId, because
   //        it needs to be known by the detail status indicators.
-  // Returns an array of elements: icons, reject button, approve button.
+  // Returns an array of elements: approval container (icons and details), reject button, approve button.
   self.makeApprovalButtons = function (path, model, opts ) {
     opts = opts || {};
-    var statusContainer$ = null;
+    //var statusContainer$ = null;
     var statusKey = _.uniqueId( "status");
-    if( !opts.bar ) {
-      statusContainer$ = $("<div>").addClass( "like-btn");
-      statusContainer$.append( $("<i>").addClass( "lupicon-circle-attention rejected"));
-      statusContainer$.append( $("<i>").addClass( "lupicon-circle-check approved"));
-      statusContainer$.append( $("<span>"));
+    var approvalContainer$ = null;
+    if( !opts[self.sectionId] ) {
+      approvalContainer$ = makeApprovalContainer( statusKey);
+      // statusContainer$ = $("<div>").addClass( "like-btn");
+      // statusContainer$.append( $("<i>").addClass( "lupicon-circle-attention rejected"));
+      // statusContainer$.append( $("<i>").addClass( "lupicon-circle-check approved"));
+      // statusContainer$.append( $("<span>"));
     }
-    var approvalContainer$ = $("<span>")
-                             .addClass("form-approval-status is-status empty")
-                             .append(statusContainer$);
+    // var approvalContainer$ = $("<span>")
+    //                          .addClass("form-approval-status is-status empty")
+    //                          .append(statusContainer$);
     var approveButton$ = null;
     var rejectButton$ = null;
     var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: self.getCollection() };
@@ -458,13 +479,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           text += " (" + approval.user.lastName + " " + approval.user.firstName;
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
-        if( opts.bar ) {
-          opts.bar.fun( approval, text );
-          self.statusOrder.update( 'bar', opts.bar.selector, setStatus, approval );
+        if( opts[self.sectionId] ) {
+          opts[self.sectionId].fun( approval, text );
+          self.statusOrder.update( self.sectionId, setStatus, approval );
         } else {
-          statusContainer$.children("span").text(text);
-          var statusParent$ = statusContainer$.closest( ".is-status");
-          self.statusOrder.update( statusKey, statusParent$, setStatus, approval );
+          approvalContainer$.find("span.is-details").text(text);
+          //var statusParent$ = approvalContainer$; //approvalContainer$.find( ".is-status");
+          self.statusOrder.update( statusKey, setStatus, approval );
           self.statusOrder.setStatusClass( statusKey, approval.value );
           self.statusOrder.setSectionStatus( statusKey, approval.value === "rejected" ? "rejected" : null );
         }
@@ -538,7 +559,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     //     approvalContainer$.removeClass("empty");
     // }
 
-    if( requiresApproval || approval ) {
+    if( approvalContainer$ && ( requiresApproval || approval) ) {
       approvalContainer$.removeClass( "empty");
     }
     if (!requiresApproval) {
@@ -606,7 +627,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var approvalElements = self.makeApprovalButtons(path, model, opts.approval);
       var elemCount = _.size( approvalElements );
       // We only proceed if elements is not just an empty tag.
-      if( elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ).children().length )) {
+      if( elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ) /*.children().length*/ )) {
         _.each(( approvalElements ), function( elem ) {
           buttons$.append( elem );
         });
@@ -1963,6 +1984,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     section.className = "accordion is-status";
     section.setAttribute("data-doc-type", self.schemaName);
+    section.setAttribute( "data-section-id", self.sectionId );
     elements.className = "accordion-fields";
 
     iconUp.className = "lupicon-chevron-up toggle";
@@ -2024,9 +2046,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     if (self.schema.info.approvable) {
-      opts.approval = {bar: {fun:  _.partial( self.barStatusHandler, $(toggle)),
-                             selector: $(toggle)
-                            }};
+      $(toggle).attr( "data-status-key", self.sectionId);
+      opts.approval = {};
+      opts.approval[self.sectionId] = {fun: barStatusHandler};
+
     }
     opts.remove = removeOpts;
 
@@ -2040,10 +2063,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     appendGroupButtons( sticky, [], self.model, opts );
-    //sticky.append(self.makeGroupButtons([], self.model, opts));
-    // if( opts.description ) {
-    //   sticky.append( opts.description.bubble );
-    // }
 
     sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
     sectionContainer.setAttribute("data-accordion-state", (accordionCollapsed ? "closed" : "open"));
