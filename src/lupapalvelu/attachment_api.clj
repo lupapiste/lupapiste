@@ -31,8 +31,6 @@
             [lupapalvelu.pdftk :as pdftk])
   (:import [java.io File]))
 
-(defn- delete-file! [^java.io.File file] (try (.delete file) (catch Exception _)))
-
 ;; Validators
 
 (defn- attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
@@ -361,9 +359,7 @@
                       (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
    :pre-checks  attachment-modification-precheks
    :states      (states/all-states-but states/terminal-states)
-   :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."
-   :feature     :pdfrotate
-   }
+   :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."}
   [{:keys [application user created]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
     (let [{:keys [contentType fileId filename] :as latest-version} (last (:versions attachment))
@@ -384,7 +380,7 @@
           (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
           (upload! (assoc upload-options :size (.length temp-pdf))))
         (finally
-          (delete-file! temp-pdf))))
+          (attachment/delete-file! temp-pdf))))
     (fail :error.unknown)))
 
 ;;
@@ -412,24 +408,13 @@
            :attachment-id (:id attachment))))
 
 
-(defn- ensure-pdf-a [temp-file valid-pdfa]
-  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
-  (if (not valid-pdfa)
-    (do (debugf "    no PDF/A required, no conversion") {:file temp-file :pdfa false})
-    (let [a-temp-file (File/createTempFile "lupapiste.stamp.a." ".tmp")
-          conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath temp-file) (.getAbsolutePath a-temp-file))]
-      (cond
-        (:already-valid-pdfa? conversion-result) (do (debugf "      file valid PDF/A, no conversion") {:file temp-file :pdfa true})
-        (:pdfa? conversion-result) (do (debug "      converting to PDF/A file: " (.getAbsolutePath a-temp-file)) (delete-file! temp-file) {:file a-temp-file :pdfa true})
-        :else (do (errorf "Ensuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
-
 (defn- stamp-attachment! [stamp file-info {:keys [application user now x-margin y-margin transparency]}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp? valid-pdfa]} file-info
         temp-file (File/createTempFile "lupapiste.stamp." ".tmp")
         new-file-id (mongo/create-id)]
     (with-open [out (io/output-stream temp-file)]
       (stamper/stamp stamp fileId out x-margin y-margin transparency))
-    (let [ensured-file (ensure-pdf-a temp-file valid-pdfa)
+    (let [ensured-file (attachment/ensure-pdf-a temp-file valid-pdfa)
           {:keys [file pdfa]} ensured-file]
       (debug "uploading stamped file: " (.getAbsolutePath file))
       (mongo/upload new-file-id filename contentType file :application (:id application))
@@ -441,7 +426,7 @@
                                             :comment-text nil :now now :user user
                                             :valid-pdfa pdfa
                                             :stamped true :make-comment false :state :ok}))
-      (delete-file! file))
+      (attachment/delete-file! file))
     new-file-id))
 
 (defn- stamp-attachments!
