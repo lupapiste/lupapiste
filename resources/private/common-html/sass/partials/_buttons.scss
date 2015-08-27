@@ -357,6 +357,7 @@ $icon-pad: 10px;
   line-height: $lupicon-size + 4;
 }
 
+
 .caps {
   text-transform: uppercase;
 }
@@ -509,13 +510,23 @@ $icon-pad: 10px;
 button.function {
   &:disabled {
     border-color: $gray221 !important;
-                     }
+  }
  }
 
 @include button-div-a ("function.authority") {
   @include function( $turqo-link, $turqo-hover, $gray51 );
 }
 
+// Link button is a link that is laid out as button.
+// However, no background or borders.
+
+a.link-btn {
+  @extend .like-btn;
+  @include styled-input( none, none, none,
+                         $text: $orange-link, $hover-text: $orange-hover,
+                         $active-text: $orange-active, $disabled-bg: none);
+  cursor: pointer;
+}
 
 // Waiting animation
 
