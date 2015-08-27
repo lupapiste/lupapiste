@@ -181,10 +181,11 @@
     (fact "XML contains correct amount attachments" (count liitetieto) => expected-attachment-count)
 
     (fact "Correct number of attachments are marked sent"
-      (count (->> app-attachments
-               (filter :latestVersion)
-               (filter #(not= (get-in % [:target :type]) "verdict"))
-               (filter :sent)))
+      (->> app-attachments
+             (filter :latestVersion)
+             (filter #(not= (get-in % [:target :type]) "verdict"))
+             (filter :sent)
+             count)
       => expected-sent-attachment-count)
 
     (fact "XML contains correct amount of polygons"
