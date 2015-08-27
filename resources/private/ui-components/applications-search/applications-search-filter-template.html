@@ -19,9 +19,9 @@
       <div class="feature filter-item" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
         <a class="command" data-test-id="toggle-advanced-filters" data-bind="ltext: advancedFiltersText, toggleClick: showAdvancedFilters"></a>
         <!-- ko if: showAdvancedFilters() -->
-        <button class="positive" data-test-id="save-advanced-filters">
+        <button class="positive" data-test-id="save-advanced-filters" data-bind="click: saveAdvancedFilters">
           <i class="lupicon-circle-plus"></i>
-          <span data-bind="ltext: 'applications.filter.advancedFilter.save', click: saveAdvancedFilters"></span>
+          <span data-bind="ltext: 'applications.filter.advancedFilter.save'"></span>
         </button>
       <!-- /ko -->
       </div>
@@ -33,8 +33,7 @@
         <label data-bind="ltext: 'applications.filter.tags'" />
         <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete-tags', params: {selectedValues: dataProvider.tags}}"></div>
       </div>
-    </div>
-    <div class="feature filter-row advanced">
+
       <div class="filter-item" data-test-id="operation-filter-item">
         <label data-bind="ltext: 'applications.filter.operations'" />
         <div data-test-id="operations-filter-component" data-bind="component: {name: 'autocomplete-operations', params: {selectedValues: dataProvider.operations}}"></div>
