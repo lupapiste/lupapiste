@@ -146,6 +146,7 @@
                                            href="#" class="remove-link-permit link-btn">
                                             <i class="lupicon-remove"></i>
                                         </a>
+                                    </span>
                                     <span data-bind="visible: $data.type() === 'kuntalupatunnus'" class="link-permit">
                                         <span data-bind="text: $data.id,
                                                          attr: {'data-test-app-link-permit': $data.id}"
@@ -153,7 +154,6 @@
                                               class="link-permit-item">
                                         </span>
                                         <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
-                                                      ltext_old: 'application.linkPermitRemoveSelected',
                                                       click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
                                            data-test-id="test-remove-link-permit"
                                            href="#" class="remove-link-permit link-btn">
