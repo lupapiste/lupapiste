@@ -327,7 +327,6 @@
                                                          :1 {:pintaAla {:value "10"}
                                                              :kayttotarkoitusKoodi {:value "varastotilaa"}}}}}})})
 
-
 (def- purku {:id "purku"
                       :created 4
                       :schema-info {:name "purkaminen"
@@ -406,7 +405,7 @@
            :username "pena"
            :type "owner"
            :role "owner"}]
-   :state "sent"
+   :state "submitted"
    :opened 1354532324658
    :submitted 1354532324658
    :location [408048 6693225]
