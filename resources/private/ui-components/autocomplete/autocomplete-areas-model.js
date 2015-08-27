@@ -7,11 +7,33 @@ LUPAPISTE.AutocompleteAreasModel = function(params) {
 
   var orgsAreas = ko.observable();
 
+  var defaultFilter = ko.pureComputed(function() {
+    var currentUser = lupapisteApp.models.currentUser;
+    if (currentUser.applicationFilters && currentUser.applicationFilters()[0].filter.areas) {
+      return currentUser.applicationFilters()[0].filter.areas();
+    }
+    return [];
+  });
+
   ajax
     .query("get-organization-areas")
     .error(_.noop)
     .success(function(res) {
       orgsAreas(res.areas);
+
+      ko.utils.arrayPushAll(self.selected,
+        _(res.areas)
+          .map('areas')
+          .pluck('features')
+          .flatten()
+          .filter(function(feature) {
+            return _.contains(defaultFilter(), feature.id);
+          })
+          .map(function(feature) {
+            console.log(feature);
+            return {id: feature.id, label: util.getFeatureName(feature)};
+          })
+          .value());
     })
     .call();
 
@@ -22,12 +44,8 @@ LUPAPISTE.AutocompleteAreasModel = function(params) {
       if (org.areas && org.areas.features) {
         var header = {label: org.name[loc.currentLanguage], groupHeader: true};
 
-
         var features = _.map(org.areas.features, function(feature) {
-          for(var key in feature.properties) { // properties to lower case
-            feature.properties[key.toLowerCase()] = feature.properties[key];
-          }
-          var nimi = util.getIn(feature, ["properties", "nimi"]);
+          var nimi = util.getFeatureName(feature);
           var id = feature.id;
           return {label: nimi, id: id};
         });

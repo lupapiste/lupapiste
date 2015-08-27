@@ -213,7 +213,7 @@
    :input-validators [(partial action/non-blank-parameters [:filter])]
    :description "Adds/Updates user specific filters for the application search"}
   [{{id :id} :user}]
-  (mongo/update-by-id :users id {$set {:applicationFilter [{:filter filter}]}})
+  (mongo/update-by-id :users id {$set {:applicationFilters [{:filter filter}]}})
   (ok))
 
 ;;

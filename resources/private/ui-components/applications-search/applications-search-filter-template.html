@@ -18,10 +18,12 @@
       <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.isAuthority() -->
       <div class="feature filter-item" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
         <a class="command" data-test-id="toggle-advanced-filters" data-bind="ltext: advancedFiltersText, toggleClick: showAdvancedFilters"></a>
+        <!-- ko if: showAdvancedFilters() -->
         <button class="positive" data-test-id="save-advanced-filters">
           <i class="lupicon-circle-plus"></i>
           <span data-bind="ltext: 'applications.filter.advancedFilter.save', click: saveAdvancedFilters"></span>
         </button>
+      <!-- /ko -->
       </div>
       <!-- /ko -->
     </div>
