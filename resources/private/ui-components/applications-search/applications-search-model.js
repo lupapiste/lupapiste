@@ -17,13 +17,13 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.handler = ko.observable();
 
-  self.tags = ko.observableArray([]);
+  self.tags = lupapisteApp.models.tagFilterService.selected;
 
   self.operations = ko.observableArray([]);
 
   self.organizations = ko.observableArray([]);
 
-  self.areas = ko.observableArray([]);
+  self.areas = lupapisteApp.models.areaFilterService.selected;
 
   self.limit = ko.observable(25);
 

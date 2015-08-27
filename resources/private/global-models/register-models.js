@@ -10,4 +10,8 @@
   lupapisteApp.models.rootVMO = new LUPAPISTE.RootViewModel();
 
   lupapisteApp.models.currentUser = new LUPAPISTE.CurrentUser();
+
+  lupapisteApp.models.areaFilterService = new LUPAPISTE.AreaFilterService();
+
+  lupapisteApp.models.tagFilterService = new LUPAPISTE.TagFilterService();
 })();
