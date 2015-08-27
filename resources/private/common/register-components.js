@@ -42,7 +42,8 @@ jQuery(document).ready(function() {
     {name: "autocomplete-operations", template: "autocomplete-tags-components"},
     {name: "autocomplete-organizations", template: "autocomplete-tags-components"},
     {name: "autocomplete-areas", template: "autocomplete-tags-components"},
-    {name: "autocomplete-handlers"}
+    {name: "autocomplete-handlers"},
+    {name: "autocomplete-application-tags", template: "autocomplete-tags-components"}
   ];
 
   _.forEach(components, function(component) {
