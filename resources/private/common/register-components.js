@@ -38,7 +38,10 @@ jQuery(document).ready(function() {
     {name: "applications-search-results"},
     {name: "applications-search-filter"},
     {name: "applications-search-paging"},
-    {name: "autocomplete-tags", template: "autocomplete"}
+    {name: "autocomplete-tags", template: "autocomplete-components"},
+    {name: "autocomplete-operations", template: "autocomplete-components"},
+    {name: "autocomplete-organizations", template: "autocomplete-components"},
+    {name: "autocomplete-areas", template: "autocomplete-components"}
   ];
 
   _.forEach(components, function(component) {
