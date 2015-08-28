@@ -738,17 +738,35 @@ section.approved .group-buttons  {
 }
 
 // Top-level form-approval-status
-div.sticky > .form-approval-status > .like-btn {
-  padding: {
-    left: 10px;
-    top: 4px;
-  }
-  min-height: initial;
-  line-height: initial;
-  span {
-    color: $gray153;
+
+div.sticky > .form-approval-status {
+  border-left: 1px solid $gray221;
+  border-right: 1px solid $gray221;
+  width: 100%;
+  .like-btn {
+    padding: {
+      left: 10px;
+      top: 4px;
+    }
+    min-height: initial;
+    line-height: initial;
+    span {
+      color: $gray153;
+    }
   }
 }
+
+/* div.sticky > .form-approval-status > .like-btn { */
+/*   padding: { */
+/*     left: 10px; */
+/*     top: 4px; */
+/*   } */
+/*   min-height: initial; */
+/*   line-height: initial; */
+/*   span { */
+/*     color: $gray153; */
+/*   } */
+/* } */
 
 
 // Top-level reject button should be invisible

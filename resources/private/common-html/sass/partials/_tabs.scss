@@ -99,7 +99,7 @@ ul.tabs {
 
 // Override the padding reset in _buttons.
 .tabs a.link-btn {
-  :last-child {
+  :first-child {
     padding-right: 2px !important;
   }
 }

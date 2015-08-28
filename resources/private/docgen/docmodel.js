@@ -346,11 +346,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                     };
     }
     function setOrdered() {
-      _( stats )
-      .sortBy( _.partialRight( _.get, "approval.timestamp") )
-      .pluck( 'fun' )
-      .each( function( f ) {f()} )
-      .value()
+      var sorted = _.sortBy( _.values( stats ), function( dic ) {
+        return dic.approval.timestamp;
+      } );
+      _.each( sorted, function( dic ) {
+        dic.fun()
+      });
     }
     function setText( name ) {
       var sel = statusSelector( name );
@@ -437,7 +438,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }();
 
     function barStatusHandler( approval ) {
-      self.statusOrder.update( self.sectionId, self.barStatusHandler, approval );
+      self.statusOrder.update( self.sectionId, barStatusHandler, approval );
       var cls = approval.value;
 
       // Approving the whole approves the details.
@@ -470,7 +471,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   // Returns an array of elements: approval container (icons and details), reject button, approve button.
   self.makeApprovalButtons = function (path, model, opts ) {
     opts = opts || {};
-    //var statusContainer$ = null;
     var statusKey = _.uniqueId( "status");
     var approvalContainer$ = null;
     if( !opts[self.sectionId] ) {
@@ -488,8 +488,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (approval) {
         if( opts[self.sectionId] ) {
           opts[self.sectionId].fun( approval );
-          self.statusOrder.update( self.sectionId, setStatus, approval );
         } else {
+          console.log( "setStatus", approval);
           self.statusOrder.update( statusKey, setStatus, approval );
           self.statusOrder.setStatusClass( statusKey, approval.value );
           self.statusOrder.setSectionStatus( statusKey, approval.value === "rejected" ? "rejected" : null );

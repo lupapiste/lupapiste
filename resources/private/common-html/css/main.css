@@ -3645,29 +3645,46 @@ section.approved .group-buttons button.rejected {
   padding-right: 10px;
 }
 
-/* line 741, ../sass/partials/_forms.scss */
-div.sticky > .form-approval-status > .like-btn, div.sticky > .form-approval-status > a.link-btn {
+/* line 742, ../sass/partials/_forms.scss */
+div.sticky > .form-approval-status {
+  border-left: 1px solid #dddddd;
+  border-right: 1px solid #dddddd;
+  width: 100%;
+}
+/* line 746, ../sass/partials/_forms.scss */
+div.sticky > .form-approval-status .like-btn, div.sticky > .form-approval-status a.link-btn {
   padding-left: 10px;
   padding-top: 4px;
   min-height: initial;
   line-height: initial;
 }
-/* line 748, ../sass/partials/_forms.scss */
-div.sticky > .form-approval-status > .like-btn span, div.sticky > .form-approval-status > a.link-btn span {
+/* line 753, ../sass/partials/_forms.scss */
+div.sticky > .form-approval-status .like-btn span, div.sticky > .form-approval-status a.link-btn span {
   color: #999999;
 }
 
-/* line 756, ../sass/partials/_forms.scss */
+/* div.sticky > .form-approval-status > .like-btn { */
+/*   padding: { */
+/*     left: 10px; */
+/*     top: 4px; */
+/*   } */
+/*   min-height: initial; */
+/*   line-height: initial; */
+/*   span { */
+/*     color: $gray153; */
+/*   } */
+/* } */
+/* line 774, ../sass/partials/_forms.scss */
 button.rejected ~ .group-buttons .is-top.rejected {
   display: none;
 }
 
-/* line 760, ../sass/partials/_forms.scss */
+/* line 778, ../sass/partials/_forms.scss */
 .is-middle {
   vertical-align: middle;
 }
 
-/* line 764, ../sass/partials/_forms.scss */
+/* line 782, ../sass/partials/_forms.scss */
 .description-bubble {
   display: block;
   position: relative;
@@ -3680,7 +3697,7 @@ button.rejected ~ .group-buttons .is-top.rejected {
   padding: 6px 6px 6px 6px;
   margin-top: 15px;
 }
-/* line 777, ../sass/partials/_forms.scss */
+/* line 795, ../sass/partials/_forms.scss */
 .description-bubble:after, .description-bubble:before {
   bottom: 100%;
   left: 5%;
@@ -3691,21 +3708,21 @@ button.rejected ~ .group-buttons .is-top.rejected {
   position: absolute;
   pointer-events: none;
 }
-/* line 788, ../sass/partials/_forms.scss */
+/* line 806, ../sass/partials/_forms.scss */
 .description-bubble:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 794, ../sass/partials/_forms.scss */
+/* line 812, ../sass/partials/_forms.scss */
 .description-bubble:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 800, ../sass/partials/_forms.scss */
+/* line 818, ../sass/partials/_forms.scss */
 .description-bubble input {
   box-sizing: border-box;
   border: none;
@@ -3714,18 +3731,18 @@ button.rejected ~ .group-buttons .is-top.rejected {
   box-shadow: none;
   color: #333333;
 }
-/* line 807, ../sass/partials/_forms.scss */
+/* line 825, ../sass/partials/_forms.scss */
 .description-bubble input:focus {
   border: none;
   box-shadow: none;
 }
 
-/* line 814, ../sass/partials/_forms.scss */
+/* line 832, ../sass/partials/_forms.scss */
 .description-bubble.is-closed {
   display: none;
 }
 
-/* line 818, ../sass/partials/_forms.scss */
+/* line 836, ../sass/partials/_forms.scss */
 .form-help {
   min-height: 100px;
   padding: 6px 24px 6px 6px;
@@ -3740,7 +3757,7 @@ button.rejected ~ .group-buttons .is-top.rejected {
   box-shadow: 2px 2px 3px #4f4f4f;
   text-align: left;
 }
-/* line 831, ../sass/partials/_forms.scss */
+/* line 849, ../sass/partials/_forms.scss */
 .form-help:after {
   content: " ";
   width: 0;
@@ -3753,7 +3770,7 @@ button.rejected ~ .group-buttons .is-top.rejected {
   border-right: 14px solid transparent;
   border-top: 14px solid #4f4f4f;
 }
-/* line 843, ../sass/partials/_forms.scss */
+/* line 861, ../sass/partials/_forms.scss */
 .form-help:before {
   content: " ";
   background-image: url("/img/icons-sprite-1.18.png");
@@ -3766,14 +3783,14 @@ button.rejected ~ .group-buttons .is-top.rejected {
   right: 6px;
 }
 
-/* line 855, ../sass/partials/_forms.scss */
+/* line 873, ../sass/partials/_forms.scss */
 .form-full-width .form-help {
   top: 4px;
   left: 85%;
   bottom: auto;
   width: 55%;
 }
-/* line 860, ../sass/partials/_forms.scss */
+/* line 878, ../sass/partials/_forms.scss */
 .form-full-width .form-help:after {
   content: " ";
   width: 0;
@@ -3787,7 +3804,7 @@ button.rejected ~ .group-buttons .is-top.rejected {
   border-bottom: 14px solid transparent;
   border-right: 14px solid #4f4f4f;
 }
-/* line 873, ../sass/partials/_forms.scss */
+/* line 891, ../sass/partials/_forms.scss */
 .form-full-width .form-help:before {
   content: " ";
   background-image: url("/img/icons-sprite-1.18.png");
@@ -3800,12 +3817,12 @@ button.rejected ~ .group-buttons .is-top.rejected {
   right: 6px;
 }
 
-/* line 891, ../sass/partials/_forms.scss */
+/* line 909, ../sass/partials/_forms.scss */
 #neighbor-show [type="checkbox"]:disabled {
   position: relative;
   visibility: hidden;
 }
-/* line 894, ../sass/partials/_forms.scss */
+/* line 912, ../sass/partials/_forms.scss */
 #neighbor-show [type="checkbox"]:disabled:checked {
   visibility: visible;
   opacity: 1;
@@ -3819,75 +3836,75 @@ button.rejected ~ .group-buttons .is-top.rejected {
   background: #f6f6f6 url(https://cdn2.iconfinder.com/data/icons/flat-ui-icons-24-px/24/checkmark-24-512.png) center center no-repeat;
   background-size: 12px 12px;
 }
-/* line 911, ../sass/partials/_forms.scss */
+/* line 929, ../sass/partials/_forms.scss */
 #neighbor-show [type="radio"]:disabled {
   position: relative;
   visibility: hidden;
 }
-/* line 914, ../sass/partials/_forms.scss */
+/* line 932, ../sass/partials/_forms.scss */
 #neighbor-show [type="radio"]:disabled:checked {
   visibility: visible;
   opacity: 1;
 }
 
-/* line 922, ../sass/partials/_forms.scss */
+/* line 940, ../sass/partials/_forms.scss */
 .three-col {
   width: 100%;
 }
-/* line 925, ../sass/partials/_forms.scss */
+/* line 943, ../sass/partials/_forms.scss */
 .three-col .form-input {
   width: 17.25em;
 }
-/* line 929, ../sass/partials/_forms.scss */
+/* line 947, ../sass/partials/_forms.scss */
 .three-col .col1 {
   float: left;
   padding-right: 12px;
 }
-/* line 934, ../sass/partials/_forms.scss */
+/* line 952, ../sass/partials/_forms.scss */
 .three-col .col2 {
   float: left;
   padding-left: 12px;
   padding-right: 12px;
 }
-/* line 939, ../sass/partials/_forms.scss */
+/* line 957, ../sass/partials/_forms.scss */
 .three-col .col3 {
   float: left;
   padding-left: 12px;
 }
 
-/* line 946, ../sass/partials/_forms.scss */
+/* line 964, ../sass/partials/_forms.scss */
 foreman-history h2 {
   background-color: #f6f6f6 !important;
 }
-/* line 949, ../sass/partials/_forms.scss */
+/* line 967, ../sass/partials/_forms.scss */
 foreman-history th.first {
   width: 10%;
 }
-/* line 952, ../sass/partials/_forms.scss */
+/* line 970, ../sass/partials/_forms.scss */
 foreman-history th.second {
   width: 15%;
 }
-/* line 955, ../sass/partials/_forms.scss */
+/* line 973, ../sass/partials/_forms.scss */
 foreman-history th.third {
   width: 10%;
 }
-/* line 958, ../sass/partials/_forms.scss */
+/* line 976, ../sass/partials/_forms.scss */
 foreman-history th.fourth {
   width: 20%;
 }
-/* line 961, ../sass/partials/_forms.scss */
+/* line 979, ../sass/partials/_forms.scss */
 foreman-history th.fifth {
   width: 45%;
 }
 
-/* line 966, ../sass/partials/_forms.scss */
+/* line 984, ../sass/partials/_forms.scss */
 .indicator-wrapper {
   position: relative;
   display: inline-block;
   width: 100%;
 }
 
-/* line 972, ../sass/partials/_forms.scss */
+/* line 990, ../sass/partials/_forms.scss */
 div.alleYli-radioGroup {
   display: inline-block;
   margin-top: 24px;
@@ -5042,7 +5059,7 @@ ul.tabs {
 }
 
 /* line 102, ../sass/partials/_tabs.scss */
-.tabs a.link-btn :last-child {
+.tabs a.link-btn :first-child {
   padding-right: 2px !important;
 }
 
