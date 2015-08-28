@@ -549,7 +549,9 @@
   {:parameters [id]
    :user-roles #{:applicant}
    :states     #{:draft :open :submitted :complement-needed}
-   :pre-checks [(fn [command application] (not (-> command :user :architect)))]}  ;;TODO: lisaa architect? check
+   :pre-checks [(fn [command _]
+                  (when-not (-> command :user :architect)
+                    unauthorized))]}
   [{application :application user :user}]
   (doseq [attachment (:attachments (mongo/by-id :users (:id user)))]
     (let [application-id id
