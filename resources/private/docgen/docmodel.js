@@ -437,16 +437,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }();
 
-    function barStatusHandler( approval ) {
-      self.statusOrder.update( self.sectionId, barStatusHandler, approval );
-      var cls = approval.value;
+  function barStatusHandler( approval ) {
+    self.statusOrder.update( self.sectionId, barStatusHandler, approval );
+    var cls = approval.value;
 
-      // Approving the whole approves the details.
-      // Rejecting the whole resets the details. In other words
-      // details should be intact after approving and immediately
-      // rejecting the whole.
-      self.statusOrder.setSectionStatus( self.sectionId, cls );
-      self.statusOrder.setStatusClass( self.sectionId, cls );
+    // Approving the whole approves the details.
+    // Rejecting the whole resets the details. In other words
+    // details should be intact after approving and immediately
+    // rejecting the whole.
+    self.statusOrder.setSectionStatus( self.sectionId, cls );
+    self.statusOrder.setStatusClass( self.sectionId, cls );
   };
 
   function makeApprovalContainer( statusKey ) {
@@ -462,19 +462,21 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
 
   // Opts can have the following (optional) properties:
-  //   bar: denotes the accordion horizontal bar.
+  //   self.sectionId: denotes the accordion horizontal bar.
   //        It is an object with two properties:
   //        selector: jQuery selector for bar.
   //        fun: function to be called when status changes.
   //        Note: The bar's order name (see above) is self.sectionId, because
   //        it needs to be known by the detail status indicators.
+  //   statusKey: If truthy then the bar form approval status details are inline
+  //        with buttons and the value is used as data-status-key.
   // Returns an array of elements: approval container (icons and details), reject button, approve button.
   self.makeApprovalButtons = function (path, model, opts ) {
     opts = opts || {};
     var statusKey = _.uniqueId( "status");
     var approvalContainer$ = null;
-    if( !opts[self.sectionId] ) {
-      approvalContainer$ = makeApprovalContainer( statusKey);
+    if( !opts[self.sectionId] || opts.statusKey ) {
+      approvalContainer$ = makeApprovalContainer( opts.statusKey || statusKey);
     }
     var approveButton$ = null;
     var rejectButton$ = null;
@@ -489,7 +491,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         if( opts[self.sectionId] ) {
           opts[self.sectionId].fun( approval );
         } else {
-          console.log( "setStatus", approval);
           self.statusOrder.update( statusKey, setStatus, approval );
           self.statusOrder.setStatusClass( statusKey, approval.value );
           self.statusOrder.setSectionStatus( statusKey, approval.value === "rejected" ? "rejected" : null );
@@ -506,8 +507,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
             $(makeButton(self.docId + "_" + verb, title, opts ))
           .click(function () {
             ajax.command(cmd, cmdArgs)
-              .success(function () {
-                setStatus({ value: noun });
+              .success(function (result) {
+                setStatus(result.approval);
                 window.Stickyfill.rebuild();
               })
               .call();
@@ -2033,12 +2034,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       }
     }
 
-    if (self.schema.info.approvable) {
-      $(toggle).attr( "data-status-key", self.sectionId);
-      opts.approval = {};
-      opts.approval[self.sectionId] = {fun: barStatusHandler};
-      sticky.append( makeApprovalContainer( self.sectionId ));
-    }
     opts.remove = removeOpts;
 
     if (op) {
@@ -2049,6 +2044,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else {
       title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
+
+    if (self.schema.info.approvable) {
+      $(toggle).attr( "data-status-key", self.sectionId);
+      opts.approval = {};
+      opts.approval[self.sectionId] = {fun: barStatusHandler};
+      if( !opts.star && !opts.description ) {
+        opts.approval.statusKey = self.sectionId;
+      } else {
+        sticky. append ( makeApprovalContainer( self.sectionId ).addClass( "no-border-bottom"));
+      }
+    }
+
 
     appendGroupButtons( sticky, [], self.model, opts );
 
