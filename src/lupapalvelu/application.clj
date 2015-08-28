@@ -237,7 +237,8 @@
 (defn make-application [id operation x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
   {:pre [id operation address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
   (let [permit-type (operations/permit-type-of-operation operation)
-        owner (user/user-in-role user :owner :type :owner)
+        owner (merge (user/user-in-role user :owner :type :owner)
+                     {:unsubscribed (= operation :aiemmalla-luvalla-hakeminen)})
         op (make-op operation created)
         state (cond
                 info-request? :info

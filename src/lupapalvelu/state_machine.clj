@@ -48,5 +48,5 @@
   [next-state _ application]
   (if (map? application)
     (when-not (can-proceed? application next-state)
-      (fail :error.command-illegal-state))
+      (fail :error.command-illegal-state :state (:state application) :next-state next-state))
     unauthorized))
