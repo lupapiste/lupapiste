@@ -211,29 +211,6 @@
       "2.2.1" ya_to_krysp_2_2_1
       (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version))))))
 
-(defn- add-statement-attachments [lupa-name-key canonical statement-attachments]
-  ;; if we have no statement-attachments to add return the canonical map itself
-  (if (empty? statement-attachments)
-    canonical
-    (reduce
-      (fn [c a]
-        (let [lausuntotieto (get-in c [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto])
-              lausunto-id (name (first (keys a)))
-              paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id) %) lausuntotieto)
-              index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
-              paivitetty-lausunto (assoc-in
-                                    paivitettava-lausunto
-                                    [:Lausunto :lausuntotieto :Lausunto :liitetieto]
-                                    ((keyword lausunto-id) a))
-              paivitetty (assoc
-                           lausuntotieto
-                           index-of-paivitettava
-                           paivitetty-lausunto)]
-          (assoc-in c [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto] paivitetty)))
-      canonical
-      statement-attachments)))
-
-
 (defn- map-kayttotarkoitus [canonical lupa-name-key]
   (update-in canonical [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :kayttotarkoitus]
              (fn [kayttotarkoitus]
@@ -272,10 +249,10 @@
                               (get-in canonical-without-attachments
                                 [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto]))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        canonical-with-statement-attachments (add-statement-attachments
-                                               lupa-name-key
+        canonical-with-statement-attachments (mapping-common/add-statement-attachments
                                                canonical-without-attachments
-                                               statement-attachments)
+                                               statement-attachments
+                                               [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto])
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]

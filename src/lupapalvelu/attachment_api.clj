@@ -359,9 +359,7 @@
                       (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
    :pre-checks  attachment-modification-precheks
    :states      (states/all-states-but states/terminal-states)
-   :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."
-   :feature     :pdfrotate
-   }
+   :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."}
   [{:keys [application user created]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
     (let [{:keys [contentType fileId filename] :as latest-version} (last (:versions attachment))
