@@ -35,19 +35,19 @@
             <textarea id="add-text-sv" rows="4" cols="50" data-bind="textInput: textSv"></textarea>
             <br />
 
+            <div class="stacked inner-margins">
             <button href="#"
               data-bind="click: addMessage,
                          ltext: 'admin.screenmessages.addScreenmessageButtonLabel',
                          disable: disabled"
-              class="modal btn btn-primary btn-narrow screenmessagebutton"
+              class="positive"
               data-test-id="test-add-screenmessage"></button>
-            <hr />
             <button href="#"
               data-bind="click: $root.screenmessages.reset,
                          ltext: 'admin.screenmessages.deleteScreenmessageButtonLabel'"
-              class="modal btn btn-primary btn-narrow screenmessagebutton"
+              class="positive"
               data-test-id="test-delete-screenmessage"></button>
-
+            </div>
           </div>
 
       </div>

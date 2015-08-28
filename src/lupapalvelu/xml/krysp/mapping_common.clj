@@ -3,6 +3,7 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.i18n :refer [with-lang loc localize]]
             [lupapalvelu.xml.disk-writer :as writer]))
 
 (def- rakval-yht {"2.1.2" "2.1.0"
@@ -602,25 +603,29 @@
    :fileId file-id
    :filename filename})
 
-(defn- get-metatieto [k v]
+(defn- create-metatieto [k v]
   {:metatieto {:metatietoNimi k :metatietoArvo v}
    :Metatieto {:metatietoNimi k :metatietoArvo v}})
 
 (defn- get-attachment-meta [attachment]
   (let [signatures (:signatures attachment)
-        latestVersion (:latestVersion attachment)]
-    (->> signatures
-         (filter #(and
-                   (= (get-in % [:version :major]) (get-in latestVersion [:version :major]))
-                   (= (get-in % [:version :minor]) (get-in latestVersion [:version :minor]))))
-         (map #(let [firstName (get-in %2 [:user :firstName])
-                     lastName (get-in %2 [:user :lastName])
-                     created (util/to-xml-datetime (:created %2))
-                     count %1]
-                [(get-metatieto (str "allekirjoittaja_" count) (str firstName " " lastName))
-                 (get-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
-         (flatten)
-         (vec))))
+        latestVersion (:latestVersion attachment)
+        liitepohja [(create-metatieto "liiteId" (:id attachment))]
+        signatures (->> signatures
+                           (filter #(and
+                                     (= (get-in % [:version :major]) (get-in latestVersion [:version :major]))
+                                     (= (get-in % [:version :minor]) (get-in latestVersion [:version :minor]))))
+                           (map #(let [firstName (get-in %2 [:user :firstName])
+                                       lastName (get-in %2 [:user :lastName])
+                                       created (util/to-xml-datetime (:created %2))
+                                       count %1]
+                                  [(create-metatieto (str "allekirjoittaja_" count) (str firstName " " lastName))
+                                   (create-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
+                           (flatten)
+                           (vec))]
+    (if (empty? signatures)
+      liitepohja
+      (into liitepohja signatures))))
 
 (defn get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
@@ -648,13 +653,17 @@
                            (not= "statement" (-> attachment :target :type))
                            (not= "verdict" (-> attachment :target :type))
                            (or (nil? target) (= target (:target attachment))))
-                   :let [type (get-in attachment [:type :type-id])
-                         attachment-title (str title ": " type "-" (:id attachment))
+                   :let [type-group (get-in attachment [:type :type-group])
+                         type-id (get-in attachment [:type :type-id])
+                         attachment-localized-name (localize "fi" (ss/join "." ["attachmentType" type-group type-id]))
+                         attachment-title (if (:contents attachment)
+                                            (str attachment-localized-name ": " (:contents attachment))
+                                            attachment-localized-name)
                          file-id (get-in attachment [:latestVersion :fileId])
                          attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                          link (str begin-of-link attachment-file-name)
                          meta (get-attachment-meta attachment)]]
-               {:Liite (get-Liite attachment-title link attachment type file-id attachment-file-name meta)})))
+               {:Liite (get-Liite attachment-title link attachment type-id file-id attachment-file-name meta)})))
 
 (defn add-statement-attachments [canonical statement-attachments lausunto-path]
   (if (empty? statement-attachments)
@@ -663,7 +672,7 @@
       (fn [c a]
         (let [lausuntotieto (get-in c lausunto-path)
               lausunto-id (name (first (keys a)))
-              paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
+              paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id) %) lausuntotieto)
               index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
               paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
               paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
