@@ -13,17 +13,10 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   self.applicationType = ko.observable("all");
 
   self.searchField = ko.observable("");
+
   self.searchFieldDelayed = ko.pureComputed(self.searchField).extend({rateLimit: {method: "notifyWhenChangesStop", timeout: 750}});
 
   self.handler = ko.observable();
-
-  self.tags = lupapisteApp.models.tagFilterService.selected;
-
-  self.operations = lupapisteApp.models.operationFilterService.selected;
-
-  self.organizations = lupapisteApp.models.organizationFilterService.selected;
-
-  self.areas = lupapisteApp.models.areaFilterService.selected;
 
   self.limit = ko.observable(25);
 
@@ -45,12 +38,12 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     ajax.datatables("applications-search",
       {
         searchText: self.searchFieldDelayed(),
-        tags: _.pluck(self.tags(), "id"),
-        organizations: _.pluck(self.organizations(), "id"),
-        operations: _.pluck(self.operations(), "id"),
+        tags: _.pluck(lupapisteApp.models.tagFilterService.selected(), "id"),
+        organizations: _.pluck(lupapisteApp.models.organizationFilterService.selected(), "id"),
+        operations: _.pluck(lupapisteApp.models.operationFilterService.selected(), "id"),
         handler: self.handler() ? self.handler().id : undefined,
         applicationType: self.applicationType(),
-        areas: _.pluck(self.areas(), "id"),
+        areas: _.pluck(lupapisteApp.models.areaFilterService.selected(), "id"),
         limit: self.limit(),
         sort: ko.mapping.toJS(self.sort),
         skip: self.skip()
@@ -65,12 +58,12 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     ajax.datatables("applications-search",
       {
         searchText: self.searchField(),
-        tags: _.pluck(self.tags(), "id"),
-        organizations: _.pluck(self.organizations(), "id"),
-        operations: _.pluck(self.operations(), "id"),
+        tags: _.pluck(lupapisteApp.models.tagFilterService.selected, "id"),
+        organizations: _.pluck(lupapisteApp.models.organizationFilterService.selected(), "id"),
+        operations: _.pluck(lupapisteApp.models.operationFilterService.selected(), "id"),
         handler: self.handler() ? self.handler().id : undefined,
         applicationType: self.applicationType(),
-        areas: _.pluck(self.areas(), "id"),
+        areas: _.pluck(lupapisteApp.models.areaFilterService.selected(), "id"),
         limit: self.limit(),
         sort: ko.mapping.toJS(self.sort),
         skip: self.skip()
