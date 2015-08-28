@@ -40,11 +40,12 @@
         <label data-bind="ltext: 'applications.filter.operations'" />
         <div data-test-id="operations-filter-component" data-bind="component: 'autocomplete-operations'"></div>
       </div>
-
+      <!-- ko if: _(lupapisteApp.models.currentUser.orgAuthz()).keys().value().length > 1 -->
       <div class="filter-item" data-test-id="organization-filter-item">
         <label data-bind="ltext: 'applications.filter.organizations'" />
         <div data-test-id="organization-filter-component" data-bind="component: 'autocomplete-organizations'"></div>
       </div>
+      <!-- /ko -->
 
       <div class="filter-item">
         <label data-bind="ltext: 'applications.filter.areas'" />
