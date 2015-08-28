@@ -1,0 +1,37 @@
+#indicator {
+  .indicator-bar {
+    display: none;
+    position: fixed;
+    height: 50px;
+    width: 100%;
+    z-index: 2001;
+    color: #fff;
+    font-size: 18px;
+    box-sizing: border-box;
+  }
+
+  .indicator-box {
+    max-width: $application-max-width;
+    min-width: $application-min-width;
+    margin: 0 auto;
+    padding-left: $marginS;
+    padding-top: $marginM;
+  }
+
+  .indicator-bar.positive {
+    background-color: $positive;
+  }
+
+  .indicator-bar.negative {
+    background-color: $negative;
+  }
+
+  .indicator-info {
+    float: left;
+    margin-right: $marginL;
+  }
+
+  .indicator-message {
+    float: left;
+  }
+}
