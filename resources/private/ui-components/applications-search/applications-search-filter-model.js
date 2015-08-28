@@ -11,10 +11,10 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   self.saveAdvancedFilters = function() {
     var filter = {
-      tags:          _.map(ko.unwrap(lupapisteApp.models.tagFilterService.selected), "id"),
-      operations:    _.map(ko.unwrap(lupapisteApp.models.operationFilterService.selected), "id"),
-      organizations: _.map(ko.unwrap(lupapisteApp.models.organizationFilterService.selected), "id"),
-      areas:         _.map(ko.unwrap(lupapisteApp.models.areaFilterService.selected), "id")
+      tags:          _.map(ko.unwrap(lupapisteApp.services.tagFilterService.selected), "id"),
+      operations:    _.map(ko.unwrap(lupapisteApp.services.operationFilterService.selected), "id"),
+      organizations: _.map(ko.unwrap(lupapisteApp.services.organizationFilterService.selected), "id"),
+      areas:         _.map(ko.unwrap(lupapisteApp.services.areaFilterService.selected), "id")
     };
 
     ajax

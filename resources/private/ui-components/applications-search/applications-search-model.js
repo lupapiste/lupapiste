@@ -38,12 +38,12 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     ajax.datatables("applications-search",
       {
         searchText: self.searchFieldDelayed(),
-        tags: _.pluck(lupapisteApp.models.tagFilterService.selected(), "id"),
-        organizations: _.pluck(lupapisteApp.models.organizationFilterService.selected(), "id"),
-        operations: _.pluck(lupapisteApp.models.operationFilterService.selected(), "id"),
+        tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
+        organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
+        operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
         handler: self.handler() ? self.handler().id : undefined,
         applicationType: self.applicationType(),
-        areas: _.pluck(lupapisteApp.models.areaFilterService.selected(), "id"),
+        areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
         limit: self.limit(),
         sort: ko.mapping.toJS(self.sort),
         skip: self.skip()
@@ -58,12 +58,12 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     ajax.datatables("applications-search",
       {
         searchText: self.searchField(),
-        tags: _.pluck(lupapisteApp.models.tagFilterService.selected, "id"),
-        organizations: _.pluck(lupapisteApp.models.organizationFilterService.selected(), "id"),
-        operations: _.pluck(lupapisteApp.models.operationFilterService.selected(), "id"),
+        tags: _.pluck(lupapisteApp.services.tagFilterService.selected, "id"),
+        organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
+        operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
         handler: self.handler() ? self.handler().id : undefined,
         applicationType: self.applicationType(),
-        areas: _.pluck(lupapisteApp.models.areaFilterService.selected(), "id"),
+        areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
         limit: self.limit(),
         sort: ko.mapping.toJS(self.sort),
         skip: self.skip()

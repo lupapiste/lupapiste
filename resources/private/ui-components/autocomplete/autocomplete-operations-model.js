@@ -2,7 +2,7 @@ LUPAPISTE.AutocompleteOperationsModel = function() {
   "use strict";
   var self = this;
 
-  self.selected = lupapisteApp.models.operationFilterService.selected;
+  self.selected = lupapisteApp.services.operationFilterService.selected;
 
   self.query = ko.observable("");
 
@@ -16,7 +16,7 @@ LUPAPISTE.AutocompleteOperationsModel = function() {
   self.data = ko.pureComputed(function() {
     var result = [];
 
-    var data = _.map(lupapisteApp.models.operationFilterService.data(), function(operations, permitType) {
+    var data = _.map(lupapisteApp.services.operationFilterService.data(), function(operations, permitType) {
       return {
         permitType: loc(permitType),
         operations: wrapInObject(operations)

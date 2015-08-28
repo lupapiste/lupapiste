@@ -11,8 +11,8 @@
 
   lupapisteApp.models.currentUser = new LUPAPISTE.CurrentUser();
 
-  lupapisteApp.models.areaFilterService = new LUPAPISTE.AreaFilterService();
-  lupapisteApp.models.tagFilterService = new LUPAPISTE.TagFilterService();
-  lupapisteApp.models.operationFilterService = new LUPAPISTE.OperationFilterService();
-  lupapisteApp.models.organizationFilterService = new LUPAPISTE.OrganizationFilterService();
+  lupapisteApp.services.areaFilterService = new LUPAPISTE.AreaFilterService();
+  lupapisteApp.services.tagFilterService = new LUPAPISTE.TagFilterService();
+  lupapisteApp.services.operationFilterService = new LUPAPISTE.OperationFilterService();
+  lupapisteApp.services.organizationFilterService = new LUPAPISTE.OrganizationFilterService();
 })();

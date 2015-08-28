@@ -2,14 +2,14 @@ LUPAPISTE.AutocompleteAreasModel = function() {
   "use strict";
   var self = this;
 
-  self.selected = lupapisteApp.models.areaFilterService.selected;
+  self.selected = lupapisteApp.services.areaFilterService.selected;
 
   self.query = ko.observable("");
 
   self.data = ko.computed(function() {
     var result = [];
 
-    _.forEach(lupapisteApp.models.areaFilterService.data(), function(org) {
+    _.forEach(lupapisteApp.services.areaFilterService.data(), function(org) {
       if (org.areas && org.areas.features) {
         var header = {label: org.name[loc.currentLanguage], groupHeader: true};
 
@@ -23,7 +23,7 @@ LUPAPISTE.AutocompleteAreasModel = function() {
         var filteredData = util.filterDataByQuery(features, self.query() || "", self.selected());
         // append group header and group items to result data
         if (filteredData.length > 0) {
-          if (_.keys(lupapisteApp.models.areaFilterService.data()).length > 1) {
+          if (_.keys(lupapisteApp.services.areaFilterService.data()).length > 1) {
             result = result.concat(header);
           }
           result = result.concat(filteredData);
