@@ -21,7 +21,7 @@ LUPAPISTE.IndicatorModel = function(params) {
     self.showIndicator(true);
     _.delay(function() {
       self.showIndicator(false);
-    }, 1000);
+    }, 1600);
 
   });
 };
