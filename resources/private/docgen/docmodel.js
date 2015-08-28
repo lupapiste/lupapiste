@@ -514,7 +514,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
               .call();
           });
       if (options && options.dataTestSpecifiers) {
-        button.attr("data-test-id", verb + "-doc-" + self.schemaName);
+        button.attr("data-test-id", verb + "-doc-" + (_.first ( path ) || self.schemaName ));
       }
       return button;
     }

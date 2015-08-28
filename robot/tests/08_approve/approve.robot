@@ -42,16 +42,28 @@ Sonja logs in for approval
 Sonja rejects hankkeen-kuvaus
   Wait Until  Element should be visible  //div[@id="application-info-tab"]
   Open accordions  info
-  Wait Until  Element should be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
-  Wait Until  Element should be visible  xpath=//button[@data-test-id='approve-doc-hankkeen-kuvaus']
-  Click enabled by test id  reject-doc-hankkeen-kuvaus
-  Wait Until  Element should not be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
+  Reject accordion  hankkeen-kuvaus
 
 Sonja approves hankkeen-kuvaus
-  Wait Until  Element should be visible  xpath=//button[@data-test-id='approve-doc-hankkeen-kuvaus']
-  Click enabled by test id  approve-doc-hankkeen-kuvaus
-  Wait Until  Element should not be visible  xpath=//button[@data-test-id='approve-doc-hankkeen-kuvaus']
-  Wait Until  Element should be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
+  Approve accordion  hankkeen-kuvaus
+
+Sonja approves group kaytto
+  Approve group  kaytto
+
+Sonja rejects group mitat
+  Reject group  mitat
+  Accordion neutral  uusiRakennus
+
+Sonja approves accordion uusiRakennus
+  Approve accordion  uusiRakennus
+
+Sonja rejects group kaytto
+  Reject group  kaytto
+  Accordion negated  uusiRakennus
+
+Sonja approves group kaytto again
+  Approve group  kaytto
+  Accordion approved  uusiRakennus
 
 Party tab has indicators
   Wait Until  Element should be visible  applicationPartyDocumentIndicator
@@ -83,3 +95,90 @@ Mikko comes back, fills in missing parts and no submit button enabled
   Open accordions  info
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
   [Teardown]  logout
+
+
+*** Keywords ***
+
+Accordion approved
+  [Arguments]  ${name}
+  Wait Until  Element should be visible  jquery=button.positive.approved[data-accordion-id='${name}'] i.approved
+  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky div.group-buttons i.approved
+  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky div.group-buttons span:contains('Sibbo Sonja')
+  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky div.group-buttons button.rejected
+  Element should not be visible  jquery=section[data-doc-type=${name}] div.sticky div.group-buttons button.approved
+  # Every group is approved or neutral
+  Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}] i.rejected
+  Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}] .accordion_content button.approved
+
+
+Accordion rejected
+  [Arguments]  ${name}
+  Wait until  Element should be visible  jquery=button.secondary.rejected[data-accordion-id='${name}'] i.rejected
+  Element should not be visible  jquery=button.positve[data-accordion-id='${name}']
+  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky div.group-buttons i.rejected
+  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky div.group-buttons span:contains('Sibbo Sonja')
+  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky div.group-buttons button.approved
+  Element should not be visible  jquery=section[data-doc-type=${name}] div.sticky div.group-buttons button.rejected
+
+# If a subgroup is rejected, the approved accordion is negated: it is no longer positive, has reject icon
+# but both buttons are visible.
+Accordion negated
+  [Arguments]  ${name}
+  Wait until  Element should be visible  jquery=button.secondary.rejected[data-accordion-id='${name}'] i.rejected
+  Element should not be visible  jquery=button.positve[data-accordion-id='${name}']
+  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky div.group-buttons i.rejected
+  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky div.group-buttons button.approved
+  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky div.group-buttons button.rejected
+
+Group neutral
+  [Arguments]  ${name}
+  Element should be visible  jquery=button[data-test-id=approve-doc-${name}]
+  Element should be visible  jquery=button[data-test-id=reject-doc-${name}]
+
+Group approved
+  [Arguments]  ${name}
+  Element should not be visible  jquery=button[data-test-id=approve-doc-${name}]
+  Element should be visible  jquery=button[data-test-id=reject-doc-${name}]
+  Element should be visible  jquery=div.form-group[id*='${name}'] i.approved
+  Element should not be visible  jquery=div.form-group[id*='${name}'] i.rejected
+  Wait Until  Element should be visible  jquery=div.form-group[id*='${name}'] span:contains('Sibbo Sonja')
+
+Group rejected
+  [Arguments]  ${name}
+  Element should not be visible  jquery=button[data-test-id=reject-doc-${name}]
+  Element should be visible  jquery=button[data-test-id=approve-doc-${name}]
+  Element should be visible  jquery=div.form-group[id*=${name}] i.rejected
+  Element should not be visible  jquery=div.form-group[id*=${name}] i.approved
+  Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] span:contains('Sibbo Sonja')
+
+# Clickers
+
+Click reject
+  [Arguments]  ${name}
+  Wait Until  Element should be visible  jquery=button[data-test-id=reject-doc-${name}]
+  Click Button  jquery=button[data-test-id=reject-doc-${name}]
+
+Click approve
+  [Arguments]  ${name}
+  Wait Until  Element should be visible  jquery=button[data-test-id=approve-doc-${name}]
+  Click Button  jquery=button[data-test-id=approve-doc-${name}]
+
+Approve accordion
+  [Arguments]  ${name}
+  Click approve  ${name}
+  Accordion approved  ${name}
+
+Reject accordion
+  [Arguments]  ${name}
+  Click reject  ${name}
+  Accordion rejected  ${name}
+
+Approve group
+  [Arguments]  ${name}
+  Click approve  ${name}
+  Group approved  ${name}
+
+Reject group
+  [Arguments]  ${name}
+  Click reject  ${name}
+  Group rejected  ${name}
