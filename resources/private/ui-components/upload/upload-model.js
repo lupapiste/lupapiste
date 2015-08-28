@@ -15,7 +15,7 @@ LUPAPISTE.UploadModel = function(params) {
     var formData = new FormData(form);
     $.ajax({
       type: "POST",
-      url: "/api/upload/organization-area",
+      url: "/api/raw/organization-area",
       enctype: "multipart/form-data",
       data: formData,
       cache: false,
@@ -34,8 +34,8 @@ LUPAPISTE.UploadModel = function(params) {
           params.onSuccess(res);
         }
       },
-      error: function() {
-        self.errorMessage("error.upload-failed");
+      error: function(res) {
+        self.errorMessage(res.responseText || "error.upload-failed");
       },
       complete: function() {
         self.pending(false);

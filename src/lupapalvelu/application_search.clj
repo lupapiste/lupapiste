@@ -12,8 +12,9 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.user :refer [applicant?]]
-            [lupapalvelu.application-meta-fields :as meta-fields]))
+            [lupapalvelu.user :refer [applicant?] :as user]
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.geojson :as geo]))
 
 ;; Operations
 
@@ -59,7 +60,18 @@
     (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
     :else (make-free-text-query filter-search)))
 
-(defn make-query [query {:keys [searchText kind applicationType handler applicationTags applicationOrganizations applicationOperations]} user]
+(defn- make-area-query [areas user]
+  {:pre [(sequential? areas)]}
+  (let [orgs (user/organization-ids-by-roles user #{:authority})
+        orgs-with-areas (mongo/select :organizations {:_id {$in orgs} :areas.features.id {$in areas}} [:areas])
+        features (flatten (map (comp :features :areas) orgs-with-areas))
+        selected-areas (set areas)
+        filtered-features (filter (comp selected-areas :id) features)
+        coordinates (apply concat (map geo/resolve-polygons filtered-features))]
+    (when (seq coordinates)
+      {$or (map (fn [c] {:location {$geoWithin {"$polygon" c}}}) coordinates)})))
+
+(defn make-query [query {:keys [searchText kind applicationType handler tags organizations operations areas]} user]
   {$and
    (filter seq
      [query
@@ -74,16 +86,19 @@
             "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
             "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
             "canceled"          {:state "canceled"}
-            all))
-        (when-not (contains? #{nil "0"} handler)
-          {$or [{"auth.id" handler}
-                {"authority.id" handler}]})
-        (when-not (empty? applicationTags)
-          {:tags {$in applicationTags}})
-        (when-not (empty? applicationOrganizations)
-          {:organization {$in applicationOrganizations}})
-        (when-not (empty? applicationOperations)
-          {:primaryOperation.name {$in applicationOperations}}))])})
+            all)))
+      (when-not (contains? #{nil "0"} handler)
+        {$or [{"auth.id" handler}
+              {"authority.id" handler}]})
+      (when-not (empty? tags)
+        {:tags {$in tags}})
+      (when-not (empty? organizations)
+        {:organization {$in organizations}})
+      (when-not (empty? operations)
+        {:primaryOperation.name {$in operations}})
+      (when-not (empty? areas)
+        (make-area-query areas user))])})
+
 
 ;;
 ;; Public API

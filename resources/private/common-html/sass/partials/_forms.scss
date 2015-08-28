@@ -290,12 +290,17 @@ input.form-input.long {
 }
 .form-group, .form-choice, .form-table {
   overflow:visible;
-  border-radius: 3px;
+  //border-radius: 3px;
   display: block;
-  margin: 0 $marginS $marginS 0;
-  padding: $marginS $marginS 0 $marginS;
-  background: $lp-light-grey;
-  border-bottom: 1px solid darken($lp-light-grey, 5%);
+  //margin: 0 $marginS $marginS 0;
+  //padding: $marginS $marginS 0 $marginS;
+  //background: $lp-light-grey;
+  padding: {
+    left: $marginS;
+    right: $marginS;
+  }
+  box-sizing: border-box;
+  border-bottom: 1px solid $gray221;
   &:last-child
   {
     border-bottom: none;
@@ -321,8 +326,10 @@ input.form-input.long {
   .form-label-group, .form-label-table {
     width: 100%;
     display: block;
-    text-transform: uppercase;
+    //text-transform: uppercase;
     font-family: $font-heading;
+    font-weight: bold;
+    margin-bottom: $marginS;
   }
   .form-entry {
     display: inline-block;
@@ -554,9 +561,44 @@ input.form-input.long {
   }
 
   .button-group {
-    .btn, button {
-      margin-right: 10px
+    width: 100%;
+    padding: {
+      left: 10px;
+      right: 10px;
+      top: 10px;
+      bottom: 10px;
     }
+    background-color: $gray246;
+    border-bottom: 1px solid $gray221;
+    /* .btn, button { */
+    /*   margin-right: 10px */
+    /* } */
+  }
+}
+
+
+// Padding tweaks for special cases.
+.accordion-fields > .form-entry,
+.accordion-fields > .verdict-info-fields,
+.accordion-fields > div p {
+  padding: {
+    left: $marginS;
+    right: $marginS;
+  }
+}
+
+
+
+
+.accordion-fields button.margins-s {
+  margin-bottom: 0;
+}
+
+.accordion_content > .group-help-text {
+  display: block;
+  margin: {
+    left: $marginS;
+    right: $marginS;
   }
 }
 
@@ -586,11 +628,23 @@ input.form-input.long {
     margin-right: $marginS;
   }
   padding-right: $marginS;
+  padding-left: $marginS;
   margin: {
     top: $marginS;
     bottom: $marginS;
 
   }
+}
+
+// Top-level group buttons tweaks
+.accordion-toggle > .group-buttons {
+  background-color: $gray246;
+  border: 1px solid $gray221;
+  padding: {
+    top: $marginS;
+    bottom: $marginS;
+  }
+  margin: 0;
 }
 
 .button-group button.is-right {
@@ -652,7 +706,7 @@ section.approved .group-buttons  {
     }
 }
 
-.is-status > .like-btn {
+.is-status .like-btn {
   @include btn-height;
   min-width: 500px;
   span {
@@ -671,7 +725,7 @@ section.approved .group-buttons  {
 
 // Top-level reject button should be invisible
 // when the bar is in rejected mode.
-button.sticky.rejected ~ .accordion_content .is-top.rejected {
+button.rejected ~ .group-buttons .is-top.rejected {
   display: none;
 }
 
@@ -680,8 +734,12 @@ button.sticky.rejected ~ .accordion_content .is-top.rejected {
 }
 
 .description-bubble {
-  display: none;
+  //display: none;
+  display: block;
+  //overflow-y: visible;
   position: relative;
+  float: left;
+  box-sizing: border-box;
   background-color: white;
   width: 100%;
   border-radius: 2px;
@@ -725,6 +783,9 @@ button.sticky.rejected ~ .accordion_content .is-top.rejected {
   }
 }
 
+.description-bubble.is-closed {
+  display: none;
+}
 
 .form-help {
   min-height: 100px;

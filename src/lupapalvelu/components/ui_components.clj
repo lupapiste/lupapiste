@@ -101,8 +101,9 @@
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
    :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
-   :leaflet        {:js ["leaflet.min.js"]
-                    :css ["leaflet.css"]}
+   :ol             {:js ["openlayers-3.8.2.min.js" "ol3-popup.js"]
+                    :css ["openlayers-3.8.2.css" "ol3-popup.css"]}
+   :proj4          {:js ["proj4-2.3.3.min.js"]}
    :stickyfill     {:js ["stickyfill.min.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
@@ -139,7 +140,10 @@
 
    :analytics    {:js ["analytics.js"]}
 
-   :global-models {:js ["root-model.js" "application-model.js" "register-models.js"]}
+   :services {:js ["area-filter-service.js" "tag-filter-service.js" "operation-filter-service.js" "organization-filter-service.js"]}
+
+   :global-models {:depends [:services]
+                   :js ["root-model.js" "application-model.js" "register-models.js"]}
 
    :screenmessages  {:js   ["screenmessage.js"]
                      :html ["screenmessage.html"]}
@@ -304,6 +308,7 @@
 
    :applicant-app {:depends [:ui-components]
                    :js ["applicant.js"]}
+
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :header :debug
@@ -321,7 +326,7 @@
 
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin-app.js" "register-authority-admin-models.js"]}
-   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :header :debug :analytics :leaflet]
+   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :header :debug :analytics :proj4 :ol]
                          :js [schema-versions-by-permit-type "organization-user.js" "edit-roles-dialog-model.js" "authority-admin.js"]
                          :html ["authority-admin.html"]}
 

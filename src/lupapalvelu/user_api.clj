@@ -207,6 +207,15 @@
       (mongo/update :users {:email email} {$set {:role "authority"}})
       (fail :error.user-not-found))))
 
+(defcommand update-default-application-filter
+  {:parameters [filter]
+   :user-roles #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:filter])]
+   :description "Adds/Updates user specific filters for the application search"}
+  [{{id :id} :user}]
+  (mongo/update-by-id :users id {$set {:applicationFilters [{:filter filter}]}})
+  (ok))
+
 ;;
 ;; Change organization data:
 ;;
@@ -512,7 +521,7 @@
 
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
     (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
-    (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type))
+    (when-not (mime/allowed-file? filename) (fail! :error.illegal-file-type))
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
     (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
@@ -549,7 +558,9 @@
   {:parameters [id]
    :user-roles #{:applicant}
    :states     #{:draft :open :submitted :complement-needed}
-   :pre-checks [(fn [command application] (not (-> command :user :architect)))]}  ;;TODO: lisaa architect? check
+   :pre-checks [(fn [command _]
+                  (when-not (-> command :user :architect)
+                    unauthorized))]}
   [{application :application user :user}]
   (doseq [attachment (:attachments (mongo/by-id :users (:id user)))]
     (let [application-id id

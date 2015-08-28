@@ -226,6 +226,7 @@
       (fail :error.command-illegal-state :state state))))
 
 (defn pre-checks-fail [command application]
+  {:post [(or (nil? %) (contains? % :ok))]}
   (when-let [pre-checks (:pre-checks (meta-data command))]
     (reduce #(or %1 (%2 command application)) nil pre-checks)))
 

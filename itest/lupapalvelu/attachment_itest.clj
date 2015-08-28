@@ -198,6 +198,26 @@
     pena => (allowed? :pdf-export :id application-id)
     (raw pena "pdf-export" :id application-id) => http200?))
 
+(facts "Rotate PDF"
+  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+        application-id (:id application)
+        attachment1 (first (:attachments application))
+        attachment2 (last (:attachments application))]
+
+    attachment1 =not=> attachment2
+
+    (upload-attachment sonja application-id attachment1 true :filename "dev-resources/test-pdf.pdf")
+    (upload-attachment sonja application-id attachment2 true :filename "dev-resources/test-attachment.txt")
+
+    (fact "Can rotate PDF"
+      (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 90) => ok?)
+
+    (fact "Can not rotate PDF 0 degrees"
+      (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 0) => fail?)
+
+    (fact "Can not rotate txt"
+      (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment2) :rotation 90) => fail?)))
+
 (defn- poll-job [id version limit]
   (when (pos? limit)
     (let [resp (query sonja :stamp-attachments-job :job-id id :version version)]

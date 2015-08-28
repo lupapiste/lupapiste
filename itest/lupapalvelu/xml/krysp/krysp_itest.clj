@@ -30,6 +30,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.i18n :refer [with-lang loc localize]]
             [lupapalvelu.tasks] ; ensure task schemas are loaded
             [sade.env :as env]
             [sade.xml :as xml]
@@ -114,7 +115,6 @@
         output-dir  (str "target/" sftp-user permit-type-dir "/")
 
         linkkiliitteeseen  (xml/get-text liite [:linkkiliitteeseen])
-        kuvaus  (xml/get-text liite [:kuvaus])
         tyyppi (xml/get-text liite [:tyyppi])
         linkki-as-uri (when linkkiliitteeseen (URI. linkkiliitteeseen))
         attachment-file-name  (last (s/split linkkiliitteeseen #"/"))
@@ -134,7 +134,7 @@
 
 (defn- final-xml-validation [application expected-attachment-count expected-sent-attachment-count & [additional-validator]]
   (let [permit-type (keyword (permit/permit-type application))
-        app-attachments (filter #(:latestVersion %) (:attachments application))
+        app-attachments (filter :latestVersion (:attachments application))
         organization (organization-from-minimal-by-id (:organization application))
         sftp-user  (get-in organization [:krysp permit-type :ftpUser])
         krysp-version (get-in organization [:krysp permit-type :version])
@@ -181,10 +181,11 @@
     (fact "XML contains correct amount attachments" (count liitetieto) => expected-attachment-count)
 
     (fact "Correct number of attachments are marked sent"
-      (count (->> app-attachments
-               (filter :latestVersion)
-               (filter #(not= (get-in % [:target :type]) "verdict"))
-               (filter :sent)))
+      (->> app-attachments
+             (filter :latestVersion)
+             (filter #(not= (get-in % [:target :type]) "verdict"))
+             (filter :sent)
+             count)
       => expected-sent-attachment-count)
 
     (fact "XML contains correct amount of polygons"
@@ -199,7 +200,14 @@
                              last)
             liite          (-> liitetieto take-liite-fn (xml/select1 [:Liite]))
             kuvaus         (xml/get-text liite [:kuvaus])
-            app-attachment (some #(when (.contains kuvaus (:id %)) %) app-attachments)
+            metatiedot     (xml/select liite [:metatietotieto])
+            metatiedot-edn (map
+                             (comp
+                               #(or (get-in % [:metatietotieto :metatieto]) (get-in % [:metatietotieto :Metatieto]))
+                               xml/xml->edn)
+                             metatiedot)
+            liite-id       (some #(when (= "liiteId" (:metatietoNimi %)) (:metatietoArvo %)) metatiedot-edn)
+            app-attachment (some #(when (= liite-id (:id %)) %) app-attachments)
             expected-type  (get-in app-attachment [:type :type-id])]
 
         (fact "XML has corresponding attachment in app" app-attachment => truthy)

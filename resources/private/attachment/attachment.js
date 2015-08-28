@@ -14,7 +14,7 @@ var attachment = (function() {
     ajax
       .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
       .success(function() {
-        repository.load(applicationId);
+        applicationModel.reload();
         applicationModel.open("attachments");
         model.previewDisabled(false);
         return false;
@@ -110,6 +110,7 @@ var attachment = (function() {
     type:                         ko.observable(),
     attachmentType:               ko.observable(),
     previewDisabled:              ko.observable(false),
+    previewVisible:               ko.observable(false),
     operation:                    ko.observable(),
     selectedOperationId:          ko.observable(),
     selectableOperations:         ko.observableArray(),
@@ -227,6 +228,24 @@ var attachment = (function() {
 
     toggleTosMetadata: function() {
       model.showTosMetadata(!model.showTosMetadata());
+    },
+
+    previewUrl: ko.pureComputed(function() {
+      return "/api/raw/view-attachment?attachment-id=" + model.latestVersion().fileId;
+    }),
+
+    rotete: function(rotation) {
+      var iframe$ = $("#file-preview-iframe");
+      iframe$.attr("src","/img/ajax-loader.gif");
+      ajax.command("rotate-pdf", {id: applicationId, attachmentId: attachmentId, rotation: rotation})
+        .success(function() {
+          applicationModel.reload();
+          hub.subscribe("attachment-loaded", function() {
+            model.previewVisible(true);
+            iframe$.attr("src", model.previewUrl());
+          }, true);
+        })
+        .call();
     }
   };
 
@@ -263,6 +282,7 @@ var attachment = (function() {
       .command("set-attachment-meta", data)
       .success(function() {
         model.indicator({name: name, type: "saved"});
+        applicationModel.reload();
       })
       .error(function(e) {
         error(e.text);
@@ -403,6 +423,7 @@ var attachment = (function() {
     }
 
     $("#file-preview-iframe").attr("src","");
+    model.previewVisible(false);
 
     var isUserAuthorizedForAttachment = attachment.required ? lupapisteApp.models.currentUser.role() === "authority" : true;
     model.authorized(isUserAuthorizedForAttachment);
@@ -461,8 +482,10 @@ var attachment = (function() {
       return att.id === model.id();
     }));
 
-    subscribe();
+    hub.send("attachment-loaded");
   }
+
+  hub.subscribe("attachment-loaded", subscribe);
 
   hub.onPageLoad("attachment", function() {
     pageutil.showAjaxWait();

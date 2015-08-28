@@ -32,6 +32,7 @@
    :sftp-directory   "/rakennus"
    :applicant-doc-schema "hakija-r"
    :multiple-parties-allowed true
+   :extra-statement-selection-values true
    :wfs-krysp-ns-name "rakennusvalvonta"
    :wfs-krysp-url-asia-prefix "rakval:luvanTunnisteTiedot/"})
 
@@ -40,6 +41,7 @@
    :sftp-directory       "/yleiset_alueet"
    :applicant-doc-schema "hakija-ya"
    :multiple-parties-allowed false
+   :extra-statement-selection-values false
    :wfs-krysp-ns-name "yleisenalueenkaytonlupahakemus"
    :wfs-krysp-url-asia-prefix "yak:luvanTunnisteTiedot/"})
 
@@ -48,6 +50,7 @@
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/ilmoitukset"})
 
 (defpermit YL  "Ymparistolupa"
@@ -55,6 +58,7 @@
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/ymparistoluvat"
    :wfs-krysp-url-asia-prefix "ymy:luvanTunnistetiedot/"})
 
@@ -63,6 +67,7 @@
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/vesihuoltolaki"
    :wfs-krysp-url-asia-prefix "ymv:luvanTunnistetiedot/"})
 
@@ -71,6 +76,7 @@
    :sftp-directory   "/poikkeusasiat"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :extra-statement-selection-values true
    :wfs-krysp-ns-name "poikkeamispaatos_ja_suunnittelutarveratkaisu"
    :wfs-krysp-url-asia-prefix "ppst:luvanTunnistetiedot/"})
 
@@ -79,6 +85,7 @@
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/maa_ainesluvat"
    :wfs-krysp-url-asia-prefix "ymm:luvanTunnistetiedot/"})
 
@@ -86,13 +93,15 @@
   {:subtypes       []
    :sftp-directory "/rakennus"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :extra-statement-selection-values false})
 
 (defpermit MM "Maankayton muutos"
   {:subtypes       []
    :sftp-directory "/kaavat"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :extra-statement-selection-values false})
 
 ;;
 ;; Helpers

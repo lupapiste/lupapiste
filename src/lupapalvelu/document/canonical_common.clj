@@ -20,8 +20,7 @@
 (def toimituksenTiedot-tila "keskener\u00e4inen")
 
 (def application-state-to-krysp-state
-  {:open "uusi lupa, ei k\u00e4sittelyss\u00e4"
-   :submitted "vireill\u00e4"
+  {:submitted "vireill\u00e4"
    :sent "vireill\u00e4"
    :complement-needed "odottaa asiakkaan toimenpiteit\u00e4"
    :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
@@ -29,8 +28,7 @@
    :closed "valmis"})
 
 (def ymp-application-state-to-krysp-state
-  {:open "1 Vireill\u00e4"
-   :sent "1 Vireill\u00e4"
+  {:sent "1 Vireill\u00e4"
    :submitted "1 Vireill\u00e4"
    :complement-needed "1 Vireill\u00e4"
    :verdictGiven "ei tiedossa"
@@ -38,8 +36,7 @@
    :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
 
 (def- state-timestamp-fn
-  {:open #(or (:opened %) (:created %))
-   :submitted :submitted
+  {:submitted :submitted
    :sent :submitted ; Enables XML to be formed from sent applications
    :complement-needed :complementNeeded
    :verdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
@@ -521,7 +518,8 @@
    {:osapuolitieto (get-parties documents-by-types)
     :suunnittelijatieto (get-designers documents-by-types)
     :tyonjohtajatieto (get-foremen documents-by-types lang)
-    :naapuritieto (get-neighbors neighbors)}})
+    ;:naapuritieto (get-neighbors neighbors)LPK-215
+    }})
 
 (defn change-value-to-when [value to_compare new_val]
   (if (= value to_compare) new_val value))

@@ -148,11 +148,11 @@ Close side panel
 
 Open accordions
   [Arguments]  ${tab}
-  Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'accordion-toggle')]
+  # The accordion-toggle class can either be in button or its container.
   Execute Javascript  $("#application-${tab}-tab button.accordion-toggle.toggled").click();
-  Wait Until  Element should not be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'toggled')]
+  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle.toggled [data-accordion-id]").click();
   Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
-  Wait Until  Element should be visible  //div[@id='application-${tab}-tab']//button[contains(@class, 'toggled')]
+  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
 
 #
 # Login stuff
@@ -318,6 +318,18 @@ Select From Autocomplete
   Wait until  Element should be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
   Click Element  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
   Wait for jQuery
+
+Autocomplete selectable values should not contain
+  [Arguments]  ${container}  ${value}
+  # Open dropdown if it is not open
+  ${autocompleteListNotOpen} =  Element should not be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[@class="autocomplete-dropdown"]
+  Run Keyword If  '${autocompleteListNotOpen}' == 'PASS'  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//span[@class='autocomplete-selection']
+  Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
+
+Autocomplete option list should contain
+  [Arguments]  @{options}
+  :FOR  ${element}  IN  @{options}
+  \  Element should contain  xpath=//div[@data-test-id="operations-filter-component"]//ul[@class="autocomplete-result autocomplete-result-grouped"]  ${element}
 
 Click by id
   [Arguments]  ${id}

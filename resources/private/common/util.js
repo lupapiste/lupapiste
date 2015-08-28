@@ -120,7 +120,16 @@ var util = (function($) {
     return defaultValue;
   }
 
-    function locKeyFromDocPath(pathStr) {
+  function getFeatureName(feature) {
+    for(var key in feature.properties) { // properties to lower case
+      if (key.toLowerCase() === "nimi") {
+        return feature.properties[key];
+      }
+    }
+    return undefined;
+  }
+
+  function locKeyFromDocPath(pathStr) {
     var res = (pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
     return res;
   }
@@ -200,6 +209,15 @@ var util = (function($) {
     return id;
   }
 
+  function withSuffix(strOrArr, suffix) {
+    if (_.isArray(strOrArr)) {
+      return _.map(strOrArr, function(s) {
+        return s + suffix;
+      });
+    }
+    return [strOrArr + suffix];
+  }
+
   function filterDataByQuery(data, q, selected) {
     return _.filter(data, function(item) {
       return _.reduce(q.split(" "), function(result, word) {
@@ -231,6 +249,7 @@ var util = (function($) {
     autofocus:    autofocus,
     isNum:        isNum,
     getIn:        getIn,
+    getFeatureName: getFeatureName,
     locKeyFromDocPath: locKeyFromDocPath,
     getDocumentOrder: getDocumentOrder,
     isPartyDoc: isPartyDoc,
@@ -238,6 +257,7 @@ var util = (function($) {
     extractRequiredErrors: extractRequiredErrors,
     dissoc: dissoc,
     randomElementId: randomElementId,
+    withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery
   };
 

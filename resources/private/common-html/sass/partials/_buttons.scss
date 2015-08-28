@@ -357,6 +357,7 @@ $icon-pad: 10px;
   line-height: $lupicon-size + 4;
 }
 
+
 .caps {
   text-transform: uppercase;
 }
@@ -509,13 +510,23 @@ $icon-pad: 10px;
 button.function {
   &:disabled {
     border-color: $gray221 !important;
-                     }
+  }
  }
 
 @include button-div-a ("function.authority") {
   @include function( $turqo-link, $turqo-hover, $gray51 );
 }
 
+// Link button is a link that is laid out as button.
+// However, no background or borders.
+
+a.link-btn {
+  @extend .like-btn;
+  @include styled-input( none, none, none,
+                         $text: $orange-link, $hover-text: $orange-hover,
+                         $active-text: $orange-active, $disabled-bg: none);
+  cursor: pointer;
+}
 
 // Waiting animation
 
@@ -596,13 +607,16 @@ i.toggle {
   padding: 0 !important;
 }
 
-.toggled {
-  i {
-    display: none;
-  }
-  i.toggle {
-    display: table-cell
-  }
+// Since accordions are actually
+// divs that include button we must
+// be very specific.
+
+.toggled > i, .toggled > button > i {
+  display: none;
+}
+
+.toggled i.toggle {
+  display: table-cell;
 }
 
 .toggled .toggle + span {
@@ -660,6 +674,11 @@ i.toggle {
   :first-child {
     margin-top: 0;
   }
+}
+
+// Generic margins support
+.margins-s {
+  margin: $marginS $marginS $marginS $marginS;
 }
 
 // Margin between form buttons.
