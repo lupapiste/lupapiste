@@ -4,7 +4,14 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   self.dataProvider = params.dataProvider;
 
-  self.showAdvancedFilters = ko.observable(false);
+  self.filterCount = ko.computed(function() {
+    return _.size(ko.unwrap(lupapisteApp.services.tagFilterService.selected)) +
+           _.size(ko.unwrap(lupapisteApp.services.operationFilterService.selected)) +
+           _.size(ko.unwrap(lupapisteApp.services.organizationFilterService.selected)) +
+           _.size(ko.unwrap(lupapisteApp.services.areaFilterService.selected));
+  });
+
+  self.showAdvancedFilters = ko.observable(self.filterCount() > 0);
   self.advancedFiltersText = ko.computed(function() {
     return self.showAdvancedFilters() ? "applications.filter.advancedFilter.hide" : "applications.filter.advancedFilter.show";
   });
@@ -25,4 +32,8 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
     })
     .call();
   };
+
+  hub.onPageLoad("applications", function() {
+    self.showAdvancedFilters(self.filterCount() > 0);
+  });
 };
