@@ -1006,6 +1006,13 @@
             :type :location}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
+    {:info {:name "kiinteisto-repeating"
+            :approvable true
+            :order 2
+            :repeating true
+            :type :location}
+     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
+
     {:info {:name "paatoksen-toimitus-rakval"
             :removable false
             :approvable true

@@ -1,0 +1,12 @@
+kiinteisto-repeating._append_label: Lisää kiinteistö
+kiinteisto-repeating._group_label: Kohteena oleva kiinteistö
+kiinteisto-repeating.kiinteisto._group_label: Kiinteistö
+kiinteisto-repeating.kiinteisto.kiinteisto.huoneistonTyyppi._group_label: Huoneiston tyyppi
+kiinteisto-repeating.kiinteisto.kiinteistotunnus: Kiinteistötunnus
+kiinteisto-repeating.kiinteisto.kylaNimi: Kylän tai kaupunginosan nimi
+kiinteisto-repeating.kiinteisto.maapintaala: Maapinta-ala
+kiinteisto-repeating.kiinteisto.maaraalaTunnus: Määräalan tunnus (jos kyseessä määräala)
+kiinteisto-repeating.kiinteisto.rantaKytkin: kiinteistö sijaitsee rannalla
+kiinteisto-repeating.kiinteisto.rekisterointipvm: Rekisteröintipäivä
+kiinteisto-repeating.kiinteisto.tilanNimi: Tilan nimi
+kiinteisto-repeating.kiinteisto.vesipintaala: Vesipinta-ala
