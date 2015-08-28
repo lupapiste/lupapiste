@@ -120,7 +120,16 @@ var util = (function($) {
     return defaultValue;
   }
 
-    function locKeyFromDocPath(pathStr) {
+  function getFeatureName(feature) {
+    for(var key in feature.properties) { // properties to lower case
+      if (key.toLowerCase() === "nimi") {
+        return feature.properties[key];
+      }
+    }
+    return undefined;
+  }
+
+  function locKeyFromDocPath(pathStr) {
     var res = (pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
     return res;
   }
@@ -240,6 +249,7 @@ var util = (function($) {
     autofocus:    autofocus,
     isNum:        isNum,
     getIn:        getIn,
+    getFeatureName: getFeatureName,
     locKeyFromDocPath: locKeyFromDocPath,
     getDocumentOrder: getDocumentOrder,
     isPartyDoc: isPartyDoc,
