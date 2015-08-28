@@ -512,7 +512,7 @@
 
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
     (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
-    (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type))
+    (when-not (mime/allowed-file? filename) (fail! :error.illegal-file-type))
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
     (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
