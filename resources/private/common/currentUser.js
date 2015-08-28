@@ -23,7 +23,8 @@ LUPAPISTE.CurrentUser = function() {
       titleI18nkey:   undefined,
       message:        undefined,
       messageI18nkey: undefined
-    }
+    },
+    applicationFilters: []
   };
 
   function constructor(user) {

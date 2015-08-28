@@ -7228,11 +7228,30 @@ div.filter-row .autocomplete-component > .autocomplete-selection-wrapper > span.
 div.filter-row .filter-item {
   margin-right: 12px;
 }
-/* line 74, ../sass/partials/_applications_search.scss */
-div.filter-row .filter-item:last-child {
-  margin-right: 0;
+
+/* line 78, ../sass/partials/_applications_search.scss */
+div.filter-row.advanced .autocomplete-component {
+  width: 600px;
 }
 
+@media (max-width: 1260px) {
+  /* line 85, ../sass/partials/_applications_search.scss */
+  div.filter-row.advanced .autocomplete-component {
+    width: 460px;
+  }
+}
+@media (max-width: 990px) {
+  /* line 93, ../sass/partials/_applications_search.scss */
+  div.filter-row.advanced .autocomplete-component {
+    width: 390px;
+  }
+}
+@media (max-width: 990px) {
+  /* line 101, ../sass/partials/_applications_search.scss */
+  div.filter-row.advanced .autocomplete-component {
+    width: 790px;
+  }
+}
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
