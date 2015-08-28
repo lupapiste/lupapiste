@@ -31,6 +31,9 @@ var LUPAPISTE = LUPAPISTE || {};
     // Global models
     self.models = {};
 
+    // Gobal service
+    self.services = {};
+
     /**
      * Prepends given title to browser window title.
      *

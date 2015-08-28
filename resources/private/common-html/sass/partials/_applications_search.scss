@@ -71,16 +71,35 @@ div.filter-row {
   }
   .filter-item {
     margin-right: $marginM;
-    &:last-child {
-      margin-right: 0;
-    }
   }
 }
 
 div.filter-row.advanced {
   .autocomplete-component {
-    width: 610px;
+    width: 600px;
   }
 }
 
+@media (max-width:1260px) {
+  div.filter-row.advanced {
+    .autocomplete-component {
+      width: 460px;
+    }
+  }
+}
 
+@media (max-width:990px) {
+  div.filter-row.advanced {
+    .autocomplete-component {
+      width:390px;
+    }
+  }
+}
+
+@media (max-width:990px) {
+  div.filter-row.advanced {
+    .autocomplete-component {
+      width:790px;
+    }
+  }
+}
