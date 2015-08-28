@@ -7252,6 +7252,43 @@ div.filter-row.advanced .autocomplete-component {
     width: 790px;
   }
 }
+/* line 2, ../sass/partials/_indicator.scss */
+#indicator .indicator-bar {
+  display: none;
+  position: fixed;
+  height: 50px;
+  width: 100%;
+  z-index: 2001;
+  color: #fff;
+  font-size: 18px;
+  box-sizing: border-box;
+}
+/* line 13, ../sass/partials/_indicator.scss */
+#indicator .indicator-box {
+  max-width: 1280px;
+  min-width: 640px;
+  margin: 0 auto;
+  padding-left: 6px;
+  padding-top: 12px;
+}
+/* line 21, ../sass/partials/_indicator.scss */
+#indicator .indicator-bar.positive {
+  background-color: #2ca92c;
+}
+/* line 25, ../sass/partials/_indicator.scss */
+#indicator .indicator-bar.negative {
+  background-color: #df3215;
+}
+/* line 29, ../sass/partials/_indicator.scss */
+#indicator .indicator-info {
+  float: left;
+  margin-right: 24px;
+}
+/* line 34, ../sass/partials/_indicator.scss */
+#indicator .indicator-message {
+  float: left;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
@@ -10146,50 +10183,50 @@ div.attachment-multiselect-content tr.attachment-group-header {
 /*
   Lupapalvelu CSS:
 */
-/* line 153, ../sass/main.scss */
+/* line 154, ../sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 159, ../sass/main.scss */
+/* line 160, ../sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 163, ../sass/main.scss */
+/* line 164, ../sass/main.scss */
 .hidden {
   display: none !important;
 }
 
-/* line 167, ../sass/main.scss */
+/* line 168, ../sass/main.scss */
 .inline {
   display: inline;
 }
 
-/* line 171, ../sass/main.scss */
+/* line 172, ../sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 175, ../sass/main.scss */
+/* line 176, ../sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 179, ../sass/main.scss */
+/* line 180, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 184, ../sass/main.scss */
+/* line 185, ../sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 188, ../sass/main.scss */
+/* line 189, ../sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -10201,27 +10238,27 @@ div.attachment-multiselect-content tr.attachment-group-header {
   display: table-cell;
 }
 
-/* line 199, ../sass/main.scss */
+/* line 200, ../sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 207, ../sass/main.scss */
+/* line 208, ../sass/main.scss */
 .table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 213, ../sass/main.scss */
+/* line 214, ../sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 218, ../sass/main.scss */
+/* line 219, ../sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -10235,47 +10272,47 @@ div.pzbDiv {
   font-size: 0.8em;
   color: #333;
 }
-/* line 231, ../sass/main.scss */
+/* line 232, ../sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 233, ../sass/main.scss */
+/* line 234, ../sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 239, ../sass/main.scss */
+/* line 240, ../sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 244, ../sass/main.scss */
+/* line 245, ../sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 246, ../sass/main.scss */
+/* line 247, ../sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 249, ../sass/main.scss */
+/* line 250, ../sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 250, ../sass/main.scss */
+/* line 251, ../sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 253, ../sass/main.scss */
+/* line 254, ../sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 255, ../sass/main.scss */
+/* line 256, ../sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 257, ../sass/main.scss */
+/* line 258, ../sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }
