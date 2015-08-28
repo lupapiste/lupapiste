@@ -26,9 +26,11 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
     ajax
     .command("update-default-application-filter", {filter: filter})
-    .error(_.noop)
+    .error(function() {
+      hub.send("indicator", {style: "negative"});
+    })
     .success(function() {
-      // TODO show indicator for success
+      hub.send("indicator", {style: "positive"});
     })
     .call();
   };
