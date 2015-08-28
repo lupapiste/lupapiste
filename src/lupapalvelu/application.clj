@@ -238,6 +238,9 @@
   {:pre [id operation address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
   (let [permit-type (operations/permit-type-of-operation operation)
         owner (user/user-in-role user :owner :type :owner)
+        owner (if (= operation :aiemmalla-luvalla-hakeminen)
+                (merge owner {:unsubscribed true})
+                owner)
         op (make-op operation created)
         state (cond
                 info-request? :info
