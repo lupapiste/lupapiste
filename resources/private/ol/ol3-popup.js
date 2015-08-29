@@ -10,6 +10,8 @@
  */
 ol.Overlay.Popup = function(opt_options) {
 
+    "use strict";
+
     var options = opt_options || {};
 
     this.panMapIfOutOfView = options.panMapIfOutOfView;
@@ -61,6 +63,8 @@ ol.inherits(ol.Overlay.Popup, ol.Overlay);
  * @param {String} html String of HTML to display within the popup.
  */
 ol.Overlay.Popup.prototype.show = function(coord, html) {
+    "use strict";
+
     this.setPosition(coord);
     this.content.innerHTML = html;
     this.container.style.display = 'block';
@@ -75,6 +79,7 @@ ol.Overlay.Popup.prototype.show = function(coord, html) {
  * @private
  */
 ol.Overlay.Popup.prototype.panIntoView_ = function(coord) {
+    "use strict";
 
     var popSize = {
             width: this.getElement().clientWidth + 20,
@@ -127,6 +132,8 @@ ol.Overlay.Popup.prototype.panIntoView_ = function(coord) {
  * Hide the popup.
  */
 ol.Overlay.Popup.prototype.hide = function() {
+    "use strict";
+
     this.container.style.display = 'none';
     return this;
 };

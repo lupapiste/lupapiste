@@ -11,16 +11,13 @@ Mikko creates application
 
 Mikko edits operation description
   Open application  application-papplication  753-416-25-30
-  Open accordions  info
   Wait and click  xpath=//div[@id='application-info-tab']//button[@data-test-id='edit-op-description']
   Input text by test id  op-description-editor  Talo A
+  Wait for jQuery
   Wait until  Page should contain  Tallennettu
   Wait until  Element should not be visible  xpath=//div[@id='application-info-tab']//input[@data-test-id="op-description-editor"]
 
-  [Teardown]  logout
-
 Mikko can see new operation description
-  Mikko logs in
-  Open application  application-papplication  753-416-25-30
+  Reload Page
   Wait until  Element text should be  xpath=//div[@id='application-info-tab']//span[@data-test-id='op-description']  - Talo A
   [Teardown]  logout

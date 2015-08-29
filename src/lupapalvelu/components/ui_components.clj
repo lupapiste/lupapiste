@@ -140,7 +140,10 @@
 
    :analytics    {:js ["analytics.js"]}
 
-   :global-models {:js ["root-model.js" "application-model.js" "register-models.js"]}
+   :services {:js ["area-filter-service.js" "tag-filter-service.js" "operation-filter-service.js" "organization-filter-service.js"]}
+
+   :global-models {:depends [:services]
+                   :js ["root-model.js" "application-model.js" "register-models.js"]}
 
    :screenmessages  {:js   ["screenmessage.js"]
                      :html ["screenmessage.html"]}
@@ -305,6 +308,7 @@
 
    :applicant-app {:depends [:ui-components]
                    :js ["applicant.js"]}
+
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :header :debug
