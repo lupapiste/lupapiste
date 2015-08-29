@@ -391,8 +391,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     //       rejected: removal of approved from section (but no adding rejected)
     //                 rejected to bar.
     //       null: If section is approved then do nothing. Otherwise, add rejected
-    //             to bar if any of the stats is rejected. However, if every stat is
-    //             approved, call setSectionStatus( self.sectionId, "approved")
+    //             to bar if any of the stats is rejected. However, if every (non-neutral) stat
+    //             and self.sectionId is approved, call setSectionStatus( self.sectionId, "approved")
     function setSectionStatus( name, cls ) {
       var bar = self.section$.find("button[data-status-key=" + self.sectionId + "]");
       //var section = $("[data-section-id=" + self.sectionId + "]");
@@ -421,7 +421,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
               break;
             }
           });
-          if( goods == _.size( stats )) {
+          if( goods == _.size( stats)
+           && stats[self.sectionId]
+           && stats[self.sectionId].approval.value == "approved") {
             // Everything is approved.
             setSectionStatus( self.sectionId, "approved");
           }

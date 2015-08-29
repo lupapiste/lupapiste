@@ -48,23 +48,43 @@ Sonja approves hankkeen-kuvaus
   Approve accordion  hankkeen-kuvaus
 
 Sonja approves group kaytto
+  Group neutral  kaytto
   Approve group  kaytto
+
+Sonja approves group lammitys
+  Group neutral  lammitys
+  Approve group  lammitys
 
 Sonja rejects group mitat
   Reject group  mitat
-  Accordion negated  uusiRakennus
+  Sonja accordion negated  uusiRakennus
 
 Sonja approves accordion uusiRakennus
   Approve accordion  uusiRakennus
 
 Sonja rejects group kaytto
   Reject group  kaytto
-  Accordion negated  uusiRakennus
+  Sonja accordion negated  uusiRakennus
+  [Teardown]  logout
 
-Sonja approves groups kaytto and mitat
+Mikko logs in and sees correct approval state
+  Mikko logs in
+  Open application  ${appname}  753-416-25-30
+  Open accordions  info
+  Accordion approved  hankkeen-kuvaus
+  Accordion negated  uusiRakennus
+  Group rejected  mitat
+  Group rejected  kaytto
+  Group approved  lammitys
+  [Teardown]  logout
+
+Sonja logs in and approves groups kaytto and mitat
+  Sonja logs in
+  Open application  ${appname}  753-416-25-30
+  Open accordions  info
   Approve group  kaytto
   Approve group  mitat
-  Accordion approved  uusiRakennus
+  Sonja accordion approved  uusiRakennus
 
 Party tab has indicators
   Wait Until  Element should be visible  applicationPartyDocumentIndicator
@@ -104,11 +124,17 @@ Accordion approved
   [Arguments]  ${name}
   Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky button.positive.approved i.approved
   Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status i.approved
-  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status span:contains('Sibbo Sonja')
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status span:contains('Sibbo Sonja')
+  # Every group is approved or neutral
+  Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}] i.rejected
+
+
+Sonja accordion approved
+  [Arguments]  ${name}
+  Accordion approved  ${name}
   Element should be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.rejected
   Element should not be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.approved
   # Every group is approved or neutral
-  Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}] i.rejected
   Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}] .accordion_content button.approved
 
 
@@ -117,7 +143,11 @@ Accordion rejected
   Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] .sticky button.secondary.rejected i.rejected
   Element should not be visible  jquery=button.positve[data-accordion-id='${name}']
   Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status i.rejected
-  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status span:contains('Sibbo Sonja')
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status span:contains('Sibbo Sonja')
+
+Sonja accordion rejected
+  [Arguments]  ${name}
+  Accordion rejected  ${name}
   Element should be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.approved
   Element should not be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.rejected
 
@@ -127,6 +157,11 @@ Accordion negated
   [Arguments]  ${name}
   Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] .sticky button.secondary.rejected i.rejected
   Element should not be visible  jquery=button.positve[data-accordion-id='${name}']
+
+
+Sonja accordion negated
+  [Arguments]  ${name}
+  Accordion negated  ${name}
   Element should be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.approved
   Element should be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.rejected
 
@@ -137,19 +172,30 @@ Group neutral
 
 Group approved
   [Arguments]  ${name}
-  Element should not be visible  jquery=button[data-test-id=approve-doc-${name}]
-  Element should be visible  jquery=button[data-test-id=reject-doc-${name}]
   Element should be visible  jquery=div.form-group[id*='${name}'] i.approved
   Element should not be visible  jquery=div.form-group[id*='${name}'] i.rejected
+  Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] span:contains('OK')
   Wait Until  Element should be visible  jquery=div.form-group[id*='${name}'] span:contains('Sibbo Sonja')
+
+
+Sonja group approved
+  [Arguments]  ${name}
+  Group approved  ${name}
+  Element should not be visible  jquery=button[data-test-id=approve-doc-${name}]
+  Element should be visible  jquery=button[data-test-id=reject-doc-${name}]
 
 Group rejected
   [Arguments]  ${name}
-  Element should not be visible  jquery=button[data-test-id=reject-doc-${name}]
-  Element should be visible  jquery=button[data-test-id=approve-doc-${name}]
   Element should be visible  jquery=div.form-group[id*=${name}] i.rejected
   Element should not be visible  jquery=div.form-group[id*=${name}] i.approved
+  Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] span:contains('Tarkennettavaa')
   Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] span:contains('Sibbo Sonja')
+
+Sonja group rejected
+  [Arguments]  ${name}
+  Group rejected  ${name}
+  Element should not be visible  jquery=button[data-test-id=reject-doc-${name}]
+  Element should be visible  jquery=button[data-test-id=approve-doc-${name}]
 
 # Clickers
 
@@ -166,19 +212,19 @@ Click approve
 Approve accordion
   [Arguments]  ${name}
   Click approve  ${name}
-  Accordion approved  ${name}
+  Sonja accordion approved  ${name}
 
 Reject accordion
   [Arguments]  ${name}
   Click reject  ${name}
-  Accordion rejected  ${name}
+  Sonja accordion rejected  ${name}
 
 Approve group
   [Arguments]  ${name}
   Click approve  ${name}
-  Group approved  ${name}
+  Sonja group approved  ${name}
 
 Reject group
   [Arguments]  ${name}
   Click reject  ${name}
-  Group rejected  ${name}
+  Sonja group rejected  ${name}
