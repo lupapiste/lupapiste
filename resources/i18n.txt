@@ -1,0 +1,1 @@
+error.rakennusvalitsin-muu: Manuaalinen rakennusnumero syötettävä
