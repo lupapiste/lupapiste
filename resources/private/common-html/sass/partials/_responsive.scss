@@ -10,3 +10,10 @@ $narrow-breakpoint:  991px;
     }
 }
 
+
+// On Windows Phone the zooming + position: fixed sems
+// cause problems when zooming. We circumwent the
+// issue by making the the viewport initially bigger.
+@-ms-viewport {
+  width: 820px;
+}
