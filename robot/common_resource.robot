@@ -297,13 +297,18 @@ Jarvenpaa authority logs in
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
 
+Input text with jQuery
+  [Arguments]  ${selector}  ${value}  ${leaveFocus}=${false}
+  Wait until page contains element  jquery=${selector}
+  Wait until  Element should be visible  jquery=${selector}
+  Wait until  Element should be enabled  jquery=${selector}
+  Execute Javascript  $('${selector}')[0].parentNode.scrollIntoView();
+  Execute Javascript  $('${selector}').focus().val("${value}").change();
+  Run Keyword Unless  ${leaveFocus}  Execute Javascript  $('${selector}').blur();
+
 Input text by test id
   [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
-  Wait until page contains element  xpath=//input[@data-test-id="${id}"]
-  Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
-  Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
-  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change();
-  Run Keyword Unless  ${leaveFocus}  Execute Javascript  $("input[data-test-id='${id}']").blur();
+  Input text with jQuery  input[data-test-id="${id}"]  ${value}  ${leaveFocus}
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
