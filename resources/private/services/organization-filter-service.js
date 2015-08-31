@@ -19,8 +19,8 @@ LUPAPISTE.OrganizationFilterService = function() {
   self.data = ko.computed(function() {
     var usersOwnOrganizations = _.keys(lupapisteApp.models.currentUser.orgAuthz());
     var ownOrgsWithNames = _.map(usersOwnOrganizations, function(org) {
-      var name = organizationNames().names[org][loc.currentLanguage];
-      var fallback = organizationNames().names[org].fi; // fallback to "fi" language
+      var name = util.getIn(organizationNames(), ["names", org, loc.currentLanguage]);
+      var fallback = util.getIn(organizationNames(), ["names", org, "fi"]); // fallback to "fi" language
       return {id: org, label: name ? name : fallback};
     });
 

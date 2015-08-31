@@ -15,6 +15,7 @@ Mikko edits operation description
   Input text by test id  op-description-editor  Talo A
   Wait for jQuery
   Wait until  Page should contain  Tallennettu
+  Wait until  Element should not be visible  xpath=//div[@id='application-info-tab']//input[@data-test-id="op-description-editor"]
 
 Mikko can see new operation description
   Reload Page
