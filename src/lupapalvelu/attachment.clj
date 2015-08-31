@@ -364,7 +364,8 @@
     (update-application
       (application->command application)
       {:attachments {$elemMatch {:id attachment-id}}}
-      {$pull {:attachments.$.versions {:fileId fileId}}
+      {$pull {:attachments.$.versions {:fileId fileId}
+              :attachments.$.signatures {:version (get-version-number application attachment-id fileId)}}
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 

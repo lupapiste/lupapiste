@@ -184,11 +184,27 @@
 
             (fact "Applicant cannot delete attachment that is required"
               (command pena :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => (contains {:ok false :text "error.unauthorized"}))
+           )))
 
-            (fact "Authority deletes attachment"
-              (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
-              (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?)
-           ))))))
+      (let [versioned-attachment (first (:attachments (query-application pena application-id)))]
+        (fact "Pena upload new version"
+          (upload-attachment pena application-id versioned-attachment true)) 
+        (fact "Pena signs the attachment version"
+          (command pena :sign-attachments :id application-id :attachmentIds [(:id versioned-attachment)] :password "pena") => ok?)
+        (let [signed-attachment (get-attachment-by-id pena application-id (:id versioned-attachment))]
+          
+          (fact "Attachment is signed"
+            (count (:signatures signed-attachment)) => 1)
+
+          (fact "Delete version and its signature"
+            (command veikko :delete-attachment-version :id application-id
+                     :attachmentId (:id versioned-attachment) :fileId (get-in signed-attachment [:latestVersion :fileId])) => ok?
+                     (fact (count (:signatures (get-attachment-by-id veikko application-id (:id versioned-attachment)))) => 0))
+
+          (fact "Authority deletes attachment"
+            (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
+            (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?))
+          ))))
 
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
