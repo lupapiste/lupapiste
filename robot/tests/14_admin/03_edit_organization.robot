@@ -68,28 +68,3 @@ Admin impersonated Sipoo authority
 Admin sees Mikko's inforequest
   Request should be visible  ${appname}
   [Teardown]  Logout
-
-*** Keywords ***
-
-Edit user
-  [Arguments]  ${organization}  ${email}  ${firstName}  ${lastName}
-  Wait Until       Element Should be Visible  xpath=//a[@data-test-edit-email="${email}"]
-  Click Element    xpath=//a[@data-test-edit-email="${email}"]
-  Wait until       Element should be visible  user-edit-firstName
-  Select From List by test id  edit-admin-organizations-select  ${organization}
-  Input text       user-edit-firstName  ${firstName}
-  Input text       user-edit-lastName  ${lastName}
-  Click element    test-edit-user-save
-  Wait Until       Element Should Not Be Visible  dialog-modify-user
-
-Change user password
-  [Arguments]  ${email}  ${newPassword}
-  Click Element    xpath=//a[@data-test-password-email="${email}"]
-  Wait until       Element should be visible  change-user-password
-  Input text       change-user-password  ${newPassword}
-  Click element    test-change-password-save
-  Wait Until       Element Should Not Be Visible  dialog-reset-password
-
-Users full name equals
-  [Arguments]  ${email}  ${fullname}
-  Wait until  Element text should be  //*[@data-test-full-name-by-email="${email}"]  ${fullname}
