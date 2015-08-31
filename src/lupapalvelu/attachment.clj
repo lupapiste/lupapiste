@@ -210,6 +210,18 @@
         latest     (last sorted)]
     latest))
 
+(defn get-version-by-file-id [attachment fileId]
+  (->> attachment
+       :versions
+       (filter #(= (:fileId %) fileId))
+       first))
+
+(defn get-version-number
+  [{:keys [attachments] :as application} attachment-id fileId]
+  (let [attachment (get-attachment-info application attachment-id)
+        version    (get-version-by-file-id attachment fileId)]
+    (:version version)))
+
 (defn set-attachment-version
   ([options]
     {:pre [(map? options)]}
@@ -368,18 +380,6 @@
               :attachments.$.signatures {:version (get-version-number application attachment-id fileId)}}
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
-
-(defn get-version-by-file-id [attachment fileId]
-  (->> attachment
-       :versions
-       (filter #(= (:fileId %) fileId))
-       first))
-
-(defn get-version-number
-  [{:keys [attachments] :as application} attachment-id fileId]
-  (let [attachment (get-attachment-info application attachment-id)
-        version    (get-version-by-file-id attachment fileId)]
-    (:version version)))
 
 (defn get-attachment-as
   "Returns the attachment if user has access to application, otherwise nil."
