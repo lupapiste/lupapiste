@@ -232,4 +232,4 @@ Reject group
 # login page
 Kill session
   Delete Cookie  ring-session
-  Go To  http://localhost:8000/app/fi/welcome#!/login
+  Go To  ${LOGIN URL}
