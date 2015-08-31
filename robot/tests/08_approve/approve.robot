@@ -33,7 +33,7 @@ Mikko decides to submit application
 
 Mikko still can't approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
-  [Teardown]  logout
+  Kill session
 
 Sonja logs in for approval
   Sonja logs in
@@ -65,7 +65,7 @@ Sonja approves accordion uusiRakennus
 Sonja rejects group kaytto
   Reject group  kaytto
   Sonja accordion negated  uusiRakennus
-  [Teardown]  logout
+  Kill session
 
 Mikko logs in and sees correct approval state
   Mikko logs in
@@ -76,7 +76,7 @@ Mikko logs in and sees correct approval state
   Group rejected  mitat
   Group rejected  kaytto
   Group approved  lammitys
-  [Teardown]  logout
+  Kill session
 
 Sonja logs in and approves groups kaytto and mitat
   Sonja logs in
@@ -108,15 +108,14 @@ Sonja sees that attachment has transferred indicator icon
 Sonja sees that some completion is needed
   Click enabled by test id  request-for-complement
   Wait Until  Application state should be  complement-needed
-  [Teardown]  logout
+  Kill session
 
 Mikko comes back, fills in missing parts and no submit button enabled
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Open accordions  info
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
-  [Teardown]  logout
-
+  Kill session
 
 *** Keywords ***
 
@@ -228,3 +227,9 @@ Reject group
   [Arguments]  ${name}
   Click reject  ${name}
   Sonja group rejected  ${name}
+
+# Quick'n'dirty: wipe out current session and go to
+# login page
+Kill session
+  Delete Cookie  ring-session
+  Go To  http://localhost:8000/app/fi/welcome#!/login
