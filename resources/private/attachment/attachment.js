@@ -282,7 +282,9 @@ var attachment = (function() {
       .command("set-attachment-meta", data)
       .success(function() {
         model.indicator({name: name, type: "saved"});
-        applicationModel.reload();
+        if (name === "operation") {
+          applicationModel.reload();
+        }
       })
       .error(function(e) {
         error(e.text);

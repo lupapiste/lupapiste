@@ -17,10 +17,12 @@ Mikko opens an application
 # Testing the case that was fixed with hotfix/repeating-element-saving
 # and later regression LUPA-1784
 # Note: The test browser must be active or the case will fail.
-Mikko adds three owners to the Uusirakennus document, and all owners are visible after page refresh
+Mikko adds three owners to the Uusirakennus document
   Open accordions  info
   Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  1
-  Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
+
+  Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi"]  pikku
+
   Wait Until  Element Should Be Visible  //button[@id="rakennuksenOmistajat_append"]
   Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']
@@ -28,10 +30,14 @@ Mikko adds three owners to the Uusirakennus document, and all owners are visible
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi']
   Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi']
-  Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO1
-  Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi']  ISO2
-  Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi']  ISO3
   Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  4
+
+  Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi"]  ISO1
+  Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi"]  ISO2
+  Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi"]  ISO3
+  Wait for jQuery
+
+Owners are visible after page refresh
   Reload Page
   Open accordions  info
   Wait Until  Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  4
