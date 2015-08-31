@@ -58,6 +58,8 @@ LUPAPISTE.ApplicationModel = function() {
   self.neighbors = ko.observable([]);
   self.submittable = ko.observable(true);
 
+  self.organization = ko.observable([]);
+
   self.asianhallintaEnabled = ko.computed(function() {
     return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
   });

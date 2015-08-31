@@ -7,9 +7,7 @@ LUPAPISTE.AutocompleteApplicationTagsModel = function(params) {
   self.query = ko.observable("");
 
   self.data = ko.pureComputed(function() {
-    var organizationTags =  _.map(lupapisteApp.models.application.organizationMeta().tags, function(k, v) {
-      return {id: v, label: ko.unwrap(k)};
-    });
+    var organizationTags = lupapisteApp.services.organizationTagsService.currentApplicationOrganizationTags();
 
     var filteredData = _.filter(organizationTags, function(tag) {
       return !_.some(self.selected(), tag);
@@ -22,4 +20,5 @@ LUPAPISTE.AutocompleteApplicationTagsModel = function(params) {
     });
     return filteredData;
   });
+
 };
