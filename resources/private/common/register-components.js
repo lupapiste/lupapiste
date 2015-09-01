@@ -34,6 +34,7 @@ jQuery(document).ready(function() {
     {name: "vetuma-init"},
     {name: "vetuma-status"},
     {name: "help-toggle"},
+    {name: "address"},
     {name: "applications-search"},
     {name: "applications-search-results"},
     {name: "applications-search-filter"},
