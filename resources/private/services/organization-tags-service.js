@@ -5,7 +5,7 @@ LUPAPISTE.OrganizationTagsService = function() {
   self.data = ko.observable();
 
   self.currentApplicationOrganizationTags = ko.pureComputed(function() {
-    var currentOrganization = ko.unwrap(lupapisteApp.models.application.organization);
+    var currentOrganization = util.getIn(lupapisteApp, ["models", "application", "organization"]);
     if (currentOrganization && self.data()) {
       return util.getIn(self.data(), [currentOrganization, "tags"]);
     }
