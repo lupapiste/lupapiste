@@ -10,5 +10,6 @@
             muu        [:manuaalinen_rakennusnro]]
    :facts {:ok   []
            :fail [["other" nil]
-                  ["other" ""]]}}
+                  ["other" ""]
+                  ["other" "    "]]}}
   (and (= "other" buildingId) (s/blank? muu)))
