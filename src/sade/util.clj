@@ -57,6 +57,10 @@
   "removes recursively all keys from map which have value of nil"
   [m] (postwalk-map (partial filter (comp not nil? val)) m))
 
+(defn ensure-sequential
+  "Makes sure that the value of key k in map m is sequental"
+  [m k] (let [v (k m)] (if (and v (not (sequential? v))) (assoc m k [v]) m)))
+
 ; from clojure.contrib/core
 
 (defn dissoc-in
