@@ -65,7 +65,7 @@ Sonja approves accordion uusiRakennus
 Sonja rejects group kaytto
   Reject group  kaytto
   Sonja accordion negated  uusiRakennus
-  Kill session
+  [Teardown]  Kill session
 
 Mikko logs in and sees correct approval state
   Mikko logs in
@@ -76,7 +76,7 @@ Mikko logs in and sees correct approval state
   Group rejected  mitat
   Group rejected  kaytto
   Group approved  lammitys
-  Kill session
+  [Teardown]  Kill session
 
 Sonja logs in and approves groups kaytto and mitat
   Sonja logs in
@@ -171,8 +171,8 @@ Group neutral
 
 Group approved
   [Arguments]  ${name}
-  Element should be visible  jquery=div.form-group[id*='${name}'] i.approved
-  Element should not be visible  jquery=div.form-group[id*='${name}'] i.rejected
+  Wait Until  Element should be visible  jquery=div.form-group[id*='${name}'] i.approved
+  Wait Until  Element should not be visible  jquery=div.form-group[id*='${name}'] i.rejected
   Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] span:contains('OK')
   Wait Until  Element should be visible  jquery=div.form-group[id*='${name}'] span:contains('Sibbo Sonja')
 
@@ -180,21 +180,21 @@ Group approved
 Sonja group approved
   [Arguments]  ${name}
   Group approved  ${name}
-  Element should not be visible  jquery=button[data-test-id=approve-doc-${name}]
-  Element should be visible  jquery=button[data-test-id=reject-doc-${name}]
+  Wait Until  Element should not be visible  jquery=button[data-test-id=approve-doc-${name}]
+  Wait Until  Element should be visible  jquery=button[data-test-id=reject-doc-${name}]
 
 Group rejected
   [Arguments]  ${name}
-  Element should be visible  jquery=div.form-group[id*=${name}] i.rejected
-  Element should not be visible  jquery=div.form-group[id*=${name}] i.approved
+  Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] i.rejected
+  Wait Until  Element should not be visible  jquery=div.form-group[id*=${name}] i.approved
   Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] span:contains('Tarkennettavaa')
   Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] span:contains('Sibbo Sonja')
 
 Sonja group rejected
   [Arguments]  ${name}
   Group rejected  ${name}
-  Element should not be visible  jquery=button[data-test-id=reject-doc-${name}]
-  Element should be visible  jquery=button[data-test-id=approve-doc-${name}]
+  Wait Until  Element should not be visible  jquery=button[data-test-id=reject-doc-${name}]
+  Wait Until  Element should be visible  jquery=button[data-test-id=approve-doc-${name}]
 
 # Clickers
 
