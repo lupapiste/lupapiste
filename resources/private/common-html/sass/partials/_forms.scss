@@ -640,12 +640,19 @@ input.form-input.long {
 .accordion-toggle > .group-buttons {
   background-color: $gray246;
   border: 1px solid $gray221;
+  border-top: none;
   padding: {
     top: $marginS;
     bottom: $marginS;
   }
   margin: 0;
 }
+
+div.sticky {
+  background-color: $gray246;
+}
+
+
 
 .button-group button.is-right {
   margin-right: 0;
@@ -654,7 +661,7 @@ input.form-input.long {
 .form-approval-status {
   text-transform: none;
   //width: 100%;
-  display: inline-block;
+  display: none;
   min-height: 32px;
 
   &.empty {
@@ -683,6 +690,12 @@ input.form-input.long {
   }
 }
 
+.form-approval-status.approved,
+.form-approval-status.rejected {
+  display: inline-block;
+}
+
+
 .form-approval-status.approved ~ button.approved {
   display: none;
 }
@@ -690,6 +703,7 @@ input.form-input.long {
 .form-approval-status.rejected ~ button.rejected {
   display: none;
 }
+
 
 section.approved .group-buttons  {
     button.approved {
@@ -706,7 +720,7 @@ section.approved .group-buttons  {
     }
 }
 
-.is-status .like-btn {
+.is-status > .like-btn {
   @include btn-height;
   min-width: 500px;
   span {
@@ -722,6 +736,31 @@ section.approved .group-buttons  {
     padding-right: $icon-pad;
   }
 }
+
+// Top-level form-approval-status
+
+div.sticky .form-approval-status.no-border-bottom {
+  border-left: 1px solid $gray221;
+  border-right: 1px solid $gray221;
+  border-bottom: 1px solid $gray221;
+  width: 100%;
+  .like-btn {
+    padding: {
+      left: 10px;
+      top: 4px;
+    }
+    min-height: initial;
+    line-height: initial;
+    span {
+      color: $gray153;
+    }
+  }
+}
+
+div.sticky .form-approval-status.no-border-bottom {
+  border-bottom: none;
+}
+
 
 // Top-level reject button should be invisible
 // when the bar is in rejected mode.

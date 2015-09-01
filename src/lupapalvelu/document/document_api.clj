@@ -136,19 +136,21 @@
 (defn- ->approval-mongo-model
   "Creates a mongo update map of approval data.
    To be used within model/with-timestamp."
-  [path status user]
+  [path approval]
   (let [mongo-path (if (ss/blank? path) "documents.$.meta._approved" (str "documents.$.meta." path "._approved"))]
-    {$set {mongo-path (model/->approved status user)
+    {$set {mongo-path approval
            :modified (model/current-timestamp)}}))
 
 (defn- approve [{{:keys [id doc path collection]} :data user :user created :created :as command} status]
   (or
-    (validate-approvability command)
-    (model/with-timestamp created
-      (update-application
+   (validate-approvability command)
+   (model/with-timestamp created
+     (let [approval (model/->approved status user)]
+       (update-application
         command
         {collection {$elemMatch {:id doc}}}
-        (->approval-mongo-model path status user)))))
+        (->approval-mongo-model path approval))
+       approval))))
 
 (defcommand approve-doc
   {:parameters [:id :doc :path :collection]
@@ -156,7 +158,7 @@
    :user-roles #{:authority}
    :states     approve-doc-states}
   [command]
-  (approve command "approved"))
+  (ok :approval (approve command "approved")))
 
 (defcommand reject-doc
   {:parameters [:id :doc :path :collection]
@@ -164,7 +166,7 @@
    :user-roles #{:authority}
    :states     approve-doc-states}
   [command]
-  (approve command "rejected"))
+  (ok :approval (approve command "rejected")))
 
 ;;
 ;; Set party to document

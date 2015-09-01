@@ -43,7 +43,7 @@
   (-> (make-query {:auth.id "123"} {} {}) (get "$and") first) => {:auth.id "123"})
 
 (fact "Tags are present in query"
-  (-> (make-query {} {:applicationTags ["test1" "test2"]} {}) (get "$and") last :tags) => {"$in" ["test1" "test2"]})
+  (-> (make-query {} {:tags ["test1" "test2"]} {}) (get "$and") last :tags) => {"$in" ["test1" "test2"]})
 
 (fact "Make query has correct query form"
   (make-query
@@ -51,14 +51,14 @@
     {:kind  "applications"
      :applicationType "all"
      :handler  "321"
-     :applicationTags ["test1" "test2"]}
+     :tags ["test1" "test2"]}
     {:role "authority"}) => (just {"$and" (just [{:auth.id "123"}
                                                  {:infoRequest false :state {"$nin" ["draft" "canceled"]}}
                                                  {"$or" [{"auth.id" "321"} {"authority.id" "321"}]}
                                                  {:tags {"$in" ["test1" "test2"]}}])}))
 
 (fact "Organization are present in query"
-  (-> (make-query {} {:applicationOrganizations ["753-R" "753-YA"]} {}) (get "$and") last :organization) => {"$in" ["753-R" "753-YA"]})
+  (-> (make-query {} {:organizations ["753-R" "753-YA"]} {}) (get "$and") last :organization) => {"$in" ["753-R" "753-YA"]})
 
 
 (def multi-feature-simple {:id "multi-simple",

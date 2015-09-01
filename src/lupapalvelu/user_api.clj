@@ -207,6 +207,15 @@
       (mongo/update :users {:email email} {$set {:role "authority"}})
       (fail :error.user-not-found))))
 
+(defcommand update-default-application-filter
+  {:parameters [filter]
+   :user-roles #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:filter])]
+   :description "Adds/Updates user specific filters for the application search"}
+  [{{id :id} :user}]
+  (mongo/update-by-id :users id {$set {:applicationFilters [{:filter filter}]}})
+  (ok))
+
 ;;
 ;; Change organization data:
 ;;

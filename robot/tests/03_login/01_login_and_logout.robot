@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation   Login & Logout
-Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
 
 *** Variables ***
