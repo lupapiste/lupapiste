@@ -355,7 +355,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     function setText( name ) {
       var sel = statusSelector( name );
-      if( sel ) {
+      if( sel && stats[name]) {
         sel = sel.find( "span.is-details");
         var approval = stats[name].approval;
         var text = loc(["document", approval.value]);
