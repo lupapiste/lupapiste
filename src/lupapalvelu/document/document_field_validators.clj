@@ -5,7 +5,7 @@
 
 (defvalidator :rakennusvalitsin-muu
   {:doc "Jos rakennusvalitsimesta on valittu vaihtoehto Muu, on Manuaalinen rakennusnumero -kenttaan syotettava arvo"
-   :schema "rakennuksen-muuttaminen"
+   :schemas ["rakennuksen-muuttaminen"]
    :fields [buildingId [:buildingId]
             muu        [:manuaalinen_rakennusnro]]
    :facts {:ok   []

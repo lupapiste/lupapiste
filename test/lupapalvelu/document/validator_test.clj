@@ -5,7 +5,7 @@
 
 (defvalidator :too-much-health
   {:doc    "health validator"
-   :schema "test"
+   :schemas ["test"]
    :fields [health     [:player :health]
             max-health [:game :max-health]]}
   (and health max-health (> health max-health)))
