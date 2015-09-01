@@ -76,17 +76,13 @@
    (filter seq
      [query
       (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
-      (merge
-        (case kind
-          "applications" {:infoRequest false}
-          "inforequests" {:infoRequest true}
-          nil) ; defaults to both
-        (let [all (if (applicant? user) {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})]
-          (case applicationType
-            "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
-            "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
-            "canceled"          {:state "canceled"}
-            all)))
+      (let [all (if (applicant? user) {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})]
+        (case applicationType
+          "inforequest"       {:state {$in ["answered" "open" "info"]}}
+          "application"       {:state {$in ["submitted" "sent" "complement-needed"]}}
+          "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
+          "canceled"          {:state "canceled"}
+          all))
       (when-not (contains? #{nil "0"} handler)
         {$or [{"auth.id" handler}
               {"authority.id" handler}]})
@@ -123,15 +119,9 @@
       (sequential? sort-field) (zipmap sort-field (repeat dir))
       :else {sort-field dir})))
 
-(def kind-mapping {"all" "both"
-                   "inforequest" "inforequests"
-                   "canceled" "both"})
-
 (defn applications-for-user [user {application-type :applicationType :as params}]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
-        kind        (get kind-mapping application-type "applications")
-        params      (merge {:kind kind} params)
         query       (make-query user-query params user)
         query-total (mongo/count :applications query)
         skip        (or (:skip params) 0)
