@@ -28,10 +28,13 @@ LUPAPISTE.AutocompleteHandlersModel = function(params) {
 
   self.data = ko.pureComputed(function() {
     var q = self.query() || "";
-    return _.filter(data(), function(item) {
-      return _.reduce(q.split(" "), function(result, word) {
-        return _.contains(item.fullName.toUpperCase(), word.toUpperCase()) && result;
-      }, true);
-    });
+    return _(data())
+      .filter(function(item) {
+        return _.reduce(q.split(" "), function(result, word) {
+          return _.contains(item.fullName.toUpperCase(), word.toUpperCase()) && result;
+        }, true);
+      })
+      .sortBy("label")
+      .value();
   });
 };
