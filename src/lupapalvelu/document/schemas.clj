@@ -1007,9 +1007,11 @@
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
     {:info {:name "kiinteisto-repeating"
+            :i18name "kiinteisto"
             :approvable true
             :order 2
             :repeating true
+            :removable true
             :type :location}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
