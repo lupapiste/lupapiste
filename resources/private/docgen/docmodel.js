@@ -602,14 +602,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       buttons$.append( btnHelper( opts.description,
                                   "secondary is-left",
                                   "lupicon-pen",
-                                  loc( "op-description.edit")))
+                                  loc( "op-description.edit")));
     }
     if( opts.star ) {
       buttons$.append( btnHelper( opts.star,
                                   "secondary is-left",
                                   "lupicon-star",
-                                  opts.star.text))
-    }if ( opts.remove ) {
+                                  opts.star.text));
+    }
+    if ( opts.remove ) {
       buttons$.append( btnHelper( opts.remove,
                                   "secondary is-right",
                                   "lupicon-remove",
