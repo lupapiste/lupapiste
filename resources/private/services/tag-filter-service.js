@@ -1,8 +1,8 @@
-LUPAPISTE.TagFilterService = function() {
+LUPAPISTE.TagFilterService = function(tagsService) {
   "use strict";
   var self = this;
 
-  self.data = ko.observable();
+  self.data = tagsService.data;
 
   self.selected = ko.observableArray([]);
 
@@ -24,13 +24,4 @@ LUPAPISTE.TagFilterService = function() {
         })
         .value());
   });
-
-  ajax
-    .query("get-organization-tags")
-    .error(_.noop)
-    .success(function(res) {
-      self.data(res.tags);
-    })
-    .call();
-
 };
