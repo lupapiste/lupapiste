@@ -161,8 +161,11 @@
 (defvalidator :vrk:CR324
   {:doc    "Sahko polttoaineena vaatii varusteeksi sahkon"
    :schemas ["uusiRakennus"]
-   :fields [polttoaine [:lammitus :lammonlahde]
-            sahko      [:varusteet :sahkoKytkin]]}
+   :fields [polttoaine [:lammitys :lammonlahde]
+            sahko      [:varusteet :sahkoKytkin]]
+   :facts {:ok   [["s\u00e4hk\u00f6" true]
+                  ["raskas poltto\u00f6ljy" false]]
+           :fail [["s\u00e4hk\u00f6" false]]}}
   (and (= polttoaine "s\u00e4hk\u00f6") (not= sahko true)))
 
 (defvalidator :vrk:CR322
