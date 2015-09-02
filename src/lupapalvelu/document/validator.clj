@@ -1,8 +1,25 @@
 (ns lupapalvelu.document.validator
-  (:require [sade.util :as util]
+  (:require [schema.core :as sc]
+            [sade.util :as util]
             [lupapalvelu.document.tools :as tools]))
 
 (defonce validators (atom {}))
+
+(def Validator
+  {:doc                     sc/Str
+   :schemas                 [sc/Str]
+   (sc/optional-key :level) (sc/enum :tip :warn :error)
+   ;;
+   ;; *** TODO: ota tassa kayttoon tallainen parempi tarkistus ***
+   ;;
+   :fields                  [sc/Any]
+;   :fields                  [(sc/pair sc/Symbol "variable-symbol" [(sc/either sc/Keyword util/Fn)] "path-part")]  ;; TODO: tama ei toimi
+   :facts   {:ok            (sc/either
+                              []
+                              [(sc/pred vector? "The expected OK fact results must be in a vector")])
+             :fail          (sc/either
+                              []
+                              [(sc/pred vector? "The expected FAIL fact results must be in a vector")])}})
 
 (defn validate
   "Runs all validators, returning list of concatenated validation results."
@@ -31,6 +48,11 @@
 (defmacro defvalidator
   "Macro to create document-level validators. Unwraps data etc."
   [code validator-data & body]
+  {:pre (keyword? code)}
+
+  (let [v (sc/check Validator validator-data)]
+    (assert (nil? v) (str code v)))
+
   (let [validator-data (util/ensure-sequential validator-data :schemas)
         {:keys [doc schemas level fields facts] :or {level :warn}} validator-data
         paths (->> fields (partition 2) (map last) (map starting-keywords) vec)]
