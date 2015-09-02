@@ -466,7 +466,7 @@
   (when (= lammonlahde "s\u00e4hk\u00f6") (not sahkoliittyma?)))
 
 (defvalidator :vrk:CR341
-  {:doc "Sahkolammitus vaatii sahkoliittyman"
+  {:doc "Sahkolammitys vaatii sahkoliittyman"
    :schemas ["uusiRakennus"]
    :fields [lammitystapa [:lammitys :lammitystapa]
             sahkoliittyma?  [:verkostoliittymat :sahkoKytkin]]
