@@ -194,7 +194,7 @@
   (condp = op
     :admin  (mongo/update-by-id :users user-id {$set {:company.role (if value "admin" "user")}})
     :enabled (mongo/update-by-id :users user-id {$set {:enabled (if value true false)}})
-    :delete (mongo/update-by-id :users user-id {$set {:enabled false :company nil}})
+    :delete (mongo/update-by-id :users user-id {$set {:enabled false}, $unset {:company 1}})
     (fail! :bad-request)))
 
 ;;

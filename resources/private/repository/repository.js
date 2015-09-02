@@ -37,7 +37,7 @@ var repository = (function() {
       var unsignedVersions = _(attachment.versions)
         // Drop previous, signed versions
         .dropWhile(function(v) {
-          return v.version.major !== lastSignature.version.major && v.version.minor !== lastSignature.version.minor;
+          return v.version.major !== lastSignature.version.major || v.version.minor !== lastSignature.version.minor;
         })
         // Drop current, signed versions
         .rest()

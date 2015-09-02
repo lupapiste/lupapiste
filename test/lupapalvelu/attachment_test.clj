@@ -116,6 +116,21 @@
     (create-sent-timestamp-update-statements attachments ["12" "23"] 123) => {"attachments.1.sent" 123
                                                                               "attachments.2.sent" 123}))
 
+(let [attachments [{:id 1 :versions [{:fileId "11", :version {:major 1, :minor 1}}
+                                     {:fileId "21", :version {:major 2, :minor 1}}]}
+                   {:id 2 :versions [{:fileId "12", :version {:major 1, :minor 2}}
+                                     {:fileId "22", :version {:major 2, :minor 2}}]}]]
+
+  (facts "get attachment version by file id"
+    (get-version-by-file-id (first attachments) "11") => {:fileId "11", :version {:major 1, :minor 1}}
+    (get-version-by-file-id (first attachments) "21") => {:fileId "21", :version {:major 2, :minor 1}}
+    (get-version-by-file-id (first attachments) "10") => nil)
+
+  (facts "get attachment version number by file id"
+    (get-version-number {:attachments attachments} 2 "12") => {:major 1, :minor 2}
+    (get-version-number {:attachments attachments} 1 "11") => {:major 1, :minor 1}
+    (get-version-number {:attachments attachments} 0 "12") => nil))
+
 (fact "attachment type IDs are unique"
   (let [known-duplicates (set (conj attachment-types-osapuoli
                                 :ote_asunto-osakeyhtion_kokouksen_poytakirjasta

@@ -32,6 +32,8 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.data = ko.observableArray(self.options());
 
+  self.optionsCaption = params.optionsCaption || loc("choose");
+
   self.showCaption = ko.pureComputed(function() {
     return !self.selected() && self.selectedTags().length === 0;
   });

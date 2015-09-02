@@ -9,7 +9,7 @@
             <!-- ko if: selected -->
             <span data-bind="text: selectedText ? selected()[selectedText] : selected()"></span>
             <!-- /ko -->
-            <span class="caption" data-bind="visible: showCaption, ltext: 'choose'"></span>
+            <span class="caption" data-bind="visible: showCaption, text: optionsCaption"></span>
             <!-- ko if: tags -->
             <ul data-bind="visible: selectedTags().length > 0" class="tags">
               <!-- ko foreach: selectedTags -->
@@ -41,8 +41,8 @@
                                      mousedown: $parent.selectItem.bind($data)},
                              mousedownBubble: false,
                              css: {active: $index() === $parent.index()},
-                             titleWhenOverflow: $data === null ? loc('choose') : $parent.selectedText ? $data[$parent.selectedText] : $data">
-                <span data-bind="text: $data === null ? loc('choose') : $parent.selectedText ? $data[$parent.selectedText] : $data"></span>
+                             titleWhenOverflow: $data === null ? $component.optionsCaption : $parent.selectedText ? $data[$parent.selectedText] : $data">
+                <span data-bind="text: $data === null ? $component.optionsCaption : $parent.selectedText ? $data[$parent.selectedText] : $data"></span>
               </li>
               <!-- /ko -->
               <!-- /ko -->
