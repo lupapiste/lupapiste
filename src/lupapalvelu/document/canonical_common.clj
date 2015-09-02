@@ -432,7 +432,7 @@
                         loc-s))}}))
            tyotehtavat))})))
 
-(defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
+(defn get-tyonjohtaja-data [application lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         ;; The mappings in backing system providers' end make us pass "muu" when "muu koulutus" is selected.
@@ -464,7 +464,7 @@
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
-(defn get-tyonjohtaja-v2-data [lang application tyonjohtaja party-type]
+(defn get-tyonjohtaja-v2-data [application lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         koulutus (if (= "other" (:koulutusvalinta patevyys))
@@ -494,10 +494,10 @@
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
-(defn- get-foremen [documents lang]
-  (if (contains? documents :tyonjohtaja)
-    (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data lang))
-    (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data lang))))
+(defn- get-foremen [application documents-by-type lang]
+  (if (contains? documents-by-type :tyonjohtaja)
+    (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data application lang))
+    (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data application lang))))
 
 (defn- get-neighbor [neighbor-name property-id]
   {:Naapuri {:henkilo neighbor-name
@@ -518,7 +518,7 @@
   {:Osapuolet
    {:osapuolitieto (get-parties documents-by-types)
     :suunnittelijatieto (get-designers documents-by-types)
-    :tyonjohtajatieto (get-foremen documents-by-types lang)
+    :tyonjohtajatieto (get-foremen application documents-by-types lang)
     ;:naapuritieto (get-neighbors neighbors)LPK-215
     }})
 
