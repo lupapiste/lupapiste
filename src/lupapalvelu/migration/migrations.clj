@@ -1066,7 +1066,8 @@
               (mongo/update-n collection {:_id (:id application)} {$set {:location [x y]}})))))
 
 ; TODO
-; tj v2 :ilmoitusHakemusValitsin -> permitSubtype
+; tj v2 (-> doc :data :ilmoitusHakemusValitsin :value) to permitSubtype
+
 
 ;;
 ;; ****** NOTE! ******

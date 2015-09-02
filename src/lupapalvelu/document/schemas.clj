@@ -379,10 +379,6 @@
                    {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja}
                    sijaisuus-tyonjohtaja))
 
-(def ilmoitus-hakemus-valitsin {:name "ilmoitusHakemusValitsin" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin._group_label" :type :select :sortBy :displayname :required true :blacklist [:applicant] :layout :single-line
-                                :body [{:name "ilmoitus" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin.ilmoitus"}
-                                       {:name "hakemus" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin.hakemus"}]})
-
 (def kuntaroolikoodi-tyonjohtaja-v2 [{:name "kuntaRoolikoodi"
                                       :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label"
                                       :type :select
@@ -457,7 +453,6 @@
 (def tyonjohtaja-v2 (body
                       tayta-omat-tiedot-button
                       designer-basic
-                      ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
                       patevyysvaatimusluokka ; Actually vaadittuPatevyysluokka in KRYSP
                       vastattavat-tyotehtavat-tyonjohtaja-v2
