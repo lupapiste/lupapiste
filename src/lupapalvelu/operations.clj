@@ -327,7 +327,7 @@
    :link-permit-verdict-required sc/Bool
    :add-operation-allowed sc/Bool
    :required [sc/Str]
-   (sc/optional-key :subtypes) [sc/Keyword]
+   (sc/optional-key :subtypes) [(sc/maybe sc/Keyword)]
    (sc/optional-key :state-graph-resolver) util/Fn
    (sc/optional-key :schema-data) [sc/Any]})
 
@@ -857,7 +857,7 @@
 
     :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
                                   :permit-type permit/R
-                                  :subtypes [:tyonjohtaja-hakemus :tyonjohtaja-ilmoitus]
+                                  :subtypes [nil :tyonjohtaja-hakemus :tyonjohtaja-ilmoitus]
                                   :state-graph-resolver tyonjohtaja-state-machine-resolver
                                   :required ["hankkeen-kuvaus-minimum"]
                                   :attachments []
