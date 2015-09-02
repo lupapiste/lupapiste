@@ -1065,6 +1065,9 @@
             (let [{:keys [x y]} (:location application)]
               (mongo/update-n collection {:_id (:id application)} {$set {:location [x y]}})))))
 
+; TODO
+; tj v2 :ilmoitusHakemusValitsin -> permitSubtype
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

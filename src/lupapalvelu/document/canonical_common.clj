@@ -484,7 +484,7 @@
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
-       :tyonjohtajaHakemusKytkin (= "hakemus" (:ilmoitusHakemusValitsin tyonjohtaja))
+       :tyonjohtajaHakemusKytkin (= "tyonjohtaja-hakemus" (:permitSubtype application))
        :sijaistustieto (get-sijaistustieto sijaistus rooli)
        :vainTamaHankeKytkin (:tyonjohtajanHyvaksynta (:tyonjohtajanHyvaksynta tyonjohtaja))}
       (when-not (s/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
@@ -516,9 +516,9 @@
 (defn osapuolet [{neighbors :neighbors :as application} documents-by-type lang]
   {:pre [(map? documents-by-type) (string? lang)]}
   {:Osapuolet
-   {:osapuolitieto (get-parties documents-by-types)
-    :suunnittelijatieto (get-designers documents-by-types)
-    :tyonjohtajatieto (get-foremen application documents-by-types lang)
+   {:osapuolitieto (get-parties documents-by-type)
+    :suunnittelijatieto (get-designers documents-by-type)
+    :tyonjohtajatieto (get-foremen application documents-by-type lang)
     ;:naapuritieto (get-neighbors neighbors)LPK-215
     }})
 
