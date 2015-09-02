@@ -1065,9 +1065,17 @@
             (let [{:keys [x y]} (:location application)]
               (mongo/update-n collection {:_id (:id application)} {$set {:location [x y]}})))))
 
-; TODO
-; tj v2 (-> doc :data :ilmoitusHakemusValitsin :value) to permitSubtype
-
+(defmigration ilmoitusHakemusValitsin-permitSubtype
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]
+          application (mongo/select collection {:primaryOperation.name "tyonjohtajan-nimeaminen-v2"} {:documents 1})
+          :let [doc (domain/get-document-by-name application "tyonjohtaja-v2")
+                val (-> doc :data :ilmoitusHakemusValitsin :value)
+                subtype (case val
+                          "ilmoitus" :tyonjohtaja-ilmoitus
+                          "hakemus"  :tyonjohtaja-hakemus
+                          nil)]]
+      (mongo/update-n collection {:_id (:id application)} {$set {:permitSubtype subtype}}))))
 
 ;;
 ;; ****** NOTE! ******
