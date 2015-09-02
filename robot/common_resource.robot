@@ -285,6 +285,9 @@ Naantali logs in
 Kuopio logs in
   Authority-admin logs in  kuopio-r  kuopio  Paakayttaja-R Kuopio
 
+Pena logs in
+  Applicant logs in  pena  pena  Pena Panaani
+
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until  Element should be visible  admin
