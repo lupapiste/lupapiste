@@ -28,6 +28,12 @@
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
 
+(defn- resolve-valid-subtypes
+  "Returns a set of valid permit and operation subtypes for the application."
+  [{permit-type :permitType op :primaryOperation}]
+  (let [op-subtypes (operations/get-primary-operation-metadata {:primaryOperation op} :subtypes)
+        permit-subtypes (permit/permit-subtypes permit-type)]
+    (->> (concat op-subtypes permit-subtypes) (remove nil?) set)))
 
 ;;
 ;; Validators
@@ -59,6 +65,15 @@
   [{user :user} {state :state}]
   (when (and (= :draft (keyword state)) (user/authority? user))
     unauthorized))
+
+(defn validate-has-subtypes [_ application]
+  (when (empty? (resolve-valid-subtypes application))
+    (fail :error.permit-has-no-subtypes)))
+
+(defn pre-check-permit-subtype [{data :data} application]
+  (when-let [subtype (:permitSubtype data)]
+    (when-not (contains? (resolve-valid-subtypes application) (keyword subtype))
+      (fail :error.permit-has-no-such-subtype))))
 
 ;;
 ;; Helpers
@@ -329,9 +344,3 @@
                                                               (:name))}}
                         :upsert true)))
 
-
-(defn validate-has-subtypes [_ {permit-type :permitType :as application}]
-  (when (and
-          (empty? (operations/get-primary-operation-metadata application :subtypes))
-          (empty? (permit/permit-subtypes permit-type)))
-    (fail :error.permit-has-no-subtypes)))

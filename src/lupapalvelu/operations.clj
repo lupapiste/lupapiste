@@ -990,8 +990,8 @@
   ([operation metadata-key] ((keyword metadata-key) (operations (keyword operation)))))
 
 (defn get-primary-operation-metadata
-  ([application] (get-operation-metadata (-> application :primaryOperation :name)))
-  ([application metadata-key] (get-operation-metadata (-> application :primaryOperation :name) metadata-key)))
+  ([{op :primaryOperation}] (get-operation-metadata (:name op)))
+  ([{op :primaryOperation} metadata-key] (get-operation-metadata (:name op) metadata-key)))
 
 (defn permit-type-of-operation [operation]
   (get-operation-metadata operation :permit-type))

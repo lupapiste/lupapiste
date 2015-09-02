@@ -413,24 +413,20 @@
     (when-not new-primary-op
       (fail! :error.unknown-operation))
     (update-application command {$set {:primaryOperation new-primary-op
-                                       :secondaryOperations new-secondary-ops}})))
+                                       :secondaryOperations new-secondary-ops}})
+    (ok)))
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :user-roles #{:applicant :authority}
    :states     states/pre-sent-application-states
+   :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
    :pre-checks [a/validate-has-subtypes
+                a/pre-check-permit-subtype
                 a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
-  (let [subtype (keyword permitSubtype)
-        op-subtypes (operations/get-primary-operation-metadata application :subtypes)
-        permit-subtypes (-> application permit/permit-type permit/permit-subtypes)
-        valid-subtypes (set (concat op-subtypes permit-subtypes))]
-    (if (valid-subtypes subtype)
-      (do
-        (update-application command {$set {:permitSubtype subtype, :modified created}})
-        (ok))
-      (fail :error.permit-has-no-such-subtype))))
+  (update-application command {$set {:permitSubtype permitSubtype, :modified created}})
+  (ok))
 
 (defn authority-if-post-verdict-state [{user :user} {state :state}]
   (when-not (or (user/authority? user)
