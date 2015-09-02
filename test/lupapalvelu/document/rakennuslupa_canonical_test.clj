@@ -179,7 +179,6 @@
            suunnittelija-henkilo
            (select-keys (:data tyonjohtaja) [:kuntaRoolikoodi :sijaistus :yritys])
            {:fillMyInfo {:value nil}
-            :ilmoitusHakemusValitsin {:value "hakemus"}
             :patevyysvaatimusluokka {:value "A"}
             :patevyys-tyonjohtaja {:koulutusvalinta {:value "arkkitehtiylioppilas"}
                                    :koulutus {:value ""}
@@ -442,6 +441,7 @@
                                    :primaryOperation {:name "tyonjohtajan-nimeaminen"
                                                       :id "5272668be8db5aaa01084601"
                                                       :created 1383229067483}
+                                   :permitSubtype "tyonjohtaja-hakemus"
                                    :documents [hakija-henkilo
                                                maksaja-henkilo
                                                tyonjohtaja-v2
