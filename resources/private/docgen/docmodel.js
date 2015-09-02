@@ -597,40 +597,47 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       }
       return b;
     }
-    var buttons$ = $("<div>").addClass( "group-buttons" );
-    if( opts.description ) {
-      buttons$.append( btnHelper( opts.description,
-                                  "secondary is-left",
-                                  "lupicon-pen",
-                                  loc( "op-description.edit")));
+    var groupButtons = $("<div>").addClass("group-buttons");
+
+    if (opts.description) {
+      groupButtons.append(
+        btnHelper(opts.description,
+                  "secondary is-left",
+                  "lupicon-pen",
+                  loc( "op-description.edit")));
     }
-    if( opts.star ) {
-      buttons$.append( btnHelper( opts.star,
-                                  "secondary is-left",
-                                  "lupicon-star",
-                                  opts.star.text));
+
+    if (opts.star) {
+      groupButtons.append(
+        btnHelper(opts.star,
+                  "secondary is-left",
+                  "lupicon-star",
+                  opts.star.text));
     }
-    if ( opts.remove ) {
-      buttons$.append( btnHelper( opts.remove,
-                                  "secondary is-right",
-                                  "lupicon-remove",
-                                  loc( "remove")));
+
+    if (opts.remove) {
+      groupButtons.append(
+        btnHelper(opts.remove,
+                  "secondary is-right",
+                  "lupicon-remove",
+                  loc( "remove")));
     }
-    if( opts.approval ) {
+
+    if (opts.approval) {
       var approvalElements = self.makeApprovalButtons(path, model, opts.approval);
-      var elemCount = _.size( approvalElements );
-      if( elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ))) {
+      var elemCount = _.size(approvalElements);
+      if (elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ))) {
         _.each(( approvalElements ), function( elem ) {
-          buttons$.append( elem );
+          groupButtons.append( elem );
         });
       }
     }
     if( opts.description ) {
-      buttons$.append( opts.description.bubble );
+      groupButtons.append( opts.description.bubble );
     }
 
-    if( buttons$.children().length ) {
-      container$.append( buttons$ );
+    if( groupButtons.children().length ) {
+      container$.append( groupButtons );
     }
   }
 
