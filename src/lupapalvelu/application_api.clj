@@ -71,7 +71,9 @@
           :authorities (if (user/authority? user)
                          (map #(select-keys % [:id :firstName :lastName]) (find-authorities-in-applications-organization app))
                          [])
-          :permitSubtypes (permit/permit-subtypes (:permitType app))))
+          :permitSubtypes (or
+                            (operations/get-primary-operation-metadata app :subtypes)
+                            (-> app permit/permit-type permit/permit-subtypes))))
     (fail :error.not-found)))
 
 (defquery application-authorities
