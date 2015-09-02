@@ -330,3 +330,8 @@
                         :upsert true)))
 
 
+(defn validate-has-subtypes [_ {permit-type :permitType :as application}]
+  (when (and
+          (empty? (operations/get-primary-operation-metadata application :subtypes))
+          (empty? (permit/permit-subtypes permit-type)))
+    (fail :error.permit-has-no-subtypes)))

@@ -419,18 +419,22 @@
   {:parameters [id permitSubtype]
    :user-roles #{:applicant :authority}
    :states     states/pre-sent-application-states
-   :pre-checks [permit/validate-permit-has-subtypes
+   :pre-checks [a/validate-has-subtypes
                 a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
-  (if-let [validation-errors (permit/is-valid-subtype (keyword permitSubtype) application)]
-    validation-errors
-    (update-application command
-                        {$set {:permitSubtype permitSubtype
-                               :modified      created}})))
+  (let [subtype (keyword permitSubtype)
+        op-subtypes (operations/get-primary-operation-metadata application :subtypes)
+        permit-subtypes (-> application permit/permit-type permit/permit-subtypes)
+        valid-subtypes (set (concat op-subtypes permit-subtypes))]
+    (if (valid-subtypes subtype)
+      (do
+        (update-application command {$set {:permitSubtype subtype, :modified created}})
+        (ok))
+      (fail :error.permit-has-no-such-subtype))))
 
 (defn authority-if-post-verdict-state [{user :user} {state :state}]
   (when-not (or (user/authority? user)
-                (contains? states/pre-verdict-states (keyword state)))
+                (states/pre-verdict-states (keyword state)))
     (fail :error.unauthorized)))
 
 (defcommand change-location
