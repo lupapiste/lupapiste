@@ -1006,7 +1006,7 @@
             :type :location}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
-    {:info {:name "kiinteisto-repeating"
+    {:info {:name "secondary-kiinteistot"
             :i18name "kiinteisto"
             :approvable true
             :order 2

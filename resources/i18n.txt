@@ -1,2 +1,2 @@
-kiinteisto-repeating._group_label: Kohteena oleva kiinteistö
-kiinteisto-repeating._append_label: Lisää kiinteistö
+secondary-kiinteistot._group_label: Kohteena oleva kiinteistö
+secondary-kiinteistot._append_label: Lisää kiinteistö
