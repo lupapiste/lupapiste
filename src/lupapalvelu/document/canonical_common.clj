@@ -464,7 +464,7 @@
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
-(defn get-tyonjohtaja-v2-data [lang tyonjohtaja party-type]
+(defn get-tyonjohtaja-v2-data [lang application tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         koulutus (if (= "other" (:koulutusvalinta patevyys))
@@ -513,7 +513,8 @@
                        "mark-done" (get-neighbor (-> neighbor :owner :name) propertyId)
                        nil)))))
 
-(defn osapuolet [documents-by-types neighbors lang]
+(defn osapuolet [{neighbors :neighbors :as application} documents-by-type lang]
+  {:pre [(map? documents-by-type) (string? lang)]}
   {:Osapuolet
    {:osapuolitieto (get-parties documents-by-types)
     :suunnittelijatieto (get-designers documents-by-types)
