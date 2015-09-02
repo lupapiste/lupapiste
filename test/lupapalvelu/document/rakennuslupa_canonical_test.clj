@@ -596,7 +596,7 @@
 
 (facts "Canonical tyonjohtaja model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja))
-        tyonjohtaja-model (get-tyonjohtaja-data {:permitSubtype "tyonjohtaja-hakemus"} "fi" tyonjohtaja-unwrapped :tyonjohtaja)
+        tyonjohtaja-model (get-tyonjohtaja-data {} "fi" tyonjohtaja-unwrapped :tyonjohtaja)
         henkilo (:henkilo tyonjohtaja-model)
         yritys (:yritys tyonjohtaja-model)
         sijaistus-213 (get-in tyonjohtaja-model [:sijaistustieto :Sijaistus])]
@@ -647,7 +647,7 @@
 
 (facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-blank-role-and-blank-qualification))
-        tyonjohtaja-model (get-tyonjohtaja-data {:permitSubtype "tyonjohtaja-ilmoitus"} "fi" tyonjohtaja-unwrapped :tyonjohtaja)]
+        tyonjohtaja-model (get-tyonjohtaja-data {} "fi" tyonjohtaja-unwrapped :tyonjohtaja)]
     (fact "model" tyonjohtaja-model => truthy)
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => "ei tiedossa")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ei tiedossa")
@@ -657,7 +657,7 @@
 
 (facts "Canonical tyonjohtajan sijaistus model is correct"
   (let [tyonjohtaja       (tools/unwrapped (:data tyonjohtajan-sijaistus-blank-dates))
-        tyonjohtaja-model (get-tyonjohtaja-data {:permitSubtype "tyonjohtaja-hakemus"} "fi" tyonjohtaja :tyonjohtaja)
+        tyonjohtaja-model (get-tyonjohtaja-data {} "fi" tyonjohtaja :tyonjohtaja)
         sijaistus-213     (-> tyonjohtaja-model :sijaistustieto :Sijaistus)]
     (facts "model 2.1.3" sijaistus-213 => truthy
       (fact "missing alkamisPvm" (:alkamisPvm sijaistus-213) => nil)
@@ -667,7 +667,7 @@
 
 (facts "Canonical tyonjohtajan vastattavaTyotieto is correct"
   (let [tyonjohtaja       (-> tyonjohtaja :data (dissoc :sijaistus) tools/unwrapped)
-        tyonjohtaja-model (get-tyonjohtaja-data {:permitSubtype "tyonjohtaja-hakemus"} "fi" tyonjohtaja :tyonjohtaja)
+        tyonjohtaja-model (get-tyonjohtaja-data {} "fi" tyonjohtaja :tyonjohtaja)
         sijaistus-213     (-> tyonjohtaja-model :sijaistustieto)]
     (:sijaistustieto tyonjohtaja-model) => nil
     (fact "no dates" (-> tyonjohtaja-model :vastattavaTyotieto first :VastattavaTyo keys) => [:vastattavaTyo])
