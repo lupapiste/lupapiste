@@ -7,17 +7,17 @@
         <div class="autocomplete-selection-wrapper" data-bind="event: {click: selectInput}">
           <span class="autocomplete-selection">
             <!-- ko if: selected -->
-            <span data-bind="text: selectedText ? selected()[selectedText] : selected()"></span>
+            <span data-bind="text: optionsText ? selected()[optionsText] : selected()"></span>
             <!-- /ko -->
-            <span class="caption" data-bind="visible: showCaption, ltext: 'choose'"></span>
+            <span class="caption" data-bind="visible: showCaption, text: optionsCaption"></span>
             <!-- ko if: tags -->
             <ul data-bind="visible: selectedTags().length > 0" class="tags">
               <!-- ko foreach: selectedTags -->
               <li class="tag">
                 <span class="tag-remove icon remove"
-                      data-bind="click: $parent.removeTag, clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false"></span>
-                <span class="tag-label" data-bind="text: $parent.selectedText ? $data[$parent.selectedText] : $data,
-                                                   titleWhenOverflow: $parent.selectedText ? $data[$parent.selectedText] : $data"></span>
+                      data-bind="click: $component.removeTag, clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false"></span>
+                <span class="tag-label" data-bind="text: $component.optionsText ? $data[$component.optionsText] : $data,
+                                                   titleWhenOverflow: $component.optionsText ? $data[$component.optionsText] : $data"></span>
               </li>
               <!-- /ko -->
             </ul>
@@ -32,17 +32,17 @@
           <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}, css: {'autocomplete-result-grouped': groupedResults}">
             <!-- ko foreach: data -->
               <!-- ko if: $data && $data.groupHeader -->
-              <li class="autocomplete-group-header" data-bind="text: $parent.selectedText ? $data[$parent.selectedText] : $data,
-                                                               titleWhenOverflow: $parent.selectedText ? $data[$parent.selectedText] : $data"></li>
+              <li class="autocomplete-group-header" data-bind="text: $component.optionsText ? $data[$component.optionsText] : $data,
+                                                               titleWhenOverflow: $component.optionsText ? $data[$component.optionsText] : $data"></li>
               <!-- /ko -->
               <!-- ko ifnot: $data && $data.groupHeader -->
               <li class="autocomplete-result-item"
-                  data-bind="event: {mouseover: $parent.changeIndex.bind($data, $index()),
-                                     mousedown: $parent.selectItem.bind($data)},
+                  data-bind="event: {mouseover: $component.changeIndex.bind($data, $index()),
+                                     mousedown: $component.selectItem.bind($data)},
                              mousedownBubble: false,
-                             css: {active: $index() === $parent.index()},
-                             titleWhenOverflow: $data === null ? loc('choose') : $parent.selectedText ? $data[$parent.selectedText] : $data">
-                <span data-bind="text: $data === null ? loc('choose') : $parent.selectedText ? $data[$parent.selectedText] : $data"></span>
+                             css: {active: $index() === $component.index()},
+                             titleWhenOverflow: $data === null ? $component.optionsCaption : $component.optionsText ? $data[$component.optionsText] : $data">
+                <span data-bind="text: $data === null ? $component.optionsCaption : $component.optionsText ? $data[$component.optionsText] : $data"></span>
               </li>
               <!-- /ko -->
               <!-- /ko -->

@@ -2,7 +2,11 @@ LUPAPISTE.OperationFilterService = function(params) {
   "use strict";
   var self = this;
 
-  self.data = ko.observable();
+  var _data = ko.observable();
+
+  self.data = ko.pureComputed(function() {
+    return _data();
+  });
 
   self.selected = ko.observableArray([]);
 
@@ -29,8 +33,7 @@ LUPAPISTE.OperationFilterService = function(params) {
     .query("get-application-operations")
     .error(_.noop)
     .success(function(res) {
-      self.data(res.operationsByPermitType);
+      _data(res.operationsByPermitType);
     })
     .call();
-
 };

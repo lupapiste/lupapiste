@@ -7,12 +7,7 @@ LUPAPISTE.AutocompleteOrganizationsModel = function() {
   self.query = ko.observable("");
 
   self.data = ko.pureComputed(function() {
-    var q = self.query() || "";
-    return _.filter(lupapisteApp.services.organizationFilterService.data(), function(item) {
-      return _.reduce(q.split(" "), function(result, word) {
-        return _.contains(item.label.toUpperCase(), word.toUpperCase()) &&
-          !_.some(self.selected(), item) && result;
-      }, true);
-    });
+    var filteredData = util.filterDataByQuery(lupapisteApp.services.organizationFilterService.data(), self.query() || "", self.selected());
+    return _.sortBy(filteredData, "label");
   });
 };
