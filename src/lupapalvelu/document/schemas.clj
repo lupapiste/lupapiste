@@ -910,7 +910,7 @@
 
     {:info {:name "hakija"
             :i18name "osapuoli"
-            :order 3
+            :order 4
             :removable true
             :repeating true
             :approvable true
@@ -924,7 +924,7 @@
 
     {:info {:name "hakija-r"
             :i18name "osapuoli"
-            :order 3
+            :order 4
             :removable true
             :repeating true
             :approvable true
@@ -938,7 +938,7 @@
 
     {:info {:name "hakija-ya"
             :i18name "osapuoli"
-            :order 3
+            :order 4
             :removable false
             :repeating false
             :approvable true
@@ -951,7 +951,7 @@
 
     {:info {:name "paasuunnittelija"
             :i18name "osapuoli"
-            :order 4
+            :order 5
             :removable false
             :approvable true
             :type :party}
@@ -960,7 +960,7 @@
     {:info {:name "suunnittelija"
             :i18name "osapuoli"
             :repeating true
-            :order 5
+            :order 6
             :removable true
             :approvable true
             :type :party}
@@ -968,7 +968,7 @@
 
     {:info {:name "tyonjohtaja"
             :i18name "osapuoli"
-            :order 5
+            :order 6
             :removable true
             :repeating true
             :approvable true
@@ -977,7 +977,7 @@
 
     {:info {:name "tyonjohtaja-v2"
             :i18name "osapuoli"
-            :order 5
+            :order 6
             :removable false
             :repeating false
             :approvable true
@@ -987,7 +987,7 @@
     {:info {:name "maksaja"
             :i18name "osapuoli"
             :repeating true
-            :order 6
+            :order 7
             :removable true
             :approvable true
             :subtype :maksaja
@@ -1009,7 +1009,7 @@
     {:info {:name "secondary-kiinteistot"
             :i18name "kiinteisto"
             :approvable true
-            :order 2
+            :order 3
             :repeating true
             :removable true
             :type :location}
