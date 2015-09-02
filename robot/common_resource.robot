@@ -366,8 +366,8 @@ Primary operation is
 #
 
 Create application the fast way
-  [Arguments]  ${address}  ${propertyId}  ${operation}
-  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
+  [Arguments]  ${address}  ${propertyId}  ${operation}  ${state}=draft
+  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
