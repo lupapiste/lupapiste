@@ -6,8 +6,9 @@
 (defvalidator :too-much-health
   {:doc    "health validator"
    :schemas ["test"]
-   :fields [health     [:player :health]
-            max-health [:game :max-health]]}
+   :facts   {:ok [] :fail []}
+   :fields  [health     [:player :health]
+             max-health [:game :max-health]]}
   (and health max-health (> health max-health)))
 
 (def document {:schema-info {:name "invalid"}
