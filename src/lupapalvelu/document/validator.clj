@@ -10,7 +10,7 @@
    :schemas                 [sc/Str]
    (sc/optional-key :level) (sc/enum :tip :warn :error)
    ;;
-   ;; *** TODO: ota tassa kayttoon tallainen parempi tarkistus ***
+   ;; *** TODO: ota tassa kayttoon parempi tarkistus. Yritelma alla kommenteissa. ***
    ;;
    :fields                  [sc/Any]
 ;   :fields                  [(sc/pair sc/Symbol "variable-symbol" [(sc/either sc/Keyword util/Fn)] "path-part")]  ;; TODO: tama ei toimi
@@ -49,11 +49,9 @@
   "Macro to create document-level validators. Unwraps data etc."
   [code validator-data & body]
   {:pre (keyword? code)}
-
-  (let [v (sc/check Validator validator-data)]
-    (assert (nil? v) (str code v)))
-
   (let [validator-data (util/ensure-sequential validator-data :schemas)
+        validator-result (sc/check Validator validator-data)
+        _ (assert (nil? validator-result) (str code validator-result))
         {:keys [doc schemas level fields facts] :or {level :warn}} validator-data
         paths (->> fields (partition 2) (map last) (map starting-keywords) vec)]
     (doseq [schema schemas]
