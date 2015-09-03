@@ -4,7 +4,7 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="autocomplete-template">
       <div class="autocomplete-component" data-bind="css: {'has-tags': tags}">
-        <div class="autocomplete-selection-wrapper" data-bind="event: {click: selectInput}">
+        <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}">
           <span class="autocomplete-selection">
             <!-- ko if: selected -->
             <span data-bind="text: optionsText ? selected()[optionsText] : selected()"></span>
