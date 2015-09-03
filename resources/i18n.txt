@@ -1,0 +1,35 @@
+operations.tree.kiinteistonmuodostus: Kiinteistönmuodostus
+operations.kiinteistonmuodostus: Kiinteistönmuodostus
+operations.kiinteistonmuodostus.desc: Lohkominen, tontin lohkominen, yleisen alueen lohkominen, tunnusmuutos, laadunmuutos, kiinteistöjen yhdistäminen, halkominen, tilusvaihto
+operations.tree.rajankaynti: Rajankäynti
+operations.rajankaynti: Rajankäynti
+operations.rajankaynti.desc: Jos rajan paikasta on epäselvyyttä ja se halutaan maastoon merkittäväksi virallisilla rajamerkeillä voi maanomistaja hakea rajanmääräämistä. Rajanmäärääminen on kiinteistötoimitus, jossa viranomainen tekee päätöksen rajan paikasta. Rajannäyttö tarkoittaa epäselvän tontin tai kiinteistön rajan paikan merkintää esimerkiksi puupaaluilla maastoon. Rajanäyttö on maksullinen. Mikäli kadonneiden rajamerkkien paikalle halutaan viralliset rajamerkit, rajan paikka selvitetään ja vahvistetaan rajankäyntitoimituksella.
+rajankaynti.rajankayntiTyyppi._group_label: Selvitettävä asia
+rajankaynti.rajankayntiTyyppi.Rajan paikkaa ja rajamerkkiä koskeva epäselvyys (rajankäynti): Rajan paikkaa ja rajamerkkiä koskeva epäselvyys (rajankäynti)
+rajankaynti.rajankayntiTyyppi.Epäselvyys siitä, mihin rekisteriyksikköön jokin alue kuuluu: Epäselvyys siitä, mihin rekisteriyksikköön jokin alue kuuluu
+rajankaynti.rajankayntiTyyppi.Rasiteoikeutta ja rasitteen sijaintia koskeva epäselvyys: Rasiteoikeutta ja rasitteen sijaintia koskeva epäselvyys
+rajankaynti.rajankayntiTyyppi.Kiinteistön osuus yhteiseen alueeseen tai yhteiseen erityiseen etuuteen ja osuudensuuruus sekä kiinteistölle kuuluva erityinen etuus: Kiinteistön osuus yhteiseen alueeseen tai yhteiseen erityiseen etuuteen ja osuudensuuruus sekä kiinteistölle kuuluva erityinen etuus
+rajankaynti.rajankayntiTyyppi.Yhteisen alueen tai yhteisen erityisen etuuden osakaskiinteistöt ja niille kuuluvien osuuksien suuruudet: Yhteisen alueen tai yhteisen erityisen etuuden osakaskiinteistöt ja niille kuuluvien osuuksien suuruudet
+rajankaynti.rajankayntiTyyppi.Epäselvän, kadonneen tai turmeltuneen toimitusasiakirjan tai kartan sisältö: Epäselvän, kadonneen tai turmeltuneen toimitusasiakirjan tai kartan sisältö
+rajankaynti.rajankayntiTyyppi.Ristiriitaisista toimitusasiakirjoista tai kartoista johtuva epäselvyys: Ristiriitaisista toimitusasiakirjoista tai kartoista johtuva epäselvyys
+rajankaynti.kuvaus: Kuvaus
+rajankaynti._group_label: Rajankäynti
+operations.tree.tonttijako: Tonttijako
+operations.tree.tonttijako.desc: Tonttijako on lohkomissuunnitelma, joka tarvitaan asemakaava-alueella ennen lohkomista. Tonttijako lähtee liikkeelle maanomistajan aloitteesta. Ensimmäinen tonttijako on maksuton, jos korttelialueella on useita maanomistajia. Jos tonttijako tehdään vain yhden maanomistajan tarpeisiin, peritään siitä maksu.
+operations.tonttijako: Tonttijako
+tonttijako._group_label: Tonttijako
+operations.tree.asemakaava: Asemakaava
+operations.tree.asemakaava.desc: Asemakaavan laadinta ja päivittäminen.
+operations.asemakaava: Asemakaava
+asemakaava._group_label: Asemakaava
+operations.tree.ranta-asemakaava: Ranta-asemakaava
+operations.tree.ranta-asemakaava.desc: Ranta-asemakaavan laadinnan ja muutosten hakeminen.
+operations.ranta-asemakaava: Ranta-asemakaava
+ranta-asemakaava._group_label: Ranta-asemakaava
+operations.tree.yleiskaava: Yleiskaava
+operations.tree.yleiskaava.desc: Yleiskaavalaadinnan ja muutosten hakeminen.
+operations.yleisasemakaava: Yleiskaava
+yleiskaava._group_label: Yleiskaava
+maankayton-muutos.uusiKytkin.uusi: Uusi
+maankayton-muutos.uusiKytkin.muutos: Muutos olemassaolevaan
+maankayton-muutos.kuvaus: Kuvaus
