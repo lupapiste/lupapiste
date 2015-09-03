@@ -54,26 +54,26 @@
         _ (assert (nil? validator-result) (str code validator-result))
         {:keys [doc schemas level fields facts] :or {level :warn}} validator-data
         paths (->> fields (partition 2) (map last) (map starting-keywords) vec)]
-    (doseq [schema schemas]
-      `(swap! validators assoc ~code
-        {:code ~code
-         :doc ~doc
-         :paths ~paths
-         :level ~level
-         :schema ~schema
-         :facts ~facts
-         :fn (fn [{~'data :data {~'doc-schema :name} :schema-info}]
-               (let [~'data (tools/unwrapped ~'data)]
-                 (when (or (not ~schema) (= ~schema ~'doc-schema))
-                   (let
-                     ~(reduce into
-                        (for [[k v] (partition 2 fields)]
-                          [k `(->> ~'data ~@v)]))
-                     (try
-                       (when-let [resp# (do ~@body)]
-                         (map (fn [path#] {:path   path#
-                                           :result [~level ~(name code)]}) ~paths))
-                       (catch Exception e#
-                         [{:path   []
-                           :result [:warn (str "validator")]
-                           :reason (str e#)}]))))))}))))
+    `(doseq [schema# ~schemas]
+       (swap! validators assoc ~code
+         {:code ~code
+          :doc ~doc
+          :paths ~paths
+          :level ~level
+          :schema schema#
+          :facts ~facts
+          :fn (fn [{~'data :data {~'doc-schema :name} :schema-info}]
+                (let [~'data (tools/unwrapped ~'data)]
+                  (when (or (not schema#) (= schema# ~'doc-schema))
+                    (let
+                      ~(reduce into
+                         (for [[k v] (partition 2 fields)]
+                           [k `(->> ~'data ~@v)]))
+                      (try
+                        (when-let [resp# (do ~@body)]
+                          (map (fn [path#] {:path   path#
+                                            :result [~level ~(name code)]}) ~paths))
+                        (catch Exception e#
+                          [{:path   []
+                            :result [:warn (str "validator")]
+                            :reason (str e#)}]))))))}))))
