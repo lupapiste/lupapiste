@@ -28,20 +28,23 @@ ${DB PREFIX}                    test_
 
 *** Keywords ***
 Browser
-  [Arguments]  ${url}
+  [Arguments]
   ${timestamp}=  Get Time  epoch
   Set Test Variable  \${dbname}  ${DB PREFIX}${timestamp}
-  Open browser  ${url}  ${BROWSER}   remote_url=${SELENIUM}
+  # Setting cookies on login page fails on IE8, perhaps bacause of
+  # caching headers:
+  # https://code.google.com/p/selenium/issues/detail?id=6985
+  # Open a static HTML page and set cookie there
+  Open browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
   Add Cookie  ${DB COOKIE}  ${dbname}
   Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
   Log  Cookie: ${DB COOKIE} = ${dbname}
 
 Open browser to login page
-  Browser  ${LOGIN URL}
+  Browser
   Maximize browser window
   Set selenium speed  ${DEFAULT_SPEED}
-  Title should be  Lupapiste
-  Wait Until  Page should contain  Haluan kirjautua palveluun
+  Go to login page
 
 Go to login page
   Go to  ${LOGIN URL}
