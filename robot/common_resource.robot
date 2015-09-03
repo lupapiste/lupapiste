@@ -457,7 +457,7 @@ Do prepare new request
 Select attachment operation option from dropdown
   [Arguments]  ${optionName}
   Wait until  Element should be visible  xpath=//select[@data-test-id="attachment-operations-select-lower"]
-  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
+  Wait until  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
 
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}

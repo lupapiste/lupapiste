@@ -55,8 +55,10 @@ Sonja marks one attachment as verdict attachment using multiselect view
   Select attachment operation option from dropdown  markVerdictAttachments
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
   Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
-  Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
+  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
+  Wait until  Checkbox Should Be Selected  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]//input
   Click by test id  multiselect-action-button
+  Wait for jQuery
 
 There should be now one verdict attachment
   Wait until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="verdict-attachment-muut.muu"]
