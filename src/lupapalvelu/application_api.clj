@@ -22,7 +22,7 @@
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ktj :as ktj]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.operations :as operations]
@@ -243,7 +243,7 @@
                                             meta-fields/enrich-with-link-permit-data
                                             (dissoc :id)
                                             (assoc :_id (:id application))))
-    (catch com.mongodb.MongoException$DuplicateKey e
+    (catch com.mongodb.DuplicateKeyException e
       ; This is ok. Only the first submit is saved.
       )))
 
