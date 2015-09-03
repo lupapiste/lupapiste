@@ -14,6 +14,17 @@
    ;;
    :fields                  [sc/Any]
 ;   :fields                  [(sc/pair sc/Symbol "variable-symbol" [(sc/either sc/Keyword util/Fn)] "path-part")]  ;; TODO: tama ei toimi
+;;  Saako taman toimimaan?
+;   :fields                  (sc/pred
+;                              (fn [fields]
+;                                (println "\n fields first: " (first fields) "\n")
+;                                (println "\n fields second: " (second fields) "\n")
+;                                (every? (fn [field]
+;                                          (and
+;                                            (-> field first keyword?)
+;                                            (-> field second vector?)
+;                                            (every? (fn [part] (or (keyword? part) (fn? part))) (second field)))) (partition 2 fields)))
+;                              "field")
    :facts   {:ok            (sc/either
                               []
                               [(sc/pred vector? "The expected OK fact results must be in a vector")])
@@ -55,25 +66,26 @@
         {:keys [doc schemas level fields facts] :or {level :warn}} validator-data
         paths (->> fields (partition 2) (map last) (map starting-keywords) vec)]
     `(doseq [schema# ~schemas]
-       (swap! validators assoc ~code
-         {:code ~code
-          :doc ~doc
-          :paths ~paths
-          :level ~level
-          :schema schema#
-          :facts ~facts
-          :fn (fn [{~'data :data {~'doc-schema :name} :schema-info}]
-                (let [~'data (tools/unwrapped ~'data)]
-                  (when (or (not schema#) (= schema# ~'doc-schema))
-                    (let
-                      ~(reduce into
-                         (for [[k v] (partition 2 fields)]
-                           [k `(->> ~'data ~@v)]))
-                      (try
-                        (when-let [resp# (do ~@body)]
-                          (map (fn [path#] {:path   path#
-                                            :result [~level ~(name code)]}) ~paths))
-                        (catch Exception e#
-                          [{:path   []
-                            :result [:warn (str "validator")]
-                            :reason (str e#)}]))))))}))))
+       (let [validator-code# (keyword (str (name ~code) "-" schema#))]
+         (swap! validators assoc validator-code#
+           {:code validator-code#
+            :doc ~doc
+            :paths ~paths
+            :level ~level
+            :schema schema#
+            :facts ~facts
+            :fn (fn [{~'data :data {~'doc-schema :name} :schema-info}]
+                  (let [~'data (tools/unwrapped ~'data)]
+                    (when (or (not schema#) (= schema# ~'doc-schema))
+                      (let
+                        ~(reduce into
+                           (for [[k v] (partition 2 fields)]
+                             [k `(->> ~'data ~@v)]))
+                        (try
+                          (when-let [resp# (do ~@body)]
+                            (map (fn [path#] {:path   path#
+                                              :result [~level ~(name code)]}) ~paths))
+                          (catch Exception e#
+                            [{:path   []
+                              :result [:warn (str "validator")]
+                              :reason (str e#)}]))))))})))))
