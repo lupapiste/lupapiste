@@ -10,6 +10,7 @@ Suite setup  Apply minimal fixture now
 Teppo logs in and creates some applications
   Teppo logs in
   ${secs} =  Get Time  epoch
+  Set Suite Variable  ${info}  info
   Set Suite Variable  ${draft}  draft
   Set Suite Variable  ${open}  open
   Set Suite Variable  ${answered}  answered
@@ -35,11 +36,13 @@ Teppo navigates to application page
 
 Teppo selects application tab
   Click by test id  search-tab-application
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  4
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  6
   Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${submitted}"]
   Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${sent}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${comlement-needed}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${complement-needed}"]
   Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${draft}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${open}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${answered}"]
 
 Teppo selects construction tab
   Click by test id  search-tab-construction
@@ -49,9 +52,7 @@ Teppo selects construction tab
 
 Teppo selects inforequest tab
   Click by test id  search-tab-inforequest
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  3
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${open}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${answered}"]
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  1
   Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${info}"]
 
 Teppo selects cancelled tab
@@ -74,7 +75,7 @@ Sonja selects application tab
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  3
   Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${submitted}"]
   Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${sent}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${comlement-needed}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${complement-needed}"]
 
 Sonja selects construction tab
   Click by test id  search-tab-construction

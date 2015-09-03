@@ -78,8 +78,8 @@
       (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
       (if (applicant? user)
         (case applicationType
-          "inforequest"       {:state {$in ["answered" "open" "info"]}}
-          "application"       {:state {$in ["submitted" "sent" "complement-needed" "draft"]}}
+          "inforequest"       {:state "info"}
+          "application"       {:state {$in ["answered" "open" "submitted" "sent" "complement-needed" "draft"]}}
           "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
           "canceled"          {:state "canceled"}
           {:state {$ne ["cancelled"]}})
