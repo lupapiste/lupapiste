@@ -14,6 +14,7 @@
             [monger.gridfs :as gfs]
             [monger.command :refer [server-status]]
             [monger.query :as query]
+            [monger.credentials :as mcred]
             [sade.status :refer [defstatus]])
   (:import [javax.net.ssl SSLSocketFactory]
            [org.bson.types ObjectId]
@@ -21,11 +22,7 @@
            [com.mongodb.gridfs GridFS GridFSInputFile]))
 
 
-;; $each is missing from monger.operations.
-;; https://github.com/michaelklishin/monger/pull/84
-(def $each "$each")
-
-(def operators (conj (set (map name (keys (ns-publics 'monger.operators)))) $each))
+(def operators (set (map name (keys (ns-publics 'monger.operators)))))
 
 ;;
 ;; Utils
@@ -125,20 +122,20 @@
   ([collection query]
     {:pre [collection (map? query)]}
     (map with-id (query/with-collection (name collection)
-                 (query/find (remove-null-chars query))
-                 (query/snapshot))))
+                                        (query/find (remove-null-chars query))
+                                        (query/snapshot))))
   ([collection query projection]
     {:pre [collection (map? query) (seq projection)]}
     (map with-id (query/with-collection (name collection)
-                 (query/find (remove-null-chars query))
-                 (query/fields (if (map? projection) (keys projection) projection))
-                 (query/snapshot))))
+                                        (query/find (remove-null-chars query))
+                                        (query/fields (if (map? projection) (keys projection) projection))
+                                        (query/snapshot))))
   ([collection query projection order-by]
     {:pre [collection (map? query) (seq projection) (instance? clojure.lang.PersistentArrayMap order-by)]}
     (map with-id (query/with-collection (name collection)
-                   (query/find (remove-null-chars query))
-                   (query/fields (if (map? projection) (keys projection) projection))
-                   (query/sort order-by)))))
+                                        (query/find (remove-null-chars query))
+                                        (query/fields (if (map? projection) (keys projection) projection))
+                                        (query/sort order-by)))))
 
 (defn select-one
   "returns one entry by matching the monger query"
@@ -275,6 +272,8 @@
 
 (defonce connected (atom false))
 
+(defonce mongo-conn (atom {:db nil}))
+
 (defn connect!
   ([]
     (let [conf (env/value :mongodb)
@@ -285,35 +284,39 @@
       (connect! server-list db user pw ssl)))
   ([^String host ^Long port]
     (let [conf (env/value :mongodb)
-          db   (:dbname conf)
+          dbname   (:dbname conf)
           user (-> conf :credentials :username)
           pw   (-> conf :credentials :password)
           ssl  (:ssl conf)]
-      (connect! (m/server-address host port) db user pw ssl)))
-  ([servers db username password ssl]
+      (connect! (m/server-address host port) dbname user pw ssl)))
+  ([servers dbname username password ssl]
     (let [servers (if (string? servers)
                     (let [[host port] (clojure.string/split servers #":")]
                       (m/server-address host (Long/parseLong port)))
-                    servers  )]
+                    servers)]
       (if @connected
        (debug "Already connected!")
        (do
          (debug "Connecting to MongoDB:" (s/join (map str servers)) (if ssl "using ssl" "without encryption"))
-         (m/connect! servers (mongo-options :ssl ssl))
+         (let [conn (if (and username password)
+                      (m/connect servers (mongo-options :ssl ssl) (mcred/create username dbname password))
+                      (m/connect servers (mongo-options :ssl ssl)))
+               db   (m/get-db conn dbname)]
+           (swap! mongo-conn assoc :conn db))
          (reset! connected true)
          (m/set-default-write-concern! WriteConcern/JOURNALED)
-         (when (and username password)
-           (if (m/authenticate (m/get-db db) username (.toCharArray password))
-             (debugf "Authenticated to DB '%s' as '%s'" db username)
-             (errorf "Authentication to DB '%s' as '%s' failed!" db username)))
-         (m/use-db! db)
-         (debugf "MongoDB %s mode is %s" (.getName (m/get-db)) (db-mode)))))))
+         #_(when (and username password)
+           (if (m/authenticate (m/get-db dbname) username (.toCharArray password))
+             (debugf "Authenticated to DB '%s' as '%s'" dbname username)
+             (errorf "Authentication to DB '%s' as '%s' failed!" dbname username)))
+         #_(m/use-db! dbname)
+         #_(debugf "MongoDB %s mode is %s" (.getName (m/get-db)) (db-mode)))))))
 
 (defn disconnect! []
   (debug "Disconnecting")
   (if @connected
     (do
-      (m/disconnect!)
+      (m/disconnect (:db @mongo-conn))
       (reset! connected false))
     (debug "Not connected")))
 
