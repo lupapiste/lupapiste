@@ -23,12 +23,18 @@ ${CREATE URL}                   ${SERVER}/dev/create
 ${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
 ${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
 ${SELENIUM}                     ${EMPTY}
+${DB COOKIE}                    test_db_name
+${DB PREFIX}                    test_
 
 *** Keywords ***
-
 Browser
   [Arguments]  ${url}
+  ${timestamp}=  Get Time  epoch
+  Set Test Variable  \${dbname}  ${DB PREFIX}${timestamp}
   Open browser  ${url}  ${BROWSER}   remote_url=${SELENIUM}
+  Add Cookie  ${DB COOKIE}  ${dbname}
+  Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
+  Log  Cookie: ${DB COOKIE} = ${dbname}
 
 Open browser to login page
   Browser  ${LOGIN URL}
