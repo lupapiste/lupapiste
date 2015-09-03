@@ -766,17 +766,17 @@
         rakennuksen-osoite
         rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja-muutos))
 
-(def rakennuksen-muuttaminen-ei-huoneistoja (body
-                                              muutostyonlaji
-                                              olemassaoleva-rakennus-ei-huoneistoja))
+#_(def rakennuksen-muuttaminen-ei-huoneistoja (body
+                                               muutostyonlaji
+                                               olemassaoleva-rakennus-ei-huoneistoja))
 
 (def rakennuksen-muuttaminen-ei-huoneistoja-muutos (body
                                                      muutostyonlaji
                                                      olemassaoleva-rakennus-ei-huoneistoja-muutos))
 
-(def rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja (body
-                                                                    muutostyonlaji
-                                                                    olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
+#_(def rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja (body
+                                                                     muutostyonlaji
+                                                                     olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
 
 (def rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja-muutos (body
                                                                            muutostyonlaji
@@ -895,13 +895,12 @@
     {:info {:name "kaupunkikuvatoimenpide" :approvable true}
      :body (approvable-top-level-groups rakennelma)}
 
-    {:info {:name "maalampokaivo"
-            :approvable true
-            :i18name "maalampokaivo"}
+    {:info {:name "maalampokaivo" :approvable true :i18name "maalampokaivo"}
      :body (approvable-top-level-groups maalampokaivo-rakennelma)}
 
     {:info {:name "maisematyo" :approvable true}
      :body (approvable-top-level-groups maisematyo)}
+
     {:info {:name "kiinteistotoimitus" :approvable true}
      :body (approvable-top-level-groups (body kuvaus))}
 
