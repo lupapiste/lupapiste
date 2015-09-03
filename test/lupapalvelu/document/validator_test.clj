@@ -11,7 +11,7 @@
              max-health [:game :max-health]]}
   (and health max-health (> health max-health)))
 
-(def document {:schema-info {:name "invalid"}
+(def document {:schema-info {:name "test"}
                :data {:player {:health     10}
                       :game   {:max-health 10}}})
 
@@ -22,15 +22,15 @@
   (fact "is valid with wrong data and wrong schema"
     (->
       document
-      (assoc-in [:schema-info :name] "test")
+      (assoc-in [:schema-info :name] "invalid")
       (assoc-in [:data :player :health] 11)
-      validate) => [{:path [:player :health]
-                     :result [:warn "too-much-health"]}
-                    {:path [:game :max-health]
-                     :result [:warn "too-much-health"]}])
+      validate) => empty?)
 
   (fact "is invalid with wrong data and right schema"
     (->
       document
       (assoc-in [:data :player :health] 11)
-      validate) => empty?))
+      validate) => [{:path [:player :health]
+                     :result [:warn "too-much-health"]}
+                    {:path [:game :max-health]
+                     :result [:warn "too-much-health"]}]))
