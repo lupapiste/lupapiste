@@ -1,7 +1,6 @@
 (ns lupapalvelu.fixture.core
   (:require [taoensso.timbre :as timbre :refer [debug info warnf error]]
-            [lupapalvelu.mongo :as mongo])
-  (:import [com.mongodb MongoException MongoException$DuplicateKey]))
+            [lupapalvelu.mongo :as mongo]))
 
 (defonce fixtures (atom {}))
 
@@ -27,13 +26,13 @@
   (try
     (mongo/insert :users user)
     (debug "Created user" (:email user))
-    (catch MongoException$DuplicateKey e
+    (catch com.mongodb.DuplicateKeyException e
       (debug "Duplicate user:" (:email user)))))
 
 (defn insert-organization [organization]
   (try
     (mongo/insert :organizations organization)
     (debug "Created organization" (-> organization :name :fi) (:id organization))
-    (catch MongoException$DuplicateKey e
+    (catch com.mongodb.DuplicateKeyException e
       (debug "Duplicate organization:" (:id organization)))))
 

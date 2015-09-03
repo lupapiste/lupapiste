@@ -453,7 +453,7 @@
 
       (get-user-by-email email)
 
-      (catch com.mongodb.MongoException$DuplicateKey e
+      (catch com.mongodb.DuplicateKeyException e
         (if-let [field (second (re-find #"E11000 duplicate key error index: lupapiste\.users\.\$([^\s._]+)" (.getMessage e)))]
           (do
             (warnf "Duplicate key detected when inserting new user: field=%s" field)
