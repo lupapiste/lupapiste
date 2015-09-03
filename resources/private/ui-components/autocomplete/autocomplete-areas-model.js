@@ -26,7 +26,7 @@ LUPAPISTE.AutocompleteAreasModel = function() {
           if (_.keys(lupapisteApp.services.areaFilterService.data()).length > 1) {
             result = result.concat(header);
           }
-          result = result.concat(filteredData);
+          result = result.concat(_.sortBy(filteredData, "label"));
         }
       }
     });

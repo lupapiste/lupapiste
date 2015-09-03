@@ -3,7 +3,6 @@
 Documentation   Prev permit interaction
 Suite teardown  Logout
 Resource        ../../common_resource.robot
-#Variables      ../06_attachments/variables.py
 
 *** Test Cases ***
 

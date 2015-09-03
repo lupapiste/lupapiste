@@ -23,12 +23,18 @@ ${CREATE URL}                   ${SERVER}/dev/create
 ${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
 ${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
 ${SELENIUM}                     ${EMPTY}
+${DB COOKIE}                    test_db_name
+${DB PREFIX}                    test_
 
 *** Keywords ***
-
 Browser
   [Arguments]  ${url}
+  ${timestamp}=  Get Time  epoch
+  Set Test Variable  \${dbname}  ${DB PREFIX}${timestamp}
   Open browser  ${url}  ${BROWSER}   remote_url=${SELENIUM}
+  Add Cookie  ${DB COOKIE}  ${dbname}
+  Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
+  Log  Cookie: ${DB COOKIE} = ${dbname}
 
 Open browser to login page
   Browser  ${LOGIN URL}
@@ -285,6 +291,9 @@ Naantali logs in
 Kuopio logs in
   Authority-admin logs in  kuopio-r  kuopio  Paakayttaja-R Kuopio
 
+Pena logs in
+  Applicant logs in  pena  pena  Pena Panaani
+
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until  Element should be visible  admin
@@ -448,7 +457,7 @@ Do prepare new request
 Select attachment operation option from dropdown
   [Arguments]  ${optionName}
   Wait until  Element should be visible  xpath=//select[@data-test-id="attachment-operations-select-lower"]
-  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
+  Wait until  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
 
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}

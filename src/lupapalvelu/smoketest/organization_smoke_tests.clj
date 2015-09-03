@@ -12,7 +12,8 @@
                      (mapcat :scope)
                      (group-by :municipality)
                      (map (fn [[muni scopes]] [muni (map :permitType scopes)]))
-                     (remove #(apply distinct? (second %))))]
+                     (remove #(apply distinct? (second %)))
+                     (into {}))]
     (if (seq results)
       {:ok false :results results}
       {:ok true})))

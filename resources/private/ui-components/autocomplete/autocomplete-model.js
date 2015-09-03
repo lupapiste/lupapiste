@@ -3,34 +3,36 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   var self = this;
 
-  // self.dataProvider = params.dataProvider;
+  self.selectedOptions = params.selectedOptions;
 
-  self.value = params.selectedOptions;
-
+  // Parameters
   // tagging support
   self.tags = params.tags;
 
-  self.selectedText = params.optionsText || "label";
+  self.optionsText = params.optionsText || "label";
 
   self.query = params.query;
 
-  self.inputSelected = ko.observable(false);
+  self.options = params.options;
 
-  self.dropdownClick = ko.observable(false);
+  self.optionsCaption = params.optionsCaption || loc("choose");
 
-  self.dropdownVisible = ko.computed(function() {
-    return self.inputSelected() || self.dropdownClick(); // works in IE when scrollbar is clicked
-  });
-
+  // Observables
   self.selected = ko.observable("");
+
+  self.data = ko.observableArray(self.options());
 
   self.index = ko.observable(0);
 
   self.selectedTags = ko.observableArray();
 
-  self.options = params.options;
+  self.inputSelected = ko.observable(false);
 
-  self.data = ko.observableArray(self.options());
+  self.dropdownClick = ko.observable(false);
+
+  self.dropdownVisible = ko.pureComputed(function() {
+    return self.inputSelected() || self.dropdownClick(); // works in IE when scrollbar is clicked
+  });
 
   self.showCaption = ko.pureComputed(function() {
     return !self.selected() && self.selectedTags().length === 0;
@@ -46,13 +48,14 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   // set initial value
   if (self.tags) {
-    self.selectedTags = self.value;
+    self.selectedTags = self.selectedOptions;
   } else {
-    self.selected = self.value;
+    self.selected = self.selectedOptions;
   }
 
   self.subscriptions = [];
 
+  // Helpers
   function getCurrentItem() {
     return self.data()[self.index()];
   }
@@ -68,17 +71,21 @@ LUPAPISTE.AutocompleteModel = function(params) {
   // set initial index
   initIndex();
 
+  // set initial Data from options
   self.subscriptions.push(self.options.subscribe(function() {
     if (params.nullable) {
+      // add nullable parameter
       self.data([null].concat(self.options()));
     } else {
       self.data(self.options());
     }
+    // reset index
     initIndex();
   }));
 
+  // view model functions
   self.selectInput = function() {
-    self.inputSelected(true);
+    self.inputSelected(!self.inputSelected());
   };
 
   self.retainFocus = function() {
@@ -99,9 +106,9 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.selectItem = function(item) {
     if (self.tags) {
-      self.value.push(item);
+      self.selectedOptions.push(item);
     } else {
-      self.value(item);
+      self.selectedOptions(item);
     }
     self.dropdownClick(false); // set to false so dropdown closes
     self.inputSelected(false);
@@ -139,7 +146,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
       if (getCurrentItem() && getCurrentItem().groupHeader && self.index() <= 0) {
         self.index(self.index() + 1);
       }
-
       // skip group header
       else if (getCurrentItem() /* is not nullable */ && getCurrentItem().groupHeader && !firstItem) {
         self.index(self.index() - 1);

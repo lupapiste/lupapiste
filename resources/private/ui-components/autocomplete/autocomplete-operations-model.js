@@ -30,7 +30,7 @@ LUPAPISTE.AutocompleteOperationsModel = function() {
 
       // append group header and group items to result data
       if (filteredData.length > 0) {
-        result = result.concat(header).concat(filteredData);
+        result = result.concat(header).concat(_.sortBy(filteredData, "label"));
       }
     });
 
