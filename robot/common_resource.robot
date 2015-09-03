@@ -647,12 +647,6 @@ Open application
   Wait until  Element Should Be Visible  application
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
-Open application at index
-  [Arguments]  ${address}  ${propertyId}  ${index}
-  Open the request at index  ${address}  ${index}
-  Wait until  Element Should Be Visible  application
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
-
 Open inforequest
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
