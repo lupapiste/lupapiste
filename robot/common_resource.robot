@@ -44,7 +44,7 @@ Open browser to login page
   Browser
   Maximize browser window
   Set selenium speed  ${DEFAULT_SPEED}
-  Go to login page
+  Apply minimal fixture now
 
 Go to login page
   Go to  ${LOGIN URL}
