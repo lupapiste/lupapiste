@@ -15,5 +15,5 @@
                      (remove #(apply distinct? (second %)))
                      (into {}))]
     (if (seq results)
-      {:ok false :results results}
+      {:ok false :results (str results)}
       {:ok true})))
