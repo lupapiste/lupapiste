@@ -76,13 +76,19 @@
    (filter seq
      [query
       (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
-      (let [all (if (applicant? user) {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})]
+      (if (applicant? user)
         (case applicationType
           "inforequest"       {:state {$in ["answered" "open" "info"]}}
+          "application"       {:state {$in ["submitted" "sent" "complement-needed" "draft"]}}
+          "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
+          "canceled"          {:state "canceled"}
+          {:state {$ne ["cancelled"]}})
+        (case applicationType
+          "inforequest"       {:state {$in ["open" "answered" "info"]}}
           "application"       {:state {$in ["submitted" "sent" "complement-needed"]}}
           "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
           "canceled"          {:state "canceled"}
-          all))
+          {:state {$nin ["draft" "canceled"]}}))
       (when-not (contains? #{nil "0"} handler)
         {$or [{"auth.id" handler}
               {"authority.id" handler}]})
