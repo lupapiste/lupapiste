@@ -6,6 +6,9 @@ LUPAPISTE.AddPropertyModel = function(params) {
   var app = params.application;
 
   self.addProperty = function() {
-    changeLoc.changeLocation(app);
+    //changeLoc.changeLocation(app);
+    hub.send("show-dialog", {title: "ASDSASDAS", // ltitle
+                             size: "medium",
+                             component: "change-location-dialog"});
   };
 };

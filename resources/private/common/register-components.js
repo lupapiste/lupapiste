@@ -45,7 +45,8 @@ jQuery(document).ready(function() {
     {name: "autocomplete-handlers"},
     {name: "autocomplete-application-tags", template: "autocomplete-tags-components"},
     {name: "indicator"},
-    {name: "add-property"}
+    {name: "add-property"},
+    {name: "change-location-dialog"}
   ];
 
   _.forEach(components, function(component) {
