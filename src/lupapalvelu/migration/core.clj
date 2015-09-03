@@ -42,7 +42,7 @@
       e)))
 
 (defn execute-migration! [migration-name]
-  (if-let [m (@migrations migration-name)] 
+  (if-let [m (@migrations migration-name)]
     (when-let [result (execute-migration m)]
       (let [record (assoc result :name (:name m) :time (now))]
         (mc/insert :migrations record)
@@ -75,11 +75,11 @@
         body           (if has-opts? (rest body) body)]
     `(do
        (swap! migrations assoc ~name-str {:name ~name-str
-                                        :order ~order
-                                        :pre ~pre
-                                        :post ~post
-                                        :apply-when (when (quote ~apply-when) (fn [] ~apply-when))
-                                        :fn (fn [] (do ~@body))})
+                                          :order ~order
+                                          :pre ~pre
+                                          :post ~post
+                                          :apply-when (when (quote ~apply-when) (fn [] ~apply-when))
+                                          :fn (fn [] (do ~@body))})
        (defn ~migration-name []
          (execute-migration! ~(name name-str))))))
 
