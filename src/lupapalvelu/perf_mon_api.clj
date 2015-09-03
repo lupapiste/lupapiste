@@ -34,5 +34,5 @@
              {:ts     (java.util.Date.)
               :ua     (get-in command [:web :user-agent])
               :timing timing}
-             WriteConcern/NONE)
+             WriteConcern/UNACKNOWLEDGED)
   (ok))
