@@ -76,6 +76,10 @@ LUPAPISTE.ApplicationModel = function() {
   self.hasIncorrectlyFilledRequiredFields = ko.computed(function() {
     return self.incorrectlyFilledRequiredFields() && self.incorrectlyFilledRequiredFields().length > 0;
   });
+  self.fieldWarnings = ko.observable([]);
+  self.hasFieldWarnings = ko.computed(function() {
+    return self.fieldWarnings() && self.fieldWarnings().length > 0;
+  });
 
   self.summaryAvailable = ko.computed(function() {
     return self.inPostVerdictState() || self.state() === "canceled";
@@ -205,7 +209,7 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.missingRequiredInfo = ko.computed(function() {
-    return self.hasIncorrectlyFilledRequiredFields() || self.hasMissingRequiredAttachments();
+    return self.hasIncorrectlyFilledRequiredFields() || self.hasFieldWarnings() || self.hasMissingRequiredAttachments();
   });
 
   self.submitButtonEnabled = ko.computed(function() {
@@ -587,6 +591,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.updateMissingApplicationInfo = function(errors) {
     self.incorrectlyFilledRequiredFields(util.extractRequiredErrors(errors));
+    self.fieldWarnings(util.extractWarnErrors(errors));
     self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
   };
 

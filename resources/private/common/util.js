@@ -182,11 +182,12 @@ var util = (function($) {
     return personIdCn[parseInt(n, 10) % 31] === c;
   }
 
-  function extractRequiredErrors(errors) {
+
+
+  var extractErrors = function(filterFn, errors) {
     var errs = _.map(errors, function(errArray) {
       return _.filter(errArray, function(err) {
-        var ret = _.includes(err.result, "illegal-value:required");
-        return ret;
+        return filterFn(err.result);
       });
     });
     errs = _.filter(errs, function(errArray) {
@@ -194,6 +195,16 @@ var util = (function($) {
     });
     return errs;
   }
+
+  var extractRequiredErrors = _.partial(extractErrors, function(errResult) {
+    return _.includes(errResult, "tip") && _.includes(errResult, "illegal-value:required");
+  });
+
+  var extractWarnErrors = _.partial(extractErrors, function(errResult) {
+    return _.includes(errResult, "warn");
+  });
+
+
 
   function dissoc(m, k) {
     delete m[k];
@@ -255,6 +266,7 @@ var util = (function($) {
     isPartyDoc: isPartyDoc,
     isNotPartyDoc: isNotPartyDoc,
     extractRequiredErrors: extractRequiredErrors,
+    extractWarnErrors: extractWarnErrors,
     dissoc: dissoc,
     randomElementId: randomElementId,
     withSuffix: withSuffix,
