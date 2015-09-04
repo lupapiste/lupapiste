@@ -4,3 +4,4 @@ tyonjohtaja.ilmoitusHakemusValitsin.hakemus: POISTA EXCELISTA!
 permitSubtype.tyonjohtaja-hakemus: Hakemus / Ansökan
 permitSubtype.tyonjohtaja-ilmoitus: Ilmoitus / Anmälan
 help.tyonjohtajan-nimeaminen-v2.subtype: Uudelleennimeä avain tyonjohtaja.ilmoitusHakemusValitsin._group_label.help
+permitSubtype.muutoslupa: Muutoslupa
