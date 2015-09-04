@@ -27,7 +27,7 @@ Mikko changes his name and experience
   Select Checkbox  allowDirectMarketing
 
   Save User Data
-  Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
+  Positive indicator should be visible
   User should be logged in  Mika Intola
 
 Name and experience should have changed in Swedish page too
@@ -47,7 +47,7 @@ Mika changes the name and experience back
   Textfield Value Should Be  architect.graduatingYear  2000
   Change Textfield Value  architect.fise  fise  f
   Save User Data
-  Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
+  Positive indicator should be visible
 
 Name and experience should have changed in Finnish page too
   Language To  FI
@@ -68,6 +68,7 @@ Wait for Page to Load
   Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
   Wait Until  Textfield Value Should Be  firstName  ${firstName}
   Wait Until  Textfield Value Should Be  lastName   ${lastName}
+  Open accordion by test id  mypage-personal-info-accordion
 
 Change Textfield Value
   [Arguments]  ${field}  ${old}  ${new}

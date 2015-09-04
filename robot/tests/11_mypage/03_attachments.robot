@@ -29,20 +29,21 @@ Mikko copies his attachments to application
 Copy own attachments button is not shown to non-architect
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
-  Click Element  architect
+  Wait until  Click Element  architect
   Save User Data
-  Go Back
   Reload Page
+  Wait for Page to Load  Mikko  Intonen
   Wait until  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsCopyOwn']
 
 *** Keywords ***
 
 Save User Data
   Click enabled by test id  save-my-userinfo
-  Wait until  Page should contain  Tallennettu
+  Positive indicator should be visible
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}
   Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
   Wait Until  Textfield Value Should Be  firstName  ${firstName}
   Wait Until  Textfield Value Should Be  lastName   ${lastName}
+  Open accordion by test id  mypage-personal-info-accordion

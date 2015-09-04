@@ -164,6 +164,13 @@ Open accordions
   Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
   Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
 
+Open accordion by test id
+  [Arguments]  ${testId}
+  Execute Javascript  $("div[data-test-id='${testId}'] button.accordion-toggle").click();
+
+Positive indicator should be visible
+  Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
+
 #
 # Login stuff
 #
