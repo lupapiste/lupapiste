@@ -9,21 +9,15 @@
   {:doc                     sc/Str
    :schemas                 [sc/Str]
    (sc/optional-key :level) (sc/enum :tip :warn :error)
-   ;;
-   ;; *** TODO: ota tassa kayttoon parempi tarkistus. Yritelmia alla kommenteissa. ***
-   ;;
-   :fields                  [sc/Any]
-;   :fields                  [(sc/pair sc/Symbol "variable-symbol" [(sc/either sc/Keyword util/Fn)] "path-part")]  ;; TODO: tama ei toimi
-;   :fields                  (sc/pred
-;                              (fn [fields]
-;                                (println "\n fields first: " (first fields) "\n")
-;                                (println "\n fields second: " (second fields) "\n")
-;                                (every? (fn [field]
-;                                          (and
-;                                            (-> field first keyword?)
-;                                            (-> field second vector?)
-;                                            (every? (fn [part] (or (keyword? part) (fn? part))) (second field)))) (partition 2 fields)))
-;                              "field")
+   :fields                  (sc/pred
+                              (fn [fields]
+                                (every? (fn [field-pair]
+                                          (and
+                                            (-> field-pair first symbol?)
+                                            (-> field-pair second vector?)
+                                            (every? #(or (keyword? %) (fn? %) (symbol? %)) (second field-pair))))
+                                  (partition 2 fields)))
+                              "field")
    :facts   {:ok            (sc/either
                               []
                               [(sc/pred vector? "The expected OK fact results must be in a vector")])
