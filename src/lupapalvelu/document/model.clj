@@ -228,10 +228,9 @@
     {:pre [(map? application) (map? document)]}
     (let [data (:data document)
           schema (or schema (get-document-schema document))
-          document-loc-key (or (-> schema :info :i18name) (-> schema :info :name))
           info {:document {:id (:id document)
                            :name (-> schema :info :name)
-                           :locKey document-loc-key
+                           :locKey (or (-> schema :info :i18name) (-> schema :info :name))
                            :type (-> schema :info :type)}
                 :schema-body (:body schema)}]
       (when data
