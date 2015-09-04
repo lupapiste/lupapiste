@@ -84,7 +84,7 @@
                 <div class="unseen-attachments" data-bind="text: $data.attachmentsRequiringAction > 99 ? '*' : $data.attachmentsRequiringAction,
                                   attr: {title: loc('attachments.title')}"></div>
               </td>
-              <td data-bind="ltext: 'applications.' + $data.kind" data-test-col-name="type"></td>
+              <td data-bind="ltext: $data.kind" data-test-col-name="type"></td>
               <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
               <td data-bind="text: $data.primaryOperation ? loc('operations.' + $data.primaryOperation.name) : ''" data-test-col-name="operation"></td>
               <td data-bind="text: $data.applicant" data-test-col-name="applicant"></td>
