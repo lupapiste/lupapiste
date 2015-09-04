@@ -148,15 +148,14 @@
         (find-by-name (:body elem) ks)))))
 
 (defn- resolve-element-loc-key [info element path]
-  (let [loc-key (str (-> info :document :locKey) "." (join "." (map name path)))]
-    (if (:i18nkey element)
-      (:i18nkey element)
+  (if (:i18nkey element)
+    (:i18nkey element)
+    (let [loc-key (str (-> info :document :locKey) "." (join "." (map name path)))]
       (-> (if (= :select (:type element))
             (str loc-key "._group_label")
             loc-key)
         (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
-        (s/replace #"\.+" ".")))     ;; removes multiple dots: "a..b" => "a.b"
-    ))
+        (s/replace #"\.+" ".")))))
 
 (defn- ->validation-result [info data path element result]
   (when result
@@ -224,9 +223,6 @@
 ;;
 (defn- validate-document [schema document info data]
   (let [doc-validation-results (validator/validate document)]
-
-(defn- validate-document [schema document info data #_path]
-
     (map
       #(let [element (find-by-name (:schema-body info) (:path %))]
          (->validation-result info data (:path %) element (:result %)))
