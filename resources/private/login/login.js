@@ -21,10 +21,15 @@
     }
   }
 
+  function clearError() {
+    $("#login-message").text("").css("display", "none");
+  }
+
   function login() {
+    clearError();
+
     var username = _.trim($("#login-username").val());
     var password = $("#login-password").val();
-    $("#login-message").text("").css("display", "none");
 
     if (rememberMe()) {
       $.cookie(rememberMeCookieName, username.toLowerCase(), { expires: 365, path: "/", secure: LUPAPISTE.config.cookie.secure});
@@ -77,6 +82,9 @@
     recallMe();
     if (document.getElementById("login")) {
       $("#login").applyBindings({rememberMe: rememberMe, processing: processing, pending: pending, handleLoginSubmit: handleLoginSubmit});
+      // Refactor to use Knockout at some point. Changes must be synchronized with WordPress theme deployment.
+      $("#login-username").keypress(clearError).change(clearError);
+      $("#login-password").keypress(clearError).change(clearError);
       $("#register-button").click(function() {
         pageutil.openPage("register");
       });
