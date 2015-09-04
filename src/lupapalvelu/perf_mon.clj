@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [noir.core :refer [defpage]]
             [monger.operators :refer :all]
+            [lupapalvelu.mongo :as mongo]
             [clojure.string :refer [join]]
             [noir.server :as server]
             [sade.env :as env]
