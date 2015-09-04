@@ -115,16 +115,17 @@
                           "location" :address
                           "modified" :modified
                           "submitted" :submitted
-                          "type" :infoRequest
                           "state" :state})
 
+(defn- dir [asc] (if asc 1 -1))
+
 (defn- make-sort [{{:keys [field asc]} :sort}]
-  (let [sort-field (sort-field-mapping field)
-        dir (if asc 1 -1)]
+  (let [sort-field (sort-field-mapping field)]
     (cond
+      (= "type" field) {:permitSubtype (dir asc) :infoRequest (dir (not asc))}
       (nil? sort-field) {}
-      (sequential? sort-field) (zipmap sort-field (repeat dir))
-      :else {sort-field dir})))
+      (sequential? sort-field) (zipmap sort-field (repeat (dir asc)))
+      :else {sort-field (dir asc)})))
 
 (def kind-mapping {"all" "both"
                    "inforequest" "inforequests"
