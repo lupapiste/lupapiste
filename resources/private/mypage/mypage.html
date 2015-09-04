@@ -257,13 +257,16 @@
       <!-- /ko -->
 
       <script type="text/x-jquery-tmpl" id="mypage-register-company-template">
-        <h2 data-bind="ltext: 'register.company.header'"></h2>
-        <p data-bind="lhtml: 'register.company.info'" class="register-info"></p>
-        <a data-bind="attr: {href: '#!/register-company-account-type'}, ltext: 'register.company.register'"
-           href="#"
-           class="btn btn-primary"
-           data-test-id="logged-user-register-company-start">
-        </a>
+        <div class="form-group">
+          <h2 data-bind="ltext: 'register.company.header'"></h2>
+          <p data-bind="lhtml: 'register.company.info'" class="register-info"></p>
+          <a href="#!/register-company-account-type"
+             class="btn btn-primary"
+             data-test-id="logged-user-register-company-start">
+             <span data-bind="ltext: 'register.company.register'"></span>
+             <i class="lupicon-chevron-right"></i>
+          </a>
+        </div>
       </script>
     </div>
 

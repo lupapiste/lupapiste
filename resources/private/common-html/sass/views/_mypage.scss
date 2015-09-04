@@ -78,8 +78,9 @@
 
 #mypage-register-company {
   padding: 0 $marginL;
-  .form-group {
-    padding: $marginM;
+  .btn {
+    margin-left: $marginS;
+    margin-bottom: $marginS;
   }
 }
 
