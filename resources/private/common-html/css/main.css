@@ -6744,29 +6744,28 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 70, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields h2 {
-  background: #e9e9e9;
   color: black;
   margin: 12px 0;
   padding-left: 6px;
 }
-/* line 77, ../sass/partials/_accordion.scss */
+/* line 76, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields .authority-accept-fields h2 {
   background: #f6f6f6;
 }
-/* line 81, ../sass/partials/_accordion.scss */
+/* line 80, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields h3 {
   margin-top: 12px;
 }
-/* line 84, ../sass/partials/_accordion.scss */
+/* line 83, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields .form-group {
   margin-top: 6px;
 }
-/* line 90, ../sass/partials/_accordion.scss */
+/* line 89, ../sass/partials/_accordion.scss */
 .accordion .accordion_content.expanded {
   display: block;
 }
 
-/* line 96, ../sass/partials/_accordion.scss */
+/* line 95, ../sass/partials/_accordion.scss */
 .accordion-indicator {
   z-index: 12000;
   width: 112px;
@@ -6775,25 +6774,25 @@ ul.attachments-list li.mandatory-attachments {
   padding: 0 24px 0 0;
   margin-left: 12px;
 }
-/* line 104, ../sass/partials/_accordion.scss */
+/* line 103, ../sass/partials/_accordion.scss */
 .accordion-indicator .icon {
   display: none;
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
 }
-/* line 109, ../sass/partials/_accordion.scss */
+/* line 108, ../sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-saved .icon {
   display: inline-block;
   background-position: 4px -2499px;
   border-right: none;
 }
-/* line 116, ../sass/partials/_accordion.scss */
+/* line 115, ../sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-warn .icon {
   display: inline-block;
   background-position: 4px -3199px;
   border-right: none;
 }
-/* line 123, ../sass/partials/_accordion.scss */
+/* line 122, ../sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-err .icon {
   display: inline-block;
   background-position: 4px -2399px;
@@ -9347,60 +9346,65 @@ td.comment-text {
 
 /* line 39, ../sass/views/_mypage.scss */
 #mypage .button-group {
+  margin: 12px 0;
   position: relative;
-  width: 360px;
-}
-/* line 42, ../sass/views/_mypage.scss */
-#mypage .button-group .form-indicator {
-  top: -4px;
 }
 
 /*  */
-/* line 49, ../sass/views/_mypage.scss */
+/* line 46, ../sass/views/_mypage.scss */
 #own-info-form {
   padding: 0 24px;
 }
-/* line 51, ../sass/views/_mypage.scss */
+/* line 48, ../sass/views/_mypage.scss */
 #own-info-form .architect-toggle, #own-info-form .allowDirectMarketing-toggle {
   height: 55px;
   margin: 9px 0;
   display: block;
   width: 100%;
 }
-/* line 57, ../sass/views/_mypage.scss */
+/* line 54, ../sass/views/_mypage.scss */
 #own-info-form .architect-toggle label, #own-info-form .architect-toggle input, #own-info-form .allowDirectMarketing-toggle label, #own-info-form .allowDirectMarketing-toggle input {
   display: inline;
   width: 3.75em;
 }
-/* line 61, ../sass/views/_mypage.scss */
+/* line 58, ../sass/views/_mypage.scss */
 #own-info-form .architect-toggle input, #own-info-form .allowDirectMarketing-toggle input {
   margin-right: 12px;
   display: inline;
 }
-/* line 66, ../sass/views/_mypage.scss */
+/* line 63, ../sass/views/_mypage.scss */
 #own-info-form .form-group {
   padding: 12px;
 }
 
-/* line 71, ../sass/views/_mypage.scss */
+/* line 68, ../sass/views/_mypage.scss */
 #pw-form {
   padding: 0 24px;
 }
-/* line 74, ../sass/views/_mypage.scss */
+/* line 71, ../sass/views/_mypage.scss */
 #pw-form .form-group {
   padding: 12px;
 }
-/* line 77, ../sass/views/_mypage.scss */
+/* line 74, ../sass/views/_mypage.scss */
 #pw-form .form-entry {
   height: 78px;
 }
 
-/* line 83, ../sass/views/_mypage.scss */
+/* line 79, ../sass/views/_mypage.scss */
+#mypage-register-company {
+  padding: 0 24px;
+}
+/* line 81, ../sass/views/_mypage.scss */
+#mypage-register-company .form-group {
+  padding: 12px;
+}
+
+/* line 86, ../sass/views/_mypage.scss */
 .architect-info {
   margin: 24px auto;
   transition: height 2s;
 }
-/* line 88, ../sass/views/_mypage.scss */
+/* line 91, ../sass/views/_mypage.scss */
 .architect-info .architect-attachments {
   margin-top: 24px;
 }

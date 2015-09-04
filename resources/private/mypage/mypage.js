@@ -6,6 +6,10 @@
 
   function makeSaveFn(commandName, propertyNames) {
     return function(model, event) {
+      if (!event) {
+        return;
+      }
+
       var img = $(event.target).parent().find("img");
       var t = setTimeout(img.show, 200);
       var params = _.reduce(propertyNames, function(m, n) {
@@ -302,6 +306,7 @@
     $("#mypage")
       .find("#own-info-form").applyBindings(ownInfo).end()
       .find("#pw-form").applyBindings(pw).end()
+      .find("#mypage-register-company").applyBindings(ownInfo).end()
       .find("#dialog-userinfo-architect-upload")
         .applyBindings(uploadModel)
         .find("form")

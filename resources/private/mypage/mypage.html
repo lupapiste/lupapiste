@@ -2,85 +2,80 @@
 <html>
 <body>
   <section class="page container" id="mypage">
-
-    <form id="own-info-form">
-      <a href="#" onclick="javascript:history.go(-1);return false;" class="btn left-align secondary">
-          <i class="lupicon-chevron-start"></i>
-          <span data-bind="ltext: 'back'"></span>
-      </a>
+    <!-- TODO opening first accordion causes form to submit, don't know why -->
+    <form id="own-info-form" data-bind="submit: function() {}">
       <div class="clear"></div>
       <h1 data-bind="ltext: 'mypage.title'"></h1>
       <div data-bind="lhtml:'mypage.desc'" class="page-info"></div>
 
-      <!-- ko ifnot: companyShow -->
-      <h1 data-bind="ltext: 'register.company.header'"></h1>
-      <p data-bind="lhtml: 'register.company.info'" class="register-info"></p>
-      <a data-bind="attr: {href: '#!/register-company-account-type'}, ltext: 'register.company.register'"
-         href="#"
-         class="btn btn-primary"
-         data-test-id="logged-user-register-company-start">
-      </a>
-      <!-- /ko -->
+      <div data-test-id="mypage-personal-info-accordion"
+           data-bind="component: {name: 'accordion', params: {ltitle: 'mypage.personalInfo',
+                                                              accordionContentTemplate: 'mypage-personal-info-template',
+                                                              accordionContentTemplateData: $data}}"></div>
 
-      <div class="own-info form-group">
-        <h2 data-bind="ltext: 'mypage.personalInfo'"></h2>
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.firstName'"
-            for="firstName" class="form-label"></label> <input
-            data-bind="textInput: firstName, attr: {placeholder: loc('userinfo.firstName')}"
-            id="firstName" type="text" class="form-input" maxlength="255"></input>
-        </div>
+      <script type="text/x-jquery-tmpl" id="mypage-personal-info-template">
+        <div class="own-info form-group">
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.firstName'"
+              for="firstName" class="form-label"></label> <input
+              data-bind="textInput: firstName, attr: {placeholder: loc('userinfo.firstName')}"
+              id="firstName" type="text" class="form-input" maxlength="255"></input>
+          </div>
 
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.lastName'" for="lastName"
-            class="form-label"></label> <input
-            data-bind="textInput: lastName, attr: {placeholder: loc('userinfo.lastName')}"
-            id="lastName" type="text" class="form-input" maxlength="255"></input>
-        </div>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.lastName'" for="lastName"
+              class="form-label"></label> <input
+              data-bind="textInput: lastName, attr: {placeholder: loc('userinfo.lastName')}"
+              id="lastName" type="text" class="form-input" maxlength="255"></input>
+          </div>
 
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.phone'" for="phone"
-            class="form-label"></label> <input
-            data-bind="textInput: phone, attr: {placeholder: loc('userinfo.phone')}"
-            id="phone" type="text" class="form-input" maxlength="255"></input>
-        </div>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.phone'" for="phone"
+              class="form-label"></label> <input
+              data-bind="textInput: phone, attr: {placeholder: loc('userinfo.phone')}"
+              id="phone" type="text" class="form-input" maxlength="255"></input>
+          </div>
 
-        <div data-bind="visible: showSimpleCompanyInfo" class="form-entry">
-          <label
-            data-bind="ltext: 'userinfo.architect.company.name'"
-            for="architect.company.name" class="form-label"></label>
-          <input data-bind="value: companyName"
-            id="architect.company.name" type="text"
-            class="form-input" maxlength="255"></input>
-        </div>
+          <div data-bind="if: showSimpleCompanyInfo">
+            <div class="form-entry">
+              <label
+                data-bind="ltext: 'userinfo.architect.company.name'"
+                for="architect.company.name" class="form-label"></label>
+              <input data-bind="value: companyName"
+                id="architect.company.name" type="text"
+                class="form-input" maxlength="255"></input>
+            </div>
 
-        <div data-bind="visible: showSimpleCompanyInfo" class="form-entry">
-          <label
-            data-bind="ltext: 'userinfo.architect.company.id'"
-            for="architect.company.id" class="form-label"></label>
-          <input data-bind="value: companyId"
-            id="architect.company.id" type="text"
-            class="form-input" maxlength="255"></input>
-        </div>
+            <div class="form-entry">
+              <label
+                data-bind="ltext: 'userinfo.architect.company.id'"
+                for="architect.company.id" class="form-label"></label>
+              <input data-bind="value: companyId"
+                id="architect.company.id" type="text"
+                class="form-input" maxlength="255"></input>
+            </div>
+          </div>
 
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.street'" for="street"
-            class="form-label tip"></label> <input
-            data-bind="textInput: street, attr: {placeholder: loc('userinfo.street')}"
-            id="street" type="text" class="form-input" maxlength="255"></input>
-        </div>
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.zip'" for="zip"
-            class="form-label tip"></label> <input
-            data-bind="textInput: zip, attr: {placeholder: loc('userinfo.zip')}"
-            id="zip" type="text" class="form-input" maxlength="5"></input>
-        </div>
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.city'" for="city"
-            class="form-label tip"></label> <input
-            data-bind="textInput: city, attr: {placeholder: loc('userinfo.city')}"
-            id="city" type="text" class="form-input" maxlength="255"></input>
-        </div>
+          <div class="form-entry clear">
+            <label data-bind="ltext: 'userinfo.street'" for="street"
+              class="form-label tip"></label> <input
+              data-bind="textInput: street, attr: {placeholder: loc('userinfo.street')}"
+              id="street" type="text" class="form-input" maxlength="255"></input>
+          </div>
+
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.zip'" for="zip"
+              class="form-label tip"></label> <input
+              data-bind="textInput: zip, attr: {placeholder: loc('userinfo.zip')}"
+              id="zip" type="text" class="form-input" maxlength="5"></input>
+          </div>
+
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.city'" for="city"
+              class="form-label tip"></label> <input
+              data-bind="textInput: city, attr: {placeholder: loc('userinfo.city')}"
+              id="city" type="text" class="form-input" maxlength="255"></input>
+          </div>
 
           <div class="form-entry allowDirectMarketing-toggle">
             <input data-bind="checked: allowDirectMarketing" id="allowDirectMarketing"
@@ -97,154 +92,179 @@
           </div>
         </div>
 
-      <div data-bind="visible: companyShow" data-test-id="my-company">
-        <div class="form-group">
-          <h2 data-bind="ltext: 'userInfo.company.title'"></h2>
+        <!-- ko if: companyShow -->
+          <div class="form-group" data-test-id="my-company">
 
-          <div data-bind="visible: companyLoading">
-            <em class="button-loader"></em>
-            <span data-bind="ltext: 'userInfo.company.loading'"></span>
-          </div>
-
-          <div data-bind="visible: companyLoaded">
-            <label data-bind="ltext: 'userInfo.company.name'" class="form-label"></label>
-            <span data-bind="text: company.name" class="form-input" data-test-id="my-company-name"></span>
-            <label data-bind="ltext: 'userInfo.company.y'" class="form-label"></label>
-            <span data-bind="text: company.y" class="form-input" data-test-id="my-company-id"></span>
-
-            <div data-bind="if: company.document()">
-              <label data-bind="ltext: 'userInfo.company.contract'" class="form-label"></label>
-              <a data-bind="text: company.document, attr: {href: company.document}" target="_blank"></a>
+            <div data-bind="visible: companyLoading">
+              <em class="button-loader"></em>
+              <span data-bind="ltext: 'userInfo.company.loading'"></span>
             </div>
 
-            <button data-bind="click: editCompany, ltext: 'mypage.companyAccount.editInfo'" class="btn btn-primary" data-test-id="company-edit-info"></button>
-            <button data-bind="click: editUsers, ltext: 'mypage.companyAccount.editUsers'" class="btn btn-primary" data-test-id="company-edit-users"></button>
+            <div data-bind="visible: companyLoaded">
+              <label data-bind="ltext: 'userInfo.company.name'" class="form-label"></label>
+              <span data-bind="text: company.name" class="form-input" data-test-id="my-company-name"></span>
+              <label data-bind="ltext: 'userInfo.company.y'" class="form-label"></label>
+              <span data-bind="text: company.y" class="form-input" data-test-id="my-company-id"></span>
+
+              <div data-bind="if: company.document()">
+                <label data-bind="ltext: 'userInfo.company.contract'" class="form-label"></label>
+                <a data-bind="text: company.document, attr: {href: company.document}" target="_blank"></a>
+              </div>
+
+              <button data-bind="click: editCompany, ltext: 'mypage.companyAccount.editInfo'" class="btn btn-primary" data-test-id="company-edit-info"></button>
+              <button data-bind="click: editUsers, ltext: 'mypage.companyAccount.editUsers'" class="btn btn-primary" data-test-id="company-edit-users"></button>
+            </div>
           </div>
-        </div>
+        <!-- /ko -->
+
+        <!-- ko if: architect -->
+          <div class="architect-info form-group">
+            <h2 data-bind="ltext: 'architect.experience.title'"></h2>
+
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.degree'" for="architect.degree" class="form-label"></label>
+              <select class="form-input combobox"
+                      name="architect.degree"
+                      data-test-id="architect-degree-select"
+                      title="loc('userinfo.architect.degree.choose.help')"
+                      data-bind="options: availableDegrees,
+                                 value: degree,
+                                 optionsValue: 'id',
+                                 optionsText: 'name',
+                                 optionsCaption: loc('userinfo.architect.degree.choose')"></select>
+            </div>
+
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.graduatingYear'" for="architect.graduatingYear" class="form-label"></label>
+              <input data-bind="value: graduatingYear" id="architect.graduatingYear" type="text" class="form-input" maxlength="4"></input>
+            </div>
+
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.fise'" for="architect.fise" class="form-label"></label>
+              <input data-bind="value: fise" id="architect.fise" type="text" class="form-input" maxlength="255"></input>
+            </div>
+
+            <div class="form-entry clear" data-bind="visible: lupapisteApp.models.globalAuthModel.ok('add-user-attachment-allowed')">
+              <div data-bind="visible: !hasAttachments(), ltext: 'userinfo.architect.attachments.no-attachments'"></div>
+              <table data-bind="visible: hasAttachments" class="architect-attachments">
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
+                    <th data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: attachments">
+                  <tr>
+                    <td data-bind="attr: {'data-test-id': $data['attachment-id']}">
+                      <div
+                        data-bind="text: loc(['attachmentType.osapuolet', $data['attachment-type']['type-id']])"
+                        data-test-id="attachment-type"></div>
+                      <div data-bind="text:  $data['file-name']"
+                        data-test-id="filename"></div>
+                    </td>
+                    <td>
+                      <a data-bind="ltext: 'userinfo.architect.attachments.load',
+                                    attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}"
+                         data-test-id="load" href="#" target="_blank"></a>
+                      <a data-bind="ltext: 'userinfo.architect.attachments.remove',
+                                    click: $parent.remove"
+                         data-test-id="remove" href="#"></a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <button data-bind="click: add, ltext: 'userinfo.architect.attachments.add'" data-test-id="test-add-architect-attachment"></button>
+            </div>
+          </div>
+        <!-- /ko -->
+      </script>
+      <div class="button-group">
+        <button data-bind="click: save,
+                           disable: processing,
+                           enable: isValid,
+                           css: {waiting: pending}" class="positive"
+                data-test-id="save-my-userinfo">
+            <i class="lupicon-save"></i>
+            <i class="wait spin lupicon-refresh"></i>
+            <span data-bind="ltext: 'save'"></span>
+        </button>
+
+        <p class="context-error"
+           data-bind="visible: error() != null, ltext: error">
+        </p>
       </div>
-
-      <div data-bind="visible: architect">
-        <div class="architect-info form-group">
-          <h2 data-bind="ltext: 'architect.experience.title'"></h2>
-
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.architect.degree'" for="architect.degree" class="form-label"></label>
-            <select class="form-input combobox"
-                    name="architect.degree"
-                    data-test-id="architect-degree-select"
-                    title="loc('userinfo.architect.degree.choose.help')"
-                    data-bind="options: availableDegrees,
-                               value: degree,
-                               optionsValue: 'id',
-                               optionsText: 'name',
-                               optionsCaption: loc('userinfo.architect.degree.choose')"></select>
-          </div>
-
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.architect.graduatingYear'" for="architect.graduatingYear" class="form-label"></label>
-            <input data-bind="value: graduatingYear" id="architect.graduatingYear" type="text" class="form-input" maxlength="4"></input>
-          </div>
-
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.architect.fise'" for="architect.fise" class="form-label"></label>
-            <input data-bind="value: fise" id="architect.fise" type="text" class="form-input" maxlength="255"></input>
-          </div>
-
-          <div class="form-entry clear" data-bind="visible: lupapisteApp.models.globalAuthModel.ok('add-user-attachment-allowed')">
-            <div data-bind="visible: !hasAttachments(), ltext: 'userinfo.architect.attachments.no-attachments'"></div>
-            <table data-bind="visible: hasAttachments" class="architect-attachments">
-              <thead>
-                <tr>
-                  <th data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
-                  <th data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
-                </tr>
-              </thead>
-              <tbody data-bind="foreach: attachments">
-                <tr>
-                  <td data-bind="attr: {'data-test-id': $data['attachment-id']}">
-                    <div
-                      data-bind="text: loc(['attachmentType.osapuolet', $data['attachment-type']['type-id']])"
-                      data-test-id="attachment-type"></div>
-                    <div data-bind="text:  $data['file-name']"
-                      data-test-id="filename"></div>
-                  </td>
-                  <td>
-                    <a data-bind="ltext: 'userinfo.architect.attachments.load',
-                                  attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}"
-                       data-test-id="load" href="#" target="_blank"></a>
-                    <a data-bind="ltext: 'userinfo.architect.attachments.remove',
-                                  click: $parent.remove"
-                       data-test-id="remove" href="#"></a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <button data-bind="click: add, ltext: 'userinfo.architect.attachments.add'" data-test-id="test-add-architect-attachment"></button>
-          </div>
-        </div>
-      </div>
-
-      <button data-bind="click: save,
-                         disable: processing,
-                         enable: isValid,
-                         css: {waiting: pending}" class="positive"
-              data-test-id="save-my-userinfo">
-          <i class="lupicon-save"></i>
-          <i class="wait spin lupicon-refresh"></i>
-          <span data-bind="ltext: 'save'"></span>
-      </button>
-
-      <p class="context-error"
-         data-bind="visible: error() != null, ltext: error">
-      </p>
 
       </form>
 
-    <div>
-      <form id="pw-form">
-        <div class="form-group">
-          <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
+    <!-- TODO: componentize mypage -->
+    <div id="pw-form">
+      <div data-test-id="mypage-change-password-accordion"
+           data-bind="component: {name: 'accordion', params: {ltitle: 'userinfo.changePassword',
+                                                              accordionContentTemplate: 'mypage-change-password',
+                                                              accordionContentTemplateData: $data}}"></div>
+      <script type="text/x-jquery-tmpl" id="mypage-change-password">
+        <div>
+          <form>
+            <div class="form-group">
+              <div class="form-entry">
+                <label data-bind="ltext: 'userinfo.oldPassword'"
+                  for="oldPassword" class="form-label"></label> <input
+                  data-bind="textInput: oldPassword, attr: {placeholder: loc('userinfo.oldPassword')}"
+                  id="oldPassword" type="password" class="form-input"></input>
+              </div>
+              <div class="form-entry">
+                <label data-bind="ltext: 'userinfo.newPassword'"
+                  for="newPassword" class="form-label">:</label> <input
+                  data-bind="textInput: newPassword, attr: {placeholder: loc('userinfo.newPassword')}"
+                  id="newPassword" type="password" class="form-input"></input>
+                <span
+                  data-bind="text: loc(['mypage.quality', quality()]), attr: {'class': quality}, visible: newPassword().length > 0"></span>
+              </div>
+              <div class="form-entry">
+                <label data-bind="ltext: 'userinfo.newPassword2'"
+                  for="newPassword2" class="form-label">:</label> <input
+                  data-bind="textInput: newPassword2, attr: {placeholder: loc('userinfo.newPassword2')}"
+                  id="newPassword2" type="password" class="form-input"></input>
+                <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'"
+                  style="color: gray; font-style: italic;"></span>
+              </div>
+              <div class="clear"></div>
 
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.oldPassword'"
-              for="oldPassword" class="form-label"></label> <input
-              data-bind="textInput: oldPassword, attr: {placeholder: loc('userinfo.oldPassword')}"
-              id="oldPassword" type="password" class="form-input"></input>
-          </div>
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.newPassword'"
-              for="newPassword" class="form-label">:</label> <input
-              data-bind="textInput: newPassword, attr: {placeholder: loc('userinfo.newPassword')}"
-              id="newPassword" type="password" class="form-input"></input>
-            <span
-              data-bind="text: loc(['mypage.quality', quality()]), attr: {'class': quality}, visible: newPassword().length > 0"></span>
-          </div>
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.newPassword2'"
-              for="newPassword2" class="form-label">:</label> <input
-              data-bind="textInput: newPassword2, attr: {placeholder: loc('userinfo.newPassword2')}"
-              id="newPassword2" type="password" class="form-input"></input>
-            <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'"
-              style="color: gray; font-style: italic;"></span>
-          </div>
-          <div class="clear"></div>
-
-          <button data-bind="click: save,
-                             disable: processing,
-                             enable: ok,
-                             css: {waiting: pending}" class="positive"
-                  data-test-id="change-my-password">
-              <i class="lupicon-refresh"></i>
-              <i class="wait spin lupicon-refresh"></i>
-              <span data-bind="ltext: 'userinfo.changePassword'"></span>
-          </button>
-          <p class="context-error"
-             data-bind="visible: error() != null, ltext: error"
-             class="context-error">
-          </p>
-
+              <button data-bind="click: save,
+                                 disable: processing,
+                                 enable: ok,
+                                 css: {waiting: pending}" class="positive"
+                      data-test-id="change-my-password">
+                  <i class="lupicon-refresh"></i>
+                  <i class="wait spin lupicon-refresh"></i>
+                  <span data-bind="ltext: 'userinfo.changePassword'"></span>
+              </button>
+              <p class="context-error"
+                 data-bind="visible: error() != null, ltext: error"
+                 class="context-error">
+              </p>
+            </div>
+          </form>
         </div>
-      </form>
+      </script>
+    </div>
+
+    <div id="mypage-register-company">
+      <!-- ko ifnot: companyShow -->
+      <div data-bind="component: {name: 'accordion', params: {ltitle: 'register.company.header',
+                                                              accordionContentTemplate: 'mypage-register-company-template',
+                                                              accordionContentTemplateData: $data}}"></div>
+      <!-- /ko -->
+
+      <script type="text/x-jquery-tmpl" id="mypage-register-company-template">
+        <h2 data-bind="ltext: 'register.company.header'"></h2>
+        <p data-bind="lhtml: 'register.company.info'" class="register-info"></p>
+        <a data-bind="attr: {href: '#!/register-company-account-type'}, ltext: 'register.company.register'"
+           href="#"
+           class="btn btn-primary"
+           data-test-id="logged-user-register-company-start">
+        </a>
+      </script>
     </div>
 
     <div id="dialog-userinfo-architect-upload" class="window autosized">

@@ -37,11 +37,8 @@
 
 #mypage {
   .button-group {
+    margin: $marginM 0;
     position: relative;
-    width: 360px;
-    .form-indicator {
-      top: -4px;
-    }
   }
 }
 
@@ -79,6 +76,12 @@
   }
 }
 
+#mypage-register-company {
+  padding: 0 $marginL;
+  .form-group {
+    padding: $marginM;
+  }
+}
 
 .architect-info {
   margin: $marginL auto;
@@ -89,3 +92,4 @@
     margin-top: $marginL;
   }
 }
+
