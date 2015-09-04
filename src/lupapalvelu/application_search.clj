@@ -136,7 +136,7 @@
         query-total (mongo/count :applications query)
         skip        (or (:skip params) 0)
         limit       (or (:limit params) 10)
-        apps        (query/with-collection "applications"
+        apps        (mongo/with-collection "applications"
                       (query/find query)
                       (query/sort (make-sort params))
                       (query/skip skip)

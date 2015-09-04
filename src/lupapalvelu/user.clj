@@ -271,7 +271,7 @@
         base-query-total (mongo/count :users (limit-organizations base-query))
         query            (limit-organizations (users-for-datatables-query base-query params))
         query-total      (mongo/count :users query)
-        users            (query/with-collection "users"
+        users            (mongo/with-collection "users"
                            (query/find query)
                            (query/fields [:email :firstName :lastName :role :orgAuthz :enabled])
                            (query/skip (util/->int (:iDisplayStart params) 0))

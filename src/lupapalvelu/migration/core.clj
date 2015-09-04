@@ -1,6 +1,7 @@
 (ns lupapalvelu.migration.core
   (:require [monger.collection :as mc]
             [monger.query :as q]
+            [lupapalvelu.mongo :as mongo]
             [slingshot.slingshot :refer [try+ throw+]]
             [clojure.stacktrace :refer [print-cause-trace]]
             [sade.core :refer [def- now]]))
@@ -12,7 +13,7 @@
   `(fn [] ~@(map #(cons 'assert (list %)) body)))
 
 (defn migration-history []
-  (q/with-collection "migrations"
+  (mongo/with-collection "migrations"
     (q/sort {:time 1})))
 
 (def- execution-name {:pre "pre-condition"
