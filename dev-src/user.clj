@@ -1,10 +1,5 @@
 (ns user
-  (:require [monger.operators :refer :all]
-            [monger.core :as m]
-            [monger.collection :as mc]
-            [monger.db :as db]
-            [monger.gridfs :as gfs]
-            [clojure.java.io :as io])
+  (:require [clojure.java.io :as io])
   (:import  [java.util.zip ZipInputStream]))
 
 (defn disable-anti-csrf []

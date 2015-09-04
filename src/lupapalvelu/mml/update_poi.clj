@@ -5,6 +5,7 @@
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
+            [lupapalvelu.mongo :as mongo]
             [swiss.arrows :refer [-<>>]]
             [slingshot.slingshot :refer [try+ throw+]]))
 
@@ -83,19 +84,18 @@
 (defn run [filename]
   (let [start (System/currentTimeMillis)]
     (println "Removing old data (this might take some time)...")
-    (mc/drop :poi)
+    (mongo/drop-collection :poi)
     (println (format "Processing file %s..." filename))
     (let [[rows pois] (process filename)
-          total (mc/count :poi)]
+          total (mongo/count :poi)]
       (if (= pois total)
         (do
-          (mc/ensure-index :poi {:name 1 :lang 1 :priority 1})
+          (mongo/ensure-index :poi {:name 1 :lang 1 :priority 1})
           (println "Done, processed" rows "rows with" pois "poi's, in" (-<>> start (- (System/currentTimeMillis)) double (/ <> 1000.0) (format "%.1f")) "sec"))
         (println "ERROR: processed" rows "rows with" pois "poi's, but :poi collection has" total "records")))))
 
 (defn connect []
-  (m/connect!)
-  (m/use-db! "lupapiste"))
+  (mongo/connect!))
 
 (defn -main [& args]
   (let [filename (first args)]

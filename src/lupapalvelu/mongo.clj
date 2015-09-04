@@ -105,36 +105,36 @@
   "Updates data into collection by query, returns a number of updated documents."
   [collection query data & {:as opts}]
   (let [options (-> (merge {:write-concern WriteConcern/ACKNOWLEDGED} opts) seq flatten)]
-    (.getN (apply mc/update collection (merge isolated query) (remove-null-chars data) options))))
+    (.getN (apply mc/update (get-db) collection (merge isolated query) (remove-null-chars data) options))))
 
 (defn update
   "Updates data into collection by query. Always returns nil."
   [collection query data & opts]
-  (apply mc/update collection (merge isolated (remove-null-chars query)) (remove-null-chars data) opts)
+  (apply mc/update (get-db) collection (merge isolated (remove-null-chars query)) (remove-null-chars data) opts)
   nil)
 
 (defn update-by-id
   "Updates data into collection by id (which is mapped to _id). Always returns nil."
   [collection id data & opts]
-  (apply mc/update-by-id collection (remove-null-chars id) (remove-null-chars data) opts)
+  (apply mc/update-by-id (get-db) collection (remove-null-chars id) (remove-null-chars data) opts)
   nil)
 
 (defn update-by-query
   "Updates data into collection. Returns the number of documents updated"
   [collection query data]
-  (.getN (mc/update collection (merge isolated query) (remove-null-chars data) :multi true)))
+  (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) :multi true)))
 
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
   [collection data]
-  (mc/insert collection (with-_id (remove-null-chars data)))
+  (mc/insert (get-db) collection (with-_id (remove-null-chars data)))
   nil)
 
 (defn by-id
   ([collection id]
-    (with-id (mc/find-one-as-map collection {:_id (remove-null-chars id)})))
+    (with-id (mc/find-one-as-map (get-db) collection {:_id (remove-null-chars id)})))
   ([collection id projection]
-    (with-id (mc/find-one-as-map collection {:_id (remove-null-chars id)} projection))))
+    (with-id (mc/find-one-as-map (get-db) collection {:_id (remove-null-chars id)} projection))))
 
 (defmacro with-collection
   "Simple wrapper for monger.query/with-collection which gets db and passes it to monger with args." 
@@ -169,24 +169,24 @@
   "returns one entry by matching the monger query"
   ([collection query]
     {:pre [(map? query)]}
-    (with-id (mc/find-one-as-map collection (remove-null-chars query))))
+    (with-id (mc/find-one-as-map (get-db) collection (remove-null-chars query))))
   ([collection query projection]
     {:pre [(map? query)]}
-    (with-id (mc/find-one-as-map collection (remove-null-chars query) projection))))
+    (with-id (mc/find-one-as-map (get-db)  collection (remove-null-chars query) projection))))
 
 (defn any?
   "check if any"
   ([collection query]
-    (mc/any? collection (remove-null-chars query))))
+    (mc/any? (get-db) collection (remove-null-chars query))))
 
 (defn update-one-and-return
   "Updates first document in collection matching conditions. Returns updated document or nil."
   [collection conditions document & {:keys [fields sort remove upsert] :or {fields nil sort nil remove false upsert false}}]
-  (mc/find-and-modify collection (remove-null-chars conditions) (remove-null-chars document)
+  (mc/find-and-modify (get-db) collection (remove-null-chars conditions) (remove-null-chars document)
     :return-new true :upsert upsert :remove remove :sort sort :fields fields))
 
 (defn drop-collection [collection]
-  (mc/drop collection))
+  (mc/drop (get-db) collection))
 
 (defn remove
   "Removes documents by id."
@@ -241,9 +241,9 @@
 (defn count
   "returns count of objects in collection"
   ([collection]
-    (mc/count collection))
+    (mc/count (get-db) collection))
   ([collection query]
-    (mc/count collection (remove-null-chars query))))
+    (mc/count (get-db) collection (remove-null-chars query))))
 
 (defn get-next-sequence-value [sequence-name]
   (:count (update-one-and-return :sequences {:_id (name sequence-name)} {$inc {:count 1}} :upsert true)))
@@ -344,43 +344,51 @@
       (reset! connection nil))
     (debug "Not connected")))
 
+(defn ensure-index
+  [coll keys & args]
+  (apply mc/ensure-index (get-db) coll keys args))
+
+(defn drop-index
+  [coll idx]
+  (mc/drop-index (get-db) coll idx))
+
 (defn ensure-indexes []
   (debug "ensure-indexes")
-  (mc/ensure-index :users {:username 1} {:unique true})
-  (mc/ensure-index :users {:email 1} {:unique true})
-  (mc/ensure-index :users {:organizations 1} {:sparse true})
-  (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
-  (mc/ensure-index :users {:company.id 1} {:sparse true})
-  (mc/ensure-index :applications {:municipality 1})
-  (mc/ensure-index :applications {:submitted 1})
-  (mc/ensure-index :applications {:modified -1})
-  (mc/ensure-index :applications {:organization 1})
-  (mc/ensure-index :applications {:auth.id 1})
-  (mc/ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
-  (mc/ensure-index :applications {:address 1})
-  (mc/ensure-index :applications {:tags 1})
+  (ensure-index :users {:username 1} {:unique true})
+  (ensure-index :users {:email 1} {:unique true})
+  (ensure-index :users {:organizations 1} {:sparse true})
+  (ensure-index :users {:private.apikey 1} {:unique true :sparse true})
+  (ensure-index :users {:company.id 1} {:sparse true})
+  (ensure-index :applications {:municipality 1})
+  (ensure-index :applications {:submitted 1})
+  (ensure-index :applications {:modified -1})
+  (ensure-index :applications {:organization 1})
+  (ensure-index :applications {:auth.id 1})
+  (ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
+  (ensure-index :applications {:address 1})
+  (ensure-index :applications {:tags 1})
   (try
-    (mc/drop-index :activation "created-at_1") ; no such field "created-at"
+    (drop-index :activation "created-at_1") ; no such field "created-at"
     (catch Exception _))
-  (mc/ensure-index :activation {:email 1})
-  (mc/drop-index :vetuma "created-at_1") ; expiration time has changed
-  (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
-  (mc/ensure-index :vetuma {:user.stamp 1})
-  (mc/ensure-index :vetuma {:sessionid 1})
-  (mc/ensure-index :vetuma {:trid 1} {:unique true})
-  (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
-  (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
-  (mc/ensure-index :open-inforequest-token {:application-id 1})
-  (mc/ensure-index :app-links {:link 1})
+  (ensure-index :activation {:email 1})
+  (drop-index :vetuma "created-at_1") ; expiration time has changed
+  (ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
+  (ensure-index :vetuma {:user.stamp 1})
+  (ensure-index :vetuma {:sessionid 1})
+  (ensure-index :vetuma {:trid 1} {:unique true})
+  (ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
+  (ensure-index :fs.chunks {:files_id 1 :n 1 })
+  (ensure-index :open-inforequest-token {:application-id 1})
+  (ensure-index :app-links {:link 1})
   ; Disabled TTL for now: (mc/ensure-index :sign-processes {:created 1} {:expireAfterSeconds (env/value :onnistuu :timeout)})
-  (mc/ensure-index :companies {:name 1} {:name "company-name"})
-  (mc/ensure-index :companies {:y 1} {:name "company-y"})
-  (mc/ensure-index :perf-mon {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
-  (mc/ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
+  (ensure-index :companies {:name 1} {:name "company-name"})
+  (ensure-index :companies {:y 1} {:name "company-y"})
+  (ensure-index :perf-mon {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
+  (ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
   (try
-    (mc/drop-index :organizations "areas.features.geometry_2dsphere")
+    (drop-index :organizations "areas.features.geometry_2dsphere")
     (catch Exception _))
-  (mc/ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32}))
+  (ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32}))
 
 (defn clear! []
   (if-let [mode (db-mode)]
