@@ -5,15 +5,14 @@
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [now]]
-            [sade.http :as http]
             [sade.env :as env]
             [cheshire.core :as json]))
 
 ; make sure proxies are enabled:
-(http/post (str (server-address) "/api/proxy-ctrl/on"))
+(http-post (str (server-address) "/api/proxy-ctrl/on") {})
 
 (defn- proxy-request [apikey proxy-name & args]
-  (-> (http/post
+  (-> (http-post
         (str (server-address) "/proxy/" (name proxy-name))
         {:headers {"authorization" (str "apikey=" apikey)
                    "content-type" "application/json;charset=utf-8"}
@@ -177,7 +176,7 @@
                      :headers {"accept-encoding" "gzip, deflate"}
                      :as :stream}]
         (println "Checking" (get layer "LAYERS"))
-        (http/get (env/value :maps :geoserver) request) => http200?))))
+        (http-get (env/value :maps :geoserver) request) => http200?))))
 
 (facts "WMTS layers"
   (let [base-params {:FORMAT "image/png"
@@ -221,7 +220,7 @@
         (wfs/raster-images request "wms") => http200?))))
 
 (fact "WMS capabilites"
-  (http/get (str (server-address) "/proxy/wmscap")
+  (http-get (str (server-address) "/proxy/wmscap")
     {:query-params {:v (str (now))}
      :throw-exceptions false}) => http200?)
 

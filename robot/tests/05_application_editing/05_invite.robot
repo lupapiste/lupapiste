@@ -33,6 +33,7 @@ Mikko invites Teppo
   Invite Teppo
 
 Mikko can't reinvite Teppo
+  Open accordions  parties
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
   Sleep  1
