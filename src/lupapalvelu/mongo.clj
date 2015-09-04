@@ -24,9 +24,24 @@
 
 (def operators (set (map name (keys (ns-publics 'monger.operators)))))
 
+(defonce connection (atom nil))
+(defonce ^:private dbs (atom {}))
+
+(def ^:dynamic *db-name* :default)
+
+
 ;;
 ;; Utils
 ;;
+
+(defmacro with-db [db-name]
+  `(binding [*db-name* db-name]))
+
+(defn- get-db []
+  (locking dbs
+    (or (@dbs *db-name*)
+        (when-let [db (m/get-db @connection *db-name*)]
+          (swap! dbs assoc *db-name* db)))))
 
 (defn with-_id [m]
   (if-let [id (:id m)]
@@ -113,6 +128,11 @@
   ([collection id projection]
     (with-id (mc/find-one-as-map collection {:_id (remove-null-chars id)} projection))))
 
+(defmacro with-collection
+  "Simple wrapper for monger.query/with-collection which gets db and passes it to monger with args." 
+  [collection & body]
+  `(query/with-collection (get-db) ~collection ~@body))
+
 (defn select
   "Returns multiple entries by matching the monger query.
    Cursor is snapshotted unless order-by clause is defined"
@@ -121,18 +141,18 @@
     (select collection {}))
   ([collection query]
     {:pre [collection (map? query)]}
-    (map with-id (query/with-collection (name collection)
+    (map with-id (with-collection (name collection)
                                         (query/find (remove-null-chars query))
                                         (query/snapshot))))
   ([collection query projection]
     {:pre [collection (map? query) (seq projection)]}
-    (map with-id (query/with-collection (name collection)
+    (map with-id (with-collection (name collection)
                                         (query/find (remove-null-chars query))
                                         (query/fields (if (map? projection) (keys projection) projection))
                                         (query/snapshot))))
   ([collection query projection order-by]
     {:pre [collection (map? query) (seq projection) (instance? clojure.lang.PersistentArrayMap order-by)]}
-    (map with-id (query/with-collection (name collection)
+    (map with-id (with-collection (name collection)
                                         (query/find (remove-null-chars query))
                                         (query/fields (if (map? projection) (keys projection) projection))
                                         (query/sort order-by)))))
@@ -270,10 +290,6 @@
         servers (if (map? conf) (vals conf) conf)]
     (map #(apply m/server-address [(:host %) (:port %)]) servers)))
 
-(defonce connected (atom false))
-
-(defonce mongo-conn (atom {:db nil}))
-
 (defn connect!
   ([]
     (let [conf (env/value :mongodb)
@@ -294,7 +310,7 @@
                     (let [[host port] (clojure.string/split servers #":")]
                       (m/server-address host (Long/parseLong port)))
                     servers)]
-      (if @connected
+      (if @connection
        (debug "Already connected!")
        (do
          (debug "Connecting to MongoDB:" (s/join (map str servers)) (if ssl "using ssl" "without encryption"))
@@ -302,8 +318,8 @@
                       (m/connect servers (mongo-options :ssl ssl) (mcred/create username dbname password))
                       (m/connect servers (mongo-options :ssl ssl)))
                db   (m/get-db conn dbname)]
-           (swap! mongo-conn assoc :conn db))
-         (reset! connected true)
+           (reset! connection conn)
+           (swap! dbs assoc dbname db))
          (m/set-default-write-concern! WriteConcern/JOURNALED)
          #_(when (and username password)
            (if (m/authenticate (m/get-db dbname) username (.toCharArray password))
@@ -314,10 +330,10 @@
 
 (defn disconnect! []
   (debug "Disconnecting")
-  (if @connected
+  (if @connection
     (do
-      (m/disconnect (:db @mongo-conn))
-      (reset! connected false))
+      (m/disconnect @connection)
+      (reset! connection nil))
     (debug "Not connected")))
 
 (defn ensure-indexes []
