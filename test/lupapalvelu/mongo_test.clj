@@ -8,7 +8,9 @@
 (def valid-id "502770568de2282ae6fbb0be")
 (def invalid-id "123")
 
-(mongo/with-db "mongo_test_foo"
+(def test-db-name (str "test_" (now)))
+
+(mongo/with-db test-db-name
   (facts "Facts about create-id"
     (fact (mongo/create-id) => string?))
 
