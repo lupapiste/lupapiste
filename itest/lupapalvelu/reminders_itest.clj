@@ -14,6 +14,7 @@
             [lupapalvelu.batchrun :as batchrun]))
 
 (dummy-email-server/messages :reset true)  ;; clears inbox
+(mongo/connect!) ; TODO: to test database
 (fixture/apply-fixture "minimal")
 
 (def- timestamp-the-beginning-of-time 0)

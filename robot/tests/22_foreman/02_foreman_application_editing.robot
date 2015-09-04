@@ -7,7 +7,7 @@ Suite Setup     Initialize
 
 *** Keywords ***
 Mikko creates an application and invites foreman
-  Mikko creates new application
+  Create project application
   Mikko invites foreman to application
 
 *** Test Cases ***
