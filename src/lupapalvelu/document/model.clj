@@ -219,6 +219,46 @@
    :post [%]}
   (schemas/get-schema schema-info))
 
+(defn- find-document-part-i18nkey [schema-body path]
+  ;;
+  ;; TODO: ;; does not yet work for paths deeper than one key
+  ;;
+  (let [document-part (find-by-name schema-body path)]
+    (println "\n document-part:" document-part "\n")
+    (:i18nkey document-part)))
+
+(defn- validate-document [schema document info data #_path]
+
+  ;; TODO: lisaa tahan ainakin element.locKey ja document.name  (katso mallia validate-fields:sta?)
+
+  (let [tulokset (validator/validate document)
+        tulokset (map
+                   #(-> %
+                      (assoc-in [:element :locKey] (find-document-part-i18nkey (:schema-body info) (:path %)))
+                      (assoc :document (:document info)))
+                   tulokset)]
+
+      (when (seq tulokset)
+
+;        (println "\n schema:\n")
+;        (clojure.pprint/pprint schema)
+
+        (println "\n info:\n")
+        (clojure.pprint/pprint info)
+
+        (println "\n validator/validate tulokset:\n")
+        (clojure.pprint/pprint tulokset)
+
+        (println "\n find-by-name:\n")
+        (clojure.pprint/pprint tulokset)
+        (println "\n")
+
+        (println "\n data:\n")
+        (clojure.pprint/pprint data)
+        )
+
+      tulokset))
+
 (defn validate
   "Validates document against schema and document level rules. Returns list of validation errors.
    If schema is not given, uses schema defined in document."
@@ -238,7 +278,7 @@
           (concat
             (validate-fields application info nil data [])
             (validate-required-fields info [] data [])
-            (validator/validate document)))))))
+            (validate-document schema document info data #_ [])))))))
 
 (defn has-errors?
   [results]
