@@ -10,11 +10,10 @@
    :schemas                 [sc/Str]
    (sc/optional-key :level) (sc/enum :tip :warn :error)
    ;;
-   ;; *** TODO: ota tassa kayttoon parempi tarkistus. Yritelma alla kommenteissa. ***
+   ;; *** TODO: ota tassa kayttoon parempi tarkistus. Yritelmia alla kommenteissa. ***
    ;;
    :fields                  [sc/Any]
 ;   :fields                  [(sc/pair sc/Symbol "variable-symbol" [(sc/either sc/Keyword util/Fn)] "path-part")]  ;; TODO: tama ei toimi
-;;  Saako taman toimimaan?
 ;   :fields                  (sc/pred
 ;                              (fn [fields]
 ;                                (println "\n fields first: " (first fields) "\n")
