@@ -7,7 +7,7 @@
 
 
 (defn -main [& args]
-  (when @mongo/connected
+  (when @mongo/connection
     (println "Warning: disconnecting current MongoDB connection!")
     (mongo/disconnect!))
 
