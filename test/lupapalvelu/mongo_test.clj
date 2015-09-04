@@ -2,7 +2,8 @@
   (:require [clojure.test :refer :all]
             [midje.sweet :refer :all]
             [monger.collection :as mc]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [sade.core :refer :all]))
 
 (def valid-id "502770568de2282ae6fbb0be")
 (def invalid-id "123")
@@ -26,10 +27,10 @@
   (facts "Facts about insert"
     (fact (mongo/insert "c" {:id "foo" :data "data"}) => nil
           (provided
-           (mc/insert "c" {:_id "foo" :data "data"}) => nil))
+           (mc/insert anything "c" {:_id "foo" :data "data"}) => nil))
     (fact (mongo/insert "c" {:data "data"}) => nil
           (provided
-           (mc/insert "c" {:data "data"}) => nil)))
+           (mc/insert anything "c" {:data "data"}) => nil)))
 
   (facts "valid key"
     (mongo/valid-key? (mongo/create-id)) => true

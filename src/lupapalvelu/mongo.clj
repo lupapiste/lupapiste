@@ -17,8 +17,8 @@
             [sade.status :refer [defstatus]])
   (:import [javax.net.ssl SSLSocketFactory]
            [org.bson.types ObjectId]
-           [com.mongodb WriteConcern MongoClientOptions MongoClientOptions$Builder]
-           [com.mongodb.gridfs GridFS GridFSInputFile]))
+           [com.mongodb WriteConcern MongoClientOptions$Builder]
+           [com.mongodb.gridfs GridFSInputFile]))
 
 
 (def operators (set (map name (keys (ns-publics 'monger.operators)))))
@@ -39,7 +39,7 @@
 
 (defn db-selection-middleware [handler]
   (fn [request]
-    (let [db-name (get-in request [:cookies :test_db_name])]
+    (let [db-name (get-in request [:cookies "test_db_name" :value] "lupapiste")]
       (with-db db-name
         (handler request)))))
 
@@ -108,24 +108,24 @@
   "Updates data into collection by query, returns a number of updated documents."
   [collection query data & {:as opts}]
   (let [options (-> (merge {:write-concern WriteConcern/ACKNOWLEDGED} opts) seq flatten)]
-    (.getN (apply mc/update (get-db) collection (merge isolated query) (remove-null-chars data) options))))
+    (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) options))))
 
 (defn update
   "Updates data into collection by query. Always returns nil."
   [collection query data & opts]
-  (apply mc/update (get-db) collection (merge isolated (remove-null-chars query)) (remove-null-chars data) opts)
+  (mc/update (get-db) collection (merge isolated (remove-null-chars query)) (remove-null-chars data) opts)
   nil)
 
 (defn update-by-id
   "Updates data into collection by id (which is mapped to _id). Always returns nil."
   [collection id data & opts]
-  (apply mc/update-by-id (get-db) collection (remove-null-chars id) (remove-null-chars data) opts)
+  (mc/update-by-id (get-db) collection (remove-null-chars id) (remove-null-chars data) opts)
   nil)
 
 (defn update-by-query
   "Updates data into collection. Returns the number of documents updated"
   [collection query data]
-  (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) :multi true)))
+  (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) {:multi true})))
 
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
@@ -200,7 +200,7 @@
   "Updates first document in collection matching conditions. Returns updated document or nil."
   [collection conditions document & {:keys [fields sort remove upsert] :or {fields nil sort nil remove false upsert false}}]
   (mc/find-and-modify (get-db) collection (remove-null-chars conditions) (remove-null-chars document)
-    :return-new true :upsert upsert :remove remove :sort sort :fields fields))
+    {:return-new true :upsert upsert :remove remove :sort sort :fields fields}))
 
 (defn drop-collection [collection]
   (mc/drop (get-db) collection))
@@ -208,12 +208,12 @@
 (defn remove
   "Removes documents by id."
   [collection id]
-  (.ok (.getLastError (mc/remove collection {:_id (remove-null-chars id)}))))
+  (.wasAcknowledged (mc/remove (get-db) collection {:_id (remove-null-chars id)})))
 
 (defn remove-many
   "Removes all documents matching query. Returns the success status."
   [collection query]
-  (.ok (.getLastError (mc/remove collection (remove-null-chars query)))))
+  (.wasAcknowledged (mc/remove (get-db) collection (remove-null-chars query))))
 
 (defn set-file-id [^GridFSInputFile input ^String id]
   (.setId input (remove-null-chars id))
@@ -354,9 +354,15 @@
       (reset! connection nil))
     (debug "Not connected")))
 
-(defn ensure-index
+(defn ensure-index-old
   [coll keys & args]
   (apply mc/ensure-index (get-db) coll keys args))
+
+(defn ensure-index
+  ([coll keys]
+   (mc/ensure-index (get-db) coll keys))
+  ([coll keys opts]
+   (mc/ensure-index (get-db) coll keys opts)))
 
 (defn drop-index
   [coll idx]
@@ -381,7 +387,6 @@
     (drop-index :activation "created-at_1") ; no such field "created-at"
     (catch Exception _))
   (ensure-index :activation {:email 1})
-  (drop-index :vetuma "created-at_1") ; expiration time has changed
   (ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
   (ensure-index :vetuma {:user.stamp 1})
   (ensure-index :vetuma {:sessionid 1})
@@ -407,8 +412,8 @@
       (warn "Clearing MongoDB")
       (gfs/remove-all (get-gfs))
       ; Collections must be dropped individially, otherwise index cache will be stale
-      (doseq [coll (db/get-collection-names)]
-        (when-not (or (.startsWith coll "system") (= "poi" coll)) (mc/drop coll)))
+      (doseq [coll (db/get-collection-names (get-db))]
+        (when-not (or (.startsWith coll "system") (= "poi" coll)) (mc/drop (get-db) coll)))
       (ensure-indexes))))
 
-(defstatus :mongo (server-status))
+(defstatus :mongo (server-status (get-db)))
