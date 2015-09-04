@@ -4,13 +4,14 @@
   (:import [com.mongodb MongoException MongoException$DuplicateKey]))
 
 (defonce fixtures (atom {}))
+(defonce exec-lock (Object.))
 
 (defn exists? [name]
   (contains? @fixtures (keyword name)))
 
 (defn apply-fixture [name]
   (if-let [fixture (@fixtures (keyword name))]
-    (do
+    (locking exec-lock
       (info "applying fixture:" name)
       (mongo/connect!)
       ((:handler fixture)) [])
