@@ -172,13 +172,10 @@ Mikko creates a new tyonjohtaja application
   #Mikko logs in
   Create application the fast way  ${appname}-tj  ${propertyId}  tyonjohtajan-nimeaminen
 
-Mikko can see invite tyonjohtaja button in parties tab
+Mikko invites previously unknown user Unto as tyonjohtaja
   Open tab  parties
   Open accordions  parties
-  Element should be visible  xpath=//*[@data-test-id='application-invite-tyonjohtaja']
-
-Mikko invites previously unknown user Unto as tyonjohtaja
-  Element should be visible  xpath=//*[@data-test-id='application-invite-tyonjohtaja']
+  Wait until  Element should be visible  xpath=//div[@id="application-parties-tab"]//*[@data-test-id='application-invite-tyonjohtaja']
   Click by test id  application-invite-tyonjohtaja
   Wait until  Element should be visible  invite-email
   Input Text  invite-email  unto@example.com
