@@ -2,6 +2,10 @@
   (:require [clojure.string :as s]
             [lupapalvelu.document.validator :refer :all]))
 
+;; Huom!
+;;  Toisteisille kentille :fieldsiin pitaa antaa path muodossa [:rakennuksenOmistajat :0 :omistajalaji] eli numero mukaan.
+;;
+
 (defvalidator :rakennusvalitsin-muu
   {:doc "Jos rakennusvalitsimesta on valittu vaihtoehto Muu, on Manuaalinen rakennusnumero -kenttaan syotettava arvo"
    :schemas ["rakennuksen-muuttaminen"
