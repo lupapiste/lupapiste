@@ -1,5 +1,5 @@
 (ns lupapalvelu.mongo
-  (:refer-clojure :exclude [count remove update])
+  (:refer-clojure :exclude [count remove update distinct])
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf]]
             [clojure.walk :as walk]
             [clojure.string :as s]
@@ -135,6 +135,20 @@
     (with-id (mc/find-one-as-map (get-db) collection {:_id (remove-null-chars id)})))
   ([collection id projection]
     (with-id (mc/find-one-as-map (get-db) collection {:_id (remove-null-chars id)} projection))))
+
+(defn find-maps
+  "Wrapper for monger.collection/find-maps 3-arity version
+   Queries for objects in this collection.
+   This function returns clojure Seq of Maps."
+  ([coll ref]
+   (mc/find-maps (get-db) coll ref)))
+
+(defn distinct
+  "Wrapper for monger.collection/distinct. Finds distinct values for a key."
+  ([coll key]
+   (mc/distinct (get-db) coll key))
+  ([coll key query]
+   (mc/distinct (get-db) coll key (remove-null-chars query))))
 
 (defmacro with-collection
   "Simple wrapper for monger.query/with-collection which gets db and passes it to monger with args." 

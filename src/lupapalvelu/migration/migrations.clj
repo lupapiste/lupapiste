@@ -1,6 +1,5 @@
 (ns lupapalvelu.migration.migrations
   (:require [monger.operators :refer :all]
-            [monger.collection :as mc]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
@@ -994,7 +993,7 @@
 
 ; To find current unmapped operator values
 (comment
-  (let [cur-vals (mc/distinct :applications "documents.data.yritys.verkkolaskutustieto.valittajaTunnus.value")]
+  (let [cur-vals (mongo/distinct :applications "documents.data.yritys.verkkolaskutustieto.valittajaTunnus.value")]
     (remove (fn [val] (some #(= val %) (map :name lupapalvelu.document.schemas/e-invoice-operators))) cur-vals)))
 
 
@@ -1010,7 +1009,7 @@
               (mongo/update-by-id :users (:id user) {$set {:degree mapped}}))))))))
 
 (comment
-  (let [cur-vals (mc/distinct :users "degree")]
+  (let [cur-vals (mongo/distinct :users "degree")]
     (remove (fn [val] (some #(= val %) (map :name (:body lupapalvelu.document.schemas/koulutusvalinta)))) cur-vals)))
 
 (defmigration separate-operations-to-primary-and-secondary-operations

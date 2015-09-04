@@ -3,7 +3,6 @@
             [clojure.java.io :as io]
             [clojure.walk :as walk]
             [pandect.core :as pandect]
-            [monger.collection :as mc]
             [monger.operators :refer :all]
             [schema.core :as sc]
             [cheshire.core :as json]

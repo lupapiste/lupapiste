@@ -3,7 +3,6 @@
             [clojure.string :as s]
             [monger.operators :refer :all]
             [monger.core :as m]
-            [monger.collection :as mc]
             [monger.db :as db]
             [lupapalvelu.mongo :as mongo]
             [swiss.arrows :refer [-<>>]]
@@ -72,7 +71,7 @@
     [i c]
     (let [data (parse record)]
       (when data
-        (mc/insert :poi data))
+        (mongo/insert :poi data))
       (when (and (zero? (mod i 10000)) (pos? i))
         (println "processed" i "lines..."))
       (recur (inc i) (if data (inc c) c) r))))
