@@ -13,7 +13,6 @@
   (if-let [fixture (@fixtures (keyword name))]
     (locking exec-lock
       (info "applying fixture:" name)
-      (mongo/connect!)
       ((:handler fixture)) [])
     (error "fixture not found:" name)))
 
