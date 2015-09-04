@@ -77,7 +77,7 @@
                         (try
                           (when-let [resp# (do ~@body)]
                             (map (fn [path#] {:path   path#
-                                              :result [~level (name validator-code#)]}) ~paths))
+                                              :result [~level (name ~code)]}) ~paths))
                           (catch Exception e#
                             [{:path   []
                               :result [:warn (str "validator")]

@@ -15,6 +15,7 @@
   (when (and ok fail)
     (let [dummy  (dummy-doc schema)
           doc    (s/replace doc #"\s+" " ")
+          code-without-schema-name (subs (name code) (inc (count schema)))
           update (fn [values]
                    (reduce
                      (fn [d i]
@@ -27,7 +28,7 @@
         (doseq [values ok]
           (validate-fn (update values)) => nil?)
         (doseq [values fail]
-          (validate-fn (update values)) => (has some (contains {:result [level (name code)]})))))))
+          (validate-fn (update values)) => (has some (contains {:result [level code-without-schema-name]})))))))
 
 (defn check-all-validators []
   (let [validators (->> v/validators deref vals (filter (fn-> :facts nil? not)))]

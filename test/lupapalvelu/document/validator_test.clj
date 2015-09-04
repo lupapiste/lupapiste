@@ -31,6 +31,6 @@
       document
       (assoc-in [:data :player :health] 11)
       validate) => [{:path [:player :health]
-                     :result [:warn "test-schema-too-much-health"]}
+                     :result [:warn "too-much-health"]}
                     {:path [:game :max-health]
-                     :result [:warn "test-schema-too-much-health"]}]))
+                     :result [:warn "too-much-health"]}]))
