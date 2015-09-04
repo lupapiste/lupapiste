@@ -4,6 +4,7 @@
             [sade.core :refer [def-]]
             [sade.xml :as xml]
             [sade.http :as http]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.prev-permit-api :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
@@ -15,6 +16,7 @@
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.itest-util :as util]))
 
+(mongo/connect!) ; TODO: to test database
 (fixture/apply-fixture "minimal")
 
 (def- example-kuntalupatunnus "14-0241-R 3")

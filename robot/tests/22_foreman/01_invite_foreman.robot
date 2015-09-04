@@ -2,16 +2,13 @@
 
 Resource        ../../common_resource.robot
 Resource        keywords.robot
+Suite Setup     Initialize
 
 *** Test Cases ***
 
 Pena creates new application
   Pena logs in
-  ${secs} =  Get Time  epoch
-  Set Suite Variable  ${appname}  foreman-app${secs}
-  Create application the fast way  ${appname}  753-416-25-22  kerrostalo-rivitalo
-  ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
-  Set Suite Variable  ${newApplicationid}  ${newApplicationid}
+  Create project application
 
 Pena invites Mikko
   Open tab  parties
@@ -73,14 +70,13 @@ Pena invites foreman to application
   Set Suite Variable  ${foremanAppId}  ${foremanAppId}
 
 Pena sees sent invitation on the original application
-  Click by test id  test-application-link-permit-lupapistetunnus
-  Wait until  Element text should be  xpath=//span[@data-test-id='application-id']  ${newApplicationid}
+  Go back to project application
   Open tab  parties
   Open accordions  parties
   Wait until  Element text should be  xpath=//ul[@data-test-id='invited-foremans']//span[@data-test-id='foreman-email']  (teppo@example.com)
 
 Pena sees sent invitations on the foreman application
-  Open application at index  ${appname}  753-416-25-22  1
+  Open application by id  ${foremanAppId}
   Open tab  parties
   Open accordions  parties
   Wait until  Xpath Should Match X Times  //ul/li[@class="party"]  3
@@ -96,7 +92,7 @@ Foreman can see application
 
 Foreman application can't be submitted before link permit application
   Pena logs in
-  Open application at index  ${appname}  753-416-25-22  2
+  Open project application
   Wait until  Element should be visible  xpath=//a[@data-test-id='test-application-app-linking-to-us']
   Click by test id  test-application-app-linking-to-us
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
@@ -105,7 +101,7 @@ Foreman application can't be submitted before link permit application
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//p[@data-test-id='foreman-not-submittable']
 
 Application is submitted
-  Open application at index  ${appname}  753-416-25-22  2
+  Open project application
   Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
   Submit application
   [Teardown]  logout
@@ -113,7 +109,7 @@ Application is submitted
 Authority can view draft foreman application, but can't use commands
   # LPK-289
   Sonja logs in
-  Open application at index  ${appname}  753-416-25-22  1
+  Open project application
   Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
   Click by test id  test-application-app-linking-to-us
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
@@ -150,7 +146,7 @@ Add työnjohtaja task to original application
 
 Pena can link existing foreman application to foreman task
   Pena logs in
-  Open application at index  ${appname}  753-416-25-22  1
+  Open project application
   Open tab  tasks
   Select From List By Value  foreman-selection  ${foremanAppId}
 

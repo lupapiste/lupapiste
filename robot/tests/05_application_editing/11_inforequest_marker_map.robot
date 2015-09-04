@@ -6,8 +6,8 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-Setting maps enabled for these tests
-  Set integration proxy on
+#Setting maps enabled for these tests
+#  Set integration proxy on
 
 Mikko as applicant does not see the inforequest marker map
   Mikko logs in
@@ -91,8 +91,8 @@ Open the marker contents window and follow the link displayed in an info card
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']  ${first-app-id}
   Logout
 
-Setting maps disabled again after the tests
-  Set integration proxy off
+#Setting maps disabled again after the tests
+#  Set integration proxy off
 
 
 *** Keywords ***

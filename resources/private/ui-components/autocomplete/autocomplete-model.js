@@ -85,7 +85,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   // view model functions
   self.selectInput = function() {
-    self.inputSelected(true);
+    self.inputSelected(!self.inputSelected());
   };
 
   self.retainFocus = function() {

@@ -52,7 +52,7 @@ Can not add the same user again
   Wait until  Element should be visible  dialog-company-new-user
   Input text by test id  company-new-user-email  dummy@example.com
   Click enabled by test id  company-search-email
-  Element should be visible  //div[@id="dialog-company-new-user"]//span[@data-bind="ltext: 'register.company.add-user.already-in'"]
+  Wait until  Element should be visible  //div[@id="dialog-company-new-user"]//span[@data-bind="ltext: 'register.company.add-user.already-in'"]
   Click enabled by test id  company-add-user-already-in-close
 
 Delete dummy user
@@ -109,8 +109,8 @@ User sees herself as company admin
 
 Solita admin sets custom account for company 'Solita Oy', max users 2
   SolitaAdmin logs in
-  Click element  xpath=//li/a[contains(text(), "Yritykset")]
-  Click element  xpath=//table[@data-test-id="corporations-table"]//tr[@data-test-id="company-row-solita"]//a[@data-test-id="company-edit"]
+  Wait until  Click element  xpath=//li/a[contains(text(), "Yritykset")]
+  Wait until  Click element  xpath=//table[@data-test-id="corporations-table"]//tr[@data-test-id="company-row-solita"]//a[@data-test-id="company-edit"]
   Wait until  Element text should be  xpath=//div[@data-test-id="modal-dialog-content"]/div[@class="header"]/span[@class="title"]  Muokkaa yritysta
   Select from list by value  xpath=//select[@name="account-type"]  custom
   Input text  xpath=//input[@name="customAccountLimit"]  2
@@ -123,7 +123,7 @@ Kaino logs in and sees account is custom, and it can't be changed by Kaino
   Login  kaino@solita.fi  kaino123
   User should be logged in  Kaino Solita
   Open company details
-  Element should be visible  xpath=//span[@data-test-id="company-custom-account"]
+  Wait until  Element should be visible  xpath=//span[@data-test-id="company-custom-account"]
   Element should not be visible  xpath=//select[@data-test-id="company-account-select"]
 
 Kaino wants to invite new users, but can't because account limit is reached
