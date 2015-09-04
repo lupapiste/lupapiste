@@ -342,13 +342,7 @@
                db   (m/get-db conn dbname)]
            (reset! connection conn)
            (swap! dbs assoc dbname db))
-         (m/set-default-write-concern! WriteConcern/JOURNALED)
-         #_(when (and username password)
-           (if (m/authenticate (m/get-db dbname) username (.toCharArray password))
-             (debugf "Authenticated to DB '%s' as '%s'" dbname username)
-             (errorf "Authentication to DB '%s' as '%s' failed!" dbname username)))
-         #_(m/use-db! dbname)
-         #_(debugf "MongoDB %s mode is %s" (.getName (m/get-db)) (db-mode)))))))
+         (m/set-default-write-concern! WriteConcern/JOURNALED))))))
 
 (defn disconnect! []
   (debug "Disconnecting")
