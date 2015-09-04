@@ -65,7 +65,7 @@
         {:keys [doc schemas level fields facts] :or {level :warn}} validator-data
         paths (->> fields (partition 2) (map last) (map starting-keywords) vec)]
     `(doseq [schema# ~schemas]
-       (let [validator-code# (keyword (str (name ~code) "-" schema#))]
+       (let [validator-code# (keyword (str schema# "-" (name ~code)))]
          (swap! validators assoc validator-code#
            {:code validator-code#
             :doc ~doc

@@ -5,13 +5,13 @@
 
 (defvalidator :too-much-health
   {:doc    "health validator"
-   :schemas ["test"]
+   :schemas ["test-schema"]
    :facts   {:ok [] :fail []}
    :fields  [health     [:player :health]
              max-health [:game :max-health]]}
   (and health max-health (> health max-health)))
 
-(def document {:schema-info {:name "test"}
+(def document {:schema-info {:name "test-schema"}
                :data {:player {:health     10}
                       :game   {:max-health 10}}})
 
@@ -31,6 +31,6 @@
       document
       (assoc-in [:data :player :health] 11)
       validate) => [{:path [:player :health]
-                     :result [:warn "too-much-health"]}
+                     :result [:warn "test-schema-too-much-health"]}
                     {:path [:game :max-health]
-                     :result [:warn "too-much-health"]}]))
+                     :result [:warn "test-schema-too-much-health"]}]))
