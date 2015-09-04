@@ -150,12 +150,12 @@
 (defn- resolve-element-loc-key [info element path]
   (if (:i18nkey element)
     (:i18nkey element)
-    (let [loc-key (str (-> info :document :locKey) "." (join "." (map name path)))]
-      (-> (if (= :select (:type element))
-            (str loc-key "._group_label")
-            loc-key)
-        (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
-        (s/replace #"\.+" ".")))))
+    (->
+      (str
+        (join "." (concat [(-> info :document :locKey)] (map name path)))
+        (when (= :select (:type element)) "._group_label"))
+      (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
+      (s/replace #"\.+" "."))))
 
 (defn- ->validation-result [info data path element result]
   (when result
