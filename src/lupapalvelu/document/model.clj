@@ -247,7 +247,7 @@
           (concat
             (validate-fields application info nil data [])
             (validate-required-fields info [] data [])
-            (validate-document schema document info data #_ [])))))))
+            (validate-document schema document info data)))))))
 
 (defn has-errors?
   [results]
