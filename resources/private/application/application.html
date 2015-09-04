@@ -670,11 +670,8 @@
 
                             <!-- missing information -->
 
-                            <!-- ko if: missingRequiredInfo -->
-                            <h2 data-bind="ltext: 'application.warningsInDocument'" class="missing-info-title"></h2>
-                            <!-- /ko -->
-
                             <!--  ko if: hasFieldWarnings() -->
+                            <h2 data-bind="ltext: 'application.warningsInDocument'" class="missing-info-title"></h2>
                             <!-- ko foreach: fieldWarnings -->
                             <div data-bind="with: $data[0]">
                                 <h3 class="required-field-error-doc" data-bind="ltext: document.name + '._group_label'"></h3>
