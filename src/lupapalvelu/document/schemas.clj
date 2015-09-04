@@ -47,6 +47,10 @@
 (defn get-latest-schema-version []
   (->> @registered-schemas keys (sort >) first))
 
+(defn with-current-schema-info [document]
+  (let [current-info (-> document :schema-info get-schema :info (select-keys immutable-keys))]
+    (update document :schema-info merge current-info)))
+
 ;;
 ;; helpers
 ;;

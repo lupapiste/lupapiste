@@ -131,15 +131,11 @@
             whitelisted-paths)))
 
 ; Process
-(defn- with-current-schema-info [document]
-  (let [current-info (-> document :schema-info schemas/get-schema :info (select-keys schemas/immutable-keys))]
-    (update document :schema-info merge current-info)))
-
 (defn- process-documents-and-tasks [user {authority :authority :as application}]
   (let [validate        (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
         mask-person-ids (person-id-masker-for-user user application)
         disabled-flag   (partial enrich-single-doc-disabled-flag user)
-        mapper          (comp disabled-flag with-current-schema-info mask-person-ids validate)]
+        mapper          (comp disabled-flag schemas/with-current-schema-info mask-person-ids validate)]
     (-> application
       (update :documents (partial map mapper))
       (update :tasks (partial map mapper)))))
