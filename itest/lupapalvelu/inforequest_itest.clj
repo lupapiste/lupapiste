@@ -1,7 +1,6 @@
 (ns lupapalvelu.inforequest-itest
   (:require [midje.sweet  :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [sade.http :as http]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
@@ -83,7 +82,7 @@
 
     (fact "Clicking the link redirects to oir page"
       (let [expected-location (str (server-address) "/app/fi/oir#!/inforequest/")
-           resp (http/get (str (server-address) url) params)]
+           resp (http-get (str (server-address) url) params)]
        (get-in resp [:headers "location"]) =>  #(sade.strings/starts-with % expected-location)))
 
     (comment-application pena application-id false) => ok?
@@ -114,7 +113,7 @@
         (:n resp) => 1))
 
     (fact "Token no longer works"
-      (http/get (str (server-address) url) params) => http404?)
+      (http-get (str (server-address) url) params) => http404?)
 
     (fact "Application is no longer oir"
       (let [application (query-application pena application-id)]
