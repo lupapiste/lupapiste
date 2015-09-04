@@ -4,7 +4,6 @@
             [monger.collection :as mc]
             [monger.db :as db]
             [monger.gridfs :as gfs]
-            [monger.command :refer [server-status]]
             [clojure.java.io :as io])
   (:import  [java.util.zip ZipInputStream]))
 
