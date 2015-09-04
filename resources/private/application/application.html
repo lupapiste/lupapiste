@@ -348,7 +348,7 @@
                                 <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab"
                                    class="link-btn">
                                     <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
-                            
+
                             <li data-bind="if: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application') && features.enabled('arkistointi'),
                                            css: {'active': $parent.selectedTabName() === 'metadata'}">
                                 <a data-bind="click: changeTab" href="#" data-target="metadata" data-test-id="application-open-tasks-tab"
@@ -669,6 +669,27 @@
                             </div>
 
                             <!-- missing information -->
+
+                            <!-- ko if: missingRequiredInfo -->
+                            <h2 data-bind="ltext: 'application.warningsInDocument'" class="missing-info-title"></h2>
+                            <!-- /ko -->
+
+                            <!--  ko if: hasFieldWarnings() -->
+                            <!-- ko foreach: fieldWarnings -->
+                            <div data-bind="with: $data[0]">
+                                <h3 class="required-field-error-doc" data-bind="ltext: document.name + '._group_label'"></h3>
+                            </div>
+                            <!-- ko foreach: $data -->
+                            <div class="requiredField-line">
+                                <div class="like-btn">
+                                    <i class="lupicon-circle-attention"></i>
+                                    <span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span>
+                                </div>
+                                <a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>
+                            </div>
+                            <!-- /ko -->
+                            <!-- /ko -->
+                            <!-- /ko -->
 
                             <!-- ko if: missingRequiredInfo -->
                             <h2 data-bind="ltext: 'application.requiredDataMissing'" class="missing-info-title"></h2>
