@@ -12,25 +12,20 @@ Initialize
   ${foremanApps} =  Create List
   Set Suite Variable  ${foremanApps}
 
-Mikko creates new application
+Create project application
   ${secs} =  Get Time  epoch
-  # appname contains always the last created application
   Set Suite Variable  ${appname}  foreman-app${secs}
   Append To List  ${applications}  ${appname}
   Create application the fast way  ${appname}  753-416-25-22  kerrostalo-rivitalo
   ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
-  Set Suite Variable  ${newApplicationid}
   Append To List  ${applicationIds}  ${newApplicationId}
   Set Suite Variable  ${applicationIds}
 
-Mikko navigates to application
-  Open application  ${appname}  ${newApplicationid}
-
-Mikko goes back to project application
+Go back to project application
   Click by test id  test-application-link-permit-lupapistetunnus
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='kerrostalo-rivitalo']
 
-Foreman opens application
+Open foreman application
   [Arguments]  ${index}
   ${foremanAppId} =  Get From List  ${foremanApps}  ${index}
   Open application by id  ${foremanAppId}
@@ -49,7 +44,7 @@ Mikko invites foreman to application
 
 Foreman applies personal information to the foreman application
   [Arguments]  ${index}
-  Foreman opens application  ${index}
+  Open foreman application  ${index}
   Wait until  Confirm yes no dialog
   Open tab  parties
   Wait until  Page should contain  Hyväksynyt valtuutuksen
@@ -64,7 +59,7 @@ Foreman accepts invitation and fills info
 
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}
-  Foreman opens application  ${index}
+  Open foreman application  ${index}
   Deny yes no dialog
   Open tab  parties
   Open accordions  parties
@@ -81,15 +76,23 @@ Open application by id
   Wait until  Element Should Be Visible  application
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${appId}
 
+Open project application
+  ${appId} =   Get From List  ${applicationIds}  0
+  Open application by id  ${appId}
+
 Foreman history should have text X times
   [Arguments]  ${text}  ${times}
   Xpath Should Match X Times  //foreman-history//td[text()='${text}']  ${times}
 
 Foreman can see the first related construction info on the second foreman application
-  Foreman opens application  1
+  Open foreman application  1
   Open tab  parties
+
+  ${rows} =  Get Matching Xpath Count  //table[@data-test-id="foreman-other-applications-table"]/tbody[1]/tr
+  ${lastRowIndex} =  Evaluate  ${rows} - 1
   ${permitId} =   Get From List  ${applicationIds}  0
-  Wait until  Textfield Value Should Be  xpath=//input[@data-test-id='muutHankkeet.0.luvanNumero']  ${permitId}
+
+  Wait until  Textfield Value Should Be  xpath=//input[@data-test-id='muutHankkeet.${lastRowIndex}.luvanNumero']  ${permitId}
 
 Foreman logs in
   Logout

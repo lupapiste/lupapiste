@@ -40,8 +40,8 @@ New applications does not have statements
 
 Sonja sees indicators from pre-filled fields
   Sonja logs in
-  # The unseen changes count includes changes in "Rakennuksen kayttotarkoitus" and "Huoneistotiedot".
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  3
+  # The unseen changes count includes changes in property information + "Rakennuksen kayttotarkoitus" and "Huoneistotiedot" documents.
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  7
 
 Sonja adds four statement persons to application
   Open application  ${appname}  753-416-25-22
@@ -116,7 +116,7 @@ Veikko from Tampere can give verdict to own statement
 
 Sonja can see statement indicator
   Sonja logs in
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  4
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  8
 
 # add attachment
 

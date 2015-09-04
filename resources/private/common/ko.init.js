@@ -306,10 +306,15 @@
       var value = ko.utils.unwrapObservable(valueAccessor());
       var className = allBindings()["class"];
       var type = allBindings().type;
-      if (type) {
-        $(element)[type + "Toggle"](1000);
+
+      if (LUPAPISTE.config.features.animations) {
+        if (type) {
+          $(element)[type + "Toggle"](1000);
+        } else {
+          $(element).toggleClass(className, value, 100);
+        }
       } else {
-        $(element).toggleClass(className, value, 100);
+        $(element).toggleClass(className, value);
       }
     }
   };
@@ -320,10 +325,14 @@
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
       var duration = bindings.duration || 100;
       var easing = bindings.easing || "swing";
-      if (value) {
-        $(element).slideDown(duration, easing);
+      if (LUPAPISTE.config.features.animations) {
+        if (value) {
+          $(element).slideDown(duration, easing);
+        } else {
+          $(element).slideUp(duration, easing);
+        }
       } else {
-        $(element).slideUp(duration, easing);
+        $(element).toggle(value);
       }
     }
   };
@@ -333,10 +342,14 @@
       var value = ko.utils.unwrapObservable(valueAccessor());
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
       var duration = bindings.duration || 100;
-      if (value) {
-        $(element).fadeIn({duration: duration, queue: false});
+      if (LUPAPISTE.config.features.animations) {
+        if (value) {
+          $(element).fadeIn({duration: duration, queue: false});
+        } else {
+          $(element).fadeOut({duration: duration, queue: false});
+        }
       } else {
-        $(element).fadeOut({duration: duration, queue: false});
+        $(element).toggle(value);
       }
     }
   };
@@ -348,9 +361,17 @@
       var duration = bindings.duration || 100;
       var delay = (bindings.delay || 1000) + duration;
       if (value) {
-        $(element).fadeIn({duration: duration, queue: false});
+        if (LUPAPISTE.config.features.animations) {
+          $(element).fadeIn({duration: duration, queue: false});
+        } else {
+          $(element).show();
+        }
         _.delay(function() {
-          $(element).fadeOut({duration: duration, queue: false});
+          if (LUPAPISTE.config.features.animations) {
+            $(element).fadeOut({duration: duration, queue: false});
+          } else {
+            $(element).hide();
+          }
         }, delay);
       }
     }
