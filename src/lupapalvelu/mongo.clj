@@ -7,7 +7,6 @@
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
             [sade.util :as util]
-            [sade.strings :as ss]
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
@@ -46,10 +45,14 @@
 
 (defn get-db []
   (locking dbs
-    (or (@dbs *db-name*)
+    (or (get @dbs *db-name*)
         (when-let [db (m/get-db @connection *db-name*)]
           (swap! dbs assoc *db-name* db)
           db))))
+
+(defn get-gfs []
+  {:pre [(get @dbs *db-name*) @connection]}
+  (m/get-gridfs @connection *db-name*))
 
 (defn with-_id [m]
   (if-let [id (:id m)]
@@ -224,15 +227,14 @@
   (let [meta (remove-null-chars (if (map? (first metadata))
                                   (first metadata)
                                   (apply hash-map metadata)))]
-    (gfs/store-file
-      (gfs/make-input-file content)
+    (gfs/store-file (gfs/make-input-file (get-gfs) content)
       (set-file-id file-id)
       (gfs/filename filename)
       (gfs/content-type content-type)
       (gfs/metadata (assoc meta :uploaded (System/currentTimeMillis))))))
 
 (defn download-find [query]
-  (when-let [attachment (gfs/find-one (with-_id (remove-null-chars query)))]
+  (when-let [attachment (gfs/find-one (get-gfs) (with-_id (remove-null-chars query)))]
     (let [metadata (from-db-object (.getMetaData attachment) :true)]
       {:content (fn [] (.getInputStream attachment))
        :content-type (.getContentType attachment)
@@ -247,7 +249,7 @@
 (defn delete-file [query]
   (let [query (with-_id (remove-null-chars query))]
     (info "removing file" query)
-    (gfs/remove query)))
+    (gfs/remove (get-gfs) query)))
 
 (defn delete-file-by-id [file-id]
   (delete-file {:id file-id}))
@@ -403,7 +405,7 @@
     (throw (IllegalStateException. (str "Database is running in " mode " mode, not clearing MongoDB")))
     (do
       (warn "Clearing MongoDB")
-      (gfs/remove-all)
+      (gfs/remove-all (get-gfs))
       ; Collections must be dropped individially, otherwise index cache will be stale
       (doseq [coll (db/get-collection-names)]
         (when-not (or (.startsWith coll "system") (= "poi" coll)) (mc/drop coll)))

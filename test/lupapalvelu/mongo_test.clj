@@ -2,7 +2,6 @@
   (:require [clojure.test :refer :all]
             [midje.sweet :refer :all]
             [monger.collection :as mc]
-            [monger.gridfs :as gfs]
             [lupapalvelu.mongo :as mongo]))
 
 (def valid-id "502770568de2282ae6fbb0be")
