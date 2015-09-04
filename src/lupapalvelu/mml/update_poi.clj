@@ -2,9 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [monger.operators :refer :all]
-            [monger.core :as m]
             [monger.collection :as mc]
-            [monger.db :as db]
             [lupapalvelu.mongo :as mongo]
             [swiss.arrows :refer [-<>>]]
             [slingshot.slingshot :refer [try+ throw+]]))
