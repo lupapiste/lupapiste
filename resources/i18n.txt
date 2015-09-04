@@ -1,2 +1,6 @@
-error.rakennusvalitsin-muu: Manuaalinen rakennusnumero syötettävä
+error.rakennuksen-muuttaminen-rakennusvalitsin-muu: Manuaalinen rakennusnumero syötettävä
+error.rakennuksen-muuttaminen-ei-huoneistoja-rakennusvalitsin-muu: Manuaalinen rakennusnumero syötettävä
+error.rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia-rakennusvalitsin-muu: Manuaalinen rakennusnumero syötettävä
+error.rakennuksen-laajentaminen-rakennusvalitsin-muu: Manuaalinen rakennusnumero syötettävä
+error.purkaminen-rakennusvalitsin-muu: Manuaalinen rakennusnumero syötettävä
 application.warningsInDocument: Dokumenteilla olevat varoitukset
