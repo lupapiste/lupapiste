@@ -45,6 +45,7 @@ Open browser to login page
   Maximize browser window
   Set selenium speed  ${DEFAULT_SPEED}
   Apply minimal fixture now
+  Set integration proxy on
 
 Go to login page
   Go to  ${LOGIN URL}
