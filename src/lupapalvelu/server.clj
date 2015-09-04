@@ -65,6 +65,7 @@
       (email/send-email-message "lupapalvelu@solita.fi" "Critical: Migration failure!" [msg msg])))
 
   (mongo/ensure-indexes)
+  (server/add-middleware mongo/db-selection-middleware)
   (server/add-middleware web/tempfile-cleanup)
   (server/add-middleware i18n/lang-middleware)
   (server/add-middleware web/parse-json-body-middleware)

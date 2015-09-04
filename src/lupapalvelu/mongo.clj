@@ -27,21 +27,29 @@
 (defonce connection (atom nil))
 (defonce ^:private dbs (atom {}))
 
-(def ^:dynamic *db-name* :default)
+(def ^:dynamic *db-name* "lupapiste")
 
 
 ;;
 ;; Utils
 ;;
 
-(defmacro with-db [db-name]
-  `(binding [*db-name* db-name]))
+(defmacro with-db [db-name & body]
+  `(binding [*db-name* ~db-name]
+     ~@body))
 
-(defn- get-db []
+(defn db-selection-middleware [handler]
+  (fn [request]
+    (let [db-name (get-in request [:cookies :test_db_name])]
+      (with-db db-name
+        (handler request)))))
+
+(defn get-db []
   (locking dbs
     (or (@dbs *db-name*)
         (when-let [db (m/get-db @connection *db-name*)]
-          (swap! dbs assoc *db-name* db)))))
+          (swap! dbs assoc *db-name* db)
+          db))))
 
 (defn with-_id [m]
   (if-let [id (:id m)]
