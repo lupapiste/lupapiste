@@ -26,7 +26,7 @@ Foreman sees his other foreman jobs
   Foreman can see the first related construction info on the second foreman application
 
 Foreman gets error message when trying to submit foreman notice before link permit has verdict
-  Select from list by value  permitSubtypeSelect  ilmoitus
+  Select from list by value  permitSubtypeSelect  tyonjohtaja-ilmoitus
   Open tab  requiredFieldSummary
   Click enabled by test id  application-submit-btn
   Wait Until  Click element  xpath=//div[@id='dynamic-yes-no-confirm-dialog']//button[@data-test-id='confirm-yes']
