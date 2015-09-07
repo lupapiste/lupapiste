@@ -3,9 +3,10 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="text-field-template">
-      <div class="grid-element">
+      <div class="col--vertical">
         <label data-bind="text: label, attr: {for: id}"></label>
-        <input data-bind="textInput: value, attr: {placeholder: placeholder, id: id}"
+        <input type="text"
+               data-bind="textInput: value, attr: {placeholder: placeholder, id: id}"
                maxlength="255"></input>
       </div>
     </script>
