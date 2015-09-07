@@ -45,7 +45,8 @@ jQuery(document).ready(function() {
     {name: "autocomplete-handlers"},
     {name: "autocomplete-application-tags", template: "autocomplete-tags-components"},
     {name: "indicator"},
-    {name: "accordion"}
+    {name: "accordion"},
+    {name: "text-field"}
   ];
 
   _.forEach(components, function(component) {
