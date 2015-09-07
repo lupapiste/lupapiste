@@ -413,14 +413,15 @@
      :body "404"}))
 
 (defn create-preview
-  [file-id filename content-type content application-id]
+  [file-id filename content-type content application-id & [db-name]]
   (when (and (env/feature? :preview) (preview/converter content-type))
-    (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
-    (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
-                                            (with-open [content ((:content (mongo/download file-id)))]
-                                              (preview/create-preview content content-type)))]
-      (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
-      (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id))))
+    (mongo/with-db db-name
+      (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
+      (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+                                              (with-open [content ((:content (mongo/download file-id)))]
+                                                (preview/create-preview content content-type)))]
+        (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
+        (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id)))))
 
 (defn output-attachment-preview
   "Outputs attachment preview creating it if is it does not already exist"
@@ -441,7 +442,8 @@
    Returns attachment version."
   [options]
   {:pre [(map? (:application options))]}
-  (let [file-id (mongo/create-id)
+  (let [db-name mongo/*db-name* ; pass db-name to threadpool context
+        file-id (mongo/create-id)
         {:keys [filename content]} options
         application-id (-> options :application :id)
         sanitazed-filename (mime/sanitize-filename filename)
@@ -450,7 +452,7 @@
                                 :filename sanitazed-filename
                                 :content-type content-type})]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
-    (.submit preview-threadpool #(create-preview file-id sanitazed-filename content-type content application-id))
+    (.submit preview-threadpool #(create-preview file-id sanitazed-filename content-type content application-id db-name))
     (update-or-create-attachment options)))
 
 (defn get-attachments-by-operation
