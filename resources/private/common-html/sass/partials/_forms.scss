@@ -984,3 +984,50 @@ div.alleYli-radioGroup {
   display: inline-block;
   margin-top: $marginL;
 }
+
+$col: 25%;
+
+@mixin form-grid-clear {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+@mixin column ($size) {
+  float: left;
+  width: $size * $col;
+  min-width: $size * $col;
+  max-width: $size * $col;
+  padding: 0 $marginM;
+  .col--vertical, .col--horizontal {
+    width: 100%;
+    box-sizing: border-box;
+    [type=text] {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
+  .col--vertical {
+    label {
+      display: block;
+    }
+  }
+}
+
+.form-grid {
+  overflow-y: hidden;
+  width: 100%;
+  &:after {
+    @include form-grid-clear;
+  }
+
+  @for $i from 1 through 4 {
+    .col-#{$i} {
+      @include column($i);
+    }
+  }
+
+  .form-grid__row {
+    @include form-grid-clear;
+  }
+}

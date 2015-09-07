@@ -4199,6 +4199,112 @@ div.alleYli-radioGroup {
   margin-top: 24px;
 }
 
+/* line 1017, ../sass/partials/_forms.scss */
+.form-grid {
+  overflow-y: hidden;
+  width: 100%;
+}
+/* line 1020, ../sass/partials/_forms.scss */
+.form-grid:after {
+  content: "";
+  display: block;
+  clear: both;
+}
+/* line 1025, ../sass/partials/_forms.scss */
+.form-grid .col-1 {
+  float: left;
+  width: 25%;
+  min-width: 25%;
+  max-width: 25%;
+  padding: 0 12px;
+}
+/* line 1002, ../sass/partials/_forms.scss */
+.form-grid .col-1 .col--vertical, .form-grid .col-1 .col--horizontal {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 1005, ../sass/partials/_forms.scss */
+.form-grid .col-1 .col--vertical [type=text], .form-grid .col-1 .col--horizontal [type=text] {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 1011, ../sass/partials/_forms.scss */
+.form-grid .col-1 .col--vertical label {
+  display: block;
+}
+/* line 1025, ../sass/partials/_forms.scss */
+.form-grid .col-2 {
+  float: left;
+  width: 50%;
+  min-width: 50%;
+  max-width: 50%;
+  padding: 0 12px;
+}
+/* line 1002, ../sass/partials/_forms.scss */
+.form-grid .col-2 .col--vertical, .form-grid .col-2 .col--horizontal {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 1005, ../sass/partials/_forms.scss */
+.form-grid .col-2 .col--vertical [type=text], .form-grid .col-2 .col--horizontal [type=text] {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 1011, ../sass/partials/_forms.scss */
+.form-grid .col-2 .col--vertical label {
+  display: block;
+}
+/* line 1025, ../sass/partials/_forms.scss */
+.form-grid .col-3 {
+  float: left;
+  width: 75%;
+  min-width: 75%;
+  max-width: 75%;
+  padding: 0 12px;
+}
+/* line 1002, ../sass/partials/_forms.scss */
+.form-grid .col-3 .col--vertical, .form-grid .col-3 .col--horizontal {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 1005, ../sass/partials/_forms.scss */
+.form-grid .col-3 .col--vertical [type=text], .form-grid .col-3 .col--horizontal [type=text] {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 1011, ../sass/partials/_forms.scss */
+.form-grid .col-3 .col--vertical label {
+  display: block;
+}
+/* line 1025, ../sass/partials/_forms.scss */
+.form-grid .col-4 {
+  float: left;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+  padding: 0 12px;
+}
+/* line 1002, ../sass/partials/_forms.scss */
+.form-grid .col-4 .col--vertical, .form-grid .col-4 .col--horizontal {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 1005, ../sass/partials/_forms.scss */
+.form-grid .col-4 .col--vertical [type=text], .form-grid .col-4 .col--horizontal [type=text] {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 1011, ../sass/partials/_forms.scss */
+.form-grid .col-4 .col--vertical label {
+  display: block;
+}
+/* line 1030, ../sass/partials/_forms.scss */
+.form-grid .form-grid__row {
+  content: "";
+  display: block;
+  clear: both;
+}
+
 /* line 4, ../sass/partials/_tables.scss */
 table {
   width: 100%;
