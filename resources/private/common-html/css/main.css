@@ -3432,7 +3432,7 @@ input.form-input.long {
 }
 
 /* line 257, ../sass/partials/_forms.scss */
-.form-input.checkbox, [type="checkbox"], .form-input.radio, [type="radio"] {
+.form-input.checkbox, .form-input.radio {
   width: auto;
   display: inline-block;
   vertical-align: bottom;
@@ -3442,15 +3442,15 @@ input.form-input.long {
   padding: 0;
 }
 /* line 265, ../sass/partials/_forms.scss */
-.form-input.checkbox.error, [type="checkbox"].error, .form-input.radio.error, [type="radio"].error {
+.form-input.checkbox.error, .form-input.radio.error {
   outline: 3px solid red;
 }
 /* line 268, ../sass/partials/_forms.scss */
-.form-input.checkbox.warning, [type="checkbox"].warning, .form-input.radio.warning, [type="radio"].warning {
+.form-input.checkbox.warning, .form-input.radio.warning {
   outline: 3px solid #f39129;
 }
 /* line 271, ../sass/partials/_forms.scss */
-.form-input.checkbox.source-value-changed, [type="checkbox"].source-value-changed, .form-input.radio.source-value-changed, [type="radio"].source-value-changed {
+.form-input.checkbox.source-value-changed, .form-input.radio.source-value-changed {
   outline: 2px solid #04c714;
 }
 
