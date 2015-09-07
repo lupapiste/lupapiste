@@ -44,6 +44,7 @@
         (handler request)))))
 
 (defn get-db []
+  {:pre [@connection]}
   (locking dbs
     (or (get @dbs *db-name*)
         (when-let [db (m/get-db @connection *db-name*)]
