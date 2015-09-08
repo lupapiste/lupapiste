@@ -43,7 +43,8 @@
                                                  lLabel: 'userinfo.phone'}}"></div>
           </div>
 
-          <div class="row" data-bind="if: showSimpleCompanyInfo">
+          <!-- ko if: showSimpleCompanyInfo -->
+          <div class="row">
             <div class="col-1"
                  data-bind="component: {name: 'text-field',
                                         params: {value: companyName,
@@ -57,7 +58,7 @@
                                                  lLabel: 'userinfo.architect.company.id',
                                                  placeholder: '000009-1'}}"></div>
           </div>
-
+          <!-- /ko -->
 
           <div class="row">
             <div class="col-1"
@@ -81,13 +82,6 @@
                                                  lLabel: 'userinfo.city',
                                                  required: true}}"></div>
           </div>
-<!--           <div class="form-entry allowDirectMarketing-toggle">
-            <input data-bind="checked: allowDirectMarketing" id="allowDirectMarketing"
-              type="checkbox" class="form-input"></input>
-            <label data-bind="ltext: 'userinfo.allowDirectMarketing'" for="allowDirectMarketing"
-              class="form-label"></label>
-          </div>
- -->
 
           <div class="row">
             <div class="col-3"
@@ -104,31 +98,6 @@
                                                  lLabel: 'userinfo.architect'}}"></div>
           </div>
         </div>
-
-        <!-- ko if: companyShow -->
-          <div class="form-group" data-test-id="my-company">
-
-            <div data-bind="visible: companyLoading">
-              <em class="button-loader"></em>
-              <span data-bind="ltext: 'userInfo.company.loading'"></span>
-            </div>
-
-            <div data-bind="visible: companyLoaded">
-              <label data-bind="ltext: 'userInfo.company.name'" class="form-label"></label>
-              <span data-bind="text: company.name" class="form-input" data-test-id="my-company-name"></span>
-              <label data-bind="ltext: 'userInfo.company.y'" class="form-label"></label>
-              <span data-bind="text: company.y" class="form-input" data-test-id="my-company-id"></span>
-
-              <div data-bind="if: company.document()">
-                <label data-bind="ltext: 'userInfo.company.contract'" class="form-label"></label>
-                <a data-bind="text: company.document, attr: {href: company.document}" target="_blank"></a>
-              </div>
-
-              <button data-bind="click: editCompany, ltext: 'mypage.companyAccount.editInfo'" class="btn btn-primary" data-test-id="company-edit-info"></button>
-              <button data-bind="click: editUsers, ltext: 'mypage.companyAccount.editUsers'" class="btn btn-primary" data-test-id="company-edit-users"></button>
-            </div>
-          </div>
-        <!-- /ko -->
 
         <!-- ko if: architect -->
           <div class="architect-info form-grid">
@@ -160,43 +129,45 @@
                                                    lLabel: 'userinfo.architect.fise'}}"></div>
             </div>
 
-
-            <div class="col-4" data-bind="visible: lupapisteApp.models.globalAuthModel.ok('add-user-attachment-allowed')">
-              <div data-bind="visible: !hasAttachments(), ltext: 'userinfo.architect.attachments.no-attachments'"></div>
-              <table data-bind="visible: hasAttachments" class="architect-attachments">
-                <thead>
-                  <tr>
-                    <th data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
-                    <th data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
-                  </tr>
-                </thead>
-                <tbody data-bind="foreach: attachments">
-                  <tr>
-                    <td data-bind="attr: {'data-test-id': $data['attachment-id']}">
-                      <div
-                        data-bind="text: loc(['attachmentType.osapuolet', $data['attachment-type']['type-id']])"
-                        data-test-id="attachment-type"></div>
-                      <div data-bind="text:  $data['file-name']"
-                        data-test-id="filename"></div>
-                    </td>
-                    <td>
-                      <a data-bind="ltext: 'userinfo.architect.attachments.load',
-                                    attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}"
-                         data-test-id="load" href="#" target="_blank"></a>
-                      <a data-bind="ltext: 'userinfo.architect.attachments.remove',
-                                    click: $parent.remove"
-                         data-test-id="remove" href="#"></a>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <button class="positive" data-bind="click: add" data-test-id="test-add-architect-attachment">
-                <i class="lupicon-upload"></i>
-                <span data-bind="ltext: 'userinfo.architect.attachments.add'"></span>
-              </button>
+            <div class="row">
+              <div class="col-4" data-bind="visible: lupapisteApp.models.globalAuthModel.ok('add-user-attachment-allowed')">
+                <div data-bind="visible: !hasAttachments(), ltext: 'userinfo.architect.attachments.no-attachments'"></div>
+                <table data-bind="visible: hasAttachments" class="architect-attachments">
+                  <thead>
+                    <tr>
+                      <th data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
+                      <th data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
+                    </tr>
+                  </thead>
+                  <tbody data-bind="foreach: attachments">
+                    <tr>
+                      <td data-bind="attr: {'data-test-id': $data['attachment-id']}">
+                        <div
+                          data-bind="text: loc(['attachmentType.osapuolet', $data['attachment-type']['type-id']])"
+                          data-test-id="attachment-type"></div>
+                        <div data-bind="text:  $data['file-name']"
+                          data-test-id="filename"></div>
+                      </td>
+                      <td>
+                        <a data-bind="ltext: 'userinfo.architect.attachments.load',
+                                      attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}"
+                           data-test-id="load" href="#" target="_blank"></a>
+                        <a data-bind="ltext: 'userinfo.architect.attachments.remove',
+                                      click: $parent.remove"
+                           data-test-id="remove" href="#"></a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <button class="positive" data-bind="click: add" data-test-id="test-add-architect-attachment">
+                  <i class="lupicon-upload"></i>
+                  <span data-bind="ltext: 'userinfo.architect.attachments.add'"></span>
+                </button>
+              </div>
             </div>
           </div>
         <!-- /ko -->
+
       </script>
       <div class="button-group">
         <button data-bind="click: save,
@@ -267,6 +238,47 @@
               </div>
             </div>
           </form>
+        </div>
+      </script>
+    </div>
+
+    <div id="mypage-company">
+      <!-- ko if: companyShow -->
+      <div data-bind="component: {name: 'accordion', params: {ltitle: 'company.title',
+                                                              accordionContentTemplate: 'mypage-company-template',
+                                                              accordionContentTemplateData: $data}}"></div>
+      <!-- /ko -->
+
+      <script type="text/x-jquery-tmpl" id="mypage-company-template">
+        <div class="form-grid" data-test-id="my-company">
+          <div class="row">
+          <div class="col-4">
+          <div data-bind="visible: companyLoading">
+            <em class="button-loader"></em>
+            <span data-bind="ltext: 'userInfo.company.loading'"></span>
+          </div>
+
+          <div data-bind="visible: companyLoaded">
+            <label data-bind="ltext: 'userInfo.company.name'" class="form-label"></label>
+            <span data-bind="text: company.name" class="form-input" data-test-id="my-company-name"></span>
+            <label data-bind="ltext: 'userInfo.company.y'" class="form-label"></label>
+            <span data-bind="text: company.y" class="form-input" data-test-id="my-company-id"></span>
+
+            <div data-bind="if: company.document()">
+              <label data-bind="ltext: 'userInfo.company.contract'" class="form-label"></label>
+              <a data-bind="text: company.document, attr: {href: company.document}" target="_blank"></a>
+            </div>
+            <button data-bind="click: editCompany" class="btn btn-primary" data-test-id="company-edit-info">
+              <i class="lupicon-chevron-right"></i>
+              <span data-bind="ltext: 'mypage.companyAccount.editInfo'"></span>
+            </button>
+            <button data-bind="click: editUsers" class="btn btn-primary" data-test-id="company-edit-users">
+              <i class="lupicon-chevron-right"></i>
+              <span data-bind="ltext: 'mypage.companyAccount.editUsers'"></span>
+            </button>
+          </div>
+          </div>
+          </div>
         </div>
       </script>
     </div>

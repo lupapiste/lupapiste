@@ -39,7 +39,7 @@
   }
 }
 
-#mypage-register-company {
+#mypage-register-company, #mypage-company {
   padding: 0 $marginL;
   h2 {
     padding-left: 0;
@@ -54,12 +54,7 @@
 }
 
 .architect-info {
-  margin: $marginL auto;
   transition: height 2s;
 
-
-  .architect-attachments {
-    margin-top: $marginL;
-  }
 }
 

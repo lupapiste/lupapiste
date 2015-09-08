@@ -4187,14 +4187,19 @@ div.alleYli-radioGroup {
 .form-grid {
   overflow-y: hidden;
   width: 100%;
+  border-bottom: 1px solid #dddddd;
 }
-/* line 1022, ../sass/partials/_forms.scss */
+/* line 1024, ../sass/partials/_forms.scss */
+.form-grid:last-child {
+  border-bottom: none;
+}
+/* line 1028, ../sass/partials/_forms.scss */
 .form-grid:after {
   content: "";
   display: block;
   clear: both;
 }
-/* line 1026, ../sass/partials/_forms.scss */
+/* line 1032, ../sass/partials/_forms.scss */
 .form-grid [type=text], .form-grid [type=password], .form-grid select {
   padding: 0 12px;
   min-height: 40px;
@@ -4207,16 +4212,16 @@ div.alleYli-radioGroup {
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
 }
-/* line 1037, ../sass/partials/_forms.scss */
+/* line 1043, ../sass/partials/_forms.scss */
 .form-grid [type=text]:focus, .form-grid [type=password]:focus, .form-grid select:focus {
   color: #333333;
   border-color: #fbc732;
 }
-/* line 1043, ../sass/partials/_forms.scss */
+/* line 1049, ../sass/partials/_forms.scss */
 .form-grid select.required, .form-grid input.required {
   border-color: #fbc732;
 }
-/* line 1047, ../sass/partials/_forms.scss */
+/* line 1053, ../sass/partials/_forms.scss */
 .form-grid .select-arrow {
   position: absolute;
   right: 20px;
@@ -4224,18 +4229,18 @@ div.alleYli-radioGroup {
   color: #f39129;
   pointer-events: none;
 }
-/* line 1055, ../sass/partials/_forms.scss */
+/* line 1061, ../sass/partials/_forms.scss */
 .form-grid [type=text].err, .form-grid [type=password].err {
   border: 1px solid #df3215;
 }
-/* line 1060, ../sass/partials/_forms.scss */
+/* line 1066, ../sass/partials/_forms.scss */
 .form-grid .col-1 {
   position: relative;
   float: left;
   width: 25%;
   min-width: 25%;
   max-width: 25%;
-  padding: 0 12px;
+  padding-left: 20px;
 }
 /* line 1003, ../sass/partials/_forms.scss */
 .form-grid .col-1 label.required:after {
@@ -4251,14 +4256,14 @@ div.alleYli-radioGroup {
 .form-grid .col-1 .col--vertical label {
   display: block;
 }
-/* line 1060, ../sass/partials/_forms.scss */
+/* line 1066, ../sass/partials/_forms.scss */
 .form-grid .col-2 {
   position: relative;
   float: left;
   width: 50%;
   min-width: 50%;
   max-width: 50%;
-  padding: 0 12px;
+  padding-left: 20px;
 }
 /* line 1003, ../sass/partials/_forms.scss */
 .form-grid .col-2 label.required:after {
@@ -4274,14 +4279,14 @@ div.alleYli-radioGroup {
 .form-grid .col-2 .col--vertical label {
   display: block;
 }
-/* line 1060, ../sass/partials/_forms.scss */
+/* line 1066, ../sass/partials/_forms.scss */
 .form-grid .col-3 {
   position: relative;
   float: left;
   width: 75%;
   min-width: 75%;
   max-width: 75%;
-  padding: 0 12px;
+  padding-left: 20px;
 }
 /* line 1003, ../sass/partials/_forms.scss */
 .form-grid .col-3 label.required:after {
@@ -4297,14 +4302,14 @@ div.alleYli-radioGroup {
 .form-grid .col-3 .col--vertical label {
   display: block;
 }
-/* line 1060, ../sass/partials/_forms.scss */
+/* line 1066, ../sass/partials/_forms.scss */
 .form-grid .col-4 {
   position: relative;
   float: left;
   width: 100%;
   min-width: 100%;
   max-width: 100%;
-  padding: 0 12px;
+  padding-left: 20px;
 }
 /* line 1003, ../sass/partials/_forms.scss */
 .form-grid .col-4 label.required:after {
@@ -4320,7 +4325,7 @@ div.alleYli-radioGroup {
 .form-grid .col-4 .col--vertical label {
   display: block;
 }
-/* line 1065, ../sass/partials/_forms.scss */
+/* line 1071, ../sass/partials/_forms.scss */
 .form-grid .row {
   content: "";
   display: block;
@@ -4328,11 +4333,11 @@ div.alleYli-radioGroup {
   margin-bottom: 20px;
   overflow-y: hidden;
 }
-/* line 1070, ../sass/partials/_forms.scss */
+/* line 1076, ../sass/partials/_forms.scss */
 .form-grid .row:last-child {
   margin-bottom: 12px;
 }
-/* line 1075, ../sass/partials/_forms.scss */
+/* line 1081, ../sass/partials/_forms.scss */
 .form-grid .info-message {
   background-color: #df3215;
   color: #fff;
@@ -4343,35 +4348,35 @@ div.alleYli-radioGroup {
   display: block;
   height: 40px;
 }
-/* line 1087, ../sass/partials/_forms.scss */
+/* line 1093, ../sass/partials/_forms.scss */
 .form-grid .poor.info-message,
 .form-grid .low.info-message {
   background-color: #df3215;
 }
-/* line 1092, ../sass/partials/_forms.scss */
+/* line 1098, ../sass/partials/_forms.scss */
 .form-grid .average.info-message {
   background-color: #f39129;
 }
-/* line 1096, ../sass/partials/_forms.scss */
+/* line 1102, ../sass/partials/_forms.scss */
 .form-grid .good.info-message,
 .form-grid .excellent.info-message {
   background-color: #2ca92c;
 }
-/* line 1101, ../sass/partials/_forms.scss */
+/* line 1107, ../sass/partials/_forms.scss */
 .form-grid [type=password].poor,
 .form-grid [type=password].low {
   border-color: #df3215;
 }
-/* line 1106, ../sass/partials/_forms.scss */
+/* line 1112, ../sass/partials/_forms.scss */
 .form-grid [type=password].average {
   border-color: #f39129;
 }
-/* line 1110, ../sass/partials/_forms.scss */
+/* line 1116, ../sass/partials/_forms.scss */
 .form-grid [type=password].good,
 .form-grid [type=password].excellent {
   border-color: #2ca92c;
 }
-/* line 1115, ../sass/partials/_forms.scss */
+/* line 1121, ../sass/partials/_forms.scss */
 .form-grid .error-message {
   background-color: #df3215;
   color: #fff;
@@ -4380,7 +4385,7 @@ div.alleYli-radioGroup {
   font-style: normal;
   font-weight: bold;
 }
-/* line 1122, ../sass/partials/_forms.scss */
+/* line 1128, ../sass/partials/_forms.scss */
 .form-grid .error-message:before {
   font-family: 'lupapiste';
   speak: none;
@@ -9547,45 +9552,40 @@ td.comment-text {
 }
 
 /* line 42, ../sass/views/_mypage.scss */
-#mypage-register-company {
+#mypage-register-company, #mypage-company {
   padding: 0 24px;
 }
 /* line 44, ../sass/views/_mypage.scss */
-#mypage-register-company h2 {
+#mypage-register-company h2, #mypage-company h2 {
   padding-left: 0;
 }
 /* line 47, ../sass/views/_mypage.scss */
-#mypage-register-company p {
+#mypage-register-company p, #mypage-company p {
   padding-left: 0;
 }
 /* line 49, ../sass/views/_mypage.scss */
-#mypage-register-company p a {
+#mypage-register-company p a, #mypage-company p a {
   color: #f39129;
   text-decoration: none;
 }
 /* line 14, ../sass/partials/_links.scss */
-#mypage-register-company p a:link, #mypage-register-company p a:visited {
+#mypage-register-company p a:link, #mypage-register-company p a:visited, #mypage-company p a:link, #mypage-company p a:visited {
   color: #f39129;
 }
 /* line 17, ../sass/partials/_links.scss */
-#mypage-register-company p a:hover {
+#mypage-register-company p a:hover, #mypage-company p a:hover {
   color: #f7ac2e;
   text-decoration: underline;
 }
 /* line 21, ../sass/partials/_links.scss */
-#mypage-register-company p a:active {
+#mypage-register-company p a:active, #mypage-company p a:active {
   color: #fbc732;
   text-decoration: underline;
 }
 
 /* line 56, ../sass/views/_mypage.scss */
 .architect-info {
-  margin: 24px auto;
   transition: height 2s;
-}
-/* line 61, ../sass/views/_mypage.scss */
-.architect-info .architect-attachments {
-  margin-top: 24px;
 }
 
 /* line 1, ../sass/views/_admin.scss */

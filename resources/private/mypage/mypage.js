@@ -307,6 +307,7 @@
       .find("#own-info-form").applyBindings(ownInfo).end()
       .find("#pw-form").applyBindings(pw).end()
       .find("#mypage-register-company").applyBindings(ownInfo).end()
+      .find("#mypage-company").applyBindings(ownInfo).end()
       .find("#dialog-userinfo-architect-upload")
         .applyBindings(uploadModel)
         .find("form")

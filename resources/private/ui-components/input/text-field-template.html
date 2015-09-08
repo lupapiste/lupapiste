@@ -5,7 +5,7 @@
     <script type="text/x-jquery-tmpl" id="text-field-template">
       <div class="col--vertical">
         <label data-bind="text: label, attr: {for: id}, css: {required: required}"></label>
-        <input type="text"
+        <input class="input" type="text"
                data-bind="textInput: value, attr: {placeholder: placeholder, id: id},
                           css: {required: required && !value()}"
                maxlength="255"></input>
