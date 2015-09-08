@@ -21,7 +21,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.ktj :as ktj]
+            [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
@@ -88,7 +88,7 @@
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
     (when-let [rakennuspaikka (domain/get-document-by-type application :location)]
-      (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
+      (when-let [ktj-tiedot (wfs/rekisteritiedot-xml (:propertyId application))]
         (let [updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
                        [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
                        [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
