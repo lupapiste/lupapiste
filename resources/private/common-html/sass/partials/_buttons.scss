@@ -1,73 +1,3 @@
-// Simple button
-//
-// :hover         - Yes, you can press this button
-// :active, .act  - You are press all the right buttons
-//
-// Styleguide 3.1
-
-/* [type=submit], .btn, button { */
-/*   background: darken($lp-light-grey, 15%); */
-/*   text-align: center; */
-/*   cursor: pointer; */
-/*   display:inline-block; */
-/*   font-family:inherit; */
-/*   font-size: 0.9em; */
-/*   line-height:1.8em; */
-/*   font-weight:400; */
-/*   width: $cols3; */
-/*   margin:0 0 $marginS; */
-/*   padding:.25em 1.125em; */
-/*   text-decoration:none; */
-/*   text-shadow:0px 1px 0px #fff; */
-/*   border: none; */
-/*   color: rgb(48,48,48); */
-/*   position: relative; */
-/*   min-height: 30px; */
-/*   -moz-box-sizing: border-box; */
-/*   box-sizing: border-box; */
-/*   -webkit-font-smoothing: antialiased; */
-
-/*   &:hover { */
-/*     background: darken($lp-light-grey, 10%); */
-/*   } */
-/*   &:active, &.act { */
-
-/*   } */
-
-/*   &:disabled, &[disabled=disabled], &.disabled, */
-/*   &:disabled:hover, &[disabled=disabled]:hover, &.disabled:hover, */
-/*   &:disabled:active, &[disabled=disabled]:active, &.disabled:active { */
-/*     color: darken($lp-light-grey, 30%); */
-/*     -webkit-box-shadow:none; */
-/*     box-shadow:none; */
-/*     background: $lp-light-grey; */
-/*   } */
-
-/*   &.block{ */
-/*     display: block; */
-/*   } */
-
-/*   span:nth-child(1){ */
-/*     max-width: 100px; */
-/*     height: auto; */
-/*   } */
-
-/*   span.btn-label { */
-/*     margin-left: 12px; */
-/*   } */
-/* } */
-
-/* // IE 8 */
-/* button[disabled] { */
-/*     color: darken($lp-light-grey, 30%); */
-/*     -webkit-box-shadow:none; */
-/*     box-shadow:none; */
-/*     background: $lp-light-grey; */
-/* } */
-
-/* .btn.left-align { */
-/*   float: left; */
-/* } */
 
 
 button.btn-dialog, .btn-dialog {
@@ -95,68 +25,10 @@ button.btn-dialog, .btn-dialog {
    max-width: $cols3;
 }
 
-
-/* .btn-link { */
-/*   line-height:$baseline - 1; */
-/*   margin:$baseline; */
-/*   padding:1.125em; */
-/*   font-size:0.875em; */
-/*   font-weight:700; */
-/*   overflow: auto; */
-/* } */
-
 .btn-dialog.btn-primary, .btn-dialog.positive {
   left: 0;
   text-transform: uppercase;
 }
-
-
-
-/* .btn-wizard { */
-/*   margin-top: $marginM; */
-/* } */
-
-/* .btn-wizard.btn-primary{ */
-/*   float: right; */
-/*   margin-right: $marginL; */
-/* } */
-
-/* .btn-narrow { */
-/*   width: $cols2; */
-/*   text-align: center; */
-/* } */
-
-/* .btn-auto { */
-/*   width: auto; */
-/*   text-align: center; */
-/* } */
-
-/* // Primary action button */
-/* // */
-/* // */
-/* // Styleguide 3.1.1 */
-
-/* .btn-primary { */
-/*   background: $lp-green; */
-/*   text-transform:uppercase; */
-/*   color: white; */
-/*   text-shadow: none; */
-/*   font-weight: normal; */
-/*    &:hover { */
-/*     background: darken($lp-green, 10%); */
-/*     -webkit-box-shadow:0 1px 2px darken($lp-light-grey, 20%); */
-/*     box-shadow:0 1px 2px darken($lp-light-grey, 20%); */
-/*   } */
-/*   &:visited, &:active { */
-/*     color: white; */
-/*   } */
-
-/* } */
-
-/* // Decline button */
-/* // */
-/* // */
-/* // Styleguide 3.1.2 */
 
 .btn-decline {
   background: red;
@@ -180,115 +52,6 @@ button.btn-dialog, .btn-dialog {
   right: 8px;
 }
 
-/* .btn-nav-forward { */
-/*   position: relative; */
-/*   max-height: 30px; */
-/*   overflow: visible; */
-/*   margin-right: 20px; */
-/*   text-align: center; */
-
-/*   &:after{ */
-/*     content: " "; */
-/*     width: 0; */
-/*     height: 0; */
-/*     border-top: 15px solid transparent; */
-/*     border-left: 22px solid darken($lp-light-grey, 15%); */
-/*     border-bottom: 15px solid transparent; */
-/*     position: absolute; */
-/*     top: 0; */
-/*     right: -22px; */
-/*   } */
-/*   &:disabled, &[disabled=disabled], &.disabled, */
-/*   &:disabled:hover, &[disabled=disabled]:hover, &.disabled:hover, */
-/*   &:disabled:active, &[disabled=disabled]:active, &.disabled:active { */
-/*     &:after{ */
-/*       border-left: 22px solid $lp-light-grey; */
-/*     } */
-/*   } */
-
-/*   &:hover { */
-/*     &:after{ */
-/*       border-left: 22px solid darken($lp-light-grey, 10%); */
-/*     } */
-/*   } */
-/*   &.btn-primary { */
-/*     &:after{ */
-/*       border-left: 22px solid $lp-green; */
-/*     } */
-/*     &:disabled, &[disabled=disabled], &.disabled, */
-/*     &:disabled:hover, &[disabled=disabled]:hover, &.disabled:hover, */
-/*     &:disabled:active, &[disabled=disabled]:active, &.disabled:active { */
-/*       &:after{ */
-/*         border-left: 22px solid $lp-light-grey; */
-/*       } */
-/*     } */
-/*     &:hover { */
-/*       &:after{ */
-/*         border-left: 22px solid darken($lp-green, 10%); */
-/*       } */
-/*     } */
-/*   } */
-/*   .icon.right-align { */
-/*     right: -12px; */
-/*     z-index: 3; */
-/*   } */
-/* } */
-
-/* .btn-nav-back { */
-/*   text-align: center; */
-/*   position: relative; */
-/*   max-height: 30px; */
-/*   margin-left: 22px; */
-/*   overflow: visible; */
-
-/*   &:before { */
-/*     content: " "; */
-/*     width: 0; */
-/*     height: 0; */
-/*     border-top: 15px solid transparent; */
-/*     border-right: 22px solid darken($lp-light-grey, 15%); */
-/*     border-bottom: 15px solid transparent; */
-/*     position: absolute; */
-/*     top: 0; */
-/*     left: -22px; */
-/*   } */
-/*   &:disabled, &[disabled=disabled], &.disabled, */
-/*   &:disabled:hover, &[disabled=disabled]:hover, &.disabled:hover, */
-/*   &:disabled:active, &[disabled=disabled]:active, &.disabled:active { */
-/*     &:before { */
-/*       border-right: 22px solid $lp-light-grey; */
-/*     } */
-/*   } */
-/*   &:hover { */
-/*     &:before{ */
-/*       border-right: 22px solid darken($lp-light-grey, 10%); */
-/*     } */
-/*   } */
-/*   .icon.left-align { */
-/*     left: -9px; */
-/*     z-index: 3; */
-/*   } */
-/* } */
-
-/* .btn-container { */
-/*   button { */
-/*     margin-right: $marginS; */
-/*   } */
-/*   button:last-child { */
-/*     margin-right: 0; */
-/*   } */
-/* } */
-
-/* .btn-container.right-align { */
-/*   float: right; */
-/* } */
-
-/* a.command { */
-/*   &:before { content: "["; } */
-/*   &:after { content: "]"; } */
-/*   white-space: nowrap; */
-/* } */
-
 // New buttons
 
 $btn-spacer: 12px;
@@ -311,7 +74,6 @@ $icon-pad: 10px;
   white-space: nowrap;
   text-align: left;
   text-decoration: none;
-  //display: table;
   cursor: pointer;
   padding: {
     left: $btn-spacer;
@@ -336,14 +98,21 @@ $icon-pad: 10px;
   }
   :last-child {
     padding: {
-    right: 0px !important;
+      right: 0px !important;
     }
   }
 }
 
+i.btn {
+  margin: 0;
+  font-size: $lupicon-size;
+}
 
-
-
+@mixin small {
+  min-height: $lupicon-size + 4;
+  max-height: $lupicon-size + 4;
+  line-height: $lupicon-size + 4;
+}
 
 // Layout like button, but semantically is not.
 // This is useful when displaying text with icons,
@@ -352,11 +121,21 @@ $icon-pad: 10px;
   @extend .btn;
   cursor: default;
   padding: 0;
-  min-height: $lupicon-size + 4;
-  max-height: $lupicon-size + 4;
-  line-height: $lupicon-size + 4;
+  @include small;
 }
 
+.btn-small {
+  @include small;
+  // Padding adjusted to make i.btn-small.lupicon-xxx square.
+  padding: {
+    left: 4px;
+    right: 4px;
+  }
+}
+
+i.btn-small {
+  font-size: $lupicon-size - 4px;
+}
 
 .caps {
   text-transform: uppercase;
@@ -423,10 +202,12 @@ $icon-pad: 10px;
   // here in order to avoid confusion ("What .disabled?").
 }
 
-@mixin button-div-a ($name) {
+@mixin button-div-a-i-span ($name) {
   button.#{$name} { @content; }
   div.btn.#{$name} { @content; }
   a.btn.#{$name} { @content; }
+  i.btn.#{$name} { @content; }
+  span.btn.#{$name} { @content; }
 }
 
 @mixin styled-input ($bg, $hover-bg, $active-bg,
@@ -452,30 +233,30 @@ $icon-pad: 10px;
   }
 }
 
-@include button-div-a ( primary ) {
+@include button-div-a-i-span ( primary ) {
   @include styled-input( $bg: $orange-link, $hover-bg: $orange-hover, $active-bg: $orange-active );
 }
 
-@include button-div-a (secondary) {
+@include button-div-a-i-span (secondary) {
   @include styled-input( $bg: $gray-link, $hover-bg: $gray-hover, $active-bg: $gray-active );
 }
 
-@include button-div-a (positive) {
+@include button-div-a-i-span (positive) {
   @include styled-input( $bg: $green-link, $hover-bg: $green-hover, $active-bg: $green-active );
 }
 
 // btn-primary is now the same as positive.
 // This is used only for legacy support until the old definitions have been rooted out.
 
-@include button-div-a (btn-primary ) {
+@include button-div-a-i-span (btn-primary ) {
   @include styled-input( $bg: $green-link, $hover-bg: $green-hover, $active-bg: $green-active );
 }
 
-@include button-div-a ( negative ) {
+@include button-div-a-i-span ( negative ) {
   @include styled-input( $bg: $red-link, $hover-bg: $red-hover, $active-bg: $red-active );
 }
 
-@include button-div-a ( authority ) {
+@include button-div-a-i-span ( authority ) {
   @include styled-input( $bg: $turqo-link, $hover-bg: $turqo-hover, $active-bg: $turqo-active );
 }
 
@@ -496,7 +277,7 @@ $icon-pad: 10px;
            }
 }
 
-@include button-div-a (function) {
+@include button-div-a-i-span (function) {
   @include function( $orange-link, $orange-hover, $gray51 );
 }
 
@@ -513,7 +294,7 @@ button.function {
   }
  }
 
-@include button-div-a ("function.authority") {
+@include button-div-a-i-span ("function.authority") {
   @include function( $turqo-link, $turqo-hover, $gray51 );
 }
 

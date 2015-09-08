@@ -5,8 +5,8 @@ Resource       ../common_resource.robot
 
 *** Test Cases ***
 
-Re-enable proxies
-  Set integration proxy on
+#Re-enable proxies
+#  Set integration proxy on
 
 Close all browsers
   [Tags]  ie8

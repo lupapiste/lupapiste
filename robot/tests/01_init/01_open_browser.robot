@@ -8,14 +8,13 @@ Resource        ../../common_resource.robot
 The shared browser is opened
   [Tags]  ie8
   Open browser to login page
-  Apply minimal fixture now
 
 The shared browser is opened for integration tests
   [Tags]  integration
   Open browser to login page
 
-Disable proxy
-  Set integration proxy off
+#Disable proxy
+#  Set integration proxy off
 
 Login page is in Finnish
   [Tags]  ie8

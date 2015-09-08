@@ -746,6 +746,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return util.getIn(model, [name, "whitelist-action"]) === "disabled";
   }
 
+  function isSubSchemaWhitelisted(schema) {
+    return util.getIn(schema, ["whitelist", "otherwise"]) === "disabled" && !_.contains(util.getIn(schema, ["whitelist", "roles"]), lupapisteApp.models.currentUser.role());
+  }
+
   function buildText(subSchema, model, path) {
     var myPath = path.join(".");
     var input = document.createElement("textarea");
@@ -955,7 +959,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                                  { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, path); } },
                                                  { title: loc("no") });
         }
-      }
+      };
       if( options && options.dataTestSpecifiers ) {
         opts.attr =  {"data-test-class": "delete-schemas." + subSchema. name};
       }
@@ -1541,6 +1545,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var appendButton = makeButton(myPath.join("_") + "_append",
                                     loc([self.schemaI18name, myPath.join("."), "_append_label"]),
                                     {icon: "lupicon-circle-plus", className: "secondary"});
+      appendButton.disabled = isSubSchemaWhitelisted(subSchema);
 
       var appender = function () {
         var parent$ = $(this).closest(".accordion-fields");

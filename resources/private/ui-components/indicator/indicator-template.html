@@ -3,7 +3,7 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="indicator-template">
-      <div class="indicator-bar" data-bind="slider: showIndicator, css: indicatorStyle">
+      <div class="indicator-bar" data-bind="fader: showIndicator, css: indicatorStyle, attr: {'data-test-id': 'indicator-' + indicatorStyle()}">
         <div class="indicator-box">
           <div class="indicator-info" data-bind="css: iconStyle"></div>
           <div class="indicator-message" data-bind="ltext: message"></div>
