@@ -48,7 +48,8 @@ jQuery(document).ready(function() {
     {name: "accordion"},
     {name: "text-field", model: "input-field"},
     {name: "checkbox-field", model: "input-field"},
-    {name: "select-field", model: "input-field"}
+    {name: "select-field", model: "input-field"},
+    {name: "password-field"}
   ];
 
   _.forEach(components, function(component) {
