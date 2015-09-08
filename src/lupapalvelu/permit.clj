@@ -103,7 +103,7 @@
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "maankaytonmuutos"
-   :wfs-krysp-url-asia-prefix "mkmu:luvanTunnistetiedot/"})
+   })
 
 ;;
 ;; Helpers
