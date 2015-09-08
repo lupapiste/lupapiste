@@ -1040,6 +1040,10 @@ $col: 25%;
     }
   }
 
+  select.required, input.required {
+    border-color: $input-focus-border-color;
+  }
+
   .select-arrow {
     position: absolute;
     right: 20px;

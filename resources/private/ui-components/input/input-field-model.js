@@ -10,9 +10,14 @@ LUPAPISTE.InputFieldModel = function(params) {
   self.value = params.value;
   self.placeholder = params.lPlaceholder ? loc(params.lPlaceholder) : params.placeholder;
 
+  self.required = params.required || false;
+  if (self.required) {
+    self.value.extend({required: true});
+  }
+
   // TODO select model
   self.options = params.options || [];
   self.optionsValue = params.optionsValue || "";
   self.optionsText  = params.optionsText || "";
-  self.optionsCaption = params.optionsCaption || "";
+  self.optionsCaption = params.lOptionsCaption ? loc(params.lOptionsCaption) : params.optionsCaption;
 };

@@ -4213,6 +4213,10 @@ div.alleYli-radioGroup {
   border-color: #fbc732;
 }
 /* line 1043, ../sass/partials/_forms.scss */
+.form-grid select.required, .form-grid input.required {
+  border-color: #fbc732;
+}
+/* line 1047, ../sass/partials/_forms.scss */
 .form-grid .select-arrow {
   position: absolute;
   right: 20px;
@@ -4220,11 +4224,11 @@ div.alleYli-radioGroup {
   color: #f39129;
   pointer-events: none;
 }
-/* line 1051, ../sass/partials/_forms.scss */
+/* line 1055, ../sass/partials/_forms.scss */
 .form-grid [type=text].err {
   border: 1px solid #df3215;
 }
-/* line 1056, ../sass/partials/_forms.scss */
+/* line 1060, ../sass/partials/_forms.scss */
 .form-grid .col-1 {
   position: relative;
   float: left;
@@ -4247,7 +4251,7 @@ div.alleYli-radioGroup {
 .form-grid .col-1 .col--vertical label {
   display: block;
 }
-/* line 1056, ../sass/partials/_forms.scss */
+/* line 1060, ../sass/partials/_forms.scss */
 .form-grid .col-2 {
   position: relative;
   float: left;
@@ -4270,7 +4274,7 @@ div.alleYli-radioGroup {
 .form-grid .col-2 .col--vertical label {
   display: block;
 }
-/* line 1056, ../sass/partials/_forms.scss */
+/* line 1060, ../sass/partials/_forms.scss */
 .form-grid .col-3 {
   position: relative;
   float: left;
@@ -4293,7 +4297,7 @@ div.alleYli-radioGroup {
 .form-grid .col-3 .col--vertical label {
   display: block;
 }
-/* line 1056, ../sass/partials/_forms.scss */
+/* line 1060, ../sass/partials/_forms.scss */
 .form-grid .col-4 {
   position: relative;
   float: left;
@@ -4316,7 +4320,7 @@ div.alleYli-radioGroup {
 .form-grid .col-4 .col--vertical label {
   display: block;
 }
-/* line 1061, ../sass/partials/_forms.scss */
+/* line 1065, ../sass/partials/_forms.scss */
 .form-grid .row {
   content: "";
   display: block;
@@ -4324,7 +4328,7 @@ div.alleYli-radioGroup {
   margin-bottom: 20px;
   overflow-y: hidden;
 }
-/* line 1067, ../sass/partials/_forms.scss */
+/* line 1071, ../sass/partials/_forms.scss */
 .form-grid .error-message {
   background-color: #df3215;
   color: #fff;
