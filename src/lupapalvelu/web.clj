@@ -611,10 +611,8 @@
           response (execute-command "create-application" params request)]
       (if (core/ok? response)
         (do
-          (clojure.pprint/pprint query-params)
           (when-let [opt-data (not-empty (select-keys query-params [:state]))]
             (do
-              (clojure.pprint/pprint opt-data)
               (mongo/update-by-id :applications (:id response) {$set opt-data})))
           (redirect "fi" (str (user/applicationpage-for (:role (user/current-user request)))
                               "#!/" (if infoRequest "inforequest" "application") "/" (:id response))))
