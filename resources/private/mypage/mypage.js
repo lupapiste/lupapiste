@@ -202,7 +202,7 @@
   function Password() {
     this.oldPassword = ko.observable("");
     this.newPassword = ko.observable("");
-    this.newPassword2 = ko.observable("");
+    this.newPassword2 = ko.observable("").extend({match: {params: this.newPassword, message: loc("mypage.noMatch")}});
     this.error = ko.observable(null);
     this.saved = ko.observable(false);
     this.pending = ko.observable();

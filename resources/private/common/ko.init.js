@@ -63,6 +63,14 @@
     message: loc("email-in-use")
   };
 
+  ko.validation.rules.match = {
+    validator: function(value1, value2) {
+      console.log("match", value1, value2);
+      return value1 === value2;
+    },
+    message: ""
+  };
+
   /*
    * Determines if a field is required or not based on a function or value
    * Parameter: boolean function, or boolean value
