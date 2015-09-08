@@ -46,12 +46,14 @@ jQuery(document).ready(function() {
     {name: "autocomplete-application-tags", template: "autocomplete-tags-components"},
     {name: "indicator"},
     {name: "accordion"},
-    {name: "text-field"}
+    {name: "text-field", model: "input-field"},
+    {name: "checkbox-field", model: "input-field"},
+    {name: "select-field", model: "input-field"}
   ];
 
   _.forEach(components, function(component) {
     ko.components.register(component.name, {
-      viewModel: LUPAPISTE[_.capitalize(_.camelCase(component.name)) + "Model"],
+      viewModel: LUPAPISTE[_.capitalize(_.camelCase(component.model ? component.model : component.name)) + "Model"],
       template: { element: (component.template ? component.template : component.name) + "-template"}
     });
   });
