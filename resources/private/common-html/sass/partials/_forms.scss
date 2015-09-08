@@ -1029,7 +1029,12 @@ $col: 25%;
     @include form-grid-clear;
   }
 
-  [type=text], [type=password], select {
+  .checkbox-wrapper {
+    border: 1px solid $checkbox-border-color;
+    padding: 7px;
+  }
+
+  input[type=text], input[type=password], select {
     padding: 0 $marginM;
     min-height: 40px;
     height: 40px;
@@ -1046,6 +1051,25 @@ $col: 25%;
     }
   }
 
+  input[type=checkbox] {
+    display: none;
+  }
+
+  .checkbox-label:before {
+    @include lupicon-font;
+    content: "\e603";
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: top;
+    color: $checkbox-color;
+  }
+
+  input[type=checkbox]:checked + .checkbox-label:before {
+    @include lupicon-font;
+    content: "\e604";
+    color: $checkbox-selected-color;
+  }
+
   select.required, input.required {
     border-color: $input-focus-border-color;
   }
@@ -1058,7 +1082,7 @@ $col: 25%;
     pointer-events:none;
   }
 
-  [type=text].err, [type=password].err {
+  input[type=text].err, input[type=password].err {
     border: 1px solid $negative;
   }
 
