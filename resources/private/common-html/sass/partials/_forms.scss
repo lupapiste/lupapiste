@@ -1075,5 +1075,10 @@ $col: 25%;
     padding: $marginS;
     font-style: normal;
     font-weight: bold;
+    &:before {
+      @include lupicon-font;
+      content: "\e63c";
+      margin-right: $marginS;
+    }
   }
 }
