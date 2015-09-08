@@ -11,7 +11,7 @@
           <span data-bind="visible: dataProvider.searchField, click: _.partial(dataProvider.searchField, ''), attr: {title: loc('applications.filter.search.clear')}" class="icon remove-grey"></span>
         </div>
       </div>
-      <div class="filter-item" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
+      <div class="filter-item"  data-test-id="handler-filter-component" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
         <label data-bind="ltext: 'applications.filter.handler'" />
         <div data-test-id="handlers-filter-component" data-bind="component: {name: 'autocomplete-handlers', params: {selectedValues: dataProvider.handler}}"></div>
       </div>
@@ -19,14 +19,12 @@
       <div class="feature filter-item" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
         <a class="command" data-test-id="toggle-advanced-filters" data-bind="ltext: advancedFiltersText, toggleClick: showAdvancedFilters"></a>
       </div>
-      <!-- ko if: showAdvancedFilters() -->
       <div class="feature filter-item">
         <button class="positive" data-test-id="save-advanced-filters" data-bind="click: saveAdvancedFilters">
           <i class="lupicon-circle-plus"></i>
           <span data-bind="ltext: 'applications.filter.advancedFilter.save'"></span>
         </button>
       </div>
-      <!-- /ko -->
       <!-- /ko -->
     </div>
     <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && showAdvancedFilters() && lupapisteApp.models.currentUser.isAuthority() -->
