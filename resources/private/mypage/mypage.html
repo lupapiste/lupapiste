@@ -14,81 +14,94 @@
                                                               accordionContentTemplateData: $data}}"></div>
 
       <script type="text/x-jquery-tmpl" id="mypage-personal-info-template">
-        <div class="own-info form-group">
-          <div class="form-entry">
+        <div class="form-grid">
+<!--           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.firstName'"
               for="firstName" class="form-label"></label> <input
               data-bind="textInput: firstName, attr: {placeholder: loc('userinfo.firstName')}"
               id="firstName" type="text" class="form-input" maxlength="255"></input>
           </div>
+ -->
 
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.lastName'" for="lastName"
-              class="form-label"></label> <input
-              data-bind="textInput: lastName, attr: {placeholder: loc('userinfo.lastName')}"
-              id="lastName" type="text" class="form-input" maxlength="255"></input>
+          <div class="row">
+            <div class="col-1"
+                 data-bind="component: {name: 'text-field',
+                                        params: {value: firstName,
+                                                 id: 'firstName',
+                                                 lLabel: 'userinfo.firstName'}}"></div>
+
+            <div class="col-1"
+                 data-bind="component: {name: 'text-field',
+                                        params: {value: lastName,
+                                                 id: 'lastName',
+                                                 lLabel: 'userinfo.lastName'}}"></div>
+
+            <div class="col-1"
+                 data-bind="component: {name: 'text-field',
+                                        params: {value: phone,
+                                                 id: 'phone',
+                                                 lLabel: 'userinfo.phone'}}"></div>
           </div>
 
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.phone'" for="phone"
-              class="form-label"></label> <input
-              data-bind="textInput: phone, attr: {placeholder: loc('userinfo.phone')}"
-              id="phone" type="text" class="form-input" maxlength="255"></input>
+          <div class="row" data-bind="if: showSimpleCompanyInfo">
+            <div class="col-1"
+                 data-bind="component: {name: 'text-field',
+                                        params: {value: companyName,
+                                                 id: 'architect.company.name',
+                                                 lLabel: 'userinfo.architect.company.name'}}"></div>
+
+            <div class="col-1"
+                 data-bind="component: {name: 'text-field',
+                                        params: {value: companyId,
+                                                 id: 'architect.company.id',
+                                                 lLabel: 'userinfo.architect.company.id',
+                                                 placeholder: '000009-1'}}"></div>
           </div>
 
-          <div data-bind="if: showSimpleCompanyInfo">
-            <div class="form-entry">
-              <label
-                data-bind="ltext: 'userinfo.architect.company.name'"
-                for="architect.company.name" class="form-label"></label>
-              <input data-bind="value: companyName"
-                id="architect.company.name" type="text"
-                class="form-input" maxlength="255"></input>
-            </div>
 
-            <div class="form-entry">
-              <label
-                data-bind="ltext: 'userinfo.architect.company.id'"
-                for="architect.company.id" class="form-label"></label>
-              <input data-bind="value: companyId"
-                id="architect.company.id" type="text"
-                class="form-input" maxlength="255"></input>
-            </div>
+          <div class="row">
+            <div class="col-1"
+                 data-bind="component: {name: 'text-field',
+                                        params: {value: street,
+                                                 id: 'stree',
+                                                 lLabel: 'userinfo.street',
+                                                 required: true}}"></div>
+
+            <div class="col-1"
+                 data-bind="component: {name: 'text-field',
+                                        params: {value: zip,
+                                                 id: 'zip',
+                                                 lLabel: 'userinfo.zip',
+                                                 required: true}}"></div>
+
+            <div class="col-1"
+                 data-bind="component: {name: 'text-field',
+                                        params: {value: city,
+                                                 id: 'city',
+                                                 lLabel: 'userinfo.city',
+                                                 required: true}}"></div>
           </div>
-
-          <div class="form-entry clear">
-            <label data-bind="ltext: 'userinfo.street'" for="street"
-              class="form-label tip"></label> <input
-              data-bind="textInput: street, attr: {placeholder: loc('userinfo.street')}"
-              id="street" type="text" class="form-input" maxlength="255"></input>
-          </div>
-
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.zip'" for="zip"
-              class="form-label tip"></label> <input
-              data-bind="textInput: zip, attr: {placeholder: loc('userinfo.zip')}"
-              id="zip" type="text" class="form-input" maxlength="5"></input>
-          </div>
-
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.city'" for="city"
-              class="form-label tip"></label> <input
-              data-bind="textInput: city, attr: {placeholder: loc('userinfo.city')}"
-              id="city" type="text" class="form-input" maxlength="255"></input>
-          </div>
-
-          <div class="form-entry allowDirectMarketing-toggle">
+<!--           <div class="form-entry allowDirectMarketing-toggle">
             <input data-bind="checked: allowDirectMarketing" id="allowDirectMarketing"
               type="checkbox" class="form-input"></input>
             <label data-bind="ltext: 'userinfo.allowDirectMarketing'" for="allowDirectMarketing"
               class="form-label"></label>
           </div>
+ -->
 
-          <div class="form-entry architect-toggle">
-            <input data-bind="checked: architect" id="architect"
-              type="checkbox" class="form-input"></input> <label
-              data-bind="ltext: 'userinfo.architect'" for="architect"
-              class="form-label"></label>
+          <div class="row">
+            <div class="col-3"
+                data-bind="component: {name: 'checkbox-field',
+                                       params: {value: allowDirectMarketing,
+                                                id: 'allowDirectMarketing',
+                                                lLabel: 'userinfo.allowDirectMarketing'}}"></div>
+          </div>
+          <div class="row">
+            <div class="col-3"
+                 data-bind="component: {name: 'checkbox-field',
+                                        params: {value: architect,
+                                                 id: 'architect',
+                                                 lLabel: 'userinfo.architect'}}"></div>
           </div>
         </div>
 
@@ -118,33 +131,37 @@
         <!-- /ko -->
 
         <!-- ko if: architect -->
-          <div class="architect-info form-group">
+          <div class="architect-info form-grid">
             <h2 data-bind="ltext: 'architect.experience.title'"></h2>
 
-            <div class="form-entry">
-              <label data-bind="ltext: 'userinfo.architect.degree'" for="architect.degree" class="form-label"></label>
-              <select class="form-input combobox"
-                      name="architect.degree"
-                      data-test-id="architect-degree-select"
-                      title="loc('userinfo.architect.degree.choose.help')"
-                      data-bind="options: availableDegrees,
-                                 value: degree,
-                                 optionsValue: 'id',
-                                 optionsText: 'name',
-                                 optionsCaption: loc('userinfo.architect.degree.choose')"></select>
+            <div class="row">
+              <div class="col-1"
+                   data-bind="component: {name: 'select-field',
+                                          params: {value: degree,
+                                                   options: availableDegrees,
+                                                   optionsValue: 'id',
+                                                   optionsText: 'name',
+                                                   lOptionsCaption: 'userinfo.architect.degree.choose',
+                                                   id: 'architect',
+                                                   lLabel: 'userinfo.architect'}}"></div>
+
+
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                                          params: {value: graduatingYear,
+                                                   id: 'architect.graduatingYear',
+                                                   lLabel: 'userinfo.architect.graduatingYear',
+                                                   maxLength: 4}}"></div>
+
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                                          params: {value: fise,
+                                                   id: 'architect.fise',
+                                                   lLabel: 'userinfo.architect.fise'}}"></div>
             </div>
 
-            <div class="form-entry">
-              <label data-bind="ltext: 'userinfo.architect.graduatingYear'" for="architect.graduatingYear" class="form-label"></label>
-              <input data-bind="value: graduatingYear" id="architect.graduatingYear" type="text" class="form-input" maxlength="4"></input>
-            </div>
 
-            <div class="form-entry">
-              <label data-bind="ltext: 'userinfo.architect.fise'" for="architect.fise" class="form-label"></label>
-              <input data-bind="value: fise" id="architect.fise" type="text" class="form-input" maxlength="255"></input>
-            </div>
-
-            <div class="form-entry clear" data-bind="visible: lupapisteApp.models.globalAuthModel.ok('add-user-attachment-allowed')">
+            <div class="col-4" data-bind="visible: lupapisteApp.models.globalAuthModel.ok('add-user-attachment-allowed')">
               <div data-bind="visible: !hasAttachments(), ltext: 'userinfo.architect.attachments.no-attachments'"></div>
               <table data-bind="visible: hasAttachments" class="architect-attachments">
                 <thead>
@@ -173,7 +190,10 @@
                   </tr>
                 </tbody>
               </table>
-              <button data-bind="click: add, ltext: 'userinfo.architect.attachments.add'" data-test-id="test-add-architect-attachment"></button>
+              <button class="positive" data-bind="click: add" data-test-id="test-add-architect-attachment">
+                <i class="lupicon-upload"></i>
+                <span data-bind="ltext: 'userinfo.architect.attachments.add'"></span>
+              </button>
             </div>
           </div>
         <!-- /ko -->
@@ -205,14 +225,22 @@
       <script type="text/x-jquery-tmpl" id="mypage-change-password">
         <div>
           <form>
-            <div class="form-group">
-              <div class="form-entry">
+            <div class="form-grid">
+<!--               <div class="form-entry">
                 <label data-bind="ltext: 'userinfo.oldPassword'"
                   for="oldPassword" class="form-label"></label> <input
                   data-bind="textInput: oldPassword, attr: {placeholder: loc('userinfo.oldPassword')}"
                   id="oldPassword" type="password" class="form-input"></input>
               </div>
-              <div class="form-entry">
+ -->
+              <div class="row">
+                <div class="col-1"
+                     data-bind="component: {name: 'text-field',
+                                            params: {value: oldPassword,
+                                                     id: 'oldPassword',
+                                                     lLabel: 'userinfo.oldPassword'}}"></div>
+
+<!--               <div class="form-entry">
                 <label data-bind="ltext: 'userinfo.newPassword'"
                   for="newPassword" class="form-label">:</label> <input
                   data-bind="textInput: newPassword, attr: {placeholder: loc('userinfo.newPassword')}"
@@ -229,20 +257,40 @@
                   style="color: gray; font-style: italic;"></span>
               </div>
               <div class="clear"></div>
+ -->
+                <div class="col-1"
+                     data-bind="component: {name: 'password-field',
+                                            params: {value: newPassword,
+                                                     id: 'newPassword',
+                                                     lLabel: 'userinfo.newPassword',
+                                                     quality: quality}}"></div>
 
-              <button data-bind="click: save,
-                                 disable: processing,
-                                 enable: ok,
-                                 css: {waiting: pending}" class="positive"
-                      data-test-id="change-my-password">
-                  <i class="lupicon-refresh"></i>
-                  <i class="wait spin lupicon-refresh"></i>
-                  <span data-bind="ltext: 'userinfo.changePassword'"></span>
-              </button>
-              <p class="context-error"
-                 data-bind="visible: error() != null, ltext: error"
-                 class="context-error">
-              </p>
+                <!-- TODO use ko.validating for passwd matching-->
+                <div class="col-1"
+                     data-bind="component: {name: 'password-field',
+                                            params: {value: newPassword2,
+                                                     id: 'newPassword2',
+                                                     lLabel: 'userinfo.newPassword2'}}"></div>
+              </div>
+
+              <div class="row">
+                <div class="col-4">
+                  <button data-bind="click: save,
+                                     disable: processing,
+                                     enable: ok,
+                                     css: {waiting: pending}" class="positive"
+                          data-test-id="change-my-password">
+                      <i class="lupicon-refresh"></i>
+                      <i class="wait spin lupicon-refresh"></i>
+                      <span data-bind="ltext: 'userinfo.changePassword'"></span>
+                  </button>
+
+                  <p class="context-error"
+                     data-bind="visible: error() != null, ltext: error"
+                     class="context-error">
+                  </p>
+                </div>
+              </div>
             </div>
           </form>
         </div>
