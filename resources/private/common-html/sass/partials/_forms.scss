@@ -1023,7 +1023,7 @@ $col: 25%;
     @include form-grid-clear;
   }
 
-  [type=text], select {
+  [type=text], [type=password], select {
     padding: 0 $marginM;
     min-height: 40px;
     height: 40px;
@@ -1052,7 +1052,7 @@ $col: 25%;
     pointer-events:none;
   }
 
-  [type=text].err {
+  [type=text].err, [type=password].err {
     border: 1px solid $negative;
   }
 
@@ -1066,6 +1066,45 @@ $col: 25%;
     @include form-grid-clear;
     margin-bottom: 20px;
     overflow-y: hidden;
+  }
+
+  .info-message {
+    background-color: $negative;
+    color: #fff;
+    margin: 0;
+    padding: $marginS;
+    font-style: normal;
+    font-weight: bold;
+    display: block,
+  }
+
+  // password field
+  .poor.info-message,
+  .low.info-message {
+    background-color: $negative;
+  }
+
+  .average.info-message {
+    background-color: $primary;
+  }
+
+  .good.info-message,
+  .excellent.info-message {
+    background-color: $positive;
+  }
+
+  [type=password].poor,
+  [type=password].low {
+    border-color: $negative;
+  }
+
+  [type=password].average {
+    border-color: $primary;
+  }
+
+  [type=password].good,
+  [type=password].excellent {
+    border-color: $positive;
   }
 
   .error-message {

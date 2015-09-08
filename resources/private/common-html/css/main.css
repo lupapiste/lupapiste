@@ -4195,7 +4195,7 @@ div.alleYli-radioGroup {
   clear: both;
 }
 /* line 1026, ../sass/partials/_forms.scss */
-.form-grid [type=text], .form-grid select {
+.form-grid [type=text], .form-grid [type=password], .form-grid select {
   padding: 0 12px;
   min-height: 40px;
   height: 40px;
@@ -4208,7 +4208,7 @@ div.alleYli-radioGroup {
   -webkit-border-radius: 0px;
 }
 /* line 1037, ../sass/partials/_forms.scss */
-.form-grid [type=text]:focus, .form-grid select:focus {
+.form-grid [type=text]:focus, .form-grid [type=password]:focus, .form-grid select:focus {
   color: #333333;
   border-color: #fbc732;
 }
@@ -4225,7 +4225,7 @@ div.alleYli-radioGroup {
   pointer-events: none;
 }
 /* line 1055, ../sass/partials/_forms.scss */
-.form-grid [type=text].err {
+.form-grid [type=text].err, .form-grid [type=password].err {
   border: 1px solid #df3215;
 }
 /* line 1060, ../sass/partials/_forms.scss */
@@ -4329,6 +4329,44 @@ div.alleYli-radioGroup {
   overflow-y: hidden;
 }
 /* line 1071, ../sass/partials/_forms.scss */
+.form-grid .info-message {
+  background-color: #df3215;
+  color: #fff;
+  margin: 0;
+  padding: 6px;
+  font-style: normal;
+  font-weight: bold;
+  display: block;
+}
+/* line 1082, ../sass/partials/_forms.scss */
+.form-grid .poor.info-message,
+.form-grid .low.info-message {
+  background-color: #df3215;
+}
+/* line 1087, ../sass/partials/_forms.scss */
+.form-grid .average.info-message {
+  background-color: #f39129;
+}
+/* line 1091, ../sass/partials/_forms.scss */
+.form-grid .good.info-message,
+.form-grid .excellent.info-message {
+  background-color: #2ca92c;
+}
+/* line 1096, ../sass/partials/_forms.scss */
+.form-grid [type=password].poor,
+.form-grid [type=password].low {
+  border-color: #df3215;
+}
+/* line 1101, ../sass/partials/_forms.scss */
+.form-grid [type=password].average {
+  border-color: #f39129;
+}
+/* line 1105, ../sass/partials/_forms.scss */
+.form-grid [type=password].good,
+.form-grid [type=password].excellent {
+  border-color: #2ca92c;
+}
+/* line 1110, ../sass/partials/_forms.scss */
 .form-grid .error-message {
   background-color: #df3215;
   color: #fff;
@@ -4337,7 +4375,7 @@ div.alleYli-radioGroup {
   font-style: normal;
   font-weight: bold;
 }
-/* line 1078, ../sass/partials/_forms.scss */
+/* line 1117, ../sass/partials/_forms.scss */
 .form-grid .error-message:before {
   font-family: 'lupapiste';
   speak: none;
@@ -9457,110 +9495,68 @@ td.comment-text {
   margin-bottom: 24px;
 }
 
-/* line 1, ../sass/views/_mypage.scss */
-#mypage .poor {
-  color: red;
-  font-weight: bold;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-/* line 9, ../sass/views/_mypage.scss */
-#mypage .low {
-  color: red;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-/* line 16, ../sass/views/_mypage.scss */
-#mypage .average {
-  color: black;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-/* line 23, ../sass/views/_mypage.scss */
-#mypage .good {
-  color: green;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-/* line 30, ../sass/views/_mypage.scss */
-#mypage .excellent {
-  color: green;
-  font-weight: bold;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-/* line 39, ../sass/views/_mypage.scss */
+/* line 2, ../sass/views/_mypage.scss */
 #mypage .button-group {
   margin: 12px 0;
   position: relative;
 }
 
 /*  */
-/* line 46, ../sass/views/_mypage.scss */
+/* line 9, ../sass/views/_mypage.scss */
 #own-info-form {
   padding: 0 24px;
 }
-/* line 48, ../sass/views/_mypage.scss */
+/* line 11, ../sass/views/_mypage.scss */
 #own-info-form .architect-toggle, #own-info-form .allowDirectMarketing-toggle {
   height: 55px;
   margin: 9px 0;
   display: block;
   width: 100%;
 }
-/* line 54, ../sass/views/_mypage.scss */
+/* line 17, ../sass/views/_mypage.scss */
 #own-info-form .architect-toggle label, #own-info-form .architect-toggle input, #own-info-form .allowDirectMarketing-toggle label, #own-info-form .allowDirectMarketing-toggle input {
   display: inline;
   width: 3.75em;
 }
-/* line 58, ../sass/views/_mypage.scss */
+/* line 21, ../sass/views/_mypage.scss */
 #own-info-form .architect-toggle input, #own-info-form .allowDirectMarketing-toggle input {
   margin-right: 12px;
   display: inline;
 }
-/* line 63, ../sass/views/_mypage.scss */
+/* line 26, ../sass/views/_mypage.scss */
 #own-info-form .form-group {
   padding: 12px;
 }
 
-/* line 68, ../sass/views/_mypage.scss */
+/* line 31, ../sass/views/_mypage.scss */
 #pw-form {
   padding: 0 24px;
 }
-/* line 71, ../sass/views/_mypage.scss */
+/* line 34, ../sass/views/_mypage.scss */
 #pw-form .form-group {
   padding: 12px;
 }
-/* line 74, ../sass/views/_mypage.scss */
+/* line 37, ../sass/views/_mypage.scss */
 #pw-form .form-entry {
   height: 78px;
 }
 
-/* line 79, ../sass/views/_mypage.scss */
+/* line 42, ../sass/views/_mypage.scss */
 #mypage-register-company {
   padding: 0 24px;
 }
-/* line 81, ../sass/views/_mypage.scss */
+/* line 44, ../sass/views/_mypage.scss */
 #mypage-register-company .btn, #mypage-register-company .like-btn, #mypage-register-company a.link-btn, #mypage-register-company .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #mypage-register-company .paginate_disabled_previous, #mypage-register-company .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #mypage-register-company .paginate_disabled_next {
   margin-left: 6px;
   margin-bottom: 6px;
 }
 
-/* line 87, ../sass/views/_mypage.scss */
+/* line 50, ../sass/views/_mypage.scss */
 .architect-info {
   margin: 24px auto;
   transition: height 2s;
 }
-/* line 92, ../sass/views/_mypage.scss */
+/* line 55, ../sass/views/_mypage.scss */
 .architect-info .architect-attachments {
   margin-top: 24px;
 }
@@ -9668,32 +9664,32 @@ td.comment-text {
 }
 
 /* line 9, ../sass/views/_register.scss */
-.register-form .error-message, #pw-form .error-message {
+.register-form .error-message {
   font-style: italic;
   color: red;
   margin: -10px 0 0 0;
 }
 /* line 16, ../sass/views/_register.scss */
-.register-form p, #pw-form p {
+.register-form p {
   margin-bottom: 8px;
 }
 /* line 21, ../sass/views/_register.scss */
-.register-form .form-entry.register-checkbox, #pw-form .form-entry.register-checkbox {
+.register-form .form-entry.register-checkbox {
   width: 100%;
   height: auto;
   min-height: 32px;
 }
 /* line 28, ../sass/views/_register.scss */
-.register-form .register-error, #pw-form .register-error {
+.register-form .register-error {
   position: relative;
   margin: 6px 0;
 }
 /* line 33, ../sass/views/_register.scss */
-.register-form .architect-toggle, #pw-form .architect-toggle {
+.register-form .architect-toggle {
   min-height: 36px;
 }
 /* line 37, ../sass/views/_register.scss */
-.register-form .info-indicator, #pw-form .info-indicator {
+.register-form .info-indicator {
   cursor: pointer;
 }
 
