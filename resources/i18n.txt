@@ -1,2 +1,0 @@
-applications.filter.application: Hakemukset
-applications.filter.inforequest: Neuvonta
