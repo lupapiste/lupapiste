@@ -17,25 +17,24 @@
 
 (def local-db-name (str "test_app-from-prev-permit-itest_" (now)))
 
-(mongo/connect!) ; TODO: to test database
+(mongo/connect!)
 (mongo/with-db local-db-name (fixture/apply-fixture "minimal"))
 
 (def- example-kuntalupatunnus "14-0241-R 3")
 (def- example-LP-tunnus "LP-186-2014-00290")
 
-(mongo/with-db local-db-name
-  (defn- create-app-from-prev-permit [apikey & args]
-    (let [args (->> args
-                    (apply hash-map)
-                    (merge {:lang "fi"
-                            :organizationId "186-R"  ;; Jarvenpaan rakennusvalvonta
-                            :kuntalupatunnus example-kuntalupatunnus
-                            :y 0
-                            :x 0
-                            :address ""
-                            :propertyId nil})
-                    (mapcat seq))]
-      (apply local-command apikey :create-application-from-previous-permit args))))
+(defn- create-app-from-prev-permit [apikey & args]
+  (let [args (->> args
+                  (apply hash-map)
+                  (merge {:lang "fi"
+                          :organizationId "186-R"  ;; Jarvenpaan rakennusvalvonta
+                          :kuntalupatunnus example-kuntalupatunnus
+                          :y 0
+                          :x 0
+                          :address ""
+                          :propertyId nil})
+                  (mapcat seq))]
+    (apply local-command apikey :create-application-from-previous-permit args)))
 
 (mongo/with-db local-db-name
   (let [example-xml (xml/parse (slurp (io/resource "../resources/krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml")))
