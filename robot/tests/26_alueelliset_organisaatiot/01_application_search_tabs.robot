@@ -36,13 +36,12 @@ Teppo navigates to application page
 
 Teppo selects application tab
   Click by test id  search-tab-application
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  6
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  5
   Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${submitted}"]
   Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${sent}"]
   Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${complement-needed}"]
   Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${draft}"]
   Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${open}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${answered}"]
 
 Teppo selects construction tab
   Click by test id  search-tab-construction
@@ -52,8 +51,9 @@ Teppo selects construction tab
 
 Teppo selects inforequest tab
   Click by test id  search-tab-inforequest
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  1
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  2
   Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${info}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${answered}"]
 
 Teppo selects cancelled tab
   Click by test id  search-tab-canceled
