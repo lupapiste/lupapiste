@@ -1066,6 +1066,10 @@ $col: 25%;
     @include form-grid-clear;
     margin-bottom: 20px;
     overflow-y: hidden;
+
+    &:last-child {
+      margin-bottom: $marginM;
+    }
   }
 
   .info-message {

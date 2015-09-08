@@ -226,13 +226,6 @@
         <div>
           <form>
             <div class="form-grid">
-<!--               <div class="form-entry">
-                <label data-bind="ltext: 'userinfo.oldPassword'"
-                  for="oldPassword" class="form-label"></label> <input
-                  data-bind="textInput: oldPassword, attr: {placeholder: loc('userinfo.oldPassword')}"
-                  id="oldPassword" type="password" class="form-input"></input>
-              </div>
- -->
               <div class="row">
                 <div class="col-1"
                      data-bind="component: {name: 'text-field',
@@ -240,24 +233,6 @@
                                                      id: 'oldPassword',
                                                      lLabel: 'userinfo.oldPassword'}}"></div>
 
-<!--               <div class="form-entry">
-                <label data-bind="ltext: 'userinfo.newPassword'"
-                  for="newPassword" class="form-label">:</label> <input
-                  data-bind="textInput: newPassword, attr: {placeholder: loc('userinfo.newPassword')}"
-                  id="newPassword" type="password" class="form-input"></input>
-                <span
-                  data-bind="text: loc(['mypage.quality', quality()]), attr: {'class': quality}, visible: newPassword().length > 0"></span>
-              </div>
-              <div class="form-entry">
-                <label data-bind="ltext: 'userinfo.newPassword2'"
-                  for="newPassword2" class="form-label">:</label> <input
-                  data-bind="textInput: newPassword2, attr: {placeholder: loc('userinfo.newPassword2')}"
-                  id="newPassword2" type="password" class="form-input"></input>
-                <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'"
-                  style="color: gray; font-style: italic;"></span>
-              </div>
-              <div class="clear"></div>
- -->
                 <div class="col-1"
                      data-bind="component: {name: 'password-field',
                                             params: {value: newPassword,
@@ -265,7 +240,6 @@
                                                      lLabel: 'userinfo.newPassword',
                                                      quality: quality}}"></div>
 
-                <!-- TODO use ko.validating for passwd matching-->
                 <div class="col-1"
                      data-bind="component: {name: 'password-field',
                                             params: {value: newPassword2,
@@ -305,15 +279,19 @@
       <!-- /ko -->
 
       <script type="text/x-jquery-tmpl" id="mypage-register-company-template">
-        <div class="form-group">
-          <h2 data-bind="ltext: 'register.company.header'"></h2>
-          <p data-bind="lhtml: 'register.company.info'" class="register-info"></p>
-          <a href="#!/register-company-account-type"
-             class="btn btn-primary"
-             data-test-id="logged-user-register-company-start">
-             <span data-bind="ltext: 'register.company.register'"></span>
-             <i class="lupicon-chevron-right"></i>
-          </a>
+        <div class="form-grid">
+          <div class="row">
+            <div class="col-4">
+              <h2 data-bind="ltext: 'register.company.header'"></h2>
+              <p data-bind="lhtml: 'register.company.info'" class="register-info"></p>
+              <a href="#!/register-company-account-type"
+                 class="btn positive"
+                 data-test-id="logged-user-register-company-start">
+                 <span data-bind="ltext: 'register.company.register'"></span>
+                 <i class="lupicon-chevron-right"></i>
+              </a>
+            </div>
+          </div>
         </div>
       </script>
     </div>

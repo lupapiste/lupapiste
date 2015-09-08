@@ -41,9 +41,15 @@
 
 #mypage-register-company {
   padding: 0 $marginL;
-  .btn {
-    margin-left: $marginS;
-    margin-bottom: $marginS;
+  h2 {
+    padding-left: 0;
+  }
+  p {
+    // TODO not needed after all links are changed
+    a {
+      @include link;
+    }
+    padding-left: 0;
   }
 }
 

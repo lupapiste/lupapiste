@@ -4328,7 +4328,11 @@ div.alleYli-radioGroup {
   margin-bottom: 20px;
   overflow-y: hidden;
 }
-/* line 1071, ../sass/partials/_forms.scss */
+/* line 1070, ../sass/partials/_forms.scss */
+.form-grid .row:last-child {
+  margin-bottom: 12px;
+}
+/* line 1075, ../sass/partials/_forms.scss */
 .form-grid .info-message {
   background-color: #df3215;
   color: #fff;
@@ -4339,35 +4343,35 @@ div.alleYli-radioGroup {
   display: block;
   height: 40px;
 }
-/* line 1083, ../sass/partials/_forms.scss */
+/* line 1087, ../sass/partials/_forms.scss */
 .form-grid .poor.info-message,
 .form-grid .low.info-message {
   background-color: #df3215;
 }
-/* line 1088, ../sass/partials/_forms.scss */
+/* line 1092, ../sass/partials/_forms.scss */
 .form-grid .average.info-message {
   background-color: #f39129;
 }
-/* line 1092, ../sass/partials/_forms.scss */
+/* line 1096, ../sass/partials/_forms.scss */
 .form-grid .good.info-message,
 .form-grid .excellent.info-message {
   background-color: #2ca92c;
 }
-/* line 1097, ../sass/partials/_forms.scss */
+/* line 1101, ../sass/partials/_forms.scss */
 .form-grid [type=password].poor,
 .form-grid [type=password].low {
   border-color: #df3215;
 }
-/* line 1102, ../sass/partials/_forms.scss */
+/* line 1106, ../sass/partials/_forms.scss */
 .form-grid [type=password].average {
   border-color: #f39129;
 }
-/* line 1106, ../sass/partials/_forms.scss */
+/* line 1110, ../sass/partials/_forms.scss */
 .form-grid [type=password].good,
 .form-grid [type=password].excellent {
   border-color: #2ca92c;
 }
-/* line 1111, ../sass/partials/_forms.scss */
+/* line 1115, ../sass/partials/_forms.scss */
 .form-grid .error-message {
   background-color: #df3215;
   color: #fff;
@@ -4376,7 +4380,7 @@ div.alleYli-radioGroup {
   font-style: normal;
   font-weight: bold;
 }
-/* line 1118, ../sass/partials/_forms.scss */
+/* line 1122, ../sass/partials/_forms.scss */
 .form-grid .error-message:before {
   font-family: 'lupapiste';
   speak: none;
@@ -9547,17 +9551,39 @@ td.comment-text {
   padding: 0 24px;
 }
 /* line 44, ../sass/views/_mypage.scss */
-#mypage-register-company .btn, #mypage-register-company .like-btn, #mypage-register-company a.link-btn, #mypage-register-company .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #mypage-register-company .paginate_disabled_previous, #mypage-register-company .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #mypage-register-company .paginate_disabled_next {
-  margin-left: 6px;
-  margin-bottom: 6px;
+#mypage-register-company h2 {
+  padding-left: 0;
+}
+/* line 47, ../sass/views/_mypage.scss */
+#mypage-register-company p {
+  padding-left: 0;
+}
+/* line 49, ../sass/views/_mypage.scss */
+#mypage-register-company p a {
+  color: #f39129;
+  text-decoration: none;
+}
+/* line 14, ../sass/partials/_links.scss */
+#mypage-register-company p a:link, #mypage-register-company p a:visited {
+  color: #f39129;
+}
+/* line 17, ../sass/partials/_links.scss */
+#mypage-register-company p a:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
+/* line 21, ../sass/partials/_links.scss */
+#mypage-register-company p a:active {
+  color: #fbc732;
+  text-decoration: underline;
 }
 
-/* line 50, ../sass/views/_mypage.scss */
+/* line 56, ../sass/views/_mypage.scss */
 .architect-info {
   margin: 24px auto;
   transition: height 2s;
 }
-/* line 55, ../sass/views/_mypage.scss */
+/* line 61, ../sass/views/_mypage.scss */
 .architect-info .architect-attachments {
   margin-top: 24px;
 }
