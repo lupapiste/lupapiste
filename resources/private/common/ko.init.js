@@ -7,7 +7,8 @@
 
   ko.validation.init({
     insertMessages: true,
-    decorateElement: true,
+    decorateInputElement: true,
+    errorElementClass: "err",
     errorMessageClass: "error-message",
     parseInputAttributes: true,
     messagesOnModified: true,
