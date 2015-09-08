@@ -15,6 +15,9 @@ LUPAPISTE.InputFieldModel = function(params) {
     self.value.extend({required: true});
   }
 
+  self.infoMsg = params.infoMsg || "";
+  self.infoStyle = params.infoStyle || "";
+
   // TODO select model
   self.options = params.options || [];
   self.optionsValue = params.optionsValue || "";
