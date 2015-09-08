@@ -2,7 +2,11 @@ LUPAPISTE.AreaFilterService = function() {
   "use strict";
   var self = this;
 
-  self.data = ko.observable();
+  var _data = ko.observable();
+
+  self.data = ko.pureComputed(function() {
+    return _data();
+  });
 
   self.selected = ko.observableArray([]);
 
@@ -33,7 +37,7 @@ LUPAPISTE.AreaFilterService = function() {
     .query("get-organization-areas")
     .error(_.noop)
     .success(function(res) {
-      self.data(res.areas);
+      _data(res.areas);
     })
     .call();
 };

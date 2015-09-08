@@ -12,6 +12,7 @@
 ;;
 
 (facts change-password
+  (mongo/connect!) ; TODO: to test database
   (fixture/apply-fixture "minimal")
 
   (fact (user/change-password "veikko.viranomainen@tampere.fi" "passu") => nil

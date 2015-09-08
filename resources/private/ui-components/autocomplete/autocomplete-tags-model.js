@@ -18,7 +18,7 @@ LUPAPISTE.AutocompleteTagsModel = function() {
         if (_.keys(lupapisteApp.services.tagFilterService.data()).length > 1) {
           result = result.concat(header);
         }
-        result = result.concat(filteredData);
+        result = result.concat(_.sortBy(filteredData, "label"));
       }
     }
     return result;

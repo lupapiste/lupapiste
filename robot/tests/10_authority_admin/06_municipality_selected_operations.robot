@@ -8,8 +8,8 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-Setting maps enabled for these tests
-  Set integration proxy on
+#Setting maps enabled for these tests
+#  Set integration proxy on
 
 Operation tree does have 'Asuinkerrostalon tai rivitalon rakentaminen' in it
   Mikko logs in
@@ -61,8 +61,8 @@ Operation tree does not have 'Asuinkerrostalon tai rivitalon rakentaminen' in it
 #  Wait until  Element should not be visible  ${element}
   Logout
 
-Setting maps disabled again after the tests
-  Set integration proxy off
+#Setting maps disabled again after the tests
+#  Set integration proxy off
 
 
 *** Keywords ***
