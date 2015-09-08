@@ -7,6 +7,18 @@
 
 (apply-remote-minimal)
 
+(facts
+  (let [uri "http://127.0.0.1:8000/dev/krysp"]
+    (fact "pena can't set krysp-url"
+      (command pena :set-krysp-endpoint :url uri :permitType "R" :version "1") => unauthorized?)
+
+    (fact "sipoo can set working krysp-url"
+      (command sipoo :set-krysp-endpoint :url uri :permitType "YA" :version "2") => ok?)
+
+    (fact "sipoo cant set incorrect krysp-url"
+      (command sipoo :set-krysp-endpoint :url "BROKEN_URL" :permitType "R"  :version "1") => fail?)))
+
+
 (facts* "users-in-same-organizations"
   (let [naantali (apikey-for "rakennustarkastaja@naantali.fi")
         jarvenpaa (apikey-for "rakennustarkastaja@jarvenpaa.fi")
