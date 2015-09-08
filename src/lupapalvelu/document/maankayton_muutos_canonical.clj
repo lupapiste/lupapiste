@@ -42,15 +42,15 @@
   (let [{contact :yhteystiedot personal :henkilotiedot} (:yhteyshenkilo company)]
     (merge (entry :turvakieltoKytkin personal :turvakieltokytkin))
     {:Yritys (merge (entry :yritysNimi company :nimi)
-                   (entry :liikeJaYhteisoTunnus company )
+                   (entry :liikeJaYhteisoTunnus company :liikeJaYhteisotunnus )
                    {:postiosoitetieto (->postiosoite-type (:osoite company))}
                    (entry :puhelin contact)
                    (entry :email contact :sahkopostiosoite))}))
 
 (defn process-party [lang {{role :subtype} :schema-info data :data}]
-  {:Osapuoli (merge {:roolikoodi (str/capitalize role)
-                     :asioimiskieli lang
-                     :vainsahkoinenAsiointiKytkin false} (osapuolitieto data))})
+  {:osapuolitieto {:Osapuoli (merge {:roolikoodi (str/capitalize role)
+                                     :asioimiskieli lang
+                                     :vainsahkoinenAsiointiKytkin false} (osapuolitieto data))}})
 
 (defn filter-parties [docs lang]
   (map (partial process-party lang) (schema-info-filter docs :type "party")))
@@ -64,6 +64,13 @@
       :kasittelija (format "%s %s" a-first a-last)
       :hakemuksenTila (state canonical-common/application-state-to-krysp-state)}}))
 
+
+(defn toimituksen-tila [app]
+  (let [state (-> app :state keyword)
+        state-name (state {:sent "Hakemus"})]
+    ;; TODO: add more states.
+    (or state-name "Hakemus")
+    ))
 
 (defn maankayton-muutos-canonical [application lang]
   (let [app (tools/unwrapped application)
@@ -79,11 +86,10 @@
        {:toimituksenTiedottieto
         {:ToimituksenTiedot (canonical-common/toimituksen-tiedot application lang)}
         :hakemustieto
-        {:Hakemus
-         {:osapuolitieto parties
-          :sijaintitieto (canonical-common/get-sijaintitieto application)
-          :kohdekiinteisto (:propertyId application)
-          :maaraAla (:maaraalaTunnus property)
-          :tilatieto (application-state app)}}
-        :uusiKytkin (= op-age "uusi")
-        :kuvaus op-desc}}}}))
+        {:Hakemus (concat parties [{:sijaintitieto (canonical-common/get-sijaintitieto application)}
+                                   {:kohdekiinteisto (:propertyId application)}
+                                   {:maaraAla (:maaraalaTunnus property)}
+                                   {:tilatieto (application-state app)}])}}
+       :toimituksenTila (toimituksen-tila app)
+       :uusiKytkin (= op-age "uusi")
+       :kuvaus op-desc}}}))

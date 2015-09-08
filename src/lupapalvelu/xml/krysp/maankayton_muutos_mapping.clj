@@ -37,8 +37,6 @@
         identity))
     identity))
 
-
-
 (defn make-seq [a]
   (if (sequential? a)
     a
@@ -47,7 +45,8 @@
 (defn tag-ns [path]
   (when (> (count  path) 4)
     (let [ns-paths { [:toimituksenTiedottieto :ToimituksenTiedot] "yht"
-                     [:hakemustieto :Hakemus :osapuolitieto :Osapuoli :henkilotieto :Henkilo] "yht"}
+                     [:hakemustieto :Hakemus :osapuolitieto :Osapuoli :henkilotieto :Henkilo] "yht"
+                     [:hakemustieto :Hakemus :sijaintitieto :Sijainti] "yht"}
           popped (pop (subvec path 2))]
 
       (defn popper [p]
@@ -56,6 +55,11 @@
             ns
             (popper (pop p)))))
       (popper popped))))
+
+(defn unwrap [xs]
+  (if (and (sequential? xs) (= (count xs) 1))
+    (first xs)
+    xs))
 
 (defn tagger
   ([k v path]
@@ -70,19 +74,95 @@
    (if (map? arg)
      (let [tags (sort-by (sorter (last path)) (keys arg))
            m  (map (fn [k] (tagger k (k arg) (conj path k))) tags)]
-       (if (= (count m) 1)
-         (first m)
-         m))
+       (unwrap m))
      (when (coll? arg)
-       (map #(tagger % path) arg)))))
+       (unwrap (map #(tagger % path) arg))))))
 
 
-(defn ->krysp [{mm :Maankaytonmuutos}]
+(defn taggy
+  "Returns list [map ns] where the map contains :tag and :ns (if given).
+   The tag name is defined by argument k. The format is
+   :tagname/ns where the namespace part is optional.
+   Note: namespace is returned but not used on this element.
+   The namespace for this element is the ns argument or nothing."
+  [k & [ns]]
+  (let [[tag new-ns] (-> k str rest str/join (str/split #"/"))]
+    [(merge (when ns {:ns ns})
+            {:tag (keyword tag)}) (or new-ns ns)]))
+
+(defmulti mapper (fn [& args]
+                   (let [arg (first args)]
+                     (if (map? arg)
+                      :map
+                      (if (keyword? arg)
+                        :keyword
+                        (if (sequential? arg)
+                          :sequential))))))
+
+(defmethod mapper :map [m & [ns]]
+  (let [k (-> m keys first)
+        [tag ns] (taggy k ns)
+        v (k m)]
+    ;; Mapping sanity check
+    (assert (= (count m) 1))
+    (assoc tag :child (make-seq (mapper v ns)))))
+
+(defmethod mapper :keyword [kw & [ns]]
+  (first (taggy kw ns)))
+
+(defmethod mapper :sequential [xs & [ns]]
+  (map #(mapper % ns) xs))
+
+(defn ->mapping [muutos]
+  (let [osoite [{:osoitenimi :teksti} :postinumero :postitoimipaikannimi]]
+    {:tag :Maankaytonmuutos :ns "mkmu"
+     :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :MM "1.0.1")
+                   :xmlns:mkmu "http://www.paikkatietopalvelu.fi/gml/maankaytonmuutos"}
+                  mapping-common/common-namespaces)
+     :child [(mapper {:maankayttomuutosTieto
+                      {muutos
+                       [{:toimituksenTiedottieto
+                         {:ToimituksenTiedot/yht [:aineistonnimi :aineistotoimittaja :tila :toimitusPvm :kuntakoodi
+                                                  :kielitieto]}}
+                        {:hakemustieto
+                         [{:Hakemus
+                           {:osapuolitieto
+                            {:Osapuoli
+                             [:roolikoodi :turvakieltokytkin :asioimiskieli
+                              {:henkilotieto
+                               {:Henkilo/yht [{:nimi [:etunimi :sukunimi]}
+                                              {:osoite osoite}
+                                              :sahkopostiosoite
+                                              :faksinumero
+                                              :puhelin
+                                              :henkilotunnus]}}
+                              {:yritystieto
+                               {:Yritys/yht [:nimi :liikeJaYhteisotunnus
+                                             {:postiosoitetieto {:postiosoite osoite}}
+                                             :sahkopostiosoite
+                                             :puhelin
+                                             :sahkopostiosoite]}}
+                              :vainsahkoinenAsiointiKytkin]}}}
+                          {:sijaintitieto {:Sijainti/yht [{:osoite [:yksilointitieto :alkuHetki {:osoitenimi :teksti}]}
+                                                          {:piste {:Point :pos}}]}}
+                          :kohdekiinteisto
+                          :maaraAla
+                          {:tilatieto {:Tila/yht [:pvm :kasittelija :hakemuksenTila]}}]}
+                        :toimituksenTila
+                        :uusiKytkin
+                        :kuvaus]}})]}))
+
+
+
+
+#_(defn ->krysp [{mm :Maankaytonmuutos}]
   (merge {:tag :Maankaytonmuutos :ns "mkmu"
           :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :MM "1.0.1")
                         :xmlns:mkmu "http://www.paikkatietopalvelu.fi/gml/maankaytonmuutos"}
                        mapping-common/common-namespaces) }
          {:child [(tagger mm [])]}))
+
+
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
@@ -95,9 +175,10 @@
                     canonical-without-attachments
                     [:Maankaytonmuutos :maankayttomuutosTieto muutos :liitetieto ]
                     attachments-canonical)
-        mapping (->krysp canonical)
+        _ (>pprint canonical-without-attachments)
+        mapping (->mapping muutos)
         _ (>pprint mapping)
-        xml (element-to-xml canonical mapping)
+        xml (element-to-xml canonical-without-attachments mapping)
         _ (>pprint xml)
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
     (writer/write-to-disk
