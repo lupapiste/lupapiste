@@ -999,7 +999,7 @@ $col: 25%;
   width: $size * $col;
   min-width: $size * $col;
   max-width: $size * $col;
-  padding: 0 $marginM;
+  padding-left: 20px;
   label.required:after {
     content: "*";
     color: $negative;
@@ -1019,6 +1019,12 @@ $col: 25%;
 .form-grid {
   overflow-y: hidden;
   width: 100%;
+  border-bottom: 1px solid $grid-border-color;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
   &:after {
     @include form-grid-clear;
   }
