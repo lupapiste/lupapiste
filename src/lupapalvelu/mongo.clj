@@ -26,7 +26,8 @@
 (defonce connection (atom nil))
 (defonce ^:private dbs (atom {}))
 
-(def ^:dynamic *db-name* (:dbname (env/value :mongodb)))
+(def default-db-name (:dbname (env/value :mongodb)))
+(def ^:dynamic *db-name* default-db-name)
 
 ;;
 ;; Utils
@@ -38,8 +39,7 @@
 
 (defn db-selection-middleware [handler]
   (fn [request]
-    (let [default-db-name (:dbname (env/value :mongodb))
-          db-name (get-in request [:cookies "test_db_name" :value] default-db-name)]
+    (let [db-name (get-in request [:cookies "test_db_name" :value] default-db-name)]
       (with-db db-name
         (handler request)))))
 
