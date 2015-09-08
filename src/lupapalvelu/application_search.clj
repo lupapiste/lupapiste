@@ -82,7 +82,7 @@
           "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "draft"]}}
           "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
           "canceled"          {:state "canceled"}
-          {:state {$ne ["cancelled"]}})
+          {:state {$ne "canceled"}})
         (case applicationType
           "inforequest"       {:state {$in ["open" "answered" "info"]}}
           "application"       {:state {$in ["submitted" "sent" "complement-needed"]}}
