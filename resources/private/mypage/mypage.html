@@ -28,13 +28,15 @@
                  data-bind="component: {name: 'text-field',
                                         params: {value: firstName,
                                                  id: 'firstName',
-                                                 lLabel: 'userinfo.firstName'}}"></div>
+                                                 lLabel: 'userinfo.firstName',
+                                                 required: true}}"></div>
 
             <div class="col-1"
                  data-bind="component: {name: 'text-field',
                                         params: {value: lastName,
                                                  id: 'lastName',
-                                                 lLabel: 'userinfo.lastName'}}"></div>
+                                                 lLabel: 'userinfo.lastName',
+                                                 required: true}}"></div>
 
             <div class="col-1"
                  data-bind="component: {name: 'text-field',
@@ -112,8 +114,8 @@
                                                    optionsValue: 'id',
                                                    optionsText: 'name',
                                                    lOptionsCaption: 'userinfo.architect.degree.choose',
-                                                   id: 'architect',
-                                                   lLabel: 'userinfo.architect'}}"></div>
+                                                   id: 'architect-degree-select',
+                                                   lLabel: 'userinfo.architect.degree'}}"></div>
 
 
               <div class="col-1"
