@@ -135,7 +135,7 @@
                      :op nil)))})))
   )
 
-(defn do-create-doc [{{:keys [id schemaName]} :data created :created application :application :as command}]
+(defn do-create-doc [{{:keys [schemaName]} :data created :created application :application :as command}]
   (let [schema (schemas/get-schema (:schema-version application) schemaName)]
     (when-not (:repeating (:info schema)) (fail! :illegal-schema))
     (let [document (model/new-document schema created)]
