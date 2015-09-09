@@ -1012,7 +1012,6 @@
             :order 3
             :repeating true
             :removable true
-            :initially-empty true
             :type :location}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
