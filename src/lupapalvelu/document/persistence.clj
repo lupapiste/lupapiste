@@ -135,16 +135,18 @@
                      :attachments
                      (:attachments application)
                      #(= (:id (:op %)) op-id)
-                     :op nil)))})))
-  )
+                     :op nil)))}))))
 
-(defn do-create-doc [{{:keys [schemaName]} :data created :created application :application :as command}]
+(defn do-create-doc [{{:keys [schemaName]} :data created :created application :application :as command} & updates]
   (let [schema (schemas/get-schema (:schema-version application) schemaName)]
     (when-not (:repeating (:info schema)) (fail! :illegal-schema))
     (let [document (model/new-document schema created)]
       (update-application command
                           {$push {:documents document}
                            $set {:modified created}})
+      (when updates
+        (let [model-updates (->model-updates (first updates))]
+          (persist-model-updates application "documents" document model-updates created)))
       document)))
 
 (defn- update-key-in-schema? [schema [update-key _]]

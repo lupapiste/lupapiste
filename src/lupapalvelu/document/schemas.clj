@@ -17,7 +17,7 @@
                  :approvable :removable :deny-removing-last-document
                  :group-help :section-help
                  :after-update
-                 :repeating :initially-empty :order})
+                 :repeating :no-repeat-button :order})
 
 (def updateable-keys #{:removable})
 (def immutable-keys (set/difference info-keys updateable-keys) )
@@ -850,6 +850,34 @@
                              {:name "ranta-asemakaava"}
                              {:name "ei kaavaa"}]}])
 
+(def lisakohde-rakennuspaikka [{:name "kiinteisto"
+                                :type :group
+                                :body [{:name "kiinteistoTunnus" :type :string :readonly true}
+                                       {:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
+                                       {:name "tilanNimi" :type :string :readonly true}
+                                       {:name "rekisterointipvm" :type :string :readonly true}
+                                       {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
+                                       {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}
+                                       {:name "rantaKytkin" :type :checkbox}]}
+                               {:name "hallintaperuste" :type :select :sortBy :displayname :required true
+                                :body [{:name "oma"}
+                                       {:name "vuokra"}
+                                       {:name "ei tiedossa"}]}
+                               {:name "kaavanaste" :type :select :sortBy :displayname :hidden true
+                                :body [{:name "asema"}
+                                       {:name "ranta"}
+                                       {:name "rakennus"}
+                                       {:name "yleis"}
+                                       {:name "ei kaavaa"}
+                                       {:name "ei tiedossa"}]}
+                               {:name "kaavatilanne" :type :select :sortBy :displayname
+                                :body [{:name "maakuntakaava"}
+                                       {:name "oikeusvaikutteinen yleiskaava"}
+                                       {:name "oikeusvaikutukseton yleiskaava"}
+                                       {:name "asemakaava"}
+                                       {:name "ranta-asemakaava"}
+                                       {:name "ei kaavaa"}]}])
+
 
 (defn- approvable-top-level-groups [v]
   (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
@@ -1011,9 +1039,10 @@
             :approvable true
             :order 3
             :repeating true
+            :no-repeat-button true
             :removable true
             :type :location}
-     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
+     :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
     {:info {:name "paatoksen-toimitus-rakval"
             :removable false

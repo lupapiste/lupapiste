@@ -1,4 +1,5 @@
-secondary-kiinteistot._group_label: Kohteena oleva kiinteistö
-secondary-kiinteistot._append_label: Lisää kiinteistö
+secondary-kiinteistot._group_label: Lisäkohdekiinteistö
+secondary-kiinteistot._append_label: Lisää lisäkohdekiinteistö
 application.dialog.add-property.title: Lisää kiinteistö hakemukseen
 application.dialog.add-property.submit: Lisää hakemukseen
+kiinteisto.kiinteisto.kiinteistoTunnus: Kiinteistötunnus
