@@ -8,7 +8,7 @@
             [lupapalvelu.comment :as comment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.statement :refer :all]

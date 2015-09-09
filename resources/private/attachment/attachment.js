@@ -130,6 +130,7 @@ var attachment = (function() {
     changeTypeDialogModel:        undefined,
     metadata:                     ko.observable(),
     showTosMetadata:              ko.observable(false),
+    dirty:                        false,
 
     // toggleHelp: function() {
     //   model.showHelp(!model.showHelp());
@@ -187,6 +188,9 @@ var attachment = (function() {
       if (previousId) {
         pageutil.openPage("attachment", applicationId + "/" + previousId);
         hub.send("track-click", {category:"Attachments", label: "", event:"previousAttachment"});
+        if (model.dirty) {
+          repository.load(model.application.id());
+        }
       }
     },
 
@@ -195,6 +199,9 @@ var attachment = (function() {
       if (nextId) {
         pageutil.openPage("attachment", applicationId + "/" + nextId);
         hub.send("track-click", {category:"Attachments", label: "", event:"nextAttachment"});
+        if (model.dirty) {
+          repository.load(model.application.id());
+        }
       }
     },
 
@@ -246,6 +253,13 @@ var attachment = (function() {
           }, true);
         })
         .call();
+    },
+
+    goBackToApplication: function() {
+      model.application.open("attachments");
+      if (model.dirty) {
+        repository.load(model.application.id());
+      }
     }
   };
 
@@ -282,9 +296,7 @@ var attachment = (function() {
       .command("set-attachment-meta", data)
       .success(function() {
         model.indicator({name: name, type: "saved"});
-        if (name === "operation") {
-          applicationModel.reload();
-        }
+        model.dirty = true;
       })
       .error(function(e) {
         error(e.text);
@@ -455,7 +467,7 @@ var attachment = (function() {
 
     pageutil.hideAjaxWait();
     model.indicator(false);
-
+    model.dirty = false;
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {
       model.init(true);
       if (!model.latestVersion()) {
@@ -496,7 +508,7 @@ var attachment = (function() {
     applicationId = pageutil.subPage();
     attachmentId = pageutil.lastSubPage();
 
-    if (applicationModel._js.id !== applicationId) {
+    if (applicationModel._js.id !== applicationId || model.dirty) {
       repository.load(applicationId);
     } else {
       showAttachment();

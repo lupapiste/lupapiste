@@ -2,8 +2,7 @@
   (:require [midje.sweet  :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.domain :as domain]
-            [sade.http :as http]))
+            [lupapalvelu.domain :as domain]))
 
 (apply-remote-minimal)
 
@@ -27,7 +26,7 @@
                     :throw-exceptions false
                     :content-type     :json
                     :body "{\"ok\": true}"}
-            resp (http/post (str (server-address) "/api/token/" token) params)
+            resp (http-post (str (server-address) "/api/token/" token) params)
             ]
         (:status resp) => 200
         (:to email) => "Teppo Nieminen <teppo@example.com>")))

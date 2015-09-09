@@ -39,31 +39,17 @@
           //top: 1px;
           &.tag {
             position: relative;
-            background-color: $lp-orange;
-            font-size: 16px;
+            background-color: $primary;
+            /* font-size: 16px; */
             margin-right: $marginS;
             white-space: nowrap;
             margin-bottom: $marginS;
 
             span.tag-label {
-              color: #fff;
-              margin-left: $marginL + $marginS / 2;
-              margin-right: $marginM;
               text-overflow: ellipsis;
               overflow: hidden;
-              display: block;
-            }
-
-            span.tag-remove {
-              cursor: pointer;
-              position: absolute;
-              left: $marginS;
-              top: 0;
-              bottom: 0;
-              margin: auto;
             }
           }
-
           &.tag-ellipsis {
             color: $lp-orange;
             cursor: pointer;
@@ -76,12 +62,12 @@
     span.caption {
       cursor: default;
     }
-    span.autocomplete-selection-arrow {
+    i.autocomplete-selection-arrow{
       position: absolute;
       top: 0;
       bottom: 0;
       margin: auto;
-      right: 9px;
+      right: 0px;
       cursor: default;
     }
   }

@@ -3,7 +3,6 @@
 Documentation   Prev permit interaction
 Suite teardown  Logout
 Resource        ../../common_resource.robot
-#Variables      ../06_attachments/variables.py
 
 *** Test Cases ***
 
@@ -26,7 +25,7 @@ Järvenpää authority logs in and sees the Nouda lupa button
   # test the smaller button in the upper-right corner
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname-jarvenpaa-normal}  create-jarvenpaa-app-${secs}
-  Create application the fast way  ${appname-jarvenpaa-normal}  186-2-215-10  kerrostalo-rivitalo
+  Create application the fast way  ${appname-jarvenpaa-normal}  186-2-215-10  kerrostalo-rivitalo  open
   Go to page  applications
   Wait until  Element should be visible  //section[@id='applications']//button[@data-test-id='applications-create-new-with-prev-permit']
 

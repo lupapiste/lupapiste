@@ -75,6 +75,7 @@ Mikko removes apartment
   Xpath Should Match X Times  //div[@id='application-info-tab']//tr[@data-repeating-id="huoneistot"]  1
 
 Mikko can't set "other" building material
+  Open accordions  info
   Wait Until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']//select[@data-docgen-path='rakenne.kantavaRakennusaine']
   Wait Until  Element should not be visible  //section[@id='application']//div[@id='application-info-tab']//input[@data-docgen-path='rakenne.muuRakennusaine']
 

@@ -2,11 +2,16 @@
   (:require [clojure.test :refer :all]
             [midje.sweet :refer :all]
             [monger.collection :as mc]
-            [monger.gridfs :as gfs]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [sade.core :refer :all]))
 
 (def valid-id "502770568de2282ae6fbb0be")
 (def invalid-id "123")
+
+(def test-db-name (str "test_" (now)))
+
+(fact "with-db sets db-name" 
+  (mongo/with-db test-db-name mongo/*db-name*) => test-db-name)
 
 (facts "Facts about create-id"
   (fact (mongo/create-id) => string?))
@@ -24,10 +29,12 @@
 (facts "Facts about insert"
   (fact (mongo/insert "c" {:id "foo" :data "data"}) => nil
         (provided
-          (mc/insert "c" {:_id "foo" :data "data"}) => nil))
+         (mongo/get-db) => anything
+         (mc/insert anything "c" {:_id "foo" :data "data"}) => nil))
   (fact (mongo/insert "c" {:data "data"}) => nil
         (provided
-          (mc/insert "c" {:data "data"}) => nil)))
+         (mongo/get-db) => anything
+         (mc/insert anything "c" {:data "data"}) => nil)))
 
 (facts "valid key"
   (mongo/valid-key? (mongo/create-id)) => true

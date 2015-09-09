@@ -2,10 +2,14 @@ LUPAPISTE.OrganizationTagsService = function() {
   "use strict";
   var self = this;
 
-  self.data = ko.observable();
+  var _data = ko.observable();
+
+  self.data = ko.pureComputed(function() {
+    return _data();
+  });
 
   self.currentApplicationOrganizationTags = ko.pureComputed(function() {
-    var currentOrganization = ko.unwrap(lupapisteApp.models.application.organization);
+    var currentOrganization = util.getIn(lupapisteApp, ["models", "application", "organization"]);
     if (currentOrganization && self.data()) {
       return util.getIn(self.data(), [currentOrganization, "tags"]);
     }
@@ -14,7 +18,7 @@ LUPAPISTE.OrganizationTagsService = function() {
 
   ajax.query("get-organization-tags")
   .success(function(res) {
-    self.data(res.tags);
+    _data(res.tags);
   })
   .error(_.noop)
   .call();
