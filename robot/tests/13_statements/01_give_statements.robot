@@ -78,14 +78,12 @@ Sonja can comment on Ronjas statement
 
 Sonja can give statement to own request
   Open statement  2
-  Sleep  1
-  Select From List  statement-type-select  puoltaa
+  Wait until  Select From List  statement-type-select  puoltaa
   Input text  statement-text  salibandy on the rocks.
   Wait and click  statement-submit
 
 Comment is added
   Open statement  2
-  Sleep  1
   Wait until  Comment count is  1
 
 Sonja can regive statement to own statement
@@ -95,7 +93,6 @@ Sonja can regive statement to own statement
 
 Another comment is added
   Open statement  2
-  Sleep  1
   Wait until  Comment count is  2
 
 Veikko can see statements as he is beeing requested a statement to the application

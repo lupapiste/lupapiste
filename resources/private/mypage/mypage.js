@@ -19,8 +19,13 @@
       ajax
         .command(commandName, params)
         .pending(model.pending)
-        .success(function() { model.clear().saved(true).indicator({type: "saved"}); })
-        .error(function(d) { model.clear().saved(false).indicator({type: "err"}).error(d.text); })
+        .success(function() {
+          model.clear().saved(true);
+          hub.send("indicator", {style: "positive"}); })
+        .error(function(d) {
+          model.clear().saved(false).error(d.text);
+          hub.send("indicator", {style: "negative"});
+        })
         .complete(function() { clearTimeout(t); img.hide(); })
         .call();
     };
@@ -66,7 +71,7 @@
 
     self.pending = ko.observable();
 
-    self.indicator = ko.observable().extend({notify: "always"});
+    self.processing = ko.observable();
 
     self.loadingAttachments = ko.observable();
 
@@ -196,8 +201,8 @@
     this.newPassword2 = ko.observable("");
     this.error = ko.observable(null);
     this.saved = ko.observable(false);
-    this.indicator = ko.observable().extend({ notify: "always" });
     this.pending = ko.observable();
+    this.processing = ko.observable();
 
     this.clear = function() {
       return this

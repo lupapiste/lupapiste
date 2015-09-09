@@ -80,12 +80,12 @@
 (facts update-default-application-filter
   (apply-remote-minimal)
 
-  (fact (->> (command sonja :update-default-application-filter :filter {:tags ["bar" "buzz"] :operations [] :organizations [] :areas ["1"]})) => ok?)
+  (fact (->> (command sonja :update-default-application-filter :filter {:handler (:id sonja)  :tags ["bar" "buzz"] :operations [] :organizations [] :areas ["1"]} :sort {:column "type" :asc false})) => ok?)
 
   (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter) first :tags) => ["bar" "buzz"])
 
   (fact "Overwrite default filter"
-      (->> (command sonja :update-default-application-filter :filter {:tags ["foo"]})) => ok?)
+      (->> (command sonja :update-default-application-filter :filter {:tags ["foo"]} :sort {:column "modified" :asc true})) => ok?)
 
   (fact "Filter overwritten"
       (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter)) => [{:tags ["foo"]}]))
