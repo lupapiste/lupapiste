@@ -293,7 +293,7 @@
           user (-> conf :credentials :username)
           pw   (-> conf :credentials :password)
           ssl  (:ssl conf)]
-      (connect! (m/server-address host port) dbname user pw ssl)))
+      (connect! [(m/server-address host port)] dbname user pw ssl)))
   ([servers dbname username password ssl]
     (let [servers (if (string? servers)
                     (let [[host port] (clojure.string/split servers #":")]
