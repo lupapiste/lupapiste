@@ -1,47 +1,7 @@
-#mypage .poor {
-  color: red;
-  font-weight: bold;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-#mypage .low {
-  color: red;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-#mypage .average {
-  color: black;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-#mypage .good {
-  color: green;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-#mypage .excellent {
-  color: green;
-  font-weight: bold;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
 #mypage {
   .button-group {
+    margin: 20px;
     position: relative;
-    width: 360px;
-    .form-indicator {
-      top: -4px;
-    }
   }
 }
 
@@ -79,13 +39,18 @@
   }
 }
 
-
-.architect-info {
-  margin: $marginL auto;
-  transition: height 2s;
-
-
-  .architect-attachments {
-    margin-top: $marginL;
+#mypage-register-company, #mypage-company {
+  padding: 0 $marginL;
+  p {
+    // TODO not needed after all links are changed
+    a {
+      @include link;
+    }
   }
 }
+
+.architect-info {
+  transition: height 2s;
+
+}
+

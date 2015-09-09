@@ -6,6 +6,10 @@
 
   function makeSaveFn(commandName, propertyNames) {
     return function(model, event) {
+      if (!event) {
+        return;
+      }
+
       var img = $(event.target).parent().find("img");
       var t = setTimeout(img.show, 200);
       var params = _.reduce(propertyNames, function(m, n) {
@@ -198,7 +202,7 @@
   function Password() {
     this.oldPassword = ko.observable("");
     this.newPassword = ko.observable("");
-    this.newPassword2 = ko.observable("");
+    this.newPassword2 = ko.observable("").extend({match: {params: this.newPassword, message: loc("mypage.noMatch")}});
     this.error = ko.observable(null);
     this.saved = ko.observable(false);
     this.pending = ko.observable();
@@ -302,6 +306,8 @@
     $("#mypage")
       .find("#own-info-form").applyBindings(ownInfo).end()
       .find("#pw-form").applyBindings(pw).end()
+      .find("#mypage-register-company").applyBindings(ownInfo).end()
+      .find("#mypage-company").applyBindings(ownInfo).end()
       .find("#dialog-userinfo-architect-upload")
         .applyBindings(uploadModel)
         .find("form")
