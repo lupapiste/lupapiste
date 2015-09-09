@@ -393,7 +393,10 @@
   (ensure-index :vetuma {:sessionid 1})
   (ensure-index :vetuma {:trid 1} {:unique true})
   (ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
-  (ensure-index :fs.chunks {:files_id 1 :n 1 })
+  (try
+    (ensure-index :fs.chunks {:files_id 1 :n 1 })
+    (catch Exception e
+      (warn "Failed ensuring index:" (.getMessage e))))
   (ensure-index :open-inforequest-token {:application-id 1})
   (ensure-index :app-links {:link 1})
   ; Disabled TTL for now: (mc/ensure-index :sign-processes {:created 1} {:expireAfterSeconds (env/value :onnistuu :timeout)})
