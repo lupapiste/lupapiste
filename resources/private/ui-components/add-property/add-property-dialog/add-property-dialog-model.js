@@ -50,9 +50,11 @@ LUPAPISTE.AddPropertyDialogModel = function() {
   };
 
   self.submit = function() {
+    var updates = [["kiinteisto.kiinteistoTunnus", self.propertyId()]];
     ajax
       .command("create-doc", { id: app.id(),
-                               schemaName: "secondary-kiinteistot" })
+                               schemaName: "secondary-kiinteistot",
+                               updates: updates })
       .success(function() { repository.load(app.id()); })
       .call();
     hub.send("close-dialog");
