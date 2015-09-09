@@ -41,15 +41,11 @@
 
 #mypage-register-company, #mypage-company {
   padding: 0 $marginL;
-  h2 {
-    padding-left: 0;
-  }
   p {
     // TODO not needed after all links are changed
     a {
       @include link;
     }
-    padding-left: 0;
   }
 }
 

@@ -101,6 +101,7 @@
 
         <!-- ko if: architect -->
           <div class="architect-info form-grid">
+
             <h2 data-bind="ltext: 'architect.experience.title'"></h2>
 
             <div class="row">
@@ -292,10 +293,14 @@
 
       <script type="text/x-jquery-tmpl" id="mypage-register-company-template">
         <div class="form-grid">
+          <h2 data-bind="ltext: 'register.company.header'"></h2>
           <div class="row">
-            <div class="col-4">
-              <h2 data-bind="ltext: 'register.company.header'"></h2>
+            <div class="col-3">
               <p data-bind="lhtml: 'register.company.info'" class="register-info"></p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-1">
               <a href="#!/register-company-account-type"
                  class="btn positive"
                  data-test-id="logged-user-register-company-start">
