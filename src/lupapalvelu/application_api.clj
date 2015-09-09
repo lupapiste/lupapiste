@@ -243,7 +243,7 @@
                                             meta-fields/enrich-with-link-permit-data
                                             (dissoc :id)
                                             (assoc :_id (:id application))))
-    (catch com.mongodb.MongoException$DuplicateKey e
+    (catch com.mongodb.DuplicateKeyException e
       ; This is ok. Only the first submit is saved.
       )))
 
