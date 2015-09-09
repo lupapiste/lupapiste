@@ -25,7 +25,6 @@
 
 (defmulti osapuolitieto :_selected)
 
-
 (defmethod osapuolitieto "henkilo"
   [{{contact :yhteystiedot personal :henkilotiedot address :osoite} :henkilo}]
   (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
@@ -40,12 +39,12 @@
 (defmethod osapuolitieto "yritys"
   [{company :yritys}]
   (let [{contact :yhteystiedot personal :henkilotiedot} (:yhteyshenkilo company)]
-    (merge (entry :turvakieltoKytkin personal :turvakieltokytkin))
-    {:yritystieto {:Yritys (merge (entry :yritysNimi company :nimi)
-                                  (entry :liikeJaYhteisoTunnus company :liikeJaYhteisotunnus )
-                                  {:postiosoitetieto (->postiosoite-type (:osoite company))}
-                                  (entry :puhelin contact)
-                                  (entry :email contact :sahkopostiosoite))}}))
+    (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
+           {:yritystieto {:Yritys (merge (entry :yritysnimi company :nimi)
+                                         (entry :liikeJaYhteisoTunnus company :liikeJaYhteisotunnus )
+                                         {:postiosoitetieto (->postiosoite-type (:osoite company))}
+                                         (entry :puhelin contact)
+                                         (entry :email contact :sahkopostiosoite))}})))
 
 (defn process-party [lang {{role :subtype} :schema-info data :data}]
   {:osapuolitieto {:Osapuoli (merge {:roolikoodi (str/capitalize role)
@@ -56,13 +55,16 @@
   (map (partial process-party lang) (schema-info-filter docs :type "party")))
 
 (defn application-state [app]
-  (let [state (-> app :state keyword)
+  (let [enums {:submitted "Vireill\u00e4"
+               :sent "Haettu"
+               :closed "P\u00e4\u00e4ttynyt"}
+        state (-> app :state keyword)
         date (util/to-xml-date (state app))
         {a-first :firstName a-last :lastName} (:authority app)]
     {:Tila
      {:pvm date
       :kasittelija (format "%s %s" a-first a-last)
-      :hakemuksenTila (state canonical-common/application-state-to-krysp-state)}}))
+      :hakemuksenTila (state enums)}}))
 
 
 (defn toimituksen-tila [app]

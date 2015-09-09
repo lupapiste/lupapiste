@@ -4,101 +4,42 @@
             [clojure.walk :as walk]
             [lupapalvelu.document.maankayton-muutos-canonical :as maankayton-muutos-canonical]
             [lupapalvelu.permit :as permit]
-            lupapalvelu.xml.disk-writer
             [lupapalvelu.xml.disk-writer :as writer]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
 
-(defn sorter
-  "Sorter functions for the immediate children of the tag.
-   Used with sort-by. This is needed because typical XML schemas have
-   fixed order of the child elements"
-  [tag]
-  ;; Sorting is case-insensitive. We list all the fields (child elements) although
-  ;; not all of them are used.
-  (if tag
-    (let [fields {"toimituksentiedot" ["aineistonnimi" "aineistotoimittaja" "tila" "toimituspvm" "kuntakoodi"
-                                       "kielitieto" "metatietotunniste" "metatietoxmlurl" "metatietourl"
-                                       "tietotuoteurl"]
-                  "tonttijako" ["toimituksentiedottieto" "hakemustieto" "paatostieto" "referenssisijaintitieto"
-                                "toimituksentila" "toimitusnumero" "liitetieto" "kiinteisto" "maaraala"
-                                "uusikytkin" "kuvaus"]
-                  "hakemus" ["hakemustunnustieto" "osapuolitieto" "sijaintitieto" "liitetieto"
-                             "kohdekiinteisto" "maaraala" "tilatieto" "kuvaus"]
-                  "osapuoli" ["roolikoodi" "turvakieltokytkin" "asioimiskieli" "henkilotieto"
-                              "yritystieto" "vainsahkoinenasiointikytkin"]
-                  "henkilo" ["nimi" "osoite" "sahkopostiosoite" "faksinumero" "puhelin" "henkilotunnus"]
-                  "yritys" ["nimi" "liikejayhteisotunnus" "kayntiosoitetieto" "postiosoitetieto"
-                            "kotipaikka" "faksinumero" "puhelin" "www" "sahkopostiosoite" "verkkolaskutustieto"]
-                  }
 
-          tag-str    (fn [t] (-> t name str/lower-case))]
-      (if-let [xs (get fields (tag-str tag))]
-        #(.indexOf xs (tag-str %))
-        identity))
-    identity))
 
-(defn make-seq [a]
+(defn- make-seq [a]
   (if (sequential? a)
     a
     [a]))
 
-(defn tag-ns [path]
-  (when (> (count  path) 4)
-    (let [ns-paths { [:toimituksenTiedottieto :ToimituksenTiedot] "yht"
-                     [:hakemustieto :Hakemus :osapuolitieto :Osapuoli :henkilotieto :Henkilo] "yht"
-                     [:hakemustieto :Hakemus :sijaintitieto :Sijainti] "yht"}
-          popped (pop (subvec path 2))]
-
-      (defn popper [p]
-        (when (not-empty p)
-          (if-let [ns (get ns-paths p)]
-            ns
-            (popper (pop p)))))
-      (popper popped))))
-
-(defn unwrap [xs]
-  (if (and (sequential? xs) (= (count xs) 1))
-    (first xs)
-    xs))
-
-(defn tagger
-  ([k v path]
-   (let [ns (tag-ns path)
-         m-ns (when ns
-                {:ns ns})
-         m (merge  {:tag k} m-ns)]
-     (if (coll? v)
-       (assoc m :child (-> v (tagger path) make-seq))
-       m)))
-  ([arg path]
-   (if (map? arg)
-     (let [tags (sort-by (sorter (last path)) (keys arg))
-           m  (map (fn [k] (tagger k (k arg) (conj path k))) tags)]
-       (unwrap m))
-     (when (coll? arg)
-       (unwrap (map #(tagger % path) arg))))))
-
-
 (defn taggy
   "Returns list [map ns] where the map contains :tag and :ns (if given).
-   The tag name is defined by argument k. The format is
-   :tagname/ns where the namespace part is optional.
-   Note: namespace is returned but not used on this element.
-   The namespace for this element is the ns argument or nothing."
+  The tag name is defined by argument k. The format is
+  :tagname/ns where the namespace part is optional.  Note: namespace
+  is returned but not used on this element.  The namespace for this
+  element is the ns argument or nothing."
   [k & [ns]]
   (let [[tag new-ns] (-> k str rest str/join (str/split #"/"))]
     [(merge (when ns {:ns ns})
             {:tag (keyword tag)}) (or new-ns ns)]))
 
-(defmulti mapper (fn [& args]
-                   (let [arg (first args)]
-                     (if (map? arg)
-                      :map
-                      (if (keyword? arg)
-                        :keyword
-                        (if (sequential? arg)
-                          :sequential))))))
+(defmulti mapper
+  "Recursively generates a 'traditional' mapping (with :tag, :ns
+  and :child properties) from the shorthand form. As the shorthand
+  uses lists, maps and keywords, each type is handled byt its
+  corresponding method.
+  Note: The root element must be defined separately. See the
+  ->mapping function for details."
+  (fn [& args]
+    (let [arg (first args)]
+      (if (map? arg)
+        :map
+        (if (keyword? arg)
+          :keyword
+          (if (sequential? arg)
+            :sequential))))))
 
 (defmethod mapper :map [m & [ns]]
   (let [k (-> m keys first)
@@ -140,50 +81,56 @@
                                {:yritystieto
                                 {:Yritys/yht [:nimi :liikeJaYhteisotunnus
                                               {:postiosoitetieto {:postiosoite osoite}}
-                                              :sahkopostiosoite
                                               :puhelin
                                               :sahkopostiosoite]}}
                                :vainsahkoinenAsiointiKytkin]}}
                             {:sijaintitieto {:Sijainti/yht [{:osoite [:yksilointitieto :alkuHetki {:osoitenimi :teksti}]}
-                                                            {:piste {:Point :pos}}]}}
+                                                            {:piste/gml {:Point :pos}}]}}
                             :kohdekiinteisto
                             :maaraAla
-                            {:tilatieto {:Tila/yht [:pvm :kasittelija :hakemuksenTila]}}]}]}
+                            {:tilatieto {:Tila [:pvm :kasittelija :hakemuksenTila]}}]}]}
                         :toimituksenTila
+                        {:liitetieto {:Liite/yht [:kuvaus :linkkiliitteeseen :muokkausHetki :versionumero]}}
                         :uusiKytkin
                         :kuvaus]}})]}))
 
-(defmulti canon-data (fn [canon _]
-                       (if (sequential? canon)
-                         :sequential
-                         :map)))
+(defmulti ->xml-data
+  "Combines canonical presentation and the mapping into XML-compatible
+  tree structure (:tag :ns :attr and :child properties).
+  Note: This implementation differs from lupapalvelu.xml.emit by supporting
+  child elements where some siblings are repeated and some are not."
+  (fn [canon _ _]
+    (if (sequential? canon)
+      :sequential
+      :map)))
 
-(defmethod canon-data :sequential [xs mapping]
-  (filter identity (map #(canon-data % mapping) xs)))
+(defmethod ->xml-data :sequential [xs mapping ns]
+  (filter identity (map #(->xml-data % mapping ns) xs)))
 
-(defn good-content [content]
+(defn- good-content? [content]
   (if (nil? content)
     false
     (if (and (coll? content) (empty? content))
       false
       true)))
 
-(defmethod canon-data :map [m mapping]
+(defmethod ->xml-data :map [m mapping ns]
   (if (sequential? mapping)
-    (filter identity (map #(canon-data m %) mapping))
-    (let [{tag :tag attr :attr child :child} mapping
+    (filter identity (map #(->xml-data m % ns) mapping))
+    (let [{tag :tag attr :attr child :child new-ns :ns} mapping
+          ns (or new-ns ns)
           cc (tag m)
           content (if (and child cc)
-                    (canon-data cc child)
+                    (->xml-data cc child ns)
                     cc)]
-      (when (good-content content)
-        (xml/element tag attr content)))))
+      (when (good-content? content)
+        (xml/element (str (or ns "") tag) attr content)))))
 
 
 
 (defn save-application-as-krysp
-  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
-   3rd parameter (submitted-application) is not used on MM applications."
+  "Sends application to municipality backend. Returns a sequence of
+  attachment file IDs that ware sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments  (maankayton-muutos-canonical/maankayton-muutos-canonical application lang)
         attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
@@ -192,10 +139,10 @@
                     canonical-without-attachments
                     [:Maankaytonmuutos :maankayttomuutosTieto muutos :liitetieto ]
                     attachments-canonical)
-        _ (>pprint canonical-without-attachments)
+        _ (>pprint canonical)
         mapping (->mapping muutos)
         _ (>pprint mapping)
-        xml (canon-data canonical-without-attachments mapping)
+        xml (->xml-data canonical mapping nil)
         _ (>pprint xml)
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
     (writer/write-to-disk
