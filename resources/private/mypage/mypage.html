@@ -3,8 +3,7 @@
 <body>
   <section class="page container" id="mypage">
     <!-- TODO opening first accordion causes form to submit, don't know why -->
-    <form id="own-info-form" data-bind="submit: function() {}">
-      <div class="clear"></div>
+    <div id="own-info-form">
       <h1 data-bind="ltext: 'mypage.title'"></h1>
       <div data-bind="lhtml:'mypage.desc'" class="page-info"></div>
 
@@ -14,181 +13,175 @@
                                                               accordionContentTemplateData: $data}}"></div>
 
       <script type="text/x-jquery-tmpl" id="mypage-personal-info-template">
-        <div class="form-grid">
-<!--           <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.firstName'"
-              for="firstName" class="form-label"></label> <input
-              data-bind="textInput: firstName, attr: {placeholder: loc('userinfo.firstName')}"
-              id="firstName" type="text" class="form-input" maxlength="255"></input>
-          </div>
- -->
+        <form>
+          <div class="form-grid">
+            <div class="row">
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                                          params: {value: firstName,
+                                                   id: 'firstName',
+                                                   lLabel: 'userinfo.firstName',
+                                                   required: true}}"></div>
 
-          <div class="row">
-            <div class="col-1"
-                 data-bind="component: {name: 'text-field',
-                                        params: {value: firstName,
-                                                 id: 'firstName',
-                                                 lLabel: 'userinfo.firstName',
-                                                 required: true}}"></div>
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                                          params: {value: lastName,
+                                                   id: 'lastName',
+                                                   lLabel: 'userinfo.lastName',
+                                                   required: true}}"></div>
 
-            <div class="col-1"
-                 data-bind="component: {name: 'text-field',
-                                        params: {value: lastName,
-                                                 id: 'lastName',
-                                                 lLabel: 'userinfo.lastName',
-                                                 required: true}}"></div>
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                                          params: {value: phone,
+                                                   id: 'phone',
+                                                   lLabel: 'userinfo.phone'}}"></div>
+            </div>
 
-            <div class="col-1"
-                 data-bind="component: {name: 'text-field',
-                                        params: {value: phone,
-                                                 id: 'phone',
-                                                 lLabel: 'userinfo.phone'}}"></div>
-          </div>
+            <!-- ko if: showSimpleCompanyInfo -->
+            <div class="row">
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                                          params: {value: companyName,
+                                                   id: 'architect.company.name',
+                                                   lLabel: 'userinfo.architect.company.name'}}"></div>
 
-          <!-- ko if: showSimpleCompanyInfo -->
-          <div class="row">
-            <div class="col-1"
-                 data-bind="component: {name: 'text-field',
-                                        params: {value: companyName,
-                                                 id: 'architect.company.name',
-                                                 lLabel: 'userinfo.architect.company.name'}}"></div>
-
-            <div class="col-1"
-                 data-bind="component: {name: 'text-field',
-                                        params: {value: companyId,
-                                                 id: 'architect.company.id',
-                                                 lLabel: 'userinfo.architect.company.id',
-                                                 placeholder: '000009-1'}}"></div>
-          </div>
-          <!-- /ko -->
-
-          <div class="row">
-            <div class="col-1"
-                 data-bind="component: {name: 'text-field',
-                                        params: {value: street,
-                                                 id: 'stree',
-                                                 lLabel: 'userinfo.street',
-                                                 required: true}}"></div>
-
-            <div class="col-1"
-                 data-bind="component: {name: 'text-field',
-                                        params: {value: zip,
-                                                 id: 'zip',
-                                                 lLabel: 'userinfo.zip',
-                                                 required: true}}"></div>
-
-            <div class="col-1"
-                 data-bind="component: {name: 'text-field',
-                                        params: {value: city,
-                                                 id: 'city',
-                                                 lLabel: 'userinfo.city',
-                                                 required: true}}"></div>
-          </div>
-
-          <div class="row">
-            <div class="col-3"
-                data-bind="component: {name: 'checkbox-field',
-                                       params: {value: allowDirectMarketing,
-                                                id: 'allowDirectMarketing',
-                                                lLabel: 'userinfo.allowDirectMarketing'}}"></div>
-          </div>
-          <div class="row">
-            <div class="col-3"
-                 data-bind="component: {name: 'checkbox-field',
-                                        params: {value: architect,
-                                                 id: 'architect',
-                                                 lLabel: 'userinfo.architect'}}"></div>
-          </div>
-        </div>
-
-        <!-- ko if: architect -->
-          <div class="architect-info form-grid">
-
-            <h2 data-bind="ltext: 'architect.experience.title'"></h2>
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                                          params: {value: companyId,
+                                                   id: 'architect.company.id',
+                                                   lLabel: 'userinfo.architect.company.id',
+                                                   placeholder: '000009-1'}}"></div>
+            </div>
+            <!-- /ko -->
 
             <div class="row">
               <div class="col-1"
-                   data-bind="component: {name: 'select-field',
-                                          params: {value: degree,
-                                                   options: availableDegrees,
-                                                   optionsValue: 'id',
-                                                   optionsText: 'name',
-                                                   lOptionsCaption: 'userinfo.architect.degree.choose',
-                                                   id: 'architect-degree-select',
-                                                   lLabel: 'userinfo.architect.degree'}}"></div>
-
+                   data-bind="component: {name: 'text-field',
+                                          params: {value: street,
+                                                   id: 'stree',
+                                                   lLabel: 'userinfo.street',
+                                                   required: true}}"></div>
 
               <div class="col-1"
                    data-bind="component: {name: 'text-field',
-                                          params: {value: graduatingYear,
-                                                   id: 'architect.graduatingYear',
-                                                   lLabel: 'userinfo.architect.graduatingYear',
-                                                   maxLength: 4}}"></div>
+                                          params: {value: zip,
+                                                   id: 'zip',
+                                                   lLabel: 'userinfo.zip',
+                                                   required: true}}"></div>
 
               <div class="col-1"
                    data-bind="component: {name: 'text-field',
-                                          params: {value: fise,
-                                                   id: 'architect.fise',
-                                                   lLabel: 'userinfo.architect.fise'}}"></div>
+                                          params: {value: city,
+                                                   id: 'city',
+                                                   lLabel: 'userinfo.city',
+                                                   required: true}}"></div>
             </div>
 
             <div class="row">
-              <div class="col-4" data-bind="visible: lupapisteApp.models.globalAuthModel.ok('add-user-attachment-allowed')">
-                <div data-bind="visible: !hasAttachments(), ltext: 'userinfo.architect.attachments.no-attachments'"></div>
-                <table data-bind="visible: hasAttachments" class="architect-attachments">
-                  <thead>
-                    <tr>
-                      <th data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
-                      <th data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
-                    </tr>
-                  </thead>
-                  <tbody data-bind="foreach: attachments">
-                    <tr>
-                      <td data-bind="attr: {'data-test-id': $data['attachment-id']}">
-                        <div
-                          data-bind="text: loc(['attachmentType.osapuolet', $data['attachment-type']['type-id']])"
-                          data-test-id="attachment-type"></div>
-                        <div data-bind="text:  $data['file-name']"
-                          data-test-id="filename"></div>
-                      </td>
-                      <td>
-                        <a data-bind="ltext: 'userinfo.architect.attachments.load',
-                                      attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}"
-                           data-test-id="load" href="#" target="_blank"></a>
-                        <a data-bind="ltext: 'userinfo.architect.attachments.remove',
-                                      click: $parent.remove"
-                           data-test-id="remove" href="#"></a>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <button class="positive" data-bind="click: add" data-test-id="test-add-architect-attachment">
-                  <i class="lupicon-upload"></i>
-                  <span data-bind="ltext: 'userinfo.architect.attachments.add'"></span>
-                </button>
+              <div class="col-3"
+                  data-bind="component: {name: 'checkbox-field',
+                                         params: {value: allowDirectMarketing,
+                                                  id: 'allowDirectMarketing',
+                                                  lLabel: 'userinfo.allowDirectMarketing'}}"></div>
+            </div>
+            <div class="row">
+              <div class="col-3"
+                   data-bind="component: {name: 'checkbox-field',
+                                          params: {value: architect,
+                                                   id: 'architect',
+                                                   lLabel: 'userinfo.architect'}}"></div>
+            </div>
+          </div>
+
+          <!-- ko if: architect -->
+            <div class="architect-info form-grid">
+
+              <h2 data-bind="ltext: 'architect.experience.title'"></h2>
+
+              <div class="row">
+                <div class="col-1"
+                     data-bind="component: {name: 'select-field',
+                                            params: {value: degree,
+                                                     options: availableDegrees,
+                                                     optionsValue: 'id',
+                                                     optionsText: 'name',
+                                                     lOptionsCaption: 'userinfo.architect.degree.choose',
+                                                     id: 'architect-degree-select',
+                                                     lLabel: 'userinfo.architect.degree'}}"></div>
+
+
+                <div class="col-1"
+                     data-bind="component: {name: 'text-field',
+                                            params: {value: graduatingYear,
+                                                     id: 'architect.graduatingYear',
+                                                     lLabel: 'userinfo.architect.graduatingYear',
+                                                     maxLength: 4}}"></div>
+
+                <div class="col-1"
+                     data-bind="component: {name: 'text-field',
+                                            params: {value: fise,
+                                                     id: 'architect.fise',
+                                                     lLabel: 'userinfo.architect.fise'}}"></div>
+              </div>
+
+              <div class="row">
+                <div class="col-4" data-bind="visible: lupapisteApp.models.globalAuthModel.ok('add-user-attachment-allowed')">
+                  <div data-bind="visible: !hasAttachments(), ltext: 'userinfo.architect.attachments.no-attachments'"></div>
+                  <table data-bind="visible: hasAttachments" class="architect-attachments">
+                    <thead>
+                      <tr>
+                        <th data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
+                        <th data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
+                      </tr>
+                    </thead>
+                    <tbody data-bind="foreach: attachments">
+                      <tr>
+                        <td data-bind="attr: {'data-test-id': $data['attachment-id']}">
+                          <div
+                            data-bind="text: loc(['attachmentType.osapuolet', $data['attachment-type']['type-id']])"
+                            data-test-id="attachment-type"></div>
+                          <div data-bind="text:  $data['file-name']"
+                            data-test-id="filename"></div>
+                        </td>
+                        <td>
+                          <a data-bind="ltext: 'userinfo.architect.attachments.load',
+                                        attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}"
+                             data-test-id="load" href="#" target="_blank"></a>
+                          <a data-bind="ltext: 'userinfo.architect.attachments.remove',
+                                        click: $parent.remove"
+                             data-test-id="remove" href="#"></a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <button class="positive" data-bind="click: add" data-test-id="test-add-architect-attachment">
+                    <i class="lupicon-upload"></i>
+                    <span data-bind="ltext: 'userinfo.architect.attachments.add'"></span>
+                  </button>
+                </div>
               </div>
             </div>
+          <!-- /ko -->
+
+          <div class="button-group">
+            <button data-bind="click: save,
+                               disable: processing,
+                               enable: isValid,
+                               css: {waiting: pending}" class="positive"
+                    data-test-id="save-my-userinfo">
+                <i class="lupicon-save"></i>
+                <i class="wait spin lupicon-refresh"></i>
+                <span data-bind="ltext: 'save'"></span>
+            </button>
+
+            <p class="context-error"
+               data-bind="visible: error() != null, ltext: error">
+            </p>
           </div>
-        <!-- /ko -->
 
+        </form>
       </script>
-      <div class="button-group">
-        <button data-bind="click: save,
-                           disable: processing,
-                           enable: isValid,
-                           css: {waiting: pending}" class="positive"
-                data-test-id="save-my-userinfo">
-            <i class="lupicon-save"></i>
-            <i class="wait spin lupicon-refresh"></i>
-            <span data-bind="ltext: 'save'"></span>
-        </button>
-
-        <p class="context-error"
-           data-bind="visible: error() != null, ltext: error">
-        </p>
-      </div>
-
-      </form>
+    </div>
 
     <!-- TODO: componentize mypage -->
     <div id="pw-form">
@@ -289,7 +282,8 @@
 
     <div id="mypage-register-company">
       <!-- ko ifnot: companyShow -->
-      <div data-bind="component: {name: 'accordion', params: {ltitle: 'register.company.header',
+      <div data-test-id="mypage-register-company-accordion"
+           data-bind="component: {name: 'accordion', params: {ltitle: 'register.company.header',
                                                               accordionContentTemplate: 'mypage-register-company-template',
                                                               accordionContentTemplateData: $data}}"></div>
       <!-- /ko -->
