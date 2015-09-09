@@ -188,20 +188,22 @@
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
 
       var devMode = LUPAPISTE.config.mode === "dev";
+      var isAuthority = lupapisteApp.models.currentUser.isAuthority();
+
       docgen.displayDocuments("#applicationDocgen",
                               app,
                               applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
                               authorizationModel,
-                              {dataTestSpecifiers: devMode, accordionCollapsed: true});
+                              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
       docgen.displayDocuments("#partiesDocgen",
                               app,
                               sortedPartyDocs,
-                              authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: true});
+                              authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
       docgen.displayDocuments("#applicationAndPartiesDocgen",
                               app,
                               applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
                               authorizationModel,
-                              {dataTestSpecifiers: false, accordionCollapsed: true});
+                              {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
 
       // Indicators
       function sumDocIndicators(sum, doc) {
