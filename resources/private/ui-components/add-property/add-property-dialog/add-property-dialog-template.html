@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="add-property-dialog-template">
+      <div class="content">
+        <div class="map-container">
+          <div id="add-location-map" class="map map-large" style="width: 430px; height: 360px;"></div>
+        </div>
+
+        <div class="with-map-top">
+          <div><span data-bind="ltext: 'newRequest.propertyId'"></span></div>
+          <div><span data-bind="text: propertyId"></span></div>
+        </div>
+      </div>
+
+      <div data-bind="component: {name: 'submit-button-group',
+                                  params: { submit: submit,
+                                            lSubmitTitle: 'application.dialog.add-property.submit' }}"></div>
+    </script>
+  </section>
+</body>
+</html>
