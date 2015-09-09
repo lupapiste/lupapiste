@@ -8,6 +8,6 @@ LUPAPISTE.AddPropertyModel = function(params) {
   self.addProperty = function() {
     hub.send("show-dialog", {ltitle: "application.dialog.add-property.title",
                              size: "medium",
-                             component: "change-location-dialog"});
+                             component: "add-property-dialog"});
   };
 };
