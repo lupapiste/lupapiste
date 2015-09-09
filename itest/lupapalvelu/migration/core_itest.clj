@@ -14,13 +14,13 @@
 (defn cleanup! []
   (reset! migrations {})
   (reset! migration-order 0)
-  (mongo/remove-many :migrations {}))
+  (mongo/with-db db-name 
+    (mongo/remove-many :migrations {})))
 
 (background (before :facts (cleanup!)))
 
 (def oh-noes (fn [s] (re-find #"java.lang.RuntimeException: oh noes!" s)))
 (defn starts-with [prefix] (fn [s] (ss/starts-with s prefix)))
-
 
 (facts "define migration"
   (mongo/with-db db-name
@@ -110,4 +110,4 @@
     (execute-migration! "a") => (contains {:name "a" :ok false :error "migration execution did not change result of apply-when"})))
 
 ; leave everything is pristine condition
-(mongo/with-db db-name (cleanup!))
+(cleanup!)

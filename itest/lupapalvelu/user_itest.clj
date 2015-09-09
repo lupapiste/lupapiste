@@ -38,27 +38,30 @@
 ;; ==============================================================================
 ;;
 
+
 (facts login-trottle
-  (against-background 
-    [(sade.env/value :login :allowed-failures) => 2
-     (sade.env/value :login :throttle-expires) => 1] 
-    (fact "First failure doesn't lock username"
-      (user/throttle-login? "foo") => false
-      (user/login-failed "foo") => nil
-      (user/throttle-login? "foo") => false)
-    (fact "Second failure locks username"
-      (user/login-failed "foo") => nil
-      (user/throttle-login? "foo") => true)
-    (fact "Lock expires after timeout"
-      (Thread/sleep 1001)
-      (user/throttle-login? "foo") => false)))
+  (mongo/with-db db-name
+    (against-background 
+     [(sade.env/value :login :allowed-failures) => 2
+      (sade.env/value :login :throttle-expires) => 1] 
+     (fact "First failure doesn't lock username"
+       (user/throttle-login? "foo") => false
+       (user/login-failed "foo") => nil
+       (user/throttle-login? "foo") => false)
+     (fact "Second failure locks username"
+       (user/login-failed "foo") => nil
+       (user/throttle-login? "foo") => true)
+     (fact "Lock expires after timeout"
+       (Thread/sleep 1001)
+       (user/throttle-login? "foo") => false))))
 
 (facts clear-login-trottle
-  (against-background 
-    [(sade.env/value :login :allowed-failures) => 1
-     (sade.env/value :login :throttle-expires) => 10] 
-    (fact (user/throttle-login? "bar") => false
-          (user/login-failed "bar") => nil
-          (user/throttle-login? "bar") => true
-          (user/clear-logins "bar") => true
-          (user/throttle-login? "bar") => false)))
+  (mongo/with-db db-name
+    (against-background 
+     [(sade.env/value :login :allowed-failures) => 1
+      (sade.env/value :login :throttle-expires) => 10] 
+     (fact (user/throttle-login? "bar") => false
+           (user/login-failed "bar") => nil
+           (user/throttle-login? "bar") => true
+           (user/clear-logins "bar") => true
+           (user/throttle-login? "bar") => false))))
