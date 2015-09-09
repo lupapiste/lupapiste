@@ -11,22 +11,22 @@
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
 
-(def local-db-name (str "test_autom_check_verdicts_itest_" (now)))
+(def db-name (str "test_autom-check-verdicts-itest_" (now)))
 
 (mongo/connect!)
-(mongo/with-db local-db-name (fixture/apply-fixture "minimal"))
-
-(mongo/with-db local-db-name 
+(mongo/with-db db-name 
+  (fixture/apply-fixture "minimal")
   (mongo/remove-many :organizations {})
   (mongo/remove-many :applications {}))
 
-(mongo/with-db local-db-name 
+(mongo/with-db db-name 
   (let [krysp-url (str (server-address) "/dev/krysp")
         organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)]
     (dorun (map (partial mongo/insert :organizations) organizations))))
 
-(mongo/with-db local-db-name 
-  (facts "Automatic checking for verdicts"
+
+(facts "Automatic checking for verdicts"
+  (mongo/with-db db-name 
     (let [application-submitted         (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 17")
           application-id-submitted      (:id application-submitted)
           application-sent              (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 18")
