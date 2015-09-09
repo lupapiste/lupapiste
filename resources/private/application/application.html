@@ -415,9 +415,7 @@
                         </div>
 
                         <!-- ko if: $root.application.permitType() == 'KT' && $parent.authorization.ok('create-doc') -->
-                        <div data-bind="component: {name: 'add-property',
-                                                    params: {changeLoc: $root.changeLocationModel,
-                                                             application: $root.application}}"></div>
+                        <div data-bind="component: 'add-property'"></div>
                         <!-- /ko -->
 
                         <div class="process-nav">

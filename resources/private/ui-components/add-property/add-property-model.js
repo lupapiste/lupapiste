@@ -1,9 +1,6 @@
-LUPAPISTE.AddPropertyModel = function(params) {
+LUPAPISTE.AddPropertyModel = function() {
   "use strict";
   var self = this;
-
-  var changeLoc = params.changeLoc;
-  var app = params.application;
 
   self.addProperty = function() {
     hub.send("show-dialog", {ltitle: "application.dialog.add-property.title",
