@@ -999,10 +999,7 @@ $col: 25%;
   width: $size * $col;
   min-width: $size * $col;
   max-width: $size * $col;
-  padding-right: 20px;
-  &:last-child {
-    padding-right: 0;
-  }
+  padding: 0 20px;
 
   label.required:after {
     content: "*";
@@ -1024,7 +1021,6 @@ $col: 25%;
   overflow-y: hidden;
   width: 100%;
   border-bottom: 1px solid $grid-border-color;
-  padding: 20px;
 
   &:last-child {
     border-bottom: none;
@@ -1109,12 +1105,8 @@ $col: 25%;
 
   .row {
     @include form-grid-clear;
-    margin-bottom: 20px;
+    margin: 20px 0;
     overflow-y: hidden;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
   }
 
   .info-message {
