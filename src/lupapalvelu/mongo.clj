@@ -274,42 +274,6 @@
 ;; Bootstrappin'
 ;;
 
-;; From monger.core, pimped with SSL option
-(defn mongo-options
-  [& { :keys [connections-per-host threads-allowed-to-block-for-connection-multiplier
-              max-wait-time connect-timeout socket-timeout socket-keep-alive auto-connect-retry max-auto-connect-retry-time ssl
-              safe w w-timeout fsync j] :or [auto-connect-retry true] }]
-  (let [mob (MongoClientOptions$Builder.)]
-    (when connections-per-host
-      (.connectionsPerHost mob connections-per-host))
-    (when threads-allowed-to-block-for-connection-multiplier
-      (.threadsAllowedToBlockForConnectionMultiplier mob threads-allowed-to-block-for-connection-multiplier))
-    (when max-wait-time
-      (.maxWaitTime mob max-wait-time))
-    (when connect-timeout
-      (.connectTimeout mob connect-timeout))
-    (when socket-timeout
-      (.socketTimeout mob socket-timeout))
-    (when socket-keep-alive
-      (.socketKeepAlive mob socket-keep-alive))
-    (when auto-connect-retry
-      (.autoConnectRetry mob auto-connect-retry))
-    (when max-auto-connect-retry-time
-      (.maxAutoConnectRetryTime mob max-auto-connect-retry-time))
-    (when ssl
-      (.socketFactory mob (SSLSocketFactory/getDefault)))
-    (when safe
-      (.safe mob safe))
-    (when w
-      (.w mob w))
-    (when w-timeout
-      (.wtimeout mob w-timeout))
-    (when j
-      (.j mob j))
-    (when fsync
-      (.fsync mob fsync))
-    (.build mob)))
-
 (def server-list
   (let [conf    (env/value :mongodb :servers)
         servers (if (map? conf) (vals conf) conf)]
@@ -334,18 +298,19 @@
     (let [servers (if (string? servers)
                     (let [[host port] (clojure.string/split servers #":")]
                       (m/server-address host (Long/parseLong port)))
-                    servers)]
+                    servers)
+          options (m/mongo-options {:write-concern WriteConcern/JOURNALED})]
       (if @connection
        (debug "Already connected!")
        (do
-         (debugf "Connecting to %s MongoDB (%s) %s"  env/target-env (s/join (map str servers)) (if ssl "using ssl" "without encryption"))
+         (debugf "Connecting to %s MongoDB (%s) database '%s' as user '%s'"  env/target-env (s/join (map str servers)) dbname username)
          (let [conn (if (and username password)
-                      (m/connect servers (mongo-options :ssl ssl) (mcred/create username dbname password))
-                      (m/connect servers (mongo-options :ssl ssl)))
+                      (m/connect servers options (mcred/create username dbname password))
+                      (m/connect servers options))
                db   (m/get-db conn dbname)]
            (reset! connection conn)
            (swap! dbs assoc dbname db))
-         (m/set-default-write-concern! WriteConcern/JOURNALED))))))
+         )))))
 
 (defn disconnect! []
   (debug "Disconnecting")
