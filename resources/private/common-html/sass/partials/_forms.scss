@@ -999,7 +999,11 @@ $col: 25%;
   width: $size * $col;
   min-width: $size * $col;
   max-width: $size * $col;
-  padding-left: 20px;
+  padding-right: 20px;
+  &:last-child {
+    padding-right: 0;
+  }
+
   label.required:after {
     content: "*";
     color: $negative;
@@ -1020,6 +1024,7 @@ $col: 25%;
   overflow-y: hidden;
   width: 100%;
   border-bottom: 1px solid $grid-border-color;
+  padding: 20px;
 
   &:last-child {
     border-bottom: none;
@@ -1081,7 +1086,7 @@ $col: 25%;
 
   .select-arrow {
     position: absolute;
-    right: 1px;
+    right: 21px;
     bottom: 1px;
     color: $orange-dark;
     pointer-events:none;
@@ -1108,7 +1113,7 @@ $col: 25%;
     overflow-y: hidden;
 
     &:last-child {
-      margin-bottom: $marginM;
+      margin-bottom: 0;
     }
   }
 
