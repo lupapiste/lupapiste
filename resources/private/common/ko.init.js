@@ -65,7 +65,6 @@
 
   ko.validation.rules.match = {
     validator: function(value1, value2) {
-      console.log("match", value1, value2);
       return value1 === value2;
     },
     message: ""
