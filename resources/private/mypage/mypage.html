@@ -247,7 +247,8 @@
 
     <div id="mypage-company">
       <!-- ko if: companyShow -->
-      <div data-bind="component: {name: 'accordion', params: {ltitle: 'company.title',
+      <div data-test-id="mypage-company-accordion"
+           data-bind="component: {name: 'accordion', params: {ltitle: 'company.title',
                                                               accordionContentTemplate: 'mypage-company-template',
                                                               accordionContentTemplateData: $data}}"></div>
       <!-- /ko -->

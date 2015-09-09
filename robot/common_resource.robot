@@ -878,15 +878,17 @@ Fill in new password
 Open company user listing
   Click Element  user-name
   Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
+  Open accordion by test id  mypage-company-accordion
   Element should be visible  //div[@data-test-id='my-company']
-  Click button  Hallinnoi yrityksen käyttäjiä
+  Click by test id  company-edit-users
   Wait until  Element should be visible  company
 
 Open company details
   Click Element  user-name
   Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
+  Open accordion by test id  mypage-company-accordion
   Element should be visible  //div[@data-test-id='my-company']
-  Click button  Muokkaa yrityksen tietoja
+  Click by test id  company-edit-info
   Wait until  Element should be visible  company
 
 
