@@ -28,7 +28,10 @@
 
 (defn ->model-updates
   "Creates model-updates from ui-format."
-  [updates] (for [[k v] updates] [(-> k (s/split #"\.") (->> (map keyword)) vec) v]))
+  [updates]
+  (for [[k v] updates]
+    (let [keys (mapv keyword (s/split k #"\."))]
+      [keys v])))
 
 (defn ->mongo-updates
   "Creates full paths to document update values to be $set.
@@ -140,8 +143,8 @@
     (when-not (:repeating (:info schema)) (fail! :illegal-schema))
     (let [document (model/new-document schema created)]
       (update-application command
-        {$push {:documents document}
-         $set {:modified created}})
+                          {$push {:documents document}
+                           $set {:modified created}})
       document)))
 
 (defn- update-key-in-schema? [schema [update-key _]]
