@@ -2,8 +2,8 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
-            [monger.collection :as mc]
             [sade.core :refer :all]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [defcommand]]
             [lupapalvelu.perf-mon :as perf])
   (:import (com.mongodb WriteConcern)))
@@ -30,9 +30,9 @@
    :user-roles #{:anonymous}}
   [command]
   (info "browser-timing called from" pathname)
-  (mc/insert "perf-mon-timing"
-             {:ts     (java.util.Date.)
-              :ua     (get-in command [:web :user-agent])
-              :timing timing}
-             WriteConcern/NONE)
+  (mongo/insert "perf-mon-timing"
+                {:ts     (java.util.Date.)
+                 :ua     (get-in command [:web :user-agent])
+                 :timing timing}
+                WriteConcern/UNACKNOWLEDGED)
   (ok))

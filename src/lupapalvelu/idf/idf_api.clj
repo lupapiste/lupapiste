@@ -83,6 +83,7 @@
   (let [user (or
                (user/get-user-by-email email)
                (create-user! first-name last-name email phone marketing architect))]
+    (debug email app id)
     (link-account! email app id ts true)
     (:id user)))
 

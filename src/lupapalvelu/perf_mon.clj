@@ -2,9 +2,8 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [noir.core :refer [defpage]]
             [monger.operators :refer :all]
+            [lupapalvelu.mongo :as mongo]
             [clojure.string :refer [join]]
-            [monger.collection :as mc]
-
             [noir.server :as server]
             [sade.env :as env]
             [sade.core :refer :all]))
@@ -97,7 +96,7 @@
 
 (defn get-data [start end]
   (map (fn [row] (dissoc row :_id))
-       (mc/find-maps "perf-mon" {$and [{:ts {$gte start}}
+       (mongo/find-maps "perf-mon" {$and [{:ts {$gte start}}
                                        {:ts {$lte end}}]})))
 
 (defn to-long [v]
