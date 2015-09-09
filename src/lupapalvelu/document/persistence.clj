@@ -169,7 +169,7 @@
                             ; Path should exist in schema!
                             (filter (partial update-key-in-schema? (:body schema))))]
       (when-not schema (fail! :error.schema-not-found))
-      (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
+      (debugf "merging user %s with best effort into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
       (persist-model-updates application "documents" document updates timestamp))))
 
 (defn do-set-user-to-document [application document-id user-id path timestamp]
@@ -197,7 +197,7 @@
       (when-not company (fail! :error.company-not-found))
       (when-not (and (domain/has-auth? application company-id) (domain/no-pending-invites? application company-id))
         (fail! :error.application-does-not-have-given-auth))
-      (debugf "merging company %s into %s %s" model (get-in document [:schema-info :name]) (:id document))
+      (debugf "merging company %s into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
       (persist-model-updates application "documents" document updates timestamp))))
 
 

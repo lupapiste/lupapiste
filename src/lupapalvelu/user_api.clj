@@ -208,12 +208,12 @@
       (fail :error.user-not-found))))
 
 (defcommand update-default-application-filter
-  {:parameters [filter]
+  {:parameters [filter sort]
    :user-roles #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:filter])]
+   :input-validators [(partial action/non-blank-parameters [:filter]) (partial action/non-blank-parameters [:sort])]
    :description "Adds/Updates user specific filters for the application search"}
   [{{id :id} :user}]
-  (mongo/update-by-id :users id {$set {:applicationFilters [{:filter filter}]}})
+  (mongo/update-by-id :users id {$set {:applicationFilters [{:filter filter :sort sort}]}})
   (ok))
 
 ;;

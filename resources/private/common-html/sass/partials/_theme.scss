@@ -83,6 +83,19 @@ $gray238: make-gray( 238 );
 $gray246: make-gray( 246 );
 $gray255: make-gray( 255 );
 
+
+$grid-border-color: $gray221;
+
+$checkbox-color:          $gray187;
+$checkbox-selected-color: $orange-light;
+$checkbox-border-color:   $gray221;
+
+$input-color:       $gray51;
+$input-focus-color: $gray51;
+
+$input-border-color: $gray187;
+$input-focus-border-color: $orange-light;
+
 $gray-link:   $gray85;
 $gray-hover:  $gray119;
 $gray-active: $gray153;

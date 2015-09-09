@@ -74,6 +74,8 @@
   (server/add-middleware web/anti-csrf)
   (server/add-middleware web/wrap-authentication)
   (server/add-middleware web/session-timeout)
+  (env/in-dev
+   (server/add-middleware mongo/db-selection-middleware))
 
   (when-let [gemsdir (io/resource "gems")]
     (scss/initialize :gempath (.getPath gemsdir)))
