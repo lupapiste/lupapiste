@@ -20,7 +20,7 @@ There is no company info
 Mikko changes his name and experience
   Change Textfield Value  firstName  Mikko  Mika
   Change Textfield Value  lastName  Intonen  Intola
-  Select From List  xpath=//select[@data-test-id='architect-degree-select']  Arkkitehti
+  Select From List  architect-degree-select  Arkkitehti
   Change Textfield Value  architect.graduatingYear  2000  2001
   Change Textfield Value  architect.fise  f  fise
   Checkbox Should Not Be Selected  allowDirectMarketing
@@ -35,14 +35,14 @@ Name and experience should have changed in Swedish page too
   Wait for Page to Load  Mika  Intola
   User should be logged in  Mika Intola
   Checkbox Should Be Selected  allowDirectMarketing
-  Wait until  List Selection Should Be  architect.degree  Arkitekt
+  Wait until  List Selection Should Be  architect-degree-select  Arkitekt
   Textfield Value Should Be  architect.graduatingYear  2001
   Textfield Value Should Be  architect.fise  fise
 
 Mika changes the name and experience back
   Change Textfield Value  firstName  Mika  Mikko
   Change Textfield Value  lastName  Intola  Intonen
-  Select From List  xpath=//select[@data-test-id='architect-degree-select']  Timmerman
+  Select From List  architect-degree-select  Timmerman
   Change Textfield Value  architect.graduatingYear  2001  2000
   Textfield Value Should Be  architect.graduatingYear  2000
   Change Textfield Value  architect.fise  fise  f
@@ -54,7 +54,7 @@ Name and experience should have changed in Finnish page too
   Wait for Page to Load  Mikko  Intonen
   User should be logged in  Mikko Intonen
   Checkbox Should Be Selected  allowDirectMarketing
-  Wait until  List Selection Should Be  architect.degree  Kirvesmies
+  Wait until  List Selection Should Be  architect-degree-select  Kirvesmies
   Wait until  Textfield Value Should Be  architect.graduatingYear  2000
   Textfield Value Should Be  architect.fise  f
 
@@ -76,4 +76,3 @@ Change Textfield Value
   Wait Until  Textfield Value Should Be  ${field}  ${old}
   Input text with jQuery  input[id="${field}"]  ${new}
   Textfield Value Should Be  ${field}  ${new}
-  Focus  street

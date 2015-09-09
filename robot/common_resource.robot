@@ -166,7 +166,7 @@ Open accordions
 
 Open accordion by test id
   [Arguments]  ${testId}
-  Execute Javascript  $("div[data-test-id='${testId}'] button.accordion-toggle").click();
+  Execute Javascript  $("div[data-test-id='${testId}'] button.accordion-toggle:not(.toggled)").click();
 
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
