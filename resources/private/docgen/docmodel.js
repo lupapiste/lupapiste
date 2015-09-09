@@ -1979,6 +1979,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var accordionCollapsed = (options && options.accordionCollapsed) ? true : false;
 
+    sticky.toggleClass( "toggled", !accordionCollapsed);
+
     section.className = "accordion is-status";
     section.setAttribute("data-doc-type", self.schemaName);
     section.setAttribute( "data-section-id", self.sectionId );
