@@ -53,7 +53,7 @@
      :handler  "321"
      :tags ["test1" "test2"]}
     {:role "authority"}) => (just {"$and" (just [{:auth.id "123"}
-                                                 {:infoRequest false :state {"$nin" ["draft" "canceled"]}}
+                                                 {:state {"$nin" ["draft" "canceled"]}}
                                                  {"$or" [{"auth.id" "321"} {"authority.id" "321"}]}
                                                  {:tags {"$in" ["test1" "test2"]}}])}))
 

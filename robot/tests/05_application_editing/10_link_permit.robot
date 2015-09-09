@@ -12,7 +12,7 @@ Sonja prepares the application that will later act as link permit
   Set Suite Variable  ${appname}  Link_permit_app_${secs}
   Set Suite Variable  ${baseApp}  App_to_have_link_permit_${secs}
   Set Suite Variable  ${propertyid}  753-423-5-10
-  Create application the fast way  ${appname}  ${propertyid}  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  ${propertyid}  kerrostalo-rivitalo  open
   Submit application
   Click enabled by test id  approve-application
 
@@ -20,7 +20,7 @@ Sonja prepares the application that will later act as link permit
   Set Suite Variable  ${linkPermitAppId}
 
 Sonja prepares the application to whom the link permit will be added
-  Create application the fast way  ${baseApp}  ${propertyid}  kerrostalo-rivitalo
+  Create application the fast way  ${baseApp}  ${propertyid}  kerrostalo-rivitalo  open
 
 Sonja adds a link permit (lupapistetunnus type) via the link permit dialog
   Open link permit dialog
