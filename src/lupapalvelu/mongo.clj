@@ -155,7 +155,7 @@
    (mc/distinct (get-db) coll key (remove-null-chars query))))
 
 (defmacro with-collection
-  "Simple wrapper for monger.query/with-collection which gets db and passes it to monger with args." 
+  "Simple wrapper for monger.query/with-collection which gets db and passes it to monger with args."
   [collection & body]
   `(query/with-collection (get-db) ~collection ~@body))
 
@@ -338,7 +338,7 @@
       (if @connection
        (debug "Already connected!")
        (do
-         (debug "Connecting to MongoDB:" (s/join (map str servers)) (if ssl "using ssl" "without encryption"))
+         (debugf "Connecting to %s MongoDB (%s) %s"  env/target-env (s/join (map str servers)) (if ssl "using ssl" "without encryption"))
          (let [conn (if (and username password)
                       (m/connect servers (mongo-options :ssl ssl) (mcred/create username dbname password))
                       (m/connect servers (mongo-options :ssl ssl)))
