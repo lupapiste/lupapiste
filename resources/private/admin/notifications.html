@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="notifications">
+      <div class="container">
+        <h2>Käyttäjä ilmoitukset</h2>
+
+        <div>
+          <input type="checkbox" id="applicant-notices" data-bind="checked: applicants"></input>
+          <label for="applicant-notices">Hakijat</label>
+        </div>
+
+        <div>
+          <input type="checkbox" id="authority-notices" data-bind="checked: authorities"></input>
+          <label for="authority-notices">Viranomaiset</label>
+        </div>
+
+        <div>
+          <textarea rows="4" cols="50" data-bind="value: message"></textarea>
+        </div>
+
+        <button class="btn positive" data-bind="click: updateNotifications">Lisää ilmoitus käyttäjille</button>
+      </div>
+    </section>
+  </body>
+</html>
