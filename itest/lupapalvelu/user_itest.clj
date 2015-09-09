@@ -3,7 +3,10 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.fixture.core :as fixture]
+            [sade.core :refer [now]]
             [midje.sweet :refer :all]))
+
+(def db-name (str "test_user-itest_" (now)))
 
 ;;
 ;; ==============================================================================
@@ -11,16 +14,23 @@
 ;; ==============================================================================
 ;;
 
+
 (facts change-password
-  (mongo/connect!) ; TODO: to test database
-  (fixture/apply-fixture "minimal")
+  (mongo/connect!)
+  (mongo/with-db db-name (fixture/apply-fixture "minimal"))
 
-  (fact (user/change-password "veikko.viranomainen@tampere.fi" "passu") => nil
-     (provided (security/get-hash "passu" anything) => "hash"))
+  (fact
+      (mongo/with-db db-name
+        (user/change-password "veikko.viranomainen@tampere.fi" "passu") => nil
+        (provided (security/get-hash "passu" anything) => "hash")))
 
-  (fact (-> (user/find-user {:email "veikko.viranomainen@tampere.fi"}) :private :password) => "hash")
+  (fact
+      (mongo/with-db db-name
+        (-> (user/find-user {:email "veikko.viranomainen@tampere.fi"}) :private :password) => "hash"))
 
-  (fact (user/change-password "does.not@exist.at.all" "anything") => (throws Exception #"unknown-user")))
+  (fact 
+      (mongo/with-db db-name
+        (user/change-password "does.not@exist.at.all" "anything") => (throws Exception #"unknown-user"))))
 
 ;;
 ;; ==============================================================================
