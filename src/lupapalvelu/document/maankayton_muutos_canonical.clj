@@ -41,11 +41,11 @@
   [{company :yritys}]
   (let [{contact :yhteystiedot personal :henkilotiedot} (:yhteyshenkilo company)]
     (merge (entry :turvakieltoKytkin personal :turvakieltokytkin))
-    {:Yritys (merge (entry :yritysNimi company :nimi)
-                   (entry :liikeJaYhteisoTunnus company :liikeJaYhteisotunnus )
-                   {:postiosoitetieto (->postiosoite-type (:osoite company))}
-                   (entry :puhelin contact)
-                   (entry :email contact :sahkopostiosoite))}))
+    {:yritystieto {:Yritys (merge (entry :yritysNimi company :nimi)
+                                  (entry :liikeJaYhteisoTunnus company :liikeJaYhteisotunnus )
+                                  {:postiosoitetieto (->postiosoite-type (:osoite company))}
+                                  (entry :puhelin contact)
+                                  (entry :email contact :sahkopostiosoite))}}))
 
 (defn process-party [lang {{role :subtype} :schema-info data :data}]
   {:osapuolitieto {:Osapuoli (merge {:roolikoodi (str/capitalize role)
@@ -67,7 +67,8 @@
 
 (defn toimituksen-tila [app]
   (let [state (-> app :state keyword)
-        state-name (state {:sent "Hakemus"})]
+        state-name (state {:sent "Hakemus"
+                           :submitted "Hakemus"})]
     ;; TODO: add more states.
     (or state-name "Hakemus")
     ))
@@ -89,7 +90,7 @@
         {:Hakemus (concat parties [{:sijaintitieto (canonical-common/get-sijaintitieto application)}
                                    {:kohdekiinteisto (:propertyId application)}
                                    {:maaraAla (:maaraalaTunnus property)}
-                                   {:tilatieto (application-state app)}])}}
-       :toimituksenTila (toimituksen-tila app)
-       :uusiKytkin (= op-age "uusi")
-       :kuvaus op-desc}}}))
+                                   {:tilatieto (application-state app)}])}
+        :toimituksenTila (toimituksen-tila app)
+        :uusiKytkin (= op-age "uusi")
+        :kuvaus op-desc}}}}))

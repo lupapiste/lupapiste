@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.krysp.maankayton-muutos-mapping
-  (:require [clojure.string :as str]
+  (:require [clojure.data.xml :as xml]
+            [clojure.string :as str]
             [clojure.walk :as walk]
             [lupapalvelu.document.maankayton-muutos-canonical :as maankayton-muutos-canonical]
             [lupapalvelu.permit :as permit]
@@ -104,7 +105,7 @@
         [tag ns] (taggy k ns)
         v (k m)]
     ;; Mapping sanity check
-    (assert (= (count m) 1))
+    (assert (= (count m) 1) k)
     (assoc tag :child (make-seq (mapper v ns)))))
 
 (defmethod mapper :keyword [kw & [ns]]
@@ -126,28 +127,28 @@
                                                   :kielitieto]}}
                         {:hakemustieto
                          [{:Hakemus
-                           {:osapuolitieto
-                            {:Osapuoli
-                             [:roolikoodi :turvakieltokytkin :asioimiskieli
-                              {:henkilotieto
-                               {:Henkilo/yht [{:nimi [:etunimi :sukunimi]}
-                                              {:osoite osoite}
+                           [{:osapuolitieto
+                             {:Osapuoli
+                              [:roolikoodi :turvakieltokytkin :asioimiskieli
+                               {:henkilotieto
+                                {:Henkilo/yht [{:nimi [:etunimi :sukunimi]}
+                                               {:osoite osoite}
+                                               :sahkopostiosoite
+                                               :faksinumero
+                                               :puhelin
+                                               :henkilotunnus]}}
+                               {:yritystieto
+                                {:Yritys/yht [:nimi :liikeJaYhteisotunnus
+                                              {:postiosoitetieto {:postiosoite osoite}}
                                               :sahkopostiosoite
-                                              :faksinumero
                                               :puhelin
-                                              :henkilotunnus]}}
-                              {:yritystieto
-                               {:Yritys/yht [:nimi :liikeJaYhteisotunnus
-                                             {:postiosoitetieto {:postiosoite osoite}}
-                                             :sahkopostiosoite
-                                             :puhelin
-                                             :sahkopostiosoite]}}
-                              :vainsahkoinenAsiointiKytkin]}}}
-                          {:sijaintitieto {:Sijainti/yht [{:osoite [:yksilointitieto :alkuHetki {:osoitenimi :teksti}]}
-                                                          {:piste {:Point :pos}}]}}
-                          :kohdekiinteisto
-                          :maaraAla
-                          {:tilatieto {:Tila/yht [:pvm :kasittelija :hakemuksenTila]}}]}
+                                              :sahkopostiosoite]}}
+                               :vainsahkoinenAsiointiKytkin]}}
+                            {:sijaintitieto {:Sijainti/yht [{:osoite [:yksilointitieto :alkuHetki {:osoitenimi :teksti}]}
+                                                            {:piste {:Point :pos}}]}}
+                            :kohdekiinteisto
+                            :maaraAla
+                            {:tilatieto {:Tila/yht [:pvm :kasittelija :hakemuksenTila]}}]}]}
                         :toimituksenTila
                         :uusiKytkin
                         :kuvaus]}})]}))
@@ -157,12 +158,27 @@
                          :sequential
                          :map)))
 
-(defmethod canon-data :sequential [canon tag]
-  (filter #(= (tag ()))))
+(defmethod canon-data :sequential [xs mapping]
+  (filter identity (map #(canon-data % mapping) xs)))
 
+(defn good-content [content]
+  (if (nil? content)
+    false
+    (if (and (coll? content) (empty? content))
+      false
+      true)))
 
-(defn ->xml [canon {tag :tag attr :attr child :child}]
-  (let [cc (canon-content canon tag)]))
+(defmethod canon-data :map [m mapping]
+  (if (sequential? mapping)
+    (filter identity (map #(canon-data m %) mapping))
+    (let [{tag :tag attr :attr child :child} mapping
+          cc (tag m)
+          content (if (and child cc)
+                    (canon-data cc child)
+                    cc)]
+      (when (good-content content)
+        (xml/element tag attr content)))))
+
 
 
 (defn save-application-as-krysp
@@ -176,10 +192,10 @@
                     canonical-without-attachments
                     [:Maankaytonmuutos :maankayttomuutosTieto muutos :liitetieto ]
                     attachments-canonical)
-        _ (>pprint canonical)
+        _ (>pprint canonical-without-attachments)
         mapping (->mapping muutos)
         _ (>pprint mapping)
-        xml (element-to-xml canonical mapping)
+        xml (canon-data canonical-without-attachments mapping)
         _ (>pprint xml)
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
     (writer/write-to-disk
