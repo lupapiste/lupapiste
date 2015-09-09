@@ -4414,34 +4414,46 @@ div.alleYli-radioGroup {
   height: 40px;
 }
 /* line 1141, ../sass/partials/_forms.scss */
-.form-grid .poor.info-message,
-.form-grid .low.info-message {
+.form-grid .poor.info-message {
   background-color: #df3215;
 }
-/* line 1146, ../sass/partials/_forms.scss */
-.form-grid .average.info-message {
-  background-color: #f39129;
+/* line 1145, ../sass/partials/_forms.scss */
+.form-grid .low.info-message {
+  background-color: #e7541d;
 }
-/* line 1150, ../sass/partials/_forms.scss */
-.form-grid .good.info-message,
+/* line 1149, ../sass/partials/_forms.scss */
+.form-grid .average.info-message {
+  background-color: #f7ac2e;
+}
+/* line 1153, ../sass/partials/_forms.scss */
+.form-grid .good.info-message {
+  background-color: #61b72f;
+}
+/* line 1157, ../sass/partials/_forms.scss */
 .form-grid .excellent.info-message {
   background-color: #2ca92c;
 }
-/* line 1155, ../sass/partials/_forms.scss */
-.form-grid [type=password].poor,
-.form-grid [type=password].low {
+/* line 1161, ../sass/partials/_forms.scss */
+.form-grid [type=password].poor {
   border-color: #df3215;
 }
-/* line 1160, ../sass/partials/_forms.scss */
-.form-grid [type=password].average {
-  border-color: #f39129;
+/* line 1165, ../sass/partials/_forms.scss */
+.form-grid [type=password].low {
+  border-color: #e7541d;
 }
-/* line 1164, ../sass/partials/_forms.scss */
-.form-grid [type=password].good,
+/* line 1169, ../sass/partials/_forms.scss */
+.form-grid [type=password].average {
+  border-color: #f7ac2e;
+}
+/* line 1173, ../sass/partials/_forms.scss */
+.form-grid [type=password].good {
+  border-color: #61b72f;
+}
+/* line 1177, ../sass/partials/_forms.scss */
 .form-grid [type=password].excellent {
   border-color: #2ca92c;
 }
-/* line 1169, ../sass/partials/_forms.scss */
+/* line 1181, ../sass/partials/_forms.scss */
 .form-grid .error-message {
   background-color: #df3215;
   color: #fff;
@@ -4450,7 +4462,7 @@ div.alleYli-radioGroup {
   font-style: normal;
   font-weight: bold;
 }
-/* line 1176, ../sass/partials/_forms.scss */
+/* line 1188, ../sass/partials/_forms.scss */
 .form-grid .error-message:before {
   font-family: 'lupapiste';
   speak: none;

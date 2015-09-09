@@ -1138,32 +1138,44 @@ $col: 25%;
   }
 
   // password field
-  .poor.info-message,
+  .poor.info-message {
+    background-color: $red-dark;
+  }
+
   .low.info-message {
-    background-color: $negative;
+    background-color: $red-light;
   }
 
   .average.info-message {
-    background-color: $primary;
+    background-color: $orange;
   }
 
-  .good.info-message,
+  .good.info-message {
+    background-color: $green-light;
+  }
+
   .excellent.info-message {
-    background-color: $positive;
+    background-color: $green-dark;
   }
 
-  [type=password].poor,
+  [type=password].poor {
+    border-color: $red-dark;
+  }
+
   [type=password].low {
-    border-color: $negative;
+    border-color: $red-light
   }
 
   [type=password].average {
-    border-color: $primary;
+    border-color: $orange;
   }
 
-  [type=password].good,
+  [type=password].good {
+    border-color: $green-light;
+  }
+
   [type=password].excellent {
-    border-color: $positive;
+    border-color: $green-dark;
   }
 
   .error-message {
