@@ -43,7 +43,6 @@ Save User Data
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
   Wait Until  Textfield Value Should Be  firstName  ${firstName}
   Wait Until  Textfield Value Should Be  lastName   ${lastName}
   Open accordion by test id  mypage-personal-info-accordion
