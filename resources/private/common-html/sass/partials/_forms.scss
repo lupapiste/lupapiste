@@ -1050,6 +1050,10 @@ $col: 25%;
       display: none;
   }
 
+  button::-moz-focus-inner {
+    border: 0;
+  }
+
   input[type=text], input[type=password], select {
     padding: 0 $marginM;
     min-height: 40px;
@@ -1061,6 +1065,7 @@ $col: 25%;
     border: 1px solid $input-border-color;
     -webkit-appearance: none;
     -webkit-border-radius: 0px;
+    -moz-appearance:none;
 
     &:focus {
       color: $input-focus-color;
@@ -1069,7 +1074,8 @@ $col: 25%;
   }
 
   input[type=checkbox] {
-    display: none;
+    opacity: 0;
+    width: 0px;
   }
 
   .checkbox-label:before {
@@ -1093,7 +1099,7 @@ $col: 25%;
 
   .select-arrow {
     position: absolute;
-    right: 21px;
+    right: 1px;
     bottom: 1px;
     color: $orange-dark;
     pointer-events:none;
