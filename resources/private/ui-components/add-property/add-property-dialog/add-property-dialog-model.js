@@ -1,4 +1,4 @@
-LUPAPISTE.AddPropertyDialogModel = function(params) {
+LUPAPISTE.AddPropertyDialogModel = function() {
   "use strict";
   var self = this;
 
@@ -7,7 +7,13 @@ LUPAPISTE.AddPropertyDialogModel = function(params) {
 
   self.x = app.location().x();
   self.y = app.location().y();
-  self.propertyId = ko.observable(humanize(app.propertyId()));
+  self.propertyId = ko.observable(app.propertyId());
+  self.humanizedPropertyId = ko.pureComputed(function() {
+    return humanize(self.propertyId());
+  });
+  self.selectedNotAppProperty = ko.pureComputed(function() {
+    return self.propertyId() !== app.propertyId();
+  });
 
   function resolvePropertyId(x, y) {
     ajax
@@ -15,7 +21,7 @@ LUPAPISTE.AddPropertyDialogModel = function(params) {
       .param("x", x)
       .param("y", y)
       .success(function(propertyId) {
-        self.propertyId(humanize(propertyId));
+        self.propertyId(propertyId);
       })
       .fail(_.noop)
       .call();
@@ -44,7 +50,11 @@ LUPAPISTE.AddPropertyDialogModel = function(params) {
   };
 
   self.submit = function() {
-    // AJAX new propertyId here
+    ajax
+      .command("create-doc", { id: app.id(),
+                               schemaName: "secondary-kiinteistot" })
+      .success(function() { repository.load(app.id()); })
+      .call();
     hub.send("close-dialog");
   };
 

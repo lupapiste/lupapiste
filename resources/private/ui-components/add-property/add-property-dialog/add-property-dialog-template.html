@@ -10,13 +10,14 @@
 
         <div class="with-map-top">
           <div><span data-bind="ltext: 'newRequest.propertyId'"></span></div>
-          <div><span data-bind="text: propertyId"></span></div>
+          <div><span data-bind="text: humanizedPropertyId"></span></div>
         </div>
       </div>
 
       <div data-bind="component: {name: 'submit-button-group',
                                   params: { submit: submit,
-                                            lSubmitTitle: 'application.dialog.add-property.submit' }}"></div>
+                                            lSubmitTitle: 'application.dialog.add-property.submit',
+                                            isSubmitEnabled: selectedNotAppProperty }}"></div>
     </script>
   </section>
 </body>
