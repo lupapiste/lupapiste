@@ -152,16 +152,17 @@
                         :uusiKytkin
                         :kuvaus]}})]}))
 
+(defmulti canon-data (fn [canon _]
+                       (if (sequential? canon)
+                         :sequential
+                         :map)))
+
+(defmethod canon-data :sequential [canon tag]
+  (filter #(= (tag ()))))
 
 
-
-#_(defn ->krysp [{mm :Maankaytonmuutos}]
-  (merge {:tag :Maankaytonmuutos :ns "mkmu"
-          :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :MM "1.0.1")
-                        :xmlns:mkmu "http://www.paikkatietopalvelu.fi/gml/maankaytonmuutos"}
-                       mapping-common/common-namespaces) }
-         {:child [(tagger mm [])]}))
-
+(defn ->xml [canon {tag :tag attr :attr child :child}]
+  (let [cc (canon-content canon tag)]))
 
 
 (defn save-application-as-krysp
@@ -175,10 +176,10 @@
                     canonical-without-attachments
                     [:Maankaytonmuutos :maankayttomuutosTieto muutos :liitetieto ]
                     attachments-canonical)
-        _ (>pprint canonical-without-attachments)
+        _ (>pprint canonical)
         mapping (->mapping muutos)
         _ (>pprint mapping)
-        xml (element-to-xml canonical-without-attachments mapping)
+        xml (element-to-xml canonical mapping)
         _ (>pprint xml)
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
     (writer/write-to-disk
