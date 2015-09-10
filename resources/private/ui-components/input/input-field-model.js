@@ -15,7 +15,7 @@ LUPAPISTE.InputFieldModel = function(params) {
     self.value.extend({required: true});
   }
 
-  self.infoMsg = params.infoMsg || "";
+  self.infoMsg = params.infoMsg || "";
   self.infoStyle = params.infoStyle || "";
 
   // TODO select model

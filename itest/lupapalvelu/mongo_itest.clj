@@ -1,4 +1,4 @@
-(ns lupapalvelu.mongo-test
+(ns lupapalvelu.mongo-itest
   (:require [clojure.test :refer :all]
             [midje.sweet :refer :all]
             [monger.collection :as mc]

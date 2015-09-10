@@ -101,7 +101,9 @@
    :sftp-directory "/kaavat"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
-   :extra-statement-selection-values false})
+   :extra-statement-selection-values false
+   :wfs-krysp-ns-name "maankaytonmuutos"
+   })
 
 ;;
 ;; Helpers

@@ -12,7 +12,7 @@ Teppo opens own details
   Open accordion by test id  mypage-register-company-accordion
 
 There is no company info
-  Element should not be visible  //div[@data-test-id='my-company']
+  Element should not be visible  //div[@data-test-id='mypage-company-accordion']
 
 Start registration
   Click by test id  logged-user-register-company-start
