@@ -64,16 +64,14 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-roles
    :org-authz-roles  action/reader-org-authz-roles}
-  [{app :application user :user}]
-  (if app
-    (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
+  [{:keys [application user]}]
+  (if application
+    (let [app (assoc application :allowedAttachmentTypes (attachment/get-attachment-types-for-application application))]
       (ok :application (a/post-process-app app user)
           :authorities (if (user/authority? user)
                          (map #(select-keys % [:id :firstName :lastName]) (find-authorities-in-applications-organization app))
                          [])
-          :permitSubtypes (or
-                            (operations/get-primary-operation-metadata app :subtypes)
-                            (-> app permit/permit-type permit/permit-subtypes))))
+          :permitSubtypes (a/resolve-valid-subtypes app)))
     (fail :error.not-found)))
 
 (defquery application-authorities

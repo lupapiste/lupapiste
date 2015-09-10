@@ -28,7 +28,7 @@
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
 
-(defn- resolve-valid-subtypes
+(defn resolve-valid-subtypes
   "Returns a set of valid permit and operation subtypes for the application."
   [{permit-type :permitType op :primaryOperation}]
   (let [op-subtypes (operations/get-primary-operation-metadata {:primaryOperation op} :subtypes)
