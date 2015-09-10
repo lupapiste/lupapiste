@@ -26,11 +26,11 @@
     {:VTJ_PRT "1030462707" :RAKENNUSTUNNUS "091-003-0052-0010 001" :SIJAINTIKIINTEISTO "091-003-0052-0010" :KUNNAN_PYSYVA_RAKNRO "473"})
 
   (fact "no building, no change"
-    (document-raki-conversion ..id.. ..anything.. (documents 1)) => (documents 1)
-    (document-raki-conversion ..id.. ..anything.. (documents 2)) => (documents 2))
+    (document-raki-conversion :hki_tunnusvastaavuudet ..id.. ..anything.. (documents 1)) => (documents 1)
+    (document-raki-conversion :hki_tunnusvastaavuudet ..id.. ..anything.. (documents 2)) => (documents 2))
 
   (fact "national building id is generated"
-    (document-raki-conversion ..id.. "09100300520010" (documents 0)) =>
+    (document-raki-conversion :hki_tunnusvastaavuudet ..id.. "09100300520010" (documents 0)) =>
     {:data {:buildingId {:value "1030462707" :source "krysp"}
             :muutostyolaji {:value "muut muutosty\u00f6t"}
             :rakennusnro {:value "001" :source "krysp"}
@@ -45,7 +45,7 @@
     (lupapalvelu.mongo/select-one :hki_tunnusvastaavuudet {:RAKENNUSTUNNUS "091-040-0153-0009 016"}) =>
     {:VTJ_PRT "102260741K" :RAKENNUSTUNNUS "091-040-0153-0009 016" :SIJAINTIKIINTEISTO "091-040-0153-0009" :KUNNAN_PYSYVA_RAKNRO "48780"})
 
-  (building-raki-conversion ..id..
+  (building-raki-conversion :hki_tunnusvastaavuudet ..id..
     {:localShortId "016"
      :buildingId "016"
      :index "1"
@@ -84,13 +84,13 @@
     {:VTJ_PRT "1030368157" :RAKENNUSTUNNUS "091-002-0040-0009 001" :SIJAINTIKIINTEISTO "091-002-0040-0009" :KUNNAN_PYSYVA_RAKNRO "370"})
 
   (fact "no building, no change"
-    (task-raki-conversion ..id.. ..anything.. (tasks 0)) => (tasks 0)
-    (task-raki-conversion ..id.. ..anything.. (tasks 2)) => (tasks 2)
-    (task-raki-conversion ..id.. ..anything.. (tasks 3)) => (tasks 3)
-    (task-raki-conversion ..id.. ..anything.. (tasks 4)) => (tasks 4))
+    (task-raki-conversion :hki_tunnusvastaavuudet ..id.. ..anything.. (tasks 0)) => (tasks 0)
+    (task-raki-conversion :hki_tunnusvastaavuudet ..id.. ..anything.. (tasks 2)) => (tasks 2)
+    (task-raki-conversion :hki_tunnusvastaavuudet ..id.. ..anything.. (tasks 3)) => (tasks 3)
+    (task-raki-conversion :hki_tunnusvastaavuudet ..id.. ..anything.. (tasks 4)) => (tasks 4))
 
   (fact "national building id is generated"
-    (task-raki-conversion ..id.. "09100200400009" (tasks 1)) =>
+    (task-raki-conversion :hki_tunnusvastaavuudet ..id.. "09100200400009" (tasks 1)) =>
     {:data {:katselmuksenLaji {:value "aloituskokous"} :vaadittuLupaehtona {:value true}
             :rakennus {:1 {}
                        :0 {:rakennus {:valtakunnallinenNumero {:value "1030368157"}
