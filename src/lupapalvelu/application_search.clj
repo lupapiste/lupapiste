@@ -124,10 +124,10 @@
 (defn- make-sort [{{:keys [field asc]} :sort}]
   (let [sort-field (sort-field-mapping field)]
     (cond
-      (= "type" field) {:permitSubtype (dir asc) :infoRequest (dir (not asc))}
+      (= "type" field) (array-map :permitSubtype (dir asc) :infoRequest (dir (not asc)))
       (nil? sort-field) {}
-      (sequential? sort-field) (zipmap sort-field (repeat (dir asc)))
-      :else {sort-field (dir asc)})))
+      (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
+      :else (array-map sort-field (dir asc)))))
 
 (defn applications-for-user [user {application-type :applicationType :as params}]
   (let [user-query  (domain/basic-application-query-for user)
