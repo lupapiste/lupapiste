@@ -1114,6 +1114,7 @@ $col: 25%;
 
   input[type=text].err, input[type=password].err {
     border: 1px solid $negative;
+    color: $negative;
   }
 
   @for $i from 1 through 4 {
@@ -1160,23 +1161,23 @@ $col: 25%;
     background-color: $green-dark;
   }
 
-  [type=password].poor {
+  input[type=password].poor {
     border-color: $red-dark;
   }
 
-  [type=password].low {
+  input[type=password].low {
     border-color: $red-light
   }
 
-  [type=password].average {
+  input[type=password].average {
     border-color: $orange;
   }
 
-  [type=password].good {
+  input[type=password].good {
     border-color: $green-light;
   }
 
-  [type=password].excellent {
+  input[type=password].excellent {
     border-color: $green-dark;
   }
 
