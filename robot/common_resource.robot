@@ -166,7 +166,8 @@ Open accordions
 
 Open accordion by test id
   [Arguments]  ${testId}
-  Execute Javascript  $("div[data-test-id='${testId}'] button.accordion-toggle:not(.toggled)").click();
+  ${accordionIsClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@data-test-id="${testId}"]//div[@data-accordion-state="open"]
+  Run keyword If  ${accordionIsClosed}  Execute Javascript  $("div[data-test-id='${testId}'] button.accordion-toggle:not(.toggled)").click();
 
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
@@ -878,14 +879,14 @@ Fill in new password
 Open company user listing
   Click Element  user-name
   Open accordion by test id  mypage-company-accordion
-  Element should be visible  //div[@data-test-id='my-company']
+  Wait Until  Element should be visible  //div[@data-test-id='my-company']
   Click by test id  company-edit-users
   Wait until  Element should be visible  company
 
 Open company details
   Click Element  user-name
   Open accordion by test id  mypage-company-accordion
-  Element should be visible  //div[@data-test-id='my-company']
+  Wait Until  Element should be visible  //div[@data-test-id='my-company']
   Click by test id  company-edit-info
   Wait until  Element should be visible  company
 
