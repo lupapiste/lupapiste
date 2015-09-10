@@ -1071,14 +1071,19 @@
 (defmigration ilmoitusHakemusValitsin-permitSubtype
   (reduce + 0
     (for [collection [:applications :submitted-applications]
-          application (mongo/select collection {:primaryOperation.name "tyonjohtajan-nimeaminen-v2"} {:documents 1})
+          application (mongo/select collection
+                        {$or [{:primaryOperation.name "tyonjohtajan-nimeaminen-v2"}
+                              {:primaryOperatio nil, :documents.schema-info.name "tyonjohtaja-v2"}]}
+                        {:documents 1})
           :let [doc (domain/get-document-by-name application "tyonjohtaja-v2")
                 val (-> doc :data :ilmoitusHakemusValitsin :value)
-                subtype (case val
-                          "ilmoitus" :tyonjohtaja-ilmoitus
-                          "hakemus"  :tyonjohtaja-hakemus
-                          nil)]]
-      (mongo/update-n collection {:_id (:id application)} {$set {:permitSubtype subtype}}))))
+                subtype (if (= "ilmoitus" val)
+                          :tyonjohtaja-ilmoitus
+                          :tyonjohtaja-hakemus)]]
+      (mongo/update-n collection
+        {:_id (:id application), :documents {$elemMatch {:id (:id doc)}}}
+        {$set {:permitSubtype subtype}
+         $unset {:documents.$.data.ilmoitusHakemusValitsin 1}}))))
 
 ;;
 ;; ****** NOTE! ******
