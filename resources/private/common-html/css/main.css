@@ -805,7 +805,7 @@ h1 .icon {
   font-weight: normal;
   font-style: normal;
 }
-/* line 19, ../sass/partials/_lupicons.scss */
+/* line 34, ../sass/partials/_lupicons.scss */
 [class^="lupicon-"], [class*=" lupicon-"] {
   font-family: 'lupapiste';
   speak: none;
@@ -820,411 +820,411 @@ h1 .icon {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* line 35, ../sass/partials/_lupicons.scss */
+/* line 39, ../sass/partials/_lupicons.scss */
 [class^="lupicon-"].primary,
 [class*=" lupicon-"].primary {
   color: #f39129;
 }
 
-/* line 40, ../sass/partials/_lupicons.scss */
+/* line 44, ../sass/partials/_lupicons.scss */
 [class^="lupicon-"].positive,
 [class*=" lupicon-"].positive {
   color: #2ca92c;
 }
 
-/* line 45, ../sass/partials/_lupicons.scss */
+/* line 49, ../sass/partials/_lupicons.scss */
 [class^="lupicon-"].negative,
 [class*=" lupicon-"].negative {
   color: #df3215;
 }
 
-/* line 51, ../sass/partials/_lupicons.scss */
+/* line 55, ../sass/partials/_lupicons.scss */
 .lupicon-circle-question, .lupicon-remove {
   cursor: pointer;
 }
 
-/* line 57, ../sass/partials/_lupicons.scss */
+/* line 61, ../sass/partials/_lupicons.scss */
 [class^="lupicon-"].no-hand,
 [class*=" lupicon-"].no-hand {
   cursor: default;
 }
 
-/* line 62, ../sass/partials/_lupicons.scss */
+/* line 66, ../sass/partials/_lupicons.scss */
 .lupicon-paperclip:before {
   content: "\e649";
 }
 
-/* line 65, ../sass/partials/_lupicons.scss */
+/* line 69, ../sass/partials/_lupicons.scss */
 .lupicon-rotate-left:before {
   content: "\e64a";
 }
 
-/* line 68, ../sass/partials/_lupicons.scss */
+/* line 72, ../sass/partials/_lupicons.scss */
 .lupicon-rotate-right:before {
   content: "\e64b";
 }
 
-/* line 71, ../sass/partials/_lupicons.scss */
+/* line 75, ../sass/partials/_lupicons.scss */
 .lupicon-add-area:before {
   content: "\e63f";
 }
 
-/* line 74, ../sass/partials/_lupicons.scss */
+/* line 78, ../sass/partials/_lupicons.scss */
 .lupicon-add-path:before {
   content: "\e640";
 }
 
-/* line 77, ../sass/partials/_lupicons.scss */
+/* line 81, ../sass/partials/_lupicons.scss */
 .lupicon-add-point:before {
   content: "\e641";
 }
 
-/* line 80, ../sass/partials/_lupicons.scss */
+/* line 84, ../sass/partials/_lupicons.scss */
 .lupicon-arrows:before {
   content: "\e642";
 }
 
-/* line 83, ../sass/partials/_lupicons.scss */
+/* line 87, ../sass/partials/_lupicons.scss */
 .lupicon-file-check:before {
   content: "\e643";
 }
 
-/* line 86, ../sass/partials/_lupicons.scss */
+/* line 90, ../sass/partials/_lupicons.scss */
 .lupicon-layers:before {
   content: "\e644";
 }
 
-/* line 89, ../sass/partials/_lupicons.scss */
+/* line 93, ../sass/partials/_lupicons.scss */
 .lupicon-measure-area:before {
   content: "\e645";
 }
 
-/* line 92, ../sass/partials/_lupicons.scss */
+/* line 96, ../sass/partials/_lupicons.scss */
 .lupicon-measure:before {
   content: "\e646";
 }
 
-/* line 95, ../sass/partials/_lupicons.scss */
+/* line 99, ../sass/partials/_lupicons.scss */
 .lupicon-star:before {
   content: "\e647";
 }
 
-/* line 98, ../sass/partials/_lupicons.scss */
+/* line 102, ../sass/partials/_lupicons.scss */
 .lupicon-zoom-in-area:before {
   content: "\e648";
 }
 
-/* line 101, ../sass/partials/_lupicons.scss */
+/* line 105, ../sass/partials/_lupicons.scss */
 .lupicon-archives:before {
   content: "\e600";
 }
 
-/* line 104, ../sass/partials/_lupicons.scss */
+/* line 108, ../sass/partials/_lupicons.scss */
 .lupicon-calendar:before {
   content: "\e601";
 }
 
-/* line 107, ../sass/partials/_lupicons.scss */
+/* line 111, ../sass/partials/_lupicons.scss */
 .lupicon-check:before {
   content: "\e602";
 }
 
-/* line 110, ../sass/partials/_lupicons.scss */
+/* line 114, ../sass/partials/_lupicons.scss */
 .lupicon-checkbox-off:before {
   content: "\e603";
 }
 
-/* line 113, ../sass/partials/_lupicons.scss */
+/* line 117, ../sass/partials/_lupicons.scss */
 .lupicon-checkbox-on:before {
   content: "\e604";
 }
 
-/* line 116, ../sass/partials/_lupicons.scss */
+/* line 120, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-bottom:before {
   content: "\e605";
 }
 
-/* line 119, ../sass/partials/_lupicons.scss */
+/* line 123, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-down:before {
   content: "\e606";
 }
 
-/* line 122, ../sass/partials/_lupicons.scss */
+/* line 126, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-end:before {
   content: "\e607";
 }
 
-/* line 125, ../sass/partials/_lupicons.scss */
+/* line 129, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-left:before {
   content: "\e608";
 }
 
-/* line 128, ../sass/partials/_lupicons.scss */
+/* line 132, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-right:before {
   content: "\e609";
 }
 
-/* line 131, ../sass/partials/_lupicons.scss */
+/* line 135, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-small-down:before {
   content: "\e60a";
 }
 
-/* line 134, ../sass/partials/_lupicons.scss */
+/* line 138, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-small-left:before {
   content: "\e60b";
 }
 
-/* line 137, ../sass/partials/_lupicons.scss */
+/* line 141, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-small-right:before {
   content: "\e60c";
 }
 
-/* line 140, ../sass/partials/_lupicons.scss */
+/* line 144, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-small-up:before {
   content: "\e60d";
 }
 
-/* line 143, ../sass/partials/_lupicons.scss */
+/* line 147, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-start:before {
   content: "\e60e";
 }
 
-/* line 146, ../sass/partials/_lupicons.scss */
+/* line 150, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-top:before {
   content: "\e60f";
 }
 
-/* line 149, ../sass/partials/_lupicons.scss */
+/* line 153, ../sass/partials/_lupicons.scss */
 .lupicon-chevron-up:before {
   content: "\e610";
 }
 
-/* line 152, ../sass/partials/_lupicons.scss */
+/* line 156, ../sass/partials/_lupicons.scss */
 .lupicon-circle-arrow-down:before {
   content: "\e611";
 }
 
-/* line 155, ../sass/partials/_lupicons.scss */
+/* line 159, ../sass/partials/_lupicons.scss */
 .lupicon-circle-arrow-left:before {
   content: "\e612";
 }
 
-/* line 158, ../sass/partials/_lupicons.scss */
+/* line 162, ../sass/partials/_lupicons.scss */
 .lupicon-circle-arrow-right:before {
   content: "\e613";
 }
 
-/* line 161, ../sass/partials/_lupicons.scss */
+/* line 165, ../sass/partials/_lupicons.scss */
 .lupicon-circle-arrow-up:before {
   content: "\e614";
 }
 
-/* line 164, ../sass/partials/_lupicons.scss */
+/* line 168, ../sass/partials/_lupicons.scss */
 .lupicon-circle-attention:before {
   content: "\e615";
 }
 
-/* line 167, ../sass/partials/_lupicons.scss */
+/* line 171, ../sass/partials/_lupicons.scss */
 .lupicon-circle-check:before {
   content: "\e616";
 }
 
-/* line 170, ../sass/partials/_lupicons.scss */
+/* line 174, ../sass/partials/_lupicons.scss */
 .lupicon-circle-info:before {
   content: "\e617";
 }
 
-/* line 173, ../sass/partials/_lupicons.scss */
+/* line 177, ../sass/partials/_lupicons.scss */
 .lupicon-circle-minus:before {
   content: "\e618";
 }
 
-/* line 176, ../sass/partials/_lupicons.scss */
+/* line 180, ../sass/partials/_lupicons.scss */
 .lupicon-circle-pen:before {
   content: "\e619";
 }
 
-/* line 179, ../sass/partials/_lupicons.scss */
+/* line 183, ../sass/partials/_lupicons.scss */
 .lupicon-circle-plus:before {
   content: "\e61a";
 }
 
-/* line 182, ../sass/partials/_lupicons.scss */
+/* line 186, ../sass/partials/_lupicons.scss */
 .lupicon-circle-question:before {
   content: "\e61b";
 }
 
-/* line 185, ../sass/partials/_lupicons.scss */
+/* line 189, ../sass/partials/_lupicons.scss */
 .lupicon-circle-remove:before {
   content: "\e61c";
 }
 
-/* line 188, ../sass/partials/_lupicons.scss */
+/* line 192, ../sass/partials/_lupicons.scss */
 .lupicon-circle-section-sign:before {
   content: "\e61d";
 }
 
-/* line 191, ../sass/partials/_lupicons.scss */
+/* line 195, ../sass/partials/_lupicons.scss */
 .lupicon-circle-stamp:before {
   content: "\e61e";
 }
 
-/* line 194, ../sass/partials/_lupicons.scss */
+/* line 198, ../sass/partials/_lupicons.scss */
 .lupicon-circle-star:before {
   content: "\e61f";
 }
 
-/* line 197, ../sass/partials/_lupicons.scss */
+/* line 201, ../sass/partials/_lupicons.scss */
 .lupicon-circle:before {
   content: "\e620";
 }
 
-/* line 200, ../sass/partials/_lupicons.scss */
+/* line 204, ../sass/partials/_lupicons.scss */
 .lupicon-clock:before {
   content: "\e621";
 }
 
-/* line 203, ../sass/partials/_lupicons.scss */
+/* line 207, ../sass/partials/_lupicons.scss */
 .lupicon-collapse:before {
   content: "\e622";
 }
 
-/* line 206, ../sass/partials/_lupicons.scss */
+/* line 210, ../sass/partials/_lupicons.scss */
 .lupicon-comment:before {
   content: "\e623";
 }
 
-/* line 209, ../sass/partials/_lupicons.scss */
+/* line 213, ../sass/partials/_lupicons.scss */
 .lupicon-conversation:before {
   content: "\e624";
 }
 
-/* line 212, ../sass/partials/_lupicons.scss */
+/* line 216, ../sass/partials/_lupicons.scss */
 .lupicon-documents:before {
   content: "\e625";
 }
 
-/* line 215, ../sass/partials/_lupicons.scss */
+/* line 219, ../sass/partials/_lupicons.scss */
 .lupicon-download:before {
   content: "\e626";
 }
 
-/* line 218, ../sass/partials/_lupicons.scss */
+/* line 222, ../sass/partials/_lupicons.scss */
 .lupicon-envelope:before {
   content: "\e627";
 }
 
-/* line 221, ../sass/partials/_lupicons.scss */
+/* line 225, ../sass/partials/_lupicons.scss */
 .lupicon-expand:before {
   content: "\e628";
 }
 
-/* line 224, ../sass/partials/_lupicons.scss */
+/* line 228, ../sass/partials/_lupicons.scss */
 .lupicon-eye:before {
   content: "\e629";
 }
 
-/* line 227, ../sass/partials/_lupicons.scss */
+/* line 231, ../sass/partials/_lupicons.scss */
 .lupicon-file:before {
   content: "\e62a";
 }
 
-/* line 230, ../sass/partials/_lupicons.scss */
+/* line 234, ../sass/partials/_lupicons.scss */
 .lupicon-folder:before {
   content: "\e62b";
 }
 
-/* line 233, ../sass/partials/_lupicons.scss */
+/* line 237, ../sass/partials/_lupicons.scss */
 .lupicon-lightbulb:before {
   content: "\e62c";
 }
 
-/* line 236, ../sass/partials/_lupicons.scss */
+/* line 240, ../sass/partials/_lupicons.scss */
 .lupicon-list:before {
   content: "\e62d";
 }
 
-/* line 239, ../sass/partials/_lupicons.scss */
+/* line 243, ../sass/partials/_lupicons.scss */
 .lupicon-location:before {
   content: "\e62e";
 }
 
-/* line 242, ../sass/partials/_lupicons.scss */
+/* line 246, ../sass/partials/_lupicons.scss */
 .lupicon-log-in:before {
   content: "\e62f";
 }
 
-/* line 245, ../sass/partials/_lupicons.scss */
+/* line 249, ../sass/partials/_lupicons.scss */
 .lupicon-log-out:before {
   content: "\e630";
 }
 
-/* line 248, ../sass/partials/_lupicons.scss */
+/* line 252, ../sass/partials/_lupicons.scss */
 .lupicon-menu:before {
   content: "\e631";
 }
 
-/* line 251, ../sass/partials/_lupicons.scss */
+/* line 255, ../sass/partials/_lupicons.scss */
 .lupicon-pen:before {
   content: "\e632";
 }
 
-/* line 254, ../sass/partials/_lupicons.scss */
+/* line 258, ../sass/partials/_lupicons.scss */
 .lupicon-print:before {
   content: "\e633";
 }
 
-/* line 257, ../sass/partials/_lupicons.scss */
+/* line 261, ../sass/partials/_lupicons.scss */
 .lupicon-radio-off:before {
   content: "\e634";
 }
 
-/* line 260, ../sass/partials/_lupicons.scss */
+/* line 264, ../sass/partials/_lupicons.scss */
 .lupicon-radio-on:before {
   content: "\e635";
 }
 
-/* line 263, ../sass/partials/_lupicons.scss */
+/* line 267, ../sass/partials/_lupicons.scss */
 .lupicon-refresh:before {
   content: "\e636";
 }
 
-/* line 266, ../sass/partials/_lupicons.scss */
+/* line 270, ../sass/partials/_lupicons.scss */
 .lupicon-remove:before {
   content: "\e637";
 }
 
-/* line 269, ../sass/partials/_lupicons.scss */
+/* line 273, ../sass/partials/_lupicons.scss */
 .lupicon-save:before {
   content: "\e638";
 }
 
-/* line 272, ../sass/partials/_lupicons.scss */
+/* line 276, ../sass/partials/_lupicons.scss */
 .lupicon-search:before {
   content: "\e639";
 }
 
-/* line 275, ../sass/partials/_lupicons.scss */
+/* line 279, ../sass/partials/_lupicons.scss */
 .lupicon-upload:before {
   content: "\e63a";
 }
 
-/* line 278, ../sass/partials/_lupicons.scss */
+/* line 282, ../sass/partials/_lupicons.scss */
 .lupicon-user:before {
   content: "\e63b";
 }
 
-/* line 281, ../sass/partials/_lupicons.scss */
+/* line 285, ../sass/partials/_lupicons.scss */
 .lupicon-warning:before {
   content: "\e63c";
 }
 
-/* line 284, ../sass/partials/_lupicons.scss */
+/* line 288, ../sass/partials/_lupicons.scss */
 .lupicon-zoom-in:before {
   content: "\e63d";
 }
 
-/* line 287, ../sass/partials/_lupicons.scss */
+/* line 291, ../sass/partials/_lupicons.scss */
 .lupicon-zoom-out:before {
   content: "\e63e";
 }
@@ -3189,23 +3189,7 @@ legend {
   font-size: 0.875em;
   margin: 0;
   outline: 0;
-  padding-left: 0.5em;
-  -webkit-transition: border 125ms ease;
-  -moz-transition: border 125ms ease;
-  -ms-transition: border 125ms ease;
-  -o-transition: border 125ms ease;
-  transition: border 125ms ease;
-  -webkit-box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 #fff;
-  box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 #fff;
-}
-/* line 31, ../sass/partials/_forms.scss */
-[type="text"]:hover, [type="email"]:hover, [type="tel"]:hover, [type="url"]:hover, [type="password"]:hover, [type="time"]:hover, [type="number"]:hover, select:hover, textarea:hover {
-  border-color: #b5b5b5;
-}
-/* line 35, ../sass/partials/_forms.scss */
-[type="text"]:focus, [type="email"]:focus, [type="tel"]:focus, [type="url"]:focus, [type="password"]:focus, [type="time"]:focus, [type="number"]:focus, select:focus, textarea:focus {
-  border-color: #17c;
-  -webkit-box-shadow: inset 0 2px 4px #c3c3c3, 0 1px 0 #fff;
+  padding-left: 6px;
 }
 /* line 40, ../sass/partials/_forms.scss */
 [type="text"].source-value-changed, [type="email"].source-value-changed, [type="tel"].source-value-changed, [type="url"].source-value-changed, [type="password"].source-value-changed, [type="time"].source-value-changed, [type="number"].source-value-changed, select.source-value-changed, textarea.source-value-changed {
@@ -3432,7 +3416,7 @@ input.form-input.long {
 }
 
 /* line 257, ../sass/partials/_forms.scss */
-.form-input.checkbox, [type="checkbox"], .form-input.radio, [type="radio"] {
+.form-input.checkbox, .form-input.radio {
   width: auto;
   display: inline-block;
   vertical-align: bottom;
@@ -3442,15 +3426,15 @@ input.form-input.long {
   padding: 0;
 }
 /* line 265, ../sass/partials/_forms.scss */
-.form-input.checkbox.error, [type="checkbox"].error, .form-input.radio.error, [type="radio"].error {
+.form-input.checkbox.error, .form-input.radio.error {
   outline: 3px solid red;
 }
 /* line 268, ../sass/partials/_forms.scss */
-.form-input.checkbox.warning, [type="checkbox"].warning, .form-input.radio.warning, [type="radio"].warning {
+.form-input.checkbox.warning, .form-input.radio.warning {
   outline: 3px solid #f39129;
 }
 /* line 271, ../sass/partials/_forms.scss */
-.form-input.checkbox.source-value-changed, [type="checkbox"].source-value-changed, .form-input.radio.source-value-changed, [type="radio"].source-value-changed {
+.form-input.checkbox.source-value-changed, .form-input.radio.source-value-changed {
   outline: 2px solid #04c714;
 }
 
@@ -4197,6 +4181,302 @@ foreman-history th.fifth {
 div.alleYli-radioGroup {
   display: inline-block;
   margin-top: 24px;
+}
+
+/* line 1020, ../sass/partials/_forms.scss */
+.form-grid {
+  overflow-y: hidden;
+  width: 100%;
+  border-bottom: 1px solid #dddddd;
+}
+/* line 1025, ../sass/partials/_forms.scss */
+.form-grid:last-child {
+  border-bottom: none;
+}
+/* line 1029, ../sass/partials/_forms.scss */
+.form-grid:after {
+  content: "";
+  display: block;
+  clear: both;
+}
+/* line 1033, ../sass/partials/_forms.scss */
+.form-grid h2 {
+  padding-left: 20px;
+  margin: 12px 0;
+}
+/* line 1039, ../sass/partials/_forms.scss */
+.form-grid p {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+/* line 1044, ../sass/partials/_forms.scss */
+.form-grid .checkbox-wrapper {
+  border: 1px solid #dddddd;
+  padding: 7px;
+}
+/* line 1049, ../sass/partials/_forms.scss */
+.form-grid select::-ms-expand {
+  display: none;
+}
+/* line 1053, ../sass/partials/_forms.scss */
+.form-grid button::-moz-focus-inner {
+  border: 0;
+}
+/* line 1057, ../sass/partials/_forms.scss */
+.form-grid input[type=text], .form-grid input[type=password], .form-grid select {
+  padding: 0 12px;
+  min-height: 40px;
+  height: 40px;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 16px;
+  color: #333333;
+  border: 1px solid #bbbbbb;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+  -moz-appearance: none;
+}
+/* line 1070, ../sass/partials/_forms.scss */
+.form-grid input[type=text]:focus, .form-grid input[type=password]:focus, .form-grid select:focus {
+  color: #333333;
+  border-color: #fbc732;
+}
+/* line 1076, ../sass/partials/_forms.scss */
+.form-grid input[type=checkbox] {
+  opacity: 0;
+  width: 0px;
+}
+/* line 1081, ../sass/partials/_forms.scss */
+.form-grid .checkbox-label:before {
+  font-family: 'lupapiste';
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e603";
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: top;
+  color: #bbbbbb;
+}
+/* line 1090, ../sass/partials/_forms.scss */
+.form-grid input[type=checkbox]:checked + .checkbox-label:before {
+  font-family: 'lupapiste';
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e604";
+  color: #fbc732;
+}
+/* line 1096, ../sass/partials/_forms.scss */
+.form-grid select.required, .form-grid input.required {
+  border-color: #fbc732;
+}
+/* line 1100, ../sass/partials/_forms.scss */
+.form-grid .select-arrow {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  color: #f39129;
+  pointer-events: none;
+  background-color: #fff;
+  height: 38px;
+  width: 30px;
+  line-height: 38px;
+  vertical-align: middle;
+}
+/* line 1113, ../sass/partials/_forms.scss */
+.form-grid input[type=text].err, .form-grid input[type=password].err {
+  border: 1px solid #df3215;
+}
+/* line 1118, ../sass/partials/_forms.scss */
+.form-grid .col-1 {
+  position: relative;
+  float: left;
+  width: 25%;
+  min-width: 25%;
+  max-width: 25%;
+  padding-left: 20px;
+}
+/* line 1004, ../sass/partials/_forms.scss */
+.form-grid .col-1 label.required:after {
+  content: "*";
+  color: #df3215;
+}
+/* line 1009, ../sass/partials/_forms.scss */
+.form-grid .col-1 .col--vertical, .form-grid .col-1 .col--horizontal {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 1014, ../sass/partials/_forms.scss */
+.form-grid .col-1 .col--vertical label {
+  display: block;
+}
+/* line 1118, ../sass/partials/_forms.scss */
+.form-grid .col-2 {
+  position: relative;
+  float: left;
+  width: 50%;
+  min-width: 50%;
+  max-width: 50%;
+  padding-left: 20px;
+}
+/* line 1004, ../sass/partials/_forms.scss */
+.form-grid .col-2 label.required:after {
+  content: "*";
+  color: #df3215;
+}
+/* line 1009, ../sass/partials/_forms.scss */
+.form-grid .col-2 .col--vertical, .form-grid .col-2 .col--horizontal {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 1014, ../sass/partials/_forms.scss */
+.form-grid .col-2 .col--vertical label {
+  display: block;
+}
+/* line 1118, ../sass/partials/_forms.scss */
+.form-grid .col-3 {
+  position: relative;
+  float: left;
+  width: 75%;
+  min-width: 75%;
+  max-width: 75%;
+  padding-left: 20px;
+}
+/* line 1004, ../sass/partials/_forms.scss */
+.form-grid .col-3 label.required:after {
+  content: "*";
+  color: #df3215;
+}
+/* line 1009, ../sass/partials/_forms.scss */
+.form-grid .col-3 .col--vertical, .form-grid .col-3 .col--horizontal {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 1014, ../sass/partials/_forms.scss */
+.form-grid .col-3 .col--vertical label {
+  display: block;
+}
+/* line 1118, ../sass/partials/_forms.scss */
+.form-grid .col-4 {
+  position: relative;
+  float: left;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+  padding-left: 20px;
+}
+/* line 1004, ../sass/partials/_forms.scss */
+.form-grid .col-4 label.required:after {
+  content: "*";
+  color: #df3215;
+}
+/* line 1009, ../sass/partials/_forms.scss */
+.form-grid .col-4 .col--vertical, .form-grid .col-4 .col--horizontal {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 1014, ../sass/partials/_forms.scss */
+.form-grid .col-4 .col--vertical label {
+  display: block;
+}
+/* line 1123, ../sass/partials/_forms.scss */
+.form-grid .row {
+  content: "";
+  display: block;
+  clear: both;
+  margin: 20px 0;
+  overflow-y: hidden;
+}
+/* line 1129, ../sass/partials/_forms.scss */
+.form-grid .info-message {
+  background-color: #df3215;
+  color: #fff;
+  margin: 0;
+  padding: 6px;
+  font-style: normal;
+  font-weight: bold;
+  display: block;
+  height: 40px;
+}
+/* line 1141, ../sass/partials/_forms.scss */
+.form-grid .poor.info-message {
+  background-color: #df3215;
+}
+/* line 1145, ../sass/partials/_forms.scss */
+.form-grid .low.info-message {
+  background-color: #e7541d;
+}
+/* line 1149, ../sass/partials/_forms.scss */
+.form-grid .average.info-message {
+  background-color: #f7ac2e;
+}
+/* line 1153, ../sass/partials/_forms.scss */
+.form-grid .good.info-message {
+  background-color: #61b72f;
+}
+/* line 1157, ../sass/partials/_forms.scss */
+.form-grid .excellent.info-message {
+  background-color: #2ca92c;
+}
+/* line 1161, ../sass/partials/_forms.scss */
+.form-grid [type=password].poor {
+  border-color: #df3215;
+}
+/* line 1165, ../sass/partials/_forms.scss */
+.form-grid [type=password].low {
+  border-color: #e7541d;
+}
+/* line 1169, ../sass/partials/_forms.scss */
+.form-grid [type=password].average {
+  border-color: #f7ac2e;
+}
+/* line 1173, ../sass/partials/_forms.scss */
+.form-grid [type=password].good {
+  border-color: #61b72f;
+}
+/* line 1177, ../sass/partials/_forms.scss */
+.form-grid [type=password].excellent {
+  border-color: #2ca92c;
+}
+/* line 1181, ../sass/partials/_forms.scss */
+.form-grid .error-message {
+  background-color: #df3215;
+  color: #fff;
+  margin: 0;
+  padding: 6px;
+  font-style: normal;
+  font-weight: bold;
+}
+/* line 1188, ../sass/partials/_forms.scss */
+.form-grid .error-message:before {
+  font-family: 'lupapiste';
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e63c";
+  margin-right: 6px;
 }
 
 /* line 4, ../sass/partials/_tables.scss */
@@ -6744,29 +7024,26 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 70, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields h2 {
-  background: #e9e9e9;
   color: black;
-  margin: 12px 0;
-  padding-left: 6px;
 }
-/* line 77, ../sass/partials/_accordion.scss */
+/* line 74, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields .authority-accept-fields h2 {
   background: #f6f6f6;
 }
-/* line 81, ../sass/partials/_accordion.scss */
+/* line 78, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields h3 {
   margin-top: 12px;
 }
-/* line 84, ../sass/partials/_accordion.scss */
+/* line 81, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields .form-group {
   margin-top: 6px;
 }
-/* line 90, ../sass/partials/_accordion.scss */
+/* line 87, ../sass/partials/_accordion.scss */
 .accordion .accordion_content.expanded {
   display: block;
 }
 
-/* line 96, ../sass/partials/_accordion.scss */
+/* line 93, ../sass/partials/_accordion.scss */
 .accordion-indicator {
   z-index: 12000;
   width: 112px;
@@ -6775,25 +7052,25 @@ ul.attachments-list li.mandatory-attachments {
   padding: 0 24px 0 0;
   margin-left: 12px;
 }
-/* line 104, ../sass/partials/_accordion.scss */
+/* line 101, ../sass/partials/_accordion.scss */
 .accordion-indicator .icon {
   display: none;
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
 }
-/* line 109, ../sass/partials/_accordion.scss */
+/* line 106, ../sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-saved .icon {
   display: inline-block;
   background-position: 4px -2499px;
   border-right: none;
 }
-/* line 116, ../sass/partials/_accordion.scss */
+/* line 113, ../sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-warn .icon {
   display: inline-block;
   background-position: 4px -3199px;
   border-right: none;
 }
-/* line 123, ../sass/partials/_accordion.scss */
+/* line 120, ../sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-err .icon {
   display: inline-block;
   background-position: 4px -2399px;
@@ -9303,106 +9580,79 @@ td.comment-text {
   margin-bottom: 24px;
 }
 
-/* line 1, ../sass/views/_mypage.scss */
-#mypage .poor {
-  color: red;
-  font-weight: bold;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-/* line 9, ../sass/views/_mypage.scss */
-#mypage .low {
-  color: red;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-/* line 16, ../sass/views/_mypage.scss */
-#mypage .average {
-  color: black;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-/* line 23, ../sass/views/_mypage.scss */
-#mypage .good {
-  color: green;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-/* line 30, ../sass/views/_mypage.scss */
-#mypage .excellent {
-  color: green;
-  font-weight: bold;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-/* line 39, ../sass/views/_mypage.scss */
+/* line 2, ../sass/views/_mypage.scss */
 #mypage .button-group {
+  margin: 20px;
   position: relative;
-  width: 360px;
-}
-/* line 42, ../sass/views/_mypage.scss */
-#mypage .button-group .form-indicator {
-  top: -4px;
 }
 
 /*  */
-/* line 49, ../sass/views/_mypage.scss */
+/* line 9, ../sass/views/_mypage.scss */
 #own-info-form {
   padding: 0 24px;
 }
-/* line 51, ../sass/views/_mypage.scss */
+/* line 11, ../sass/views/_mypage.scss */
 #own-info-form .architect-toggle, #own-info-form .allowDirectMarketing-toggle {
   height: 55px;
   margin: 9px 0;
   display: block;
   width: 100%;
 }
-/* line 57, ../sass/views/_mypage.scss */
+/* line 17, ../sass/views/_mypage.scss */
 #own-info-form .architect-toggle label, #own-info-form .architect-toggle input, #own-info-form .allowDirectMarketing-toggle label, #own-info-form .allowDirectMarketing-toggle input {
   display: inline;
   width: 3.75em;
 }
-/* line 61, ../sass/views/_mypage.scss */
+/* line 21, ../sass/views/_mypage.scss */
 #own-info-form .architect-toggle input, #own-info-form .allowDirectMarketing-toggle input {
   margin-right: 12px;
   display: inline;
 }
-/* line 66, ../sass/views/_mypage.scss */
+/* line 26, ../sass/views/_mypage.scss */
 #own-info-form .form-group {
   padding: 12px;
 }
 
-/* line 71, ../sass/views/_mypage.scss */
+/* line 31, ../sass/views/_mypage.scss */
 #pw-form {
   padding: 0 24px;
 }
-/* line 74, ../sass/views/_mypage.scss */
+/* line 34, ../sass/views/_mypage.scss */
 #pw-form .form-group {
   padding: 12px;
 }
-/* line 77, ../sass/views/_mypage.scss */
+/* line 37, ../sass/views/_mypage.scss */
 #pw-form .form-entry {
   height: 78px;
 }
 
-/* line 83, ../sass/views/_mypage.scss */
-.architect-info {
-  margin: 24px auto;
-  transition: height 2s;
+/* line 42, ../sass/views/_mypage.scss */
+#mypage-register-company, #mypage-company {
+  padding: 0 24px;
 }
-/* line 88, ../sass/views/_mypage.scss */
-.architect-info .architect-attachments {
-  margin-top: 24px;
+/* line 46, ../sass/views/_mypage.scss */
+#mypage-register-company p a, #mypage-company p a {
+  color: #f39129;
+  text-decoration: none;
+}
+/* line 14, ../sass/partials/_links.scss */
+#mypage-register-company p a:link, #mypage-register-company p a:visited, #mypage-company p a:link, #mypage-company p a:visited {
+  color: #f39129;
+}
+/* line 17, ../sass/partials/_links.scss */
+#mypage-register-company p a:hover, #mypage-company p a:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
+/* line 21, ../sass/partials/_links.scss */
+#mypage-register-company p a:active, #mypage-company p a:active {
+  color: #fbc732;
+  text-decoration: underline;
+}
+
+/* line 52, ../sass/views/_mypage.scss */
+.architect-info {
+  transition: height 2s;
 }
 
 /* line 1, ../sass/views/_admin.scss */
@@ -9508,32 +9758,32 @@ td.comment-text {
 }
 
 /* line 9, ../sass/views/_register.scss */
-.register-form .error-message, #pw-form .error-message {
+.register-form .error-message {
   font-style: italic;
   color: red;
   margin: -10px 0 0 0;
 }
 /* line 16, ../sass/views/_register.scss */
-.register-form p, #pw-form p {
+.register-form p {
   margin-bottom: 8px;
 }
 /* line 21, ../sass/views/_register.scss */
-.register-form .form-entry.register-checkbox, #pw-form .form-entry.register-checkbox {
+.register-form .form-entry.register-checkbox {
   width: 100%;
   height: auto;
   min-height: 32px;
 }
 /* line 28, ../sass/views/_register.scss */
-.register-form .register-error, #pw-form .register-error {
+.register-form .register-error {
   position: relative;
   margin: 6px 0;
 }
 /* line 33, ../sass/views/_register.scss */
-.register-form .architect-toggle, #pw-form .architect-toggle {
+.register-form .architect-toggle {
   min-height: 36px;
 }
 /* line 37, ../sass/views/_register.scss */
-.register-form .info-indicator, #pw-form .info-indicator {
+.register-form .info-indicator {
   cursor: pointer;
 }
 

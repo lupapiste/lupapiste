@@ -9,6 +9,7 @@
             [lupapalvelu.xml.asianhallinta.core :as ah]
             [lupapalvelu.xml.validator :as validator]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.fixture.core :as fixture]
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -17,14 +18,17 @@
             [midje.repl])
   (:import [java.net URI]))
 
+(def db-name (str "test_asianhallinta-itest_" (now)))
+
 (apply-remote-minimal)
+(mongo/with-db db-name (fixture/apply-fixture "minimal"))
 
 (testable-privates lupapalvelu.xml.asianhallinta.core resolve-output-directory resolve-ah-version)
 (testable-privates lupapalvelu.xml.asianhallinta.asianhallinta_mapping attachments-for-write)
 
 (fl/facts* "Asianhallinta itest"
   (facts "UusiAsia from poikkeamis application"
-    (mongo/with-db test-db-name
+    (mongo/with-db db-name
 
       (let [application (create-and-submit-application
                          pena
@@ -114,7 +118,7 @@
               (fact "Link permits do not exist" (sxml/select xml [:UusiAsia :Viiteluvat]) => empty?)))))))
 
   (facts "UusiAsia with link permits"
-    (mongo/with-db test-db-name
+    (mongo/with-db db-name
       (let [link-app (create-and-submit-application
                       pena
                       :propertyId kuopio-property-id
@@ -185,7 +189,7 @@
                    contents) => truthy))))))))
 
   (facts "AsianTaydennys"
-    (mongo/with-db test-db-name
+    (mongo/with-db db-name
       (let [application (create-and-submit-application
                          pena
                          :propertyId kuopio-property-id
