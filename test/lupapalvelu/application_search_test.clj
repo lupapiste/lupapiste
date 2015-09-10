@@ -20,8 +20,8 @@
   (make-sort {:sort {:field "unknown" :asc true}})  => {}
   (make-sort {:sort {:field "id" :asc false}}) => {}
   (make-sort {:sort {:field "_id" :asc false}}) => {}
-  (make-sort {:sort {:field "type" :asc true }})  => {:infoRequest 1}
-  (make-sort {:sort {:field "type" :asc false }}) => {:infoRequest -1}
+  (make-sort {:sort {:field "type" :asc true }})  => {:infoRequest -1, :permitSubtype 1}
+  (make-sort {:sort {:field "type" :asc false }}) => {:infoRequest 1, :permitSubtype -1}
   (make-sort {:sort {:field "location" :asc false }}) => {:address -1}
   (make-sort {:sort {:field "applicant" :asc false }}) => {:applicant -1}
   (make-sort {:sort {:field "submitted" :asc true }})  => {:submitted 1}
