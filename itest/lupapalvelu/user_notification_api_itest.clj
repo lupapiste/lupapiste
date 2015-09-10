@@ -1,4 +1,4 @@
-(ns user-notification-api-itest
+(ns lupapalvelu.user-notification-api-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]))
 
@@ -15,7 +15,7 @@
     (count (remove nil? (map :notification authorities))) => 0))
 
 (fact "Admin adds notification for all applicants and authorities"
-  (command admin :notifications-update :applicants true :authorities true :title-fi "otsake2" :message-fi "Unohtakaa äskeinen!") => ok?
+  (command admin :notifications-update :applicants true :authorities true :title-fi "otsake2" :message-fi "Unohtakaa askeinen!") => ok?
   (let [users (:users (query admin :users))
         applicants (filter #(= "applicant" (:role %)) users)
         authorities (filter #(= "authority" (:role %)) users)
@@ -23,8 +23,8 @@
         authority-notifications (remove nil? (map :notification authorities))]
     (count applicants) => (count applicant-notifications)
     (count authorities) => (count authority-notifications)
-    (first applicant-notifications) => {:message "Unohtakaa äskeinen!" :title "otsake2"}
-    (first authority-notifications) => {:message "Unohtakaa äskeinen!" :title "otsake2"}))
+    (first applicant-notifications) => {:message "Unohtakaa askeinen!" :title "otsake2"}
+    (first authority-notifications) => {:message "Unohtakaa askeinen!" :title "otsake2"}))
 
 (fact "Admin set empty notification for all"
   (command admin :notifications-update :applicants true :authorities true :title-fi "" :message-fi "") => ok?
