@@ -339,10 +339,10 @@
                :js ["admin.js" "register-admin-models.js"]}
    :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :header :debug]
                :css ["admin.css"]
-               :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
+               :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js" "notifications.js"]
                :html ["index.html" "admin.html" "organization.html"
                       "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html"
-                      "screenmessages-list.html"]}
+                      "screenmessages-list.html" "notifications.html"]}
 
    :wordpress {:depends [:login :password-reset]}
 

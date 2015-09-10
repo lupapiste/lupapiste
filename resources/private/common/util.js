@@ -226,6 +226,14 @@ var util = (function($) {
     });
   }
 
+  function showSavedIndicator(response) {
+    if (response.ok) {
+      hub.send("indicator", {style: "positive"});
+    } else {
+      hub.send("indicator", {style: "negative"});
+    }
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -258,7 +266,8 @@ var util = (function($) {
     dissoc: dissoc,
     randomElementId: randomElementId,
     withSuffix: withSuffix,
-    filterDataByQuery: filterDataByQuery
+    filterDataByQuery: filterDataByQuery,
+    showSavedIndicator: showSavedIndicator
   };
 
 })(jQuery);
