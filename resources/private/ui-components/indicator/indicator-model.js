@@ -10,11 +10,11 @@ LUPAPISTE.IndicatorModel = function(params) {
   hub.subscribe("indicator", function(e) {
     if (e.style === "positive") {
       self.iconStyle("lupicon-circle-check");
-      self.message("form.saved");
+      self.message(e.message || "form.saved");
     }
     else if (e.style === "negative") {
       self.iconStyle("lupicon-circle-attention");
-      self.message("form.err");
+      self.message(e.message || "form.err");
     }
 
     self.indicatorStyle(e.style);

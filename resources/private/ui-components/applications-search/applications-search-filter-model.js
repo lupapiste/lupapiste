@@ -27,12 +27,8 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
     ajax
     .command("update-default-application-filter", {filter: filter, sort: ko.toJS(self.dataProvider.sort)})
-    .error(function() {
-      hub.send("indicator", {style: "negative"});
-    })
-    .success(function() {
-      hub.send("indicator", {style: "positive"});
-    })
+    .error(util.showSavedIndicator)
+    .success(util.showSavedIndicator)
     .call();
   };
 
