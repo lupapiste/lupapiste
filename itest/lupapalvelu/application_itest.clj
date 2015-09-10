@@ -6,17 +6,14 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.application-api :as app]
             [lupapalvelu.application :as a]
             [lupapalvelu.actions-api :as ca]
             [lupapalvelu.document.tools :as tools]))
 
-(mongo/connect!)
-
 (apply-remote-minimal)
 
-#_(fact "can't inject js in 'x' or 'y' params"
+(fact "can't inject js in 'x' or 'y' params"
    (create-app pena :x ";alert(\"foo\");" :y "what ever") =not=> ok?
    (create-app pena :x "0.1x" :y "1.0")                   =not=> ok?
    (create-app pena :x "1x2" :y "1.0")                    =not=> ok?

@@ -65,9 +65,9 @@
   <section class="page" id="create-templates">
 
     <div class="tree-title" style="padding-left: 10px;">
-      <span data-bind="visible: !stack || stack().length == 0, ltext: 'create.choose-op'">
+      <span data-bind="visible: !$data.stack || $data.stack().length == 0, ltext: 'create.choose-op'">
       </span>
-      <span data-bind="visible: stack && stack().length > 0, foreach: stack">
+      <span data-bind="visible: $data.stack && $data.stack().length > 0, foreach: $data.stack">
         <span data-bind="visible: $index"> / </span>
         <span data-bind="text: loc(['operations.tree', op])"></span>
       </span>
@@ -114,7 +114,7 @@
               <span data-bind="ltext: 'newRequest.newApplication'"></span>
           </button>
       </div>
-      
+
     </div>
 
   </section>
@@ -156,7 +156,7 @@
               data-test-id="test-prev-permit-create-button" id="prev-permit-create-button" class="btn btn-primary">
           <i class="lupicon-search"></i>
           <i class="wait spin lupicon-refresh"></i>
-          
+
           <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span>
       </button>
     </div>

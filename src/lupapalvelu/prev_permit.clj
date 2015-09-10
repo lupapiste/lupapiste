@@ -170,7 +170,7 @@
 (def fix-prev-permit-counter (atom 0))
 
 (defn fix-prev-permit-addresses []
-  (when @mongo/connected
+  (when @mongo/connection
     (throw "Mongo already connected, aborting"))
   (try
     (mongo/connect!)
@@ -247,7 +247,7 @@
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
 (defn fix-prev-permit-applicants []
-  (when @mongo/connected
+  (when @mongo/connection
     (throw "Mongo already connected, aborting"))
   (try
     (mongo/connect!)

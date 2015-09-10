@@ -227,7 +227,7 @@ Create new application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname2}  authAtt${secs}
   Set Suite Variable  ${propertyId2}  753-416-6-12
-  Create application the fast way  ${appname2}  ${propertyId2}  kerrostalo-rivitalo
+  Create application the fast way  ${appname2}  ${propertyId2}  kerrostalo-rivitalo  open
   Open tab  attachments
 
 Authority adds png attachment without comment

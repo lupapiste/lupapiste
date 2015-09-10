@@ -16,20 +16,24 @@ $lupicon-size: 22px;
   font-style: normal;
 }
 
-[class^="lupicon-"], [class*=" lupicon-"] {
-                       font-family: 'lupapiste';
-                       speak: none;
-                       font-style: normal;
-                       font-size: $lupicon-size;
-                       font-weight: normal;
-                       font-variant: normal;
-                       text-transform: none;
-                       line-height: 1;
+@mixin lupicon-font {
+  font-family: 'lupapiste';
+  speak: none;
+  font-style: normal;
+  font-size: $lupicon-size;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
 
-                       /* Better Font Rendering =========== */
-                       -webkit-font-smoothing: antialiased;
-                       -moz-osx-font-smoothing: grayscale;
-                     }
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[class^="lupicon-"], [class*=" lupicon-"] {
+  @include lupicon-font;
+}
 
 // Convenience modifiers for marking icons.
 [class^="lupicon-"].primary,

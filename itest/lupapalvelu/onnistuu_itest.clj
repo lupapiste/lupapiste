@@ -11,6 +11,8 @@
                                             ok? fail? http200? http302?
                                             ]]))
 
+(apply-remote-minimal)
+
 (defn get-process [process-id]
   (:process (u/query u/pena :find-sign-process :processId process-id)))
 
