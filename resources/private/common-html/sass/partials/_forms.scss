@@ -1020,7 +1020,7 @@ $col: 25%;
 .form-grid {
   overflow-y: hidden;
   width: 100%;
-  border-bottom: 1px solid $grid-border-color;
+  border-top: 1px solid $grid-border-color;
 
   &:last-child {
     border-bottom: none;

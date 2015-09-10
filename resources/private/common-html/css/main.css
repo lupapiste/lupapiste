@@ -4187,7 +4187,7 @@ div.alleYli-radioGroup {
 .form-grid {
   overflow-y: hidden;
   width: 100%;
-  border-bottom: 1px solid #dddddd;
+  border-top: 1px solid #dddddd;
 }
 /* line 1025, ../sass/partials/_forms.scss */
 .form-grid:last-child {
