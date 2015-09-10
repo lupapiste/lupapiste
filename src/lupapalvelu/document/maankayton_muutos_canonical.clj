@@ -36,20 +36,27 @@
                                 (entry :puhelin contact)
                                 (entry :hetu personal :henkilotunnus))}}))
 
+
+
 (defmethod osapuolitieto "yritys"
-  [{company :yritys}]
-  (let [{contact :yhteystiedot personal :henkilotiedot} (:yhteyshenkilo company)]
+  [data]
+  (let [company (:yritys data)
+        {contact :yhteystiedot personal :henkilotiedot} (:yhteyshenkilo company)
+        billing (canonical-common/get-verkkolaskutus {:data data})
+        billing-information (when billing
+                              {:verkkolaskutustieto billing})]
     (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
            {:yritystieto {:Yritys (merge (entry :yritysnimi company :nimi)
                                          (entry :liikeJaYhteisoTunnus company :liikeJaYhteisotunnus )
-                                         {:postiosoitetieto (->postiosoite-type (:osoite company))}
+                                         {:postiosoitetieto {:postiosoite (->postiosoite-type (:osoite company))}}
                                          (entry :puhelin contact)
-                                         (entry :email contact :sahkopostiosoite))}})))
+                                         (entry :email contact :sahkopostiosoite)
+                                         billing-information)}})))
 
 (defn process-party [lang {{role :subtype} :schema-info data :data}]
-  {:osapuolitieto {:Osapuoli (merge {:roolikoodi (str/capitalize role)
-                                     :asioimiskieli lang
-                                     :vainsahkoinenAsiointiKytkin false} (osapuolitieto data))}})
+  {:Osapuoli (merge {:roolikoodi (str/capitalize role)
+                     :asioimiskieli lang
+                     :vainsahkoinenAsiointiKytkin false} (osapuolitieto data))})
 
 (defn filter-parties [docs lang]
   (map (partial process-party lang) (schema-info-filter docs :type "party")))
@@ -75,11 +82,16 @@
     (or state-name "Hakemus")
     ))
 
+
+
 (defn maankayton-muutos-canonical [application lang]
   (let [app (tools/unwrapped application)
         docs  (canonical-common/documents-without-blanks app)
         [op-doc] (schema-info-filter docs :op)
-        op-name (-> op-doc :schema-info :op :name keyword)
+        op-name ((-> op-doc :schema-info :op :name keyword) {:tonttijako :Tonttijako
+                                                             :asemakaava :Asemakaava
+                                                             :ranta-asemakaava :RantaAsemakaava
+                                                             :yleiskaava :Yleiskaava})
         {op-age :uusiKytkin op-desc :kuvaus} (:data op-doc)
         parties (filter-parties docs lang)
         [{{property :kiinteisto} :data}] (schema-info-filter docs :name "kiinteisto")]
@@ -89,10 +101,13 @@
        {:toimituksenTiedottieto
         {:ToimituksenTiedot (canonical-common/toimituksen-tiedot application lang)}
         :hakemustieto
-        {:Hakemus (concat parties [{:sijaintitieto (canonical-common/get-sijaintitieto application)}
-                                   {:kohdekiinteisto (:propertyId application)}
-                                   {:maaraAla (:maaraalaTunnus property)}
-                                   {:tilatieto (application-state app)}])}
+        {:Hakemus
+         {:osapuolitieto parties
+          :sijaintitieto (canonical-common/get-sijaintitieto application)
+          :kohdekiinteisto (:propertyId application)
+          :maaraAla (:maaraalaTunnus property)
+          :tilatieto (application-state app)}
+         }
         :toimituksenTila (toimituksen-tila app)
         :uusiKytkin (= op-age "uusi")
         :kuvaus op-desc}}}}))

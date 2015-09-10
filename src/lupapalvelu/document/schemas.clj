@@ -864,6 +864,7 @@
 (def uusi-tai-muutos {:name "uusiKytkin"
                       :type :radioGroup
                       :required true
+                      :default "uusi"
                       :body [{:name "uusi"},
                              {:name "muutos"}]})
 

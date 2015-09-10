@@ -5,7 +5,8 @@
             [lupapalvelu.document.maankayton-muutos-canonical :as maankayton-muutos-canonical]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.disk-writer :as writer]
-            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
+            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
+            [lupapalvelu.xml.emit :as emit]))
 
 
 
@@ -82,7 +83,9 @@
                                 {:Yritys/yht [:nimi :liikeJaYhteisotunnus
                                               {:postiosoitetieto {:postiosoite osoite}}
                                               :puhelin
-                                              :sahkopostiosoite]}}
+                                              :sahkopostiosoite
+                                              {:verkkolaskutustieto
+                                               {:Verkkolaskutus [:ovtTunnus :verkkolaskuTunnus :valittajaTunnus]}}]}}
                                :vainsahkoinenAsiointiKytkin]}}
                             {:sijaintitieto {:Sijainti/yht [{:osoite [:yksilointitieto :alkuHetki {:osoitenimi :teksti}]}
                                                             {:piste/gml {:Point :pos}}]}}
@@ -93,39 +96,6 @@
                         {:liitetieto {:Liite/yht [:kuvaus :linkkiliitteeseen :muokkausHetki :versionumero]}}
                         :uusiKytkin
                         :kuvaus]}})]}))
-
-(defmulti ->xml-data
-  "Combines canonical presentation and the mapping into XML-compatible
-  tree structure (:tag :ns :attr and :child properties).
-  Note: This implementation differs from lupapalvelu.xml.emit by supporting
-  child elements where some siblings are repeated and some are not."
-  (fn [canon _ _]
-    (if (sequential? canon)
-      :sequential
-      :map)))
-
-(defmethod ->xml-data :sequential [xs mapping ns]
-  (filter identity (map #(->xml-data % mapping ns) xs)))
-
-(defn- good-content? [content]
-  (if (nil? content)
-    false
-    (if (and (coll? content) (empty? content))
-      false
-      true)))
-
-(defmethod ->xml-data :map [m mapping ns]
-  (if (sequential? mapping)
-    (filter identity (map #(->xml-data m % ns) mapping))
-    (let [{tag :tag attr :attr child :child new-ns :ns} mapping
-          ns (or new-ns ns)
-          cc (tag m)
-          content (if (and child cc)
-                    (->xml-data cc child ns)
-                    cc)]
-      (when (good-content? content)
-        (xml/element (str (or ns "") tag) attr content)))))
-
 
 
 (defn save-application-as-krysp
@@ -139,11 +109,8 @@
                     canonical-without-attachments
                     [:Maankaytonmuutos :maankayttomuutosTieto muutos :liitetieto ]
                     attachments-canonical)
-        _ (>pprint canonical)
         mapping (->mapping muutos)
-        _ (>pprint mapping)
-        xml (->xml-data canonical mapping nil)
-        _ (>pprint xml)
+        xml (emit/element-to-xml canonical mapping nil)
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
     (writer/write-to-disk
       application
