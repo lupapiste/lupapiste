@@ -105,8 +105,8 @@
                                                        optionsText: function(item) {return item ? loc('permitSubtype.' + item) : loc('choose'); }"
                                             id="permitSubtypeSelect">
                                     </select>
-                                    <!-- ko if: loc.hasTerm(['help', util.getIn($root.application, ['primaryOperation', 'name']),'subtype']) -->
-                                    <span data-bind="component: { name: 'help-toggle', params: { lhtml: ['help.' + util.getIn($root.application, ['primaryOperation', 'name']) + '.subtype']}}"></span>
+                                    <!-- ko if: permitSubtypeHelp() -->
+                                    <span data-bind="component: { name: 'help-toggle', params: { lhtml: [permitSubtypeHelp()]}}"></span>
                                     <!-- /ko -->
                                 </span>
                             </div>
