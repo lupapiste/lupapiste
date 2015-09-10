@@ -7788,6 +7788,10 @@ div.filter-row.advanced .autocomplete-component {
 #indicator .indicator-message {
   float: left;
 }
+/* line 38, ../sass/partials/_indicator.scss */
+#indicator .indicator-close {
+  float: right;
+}
 
 /* VIEWS
 ------------------------------------------------------------------------------*/
