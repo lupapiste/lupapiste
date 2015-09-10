@@ -985,6 +985,9 @@ div.alleYli-radioGroup {
   margin-top: $marginL;
 }
 
+
+// Grid styles
+
 $col: 25%;
 
 @mixin form-grid-clear {
@@ -999,7 +1002,7 @@ $col: 25%;
   width: $size * $col;
   min-width: $size * $col;
   max-width: $size * $col;
-  padding-left: 20px;
+  padding-left: $grid-margin;
 
   label.required:after {
     content: "*";
@@ -1020,7 +1023,7 @@ $col: 25%;
 .form-grid {
   overflow-y: hidden;
   width: 100%;
-  border-bottom: 1px solid $grid-border-color;
+  border-top: 1px solid $grid-border-color;
 
   &:last-child {
     border-bottom: none;
@@ -1031,7 +1034,7 @@ $col: 25%;
   }
 
   h2 {
-    padding-left: 20px;
+    padding-left: $grid-margin;
     margin: $marginM 0;
   }
 
@@ -1056,11 +1059,11 @@ $col: 25%;
 
   input[type=text], input[type=password], select {
     padding: 0 $marginM;
-    min-height: 40px;
-    height: 40px;
+    min-height: $grid-input-height;
+    height: $grid-input-height;
     width: 100%;
     box-sizing: border-box;
-    font-size: 16px;
+    font-size: $grid-font-size;
     color: $input-color;
     border: 1px solid $input-border-color;
     -webkit-appearance: none;
@@ -1075,8 +1078,8 @@ $col: 25%;
 
   input[type=checkbox] {
     opacity: 0;
-    width: 0px;
-    height: 0px;
+    width: 0;
+    height: 0;
     margin: 0;
   }
 
@@ -1096,7 +1099,7 @@ $col: 25%;
   }
 
   select.required, input.required {
-    border-color: $input-focus-border-color;
+    border-color: $input-required-border-color;
   }
 
   .select-arrow {
@@ -1105,15 +1108,18 @@ $col: 25%;
     bottom: 1px;
     color: $orange-dark;
     pointer-events:none;
+
+    // show white box behind selector arrow to hide default select arrows on IE9
     background-color: #fff;
-    height: 38px;
+    height: $grid-input-height - 2px;
     width: 30px;
-    line-height: 38px;
+    line-height: $grid-input-height - 2px;
     vertical-align: middle;
   }
 
   input[type=text].err, input[type=password].err {
     border: 1px solid $negative;
+    color: $negative;
   }
 
   @for $i from 1 through 4 {
@@ -1124,7 +1130,7 @@ $col: 25%;
 
   .row {
     @include form-grid-clear;
-    margin: 20px 0;
+    margin: $grid-margin 0;
     overflow-y: hidden;
   }
 
@@ -1136,7 +1142,7 @@ $col: 25%;
     font-style: normal;
     font-weight: bold;
     display: block;
-    height: 40px;
+    height: $grid-input-height;
   }
 
   // password field
@@ -1160,23 +1166,23 @@ $col: 25%;
     background-color: $green-dark;
   }
 
-  [type=password].poor {
+  input[type=password].poor {
     border-color: $red-dark;
   }
 
-  [type=password].low {
+  input[type=password].low {
     border-color: $red-light
   }
 
-  [type=password].average {
+  input[type=password].average {
     border-color: $orange;
   }
 
-  [type=password].good {
+  input[type=password].good {
     border-color: $green-light;
   }
 
-  [type=password].excellent {
+  input[type=password].excellent {
     border-color: $green-dark;
   }
 
