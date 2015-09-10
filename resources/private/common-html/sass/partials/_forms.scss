@@ -254,7 +254,7 @@ input.form-input.long {
   height: $baseline;
 }
 
-.form-input.checkbox, .form-input.radio {
+.form-input.checkbox, [type="checkbox"], .form-input.radio, [type="radio"] {
   width: auto;
   display: inline-block;
   vertical-align: bottom;
@@ -1076,6 +1076,8 @@ $col: 25%;
   input[type=checkbox] {
     opacity: 0;
     width: 0px;
+    height: 0px;
+    margin: 0;
   }
 
   .checkbox-label:before {
