@@ -28,7 +28,7 @@ operations.ranta-asemakaava: Ranta-asemakaava
 ranta-asemakaava._group_label: Ranta-asemakaava
 operations.tree.yleiskaava: Yleiskaava
 operations.tree.yleiskaava.desc: Yleiskaavalaadinnan ja muutosten hakeminen.
-operations.yleisasemakaava: Yleiskaava
+operations.yleiskaava: Yleiskaava
 yleiskaava._group_label: Yleiskaava
 maankayton-muutos.uusiKytkin.uusi: Uusi
 maankayton-muutos.uusiKytkin.muutos: Muutos olemassaolevaan
