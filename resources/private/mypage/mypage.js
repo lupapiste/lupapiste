@@ -23,12 +23,13 @@
       ajax
         .command(commandName, params)
         .pending(model.pending)
-        .success(function() {
+        .success(function(res) {
           model.clear().saved(true);
-          hub.send("indicator", {style: "positive"}); })
-        .error(function(d) {
-          model.clear().saved(false).error(d.text);
-          hub.send("indicator", {style: "negative"});
+          util.showSavedIndicator(res);
+        })
+        .error(function(res) {
+          model.clear().saved(false).error(res.text);
+          util.showSavedIndicator(res);
         })
         .complete(function() { clearTimeout(t); img.hide(); })
         .call();
