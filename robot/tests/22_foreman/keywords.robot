@@ -29,6 +29,7 @@ Open foreman application
   [Arguments]  ${index}
   ${foremanAppId} =  Get From List  ${foremanApps}  ${index}
   Open application by id  ${foremanAppId}
+  Page should contain  Työnjohtajan nimeäminen
 
 Mikko invites foreman to application
   Open tab  parties
@@ -46,8 +47,10 @@ Foreman applies personal information to the foreman application
   Open foreman application  ${index}
   Wait until  Confirm yes no dialog
   Open tab  parties
+  Wait until  Page should contain  Hyväksynyt valtuutuksen
   Open accordions  parties
   Wait until  Click by test id  fill-info-button
+  Wait for jQuery
 
 Foreman accepts invitation and fills info
   Wait until  Click by test id  accept-invite-button
