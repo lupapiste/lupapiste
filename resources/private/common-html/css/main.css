@@ -9709,6 +9709,29 @@ td.comment-text {
   left: 250px;
 }
 
+/* line 46, ../sass/views/_admin.scss */
+#notifications p {
+  margin-bottom: 0;
+}
+/* line 50, ../sass/views/_admin.scss */
+#notifications label {
+  display: block;
+}
+/* line 54, ../sass/views/_admin.scss */
+#notifications input[type=checkbox] + label {
+  display: inline-block;
+}
+/* line 58, ../sass/views/_admin.scss */
+#notifications input[type=text] {
+  width: 480px;
+  box-sizing: border-box;
+}
+/* line 62, ../sass/views/_admin.scss */
+#notifications textarea {
+  width: 480px;
+  box-sizing: border-box;
+}
+
 /* line 2, ../sass/views/_authority_admin.scss */
 #authority-admin h2 {
   margin-top: 24px;
