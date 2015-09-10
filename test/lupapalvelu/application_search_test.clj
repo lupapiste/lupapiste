@@ -35,9 +35,9 @@
 
 (fact "make-query (LUPA-519) with filter-user checks both authority and auth.id"
   (-> (make-query {} {:kind  "both"
-                     :applicationType "all"
-                     :handler  "123"}
-                 {:role "authority"}) (get "$and") last) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
+                      :applicationType "all"
+                      :handlers  ["123"]}
+                  {:role "authority"}) (get "$and") last) => (contains {"$or" [{:auth.id {"$in" ["123"]}} {:authority.id  {"$in" ["123"]}}]}))
 
 (fact "query contais user query"
   (-> (make-query {:auth.id "123"} {} {}) (get "$and") first) => {:auth.id "123"})
@@ -50,11 +50,11 @@
     {:auth.id "123"}
     {:kind  "applications"
      :applicationType "all"
-     :handler  "321"
+     :handlers  ["321"]
      :tags ["test1" "test2"]}
     {:role "authority"}) => (just {"$and" (just [{:auth.id "123"}
                                                  {:state {"$nin" ["draft" "canceled"]}}
-                                                 {"$or" [{"auth.id" "321"} {"authority.id" "321"}]}
+                                                 {"$or" [{:auth.id {"$in" ["321"]}} {:authority.id  {"$in" ["321"]}}]}
                                                  {:tags {"$in" ["test1" "test2"]}}])}))
 
 (fact "Organization are present in query"

@@ -145,7 +145,8 @@
                    "tag-filter-service.js"
                    "operation-filter-service.js"
                    "organization-filter-service.js"
-                   "organization-tags-service.js"]}
+                   "organization-tags-service.js"
+                   "handler-filter-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js"]}

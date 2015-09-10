@@ -84,7 +84,7 @@
                                                     :title     sc/Str
                                                     :sort     {:field (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler")
                                                                :asc    sc/Bool}
-                                                    :filter   {(sc/optional-key :handler) (sc/pred vector? "Handler filter should have ids in a vector")
+                                                    :filter   {(sc/optional-key :handlers) (sc/pred vector? "Handler filter should have ids in a vector")
                                                                (sc/optional-key :tags) (sc/pred vector? "Tag filter should have ids in a vector")
                                                                (sc/optional-key :operations) (sc/pred vector? "Op filter should have ids in a vector")
                                                                (sc/optional-key :organizations) (sc/pred vector? "Org filter should have ids in a vector")

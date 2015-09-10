@@ -71,7 +71,7 @@
     (when (seq coordinates)
       {$or (map (fn [c] {:location {$geoWithin {"$polygon" c}}}) coordinates)})))
 
-(defn make-query [query {:keys [searchText kind applicationType handler tags organizations operations areas]} user]
+(defn make-query [query {:keys [searchText kind applicationType handlers tags organizations operations areas]} user]
   {$and
    (filter seq
      [query
@@ -89,9 +89,11 @@
           "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
           "canceled"          {:state "canceled"}
           {:state {$nin ["draft" "canceled"]}}))
-      (when-not (contains? #{nil "0"} handler)
-        {$or [{"auth.id" handler}
-              {"authority.id" handler}]})
+      (when-not (empty? handlers)
+        (if ((set handlers) "no-authority")
+          {$or [{:authority.id  {$exists false}}, {:authority.id {$in [nil ""]}}]}
+          {$or [{:auth.id {$in handlers}}
+                {:authority.id {$in handlers}}]}))
       (when-not (empty? tags)
         {:tags {$in tags}})
       (when-not (empty? organizations)

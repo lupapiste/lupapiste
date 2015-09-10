@@ -5,7 +5,8 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
   self.dataProvider = params.dataProvider;
 
   self.filterCount = ko.computed(function() {
-    return _.size(ko.unwrap(lupapisteApp.services.tagFilterService.selected)) +
+    return _.size(ko.unwrap(lupapisteApp.services.handlerFilterService.selected)) +
+           _.size(ko.unwrap(lupapisteApp.services.tagFilterService.selected)) +
            _.size(ko.unwrap(lupapisteApp.services.operationFilterService.selected)) +
            _.size(ko.unwrap(lupapisteApp.services.organizationFilterService.selected)) +
            _.size(ko.unwrap(lupapisteApp.services.areaFilterService.selected));
@@ -18,7 +19,7 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   self.saveAdvancedFilters = function() {
     var filter = {
-      handler:       util.getIn(self.dataProvider, ["handler", "id"]),
+      handlers:      _.map(ko.unwrap(lupapisteApp.services.handlerFilterService.selected), "id"), //util.getIn(self.dataProvider, ["handler", "id"]),
       tags:          _.map(ko.unwrap(lupapisteApp.services.tagFilterService.selected), "id"),
       operations:    _.map(ko.unwrap(lupapisteApp.services.operationFilterService.selected), "id"),
       organizations: _.map(ko.unwrap(lupapisteApp.services.organizationFilterService.selected), "id"),
@@ -26,7 +27,7 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
     };
 
     ajax
-    .command("update-default-application-filter", {filter: filter, sort: ko.toJS(self.dataProvider.sort)})
+    .command("save-application-filter", {title: "bar", filter: filter, sort: ko.toJS(self.dataProvider.sort)})
     .error(function() {
       hub.send("indicator", {style: "negative"});
     })

@@ -19,7 +19,7 @@
               user
               (select-keys
                 data
-                [:tags :organizations :applicationType :handler
+                [:tags :organizations :applicationType :handlers
                  :limit :searchText :skip :sort :operations :areas]))))
 
 (defn- selected-ops-by-permit-type [selected-ops]

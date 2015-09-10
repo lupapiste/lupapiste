@@ -80,7 +80,7 @@
 (facts update-default-application-filter
   (apply-remote-minimal)
 
-  (fact (->> (command sonja :update-default-application-filter :filter {:handler (:id sonja)  :tags ["bar" "buzz"] :operations [] :organizations [] :areas ["1"]} :sort {:column "type" :asc false})) => ok?)
+  (fact (->> (command sonja :update-default-application-filter :filter {:handlers (:id sonja)  :tags ["bar" "buzz"] :operations [] :organizations [] :areas ["1"]} :sort {:column "type" :asc false})) => ok?)
 
   (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter) first :tags) => ["bar" "buzz"])
 

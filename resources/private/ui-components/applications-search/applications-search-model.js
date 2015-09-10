@@ -16,8 +16,6 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.searchFieldDelayed = ko.pureComputed(self.searchField).extend({rateLimit: {method: "notifyWhenChangesStop", timeout: 750}});
 
-  self.handler = ko.observable();
-
   self.limit = ko.observable(25);
 
   self.sort = util.getIn(lupapisteApp.models.currentUser, ["applicationFilters", 0, "sort"])
@@ -42,7 +40,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
         tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
         organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
         operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
-        handler: self.handler() ? self.handler().id : undefined,
+        handlers: _.pluck(lupapisteApp.services.handlerFilterService.selected(), "id"),
         applicationType: self.applicationType(),
         areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
         limit: self.limit(),
@@ -62,7 +60,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
         tags: _.pluck(lupapisteApp.services.tagFilterService.selected, "id"),
         organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
         operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
-        handler: self.handler() ? self.handler().id : undefined,
+        handlers: _.pluck(lupapisteApp.services.handlerFilterService.selected(), "id"),
         applicationType: self.applicationType(),
         areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
         limit: self.limit(),
