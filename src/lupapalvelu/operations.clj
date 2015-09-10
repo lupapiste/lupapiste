@@ -697,22 +697,6 @@
                                    :link-permit-required false
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
-     ;; :tonttijaon-hakeminen        {:schema "maankayton-muutos"
-     ;;                               :permit-type permit/KT
-     ;;                               :required common-maanmittaus-schemas
-     ;;                               :attachments []
-     ;;                               :add-operation-allowed false
-     ;;                               :link-permit-required false
-     ;;                               :link-permit-verdict-required false
-     ;;                               :asianhallinta false}
-     ;; :tonttijaon-muutoksen-hakeminen {:schema "maankayton-muutos"
-     ;;                                  :permit-type permit/KT
-     ;;                                  :required common-maanmittaus-schemas
-     ;;                                  :attachments []
-     ;;                                  :add-operation-allowed false
-     ;;                                  :link-permit-required false
-     ;;                                  :link-permit-verdict-required false
-     ;;                                  :asianhallinta false}
      :kiinteistonmuodostus         {:schema "kiinteistotoimitus"
                                     :permit-type permit/KT
                                     :required common-maanmittaus-schemas
@@ -770,22 +754,6 @@
                                      :link-permit-verdict-required false
                                      :asianhallinta false}
      :rajankaynti                  {:schema "rajankaynti"
-                                    :permit-type permit/KT
-                                    :required common-maanmittaus-schemas
-                                    :attachments []
-                                    :add-operation-allowed false
-                                    :link-permit-required false
-                                    :link-permit-verdict-required false
-                                    :asianhallinta false}
-     :rajankaynnin-hakeminen       {:schema "kiinteistotoimitus"
-                                    :permit-type permit/KT
-                                    :required common-maanmittaus-schemas
-                                    :attachments []
-                                    :add-operation-allowed false
-                                    :link-permit-required false
-                                    :link-permit-verdict-required false
-                                    :asianhallinta false}
-     :rajannayton-hakeminen        {:schema "kiinteistotoimitus"
                                     :permit-type permit/KT
                                     :required common-maanmittaus-schemas
                                     :attachments []
