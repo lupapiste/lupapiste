@@ -850,6 +850,23 @@
                              {:name "ranta-asemakaava"}
                              {:name "ei kaavaa"}]}])
 
+(def rajankaynti-tyyppi {:name "rajankayntiTyyppi"
+                         :type :select
+                         :required true
+                         :body [{:name "Rajan paikkaa ja rajamerkki\u00e4 koskeva ep\u00e4selvyys (rajank\u00e4ynti)"}
+                                {:name "Ep\u00e4selvyys siit\u00e4, mihin rekisteriyksikk\u00f6\u00f6n jokin alue kuuluu"}
+                                {:name "Rasiteoikeutta ja rasitteen sijaintia koskeva ep\u00e4selvyys"}
+                                {:name "Kiinteist\u00f6n osuus yhteiseen alueeseen tai yhteiseen erityiseen etuuteen ja osuudensuuruus sek\u00e4 kiinteist\u00f6lle kuuluva erityinen etuus"}
+                                {:name "Yhteisen alueen tai yhteisen erityisen etuuden osakaskiinteist\u00f6t ja niille kuuluvien osuuksien suuruudet"}
+                                {:name "Ep\u00e4selv\u00e4n, kadonneen tai turmeltuneen toimitusasiakirjan tai kartan sis\u00e4lt\u00f6"}
+                                {:name "Ristiriitaisista toimitusasiakirjoista tai kartoista johtuva ep\u00e4selvyys"}]})
+
+(def uusi-tai-muutos {:name "uusiKytkin"
+                      :type :radioGroup
+                      :required true
+                      :default "uusi"
+                      :body [{:name "uusi"},
+                             {:name "muutos"}]})
 
 (defn- approvable-top-level-groups [v]
   (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
@@ -905,8 +922,10 @@
     {:info {:name "kiinteistotoimitus" :approvable true}
      :body (approvable-top-level-groups (body kuvaus))}
 
+    {:info {:name "rajankaynti" :approvable true}
+     :body (approvable-top-level-groups (body rajankaynti-tyyppi kuvaus))}
     {:info {:name "maankayton-muutos" :approvable true}
-     :body (approvable-top-level-groups (body kuvaus))}
+     :body (approvable-top-level-groups (body uusi-tai-muutos kuvaus))}
 
     {:info {:name "hakija"
             :i18name "osapuoli"

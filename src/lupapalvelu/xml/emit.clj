@@ -17,7 +17,7 @@
 (defn element-to-xml
   ([data model] (element-to-xml data model nil))
   ([data model prev-ns]
-    (when-not (:tag model) (throw (IllegalArgumentException. (str "tag definition missing from " model))))
+   (when-not (:tag model) (throw (IllegalArgumentException. (str "tag definition missing from " model))))
     (let [current-data ((:tag model) data)
           ns (or (:ns model) prev-ns)]
       (when-not (nil? current-data)
