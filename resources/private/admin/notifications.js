@@ -6,12 +6,15 @@
 
     self.applicants = ko.observable(false);
     self.authorities = ko.observable(false);
+    self.title = ko.observable("");
     self.message = ko.observable("");
+
 
     self.updateNotifications = function() {
       ajax.command("notifications-update", {applicants: self.applicants(),
                                             authorities: self.authorities(),
-                                            message: self.message()})
+                                            "title-fi": self.title(),
+                                            "message-fi": self.message()})
         .success(function(res) {
           console.log("success", res);
         })
