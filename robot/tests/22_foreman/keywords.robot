@@ -55,7 +55,11 @@ Foreman applies personal information to the foreman application
 Foreman accepts invitation and fills info
   Wait until  Click by test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//section[@id='application']//button[@data-test-id='accept-invite-button']
+  Wait for jQuery
+  Open accordions  parties
   Wait until  Click by test id  fill-info-button
+  Wait for jQuery
+  Open accordions  parties
 
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}

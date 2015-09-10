@@ -1,0 +1,1 @@
+LUPAPISTE.DocgenSelectModel = LUPAPISTE.DocgenInputModel;

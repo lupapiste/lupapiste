@@ -7,7 +7,8 @@
 
   ko.validation.init({
     insertMessages: true,
-    decorateElement: true,
+    decorateInputElement: true,
+    errorElementClass: "err",
     errorMessageClass: "error-message",
     parseInputAttributes: true,
     messagesOnModified: true,
@@ -60,6 +61,13 @@
         .call();
     }, 500),
     message: loc("email-in-use")
+  };
+
+  ko.validation.rules.match = {
+    validator: function(value1, value2) {
+      return value1 === value2;
+    },
+    message: ""
   };
 
   /*

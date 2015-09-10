@@ -419,19 +419,19 @@
                                     {:name "kayntienMaara" :type :string :size "s" :unit "kpl" :subtype :number :min 0 :max 9999999}]})
 
 (def hanke-row
-  [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :string :i18nkey "muutHankkeet.luvanNumero"}
-   {:name "katuosoite" :type :string :size "m" :label false :uicomponent :string :i18nkey "muutHankkeet.katuosoite"}
-   {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :string :i18nkey "muutHankkeet.rakennustoimenpide"}
-   {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.kokonaisala"}
-   {:name "vaihe" :type :select :size "t" :label false :uicomponent :select-component :i18nkey "muutHankkeet.vaihe"
+  [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
+   {:name "katuosoite" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
+   {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.rakennustoimenpide"}
+   {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
+   {:name "vaihe" :type :select :size "t" :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe"
     :body [{:name "R" :i18nkey "muutHankkeet.R"}
            {:name "A" :i18nkey "muutHankkeet.A"}
            {:name "K" :i18nkey "muutHankkeet.K"}]}
-   {:name "3kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.3kk"}
-   {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.6kk"}
-   {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.9kk"}
-   {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.12kk"}
-   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :checkbox :whitelist {:roles [:none]
+   {:name "3kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.3kk"}
+   {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.6kk"}
+   {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.9kk"}
+   {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.12kk"}
+   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :docgen-checkbox :whitelist {:roles [:none]
                                                                                                                             :otherwise :disabled}}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
