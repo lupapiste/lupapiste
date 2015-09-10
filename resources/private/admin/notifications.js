@@ -15,10 +15,8 @@
                                             authorities: self.authorities(),
                                             "title-fi": self.title(),
                                             "message-fi": self.message()})
-        .success(function(res) {
-          console.log("success", res);
-        })
-        .error(_.noop)
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
         .call();
     };
   }
