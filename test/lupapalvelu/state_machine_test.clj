@@ -13,11 +13,9 @@
     (state-graph {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
                   :documents [{:schema-info {:name "tyonjohtaja-v2"}}]}) => states/tj-hakemus-state-graph
     (state-graph {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
-                  :documents [{:data {:ilmoitusHakemusValitsin {:value "hakemus"}}
-                               :schema-info {:name "tyonjohtaja-v2"}}]}) => states/tj-hakemus-state-graph
+                  :permitSubtype "tyonjohtaja-hakemus"}) => states/tj-hakemus-state-graph
     (state-graph {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
-                  :documents [{:data {:ilmoitusHakemusValitsin {:value "ilmoitus"}}
-                               :schema-info {:name "tyonjohtaja-v2"}}]}) => states/tj-ilmoitus-state-graph))
+                  :permitSubtype "tyonjohtaja-ilmoitus"}) => states/tj-ilmoitus-state-graph))
 
 (facts "can-proceed?"
   (can-proceed? {:infoRequest true :state "info"} :answered) => true

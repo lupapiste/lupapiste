@@ -108,24 +108,28 @@
 ;; Public API
 ;;
 
-(defn- enrich-row [app]
-  (assoc app :kind (if (:infoRequest app) "inforequest" "application")))
+(defn- enrich-row [{:keys [permitSubtype infoRequest] :as app}]
+  (assoc app :kind (cond
+                     (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
+                     infoRequest "applications.inforequest"
+                     :else       "applications.application")))
 
 (def- sort-field-mapping {"applicant" :applicant
                           "handler" ["authority.lastName" "authority.firstName"]
                           "location" :address
                           "modified" :modified
                           "submitted" :submitted
-                          "type" :infoRequest
                           "state" :state})
 
+(defn- dir [asc] (if asc 1 -1))
+
 (defn- make-sort [{{:keys [field asc]} :sort}]
-  (let [sort-field (sort-field-mapping field)
-        dir (if asc 1 -1)]
+  (let [sort-field (sort-field-mapping field)]
     (cond
+      (= "type" field) (array-map :permitSubtype (dir asc) :infoRequest (dir (not asc)))
       (nil? sort-field) {}
-      (sequential? sort-field) (zipmap sort-field (repeat dir))
-      :else {sort-field dir})))
+      (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
+      :else (array-map sort-field (dir asc)))))
 
 (defn applications-for-user [user {application-type :applicationType :as params}]
   (let [user-query  (domain/basic-application-query-for user)

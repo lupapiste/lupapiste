@@ -1067,6 +1067,24 @@
 
 (defmigration jarvenpaa-raki (raki-conversion "186" "jarvenpaa_raki"))
 
+
+(defmigration ilmoitusHakemusValitsin-permitSubtype
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]
+          application (mongo/select collection
+                        {$or [{:primaryOperation.name "tyonjohtajan-nimeaminen-v2"}
+                              {:primaryOperation nil, :documents.schema-info.name "tyonjohtaja-v2"}]}
+                        {:documents 1})
+          :let [doc (domain/get-document-by-name application "tyonjohtaja-v2")
+                val (-> doc :data :ilmoitusHakemusValitsin :value)
+                subtype (if (= "ilmoitus" val)
+                          :tyonjohtaja-ilmoitus
+                          :tyonjohtaja-hakemus)]]
+      (mongo/update-n collection
+        {:_id (:id application), :documents {$elemMatch {:id (:id doc)}}}
+        {$set {:permitSubtype subtype}
+         $unset {:documents.$.data.ilmoitusHakemusValitsin 1}}))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

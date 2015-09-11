@@ -41,3 +41,26 @@
     left: 250px;
   }
 }
+
+#notifications {
+  p {
+    margin-bottom: 0;
+  }
+
+  label {
+    display: block;
+  }
+
+  input[type=checkbox] + label {
+    display: inline-block;
+  }
+
+  input[type=text] {
+    width: 480px;
+    box-sizing: border-box;
+  }
+  textarea {
+    width: 480px;
+    box-sizing: border-box;
+  }
+}

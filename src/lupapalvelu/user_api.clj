@@ -623,6 +623,6 @@
       (fail :email-not-in-use))))
 
 (defcommand remove-user-notification
-  {:user-roles #{:applicant}}
+  {:user-roles #{:applicant :authority}}
   [{{id :id} :user}]
   (mongo/update-by-id :users id {$unset {:notification 1}}))
