@@ -101,7 +101,9 @@
    :sftp-directory "/kaavat"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
-   :extra-statement-selection-values false})
+   :extra-statement-selection-values false
+   :wfs-krysp-ns-name "maankaytonmuutos"
+   })
 
 ;;
 ;; Helpers
@@ -199,12 +201,3 @@
         (when-not (= (keyword application-permit-type) (keyword validator-permit-type))
           (fail :error.invalid-permit-type :permit-type validator-permit-type)))
       (fail :error.invalid-application-parameter))))
-
-(defn is-valid-subtype [permitSubtype {permitType :permitType}]
-  (when-not (some #(= permitSubtype %) (permit-subtypes permitType))
-    (fail :error.permit-has-no-such-subtype)))
-
-
-(defn validate-permit-has-subtypes [_ {permitType :permitType}]
-    (when (empty? (permit-subtypes permitType))
-      (fail :error.permit-has-no-subtypes)))

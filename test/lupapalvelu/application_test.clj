@@ -85,3 +85,9 @@
 
     (fact "Add operation not allowed for :muutoslupa"
       (add-operation-allowed? nil {:primaryOperation {:name "kerrostalo-rivitalo"} :permitSubtype :muutoslupa}) => error)))
+
+(fact "validate-has-subtypes"
+  (validate-has-subtypes nil {:permitType "P"}) => nil
+  (validate-has-subtypes nil {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => nil
+  (validate-has-subtypes nil {:permitType "R"}) => {:ok false :text "error.permit-has-no-subtypes"}
+  (validate-has-subtypes nil nil) => {:ok false :text "error.permit-has-no-subtypes"})

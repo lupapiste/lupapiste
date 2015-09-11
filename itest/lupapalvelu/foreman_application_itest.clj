@@ -20,11 +20,11 @@
         link-to-application          (first (application :appsLinkingToUs))
         foreman-applications         (query apikey :foreman-applications :id application-id) => truthy]
 
-    (fact "Can't submit before ilmoitus or hakemus is selected"
-      (command apikey :submit-application :id foreman-application-id) => (partial expected-failure? :error.foreman.type-not-selected))
+    (fact "Initial permit subtype is 'tyonjohtaja-hakemus'"
+      (:permitSubtype foreman-application) => "tyonjohtaja-hakemus")
 
-    (fact "Update ilmoitusHakemusValitsin to 'ilmoitus'"
-      (command apikey :update-doc :id foreman-application-id :doc (:id foreman-doc) :updates [["ilmoitusHakemusValitsin" "ilmoitus"]]) => ok?)
+    (fact "Update subtype to 'tyonjohtaja-ilmoitus'"
+      (command apikey :change-permit-sub-type :id foreman-application-id :permitSubtype "tyonjohtaja-ilmoitus") => ok?)
 
     (fact "Foreman application contains link to application"
       (:id foreman-link-permit-data) => application-id)

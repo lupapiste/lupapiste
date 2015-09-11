@@ -32,6 +32,14 @@ LUPAPISTE.ApplicationModel = function() {
   self.primaryOperation = ko.observable();
   self.allOperations = ko.observable();
   self.permitSubtype = ko.observable();
+  self.permitSubtypeHelp = ko.pureComputed(function() {
+    var opName = util.getIn(self, ["primaryOperation", "name"]);
+    if (loc.hasTerm(["help", opName ,"subtype"])) {
+      return "help." + opName + ".subtype"
+    }
+    return undefined;
+  });
+
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();
   self.assignee = ko.observable();
@@ -60,28 +68,28 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.organization = ko.observable([]);
 
-  self.asianhallintaEnabled = ko.computed(function() {
+  self.asianhallintaEnabled = ko.pureComputed(function() {
     return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
   });
-  self.organizationLinks = ko.computed(function() {
+  self.organizationLinks = ko.pureComputed(function() {
     return self.organizationMeta() ? self.organizationMeta().links() : "";
   });
-  self.organizationName = ko.computed(function() {
+  self.organizationName = ko.pureComputed(function() {
     return self.organizationMeta() ? self.organizationMeta().name() : "";
   });
-  self.requiredFieldsFillingObligatory = ko.computed(function() {
+  self.requiredFieldsFillingObligatory = ko.pureComputed(function() {
     return self.organizationMeta() ? self.organizationMeta().requiredFieldsFillingObligatory() : false;
   });
   self.incorrectlyFilledRequiredFields = ko.observable([]);
-  self.hasIncorrectlyFilledRequiredFields = ko.computed(function() {
+  self.hasIncorrectlyFilledRequiredFields = ko.pureComputed(function() {
     return self.incorrectlyFilledRequiredFields() && self.incorrectlyFilledRequiredFields().length > 0;
   });
 
-  self.summaryAvailable = ko.computed(function() {
+  self.summaryAvailable = ko.pureComputed(function() {
     return self.inPostVerdictState() || self.state() === "canceled";
   });
 
-  self.taskGroups = ko.computed(function() {
+  self.taskGroups = ko.pureComputed(function() {
     var tasks = ko.toJS(self.tasks) || [];
     // TODO query without foreman tasks
     tasks = _.filter(tasks, function(task) {
@@ -115,7 +123,7 @@ LUPAPISTE.ApplicationModel = function() {
       .valueOf();
   });
 
-  self.primaryOperationName = ko.computed(function() {
+  self.primaryOperationName = ko.pureComputed(function() {
     var op = ko.unwrap(self.primaryOperation());
     if (op) {
       return "operations." + ko.unwrap(op.name);

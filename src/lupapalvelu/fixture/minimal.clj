@@ -541,7 +541,9 @@
                                :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.2"}
                                :YL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.2"}
                                :MAL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.2"}
-                               :VVVL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.3"}}
+                               :VVVL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.3"}
+                               :KT {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.6"}
+                               :MM {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "1.0.1"}}
                        :statementGivers [{:id "516560d6c2e6f603beb85147"
                                           :text "Paloviranomainen",
                                           :email "sonja.sibbo@sipoo.fi",
