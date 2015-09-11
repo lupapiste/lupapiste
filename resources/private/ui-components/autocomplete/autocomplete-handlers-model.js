@@ -15,7 +15,8 @@ LUPAPISTE.AutocompleteHandlersModel = function() {
         }, true);
       })
       .sortBy("label")
-      .unshift({id: "no-authority", fullName: "no-authority"})
+      .unshift({id: "no-authority", fullName: "Ei käsittelijää", behaviour: "singleSelection"})
+      .unshift({id: "all", fullName: "Kaikki", behaviour: "clearSelected"})
       .value();
   });
 };

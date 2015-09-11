@@ -105,10 +105,19 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.selectItem = function(item) {
-    if (self.tags) {
-      self.selectedOptions.push(item);
+    if (item.behaviour === "clearSelected") {
+      self.selectedOptions([]);
+    } else if (item.behaviour === "singleSelection") {
+      self.selectedOptions([item]);
     } else {
-      self.selectedOptions(item);
+      self.selectedOptions.remove(function(item) {
+        return item.behaviour === "singleSelection";
+      });
+      if (self.tags) {
+        self.selectedOptions.push(item);
+      } else {
+        self.selectedOptions(item);
+      }
     }
     self.dropdownClick(false); // set to false so dropdown closes
     self.inputSelected(false);
