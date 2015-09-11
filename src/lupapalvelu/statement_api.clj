@@ -13,6 +13,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.statement :refer :all]
             [lupapalvelu.states :as states]
+            [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.user-api :as user-api]))
 
@@ -104,7 +105,7 @@
    :show-municipality-in-subject true})
 
 (defcommand request-for-statement
-  {:parameters  [id personIds]
+  {:parameters  [functionCode id personIds]
    :user-roles #{:authority}
    :states      #{:open :submitted :complement-needed}
    :notified    true
@@ -122,6 +123,7 @@
                                              :requested now
                                              :given     nil
                                              :reminder-sent nil
+                                             :metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
                                              :status    nil}
                                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
                                  :recipient user}) persons)

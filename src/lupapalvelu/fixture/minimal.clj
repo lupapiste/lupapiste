@@ -553,7 +553,7 @@
                        :kopiolaitos-orderer-email "tilaaja@example.com"
                        :kopiolaitos-orderer-phone "0501231234"
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P" "YI" "YL" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v)))) operations/operations))
-                       :permanent-archive-enabled false
+                       :permanent-archive-enabled true
                        :tags [{:id "111" :label "yl\u00E4maa"} {:id "222" :label "ullakko"}]
                        :areas {:type "FeatureCollection"
                                :features [{:id "sipoo_keskusta",

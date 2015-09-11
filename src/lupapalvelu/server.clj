@@ -84,7 +84,7 @@
   (info "*** Instrumenting performance monitoring")
   (perf-mon/init)
   (when (env/feature? :nrepl)
-    (warn "*** Starting nrepl")
+    (warn "*** Starting nrepl in port 9090")
     (require 'clojure.tools.nrepl.server)
     ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090)))
 
