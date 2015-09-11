@@ -6,13 +6,13 @@
       <div class="autocomplete-component" data-bind="css: {'has-tags': tags}">
         <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}">
           <span class="autocomplete-selection">
-            <!-- ko if: selected -->
-            <span data-bind="text: optionsText ? selected()[optionsText] : selected()"></span>
+            <!-- ko if: !showTags() && selectedOptions -->
+            <span data-bind="text: optionsText ? selectedOptions()[optionsText] : selectedOptions()"></span>
             <!-- /ko -->
             <span class="caption" data-bind="visible: showCaption, text: optionsCaption"></span>
-            <!-- ko if: tags -->
-            <ul data-bind="visible: selectedTags().length > 0" class="tags">
-              <!-- ko foreach: selectedTags -->
+            <!-- ko if: showTags -->
+            <ul data-bind="visible: selectedOptions().length > 0" class="tags">
+              <!-- ko foreach: selectedOptions -->
               <li class="tag">
                 <i class="btn btn-small primary lupicon-circle-remove"
                    data-bind="click: $component.removeTag,

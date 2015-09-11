@@ -18,13 +18,9 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.optionsCaption = params.optionsCaption || loc("choose");
 
   // Observables
-  self.selected = ko.observable("");
-
   self.data = ko.observableArray(self.options());
 
   self.index = ko.observable(0);
-
-  self.selectedTags = ko.observableArray();
 
   self.inputSelected = ko.observable(false);
 
@@ -35,7 +31,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
   });
 
   self.showCaption = ko.pureComputed(function() {
-    return !self.selected() && self.selectedTags().length === 0;
+    return _.isEmpty(self.selectedOptions());
   });
 
   self.groupedResults = ko.pureComputed(function() {
@@ -46,12 +42,9 @@ LUPAPISTE.AutocompleteModel = function(params) {
     });
   });
 
-  // set initial value
-  if (self.tags) {
-    self.selectedTags = self.selectedOptions;
-  } else {
-    self.selected = self.selectedOptions;
-  }
+  self.showTags = ko.pureComputed(function() {
+    return self.tags && !_.find(self.selectedOptions(), {behaviour: "singleSelection"});
+  });
 
   self.subscriptions = [];
 
@@ -75,7 +68,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.subscriptions.push(self.options.subscribe(function() {
     if (params.nullable) {
       // add nullable parameter
-      self.data([null].concat(self.options()));
+      self.data(self.options().unshift(null));
     } else {
       self.data(self.options());
     }
@@ -110,10 +103,10 @@ LUPAPISTE.AutocompleteModel = function(params) {
     } else if (item.behaviour === "singleSelection") {
       self.selectedOptions([item]);
     } else {
-      self.selectedOptions.remove(function(item) {
-        return item.behaviour === "singleSelection";
-      });
       if (self.tags) {
+        self.selectedOptions.remove(function(item) {
+          return item.behaviour === "singleSelection";
+        });
         self.selectedOptions.push(item);
       } else {
         self.selectedOptions(item);
@@ -179,7 +172,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.removeTag = function(tag) {
-    self.selectedTags.remove(tag);
+    self.selectedOptions.remove(tag);
     self.inputSelected(false);
   };
 
