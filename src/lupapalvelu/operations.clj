@@ -155,7 +155,7 @@
     ]])
 
 (def operation-tree-for-MM
-  ["maankayton-muutos" ; kaavat
+  ["maankayton-muutos"
    [["tonttijako" :tonttijako]
     ["asemakaava" :asemakaava]
     ["ranta-asemakaava" :ranta-asemakaava]
@@ -697,31 +697,47 @@
                                    :link-permit-required false
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
-     :kiinteistonmuodostus         {:schema "kiinteistotoimitus"
+     :kiinteistonmuodostus         {:schema "kiinteistonmuodostus"
                                     :permit-type permit/KT
-                                    :required common-maanmittaus-schemas
+                                    :required (conj common-maanmittaus-schemas "rasitetoimitus")
                                     :attachments []
                                     :add-operation-allowed false
                                     :link-permit-required false
                                     :link-permit-verdict-required false
                                     :asianhallinta false}
-     :tontin-lohkominen            {:schema "kiinteistotoimitus"
-                                    :permit-type permit/KT
-                                    :required common-maanmittaus-schemas
-                                    :attachments []
-                                    :add-operation-allowed false
-                                    :link-permit-required false
-                                    :link-permit-verdict-required false
-                                    :asianhallinta false}
-     :tilan-rekisteroiminen-tontiksi {:schema "kiinteistotoimitus"
-                                      :permit-type permit/KT
-                                      :required common-maanmittaus-schemas
-                                      :attachments []
-                                      :add-operation-allowed false
-                                      :link-permit-required false
-                                      :link-permit-verdict-required false
-                                      :asianhallinta false}
-     :yhdistaminen                  {:schema "kiinteistotoimitus"
+     ;; :tontin-lohkominen            {:schema "kiinteistotoimitus"
+     ;;                                :permit-type permit/KT
+     ;;                                :required common-maanmittaus-schemas
+     ;;                                :attachments []
+     ;;                                :add-operation-allowed false
+     ;;                                :link-permit-required false
+     ;;                                :link-permit-verdict-required false
+     ;;                                :asianhallinta false}
+     ;; :tilan-rekisteroiminen-tontiksi {:schema "kiinteistotoimitus"
+     ;;                                  :permit-type permit/KT
+     ;;                                  :required common-maanmittaus-schemas
+     ;;                                  :attachments []
+     ;;                                  :add-operation-allowed false
+     ;;                                  :link-permit-required false
+     ;;                                  :link-permit-verdict-required false
+     ;;                                  :asianhallinta false}
+     ;; :yhdistaminen                  {:schema "kiinteistotoimitus"
+     ;;                                 :permit-type permit/KT
+     ;;                                 :required common-maanmittaus-schemas
+     ;;                                 :attachments []
+     ;;                                 :add-operation-allowed false
+     ;;                                 :link-permit-required false
+     ;;                                 :link-permit-verdict-required false
+     ;;                                 :asianhallinta false}
+     ;; :halkominen                    {:schema "kiinteistotoimitus"
+     ;;                                 :permit-type permit/KT
+     ;;                                 :required common-maanmittaus-schemas
+     ;;                                 :attachments []
+     ;;                                 :add-operation-allowed false
+     ;;                                 :link-permit-required false
+     ;;                                 :link-permit-verdict-required false
+     ;;                                 :asianhallinta false}
+     :rasitetoimitus                {:schema "rasitetoimitus"
                                      :permit-type permit/KT
                                      :required common-maanmittaus-schemas
                                      :attachments []
@@ -729,30 +745,14 @@
                                      :link-permit-required false
                                      :link-permit-verdict-required false
                                      :asianhallinta false}
-     :halkominen                    {:schema "kiinteistotoimitus"
-                                     :permit-type permit/KT
-                                     :required common-maanmittaus-schemas
-                                     :attachments []
-                                     :add-operation-allowed false
-                                     :link-permit-required false
-                                     :link-permit-verdict-required false
-                                     :asianhallinta false}
-     :rasitetoimitus                {:schema "kiinteistotoimitus"
-                                     :permit-type permit/KT
-                                     :required common-maanmittaus-schemas
-                                     :attachments []
-                                     :add-operation-allowed false
-                                     :link-permit-required false
-                                     :link-permit-verdict-required false
-                                     :asianhallinta false}
-     :tilusvaihto                   {:schema "kiinteistotoimitus"
-                                     :permit-type permit/KT
-                                     :required common-maanmittaus-schemas
-                                     :attachments []
-                                     :add-operation-allowed false
-                                     :link-permit-required false
-                                     :link-permit-verdict-required false
-                                     :asianhallinta false}
+     ;; :tilusvaihto                   {:schema "kiinteistotoimitus"
+     ;;                                 :permit-type permit/KT
+     ;;                                 :required common-maanmittaus-schemas
+     ;;                                 :attachments []
+     ;;                                 :add-operation-allowed false
+     ;;                                 :link-permit-required false
+     ;;                                 :link-permit-verdict-required false
+     ;;                                 :asianhallinta false}
      :rajankaynti                  {:schema "rajankaynti"
                                     :permit-type permit/KT
                                     :required common-maanmittaus-schemas
@@ -761,22 +761,22 @@
                                     :link-permit-required false
                                     :link-permit-verdict-required false
                                     :asianhallinta false}
-     :rakennuksen-sijainti         {:schema "kiinteistotoimitus"
-                                    :permit-type permit/KT
-                                    :required common-maanmittaus-schemas
-                                    :attachments []
-                                    :add-operation-allowed false
-                                    :link-permit-required false
-                                    :link-permit-verdict-required false
-                                    :asianhallinta false}
-     :ya-lohkominen                {:schema "kiinteistotoimitus"
-                                    :permit-type permit/KT
-                                    :required common-maanmittaus-schemas
-                                    :attachments []
-                                    :add-operation-allowed false
-                                    :link-permit-required false
-                                    :link-permit-verdict-required false
-                                    :asianhallinta false}
+     ;; :rakennuksen-sijainti         {:schema "kiinteistotoimitus"
+     ;;                                :permit-type permit/KT
+     ;;                                :required common-maanmittaus-schemas
+     ;;                                :attachments []
+     ;;                                :add-operation-allowed false
+     ;;                                :link-permit-required false
+     ;;                                :link-permit-verdict-required false
+     ;;                                :asianhallinta false}
+     ;; :ya-lohkominen                {:schema "kiinteistotoimitus"
+     ;;                                :permit-type permit/KT
+     ;;                                :required common-maanmittaus-schemas
+     ;;                                :attachments []
+     ;;                                :add-operation-allowed false
+     ;;                                :link-permit-required false
+     ;;                                :link-permit-verdict-required false
+     ;;                                :asianhallinta false}
      :poikkeamis                  {:schema "rakennushanke"
                                    :permit-type permit/P
                                    :required  (conj common-poikkeamis-schemas "suunnittelutarveratkaisun-lisaosa")

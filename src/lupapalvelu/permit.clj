@@ -91,19 +91,19 @@
 
 (defpermit KT "Kiinteistotoimitus"
   {:subtypes       []
-   :sftp-directory "/rakennus"
-   :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true
-   :extra-statement-selection-values false})
-
-(defpermit MM "Maankayton muutos"
-  {:subtypes       []
-   :sftp-directory "/kaavat"
+   :sftp-directory "/kiinteistotoimitus"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
    :extra-statement-selection-values false
-   :wfs-krysp-ns-name "maankaytonmuutos"
-   })
+   :wfs-krysp-ns-name "kiinteistotoimitus"})
+
+(defpermit MM "Maankayton muutos"
+  {:subtypes       []
+   :sftp-directory "/maankaytonmuutos"
+   :applicant-doc-schema "hakija"
+   :multiple-parties-allowed true
+   :extra-statement-selection-values false
+   :wfs-krysp-ns-name "maankaytonmuutos"})
 
 ;;
 ;; Helpers
