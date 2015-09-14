@@ -7,9 +7,9 @@
         <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}">
           <span class="autocomplete-selection">
             <!-- ko if: showSingleSelection -->
-            <span data-bind="text: selectionText"></span>
+            <span class="caption" data-bind="visible: selectionText, text: selectionText"></span>
             <!-- /ko -->
-            <span class="caption" data-bind="visible: showCaption, text: optionsCaption"></span>
+            <span class="selection-text" data-bind="visible: showCaption, text: optionsCaption"></span>
             <!-- ko if: showTags -->
             <ul data-bind="visible: selectedOptions().length > 0" class="tags">
               <!-- ko foreach: selectedOptions -->
