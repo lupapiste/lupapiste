@@ -169,6 +169,9 @@
 (defn authority-admin? [{role :role}]
   (= :authorityAdmin (keyword role)))
 
+(defn dummy? [{role :role}]
+  (= :dummy (keyword role)))
+
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
 

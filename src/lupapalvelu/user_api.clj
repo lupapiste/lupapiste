@@ -588,7 +588,7 @@
    :user-roles       #{:anonymous}}
   [_]
   (let [user (user/get-user-by-email email)]
-    (if user
+    (if (and user (not (user/dummy? user)))
       (ok)
       (fail :email-not-in-use))))
 
