@@ -13,15 +13,15 @@
             <!-- ko if: showTags -->
             <ul data-bind="visible: selectedOptions().length > 0" class="tags">
               <!-- ko foreach: selectedOptions -->
-              <li class="tag">
-                <i class="tag-remove lupicon-remove"
-                   data-bind="click: $component.removeTag,
-                              clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false"></i>
+              <li class="tag" data-bind="click: $component.removeTag,
+                                         clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false">
+                <i class="tag-remove lupicon-remove"></i>
                 <span class="primary tag-label"
                       data-bind="text: $component.optionsText ? $data[$component.optionsText] : $data,
                                  titleWhenOverflow: $component.optionsText ? $data[$component.optionsText] : $data"></span>
               </li>
               <!-- /ko -->
+                <i class="tag-chevron btn lupicon-chevron-small-down"></i>
             </ul>
             <!-- /ko -->
           </span>
