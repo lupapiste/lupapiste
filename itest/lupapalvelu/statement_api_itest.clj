@@ -55,7 +55,7 @@
           (query veikko :application :id application-id) => not-accessible?)
 
         (let [application-before (query-application sonja application-id)
-              resp (command sonja :request-for-statement :id application-id :personIds [statement-giver-veikko]) => ok?
+              resp (command sonja :request-for-statement :functionCode nil :id application-id :personIds [statement-giver-veikko]) => ok?
               application-after  (query-application sonja application-id)
               emails (sent-emails)
               email (first emails)]
@@ -111,7 +111,7 @@
         ))
 
     (fact "Statement person has access to application"
-      (let [resp (command sonja :request-for-statement :id application-id :personIds [statement-giver-ronja]) => ok?
+      (let [resp (command sonja :request-for-statement :functionCode nil :id application-id :personIds [statement-giver-ronja]) => ok?
             application (query-application (apikey-for "ronja") application-id)]
         (auth-contains-ronjas-statement application) => truthy
 
