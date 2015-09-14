@@ -323,7 +323,7 @@
 
     <simpleType name="PisteType">
         <annotation>
-            <documentation>UTM x (itä) ja y (pohjoinen) metreinä, esimerkkiarvo: 411933,3125 6689060,5</documentation>
+            <documentation>Koordinaatisto ETRS-TM35FIN: x (itä) ja y (pohjoinen) metreinä, esimerkkiarvo: 411933,3125 6689060,5</documentation>
         </annotation>
         <list itemType="double"></list>
     </simpleType>
