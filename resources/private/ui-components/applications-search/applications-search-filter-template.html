@@ -19,9 +19,10 @@
         <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.isAuthority() -->
         <div class="col-1" data-bind="if: lupapisteApp.models.currentUser.isAuthority()">
           <br/>
-          <button class="secondary" data-test-id="toggle-advanced-filters">
+          <button class="secondary" data-test-id="toggle-advanced-filters" data-bind="toggleClick: showAdvancedFilters, css: {toggled: showAdvancedFilters}">
             <i class="lupicon-chevron-down"></i>
-            <span data-bind="ltext: advancedFiltersText, toggleClick: showAdvancedFilters"></span>
+            <i class="lupicon-chevron-up toggle"></i>
+            <span data-bind="ltext: advancedFiltersText"></span>
           </button>
         </div>
   <!--       <div class="feature filter-item">
