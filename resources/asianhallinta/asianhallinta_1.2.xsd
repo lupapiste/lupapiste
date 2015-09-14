@@ -135,6 +135,8 @@
     <complexType name="LiiteType">
         <sequence>
             <element name="Kuvaus" type="string" maxOccurs="1" minOccurs="1"></element>
+            <element name="KuvausFi" type="string" maxOccurs="1" minOccurs="0"></element>
+            <element name="KuvausSv" type="string" maxOccurs="1" minOccurs="0"></element>
             <element name="Tyyppi" type="string" maxOccurs="1" minOccurs="1"></element>
             <element name="LinkkiLiitteeseen" type="string" maxOccurs="1" minOccurs="1"></element>
             <element name="Luotu" type="date" maxOccurs="1" minOccurs="0">
