@@ -415,7 +415,7 @@
 (defn create-preview
   [file-id filename content-type content application-id & [db-name]]
   (when (and (env/feature? :preview) (preview/converter content-type))
-    (mongo/with-db db-name
+    (mongo/with-db (or db-name mongo/default-db-name)
       (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
       (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
                                               (with-open [content ((:content (mongo/download file-id)))]
