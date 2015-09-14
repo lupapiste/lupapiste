@@ -172,7 +172,11 @@
         (fact "Canonical has correct count of attachments"
           (count canonical-attachments) => 2)
         (fact "attachment has correct keys"
-          (keys (first canonical-attachments)) => (just [:Kuvaus :Tyyppi :LinkkiLiitteeseen :Luotu :Metatiedot]))
+          (keys (first canonical-attachments)) => (just [:Kuvaus :KuvausFi :KuvausSv :Tyyppi :LinkkiLiitteeseen :Luotu :Metatiedot]))
+        (fact "Kuvaus fields"
+          (:Kuvaus (first canonical-attachments)) => "asemapiirros"
+          (:KuvausFi (first canonical-attachments)) => "Asemapiirros"
+          (:KuvausSv (first canonical-attachments)) => "Situationsplan")
         (fact "All attachments have 'begin-of-link' prefix"
           (every? #(-> % :LinkkiLiitteeseen (ss/starts-with begin-of-link)) canonical-attachments) => true)
         (fact "filenames are in format 'fileId_filename'"

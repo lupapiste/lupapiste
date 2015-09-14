@@ -109,12 +109,16 @@
 (defn- ua-get-liite
   "Return attachment in canonical format, with provided link as LinkkiLiitteeseen"
   [attachment link]
-  (util/strip-nils
-    {:Kuvaus (get-in attachment [:type :type-id])
-     :Tyyppi (get-in attachment [:latestVersion :contentType])
-     :LinkkiLiitteeseen link
-     :Luotu (util/to-xml-date (:modified attachment))
-     :Metatiedot {:Metatieto (ua-get-metatiedot attachment)}}))
+  (let [attachment-type (get-in attachment [:type :type-id])
+        attachment-group (get-in attachment [:type :type-group])]
+    (util/strip-nils
+      {:Kuvaus attachment-type
+       :KuvausFi (i18n/localize "fi" "attachmentType" attachment-group attachment-type)
+       :KuvausSv (i18n/localize "sv" "attachmentType" attachment-group attachment-type)
+       :Tyyppi (get-in attachment [:latestVersion :contentType])
+       :LinkkiLiitteeseen link
+       :Luotu (util/to-xml-date (:modified attachment))
+       :Metatiedot {:Metatieto (ua-get-metatiedot attachment)}})))
 
 ;; Public
 
