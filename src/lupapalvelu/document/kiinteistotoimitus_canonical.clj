@@ -17,18 +17,17 @@
         parties (canonical-common/process-parties docs lang)
         [{{property :kiinteisto} :data}] (canonical-common/schema-info-filter docs :name "kiinteisto")]
     {:Kiinteistotoimitus
-     {:todo
-      {op-name
-       {:toimituksenTiedottieto
-        {:ToimituksenTiedot (canonical-common/toimituksen-tiedot application lang)}
-        :hakemustieto
-        {:Hakemus
-         {:osapuolitieto parties
-          :sijaintitieto (canonical-common/get-sijaintitieto application)
-          :kohdekiinteisto (:propertyId application)
-          :maaraAla (:maaraalaTunnus property)
-          :tilatieto (application-state app)}
-         }
-        :toimituksenTila (toimituksen-tila app)
-        :uusiKytkin (= op-age "uusi")
-        :kuvaus op-desc}}}}))
+     (for []){op-name
+      {:toimituksenTiedottieto
+       {:ToimituksenTiedot (canonical-common/toimituksen-tiedot application lang)}
+       :hakemustieto
+       {:Hakemus
+        {:osapuolitieto parties
+         :sijaintitieto (canonical-common/get-sijaintitieto application)
+         :kohdekiinteisto (:propertyId application)
+         :maaraAla (:maaraalaTunnus property)
+         :tilatieto (application-state app)}
+        }
+       :toimituksenTila (toimituksen-tila app)
+       :uusiKytkin (= op-age "uusi")
+       :kuvaus op-desc}}}))
