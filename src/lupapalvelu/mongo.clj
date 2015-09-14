@@ -52,7 +52,7 @@
           db))))
 
 (defn get-gfs []
-  (m/get-gridfs @connection (get-db)))
+  (m/get-gridfs @connection (.getName (get-db))))
 
 (defn with-_id [m]
   (if-let [id (:id m)]
