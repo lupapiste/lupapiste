@@ -7714,37 +7714,19 @@ ul.attachments-list li.mandatory-attachments {
 }
 
 /* line 50, ../sass/partials/_applications_search.scss */
-div.filter-row {
-  margin-bottom: 12px;
+div.search {
+  position: relative;
 }
 /* line 52, ../sass/partials/_applications_search.scss */
-div.filter-row > div {
-  display: inline-block;
+div.search input {
+  padding-right: 40px !important;
 }
-/* line 55, ../sass/partials/_applications_search.scss */
-div.filter-row label {
-  display: block;
-}
-/* line 58, ../sass/partials/_applications_search.scss */
-div.filter-row input.search {
-  line-height: 24px;
-  padding: 3px 24px 3px 6px;
-  border: 1px solid #dddddd;
-  box-shadow: none;
-}
-/* line 59, ../sass/partials/_applications_search.scss */
-div.filter-row input.search ~ span.icon {
-  position: relative;
-  left: -22px;
-  top: 4px;
-}
-/* line 69, ../sass/partials/_applications_search.scss */
-div.filter-row .autocomplete-component > .autocomplete-selection-wrapper > span.autocomplete-selection {
-  border-radius: 0;
-}
-/* line 72, ../sass/partials/_applications_search.scss */
-div.filter-row .filter-item {
-  margin-right: 12px;
+/* line 56, ../sass/partials/_applications_search.scss */
+div.search i {
+  color: #f39129;
+  position: absolute;
+  top: 8px;
+  right: 8px;
 }
 
 /* line 2, ../sass/partials/_indicator.scss */

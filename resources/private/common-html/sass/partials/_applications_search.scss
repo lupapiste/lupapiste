@@ -47,32 +47,45 @@
   }
 }
 
-div.filter-row {
-  margin-bottom: $marginM;
-  > div {
-    display: inline-block;
+div.search {
+  position: relative;
+  input {
+    padding-right: 40px !important;
   }
-  label {
-    display: block
-  }
-  input.search {
-    ~ span.icon {
-      position: relative;
-      left: -22px;
-      top: 4px;
-    }
-    line-height: $baseline;
-    padding: $marginS/2 $marginL $marginS/2 $marginS;
-    border: 1px solid #dddddd;
-    box-shadow: none;
-  }
-  .autocomplete-component > .autocomplete-selection-wrapper > span.autocomplete-selection {
-    border-radius: 0;
-  }
-  .filter-item {
-    margin-right: $marginM;
+
+  i {
+    color: $primary;
+    position: absolute;
+    top: 8px;
+    right: 8px;
   }
 }
+// div.filter-row {
+//   margin-bottom: $marginM;
+//   > div {
+//     display: inline-block;
+//   }
+//   label {
+//     display: block
+//   }
+//   div.search {
+//     ~ span.icon {
+//       position: relative;
+//       left: -22px;
+//       top: 4px;
+//     }
+//     line-height: $baseline;
+//     padding: $marginS/2 $marginL $marginS/2 $marginS;
+//     border: 1px solid #dddddd;
+//     box-shadow: none;
+//   }
+//   .autocomplete-component > .autocomplete-selection-wrapper > span.autocomplete-selection {
+//     border-radius: 0;
+//   }
+//   .filter-item {
+//     margin-right: $marginM;
+//   }
+// }
 
 // div.filter-row.advanced {
 //   .autocomplete-component {
