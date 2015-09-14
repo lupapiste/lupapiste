@@ -476,3 +476,9 @@ i.toggle {
   text-align: center;
   width: 200px;
 }
+
+button {
+  &:focus {
+    outline:0;
+  }
+}

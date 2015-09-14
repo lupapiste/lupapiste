@@ -14,10 +14,10 @@
             <ul data-bind="visible: selectedOptions().length > 0" class="tags">
               <!-- ko foreach: selectedOptions -->
               <li class="tag">
-                <i class="btn btn-small primary lupicon-circle-remove"
+                <i class="tag-remove lupicon-remove"
                    data-bind="click: $component.removeTag,
                               clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false"></i>
-                <span class="btn btn-small primary tag-label"
+                <span class="primary tag-label"
                       data-bind="text: $component.optionsText ? $data[$component.optionsText] : $data,
                                  titleWhenOverflow: $component.optionsText ? $data[$component.optionsText] : $data"></span>
               </li>

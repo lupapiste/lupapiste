@@ -997,7 +997,7 @@ $col: 25%;
 }
 
 @mixin column ($size) {
-  position: relative;
+  // position: relative;
   float: left;
   width: $size * $col;
   min-width: $size * $col;
@@ -1132,6 +1132,10 @@ $col: 25%;
     @include form-grid-clear;
     margin: $grid-margin 0;
     overflow-y: hidden;
+  }
+
+  .autocomplete-component {
+    width: 100%;
   }
 
   .info-message {

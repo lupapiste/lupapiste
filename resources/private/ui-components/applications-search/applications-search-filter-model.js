@@ -4,6 +4,11 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   self.dataProvider = params.dataProvider;
 
+  // TODO saved filters service
+  self.savedFilters = ko.observableArray([]);
+  self.selectedFilter = ko.observable();
+  self.query = ko.observable();
+
   self.filterCount = ko.computed(function() {
     return _.size(ko.unwrap(lupapisteApp.services.handlerFilterService.selected)) +
            _.size(ko.unwrap(lupapisteApp.services.tagFilterService.selected)) +
