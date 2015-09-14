@@ -7,13 +7,7 @@ LUPAPISTE.AutocompleteHandlersModel = function() {
   self.query = ko.observable("");
 
   self.data = ko.pureComputed(function() {
-    var q = self.query() || "";
-    return _(lupapisteApp.services.handlerFilterService.data())
-      .filter(function(item) {
-        return _.reduce(q.split(" "), function(result, word) {
-          return _.contains(item.fullName.toUpperCase(), word.toUpperCase()) && result;
-        }, true);
-      })
+    return _(util.filterDataByQuery(lupapisteApp.services.handlerFilterService.data(), self.query() || "", self.selected(), "fullName"))
       .sortBy("label")
       .unshift({id: "no-authority", fullName: "Ei käsittelijää", behaviour: "singleSelection"})
       .unshift({id: "all", fullName: "Kaikki", behaviour: "clearSelected"})
