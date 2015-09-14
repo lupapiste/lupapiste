@@ -107,8 +107,11 @@
         "krysp/yhteiset-2.1.6.xsd"
         "krysp/maankaytonmuutos-1.0.1.xsd"))
 
-(def- asianhallinta
-   (conj xml-sources "asianhallinta/asianhallinta.xsd"))
+(def- asianhallinta_1_1
+   (conj xml-sources "asianhallinta/asianhallinta_1.1.xsd"))
+
+(def- asianhallinta_1_2
+   (conj xml-sources "asianhallinta/asianhallinta_1.2.xsd"))
 
 (defn- create-validator [schemas]
   (.newValidator (.newSchema schema-factory (into-array (map stream-source schemas)))))
@@ -120,7 +123,8 @@
 (def- common-validator-2_1_5 (create-validator yht-2_1_5))
 (def- common-validator-2_1_6 (create-validator yht-2_1_6))
 
-(def- asianhallinta-validator (create-validator asianhallinta))
+(def- asianhallinta-validator-1_1 (create-validator asianhallinta_1_1))
+(def- asianhallinta-validator-1_2 (create-validator asianhallinta_1_2))
 
 ; mapping-common contains the same information.
 ; Perhaps the permit type -- version -mapping could
@@ -139,7 +143,7 @@
    "2.1.3" common-validator-2_1_3
    "2.2.0" common-validator-2_1_5
    "2.2.1" common-validator-2_1_6
-   "ah-1.1" asianhallinta-validator})
+   "ah-1.1" asianhallinta-validator-1_1})
 
 (def- poik-validators
   {"2.1.2" common-validator-2_1_0
@@ -148,11 +152,11 @@
    "2.1.5" common-validator-2_1_3
    "2.2.0" common-validator-2_1_5
    "2.2.1" common-validator-2_1_6
-   "ah-1.1" asianhallinta-validator})
+   "ah-1.1" asianhallinta-validator-1_1})
 
 (def- ymp-validators
   {"2.1.2" common-validator-2_1_3
-   "ah-1.1" asianhallinta-validator})
+   "ah-1.1" asianhallinta-validator-1_1})
 
 (def- mkmu-validators
   {"2.1.6" common-validator-2_1_6
@@ -166,10 +170,10 @@
    :YI  ymp-validators
    :MAL ymp-validators
    :VVVL {"2.1.3" common-validator-2_1_3
-          "ah-1.1" asianhallinta-validator}
+          "ah-1.1" asianhallinta-validator-1_1}
    :YL  ymp-validators
    :MM  mkmu-validators ; maankayton muutos aka kaavat
-   :KT  {"ah-1.1" asianhallinta-validator}})
+   :KT  {"ah-1.1" asianhallinta-validator-1_1}})
 
 (def supported-versions-by-permit-type
   (reduce (fn [m [permit-type validators]] (assoc m permit-type (keys validators))) {} schema-validators))
