@@ -3,6 +3,7 @@
             [lupapalvelu.xml.asianhallinta.mapping_common :as ah]
             [lupapalvelu.xml.emit :as emit]
             [lupapalvelu.xml.disk-writer :as writer]
+            [lupapalvelu.xml.krysp.mapping-common :as common]
             [lupapalvelu.application :refer [get-operations]]
             [sade.core :refer [def-]]))
 
@@ -23,6 +24,15 @@
            {:tag :Viiteluvat :child [{:tag :Viitelupa :child ah/viitelupa-type}]}
            {:tag :Sijainti :child [{:tag :Sijaintipiste}]}
            {:tag :Kiinteistotunnus}]})
+
+(def uusi-asia-1_2
+  (assoc
+    uusi-asia
+    :child
+    (common/update-child-element
+      (:child uusi-asia)
+      [:Liitteet :Liite]
+      {:tag :Liite :child ah/liite-type-1_2})))
 
 (def taydennys-asiaan
   {:tag :TaydennysAsiaan
