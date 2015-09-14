@@ -76,16 +76,10 @@
   function updatePermitSubtype(value) {
     if (isInitializing || !authorizationModel.ok("change-permit-sub-type")) { return; }
 
-    var element = $("#permitSubtypeSaveIndicator");
-    element.stop().hide();
-
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
       .success(function() {
         authorizationModel.refresh(currentId);
-        element.stop().show();
-        setTimeout(function() {
-          element.fadeOut("slow");
-        }, 2000);
+        hub.send("indicator", {style: "positive"});
       })
       .call();
   }
@@ -161,6 +155,7 @@
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
+      requestForStatementModel.setFunctionCode(app.tosFunction);
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);

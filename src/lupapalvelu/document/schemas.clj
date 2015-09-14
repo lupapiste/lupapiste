@@ -47,6 +47,10 @@
 (defn get-latest-schema-version []
   (->> @registered-schemas keys (sort >) first))
 
+(defn with-current-schema-info [document]
+  (let [current-info (-> document :schema-info get-schema :info (select-keys immutable-keys))]
+    (update document :schema-info merge current-info)))
+
 ;;
 ;; helpers
 ;;
@@ -354,7 +358,7 @@
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
                            {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}
-                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :required true :type :select :sortBy :displayname :blacklist [:applicant]
+                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :required true :type :select :sortBy :displayname
                             :body [{:name "nimeaminen" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen"}
                                    {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
 
@@ -378,10 +382,6 @@
                    designer-basic
                    {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja}
                    sijaisuus-tyonjohtaja))
-
-(def ilmoitus-hakemus-valitsin {:name "ilmoitusHakemusValitsin" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin._group_label" :type :select :sortBy :displayname :required true :blacklist [:applicant] :layout :single-line
-                                :body [{:name "ilmoitus" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin.ilmoitus"}
-                                       {:name "hakemus" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin.hakemus"}]})
 
 (def kuntaroolikoodi-tyonjohtaja-v2 [{:name "kuntaRoolikoodi"
                                       :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label"
@@ -457,7 +457,6 @@
 (def tyonjohtaja-v2 (body
                       tayta-omat-tiedot-button
                       designer-basic
-                      ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
                       patevyysvaatimusluokka ; Actually vaadittuPatevyysluokka in KRYSP
                       vastattavat-tyotehtavat-tyonjohtaja-v2

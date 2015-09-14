@@ -14,11 +14,15 @@
             [sade.util :as util]
             [lupapalvelu.logging]
             [lupapalvelu.web :as web]
-            [lupapalvelu.vetuma]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.ua-compatible-header :as uach]
+            [lupapalvelu.migration.migration :as migration]
+            [lupapalvelu.perf-mon :as perf-mon]
             [scss-compiler.core :as scss]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.vetuma]
             [lupapalvelu.fixture.fixture-api]
             [lupapalvelu.fixture.minimal]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.document-api]
             [lupapalvelu.prev-permit-api]
             [lupapalvelu.user-api]
@@ -37,17 +41,14 @@
             [lupapalvelu.admin-api]
             [lupapalvelu.proxy-services]
             [lupapalvelu.exports-api]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.document.schema-repository-api]
             [lupapalvelu.actions-api]
-            [lupapalvelu.migration.migration :as migration]
             [lupapalvelu.screenmessage-api]
             [lupapalvelu.integrations-api]
             [lupapalvelu.construction-api]
             [lupapalvelu.asianhallinta-config-api]
-            [lupapalvelu.perf-mon :as perf-mon]
             [lupapalvelu.perf-mon-api]
+            [lupapalvelu.user-notification-api]
             [lupapalvelu.tiedonohjaus-api]))
 
 (defonce jetty (atom nil))
@@ -83,7 +84,7 @@
   (info "*** Instrumenting performance monitoring")
   (perf-mon/init)
   (when (env/feature? :nrepl)
-    (warn "*** Starting nrepl")
+    (warn "*** Starting nrepl in port 9090")
     (require 'clojure.tools.nrepl.server)
     ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090)))
 

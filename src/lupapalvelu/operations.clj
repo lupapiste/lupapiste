@@ -322,12 +322,10 @@
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
    :yl-toiminnan-muutos ymparistolupa-operation})
 
-(defn- tyonjohtaja-state-machine-resolver [application]
-  (let [doc (domain/get-document-by-name application "tyonjohtaja-v2")
-        val (get-in doc [:data :ilmoitusHakemusValitsin :value])]
-    (if (= "ilmoitus" val)
-      states/tj-ilmoitus-state-graph
-      states/tj-hakemus-state-graph)))
+(defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
+  (if (= :tyonjohtaja-ilmoitus (keyword subtype))
+    states/tj-ilmoitus-state-graph
+    states/tj-hakemus-state-graph))
 
 (def Operation
   {:schema sc/Str
@@ -338,6 +336,7 @@
    :link-permit-verdict-required sc/Bool
    :add-operation-allowed sc/Bool
    :required [sc/Str]
+   (sc/optional-key :subtypes) [(sc/maybe sc/Keyword)]
    (sc/optional-key :state-graph-resolver) util/Fn
    (sc/optional-key :schema-data) [sc/Any]})
 
@@ -851,6 +850,7 @@
 
     :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
                                   :permit-type permit/R
+                                  :subtypes [:tyonjohtaja-hakemus :tyonjohtaja-ilmoitus]
                                   :state-graph-resolver tyonjohtaja-state-machine-resolver
                                   :required ["hankkeen-kuvaus-minimum"]
                                   :attachments []
@@ -950,7 +950,7 @@
 ;; Validate operations
 (doseq [[k op] operations]
   (let [v (sc/check Operation op)]
-    (assert (nil? v) (str k v))))
+    (assert (nil? v) (str k \space v))))
 ;;
 ;; Functions
 ;;
@@ -964,7 +964,11 @@
 (defn get-operation-metadata
   "First form returns all metadata for operation. Second form returns value of given metadata."
   ([operation] (operations (keyword operation)))
-  ([operation metadata] ((keyword metadata) (operations (keyword operation)))))
+  ([operation metadata-key] ((keyword metadata-key) (operations (keyword operation)))))
+
+(defn get-primary-operation-metadata
+  ([{op :primaryOperation}] (get-operation-metadata (:name op)))
+  ([{op :primaryOperation} metadata-key] (get-operation-metadata (:name op) metadata-key)))
 
 (defn permit-type-of-operation [operation]
   (get-operation-metadata operation :permit-type))
