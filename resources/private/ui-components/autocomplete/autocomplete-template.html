@@ -6,8 +6,8 @@
       <div class="autocomplete-component" data-bind="css: {'has-tags': tags}">
         <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}">
           <span class="autocomplete-selection">
-            <!-- ko if: !showTags() && selectedOptions -->
-            <span data-bind="text: optionsText ? selectedOptions()[optionsText] : selectedOptions()"></span>
+            <!-- ko if: showSingleSelection -->
+            <span data-bind="text: selectionText"></span>
             <!-- /ko -->
             <span class="caption" data-bind="visible: showCaption, text: optionsCaption"></span>
             <!-- ko if: showTags -->

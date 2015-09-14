@@ -3,7 +3,13 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   var self = this;
 
-  self.selectedOptions = params.selectedOptions;
+  self.selectedOptions = params.selectedOptions || ko.observableArray(_.filter([ko.unwrap(params.selectedOption)]));
+
+  self.selectedOptions.subscribe(function(val) {
+    if (params.selectedOption) {
+      params.selectedOption(_.first(val));
+    }
+  });
 
   // Parameters
   // tagging support
@@ -44,6 +50,14 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.showTags = ko.pureComputed(function() {
     return self.tags && !_.find(self.selectedOptions(), {behaviour: "singleSelection"});
+  });
+
+  self.selectionText = ko.pureComputed(function() {
+    return self.optionsText ? util.getIn(self.selectedOptions(), [0, self.optionsText]) : self.selectedOptions()[0];
+  });
+
+  self.showSingleSelection = ko.pureComputed(function() {
+    return !self.showTags();
   });
 
   self.subscriptions = [];
@@ -109,7 +123,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
         });
         self.selectedOptions.push(item);
       } else {
-        self.selectedOptions(item);
+        self.selectedOptions([item]);
       }
     }
     self.dropdownClick(false); // set to false so dropdown closes
