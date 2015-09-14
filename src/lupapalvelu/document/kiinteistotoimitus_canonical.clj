@@ -1,46 +1,23 @@
-(ns lupapalvelu.document.maankayton-muutos-canonical
+(ns lupapalvelu.document.kiinteistotoimitus-canonical
   (:require [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
             [lupapalvelu.document.tools :as tools ]
             [lupapalvelu.permit :as permit]
             [sade.util :as util]))
 
 
-(defn- application-state [app]
-  (let [enums {:submitted "Vireill\u00e4"
-               :sent "Haettu"
-               :closed "P\u00e4\u00e4ttynyt"}
-        state (-> app :state keyword)
-        date (util/to-xml-date (state app))
-        {a-first :firstName a-last :lastName} (:authority app)]
-    {:Tila
-     {:pvm date
-      :kasittelija (format "%s %s" a-first a-last)
-      :hakemuksenTila (state enums)}}))
 
-
-(defn- toimituksen-tila [app]
-  (let [state (-> app :state keyword)
-        state-name (state {:sent "Hakemus"
-                           :submitted "Hakemus"})]
-    ;; TODO: add more states.
-    (or state-name "Hakemus")
-    ))
-
-
-
-(defn maankayton-muutos-canonical [application lang]
+#_(defn kiinteistotoimitus-canonical [application lang]
   (let [app (tools/unwrapped application)
         docs  (canonical-common/documents-without-blanks app)
-        [op-doc] (canonical-common/schema-info-filter docs :op)
+        op-docs (canonical-common/schema-info-filter docs :op)
         op-name ((-> op-doc :schema-info :op :name keyword) {:tonttijako :Tonttijako
                                                              :asemakaava :Asemakaava
                                                              :ranta-asemakaava :RantaAsemakaava
                                                              :yleiskaava :Yleiskaava})
-        {op-age :uusiKytkin op-desc :kuvaus} (:data op-doc)
         parties (canonical-common/process-parties docs lang)
         [{{property :kiinteisto} :data}] (canonical-common/schema-info-filter docs :name "kiinteisto")]
-    {:Maankaytonmuutos
-     {:maankayttomuutosTieto
+    {:Kiinteistotoimitus
+     {:todo
       {op-name
        {:toimituksenTiedottieto
         {:ToimituksenTiedot (canonical-common/toimituksen-tiedot application lang)}
