@@ -75,8 +75,8 @@
 (defquery get-possible-statement-statuses
   {:description "Provides the possible statement statuses according to the krysp version in use."
    :parameters [:id]
-   :user-roles #{:authority}
-   :user-authz-roles #{:statementGiver}
+   :user-roles #{:authority :applicant}
+   :user-authz-roles action/all-authz-roles
    :states states/all-application-states}
   [{application :application}]
   (ok :data (possible-statement-statuses application)))

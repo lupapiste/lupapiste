@@ -20,14 +20,14 @@ Teppo logs in and creates some applications
   Set Suite Variable  ${verdictGiven}  verdictGiven
   Set Suite Variable  ${constructionStarted}  constructionStarted
   Create inforequest the fast way  create-info  360603.153  6734222.95  753-423-2-40  kerrostalo-rivitalo  init-comment
-  Create application the fast way  notice-1-${secs}  753-423-2-41  kerrostalo-rivitalo  ${draft}
-  Create application the fast way  notice-2-${secs}  753-423-2-42  kerrostalo-rivitalo  ${open}
-  Create application the fast way  notice-3-${secs}  753-423-2-43  kerrostalo-rivitalo  ${answered}
-  Create application the fast way  notice-4-${secs}  753-423-2-44  kerrostalo-rivitalo  ${submitted}
-  Create application the fast way  notice-5-${secs}  753-423-2-45  kerrostalo-rivitalo  ${sent}
-  Create application the fast way  notice-6-${secs}  753-423-2-46  kerrostalo-rivitalo  ${complement-needed}
-  Create application the fast way  notice-7-${secs}  753-423-2-47  kerrostalo-rivitalo  ${verdictGiven}
-  Create application the fast way  notice-8-${secs}  753-423-2-48  kerrostalo-rivitalo  ${constructionStarted}
+  Create application with state  notice-1-${secs}  753-423-2-41  kerrostalo-rivitalo  ${draft}
+  Create application with state  notice-2-${secs}  753-423-2-42  kerrostalo-rivitalo  ${open}
+  Create application with state  notice-3-${secs}  753-423-2-43  kerrostalo-rivitalo  ${answered}
+  Create application with state  notice-4-${secs}  753-423-2-44  kerrostalo-rivitalo  ${submitted}
+  Create application with state  notice-5-${secs}  753-423-2-45  kerrostalo-rivitalo  ${sent}
+  Create application with state  notice-6-${secs}  753-423-2-46  kerrostalo-rivitalo  ${complement-needed}
+  Create application with state  notice-7-${secs}  753-423-2-47  kerrostalo-rivitalo  ${verdictGiven}
+  Create application with state  notice-8-${secs}  753-423-2-48  kerrostalo-rivitalo  ${constructionStarted}
 
 Teppo navigates to application page
   Go to page  applications
