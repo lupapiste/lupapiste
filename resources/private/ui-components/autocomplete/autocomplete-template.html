@@ -4,7 +4,7 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="autocomplete-template">
       <div class="autocomplete-component" data-bind="css: {'has-tags': tags}">
-        <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}">
+        <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}, css: {active: inputSelected()}">
           <span class="autocomplete-selection">
             <!-- ko if: showSingleSelection -->
             <span class="caption" data-bind="visible: selectionText, text: selectionText"></span>
@@ -25,7 +25,10 @@
             </ul>
             <!-- /ko -->
           </span>
-          <i data-bind="visible: showCaption" class="autocomplete-selection-arrow btn lupicon-chevron-small-down"></i>
+          <span class="autocomplete-selection-arrow" data-bind="css: {toggled: inputSelected()}">
+            <i data-bind="visible: showCaption" class="lupicon-chevron-small-down"></i>
+            <i data-bind="visible: showCaption" class="lupicon-chevron-small-up toggle"></i>
+          </span>
         </div>
         <div class="autocomplete-dropdown" data-bind="visible: false, fader: dropdownVisible, duration: 100">
           <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
