@@ -112,10 +112,12 @@
     (clear []            (reset! store {}))
     (clearExpired [])))
 
+(def test-db-cookie (->cookie "test_db_name" test-db-name))
+
 (defn http [verb url options]
   (let [store (atom {})
         cookies (or (:cookie-store options) (->cookie-store store))]
-    (.addCookie cookies (->cookie "test_db_name" test-db-name))
+    (.addCookie cookies test-db-cookie)
     (verb url (assoc options :cookie-store cookies))))
 
 (def http-get (partial http http/get))
@@ -159,8 +161,9 @@
 
 (defn command [apikey command-name & args]
   (let [{status :status body :body} (apply raw-command apikey command-name args)]
-    (when (= status 200)
-      body)))
+    (if (= status 200)
+      body
+      (error status body))))
 
 (defn datatables [apikey query-name & args]
   (let [{status :status body :body} (apply decode-post :datatables apikey query-name args)]
@@ -336,6 +339,7 @@
 (defn create-app-id
   "Verifies that an application was created and returns it's ID"
   [apikey & args]
+  {:post [%]}
   (let [{app-id :id :as resp} (apply create-app apikey args)]
     (test-application-create-successful resp app-id)
     app-id))

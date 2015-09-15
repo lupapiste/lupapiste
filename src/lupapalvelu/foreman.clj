@@ -114,13 +114,11 @@
   [application]
   (and
     (foreman-app? application)
-    (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value))))
+    (= "tyonjohtaja-ilmoitus" (:permitSubtype application))))
 
-(defn- validate-notice-or-application [application]
-  (let [foreman-doc (domain/get-document-by-name application "tyonjohtaja-v2")
-        type (get-in foreman-doc [:data :ilmoitusHakemusValitsin :value])]
-    (when (ss/blank? type)
-      (fail! :error.foreman.type-not-selected))))
+(defn- validate-notice-or-application [{subtype :permitSubtype :as application}]
+  (when (ss/blank? subtype)
+    (fail! :error.foreman.type-not-selected)))
 
 (defn- validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application}]
   (when (notice? application)

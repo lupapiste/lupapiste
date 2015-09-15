@@ -102,6 +102,11 @@
         "krysp/yhteiset-2.1.5.xsd"
         "krysp/rakennusvalvonta-2.1.8.xsd"))
 
+(def- mkmu-1_0_1
+  (conj public-schema-sources
+        "krysp/yhteiset-2.1.6.xsd"
+        "krysp/maankaytonmuutos-1.0.1.xsd"))
+
 (def- asianhallinta
    (conj xml-sources "asianhallinta/asianhallinta.xsd"))
 
@@ -149,6 +154,11 @@
   {"2.1.2" common-validator-2_1_3
    "ah-1.1" asianhallinta-validator})
 
+(def- mkmu-validators
+  {"2.1.6" common-validator-2_1_6
+   "1.0.1" (create-validator mkmu-1_0_1)})
+
+
 (def- schema-validators
   {:R   rakval-validators
    :P   poik-validators
@@ -158,7 +168,7 @@
    :VVVL {"2.1.3" common-validator-2_1_3
           "ah-1.1" asianhallinta-validator}
    :YL  ymp-validators
-   :MM  {"ah-1.1" asianhallinta-validator} ; maankayton muutos aka kaavat
+   :MM  mkmu-validators ; maankayton muutos aka kaavat
    :KT  {"ah-1.1" asianhallinta-validator}})
 
 (def supported-versions-by-permit-type

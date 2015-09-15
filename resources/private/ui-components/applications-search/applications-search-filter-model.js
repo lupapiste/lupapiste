@@ -18,6 +18,7 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   self.saveAdvancedFilters = function() {
     var filter = {
+      handler:       util.getIn(self.dataProvider, ["handler", "id"]),
       tags:          _.map(ko.unwrap(lupapisteApp.services.tagFilterService.selected), "id"),
       operations:    _.map(ko.unwrap(lupapisteApp.services.operationFilterService.selected), "id"),
       organizations: _.map(ko.unwrap(lupapisteApp.services.organizationFilterService.selected), "id"),
@@ -25,13 +26,9 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
     };
 
     ajax
-    .command("update-default-application-filter", {filter: filter})
-    .error(function() {
-      hub.send("indicator", {style: "negative"});
-    })
-    .success(function() {
-      hub.send("indicator", {style: "positive"});
-    })
+    .command("update-default-application-filter", {filter: filter, sort: ko.toJS(self.dataProvider.sort)})
+    .error(util.showSavedIndicator)
+    .success(util.showSavedIndicator)
     .call();
   };
 

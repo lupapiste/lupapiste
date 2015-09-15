@@ -164,6 +164,14 @@ Open accordions
   Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
   Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
 
+Open accordion by test id
+  [Arguments]  ${testId}
+  ${accordionIsClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@data-test-id="${testId}"]//div[@data-accordion-state="open"]
+  Run keyword If  ${accordionIsClosed}  Execute Javascript  $("div[data-test-id='${testId}'] button.accordion-toggle:not(.toggled)").click();
+
+Positive indicator should be visible
+  Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
+
 #
 # Login stuff
 #
@@ -381,6 +389,12 @@ Primary operation is
 Create application the fast way
   [Arguments]  ${address}  ${propertyId}  ${operation}
   Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+  Kill dev-box
+
+Create application with state
+  [Arguments]  ${address}  ${propertyId}  ${operation}  ${state}
+  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
@@ -870,16 +884,16 @@ Fill in new password
 
 Open company user listing
   Click Element  user-name
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
-  Element should be visible  //div[@data-test-id='my-company']
-  Click button  Hallinnoi yrityksen käyttäjiä
+  Open accordion by test id  mypage-company-accordion
+  Wait Until  Element should be visible  //div[@data-test-id='my-company']
+  Click by test id  company-edit-users
   Wait until  Element should be visible  company
 
 Open company details
   Click Element  user-name
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
-  Element should be visible  //div[@data-test-id='my-company']
-  Click button  Muokkaa yrityksen tietoja
+  Open accordion by test id  mypage-company-accordion
+  Wait Until  Element should be visible  //div[@data-test-id='my-company']
+  Click by test id  company-edit-info
   Wait until  Element should be visible  company
 
 

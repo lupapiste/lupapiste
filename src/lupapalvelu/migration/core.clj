@@ -1,6 +1,6 @@
 (ns lupapalvelu.migration.core
-  (:require [monger.collection :as mc]
-            [monger.query :as q]
+  (:require [monger.query :as q]
+            [lupapalvelu.mongo :as mongo]
             [slingshot.slingshot :refer [try+ throw+]]
             [clojure.stacktrace :refer [print-cause-trace]]
             [sade.core :refer [def- now]]))
@@ -12,7 +12,7 @@
   `(fn [] ~@(map #(cons 'assert (list %)) body)))
 
 (defn migration-history []
-  (q/with-collection "migrations"
+  (mongo/with-collection "migrations"
     (q/sort {:time 1})))
 
 (def- execution-name {:pre "pre-condition"
@@ -45,7 +45,7 @@
   (if-let [m (@migrations migration-name)]
     (when-let [result (execute-migration m)]
       (let [record (assoc result :name (:name m) :time (now))]
-        (mc/insert :migrations record)
+        (mongo/insert :migrations record)
         record))
     {:ok false :error "unknown migration"}))
 

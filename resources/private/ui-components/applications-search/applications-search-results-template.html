@@ -5,7 +5,8 @@
     <script type="text/x-jquery-tmpl" id="applications-search-results-template">
       <div class="search-tabs">
         <ul data-bind="foreach: tabs">
-          <li data-bind="ltext: 'applications.filter.' + $data, click: $parent.selectTab,
+          <li data-bind="attr: {'data-test-id': 'search-tab-' + $data},
+                         ltext: 'applications.filter.' + $data, click: $parent.selectTab,
                          css: {selected: $parent.selectedTab() === $data}"></li>
         </ul>
         <button
@@ -84,13 +85,13 @@
                 <div class="unseen-attachments" data-bind="text: $data.attachmentsRequiringAction > 99 ? '*' : $data.attachmentsRequiringAction,
                                   attr: {title: loc('attachments.title')}"></div>
               </td>
-              <td data-bind="ltext: 'applications.' + $data.kind" data-test-col-name="type"></td>
+              <td data-bind="ltext: $data.kind" data-test-col-name="type"></td>
               <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
               <td data-bind="text: $data.primaryOperation ? loc('operations.' + $data.primaryOperation.name) : ''" data-test-col-name="operation"></td>
               <td data-bind="text: $data.applicant" data-test-col-name="applicant"></td>
               <td data-bind="dateTimeString: $data.submitted" data-test-col-name="submitted"></td>
               <td data-bind="dateTimeString: $data.modified" data-test-col-name="modified"></td>
-              <td data-bind="ltext: $data.state" data-test-col-name="status"></td>
+              <td data-bind="ltext: $data.state, attr: {'data-test-row-state': $data.state}" data-test-col-name="status"></td>
               <td data-bind="fullName: $data.authority" data-test-col-name="authority"></td>
             </tr>
           </tbody>
