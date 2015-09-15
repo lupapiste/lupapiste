@@ -88,8 +88,9 @@
      :ToimenpideTeksti (i18n/localize lang "operations" (:name operation))}))
 
 (defn- ua-get-toimenpiteet [{:keys [primaryOperation secondaryOperations]} lang]
-  (let [operations (conj secondaryOperations primaryOperation)] (when (seq operations)
-    {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)})))
+  (let [operations (conj secondaryOperations primaryOperation)]
+    (when (seq operations)
+      {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)})))
 
 (defn- ua-get-viitelupa [linkPermit]
   (if (= (:type linkPermit) "lupapistetunnus")
