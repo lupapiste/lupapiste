@@ -267,7 +267,7 @@
 (defn get-timestamp-from-now
   "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
   [time-key amount]
-  {:pre [(#{:day :week :month} time-key)]}
+  {:pre [(#{:day :week :month :years} time-key)]}
   (let [time-fn (case time-key
                   :day days
                   :week weeks
