@@ -11,7 +11,7 @@ Sonja prepares the application
   Sonja logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  pre-verdict-attachment-test${secs}
-  Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo  open
+  Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
   Submit application
   Click enabled by test id  approve-application
   Open tab  verdict

@@ -11,7 +11,7 @@ Sonja prepares the application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Base_app_for_change_permit_${secs}
   Set Suite Variable  ${propertyid}  753-423-2-41
-  Create application the fast way  ${appname}  ${propertyid}  kerrostalo-rivitalo  open
+  Create application the fast way  ${appname}  ${propertyid}  kerrostalo-rivitalo
 
   Wait until  Application state should be  open
   ${applicationTitle} =  Get Text  xpath=//span[@data-test-id='application-title']
