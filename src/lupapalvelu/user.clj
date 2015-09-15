@@ -170,6 +170,9 @@
 (defn authority-admin? [{role :role}]
   (= :authorityAdmin (keyword role)))
 
+(defn dummy? [{role :role}]
+  (= :dummy (keyword role)))
+
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
 
@@ -334,6 +337,11 @@
 (defn get-user-by-email [email]
   {:pre [email]}
   (get-user {:email email}))
+
+(defn email-in-use? [email]
+  (as-> email $ 
+    (get-user-by-email $)
+    (and $ (not (dummy? $)))))
 
 (defn get-user-with-password [username password]
   (when-not (or (ss/blank? username) (ss/blank? password))

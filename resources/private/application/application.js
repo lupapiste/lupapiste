@@ -155,6 +155,7 @@
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
+      requestForStatementModel.setFunctionCode(app.tosFunction);
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
