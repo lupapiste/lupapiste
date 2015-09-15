@@ -143,7 +143,8 @@
    "2.1.3" common-validator-2_1_3
    "2.2.0" common-validator-2_1_5
    "2.2.1" common-validator-2_1_6
-   "ah-1.1" asianhallinta-validator-1_1})
+   "ah-1.1" asianhallinta-validator-1_1
+   "ah-1.2" asianhallinta-validator-1_2})
 
 (def- poik-validators
   {"2.1.2" common-validator-2_1_0
@@ -152,11 +153,13 @@
    "2.1.5" common-validator-2_1_3
    "2.2.0" common-validator-2_1_5
    "2.2.1" common-validator-2_1_6
-   "ah-1.1" asianhallinta-validator-1_1})
+   "ah-1.1" asianhallinta-validator-1_1
+   "ah-1.2" asianhallinta-validator-1_2})
 
 (def- ymp-validators
   {"2.1.2" common-validator-2_1_3
-   "ah-1.1" asianhallinta-validator-1_1})
+   "ah-1.1" asianhallinta-validator-1_1
+   "ah-1.2" asianhallinta-validator-1_2})
 
 (def- mkmu-validators
   {"2.1.6" common-validator-2_1_6
