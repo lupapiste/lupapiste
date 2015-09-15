@@ -1,5 +1,17 @@
+.applications-search-top {
+  background-color: $gray238;
+  border-bottom: 2px solid $gray221;
+  .container {
+    margin-bottom: 0;
+  }
+}
+
 .button-group {
   float: right;
+  button {
+    margin-left: $grid-margin;
+  }
+  margin-bottom: $grid-margin;
 }
 
 .applications-search-component {
