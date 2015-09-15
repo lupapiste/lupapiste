@@ -36,38 +36,43 @@
         <!-- /ko -->
       </div>
 
-      <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && showAdvancedFilters() && lupapisteApp.models.currentUser.isAuthority() -->
-      <div class="row">
-        <div class="col-2"  data-test-id="handler-filter-component">
-          <label data-bind="ltext: 'applications.filter.handler'" />
-          <div data-test-id="handlers-filter-component" data-bind="component: {name: 'autocomplete-handlers', params: {selectedValues: dataProvider.handler}}"></div>
-        </div>
+      <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.isAuthority() -->
+      <div class="row" data-bind="slider: showAdvancedFilters">
+        <div class="form-grid form-grid--no-border">
+          <div class="row row--no-margin">
+            <div class="col-2"  data-test-id="handler-filter-component">
+              <label data-bind="ltext: 'applications.filter.handler'" />
+              <div data-test-id="handlers-filter-component" data-bind="component: {name: 'autocomplete-handlers', params: {selectedValues: dataProvider.handler}}"></div>
+            </div>
 
-        <div class="col-2" data-test-id="tag-filter-item">
-          <label data-bind="ltext: 'applications.filter.tags'" />
-          <div data-test-id="tags-filter-component" data-bind="component: 'autocomplete-tags'"></div>
-        </div>
-      </div>
+            <div class="col-2" data-test-id="tag-filter-item">
+              <label data-bind="ltext: 'applications.filter.tags'" />
+              <div data-test-id="tags-filter-component" data-bind="component: 'autocomplete-tags'"></div>
+            </div>
+          </div>
 
-      <div class="row">
-        <div class="col-4" data-test-id="operation-filter-item">
-          <label data-bind="ltext: 'applications.filter.operations'" />
-          <div data-test-id="operations-filter-component" data-bind="component: 'autocomplete-operations'"></div>
-        </div>
-      </div>
+          <div class="row">
+            <div class="col-4" data-test-id="operation-filter-item">
+              <label data-bind="ltext: 'applications.filter.operations'" />
+              <div data-test-id="operations-filter-component" data-bind="component: 'autocomplete-operations'"></div>
+            </div>
+          </div>
 
-      <div class="row">
-        <div class="col-2">
-          <label data-bind="ltext: 'applications.filter.areas'" />
-          <div data-test-id="areas-filter-component" data-bind="component: 'autocomplete-areas'"></div>
-        </div>
+          <div class="row">
+            <div class="col-2">
+              <label data-bind="ltext: 'applications.filter.areas'" />
+              <div data-test-id="areas-filter-component" data-bind="component: 'autocomplete-areas'"></div>
+            </div>
 
-        <!-- ko if: _.keys(lupapisteApp.models.currentUser.orgAuthz()).length > 1 -->
-        <div class="col-2" data-test-id="organization-filter-item">
-          <label data-bind="ltext: 'applications.filter.organizations'" />
-          <div data-test-id="organization-filter-component" data-bind="component: 'autocomplete-organizations'"></div>
+            <!-- ko if: _.keys(lupapisteApp.models.currentUser.orgAuthz()).length > 1 -->
+            <div class="col-2" data-test-id="organization-filter-item">
+              <label data-bind="ltext: 'applications.filter.organizations'" />
+              <div data-test-id="organization-filter-component" data-bind="component: 'autocomplete-organizations'"></div>
+            </div>
+            <!-- /ko -->
+          </div>
         </div>
-        <!-- /ko -->
+        <div data-bind="component: {name: 'applications-search-filters-list', params: {dataProvider: dataProvider}}" class="applications-search-component"></div>
       </div>
       <!-- /ko -->
 
