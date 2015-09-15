@@ -1124,6 +1124,18 @@ $col: 25%;
     color: $negative;
   }
 
+  .input-button {
+    input {
+      border-color: $positive;
+      padding-right: 190px;
+    }
+  }
+  button.input-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
+
   @for $i from 1 through 4 {
     .col-#{$i} {
       @include column($i);

@@ -5,16 +5,21 @@
     <script type="text/x-jquery-tmpl" id="applications-search-filters-list-template">
       <div class="form-grid form-grid--no-border">
         <div class="row row--no-margin">
-          <div class="col-2"
-               data-bind="component: {name: 'text-field',
-                                      params: {value: newFilterName,
-                                               id: 'new-filter-name',
-                                               lLabel: 'applications.search.save.filter'}}"></div>
-
-          <div class="col-1 stacked">
-            <br/>
-            <button class="positive">Tallenna hakuehdot</button>
+          <div class="col-3">
+            <form data-bind="submit: saveFilter ">
+              <div class="input-button" data-bind="component: {name: 'text-field',
+                                                   params: {value: newFilterName,
+                                                   id: 'new-filter-name',
+                                                   lLabel: 'applications.search.save.filter'}}"></div>
+              <button class="input-button positive" data-bind="click: saveFilter">
+                <i class="lupicon-save"></i>
+                <i class="wait spin lupicon-refresh"></i>
+                <span>Tallenna hakuehdot</span>
+              </button>
+            </form>
           </div>
+
+
           <div class="col-1 stacked">
             <br/>
             <button class="secondary" data-test-id="toggle-saved-filters" data-bind="toggleClick: showSavedFilters, css: {toggled: showSavedFilters}">
