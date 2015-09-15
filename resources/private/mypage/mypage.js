@@ -87,6 +87,8 @@
       document: ko.observable()
     };
 
+    self.authority = ko.computed(function() { return self.role() === "authority"; });
+
     self.companyShow = ko.observable();
     self.showSimpleCompanyInfo = ko.computed(function () { return !self.companyShow(); });
     self.companyLoading = ko.observable();
