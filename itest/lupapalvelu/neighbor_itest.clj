@@ -6,8 +6,12 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.ttl :as ttl]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.fixture.core :as fixture]
             [sade.core :refer [now]]
             [sade.util :refer [fn->] :as util]))
+
+(mongo/with-db test-db-name (fixture/apply-fixture "minimal"))
 
 (defn invalid-token? [resp] (= resp {:ok false, :text "error.token-not-found"}))
 (defn invalid-response? [resp] (= (dissoc resp :response) {:ok false, :text "error.invalid-response"}))
@@ -85,6 +89,7 @@
 
     (fact "correct to" (:to email) => neighbor-email-addr)
     (fact "correct subject" (:subject email) => "Lupapiste.fi: Naapurikuja 3 - naapurin kuuleminen")
+    (fact "neighbor name field" (get-in email [:body :plain]) => (contains #"Hei( \w+)+,"))
     (fact "correnct link"
       a-id => application-id
       n-id => neighbor-id
