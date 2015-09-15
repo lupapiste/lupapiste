@@ -6,8 +6,9 @@
       <div class="tabs-container">
         <ul data-bind="foreach: tabs" class="tabs">
           <li data-bind="attr: {'data-test-id': 'search-tab-' + $data},
-                         css: {active: $parent.selectedTab() === $data}">
-            <a href="#" class="link-btn" data-bind="ltext: 'applications.filter.' + $data, click: $parent.selectTab"></a>
+                         css: {active: $parent.selectedTab() === $data},
+                         click: $parent.selectTab">
+            <a href="#" class="link-btn" data-bind="ltext: 'applications.filter.' + $data"></a>
           </li>
         </ul>
       </div>
