@@ -587,10 +587,9 @@
    :input-validators [email-validator]
    :user-roles       #{:anonymous}}
   [_]
-  (let [user (user/get-user-by-email email)]
-    (if user
-      (ok)
-      (fail :email-not-in-use))))
+  (if (user/email-in-use? email)
+    (ok)
+    (fail :email-not-in-use)))
 
 (defcommand remove-user-notification
   {:user-roles #{:applicant :authority}}

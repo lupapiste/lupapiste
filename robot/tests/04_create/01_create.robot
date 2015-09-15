@@ -63,7 +63,7 @@ The contents of unsent inforequest's message field is resetted properly when mov
 Mikko creates new application
   Go to page  applications
   Applications page should be open
-  Create application the fast way  create-app-2  753-416-25-22  kerrostalo-rivitalo  open
+  Create application the fast way  create-app-2  753-416-25-22  kerrostalo-rivitalo
   Go to page  applications
   Request should be visible  create-app
   Request should be visible  create-info
@@ -81,7 +81,7 @@ Mikko closes application at Latokuja 3 and logs out
 Authority (Veikko) can create an application
   [Tags]  ie8
   Veikko logs in
-  Create application the fast way  create-veikko-auth-app  837-111-172-1  kerrostalo-rivitalo  open
+  Create application the fast way  create-veikko-auth-app  837-111-172-1  kerrostalo-rivitalo
   Wait until  Application state should be  open
   It is possible to add operation
 
