@@ -173,7 +173,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
       var lastItem = self.index() + 1 >= self.data().length;
       self.index(lastItem ? self.index() : self.index() + 1);
       // skip groupheader
-      if (getCurrentItem().groupHeader && !lastItem) {
+      if (getCurrentItem() && getCurrentItem().groupHeader && !lastItem) {
         self.index(self.index() + 1);
       }
       scrollToActiveItem(self.index());

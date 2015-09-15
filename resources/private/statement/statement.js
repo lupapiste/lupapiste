@@ -71,20 +71,16 @@
           self.dirty(false);
         }
 
-        if (authorizationModel.ok("get-possible-statement-statuses")) {
-          ajax
-            .query("get-possible-statement-statuses", {id: applicationId})
-            .success(function(resp) {
-              var sorted = _(resp.data)
-                .map(function(item) { return {id: item, name: loc(["statement", item])}; })
-                .sortBy("name")
-                .value();
-              self.statuses(sorted);
-            })
-            .call();
-        } else if (statement.status) {
-          self.statuses([statement.status]);
-        }
+        ajax
+          .query("get-possible-statement-statuses", {id: applicationId})
+          .success(function(resp) {
+            var sorted = _(resp.data)
+              .map(function(item) { return {id: item, name: loc(["statement", item])}; })
+              .sortBy("name")
+              .value();
+            self.statuses(sorted);
+          })
+          .call();
 
       } else {
         pageutil.openPage("404");
