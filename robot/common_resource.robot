@@ -343,6 +343,7 @@ Select From Autocomplete
   Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
   Wait until  Element should be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
   Click Element  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
+  Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]
   Wait for jQuery
 
 Autocomplete selectable values should not contain
