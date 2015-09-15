@@ -337,6 +337,11 @@
   {:pre [email]}
   (get-user {:email email}))
 
+(defn email-in-use? [email]
+  (as-> email $ 
+    (get-user-by-email $)
+    (and $ (not (dummy? $)))))
+
 (defn get-user-with-password [username password]
   (when-not (or (ss/blank? username) (ss/blank? password))
     (let [user (find-user {:username username})]
