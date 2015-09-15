@@ -7707,25 +7707,24 @@ ul.attachments-list li.mandatory-attachments {
 .applications-search-top .container {
   margin-bottom: 0;
 }
-
+/* line 7, ../sass/partials/_applications_search.scss */
+.applications-search-top .button-group {
+  float: right;
+  margin-bottom: 20px;
+}
 /* line 9, ../sass/partials/_applications_search.scss */
+.applications-search-top .button-group button {
+  margin-left: 20px;
+}
+
+/* line 16, ../sass/partials/_applications_search.scss */
 #invitations {
   background-color: #eeeeee;
   margin-bottom: -24px;
 }
-/* line 12, ../sass/partials/_applications_search.scss */
+/* line 19, ../sass/partials/_applications_search.scss */
 #invitations .container {
   margin-bottom: 0;
-}
-
-/* line 17, ../sass/partials/_applications_search.scss */
-.button-group {
-  float: right;
-  margin-bottom: 20px;
-}
-/* line 19, ../sass/partials/_applications_search.scss */
-.button-group button {
-  margin-left: 20px;
 }
 
 /* line 25, ../sass/partials/_applications_search.scss */

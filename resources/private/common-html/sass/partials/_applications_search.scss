@@ -4,6 +4,13 @@
   .container {
     margin-bottom: 0;
   }
+  .button-group {
+    float: right;
+    button {
+      margin-left: $grid-margin;
+    }
+    margin-bottom: $grid-margin;
+  }
 }
 
 #invitations {
@@ -14,13 +21,6 @@
   }
 }
 
-.button-group {
-  float: right;
-  button {
-    margin-left: $grid-margin;
-  }
-  margin-bottom: $grid-margin;
-}
 
 .applications-search-component {
   clear: both;
