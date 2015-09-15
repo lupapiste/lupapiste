@@ -1,0 +1,1 @@
+create.municipality-not-supported: Valittu kunta ei ole tuettu
