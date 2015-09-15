@@ -43,16 +43,18 @@
            {:tag :Liitteet :child [{:tag :Liite :child ah/liite-type}]}]})
 
 (def- ua-version-mapping
-  {"1.1" uusi-asia})
+  {"1.1" uusi-asia
+   "1.2" uusi-asia-1_2})
 
 (def- ta-version-mapping
-  {"1.1" taydennys-asiaan})
+  {"1.1" taydennys-asiaan
+   "1.2" taydennys-asiaan})
 
 (defn- get-mapping [version-mapping version]
   (let [mapping (get-in version-mapping [(name version)])]
-       (if mapping
-         (assoc-in mapping [:attr :version] (name version))
-         (throw (IllegalArgumentException. (str "Unsupported Asianhallinta version: " version))))))
+    (if mapping
+      (assoc-in mapping [:attr :version] (name version))
+      (throw (IllegalArgumentException. (str "Unsupported Asianhallinta version: " version))))))
 
 (defn get-ua-mapping [version]
   (get-mapping ua-version-mapping version))
