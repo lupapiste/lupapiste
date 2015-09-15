@@ -4489,6 +4489,15 @@ div.alleYli-radioGroup {
   margin-right: 6px;
 }
 
+/* line 1210, ../sass/partials/_forms.scss */
+.form-grid--no-border {
+  border: none;
+}
+/* line 1214, ../sass/partials/_forms.scss */
+.form-grid--no-border .col-1:first-child, .form-grid--no-border .col-2:first-child, .form-grid--no-border .col-3:first-child, .form-grid--no-border .col-4:first-child {
+  padding-left: 0;
+}
+
 /* line 4, ../sass/partials/_tables.scss */
 table {
   width: 100%;
@@ -7662,7 +7671,17 @@ ul.attachments-list li.mandatory-attachments {
   border-collapse: separate;
 }
 
-/* line 3, ../sass/partials/_applications_search.scss */
+/* line 1, ../sass/partials/_applications_search.scss */
+.button-group {
+  float: right;
+}
+
+/* line 5, ../sass/partials/_applications_search.scss */
+.applications-search-component {
+  clear: both;
+}
+
+/* line 10, ../sass/partials/_applications_search.scss */
 .search-tabs ul {
   display: inline-block;
   list-style: none;
@@ -7671,7 +7690,7 @@ ul.attachments-list li.mandatory-attachments {
   line-height: 40px;
   vertical-align: middle;
 }
-/* line 11, ../sass/partials/_applications_search.scss */
+/* line 18, ../sass/partials/_applications_search.scss */
 .search-tabs li {
   background-color: #f6f6f6;
   color: #333;
@@ -7680,48 +7699,48 @@ ul.attachments-list li.mandatory-attachments {
   display: inline-block;
   padding: 0 24px;
 }
-/* line 18, ../sass/partials/_applications_search.scss */
+/* line 25, ../sass/partials/_applications_search.scss */
 .search-tabs li.selected {
   background-color: #dddddd;
 }
-/* line 23, ../sass/partials/_applications_search.scss */
+/* line 30, ../sass/partials/_applications_search.scss */
 .search-tabs input {
   display: inline-block;
   margin: 0;
 }
-/* line 27, ../sass/partials/_applications_search.scss */
+/* line 34, ../sass/partials/_applications_search.scss */
 .search-tabs button {
   margin: 0 6px;
   width: initial;
   padding: 0 24px;
 }
-/* line 31, ../sass/partials/_applications_search.scss */
+/* line 38, ../sass/partials/_applications_search.scss */
 .search-tabs button .icon {
   position: relative;
   top: 2px;
   margin-right: 12px;
 }
 
-/* line 40, ../sass/partials/_applications_search.scss */
+/* line 47, ../sass/partials/_applications_search.scss */
 .paging button:first-child {
   margin-right: 6px;
 }
-/* line 43, ../sass/partials/_applications_search.scss */
+/* line 50, ../sass/partials/_applications_search.scss */
 .paging select {
   width: 5.625em;
   margin-left: 12px;
   margin-right: 6px;
 }
 
-/* line 50, ../sass/partials/_applications_search.scss */
+/* line 57, ../sass/partials/_applications_search.scss */
 div.search {
   position: relative;
 }
-/* line 52, ../sass/partials/_applications_search.scss */
+/* line 59, ../sass/partials/_applications_search.scss */
 div.search input {
   padding-right: 40px !important;
 }
-/* line 56, ../sass/partials/_applications_search.scss */
+/* line 63, ../sass/partials/_applications_search.scss */
 div.search i {
   color: #f39129;
   position: absolute;

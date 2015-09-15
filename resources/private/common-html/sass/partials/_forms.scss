@@ -1206,3 +1206,14 @@ $col: 25%;
     }
   }
 }
+
+.form-grid--no-border {
+  border: none;
+
+  .col-1, .col-2, .col-3, .col-4 {
+    &:first-child {
+      padding-left: 0;
+    }
+  }
+}
+
