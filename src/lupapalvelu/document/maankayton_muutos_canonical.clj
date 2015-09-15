@@ -4,29 +4,12 @@
             [lupapalvelu.permit :as permit]
             [sade.util :as util]))
 
-
-(defn- application-state [app]
-  (let [enums {:submitted "Vireill\u00e4"
-               :sent "Haettu"
-               :closed "P\u00e4\u00e4ttynyt"}
-        state (-> app :state keyword)
-        date (util/to-xml-date (state app))
-        {a-first :firstName a-last :lastName} (:authority app)]
-    {:Tila
-     {:pvm date
-      :kasittelija (format "%s %s" a-first a-last)
-      :hakemuksenTila (state enums)}}))
-
-
 (defn- toimituksen-tila [app]
   (let [state (-> app :state keyword)
         state-name (state {:sent "Hakemus"
                            :submitted "Hakemus"})]
     ;; TODO: add more states.
-    (or state-name "Hakemus")
-    ))
-
-
+    (or state-name "Hakemus")))
 
 (defn maankayton-muutos-canonical [application lang]
   (let [app (tools/unwrapped application)
@@ -50,7 +33,7 @@
           :sijaintitieto (canonical-common/get-sijaintitieto application)
           :kohdekiinteisto (:propertyId application)
           :maaraAla (:maaraalaTunnus property)
-          :tilatieto (application-state app)}
+          :tilatieto (canonical-common/application-state app)}
          }
         :toimituksenTila (toimituksen-tila app)
         :uusiKytkin (= op-age "uusi")

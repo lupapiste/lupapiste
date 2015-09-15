@@ -711,7 +711,10 @@
   ([docs prop]
    (filter #(get-in % [:schema-info prop]) docs))
   ([docs prop value]
-   (filter #(= (get-in % [:schema-info prop]) value) docs)))
+   (let [values (if (coll? value)
+                  (set value)
+                  #{value})]
+     (filter #(contains? values (get-in % [:schema-info prop])) docs))))
 
 (defn ->postiosoite-type [address]
   (merge {:osoitenimi (entry :katu address :teksti)}
@@ -755,3 +758,15 @@
 
 (defn process-parties [docs lang]
   (map (partial process-party lang) (schema-info-filter docs :type "party")))
+
+(defn application-state [app]
+  (let [enums {:submitted "Vireill\u00e4"
+               :sent "Haettu"
+               :closed "P\u00e4\u00e4ttynyt"}
+        state (-> app :state keyword)
+        date (util/to-xml-date (state app))
+        {a-first :firstName a-last :lastName} (:authority app)]
+    {:Tila
+     {:pvm date
+      :kasittelija (format "%s %s" a-first a-last)
+      :hakemuksenTila (state enums)}}))
