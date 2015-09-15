@@ -45,7 +45,7 @@
 ; https://github.com/ring-clojure/ring/commit/be1eac9667fef18800a874fa0b61b350263b6f3f
 (defn- secure-eql? [^String a ^String b]
   (let [a (map int a), b (map int b)]
-    (if (and a b (= (count a) (count b)))
+    (if (and (not-empty a) (= (count a) (count b)))
       (zero? (reduce bit-or (map bit-xor a b)))
       false)))
 
