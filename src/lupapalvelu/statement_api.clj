@@ -104,35 +104,41 @@
    :subject-key    "statement-request"
    :show-municipality-in-subject true})
 
+(defn make-details [now persons metadata]
+  (map #(let [user (or (user/get-user-by-email (:email %)) (fail! :error.not-found))
+              statement-id (mongo/create-id)
+              statement-giver (assoc % :userId (:id user))]
+         (cond-> {:statement {:id statement-id
+                              :person statement-giver
+                              :requested now
+                              :given nil
+                              :reminder-sent nil
+                              :metadata metadata
+                              :status nil}
+                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
+                  :recipient user}
+                 (seq metadata) (assoc :metadata metadata)))
+       persons))
+
 (defcommand request-for-statement
-  {:parameters  [functionCode id personIds]
+  {:parameters [functionCode id personIds]
    :user-roles #{:authority}
-   :states      #{:open :submitted :complement-needed}
-   :notified    true
+   :states #{:open :submitted :complement-needed}
+   :notified true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
   (organization/with-organization organization
-    (fn [{:keys [statementGivers]}]
-      (let [personIdSet (set personIds)
-            persons     (filter #(personIdSet (:id %)) statementGivers)
-            details     (map #(let [user (or (user/get-user-by-email (:email %)) (fail! :error.not-found))
-                                    statement-id (mongo/create-id)
-                                    statement-giver (assoc % :userId (:id user))]
-                                {:statement {:id statement-id
-                                             :person    statement-giver
-                                             :requested now
-                                             :given     nil
-                                             :reminder-sent nil
-                                             :metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
-                                             :status    nil}
-                                 :auth (user/user-in-role user :statementGiver :statementId statement-id)
-                                 :recipient user}) persons)
-            statements (map :statement details)
-            auth       (map :auth details)
-            recipients (map :recipient details)]
-          (update-application command {$push {:statements {$each statements}
-                                              :auth {$each auth}}})
-          (notifications/notify! :request-statement (assoc command :recipients recipients))))))
+                                  (fn [{:keys [statementGivers]}]
+                                    (let [personIdSet (set personIds)
+                                          persons (filter #(personIdSet (:id %)) statementGivers)
+                                          metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
+                                          details (make-details now persons metadata)
+                                          statements (map :statement details)
+                                          auth (map :auth details)
+                                          recipients (map :recipient details)]
+                                      (update-application command {$push {:statements {$each statements}
+                                                                          :auth {$each auth}}})
+                                      (notifications/notify! :request-statement (assoc command :recipients recipients))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]
