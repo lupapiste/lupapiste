@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="applications-search-filters-list-template">
+      <div class="form-grid form-grid--no-border">
+        <div class="row row--no-margin">
+          <div class="col-2"
+               data-bind="component: {name: 'text-field',
+                                      params: {value: newFilterName,
+                                               id: 'new-filter-name',
+                                               lLabel: 'applications.search.save.filter'}}"></div>
+
+          <div class="col-1 stacked">
+            <br/>
+            <button class="positive">Tallenna hakuehdot</button>
+          </div>
+          <div class="col-1 stacked">
+            <br/>
+            <button class="secondary" data-test-id="toggle-saved-filters" data-bind="toggleClick: showSavedFilters, css: {toggled: showSavedFilters}">
+              <i class="lupicon-chevron-down"></i>
+              <i class="lupicon-chevron-up toggle"></i>
+              <span>Tallennetut hakuehdot</span>
+            </button>
+          </div>
+
+        </div>
+        <div class="row" data-bind="slider: showSavedFilters">
+          FOOBAR
+        </div>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

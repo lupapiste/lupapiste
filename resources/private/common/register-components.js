@@ -38,6 +38,7 @@ jQuery(document).ready(function() {
     {name: "applications-search-tabs"},
     {name: "applications-search-results"},
     {name: "applications-search-filter"},
+    {name: "applications-search-filters-list"},
     {name: "applications-search-paging"},
     {name: "autocomplete-tags", template: "autocomplete-tags-components"},
     {name: "autocomplete-operations", template: "autocomplete-tags-components"},
