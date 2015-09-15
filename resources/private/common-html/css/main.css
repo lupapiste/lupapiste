@@ -1433,13 +1433,14 @@ nav .header-menu .header-box a span {
 /* line 130, ../sass/partials/_header.scss */
 nav .header-menu .header-box a {
   max-width: 300px;
+  outline: 0;
 }
-/* line 133, ../sass/partials/_header.scss */
+/* line 134, ../sass/partials/_header.scss */
 nav .header-menu .header-box a, nav .header-menu .header-box span {
   line-height: 60px;
 }
 
-/* line 140, ../sass/partials/_header.scss */
+/* line 141, ../sass/partials/_header.scss */
 .nav-bottom {
   width: 100%;
   background-color: #555555;
@@ -1448,7 +1449,7 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   box-sizing: border-box;
   overflow: hidden;
 }
-/* line 142, ../sass/partials/_header.scss */
+/* line 143, ../sass/partials/_header.scss */
 .nav-bottom .language-menu {
   width: 100%;
   clear: both;
@@ -1457,13 +1458,13 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   padding-bottom: .5em;
   background-color: #555555;
 }
-/* line 151, ../sass/partials/_header.scss */
+/* line 152, ../sass/partials/_header.scss */
 .nav-bottom .language-menu ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
 }
-/* line 155, ../sass/partials/_header.scss */
+/* line 156, ../sass/partials/_header.scss */
 .nav-bottom .language-menu ul li {
   margin-bottom: .5em;
   margin-top: 0;
@@ -1501,7 +1502,7 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   vertical-align: middle;
 }
 
-/* line 173, ../sass/partials/_header.scss */
+/* line 174, ../sass/partials/_header.scss */
 .nav-notification {
   width: 100%;
   background-color: #f39129;
@@ -1515,12 +1516,12 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   margin-top: 60px;
   margin-bottom: -60px;
 }
-/* line 184, ../sass/partials/_header.scss */
+/* line 185, ../sass/partials/_header.scss */
 .nav-notification:after {
   clear: both;
 }
 
-/* line 192, ../sass/partials/_header.scss */
+/* line 193, ../sass/partials/_header.scss */
 .admin .nav-notification {
   margin-top: 106px;
   margin-bottom: -48px;
