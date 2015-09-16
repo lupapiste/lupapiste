@@ -3,3 +3,4 @@ applications.search.saved-filters:  Tallennetut hakuehdot
 applications.search.no-saved-filters:  Ei tallennettuja hakuehtoja
 applications.search.name-and-save-filter:  Nimeä ja tallenna hakuehdot
 applications.search.save-filter:  Tallenna hakuehdot
+applications.search.set-default-filter:  Aseta oletushakuehdoksi
