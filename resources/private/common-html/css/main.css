@@ -6810,7 +6810,7 @@ ul.tabs {
 /* line 82, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.caption, .autocomplete-component .autocomplete-selection-wrapper span.selection-text {
   cursor: default;
-  line-height: 36px;
+  line-height: 38px;
   padding-left: 6px;
 }
 /* line 87, ../sass/partials/_autocomplete.scss */
