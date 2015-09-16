@@ -7,15 +7,19 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
   self.showSavedFilters = ko.observable(false);
   self.newFilterName = ko.observable();
 
-  self.savedFilters = ko.pureComputed(function() {
-    return _.map(lupapisteApp.models.currentUser.applicationFilters(), function (filter) {
+  self.savedFilters = ko.observableArray([]);
+
+  ko.computed(function() {
+    var filters = _.map(lupapisteApp.models.currentUser.applicationFilters(), function (filter) {
       filter.edit = ko.observable(false);
       filter.removeFilter = function(filter) {
         ajax
         .command("remove-application-filter", {"filter-id": filter.id()})
         .error(util.showSavedIndicator)
         .success(function() {
-          // TODO append new filter to list
+          self.savedFilters.remove(function(f) {
+            return ko.unwrap(f.id) === ko.unwrap(filter.id);
+          });
         })
         .call();
       };
@@ -24,13 +28,14 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
         .command("update-default-application-filter", {"filter-id": filter.id()})
         .error(util.showSavedIndicator)
         .success(function() {
-          // TODO remove filter from the list
+          // TODO set default filter
         })
         .call();
       };
       filter.isDefaultFilter = filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "id"]);
       return filter;
     });
+    self.savedFilters(filters);
   });
 
   self.saveFilter = function() {
@@ -50,7 +55,8 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
     .error(util.showSavedIndicator)
     .success(function(res) {
       util.showSavedIndicator(res);
-      hub.send("reload-current-user");
+      // TODO return saved filter which we can append to saved array
+      self.savedFilters.push(res.filter);
     })
     .call();
   };
