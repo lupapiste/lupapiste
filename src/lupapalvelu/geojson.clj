@@ -12,15 +12,15 @@
   (map (partial apply concat) (get-in feature [:geometry :coordinates])))
 
 
-(defn validate-polygon [polygon]
+(defn validate-point [point]
   (or
-    (when-not (= (count polygon) 2) (fail :error.point-coordinate-wrong))
-    (coord/validate-coordinates polygon)))
+    (when-not (= (count point) 2) (fail :error.point-coordinate-wrong))
+    (coord/validate-coordinates point)))
 
 (defn validate-feature [feature]
   (reduce
-    (fn [res polygon]
-      (or res (validate-polygon polygon)))
+    (fn [res point]
+      (or res (validate-point point)))
     nil
     (apply concat (resolve-polygons feature))))
 
