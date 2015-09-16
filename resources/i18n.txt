@@ -1,0 +1,5 @@
+application.filter.search.select.saved.filter:  Valitse tallennettu hakuehto
+applications.search.saved-filters:  Tallennetut hakuehdot
+applications.search.no-saved-filters:  Ei tallennettuja hakuehtoja
+applications.search.name-and-save-filter:  Nimeä ja tallenna hakuehdot
+applications.search.save-filter:  Tallenna hakuehdot
