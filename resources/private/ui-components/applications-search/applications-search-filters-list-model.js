@@ -7,6 +7,8 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
   self.showSavedFilters = ko.observable(false);
   self.newFilterName = ko.observable();
 
+  self.savedFilters = lupapisteApp.models.currentUser.applicationFilters;
+
   self.saveFilter = function() {
     var filter = {
       handlers:      _.map(ko.unwrap(lupapisteApp.services.handlerFilterService.selected), "id"), //util.getIn(self.dataProvider, ["handler", "id"]),
@@ -17,7 +19,7 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
     };
 
     ajax
-    .command("save-application-filter", {title: self.newFilterName(), filter: filter, sort: ko.toJS(dataProvider.sort)})
+    .command("save-application-filter", {title: self.newFilterName(), filter: filter, sort: ko.toJS(dataProvider.sort), "filter-id": "69"})
     .error(util.showSavedIndicator)
     .success(util.showSavedIndicator)
     .call();

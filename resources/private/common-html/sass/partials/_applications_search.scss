@@ -87,6 +87,30 @@ div.search {
     right: 8px;
   }
 }
+
+.applications-search-filters-list {
+
+  .applications-search-filters-list__filters {
+    display: table;
+    border: 1px solid $grid-border-color;
+  }
+
+  .applications-search-filters-list__filter-row {
+    display: table-row;
+  }
+
+  .applications-search-filters-list__filter-item {
+    background-color: #fff;
+    display: table-cell;
+    &:first-child {
+      padding-left: $marginS;
+      border: 1px solid $grid-border-color;
+      width: 100%;
+    }
+  }
+
+}
+
 // div.filter-row {
 //   margin-bottom: $marginM;
 //   > div {

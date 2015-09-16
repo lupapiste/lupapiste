@@ -3,22 +3,15 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="applications-search-filters-list-template">
-      <div class="form-grid form-grid--no-border">
+      <div class="form-grid form-grid--no-border applications-search-filters-list">
         <div class="row row--no-margin">
           <div class="col-3">
-            <form data-bind="submit: saveFilter ">
-              <div class="input-button" data-bind="component: {name: 'text-field',
-                                                   params: {value: newFilterName,
-                                                   id: 'new-filter-name',
-                                                   lLabel: 'applications.search.save.filter'}}"></div>
-              <button class="input-button positive" data-bind="click: saveFilter">
-                <i class="lupicon-save"></i>
-                <i class="wait spin lupicon-refresh"></i>
-                <span>Tallenna hakuehdot</span>
-              </button>
-            </form>
+            <div data-bind="component: {name: 'submit-button', params: {value: newFilterName,
+                                                                      id: 'new-filter-name',
+                                                                      lLabel: 'applications.search.save.filter',
+                                                                      lSubmitTitle: 'save',
+                                                                      submitFn: saveFilter}}"></div>
           </div>
-
 
           <div class="col-1 stacked">
             <br/>
@@ -30,8 +23,31 @@
           </div>
 
         </div>
+
         <div class="row" data-bind="slider: showSavedFilters">
-          FOOBAR
+          <div class="col-4 applications-search-filters-list__filters" data-bind="foreach: savedFilters">
+            <div class="applications-search-filters-list__filter-row">
+              <div class="applications-search-filters-list__filter-item" data-bind="text: $data.title"></div>
+              <div class="applications-search-filters-list__filter-item">
+                <button class="function">
+                  <i class="lupicon-pen"></i>
+                  <span>Tallenna nimi</span>
+                </button>
+              </div>
+              <div class="applications-search-filters-list__filter-item">
+                <button class="function">
+                  <i class="lupicon-star"></i>
+                  <span>Asenta oletushakuehdoksi</span>
+                </button>
+              </div>
+              <div class="applications-search-filters-list__filter-item">
+                <button class="function">
+                  <i class="lupicon-remove"></i>
+                  <span>Poista</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </script>
