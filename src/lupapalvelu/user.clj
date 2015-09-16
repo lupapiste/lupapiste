@@ -363,6 +363,9 @@
        (fail! :error.user-not-found :email ~email))
      ~@body))
 
+(defn get-application-filters [id]
+  (or (:applicationFilters (get-user-by-id id)) []))
+
 ;;
 ;; ==============================================================================
 ;; Create user:
