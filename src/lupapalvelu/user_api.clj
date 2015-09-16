@@ -231,9 +231,10 @@
                                (zipmap (map :id $) (range))
                                (get $ filter-id (count $))
                                (assoc-in app-filters [$] filter))]
-    (if (not title-collision?)
-      (mongo/update-by-id :users user-id {$set {:applicationFilters updated-filters}})
-      (fail :error.filter-title-collision))))
+    (when title-collision?
+      (fail :error.filter-title-collision))
+    (mongo/update-by-id :users user-id {$set {:applicationFilters updated-filters}})
+    (ok :filter filter)))
 
 (defcommand remove-application-filter
   {:parameters [filter-id]
