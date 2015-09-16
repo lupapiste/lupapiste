@@ -102,13 +102,12 @@
                                 <span class="application_summary_text">
                                     <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
                                                        enable: $root.authorization.ok('change-permit-sub-type'),
-                                                       optionsText: function(item) {return loc('permitSubtype.' + item); }"
+                                                       optionsText: function(item) {return item ? loc('permitSubtype.' + item) : loc('choose'); }"
                                             id="permitSubtypeSelect">
                                     </select>
-                                    <span id="permitSubtypeSaveIndicator" class="form-indicator form-input-saved" style="position: relative;top:0;left:0;color:#595959">
-                                        <span data-bind="ltext: 'form.saved'"></span>
-                                        <span class="icon"></span>
-                                    </span>
+                                    <!-- ko if: permitSubtypeHelp() -->
+                                    <span data-bind="component: { name: 'help-toggle', params: { lhtml: [permitSubtypeHelp()]}}"></span>
+                                    <!-- /ko -->
                                 </span>
                             </div>
                             <!-- /ko -->
@@ -348,7 +347,7 @@
                                 <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab"
                                    class="link-btn">
                                     <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
-                            
+
                             <li data-bind="if: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application') && features.enabled('arkistointi'),
                                            css: {'active': $parent.selectedTabName() === 'metadata'}">
                                 <a data-bind="click: changeTab" href="#" data-target="metadata" data-test-id="application-open-tasks-tab"

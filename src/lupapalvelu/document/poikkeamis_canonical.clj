@@ -33,18 +33,18 @@
 (defn common-poikkeamis-asia [application poikkeamisasia-path lang kuvaus-avain kayttotapaus]
   (let [application (tools/unwrapped application)
         root (root-element application lang)
-        documents (documents-by-type-without-blanks application)
-        lisatiedot (:data (first (:lisatiedot documents)))
-        hanke (:data (first (:hankkeen-kuvaus documents)))]
+        documents-by-type (documents-by-type-without-blanks application)
+        lisatiedot (:data (first (:lisatiedot documents-by-type)))
+        hanke (:data (first (:hankkeen-kuvaus documents-by-type)))]
     (assoc-in
       root
       poikkeamisasia-path
       {:kasittelynTilatieto (get-state application)
        :kuntakoodi (:municipality application)
        :luvanTunnistetiedot (lupatunnus application)
-       :osapuolettieto (osapuolet documents (:neighbors application) lang)
-       :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents) application)
-       :toimenpidetieto (get-toimenpiteet (:rakennushanke documents))
+       :osapuolettieto (osapuolet application documents-by-type lang)
+       :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents-by-type) application)
+       :toimenpidetieto (get-toimenpiteet (:rakennushanke documents-by-type))
        :lausuntotieto (get-statements (:statements application))
        :lisatietotieto {:Lisatieto {:asioimiskieli (if (= lang "se")
                                                      "ruotsi"

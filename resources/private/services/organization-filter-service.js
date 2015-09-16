@@ -14,9 +14,8 @@ LUPAPISTE.OrganizationFilterService = function() {
 
   var organizationNames = ko.observable();
 
-
   // calculate data based on organizations for user and organization names from backend
-  self.data = ko.computed(function() {
+  self.data = ko.pureComputed(function() {
     var usersOwnOrganizations = _.keys(lupapisteApp.models.currentUser.orgAuthz());
     var ownOrgsWithNames = _.map(usersOwnOrganizations, function(org) {
       var name = util.getIn(organizationNames(), ["names", org, loc.currentLanguage]);

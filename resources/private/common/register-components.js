@@ -4,12 +4,12 @@ jQuery(document).ready(function() {
   var components = [
     {name: "modal-dialog"},
     {name: "message-panel"},
-    {name: "checkbox"},
     {name: "fill-info"},
     {name: "foreman-history"},
     {name: "foreman-other-applications"},
-    {name: "select-component"},
-    {name: "string"},
+    {name: "docgen-checkbox"},
+    {name: "docgen-select"},
+    {name: "docgen-string"},
     {name: "attachments-multiselect"},
     {name: "authority-select"},
     {name: "authority-select-dialog"},
@@ -45,12 +45,17 @@ jQuery(document).ready(function() {
     {name: "autocomplete-areas", template: "autocomplete-tags-components"},
     {name: "autocomplete-handlers"},
     {name: "autocomplete-application-tags", template: "autocomplete-tags-components"},
-    {name: "indicator"}
+    {name: "indicator"},
+    {name: "accordion"},
+    {name: "text-field", model: "input-field"},
+    {name: "checkbox-field", model: "input-field"},
+    {name: "select-field", model: "input-field"},
+    {name: "password-field"}
   ];
 
   _.forEach(components, function(component) {
     ko.components.register(component.name, {
-      viewModel: LUPAPISTE[_.capitalize(_.camelCase(component.name)) + "Model"],
+      viewModel: LUPAPISTE[_.capitalize(_.camelCase(component.model ? component.model : component.name)) + "Model"],
       template: { element: (component.template ? component.template : component.name) + "-template"}
     });
   });

@@ -6,6 +6,9 @@ LUPAPISTE.AutocompleteHandlersModel = function(params) {
   self.query = ko.observable("");
 
   var data = ko.observable();
+  var defaultFilter = ko.pureComputed(function() {
+    return util.getIn(lupapisteApp.models.currentUser, ["applicationFilters", 0, "filter", "handler"]);
+  });
 
   function mapUser(user) {
     var fullName = "";
@@ -18,6 +21,10 @@ LUPAPISTE.AutocompleteHandlersModel = function(params) {
     return user;
   }
 
+  ko.computed(function() {
+    self.selected(_.findWhere(data(), {id: defaultFilter()}));
+  });
+
   ajax
     .query("users-in-same-organizations")
     .error(_.noop)
@@ -28,10 +35,13 @@ LUPAPISTE.AutocompleteHandlersModel = function(params) {
 
   self.data = ko.pureComputed(function() {
     var q = self.query() || "";
-    return _.filter(data(), function(item) {
-      return _.reduce(q.split(" "), function(result, word) {
-        return _.contains(item.fullName.toUpperCase(), word.toUpperCase()) && result;
-      }, true);
-    });
+    return _(data())
+      .filter(function(item) {
+        return _.reduce(q.split(" "), function(result, word) {
+          return _.contains(item.fullName.toUpperCase(), word.toUpperCase()) && result;
+        }, true);
+      })
+      .sortBy("label")
+      .value();
   });
 };

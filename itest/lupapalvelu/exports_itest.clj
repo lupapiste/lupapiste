@@ -1,19 +1,18 @@
 (ns lupapalvelu.exports-itest
   (:require [lupapalvelu.itest-util :refer :all]
             [midje.sweet :refer :all]
-            [sade.http :as http]
             [sade.core :refer [now]]))
 
 (apply-remote-minimal)
 
 (fact "Can not use api without credentials"
-  (let [resp (http/get (str (server-address) "/data-api/json/export-applications")
+  (let [resp (http-get (str (server-address) "/data-api/json/export-applications")
                {:follow-redirects false
                 :throw-exceptions false})]
     (:status resp) => 401))
 
 (fact "Can not use api with incorrect password"
-  (let [resp (http/get (str (server-address) "/data-api/json/export-applications")
+  (let [resp (http-get (str (server-address) "/data-api/json/export-applications")
                {:basic-auth ["solita-etl" "foo"]
                 :follow-redirects false
                 :throw-exceptions false})]
@@ -21,7 +20,7 @@
 
 (fact "With valid credentials, api returns one application"
   (let [application-id (create-app-id pena :operation "markatilan-laajentaminen")
-        http-resp (http/get (str (server-address) "/data-api/json/export-applications")
+        http-resp (http-get (str (server-address) "/data-api/json/export-applications")
                     {:basic-auth ["solita-etl" "solita-etl"]
                      :follow-redirects false
                      :throw-exceptions false})
@@ -34,7 +33,7 @@
       (-> resp :applications first :operations first :priceClass) => "D"))
 
   (fact "but not if modified timestamp is too old"
-    (let [http-resp (http/get (str (server-address) "/data-api/json/export-applications")
+    (let [http-resp (http-get (str (server-address) "/data-api/json/export-applications")
                     {:basic-auth ["solita-etl" "solita-etl"]
                      :query-params {:modifiedAfterTimestampMillis (+ (now) (* 1000 60))}
                      :follow-redirects false
@@ -46,7 +45,7 @@
 
 (fact "When using kayttotarkoitus operation, price and kayttotarkoitus is included in operation"
   (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo")
-        http-resp (http/get (str (server-address) "/data-api/json/export-applications")
+        http-resp (http-get (str (server-address) "/data-api/json/export-applications")
                     {:basic-auth ["solita-etl" "solita-etl"]
                      :follow-redirects false
                      :throw-exceptions false})
@@ -58,7 +57,7 @@
     (-> resp :applications last :operations first :use) => "021 rivitalot"))
 
 (fact "Applicant can not use the api"
-  (let [http-resp (http/get (str (server-address) "/data-api/json/export-applications")
+  (let [http-resp (http-get (str (server-address) "/data-api/json/export-applications")
                     {:basic-auth ["pena" "pena"]
                      :follow-redirects false
                      :throw-exceptions false})
@@ -68,7 +67,7 @@
     (:applications resp) => nil?))
 
 (facts "export-organizations"
-  (let [http-resp (http/get (str (server-address) "/data-api/json/export-organizations")
+  (let [http-resp (http-get (str (server-address) "/data-api/json/export-organizations")
                     {:basic-auth ["solita-etl" "solita-etl"]
                      :follow-redirects false
                      :throw-exceptions false})

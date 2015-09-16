@@ -20,8 +20,8 @@
   (make-sort {:sort {:field "unknown" :asc true}})  => {}
   (make-sort {:sort {:field "id" :asc false}}) => {}
   (make-sort {:sort {:field "_id" :asc false}}) => {}
-  (make-sort {:sort {:field "type" :asc true }})  => {:infoRequest 1}
-  (make-sort {:sort {:field "type" :asc false }}) => {:infoRequest -1}
+  (make-sort {:sort {:field "type" :asc true }})  => {:infoRequest -1, :permitSubtype 1}
+  (make-sort {:sort {:field "type" :asc false }}) => {:infoRequest 1, :permitSubtype -1}
   (make-sort {:sort {:field "location" :asc false }}) => {:address -1}
   (make-sort {:sort {:field "applicant" :asc false }}) => {:applicant -1}
   (make-sort {:sort {:field "submitted" :asc true }})  => {:submitted 1}
@@ -53,7 +53,7 @@
      :handler  "321"
      :tags ["test1" "test2"]}
     {:role "authority"}) => (just {"$and" (just [{:auth.id "123"}
-                                                 {:infoRequest false :state {"$nin" ["draft" "canceled"]}}
+                                                 {:state {"$nin" ["draft" "canceled"]}}
                                                  {"$or" [{"auth.id" "321"} {"authority.id" "321"}]}
                                                  {:tags {"$in" ["test1" "test2"]}}])}))
 
