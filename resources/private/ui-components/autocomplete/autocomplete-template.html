@@ -11,7 +11,7 @@
             <!-- /ko -->
             <span class="selection-text" data-bind="visible: showCaption, text: optionsCaption"></span>
             <!-- ko if: showTags -->
-            <ul data-bind="visible: selectedOptions().length > 0" class="tags">
+            <ul class="tags" data-bind="visible: selectedOptions().length > 0, css: {toggled: inputSelected()}">
               <!-- ko foreach: selectedOptions -->
               <li class="tag" data-bind="click: $component.removeTag,
                                          clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false">
@@ -21,14 +21,13 @@
                                  titleWhenOverflow: $component.optionsText ? $data[$component.optionsText] : $data"></span>
               </li>
               <!-- /ko -->
-                <i class="tag-chevron btn lupicon-chevron-small-down"></i>
+              <i class="tag-chevron lupicon-chevron-small-down"></i>
+              <i class="tag-chevron lupicon-chevron-small-up toggle"></i>
             </ul>
             <!-- /ko -->
           </span>
-          <span class="autocomplete-selection-arrow" data-bind="css: {toggled: inputSelected()}">
-            <i data-bind="visible: showCaption" class="lupicon-chevron-small-down"></i>
-            <i data-bind="visible: showCaption" class="lupicon-chevron-small-up toggle"></i>
-          </span>
+          <i data-bind="visible: showCaption" class="tag-chevron lupicon-chevron-small-down"></i>
+          <i data-bind="visible: showCaption" class="tag-chevron lupicon-chevron-small-up toggle"></i>
         </div>
         <div class="autocomplete-dropdown" data-bind="visible: false, fader: dropdownVisible, duration: 100">
           <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"

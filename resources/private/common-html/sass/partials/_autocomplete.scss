@@ -69,14 +69,6 @@
             }
           }
         }
-        i.tag-chevron {
-          position: relative;
-          color: $primary;
-          float: right;
-          min-height: $grid-input-height - 2;
-          max-height: $grid-input-height - 2;
-          line-height: $grid-input-height - 2;
-        }
       }
     }
     span.caption, span.selection-text {
@@ -84,13 +76,14 @@
       line-height: $grid-input-height - 2;
       padding-left: 6px;
     }
-    .autocomplete-selection-arrow {
+    i.tag-chevron {
       position: absolute;
-      top: 8px;
+      bottom: 8px;
       right: 8px;
       cursor: pointer;
       color: $orange-dark;
-      &.toggled {
+      margin: 0;
+      &.toggle {
         color: $orange-light;
       }
     }

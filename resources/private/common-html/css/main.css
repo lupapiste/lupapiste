@@ -6798,40 +6798,32 @@ ul.tabs {
   line-height: 36px;
   margin: 0 6px;
 }
-/* line 72, ../sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags i.tag-chevron {
-  position: relative;
-  color: #f39129;
-  float: right;
-  min-height: 38px;
-  max-height: 38px;
-  line-height: 38px;
-}
-/* line 82, ../sass/partials/_autocomplete.scss */
+/* line 74, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.caption, .autocomplete-component .autocomplete-selection-wrapper span.selection-text {
   cursor: default;
   line-height: 38px;
   padding-left: 6px;
 }
-/* line 87, ../sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper .autocomplete-selection-arrow {
+/* line 79, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {
   position: absolute;
-  top: 8px;
+  bottom: 8px;
   right: 8px;
   cursor: pointer;
   color: #f39129;
+  margin: 0;
 }
-/* line 93, ../sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper .autocomplete-selection-arrow.toggled {
+/* line 86, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle {
   color: #fbc732;
 }
-/* line 99, ../sass/partials/_autocomplete.scss */
+/* line 92, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown {
   width: inherit;
   position: absolute;
   z-index: 1;
 }
-/* line 103, ../sass/partials/_autocomplete.scss */
+/* line 96, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown input.autocomplete-input {
   width: 100%;
   height: 40px;
@@ -6839,7 +6831,7 @@ ul.tabs {
   display: block;
   box-sizing: border-box;
 }
-/* line 110, ../sass/partials/_autocomplete.scss */
+/* line 103, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
   position: absolute;
   top: 38px;
@@ -6855,23 +6847,23 @@ ul.tabs {
   background-color: #fff;
   color: black;
 }
-/* line 126, ../sass/partials/_autocomplete.scss */
+/* line 119, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result.autocomplete-result-grouped li.autocomplete-result-item {
   padding: 0 12px;
 }
-/* line 131, ../sass/partials/_autocomplete.scss */
+/* line 124, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li {
   height: 40px;
   line-height: 40px;
 }
-/* line 136, ../sass/partials/_autocomplete.scss */
+/* line 129, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
   cursor: default;
   display: list-item;
   list-style-type: none;
   padding: 0 6px;
 }
-/* line 142, ../sass/partials/_autocomplete.scss */
+/* line 135, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
   position: relative;
@@ -6879,16 +6871,16 @@ ul.tabs {
   overflow: hidden;
   padding-right: 6px;
 }
-/* line 149, ../sass/partials/_autocomplete.scss */
+/* line 142, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #f7ac2e;
   color: #fff;
 }
-/* line 152, ../sass/partials/_autocomplete.scss */
+/* line 145, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #fbc732;
 }
-/* line 156, ../sass/partials/_autocomplete.scss */
+/* line 149, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-group-header {
   font-weight: 700;
   padding-left: 6px;
