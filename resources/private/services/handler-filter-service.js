@@ -1,17 +1,20 @@
-LUPAPISTE.HandlerFilterService = function() {
+LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
   "use strict";
   var self = this;
 
   self.selected = ko.observableArray([]);
 
   var defaultFilter = ko.pureComputed(function() {
-    return util.getIn(lupapisteApp.models.currentUser, ["applicationFilters", 0, "filter", "handlers"]);
+    var applicationFilters = _.find(applicationFiltersService.savedFilters(), function(f) {
+      return f.isDefaultFilter();
+    });
+    return util.getIn(applicationFilters, ["filter", "handlers"]) || [];
   });
 
   var usersInSameOrganizations = ko.observable();
 
   ko.computed(function() {
-    self.selected(_.filter(usersInSameOrganizations(), function (user) {return _.contains(defaultFilter(), user.id)}));
+    self.selected(_.filter(usersInSameOrganizations(), function (user) {return _.contains(defaultFilter(), user.id);}));
   });
 
   self.data = ko.pureComputed(function() {

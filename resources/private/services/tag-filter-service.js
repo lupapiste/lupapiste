@@ -1,4 +1,4 @@
-LUPAPISTE.TagFilterService = function(tagsService) {
+LUPAPISTE.TagFilterService = function(tagsService, applicationFiltersService) {
   "use strict";
   var self = this;
 
@@ -7,11 +7,10 @@ LUPAPISTE.TagFilterService = function(tagsService) {
   self.selected = ko.observableArray([]);
 
   var defaultFilter = ko.pureComputed(function() {
-    var applicationFilters = _.first(lupapisteApp.models.currentUser.applicationFilters());
-    return applicationFilters &&
-           applicationFilters.filter.tags &&
-           applicationFilters.filter.tags() ||
-           [];
+    var applicationFilters = _.find(applicationFiltersService.savedFilters(), function(f) {
+      return f.isDefaultFilter();
+    });
+    return util.getIn(applicationFilters, ["filter", "tags"]) || [];
   });
 
   ko.computed(function() {

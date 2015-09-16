@@ -1,4 +1,4 @@
-LUPAPISTE.AreaFilterService = function() {
+LUPAPISTE.AreaFilterService = function(applicationFiltersService) {
   "use strict";
   var self = this;
 
@@ -11,11 +11,10 @@ LUPAPISTE.AreaFilterService = function() {
   self.selected = ko.observableArray([]);
 
   var defaultFilter = ko.pureComputed(function() {
-    var applicationFilters = _.first(lupapisteApp.models.currentUser.applicationFilters());
-    return applicationFilters &&
-           applicationFilters.filter.areas &&
-           applicationFilters.filter.areas() ||
-           [];
+    var applicationFilters = _.find(applicationFiltersService.savedFilters(), function(f) {
+      return f.isDefaultFilter();
+    });
+    return util.getIn(applicationFilters, ["filter", "areas"]) || [];
   });
 
   ko.computed(function() {
