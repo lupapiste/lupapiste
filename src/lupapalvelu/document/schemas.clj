@@ -987,7 +987,7 @@
                                         {:name "Ulkoilureitti"}
                                         {:name "Uoma"}
                                         {:name "V\u00e4est\u00f6suojelua varten tarvittava rakennelma"}
-                                        {:name "V\u00e4h\u00e4isten laitteiden sijoittaminen (Maank\u00e4ytt\u00f6- ja rakennuslaki 163 §)"}
+                                        {:name "V\u00e4h\u00e4isten laitteiden sijoittaminen (Maank\u00e4ytt\u00f6- ja rakennuslaki 163 \u00a7)"}
                                         {:name "Valtausalue (kaivoslaki 503/1965)"}
                                         {:name "Valtion retkeilyalueen lis\u00e4alue"}
                                         {:name "Veden johtaminen maan kuivattamista varten"}
@@ -1006,9 +1006,9 @@
                                         {:name "Voiman- ja tiedonsiirtolinja"}
                                         {:name "Voimansiirtolinja"}
                                         {:name "Ydinj\u00e4tteiden loppusijoituspaikka"}
-                                        {:name "Yhdyskuntateknisten laitteiden sijoittaminen (Maank\u00e4ytt\u00f6- ja rakennuslaki 161 §)"}
-                                        {:name "Yhteisj\u00e4rjestely (Maank\u00e4ytt\u00f6- ja rakennuslaki 164 §)"}
-                                        {:name "Yhteisk\u00e4ytt\u00f6alue (Maank\u00e4ytt\u00f6- ja rakennuslaki 75 ja 91 §)"}
+                                        {:name "Yhdyskuntateknisten laitteiden sijoittaminen (Maank\u00e4ytt\u00f6- ja rakennuslaki 161 \u00a7)"}
+                                        {:name "Yhteisj\u00e4rjestely (Maank\u00e4ytt\u00f6- ja rakennuslaki 164 \u00a7)"}
+                                        {:name "Yhteisk\u00e4ytt\u00f6alue (Maank\u00e4ytt\u00f6- ja rakennuslaki 75 ja 91 \u00a7)"}
                                         {:name "Yhteispiha"}
                                         {:name "Yhteisrasite"}
                                         {:name "Yksityinen hauta"}
