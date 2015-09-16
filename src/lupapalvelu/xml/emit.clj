@@ -11,7 +11,7 @@
         (:tag model))
       (:attr model)
       (if (:child model)
-        (filter identity (map #(element-to-xml data % ns) (:child model)))
+        (map #(element-to-xml data % ns) (:child model))
         (str data)))))
 
 (defn element-to-xml

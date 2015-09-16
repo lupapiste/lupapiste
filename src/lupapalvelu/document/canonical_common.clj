@@ -770,3 +770,10 @@
      {:pvm date
       :kasittelija (format "%s %s" a-first a-last)
       :hakemuksenTila (state enums)}}))
+
+(defn maaraalatunnus
+  "Returns maaraalatunnus in the correct format if the id is available
+  in the property, otherwise nil."
+  [app property]
+  (when-let [mat (:maaraalaTunnus property)]
+    (format "%sM%s" (:propertyId app) mat)))

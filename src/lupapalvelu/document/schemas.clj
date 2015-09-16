@@ -1076,9 +1076,6 @@
 
     {:info {:name "maisematyo" :approvable true}
      :body (approvable-top-level-groups maisematyo)}
-    ;; {:info {:name "kiinteistotoimitus" :approvable true}
-    ;;  :body (approvable-top-level-groups (body kuvaus))}
-
     {:info {:name "rajankaynti" :approvable true}
      :body (approvable-top-level-groups (body rajankaynti-tyyppi kuvaus))}
     {:info {:name "maankayton-muutos" :approvable true}

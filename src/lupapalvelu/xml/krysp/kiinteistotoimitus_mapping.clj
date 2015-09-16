@@ -34,8 +34,8 @@
                       {:sijaintitieto {:Sijainti/yht [{:osoite [:yksilointitieto :alkuHetki {:osoitenimi :teksti}]}
                                                       {:piste/gml {:Point :pos}}]}}
                       {:liitetieto {:Liite/yht [:kuvaus :linkkiliitteeseen :muokkausHetki :versionumero]}}
-                      :kohdekiinteisto
-                      :maaraAla
+                      {:kiinteistotieto {:Kiinteisto :kiinteistotunnus}}
+                      {:maaraAlatieto {:MaaraAla :maaraAlatunnus}}
                       {:tilatieto {:Tila [:pvm :kasittelija :hakemuksenTila]}}]}]}
                   :toimituksenTila]
         basic (conj toimitus :kuvaus)
@@ -56,23 +56,28 @@
                   mapping-common/common-namespaces)
      :child [(mapping-common/mapper toimitus-types "gml")]}))
 
+(defn bind-attachments
+  "As agreed with CGI, the attachments are part of
+  Toimitushakemus. Thus, we need to add (the same) application
+  attachments to every operative document."
+  [canon attachments]
+  (defn binder [[k xs]]
+    {k (map #(assoc-in % [:toimitushakemustieto :Toimitushakemus :liitetieto] attachments) xs)})
+  (if attachments
+    (let [m (-> canon :Kiinteistotoimitus :featureMembers)
+          attached (reduce #(conj %1 (binder %2)) {} m)]
+      (assoc-in canon [:Kiinteistotoimitus :featureMembers] attached))
+    canon))
+
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of
-  attachment file IDs that ware sent."
+  attachment file IDs that were sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
-  (println "krysp-version:" krysp-version)
   (let [canonical-without-attachments (kiinteistotoimitus-canonical application lang)
         attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
-        ;; canonical (assoc-in
-        ;;             canonical-without-attachments
-        ;;             [:Maankaytonmuutos :maankayttomuutosTieto muutos :liitetieto ]
-        ;;             attachments-canonical)
-        canonical canonical-without-attachments
-        ;;_ (>pprint canonical)
+        canonical (bind-attachments canonical-without-attachments attachments-canonical)
         mapping (->mapping)
-        ;;_ (>pprint mapping)
         xml (emit/element-to-xml canonical mapping)
-        _ (>pprint xml)
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
     (writer/write-to-disk
       application

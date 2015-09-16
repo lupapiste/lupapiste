@@ -53,7 +53,7 @@
                   (merge (select-keys g [:kayttooikeuslaji :kayttaja :antaja])
                          (when date
                            {:paattymispvm date})
-                         {:valiaikainenKytkin (str/blank? date)})}}})))
+                         {:valiaikainenKytkin (not (str/blank? date))})}}})))
 
 (defmethod operation-details :rajankaynti
   [{data :data}]
@@ -67,6 +67,7 @@
         op-docs (canonical-common/schema-info-filter docs :name #{"kiinteistonmuodostus" "rasitetoimitus" "rajankaynti"})
         parties (canonical-common/process-parties docs lang)
         [{{property :kiinteisto} :data}] (canonical-common/schema-info-filter docs :name "kiinteisto")
+        property-id (:propertyId application)
         toimitus-fn (fn [{:keys [:name :details]}]
                       (merge {:toimituksenTiedottieto
                               {:ToimituksenTiedot (canonical-common/toimituksen-tiedot application lang)}
@@ -74,8 +75,9 @@
                               {:Toimitushakemus
                                {:osapuolitieto parties
                                 :sijaintitieto (canonical-common/get-sijaintitieto application)
-                                :kiinteistotieto {:Kiinteisto {:kiinteistotunnus (:propertyId application)}}
-                                :maaraAlatieto  {:maaraAla {:maaraAlaTunnus (:maaraalaTunnus property)}}
+                                :kiinteistotieto {:Kiinteisto {:kiinteistotunnus property-id}}
+                                :maaraAlatieto  (when-let [mat (canonical-common/maaraalatunnus app property)]
+                                                  {:MaaraAla {:maaraAlatunnus mat}})
                                 :tilatieto (canonical-common/application-state app)}}
                               :toimituksenTila "Hakemus"}
                              details))]
@@ -86,13 +88,9 @@
                                         (let [op-name  (:name op-details)
                                               ops      (get all-details op-name (get acc op-name []))
                                               toimitus (toimitus-fn op-details)]
-                                          (assoc all-details op-name (conj ops toimitus))
-                                          ;;(conj all-details toimitus)
-                                          ))
+                                          (assoc all-details op-name (conj ops toimitus))))
                                       {}
                                       (operation-details doc))]
-                  (merge acc doc-ops)
-                  ;;(concat acc doc-ops)
-                  ))
+                  (merge acc doc-ops)))
               {}
               op-docs)}}))

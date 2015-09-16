@@ -688,7 +688,7 @@
                                     :asianhallinta false}
      :rasitetoimitus                {:schema "rasitetoimitus"
                                      :permit-type permit/KT
-                                     :required common-maanmittaus-schemas
+                                     :required (conj common-maanmittaus-schemas "kiinteistonmuodostus")
                                      :attachments []
                                      :add-operation-allowed false
                                      :link-permit-required false

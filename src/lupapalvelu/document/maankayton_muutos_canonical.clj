@@ -32,7 +32,7 @@
          {:osapuolitieto parties
           :sijaintitieto (canonical-common/get-sijaintitieto application)
           :kohdekiinteisto (:propertyId application)
-          :maaraAla (:maaraalaTunnus property)
+          :maaraAla (canonical-common/maaraalatunnus app property)
           :tilatieto (canonical-common/application-state app)}
          }
         :toimituksenTila (toimituksen-tila app)
