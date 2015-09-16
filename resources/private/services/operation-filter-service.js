@@ -26,6 +26,7 @@ LUPAPISTE.OperationFilterService = function(params) {
   }
 
   ko.computed(function() {
+    self.selected([]);
     ko.utils.arrayPushAll(self.selected, wrapInObject(defaultFilter()));
   });
 

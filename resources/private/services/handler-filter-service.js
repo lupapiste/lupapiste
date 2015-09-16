@@ -20,6 +20,7 @@ LUPAPISTE.HandlerFilterService = function() {
 
   // add default filter items when data or filter updates
   ko.computed(function() {
+    self.selected([]);
     ko.utils.arrayPushAll(self.selected,
       _.filter(self.data(), function(user) {
         return _.contains(defaultFilter(), user.id);

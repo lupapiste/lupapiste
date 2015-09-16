@@ -19,6 +19,7 @@ LUPAPISTE.AreaFilterService = function() {
   });
 
   ko.computed(function() {
+    self.selected([]);
     ko.utils.arrayPushAll(self.selected,
       _(self.data())
         .map("areas")

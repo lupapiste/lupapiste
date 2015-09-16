@@ -28,6 +28,7 @@ LUPAPISTE.OrganizationFilterService = function() {
 
   // add default filter items when data or filter updates
   ko.computed(function() {
+    self.selected([]);
     ko.utils.arrayPushAll(self.selected,
       _.filter(self.data(), function(org) {
         return _.contains(defaultFilter(), org.id);
