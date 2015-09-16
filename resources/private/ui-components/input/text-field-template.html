@@ -4,10 +4,11 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="text-field-template">
       <div class="col--vertical">
-        <label data-bind="text: label, attr: {for: id}, css: {required: required}"></label>
+        <label data-bind="text: label, attr: {for: id}, css: {required: required}, visible: label"></label>
         <input class="input" type="text"
                data-bind="textInput: value, attr: {placeholder: placeholder, id: id},
-                          css: {required: required && !value()}"
+                          css: {required: required && !value()},
+                          disable: disable"
                maxlength="255"></input>
       </div>
     </script>

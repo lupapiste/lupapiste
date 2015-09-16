@@ -7,10 +7,10 @@
         <div class="row row--no-margin">
           <div class="col-3">
             <div data-bind="component: {name: 'submit-button', params: {value: newFilterName,
-                                                                      id: 'new-filter-name',
-                                                                      lLabel: 'applications.search.save.filter',
-                                                                      lSubmitTitle: 'save',
-                                                                      submitFn: saveFilter}}"></div>
+                                                                        id: 'new-filter-name',
+                                                                        lLabel: 'applications.search.save.filter',
+                                                                        lSubmitTitle: 'save',
+                                                                        submitFn: saveFilter}}"></div>
           </div>
 
           <div class="col-1 stacked">
@@ -27,21 +27,31 @@
         <div class="row" data-bind="slider: showSavedFilters">
           <div class="col-4 applications-search-filters-list__filters" data-bind="foreach: savedFilters">
             <div class="applications-search-filters-list__filter-row">
-              <div class="applications-search-filters-list__filter-item" data-bind="text: $data.title"></div>
               <div class="applications-search-filters-list__filter-item">
-                <button class="function">
-                  <i class="lupicon-pen"></i>
-                  <span>Tallenna nimi</span>
+                <div class=""
+                     data-bind="component: {name: 'text-field', params: {value: $data.title,
+                                                                         id: id,
+                                                                         disable: true}}">
+                </div>
+              </div>
+
+              <div class="applications-search-filters-list__filter-item">
+                <button class="function" data-bind="click: function() {console.log('valitse');}">
+                  <i class="lupicon-radio-off"></i>
+                  <i class="lupicon-radio-on toggle"></i>
+                  <span>Valitse</span>
                 </button>
               </div>
+
               <div class="applications-search-filters-list__filter-item">
-                <button class="function">
+                <button class="function" data-bind="click: $data.defaultFilter, disable: $data.isDefaultFilter">
                   <i class="lupicon-star"></i>
-                  <span>Asenta oletushakuehdoksi</span>
+                  <span>Aseta oletushakuehdoksi</span>
                 </button>
               </div>
+
               <div class="applications-search-filters-list__filter-item">
-                <button class="function">
+                <button class="function" data-bind="click: $data.removeFilter">
                   <i class="lupicon-remove"></i>
                   <span>Poista</span>
                 </button>
