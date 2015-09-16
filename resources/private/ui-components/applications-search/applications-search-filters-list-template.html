@@ -8,7 +8,7 @@
           <div class="col-3">
             <div data-bind="component: {name: 'submit-button', params: {value: newFilterName,
                                                                         id: 'new-filter-name',
-                                                                        lLabel: 'applications.search.save.filter',
+                                                                        lLabel: 'applications.search.save-filter',
                                                                         lSubmitTitle: 'save',
                                                                         submitFn: saveFilter}}"></div>
           </div>
@@ -25,6 +25,7 @@
         </div>
 
         <div class="row" data-bind="slider: showSavedFilters">
+          <!-- ko if savedFilters().length > 0 -->
           <div class="col-4 applications-search-filters-list__filters" data-bind="foreach: savedFilters">
             <div class="applications-search-filters-list__filter-row">
               <div class="applications-search-filters-list__filter-item">
@@ -58,6 +59,10 @@
               </div>
             </div>
           </div>
+          <!-- /ko -->
+          <!-- ko if: savedFilters().length === 0 -->
+          <p data-bind="ltext: 'applications.search.no-saved-filters'"></p>
+          <!-- /ko -->
         </div>
       </div>
     </script>
