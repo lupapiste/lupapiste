@@ -1124,12 +1124,22 @@ $col: 25%;
     color: $negative;
   }
 
-  .input-button {
-    input {
-      border-color: $positive;
-      padding-right: 190px;
+  .submit-button {
+    display: table-row;
+    .submit-button__item {
+      display: table-cell;
+      &:first-child {
+        width: 100%;
+      }
+    }
+
+    .submittable {
+      input {
+        border-color: $positive;
+      }
     }
   }
+
   button.input-button {
     position: absolute;
     bottom: 0;

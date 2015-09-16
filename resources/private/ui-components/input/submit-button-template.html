@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="submit-button-template">
+      <form class="submit-button" data-bind="submit: submitFn">
+        <div class="submit-button__item"
+             data-bind="component: {name: 'text-field', params: {value: value,
+                                                                 id: id,
+                                                                 lLabel: lLabel}},
+                        css: {submittable: !disabled()}"></div>
+        <div class="submit-button_item">
+          <br/>
+          <button class="positive" data-bind="click: submitFn, css: {disabled: disabled}">
+            <i class="lupicon-save"></i>
+            <i class="wait spin lupicon-refresh"></i>
+            <span data-bind="ltext: lSubmitTitle"></span>
+          </button>
+        </div>
+      </form>
+    </script>
+  </section>
+</body>
+</html>
