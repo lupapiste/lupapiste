@@ -12,8 +12,9 @@
   (map (partial apply concat) (get-in feature [:geometry :coordinates])))
 
 
-(defn validate-point [point]
+(defn validate-point [[x y :as point]]
   (or
+    (when-not (and (number? x) (number? y)) (fail :error.point-coordinate-not-number))
     (when-not (= (count point) 2) (fail :error.point-coordinate-wrong))
     (coord/validate-coordinates point)))
 
