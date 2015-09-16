@@ -27,11 +27,14 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
       .command("update-default-application-filter", {"filter-id": filter.id()})
       .error(util.showSavedIndicator)
       .success(function() {
-        // TODO set default filter
+        _.forEach(self.savedFilters(), function(f) {
+          f.isDefaultFilter(false);
+        });
+        filter.isDefaultFilter(true);
       })
       .call();
     };
-    filter.isDefaultFilter = filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "id"]);
+    filter.isDefaultFilter = ko.observable(filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "id"]));
     return filter;
   }
 
