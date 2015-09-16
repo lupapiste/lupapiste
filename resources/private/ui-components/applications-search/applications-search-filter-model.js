@@ -5,8 +5,8 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
   self.dataProvider = params.dataProvider;
 
   // TODO saved filters service
-  self.savedFilters = ko.observableArray([]);
-  self.selectedFilter = ko.observable();
+  self.savedFilters = lupapisteApp.services.applicationFiltersService.savedFilters;
+
   self.query = ko.observable();
 
   self.filterCount = ko.computed(function() {
@@ -21,22 +21,6 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
   self.advancedFiltersText = ko.computed(function() {
     return self.showAdvancedFilters() ? "applications.filter.advancedFilter.hide" : "applications.filter.advancedFilter.show";
   });
-
-  self.saveAdvancedFilters = function() {
-    var filter = {
-      handlers:      _.map(ko.unwrap(lupapisteApp.services.handlerFilterService.selected), "id"), //util.getIn(self.dataProvider, ["handler", "id"]),
-      tags:          _.map(ko.unwrap(lupapisteApp.services.tagFilterService.selected), "id"),
-      operations:    _.map(ko.unwrap(lupapisteApp.services.operationFilterService.selected), "id"),
-      organizations: _.map(ko.unwrap(lupapisteApp.services.organizationFilterService.selected), "id"),
-      areas:         _.map(ko.unwrap(lupapisteApp.services.areaFilterService.selected), "id")
-    };
-
-    ajax
-    .command("save-application-filter", {title: "bar", filter: filter, sort: ko.toJS(self.dataProvider.sort)})
-    .error(util.showSavedIndicator)
-    .success(util.showSavedIndicator)
-    .call();
-  };
 
   hub.onPageLoad("applications", function() {
     self.showAdvancedFilters(self.filterCount() > 0);
