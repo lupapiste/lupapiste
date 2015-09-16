@@ -8,8 +8,8 @@
                 <span data-bind="ltext: prefix"></span>
               <!-- /ko -->
               <span data-bind="text: address" class="address"></span>
-              <a data-bind="click: location.changeLocation,
-                            visible: $root.authorization.ok('change-location')"
+              <a data-bind="click: $parent.changeLocationModel.changeLocation,
+                            visible: $parent.authorization.ok('change-location')"
                  data-test-id="change-location-link"
                  class="link-btn">
                   <i class="lupicon-pen"></i>

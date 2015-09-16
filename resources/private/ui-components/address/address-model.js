@@ -8,4 +8,5 @@ LUPAPISTE.AddressModel = function( params ) {
   this.address = params.address;
   this.edit = params.edit ? loc( params.edit ) : "";
   this.location = new LUPAPISTE.ChangeLocationModel();
+  this.authorization = lupapisteApp.models.applicationAuthModel;
 };
