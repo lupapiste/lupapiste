@@ -224,7 +224,7 @@ LUPAPISTE.ForemanModel = function() {
     function getHakijat() {
       var hakijaDocs = _.where(self.application().documents, {"schema-info": {"name": "hakija"}});
       hakijaDocs = hakijaDocs.concat(_.where(self.application().documents, {"schema-info": {"name": "hakija-r"}}));
-      return _.map(hakijaDocs, function(doc) {
+      return _(hakijaDocs).map(function(doc) {
         var userId = util.getIn(doc, ["data", "henkilo", "userId", "value"]);
         var companyId = util.getIn(doc, ["data", "yritys", "companyId", "value"]);
         // check if hakija is company or person
@@ -247,7 +247,7 @@ LUPAPISTE.ForemanModel = function() {
             companyId: companyId
           };
         }
-      });
+      }).filter(_.identity).value();
     }
 
     function inviteHakijat(id, auth) {

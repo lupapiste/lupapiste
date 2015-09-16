@@ -281,7 +281,7 @@
     </div>
 
     <div id="mypage-register-company">
-      <!-- ko ifnot: companyShow -->
+      <!-- ko if: !authority() && !companyShow() -->
       <div data-test-id="mypage-register-company-accordion"
            data-bind="component: {name: 'accordion', params: {ltitle: 'register.company.header',
                                                               accordionContentTemplate: 'mypage-register-company-template',
