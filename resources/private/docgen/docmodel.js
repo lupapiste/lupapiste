@@ -1716,7 +1716,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var p = _.isArray(paths) ? paths : [paths];
     var v = _.isArray(values) ? values : [values];
     var updates = _.zip(
-        _.map(p, function(path) {return path.replace(new RegExp("^" + self.docId + "."), "");}),
+        _.map(p, function(path) {
+          return path.replace(new RegExp("^" + self.docId + "."), "");
+        }),
         v);
     var updateCommand = getUpdateCommand();
 

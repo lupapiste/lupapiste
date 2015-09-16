@@ -3,6 +3,12 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   var self = this;
 
   self.isMaaraala = ko.observable(false);
-  self.propertyId = params.propertyId;
-
+  var humanizedPropId = util.prop.toHumanFormat(params.propertyId);
+  self.propertyId = ko.pureComputed(function() {
+    return self.isMaaraala() ? humanizedPropId + "-M" : humanizedPropId;
+  });
+  self.propertyIdLabel = ko.pureComputed(function() {
+    return self.isMaaraala() ? "Määräala" : "Kiinteistötunnus";
+  });
+  
 };

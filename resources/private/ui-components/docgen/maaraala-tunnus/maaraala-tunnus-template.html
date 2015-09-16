@@ -4,15 +4,17 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="maaraala-tunnus-template">
       <span class="form-entry">
-        <input data-bind="checked: isMaaraala" type="checkbox"></input>
-        <label>Kyseessä määräala</label>
-        <br>
+        <div>
+          <label>
+            <input id="" data-bind="checked: isMaaraala" type="checkbox"></input>Kyseessä määräala
+          </label>
+        </div>
+        
+        <label style="display: block;" class="form-label" data-bind="text: propertyIdLabel"></label>
         <span class="kiintun-and-maaraalatunnus">
           <span class="form-maaraala" data-bind="text: propertyId"></span>
           <input class="form-input text form-input short" data-bind="visible: isMaaraala" type="text"></input>
         </span>
-        
-        
       </span>
     </script>
   </section>
