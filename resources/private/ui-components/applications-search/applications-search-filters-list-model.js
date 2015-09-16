@@ -9,33 +9,37 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
 
   self.savedFilters = ko.observableArray([]);
 
+  function wrapFilter(filter) {
+    filter.edit = ko.observable(false);
+    filter.removeFilter = function(filter) {
+      ajax
+      .command("remove-application-filter", {"filter-id": filter.id()})
+      .error(util.showSavedIndicator)
+      .success(function() {
+        self.savedFilters.remove(function(f) {
+          return ko.unwrap(f.id) === ko.unwrap(filter.id);
+        });
+      })
+      .call();
+    };
+    filter.defaultFilter = function(filter) {
+      ajax
+      .command("update-default-application-filter", {"filter-id": filter.id()})
+      .error(util.showSavedIndicator)
+      .success(function() {
+        // TODO set default filter
+      })
+      .call();
+    };
+    filter.isDefaultFilter = filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "id"]);
+    return filter;
+  }
+
   ko.computed(function() {
-    var filters = _.map(lupapisteApp.models.currentUser.applicationFilters(), function (filter) {
-      filter.edit = ko.observable(false);
-      filter.removeFilter = function(filter) {
-        ajax
-        .command("remove-application-filter", {"filter-id": filter.id()})
-        .error(util.showSavedIndicator)
-        .success(function() {
-          self.savedFilters.remove(function(f) {
-            return ko.unwrap(f.id) === ko.unwrap(filter.id);
-          });
-        })
-        .call();
-      };
-      filter.defaultFilter = function(filter) {
-        ajax
-        .command("update-default-application-filter", {"filter-id": filter.id()})
-        .error(util.showSavedIndicator)
-        .success(function() {
-          // TODO set default filter
-        })
-        .call();
-      };
-      filter.isDefaultFilter = filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "id"]);
-      return filter;
-    });
-    self.savedFilters(filters);
+    self.savedFilters(_(lupapisteApp.models.currentUser.applicationFilters())
+      .map(wrapFilter)
+      .reverse()
+      .value());
   });
 
   self.saveFilter = function() {
@@ -55,8 +59,7 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
     .error(util.showSavedIndicator)
     .success(function(res) {
       util.showSavedIndicator(res);
-      // TODO return saved filter which we can append to saved array
-      self.savedFilters.push(res.filter);
+      self.savedFilters.unshift(wrapFilter(ko.mapping.fromJS(res.filter)));
     })
     .call();
   };
