@@ -80,6 +80,7 @@
                                                                  :origin sc/Bool}}
            (sc/optional-key :notification)        {:messageI18nkey sc/Str
                                                    :titleI18nkey   sc/Str}
+           (sc/optional-key :defaultFilter)       {:id sc/Str}
            (sc/optional-key :applicationFilters)  [{:id        sc/Str
                                                     :title     sc/Str
                                                     :sort     {:field (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler")

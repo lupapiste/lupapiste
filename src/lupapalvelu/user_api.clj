@@ -208,33 +208,31 @@
       (fail :error.user-not-found))))
 
 (defcommand update-default-application-filter
-  {:parameters [filter sort]
+  {:parameters [filter-id]
    :user-roles #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:filter :sort])]
    :description "Adds/Updates users default filter for the application search"}
   [{{id :id} :user}]
-  (mongo/update-by-id :users id {$set {:applicationFilters [{:filter filter :sort sort}]}})
-  (ok))
+  (mongo/update-by-id :users id {$set {:defaultFilter {:id filter-id}}}))
 
 (defcommand save-application-filter
   {:parameters [title filter sort]
    :user-roles #{:authority}
    :input-validators [(partial action/non-blank-parameters [:title :filter :sort])]
    :description "Atomically adds/updates application filter for the user"}
-  [{{id :id} :user {filter-id :id} :data}]
+  [{{id :id} :user {filter-id :filter-id} :data}]
   (let [filter-id        (or filter-id (mongo/create-id))
         app-filters      (:applicationFilters (user/get-user-by-id id))
         title-collision? (->> app-filters
                               (clojure.core/filter #(= (:title %) title))
                               (map :id)
                               (some (partial not= filter-id)))
-        updated-filters  (->> (assoc app-filters )
-                              (remove #(= (:id %) filter-id))
-                              (cons {:id filter-id :title title :filter filter :sort sort}))]
+        filter           {:id filter-id :title title :filter filter :sort sort}
+        updated-filters  (as-> app-filters $
+                              (zipmap (map :id $) $)
+                              (assoc-in $ [filter-id] filter))]
+    (clojure.pprint/pprint updated-filters)
     (if (not title-collision?)
-      (do
-        (mongo/update-by-id :users id {$set {:applicationFilters updated-filters}})
-        (ok))
+      (mongo/update-by-id :users id {$set {:applicationFilters updated-filters}})
       (fail :error.filter-title-collision))))
 
 (defcommand remove-application-filter
@@ -243,8 +241,7 @@
    :input-validators [(partial action/non-blank-parameters [:filter-id])]
    :description "Removes users application filter"}
   [{{id :id} :user}]
-  (mongo/update-by-id :users id {$pull {:applicationFilters {:filter-id filter-id}}})
-  (ok))
+  (mongo/update-by-id :users id {$pull {:applicationFilters {:id filter-id}}}))
 
 ;;
 ;; Change organization data:
