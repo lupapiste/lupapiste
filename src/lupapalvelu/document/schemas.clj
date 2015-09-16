@@ -851,8 +851,10 @@
 
 (def lisakohde-rakennuspaikka [{:name "kiinteisto"
                                 :type :group
-                                :body [{:name "kiinteistoTunnus" :type :string :readonly true}
+                                :body [{:name "maaraalaTunnus2" :type :maaraalaTunnus :i18nkey "kiinteisto.maaraalaTunnus"}
+                                       {:name "kiinteistoTunnus" :type :string :readonly true}
                                        {:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
+                                       ;{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                                        {:name "tilanNimi" :type :string :readonly true}
                                        {:name "rekisterointipvm" :type :string :readonly true}
                                        {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}

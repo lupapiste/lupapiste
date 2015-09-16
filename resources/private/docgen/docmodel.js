@@ -1418,6 +1418,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return div;
   }
 
+  function getPropertyId(model) {
+    if (model.kiinteistoTunnus) {
+      return model.kiinteistoTunnus.value;
+    }
+    return undefined;
+  }
+
+  function buildMaaraalaTunnus (subschema, model, path) {
+    return createComponent("maaraala-tunnus",
+      {propertyId: getPropertyId(model)});
+  }
+
   var builders = {
     group: buildGroup,
     string: buildString,
@@ -1437,6 +1449,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     personSelector: buildPersonSelector,
     companySelector: buildCompanySelector,
     table: buildTableRow,
+    maaraalaTunnus: buildMaaraalaTunnus,
     unknown: buildUnknown
   };
 
