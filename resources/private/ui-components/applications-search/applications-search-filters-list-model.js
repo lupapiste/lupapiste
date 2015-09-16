@@ -15,7 +15,7 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
         .command("remove-application-filter", {"filter-id": filter.id()})
         .error(util.showSavedIndicator)
         .success(function() {
-          hub.send("reload-current-user");
+          // TODO append new filter to list
         })
         .call();
       };
@@ -24,7 +24,7 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
         .command("update-default-application-filter", {"filter-id": filter.id()})
         .error(util.showSavedIndicator)
         .success(function() {
-          hub.send("reload-current-user");
+          // TODO remove filter from the list
         })
         .call();
       };
