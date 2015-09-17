@@ -46,9 +46,6 @@ LUPAPISTE.ApplicationFiltersService = function() {
       .value());
   });
 
-  self.savedFilters.subscribe(function(val) {
-    console.log("woot", val);
-  });
   self.addFilter = function(filter) {
     _savedFilters.unshift(wrapFilter(ko.mapping.fromJS(filter)));
   };
