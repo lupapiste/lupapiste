@@ -10,7 +10,10 @@ LUPAPISTE.ApplicationFiltersService = function() {
     _.forEach(_savedFilters(), function(f) {
       f.isSelected(false);
     });
-    val.isSelected(true);
+    // val is not defined when selection is cleared
+    if (val) {
+      val.isSelected(true);
+    }
   });
 
   self.savedFilters = ko.computed(function() {
