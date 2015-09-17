@@ -164,7 +164,8 @@
           [operation-tree-for-KT operation-tree-for-MM])]))
 
 
-(def schema-data-yritys-selected [[["_selected"] "yritys"]])
+(def schema-data-yritys-selected  [[["_selected"] "yritys"]])
+(def schema-data-henkilo-selected [[["_selected"] "henkilo"]])
 
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
@@ -182,49 +183,44 @@
 (def- common-vvvl-schemas ["hankkeen-kuvaus-vesihuolto" "vesihuolto-kiinteisto"])
 
 
-(def- uuden_rakennuksen_liitteet [:paapiirustus
-                                           [:asemapiirros
-                                            :pohjapiirros
-                                            :julkisivupiirros
-                                            :leikkauspiirros]
-                                           :rakennuspaikka
-                                           [:selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista]])
+(def- uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
+                                                 :pohjapiirros
+                                                 :julkisivupiirros
+                                                 :leikkauspiirros]
+                                  :rakennuspaikka [:selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista]])
 
-(def- rakennuksen_muutos_liitteet [:paapiirustus
-                                            [:pohjapiirros
-                                             :julkisivupiirros]])
-
-(def- rakennuksen_laajennuksen_liitteet [:paapiirustus
-                                                  [:asemapiirros
-                                                   :pohjapiirros
-                                                   :julkisivupiirros
-                                                   :leikkauspiirros]])
-
-(def- kaupunkikuva_toimenpide_liitteet [:paapiirustus
-                                                 [:asemapiirros
+(def- rakennuksen_muutos_liitteet [:paapiirustus [:pohjapiirros
                                                   :julkisivupiirros]])
 
+(def- rakennuksen_laajennuksen_liitteet [:paapiirustus [:asemapiirros
+                                                        :pohjapiirros
+                                                        :julkisivupiirros
+                                                        :leikkauspiirros]])
+
+(def- kaupunkikuva_toimenpide_liitteet [:paapiirustus [:asemapiirros
+                                                       :julkisivupiirros]])
+
 (def- ya-katulupa-general {:schema "tyomaastaVastaava"
-                                    :permit-type permit/YA
-                                    :schema-data schema-data-yritys-selected
-                                    :required (conj common-yleiset-alueet-schemas
-                                                "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
-                                                "tyoaika")
-                                    :attachments []
-                                    :add-operation-allowed false
-                                    :link-permit-required false
-                                    :link-permit-verdict-required false
-                                    :asianhallinta true})
+                           :permit-type permit/YA
+                           :schema-data schema-data-henkilo-selected
+                           :required (conj common-yleiset-alueet-schemas
+                                       "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
+                                       "tyoaika")
+                           :attachments []
+                           :add-operation-allowed false
+                           :link-permit-required false
+                           :link-permit-verdict-required false
+                           :asianhallinta true})
 
 (def- ya-kayttolupa-general {:schema "tyoaika"
-                                      :permit-type permit/YA
-                                      :required (conj common-yleiset-alueet-schemas
-                                                  "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
-                                      :attachments []
-                                      :add-operation-allowed false
-                                      :link-permit-required false
-                                      :link-permit-verdict-required false
-                                      :asianhallinta true})
+                             :permit-type permit/YA
+                             :required (conj common-yleiset-alueet-schemas
+                                         "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
+                             :attachments []
+                             :add-operation-allowed false
+                             :link-permit-required false
+                             :link-permit-verdict-required false
+                             :asianhallinta true})
 
 (def- ya-kayttolupa-with-tyomaastavastaava
   (update-in ya-kayttolupa-general [:required] conj "tyomaastaVastaava"))
