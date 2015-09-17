@@ -23,14 +23,30 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.optionsCaption = params.optionsCaption || loc("choose");
 
-  // Observables
-  self.data = ko.observableArray(self.options());
+  self.nullable = params.nullable;
 
+  // Observables
   self.index = ko.observable(0);
 
   self.inputSelected = ko.observable(false);
 
   self.dropdownClick = ko.observable(false);
+
+  // Computed
+  self.data = ko.pureComputed(function() {
+    if (self.nullable && !self.tags) {
+      // add nullable parameter to copy  of array
+      var copy = self.options().slice();
+      var item = {behaviour: "clearSelected"};
+      item[self.optionsText] = self.optionsCaption;
+      copy.unshift(item);
+      return copy;
+    } else {
+      return self.options();
+    }
+    // reset index
+    initIndex();
+  });
 
   self.dropdownVisible = ko.pureComputed(function() {
     return self.inputSelected() || self.dropdownClick(); // works in IE when scrollbar is clicked
@@ -74,21 +90,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
       self.index(1);
     }
   }
-
-  // set initial index
-  initIndex();
-
-  // set initial Data from options
-  self.subscriptions.push(self.options.subscribe(function() {
-    if (params.nullable) {
-      // add nullable parameter
-      self.data(self.options().unshift(null));
-    } else {
-      self.data(self.options());
-    }
-    // reset index
-    initIndex();
-  }));
 
   // view model functions
   self.selectInput = function() {
