@@ -224,7 +224,7 @@ i.btn-small {
     color: $hover-text;
     background-color: $hover-bg
   }
-  &:active {
+  &:active, &.active {
     color: $active-text;
     background-color: $active-bg
   }
