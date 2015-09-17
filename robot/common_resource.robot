@@ -3,6 +3,7 @@
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
 Library        Selenium2Library   timeout=10  run_on_failure=Nothing
+Library        String
 
 *** Variables ***
 
@@ -786,13 +787,15 @@ Permit type should be
 
 Application address should be
   [Arguments]  ${address}
+  ${a} =  Convert To Uppercase  ${address}
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//span[@data-test-id='application-title']
-  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  ${address}
+  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  ${a}
 
 Neighbor application address should be
   [Arguments]  ${address}
+  ${a} =  Convert To Uppercase  ${address}
   Wait Until  Element Should Be Visible  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']
-  Wait Until  Element text should be  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']  ${address}
+  Wait Until  Element text should be  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']  ${a}
 
 
 #
