@@ -37,7 +37,7 @@
               </div>
 
               <div class="applications-search-filters-list__filter-item">
-                <button class="function" data-bind="click: function() {console.log('valitse');}">
+                <button class="function" data-bind="click: $data.selectFilter, css: {toggled: $data.isSelected}">
                   <i class="lupicon-radio-off"></i>
                   <i class="lupicon-radio-on toggle"></i>
                   <span data-bind="ltext: 'choose'"></span>

@@ -6,6 +6,13 @@ LUPAPISTE.ApplicationFiltersService = function() {
 
   self.selected = ko.observable();
 
+  self.selected.subscribe(function(val) {
+    _.forEach(_savedFilters(), function(f) {
+      f.isSelected(false);
+    });
+    val.isSelected(true);
+  });
+
   self.savedFilters = ko.computed(function() {
     return _savedFilters();
   });
@@ -24,6 +31,8 @@ LUPAPISTE.ApplicationFiltersService = function() {
 
   function wrapFilter(filter) {
     filter.edit = ko.observable(false);
+    filter.isSelected = ko.observable();
+    filter.isDefaultFilter = ko.observable(filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "id"]));
     filter.removeFilter = function(filter) {
       ajax
       .command("remove-application-filter", {"filter-id": filter.id()})
@@ -51,7 +60,13 @@ LUPAPISTE.ApplicationFiltersService = function() {
       })
       .call();
     };
-    filter.isDefaultFilter = ko.observable(filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "id"]));
+    filter.selectFilter = function(filter) {
+      _.forEach(_savedFilters(), function(f) {
+        f.isSelected(false);
+      });
+      filter.isSelected(true);
+      self.selected(filter);
+    };
     return filter;
   }
 
