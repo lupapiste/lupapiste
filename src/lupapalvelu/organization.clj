@@ -18,7 +18,7 @@
    :open-inforequest-email ""
    :opening nil})
 
-(def authority-roles [:authority :reader :tos-editor :tos-publisher])
+(def authority-roles [:authority :reader :tos-editor :tos-publisher :approver])
 
 (defn- with-scope-defaults [org]
   (when (seq org)
