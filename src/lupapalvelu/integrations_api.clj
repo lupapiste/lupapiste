@@ -77,7 +77,8 @@
    :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-state-change)
-   :states     #{:submitted :complement-needed}}
+   :states     #{:submitted :complement-needed}
+   :org-authz-roles  #{:approver}}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
         foreman-notice? (foreman/notice? application)
