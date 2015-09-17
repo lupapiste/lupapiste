@@ -6,14 +6,21 @@
       <span class="form-entry">
         <div>
           <label>
-            <input id="" data-bind="checked: isMaaraala" type="checkbox"></input>Kyseessä määräala
+            <input id="" data-bind="checked: isMaaraala" type="checkbox"></input>
+            Kyseessä määräala
           </label>
         </div>
         
         <label style="display: block;" class="form-label" data-bind="text: propertyIdLabel"></label>
         <span class="kiintun-and-maaraalatunnus">
           <span class="form-maaraala" data-bind="text: propertyId"></span>
-          <input class="form-input text form-input short" data-bind="visible: isMaaraala" type="text"></input>
+          <div data-bind="component: {name: 'docgen-string',
+                                      params: {schema: schema,
+                                               path: path}},
+                          visible: isMaaraala"></div>
+          <!--
+          <input class="form-input text form-input short" data-bind="visible: isMaaraala, textInput: maaraalaTunnus" type="text"></input>
+        -->
         </span>
       </span>
     </script>

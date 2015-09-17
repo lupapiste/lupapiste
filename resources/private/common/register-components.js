@@ -10,6 +10,7 @@ jQuery(document).ready(function() {
     {name: "docgen-checkbox"},
     {name: "docgen-select"},
     {name: "docgen-string"},
+    {name: "docgen-group"},
     {name: "attachments-multiselect"},
     {name: "authority-select"},
     {name: "authority-select-dialog"},

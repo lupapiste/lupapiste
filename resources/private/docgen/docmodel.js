@@ -1000,6 +1000,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return div;
   }
 
+  function buildDocgenGroup (subSchema, model, path) {
+    var name = subSchema.name;
+    console.log("docgen",model);
+    var params = {
+      path: path,
+      subSchema: subSchema,
+      documentId: self.docId,
+      model: model[name]
+    };
+    return createComponent("docgen-group", params);
+  }
+
   function buildRadioGroup(subSchema, model, path) {
     var myPath = path.join(".");
     var myModel;
@@ -1233,6 +1245,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function createComponent(name, params, classes) {
     // createElement works with IE8
     var element = document.createElement(name);
+    
     $(element)
       .attr("params", paramsStr(params))
       .addClass(classes)
@@ -1426,12 +1439,19 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildMaaraalaTunnus (subschema, model, path) {
+    var schema = _.extend(subschema, {
+      size: "s",
+      label: false
+    });
     return createComponent("maaraala-tunnus",
-      {propertyId: getPropertyId(model)});
+      {propertyId: getPropertyId(model),
+       schema: schema,
+       path: path});
   }
 
   var builders = {
     group: buildGroup,
+    docgenGroup: buildDocgenGroup,
     string: buildString,
     hetu: buildString,
     text: buildText,
