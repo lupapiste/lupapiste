@@ -87,6 +87,7 @@
   var model = function(params) {
     var self = this;
     self.attachmentId = params.attachmentId ? params.attachmentId : ko.observable(null);
+    self.statementId = params.statementId ? params.statementId : ko.observable(null);
     self.applicationId = params.applicationId;
     self.metadata = params.metadata;
     self.editable = ko.observable(false);
@@ -100,7 +101,8 @@
 
     self.metadata.subscribe(function(newValue) {
       // If metadata changes outside this component, we update the new values to the local copy
-      if (!_.isEmpty(self.schema())) {
+      // TODO: this was randomly called with null argument, causing ko. mappping to NPE. Why ?
+      if (!_.isEmpty(self.schema()) && !_.isEmpty(newValue)) {
         var newData = constructEditableMetadata(ko.mapping.toJS(newValue), self.schema());
         self.editedMetadata(newData);
       }
@@ -125,9 +127,10 @@
 
     self.save = function() {
       var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap);
-      var command = self.attachmentId() ? "store-tos-metadata-for-attachment" : "store-tos-metadata-for-application";
+      var command = self.attachmentId() ? "store-tos-metadata-for-attachment" : self.statementId() ? "store-tos-metadata-for-statement" : "store-tos-metadata-for-application";
+
       ajax.command(command)
-        .json({id: self.applicationId(), attachmentId: self.attachmentId(), metadata: metadata})
+        .json({id: self.applicationId(), attachmentId: self.attachmentId(), statementId: self.statementId(), metadata: metadata})
         .success(function() {
           self.metadata(ko.mapping.fromJS(ko.mapping.toJS(self.editedMetadata)));
           self.editable(false);

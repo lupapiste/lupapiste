@@ -364,7 +364,7 @@
                             <h1 data-bind="ltext: 'application.tabInfo'"></h1>
                             <span data-bind="component: {
                                              name: 'help-toggle',
-                                             params: {lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc' }
+                                             params: {lhtml: 'help.' + permitType() + '.applicationInfoDesc' }
                                              }"></span>
                         </div>
                         <div data-bind="if: $root.application.state() == 'draft'">
@@ -373,7 +373,7 @@
                         <div class="operation-info">
 
                             <div data-bind="if: $root.authorization.ok('add-operation')">
-                                <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
+                                <p data-bind="lhtml: 'help.' + permitType() + '.AddOperations'"></p>
                                 <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="positive">
                                     <i class="lupicon-circle-plus"></i>
                                     <span data-bind="ltext: 'application.addOperation'"></span>
@@ -421,7 +421,7 @@
                         <h1 data-bind="ltext: 'application.tabParties'"></h1>
                         <span data-bind="component: {
                                          name: 'help-toggle',
-                                         params: { lhtml: ['help.' + $root.application.permitType() + '.PartiesDesc',
+                                         params: { lhtml: ['help.' + permitType() + '.PartiesDesc',
                                          'company-invite.help']}
                                          }"></span>
                         <div class="application_section">
@@ -1285,7 +1285,9 @@
                             </table>
                         </div>
 
+                        <!-- ko if: $root.foreman.isVisible -->
                         <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
+                        <!-- /ko -->
 
                         <div>
                             <div data-bind="foreach: taskGroups">
