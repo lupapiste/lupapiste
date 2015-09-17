@@ -958,3 +958,11 @@
 (comment
   ; operations (keys) with asianhallinta enabled
   (keys (into {} (filter (fn [[k v]] (:asianhallinta v)) operations))))
+
+(defn printout! [x indent]
+  (let [p! #(println (str indent (lupapalvelu.i18n/localize "fi" "operations.tree" %)))]
+    (cond
+      (string? x) (p! x)
+      (keyword? (second x)) (p! (first x))
+      (string? (first x)) (do (p! (first x)) (printout! (second x) (str indent \tab)))
+      :else (doseq [x2 x] (printout! x2 indent)))))
