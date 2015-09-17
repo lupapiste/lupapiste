@@ -47,6 +47,7 @@ Open browser to login page
   Set selenium speed  ${DEFAULT_SPEED}
   Apply minimal fixture now
   Set integration proxy on
+  Disable maps
 
 Go to login page
   Go to  ${LOGIN URL}
@@ -802,18 +803,22 @@ Neighbor application address should be
 # Proxy control:
 #
 
+Enable maps
+  Execute Javascript  ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
+  Wait for jQuery
+
 Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
-  Wait for jQuery
-  Execute Javascript  ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
   Wait for jQuery
   Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
   Wait for jQuery
 
+Disable maps
+  Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
+  Wait for jQuery
+
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
-  Wait for jQuery
-  Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
   Wait for jQuery
   Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:true}).call();
   Wait for jQuery
