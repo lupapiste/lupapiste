@@ -21,13 +21,14 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
       areas:         _.map(ko.unwrap(lupapisteApp.services.areaFilterService.selected), "id")
     };
 
-    // TODO filter-id from selected filter
     ajax
-    .command("save-application-filter", {title: title, filter: filter, sort: ko.toJS(dataProvider.sort), "filter-id": filter.id})
+    .command("save-application-filter", {title: title, filter: filter, sort: ko.toJS(dataProvider.sort)})
     .error(util.showSavedIndicator)
     .success(function(res) {
       util.showSavedIndicator(res);
       lupapisteApp.services.applicationFiltersService.addFilter(res.filter);
+      self.newFilterName("");
+      self.showSavedFilters(true);
     })
     .call();
   };
