@@ -11,6 +11,9 @@
     (count (:invitations company)) => 0
     (count (:users company)) => 1
 
+    (fact "Can not invite with non-ascii email"
+      (command kaino :company-invite-user :email "tepp\u00f6@example.com") => fail?)
+
     (fact "Invite is sent"
       (command kaino :company-invite-user :email "teppo@example.com") => ok?)
 

@@ -296,7 +296,7 @@
   ([servers dbname username password ssl]
     (let [servers (if (string? servers)
                     (let [[host port] (clojure.string/split servers #":")]
-                      (m/server-address host (Long/parseLong port)))
+                      [(m/server-address host (Long/parseLong port))])
                     servers)
           options (m/mongo-options {:write-concern WriteConcern/JOURNALED})]
       (if @connection

@@ -17,7 +17,6 @@
             [camel-snake-kebab :as csk]
             [me.raynes.fs :as fs]
             [slingshot.slingshot :refer [try+]]
-            [sade.coordinate :as coord]
             [sade.core :refer [ok fail fail! now]]
             [sade.util :as util]
             [sade.env :as env]
@@ -447,15 +446,6 @@
     (.close iterator)
     (DataUtilities/collection list)))
 
-(defn- validate-feature [feature]
-  (reduce
-    (fn [res polygon]
-      (or res (coord/validate-coordinates polygon)))
-    nil
-    (apply concat (geo/resolve-polygons feature))))
-
-(defn- validate-features [features]
-  (reduce (fn [res feature] (or res (validate-feature feature))) nil features))
 
 (defraw organization-area
   {:user-roles #{:authorityAdmin}}
@@ -481,7 +471,7 @@
                              .getFeatures
                              transform-crs-to-wgs84)
             areas (cheshire/parse-string (.toString (FeatureJSON.) new-collection))]
-        (when (validate-features (:features (keywordize-keys areas)))
+        (when (geo/validate-features (:features (keywordize-keys areas)))
           (fail! :error.coordinates-not-epsg3067))
         (o/update-organization org-id {$set {:areas areas}})
         (.dispose data-store)
