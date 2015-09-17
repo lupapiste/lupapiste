@@ -36,14 +36,18 @@ LUPAPISTE.ApplicationFiltersService = function() {
       .call();
     };
     filter.defaultFilter = function(filter) {
+      // unset old or set new default filter
+      var id = filter.isDefaultFilter() ? null : filter.id();
       ajax
-      .command("update-default-application-filter", {"filter-id": filter.id()})
+      .command("update-default-application-filter", {"filter-id": id})
       .error(util.showSavedIndicator)
       .success(function() {
         _.forEach(_savedFilters(), function(f) {
           f.isDefaultFilter(false);
         });
-        filter.isDefaultFilter(true);
+        if (id) {
+          filter.isDefaultFilter(true);
+        }
       })
       .call();
     };
