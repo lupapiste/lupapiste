@@ -8,10 +8,6 @@ LUPAPISTE.ApplicationFiltersService = function() {
 
   self.selected = ko.observable();
 
-  self.selected.subscribe(function(val) {
-    console.log("val", val);
-  });
-
   ko.computed(function() {
     self.savedFilters(_savedFilters());
   });
