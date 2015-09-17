@@ -5,8 +5,8 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
   self.selected = ko.observableArray([]);
 
   // dummy elements for autocomplete
-  self.noAuthority = {id: "no-authority", fullName: "Ei käsittelijää", behaviour: "singleSelection"};
-  self.all = {id: "all", fullName: "Kaikki", behaviour: "clearSelected"};
+  self.noAuthority = {id: "no-authority", fullName: loc("applications.search.handler.no-authority"), behaviour: "singleSelection"};
+  self.all = {id: "all", fullName: loc("all"), behaviour: "clearSelected"};
 
   var defaultFilter = ko.pureComputed(function() {
     var applicationFilters = _.find(applicationFiltersService.savedFilters(), function(f) {
