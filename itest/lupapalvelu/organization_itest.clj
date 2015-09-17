@@ -287,3 +287,4 @@
       (fact "when tag is not used in applications, ok is returned"
         (command sonja :add-application-tags :id id :tags []) => ok?
         (query sipoo :remove-tag-ok :tagId tag-id) => ok?))))
+
