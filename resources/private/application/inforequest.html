@@ -8,7 +8,7 @@
                 <div data-bind="with: application" class="application_summary_info">
                     <h1 data-bind="component: {name: 'address',
                                    params: { prefix: 'infoRequest',
-                                             address: address,
+                                             application: $parent,
                                              edit: 'edit'}}"></h1>
                     <h2 data-bind="if: primaryOperation">
             <span data-test-id="test-application-primary-operation"

@@ -6,15 +6,10 @@
                 <div class="container">
                     <div class="preamble">
                         <div class="application_summary_info" data-bind="with: application">
-                            <h1><span data-bind="text: address" data-test-id="application-title" class="address"></span>
-                                <a data-bind="click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
-                                   data-test-id="change-location-link"
-                                   class="link-btn">
-                                    <i class="lupicon-pen"></i>
-                                    <span data-bind="ltext: 'edit.address'"></span></a>
-                            </h1>
-
-                            <h2 data-bind="if: primaryOperation">
+                          <h1 data-bind="component: {name: 'address',
+                                         params: { application: $parent,
+                                                   edit: 'edit.address'}}"></h1>
+                          <h2 data-bind="if: primaryOperation">
                                 <span data-test-id="test-application-primary-operation"
                                       data-bind="ltext: primaryOperationName, attr: {'data-test-primary-operation-id': primaryOperation().name}"></span>
                             </h2>
