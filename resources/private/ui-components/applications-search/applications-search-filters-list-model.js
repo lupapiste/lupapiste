@@ -6,9 +6,18 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
 
   self.showSavedFilters = ko.observable(false);
 
-  self.newFilterName = ko.observable();
-
   self.savedFilters = lupapisteApp.services.applicationFiltersService.savedFilters;
+
+  self.newFilterName = ko.observable().extend({
+    validation: {
+      validator: function (val) {
+        return _.isEmpty(_.find(self.savedFilters(), function(f) {
+          return val === ko.unwrap(f.title);
+        }));
+      },
+      message: loc("applications.search.filter-name-already-in-use")
+    }
+  });
 
   self.saveFilter = function() {
     var title = self.newFilterName();

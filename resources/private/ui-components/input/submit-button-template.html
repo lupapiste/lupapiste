@@ -8,10 +8,10 @@
              data-bind="component: {name: 'text-field', params: {value: value,
                                                                  id: id,
                                                                  lLabel: lLabel}},
-                        css: {submittable: !disabled()}"></div>
+                        css: {submittable: !disableButton()}"></div>
         <div class="submit-button_item">
           <br/>
-          <button class="positive" data-bind="click: submitFn, css: {disabled: disabled}">
+          <button class="positive" data-bind="click: submitFn, disable: disableButton">
             <i class="lupicon-save"></i>
             <i class="wait spin lupicon-refresh"></i>
             <span data-bind="ltext: lSubmitTitle"></span>

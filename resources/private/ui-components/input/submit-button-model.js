@@ -9,7 +9,9 @@ LUPAPISTE.SubmitButtonModel = function(params) {
   self.lLabel = params.lLabel;
   self.lSubmitTitle = params.lSubmitTitle;
 
-  self.disabled = ko.pureComputed(function() {
-    return !self.value();
+  self.validated = ko.validatedObservable([self.value]);
+
+  self.disableButton = ko.pureComputed(function() {
+    return !self.validated.isValid() || !self.value();
   });
 };
