@@ -9,8 +9,8 @@ LUPAPISTE.AutocompleteHandlersModel = function() {
   self.data = ko.pureComputed(function() {
     return _(util.filterDataByQuery(lupapisteApp.services.handlerFilterService.data(), self.query() || "", self.selected(), "fullName"))
       .sortBy("label")
-      .unshift({id: "no-authority", fullName: "Ei käsittelijää", behaviour: "singleSelection"})
-      .unshift({id: "all", fullName: "Kaikki", behaviour: "clearSelected"})
+      .unshift(lupapisteApp.services.handlerFilterService.noAuthority)
+      .unshift(lupapisteApp.services.handlerFilterService.all)
       .value();
   });
 };

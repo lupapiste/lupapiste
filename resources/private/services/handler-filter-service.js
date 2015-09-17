@@ -4,6 +4,10 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
 
   self.selected = ko.observableArray([]);
 
+  // dummy elements for autocomplete
+  self.noAuthority = {id: "no-authority", fullName: "Ei käsittelijää", behaviour: "singleSelection"};
+  self.all = {id: "all", fullName: "Kaikki", behaviour: "clearSelected"};
+
   var defaultFilter = ko.pureComputed(function() {
     var applicationFilters = _.find(applicationFiltersService.savedFilters(), function(f) {
       return f.isDefaultFilter();
@@ -15,30 +19,27 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
     return util.getIn(applicationFiltersService.selected(), ["filter", "handlers"]);
   });
 
-
   var usersInSameOrganizations = ko.observable();
 
   ko.computed(function() {
-    self.selected(_.filter(usersInSameOrganizations(), function (user) {
-      if (savedFilter()) {
-        return  _.contains(savedFilter(), user.id);
-      } else {
-        return _.contains(defaultFilter(), user.id);
-      }
-    }));
+    if (savedFilter() && _.contains(savedFilter(), "no-authority")) {
+      self.selected([self.noAuthority]);
+    } else if (!savedFilter() && _.contains(defaultFilter(), "no-authority")) {
+      self.selected([self.noAuthority]);
+    } else {
+      self.selected(_.filter(usersInSameOrganizations(),
+        function (user) {
+          if (savedFilter()) {
+            return _.contains(savedFilter(), user.id);
+          } else {
+            return _.contains(defaultFilter(), user.id);
+          }
+        }));
+    }
   });
 
   self.data = ko.pureComputed(function() {
     return usersInSameOrganizations();
-  });
-
-  // add default filter items when data or filter updates
-  ko.computed(function() {
-    self.selected([]);
-    ko.utils.arrayPushAll(self.selected,
-      _.filter(self.data(), function(user) {
-        return _.contains(defaultFilter(), user.id);
-      }));
   });
 
   function mapUser(user) {
