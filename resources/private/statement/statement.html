@@ -58,6 +58,7 @@
         <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
       </form>
     </div>
+
     <div data-bind="with: $root.attachmentsModel" class="statement-conversation">
       <div class="statement-attachments">
         <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
@@ -105,6 +106,24 @@
       </div>
 
     </div>
+
+    <!-- ko if: features.enabled('tiedonohjaus') && !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-attachment') -->
+    <div class="feature" style="margin-top: 15px;">
+      <button id="show-tos-metadata" class="btn"
+              data-bind="click: toggleTosMetadata, visible: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application')">
+        <i data-bind="css: {'lupicon-chevron-small-right': !showTosMetadata(),
+                                      'lupicon-chevron-small-down': showTosMetadata}"></i>
+        <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
+      </button>
+
+      <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: !_.isEmpty(metadata())">
+        <div data-bind="component: {name: 'metadata-editor',
+                                              params: {statementId: statementId, metadata: metadata, applicationId: applicationId}}">
+        </div>
+      </div>
+
+    </div>
+    <!-- /ko -->
 
     <!-- /ko -->
   </section>
