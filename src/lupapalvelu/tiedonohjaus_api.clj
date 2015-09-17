@@ -103,6 +103,27 @@
                           [new-k new-v])))
        (into {})))
 
+(defcommand store-tos-metadata-for-statement
+  {:parameters [:id statementId metadata]
+   :user-roles #{:authority}
+   :states     states/all-but-draft-or-terminal}
+  [{:keys [application created] :as command}]
+  (when (env/feature? :tiedonohjaus)
+    (try
+      (if-let [statement (first (filter #(= (:id %) statementId) (:statements application)))]
+        (let [metadata (->> (keywordize-keys-and-some-values metadata [])
+                            (#(assoc % :tila (or (get-in statement [:metadata :tila]) "Valmis")))
+                            (tms/sanitize-metadata))
+              updated-statement (assoc statement :metadata metadata)
+              updated-statements (-> (remove #(= % statement) (:statements application))
+                                      (conj updated-statement))]
+          (action/update-application command {$set {:modified created
+                                                    :statements updated-statements}}))
+        (fail "error.attachment.id"))
+      (catch RuntimeException e
+        (timbre/error e)
+        (fail "error.invalid.metadata")))))
+
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
    :user-roles #{:authority}

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+      <script type="text/html" id="address-template">
+          <div>
+              <!-- ko if: prefix -->
+                <span data-bind="ltext: prefix"></span>
+              <!-- /ko -->
+              <span data-bind="text: address" class="address"></span>
+              <a data-bind="click: changeAddress,
+                            visible: isAuthorized()"
+                 data-test-id="change-location-link"
+                 class="link-btn">
+                  <i class="lupicon-pen"></i>
+                  <span data-bind="text: edit"></span>
+              </a>
+          </div>
+      </script>
+  </section>
+</body>
+</html>
