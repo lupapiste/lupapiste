@@ -47,6 +47,10 @@ LUPAPISTE.ApplicationFiltersService = function() {
   });
 
   self.addFilter = function(filter) {
-    _savedFilters.unshift(wrapFilter(ko.mapping.fromJS(filter)));
+    _savedFilters.remove(function(f) {
+      return ko.unwrap(f.id) === ko.unwrap(filter.id);
+    });
+    var wrapped = wrapFilter(ko.mapping.fromJS(filter));
+    _savedFilters.unshift(wrapped);
   };
 };
