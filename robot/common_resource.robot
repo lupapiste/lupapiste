@@ -784,6 +784,17 @@ Permit type should be
   [Arguments]  ${type}
   Element Text Should Be  xpath=//span[@data-bind='ltext: permitType']  ${type}
 
+Application address should be
+  [Arguments]  ${address}
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//span[@data-test-id='application-title']
+  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  ${address}
+
+Neighbor application address should be
+  [Arguments]  ${address}
+  Wait Until  Element Should Be Visible  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']
+  Wait Until  Element text should be  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']  ${address}
+
+
 #
 # Proxy control:
 #
