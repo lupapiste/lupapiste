@@ -10,6 +10,8 @@
             [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping]
             [lupapalvelu.xml.krysp.maa-aines-mapping]
+            [lupapalvelu.xml.krysp.maankayton-muutos-mapping]
+            [lupapalvelu.xml.krysp.kiinteistotoimitus-mapping]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :as yi-mapping]
             [lupapalvelu.xml.krysp.vesihuolto-mapping :as vh-mapping]))
 
@@ -46,6 +48,7 @@
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type)]
+    (assert krysp-fn "KRYSP mapper function not found/defined?")
     (krysp-fn application lang submitted-application krysp-version output-dir begin-of-link)))
 
 (defn save-review-as-krysp
