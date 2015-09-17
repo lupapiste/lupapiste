@@ -1,0 +1,2 @@
+osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label.työnjohtaja: Työnjohtaja
+osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label.ei tiedossa: Ei tiedossa
