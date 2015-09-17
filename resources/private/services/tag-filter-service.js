@@ -13,6 +13,10 @@ LUPAPISTE.TagFilterService = function(tagsService, applicationFiltersService) {
     return util.getIn(applicationFilters, ["filter", "tags"]) || [];
   });
 
+  var savedFilter = ko.pureComputed(function() {
+    return util.getIn(applicationFiltersService.selected(), ["filter", "tags"]);
+  });
+
   ko.computed(function() {
     self.selected([]);
     ko.utils.arrayPushAll(self.selected,
@@ -20,7 +24,11 @@ LUPAPISTE.TagFilterService = function(tagsService, applicationFiltersService) {
         .map("tags")
         .flatten()
         .filter(function(tag) {
-          return _.contains(defaultFilter(), tag.id);
+          if (savedFilter()) {
+            return  _.contains(savedFilter(), tag.id);
+          } else {
+            return _.contains(defaultFilter(), tag.id);
+          }
         })
         .value());
   });

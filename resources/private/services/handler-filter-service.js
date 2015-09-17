@@ -11,10 +11,21 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
     return util.getIn(applicationFilters, ["filter", "handlers"]) || [];
   });
 
+  var savedFilter = ko.pureComputed(function() {
+    return util.getIn(applicationFiltersService.selected(), ["filter", "handlers"]);
+  });
+
+
   var usersInSameOrganizations = ko.observable();
 
   ko.computed(function() {
-    self.selected(_.filter(usersInSameOrganizations(), function (user) {return _.contains(defaultFilter(), user.id);}));
+    self.selected(_.filter(usersInSameOrganizations(), function (user) {
+      if (savedFilter()) {
+        return  _.contains(savedFilter(), user.id);
+      } else {
+        return _.contains(defaultFilter(), user.id);
+      }
+    }));
   });
 
   self.data = ko.pureComputed(function() {

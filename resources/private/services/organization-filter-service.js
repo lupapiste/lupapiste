@@ -11,6 +11,10 @@ LUPAPISTE.OrganizationFilterService = function(applicationFiltersService) {
     return util.getIn(applicationFilters, ["filter", "organizations"]) || [];
   });
 
+  var savedFilter = ko.pureComputed(function() {
+    return util.getIn(applicationFiltersService.selected(), ["filter", "organizations"]);
+  });
+
   var organizationNames = ko.observable();
 
   // calculate data based on organizations for user and organization names from backend
@@ -30,7 +34,11 @@ LUPAPISTE.OrganizationFilterService = function(applicationFiltersService) {
     self.selected([]);
     ko.utils.arrayPushAll(self.selected,
       _.filter(self.data(), function(org) {
-        return _.contains(defaultFilter(), org.id);
+        if (savedFilter()) {
+          return  _.contains(savedFilter(), org.id);
+        } else {
+          return _.contains(defaultFilter(), org.id);
+        }
       }));
   });
 

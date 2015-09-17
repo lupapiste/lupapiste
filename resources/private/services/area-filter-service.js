@@ -17,6 +17,10 @@ LUPAPISTE.AreaFilterService = function(applicationFiltersService) {
     return util.getIn(applicationFilters, ["filter", "areas"]) || [];
   });
 
+  var savedFilter = ko.pureComputed(function() {
+    return util.getIn(applicationFiltersService.selected(), ["filter", "areas"]);
+  });
+
   ko.computed(function() {
     self.selected([]);
     ko.utils.arrayPushAll(self.selected,
@@ -25,7 +29,12 @@ LUPAPISTE.AreaFilterService = function(applicationFiltersService) {
         .pluck("features")
         .flatten()
         .filter(function(feature) {
-          return _.contains(defaultFilter(), feature.id);
+          // first we are interested on selected filter then default filter
+          if (savedFilter()) {
+            return  _.contains(savedFilter(), feature.id);
+          } else {
+            return _.contains(defaultFilter(), feature.id);
+          }
         })
         .map(function(feature) {
           return {id: feature.id, label: util.getFeatureName(feature)};

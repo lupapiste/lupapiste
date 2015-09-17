@@ -4,12 +4,10 @@ LUPAPISTE.ApplicationFiltersService = function() {
 
   var _savedFilters = ko.observableArray([]);
 
-  self.savedFilters = ko.observableArray([]);
-
   self.selected = ko.observable();
 
-  ko.computed(function() {
-    self.savedFilters(_savedFilters());
+  self.savedFilters = ko.computed(function() {
+    return _savedFilters();
   });
 
   function wrapFilter(filter) {
@@ -48,6 +46,9 @@ LUPAPISTE.ApplicationFiltersService = function() {
       .value());
   });
 
+  self.savedFilters.subscribe(function(val) {
+    console.log("woot", val);
+  });
   self.addFilter = function(filter) {
     _savedFilters.unshift(wrapFilter(ko.mapping.fromJS(filter)));
   };

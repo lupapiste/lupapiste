@@ -17,6 +17,10 @@ LUPAPISTE.OperationFilterService = function(applicationFiltersService) {
     return util.getIn(applicationFilters, ["filter", "operations"]) || [];
   });
 
+  var savedFilter = ko.pureComputed(function() {
+    return util.getIn(applicationFiltersService.selected(), ["filter", "operations"]);
+  });
+
   function wrapInObject(operations) {
     return _.map(operations, function(op) {
       return {label: loc("operations." + op),
@@ -26,7 +30,7 @@ LUPAPISTE.OperationFilterService = function(applicationFiltersService) {
 
   ko.computed(function() {
     self.selected([]);
-    ko.utils.arrayPushAll(self.selected, wrapInObject(defaultFilter()));
+    ko.utils.arrayPushAll(self.selected, savedFilter() ? wrapInObject(savedFilter()) : wrapInObject(defaultFilter()));
   });
 
   ajax
