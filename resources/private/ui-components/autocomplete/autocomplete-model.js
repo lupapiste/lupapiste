@@ -3,13 +3,26 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   var self = this;
 
+  // TODO rethink how we handle single selection in autocomplete component
   self.selectedOptions = params.selectedOptions || ko.observableArray(_.filter([ko.unwrap(params.selectedOption)]));
 
+  var pauseUpdatingOption = ko.observable(false);
+
+  if (params.selectedOption) {
+    params.selectedOption.subscribe(function(val) {
+      pauseUpdatingOption(true);
+      self.selectedOptions(_.filter([val]));
+      pauseUpdatingOption(false);
+    });
+  }
+
   self.selectedOptions.subscribe(function(val) {
-    if (params.selectedOption) {
+    if (params.selectedOption && !pauseUpdatingOption()) {
       params.selectedOption(_.first(val));
     }
   });
+  // end TODO
+
 
   // Parameters
   // tagging support

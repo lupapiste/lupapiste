@@ -10,6 +10,18 @@ LUPAPISTE.ApplicationFiltersService = function() {
     return _savedFilters();
   });
 
+  self.defaultFilter = ko.pureComputed(function() {
+    return _.find(_savedFilters(), function(f){
+      return f.isDefaultFilter();
+    });
+  });
+
+  self.defaultFilter.subscribe(function(val) {
+    if (!self.selected()) {
+      self.selected(val);
+    }
+  });
+
   function wrapFilter(filter) {
     filter.edit = ko.observable(false);
     filter.removeFilter = function(filter) {
@@ -52,5 +64,6 @@ LUPAPISTE.ApplicationFiltersService = function() {
     });
     var wrapped = wrapFilter(ko.mapping.fromJS(filter));
     _savedFilters.unshift(wrapped);
+    self.selected(wrapped);
   };
 };
