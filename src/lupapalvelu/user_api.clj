@@ -232,7 +232,7 @@
                                (get $ filter-id (count $))
                                (assoc-in app-filters [$] filter))]
     (when title-collision?
-      (fail :error.filter-title-collision))
+      (fail! :error.filter-title-collision))
     (mongo/update-by-id :users user-id {$set {:applicationFilters updated-filters}})
     (ok :filter filter)))
 
