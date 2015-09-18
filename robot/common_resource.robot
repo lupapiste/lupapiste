@@ -882,11 +882,26 @@ Submit empty verdict
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  verdictGiven
 
-Fetch verdict
+Do fetch verdict
+  [Arguments]  ${fetchConfirmationText}
   Click enabled by test id  fetch-verdict
   Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
-  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
+  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  ${fetchConfirmationText}
   Confirm  dynamic-ok-confirm-dialog
+
+Fetch verdict
+  Do fetch verdict  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
+  Verdict is given  2013-01  0
+
+Fetch YA verdict
+  Do fetch verdict  Taustajärjestelmästä haettiin 1 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 2 uutta vaatimusta Rakentaminen-välilehdelle.
+  Verdict is given  523  0
+
+Verdict is given
+  [Arguments]  ${kuntalupatunnus}  ${i}
+  Wait until  Element should be visible  application-verdict-details
+  Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
+
 
 # User management
 
