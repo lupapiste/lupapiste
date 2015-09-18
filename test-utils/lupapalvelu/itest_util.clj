@@ -12,9 +12,10 @@
             [midje.util.exceptions :refer :all]
             [slingshot.slingshot :refer [try+]]
             [sade.strings :as ss]
-            [sade.core :refer [fail! unauthorized not-accessible]]
+            [sade.core :refer [fail! unauthorized not-accessible now]]
             [sade.http :as http]
             [sade.env :as env]
+            [sade.dummy-email-server]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
@@ -88,8 +89,42 @@
 
 (defn printed [x] (println x) x)
 
+;;
+;; HTTP Client cookie store
+;;
+
+(def test-db-name (str "test_" (now)))
+
+(defn ->cookie [name value]
+  (proxy [Cookie] []
+    (getName [] name)
+    (getValue [] value)
+    (getDomain [] (get (re-matches #"(http(s)?://)([^\d]+)(:\d+)?" (server-address)) 3))
+    (getPath [] "/")
+    (isSecure [] false)
+    (getVersion [] 2)
+    (isExpired [_] false)))
+
+(defn ->cookie-store [store]
+  (proxy [CookieStore] []
+    (getCookies []       (or (vals @store) []))
+    (addCookie [cookie]  (swap! store assoc (.getName cookie) cookie))
+    (clear []            (reset! store {}))
+    (clearExpired [])))
+
+(def test-db-cookie (->cookie "test_db_name" test-db-name))
+
+(defn http [verb url options]
+  (let [store (atom {})
+        cookies (or (:cookie-store options) (->cookie-store store))]
+    (.addCookie cookies test-db-cookie)
+    (verb url (assoc options :cookie-store cookies))))
+
+(def http-get (partial http http/get))
+(def http-post (partial http http/post))
+
 (defn raw [apikey action & args]
-  (http/get
+  (http-get
     (str (server-address) "/api/raw/" (name action))
     {:headers {"authorization" (str "apikey=" apikey)}
      :query-params (apply hash-map args)
@@ -98,7 +133,7 @@
 
 (defn raw-query [apikey query-name & args]
   (decode-response
-    (http/get
+    (http-get
       (str (server-address) "/api/query/" (name query-name))
       {:headers {"authorization" (str "apikey=" apikey)
                  "accepts" "application/json;charset=utf-8"}
@@ -113,7 +148,7 @@
 
 (defn- decode-post [action-type apikey command-name & args]
   (decode-response
-    (http/post
+    (http-post
       (str (server-address) "/api/" (name action-type) "/" (name command-name))
       {:headers {"authorization" (str "apikey=" apikey)
                  "content-type" "application/json;charset=utf-8"}
@@ -126,8 +161,9 @@
 
 (defn command [apikey command-name & args]
   (let [{status :status body :body} (apply raw-command apikey command-name args)]
-    (when (= status 200)
-      body)))
+    (if (= status 200)
+      body
+      (error status body))))
 
 (defn datatables [apikey query-name & args]
   (let [{status :status body :body} (apply decode-post :datatables apikey query-name args)]
@@ -135,7 +171,7 @@
       body)))
 
 (defn apply-remote-fixture [fixture-name]
-  (let [resp (decode-response (http/get (str (server-address) "/dev/fixture/" fixture-name)))]
+  (let [resp (decode-response (http-get (str (server-address) "/dev/fixture/" fixture-name) {}))]
     (assert (-> resp :body :ok) (str "Response not ok: fixture: \"" fixture-name "\": response: " (pr-str resp)))))
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
@@ -303,6 +339,7 @@
 (defn create-app-id
   "Verifies that an application was created and returns it's ID"
   [apikey & args]
+  {:post [%]}
   (let [{app-id :id :as resp} (apply create-app apikey args)]
     (test-application-create-successful resp app-id)
     app-id))
@@ -405,7 +442,7 @@
 (defn accept-company-invitation []
   (let [email     (last-email)
         [_ token] (re-find #"http.+/app/fi/welcome#!/accept-company-invitation/([A-Za-z0-9-]+)" (:plain (:body email)))]
-    (http/post (str (server-address) "/api/token/" token) {:follow-redirects false
+    (http-post (str (server-address) "/api/token/" token) {:follow-redirects false
                                                            :throw-exceptions false})))
 
 (defn invite-company-and-accept-invitation [apikey app-id company-id]
@@ -418,7 +455,7 @@
 
 (defn sign-attachment [apikey id attachmentId password]
   (let [uri (str (server-address) "/api/command/sign-attachments")
-        resp (http/post uri
+        resp (http-post uri
                {:headers {"authorization" (str "apikey=" apikey)
                           "content-type" "application/json;charset=utf-8"}
                 :body (json/encode {:id id
@@ -432,7 +469,7 @@
 (defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-attachment.txt", text ""}}]
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
-        resp        (http/post uri
+        resp        (http-post uri
                                {:headers {"authorization" (str "apikey=" apikey)}
                                 :multipart [{:name "applicationId"  :content application-id}
                                             {:name "text"           :content text}
@@ -456,7 +493,7 @@
         uploadfile  (io/file filename)
         application (query-application apikey application-id)
         uri         (str (server-address) "/api/upload/attachment")
-        resp        (http/post uri
+        resp        (http-post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart (filter identity
                                     [{:name "applicationId"  :content application-id}
@@ -519,7 +556,7 @@
 
 (defn vetuma! [{:keys [userid firstname lastname] :as data}]
   (->
-    (http/get
+    (http-get
       (str (server-address) "/dev/api/vetuma")
       {:query-params (select-keys data [:userid :firstname :lastname])})
     decode-response
@@ -531,18 +568,6 @@
        :lastname "Banaani"}
     vetuma!
     :stamp))
-
-;;
-;; HTTP Client cookie store
-;;
-
-(defn ->cookie-store [store]
-  (proxy [org.apache.http.client.CookieStore] []
-    (getCookies []       (or (vals @store) []))
-    (addCookie [cookie]  (swap! store assoc (.getName cookie) cookie))
-    (clear []            (reset! store {}))
-    (clearExpired [])))
-
 
 ;; File actions
 

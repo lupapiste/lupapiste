@@ -40,8 +40,8 @@ New applications does not have statements
 
 Sonja sees indicators from pre-filled fields
   Sonja logs in
-  # The unseen changes count includes changes in "Rakennuksen kayttotarkoitus" and "Huoneistotiedot".
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  3
+  # The unseen changes count includes changes in property information + "Rakennuksen kayttotarkoitus" and "Huoneistotiedot" documents.
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  7
 
 Sonja adds four statement persons to application
   Open application  ${appname}  753-416-25-22
@@ -78,14 +78,12 @@ Sonja can comment on Ronjas statement
 
 Sonja can give statement to own request
   Open statement  2
-  Sleep  1
-  Select From List  statement-type-select  puoltaa
+  Wait until  Select From List  statement-type-select  puoltaa
   Input text  statement-text  salibandy on the rocks.
   Wait and click  statement-submit
 
 Comment is added
   Open statement  2
-  Sleep  1
   Wait until  Comment count is  1
 
 Sonja can regive statement to own statement
@@ -95,7 +93,6 @@ Sonja can regive statement to own statement
 
 Another comment is added
   Open statement  2
-  Sleep  1
   Wait until  Comment count is  2
 
 Veikko can see statements as he is beeing requested a statement to the application
@@ -116,7 +113,7 @@ Veikko from Tampere can give verdict to own statement
 
 Sonja can see statement indicator
   Sonja logs in
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  4
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  8
 
 # add attachment
 

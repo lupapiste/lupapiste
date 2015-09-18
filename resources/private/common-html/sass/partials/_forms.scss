@@ -16,25 +16,25 @@ legend {
   font-size: 0.875em;
   margin:0;
   outline: 0;
-  padding-left: 0.5em;
+  padding-left: $marginS;
 
 
-  -webkit-transition: border 125ms ease;
-  -moz-transition: border 125ms ease;
-  -ms-transition: border 125ms ease;
-  -o-transition: border 125ms ease;
-  transition: border 125ms ease;
+  // -webkit-transition: border 125ms ease;
+  // -moz-transition: border 125ms ease;
+  // -ms-transition: border 125ms ease;
+  // -o-transition: border 125ms ease;
+  // transition: border 125ms ease;
 
-  -webkit-box-shadow: inset 0 2px 3px darken($lp-light-grey, 10%), 0 1px 0 #fff;
-  box-shadow: inset 0 2px 3px darken($lp-light-grey, 10%), 0 1px 0 #fff;
+  // -webkit-box-shadow: inset 0 2px 3px darken($lp-light-grey, 10%), 0 1px 0 #fff;
+  // box-shadow: inset 0 2px 3px darken($lp-light-grey, 10%), 0 1px 0 #fff;
 
   &:hover {
-    border-color:#b5b5b5;
+//    border-color:#b5b5b5;
   }
 
   &:focus {
-    border-color: #17c;
-    -webkit-box-shadow: inset 0 2px 4px darken($lp-light-grey, 20%), 0 1px 0 #fff;
+    //border-color: #17c;
+    // -webkit-box-shadow: inset 0 2px 4px darken($lp-light-grey, 20%), 0 1px 0 #fff;
   }
   // newbies
   &.source-value-changed {
@@ -983,4 +983,220 @@ foreman-history {
 div.alleYli-radioGroup {
   display: inline-block;
   margin-top: $marginL;
+}
+
+
+// Grid styles
+
+$col: 25%;
+
+@mixin form-grid-clear {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+@mixin column ($size) {
+  position: relative;
+  float: left;
+  width: $size * $col;
+  min-width: $size * $col;
+  max-width: $size * $col;
+  padding-left: $grid-margin;
+
+  label.required:after {
+    content: "*";
+    color: $negative;
+  }
+
+  .col--vertical, .col--horizontal {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .col--vertical {
+    label {
+      display: block;
+    }
+  }
+}
+
+.form-grid {
+  overflow-y: hidden;
+  width: 100%;
+  border-top: 1px solid $grid-border-color;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:after {
+    @include form-grid-clear;
+  }
+
+  h2 {
+    padding-left: $grid-margin;
+    margin: $marginM 0;
+  }
+
+  // TODO could be removed after accordion styles are revamped
+  p {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .checkbox-wrapper {
+    border: 1px solid $checkbox-border-color;
+    padding: 7px;
+  }
+
+  select::-ms-expand {
+      display: none;
+  }
+
+  button::-moz-focus-inner {
+    border: 0;
+  }
+
+  input[type=text], input[type=password], select {
+    padding: 0 $marginM;
+    min-height: $grid-input-height;
+    height: $grid-input-height;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: $grid-font-size;
+    color: $input-color;
+    border: 1px solid $input-border-color;
+    -webkit-appearance: none;
+    -webkit-border-radius: 0px;
+    -moz-appearance:none;
+
+    &:focus {
+      color: $input-focus-color;
+      border-color: $input-focus-border-color;
+    }
+  }
+
+  input[type=checkbox] {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+  }
+
+  .checkbox-label:before {
+    @include lupicon-font;
+    content: "\e603";
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: top;
+    color: $checkbox-color;
+  }
+
+  input[type=checkbox]:checked + .checkbox-label:before {
+    @include lupicon-font;
+    content: "\e604";
+    color: $checkbox-selected-color;
+  }
+
+  select.required, input.required {
+    border-color: $input-required-border-color;
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+    color: $orange-dark;
+    pointer-events:none;
+
+    // show white box behind selector arrow to hide default select arrows on IE9
+    background-color: #fff;
+    height: $grid-input-height - 2px;
+    width: 30px;
+    line-height: $grid-input-height - 2px;
+    vertical-align: middle;
+  }
+
+  input[type=text].err, input[type=password].err {
+    border: 1px solid $negative;
+    color: $negative;
+  }
+
+  @for $i from 1 through 4 {
+    .col-#{$i} {
+      @include column($i);
+    }
+  }
+
+  .row {
+    @include form-grid-clear;
+    margin: $grid-margin 0;
+    overflow-y: hidden;
+  }
+
+  .info-message {
+    background-color: $negative;
+    color: #fff;
+    margin: 0;
+    padding: $marginS;
+    font-style: normal;
+    font-weight: bold;
+    display: block;
+    height: $grid-input-height;
+  }
+
+  // password field
+  .poor.info-message {
+    background-color: $red-dark;
+  }
+
+  .low.info-message {
+    background-color: $red-light;
+  }
+
+  .average.info-message {
+    background-color: $orange;
+  }
+
+  .good.info-message {
+    background-color: $green-light;
+  }
+
+  .excellent.info-message {
+    background-color: $green-dark;
+  }
+
+  input[type=password].poor {
+    border-color: $red-dark;
+  }
+
+  input[type=password].low {
+    border-color: $red-light
+  }
+
+  input[type=password].average {
+    border-color: $orange;
+  }
+
+  input[type=password].good {
+    border-color: $green-light;
+  }
+
+  input[type=password].excellent {
+    border-color: $green-dark;
+  }
+
+  .error-message {
+    background-color: $negative;
+    color: #fff;
+    margin: 0;
+    padding: $marginS;
+    font-style: normal;
+    font-weight: bold;
+    &:before {
+      @include lupicon-font;
+      content: "\e63c";
+      margin-right: $marginS;
+    }
+  }
 }

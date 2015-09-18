@@ -13,7 +13,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
@@ -28,6 +28,12 @@
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
 
+(defn resolve-valid-subtypes
+  "Returns a set of valid permit and operation subtypes for the application."
+  [{permit-type :permitType op :primaryOperation}]
+  (let [op-subtypes (operations/get-primary-operation-metadata {:primaryOperation op} :subtypes)
+        permit-subtypes (permit/permit-subtypes permit-type)]
+    (concat op-subtypes permit-subtypes)))
 
 ;;
 ;; Validators
@@ -59,6 +65,15 @@
   [{user :user} {state :state}]
   (when (and (= :draft (keyword state)) (user/authority? user))
     unauthorized))
+
+(defn validate-has-subtypes [_ application]
+  (when (empty? (resolve-valid-subtypes application))
+    (fail :error.permit-has-no-subtypes)))
+
+(defn pre-check-permit-subtype [{data :data} application]
+  (when-let [subtype (:permitSubtype data)]
+    (when-not (util/contains-value? (resolve-valid-subtypes application) (keyword subtype))
+      (fail :error.permit-has-no-such-subtype))))
 
 ;;
 ;; Helpers
@@ -116,15 +131,11 @@
             whitelisted-paths)))
 
 ; Process
-(defn- with-current-schema-info [document]
-  (let [current-info (-> document :schema-info schemas/get-schema :info (select-keys schemas/immutable-keys))]
-    (update document :schema-info merge current-info)))
-
 (defn- process-documents-and-tasks [user {authority :authority :as application}]
   (let [validate        (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
         mask-person-ids (person-id-masker-for-user user application)
         disabled-flag   (partial enrich-single-doc-disabled-flag user)
-        mapper          (comp disabled-flag with-current-schema-info mask-person-ids validate)]
+        mapper          (comp disabled-flag schemas/with-current-schema-info mask-person-ids validate)]
     (-> application
       (update :documents (partial map mapper))
       (update :tasks (partial map mapper)))))
@@ -195,7 +206,7 @@
         default-schema-datas (util/assoc-when {}
                                               op-schema-name (:schema-data op-info)
                                               "yleiset-alueet-maksaja" operations/schema-data-yritys-selected
-                                              "tyomaastaVastaava" operations/schema-data-yritys-selected)
+                                              "tyomaastaVastaava" operations/schema-data-henkilo-selected)
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
         make (fn [schema-name]
                (let [schema (schemas/get-schema schema-version schema-name)]
@@ -234,28 +245,28 @@
         counter (format "%05d" (mongo/get-next-sequence-value sequence-name))]
     (str "LP-" municipality "-" year "-" counter)))
 
-(defn make-application [id operation x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
-  {:pre [id operation address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
-  (let [permit-type (operations/permit-type-of-operation operation)
+(defn make-application [id operation-name x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
+  {:pre [id operation-name address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
+  (let [permit-type (operations/permit-type-of-operation operation-name)
         owner (merge (user/user-in-role user :owner :type :owner)
-                     {:unsubscribed (= operation :aiemmalla-luvalla-hakeminen)})
-        op (make-op operation created)
+                     {:unsubscribed (= (keyword operation-name) :aiemmalla-luvalla-hakeminen)})
+        op (make-op operation-name created)
         state (cond
                 info-request? :info
                 (or (user/authority? user) (user/rest-user? user)) :open
                 :else :draft)
         comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
-        tos-function (get-in organization [:operations-tos-functions (keyword operation)])
+        tos-function (get-in organization [:operations-tos-functions (keyword operation-name)])
+        classification {:permitType permit-type, :primaryOperation op}
         application (merge domain/application-skeleton
+                      classification
                       {:id                  id
                        :created             created
                        :opened              (when (#{:open :info} state) created)
                        :modified            created
-                       :permitType          permit-type
-                       :permitSubtype       (first (permit/permit-subtypes permit-type))
+                       :permitSubtype       (first (resolve-valid-subtypes classification))
                        :infoRequest         info-request?
                        :openInfoRequest     open-inforequest?
-                       :primaryOperation    op
                        :secondaryOperations []
                        :state               state
                        :municipality        municipality
@@ -328,5 +339,4 @@
                                                               (:primaryOperation)
                                                               (:name))}}
                         :upsert true)))
-
 

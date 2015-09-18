@@ -21,7 +21,7 @@ var accordion = (function() {
     var content = sels.content;
 
     var state = content.attr("data-accordion-state");
-    if (toState != state || force ) {
+    if (toState !== state || force ) {
       if (toState === "toggle") {
         toState = (state !== "closed") ? "closed" : "open";
       }
@@ -39,9 +39,17 @@ var accordion = (function() {
 
       content.attr("data-accordion-state", state);
       if (state !== "closed") {
-        content.slideDown(animationTime, animationEasing, complete);
+        if (LUPAPISTE.config.features.animations) {
+          content.slideDown(animationTime, animationEasing, complete);
+        } else {
+          content.show();
+        }
       } else {
-        content.slideUp(animationTime, animationEasing, complete);
+        if (LUPAPISTE.config.features.animations) {
+          content.slideUp(animationTime, animationEasing, complete);
+        } else {
+          content.hide();
+        }
       }
     }
     return t;

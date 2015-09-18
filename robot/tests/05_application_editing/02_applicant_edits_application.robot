@@ -39,6 +39,7 @@ Mikko adds three owners to the Uusirakennus document
 
 Owners are visible after page refresh
   Reload Page
+  Application address should be  ${appname}
   Open accordions  info
   Wait Until  Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  4
   Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
@@ -51,8 +52,8 @@ Huoneistot info for Uusirakennus is correct
   Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.0.huoneistonumero']  000
   List Selection Should Be  xpath=//select[@data-test-id="huoneistot.0.muutostapa"]  lis\u00e4ys
 
-  Element Should Be Visible  //button[@id="huoneistot_append"]
-  Execute Javascript  $("button[id='huoneistot_append']").click();
+  Open accordions  info
+  Click by id  huoneistot_append
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
   Element Should Be Enabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
   List Selection Should Be  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  lis\u00e4ys
@@ -75,6 +76,7 @@ Mikko removes apartment
   Xpath Should Match X Times  //div[@id='application-info-tab']//tr[@data-repeating-id="huoneistot"]  1
 
 Mikko can't set "other" building material
+  Open accordions  info
   Wait Until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']//select[@data-docgen-path='rakenne.kantavaRakennusaine']
   Wait Until  Element should not be visible  //section[@id='application']//div[@id='application-info-tab']//input[@data-docgen-path='rakenne.muuRakennusaine']
 

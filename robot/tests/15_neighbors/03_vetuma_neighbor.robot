@@ -47,8 +47,7 @@ Mail is sent
 Neighbor clicks on email link and sees application
   [Tags]  integration
   Click element  xpath=//a
-  Wait until  Element should be visible  xpath=//*[@data-test-id='application-title']
-  Wait until  Element should contain  xpath=//*[@data-test-id='application-title']  ${appname}
+  Neighbor application address should be  ${appname}
   Element should contain  xpath=//*[@data-test-id='application-property-id']  753-416-25-22
   Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
 

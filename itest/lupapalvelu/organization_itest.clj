@@ -1,11 +1,24 @@
 (ns lupapalvelu.organization-itest
   (:require [midje.sweet :refer :all]
+            [clojure.java.io :as io]
             [lupapalvelu.organization :as local-org-api]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer :all]))
 
 (apply-remote-minimal)
+
+(facts
+  (let [uri "http://127.0.0.1:8000/dev/krysp"]
+    (fact "pena can't set krysp-url"
+      (command pena :set-krysp-endpoint :url uri :permitType "R" :version "1") => unauthorized?)
+
+    (fact "sipoo can set working krysp-url"
+      (command sipoo :set-krysp-endpoint :url uri :permitType "YA" :version "2") => ok?)
+
+    (fact "sipoo cant set incorrect krysp-url"
+      (command sipoo :set-krysp-endpoint :url "BROKEN_URL" :permitType "R"  :version "1") => fail?)))
+
 
 (facts* "users-in-same-organizations"
   (let [naantali (apikey-for "rakennustarkastaja@naantali.fi")
@@ -275,3 +288,29 @@
       (fact "when tag is not used in applications, ok is returned"
         (command sonja :add-application-tags :id id :tags []) => ok?
         (query sipoo :remove-tag-ok :tagId tag-id) => ok?))))
+
+(defn- upload-area [apikey & [filename]]
+  (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
+        uploadfile  (io/file filename)
+        uri         (str (server-address) "/api/raw/organization-area")]
+    (http-post uri
+      {:headers {"authorization" (str "apikey=" apikey)}
+       :multipart [{:name "files[]" :content uploadfile}]
+       :throw-exceptions false})))
+
+(facts "Organization areas zip file upload"
+  (fact "only authorityAdmin can upload"
+    (:body (upload-area pena)) => "unauthorized"
+    (:body (upload-area sonja)) => "unauthorized")
+
+  (fact "text file is not ok (zip required)"
+    (->
+      (upload-area sipoo "dev-resources/test-attachment.txt")
+      :body) => "error.illegal-shapefile")
+
+  (let [resp (upload-area sipoo)
+        body (:body (decode-response resp))]
+
+    (fact "zip file with correct shape file can be uploaded by auth admin"
+      resp => http200?
+      body => ok?)))

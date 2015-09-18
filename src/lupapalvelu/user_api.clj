@@ -208,12 +208,12 @@
       (fail :error.user-not-found))))
 
 (defcommand update-default-application-filter
-  {:parameters [filter]
+  {:parameters [filter sort]
    :user-roles #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:filter])]
+   :input-validators [(partial action/non-blank-parameters [:filter]) (partial action/non-blank-parameters [:sort])]
    :description "Adds/Updates user specific filters for the application search"}
   [{{id :id} :user}]
-  (mongo/update-by-id :users id {$set {:applicationFilters [{:filter filter}]}})
+  (mongo/update-by-id :users id {$set {:applicationFilters [{:filter filter :sort sort}]}})
   (ok))
 
 ;;
@@ -587,12 +587,11 @@
    :input-validators [email-validator]
    :user-roles       #{:anonymous}}
   [_]
-  (let [user (user/get-user-by-email email)]
-    (if user
-      (ok)
-      (fail :email-not-in-use))))
+  (if (user/email-in-use? email)
+    (ok)
+    (fail :email-not-in-use)))
 
 (defcommand remove-user-notification
-  {:user-roles #{:applicant}}
+  {:user-roles #{:applicant :authority}}
   [{{id :id} :user}]
   (mongo/update-by-id :users id {$unset {:notification 1}}))

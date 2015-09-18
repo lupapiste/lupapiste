@@ -82,7 +82,7 @@
   [_]
   (let [query {:submitted {$ne nil}}
         limit 5
-        apps (query/with-collection "applications"
+        apps (mongo/with-collection "applications"
                (query/find query)
                (query/fields [:municipality :submitted :primaryOperation])
                (query/sort {:submitted -1})

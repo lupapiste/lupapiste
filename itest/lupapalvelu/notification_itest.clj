@@ -2,9 +2,9 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]))
 
-(last-email) ; inbox zero
-
 (apply-remote-minimal)
+
+(last-email) ; inbox zero
 
 (facts "Subscription"
   (let [{:keys [id]} (create-and-submit-application pena :propertyId sipoo-property-id)]

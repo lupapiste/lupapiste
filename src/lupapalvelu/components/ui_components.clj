@@ -51,7 +51,8 @@
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
                                           validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))
-                 :degrees               (map :name (:body schemas/koulutusvalinta))}]
+                 :degrees               (map :name (:body schemas/koulutusvalinta))
+                 :features              (into {} (filter second (env/features)))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -297,7 +298,7 @@
                        :html ["integration-error.html"]}
 
    :ui-components {:depends [:common-html]
-                   :js (distinct (conj (get-ui-components :ui-components :models) "ui-components.js" "input-model.js"))
+                   :js (distinct (conj (get-ui-components :ui-components :models) "docgen/ui-components.js" "docgen/docgen-input-model.js"))
                    :html (get-ui-components :ui-components :templates)}
 
    ;; Single Page Apps and standalone components:
@@ -338,10 +339,10 @@
                :js ["admin.js" "register-admin-models.js"]}
    :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :header :debug]
                :css ["admin.css"]
-               :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
+               :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js" "notifications.js"]
                :html ["index.html" "admin.html" "organization.html"
                       "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html"
-                      "screenmessages-list.html"]}
+                      "screenmessages-list.html" "notifications.html"]}
 
    :wordpress {:depends [:login :password-reset]}
 

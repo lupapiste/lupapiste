@@ -81,7 +81,10 @@
            (sc/optional-key :notification)        {:messageI18nkey sc/Str
                                                    :titleI18nkey   sc/Str}
            (sc/optional-key :applicationFilters)  [{(sc/optional-key :title) sc/Str
-                                                    :filter                  {(sc/optional-key :tags) (sc/pred vector? "Tag filter should have ids in a vector")
+                                                    :sort                    {:field     (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler")
+                                                                              :asc       sc/Bool}
+                                                    :filter                  {(sc/optional-key :handler) sc/Str
+                                                                              (sc/optional-key :tags) (sc/pred vector? "Tag filter should have ids in a vector")
                                                                               (sc/optional-key :operations) (sc/pred vector? "Op filter should have ids in a vector")
                                                                               (sc/optional-key :organizations) (sc/pred vector? "Org filter should have ids in a vector")
                                                                               (sc/optional-key :areas) (sc/pred vector? "Area filter should have ids in a vector")}}]})
@@ -165,6 +168,9 @@
 
 (defn authority-admin? [{role :role}]
   (= :authorityAdmin (keyword role)))
+
+(defn dummy? [{role :role}]
+  (= :dummy (keyword role)))
 
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
@@ -271,7 +277,7 @@
         base-query-total (mongo/count :users (limit-organizations base-query))
         query            (limit-organizations (users-for-datatables-query base-query params))
         query-total      (mongo/count :users query)
-        users            (query/with-collection "users"
+        users            (mongo/with-collection "users"
                            (query/find query)
                            (query/fields [:email :firstName :lastName :role :orgAuthz :enabled])
                            (query/skip (util/->int (:iDisplayStart params) 0))
@@ -330,6 +336,11 @@
 (defn get-user-by-email [email]
   {:pre [email]}
   (get-user {:email email}))
+
+(defn email-in-use? [email]
+  (as-> email $ 
+    (get-user-by-email $)
+    (and $ (not (dummy? $)))))
 
 (defn get-user-with-password [username password]
   (when-not (or (ss/blank? username) (ss/blank? password))
@@ -453,7 +464,7 @@
 
       (get-user-by-email email)
 
-      (catch com.mongodb.MongoException$DuplicateKey e
+      (catch com.mongodb.DuplicateKeyException e
         (if-let [field (second (re-find #"E11000 duplicate key error index: lupapiste\.users\.\$([^\s._]+)" (.getMessage e)))]
           (do
             (warnf "Duplicate key detected when inserting new user: field=%s" field)

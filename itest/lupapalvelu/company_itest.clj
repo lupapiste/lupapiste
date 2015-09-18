@@ -2,8 +2,7 @@
   (:require [midje.sweet  :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.domain :as domain]
-            [sade.http :as http]))
+            [lupapalvelu.domain :as domain]))
 
 (apply-remote-minimal)
 
@@ -11,6 +10,9 @@
   (let [company (query kaino :company :company "solita" :users true)]
     (count (:invitations company)) => 0
     (count (:users company)) => 1
+
+    (fact "Can not invite with non-ascii email"
+      (command kaino :company-invite-user :email "tepp\u00f6@example.com") => fail?)
 
     (fact "Invite is sent"
       (command kaino :company-invite-user :email "teppo@example.com") => ok?)
@@ -27,7 +29,7 @@
                     :throw-exceptions false
                     :content-type     :json
                     :body "{\"ok\": true}"}
-            resp (http/post (str (server-address) "/api/token/" token) params)
+            resp (http-post (str (server-address) "/api/token/" token) params)
             ]
         (:status resp) => 200
         (:to email) => "Teppo Nieminen <teppo@example.com>")))
