@@ -832,8 +832,8 @@
                              {:name "rantaKytkin" :type :checkbox}]}
 
                      {:name "kiinteisto"
-                      :type :docgenGroup
-                      :i18nkey "kiinteisto.kiinteisto"
+                      :type :group
+                      :uicomponent :docgenGroup
                       :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size "s"}
                              ;{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                              {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}

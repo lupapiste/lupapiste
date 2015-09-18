@@ -1498,7 +1498,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var myName = subSchema.name;
     var myPath = path.concat([myName]);
-    var builder = builders[subSchema.type] || buildUnknown;
+    var builder = builders[subSchema.uicomponent] || builders[subSchema.type] || buildUnknown;
     var repeatingId = myPath.join("-");
 
     function makeElem(myModel, id) {
