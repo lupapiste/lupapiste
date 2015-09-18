@@ -2,7 +2,9 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   "use strict";
   var self = this;
 
-  self.schema = params.schema;
+  self.schema = _.extend(_.cloneDeep(params.schema), {
+    label: false
+  });
   self.path = params.path;
 
   self.isMaaraala = ko.observable(false);
@@ -20,7 +22,7 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   
   self.maaraalaTunnus = ko.observable("");
   var saveFun = function() {
-    
+    console.log("saving maaraalaTunnus");
   };
   self.maaraalaTunnus.subscribe(_.debounce(saveFun, 500));
 };

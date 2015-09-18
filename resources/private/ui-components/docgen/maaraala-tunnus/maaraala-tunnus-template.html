@@ -14,13 +14,10 @@
         <label style="display: block;" class="form-label" data-bind="text: propertyIdLabel"></label>
         <span class="kiintun-and-maaraalatunnus">
           <span class="form-maaraala" data-bind="text: propertyId"></span>
-          <div data-bind="component: {name: 'docgen-string',
-                                      params: {schema: schema,
-                                               path: path}},
-                          visible: isMaaraala"></div>
-          <!--
-          <input class="form-input text form-input short" data-bind="visible: isMaaraala, textInput: maaraalaTunnus" type="text"></input>
-        -->
+          <span data-bind="component: {name: 'docgen-inline-string',
+                                       params: {schema: schema,
+                                                path: path}},
+                           visible: isMaaraala"></div>
         </span>
       </span>
     </script>

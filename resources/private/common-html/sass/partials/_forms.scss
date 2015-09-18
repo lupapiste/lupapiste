@@ -246,6 +246,10 @@ input.form-input.long {
   width: $cols5;
 }
 
+input.form-input.inline {
+  display: inline;
+}
+
 .form-add {
   display: block;
 }
