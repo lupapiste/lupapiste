@@ -12,52 +12,62 @@
 
 (def- task-schemas-version 1)
 
-(def task-name-max-len 80)
+(def- task-name-max-len 80)
+
+
+(def- task-katselmus-body
+  [{:name "katselmuksenLaji"
+    :type :select :sortBy :displayname
+    :required true
+    :whitelist {:roles [:authority] :otherwise :disabled}
+    :default "muu katselmus"
+    :body [{:name "muu katselmus"}
+           {:name "muu tarkastus"}
+           {:name "aloituskokous"}
+           {:name "rakennuksen paikan merkitseminen"}
+           {:name "rakennuksen paikan tarkastaminen"}
+           {:name "pohjakatselmus"}
+           {:name "rakennekatselmus"}
+           {:name "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"}
+           {:name "osittainen loppukatselmus"}
+           {:name "loppukatselmus"}
+           {:name "ei tiedossa"}]}
+   {:name "vaadittuLupaehtona"
+    :type :checkbox
+    :whitelist {:roles [:authority] :otherwise :disabled}
+    :i18nkey "vaadittuLupaehtona"}
+   {:name "rakennus"
+    :type :group
+    :whitelist {:roles [:authority] :otherwise :disabled}
+    :repeating true
+    :body [{:name "rakennus" :type :group :body schemas/uusi-rakennuksen-valitsin}
+           {:name "tila" :type :group
+            :body [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
+                   {:name "kayttoonottava" :type :checkbox}]}]}
+   {:name "katselmus" :type :group
+    :whitelist {:roles [:authority] :otherwise :disabled}
+    :body
+    [{:name "pitoPvm" :type :date :required true}
+     {:name "pitaja" :type :string}
+     {:name "huomautukset" :type :group
+      :body [{:name "kuvaus" :required true :type :text :max-len 4000}
+             {:name "maaraAika" :type :date}
+             {:name "toteaja" :type :string}
+             {:name "toteamisHetki" :type :date}]}
+     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
+     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
+     {:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}]}])
+
+(def- task-katselmus-body-ya
+  (tools/schema-body-without-element-by-name task-katselmus-body "rakennus"))
 
 (schemas/defschemas
   task-schemas-version
   [{:info {:name "task-katselmus" :type :task :order 1 :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
-    :body [{:name "katselmuksenLaji"
-            :type :select :sortBy :displayname
-            :required true
-            :whitelist {:roles [:authority] :otherwise :disabled}
-            :default "muu katselmus"
-            :body [{:name "muu katselmus"}
-                   {:name "muu tarkastus"}
-                   {:name "aloituskokous"}
-                   {:name "rakennuksen paikan merkitseminen"}
-                   {:name "rakennuksen paikan tarkastaminen"}
-                   {:name "pohjakatselmus"}
-                   {:name "rakennekatselmus"}
-                   {:name "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"}
-                   {:name "osittainen loppukatselmus"}
-                   {:name "loppukatselmus"}
-                   {:name "ei tiedossa"}]}
-           {:name "vaadittuLupaehtona"
-            :type :checkbox
-            :whitelist {:roles [:authority] :otherwise :disabled}
-            :i18nkey "vaadittuLupaehtona"}
-           {:name "rakennus"
-            :type :group
-            :whitelist {:roles [:authority] :otherwise :disabled}
-            :repeating true
-            :body [{:name "rakennus" :type :group :body schemas/uusi-rakennuksen-valitsin}
-                   {:name "tila" :type :group
-                    :body [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
-                           {:name "kayttoonottava" :type :checkbox}]}]}
-           {:name "katselmus" :type :group
-            :whitelist {:roles [:authority] :otherwise :disabled}
-            :body
-            [{:name "pitoPvm" :type :date :required true}
-             {:name "pitaja" :type :string}
-             {:name "huomautukset" :type :group
-              :body [{:name "kuvaus" :required true :type :text :max-len 4000}
-                     {:name "maaraAika" :type :date}
-                     {:name "toteaja" :type :string}
-                     {:name "toteamisHetki" :type :date}]}
-             {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
-             {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
-             {:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}]}]}
+    :body task-katselmus-body}
+
+   {:info {:name "task-katselmus-ya" :type :task :order 1 :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
+    :body task-katselmus-body-ya}
 
    {:info {:name "task-vaadittu-tyonjohtaja" :type :task :order 10}
     :body [{:name "osapuolena" :type :checkbox}
