@@ -99,7 +99,7 @@
               :vaadittuLupaehtona true}]
     (new-task "task-katselmus" task-name data meta source)))
 
-(defn- verdict->tasks [verdict {:keys [created] :as meta}]
+(defn- verdict->tasks [verdict meta]
   (map
     (fn [{lupamaaraykset :lupamaaraykset}]
       (let [source {:type "verdict" :id (:id verdict)}]
