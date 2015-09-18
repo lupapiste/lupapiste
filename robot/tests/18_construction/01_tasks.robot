@@ -10,9 +10,12 @@ Variables      ../06_attachments/variables.py
 Mikko prepares the application
   Mikko logs in
   ${secs} =  Get Time  epoch
-  Set Suite Variable  ${appname}  Taskitesti${secs}
+  Set Suite Variable  ${appname}  Taskitesti-${secs}
   Set Suite Variable  ${propertyId}  753-416-18-1
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
+  Submit application
+  Set Suite Variable  ${appname-ya}  Taskitesti-YA-${secs}
+  Create application the fast way  ${appname-ya}  ${propertyId}  ya-katulupa-vesi-ja-viemarityot
   Submit application
   Logout
 
@@ -127,6 +130,16 @@ Verify post-verdict attachments - Aloituskokous
   Wait until  Element should be visible  xpath=//a[@data-test-id='application-open-attachments-tab']
   Open tab  attachments
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+
+Katselmus task created in an YA application does not include any Rakennus information (LPK-719)
+  Open application  ${appname-ya}  ${propertyId}
+  Open tab  verdict
+  Fetch YA verdict
+  Open tab  tasks
+  Create katselmus task  task-katselmus-ya  uus muu ya-tarkastus
+  Task count is  task-katselmus-ya  1
+  Open task  uus muu ya-tarkastus
+  Wait until  Element should not be visible  xpath=//div[@id='taskDocgen']//div[@data-repeating-id='rakennus']
   [Teardown]  Logout
 
 Mikko is unable to edit Aloituskokous (LPK-494)
@@ -144,6 +157,15 @@ Mikko is unable to edit Aloituskokous (LPK-494)
   Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//select[@disabled]  ${selectCount}
 
 *** Keywords ***
+
+Create katselmus task
+  [Arguments]  ${taskSchemaName}  ${taskName}
+  Click enabled by test id  application-new-task
+  Wait until  Element should be visible  dialog-create-task
+  Select From List By Value  choose-task-type   ${taskSchemaName}
+  Input text  create-task-name  ${taskName}
+  Click enabled by test id  create-task-save
+  Wait until  Element should not be visible  dialog-create-task
 
 Open task
   [Arguments]  ${name}
