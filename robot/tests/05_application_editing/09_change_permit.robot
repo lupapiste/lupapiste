@@ -11,11 +11,9 @@ Sonja prepares the application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Base_app_for_change_permit_${secs}
   Set Suite Variable  ${propertyid}  753-423-2-41
-  Create application the fast way  ${appname}  ${propertyid}  kerrostalo-rivitalo  open
+  Create application the fast way  ${appname}  ${propertyid}  kerrostalo-rivitalo
 
   Wait until  Application state should be  open
-  ${applicationTitle} =  Get Text  xpath=//span[@data-test-id='application-title']
-  Set Suite Variable  ${applicationTitle}
   ${applicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
   Set Suite Variable  ${applicationid}
 
@@ -46,7 +44,7 @@ Sonja creates a change permit
   Set Suite Variable  ${newApplicationid}
   Should Not Be Equal As Strings  ${newApplicationid}  ${applicationid}
 
-  Element Text Should Be  xpath=//span[@data-test-id='application-title']  ${applicationTitle}
+  Application address should be  ${appname}
   Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyid}
   Element Should Not Be Visible  xpath=//span[@data-test-id='application-submitted-date']
 

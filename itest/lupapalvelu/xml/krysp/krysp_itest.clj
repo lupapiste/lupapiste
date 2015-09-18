@@ -90,6 +90,7 @@
   (let [sipoo-statement-givers   (:statementGivers (organization-from-minimal-by-id "753-R"))
         sonja-statement-giver-id (:id (some #(when (= (:email %) "sonja.sibbo@sipoo.fi") %) sipoo-statement-givers))
         create-statement-result   (command sonja :request-for-statement
+                                    :functionCode nil
                                     :id application-id
                                     :personIds [sonja-statement-giver-id])
         updated-application       (query-application pena application-id)

@@ -142,33 +142,15 @@
    [ ["kiinteistonmuodostus" :kiinteistonmuodostus]
     ["rasitetoimitus" :rasitetoimitus]
     ["rajankaynti" :rajankaynti]
-    ;; ["rajankaynnin-hakeminen" :rajankaynnin-hakeminen]
-    ;; ["tonttijaon-muutoksen-hakeminen" :tonttijaon-muutoksen-hakeminen]
-    ;; ["tontin-lohkominen" :tontin-lohkominen]
-    ;; ["tilan-rekisteroiminen-tontiksi" :tilan-rekisteroiminen-tontiksi]
-    ;; ["yhdistaminen" :yhdistaminen]
-    ;; ["halkominen" :halkominen]
-    ;; ["tilusvaihto" :tilusvaihto]
-    ;; ["rajannayton-hakeminen" :rajannayton-hakeminen]
-    ;; ["rakennuksen-sijainti" :rakennuksen-sijainti]
-    ;; ["ya-lohkominen" :ya-lohkominen]
     ]])
 
 (def operation-tree-for-MM
-  ["maankayton-muutos" ; kaavat
+  ["maankayton-muutos"
    [["tonttijako" :tonttijako]
     ["asemakaava" :asemakaava]
     ["ranta-asemakaava" :ranta-asemakaava]
     ["yleiskaava" :yleiskaava]
-    ]
-
-    ;; ["asemakaava-laadinta" :asemakaava-laadinta]
-    ;; ["asemakaava-muutos" :asemakaava-muutos]
-    ;; ["ranta-asemakaava-laadinta" :ranta-asemakaava-laadinta]
-    ;; ["ranta-asemakaava-muutos" :ranta-asemakaava-muutos]
-    ;; ["yleiskaava-laadinta" :yleiskaava-laadinta]
-    ;; ["yleiskaava-muutos" :yleiskaava-muutos]]
-   ])
+    ]])
 
 
 (def operation-tree
@@ -182,7 +164,8 @@
           [operation-tree-for-KT operation-tree-for-MM])]))
 
 
-(def schema-data-yritys-selected [[["_selected"] "yritys"]])
+(def schema-data-yritys-selected  [[["_selected"] "yritys"]])
+(def schema-data-henkilo-selected [[["_selected"] "henkilo"]])
 
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
@@ -200,49 +183,44 @@
 (def- common-vvvl-schemas ["hankkeen-kuvaus-vesihuolto" "vesihuolto-kiinteisto"])
 
 
-(def- uuden_rakennuksen_liitteet [:paapiirustus
-                                           [:asemapiirros
-                                            :pohjapiirros
-                                            :julkisivupiirros
-                                            :leikkauspiirros]
-                                           :rakennuspaikka
-                                           [:selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista]])
+(def- uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
+                                                 :pohjapiirros
+                                                 :julkisivupiirros
+                                                 :leikkauspiirros]
+                                  :rakennuspaikka [:selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista]])
 
-(def- rakennuksen_muutos_liitteet [:paapiirustus
-                                            [:pohjapiirros
-                                             :julkisivupiirros]])
-
-(def- rakennuksen_laajennuksen_liitteet [:paapiirustus
-                                                  [:asemapiirros
-                                                   :pohjapiirros
-                                                   :julkisivupiirros
-                                                   :leikkauspiirros]])
-
-(def- kaupunkikuva_toimenpide_liitteet [:paapiirustus
-                                                 [:asemapiirros
+(def- rakennuksen_muutos_liitteet [:paapiirustus [:pohjapiirros
                                                   :julkisivupiirros]])
 
+(def- rakennuksen_laajennuksen_liitteet [:paapiirustus [:asemapiirros
+                                                        :pohjapiirros
+                                                        :julkisivupiirros
+                                                        :leikkauspiirros]])
+
+(def- kaupunkikuva_toimenpide_liitteet [:paapiirustus [:asemapiirros
+                                                       :julkisivupiirros]])
+
 (def- ya-katulupa-general {:schema "tyomaastaVastaava"
-                                    :permit-type permit/YA
-                                    :schema-data schema-data-yritys-selected
-                                    :required (conj common-yleiset-alueet-schemas
-                                                "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
-                                                "tyoaika")
-                                    :attachments []
-                                    :add-operation-allowed false
-                                    :link-permit-required false
-                                    :link-permit-verdict-required false
-                                    :asianhallinta true})
+                           :permit-type permit/YA
+                           :schema-data schema-data-henkilo-selected
+                           :required (conj common-yleiset-alueet-schemas
+                                       "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
+                                       "tyoaika")
+                           :attachments []
+                           :add-operation-allowed false
+                           :link-permit-required false
+                           :link-permit-verdict-required false
+                           :asianhallinta true})
 
 (def- ya-kayttolupa-general {:schema "tyoaika"
-                                      :permit-type permit/YA
-                                      :required (conj common-yleiset-alueet-schemas
-                                                  "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
-                                      :attachments []
-                                      :add-operation-allowed false
-                                      :link-permit-required false
-                                      :link-permit-verdict-required false
-                                      :asianhallinta true})
+                             :permit-type permit/YA
+                             :required (conj common-yleiset-alueet-schemas
+                                         "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
+                             :attachments []
+                             :add-operation-allowed false
+                             :link-permit-required false
+                             :link-permit-verdict-required false
+                             :asianhallinta true})
 
 (def- ya-kayttolupa-with-tyomaastavastaava
   (update-in ya-kayttolupa-general [:required] conj "tyomaastaVastaava"))
@@ -697,96 +675,23 @@
                                    :link-permit-required false
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
-     :tonttijaon-hakeminen        {:schema "maankayton-muutos"
-                                   :permit-type permit/KT
-                                   :required common-maanmittaus-schemas
-                                   :optional #{"secondary-kiinteistot"}
-                                   :attachments []
-                                   :add-operation-allowed false
-                                   :link-permit-required false
-                                   :link-permit-verdict-required false
-                                   :asianhallinta false}
-     :tonttijaon-muutoksen-hakeminen {:schema "maankayton-muutos"
-                                      :permit-type permit/KT
-                                      :required common-maanmittaus-schemas
-                                      :attachments []
-                                      :add-operation-allowed false
-                                      :link-permit-required false
-                                      :link-permit-verdict-required false
-                                      :asianhallinta false}
-     :kiinteistonmuodostus         {:schema "kiinteistotoimitus"
+     :kiinteistonmuodostus         {:schema "kiinteistonmuodostus"
                                     :permit-type permit/KT
-                                    :required common-maanmittaus-schemas
+                                    :required (conj common-maanmittaus-schemas "rasitetoimitus")
                                     :attachments []
                                     :add-operation-allowed false
                                     :link-permit-required false
                                     :link-permit-verdict-required false
                                     :asianhallinta false}
-     :tontin-lohkominen            {:schema "kiinteistotoimitus"
-                                    :permit-type permit/KT
-                                    :required common-maanmittaus-schemas
-                                    :attachments []
-                                    :add-operation-allowed false
-                                    :link-permit-required false
-                                    :link-permit-verdict-required false
-                                    :asianhallinta false}
-     :tilan-rekisteroiminen-tontiksi {:schema "kiinteistotoimitus"
-                                      :permit-type permit/KT
-                                      :required common-maanmittaus-schemas
-                                      :attachments []
-                                      :add-operation-allowed false
-                                      :link-permit-required false
-                                      :link-permit-verdict-required false
-                                      :asianhallinta false}
-     :yhdistaminen                  {:schema "kiinteistotoimitus"
+     :rasitetoimitus                {:schema "rasitetoimitus"
                                      :permit-type permit/KT
-                                     :required common-maanmittaus-schemas
-                                     :attachments []
-                                     :add-operation-allowed false
-                                     :link-permit-required false
-                                     :link-permit-verdict-required false
-                                     :asianhallinta false}
-     :halkominen                    {:schema "kiinteistotoimitus"
-                                     :permit-type permit/KT
-                                     :required common-maanmittaus-schemas
-                                     :attachments []
-                                     :add-operation-allowed false
-                                     :link-permit-required false
-                                     :link-permit-verdict-required false
-                                     :asianhallinta false}
-     :rasitetoimitus                {:schema "kiinteistotoimitus"
-                                     :permit-type permit/KT
-                                     :required common-maanmittaus-schemas
-                                     :attachments []
-                                     :add-operation-allowed false
-                                     :link-permit-required false
-                                     :link-permit-verdict-required false
-                                     :asianhallinta false}
-     :tilusvaihto                   {:schema "kiinteistotoimitus"
-                                     :permit-type permit/KT
-                                     :required common-maanmittaus-schemas
+                                     :required (conj common-maanmittaus-schemas "kiinteistonmuodostus")
                                      :attachments []
                                      :add-operation-allowed false
                                      :link-permit-required false
                                      :link-permit-verdict-required false
                                      :asianhallinta false}
      :rajankaynti                  {:schema "rajankaynti"
-                                    :permit-type permit/KT
-                                    :required common-maanmittaus-schemas
-                                    :attachments []
-                                    :add-operation-allowed false
-                                    :link-permit-required false
-                                    :link-permit-verdict-required false
-                                    :asianhallinta false}
-     :rakennuksen-sijainti         {:schema "kiinteistotoimitus"
-                                    :permit-type permit/KT
-                                    :required common-maanmittaus-schemas
-                                    :attachments []
-                                    :add-operation-allowed false
-                                    :link-permit-required false
-                                    :link-permit-verdict-required false
-                                    :asianhallinta false}
-     :ya-lohkominen                {:schema "kiinteistotoimitus"
                                     :permit-type permit/KT
                                     :required common-maanmittaus-schemas
                                     :attachments []
@@ -1050,3 +955,11 @@
 (comment
   ; operations (keys) with asianhallinta enabled
   (keys (into {} (filter (fn [[k v]] (:asianhallinta v)) operations))))
+
+(defn printout! [x indent]
+  (let [p! #(println (str indent (lupapalvelu.i18n/localize "fi" "operations.tree" %)))]
+    (cond
+      (string? x) (p! x)
+      (keyword? (second x)) (p! (first x))
+      (string? (first x)) (do (p! (first x)) (printout! (second x) (str indent \tab)))
+      :else (doseq [x2 x] (printout! x2 indent)))))

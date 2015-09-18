@@ -3,6 +3,7 @@
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
 Library        Selenium2Library   timeout=10  run_on_failure=Nothing
+Library        String
 
 *** Variables ***
 
@@ -46,6 +47,7 @@ Open browser to login page
   Set selenium speed  ${DEFAULT_SPEED}
   Apply minimal fixture now
   Set integration proxy on
+  Disable maps
 
 Go to login page
   Go to  ${LOGIN URL}
@@ -387,7 +389,13 @@ Primary operation is
 #
 
 Create application the fast way
-  [Arguments]  ${address}  ${propertyId}  ${operation}  ${state}=draft
+  [Arguments]  ${address}  ${propertyId}  ${operation}
+  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+  Kill dev-box
+
+Create application with state
+  [Arguments]  ${address}  ${propertyId}  ${operation}  ${state}
   Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
@@ -778,22 +786,39 @@ Permit type should be
   [Arguments]  ${type}
   Element Text Should Be  xpath=//span[@data-bind='ltext: permitType']  ${type}
 
+Application address should be
+  [Arguments]  ${address}
+  ${a} =  Convert To Uppercase  ${address}
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//span[@data-test-id='application-title']
+  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  ${a}
+
+Neighbor application address should be
+  [Arguments]  ${address}
+  ${a} =  Convert To Uppercase  ${address}
+  Wait Until  Element Should Be Visible  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']
+  Wait Until  Element text should be  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']  ${a}
+
+
 #
 # Proxy control:
 #
 
+Enable maps
+  Execute Javascript  ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
+  Wait for jQuery
+
 Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
-  Wait for jQuery
-  Execute Javascript  ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
   Wait for jQuery
   Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
   Wait for jQuery
 
+Disable maps
+  Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
+  Wait for jQuery
+
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
-  Wait for jQuery
-  Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
   Wait for jQuery
   Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:true}).call();
   Wait for jQuery

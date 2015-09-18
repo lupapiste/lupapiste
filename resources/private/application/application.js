@@ -91,7 +91,7 @@
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
           repository.load(currentId, applicationModel.pending, function(application) {
-            applicationModel.metadata(application.metadata);
+            ko.mapping.fromJS(application.metadata, applicationModel.metadata);
           });
         })
         .call();
@@ -155,6 +155,7 @@
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
+      requestForStatementModel.setFunctionCode(app.tosFunction);
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
