@@ -51,9 +51,9 @@
    :open       [:submitted :canceled]
    :submitted  [:sent :verdictGiven :canceled]
    :sent       [:verdictGiven :complement-needed :canceled]
-   :complement-needed   [:sent :verdictGiven :cancelled]
+   :complement-needed   [:sent :verdictGiven :canceled]
    :verdictGiven        [:constructionStarted :canceled]
-   :constructionStarted [:closed :cancelled]
+   :constructionStarted [:closed :canceled]
    :closed   []
    :canceled []
    :extinct  [] ; Rauennut
