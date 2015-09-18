@@ -364,7 +364,9 @@
     };
 
     self.show = function(id, tab) {
-      if (self.id() !== id) { self.clear().id(id).load(); }
+      if (self.id()==undefined) {
+        pageutil.openPage("register-company-account-type");
+      } else if (self.id() !== id) { self.clear().id(id).load(); }
       self.tabs.show(tab);
       return self;
     };
