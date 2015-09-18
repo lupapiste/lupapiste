@@ -35,6 +35,12 @@ Mikko still can't approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
   Kill session
 
+Ronja tries to approve application without permission
+  Ronja logs in
+  Open application  ${appname}  753-416-25-30
+  Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
+  Kill session
+
 Sonja logs in for approval
   Sonja logs in
   Open application  ${appname}  753-416-25-30

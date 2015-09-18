@@ -178,6 +178,19 @@
     (fact "Authority is able to add operation"
       (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
 
+(facts "Users need approver role to approve applications"
+  (let [application    (create-and-submit-application mikko :municipality sonja-muni)
+        application-id (:id application)]
+
+    (fact "Applicant cannot approve application"
+      (command mikko :approve-application :id application-id :lang "fi") => unauthorized?)
+
+    (fact "Authority without approver role cannot approve application"
+      (command ronja :approve-application :id application-id :lang "fi") => unauthorized?)
+
+    (fact "Approver with approver role is authorized"
+      (command sonja :approve-application :id application-id :lang "fi") => ok?)))
+
 (facts "link to backend system"
   (let [application    (create-and-submit-application mikko :municipality sonja-muni)
         application-id (:id application)

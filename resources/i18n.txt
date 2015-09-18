@@ -1,0 +1,1 @@
+authorityrole.approver: Taustajärjestelmään siirto -oikeus
