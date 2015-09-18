@@ -51,7 +51,7 @@ Mikko logs in, goes to attachments tab and sees all "not needed" checkboxes as e
   Element should not be visible  xpath=//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Yleiset hankkeen liitteet')]
   Xpath Should Match X Times  //table[@data-test-id='attachments-template-table']//input[@notneeded='true']  0
 
-Mikko can not submit application with Submit button and there are items on the requiredFieldSummary tab
+Mikko can not submit application because there are "missing required" items on the requiredFieldSummary tab
   Open tab  requiredFieldSummary
   Wait Until  Element Should Be Visible  xpath=//i[@class='error-text']
   Element should be disabled  xpath=//*[@data-test-id='application-submit-btn']
@@ -75,8 +75,6 @@ Sonja logs in and adds new attachment template
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
   Add empty attachment template  Muu liite  muut  muu
-
-Sonja sees that new attachment template is visible in attachments list
   Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
 
 For that template, the "not needed" checkbox is enabled and not selected
