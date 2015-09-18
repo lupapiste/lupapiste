@@ -8,7 +8,7 @@
                         <div class="application_summary_info" data-bind="with: application">
                           <h1 data-bind="component: {name: 'address',
                                          params: { application: $parent,
-                                                   edit: 'edit.address'}}"></h1>
+                                                   edit: 'edit'}}"></h1> <!-- TODO implement LPK-724 and change: edit: 'edit.address' -->
                           <h2 data-bind="if: primaryOperation">
                                 <span data-test-id="test-application-primary-operation"
                                       data-bind="ltext: primaryOperationName, attr: {'data-test-primary-operation-id': primaryOperation().name}"></span>
