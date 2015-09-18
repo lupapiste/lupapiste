@@ -60,6 +60,7 @@
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type)]
+    (assert krysp-fn "KRYSP 'review mapper' function not found/defined?")
     (krysp-fn application task user lang krysp-version output-dir begin-of-link)))
 
 (defn save-unsent-attachments-as-krysp
