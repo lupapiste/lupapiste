@@ -18,7 +18,7 @@ Mikko creates a new application
   Set Suite Variable  ${attachment-not-needed-test-id-sonja}  attachment-not-needed-muut-muu
   Open to authorities  huba huba
 
-Mikko could submit application
+Mikko could submit application (when required fields are not obligatory)
   Open tab  requiredFieldSummary
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
   Logout
@@ -55,6 +55,9 @@ Mikko can not submit application because there are "missing required" items on t
   Open tab  requiredFieldSummary
   Wait Until  Element Should Be Visible  xpath=//i[@class='error-text']
   Element should be disabled  xpath=//*[@data-test-id='application-submit-btn']
+  Page should contain  Lomakkeilla olevat varoitukset
+  Page should contain  Puuttuvat pakolliset tiedot
+  Page should contain  Puuttuvat pakolliset liitteet
   ${missingRequiredCount} =  Get Matching Xpath Count  xpath=//*[@class='requiredField-line']
   Set Suite Variable  ${missingRequiredCount}
   Logout
@@ -111,6 +114,13 @@ Mikko adds txt attachment to the attachment template added by Sonja
   Wait Until  Tab should be visible  attachments
   Page Should Not Contain  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
 
+Mikko fills up a field marked with a VRK warning
+  Open tab  info
+  Open accordions  info
+  Select From List By Value  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='kaytto.kayttotarkoitus']  131 asuntolat yms
+  Select From List By Value  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='lammitys.lammitystapa']  ilmakeskus
+  Select From List By Value  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='lammitys.lammonlahde']  kaasu
+
 Mikko fills up first name for the hakija party in the parties tab
   Open tab  parties
   Open accordions  parties
@@ -121,12 +131,13 @@ Mikko fills up first name for the hakija party in the parties tab
   Focus  xpath=//div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']
   Wait until  Element should be visible  xpath=//span[contains(@class,'form-input-saved')]
 
-The filled-up of the party info and added attachment cause corresponding items to disappear from the "missing required" list in the requiredFieldSummary tab
+The filled-up warning field and party info plus the added attachment cause corresponding items to disappear from the "missing required" list in the requiredFieldSummary tab
   Open tab  requiredFieldSummary
   Wait for jQuery
   Wait Until  Element should be visible  xpath=//*[@data-test-id='application-submit-btn']
-  ${missingRequiredCountAfter} =  Evaluate  ${missingRequiredCount} - 2
+  ${missingRequiredCountAfter} =  Evaluate  ${missingRequiredCount} - 8
   Wait Until  Xpath Should Match X Times  //*[@class='requiredField-line']  ${missingRequiredCountAfter}
+  Page should not contain  Lomakkeilla olevat varoitukset
 
 Mikko could submit application after missing stuff have been added
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
