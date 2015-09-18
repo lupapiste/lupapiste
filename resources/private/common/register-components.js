@@ -55,7 +55,8 @@ jQuery(document).ready(function() {
     {name: "checkbox-field", model: "input-field"},
     {name: "select-field", model: "input-field"},
     {name: "password-field"},
-    {name: "maaraala-tunnus"}
+    {name: "maaraala-tunnus"},
+    {name: "property-group"}
   ];
 
   _.forEach(components, function(component) {

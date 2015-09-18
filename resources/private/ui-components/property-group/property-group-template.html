@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="property-group-template">
+      <div class="form-group" data-bind="attr: {id: self.groupId}">
+        <label class="form-label form-label-group" data-bind="ltext: groupLabel"></label>
+        <div>
+          <label>
+            <input id="" data-bind="checked: isMaaraala" type="checkbox"></input>
+            Kyseessä määräala
+          </label>
+        </div>
+
+        <div class="form-entry"
+             data-bind="component: { name: 'maaraala-tunnus',
+                                     params: { schema: maaraalaSchema,
+                                               path: path,
+                                               model: maaraalaSchema.model,
+                                               isMaaraala: isMaaraala }}"></div>
+
+
+        <!-- <div data-bind="foreach: subSchemas">
+          <div class="form-entry"
+                data-bind="component: { name: uicomponent,
+                                        params: { schema: $data,
+                                                  path: path,
+                                                  model: model }}"></div> -->
+        </div>
+      </div>
+
+
+      
+
+    </script>
+  </section>
+</body>
+</html>

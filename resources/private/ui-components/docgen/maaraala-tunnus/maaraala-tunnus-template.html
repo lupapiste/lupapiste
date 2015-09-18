@@ -4,19 +4,13 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="maaraala-tunnus-template">
       <span class="form-entry">
-        <div>
-          <label>
-            <input id="" data-bind="checked: isMaaraala" type="checkbox"></input>
-            Kyseessä määräala
-          </label>
-        </div>
-        
+
         <label style="display: block;" class="form-label" data-bind="text: propertyIdLabel"></label>
         <span class="kiintun-and-maaraalatunnus">
           <span class="form-maaraala" data-bind="text: propertyId"></span>
           <span data-bind="component: {name: 'docgen-inline-string',
                                        params: {schema: schema,
-                                                path: path}},
+                                                path: path }},
                            visible: isMaaraala"></div>
         </span>
       </span>

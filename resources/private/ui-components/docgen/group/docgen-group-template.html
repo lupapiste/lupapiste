@@ -5,6 +5,7 @@
     <script type="text/x-jquery-tmpl" id="docgen-group-template">
       <div class="form-group" data-bind="attr: {id: self.groupId}">
         <label class="form-label form-label-group" data-bind="ltext: groupLabel"></label>
+        
         <div data-bind="foreach: subSchemas">
           <span class="form-entry"
                 data-bind="component: { name: uicomponent,

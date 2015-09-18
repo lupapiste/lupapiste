@@ -1002,7 +1002,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildDocgenGroup (subSchema, model, path) {
     var name = subSchema.name;
-    console.log("docgen",model);
+
     var params = {
       path: path,
       subSchema: subSchema,
@@ -1010,6 +1010,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       model: model[name]
     };
     return createComponent("docgen-group", params);
+  }
+
+  function buildPropertyGroup (subSchema, model, path) {
+    var name = subSchema.name;
+
+    var params = {
+      path: path,
+      subSchema: subSchema,
+      documentId: self.docId,
+      model: model[name]
+    };
+    return createComponent("property-group", params);
   }
 
   function buildRadioGroup(subSchema, model, path) {
@@ -1452,6 +1464,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   var builders = {
     group: buildGroup,
     docgenGroup: buildDocgenGroup,
+    propertyGroup: buildPropertyGroup,
     string: buildString,
     hetu: buildString,
     text: buildText,
