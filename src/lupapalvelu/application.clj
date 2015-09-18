@@ -206,7 +206,7 @@
         default-schema-datas (util/assoc-when {}
                                               op-schema-name (:schema-data op-info)
                                               "yleiset-alueet-maksaja" operations/schema-data-yritys-selected
-                                              "tyomaastaVastaava" operations/schema-data-yritys-selected)
+                                              "tyomaastaVastaava" operations/schema-data-henkilo-selected)
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
         make (fn [schema-name]
                (let [schema (schemas/get-schema schema-version schema-name)]

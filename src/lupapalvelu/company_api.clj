@@ -77,9 +77,11 @@
 
 
 (defcommand company-invite-user
-  {:user-roles #{:applicant}
-   :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]
-   :parameters [email]}
+  {:parameters [email]
+   :user-roles #{:applicant}
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
   [{caller :user}]
   (let [user (u/find-user {:email email})
         tokens (c/find-user-invitations (-> caller :company :id))]
@@ -101,6 +103,8 @@
 (defcommand company-add-user
   {:user-roles #{:applicant}
    :parameters [firstName lastName email]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
   [{user :user, {:keys [admin]} :data}]
   (c/add-user! {:firstName firstName :lastName lastName :email email}

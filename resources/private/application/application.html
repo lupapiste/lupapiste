@@ -6,15 +6,10 @@
                 <div class="container">
                     <div class="preamble">
                         <div class="application_summary_info" data-bind="with: application">
-                            <h1><span data-bind="text: address" data-test-id="application-title" class="address"></span>
-                                <a data-bind="click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
-                                   data-test-id="change-location-link"
-                                   class="link-btn">
-                                    <i class="lupicon-pen"></i>
-                                    <span data-bind="ltext: 'edit.address'"></span></a>
-                            </h1>
-
-                            <h2 data-bind="if: primaryOperation">
+                          <h1 data-bind="component: {name: 'address',
+                                         params: { application: $parent,
+                                                   edit: 'edit'}}"></h1> <!-- TODO implement LPK-724 and change: edit: 'edit.address' -->
+                          <h2 data-bind="if: primaryOperation">
                                 <span data-test-id="test-application-primary-operation"
                                       data-bind="ltext: primaryOperationName, attr: {'data-test-primary-operation-id': primaryOperation().name}"></span>
                             </h2>
@@ -369,7 +364,7 @@
                             <h1 data-bind="ltext: 'application.tabInfo'"></h1>
                             <span data-bind="component: {
                                              name: 'help-toggle',
-                                             params: {lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc' }
+                                             params: {lhtml: 'help.' + permitType() + '.applicationInfoDesc' }
                                              }"></span>
                         </div>
                         <div data-bind="if: $root.application.state() == 'draft'">
@@ -378,7 +373,7 @@
                         <div class="operation-info">
 
                             <div data-bind="if: $root.authorization.ok('add-operation')">
-                                <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
+                                <p data-bind="lhtml: 'help.' + permitType() + '.AddOperations'"></p>
                                 <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="positive">
                                     <i class="lupicon-circle-plus"></i>
                                     <span data-bind="ltext: 'application.addOperation'"></span>
@@ -426,7 +421,7 @@
                         <h1 data-bind="ltext: 'application.tabParties'"></h1>
                         <span data-bind="component: {
                                          name: 'help-toggle',
-                                         params: { lhtml: ['help.' + $root.application.permitType() + '.PartiesDesc',
+                                         params: { lhtml: ['help.' + permitType() + '.PartiesDesc',
                                          'company-invite.help']}
                                          }"></span>
                         <div class="application_section">
@@ -1290,7 +1285,9 @@
                             </table>
                         </div>
 
+                        <!-- ko if: $root.foreman.isVisible -->
                         <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
+                        <!-- /ko -->
 
                         <div>
                             <div data-bind="foreach: taskGroups">

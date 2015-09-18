@@ -12,7 +12,7 @@ Mikko creates a new application
   Set Suite Variable  ${appname}  invite${secs}
   Set Suite Variable  ${appnameUC}  INVITE${secs}
   Set Suite Variable  ${propertyId}  753-416-5-5
-  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
+  Create application with state  ${appname}  ${propertyId}  kerrostalo-rivitalo  open
 
 Mikko can see the general invite button and opens invite dialog with it
   Open tab  parties
@@ -71,7 +71,7 @@ Teppo can view application
   Wait Until  Element should be visible  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
   Click element  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
   Deny yes no dialog
-  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  ${appnameUC}
+  Application address should be  ${appnameUC}
   Go to page  applications
 
 Teppo accepts invitation
@@ -113,9 +113,6 @@ Mikko can't invite himself
   Click by test id  application-invite-submit
   Error message is present on invite form
   Invite count is  0
-
-Mikko adds comment so thate application will be visible to admin
-  Open to authorities  Woe to you, Oh Earth and Sea, for the Devil sends the beast with wrath, because he knows the time is short...
 
 Mikko invites Solita
   # Click enabled by test id  company-invite
