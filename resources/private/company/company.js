@@ -353,7 +353,7 @@
     };
 
     self.load = function() {
-      if (self.id()!=undefined) {
+      if (self.id()!=="" && self.id()!=undefined) {
         ajax
           .query("company", {company: self.id(), users: true})
           .pending(self.pending)
@@ -364,7 +364,7 @@
     };
 
     self.show = function(id, tab) {
-      if (self.id()==undefined) {
+      if (id==="" || id==undefined) {
         pageutil.openPage("register-company-account-type");
       } else if (self.id() !== id) { self.clear().id(id).load(); }
       self.tabs.show(tab);
