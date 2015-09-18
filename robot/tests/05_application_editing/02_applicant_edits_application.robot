@@ -39,6 +39,7 @@ Mikko adds three owners to the Uusirakennus document
 
 Owners are visible after page refresh
   Reload Page
+  Application address should be  ${appname}
   Open accordions  info
   Wait Until  Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  4
   Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku

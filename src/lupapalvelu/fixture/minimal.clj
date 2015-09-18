@@ -114,8 +114,8 @@
     :enabled true
     :role "authority"
     :username "velho"
-    :orgAuthz {:297-R #{:authority}
-               :297-YA #{:authority}}
+    :orgAuthz {:297-R #{:authority :approver}
+               :297-YA #{:authority :approver}}
     :firstName "Velho"
     :lastName "Viranomainen"
     :phone "1231234567"
@@ -175,9 +175,9 @@
     :role "authority"
     :enabled true
     :email "sonja.sibbo@sipoo.fi"
-    :orgAuthz {:753-R #{:authority}
-               :753-YA #{:authority}
-               :998-R-TESTI-2 #{:authority}}
+    :orgAuthz {:753-R #{:authority :approver}
+               :753-YA #{:authority :approver}
+               :998-R-TESTI-2 #{:authority :approver}}
     :firstName "Sonja"
     :lastName "Sibbo"
     :phone "03121991"
