@@ -2,6 +2,7 @@
   (:require [clojure.string :as s]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.core :refer [def-]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
@@ -9,7 +10,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.tools :as tools]))
 
-(def task-schemas-version 1)
+(def- task-schemas-version 1)
 
 (def task-name-max-len 80)
 
