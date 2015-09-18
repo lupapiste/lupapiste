@@ -128,5 +128,10 @@
               :assignee (user/get-user-by-id (:id owner))}]
     (flatten (map #(verdict->tasks % meta) (:verdicts application)))))
 
-(defn task-schemas [{schema-version :schema-version}]
-  (filter #(= (:type (:info %)) :task) (vals (schemas/get-schemas schema-version))))
+(defn task-schemas [{:keys [schema-version permitType]}]
+  (let [ignored-schema-name (if (= :YA (keyword permitType)) "task-katselmus" "task-katselmus-ya")]
+    (filter
+      #(and
+         (= :task (-> % :info :type))
+         (not= ignored-schema-name (-> % :info :name)))
+      (vals (schemas/get-schemas schema-version)))))
