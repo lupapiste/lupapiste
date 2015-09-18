@@ -24,14 +24,20 @@
 (def all-but-draft-or-terminal (difference all-states #{:draft} terminal-states))
 (def all-application-states-but-draft-or-terminal (difference all-application-states #{:draft} terminal-states))
 
-(defn all-states-but [drop-states]
-  (difference all-states (set drop-states)))
+(defn- drop-state-set [drop-states]
+  (cond
+    (and (= 1 (count drop-states)) (coll? (first drop-states))) (drop-state-set (first drop-states))
+    (every? keyword? drop-states) (set drop-states)
+    :else (throw (IllegalArgumentException. "Only keyword varargs or a single collection of keywords is supported"))))
 
-(defn all-application-states-but [drop-states]
-  (difference all-application-states (set drop-states)))
+(defn all-states-but [& drop-states]
+  (difference all-states (drop-state-set drop-states)))
 
-(defn all-inforequest-states-but [drop-states]
-  (difference all-inforequest-states (set drop-states)))
+(defn all-application-states-but [& drop-states]
+  (difference all-application-states (drop-state-set drop-states)))
+
+(defn all-inforequest-states-but [& drop-states]
+  (difference all-inforequest-states (drop-state-set drop-states)))
 
 (def
   ^{:doc "Possible state transitions for inforequests.
