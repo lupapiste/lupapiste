@@ -353,12 +353,14 @@
     };
 
     self.load = function() {
-      ajax
-        .query("company", {company: self.id(), users: true})
-        .pending(self.pending)
-        .success(self.update)
-        .call();
-      return self;
+      if (self.id()!=undefined) {
+        ajax
+          .query("company", {company: self.id(), users: true})
+          .pending(self.pending)
+          .success(self.update)
+          .call();
+        return self;
+      }
     };
 
     self.show = function(id, tab) {
