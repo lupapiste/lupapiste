@@ -38,7 +38,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (path.length === 1) {
         return val;
       }
-      return self.getMeta(path.splice(1, path.length - 1), val);
+      //return self.getMeta(path.splice(1, path.length - 1), val);
+      return self.getMeta( _.rest( path ), val );
     }
   };
 
@@ -158,6 +159,20 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         }));
       }
     });
+  }
+
+  self.updateApproval = function( path, flag, cb ) {
+    var verb = flag ? "approve" : "reject";
+    ajax.command( verb + "-doc",
+                {id: self.appId,
+                 doc: self.docId,
+                 path: path.join("."),
+                 collection: self.getCollection()})
+    .success( function( result ) {
+      cb( result.approval );
+      window.Stickyfill.rebuild();
+    })
+    .call();
   }
 
   function makeGroupHelpTextSpan(schema) {
@@ -537,7 +552,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       }
       return false;
     }
-
     var meta = self.getMeta(path);
     var approval = meta ? meta._approved : null;
     var requiresApproval = !approval || modelModifiedSince(model, approval.timestamp);
@@ -977,6 +991,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     opts.remove = resolveRemoveOptions( subSchema, path);
     appendGroupButtons( $(div), path, myModel, opts );
+    $(div).append(createComponent( "group-approval",
+                                   {docModel: self,
+                                    subSchema: subSchema,
+                                    model: myModel,
+                                    path: path,
+                                    remove: opts.remove }))
     //$(div).append(self.makeGroupButtons(path, myModel, opts ));
 
     var label = makeLabel(subSchema, "group", myPath, true);

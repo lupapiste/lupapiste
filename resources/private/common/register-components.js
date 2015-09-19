@@ -50,7 +50,8 @@ jQuery(document).ready(function() {
     {name: "text-field", model: "input-field"},
     {name: "checkbox-field", model: "input-field"},
     {name: "select-field", model: "input-field"},
-    {name: "password-field"}
+    {name: "password-field"},
+    {name: "group-approval"}
   ];
 
   _.forEach(components, function(component) {
