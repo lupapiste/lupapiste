@@ -18,8 +18,13 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.limit = ko.observable(25);
 
-  self.sort = util.getIn(lupapisteApp.models.currentUser, ["applicationFilters", 0, "sort"]) ||
+  self.sort = util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]) ||
               {field: ko.observable("modified"), asc: ko.observable(false)};
+
+  lupapisteApp.services.applicationFiltersService.selected.subscribe(function(selected) {
+    self.sort.field(selected.sort.field());
+    self.sort.asc(selected.sort.asc());
+  });
 
   self.skip = ko.observable(0);
 
