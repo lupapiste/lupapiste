@@ -23,6 +23,8 @@
 
 (def operators (set (map name (keys (ns-publics 'monger.operators)))))
 
+(def default-write-concern WriteConcern/JOURNALED)
+
 (defonce connection (atom nil))
 (defonce ^:private dbs (atom {}))
 
@@ -107,7 +109,7 @@
 (defn update-n
   "Updates data into collection by query, returns a number of updated documents."
   [collection query data & {:as opts}]
-  (let [options (-> (merge {:write-concern WriteConcern/ACKNOWLEDGED} opts) seq flatten)]
+  (let [options (-> (merge {:write-concern default-write-concern} opts) seq flatten)]
     (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) options))))
 
 (defn update
@@ -129,7 +131,7 @@
 
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
-  ([collection data] (insert collection data WriteConcern/ACKNOWLEDGED))
+  ([collection data] (insert collection data default-write-concern))
   ([collection data concern] (mc/insert (get-db) collection (with-_id (remove-null-chars data))) nil))
 
 (defn by-id
@@ -297,7 +299,7 @@
                     (let [[host port] (clojure.string/split servers #":")]
                       [(m/server-address host (Long/parseLong port))])
                     servers)
-          options (m/mongo-options {:write-concern WriteConcern/JOURNALED})]
+          options (m/mongo-options {:write-concern default-write-concern})]
       (if @connection
        (debug "Already connected!")
        (do
