@@ -16,7 +16,8 @@
         <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.isAuthority() -->
         <div class="col-2">
           <label data-bind="ltext: 'application.filter.search.select.saved.filter'"></label>
-          <div data-bind="component: {name: 'autocomplete', params: {options: savedFilters, query: query, optionsText: 'title', selectedOption: lupapisteApp.services.applicationFiltersService.selected, nullable: true}}"></div>
+          <div data-test-id="select-advanced-filter"
+               data-bind="component: {name: 'autocomplete', params: {options: savedFilters, query: query, optionsText: 'title', selectedOption: lupapisteApp.services.applicationFiltersService.selected, nullable: true}}"></div>
         </div>
         <div class="col-1 stacked">
           <br/>
@@ -30,7 +31,7 @@
       </div>
 
       <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.isAuthority() -->
-      <div class="row" data-bind="slider: showAdvancedFilters">
+      <div class="row" data-test-id="advanced-filters" data-bind="slider: showAdvancedFilters">
         <div class="form-grid form-grid--no-border">
           <div class="row row--no-margin">
             <div class="col-2"  data-test-id="handler-filter-component">

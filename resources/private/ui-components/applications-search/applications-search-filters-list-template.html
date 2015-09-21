@@ -10,7 +10,8 @@
                                                                         id: 'new-filter-name',
                                                                         lLabel: 'applications.search.name-and-save-filter',
                                                                         lSubmitTitle: 'applications.search.save-filter',
-                                                                        submitFn: saveFilter}}"></div>
+                                                                        submitFn: saveFilter}}"
+                 data-test-id="new-filter-submit-button"></div>
           </div>
 
           <div class="col-1 stacked">
@@ -24,10 +25,10 @@
 
         </div>
 
-        <div class="row" data-bind="slider: showSavedFilters">
+        <div class="row" data-test-id="saved-filters-list" data-bind="slider: showSavedFilters">
           <!-- ko if savedFilters().length > 0 -->
           <div class="col-4 applications-search-filters-list__filters" data-bind="foreach: savedFilters">
-            <div class="applications-search-filters-list__filter-row">
+            <div class="applications-search-filters-list__filter-row" data-bind="attr: {'data-test-id': 'saved-filter-row-' + $data.title()}">
               <div class="applications-search-filters-list__filter-item">
                 <div class=""
                      data-bind="component: {name: 'text-field', params: {value: $data.title,
@@ -45,7 +46,8 @@
               </div>
 
               <div class="applications-search-filters-list__filter-item">
-                <button class="function" data-bind="click: $data.defaultFilter, css: {active: $data.isDefaultFilter}">
+                <button class="function" data-bind="attr: {'data-test-id': 'set-' + $data.title() + '-as-default-filter'},
+                                                    click: $data.defaultFilter, css: {active: $data.isDefaultFilter}">
                   <i class="lupicon-star"></i>
                   <span data-bind="ltext: 'applications.search.set-default-filter'"></span>
                 </button>
