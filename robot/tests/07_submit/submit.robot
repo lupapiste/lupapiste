@@ -55,9 +55,10 @@ Mikko can not submit application because there are "missing required" items on t
   Open tab  requiredFieldSummary
   Wait Until  Element Should Be Visible  xpath=//i[@class='error-text']
   Element should be disabled  xpath=//*[@data-test-id='application-submit-btn']
-  Page should contain  Lomakkeilla olevat varoitukset
-  Page should contain  Puuttuvat pakolliset tiedot
-  Page should contain  Puuttuvat pakolliset liitteet
+  Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']
+  Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-required-fields']
+  Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-required-attachments']
+  Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[@class='requiredField-line']  6
   ${missingRequiredCount} =  Get Matching Xpath Count  xpath=//*[@class='requiredField-line']
   Set Suite Variable  ${missingRequiredCount}
   Logout
@@ -137,7 +138,8 @@ The filled-up warning field and party info plus the added attachment cause corre
   Wait Until  Element should be visible  xpath=//*[@data-test-id='application-submit-btn']
   ${missingRequiredCountAfter} =  Evaluate  ${missingRequiredCount} - 8
   Wait Until  Xpath Should Match X Times  //*[@class='requiredField-line']  ${missingRequiredCountAfter}
-  Page should not contain  Lomakkeilla olevat varoitukset
+  Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[@class='requiredField-line']  0
+  Element should not be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']
 
 Mikko could submit application after missing stuff have been added
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
