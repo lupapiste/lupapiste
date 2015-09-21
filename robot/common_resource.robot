@@ -3,6 +3,7 @@
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
 Library        Selenium2Library   timeout=10  run_on_failure=Nothing
+Library        String
 
 *** Variables ***
 
@@ -23,19 +24,30 @@ ${CREATE URL}                   ${SERVER}/dev/create
 ${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
 ${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
 ${SELENIUM}                     ${EMPTY}
+${DB COOKIE}                    test_db_name
+${DB PREFIX}                    test_
 
 *** Keywords ***
-
 Browser
-  [Arguments]  ${url}
-  Open browser  ${url}  ${BROWSER}   remote_url=${SELENIUM}
+  [Arguments]
+  ${timestamp}=  Get Time  epoch
+  Set Test Variable  \${dbname}  ${DB PREFIX}${timestamp}
+  # Setting cookies on login page fails on IE8, perhaps bacause of
+  # caching headers:
+  # https://code.google.com/p/selenium/issues/detail?id=6985
+  # Open a static HTML page and set cookie there
+  Open browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
+  Add Cookie  ${DB COOKIE}  ${dbname}
+  Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
+  Log  Cookie: ${DB COOKIE} = ${dbname}
 
 Open browser to login page
-  Browser  ${LOGIN URL}
+  Browser
   Maximize browser window
   Set selenium speed  ${DEFAULT_SPEED}
-  Title should be  Lupapiste
-  Wait Until  Page should contain  Haluan kirjautua palveluun
+  Apply minimal fixture now
+  Set integration proxy on
+  Disable maps
 
 Go to login page
   Go to  ${LOGIN URL}
@@ -153,6 +165,14 @@ Open accordions
   Execute Javascript  $("#application-${tab}-tab div.accordion-toggle.toggled [data-accordion-id]").click();
   Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
   Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
+
+Open accordion by test id
+  [Arguments]  ${testId}
+  ${accordionIsClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@data-test-id="${testId}"]//div[@data-accordion-state="open"]
+  Run keyword If  ${accordionIsClosed}  Execute Javascript  $("div[data-test-id='${testId}'] button.accordion-toggle:not(.toggled)").click();
+
+Positive indicator should be visible
+  Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
 
 #
 # Login stuff
@@ -285,6 +305,9 @@ Naantali logs in
 Kuopio logs in
   Authority-admin logs in  kuopio-r  kuopio  Paakayttaja-R Kuopio
 
+Pena logs in
+  Applicant logs in  pena  pena  Pena Panaani
+
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until  Element should be visible  admin
@@ -371,6 +394,12 @@ Create application the fast way
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
+Create application with state
+  [Arguments]  ${address}  ${propertyId}  ${operation}  ${state}
+  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+  Kill dev-box
+
 Create inforequest the fast way
   [Arguments]  ${address}  ${x}  ${y}   ${propertyId}  ${operation}  ${message}
   Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&operation=${operation}&x=${x}&y=${y}&message=${message}
@@ -448,7 +477,7 @@ Do prepare new request
 Select attachment operation option from dropdown
   [Arguments]  ${optionName}
   Wait until  Element should be visible  xpath=//select[@data-test-id="attachment-operations-select-lower"]
-  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
+  Wait until  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
 
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
@@ -638,12 +667,6 @@ Open application
   Wait until  Element Should Be Visible  application
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
-Open application at index
-  [Arguments]  ${address}  ${propertyId}  ${index}
-  Open the request at index  ${address}  ${index}
-  Wait until  Element Should Be Visible  application
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
-
 Open inforequest
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
@@ -763,22 +786,39 @@ Permit type should be
   [Arguments]  ${type}
   Element Text Should Be  xpath=//span[@data-bind='ltext: permitType']  ${type}
 
+Application address should be
+  [Arguments]  ${address}
+  ${a} =  Convert To Uppercase  ${address}
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//span[@data-test-id='application-title']
+  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  ${a}
+
+Neighbor application address should be
+  [Arguments]  ${address}
+  ${a} =  Convert To Uppercase  ${address}
+  Wait Until  Element Should Be Visible  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']
+  Wait Until  Element text should be  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']  ${a}
+
+
 #
 # Proxy control:
 #
 
+Enable maps
+  Execute Javascript  ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
+  Wait for jQuery
+
 Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
-  Wait for jQuery
-  Execute Javascript  ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
   Wait for jQuery
   Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
   Wait for jQuery
 
+Disable maps
+  Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
+  Wait for jQuery
+
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
-  Wait for jQuery
-  Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
   Wait for jQuery
   Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:true}).call();
   Wait for jQuery
@@ -863,16 +903,16 @@ Fill in new password
 
 Open company user listing
   Click Element  user-name
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
-  Element should be visible  //div[@data-test-id='my-company']
-  Click button  Hallinnoi yrityksen käyttäjiä
+  Open accordion by test id  mypage-company-accordion
+  Wait Until  Element should be visible  //div[@data-test-id='my-company']
+  Click by test id  company-edit-users
   Wait until  Element should be visible  company
 
 Open company details
   Click Element  user-name
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
-  Element should be visible  //div[@data-test-id='my-company']
-  Click button  Muokkaa yrityksen tietoja
+  Open accordion by test id  mypage-company-accordion
+  Wait Until  Element should be visible  //div[@data-test-id='my-company']
+  Click by test id  company-edit-info
   Wait until  Element should be visible  company
 
 

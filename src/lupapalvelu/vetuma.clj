@@ -224,7 +224,7 @@
    "FAILURE" "Kutsun palveleminen ep\u00e4onnistui jostain muusta syyst\u00e4 kuin siit\u00e4, ett\u00e4 taustapalvelu hylk\u00e4si suorittamisen."})
 
 (defn- redirect [cause vetuma-data]
-  {:pre [(keyword? cause) (map? vetuma-data)]}
+  {:pre [(keyword? cause)]}
   (let [url (or (get-in vetuma-data [:paths cause]) (get-in vetuma-data [:paths :error] "/"))]
     (response/redirect url)))
 

@@ -23,6 +23,10 @@
 
     self.data = ko.observable();
     self.application = ko.observable();
+    self.metadata = ko.observable();
+    self.statementId  = ko.observable();
+    self.applicationId  = ko.observable();
+    self.showTosMetadata = ko.observable(false);
 
     self.statuses = ko.observableArray([]);
     self.selectedStatus = ko.observable();
@@ -45,8 +49,16 @@
       if(self.data() && self.data().status && self.data().status() !== value) { self.dirty(true); }
     });
 
+    self.toggleTosMetadata = function() {
+      self.showTosMetadata(!self.showTosMetadata());
+    };
+
     self.clear = function() {
       self.data(null);
+      self.metadata(null);
+      self.statementId(null);
+      self.applicationId(null);
+      self.showTosMetadata(false);
       self.application(null);
       self.statuses([]);
       self.selectedStatus(null);
@@ -60,6 +72,9 @@
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
       if(statement) {
         self.data(ko.mapping.fromJS(statement));
+        self.metadata(statement.metadata);
+        self.statementId(statement.id);
+        self.applicationId(application.id);
 
         if (!self.dirty()) {
           if (statement.status) {
@@ -71,20 +86,16 @@
           self.dirty(false);
         }
 
-        if (authorizationModel.ok("get-possible-statement-statuses")) {
-          ajax
-            .query("get-possible-statement-statuses", {id: applicationId})
-            .success(function(resp) {
-              var sorted = _(resp.data)
-                .map(function(item) { return {id: item, name: loc(["statement", item])}; })
-                .sortBy("name")
-                .value();
-              self.statuses(sorted);
-            })
-            .call();
-        } else if (statement.status) {
-          self.statuses([statement.status]);
-        }
+        ajax
+          .query("get-possible-statement-statuses", {id: applicationId})
+          .success(function(resp) {
+            var sorted = _(resp.data)
+              .map(function(item) { return {id: item, name: loc(["statement", item])}; })
+              .sortBy("name")
+              .value();
+            self.statuses(sorted);
+          })
+          .call();
 
       } else {
         pageutil.openPage("404");

@@ -3,7 +3,7 @@
   position: relative;
   z-index: 5;
   height: auto;
-  margin-bottom: $marginS;
+  margin-bottom: $marginL;
   @include box-sizing(border-box);
 
   div.sticky {
@@ -68,10 +68,7 @@
       width: 100%;
 
       h2 {
-        background: darken($lp-light-grey, 5%);
         color: black;
-        margin: $marginM 0;
-        padding-left: $marginS;
       }
       .authority-accept-fields {
         h2 {

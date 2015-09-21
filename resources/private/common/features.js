@@ -13,10 +13,7 @@ var features = (function() {
     self.refresh = function() {
       ajax.query("features")
         .success(function(d) {
-          var features = _.map(_.filter(d.features, function(feature) { return feature[1]; }),
-                          function(feature) { return feature[0].join("."); });
-          var asMap = _.reduce(features,function(m,f) { m[f] = true; return m;} ,{});
-          self.data(asMap);
+          self.data(d.features);
           hub.send("features-loaded");
         })
         .error(function(e) {
@@ -28,7 +25,7 @@ var features = (function() {
   }
 
   var model = new FeaturesModel();
-  model.refresh();
+  model.data(LUPAPISTE.config.features);
 
   return model;
 

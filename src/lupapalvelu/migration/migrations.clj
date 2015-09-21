@@ -1,6 +1,5 @@
 (ns lupapalvelu.migration.migrations
   (:require [monger.operators :refer :all]
-            [monger.collection :as mc]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
@@ -854,73 +853,6 @@
   {:apply-when (pos? (mongo/count :applications {:authority.lastName {$exists false}}))}
   (mongo/update-n :applications {:authority.lastName {$exists false}} {$set {:authority (:authority domain/application-skeleton)}} :multi true))
 
-(defn- rakennustunnus [property-id building-number]
-  (let [parts (rest (re-matches p/db-property-id-pattern property-id))]
-    (apply format "%s-%s-%s-%s %s" (concat parts [building-number]))))
-
-(defn- resolve-new-national-id? [building-number national-id]
-  (and (= 3 (count building-number)) (ss/blank? national-id)))
-
-(defn- find-national-id [application-id property-id building-number]
-  (let [lookup (rakennustunnus property-id building-number)
-        new-id (mongo/select-one :hki_tunnusvastaavuudet {:RAKENNUSTUNNUS lookup})]
-    (if (util/rakennustunnus? (:VTJ_PRT new-id))
-      new-id
-      (println application-id lookup new-id))))
-
-(defn- building-raki-conversion [application-id building]
-  (let [old-id (:buildingId building)
-        national-id (:nationalId building)
-        property-id (:propertyId building)]
-    (if (and (resolve-new-national-id? old-id national-id) (not (.endsWith property-id "00000000")))
-      (if-let [new-id (find-national-id application-id property-id old-id)]
-        (assoc building
-          :buildingId (:VTJ_PRT new-id)
-          :nationalId (:VTJ_PRT new-id)
-          :localId (:KUNNAN_PYSYVA_RAKNRO new-id))
-        building)
-      building)))
-
-(defn- document-raki-conversion [application-id property-id doc]
-  (let [old-id (get-in doc [:data :buildingId :value])
-        national-id (get-in doc [:data :valtakunnallinenNumero :value])]
-    (if (resolve-new-national-id? old-id national-id)
-      (if-let [new-id (find-national-id application-id property-id old-id)]
-        (-> doc
-          (assoc-in [:data :buildingId :value] (:VTJ_PRT new-id))
-          (assoc-in [:data :valtakunnallinenNumero :value] (:VTJ_PRT new-id)))
-        doc)
-      doc)))
-
-(defn- task-raki-conversion [application-id property-id task]
-  (if (empty? (get-in task [:data :rakennus]))
-    task
-    (update-in task [:data :rakennus]
-     #(reduce
-        (fn [m [k v]]
-          (assoc m k
-            (let [old-id (get-in v [:rakennus :rakennusnro :value])
-                  national-id (get-in v [:rakennus :valtakunnallinenNumero :value])]
-              (if (resolve-new-national-id? old-id national-id) ; task has old style short id but no national id
-                (if-let [new-id (find-national-id application-id property-id old-id)]
-                  (assoc-in v [:rakennus :valtakunnallinenNumero :value] (:VTJ_PRT new-id))
-                  v)
-                v)
-              )))
-        {} %))))
-
-(defmigration helsinki-raki
-  (let [query {$and [{:municipality "091"}
-                     {$or [{"buildings.0" {$exists true}}
-                           {"documents.data.buildingId" {$exists true}}
-                           {"tasks.data.rakennus" {$exists true}}]}]}]
-    (doseq [collection [:applications :submitted-applications]
-            {:keys [id buildings documents tasks propertyId]} (mongo/select collection query)]
-      (mongo/update-by-id collection id
-        {$set {:buildings (map (partial building-raki-conversion id) buildings)
-               :documents (map (partial document-raki-conversion id propertyId) documents)
-               :tasks (map (partial task-raki-conversion id propertyId) tasks)}}))))
-
 (defmigration strip-FI-from-y-tunnus
   {:apply-when (pos? (mongo/count :companies {:y {$regex #"^FI"}}))}
   (doseq [company (mongo/select :companies {:y {$regex #"^FI"}})]
@@ -931,43 +863,47 @@
   (mongo/update-n :companies {:accountType {$exists false}} {$set {:accountType "account15"}} :multi true))
 
 (def invoicing-operator-mapping
-  {"003701274855102 OKOYFIHH" "OKOYFIHH"
-   "0036714377140" "003714377140"
-   "003703575029 " "003703575029"
-   "00370357529" "003703575029"
-   "003703675029" "003703575029"
-   "003708599126/Liaison Technologies Oy" "003708599126"
-   "003710948874 " "003710948874"
-   "003714377140 Enfo" "003714377140"
-   "003714377140ENFO" "003714377140"
-   "003721291126 " "003721291126"
-   "BASWARE (BAWCFI22)" "BAWCFI22"
-   "BAWCF122" "BAWCFI22"
-   "BasWare" "BAWCFI22"
-   "Basware" "BAWCFI22"
-   "CGI / 003703575029" "003703575029"
-   "Danske Bank" "DNBAFIHX"
-   "Enfo" "003714377140"
-   "Enfo Oyj" "003714377140"
-   "Enfo Oyj 003714377140" "003714377140"
-   "Enfo Zender Oy" "003714377140"
-   "Enfo Zender Oy / 003714377140" "003714377140"
-   "Liaison" "003708599126"
-   "Logica" "003703575029"
-   "Nordea (NDEAFIHH)" "NDEAFIHH"
-   "OKOYFIHH " "OKOYFIHH"
-   "Opus Capita Group Oy" "003710948874"
-   "OpusCapita Group Oy" "003710948874"
-   "OpusCapita Group Oy  003710948874" "003710948874"
-   "Tieto Oyj" "003701011385"
-   "dabafihh" "DABAFIHH"
-   "enfo" "003714377140"
-   "logica 00370357502" "003703575029"
-   "003701011385 OKOYFIHH" "OKOYFIHH"
-   "003715482348" "OKOYFIHH"
+  {
+;   "003701274855102 OKOYFIHH" "OKOYFIHH"
+;   "0036714377140" "003714377140"
+;   "003703575029 " "003703575029"
+;   "00370357529" "003703575029"
+;   "003703675029" "003703575029"
+;   "003708599126/Liaison Technologies Oy" "003708599126"
+;   "003710948874 " "003710948874"
+;   "003714377140 Enfo" "003714377140"
+;   "003714377140ENFO" "003714377140"
+;   "003721291126 " "003721291126"
+;   "BASWARE (BAWCFI22)" "BAWCFI22"
+;   "BAWCF122" "BAWCFI22"
+;   "BasWare" "BAWCFI22"
+;   "Basware" "BAWCFI22"
+   "Basware Oyj" "BAWCFI22"
+;   "CGI / 003703575029" "003703575029"
+;   "Danske Bank" "DNBAFIHX"
+;   "Enfo" "003714377140"
+;   "Enfo Oyj" "003714377140"
+;   "Enfo Oyj 003714377140" "003714377140"
+;   "Enfo Zender Oy" "003714377140"
+;   "Enfo Zender Oy / 003714377140" "003714377140"
+;   "Liaison" "003708599126"
+;   "Logica" "003703575029"
+;   "Nordea (NDEAFIHH)" "NDEAFIHH"
+;   "OKOYFIHH " "OKOYFIHH"
+;   "Opus Capita Group Oy" "003710948874"
+   "OpusCapita Group Oy " "003710948874"
+;   "OpusCapita Group Oy" "003710948874"
+;   "OpusCapita Group Oy  003710948874" "003710948874"
+;   "Tieto Oyj" "003701011385"
+;   "dabafihh" "DABAFIHH"
+;   "enfo" "003714377140"
+;   "logica 00370357502" "003703575029"
+   "logica, 00370357502" "003703575029"
+;   "003701011385 OKOYFIHH" "OKOYFIHH"
+;   "003715482348" "OKOYFIHH"
    })
 
-(defmigration convert-invoicing-operator-values-from-documents
+(defmigration convert-invoicing-operator-values-from-documents-v2
   (let [old-op-names (keys invoicing-operator-mapping)
         path         [:data :yritys :verkkolaskutustieto :valittajaTunnus :value]
         query        (->> (cons :documents path)
@@ -982,6 +918,11 @@
           doc))
       {query {$in old-op-names}})))
 
+; To find current unmapped operator values
+(comment
+  (let [cur-vals (mongo/distinct :applications "documents.data.yritys.verkkolaskutustieto.valittajaTunnus.value")]
+    (remove (fn [val] (some #(= val %) (map :name lupapalvelu.document.schemas/e-invoice-operators))) cur-vals)))
+
 (defmigration add-permanent-archive-property-to-organizations
   {:apply-when (pos? (mongo/count :organizations {:permanent-archive-enabled {$exists false}}))}
   (doseq [organization (mongo/select :organizations {:permanent-archive-enabled {$exists false}})]
@@ -991,12 +932,6 @@
 (defmigration unset-company-address2
   {:apply-when (pos? (mongo/count :companies {:address2 {$exists true}}))}
   (mongo/update-n :companies {:address2 {$exists true}} {$unset {:address2 1}} :multi true))
-
-; To find current unmapped operator values
-(comment
-  (let [cur-vals (mc/distinct :applications "documents.data.yritys.verkkolaskutustieto.valittajaTunnus.value")]
-    (remove (fn [val] (some #(= val %) (map :name lupapalvelu.document.schemas/e-invoice-operators))) cur-vals)))
-
 
 (defmigration tutkinto-mapping-in-own-info
   (let [target-keys-set (conj (set (map :name (:body lupapalvelu.document.schemas/koulutusvalinta))) "other")
@@ -1010,7 +945,7 @@
               (mongo/update-by-id :users (:id user) {$set {:degree mapped}}))))))))
 
 (comment
-  (let [cur-vals (mc/distinct :users "degree")]
+  (let [cur-vals (mongo/distinct :users "degree")]
     (remove (fn [val] (some #(= val %) (map :name (:body lupapalvelu.document.schemas/koulutusvalinta)))) cur-vals)))
 
 (defmigration separate-operations-to-primary-and-secondary-operations
@@ -1064,6 +999,111 @@
                 application (mongo/select collection {} {:location 1})]
             (let [{:keys [x y]} (:location application)]
               (mongo/update-n collection {:_id (:id application)} {$set {:location [x y]}})))))
+
+(defn- rakennustunnus [property-id building-number]
+  (let [parts (rest (re-matches p/db-property-id-pattern property-id))]
+    (apply format "%s-%s-%s-%s %s" (concat parts [building-number]))))
+
+(defn- resolve-new-national-id? [building-number national-id]
+  (and (= 3 (count building-number)) (ss/blank? national-id)))
+
+(defn- find-national-id [conversion-table application-id property-id building-number]
+  (let [lookup (rakennustunnus property-id building-number)
+        new-id (mongo/select-one conversion-table {:RAKENNUSTUNNUS lookup})]
+    (if (util/rakennustunnus? (:VTJ_PRT new-id))
+      new-id
+      (println application-id lookup new-id))))
+
+(defn- building-raki-conversion [conversion-table application-id building]
+  (let [old-id (:buildingId building)
+        national-id (:nationalId building)
+        property-id (:propertyId building)]
+    (if (and (resolve-new-national-id? old-id national-id) (not (.endsWith property-id "00000000")))
+      (if-let [new-id (find-national-id conversion-table application-id property-id old-id)]
+        (assoc building
+          :buildingId (:VTJ_PRT new-id)
+          :nationalId (:VTJ_PRT new-id)
+          :localId (:KUNNAN_PYSYVA_RAKNRO new-id))
+        building)
+      building)))
+
+(defn- document-raki-conversion [conversion-table application-id property-id doc]
+  (let [old-id (get-in doc [:data :buildingId :value])
+        national-id (get-in doc [:data :valtakunnallinenNumero :value])]
+    (if (resolve-new-national-id? old-id national-id)
+      (if-let [new-id (find-national-id conversion-table application-id property-id old-id)]
+        (-> doc
+          (assoc-in [:data :buildingId :value] (:VTJ_PRT new-id))
+          (assoc-in [:data :valtakunnallinenNumero :value] (:VTJ_PRT new-id)))
+        doc)
+      doc)))
+
+(defn- task-raki-conversion [conversion-table application-id property-id task]
+  (if (empty? (get-in task [:data :rakennus]))
+    task
+    (update-in task [:data :rakennus]
+     #(reduce
+        (fn [m [k v]]
+          (assoc m k
+            (let [old-id (get-in v [:rakennus :rakennusnro :value])
+                  national-id (get-in v [:rakennus :valtakunnallinenNumero :value])]
+              (if (resolve-new-national-id? old-id national-id) ; task has old style short id but no national id
+                (if-let [new-id (find-national-id conversion-table application-id property-id old-id)]
+                  (assoc-in v [:rakennus :valtakunnallinenNumero :value] (:VTJ_PRT new-id))
+                  v)
+                v)
+              )))
+        {} %))))
+
+(defn- raki-conversion [municipality conversion-table]
+  {:pre [(string? municipality) (string? conversion-table)]}
+  (let [query {$and [{:municipality municipality}
+                     {$or [{"buildings.0" {$exists true}}
+                           {"documents.data.buildingId" {$exists true}}
+                           {"tasks.data.rakennus" {$exists true}}]}]}]
+    (doseq [collection [:applications :submitted-applications]
+            {:keys [id buildings documents tasks propertyId]} (mongo/select collection query)]
+      (mongo/update-by-id collection id
+        {$set {:buildings (map (partial building-raki-conversion conversion-table id) buildings)
+               :documents (map (partial document-raki-conversion conversion-table id propertyId) documents)
+               :tasks (map (partial task-raki-conversion conversion-table id propertyId) tasks)}}))))
+
+(defmigration jarvenpaa-raki (raki-conversion "186" "jarvenpaa_raki"))
+
+
+(defmigration ilmoitusHakemusValitsin-permitSubtype
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]
+          application (mongo/select collection
+                        {$or [{:primaryOperation.name "tyonjohtajan-nimeaminen-v2"}
+                              {:primaryOperation nil, :documents.schema-info.name "tyonjohtaja-v2"}]}
+                        {:documents 1})
+          :let [doc (domain/get-document-by-name application "tyonjohtaja-v2")
+                val (-> doc :data :ilmoitusHakemusValitsin :value)
+                subtype (if (= "ilmoitus" val)
+                          :tyonjohtaja-ilmoitus
+                          :tyonjohtaja-hakemus)]]
+      (mongo/update-n collection
+        {:_id (:id application), :documents {$elemMatch {:id (:id doc)}}}
+        {$set {:permitSubtype subtype}
+         $unset {:documents.$.data.ilmoitusHakemusValitsin 1}}))))
+
+(defn- add-approver-role-for-authority-in-org
+  [[org org-roles]]
+  [org (if (some (partial = "authority") org-roles)
+         (conj org-roles "approver")
+         org-roles)])
+
+(defn- add-approver-roles-for-authority
+  [{org-authz :orgAuthz :as user}]
+  (->> org-authz
+       (map add-approver-role-for-authority-in-org)
+       (into {})
+       (assoc user :orgAuthz)))
+
+(defmigration approver-roles-for-authorities
+  (doseq [authority (mongo/select :users {:role "authority" :orgAuthz {$exists true}})] 
+    (mongo/update-by-id :users (:id authority) (add-approver-roles-for-authority authority))))
 
 ;;
 ;; ****** NOTE! ******

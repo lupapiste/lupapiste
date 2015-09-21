@@ -47,6 +47,10 @@
 (defn get-latest-schema-version []
   (->> @registered-schemas keys (sort >) first))
 
+(defn with-current-schema-info [document]
+  (let [current-info (-> document :schema-info get-schema :info (select-keys immutable-keys))]
+    (update document :schema-info merge current-info)))
+
 ;;
 ;; helpers
 ;;
@@ -354,7 +358,7 @@
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
                            {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}
-                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :required true :type :select :sortBy :displayname :blacklist [:applicant]
+                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :required true :type :select :sortBy :displayname
                             :body [{:name "nimeaminen" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen"}
                                    {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
 
@@ -378,10 +382,6 @@
                    designer-basic
                    {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja}
                    sijaisuus-tyonjohtaja))
-
-(def ilmoitus-hakemus-valitsin {:name "ilmoitusHakemusValitsin" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin._group_label" :type :select :sortBy :displayname :required true :blacklist [:applicant] :layout :single-line
-                                :body [{:name "ilmoitus" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin.ilmoitus"}
-                                       {:name "hakemus" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin.hakemus"}]})
 
 (def kuntaroolikoodi-tyonjohtaja-v2 [{:name "kuntaRoolikoodi"
                                       :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label"
@@ -419,19 +419,19 @@
                                     {:name "kayntienMaara" :type :string :size "s" :unit "kpl" :subtype :number :min 0 :max 9999999}]})
 
 (def hanke-row
-  [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :string :i18nkey "muutHankkeet.luvanNumero"}
-   {:name "katuosoite" :type :string :size "m" :label false :uicomponent :string :i18nkey "muutHankkeet.katuosoite"}
-   {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :string :i18nkey "muutHankkeet.rakennustoimenpide"}
-   {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.kokonaisala"}
-   {:name "vaihe" :type :select :size "t" :label false :uicomponent :select-component :i18nkey "muutHankkeet.vaihe"
+  [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
+   {:name "katuosoite" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
+   {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.rakennustoimenpide"}
+   {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
+   {:name "vaihe" :type :select :size "t" :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe"
     :body [{:name "R" :i18nkey "muutHankkeet.R"}
            {:name "A" :i18nkey "muutHankkeet.A"}
            {:name "K" :i18nkey "muutHankkeet.K"}]}
-   {:name "3kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.3kk"}
-   {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.6kk"}
-   {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.9kk"}
-   {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.12kk"}
-   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :checkbox :whitelist {:roles [:none]
+   {:name "3kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.3kk"}
+   {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.6kk"}
+   {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.9kk"}
+   {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.12kk"}
+   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :docgen-checkbox :whitelist {:roles [:none]
                                                                                                                             :otherwise :disabled}}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
@@ -457,7 +457,6 @@
 (def tyonjohtaja-v2 (body
                       tayta-omat-tiedot-button
                       designer-basic
-                      ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
                       patevyysvaatimusluokka ; Actually vaadittuPatevyysluokka in KRYSP
                       vastattavat-tyotehtavat-tyonjohtaja-v2
@@ -850,6 +849,181 @@
                              {:name "ranta-asemakaava"}
                              {:name "ei kaavaa"}]}])
 
+(def rajankaynti-tyyppi {:name "rajankayntiTyyppi"
+                         :type :select
+                         :required true
+                         :body [{:name "Rajan paikkaa ja rajamerkki\u00e4 koskeva ep\u00e4selvyys (rajank\u00e4ynti)"}
+                                {:name "Ep\u00e4selvyys siit\u00e4, mihin rekisteriyksikk\u00f6\u00f6n jokin alue kuuluu"}
+                                {:name "Rasiteoikeutta ja rasitteen sijaintia koskeva ep\u00e4selvyys"}
+                                {:name "Kiinteist\u00f6n osuus yhteiseen alueeseen tai yhteiseen erityiseen etuuteen ja osuudensuuruus sek\u00e4 kiinteist\u00f6lle kuuluva erityinen etuus"}
+                                {:name "Yhteisen alueen tai yhteisen erityisen etuuden osakaskiinteist\u00f6t ja niille kuuluvien osuuksien suuruudet"}
+                                {:name "Ep\u00e4selv\u00e4n, kadonneen tai turmeltuneen toimitusasiakirjan tai kartan sis\u00e4lt\u00f6"}
+                                {:name "Ristiriitaisista toimitusasiakirjoista tai kartoista johtuva ep\u00e4selvyys"}]})
+
+(def uusi-tai-muutos
+  "Used in maankayton-muutos."
+  {:name "uusiKytkin"
+   :type :radioGroup
+   :required true
+   :default "uusi"
+   :body [{:name "uusi"},
+          {:name "muutos"}]})
+
+;; Kiinteistotoimitukset
+
+(def kt-kiinteistonmuodostus {:name "kiinteistonmuodostus"
+                              :type :group
+                              :repeating true
+                              :approvable true
+                              :removable true
+                              :body [{:name "kiinteistonmuodostusTyyppi"
+                                      :type :select
+                                      :layout :full-width
+                                      :required true
+                                      :body [{:name "halkominen"}
+                                             {:name "kiinteistojen-yhdistaminen"}
+                                             {:name "kiinteistolajin-muutos"}
+                                             {:name "lohkominen-tonttijako"}
+                                             {:name "lohkominen-ohjeellinen"}
+                                             {:name "tilusvaihto"}
+                                             {:name "yht-alueen-osuuksien-siirto"}
+                                             {:name "yleisen-alueen-lohkominen" }]}
+                                     kuvaus]})
+
+;; (def kt-lohkominen [{:name "lohkomisenTyypi"
+;;                      :type :select
+;;                      :required true
+;;                      :body [{:name "Tonttijaon mukainen tontti"}
+;;                             {:name "Ohjeellisen tonttijaon mukainen rakennuspaikka"}]}
+;;                     kuvaus])
+
+(def kt-rasitetoimitus {:name "rasitetoimitus"
+                        :type :group
+                        :repeating true
+                        :approvable true
+                        :removable true
+                        :body [{:name "kayttooikeuslaji"
+                                :type :select
+                                :layout :full-width
+                                :required true
+                                :body [ {:name "Ajoneuvojen pit\u00e4minen"}
+                                        {:name "Ajoneuvojen pit\u00e4minen, venevalkama ja laituri"}
+                                        {:name "Autojen pit\u00e4minen"}
+                                        {:name "Autojen pit\u00e4minen, venevalkama ja -laituri"}
+                                        {:name "Erityinen oikeus, johto tai vastaava"}
+                                        {:name "Erityisesti suojeltavan lajin esiintymispaikka"}
+                                        {:name "Hiekan ottaminen"}
+                                        {:name "Huoltorasite"}
+                                        {:name "J\u00e4teveden johtaminen ja k\u00e4sittely"}
+                                        {:name "J\u00e4tteiden kokoamispaikka"}
+                                        {:name "Johto"}
+                                        {:name "K\u00e4ytt\u00f6rasite"}
+                                        {:name "Kaasujohto"}
+                                        {:name "Kaivoksen apualue"}
+                                        {:name "Kaivosalue"}
+                                        {:name "Kaivoslupa-alue"}
+                                        {:name "Kaivoslupa-alueen apualue"}
+                                        {:name "Kalastuksen kielto lohi- ja siikapitoisessa vesist\u00f6ss\u00e4"}
+                                        {:name "Kalastuksen kielto padon alapuolella"}
+                                        {:name "Kalastusta varten tarvittava alue"}
+                                        {:name "Kalav\u00e4yl\u00e4"}
+                                        {:name "Kiinte\u00e4 muinaisj\u00e4\u00e4nn\u00f6s"}
+                                        {:name "Kiinteist\u00f6jen yhteinen l\u00e4mp\u00f6keskus"}
+                                        {:name "Kiven ottaminen"}
+                                        {:name "Kulkuyhteys asemakaava-alueella"}
+                                        {:name "Kullanhuuhdonta-alue"}
+                                        {:name "L\u00e4mp\u00f6johto"}
+                                        {:name "Laiterasite"}
+                                        {:name "Laituri"}
+                                        {:name "Lastauspaikka"}
+                                        {:name "Lentokent\u00e4n l\u00e4hestymisalue"}
+                                        {:name "Lopetetun kaivoksen vaikutusalue"}
+                                        {:name "Lunastuslain mukainen erityinen oikeus"}
+                                        {:name "Luonnonsuojelualue (Ahvenanmaa)"}
+                                        {:name "Luonnonsuojelualue"}
+                                        {:name "Maa-aineksen ottaminen"}
+                                        {:name "Maakaasujohto"}
+                                        {:name "Maantielain mukainen tieoikeus"}
+                                        {:name "Maantien liit\u00e4nn\u00e4isalue"}
+                                        {:name "Maantien n\u00e4kem\u00e4alue"}
+                                        {:name "Maantien suoja-alue"}
+                                        {:name "Malminetsint\u00e4alue"}
+                                        {:name "Moottorikelkkailureitti"}
+                                        {:name "Oikeus vesivoimaan"}
+                                        {:name "Ojitusrasite"}
+                                        {:name "Padotusalue"}
+                                        {:name "Perustusrasite"}
+                                        {:name "Puhelinjohto"}
+                                        {:name "Puutavaran varastointi"}
+                                        {:name "Puutavaran varastointi"}
+                                        {:name "Radanpit\u00e4j\u00e4ll\u00e4 oikeus laskuojaan"}
+                                        {:name "Radanpit\u00e4j\u00e4ll\u00e4 oikeus tiehen"}
+                                        {:name "Rakennerasite"}
+                                        {:name "Ratalain mukainen rautatieoikeus"}
+                                        {:name "Rautatien liit\u00e4nn\u00e4isalue"}
+                                        {:name "Rautatien n\u00e4kem\u00e4alue"}
+                                        {:name "Rautatien suoja-alue"}
+                                        {:name "S\u00e4hk\u00f6johto"}
+                                        {:name "Sadevesiviem\u00e4ri"}
+                                        {:name "Saven ottaminen"}
+                                        {:name "Sein\u00e4rasite"}
+                                        {:name "Sietorasite"}
+                                        {:name "Sopimus luontoarvokaupasta"}
+                                        {:name "Sopimus m\u00e4\u00e4r\u00e4aikaisesta rauhoittamisesta"}
+                                        {:name "Sopimus ymp\u00e4rist\u00f6tuesta"}
+                                        {:name "Soran ottaminen"}
+                                        {:name "Suojeltu luontotyyppi"}
+                                        {:name "Talousveden johtaminen"}
+                                        {:name "Tienpit\u00e4j\u00e4ll\u00e4 oikeus laskuojaan (laki yleisist\u00e4 teist\u00e4)"}
+                                        {:name "Tienpit\u00e4j\u00e4ll\u00e4 oikeus laskuojaan (maantielaki)"}
+                                        {:name "Tienpitoaineen kuljettaminen"}
+                                        {:name "Tienpitoaineen ottaminen"}
+                                        {:name "Tieoikeus"}
+                                        {:name "Turpeen ottaminen"}
+                                        {:name "Tutka-aseman ymp\u00e4rist\u00f6"}
+                                        {:name "Uimapaikka"}
+                                        {:name "Ulko- ja sis\u00e4saariston v\u00e4linen raja"}
+                                        {:name "Ulkoilureitin lev\u00e4hdyspaikka"}
+                                        {:name "Ulkoilureitti"}
+                                        {:name "Uoma"}
+                                        {:name "V\u00e4est\u00f6suojelua varten tarvittava rakennelma"}
+                                        {:name "V\u00e4h\u00e4isten laitteiden sijoittaminen (Maank\u00e4ytt\u00f6- ja rakennuslaki 163 \u00a7)"}
+                                        {:name "Valtausalue (kaivoslaki 503/1965)"}
+                                        {:name "Valtion retkeilyalueen lis\u00e4alue"}
+                                        {:name "Veden johtaminen maan kuivattamista varten"}
+                                        {:name "Vedenottamo"}
+                                        {:name "Vedenottamon suoja-alue"}
+                                        {:name "Venelaituri"}
+                                        {:name "Venevalkama (kiinteist\u00f6nmuodostamislaki)"}
+                                        {:name "Venevalkama (yksityistielaki)"}
+                                        {:name "Venevalkama ja -laituri"}
+                                        {:name "Venevalkama ja ajoneuvojen pit\u00e4minen"}
+                                        {:name "Venevalkama ja autojen pit\u00e4minen"}
+                                        {:name "Vesijohto"}
+                                        {:name "Vesilain mukainen k\u00e4ytt\u00f6oikeus"}
+                                        {:name "Vesilain mukainen rakennus, laite tai vastaava"}
+                                        {:name "Viem\u00e4rijohto"}
+                                        {:name "Voiman- ja tiedonsiirtolinja"}
+                                        {:name "Voimansiirtolinja"}
+                                        {:name "Ydinj\u00e4tteiden loppusijoituspaikka"}
+                                        {:name "Yhdyskuntateknisten laitteiden sijoittaminen (Maank\u00e4ytt\u00f6- ja rakennuslaki 161 \u00a7)"}
+                                        {:name "Yhteisj\u00e4rjestely (Maank\u00e4ytt\u00f6- ja rakennuslaki 164 \u00a7)"}
+                                        {:name "Yhteisk\u00e4ytt\u00f6alue (Maank\u00e4ytt\u00f6- ja rakennuslaki 75 ja 91 \u00a7)"}
+                                        {:name "Yhteispiha"}
+                                        {:name "Yhteisrasite"}
+                                        {:name "Yksityinen hauta"}
+                                        {:name "Talousveden ottaminen"}]}
+                               {:name "kayttaja"
+                                :required true
+                                :type :string :subtype :kiinteistotunnus
+                                }
+                               {:name "antaja"
+                                :required true
+                                :type :string :subtype :kiinteistotunnus
+                                }
+                               {:name "paattymispvm"
+                                :type :date}]})
+
 
 (defn- approvable-top-level-groups [v]
   (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
@@ -902,11 +1076,15 @@
 
     {:info {:name "maisematyo" :approvable true}
      :body (approvable-top-level-groups maisematyo)}
-    {:info {:name "kiinteistotoimitus" :approvable true}
-     :body (approvable-top-level-groups (body kuvaus))}
-
+    {:info {:name "rajankaynti" :approvable true}
+     :body (approvable-top-level-groups (body rajankaynti-tyyppi kuvaus))}
     {:info {:name "maankayton-muutos" :approvable true}
-     :body (approvable-top-level-groups (body kuvaus))}
+     :body (approvable-top-level-groups (body uusi-tai-muutos kuvaus))}
+    {:info {:name "rasitetoimitus" :approvable true}
+     :body [kt-rasitetoimitus]}
+    {:info {:name "kiinteistonmuodostus" :approvable true}
+     :body [kt-kiinteistonmuodostus]}
+
 
     {:info {:name "hakija"
             :i18name "osapuoli"

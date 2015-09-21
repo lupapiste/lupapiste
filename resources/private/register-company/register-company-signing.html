@@ -27,7 +27,7 @@
         <a data-bind="ltext: 'register.company.sign.download-contract', attr: { href: termsDocumentLink }" target="_blank"/>
 
         <div class="register-terms">
-          <input id="termsAccepted" type="checkbox" data-bind="checked: termsAccepted" class="form-input"/>
+          <input id="termsAccepted" type="checkbox" data-bind="checked: termsAccepted" class="form-input checkbox"/>
           <label for="termsAccepted" data-bind="ltext: 'register.company.sign.terms-accepted'" class="form-label-checkbox"/>
         </div>
         <span data-bind="component: {name: 'company-registration-init', params: { processIdCallback: initSignCallback,

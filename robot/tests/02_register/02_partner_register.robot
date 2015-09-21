@@ -32,7 +32,7 @@ Federated user activates account via VETUMA
   [Tags]  integration  ie8
   Authenticate via Osuuspankki via Vetuma  vetuma-linking-init
   Wait until  Submit is disabled
-  Textfield should contain  xpath=//input[@data-test-id='link-account-street']  Sepänkatu 11 A 5
+  Wait until  Textfield should contain  xpath=//input[@data-test-id='link-account-street']  Sepänkatu 11 A 5
   Textfield should contain  xpath=//input[@data-test-id='link-account-zip']  70100
   Textfield should contain  xpath=//input[@data-test-id='link-account-city']  KUOPIO
   Textfield should contain  xpath=//input[@data-test-id='link-account-phone']  040

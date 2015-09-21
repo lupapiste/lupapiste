@@ -6,10 +6,10 @@
 
         <h2>Featuret</h2>
 
-        <ul data-bind="foreach: features">
+        <ul data-bind="foreach: _.keys(features())">
           <li>
-            <span data-bind="text: $data[0].join('.'),
-                             attr: {'style': 'color: ' + ($data[1] ? 'green' : 'red')}">
+            <span data-bind="text: $data,
+                             attr: {'style': 'color: green'}">
             </span>
           </li>
         </ul>

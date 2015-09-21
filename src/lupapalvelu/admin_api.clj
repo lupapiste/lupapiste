@@ -1,6 +1,6 @@
 (ns lupapalvelu.admin-api
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf]]
-            [monger.collection :as mc]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [defraw]]
             [sade.core :refer [now]]
             [lupapalvelu.domain :as domain]
@@ -41,6 +41,6 @@
   {:user-roles #{:admin}}
   [_]
   {:status 200
-   :body (clojure.string/join "\n" (mc/distinct :users :username {:role "authority"}))
+   :body (clojure.string/join "\n" (mongo/distinct :users :username {:role "authority"}))
    :headers {"Content-Type" "text/plain"
              "Cache-Control" "no-cache"}})

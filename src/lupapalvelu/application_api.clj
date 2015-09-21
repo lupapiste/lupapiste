@@ -21,8 +21,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.ktj :as ktj]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.wfs :as wfs]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.operations :as operations]
@@ -64,19 +64,19 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-roles
    :org-authz-roles  action/reader-org-authz-roles}
-  [{app :application user :user}]
-  (if app
-    (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
+  [{:keys [application user]}]
+  (if application
+    (let [app (assoc application :allowedAttachmentTypes (attachment/get-attachment-types-for-application application))]
       (ok :application (a/post-process-app app user)
           :authorities (if (user/authority? user)
                          (map #(select-keys % [:id :firstName :lastName]) (find-authorities-in-applications-organization app))
                          [])
-          :permitSubtypes (permit/permit-subtypes (:permitType app))))
+          :permitSubtypes (a/resolve-valid-subtypes app)))
     (fail :error.not-found)))
 
 (defquery application-authorities
   {:user-roles #{:authority}
-   :states     states/all-but-draft-or-terminal ; the same as assign-application
+   :states     (states/all-states-but :draft)
    :parameters [:id]}
   [{application :application}]
   (let [authorities (find-authorities-in-applications-organization application)]
@@ -88,7 +88,7 @@
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
     (when-let [rakennuspaikka (domain/get-document-by-type application :location)]
-      (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
+      (when-let [ktj-tiedot (wfs/rekisteritiedot-xml (:propertyId application))]
         (let [updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
                        [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
                        [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
@@ -140,7 +140,7 @@
 (defcommand assign-application
   {:parameters [:id assigneeId]
    :user-roles #{:authority}
-   :states     states/all-but-draft-or-terminal}
+   :states     (states/all-states-but :draft :canceled)}
   [{:keys [user created application] :as command}]
   (let [assignee (util/find-by-id assigneeId (find-authorities-in-applications-organization application))]
     (if (or assignee (ss/blank? assigneeId))
@@ -243,7 +243,7 @@
                                             meta-fields/enrich-with-link-permit-data
                                             (dissoc :id)
                                             (assoc :_id (:id application))))
-    (catch com.mongodb.MongoException$DuplicateKey e
+    (catch com.mongodb.DuplicateKeyException e
       ; This is ok. Only the first submit is saved.
       )))
 
@@ -411,24 +411,24 @@
     (when-not new-primary-op
       (fail! :error.unknown-operation))
     (update-application command {$set {:primaryOperation new-primary-op
-                                       :secondaryOperations new-secondary-ops}})))
+                                       :secondaryOperations new-secondary-ops}})
+    (ok)))
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :user-roles #{:applicant :authority}
    :states     states/pre-sent-application-states
-   :pre-checks [permit/validate-permit-has-subtypes
+   :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
+   :pre-checks [a/validate-has-subtypes
+                a/pre-check-permit-subtype
                 a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
-  (if-let [validation-errors (permit/is-valid-subtype (keyword permitSubtype) application)]
-    validation-errors
-    (update-application command
-                        {$set {:permitSubtype permitSubtype
-                               :modified      created}})))
+  (update-application command {$set {:permitSubtype permitSubtype, :modified created}})
+  (ok))
 
 (defn authority-if-post-verdict-state [{user :user} {state :state}]
   (when-not (or (user/authority? user)
-                (contains? states/pre-verdict-states (keyword state)))
+                (states/pre-verdict-states (keyword state)))
     (fail :error.unauthorized)))
 
 (defcommand change-location

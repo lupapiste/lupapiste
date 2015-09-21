@@ -13,7 +13,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.security :as security]
             [lupapalvelu.states :as states]
@@ -88,7 +88,7 @@
 
 (defn- neighbor-invite-model [{{token :token neighbor-id :neighborId expires :expires} :data {:keys [id address municipality neighbors]} :application} _ recipient]
   (letfn [(link-fn [lang] (str (env/value :host) "/app/" (name lang) "/neighbor/" id "/" neighbor-id "/" token))]
-    {:name    (get-in neighbors [(keyword neighbor-id) :neighbor :owner :name])
+    {:name    (get-in (util/find-by-id neighbor-id neighbors) [:owner :name])
      :address address
      :expires expires
      :city-fi (i18n/localize :fi "municipality" municipality)
