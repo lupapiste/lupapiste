@@ -68,7 +68,7 @@
   [{:keys [application] :as command}]
   (let [organization (get application :organization)
         tosFunction (get application :tosFunction)
-        metadata (when (seq tosFunction) (t/metadata-for-document organization tosFunction "päätös"))
+        metadata (when (seq tosFunction) (t/metadata-for-document organization tosFunction "p\u00e4\u00e4t\u00f6s"))
         blank-verdict (cond-> (domain/->paatos {:draft true})
                               (seq metadata) (assoc :metadata metadata))]
     (update-application command {$push {:verdicts blank-verdict}})
