@@ -789,28 +789,33 @@
                                muutostyonlaji
                                olemassaoleva-rakennus-muutos))
 
-(def rakennuksen-laajentaminen (body [{:name "laajennuksen-tiedot"
-                                       :type :group
-                                       :body [{:name "perusparannuskytkin" :type :checkbox}
-                                              {:name "mitat"
-                                               :type :group
-                                               :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
-                                                      {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                                                      {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                                                      {:name "huoneistoala" :type :group :repeating true :removable true
-                                                       :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                                                              {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname
-                                                               :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
-                                                                      {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}
-                                                                      {:name "hoitotilaa"}
-                                                                      {:name "toimisto- ja hallintotilaa"}
-                                                                      {:name "kokoontumistilaa"}
-                                                                      {:name "opetustilaa"}
-                                                                      {:name "tuotantotilaa(teollisuus)"}
-                                                                      {:name "varastotilaa"}
-                                                                      {:name "muuta huoneistoalaan kuuluvaa tilaa"}
-                                                                      {:name "ei tiedossa"}]}]}]}]}]
+(def laajentaminen [{:name "laajennuksen-tiedot"
+                     :type :group
+                     :body [{:name "perusparannuskytkin" :type :checkbox}
+                            {:name "mitat"
+                             :type :group
+                             :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
+                                    {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                                    {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                                    {:name "huoneistoala" :type :group :repeating true :removable true
+                                     :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                                            {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname
+                                             :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
+                                                    {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}
+                                                    {:name "hoitotilaa"}
+                                                    {:name "toimisto- ja hallintotilaa"}
+                                                    {:name "kokoontumistilaa"}
+                                                    {:name "opetustilaa"}
+                                                    {:name "tuotantotilaa(teollisuus)"}
+                                                    {:name "varastotilaa"}
+                                                    {:name "muuta huoneistoalaan kuuluvaa tilaa"}
+                                                    {:name "ei tiedossa"}]}]}]}]}])
+
+(def rakennuksen-laajentaminen (body laajentaminen
                                      olemassaoleva-rakennus))
+
+(def rakennuksen-laajentaminen-ei-huoneistoja (body laajentaminen
+                                                    olemassaoleva-rakennus-ei-huoneistoja))
 
 (def purku (body
              {:name "poistumanSyy" :type :select :sortBy :displayname
@@ -1062,6 +1067,9 @@
 
    {:info {:name "rakennuksen-laajentaminen" :approvable true}
     :body (approvable-top-level-groups rakennuksen-laajentaminen)}
+
+   {:info {:name "rakennuksen-laajentaminen-ei-huoneistoja" :i18name "rakennuksen-laajentaminen" :approvable true}
+    :body (approvable-top-level-groups rakennuksen-laajentaminen-ei-huoneistoja)}
 
    {:info {:name "purkaminen" :i18name "purku" :approvable true}
     :body (approvable-top-level-groups purku)}
