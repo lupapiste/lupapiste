@@ -46,8 +46,6 @@ LUPAPISTE.ModalDatepickerModel = function() {
     }
 
     ajax.command(self.config.commandName, commandData)
-      .processing(self.processing)
-      .pending(self.pending)
       .success(function(resp) {
         repository.load(self.appId);
         LUPAPISTE.ModalDialog.close();

@@ -23,7 +23,7 @@
 
     (facts "by default 4 attachments exist"
       (let [application (query-application pena application-id)
-            op-id (-> application :operations first :id)]
+            op-id (-> application :primaryOperation :id)]
         (fact "the attachments are related to operation 'kerrostalo-rivitalo'"
           (count (get-attachments-by-operation application op-id)) => 4)
         (fact "the attachments have 'required', 'notNeeded' and 'requestedByAuthority' flags correctly set"
@@ -184,11 +184,27 @@
 
             (fact "Applicant cannot delete attachment that is required"
               (command pena :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => (contains {:ok false :text "error.unauthorized"}))
+           )))
 
-            (fact "Authority deletes attachment"
-              (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
-              (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?)
-           ))))))
+      (let [versioned-attachment (first (:attachments (query-application pena application-id)))]
+        (fact "Pena upload new version"
+          (upload-attachment pena application-id versioned-attachment true)) 
+        (fact "Pena signs the attachment version"
+          (command pena :sign-attachments :id application-id :attachmentIds [(:id versioned-attachment)] :password "pena") => ok?)
+        (let [signed-attachment (get-attachment-by-id pena application-id (:id versioned-attachment))]
+          
+          (fact "Attachment is signed"
+            (count (:signatures signed-attachment)) => 1)
+
+          (fact "Delete version and its signature"
+            (command veikko :delete-attachment-version :id application-id
+                     :attachmentId (:id versioned-attachment) :fileId (get-in signed-attachment [:latestVersion :fileId])) => ok?
+                     (fact (count (:signatures (get-attachment-by-id veikko application-id (:id versioned-attachment)))) => 0))
+
+          (fact "Authority deletes attachment"
+            (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
+            (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?))
+          ))))
 
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
@@ -197,6 +213,26 @@
     (:organization application) => "753-YA"
     pena => (allowed? :pdf-export :id application-id)
     (raw pena "pdf-export" :id application-id) => http200?))
+
+(facts "Rotate PDF"
+  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+        application-id (:id application)
+        attachment1 (first (:attachments application))
+        attachment2 (last (:attachments application))]
+
+    attachment1 =not=> attachment2
+
+    (upload-attachment sonja application-id attachment1 true :filename "dev-resources/test-pdf.pdf")
+    (upload-attachment sonja application-id attachment2 true :filename "dev-resources/test-attachment.txt")
+
+    (fact "Can rotate PDF"
+      (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 90) => ok?)
+
+    (fact "Can not rotate PDF 0 degrees"
+      (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 0) => fail?)
+
+    (fact "Can not rotate txt"
+      (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment2) :rotation 90) => fail?)))
 
 (defn- poll-job [id version limit]
   (when (pos? limit)
@@ -209,7 +245,7 @@
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
         application-id (:id application)
         attachment (first (:attachments application))
-        _ (upload-attachment sonja application-id attachment true :filename "dev-resources/VRK_Virhetarkistukset.pdf")
+        _ (upload-attachment sonja application-id attachment true :filename "dev-resources/test-pdf.pdf")
         application (query-application sonja application-id)
         comments (:comments application)
         {job :job :as resp} (command

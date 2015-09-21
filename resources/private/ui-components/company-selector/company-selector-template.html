@@ -2,7 +2,7 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/html" id="company-selector-template">
+    <script type="text/x-jquery-tmpl" id="company-selector-template">
       <div>
         <label class="form-label form-label-select"
                for="company-select"
@@ -14,6 +14,7 @@
                            optionsValue: 'id',
                            optionsCaption: loc('choose'),
                            optionsAfterRender: setOptionDisable,
+                           enable: authorization.ok('set-company-to-document'),
                            value: selected">
         </select>
         <span data-bind="component: {name: 'company-invite'}"></span>

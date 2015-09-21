@@ -183,7 +183,7 @@
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
 
-        operation-name-key (-> application :operations first :name keyword)
+        operation-name-key (-> application :primaryOperation :name keyword)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
 
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
@@ -294,7 +294,7 @@
                    :yleinenAlueAsiatieto (permits application)}})
 
 
-(defn jatkoaika-to-canonical [application lang]
+(defn jatkoaika-to-canonical
   "Transforms continuation period application mongodb-document to canonical model."
   [application lang]
   (let [application (tools/unwrapped application)
@@ -323,7 +323,7 @@
         vastuuhenkilotieto (vec (filter :Vastuuhenkilo [;hakija
                                                         maksaja]))
         hankkeen-kuvaus (-> documents-by-type :hankkeen-kuvaus-jatkoaika first :data :kuvaus)
-        lisaaikatieto (when alku-pvm loppu-pvm hankkeen-kuvaus
+        lisaaikatieto (when alku-pvm
                         {:Lisaaika {:alkuPvm alku-pvm
                                     :loppuPvm loppu-pvm
                                     :perustelu hankkeen-kuvaus}})

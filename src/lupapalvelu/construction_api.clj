@@ -5,6 +5,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [lupapalvelu.state-machine :as state-machine]
             [sade.core :refer :all]
             [sade.util :as util]))
 
@@ -16,7 +17,7 @@
 (defcommand inform-construction-started
   {:parameters ["id" startedTimestampStr]
    :user-roles #{:applicant :authority}
-   :states     [:verdictGiven]
+   :states     #{:verdictGiven}
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
@@ -34,7 +35,7 @@
        {:parameters ["id" buildingIndex startedDate lang]
         ; rakentamisen aikaisen toimminan yhteydessa korjataan oikeae
         ;:user-roles ???
-        :states     [:verdictGiven :constructionStarted]
+        :states     #{:verdictGiven :constructionStarted}
         :notified   true
         :pre-checks [(permit/validate-permit-type-is permit/R)]
         :input-validators [(partial action/non-blank-parameters [:buildingIndex :startedDate :lang])]}
@@ -63,10 +64,11 @@
 
 (defcommand inform-construction-ready
   {:parameters ["id" readyTimestampStr lang]
-   :user-roles #{:applicant :authority}
-   :states     [:constructionStarted]
+   :user-roles #{:authority}
+   :states     #{:constructionStarted}
    :on-success (notify :application-state-change)
-   :pre-checks [(permit/validate-permit-type-is permit/YA)]
+   :pre-checks [(permit/validate-permit-type-is permit/YA)
+                (partial state-machine/validate-state-transition :closed)]
    :input-validators [(partial action/non-blank-parameters [:readyTimestampStr])]}
   [{:keys [user created application] :as command}]
   (let [timestamp     (util/to-millis-from-local-date-string readyTimestampStr)

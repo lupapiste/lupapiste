@@ -105,6 +105,7 @@
                                       :repeating true
                                       :version 1
                                       :type "party"
+                                      :subtype "maksaja"
                                       :order 6}
                         :data {:_selected {:value "yritys"}
                                :laskuviite {:value "LVI99997"}
@@ -171,14 +172,14 @@
              :type "owner",
              :role "owner",
              :id "777777777777777777000020"}]
-     :location {:x 404174.92749023
-                :y 6690687.4923706}
+     :location [404174.92749023 6690687.4923706]
      :statements ctc/statements
      :organization "753-P"
      :title "S\u00f6derkullantie 146"
-     :operations [{:id "523844e1da063788effc1c56"
-                   :name "poikkeamis"
-                   :created 1379419361123}]
+     :primaryOperation {:id "523844e1da063788effc1c56"
+                        :name "poikkeamis"
+                        :created 1379419361123}
+     :secondaryOperations []
      :infoRequest false
      :opened 1379422973832
      :created 1379419361123

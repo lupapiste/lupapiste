@@ -18,14 +18,15 @@
   (query pena :actions) => unauthorized?
   (query sonja :actions) => unauthorized?)
 
-(let [resp  (create-app mikko :propertyId sipoo-property-id)
-      id    (:id resp)]
+(let [{id :id :as resp}  (create-app mikko :propertyId sipoo-property-id)]
   (fact "Mikko must be able to create an application!"
     resp => ok?)
 
   (let [resp  (query mikko :application :id id)
         application (:application resp)
-        hakija (domain/get-document-by-name application "hakija")]
+        hakija (domain/get-document-by-name application "hakija-r")]
+
+    hakija => map?
 
     (facts "Mikko can see his application!"
       (:ok resp)

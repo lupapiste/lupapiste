@@ -1,5 +1,6 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
+            [clojure.java.io :as io]
             [monger.operators :refer :all]
             [sade.util :as util]
             [sade.env :as env]
@@ -7,26 +8,41 @@
             [sade.core :refer :all]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
+            [lupapalvelu.states :as states]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
-            [clojure.java.io :as io])
+            [lupapiste-commons.attachment-types :as attachment-types]
+            [lupapalvelu.preview :as preview]
+            [lupapalvelu.pdf-conversion :as pdf-conversion])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File OutputStream FilterInputStream]))
+           [java.io File FilterInputStream]
+           [org.apache.commons.io FilenameUtils]
+           [java.util.concurrent Executors ThreadFactory]))
+
+(defn thread-factory []
+  (let [security-manager (System/getSecurityManager)
+        thread-group (if security-manager
+                       (.getThreadGroup security-manager)
+                       (.getThreadGroup (Thread/currentThread)))]
+    (reify
+      ThreadFactory
+      (newThread [this runnable]
+        (doto (Thread. thread-group runnable "preview-worker")
+          (.setDaemon true)
+          (.setPriority Thread/NORM_PRIORITY))))))
+
+(defonce preview-threadpool (Executors/newFixedThreadPool 1 (thread-factory)))
 
 ;;
 ;; Metadata
 ;;
 
-(def attachment-types-osapuoli
-  [:cv
-   :patevyystodistus
-   :paa_ja_rakennussuunnittelijan_tiedot
-   :tutkintotodistus])
+(def attachment-types-osapuoli attachment-types/osapuolet)
 
 (def attachment-meta-types [:size :scale :op :contents])
 
@@ -53,221 +69,17 @@
    :B5
    :muu])
 
-(def- attachment-types-R
-  [:hakija [:osakeyhtion_perustamiskirja
-            :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta
-            :ote_kauppa_ja_yhdistysrekisterista
-            :valtakirja]
-   :rakennuspaikan_hallinta [:jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta
-                             :jaljennos_myonnetyista_lainhuudoista
-                             :jaljennos_perunkirjasta
-                             :jaljennos_vuokrasopimuksesta
-                             :ote_asunto-osakeyhtion_kokouksen_poytakirjasta
-                             :rasitesopimus
-                             :rasitustodistus
-                             :todistus_erityisoikeuden_kirjaamisesta
-                             :kiinteiston_lohkominen]
-   :rakennuspaikka [:kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma
-                    :ote_alueen_peruskartasta
-                    :ote_asemakaavasta_jos_asemakaava_alueella
-                    :ote_kiinteistorekisteristerista
-                    :ote_ranta-asemakaavasta
-                    :ote_yleiskaavasta
-                    :rakennusoikeuslaskelma
-                    :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista
-                    :perustamistapalausunto
-                    :tonttikartta_tarvittaessa]
-   :paapiirustus [:asemapiirros
-                  :paapiirustus
-                  :pohjapiirros
-                  :leikkauspiirros
-                  :julkisivupiirros
-                  :yhdistelmapiirros]
-   :ennakkoluvat_ja_lausunnot [:elyn_tai_kunnan_poikkeamapaatos
-                               :naapurien_suostumukset
-                               :selvitys_naapurien_kuulemisesta
-                               :suunnittelutarveratkaisu
-                               :ymparistolupa]
+(def- attachment-types-R attachment-types/Rakennusluvat)
 
-   :rakentamisen_aikaiset [:erityissuunnitelma]
-   :osapuolet attachment-types-osapuoli
-   :muut [:energiataloudellinen_selvitys
-          :energiatodistus
-          :hulevesisuunnitelma
-          :ilmanvaihtosuunnitelma
-          :ilmoitus_vaestonsuojasta
-          :jatevesijarjestelman_rakennustapaseloste
-          :julkisivujen_varityssuunnitelma
-          :kalliorakentamistekninen_suunnitelma
-          :katselmuksen_tai_tarkastuksen_poytakirja
-          :kerrosalaselvitys
-          :liikkumis_ja_esteettomyysselvitys
-          :lomarakennuksen_muutos_asuinrakennukseksi_selvitys_maaraysten_toteutumisesta
-          :lammityslaitesuunnitelma
-          :merkki_ja_turvavalaistussuunnitelma
-          :palotekninen_selvitys
-          :paloturvallisuusselvitys
-          :paloturvallisuussuunnitelma
-          :piha_tai_istutussuunnitelma
-          :pohjaveden_hallintasuunnitelma
-          :radontekninen_suunnitelma
-          :rakennesuunnitelma
-          :rakennetapaselvitys
-          :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo
-          :rakennuksen_tietomalli_BIM
-          :rakennusautomaatiosuunnitelma
-          :riskianalyysi
-          :sammutusautomatiikkasuunnitelma
-          :selvitys_kiinteiston_jatehuollon_jarjestamisesta
-          :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
-          :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
-          :selvitys_rakennuksen_aaniteknisesta_toimivuudesta
-          :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta
-          :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo
-          :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
-          :selvitys_rakennuspaikan_korkeusasemasta
-          :selvitys_rakennuspaikan_terveellisyydesta
-          :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta
-          :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista
-          :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
-          :sopimusjaljennos
-          :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta
-          :vaestonsuojasuunnitelma
-          :valaistussuunnitelma
-          :valokuva
-          :vesi_ja_viemariliitoslausunto_tai_kartta
-          :vesikattopiirustus
-          :ympariston_tietomalli_BIM
-          :aitapiirustus
-          :haittaaineet
-          :hankeselvitys
-          :ikkunadetaljit
-          :karttaaineisto
-          :kokoontumishuoneisto
-          :korjausrakentamisen_energiaselvitys
-          :maalampo_rakennettavuusselvitys
-          :mainoslaitesuunnitelma
-          :turvallisuusselvitys
-          :yhteistilat
-          :luonnos
-          :muu]])
+(def- attachment-types-YA attachment-types/YleistenAlueidenLuvat)
 
-(def- attachment-types-YA
-  [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
-                    :asemapiirros
-                    :liitoslausunto
-                    :poikkileikkaus
-                    :rakennuspiirros
-                    :suunnitelmakartta
-                    :tieto-kaivupaikkaan-liittyvista-johtotiedoista
-                    :tilapainen-liikennejarjestelysuunnitelma
-                    :tyyppiratkaisu
-                    :tyoalueen-kuvaus
-                    :valokuva
-                    :valtakirja]
-   :osapuolet attachment-types-osapuoli
-   ;; This is needed for statement attachments to work.
-   :muut [:muu]])
+(def- attachment-types-YI attachment-types/Ymparistoilmoitukset)
 
-(def- attachment-types-YI
-  [:kartat [:kartta-melun-ja-tarinan-leviamisesta]
-   :muut [:muu]])
+(def- attachment-types-YL attachment-types/Ymparistolupa)
 
-(def- attachment-types-YL
-   [:laitoksen_tiedot [:voimassa_olevat_ymparistolupa_vesilupa
-                       :muut_paatokset_sopimukset
-                       :selvitys_ymparistovahinkovakuutuksesta]
-    :laitosalue_sen_ymparisto [:tiedot_kiinteistoista
-                               :tiedot_toiminnan_sijaintipaikasta
-                               :kaavaote
-                               :selvitys_pohjavesialueesta
-                               :selvitys_rajanaapureista
-                               :ote_asemakaavasta
-                               :ote_yleiskaavasta]
-    :laitoksen_toiminta [:yleiskuvaus_toiminnasta
-                         :yleisolle_tarkoitettu_tiivistelma
-                         :selvitys_tuotannosta
-                         :tiedot_toiminnan_suunnitellusta
-                         :tiedot_raaka-aineista
-                         :tiedot_energian
-                         :energiansaastosopimus
-                         :vedenhankinta_viemarointi
-                         :arvio_ymparistoriskeista
-                         :liikenne_liikennejarjestelyt
-                         :selvitys_ymparistoasioiden_hallintajarjestelmasta]
-    :ymparistokuormitus [:paastot_vesistoon_viemariin
-                         :paastot_ilmaan
-                         :paastot_maaperaan_pohjaveteen
-                         :tiedot_pilaantuneesta_maaperasta
-                         :melupaastot_tarina
-                         :selvitys_paastojen_vahentamisesta_puhdistamisesta
-                         :syntyvat_jatteet
-                         :selvitys_jatteiden_maaran_haitallisuuden_vahentamiseksi
-                         :kaatopaikkaa_koskevan_lupahakemuksen_lisatiedot
-                         :selvitys_vakavaraisuudesta_vakuudesta
-                         :jatteen_hyodyntamista_kasittelya_koskevan_toiminnan_lisatiedot]
-    :paras_tekniikka_kaytanto [:arvio_tekniikan_soveltamisesta
-                               :arvio_paastojen_vahentamistoimien_ristikkaisvaikutuksista
-                               :arvio_kaytannon_soveltamisesta]
-    :vaikutukset_ymparistoon [:arvio_vaikutuksista_yleiseen_viihtyvyyteen_ihmisten_terveyteen
-                              :arvio_vaikutuksista_luontoon_luonnonsuojeluarvoihin_rakennettuun_ymparistoon
-                              :arvio_vaikutuksista_vesistoon_sen_kayttoon
-                              :arvio_ilmaan_joutuvien_paastojen_vaikutuksista
-                              :arvio_vaikutuksista_maaperaan_pohjaveteen
-                              :arvio_melun_tarinan_vaikutuksista
-                              :arvio_ymparistovaikutuksista]
-    :tarkkailu_raportointi [:kayttotarkkailu
-                            :paastotarkkailu
-                            :vaikutustarkkailu
-                            :mittausmenetelmat_laitteet_laskentamenetelmat_laadunvarmistus
-                            :raportointi_tarkkailuohjelmat]
-    :vahinkoarvio_estavat_toimenpiteet [:toimenpiteet_vesistoon_kohdistuvien_vahinkojen_ehkaisemiseksi
-                                        :korvausestiys_vesistoon_kohdistuvista_vahingoista
-                                        :toimenpiteet_muiden_kuin_vesistovahinkojen_ehkaisemiseksi]
-    :muut [:asemapiirros_prosessien_paastolahteiden_sijainti
-           :ote_alueen_peruskartasta_sijainti_paastolahteet_olennaiset_kohteet
-           :prosessikaavio_yksikkoprosessit_paastolahteet
-           :selvitys_suuronnettomuuden_vaaran_arvioimiseksi
-           :muu]])
+(def- attachment-types-MAL attachment-types/Maa-ainesluvat)
 
-(def- attachment-types-MAL
-  [:hakija [:valtakirja
-            :ottamisalueen_omistus_hallintaoikeus]
-   :ottamisalue [:ote_alueen_peruskartasta
-                 :ote_yleiskaavasta
-                 :ote_asemakaavasta
-                 :naapurit]
-   :erityissuunnitelmat [:yvalain_mukainen_arviointiselostus
-                         :luonnonsuojelulain_arviointi
-                         :kivenmurskaamo
-                         :selvitys_jalkihoitotoimenpiteista
-                         :ottamissuunnitelma
-                         :kaivannaisjatteen_jatehuoltosuunnitelma]
-   :muut [:vakuus_ottamisen_aloittamiseksi_ennen_luvan_lainvoimaa
-          :selvitys_tieyhteyksista_oikeuksista
-          :pohjavesitutkimus
-          :muu]])
-
-(def- attachment-types-KT
-  [:hakija [:valtakirja
-            :virkatodistus
-            :ote_kauppa_ja_yhdistysrekisterista]
-   :kartat [:rasitesopimuksen_liitekartta
-            :liitekartta]
-   :kiinteiston_hallinta [:jaljennos_perunkirjasta
-                          :rasitesopimus
-                          :ote_asunto-osakeyhtion_kokouksen_poytakirjasta
-                          :sukuselvitys
-                          :testamentti
-                          :saantokirja
-                          :tilusvaihtosopimus
-                          :jakosopimus
-                          :kaupparekisteriote
-                          :yhtiojarjestys
-                          :ote_osakeyhtion_yhtiokokouksen_poytakirjasta
-                          :ote_osakeyhtion_hallituksen_kokouksen_poytakirjasta
-                          ]
-   :muut [:muu]])
+(def- attachment-types-KT attachment-types/Kiinteistotoimitus)
 
 (defn attachment-ids-from-tree [tree]
   {:pre [(sequential? tree)]}
@@ -316,8 +128,8 @@
       :P  attachment-types-R
       :YI attachment-types-YI
       :YL attachment-types-YL
-      :VVVL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
-      :MM attachment-types-KT ;TODO quick fix to get test and qa work. Put correct attachment list here
+      :VVVL attachment-types-YI ;TODO Put correct attachment list here
+      :MM attachment-types-KT ;TODO Put correct attachment list here
       :MAL attachment-types-MAL
       :KT attachment-types-KT
       (fail! (str "unsupported permit-type: " (name permit-type))))))
@@ -332,7 +144,9 @@
            :type attachment-type
            :modified now
            :locked locked?
-           :applicationState application-state
+           :applicationState (if (and (= "verdict" (:type target)) (not (states/post-verdict-states (keyword application-state))))
+                               "verdictGiven"
+                               application-state)
            :state :requires_user_action
            :target target
            :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
@@ -396,15 +210,26 @@
         latest     (last sorted)]
     latest))
 
+(defn get-version-by-file-id [attachment fileId]
+  (->> attachment
+       :versions
+       (filter #(= (:fileId %) fileId))
+       first))
+
+(defn get-version-number
+  [{:keys [attachments] :as application} attachment-id fileId]
+  (let [attachment (get-attachment-info application attachment-id)
+        version    (get-version-by-file-id attachment fileId)]
+    (:version version)))
+
 (defn set-attachment-version
   ([options]
     {:pre [(map? options)]}
     (set-attachment-version options 5))
-  ([{:keys [application attachment-id file-id filename content-type size comment-text now user stamped make-comment state target]
+  ([{:keys [application attachment-id file-id filename content-type size comment-text now user stamped make-comment state target valid-pdfa missing-fonts]
      :or {make-comment true state :requires_authority_action} :as options}
     retry-limit]
     {:pre [(map? options) (map? application) (string? attachment-id) (string? file-id) (string? filename) (string? content-type) (number? size) (number? now) (map? user) (not (nil? stamped))]}
-    ; TODO refactor to use proper optimistic locking
     ; TODO refactor to return version-model and mongo updates, so that updates can be merged into single statement
     (if (pos? retry-limit)
       (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
@@ -419,7 +244,9 @@
                            :filename filename
                            :contentType content-type
                            :size size
-                           :stamped stamped}
+                           :stamped stamped
+                           :valid-pdfa valid-pdfa
+                           :missing-fonts missing-fonts}
 
             comment-target {:type :attachment
                             :id attachment-id
@@ -549,7 +376,8 @@
     (update-application
       (application->command application)
       {:attachments {$elemMatch {:id attachment-id}}}
-      {$pull {:attachments.$.versions {:fileId fileId}}
+      {$pull {:attachments.$.versions {:fileId fileId}
+              :attachments.$.signatures {:version (get-version-number application attachment-id fileId)}}
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
@@ -557,7 +385,7 @@
   "Returns the attachment if user has access to application, otherwise nil."
   [user file-id]
   (when-let [attachment (mongo/download file-id)]
-    (when-let [application (get-application-as (:application attachment) user)]
+    (when-let [application (get-application-as (:application attachment) user :include-canceled-apps? true)]
       (when (seq application) attachment))))
 
 (defn get-attachment
@@ -584,13 +412,38 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
+(defn create-preview
+  [file-id filename content-type content application-id & [db-name]]
+  (when (and (env/feature? :preview) (preview/converter content-type))
+    (mongo/with-db (or db-name mongo/default-db-name)
+      (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
+      (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+                                              (with-open [content ((:content (mongo/download file-id)))]
+                                                (preview/create-preview content content-type)))]
+        (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
+        (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id)))))
+
+(defn output-attachment-preview
+  "Outputs attachment preview creating it if is it does not already exist"
+  [attachment-id attachment-fn]
+  (let [preview-id (str attachment-id "-preview")]
+    (when (= 0 (mongo/count :fs.files {:_id preview-id}))
+      (let [attachment (get-attachment attachment-id)
+            file-name (:file-name attachment)
+            content-type (:content-type attachment)
+            content ((:content attachment))
+            application-id (:application attachment)]
+        (create-preview attachment-id file-name content-type content application-id)))
+    (output-attachment preview-id false attachment-fn)))
+
 (defn attach-file!
   "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
    Content can be a file or input-stream.
    Returns attachment version."
   [options]
   {:pre [(map? (:application options))]}
-  (let [file-id (mongo/create-id)
+  (let [db-name mongo/*db-name* ; pass db-name to threadpool context
+        file-id (mongo/create-id)
         {:keys [filename content]} options
         application-id (-> options :application :id)
         sanitazed-filename (mime/sanitize-filename filename)
@@ -599,6 +452,7 @@
                                 :filename sanitazed-filename
                                 :content-type content-type})]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
+    (.submit preview-threadpool #(create-preview file-id sanitazed-filename content-type content application-id db-name))
     (update-or-create-attachment options)))
 
 (defn get-attachments-by-operation
@@ -645,3 +499,25 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
+(defn delete-file! [^File file] (try (.delete file) (catch Exception _)))
+
+(defn ensure-pdf-a
+  "Ensures PDF file PDF/A compatibility status based on original attachment status"
+  [temp-file valid-pdfa]
+  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
+  (if (not valid-pdfa)
+    (do (debugf "    no PDF/A required, no conversion") {:file temp-file :pdfa false})
+    (let [a-temp-file (File/createTempFile "lupapiste.stamp.a." ".tmp")
+          conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath temp-file) (.getAbsolutePath a-temp-file))]
+      (cond
+        (:already-valid-pdfa? conversion-result) (do (debugf "      file valid PDF/A, no conversion") {:file temp-file :pdfa true})
+        (:pdfa? conversion-result) (do (debug "      converting to PDF/A file: " (.getAbsolutePath a-temp-file)) (delete-file! temp-file) {:file a-temp-file :pdfa true})
+        :else (do (errorf "Ensuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
+
+(defn application-to-pdf-a
+  "Returns application data in PDF/A temp file"
+  [application lang]
+  (let [file (File/createTempFile "application-pdf-a-" ".tmp")
+        stream (pdf-export/generate application lang)]
+    (io/copy stream file)
+  (ensure-pdf-a file true)))

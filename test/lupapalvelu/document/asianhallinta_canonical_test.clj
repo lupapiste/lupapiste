@@ -119,7 +119,7 @@
               data    (tools/unwrapped (get-in application [:documents 4 :data]))
               yritys  (:Yritys maksaja)]
           (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
-            (keys maksaja) => (just [:Yritys :Laskuviite]))
+            (keys maksaja) => (just [:Yritys :Laskuviite] :in-any-order))
           (fact "Maksaja is not Henkilo"
             (keys keys) =not=> (contains [:Henkilo]))
           (facts "Yritys"
@@ -153,13 +153,13 @@
               op (first ops)]
           (count ops) => 1
           (keys op) => (just [:ToimenpideTunnus :ToimenpideTeksti])
-          (:ToimenpideTunnus op) => (get-in application [:operations 0 :name])
-          (:ToimenpideTeksti op) => (i18n/localize "fi" (str "operations." (get-in application [:operations 0 :name])))))
+          (:ToimenpideTunnus op) => (:name (:primaryOperation application))
+          (:ToimenpideTeksti op) => (i18n/localize "fi" (str "operations." (:name (:primaryOperation application))))))
 
       (fact "Asiointikieli"
         (get-in canonical [:UusiAsia :Asiointikieli]) => "fi")
       (fact "Sijainti is correct"
-        (get-in canonical [:UusiAsia :Sijainti :Sijaintipiste]) => (str (-> application :location :x) " " (-> application :location :y)))
+        (get-in canonical [:UusiAsia :Sijainti :Sijaintipiste]) => (str (-> application :location first) " " (-> application :location second)))
       (fact "Kiinteistotunnus is human readable"
         (get-in canonical [:UusiAsia :Kiinteistotunnus]) => (p/to-human-readable-property-id (:propertyId application))))
 
@@ -185,13 +185,13 @@
               (doseq [meta metas]
                 (has-attachment-types meta)))
             (fact "Second attachment has operation meta"
-              (last (second metas)) => {:Avain "operation" :Arvo (get-in application-with-attachments [:operations 0 :name])}))))))
+              (last (second metas)) => {:Avain "operation" :Arvo (:name (:primaryOperation application-with-attachments))}))))))
 
   (fl/facts* "TaydennysAsiaan canonical"
     (let [application poikkeus-test/poikkari-hakemus
           canonical (ah/application-to-asianhallinta-taydennys-asiaan-canonical application) => truthy
           canonical-attachments (ah/get-attachments-as-canonical
-                                  (enrich-attachments-with-operation-data test-attachments (:operations application))
+                                  (enrich-attachments-with-operation-data test-attachments (conj (seq (:secondaryOperations application)) (:primaryOperation application)))
                                   "sftp://localhost/test")]
       (facts "TaydennysAsiaan canonical from poikkeus-test/poikkari-hakemus"
         (fact "TaydennysAsiaan not empty" (:TaydennysAsiaan canonical) => seq)
@@ -201,4 +201,4 @@
         (facts "Attachments"
           (count canonical-attachments) => 2
           (fact "Second attachment has operation Metatieto"
-            (last (get-in (second canonical-attachments) [:Metatiedot :Metatieto])) => {:Avain "operation" :Arvo (get-in application [:operations 0 :name])}))))))
+            (last (get-in (second canonical-attachments) [:Metatiedot :Metatieto])) => {:Avain "operation" :Arvo (:name (:primaryOperation application))}))))))

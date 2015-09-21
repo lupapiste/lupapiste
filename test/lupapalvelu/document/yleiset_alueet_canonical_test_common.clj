@@ -3,7 +3,7 @@
 
 (def municipality 753)
 
-(def location {:x 404335.789, :y 6693783.426})
+(def location [404335.789 6693783.426])
 
 
 (def pena {:id "777777777777777777000020",
@@ -94,7 +94,7 @@
   (merge yritys
          {:verkkolaskutustieto {:ovtTunnus {:value "003712345671"}
                                 :verkkolaskuTunnus {:value "laskutunnus-1234"}
-                                :valittajaTunnus {:value "valittajatunnus-1234"}}}))
+                                :valittajaTunnus {:value "BAWCFI22"}}}))
 
 (def _laskuviite {:modified 1379404963313, :value "1234567890"})
 
@@ -141,7 +141,7 @@
 (def statements [{:id "52382cea94a74fc25bb4be5d"
                   :given 1379415837074
                   :requested 1379413226349
-                  :status "yes"
+                  :status "puoltaa"
                   :person statement-giver
                   :text "Annanpa luvan."}])
 

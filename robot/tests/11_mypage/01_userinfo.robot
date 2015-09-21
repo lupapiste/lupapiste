@@ -15,51 +15,47 @@ Mikko goes to own page
   Title Should Be  Lupapiste
 
 There is no company info
-  Element should not be visible  //div[@data-test-id='my-company']
+  Element should not be visible  //div[@data-test-id='mypage-company-accordion']
 
 Mikko changes his name and experience
   Change Textfield Value  firstName  Mikko  Mika
   Change Textfield Value  lastName  Intonen  Intola
-  Change Textfield Value  architect.degree  Tutkinto  Arkkitehti
+  Select From List  architect-degree-select  Arkkitehti
   Change Textfield Value  architect.graduatingYear  2000  2001
   Change Textfield Value  architect.fise  f  fise
   Checkbox Should Not Be Selected  allowDirectMarketing
   Select Checkbox  allowDirectMarketing
 
   Save User Data
-  Wait until  Page should contain  Tallennettu
+  Positive indicator should be visible
   User should be logged in  Mika Intola
 
-Name should have changed in Swedish page too
-  Click link  xpath=//*[@data-test-id='lang-sv']
+Name and experience should have changed in Swedish page too
+  Language To  SV
   Wait for Page to Load  Mika  Intola
   User should be logged in  Mika Intola
   Checkbox Should Be Selected  allowDirectMarketing
-
-Experience should have changed in Swedish page too
-  Wait Until  Textfield Value Should Be  architect.fise  fise
-  Textfield Value Should Be  architect.degree  Arkkitehti
+  Wait until  List Selection Should Be  architect-degree-select  Arkitekt
   Textfield Value Should Be  architect.graduatingYear  2001
   Textfield Value Should Be  architect.fise  fise
 
 Mika changes the name and experience back
   Change Textfield Value  firstName  Mika  Mikko
   Change Textfield Value  lastName  Intola  Intonen
-  Change Textfield Value  architect.degree  Arkkitehti  Tutkinto
+  Select From List  architect-degree-select  Timmerman
   Change Textfield Value  architect.graduatingYear  2001  2000
+  Textfield Value Should Be  architect.graduatingYear  2000
   Change Textfield Value  architect.fise  fise  f
   Save User Data
-  Wait until  Page should contain  Sparad
+  Positive indicator should be visible
 
-Name should have changed in Finnish page too
-  Click link  xpath=//*[@data-test-id='lang-fi']
+Name and experience should have changed in Finnish page too
+  Language To  FI
   Wait for Page to Load  Mikko  Intonen
   User should be logged in  Mikko Intonen
-
-Experience should have changed in Finnish back to original
-  Wait Until  Textfield Value Should Be  architect.fise  f
-  Textfield Value Should Be  architect.degree  Tutkinto
-  Textfield Value Should Be  architect.graduatingYear  2000
+  Checkbox Should Be Selected  allowDirectMarketing
+  Wait until  List Selection Should Be  architect-degree-select  Kirvesmies
+  Wait until  Textfield Value Should Be  architect.graduatingYear  2000
   Textfield Value Should Be  architect.fise  f
 
 *** Keywords ***
@@ -69,14 +65,12 @@ Save User Data
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
   Wait Until  Textfield Value Should Be  firstName  ${firstName}
   Wait Until  Textfield Value Should Be  lastName   ${lastName}
+  Open accordion by test id  mypage-personal-info-accordion
 
 Change Textfield Value
   [Arguments]  ${field}  ${old}  ${new}
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
   Wait Until  Textfield Value Should Be  ${field}  ${old}
-  Input Text  ${field}  ${new}
+  Input text with jQuery  input[id="${field}"]  ${new}
   Textfield Value Should Be  ${field}  ${new}
-  Focus  street

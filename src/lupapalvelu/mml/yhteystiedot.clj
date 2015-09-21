@@ -43,13 +43,18 @@
 
 (defn- get-yhteystiedot-url-template [] (env/value :mml :yhteystiedot :uri-template))
 
-(defn- get-yhteystiedot [id]
+(defn- get-yhteystiedot
+  ([id] (get-yhteystiedot id false))
+  ([id raw?]
   (let [uri (str/replace (get-yhteystiedot-url-template) "${kohdetunnus}" (URLEncoder/encode id "UTF-8"))
         username (env/value :mml :yhteystiedot :username)
         password (env/value :mml :yhteystiedot :password)]
-    (cr/get-xml uri [username password] false)))
+    (cr/get-xml uri [username password] raw?))))
 
 (defn get-owners [id]
   (let [xml (cr/strip-xml-namespaces (get-yhteystiedot id))
         henkilot (children (select1 xml :kohteenHenkilot))]
     (map ->henkilo henkilot)))
+
+(defn get-owners-raw [id]
+  (get-yhteystiedot id true))

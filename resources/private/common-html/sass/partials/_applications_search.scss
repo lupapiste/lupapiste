@@ -1,0 +1,105 @@
+
+.search-tabs {
+  ul {
+    display: inline-block;
+    list-style: none;
+    padding: 0;
+    margin-right: $marginS;
+    line-height: 40px; // buttons next to tabs are 40px
+    vertical-align: middle;
+  }
+  li {
+    background-color: $lp-light-grey;
+    color: $color-text;
+
+    cursor: pointer;
+    margin-right: $marginS;
+    display: inline-block;
+    &.selected {
+      background-color: darken($lp-light-grey, 10%);
+    }
+    padding: 0 $marginL;
+  }
+  input {
+    display: inline-block;
+    margin: 0;
+  }
+  button {
+    margin: 0 $marginS;
+    width: initial;
+    padding: 0 $marginL;
+    .icon {
+      position: relative;
+      top: 2px;
+      margin-right: $marginM;
+    }
+  }
+}
+
+.paging {
+  button:first-child {
+    margin-right: $marginS;
+  }
+  select {
+    width: $cols1*1.5;
+    margin-left: $marginM;
+    margin-right: $marginS;
+  }
+}
+
+div.filter-row {
+  margin-bottom: $marginM;
+  > div {
+    display: inline-block;
+  }
+  label {
+    display: block
+  }
+  input.search {
+    ~ span.icon {
+      position: relative;
+      left: -22px;
+      top: 4px;
+    }
+    line-height: $baseline;
+    padding: $marginS/2 $marginL $marginS/2 $marginS;
+    border: 1px solid #dddddd;
+    box-shadow: none;
+  }
+  .autocomplete-component > .autocomplete-selection-wrapper > span.autocomplete-selection {
+    border-radius: 0;
+  }
+  .filter-item {
+    margin-right: $marginM;
+  }
+}
+
+div.filter-row.advanced {
+  .autocomplete-component {
+    width: 600px;
+  }
+}
+
+@media (max-width:1260px) {
+  div.filter-row.advanced {
+    .autocomplete-component {
+      width: 460px;
+    }
+  }
+}
+
+@media (max-width:990px) {
+  div.filter-row.advanced {
+    .autocomplete-component {
+      width:390px;
+    }
+  }
+}
+
+@media (max-width:990px) {
+  div.filter-row.advanced {
+    .autocomplete-component {
+      width:790px;
+    }
+  }
+}

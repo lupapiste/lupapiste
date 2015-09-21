@@ -1,7 +1,6 @@
 (ns lupapalvelu.mml.yhteystiedot-test
   (:require [lupapalvelu.mml.yhteystiedot :as lh]
             [sade.env :as env]
-            [sade.http :as http]
             [sade.common-reader :as cr]
             [sade.xml :as xml]
             [midje.sweet :refer :all]))

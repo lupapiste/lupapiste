@@ -7,7 +7,8 @@
 
   ko.validation.init({
     insertMessages: true,
-    decorateElement: true,
+    decorateInputElement: true,
+    errorElementClass: "err",
     errorMessageClass: "error-message",
     parseInputAttributes: true,
     messagesOnModified: true,
@@ -40,6 +41,13 @@
     message: loc("error.invalidOVT")
   };
 
+  ko.validation.rules.personId = {
+    validator: function(personId) {
+      return _.isBlank(personId) || util.isValidPersonId(personId);
+    },
+    message: loc("error.illegal-hetu")
+  };
+
   ko.validation.rules.usernameAsync = {
     async: true,
     validator: _.debounce(function(val, params, cb) {
@@ -55,19 +63,59 @@
     message: loc("email-in-use")
   };
 
+  ko.validation.rules.match = {
+    validator: function(value1, value2) {
+      return value1 === value2;
+    },
+    message: ""
+  };
+
+  /*
+   * Determines if a field is required or not based on a function or value
+   * Parameter: boolean function, or boolean value
+   * Example
+   *
+   * viewModel = {
+   *   var vm = this;
+   *   vm.isRequired = ko.observable(false);
+   *   vm.requiredField = ko.observable().extend({ conditional_required: vm.isRequired});
+   * }
+   *
+   * Source: https://github.com/Knockout-Contrib/Knockout-Validation/wiki/User-Contributed-Rules
+  */
+  ko.validation.rules.conditional_required = {
+    validator: function (val, condition) {
+      var required = false;
+      if (typeof condition === "function") {
+        required = condition();
+      } else {
+        required = condition;
+      }
+
+      if (required) {
+        return !(val === undefined || val === null || val.length === 0);
+      } else {
+        return true;
+      }
+    },
+    message: ko.validation.rules.required.message
+  };
+
   ko.validation.registerExtenders();
 
   ko.bindingHandlers.dateString = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      if (value) { $(element).text(moment(value).format("D.M.YYYY")); }
+      var dateStr = value ? moment(value).format("D.M.YYYY") : "";
+      $(element).text(dateStr);
     }
   };
 
   ko.bindingHandlers.dateTimeString = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      $(element).text(moment(value).format("D.M.YYYY HH:mm"));
+      var dateStr = value ? moment(value).format("D.M.YYYY HH:mm") : "";
+      $(element).text(dateStr);
     }
   };
 
@@ -94,6 +142,17 @@
 
   ko.bindingHandlers.ltext = {
     update: _.partial(localized, "text")
+  };
+
+  // hello.id -> T e r v e
+  // Used typically with vertical buttons.
+  ko.bindingHandlers.lspaced = {
+    update: function( element, valueAccessor) {
+      var value = loc( ko.utils.unwrapObservable( valueAccessor() ) );
+      if( value ) {
+        $(element).text( value.split( "" ).join( " "));
+      }
+    }
   };
 
   ko.bindingHandlers.lhtml = {
@@ -255,10 +314,15 @@
       var value = ko.utils.unwrapObservable(valueAccessor());
       var className = allBindings()["class"];
       var type = allBindings().type;
-      if (type) {
-        $(element)[type + "Toggle"](1000);
+
+      if (LUPAPISTE.config.features.animations) {
+        if (type) {
+          $(element)[type + "Toggle"](1000);
+        } else {
+          $(element).toggleClass(className, value, 100);
+        }
       } else {
-        $(element).toggleClass(className, value, 100);
+        $(element).toggleClass(className, value);
       }
     }
   };
@@ -269,10 +333,14 @@
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
       var duration = bindings.duration || 100;
       var easing = bindings.easing || "swing";
-      if (value) {
-        $(element).slideDown(duration, easing);
+      if (LUPAPISTE.config.features.animations) {
+        if (value) {
+          $(element).slideDown(duration, easing);
+        } else {
+          $(element).slideUp(duration, easing);
+        }
       } else {
-        $(element).slideUp(duration, easing);
+        $(element).toggle(value);
       }
     }
   };
@@ -282,10 +350,37 @@
       var value = ko.utils.unwrapObservable(valueAccessor());
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
       var duration = bindings.duration || 100;
-      if (value) {
-        $(element).fadeIn({duration: duration, queue: false});
+      if (LUPAPISTE.config.features.animations) {
+        if (value) {
+          $(element).fadeIn({duration: duration, queue: false});
+        } else {
+          $(element).fadeOut({duration: duration, queue: false});
+        }
       } else {
-        $(element).fadeOut({duration: duration, queue: false});
+        $(element).toggle(value);
+      }
+    }
+  };
+
+  ko.bindingHandlers.fadeInOut = {
+    update: function(element, valueAccessor, allBindingsAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      var duration = bindings.duration || 100;
+      var delay = (bindings.delay || 1000) + duration;
+      if (value) {
+        if (LUPAPISTE.config.features.animations) {
+          $(element).fadeIn({duration: duration, queue: false});
+        } else {
+          $(element).show();
+        }
+        _.delay(function() {
+          if (LUPAPISTE.config.features.animations) {
+            $(element).fadeOut({duration: duration, queue: false});
+          } else {
+            $(element).hide();
+          }
+        }, delay);
       }
     }
   };
@@ -349,4 +444,16 @@
       });
     }
   };
+
+  ko.bindingHandlers.titleWhenOverflow = {
+    init: function(element, valueAccessor) {
+      $(element).bind("mouseenter", function(){
+        var $this = $(this);
+        if(this.offsetWidth < this.scrollWidth) {
+          $this.attr("title", ko.utils.unwrapObservable(valueAccessor()));
+        }
+      });
+    }
+  };
+
 })(jQuery);

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="tags-editor-template">
+      <div class="tags-editor-component">
+        <span data-bind="saveIndicator: indicator"></span>
+        <ul class="tags">
+          <p data-bind="visible: tags().length === 0, ltext: 'tags.no-tags'"></p>
+          <!-- ko foreach: tags -->
+          <li class="tag">
+            <span class="tag-remove icon remove"
+                  data-bind="click: $parent.removeTag,
+                             attr: {'data-test-id': 'remove-tag-button-' + $index()}"></span>
+            <span class="tag-label"
+                  data-bind="visible: !edit(), text: $data.label,
+                             attr: {'data-test-id': 'tag-label-' + $index()}"></span>
+            <input class="tag-editor"
+                   data-bind="visible: edit, hasFocus: edit, value: $data.label, event: {keypress: $parent.onKeypress},
+                              attr: {'data-test-id': 'edit-tag-input-' + $index()}"></input>
+            <span class="tag-edit icon edit"
+                  data-bind="visible: !edit(), click: $parent.editTag"></span>
+          </li>
+          <!-- /ko -->
+        </ul>
+        <button class="btn btn-primary" data-test-id="add-tag-button" data-bind="ltext: 'auth-admin.tags.add', click: addTag"></button>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

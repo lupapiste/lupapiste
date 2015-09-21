@@ -34,7 +34,7 @@
 
 
 (def- yritystilisopimus-default-model {:date ""
-                                       :company {:name "", :y "", :address1 "", :address2 "", :zip "", :po ""}
+                                       :company {:name "", :y "", :address1 "", :zip "", :po ""}
                                        :contact {:firstName "", :lastName ""}
                                        :account {:type "", :price ""}})
 

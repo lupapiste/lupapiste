@@ -27,7 +27,7 @@
             <input class="form-input text " data-test-id="register-street" data-bind="value: street" type="text" autofocus="autofocus"/>
           </div>
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'userinfo.zip'">Postinumero</label>
+            <label class="form-label tip" data-bind="ltext: 'userinfo.zip'">Postinumero</label>
             <input class="form-input text " data-test-id="register-zip" data-bind="value: zip" type="text" />
           </div>
           <div class="form-entry">
@@ -50,6 +50,42 @@
             <input class="form-input text " data-test-id="register-confirmEmail" data-bind="value: confirmEmail" type="email" required="required" />
           </div>
           <div class="clear"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-entry architect-toggle">
+            <label for="architect" class="form-label">
+              <input data-bind="checked: architect" id="architect" type="checkbox"></input>
+              <span data-bind="ltext: 'userinfo.architect'"></span>
+            </label>
+          </div>
+          <div data-bind="visible: architect">
+            <div class="architect-info form-group">
+              <h2 data-bind="ltext: 'architect.experience.title'"></h2>
+
+              <div class="form-entry">
+                <label data-bind="ltext: 'userinfo.architect.degree'" for="architect.degree" class="form-label"></label>
+                <select class="form-input combobox"
+                        name="architect.degree"
+                        data-test-id="architect-degree-select"
+                        title="loc('userinfo.architect.degree.choose.help')"
+                        data-bind="options: availableDegrees,
+                                   value: degree,
+                                   optionsValue: 'id',
+                                   optionsText: 'name',
+                                   optionsCaption: loc('userinfo.architect.degree.choose')"></select>
+              </div>
+
+              <div class="form-entry">
+                <label data-bind="ltext: 'userinfo.architect.graduatingYear'" for="architect.graduatingYear" class="form-label"></label>
+                <input data-bind="value: graduatingYear" id="architect.graduatingYear" type="text" class="form-input" maxlength="4"></input>
+              </div>
+
+              <div class="form-entry">
+                <label data-bind="ltext: 'userinfo.architect.fise'" for="architect.fise" class="form-label"></label>
+                <input data-bind="value: fise" id="architect.fise" type="text" class="form-input" maxlength="255"></input>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <div class="form-entry">
@@ -80,7 +116,7 @@
             <label>
               <input type="checkbox" id="rakentajafi" data-bind="checked: rakentajafi" value="true">
               <span data-bind="lhtml: 'register.rakentajafi'"></span>
-              <span class="icon info-indicator"  data-bind="click: showRakentajafiInfo" style="cursor: pointer;vertical-align: bottom;"></span>
+              <span class="icon info-indicator" data-bind="click: showRakentajafiInfo"></span>
             </label>
           </div>
 
@@ -92,7 +128,7 @@
             <span data-bind="ltext: 'register.register-action'"></span>
             <em data-bind="visible: pending" class="button-loader"></em>
           </button>
-          <button data-bind="click: cancel, ltext: 'cancel'" type="button" class="btn">Peruuta</button>
+          <button data-bind="click: cancel, ltext: 'cancel'" type="button" class="btn"></button>
         </div>
       </form>
     </div>
@@ -100,7 +136,7 @@
     <div id="dialogRakentajafi" class="window autosized">
       <div class="dialog-header">
         <p>Rakentaja.fi</p>
-        <p class="dialog-close close">X</p>
+        <p class="dialog-close close lupicon-remove"></p>
       </div>
       <div class="dialog-content">
         <p>
@@ -109,7 +145,7 @@
         <p><strong data-bind="ltext: 'register.rakentajafi-popup.2'"></strong></p>
         <p data-bind="ltext: 'register.rakentajafi-popup.3'"></p>
         <p data-bind="ltext: 'register.rakentajafi-popup.4'"></p>
-        <button class="btn btn-primary btn-dialog close" >OK</button>
+        <button class="positive btn-dialog close" >OK</button>
       </div>
     </div>
 

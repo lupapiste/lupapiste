@@ -89,7 +89,9 @@
     };
 
     self.canAdd      = function(ids) {
-      if (_.isEmpty(ids)) return false;
+      if (_.isEmpty(ids)) {
+        return false;
+      }
       ids = _.isArray(ids) ? ids : [ids];
       var someFalsey = _.some(ids, function(id) {
         var isAddable = id && (self.duplicatesAllowed || !self.inTarget(id));

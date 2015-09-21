@@ -1,10 +1,12 @@
 (ns lupapalvelu.company-api
   (:require [sade.core :refer [ok fail fail! unauthorized unauthorized!]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
+            [lupapalvelu.application :as application]
             [lupapalvelu.company :as c]
             [lupapalvelu.user :as u]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.states :as states]
             [sade.strings :as ss]))
 
 ;;
@@ -42,10 +44,11 @@
   (ok :companies (c/find-companies)))
 
 (defcommand company-update
-  {:user-roles #{:applicant}
-   :input-validators [validate-user-is-admin-or-company-member]
+  {:user-roles #{:applicant :admin}
+   :pre-checks [validate-user-is-admin-or-company-admin]
    :parameters [company updates]}
-  (ok :company (c/update-company! company updates)))
+  [{caller :user}]
+  (ok :company (c/update-company! company updates caller)))
 
 (defcommand company-user-update
   {:user-roles #{:applicant :admin}
@@ -63,20 +66,22 @@
 
 (defn- user-limit-not-exceeded [command _]
   (let [company (c/find-company-by-id (get-in command [:user :company :id]))
-        company-users (c/find-company-users (:id company))
+        company-users (c/company-users-count (:id company))
         invitations (c/find-user-invitations (:id company))
-        users (+ (count invitations) (count company-users))]
+        users (+ (count invitations) company-users)]
     (when-not (:accountType company)
       (fail! :error.account-type-not-defined-for-company))
-    (let [user-limit (c/user-limit-for-account-type (keyword (:accountType company)))]
+    (let [user-limit (or (:customAccountLimit company) (c/user-limit-for-account-type (keyword (:accountType company))))]
       (when-not (< users user-limit)
         (fail :error.company-user-limit-exceeded)))))
 
 
-(defquery company-invite-user
-  {:user-roles #{:applicant}
-   :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]
-   :parameters [email]}
+(defcommand company-invite-user
+  {:parameters [email]
+   :user-roles #{:applicant}
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
   [{caller :user}]
   (let [user (u/find-user {:email email})
         tokens (c/find-user-invitations (-> caller :company :id))]
@@ -98,8 +103,10 @@
 (defcommand company-add-user
   {:user-roles #{:applicant}
    :parameters [firstName lastName email]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
-  [{user :user {:keys [admin]} :params}]
+  [{user :user, {:keys [admin]} :data}]
   (c/add-user! {:firstName firstName :lastName lastName :email email}
                (c/find-company-by-id (-> user :company :id))
                (if admin :admin :user))
@@ -107,23 +114,12 @@
 
 (defcommand company-invite
   {:parameters [id company-id]
-   :states (action/all-application-states-but [:closed :canceled])
-   :user-roles #{:applicant :authority}}
+   :states (states/all-application-states-but states/terminal-states)
+   :user-roles #{:applicant :authority}
+   :pre-checks [application/validate-authority-in-drafts]}
   [{caller :user application :application}]
   (c/company-invite caller application company-id)
   (ok))
-
-(defcommand create-company
-  {:parameters [:name :y :address1 :address2 :po :zip email]
-   :input-validators [action/email-validator
-                      (partial action/non-blank-parameters [:name :y])]
-   :user-roles #{:admin}}
-  [{data :data}]
-  (if-let [user (u/find-user {:email email, :role :applicant, :company.id {"$exists" false}})]
-    (let [company (c/create-company (select-keys data [:name :y :address1 :address2 :po :zip]))]
-      (u/update-user-by-email email {:company  {:id (:id company), :role :admin}})
-      (ok))
-    (fail :error.user-not-found)))
 
 (defcommand company-cancel-invite
   {:parameters [tokenId]

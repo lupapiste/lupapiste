@@ -21,18 +21,14 @@
                                                 {:tag :kerrosala}]})
 
 (def abstract-poikkeamistype-212 [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
-                                  {:tag :luvanTunnistetiedot
-                                   :child [mapping-common/lupatunnus]}
-                                  {:tag :osapuolettieto
-                                   :child [mapping-common/osapuolet]}
-                                  {:tag :rakennuspaikkatieto
-                                   :child [mapping-common/rakennuspaikka]}
+                                  {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
+                                  {:tag :osapuolettieto :child [mapping-common/osapuolet_210]}
+                                  {:tag :rakennuspaikkatieto :child [mapping-common/rakennuspaikka]}
                                   {:tag :toimenpidetieto :child [{:tag :Toimenpide :child [{:tag :kuvausKoodi }
                                                                                            kerrosalatieto
                                                                                            {:tag :tavoitetilatieto :child [tavoitetila-212]}]}]}
                                   {:tag :lausuntotieto :child [mapping-common/lausunto_211]}
-                                  {:tag :liitetieto
-                                   :child [{:tag :Liite :child mapping-common/liite-children_211}]}
+                                  {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_211}]}
                                   {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}]}]}
                                   {:tag :asianTiedot :child [{:tag :Asiantiedot :child [{:tag :vahainenPoikkeaminen}
                                                                                         {:tag :poikkeamisasianKuvaus}
@@ -55,10 +51,22 @@
     (mapping-common/update-child-element [:lausuntotieto] {:tag :lausuntotieto :child [mapping-common/lausunto_213]})
     (mapping-common/update-child-element [:liitetieto :Liite] {:tag :Liite :child mapping-common/liite-children_213})))
 
+(def abstract-poikkeamistype-220
+  (-> abstract-poikkeamistype-215
+    (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_215]})))
+
+(def abstract-poikkeamistype-221
+  (-> abstract-poikkeamistype-220
+    (mapping-common/update-child-element [:rakennuspaikkatieto] {:tag :rakennuspaikkatieto :child [mapping-common/rakennuspaikka_216]})
+    (mapping-common/update-child-element [:lausuntotieto] {:tag :lausuntotieto :child [mapping-common/lausunto_216]})
+    (mapping-common/update-child-element [:liitetieto :Liite] {:tag :Liite :child mapping-common/liite-children_216})
+    (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_216]})))
+
+
 (def poikkeamis_to_krysp_212
   {:tag :Popast
    :ns "ppst"
-   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.2")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :P "2.1.2")
                  :xmlns:ppst "http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
@@ -67,24 +75,38 @@
 
 (def poikkeamis_to_krysp_213
   (-> poikkeamis_to_krysp_212
-    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.3"))
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :P "2.1.3"))
     (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
                    {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-213}]}
                    {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-213}]}])))
 
 (def poikkeamis_to_krysp_214
   (-> poikkeamis_to_krysp_213
-    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.4"))
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :P "2.1.4"))
     (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
                    {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-214}]}
                    {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-214}]}])))
 
 (def poikkeamis_to_krysp_215
   (-> poikkeamis_to_krysp_214
-    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.5"))
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :P "2.1.5"))
     (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
                    {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-215}]}
                    {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-215}]}])))
+
+(def poikkeamis_to_krysp_220
+  (-> poikkeamis_to_krysp_215
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :P "2.2.0"))
+    (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
+                   {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-220}]}
+                   {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-220}]}])))
+
+(def poikkeamis_to_krysp_221
+  (-> poikkeamis_to_krysp_220
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :P "2.2.1"))
+    (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
+                   {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-221}]}
+                   {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-221}]}])))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
@@ -93,6 +115,8 @@
     "2.1.3" poikkeamis_to_krysp_213
     "2.1.4" poikkeamis_to_krysp_214
     "2.1.5" poikkeamis_to_krysp_215
+    "2.2.0" poikkeamis_to_krysp_220
+    "2.2.1" poikkeamis_to_krysp_221
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn save-application-as-krysp

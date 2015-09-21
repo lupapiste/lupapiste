@@ -2,7 +2,7 @@
 <html>
   <body>
     <section class="page container">
-      <script type="text/html" id="attachments-multiselect-template">
+      <script type="text/x-jquery-tmpl" id="attachments-multiselect-template">
         <h1 data-bind="visible: params.titleLoc, ltext: params.titleLoc"></h1>
         <h1 data-bind="visible: params.title, text: params.title"></h1>
         <div class="clear">
@@ -30,7 +30,7 @@
 
         <div class="attachment-multiselect-buttons">
           <button data-bind="click: start,
-                             ltext: params.okLoc
+                             ltext: params.okLoc,
                              clickBubble: false,
                              enable: $parent.authorization.ok(params.authKey)"
             class="btn btn-primary"
@@ -43,7 +43,7 @@
         </div>
       </script>
 
-      <script type="text/html" id="attachments-multiselect-table">
+      <script type="text/x-jquery-tmpl" id="attachments-multiselect-table">
         <table class="table attachments-template-table">
           <tbody data-bind="foreach: $data">
             <tr class="attachment-group-header" data-bind="attr: {'data-test-id': $data.groupName}">

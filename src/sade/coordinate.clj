@@ -1,9 +1,28 @@
 (ns sade.coordinate
   (:require [taoensso.timbre :as timbre :refer [debug info warn error]]
-            [clojure.string :as s])
-  (:import [org.geotoolkit.referencing.crs DefaultGeographicCRS]
-           [org.geotoolkit.referencing CRS]
-           [org.geotoolkit.geometry GeneralDirectPosition]))
+            [clojure.string :as s]
+            [sade.util :as util]
+            [sade.core :refer :all])
+  (:import [org.geotools.referencing.crs DefaultGeographicCRS]
+           [org.geotools.referencing CRS]
+           [org.geotools.geometry GeneralDirectPosition]))
+
+;;; ETRS-TM35FIN / EPSG:3067 coordinate validators
+(defn valid-x? [x]
+  (if x
+    (< 10000 (util/->double x) 800000)
+    false))
+
+(defn valid-y? [y]
+  (if y
+    (<= 6610000 (util/->double y) 7779999)
+    false))
+
+(defn validate-coordinates [[x y]]
+  (when-not (and (valid-x? x) (valid-y? y))
+    (fail :error.illegal-coordinates)))
+
+
 
 (defn round-to [n acc]
   (.setScale n acc BigDecimal/ROUND_HALF_UP))

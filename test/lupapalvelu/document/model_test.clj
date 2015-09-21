@@ -1,8 +1,8 @@
 (ns lupapalvelu.document.model-test
-  (:use [lupapalvelu.document.model]
-        [lupapalvelu.document.validators]
-        [midje.sweet])
-  (:require [lupapalvelu.document.schemas :as schemas]
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.document.model :refer :all]
+            [lupapalvelu.document.validators :refer [valid-against? invalid-with? valid?]]
+            [lupapalvelu.document.schemas :as schemas]
             [sade.util :as util]))
 
 ;; Define a "random" timestamp used in test.
@@ -639,6 +639,14 @@
     (let [masked (-> hakija mask-person-id-ending mask-person-id-birthday)]
       (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "******-****")))
 
+(facts without-user-id
+  (without-user-id nil) => nil
+  (without-user-id {}) => {}
+  (without-user-id {:a nil}) => {:a nil}
+  (without-user-id {:userId nil}) => {}
+  (without-user-id {:data {:userId nil}, :schema-info {}}) => {:data {}, :schema-info {}}
+  (without-user-id {:data {:henkilo {:userId {:value "x"} :henkilotiedot {}}}}) => {:data {:henkilo {:henkilotiedot {}}}})
+
 (facts
   (fact "all fields are mapped"
     (->henkilo {:id        "id"
@@ -670,8 +678,11 @@
                  :postinumero          {:value ""}
                  :postitoimipaikannimi {:value "city"}}
         :patevyys {:fise {:value ""}
-                   :koulutus {:value ""}
+                   :koulutusvalinta {:value ""}
                    :valmistumisvuosi {:value ""}}
+        :patevyys-tyonjohtaja {:fise {:value ""}
+                               :koulutusvalinta {:value ""}
+                               :valmistumisvuosi {:value ""}}
         :yritys   {:liikeJaYhteisoTunnus {:value ""}
                    :yritysnimi {:value ""}}} )
 

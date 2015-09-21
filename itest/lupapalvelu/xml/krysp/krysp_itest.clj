@@ -10,7 +10,7 @@
             [lupapalvelu.document.model :refer [default-max-len]]
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.validator :refer [validate]]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212 rakennuslupa_to_krysp_213 rakennuslupa_to_krysp_216]]
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [get-rakennuslupa-mapping]]
             [lupapalvelu.xml.krysp.poikkeamis-mapping :refer [poikkeamis_to_krysp_212]]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :refer [ilmoitus_to_krysp]]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa_to_krysp]]
@@ -30,6 +30,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.i18n :refer [with-lang loc localize]]
             [lupapalvelu.tasks] ; ensure task schemas are loaded
             [sade.env :as env]
             [sade.xml :as xml]
@@ -51,21 +52,19 @@
     (command apikey :update-task :id id :doc task-id :updates updates)))
 
 (def- drawings [{:id 1,
-                          :name "A",
-                          :desc "A",
-                          :category "123",
-                          :geometry
-                          "POLYGON((438952 6666883.25,441420 6666039.25,441920 6667359.25,439508 6667543.25,438952 6666883.25))",
-                          :area "2686992",
-                          :height "1"}
-                         {:id 2,
-                          :name "B",
-                          :desc "B",
-                          :category "123",
-                          :geometry
-                          "POLYGON((440652 6667459.25,442520 6668435.25,441912 6667359.25,440652 6667459.25))",
-                          :area "708280",
-                          :height "12"}])
+                 :name "A",
+                 :desc "A desc",
+                 :category "123",
+                 :geometry "POLYGON((438952 6666883.25,441420 6666039.25,441920 6667359.25,439508 6667543.25,438952 6666883.25))",
+                 :area "2686992",
+                 :height "1"}
+                {:id 2,
+                 :name "B",
+                 :desc "B desc",
+                 :category "123",
+                 :geometry "POLYGON((440652 6667459.25,442520 6668435.25,441912 6667359.25,440652 6667459.25))",
+                 :area "708280",
+                 :height "12"}])
 
 (defn- add-drawings [application]
   (command pena :save-application-drawings
@@ -78,30 +77,29 @@
 (defn- generate-attachment [{id :id :as application} apikey password]
   (when-let [first-attachment (or
                                 (get-in application [:attachments 0])
-                                (case (-> application :operations first :name)
+                                (case (-> application :primaryOperation :name)
                                   "aloitusoikeus" {:type {:type-group "paapiirustus"
                                                           :type-id    "asemapiirros"}
                                                    :id   id}
                                   nil))]
     (upload-attachment apikey id first-attachment true)
-    (sign-attachment apikey id (:id first-attachment) password)
-    ))
+    (sign-attachment apikey id (:id first-attachment) password)))
 
 
 (defn- generate-statement [application-id]
   (let [sipoo-statement-givers   (:statementGivers (organization-from-minimal-by-id "753-R"))
         sonja-statement-giver-id (:id (some #(when (= (:email %) "sonja.sibbo@sipoo.fi") %) sipoo-statement-givers))
         create-statement-result   (command sonja :request-for-statement
+                                    :functionCode nil
                                     :id application-id
                                     :personIds [sonja-statement-giver-id])
         updated-application       (query-application pena application-id)
         statement-id              (:id (first (:statements updated-application)))
         upload-statement-attachment-result (upload-attachment-for-statement sonja application-id "" true statement-id)
-        give-statement-result     (command sonja
-                                    :give-statement
+        give-statement-result     (command sonja :give-statement
                                     :id application-id
                                     :statementId statement-id
-                                    :status "yes"
+                                    :status "puoltaa"
                                     :lang "fi"
                                     :text "Annanpa luvan urakalle.")]
     (query-application pena application-id)))
@@ -118,7 +116,6 @@
         output-dir  (str "target/" sftp-user permit-type-dir "/")
 
         linkkiliitteeseen  (xml/get-text liite [:linkkiliitteeseen])
-        kuvaus  (xml/get-text liite [:kuvaus])
         tyyppi (xml/get-text liite [:tyyppi])
         linkki-as-uri (when linkkiliitteeseen (URI. linkkiliitteeseen))
         attachment-file-name  (last (s/split linkkiliitteeseen #"/"))
@@ -138,7 +135,7 @@
 
 (defn- final-xml-validation [application expected-attachment-count expected-sent-attachment-count & [additional-validator]]
   (let [permit-type (keyword (permit/permit-type application))
-        app-attachments (filter #(:latestVersion %) (:attachments application))
+        app-attachments (filter :latestVersion (:attachments application))
         organization (organization-from-minimal-by-id (:organization application))
         sftp-user  (get-in organization [:krysp permit-type :ftpUser])
         krysp-version (get-in organization [:krysp permit-type :version])
@@ -160,6 +157,7 @@
         xml (parse (io/reader xml-file))
         liitetieto (xml/select xml [:liitetieto])
         polygon (xml/select xml [:Polygon])]
+
 
     (fact "Correctly named xml file is created" (.exists xml-file) => true)
 
@@ -184,13 +182,14 @@
     (fact "XML contains correct amount attachments" (count liitetieto) => expected-attachment-count)
 
     (fact "Correct number of attachments are marked sent"
-      (count (->> app-attachments
-               (filter :latestVersion)
-               (filter #(not= (get-in % [:target :type]) "verdict"))
-               (filter :sent)))
+      (->> app-attachments
+             (filter :latestVersion)
+             (filter #(not= (get-in % [:target :type]) "verdict"))
+             (filter :sent)
+             count)
       => expected-sent-attachment-count)
 
-    (fact "XML contains correct amount polygons"
+    (fact "XML contains correct amount of polygons"
       (count polygon) => (case permit-type
                            :R 0
                            :P 0
@@ -202,7 +201,14 @@
                              last)
             liite          (-> liitetieto take-liite-fn (xml/select1 [:Liite]))
             kuvaus         (xml/get-text liite [:kuvaus])
-            app-attachment (some #(when (.contains kuvaus (:id %)) %) app-attachments)
+            metatiedot     (xml/select liite [:metatietotieto])
+            metatiedot-edn (map
+                             (comp
+                               #(or (get-in % [:metatietotieto :metatieto]) (get-in % [:metatietotieto :Metatieto]))
+                               xml/xml->edn)
+                             metatiedot)
+            liite-id       (some #(when (= "liiteId" (:metatietoNimi %)) (:metatietoArvo %)) metatiedot-edn)
+            app-attachment (some #(when (= liite-id (:id %)) %) app-attachments)
             expected-type  (get-in app-attachment [:type :type-id])]
 
         (fact "XML has corresponding attachment in app" app-attachment => truthy)
@@ -256,10 +262,7 @@
                              :VVVL vesihuolto-canonical/vapautus-canonical)
               canonical (canonical-fn updated-application "fi")
               mapping (case permit-type
-                        :R (case krysp-version
-                             "2.1.2" rakennuslupa_to_krysp_212
-                             "2.1.3" rakennuslupa_to_krysp_213
-                             "2.1.6" rakennuslupa_to_krysp_216)
+                        :R (get-rakennuslupa-mapping krysp-version)
                         :YA (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version)
                         :P poikkeamis_to_krysp_212
                         :YI ilmoitus_to_krysp
@@ -380,41 +383,41 @@
       (get-in sipoo-r [:krysp :R :version]) => "2.1.6"
       (get-in jp-r [:krysp :R :version]) => "2.1.3"))
 
- (doseq [[apikey assignee property-id] [[sonja sonja-id sipoo-property-id] [raktark-jarvenpaa (id-for-key raktark-jarvenpaa) jarvenpaa-property-id]]]
-   (let [application    (create-and-submit-application apikey :propertyId property-id :address "Katselmuskatu 17")
-         application-id (:id application)
-         _ (command apikey :assign-application :id application-id :assigneeId assignee) => ok?
-         task-name      "do the shopping"
-         task-id        (:taskId (command apikey :create-task :id application-id :taskName task-name :schemaName "task-katselmus")) => truthy
-         application    (query-application apikey application-id)]
+  (doseq [[apikey assignee property-id] [[sonja sonja-id sipoo-property-id] [raktark-jarvenpaa (id-for-key raktark-jarvenpaa) jarvenpaa-property-id]]]
+    (let [application    (create-and-submit-application apikey :propertyId property-id :address "Katselmuskatu 17")
+          application-id (:id application)
+          _ (command apikey :assign-application :id application-id :assigneeId assignee) => ok?
+          task-name      "do the shopping"
+          task-id        (:taskId (command apikey :create-task :id application-id :taskName task-name :schemaName "task-katselmus")) => truthy
+          application    (query-application apikey application-id)]
 
-     (populate-task application task-id apikey) => ok?
+      (populate-task application task-id apikey) => ok?
 
-     (upload-attachment-to-target apikey application-id nil true task-id "task")
-     (upload-attachment-to-target apikey application-id nil true task-id "task" "muut.katselmuksen_tai_tarkastuksen_poytakirja")
+      (upload-attachment-to-target apikey application-id nil true task-id "task")
+      (upload-attachment-to-target apikey application-id nil true task-id "task" "muut.katselmuksen_tai_tarkastuksen_poytakirja")
 
-     (doseq [attachment (:attachments (query-application apikey application-id))]
-       (fact "sent timestamp not set"
-         (:sent attachment) => nil))
+      (doseq [attachment (:attachments (query-application apikey application-id))]
+        (fact "sent timestamp not set"
+          (:sent attachment) => nil))
 
-     (command apikey :approve-task :id application-id :taskId task-id) => ok?
-     (command apikey :send-task :id application-id :taskId task-id :lang "fi") => ok?
+      (command apikey :approve-task :id application-id :taskId task-id) => ok?
+      (command apikey :send-task :id application-id :taskId task-id :lang "fi") => ok?
 
-     (let [application (query-application apikey application-id)]
-       (final-xml-validation
-         application
-         1 ; Uploaded 2 regular attachments and
-         2 ; the other should be katselmuspoytakirja
-         (fn [xml]
-           (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
-                 poytakirja (xml/select1 katselmus [:katselmuspoytakirja])]
-             (validate-attachment poytakirja "katselmuksen_tai_tarkastuksen_poytakirja" application)
-             (fact "task name is transferred for muu katselmus type"
-               (xml/get-text katselmus [:tarkastuksenTaiKatselmuksenNimi]) => task-name))))
+      (let [application (query-application apikey application-id)]
+        (final-xml-validation
+          application
+          1 ; Uploaded 2 regular attachments and
+          2 ; the other should be katselmuspoytakirja
+          (fn [xml]
+            (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
+                  poytakirja (xml/select1 katselmus [:katselmuspoytakirja])]
+              (validate-attachment poytakirja "katselmuksen_tai_tarkastuksen_poytakirja" application)
+              (fact "task name is transferred for muu katselmus type"
+                (xml/get-text katselmus [:tarkastuksenTaiKatselmuksenNimi]) => task-name))))
 
-       (doseq [attachment (filter :latestVersion (:attachments application))]
-         (fact "sent timestamp is set"
-           (:sent attachment) => number?))))))
+        (doseq [attachment (filter :latestVersion (:attachments application))]
+          (fact "sent timestamp is set"
+            (:sent attachment) => number?))))))
 
 ;;
 ;; TODO: Fix this

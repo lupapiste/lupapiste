@@ -2,8 +2,10 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/html" id="fill-info-template">
-      <button data-bind="ltext: 'fillInfoButton', click: fillUserInfo, enable: authorization.ok('set-user-to-document')" class="btn-primary" data-test-id="fill-info-button"></button>
+    <script type="text/x-jquery-tmpl" id="fill-info-template">
+        <button data-bind="ltext: 'fillInfoButton', click: fillUserInfo, visible: authorization.ok('set-current-user-to-document')"
+                class="positive margins-s"
+                data-test-id="fill-info-button"></button>
     </script>
   </section>
 </body>

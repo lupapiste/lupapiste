@@ -2,34 +2,30 @@
 <html>
 <body>
   <section class="page" id="inforequest">
-  <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'inforequest' -->
     <div class="application_summary">
-      <div class="container">
-        <div class="application-map-container">
-          <div id="inforequest-map" class="map map-large" style="width: 320px; height: 280px;"></div>
-          <div class="application-map-actions" data-bind="with: application">
-            <!-- ko if: location() -->
-              <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
-            <!-- /ko -->
-          </div>
-        </div>
-
-        <div data-bind="with: application" class="application_summary_info">
-          <h1>
-            <span data-bind="ltext: 'infoRequest'"></span> <span data-bind="text: address" class="address"></span>
-            <a class="icon"
-               data-bind="ltext: 'edit',
-                          click: $root.changeLocationModel.changeLocation,
-                          visible: $root.authorization.ok('change-location')"
-               data-test-id="change-location-link">
-             </a>
-          </h1>
+        <div class="container">
+            <div class="preamble">
+                <div data-bind="with: application" class="application_summary_info">
+                    <h1 data-bind="component: {name: 'address',
+                                   params: { prefix: 'infoRequest',
+                                             application: $parent,
+                                             edit: 'edit'}}"></h1>
+                    <h2 data-bind="if: primaryOperation">
+            <span data-test-id="test-application-primary-operation"
+                  data-bind="ltext: primaryOperationName, attr: {'data-test-primary-operation-id': primaryOperation().name}"></span>
+          </h2>
 
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
             <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="inforequest-property-id"></span>
           </div>
+          <!-- Municipality: -->
+          <div>
+              <p data-bind="ltext: 'application.municipality'"></p>
+              <span class="application_summary_text" data-bind="text: loc(['municipality', municipality()])"></span>
+          </div>
+
           <!-- Applicant: -->
           <div>
             <p data-bind="ltext: 'application.asker'"></p>
@@ -47,53 +43,50 @@
           <!-- Created: -->
           <div>
             <p data-bind="ltext: 'inforequest.created'"></p>
-            <span data-bind="if: $data.created">
-              <span class="application_summary_text" data-bind="dateString: created"></span>
-            </span>
+            <span class="application_summary_text" data-bind="dateString: created"></span>
           </div>
           <!-- Application ID: -->
           <div>
             <p data-bind="ltext: 'application.id'"></p>
             <span data-bind="text: id" data-test-id="inforequest-application-id" class="application_summary_text"></span>
           </div>
-          <!-- Operations: -->
-          <div>
-            <p data-bind="ltext: 'application.operations'"></p>
-            <ul data-bind="foreach: operationsCount">
-              <li>
-                <span data-bind="visible: count > 1">
-                  <span data-bind="text: count"></span>
-                  <span>&#x00D7;</span>
-                </span>
-                <span data-bind="ltext: 'operations.' + name, attr: {'data-test-operation-id': name}" data-test-id="test-application-operation"></span>
-              </li>
-            </ul>
-          </div>
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
           <div data-bind="component: {name: 'authority-select', params: {kind: 'inforequest'}}"></div>
           <!-- /ko -->
         </div>
-        <div class="application_actions" data-bind="with: application">
-          <div class="muncipality-info">
-            <h2 data-bind="ltext: 'application.muncipality'"></h2>
-            <p data-bind="text: loc(['municipality', municipality()])"></p>
+                <div class="application-map-container">
+          <div id="inforequest-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+          <div class="application-map-actions" data-bind="with: application">
+            <!-- ko if: location() -->
+              <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
+            <!-- /ko -->
           </div>
-          <button data-bind="click: convertToApplication, visible: $root.authorization.ok('convert-to-application')" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary">
-            <span data-bind="ltext: 'inforequest.convertToApplication'"></span>
-            <span class="icon send left-align"></span>
-          </button>
-          <button data-bind="click: cancelInforequest,  visible: $root.authorization.ok('cancel-inforequest')"  data-test-id="inforequest-cancel-btn"  class="btn">
-            <span data-bind="ltext: 'inforequest.cancelInforequest'"></span>
-            <span class="icon remove-grey left-align"></span>
-          </button>
-          <button data-bind="click: resetIndicators,           visible: $root.authorization.ok('mark-everything-seen'),            enable: !processing() && $root.authorization.ok('mark-everything-seen')"     data-test-id="application-mark-everything-seen-btn"  class="btn">
-            <span data-bind="ltext: 'application.reset-indicators'"></span>
-            <span class="icon mark-seen left-align"></span>
-          </button>
         </div>
-        <div class="clear"></div>
-      </div>
+        <div class="application_actions">
+            <div class="stacked" data-bind="with: application">
+                <button data-bind="click: convertToApplication, visible: $root.authorization.ok('convert-to-application')"
+                        data-test-id="inforequest-convert-to-application" type="submit" class="positive">
+                    <i class="lupicon-download"></i>
+                    <span data-bind="ltext: 'inforequest.convertToApplication'"></span>
+                </button>
+                <button data-bind="click: cancelInforequest,  visible: $root.authorization.ok('cancel-inforequest')"
+                        data-test-id="inforequest-cancel-btn"  class="function">
+                    <i class="lupicon-circle-remove"></i>
+                    <span data-bind="ltext: 'inforequest.cancelInforequest'"></span>
+                </button>
+                <button data-bind="click: resetIndicators,
+                                   visible: $root.authorization.ok('mark-everything-seen'),
+                                   enable: !processing() && $root.authorization.ok('mark-everything-seen')"
+                        data-test-id="application-mark-everything-seen-btn"  class="function">
+                    <i class="lupicon-eye"></i>
+                    <span data-bind="ltext: 'application.reset-indicators'"></span>
+                </button>
+            </div>
+        </div>
+            </div>
+            <div class="clear"></div>
+        </div>
     </div>
 
 
@@ -138,9 +131,12 @@
                   </span>
                 </td>
                 <td>
-                  <span data-bind="click: $root.attachmentsTab.deleteSingleAttachment,
-                                  clickBubble: false,
-                                  attr: {'class': 'icon remove-grey', 'title': loc('attachment.delete')}"></span>
+                  <div data-bind="visible: $root.authorization.ok('delete-attachment')">
+                      <span class="primary lupicon-remove"
+                            data-bind="click: $root.attachmentsTab.deleteSingleAttachment,
+                                     clickBubble: false,
+                                     attr: {title: loc('attachment.delete')}"></span>
+                  </div>
                 </td>
               </tr>
               <!-- /ko -->
@@ -154,9 +150,14 @@
         </div>
 
         <button
-          class="btn"
-          data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enabled: $root.authorization.ok('upload-attachment'), click: application.newOtherAttachment"
-          data-test-id="add-inforequest-attachment"></button>
+          class="secondary"
+          data-bind="visible: $root.authorization.ok('upload-attachment'),
+                     enabled: $root.authorization.ok('upload-attachment'),
+                     click: application.newOtherAttachment"
+          data-test-id="add-inforequest-attachment">
+            <i class="lupicon-circle-plus"></i>
+            <span data-bind="ltext: 'application.attachmentsAdd'"></span>
+        </button>
 
         <div class="inforequest-conversation">
           <h2  data-bind="ltext: 'inforequest.comments'"></h2>
@@ -166,7 +167,6 @@
       </div>
 
     </div>
-  <!-- /ko -->
   </section>
 </body>
 </html>

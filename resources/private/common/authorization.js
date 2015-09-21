@@ -10,8 +10,8 @@ var authorization = (function() {
       return self.data && self.data()[command] && self.data()[command].ok;
     };
 
-    self.refreshWithCallback = function(data, callback) {
-      return ajax.query("allowed-actions", data)
+    self.refreshWithCallback = function(queryParams, callback) {
+      return ajax.query("allowed-actions", queryParams)
         .success(function(d) {
           self.data(d.actions);
           if (callback) { callback(); }
@@ -23,10 +23,16 @@ var authorization = (function() {
         .call();
     };
 
-    self.refresh = function(data, extraParams, callback) {
-      var id = _.isObject(data) ? data.id : data;
+    self.refresh = function(queryParams, extraParams, callback) {
+      var id = _.isObject(queryParams) ? queryParams.id : queryParams;
       var params =  _.isObject(extraParams) ? _.extend({id: id}, extraParams) : {id: id};
       self.refreshWithCallback(params, callback);
+    };
+
+    return {
+      ok: self.ok,
+      refreshWithCallback: self.refreshWithCallback,
+      refresh: self.refresh
     };
   }
 

@@ -1,66 +1,198 @@
+$header-padding: 12px;
+$header-height: 60px;
+$brand-width: 188px;
+$language-bg: $gray85;
+$language-padding: 20px;
+
+@mixin header-padding {
+  padding: {
+  left: $header-padding;
+  right: $header-padding;
+}
+}
+
+@mixin nav-link( $link: $orange, $hover: white, $hover-bg: inherit ) {
+  a {
+    font-size: 16px;
+    vertical-align: middle;
+    white-space: nowrap;
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    // Reminder of order: link, visited, hover, active
+    &:link, &:visited {
+              color: $link;
+              text-decoration: none;
+              span {
+                color: $link;
+              }
+            }
+    &:hover, &:active {
+               color: $hover;
+               background-color: $hover-bg;
+               span {
+                 color: $hover;
+               }
+             }
+    span {
+      vertical-align: middle;
+    }
+  }
+}
+
+@mixin language-select( $link: $orange, $hover: white, $bg: inherit ) {
+  @include nav-link( $link: $link, $hover: $hover, $hover-bg: $language-bg );
+  background-color: $bg;
+  display: inline-block;
+  margin: 0;
+  float: left;
+  a {
+    padding: {
+    left: $language-padding;
+    right: $language-padding;
+    top: 0;
+    bottom: 0;
+  }
+  }
+  a, span {
+    vertical-align: middle;
+    line-height: $header-height;
+    text-transform: uppercase;
+    overflow: hidden;
+  }
+}
+
+@mixin nav-row( $bg ) {
+  width: 100%;
+  background-color: $bg;
+  display: block;
+  clear: both;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.nav-wrapper {
+  width: 100%;
+}
+
+.nav-box {
+  width: 100%;
+  max-width: $application-max-width;
+  min-width: $application-min-width;
+  margin: 0 auto;
+  position: relative;
+    box-sizing: border-box;
+    margin: {
+      left: auto;
+      right: auto;
+    }
+}
 
 nav {
   position: fixed;
   top:0;
   z-index: 2002;
-  background: #fff;
-  height: 60px;
   box-sizing: border-box;
   width: 100%;
-  background: $lp-dark-grey;
-  .nav-wrapper {
-    width: 100%;
-    max-width: $application-max-width;
-    margin: 0 auto;
+  .nav-top {
+    @include nav-row( $gray51);
+  }
+  .brand {
     position: relative;
-    box-sizing: border-box;
-    .brand {
-      position: relative;
-      width: 300px;
+    width: $brand-width;
+    display: inline-block;
+    float: left;
+    a img {
+      float: left;
+      width: 164px;
+      height: 35px;
+      margin: 12px;
+    }
+  }
+  .language-closed {
+    @include language-select;
+
+  }
+  .language-open {
+    @include language-select( $link: white, $hover: $orange, $bg: $language-bg );
+  }
+  .header-menu {
+    display: inline-block;
+    position: absolute;
+    right: 0px;
+
+    .header-box {
+      @include nav-link;
+      @include header-padding;
       display: inline-block;
-      .logo {
-        margin: 12px;
+      height: $header-height;
+      a {
+        max-width: 300px;
       }
-      a img {
-        float: left;
-        width: 164px;
-        height: 35px;
-        margin: 12px;
-      }
-      .change-language {
-        color: $lp-orange;
-        text-decoration: none;
-        display: inline-block;
-        position: absolute;
-        top: 20px;
-        left: 200px;
+      a, span {
+        line-height: $header-height;
       }
     }
+  }
+}
 
-    .header-menu {
-      display: inline-block;
-      float: right;
-      .header-box {
-        display: inline-block;
-        padding: $marginM;
-        height: 60px;
-        a, span {
-          color: white;
-          font-size: 16px;
-          text-decoration: none;
-          vertical-align: middle;
-        }
-        a {
-          white-space: nowrap;
-          position: relative;
-          max-width: 300px;
-          display: inline-block;
-          overflow: hidden;
-          text-overflow: ellipsis;
+.nav-bottom {
+  @include nav-row( $language-bg );
+  .language-menu {
+    width: 100%;
+    clear: both;
+    padding: {
+      top: 1em;
+      left: $brand-width + $language-padding;
+      bottom: .5em;
+    }
+    background-color: $language-bg;
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      li {
+        @include nav-link( $link: white, $hover: $orange);
+        margin: {
+          bottom: .5em;
+          top: 0;
         }
       }
     }
   }
 }
 
+// The margins/paddings may seem arbitrary, but
+// they are due to rendering differences between
+// different browsers.
+$notification-bg: $orange-dark;
+$notification-top: 60px;
+$notification-bottom: -60px;
 
+.nav-notification {
+  @include nav-row( $orange-dark );
+  padding: {
+    left: $header-padding;
+    top: $header-padding + 1px;
+    bottom: $header-padding;
+  }
+  margin: {
+    top: $notification-top;
+    bottom: $notification-bottom;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+// Admin nav is different, so tweaking is needed.
+// See admin.css for details.
+.admin {
+  .nav-notification {
+    margin: {
+    top: $notification-top + 42px + 4px;
+    bottom: $notification-bottom + 12px;
+  }
+  }
+}

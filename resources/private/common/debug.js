@@ -9,10 +9,12 @@ jQuery(function($) {
     return false;
   }
 
-  function createApplication(operation) {
+  function createApplication(operation, permitType) {
     var municipality = "753";
     if (lupapisteApp.models.currentUser.isAuthority()) {
-      var org = _.keys(lupapisteApp.models.currentUser.orgAuthz())[0];
+      var probableOrg = municipality + "-" + permitType;
+      var orgAuthMuniKeys = _.keys(lupapisteApp.models.currentUser.orgAuthz());
+      var org = _.includes(orgAuthMuniKeys, probableOrg) ? probableOrg : orgAuthMuniKeys[0];
       municipality = org.split("-")[0];
     }
     $.ajax({
@@ -39,54 +41,59 @@ jQuery(function($) {
   }
 
   $("footer")
-    .append($("<div>").addClass("dev-debug")
-      .append($("<h3>")
-        .append($("<a>").attr("href", "#").text("Development").click(function() { $("footer .dev-debug div:eq(0)").slideToggle(); return false; })))
-      .append($("<button>").text("Hide!").css("width", "100px").click(function(){$(".dev-debug").hide();}))
-      .append($("<div>")
-        .append($("<input id='debug-tab-flow' type='checkbox'>").click(function() { hub.send("set-debug-tab-flow", { value: !!$(this).attr("checked") }); }))
-        .append($("<label>").text("Flowing tabs"))
-        .append($("<br>"))
-        .append($("<input type='checkbox'>").click(function() { $(".page").toggleClass("visible"); }))
-        .append($("<label>").text("Toggle hidden"))
-        .append($("<br>"))
-        .append($("<input type='checkbox' data-id='proxy' id='debugProxy'>").click(function(e) { ajax.post("/api/proxy-ctrl/" + ($(e.target).prop("checked") ? "on" : "off")).call(); }))
-        .append($("<label for='debugProxy'>").text("Proxy enabled"))
-        .append($("<br>"))
-        .append($("<input type='checkbox' data-id='maps' id='debugMaps'>")
-            .click(function(e) { ajax.query("set-feature", {feature: "maps-disabled", value: $(e.target).prop("checked")}).call(); })
-            .prop("checked", features.enabled("maps-disabled")))
-        .append($("<label for='debugMaps'>").text("Disable maps"))
-        .append($("<br>"))
-        .append($("<input type='checkbox' data-id='anim' checked='checked'>").click(function() { tree.animation($(this).prop("checked")); }))
-        .append($("<label>").text("Animations"))
-        .append($("<br>"))
-        .append($("<input type='checkbox' id='debugHub'>").click(function() { hub.setDebug(this.checked); }))
-        .append($("<label for='debugHub'>").text("Log events"))
-        .append($("<br>"))
-        .append($("<a href='/api/last-email'>Last Email</a><br>"))
-        .append($("<a href='/internal/reload'>Reload env/i18n</a><br>"))
-        .append($("<p>")
-          .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
-          .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("Apply minimal").click(function() { applyFixture("minimal"); }))
-        .append($("<p>").text("Create:")
-          .append($("<span>").attr("id", "debug-create-done").css("font-weight", "bold").hide())
-          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/asuinkerrostalo").click(function() { createApplication("kerrostalo-rivitalo"); }))
-          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/sisatilojen muutos").click(function() { createApplication("sisatila-muutos"); }))
-          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("YA/katulupa").click(function() { createApplication("ya-katulupa-vesi-ja-viemarityot"); }))))
-        .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
-        .append($("<span>").text("Throttle web: "))
-        .append($("<b>").addClass("dev-throttle-web").text("0"))
-        .append($("<input type='range' value='0' min='0' max='2000' step='10'>").change(_.throttle(_.partial(throttle, "web"), 500)))
-        .append($("<br>"))
-        .append($("<span>").text("Throttle DB: "))
-        .append($("<b>").addClass("dev-throttle-db").text("0"))
-        .append($("<input type='range' value='0' min='0' max='2000' step='10'>").change(_.throttle(_.partial(throttle, "db"), 500))))
-      .append($("<h3>")
-        .append($("<a>").attr("href", "#").text("Timing").click(function() { $("footer .dev-debug div:eq(1)").slideToggle(); return false; })))
-      .append($("<div>")
-        .append($("<table>").addClass("dev-debug-timing"))
-        .hide()));
+  .append($("<div>").addClass("dev-debug")
+          .append($("<h3>")
+                  .append($("<a>").attr("href", "#").text("Development").click(function() { $("footer .dev-debug div:eq(0)").slideToggle(); return false; })))
+          .append($("<button>").text("Hide!").css("width", "100px").click(function(){$(".dev-debug").hide();}))
+          .append($("<div>")
+                  .append($("<input id='debug-tab-flow' type='checkbox'>").click(function() { hub.send("set-debug-tab-flow", { value: !!$(this).attr("checked") }); }))
+                  .append($("<label>").text("Flowing tabs"))
+                  .append($("<br>"))
+                  .append($("<input type='checkbox'>").click(function() { $(".page").toggleClass("visible"); }))
+                  .append($("<label>").text("Toggle hidden"))
+                  .append($("<br>"))
+                  .append($("<input type='checkbox' data-id='proxy' id='debugProxy'>")
+                          .click(function(e) { ajax.post("/api/proxy-ctrl/" + ($(e.target).prop("checked") ? "on" : "off")).call(); }))
+                  .append($("<label for='debugProxy'>").text("Proxy enabled"))
+                  .append($("<br>"))
+                  .append($("<input type='checkbox' data-id='maps' id='debugMaps'>")
+                          .click(function(e) { ajax.query("set-feature", {feature: "maps-disabled", value: $(e.target).prop("checked")}).call(); })
+                          .prop("checked", features.enabled("maps-disabled")))
+                  .append($("<label for='debugMaps'>").text("Disable maps"))
+                  .append($("<br>"))
+                  .append($("<input type='checkbox' data-id='anim' checked='checked'>").click(function() { tree.animation($(this).prop("checked")); }))
+                  .append($("<label>").text("Animations"))
+                  .append($("<br>"))
+                  .append($("<input type='checkbox' id='debugHub'>").click(function() { hub.setDebug(this.checked); }))
+                  .append($("<label for='debugHub'>").text("Log events"))
+                  .append($("<br>"))
+                  .append($("<a href='/api/last-email'>Last Email</a> - <a href='/api/last-emails'>All</a><br>"))
+                  .append($("<a href='/internal/reload'>Reload env/i18n</a><br>"))
+                  .append($("<p>")
+                          .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
+                          .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("Apply minimal").click(function() { applyFixture("minimal"); }))
+                          .append($("<p>").text("Create:")
+                                  .append($("<span>").attr("id", "debug-create-done").css("font-weight", "bold").hide())
+                                  .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/asuinkerrostalo")
+                                          .click(function() { createApplication("kerrostalo-rivitalo", "R"); }))
+                                  .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/sisatilojen muutos")
+                                          .click(function() { createApplication("sisatila-muutos", "R"); }))
+                                  .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("YA/katulupa").
+                                          click(function() { createApplication("ya-katulupa-vesi-ja-viemarityot", "YA"); }))))
+                  .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
+                  .append($("<span>").text("Throttle web: "))
+                  .append($("<b>").addClass("dev-throttle-web").text("0"))
+                  .append($("<input type='range' value='0' min='0' max='2000' step='10'>").change(_.throttle(_.partial(throttle, "web"), 500)))
+                  .append($("<br>"))
+                  .append($("<span>").text("Throttle DB: "))
+                  .append($("<b>").addClass("dev-throttle-db").text("0"))
+                  .append($("<input type='range' value='0' min='0' max='2000' step='10'>").change(_.throttle(_.partial(throttle, "db"), 500))))
+          .append($("<h3>")
+                  .append($("<a>").attr("href", "#").text("Timing").click(function() { $("footer .dev-debug div:eq(1)").slideToggle(); return false; })))
+          .append($("<button>").text("Hide!").css("width", "100px").click(function(){$(".dev-debug").hide();}))
+          .append($("<div>")
+                  .append($("<table>").addClass("dev-debug-timing"))
+                  .hide()));
 
   ajax.get(window.location.protocol + "//" + window.location.host + "/perfmon/throttle")
     .success(function(data) {
@@ -133,7 +140,8 @@ jQuery(function($) {
           pop:       "003776543212",
           firstName: "fo",
           lastName:  "ba",
-          email:     "fo@ba.com"
+          email:     "fo@ba.com",
+          personId:  "131052-308T"
         };
         if (lupapisteApp.models.currentUser) {
           delete formData.firstName;

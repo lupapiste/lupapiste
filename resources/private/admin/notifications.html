@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="notifications">
+      <div class="container">
+        <h2>Kayttajailmoitukset</h2>
+
+        <div>
+          <p>Keille viesti nakyy</p>
+          <div>
+            <input type="checkbox" id="applicant-notices" data-bind="checked: applicants"></input>
+            <label for="applicant-notices">Hakijat</label>
+          </div>
+
+          <div>
+            <input type="checkbox" id="authority-notices" data-bind="checked: authorities"></input>
+            <label for="authority-notices">Viranomaiset</label>
+          </div>
+        </div>
+
+        <div>
+          <label>Otsikko</label>
+          <input type="text" data-bind="textInput: title"></input>
+        </div>
+
+        <div>
+          <label>Viesti</label>
+          <textarea rows="10" data-bind="value: message"></textarea>
+        </div>
+
+        <button class="btn positive" data-bind="click: updateNotifications">Tallenna ilmoitus kayttajille</button>
+      </div>
+    </section>
+  </body>
+</html>

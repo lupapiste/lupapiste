@@ -1,12 +1,14 @@
 /* attachments */
 
+$attachment-modal-width: 600px;
+
 #attachment.container {
   padding-right: 0;
 }
 
 .attachment-iframe{
-  height: 530px;
-  width: 600px;
+  height: 570px;
+  width: $attachment-modal-width;
   border:0;
   overflow: hidden;
 }
@@ -100,14 +102,14 @@ $previewHeight: 500px;
     width: $cols3;
     float: right;
     margin-top: -60px;
-    button {
-      width: 100%;
-    }
+    vertical-align: top;
   }
 }
 
 .attachment-info-wrapper {
   float: left;
+  vertical-align: top;
+  margin-top: $marginL;
   width: 80%;
   .tab-info {
     width: 80%;
@@ -115,7 +117,6 @@ $previewHeight: 500px;
 }
 
 .attachment-info-header {
-  overflow: auto;
   width: 100%;
   display: block;
   h1 {
@@ -125,10 +126,6 @@ $previewHeight: 500px;
   }
   a {
     margin-left: $marginL * 2;
-  }
-  .help {
-    margin-left: $marginM;
-    display: inline-block;
   }
 }
 
@@ -153,16 +150,6 @@ td.comment-text {
   vertical-align:bottom;
   td {
     padding: $marginS 0;
-  }
-}
-
-.attachment-back {
-
-  display: block;
-  height: 60px;
-
-  a {
-    margin-right: $marginM;
   }
 }
 
@@ -262,4 +249,15 @@ td.comment-text {
     margin-bottom: $marginM;
   }
   margin-bottom: $marginL;
+}
+
+.archive-valid {
+  .icon {
+    vertical-align: middle;
+    margin-left: 5px;
+  }
+}
+
+.modal-body p {
+  max-width: $attachment-modal-width;
 }

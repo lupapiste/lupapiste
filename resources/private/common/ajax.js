@@ -6,6 +6,17 @@ var ajax = (function($) {
   function Call(url, type) {
     var self = this;
 
+    var defaultError = function(e) {
+      error("AJAX: ERROR", self.request.url, e);
+      notify.error(loc(e.text));
+    };
+
+    self.customErrorHandlers = {};
+
+    var resolveErrorHandler = function(e) {
+      return self.customErrorHandlers[e.text] ? self.customErrorHandlers[e.text] : self.errorHandler;
+    };
+
     self.onComplete = function(jqXHR, textStatus) {
       if (self.pendingListener) {
         clearTimeout(self.pendingHandler);
@@ -28,8 +39,14 @@ var ajax = (function($) {
       rawData:   false,
       complete:  self.onComplete,
       success: function(e) {
-        var handler = (self.rawData || e.ok) ? self.successHandler : self.errorHandler;
-        handler.call(self.savedThis, e);
+        if (self.rawData || e.ok) {
+          self.successHandler.call(self.savedThis, e);
+        } else {
+          var res = resolveErrorHandler(e).call(self.savedThis, e);
+          if (res && res.ok === false) {
+            defaultError(e);
+          }
+        }
       },
       error: function(jqXHR, textStatus, errorThrown) {
         self.failHandler(jqXHR, textStatus, errorThrown);
@@ -42,10 +59,7 @@ var ajax = (function($) {
     };
 
     self.successHandler = function() { };
-    self.errorHandler = function(e) {
-      error("AJAX: ERROR", self.request.url, e);
-      notify.error(loc("error.dialog.title"), loc(e.text));
-    };
+    self.errorHandler = defaultError;
     self.failHandler = function(jqXHR, textStatus, errorThrown) {
       if (jqXHR && jqXHR.status > 0 &&jqXHR.status !== 403 && jqXHR.readyState > 0) {
         error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);
@@ -90,6 +104,12 @@ var ajax = (function($) {
       return self.success(function(e) { hub.send(n, e); });
     };
 
+    self.onError = function(errorText, f, savedThis) {
+      self.customErrorHandlers[errorText] = f;
+      self.savedThis = savedThis;
+      return self;
+    };
+
     self.error = function(f, savedThis) {
       self.errorHandler = f;
       self.savedThis = savedThis;
@@ -124,19 +144,23 @@ var ajax = (function($) {
     };
 
     self.processing = function(listener) {
-      if (!listener) { return self; }
-      if (!_.isFunction(listener)) { throw "Argument must be a function: " + listener; }
-      self.processingListener = listener;
-      self.processingListener(false);
+      if (_.isFunction(listener)) {
+        self.processingListener = listener;
+        self.processingListener(false);
+      } else {
+        error("processing listener must be a function", listener, self.request.url);
+      }
       return self;
     };
 
     self.pending = function(listener, timeout) {
-      if (!listener) { return self; }
-      if (!_.isFunction(listener)) { throw "Argument must be a function: " + listener; }
-      self.pendingListener = listener;
-      self.pendingTimeout = timeout || 100;
-      self.pendingListener(false);
+      if (_.isFunction(listener)) {
+        self.pendingListener = listener;
+        self.pendingTimeout = timeout || 100;
+        self.pendingListener(false);
+      } else {
+        error("pending listener must be a function", listener, self.request.url);
+      }
       return self;
     };
 

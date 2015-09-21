@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="applications-search-paging-template">
+      <div class="paging">
+        <div>
+          <span data-bind="text: loc('applications.results', start(), end(), count())"></span>
+        </div>
+        <div>
+          <button class="btn btn-narrow" data-bind="click: prev, enable: count() > dataProvider.limit() && start() > dataProvider.limit(), ltext: 'previous'"></button>
+          <button class="btn btn-narrow" data-bind="click: next, enable: count() > dataProvider.limit() && count() > end(), ltext: 'next'"></button>
+          <select data-bind="options: limits, value: dataProvider.limit"></select>
+          <label data-bind="ltext: 'applications.lengthMenu'"></label>
+        </div>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

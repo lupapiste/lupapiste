@@ -2,7 +2,7 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/html" id="neighbors-owners-dialog-template">
+    <script type="text/x-jquery-tmpl" id="neighbors-owners-dialog-template">
       <div class="content">
         <div>
           <h3 data-bind="visible: isPropertyIdAvailable()">
@@ -56,7 +56,7 @@
                                   params: { isSubmitVisible: true,
                                             isSubmitEnabled: isSubmitEnabled,
                                             submit: addSelectedOwners,
-                                            submitTitle: 'save'}}"></div>
+                                            lSubmitTitle: 'save'}}"></div>
     </script>
   </section>
 </body>

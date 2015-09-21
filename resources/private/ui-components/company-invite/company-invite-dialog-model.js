@@ -2,15 +2,23 @@ LUPAPISTE.CompanyInviteDialogModel = function(params) {
   "use strict";
   var self = this;
 
-  self.pending = ko.observable(false);
-  self.companies  = ko.observableArray();
-  self.selected   = ko.observable();
+  self.pending     = ko.observable(false);
+  self.companies   = ko.observableArray();
+  self.selected    = ko.observable();
+  self.confirm     = ko.observable(false);
+  self.confirmText = ko.observable("");
 
-  self.isSubmitEnabled = ko.pureComputed(function() {
+
+  self.isConfirmVisible = true;
+  self.isSubmitVisible = true;
+
+  self.isConfirmEnabled = ko.pureComputed(function() {
     return self.selected() && !self.pending();
   });
 
-  self.isSubmitVisible = true;
+  self.isSubmitEnabled = ko.pureComputed(function() {
+    return self.isConfirmEnabled() && self.confirm();
+  });
 
   self.submit = function() {
     ajax
@@ -23,12 +31,21 @@ LUPAPISTE.CompanyInviteDialogModel = function(params) {
       .call();
   };
 
+  self.openConfirm = function() {
+    self.confirm(true);
+  };
+
+  self.selected.subscribe(function(newSelected) {
+    self.confirmText(loc("company-invite-confirm.desc", newSelected.name));
+  });
+
   var CompaniesDataProvider = function() {
     var self = this;
 
     self.query = ko.observable();
 
     self.companies = ko.observable();
+    self.pending = ko.observable();
 
     self.data = ko.computed(function() {
       var q = self.query() || "";

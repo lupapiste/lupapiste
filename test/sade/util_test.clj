@@ -2,7 +2,8 @@
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [sade.util :refer :all]
             [midje.sweet :refer :all]
-            [schema.core :as sc])
+            [schema.core :as sc]
+            [lupapalvelu.document.schemas :as schema])
   (:import [org.apache.commons.io.output NullWriter]))
 
 (facts "strip-nils"
@@ -84,8 +85,12 @@
     (assoc-in {} [:a :b :d] 5)) => {:a {:b {:c 2 :d 5}}}))
 
 (facts "Contains value"
-  (fact (contains-value? nil nil) => false)
   (fact (contains-value? [] nil) => false)
+  (fact (contains-value? nil nil) => true)
+  (fact (contains-value? [nil] nil) => true)
+  (fact (contains-value? :a :a) => true)
+  (fact (contains-value? #{:a} :a) => true)
+  (fact (contains-value? #{:a} :b) => false)
   (fact (contains-value? nil true?) => false)
   (fact (contains-value? [] true?) => false)
   (fact (contains-value? [nil] true?) => false)
@@ -257,12 +262,13 @@
   (fact (sc/check (max-length-string 1) [1]) =not=> nil))
 
 (facts "comparing history item difficulties"
-  (fact "nil and item"          (compare-difficulty nil {:difficulty "A"})                => pos?)
-  (fact "item and nil"          (compare-difficulty {:difficulty "A"} nil)                => neg?)
-  (fact "old more difficult"    (compare-difficulty {:difficulty "A"} {:difficulty "B"})  => neg?)
-  (fact "new more difficult"    (compare-difficulty {:difficulty "B"} {:difficulty "A"})  => pos?)
-  (fact "tricky difficulty val" (compare-difficulty {:difficulty "A"} {:difficulty "AA"}) => pos?)
-  (fact "equality"              (compare-difficulty {:difficulty "B"} {:difficulty "B"})  => zero?))
+  (let [values (vec (map :name (:body schema/patevyysvaatimusluokka)))]
+    (fact "nil and item"          (compare-difficulty :difficulty values nil {:difficulty "A"})                => pos?)
+    (fact "item and nil"          (compare-difficulty :difficulty values {:difficulty "A"} nil)                => neg?)
+    (fact "old more difficult"    (compare-difficulty :difficulty values {:difficulty "A"} {:difficulty "B"})  => neg?)
+    (fact "new more difficult"    (compare-difficulty :difficulty values {:difficulty "B"} {:difficulty "A"})  => pos?)
+    (fact "tricky difficulty val" (compare-difficulty :difficulty values {:difficulty "A"} {:difficulty "AA"}) => pos?)
+    (fact "equality"              (compare-difficulty :difficulty values {:difficulty "B"} {:difficulty "B"})  => zero?)))
 
 (facts select-values
   (let [m {:foo "foo" :bar "bar" :baz "baz"}]
@@ -271,3 +277,32 @@
     (fact (select-values m [:bar :foo])           => ["bar" "foo"])
     (fact (select-values m [:foo :unknown :bar])  => ["foo" nil "bar"])
     (fact (select-values m [:unknown1 :unknown2]) => [nil nil])))
+
+(facts "to-long"
+  (fact (to-long "1234") => truthy)
+  (fact (to-long "213asd2") => nil)
+  (fact (to-long "") => nil)
+  (fact (to-long 1234) => nil))
+
+(facts "relative-local-url?"
+  (relative-local-url? nil) => false
+  (relative-local-url? "") => true
+  (relative-local-url? "http://localhost") => false
+  (relative-local-url? "//localhost") => false
+  (relative-local-url? "/localhost") => true
+  (relative-local-url? "../localhost") => true)
+
+(facts "version-is-greater-or-equal"
+  (fact "source (evaluated) version"
+    (version-is-greater-or-equal "2"     {:major 2 :minor 1 :micro 5}) => false
+    (version-is-greater-or-equal "2.1"   {:major 2 :minor 1 :micro 5}) => false
+    (version-is-greater-or-equal "2.1.4" {:major 2 :minor 1 :micro 5}) => false
+    (version-is-greater-or-equal "2.1.5" {:major 2 :minor 1 :micro 5}) => true
+    (version-is-greater-or-equal "2.1.6" {:major 2 :minor 1 :micro 5}) => true
+
+    (version-is-greater-or-equal "2"     {:major 2 :minor 0 :micro 0}) => true
+    (version-is-greater-or-equal "2.1"   {:major 2 :minor 1 :micro 0}) => true)
+  (fact "target version"
+    (version-is-greater-or-equal 2.1     {:major 2 :minor 1 :micro 5}) => (throws AssertionError)
+    (version-is-greater-or-equal "2.1.4" "2.1.5")                      => (throws AssertionError)
+    (version-is-greater-or-equal "2.1.4" {:major 2 :minor 1})          => (throws AssertionError)))

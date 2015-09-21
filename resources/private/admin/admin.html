@@ -32,6 +32,12 @@
           <input type="submit" value="Lataa">
         </form>
 
+        <h2>Lataa lista kaikista viranomaisk&auml;ytt&auml;jist&auml;</h2>
+        <form action="/api/raw/admin-download-authority-usernames" method="get">
+          <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+          <input type="submit" value="Lataa"/>
+        </form>
+
       </div>
     </section>
   </body>

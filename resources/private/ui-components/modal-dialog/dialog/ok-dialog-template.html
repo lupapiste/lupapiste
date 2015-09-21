@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="ok-dialog-template">
+      <div class="content">
+        <p data-bind="html: text" class="dialog-desc"></p>
+      </div>
+      <div class="button-group ok">
+      <div data-bind="component: {name:'ok-button-group',
+                                  params: {okFn: ok}}"></div>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

@@ -16,7 +16,7 @@ Mikko creates an application
 
 Mikko adds an attachment
   Open tab  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//td[@class='attachment-file-info']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
 Mikko submits application
@@ -49,17 +49,24 @@ Sonja disables verdict attachment using multiselect view
   Click by test id  multiselect-action-button
 
 There should be no verdict attachments
-  Wait until  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="verdict-attachment-muut.muu"]
+  Wait until  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="verdict-attachment-muut.muu"]
 
 Sonja marks one attachment as verdict attachment using multiselect view
   Select attachment operation option from dropdown  markVerdictAttachments
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
   Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
-  Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
+  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
+  ${passed} =   Run Keyword And Return Status  Wait until  Checkbox Should Be Selected  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]//input
+
+  # Fallback. Not sure why the checkbox is not checked by default when CI runs the test...???
+  Run Keyword Unless  ${passed}  Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
+
+  Checkbox Should Be Selected  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]//input
   Click by test id  multiselect-action-button
+  Wait for jQuery
 
 There should be now one verdict attachment
-  Wait until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="verdict-attachment-muut.muu"]
+  Wait until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="verdict-attachment-muut.muu"]
 
 Sonja gives verdict
   Open tab  verdict

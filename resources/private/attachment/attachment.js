@@ -14,9 +14,13 @@ var attachment = (function() {
     ajax
       .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
       .success(function() {
-        repository.load(applicationId);
-        window.location.hash = "!/application/"+applicationId+"/attachments";
+        applicationModel.reload();
+        applicationModel.open("attachments");
+        model.previewDisabled(false);
         return false;
+      })
+      .onError("error.pre-verdict-attachment", function(e) {
+        notify.error(loc(e.text));
       })
       .call();
       hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachment"});
@@ -39,13 +43,6 @@ var attachment = (function() {
       hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVertion"});
     return false;
   }
-
-  // These cannot be changed to use LUPAPISTE.ModalDialog.showDynamicYesNo,
-  // because the ids are registered with hub.subscribe.
-  LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment",
-    loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), deleteAttachmentFromServer, loc("no"));
-  LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment-version",
-    loc("attachment.delete.version.header"), loc("attachment.delete.version.message"), loc("yes"), function() {deleteAttachmentVersionFromServerProxy();}, loc("no"));
 
   function ApproveModel(authorizationModel) {
     var self = this;
@@ -112,8 +109,8 @@ var attachment = (function() {
     signatures:                   ko.observableArray([]),
     type:                         ko.observable(),
     attachmentType:               ko.observable(),
-    allowedAttachmentTypes:       ko.observableArray([]),
     previewDisabled:              ko.observable(false),
+    previewVisible:               ko.observable(false),
     operation:                    ko.observable(),
     selectedOperationId:          ko.observable(),
     selectableOperations:         ko.observableArray(),
@@ -131,12 +128,13 @@ var attachment = (function() {
     groupAttachments:             ko.observableArray(),
     groupIndex:                   ko.observable(),
     changeTypeDialogModel:        undefined,
-    metadata:                     ko.observableArray(),
+    metadata:                     ko.observable(),
     showTosMetadata:              ko.observable(false),
+    dirty:                        false,
 
-    toggleHelp: function() {
-      model.showHelp(!model.showHelp());
-    },
+    // toggleHelp: function() {
+    //   model.showHelp(!model.showHelp());
+    // },
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -178,35 +176,52 @@ var attachment = (function() {
 
     deleteAttachment: function() {
       model.previewDisabled(true);
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
+      hub.send("show-dialog", {ltitle: "attachment.delete.header",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "attachment.delete.message",
+                                                 yesFn: deleteAttachmentFromServer}});
     },
 
     previousAttachment: function() {
       var previousId = util.getIn(model.groupAttachments(), [model.groupIndex() - 1, "id"]);
       if (previousId) {
-        window.location.hash = "!/attachment/"+applicationId+"/" + previousId;
+        pageutil.openPage("attachment", applicationId + "/" + previousId);
         hub.send("track-click", {category:"Attachments", label: "", event:"previousAttachment"});
+        if (model.dirty) {
+          repository.load(model.application.id());
+        }
       }
     },
 
     nextAttachment: function() {
       var nextId = util.getIn(model.groupAttachments(), [model.groupIndex() + 1, "id"]);
       if (nextId) {
-        window.location.hash = "!/attachment/"+applicationId+"/" + nextId;
+        pageutil.openPage("attachment", applicationId + "/" + nextId);
         hub.send("track-click", {category:"Attachments", label: "", event:"nextAttachment"});
+        if (model.dirty) {
+          repository.load(model.application.id());
+        }
       }
     },
 
     showChangeTypeDialog: function() {
+      model.previewDisabled(true);
       model.changeTypeDialogModel.init(model.attachmentType());
       LUPAPISTE.ModalDialog.open("#change-type-dialog");
     },
 
     deleteVersion: function(fileModel) {
       var fileId = fileModel.fileId;
-      deleteAttachmentVersionFromServerProxy = function() { deleteAttachmentVersionFromServer(fileId); };
+      deleteAttachmentVersionFromServerProxy = function() {
+        deleteAttachmentVersionFromServer(fileId);
+      };
       model.previewDisabled(true);
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment-version");
+      hub.send("show-dialog", {ltitle: "attachment.delete.version.header",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "attachment.delete.version.message",
+                                                 yesFn: deleteAttachmentVersionFromServerProxy}});
     },
 
     sign: function() {
@@ -220,6 +235,31 @@ var attachment = (function() {
 
     toggleTosMetadata: function() {
       model.showTosMetadata(!model.showTosMetadata());
+    },
+
+    previewUrl: ko.pureComputed(function() {
+      return "/api/raw/view-attachment?attachment-id=" + model.latestVersion().fileId;
+    }),
+
+    rotete: function(rotation) {
+      var iframe$ = $("#file-preview-iframe");
+      iframe$.attr("src","/img/ajax-loader.gif");
+      ajax.command("rotate-pdf", {id: applicationId, attachmentId: attachmentId, rotation: rotation})
+        .success(function() {
+          applicationModel.reload();
+          hub.subscribe("attachment-loaded", function() {
+            model.previewVisible(true);
+            iframe$.attr("src", model.previewUrl());
+          }, true);
+        })
+        .call();
+    },
+
+    goBackToApplication: function() {
+      model.application.open("attachments");
+      if (model.dirty) {
+        repository.load(model.application.id());
+      }
     }
   };
 
@@ -256,6 +296,7 @@ var attachment = (function() {
       .command("set-attachment-meta", data)
       .success(function() {
         model.indicator({name: name, type: "saved"});
+        model.dirty = true;
       })
       .error(function(e) {
         error(e.text);
@@ -360,7 +401,7 @@ var attachment = (function() {
             return {
               typeLabel: attachmentTypeLabel(typeGroup[0], type),
               typeValue: attachmentType(typeGroup[0], type)
-            }
+            };
           })
         };
       });
@@ -371,7 +412,7 @@ var attachment = (function() {
     };
 
     self.ok = function() {
-      hub.send("change-attachment-type", {attachmentType: self.attachmentType()})
+      hub.send("change-attachment-type", {attachmentType: self.attachmentType()});
       LUPAPISTE.ModalDialog.close();
     };
   }
@@ -396,6 +437,7 @@ var attachment = (function() {
     }
 
     $("#file-preview-iframe").attr("src","");
+    model.previewVisible(false);
 
     var isUserAuthorizedForAttachment = attachment.required ? lupapisteApp.models.currentUser.role() === "authority" : true;
     model.authorized(isUserAuthorizedForAttachment);
@@ -405,7 +447,7 @@ var attachment = (function() {
     model.signatures(attachment.signatures || []);
     model.filename(attachment.filename);
     model.type(attachment.type);
-    model.selectableOperations(application.operations);
+    model.selectableOperations(application.allOperations);
     model.operation(attachment.op);
     model.selectedOperationId(attachment.op ? attachment.op.id : undefined);
     model.contents(attachment.contents);
@@ -413,18 +455,8 @@ var attachment = (function() {
     model.size(attachment.size);
     model.isVerdictAttachment(attachment.forPrinting);
     model.applicationState(attachment.applicationState);
-    model.allowedAttachmentTypes(application.allowedAttachmentTypes);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
-
-    var metadataArray = _.map(attachment.metadata, function(value, key) {
-      if (_.isObject(value)) {
-        value = _.map(value, function(subvalue, subkey) {
-          return {name: subkey, value: subvalue};
-        });
-      }
-      return {name: key, value: value};
-    });
-    model.metadata(metadataArray);
+    model.metadata(attachment.metadata);
 
     model.id(attachmentId);
 
@@ -435,7 +467,7 @@ var attachment = (function() {
 
     pageutil.hideAjaxWait();
     model.indicator(false);
-
+    model.dirty = false;
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {
       model.init(true);
       if (!model.latestVersion()) {
@@ -464,8 +496,10 @@ var attachment = (function() {
       return att.id === model.id();
     }));
 
-    subscribe();
+    hub.send("attachment-loaded");
   }
+
+  hub.subscribe("attachment-loaded", subscribe);
 
   hub.onPageLoad("attachment", function() {
     pageutil.showAjaxWait();
@@ -474,7 +508,7 @@ var attachment = (function() {
     applicationId = pageutil.subPage();
     attachmentId = pageutil.lastSubPage();
 
-    if (applicationModel._js.id !== applicationId) {
+    if (applicationModel._js.id !== applicationId || model.dirty) {
       repository.load(applicationId);
     } else {
       showAttachment();
@@ -492,17 +526,12 @@ var attachment = (function() {
 
   hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function() {
     resetUploadIframe();
-    model.previewDisabled(false);
   });
-  hub.subscribe({type: "dialog-close", id : "dialog-confirm-delete-attachment"}, function() {
-    model.previewDisabled(false);
-  });
-  hub.subscribe({type: "dialog-close", id : "dialog-confirm-delete-attachment-version"}, function() {
-    model.previewDisabled(false);
-  });
-  hub.subscribe({type: "dialog-close", id : "dialog-sign-attachment"}, function() {
-    model.previewDisabled(false);
-  });
+
+  hub.subscribe("dialog-close", _.partial(model.previewDisabled, false));
+
+  hub.subscribe("side-panel-open", _.partial(model.previewDisabled, true));
+  hub.subscribe("side-panel-close", _.partial(model.previewDisabled, false));
 
   $(function() {
     $("#attachment").applyBindings({

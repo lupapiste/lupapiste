@@ -1,27 +1,30 @@
 (ns lupapalvelu.itest-util
   (:require [noir.request :refer [*request*]]
-            [lupapalvelu.fixture.minimal :as minimal]
-            [sade.core :refer [fail! unauthorized not-accessible]]
-            [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.commands :as doc-commands]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.vetuma :as vetuma]
-            [lupapalvelu.web :as web]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as u]
-            [sade.http :as http]
-            [sade.env :as env]
-            [midje.sweet :refer :all]
             [cheshire.core :as json]
+            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [swiss.arrows :refer [-<>>]]
-            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clj-ssh.cli :as ssh-cli]
             [clj-ssh.ssh :as ssh]
-            [sade.strings :as ss])
+            [midje.sweet :refer :all]
+            [midje.util.exceptions :refer :all]
+            [slingshot.slingshot :refer [try+]]
+            [sade.strings :as ss]
+            [sade.core :refer [fail! unauthorized not-accessible now]]
+            [sade.http :as http]
+            [sade.env :as env]
+            [sade.dummy-email-server]
+            [lupapalvelu.fixture.minimal :as minimal]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.web :as web]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.user :as u])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
 
@@ -68,13 +71,14 @@
 (def velho      (apikey-for "velho"))
 (def velho-muni "297")
 (def velho-id   (id-for "velho"))
+(def jarvenpaa  (apikey-for "admin@jarvenpaa.fi"))
 
 (def sipoo-property-id "75300000000000")
 (def jarvenpaa-property-id "18600000000000")
 (def tampere-property-id "83700000000000")
 (def kuopio-property-id "29700000000000")
 (def oir-property-id "43300000000000")
-
+(def no-backend-property-id "56400000000000") ; Oulu
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
@@ -85,8 +89,42 @@
 
 (defn printed [x] (println x) x)
 
+;;
+;; HTTP Client cookie store
+;;
+
+(def test-db-name (str "test_" (now)))
+
+(defn ->cookie [name value]
+  (proxy [Cookie] []
+    (getName [] name)
+    (getValue [] value)
+    (getDomain [] (get (re-matches #"(http(s)?://)([^\d]+)(:\d+)?" (server-address)) 3))
+    (getPath [] "/")
+    (isSecure [] false)
+    (getVersion [] 2)
+    (isExpired [_] false)))
+
+(defn ->cookie-store [store]
+  (proxy [CookieStore] []
+    (getCookies []       (or (vals @store) []))
+    (addCookie [cookie]  (swap! store assoc (.getName cookie) cookie))
+    (clear []            (reset! store {}))
+    (clearExpired [])))
+
+(def test-db-cookie (->cookie "test_db_name" test-db-name))
+
+(defn http [verb url options]
+  (let [store (atom {})
+        cookies (or (:cookie-store options) (->cookie-store store))]
+    (.addCookie cookies test-db-cookie)
+    (verb url (assoc options :cookie-store cookies))))
+
+(def http-get (partial http http/get))
+(def http-post (partial http http/post))
+
 (defn raw [apikey action & args]
-  (http/get
+  (http-get
     (str (server-address) "/api/raw/" (name action))
     {:headers {"authorization" (str "apikey=" apikey)}
      :query-params (apply hash-map args)
@@ -95,7 +133,7 @@
 
 (defn raw-query [apikey query-name & args]
   (decode-response
-    (http/get
+    (http-get
       (str (server-address) "/api/query/" (name query-name))
       {:headers {"authorization" (str "apikey=" apikey)
                  "accepts" "application/json;charset=utf-8"}
@@ -110,7 +148,7 @@
 
 (defn- decode-post [action-type apikey command-name & args]
   (decode-response
-    (http/post
+    (http-post
       (str (server-address) "/api/" (name action-type) "/" (name command-name))
       {:headers {"authorization" (str "apikey=" apikey)
                  "content-type" "application/json;charset=utf-8"}
@@ -123,8 +161,9 @@
 
 (defn command [apikey command-name & args]
   (let [{status :status body :body} (apply raw-command apikey command-name args)]
-    (when (= status 200)
-      body)))
+    (if (= status 200)
+      body
+      (error status body))))
 
 (defn datatables [apikey query-name & args]
   (let [{status :status body :body} (apply decode-post :datatables apikey query-name args)]
@@ -132,7 +171,7 @@
       body)))
 
 (defn apply-remote-fixture [fixture-name]
-  (let [resp (decode-response (http/get (str (server-address) "/dev/fixture/" fixture-name)))]
+  (let [resp (decode-response (http-get (str (server-address) "/dev/fixture/" fixture-name) {}))]
     (assert (-> resp :body :ok) (str "Response not ok: fixture: \"" fixture-name "\": response: " (pr-str resp)))))
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
@@ -153,6 +192,11 @@
   [apikey & args]
   (apply create-app-with-fn command apikey args))
 
+
+;;
+;; Test predicates
+;;
+
 (defn success [resp]
   (fact (:text resp) => nil)
   (:ok resp))
@@ -163,25 +207,29 @@
     (= (:ok body) false)
     (= (:text body) "error.invalid-csrf-token")))
 
-;;
-;; Test predicates: TODO: comment test, add facts to get real cause
-;;
-
 (fact "invalid-csrf-token?"
   (invalid-csrf-token? {:status 403 :body {:ok false :text "error.invalid-csrf-token"}}) => true
   (invalid-csrf-token? {:status 403 :body {:ok false :text "error.SOME_OTHER_REASON"}}) => false
   (invalid-csrf-token? {:status 200 :body {:ok true}}) => false)
 
-(defn expected-failure? [expected-text {:keys [ok text]}]
-  (and (= ok false) (= text expected-text)))
+(defchecker expected-failure? [expected-text e]
+  (cond
+    (map? e)                (and (= (:ok e) false) (= (-> e :text name) (name expected-text)))
+    (captured-throwable? e) (= (some-> e throwable .getData :text name) (name expected-text))
+    :else (throw (Exception. (str "'expected-failure?' called with invalid error parameter " e)))))
 
 (def unauthorized? (partial expected-failure? (:text unauthorized)))
 (def not-accessible? (partial expected-failure? (:text not-accessible)))
 
-(fact "unauthorized?"
-  (unauthorized? unauthorized) => true
-  (unauthorized? {:ok false :text "error.SOME_OTHER_REASON"}) => false
-  (unauthorized? {:ok true}) => false)
+
+(facts "unauthorized?"
+  (fact "with map"
+    (unauthorized? unauthorized) => true
+    (unauthorized? {:ok false :text "error.SOME_OTHER_REASON"}) => false
+    (unauthorized? {:ok true}) => false)
+  (fact "with exception"
+    (fail! (:text unauthorized)) => unauthorized?
+    (fail! "error.SOME_OTHER_REASON") =not=> unauthorized?))
 
 (defn in-state? [state]
   (fn [application] (= (:state application) (name state))))
@@ -214,6 +262,9 @@
 (defn http404? [{:keys [status]}]
   (= status 404))
 
+(defn redirects-to [to {headers :headers :as resp}]
+  (and (http302? resp) (ss/ends-with (headers "location") to)))
+
 ;;
 ;; DSLs
 ;;
@@ -229,16 +280,6 @@
        (do ~@body)
        (finally
          (set-anti-csrf! (not old-value#))))))
-
-(defn create-app-id
-  "Verifies that an application was created and returns it's ID"
-  [apikey & args]
-  (let [resp (apply create-app apikey args)
-        id   (:id resp)]
-    (fact "Application created"
-      resp => ok?
-      id => truthy)
-    id))
 
 (defn comment-application
   ([apikey id open?]
@@ -271,7 +312,8 @@
             (contains? % :permitSubtype)
             (contains? % :infoRequest)
             (contains? % :openInfoRequest)
-            (:operations %)
+            (:primaryOperation %)
+            (:secondaryOperations %)
             (:state %)
             (:municipality %)
             (:location %)
@@ -289,11 +331,31 @@
       (assert ok)
       application)))
 
+(defn- test-application-create-successful [resp app-id]
+  (fact "Application created"
+    resp => ok?
+    app-id => truthy))
+
+(defn create-app-id
+  "Verifies that an application was created and returns it's ID"
+  [apikey & args]
+  {:post [%]}
+  (let [{app-id :id :as resp} (apply create-app apikey args)]
+    (test-application-create-successful resp app-id)
+    app-id))
+
+(defn create-application
+  "Runs the create-application command, returns application."
+  [apikey & args]
+  (let [{app-id :id :as resp} (apply create-app apikey args)]
+    (test-application-create-successful resp app-id)
+    (query-application apikey app-id)))
+
 (defn create-and-submit-application
   "Returns the application map"
   [apikey & args]
   (let [id    (apply create-app-id apikey args)
-        resp  (command apikey :submit-application :id id)]
+        resp  (command apikey :submit-application :id id)] ; confirm parameter used only with foreman notice
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
@@ -380,7 +442,7 @@
 (defn accept-company-invitation []
   (let [email     (last-email)
         [_ token] (re-find #"http.+/app/fi/welcome#!/accept-company-invitation/([A-Za-z0-9-]+)" (:plain (:body email)))]
-    (http/post (str (server-address) "/api/token/" token) {:follow-redirects false
+    (http-post (str (server-address) "/api/token/" token) {:follow-redirects false
                                                            :throw-exceptions false})))
 
 (defn invite-company-and-accept-invitation [apikey app-id company-id]
@@ -393,7 +455,7 @@
 
 (defn sign-attachment [apikey id attachmentId password]
   (let [uri (str (server-address) "/api/command/sign-attachments")
-        resp (http/post uri
+        resp (http-post uri
                {:headers {"authorization" (str "apikey=" apikey)
                           "content-type" "application/json;charset=utf-8"}
                 :body (json/encode {:id id
@@ -407,7 +469,7 @@
 (defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-attachment.txt", text ""}}]
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
-        resp        (http/post uri
+        resp        (http-post uri
                                {:headers {"authorization" (str "apikey=" apikey)}
                                 :multipart [{:name "applicationId"  :content application-id}
                                             {:name "text"           :content text}
@@ -423,7 +485,7 @@
              (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Upload should fail"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.56.html") => 0)))))
+             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.98.html") => 0)))))
 
 (defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
@@ -431,7 +493,7 @@
         uploadfile  (io/file filename)
         application (query-application apikey application-id)
         uri         (str (server-address) "/api/upload/attachment")
-        resp        (http/post uri
+        resp        (http-post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart (filter identity
                                     [{:name "applicationId"  :content application-id}
@@ -448,7 +510,7 @@
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Statement upload should fail"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.56.html") => 0)))))
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.98.html") => 0)))))
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
   (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))
@@ -470,7 +532,7 @@
           updates (filter (fn [[path value]]
                             (try
                               (let [splitted-path (ss/split path #"\.")]
-                                (doc-commands/validate-against-whitelist! document [[splitted-path value]] user-role))
+                                (doc-persistence/validate-against-whitelist! document [[splitted-path value]] user-role))
                               true
                               (catch Exception _
                                 false)))
@@ -494,7 +556,7 @@
 
 (defn vetuma! [{:keys [userid firstname lastname] :as data}]
   (->
-    (http/get
+    (http-get
       (str (server-address) "/dev/api/vetuma")
       {:query-params (select-keys data [:userid :firstname :lastname])})
     decode-response
@@ -506,18 +568,6 @@
        :lastname "Banaani"}
     vetuma!
     :stamp))
-
-;;
-;; HTTP Client cookie store
-;;
-
-(defn ->cookie-store [store]
-  (proxy [org.apache.http.client.CookieStore] []
-    (getCookies []       (or (vals @store) []))
-    (addCookie [cookie]  (swap! store assoc (.getName cookie) cookie))
-    (clear []            (reset! store {}))
-    (clearExpired [])))
-
 
 ;; File actions
 

@@ -22,7 +22,7 @@ LUPAPISTE.ForemanModel = function() {
   self.taskId = ko.observable();
   self.isVisible = ko.computed(function() {
     return util.getIn(self, ["application", "permitType"]) === "R" &&
-      !/tyonjohtajan-nimeaminen/.test(util.getIn(self, ["application", "operations", 0, "name"]));
+      !/tyonjohtajan-nimeaminen/.test(util.getIn(self, ["application", "primaryOperation", "name"]));
   });
   self.linkedForemanApps = ko.observableArray();
   self.selectableForemen = ko.pureComputed(function() {
@@ -30,6 +30,8 @@ LUPAPISTE.ForemanModel = function() {
       return !_.contains(self.linkedForemanApps(), app.id);
     });
   });
+
+  self.canInvite = ko.pureComputed(_.partial(lupapisteApp.models.applicationAuthModel.ok, "invite-with-role"));
 
   self.indicator = ko.observable();
 
@@ -103,6 +105,7 @@ LUPAPISTE.ForemanModel = function() {
                      "statusName": linkedForemanApp ? linkedForemanApp.statusName : "missing",
                      "selectedForeman": ko.observable(_.isEmpty(asiointitunnus) ? undefined : asiointitunnus),
                      "selectableForemen": ko.observableArray(),
+                     "canInvite": self.canInvite,
                      "indicator": ko.observable()};
 
         data.selectableForemen(_.filter(self.foremanApplications(), function(app) {
@@ -139,9 +142,7 @@ LUPAPISTE.ForemanModel = function() {
           foremanApplications(data.applications);
           loadForemanTasks();
         })
-        .error(function() {
-          // noop
-        })
+        .error(util.nop)
         .call();
     }
 
@@ -172,7 +173,7 @@ LUPAPISTE.ForemanModel = function() {
   };
 
   self.openApplication = function(id) {
-    window.location.hash = "!/application/" + id;
+    pageutil.openApplicationPage({id:id});
   };
 
   self.submit = function() {
@@ -210,24 +211,51 @@ LUPAPISTE.ForemanModel = function() {
       }
     }
 
-    function inviteHakijat(id, auth) {
+    function inviteCompanyToApplication(params, cb) {
+      ajax
+        .command("company-invite", params)
+        .processing(self.processing)
+        .pending(self.pending)
+        .success(cb)
+        .error(cb)
+        .call();
+    }
+
+    function getHakijat() {
       var hakijaDocs = _.where(self.application().documents, {"schema-info": {"name": "hakija"}});
-      var hakijat = _.map(hakijaDocs, function(doc) {
+      hakijaDocs = hakijaDocs.concat(_.where(self.application().documents, {"schema-info": {"name": "hakija-r"}}));
+      return _(hakijaDocs).map(function(doc) {
         var userId = util.getIn(doc, ["data", "henkilo", "userId", "value"]);
-        var auth = _.find(self.application().auth, function(a) {
-          return a.id === userId;
-        });
-        return {
-          userId: userId,
-          docId: doc.id,
-          docName: util.getIn(doc, ["schema-info", "name"]),
-          path: "henkilo",
-          email: util.getIn(auth, ["username"])
-        };
-      });
+        var companyId = util.getIn(doc, ["data", "yritys", "companyId", "value"]);
+        // check if hakija is company or person
+        var type = util.getIn(doc, ["data", "_selected", "value"]);
+
+        if (type === "henkilo") {
+          var auth = _.find(self.application().auth, function(a) {
+            return a.id === userId;
+          });
+          return {
+            userId: userId,
+            docId: doc.id,
+            docName: util.getIn(doc, ["schema-info", "name"]),
+            path: "henkilo",
+            email: util.getIn(auth, ["username"])
+          };
+        }
+        else if (type === "yritys") {
+          return {
+            companyId: companyId
+          };
+        }
+      }).filter(_.identity).value();
+    }
+
+    function inviteHakijat(id, auth) {
+      var hakijat = getHakijat();
+
       var deferreds = [];
       _.forEach(hakijat, function(hakija) {
-        if (hakija.email) {
+        if (hakija.userId && hakija.email) {
           deferreds.push(inviteToApplication({
             id: id,
             documentId: hakija.docId,
@@ -236,9 +264,13 @@ LUPAPISTE.ForemanModel = function() {
             email: hakija.email,
             role: "writer",
             appAuth: auth
-          }, function(){}));
+          }, _.noop));
+        }
+        else if (hakija.companyId) {
+          deferreds.push(inviteCompanyToApplication({id: id, "company-id": hakija.companyId }, _.noop));
         }
       });
+
       $.when.apply($, deferreds)
       .then(function() {
         self.finished(id);

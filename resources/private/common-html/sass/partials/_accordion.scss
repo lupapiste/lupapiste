@@ -3,94 +3,83 @@
   position: relative;
   z-index: 5;
   height: auto;
-  margin-bottom: $marginS;
+  margin-bottom: $marginL;
   @include box-sizing(border-box);
 
-  h2 {
-    padding:  $marginS $marginM;
-    background: $lp-dark-grey;
-    vertical-align: middle;
-    color: white;
-    font-size: 18px;
-    line-height: 27px;
-    position: relative;
-    cursor: pointer;
-    font-weight: normal;
-    margin-bottom: 0;
-    position: relative;
+  div.sticky {
     width: 100%;
-    padding-right:0;
-    @include box-sizing(border-box);
-    span {
-      margin-right: $marginM;
+    overflow-y: hidden;
+    span.bar-text {
+      width: 100%;
+      text-transform: uppercase;
     }
-    .icon {
-      border-right: 1px solid white;
-      padding-right: $marginL;
+    span.description {
+      padding-right: $icon-pad;
+      text-transform: none;
     }
-    .icon.remove {
-      border-right: none;
-      padding-right: 0;
-    }
-    .icon.edit {
-      border-right: none;
-      padding-right: 0;
-      padding-left: 25px;
-      margin-left: $marginM;
-      width: auto;
-    }
-
-    .op-description-wrapper {
-      display: inline-block;
-      max-width: 700px;
-      white-space: nowrap;
-      line-height: 20px;
-      span {
-        margin-right: 0;
-        vertical-align: bottom;
+    span.icons {
+      min-width: $lupicon-size;
+      .approved, .rejected {
+        display: none;
       }
-      .accordion-input {
-        width: 600px;
-        margin-left: $marginS;
-      }
-      .op-description {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        &:before {
-          content: "-";
-          margin: 0 $marginS;
-        }
-        &:empty {
-          display: none;
-        }
+      .rejected {
+        // Buttons are not used to having complex
+        // contents.
+        padding-right: 0;
       }
     }
   }
 
+  .accordion-toggle > button, button.accordion-toggle {
+    width: 100%;
+    span.bar-text {
+      width: 100%;
+      text-transform: uppercase;
+    }
+    margin-bottom: 0 !important;
+  }
+
+
+  div.sticky > button.approved > .icons > .approved {
+    display: table-cell;
+  }
+
+  div.sticky > button.rejected > .icons >  .rejected {
+    display: table-cell;
+  }
+
+
+
   .accordion_content {
     display: none;
-    padding: $marginS;
+    padding: {
+      top: $marginS;
+      bottom: $marginS;
+    }
     position: relative;
-    background: darken($lp-light-grey, 5%);
+    //background: darken($lp-light-grey, 5%);
+    border: 1px solid $gray221;
+    border-top: none;
     .accordion-content-part {
       margin-left: $marginM;
       margin-bottom: $marginM;
     }
     .accordion-fields {
       width: 100%;
+
       h2 {
-        background: darken($lp-light-grey, 5%);
         color: black;
-        margin: $marginM 0;
-        padding-left: 0;
       }
-      authority-accept-fields {
+      .authority-accept-fields {
         h2 {
           background: $lp-light-grey;
         }
       }
       h3 {
         margin-top: $marginM;
+      }
+      .form-group {
+        margin-top: $marginS;
       }
     }
   }
@@ -99,6 +88,7 @@
     display: block;
   }
 }
+
 
 .accordion-indicator {
   z-index: 12000;
@@ -134,6 +124,3 @@
     }
   }
 }
-
-
-

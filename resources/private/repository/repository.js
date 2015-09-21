@@ -21,13 +21,32 @@ var repository = (function() {
   }
 
   function calculateAttachmentStateIndicators(attachment, application) {
+    var auths = _(application.auth).filter(function(a) {return _.contains(LUPAPISTE.config.writerRoles, a.role);}).pluck("id").value();
+
     attachment.signed = false;
-    var versionsByApplicants = _(attachment.versions || []).filter(function(v) {return v.user.role === "applicant";}).value();
-    if (versionsByApplicants && versionsByApplicants.length) {
-      var lastVersionByApplicant = _.last(versionsByApplicants).version;
-      if (_.find(attachment.signatures || [], function(s) {return _.isEqual(lastVersionByApplicant, s.version);})) {
-        attachment.signed = true;
-      }
+    var lastSignature = _.last(attachment.signatures || []);
+    if (lastSignature && attachment.versions.length > 0) {
+
+      var signedVersion = _.find(attachment.versions, function(v) {
+        // Check that signed version was created before the signature
+        return v.created < lastSignature.created &&
+           v.version.major === lastSignature.version.major &&
+           v.version.minor === lastSignature.version.minor;
+      });
+
+      var unsignedVersions = _(attachment.versions)
+        // Drop previous, signed versions
+        .dropWhile(function(v) {
+          return v.version.major !== lastSignature.version.major || v.version.minor !== lastSignature.version.minor;
+        })
+        // Drop current, signed versions
+        .rest()
+        // Keep new versions added by applicants
+        .filter(function(v) {
+          return v.user.role === "applicant" ||  _.contains(auths, v.user.id);
+        })
+        .value();
+      attachment.signed = signedVersion && unsignedVersions.length === 0;
     }
 
     attachment.isSent = false;
@@ -55,6 +74,46 @@ var repository = (function() {
     }
   }
 
+  function getAllOperations(application) {
+    return _.filter([application.primaryOperation].concat(application.secondaryOperations), function(item) {
+      return !_.isEmpty(item);
+    });
+  }
+
+  function bySchemaName(schemaName) {
+    return function(task) {
+      return util.getIn(task, ["schema-info", "name"]) === schemaName;
+    };
+  }
+
+  function tasksDataBySchemaName(tasks, schemaName, mapper) {
+    return _(tasks).filter(bySchemaName(schemaName)).map(mapper).value();
+  }
+
+  function calculateVerdictTasks(verdict, tasks) {
+    // Manual verdicts have one paatokset item
+    if (verdict.paatokset && verdict.paatokset.length === 1) {
+
+      var myTasks = _.filter(tasks, function(task) {
+        return task.source && task.source.type === "verdict" && task.source.id === verdict.id;
+      });
+
+      var lupamaaraukset = _(verdict.paatokset || []).pluck("lupamaaraykset").filter().value();
+
+      if (lupamaaraukset.length === 0 && myTasks.length > 0) {
+        var katselmukset = tasksDataBySchemaName(myTasks, "task-katselmus", function(task) {
+          return {katselmuksenLaji: util.getIn(task, ["data", "katselmuksenLaji", "value"], "muu katselmus"), tarkastuksenTaiKatselmuksenNimi: task.taskname};
+        });
+        var tyonjohtajat = tasksDataBySchemaName(myTasks, "task-vaadittu-tyonjohtaja", _.property("taskname"));
+        var muut = tasksDataBySchemaName(myTasks, "task-lupamaarays", _.property("taskname"));
+
+        verdict.paatokset[0].lupamaaraykset = {vaaditutTyonjohtajat: tyonjohtajat,
+                                               muutMaaraykset: muut,
+                                               vaaditutKatselmukset: katselmukset};
+      }
+    }
+  }
+
   function loadingErrorHandler(id, e) {
     currentlyLoadingId = null;
     error("Application " + id + " not found", e);
@@ -64,7 +123,7 @@ var repository = (function() {
   function doLoad(id, pending, callback) {
     currentQuery = ajax
       .query("application", {id: id})
-      .pending(pending)
+      .pending(pending || _.noop)
       .error(_.partial(loadingErrorHandler, id))
       .fail(function (jqXHR) {
         if (jqXHR && jqXHR.status > 0) {
@@ -72,6 +131,8 @@ var repository = (function() {
         }
       })
       .call();
+
+
     $.when(loadingSchemas, currentQuery).then(function(schemasResponse, loadingResponse) {
       var schemas = schemasResponse[0].schemas,
           loading = loadingResponse[0],
@@ -87,7 +148,7 @@ var repository = (function() {
       function setOperation(application, doc) {
         var schemaInfo = doc["schema-info"];
         if (schemaInfo.op) {
-          var op = _.findWhere(application.operations, {id: schemaInfo.op.id});
+          var op = _.findWhere(application.allOperations, {id: schemaInfo.op.id});
           if (op) {
             schemaInfo.op = op;
           }
@@ -97,12 +158,15 @@ var repository = (function() {
       if (application) {
         if (application.id === currentlyLoadingId) {
           currentlyLoadingId = null;
+          application.allOperations = getAllOperations(application);
 
           _.each(application.documents || [], function(doc) {
             setOperation(application, doc);
             setSchema(doc);
           });
+
           _.each(application.tasks || [], setSchema);
+
           _.each(application.comments || [], function(comment) {
             if (comment.target && comment.target.type === "attachment" && comment.target.id) {
               var targetAttachment = _.find(application.attachments || [], function(attachment) {
@@ -114,10 +178,23 @@ var repository = (function() {
               }
             }
           });
+
           _.each(application.attachments ||[], function(att) {
             calculateAttachmentStateIndicators(att, application);
-            setAttachmentOperation(application.operations, att);
+            setAttachmentOperation(application.allOperations, att);
           });
+
+          _.each(application.verdicts ||[], function(verdict) {
+            calculateVerdictTasks(verdict, application.tasks);
+          });
+
+          application.tags = _(application.tags || []).map(function(tagId) {
+            return {id: tagId, label: util.getIn(application, ["organizationMeta", "tags", tagId])};
+          }).filter("label").value();
+
+          var sortedAttachmentTypes = attachmentUtils.sortAttachmentTypes(application.allowedAttachmentTypes);
+          application.allowedAttachmentTypes = sortedAttachmentTypes;
+
           hub.send("application-loaded", {applicationDetails: loading});
           if (_.isFunction(callback)) {
             callback(application);
@@ -156,7 +233,7 @@ var repository = (function() {
 
   function showApplicationList() {
     pageutil.hideAjaxWait();
-    window.location.hash = "!/applications";
+    pageutil.openPage("applications");
   }
 
   // Cannot be changed to use LUPAPISTE.ModalDialog.showDynamicYesNo, because the id is registered with hub.subscribe.

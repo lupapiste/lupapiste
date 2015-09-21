@@ -1,5 +1,5 @@
 (ns lupapalvelu.prev-permit-api
-  (:require [taoensso.timbre :refer [info]]
+  (:require [taoensso.timbre :refer [debug info]]
             [lupapalvelu.action :as action]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -19,12 +19,14 @@
   (let [organizations (user/organization-ids-by-roles user #{:authority})
         _             (assert (= 1 (count organizations)))
         command       (update-in command [:data] merge {:organizationId (first organizations)})
-        existing-app  (domain/get-application-as {:state    {$ne "canceled"}
-                                                  :verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user)
-        result        (apply merge (if existing-app
-                                     [(ok :id (:id existing-app)) {:text :already-existing-application}]
-                                     [(prev-permit/fetch-prev-application! command) {:text :created-new-application}]))]
-    (resp/json result)))
+        existing-app  (domain/get-application-as {:verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user :include-canceled-apps? false)]
+
+    (if existing-app
+      (resp/json (ok :id (:id existing-app) :text :already-existing-application))
+      (let [result (prev-permit/fetch-prev-application! command)]
+        (if (ok? result)
+          (resp/json (assoc result :text :created-new-application))
+          (resp/status 404 (resp/json result)))))))
 
 (defcommand create-application-from-previous-permit
   {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus]
@@ -43,9 +45,9 @@
   ;; Check if we have in database an application of same organization that has a verdict with the given kuntalupatunnus.
   (if-let [app-with-verdict (domain/get-application-as
                               {:organization organizationId
-                               :state        {$ne "canceled"}
                                :verdicts     {$elemMatch {:kuntalupatunnus kuntalupatunnus}}}
-                              user)]
+                              user
+                              :include-canceled-apps? false)]
     ;;Found an application of same organization that has a verdict with the given kuntalupatunnus -> Open it.
     (ok :id (:id app-with-verdict))
     (prev-permit/fetch-prev-application! command)))

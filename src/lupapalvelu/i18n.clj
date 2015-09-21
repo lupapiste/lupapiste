@@ -5,7 +5,8 @@
             [ontodev.excel :as xls]
             [cheshire.core :as json]
             [sade.env :as env]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [lupapiste-commons.i18n.core :as commons]))
 
 (def default-lang :fi)
 
@@ -31,21 +32,24 @@
 (defn- read-sheet [headers sheet]
   (->> sheet seq rest (map xls/read-row) (map (partial zipmap headers))))
 
-(defn- load-excel []
-  (with-open [in (io/input-stream (io/resource "i18n.xlsx"))]
-    (let [wb      (xls/load-workbook in)
-          langs   (-> wb seq first first xls/read-row rest)
-          headers (cons "key" langs)
-          data    (->> wb (map (partial read-sheet headers)) (apply concat))
-          langs-but-default (disj (set langs) (name default-lang))]
-      (reduce (partial process-row langs-but-default) {} data))))
+(defn- load-translations []
+  (merge-with conj
+              (-> (commons/read-translations (io/resource "shared_translations.txt"))
+                  commons/keys-by-language)
+              (with-open [in (io/input-stream (io/resource "i18n.xlsx"))]
+                (let [wb      (xls/load-workbook in)
+                      langs   (-> wb seq first first xls/read-row rest)
+                      headers (cons "key" langs)
+                      data    (->> wb (map (partial read-sheet headers)) (apply concat))
+                      langs-but-default (disj (set langs) (name default-lang))]
+                  (reduce (partial process-row langs-but-default) {} data)))))
 
 (def- localizations (atom nil))
-(def- excel-data (future (load-excel)))
+(def- excel-data (future (load-translations)))
 
 (defn reload! []
   (if (seq @localizations)
-    (reset! localizations (load-excel))
+    (reset! localizations (load-translations))
     (reset! localizations @excel-data)))
 
 (defn- get-or-load-localizations []
@@ -86,7 +90,8 @@
 (def ^:dynamic *lang* nil)
 (def ^{:doc "Function that localizes provided term using the current language. Use within the \"with-lang\" block."
        :dynamic true}
-  loc)
+  loc
+  (fn [& args] (throw (Exception. (str "loc called outside with-lang context, args: " args)))))
 
 (defmacro with-lang [lang & body]
   `(binding [*lang* (keyword ~lang)
