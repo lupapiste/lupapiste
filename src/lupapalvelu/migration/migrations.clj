@@ -1088,6 +1088,23 @@
         {$set {:permitSubtype subtype}
          $unset {:documents.$.data.ilmoitusHakemusValitsin 1}}))))
 
+(defn- add-approver-role-for-authority-in-org
+  [[org org-roles]]
+  [org (if (some (partial = "authority") org-roles)
+         (conj org-roles "approver")
+         org-roles)])
+
+(defn- add-approver-roles-for-authority
+  [{org-authz :orgAuthz :as user}]
+  (->> org-authz
+       (map add-approver-role-for-authority-in-org)
+       (into {})
+       (assoc user :orgAuthz)))
+
+(defmigration approver-roles-for-authorities
+  (doseq [authority (mongo/select :users {:role "authority" :orgAuthz {$exists true}})] 
+    (mongo/update-by-id :users (:id authority) (add-approver-roles-for-authority authority))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

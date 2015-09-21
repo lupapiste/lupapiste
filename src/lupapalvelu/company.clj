@@ -13,7 +13,7 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notif]
             [lupapalvelu.user :as user]
-            [lupapalvelu.user :as u]
+            [lupapalvelu.password-reset :as pw-reset]
             [lupapalvelu.document.schemas :as schema])
   (:import [java.util Date]))
 
@@ -126,7 +126,7 @@
   (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit] (array-map :name 1)))
 
 (defn find-company-users [company-id]
-  (u/get-users {:company.id company-id}))
+  (user/get-users {:company.id company-id}))
 
 (defn company-users-count [company-id]
   (mongo/count :users {:company.id company-id}))
@@ -151,7 +151,7 @@
     data))
 
 (defn find-company-admins [company-id]
-  (u/get-users {:company.id company-id, :company.role "admin"}))
+  (user/get-users {:company.id company-id, :company.role "admin"}))
 
 (defn ensure-custom-limit
   "Checks that custom account's customAccountLimit is set and allowed. Nullifies customAcconutLimit with normal accounts."
@@ -180,10 +180,10 @@
         old-limit (user-limit-for-account-type (keyword (:accountType company)))
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
-    (when (and (not (u/admin? caller))
+    (when (and (not (user/admin? caller))
                (account-type-changing-with-custom? company updates)) ; only admins are allowed to change account type to/from 'custom'
       (fail! :error.unauthorized))
-    (when (and (not (u/admin? caller)) (not (custom-account? company)) (< limit old-limit))
+    (when (and (not (user/admin? caller)) (not (custom-account? company)) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     updated))
@@ -210,7 +210,7 @@
                                    :model-fn      (fn [model _ __] model)})
 
 (defn add-user-after-company-creation! [user company role]
-  (let [user (update-in user [:email] u/canonize-email)
+  (let [user (update-in user [:email] user/canonize-email)
         token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
     (notif/notify! :new-company-admin-user {:user       user
                                             :company    company
@@ -219,7 +219,7 @@
     token-id))
 
 (defn add-user! [user company role]
-  (let [user (update-in user [:email] u/canonize-email)
+  (let [user (update-in user [:email] user/canonize-email)
         token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
     (notif/notify! :new-company-user {:user       user
                                       :company    company
@@ -244,7 +244,7 @@
 
 (defn invite-user! [user-email company-id]
   (let [company   (find-company! {:id company-id})
-        user      (u/get-user-by-email user-email)
+        user      (user/get-user-by-email user-email)
         token-id  (token/make-token :invite-company-user nil {:user user, :company company, :role :user} :auto-consume false)]
     (notif/notify! :invite-company-user {:user       user
                                          :company    company
@@ -258,6 +258,21 @@
                                       :recipients-fn notif/from-user
                                       :model-fn      (fn [model _ __] model)})
 
+
+;;
+;; Link user to company:
+;;
+
+(defn link-user-to-company! [user-id company-id role]
+  (if-let [user (user/get-user-by-id user-id)]
+    (let [updates (merge {:company {:id company-id, :role role}}
+                    (when (user/dummy? user) {:role :applicant})
+                    (when-not (:enabled user) {:enabled true}))]
+      (mongo/update :users {:_id user-id} {$set updates})
+      (when (user/dummy? user)
+        (pw-reset/reset-password (assoc user :role "applicant"))))
+    (fail! :error.user-not-found)))
+
 (defmethod token/handle-token :invite-company-user [{{:keys [user company role]} :data} {accept :ok}]
   (infof "user %s (%s) %s invitation to company %s (%s)"
          (:username user)
@@ -266,7 +281,7 @@
          (:name company)
          (:id company))
   (if accept
-    (u/link-user-to-company! (:id user) (:id company) role))
+    (link-user-to-company! (:id user) (:id company) role))
   (ok))
 
 (defn company->auth [company]
