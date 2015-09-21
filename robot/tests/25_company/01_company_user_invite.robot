@@ -24,7 +24,7 @@ New user is invited as a regular user
   Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']/td[@data-test-id='company-user-role']  Käyttäjä
   Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']/td[@data-test-id='company-user-invited']  Kutsuttu
 
-Dummy user gets email
+Dummy user gets invite email
   Open last email
   Wait Until  Page Should Contain  dummy@example.com
   Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
@@ -34,13 +34,19 @@ Account is linked
   Wait Until  Page Should Contain  Tilisi on liitetty onnistuneesti yrityksen tiliin.
   Click link  Siirry Lupapiste-palveluun
 
+Dummy user gets password reset email
+  Open last email
+  Wait Until  Page Should Contain  dummy@example.com
+  Page Should Contain  /app/fi/welcome#!/reset-password
+
 Admin logs in again
+  Go to login page
   Login  kaino@solita.fi  kaino123
   User should be logged in  Kaino Solita
 
-Dummy user is inactive in company
+Dummy user is active in company
   Open company user listing
-  Wait Until  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']/td[@data-test-id='company-user-invited']  Suljettu
+  Wait Until  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']/td[@data-test-id='company-user-invited']  Käyttäjä
 
 Conver dummy user to admin
   Click link  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']//a[@data-test-id='company-user-toggle-admin']
