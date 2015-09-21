@@ -39,8 +39,8 @@
                                         :tapahtumapaikka {:value "Sipoon urheilukentt\u00e4"}}}})
 
 (def- documents [hakija
-                          maksaja
-                          tapahtuma-info])
+                 maksaja
+                 tapahtuma-info])
 
 (def mainostus-application
   {:schema-version 1,
@@ -65,11 +65,13 @@
    :address "Latokuja 1",
    :location location,
    :attachments [],
-   :operations [operation],
+   :primaryOperation operation,
+   :secondaryOperations [],
    :propertyId "75341600550007",
    :documents documents,
    :municipality municipality,
-   :statements statements})
+   :statements statements
+   :drawings ctc/drawings})
 
 (ctc/validate-all-documents mainostus-application)
 
@@ -217,7 +219,7 @@
     ;; Sijainti
     (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id mainostus-application))
     (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address mainostus-application))
-    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> mainostus-application :location :x) " " (-> mainostus-application :location :y)))
+    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> mainostus-application :location first) " " (-> mainostus-application :location second)))
 
     ;; Maksajan tiedot
     (fact "maksaja-laskuviite" (:laskuviite Maksaja) => (:value _laskuviite))

@@ -27,9 +27,9 @@
                  :op operation}
    :data {:kayttotarkoitus {:value "Hankkeen kuvaus."}}})
 
-(def-  documents [hakija
-                           maksaja
-                           hankkeen-kuvaus-sijoituslupa])
+(def- documents [hakija
+                 maksaja
+                 hankkeen-kuvaus-sijoituslupa])
 
 
 (def sijoituslupa-application {:schema-version 1,
@@ -53,12 +53,14 @@
                                :address "Hirvim\u00e4entie 112",
                                :location location,
                                :attachments [],
-                               :operations [operation],
+                               :primaryOperation operation,
+                               :secondaryOperations [],
                                :propertyId "75342300010054",
                                :documents documents,
                                :neighbors [],
                                :municipality municipality,
-                               :statements statements})
+                               :statements statements
+                               :drawings ctc/drawings})
 
 (ctc/validate-all-documents sijoituslupa-application)
 
@@ -166,7 +168,7 @@
     ;; Sijainti
     (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id sijoituslupa-application))
     (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address sijoituslupa-application))
-    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> sijoituslupa-application :location :x) " " (-> sijoituslupa-application :location :y)))
+    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> sijoituslupa-application :location first) " " (-> sijoituslupa-application :location second)))
 
     ;; Maksajan tiedot
     (fact "maksaja-laskuviite" (:laskuviite Maksaja) => (:value _laskuviite))
@@ -250,6 +252,27 @@
   (merge
     domain/application-skeleton
     {:schema-version 1
+     :id "LP-753-2014-00005"
+     :organization "753-YA"
+     :permitType "YA"
+     :municipality "753"
+     :state :closed
+     :primaryOperation {:id "535905834206f413319be7f3"
+                        :name "ya-katulupa-vesi-ja-viemarityot"
+                        :created 1398343043267}
+     :secondaryOperations []
+     :infoRequest false
+     :openInfoRequest false
+     :title "Start_ready_app_1398343043"
+     :address "Start_ready_app_1398343043"
+     :propertyId "75341600250023"
+     :location [10000.1 6610000.0]
+     :created 1398343043267
+     :opened 1398343043267
+     :submitted 1398343047691
+     :started 1527897600000
+     :closed 1530489600000
+     :modified 1398343053832
      :auth [{:id "777777777777777777000020"
              :firstName "Pena"
              :lastName "Panaani"
@@ -262,13 +285,14 @@
              :username "sonja"
              :role "statementGiver"
              :statementId "537c655dbc45cf55abf434a6"}]
-     :submitted 1398343047691
-     :state :closed
      :closedBy {:lastName "Sibbo"
                 :firstName "Sonja"
                 :id "777777777777777777000023"}
+     :startedBy {:lastName "Sibbo"
+                 :firstName "Sonja"
+                 :id "777777777777777777000023"}
      :_verdicts-seen-by {:777777777777777777000023 1398343051151}
-     :location {:x 10000.1, :y 6610000.0}
+     :drawings ctc/drawings
      :attachments [{:state "requires_user_action"
                     :target nil
                     :op {:id "535905834206f413319be7f3"
@@ -280,18 +304,6 @@
                     :modified 1398343043267
                     :versions []
                     :id "535905834206f413319be7f6"}]
-     :organization "753-YA"
-     :title "Start_ready_app_1398343043"
-     :started 1527897600000
-     :closed 1530489600000
-     :operations [{:id "535905834206f413319be7f3"
-                   :name "ya-katulupa-vesi-ja-viemarityot"
-                   :created 1398343043267}]
-     :infoRequest false
-     :openInfoRequest false
-     :opened 1398343043267
-     :created 1398343043267
-     :propertyId "75341600250023"
      :verdicts [{:kuntalupatunnus "123567890"
                  :timestamp 1398343049972
                  :paatokset [{:paivamaarat {:anto 1525122000000
@@ -300,9 +312,6 @@
                                              :status 6
                                              :paatospvm 1525122000000
                                              :paatoskoodi "ehdollinen"}]}]}]
-     :startedBy {:lastName "Sibbo"
-                 :firstName "Sonja"
-                 :id "777777777777777777000023"}
      :documents [hakija
                  tyomaasta-vastaava
                  maksaja
@@ -324,12 +333,7 @@
                                 :repeating false
                                 :version 1
                                 :type "group"
-                                :order 63}}]
-     :modified 1398343053832
-     :address "Start_ready_app_1398343043"
-     :permitType "YA"
-     :id "LP-753-2014-00005"
-     :municipality "753"}))
+                                :order 63}}]}))
 
 (ctc/validate-all-documents valmistumisilmoitus)
 

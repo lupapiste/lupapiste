@@ -1,7 +1,6 @@
 (ns lupapalvelu.i18n-test
   (:require [lupapalvelu.i18n :refer :all]
             [midje.sweet :refer :all]
-            [lupapalvelu.test-util :refer :all]
             [lupapalvelu.mime :as mime]
             [sade.env :as env]))
 
@@ -24,5 +23,5 @@
 (fact "every supported mime type has a display name"
   (doseq [lang [:fi :sv]
           allowed-mime (filter #(re-matches mime/mime-type-pattern %) (vals mime/mime-types))]
-    (let [result (doc-result (has-term? lang allowed-mime) (str (name lang) ": " allowed-mime))]
-        (fact result => (doc-check true?)))))
+    (fact {:midje/description (str (name lang) ": " allowed-mime)}
+      (has-term? lang allowed-mime) => true)))

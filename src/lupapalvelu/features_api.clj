@@ -7,7 +7,7 @@
 (defquery "features"
    {:description "returns list of features"
     :user-roles #{:anonymous}}
-   [_] (ok :features (filter second (tools/path-vals (env/features)))))
+   [_] (ok :features (into {} (filter second (env/features)))))
 
 (when (env/dev-mode?)
   (defquery "set-feature"

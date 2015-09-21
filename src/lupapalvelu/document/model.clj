@@ -59,27 +59,13 @@
     (not (string? v)) [:err "illegal-value:not-a-string"]
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
     (and
-      (> (.length v) 0)
-      (< (.length v) (or (:min-len elem) 0))) [:warn "illegal-value:too-short"]))
-
-(defn- validate-hetu-date [hetu]
-  (let [dateparsts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
-        yy (last (butlast dateparsts))
-        yyyy (str (case (last dateparsts) "+" "18" "-" "19" "20") yy)
-        basic-date (str yyyy (second dateparsts) (first dateparsts))]
-    (try
-      (timeformat/parse (timeformat/formatters :basic-date) basic-date)
-      nil
-      (catch Exception e
-        [:err "illegal-hetu"]))))
-
-(defn- validate-hetu-checksum [hetu]
-  (when (not= (subs hetu 10 11) (util/hetu-checksum hetu)) [:err "illegal-hetu"]))
+(> (.length v) 0)
+(< (.length v) (or (:min-len elem) 0))) [:warn "illegal-value:too-short"]))
 
 (defmethod validate-field :hetu [_ _ v]
   (cond
     (ss/blank? v) nil
-    (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$" v) (or (validate-hetu-date v) (validate-hetu-checksum v))
+    (re-matches util/finnish-hetu-regex v) (when-not (util/valid-hetu? v) [:err "illegal-hetu"])
     :else [:err "illegal-hetu"]))
 
 (defmethod validate-field :checkbox [_ _ v]
@@ -161,12 +147,6 @@
         (find-by-name (:body elem) ks)))))
 
 (defn- resolve-element-loc-key [info element path]
-  ;;
-  ;; TODO: Loytyyko talle lokalisaation etsinnalle parempaa logiikkaa?
-  ;; Esimerkiksi: (= 0 (.indexOf (lupapalvelu.i18n.localize lupapalvelu.i18n.*lang* loc-key) "???")) => group loc, muuten standard?
-  ;; Ainakin select-tyyppisten elementtien lokalisaatioavaimet ovat "._group_label"-loppuisia.
-  ;; Kts. docModel.js:n funktiot "makeLabel" ja "locKeyFromPath".
-  ;;
   (let [loc-key (str (-> info :document :locKey) "." (join "." (map name path)))]
     (if (:i18nkey element)
       (:i18nkey element)
@@ -244,6 +224,7 @@
   ([application document]
     (validate application document nil))
   ([application document schema]
+    {:pre [(map? application) (map? document)]}
     (let [data (:data document)
           schema (or schema (get-document-schema document))
           document-loc-key (or (-> schema :info :i18name) (-> schema :info :name))
@@ -314,8 +295,9 @@
 ;; Approvals
 ;;
 
-(defn ->approved [status user]
+(defn ->approved
   "Approval meta data model. To be used within with-timestamp."
+  [status user]
   {:value status
    :user (select-keys user [:id :firstName :lastName])
    :timestamp (current-timestamp)})
@@ -392,8 +374,7 @@
 (defn convert-document-data
   "Walks document data starting from initial-path.
    If predicate matches, value is outputted using emitter function.
-   Predicate takes two parameters: element schema definition and the value map.
-   Emitter takes one parameter, the value map."
+   Both predicate and emitter take two parameters: element schema definition and the value map."
   [pred emitter {data :data :as document} initial-path]
   (when data
     (letfn [(doc-walk [schema-body path]
@@ -404,13 +385,13 @@
                           current-path (conj path k)
                           v (get-in data current-path)]
                       (if (pred element v)
-                        [k (emitter v)]
+                        [k (emitter element v)]
                         (when v
-                          (if (not= (keyword type) :group)  ;TODO: does this work with tables?
-                            [k v]
+                          (if (or (= (keyword type) :group) (= (keyword type) :table))
                             [k (if repeating
                                  (into {} (map (fn [k2] [k2 (doc-walk body (conj current-path k2))]) (keys v)))
-                                 (doc-walk body current-path))])))))
+                                 (doc-walk body current-path))]
+                            [k v])))))
                   schema-body)))]
       (let [path (vec initial-path)
             schema (get-document-schema document)
@@ -441,15 +422,20 @@
   "Replaces last characters of person IDs with asterisks (e.g., 010188-123A -> 010188-****)"
   [document & [initial-path]]
   (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (> (count hetu) 7)))
-        do-mask (fn [{hetu :value :as v}] (assoc v :value (str (subs hetu 0 7) "****")))]
+        do-mask (fn [_ {hetu :value :as v}] (assoc v :value (str (subs hetu 0 7) "****")))]
     (convert-document-data mask-if do-mask document initial-path)))
 
 (defn mask-person-id-birthday
   "Replaces first characters of person IDs with asterisks (e.g., 010188-123A -> ******-123A)"
   [document & [initial-path]]
   (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (pos? (count hetu))))
-        do-mask (fn [{hetu :value :as v}] (assoc v :value (str "******" (ss/substring hetu 6 11))))]
+        do-mask (fn [_ {hetu :value :as v}] (assoc v :value (str "******" (ss/substring hetu 6 11))))]
     (convert-document-data mask-if do-mask document initial-path)))
+
+(defn without-user-id
+  "Removes userIds from the document."
+  [doc]
+  (util/postwalk-map (fn [m] (dissoc m :userId)) doc))
 
 (defn has-hetu?
   ([schema]
@@ -464,22 +450,26 @@
   {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
-      {:userId                        (wrap id)
-       :henkilotiedot {:etunimi       (wrap firstName)
-                       :sukunimi      (wrap lastName)
-                       :hetu          (wrap (when with-hetu personId))
-                       :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
-       :yhteystiedot {:email          (wrap email)
-                      :puhelin        (wrap phone)}
-       :osoite {:katu                 (wrap street)
-                :postinumero          (wrap zip)
-                :postitoimipaikannimi (wrap city)}
-       :yritys {:yritysnimi           (wrap companyName)
-                :liikeJaYhteisoTunnus (wrap companyId)}
-       :patevyys {:koulutusvalinta    nil
-                  :koulutus           (wrap degree)
-                  :valmistumisvuosi   (wrap graduatingYear)
-                  :fise               (wrap fise)}}
+      {:userId                                  (wrap id)
+       :henkilotiedot {:etunimi                 (wrap firstName)
+                       :sukunimi                (wrap lastName)
+                       :hetu                    (wrap (when with-hetu personId))
+                       :turvakieltoKytkin       (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
+       :yhteystiedot {:email                    (wrap email)
+                      :puhelin                  (wrap phone)}
+       :osoite {:katu                           (wrap street)
+                :postinumero                    (wrap zip)
+                :postitoimipaikannimi           (wrap city)}
+       :yritys {:yritysnimi                     (wrap companyName)
+                :liikeJaYhteisoTunnus           (wrap companyId)}
+       :patevyys {:koulutusvalinta              (wrap degree)
+                  :koulutus                     nil
+                  :valmistumisvuosi             (wrap graduatingYear)
+                  :fise                         (wrap fise)}
+       :patevyys-tyonjohtaja {:koulutusvalinta  (wrap degree)
+                              :koulutus         nil
+                              :valmistumisvuosi (wrap graduatingYear)
+                              :fise             (wrap fise)}}
       util/strip-nils
       util/strip-empty-maps
       tools/wrapped)))

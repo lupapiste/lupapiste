@@ -3,10 +3,8 @@
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.neighbors :as neighbors]
+            [lupapalvelu.neighbors-api :as neighbors]
             [lupapalvelu.open-inforequest :as inforequest]
-            [clj-time.core :refer [days weeks months ago]]
-            [clj-time.coerce :refer [to-long]]
             [monger.operators :refer :all]
             [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
@@ -23,14 +21,6 @@
             [sade.dummy-email-server]
             [sade.core :refer :all]))
 
-
-(defn get-timestamp-from-now [time-key amount]
-  {:pre [(#{:day :week :month} time-key)]}
-  (let [time-fn (case time-key
-                  :day days
-                  :week weeks
-                  :month months)]
-    (to-long (-> amount time-fn ago))))
 
 (defn- older-than [timestamp] {$lt timestamp})
 
@@ -72,7 +62,7 @@
 
 ;; "Lausuntopyynto: Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn statement-request-reminder []
-  (let [timestamp-1-week-ago (get-timestamp-from-now :week 1)
+  (let [timestamp-1-week-ago (util/get-timestamp-from-now :week 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
                                                                    :given nil
@@ -95,7 +85,7 @@
 
 ;; "Neuvontapyynto: Neuvontapyyntoon ei ole vastattu viikon kuluessa eli neuvontapyynnon tila on avoin. Lahetetaan viikoittain uudelleen."
 (defn open-inforequest-reminder []
-  (let [timestamp-1-week-ago (get-timestamp-from-now :week 1)
+  (let [timestamp-1-week-ago (util/get-timestamp-from-now :week 1)
         oirs (mongo/select :open-inforequest-token {:created (older-than timestamp-1-week-ago)
                                                     :last-used nil
                                                     $or [{:reminder-sent {$exists false}}
@@ -114,7 +104,7 @@
 
 ;; "Naapurin kuuleminen: Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Muistutus lahetetaan kerran."
 (defn neighbor-reminder []
-  (let [timestamp-1-week-ago (get-timestamp-from-now :week 1)
+  (let [timestamp-1-week-ago (util/get-timestamp-from-now :week 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :neighbors.status {$elemMatch {$and [{:state {$in ["email-sent"]}}
                                                                                {:created (older-than timestamp-1-week-ago)}
@@ -151,7 +141,7 @@
 
 ;; "Hakemus: Hakemuksen tila on valmisteilla tai vireilla, mutta edellisesta paivityksesta on aikaa yli kuukausi. Lahetetaan kuukausittain uudelleen."
 (defn application-state-reminder []
-  (let [timestamp-1-month-ago (get-timestamp-from-now :month 1)
+  (let [timestamp-1-month-ago (util/get-timestamp-from-now :month 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :modified (older-than timestamp-1-month-ago)
                                           $or [{:reminder-sent {$exists false}}
@@ -206,7 +196,8 @@
                   (logging/log-event :info {:run-by "Automatic verdicts checking"
                                             :event "No Krysp WFS url defined for organization"
                                             :organization {:id organization :permit-type permitType}}))))
-            (catch Exception e (error e))))
+            (catch Throwable t
+              (errorf "Unable to get verdict for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t)))))
         apps))))
 
 (defn check-for-verdicts [& args]

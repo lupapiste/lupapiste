@@ -120,7 +120,16 @@ var util = (function($) {
     return defaultValue;
   }
 
-    function locKeyFromDocPath(pathStr) {
+  function getFeatureName(feature) {
+    for(var key in feature.properties) { // properties to lower case
+      if (key.toLowerCase() === "nimi") {
+        return feature.properties[key];
+      }
+    }
+    return undefined;
+  }
+
+  function locKeyFromDocPath(pathStr) {
     var res = (pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
     return res;
   }
@@ -159,6 +168,20 @@ var util = (function($) {
     return isValidY(y + "-" + c);
   }
 
+  var personIdCn = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D",
+    "E","F","H","J","K","L","M","N","P","R","S","T","U","V",
+    "W","X","Y"];
+
+  function isValidPersonId(personId) {
+    var m = /^(\d{6})[aA+-]([0-9]{3})([0-9A-Z])$/.exec(personId || ""),
+        n = m && m[1] + m[2],
+        c = m && m[3];
+
+    if(!m) { return false; }
+
+    return personIdCn[parseInt(n, 10) % 31] === c;
+  }
+
   function extractRequiredErrors(errors) {
     var errs = _.map(errors, function(errArray) {
       return _.filter(errArray, function(err) {
@@ -177,6 +200,40 @@ var util = (function($) {
     return m;
   }
 
+  function randomElementId(prefix) {
+    var random = _.random(Number.MAX_SAFE_INTEGER);
+    var id = prefix ? prefix + "-" + random : random.toString();
+    if ($(id).length) {
+      return randomElementId(prefix);
+    }
+    return id;
+  }
+
+  function withSuffix(strOrArr, suffix) {
+    if (_.isArray(strOrArr)) {
+      return _.map(strOrArr, function(s) {
+        return s + suffix;
+      });
+    }
+    return [strOrArr + suffix];
+  }
+
+  function filterDataByQuery(data, q, selected) {
+    return _.filter(data, function(item) {
+      return _.reduce(q.split(" "), function(result, word) {
+        return !_.some(selected, item) && _.contains(item.label.toUpperCase(), word.toUpperCase()) && result;
+      }, true);
+    });
+  }
+
+  function showSavedIndicator(response) {
+    if (response.ok) {
+      hub.send("indicator", {style: "positive"});
+    } else {
+      hub.send("indicator", {style: "negative"});
+    }
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -185,6 +242,9 @@ var util = (function($) {
     isValidPassword:     isValidPassword,
     isValidY:            isValidY,
     isValidOVT:          isValidOVT,
+    isValidPersonId:     isValidPersonId,
+    lowerCase: function(s) {return _.isString(s) ? s.toLowerCase() : s;},
+    upperCase: function(s) {return _.isString(s) ? s.toUpperCase() : s;},
     prop: {
       isPropertyId:           isPropertyId,
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,
@@ -197,12 +257,17 @@ var util = (function($) {
     autofocus:    autofocus,
     isNum:        isNum,
     getIn:        getIn,
+    getFeatureName: getFeatureName,
     locKeyFromDocPath: locKeyFromDocPath,
     getDocumentOrder: getDocumentOrder,
     isPartyDoc: isPartyDoc,
     isNotPartyDoc: isNotPartyDoc,
     extractRequiredErrors: extractRequiredErrors,
-    dissoc: dissoc
+    dissoc: dissoc,
+    randomElementId: randomElementId,
+    withSuffix: withSuffix,
+    filterDataByQuery: filterDataByQuery,
+    showSavedIndicator: showSavedIndicator
   };
 
 })(jQuery);

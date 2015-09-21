@@ -50,7 +50,7 @@ var taskPageController = (function() {
 
   function returnToApplication() {
     reload();
-    window.location.hash = "!/application/" + currentApplicationId + "/tasks";
+    pageutil.openApplicationPage({id: currentApplicationId}, "tasks");
   }
 
   function deleteTask() {
@@ -132,9 +132,9 @@ var taskPageController = (function() {
     }
   }
 
-  repository.loaded(["task"], function(app) {
-    if (currentApplicationId === app.id) {
-      refresh(app, currentTaskId);
+  hub.subscribe("application-model-updated", function(e) {
+    if (pageutil.getPage() === "task") {
+      refresh(lupapisteApp.models.application._js, currentTaskId);
     }
   });
 

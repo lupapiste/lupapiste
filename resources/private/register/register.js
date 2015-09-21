@@ -1,39 +1,30 @@
 (function() {
   "use strict";
 
-  var registrationModel = new LUPAPISTE.RegistrationModel("register-user", function() {window.location.hash = "!/register3";}, "#register-email-error");
-  var statusModel = new LUPAPISTE.StatusModel();
+  var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome#!/register";
+  var vetumaParams = {success: urlPrefix + "2",
+                      cancel:  urlPrefix + "/cancel",
+                      error:   urlPrefix + "/error",
+                      y:       urlPrefix + "/error",
+                      vtj:     urlPrefix + "/error",
+                      id:      "vetuma-init"};
+
+  var registrationModel = new LUPAPISTE.RegistrationModel("register-user", _.partial(pageutil.openPage, "register3"), "#register-email-error");
+  var statusModel = ko.observable();
 
   hub.onPageLoad("register", function() {
-    var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
-    $.get("/api/vetuma", {success: urlPrefix + "#!/register2",
-                          cancel:  urlPrefix + "#!/register/cancel",
-                          error:   urlPrefix + "#!/register/error"}, function(d) {
-      $("#vetuma-register")
-        .html(d).find(":submit").addClass("btn btn-primary")
-                                .attr("value",loc("register.action"))
-                                .attr("id", "vetuma-init");
-    });
-    statusModel.subPage(pageutil.subPage());
+    statusModel(pageutil.subPage());
   });
 
   hub.onPageLoad("register2", function() {
     registrationModel.reset();
-    ajax.get("/api/vetuma/user")
-      .raw(true)
-      .success(function(data) {
-        if (data) {
-          registrationModel.setVetumaData(data);
-        } else {
-          window.location.hash = "!/register";
-        }
-      })
-      .error(function(e){$("#register-email-error").text(loc(e.text));})
-      .call();
+    vetuma.getUser(registrationModel.setVetumaData,
+                   _.partial(pageutil.openPage, "register"),
+                   function(e) {$("#register-email-error").text(loc(e.text));});
   });
 
   $(function(){
-    $("#register").applyBindings(statusModel);
+    $("#register").applyBindings({status:statusModel, vetuma: vetumaParams});
     $("#register2").applyBindings(registrationModel.model);
     $("#register3").applyBindings(registrationModel.model);
   });

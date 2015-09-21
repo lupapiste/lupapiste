@@ -6,8 +6,8 @@
 
 
 (defn escape-xml
-  "http://commons.apache.org/proper/commons-lang/javadocs/api-3.1/org/apache/commons/lang3/StringEscapeUtils.html#escapeXml(java.lang.String)"
-  [^String s] (StringEscapeUtils/escapeXml s))
+  "http://commons.apache.org/proper/commons-lang/javadocs/api-3.3/org/apache/commons/lang3/StringEscapeUtils.html#escapeXml10%28java.lang.String%29"
+  [^String s] (StringEscapeUtils/escapeXml10 s))
 
 ;; Safer version of clojure.xml/startparse-sax
 (defn startparse-sax-no-doctype [s ch]

@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation   Sonja can't submit application
-Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 Variables       ../06_attachments/variables.py
@@ -10,7 +9,11 @@ Variables       ../06_attachments/variables.py
 
 Mikko creates a new application
   Mikko logs in
-  Create application the fast way  submit-app  753-416-25-30  kerrostalo-rivitalo
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname}  submit${secs}
+  Set Suite Variable  ${propertyId}  753-416-7-1
+
+  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Set Suite Variable  ${attachment-not-needed-test-id-hakija-valtakirja}  attachment-not-needed-hakija-valtakirja
   Set Suite Variable  ${attachment-not-needed-test-id-sonja}  attachment-not-needed-muut-muu
   Open to authorities  huba huba
@@ -22,7 +25,7 @@ Mikko could submit application
 
 Sonja can not submit application
   Sonja logs in
-  Open application  submit-app  753-416-25-30
+  Open application  ${appname}  ${propertyId}
   Wait until  Element should not be visible  application-requiredFieldSummary-tab
   Logout
 
@@ -42,7 +45,7 @@ Sipoo marks required fields obligatory
 
 Mikko logs in, goes to attachments tab and sees all "not needed" checkboxes as enabled and not selected
   Mikko logs in
-  Open application  submit-app  753-416-25-30
+  Open application  ${appname}  ${propertyId}
   Open tab  attachments
   Wait Until  Element should be visible  xpath=//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Asuinkerrostalon tai rivitalon rakentaminen')]
   Element should not be visible  xpath=//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Yleiset hankkeen liitteet')]
@@ -69,7 +72,7 @@ Sipoo marks required fields not obligatory
 
 Sonja logs in and adds new attachment template
   Sonja logs in
-  Open application  submit-app  753-416-25-30
+  Open application  ${appname}  ${propertyId}
   Open tab  attachments
   Add empty attachment template  Muu liite  muut  muu
 
@@ -83,7 +86,7 @@ For that template, the "not needed" checkbox is enabled and not selected
 
 Mikko logs back in and browses to the Attachments tab
   Mikko logs in
-  Open application  submit-app  753-416-25-30
+  Open application  ${appname}  ${propertyId}
   Open tab  attachments
   Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id="attachments-template-table"]//td
   Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Yleiset hankkeen liitteet')]
@@ -112,11 +115,12 @@ Mikko adds txt attachment to the attachment template added by Sonja
 
 Mikko fills up first name for the hakija party in the parties tab
   Open tab  parties
-  ${hakija-etunimi-path} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='hakija']//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']
+  Open accordions  parties
+  ${hakija-etunimi-path} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']
   Wait until  Element should be visible  xpath=${hakija-etunimi-path}
-  Execute Javascript  $('#application-parties-tab').find('section[data-doc-type="hakija"]').find('input[data-docgen-path="henkilo.henkilotiedot.etunimi"]').val("Elmeri").change().blur();
+  Execute Javascript  $('#application-parties-tab').find('section[data-doc-type="hakija-r"]').find('input[data-docgen-path="henkilo.henkilotiedot.etunimi"]').val("Elmeri").change().blur();
   Wait Until  Textfield value should be  xpath=${hakija-etunimi-path}  Elmeri
-  Focus  xpath=//div[@id='application-parties-tab']//section[@data-doc-type='hakija']//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']
+  Focus  xpath=//div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']
   Wait until  Element should be visible  xpath=//span[contains(@class,'form-input-saved')]
 
 The filled-up of the party info and added attachment cause corresponding items to disappear from the "missing required" list in the requiredFieldSummary tab

@@ -24,15 +24,17 @@
                   :suoramarkkinointilupa :ammattilainen])
     (assoc :app app)))
 
-(defn send-user-data [user partner-name]
+(defn send-user-data [user partner-name & opts]
   {:pre [(known-partner? partner-name)]}
   (let [app (send-app-for-partner partner-name)
         url (url-for-partner partner-name)
         params (->params user app)
         ts (now)
         form-params (assoc params :ts ts :mac (calculate-mac params partner-name ts :send))
+        req-params {:form-params form-params, :follow-redirects false, :throw-exceptions false}
+        opts (apply hash-map opts)
         _  (debugf "Send user %s / %s data to %s (%s)" (:id user) (:email user) partner-name url)
-        resp (http/post url {:form-params form-params, :follow-redirects false, :throw-exceptions false})
+        resp (http/post url (merge opts req-params))
         body (:body resp)]
     (if (= 200 (:status resp))
       (let [id (-> (split-lines body) first ss/trim)]

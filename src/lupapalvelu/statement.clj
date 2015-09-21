@@ -1,5 +1,10 @@
 (ns lupapalvelu.statement
-  (:require [sade.core :refer [fail]]
+  (:require [sade.core :refer :all]
+            [sade.util :as util]
+            [sade.strings :as ss]
+            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as user]))
 
 ;;
@@ -25,3 +30,21 @@
   (when (statement-given? application statementId)
     (fail :error.statement-already-given)))
 
+;;
+;; Statuses
+;;
+
+(def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
+;; Krysp Yhteiset 2.1.5+
+(def- statement-statuses-more-options
+  (vec (concat statement-statuses ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa" "lausunto" "kielteinen" "palautettu" "poydalle"])))
+
+(defn possible-statement-statuses [application]
+  (let [{permit-type :permitType municipality :municipality} application
+        extra-statement-statuses-allowed? (permit/get-metadata permit-type :extra-statement-selection-values)
+        organization (organization/resolve-organization municipality permit-type)
+        version (get-in organization [:krysp (keyword permit-type) :version] "0.0.0")
+        yht-version (mapping-common/get-yht-version permit-type version)]
+    (if (and extra-statement-statuses-allowed? (util/version-is-greater-or-equal yht-version {:major 2 :minor 1 :micro 5}))
+      statement-statuses-more-options
+      statement-statuses)))

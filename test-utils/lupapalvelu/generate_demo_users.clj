@@ -1,8 +1,8 @@
 (ns lupapalvelu.generate-demo-users
-  (require [lupapalvelu.mongo :as mongo]
-           [lupapalvelu.user-api :as user-api]
-           [monger.operators :refer :all]
-           [slingshot.slingshot :refer [try+]]))
+  (:require [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as user]
+            [monger.operators :refer :all]
+            [slingshot.slingshot :refer [try+]]))
 
 
 ;luo testikayttajia
@@ -17,7 +17,7 @@
         #(let [full-email (str email % "@" kuntano ".fi")]
            (if (lupapalvelu.user/get-user-by-email full-email)
              (println "user exits " full-email)
-             (user-api/create-new-user
+             (user/create-new-user
                {:role "authorityAdmin"
                 :orgAuthz {(keyword id) ["authorityAdmin"]}}
                {:email full-email
@@ -384,7 +384,7 @@
                         :VVVL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
                         :MAL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}})]
       (mongo/insert :organizations org)
-      (user-api/create-new-user
+      (user/create-new-user
         {:role "admin"}
         {:email email
          :username email
@@ -402,7 +402,7 @@
           i (range 1 (inc 25))]
     (let [full-email (str "hakija-" i "@" kuntano ".fi")]
       (try+
-        (let [user (user-api/create-new-user nil
+        (let [user (user/create-new-user nil
                      {:email full-email
                       :username full-email
                       :role "applicant"

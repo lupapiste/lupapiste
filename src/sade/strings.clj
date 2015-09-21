@@ -3,7 +3,7 @@
   (:import [java.text Normalizer Normalizer$Form]
            [org.apache.commons.lang3 StringUtils]
            [org.apache.commons.codec.binary Base64])
-  (:refer-clojure :exclude (replace)))
+  (:refer-clojure :exclude [replace contains? empty?]))
 
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
@@ -27,15 +27,20 @@
             truncated))
         s))))
 
-(defn contains [^String s ^CharSequence needle]
+(defn contains? [^String s ^CharSequence needle]
   (when (and s needle)
     (.contains s needle)))
+
+(defn empty? [^CharSequence s]
+  (if s
+    (.isEmpty s)
+    true))
 
 (defn suffix
   "Returns a substring from the end of last occurance of separator till the end of s"
   [^String s ^String separator]
   (when s
-    (if (and separator (not (.isEmpty separator)) (contains s separator))
+    (if (and separator (not (empty? separator)) (contains? s separator))
       (.substring s (+ (.lastIndexOf s separator) (.length separator)))
       s)))
 
@@ -108,6 +113,8 @@
 ; alias common clojure.string stuff, so that you dont need to require both namespaces:
 
 (def blank? s/blank?)
+
+(def join s/join)
 
 ;; File name handling
 

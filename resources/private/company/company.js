@@ -33,7 +33,6 @@
 
     this.canSearchUser    = this.email.isValid;
     this.pending          = ko.observable();
-    this.canCancel        = ko.computed(function() { return this.pending(); }, this);
 
     this.emailEnabled     = ko.observable();
     this.done             = ko.observable();
@@ -50,7 +49,7 @@
   NewCompanyUser.prototype.searchUser = function() {
     this.emailEnabled(false);
     ajax
-      .query("company-invite-user", {email: this.email()})
+      .command("company-invite-user", {email: this.email()})
       .pending(this.pending)
       .success(function(data) {
         var result = data.result;
@@ -212,7 +211,7 @@
   }
 
   TabsModel.prototype.click = function(tab) {
-    window.location.hash = "!/company/" + this.companyId() + "/" + tab;
+    pageutil.openPage("company", this.companyId() + "/" + tab);
     return false;
   };
 
@@ -234,13 +233,13 @@
     this.parent = parent;
     this.model = ko.validatedObservable({
       accountType:  ko.observable().extend(required),
+      customAccountLimit: ko.observable(),
       name:         ko.observable().extend(required),
       y:            ko.observable(),
       reference:    ko.observable().extend(notRequired),
-      address1:     ko.observable().extend(notRequired),
-      address2:     ko.observable().extend(notRequired),
-      po:           ko.observable().extend(notRequired),
-      zip:          ko.observable().extend(notRequired),
+      address1:     ko.observable().extend(required),
+      po:           ko.observable().extend(required),
+      zip:          ko.observable().extend({required: true, number: true, maxLength: 5}),
       country:      ko.observable().extend(notRequired),
       ovt:          ko.observable().extend(notRequired).extend({ovt: true}),
       pop:          ko.observable().extend(notRequired)
@@ -250,19 +249,20 @@
       y: undefined,
       reference: undefined,
       address1: undefined,
-      address2: undefined,
       po: undefined,
       zip: undefined,
       country: undefined,
       ovt: undefined,
       pop: undefined,
-      accountType: undefined
+      accountType: undefined,
+      customAccountLimit: undefined
     };
     this.edit          = ko.observable(false);
     this.saved         = ko.observable(null);
     this.canStartEdit  = ko.computed(function() { return !this.edit() && parent.isAdmin(); }, this);
     this.changed       = ko.computed(function() { return !_.isEqual(ko.mapping.toJS(this.model()), this.saved()); }, this);
     this.canSubmit     = ko.computed(function() { return this.edit() && this.model.isValid() && this.changed(); }, this);
+    this.accountType   = ko.observable();
     this.accountTypes  = ko.observableArray();
   }
 
@@ -271,10 +271,11 @@
   };
 
   CompanyInfo.prototype.updateAccountTypes = function(company) {
-    var currentAccountType = _.findWhere(LUPAPISTE.config.accountTypes, {name: company.accountType});
+    var accountType = this.accountType; // take correct observable to var, 'this' context differs in _.map's function
+    accountType(_.findWhere(LUPAPISTE.config.accountTypes, {name: company.accountType}));
     var mappedAccountTypes = _.map(LUPAPISTE.config.accountTypes, function(type) {
-      type.disable = ko.observable(currentAccountType ? type.limit < currentAccountType.limit : false);
-      type.displayName = loc("register.company." + type.name + ".title") + " - " + loc("register.company." + type.name + ".price");
+      type.disable = ko.observable(accountType() ? type.limit < accountType().limit : false);
+      type.displayName = loc("register.company." + type.name + ".title") + " (" + loc("register.company." + type.name + ".price") + ")";
       return type;
     });
     this.accountTypes([]);
@@ -328,8 +329,8 @@
     self.pending     = ko.observable();
     self.id          = ko.observable();
     self.isAdmin     = ko.observable();
-    self.users       = ko.observableArray();
-    self.invitations = ko.observableArray();
+    self.users       = ko.observableArray([]);
+    self.invitations = ko.observableArray([]);
     self.info        = new CompanyInfo(self);
     self.tabs        = new TabsModel(self.id);
 
@@ -338,7 +339,7 @@
         .pending(false)
         .id(null)
         .info.clear()
-        .users(null)
+        .users([])
         .isAdmin(null);
     };
 
@@ -352,16 +353,27 @@
     };
 
     self.load = function() {
-      ajax
-        .query("company", {company: self.id(), users: true})
-        .pending(self.pending)
-        .success(self.update)
-        .call();
-      return self;
+      if (self.id()!=="" && self.id()!=undefined) {
+        ajax
+          .query("company", {company: self.id(), users: true})
+          .pending(self.pending)
+          .success(self.update)
+          .error(function() {
+            notify.error(loc("error.dialog.title"), loc("error.company-not-accessible"));
+            self.id(null)
+            pageutil.openPage("applications");
+          })
+          .call();
+        return self;
+      }
     };
 
     self.show = function(id, tab) {
-      if (self.id() !== id) { self.clear().id(id).load(); }
+      if (id==="" || id==undefined) {
+        pageutil.openPage("register-company-account-type");
+      } else if (self.id() !== id) { 
+        self.clear().id(id).load();
+      }
       self.tabs.show(tab);
       return self;
     };

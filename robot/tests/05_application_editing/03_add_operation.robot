@@ -20,13 +20,13 @@ Mikko adds an operation
   Wait Until  Title Should Be  ${appname} - Lupapiste
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"]
+  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"]
   Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[@class="tree-content"]//*[@data-test-id="add-operation-to-application"]
   Click enabled by test id  add-operation-to-application
 
 Application contains two operations
   Wait Until  Page Should Contain  Asuinkerrostalon tai rivitalon rakentaminen
-  Wait Until  Page Should Contain  Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
+  Wait Until  Page Should Contain  Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
 
 Add another operation
   Click enabled by test id  add-operation
@@ -39,6 +39,22 @@ Add another operation
   Click enabled by test id  add-operation-to-application
 
 Application contains three operations
-  Wait Until  Page Should Contain  Asuinkerrostalon tai rivitalon rakentaminen
-  Wait Until  Page Should Contain  Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
-  Wait Until  Page Should Contain  Vapaa-ajan asunnon tai saunarakennuksen rakentaminen
+  Open accordions  info
+  Wait Until  Element should Contain  xpath=//span[@data-test-id="test-application-primary-operation"]  Asuinkerrostalon tai rivitalon rakentaminen
+  Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
+  Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Vapaa-ajan asunnon tai saunarakennuksen rakentaminen
+
+Primary operation can be changed
+  Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="kerrostalo-rivitalo"]/i[@class="lupicon-star"]
+  Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="muu-uusi-rakentaminen"]/i[@class="lupicon-star"]
+  Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="vapaa-ajan-asuinrakennus"]/i[@class="lupicon-star"]
+
+  Click Element  //button[@data-op-name="muu-uusi-rakentaminen"]
+
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-op-name="kerrostalo-rivitalo"]
+  Wait Until  Element Should Be Disabled  xpath=//button[@data-op-name="muu-uusi-rakentaminen"]
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-op-name="vapaa-ajan-asuinrakennus"]
+
+  Wait Until  Element should Contain  xpath=//span[@data-test-id="test-application-primary-operation"]  Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
+  Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Asuinkerrostalon tai rivitalon rakentaminen
+  Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Vapaa-ajan asunnon tai saunarakennuksen rakentaminen

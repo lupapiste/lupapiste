@@ -13,14 +13,15 @@
             [noir.response :as resp]
             [noir.session :as session]
             [noir.cookies :as cookies]
-            [sade.core :refer [ok fail now def-] :as core]
+            [monger.operators :refer [$set]]
+            [sade.core :refer [ok fail ok? fail? now def-] :as core]
             [sade.env :as env]
             [sade.util :as util]
             [sade.property :as p]
             [sade.status :as status]
             [sade.strings :as ss]
             [sade.session :as ssess]
-            [lupapalvelu.action :as action :refer [defquery]]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application-search-api]
             [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
@@ -30,7 +31,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization-api]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application-api :as application]
             [lupapalvelu.foreman-api :as foreman-api]
             [lupapalvelu.open-inforequest-api]
             [lupapalvelu.pdf-export-api]
@@ -39,7 +40,7 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
-            [lupapalvelu.neighbors]
+            [lupapalvelu.neighbors-api]
             [lupapalvelu.idf.idf-api :as idf-api]))
 
 ;;
@@ -196,9 +197,12 @@
       (resp/json (execute-export name (from-query request) (assoc request :user user)))
       basic-401)))
 
-(defpage "/api/raw/:name" {name :name}
+(defpage [:any "/api/raw/:name"] {name :name :as params}
   (let [request (request/ring-request)
-        response (execute (enriched (action/make-raw name (from-query request)) request))]
+        data (if (= :post (:request-method request))
+               (:params request)
+               (from-query request))
+        response (execute (enriched (action/make-raw name data) request))]
     (cond
       (= response core/unauthorized) (resp/status 401 "unauthorized")
       (false? (:ok response)) (resp/status 404 (resp/json response))
@@ -282,7 +286,7 @@
   (resp/redirect (str (env/value :host) (env/value :redirect-after-logout) )))
 
 (defn redirect-to-frontpage [lang]
-  (redirect lang "welcome"))
+  (resp/redirect (str (env/value :host) (or (env/value :frontpage (keyword lang)) "/"))))
 
 (defn- landing-page
   ([]
@@ -318,11 +322,6 @@
 (defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
   (serve-app app hashbang lang))
 
-(defquery redirect-after-login
-  {:user-roles action/all-authenticated-user-roles}
-  [{session :session}]
-  (ok :url (get session :redirect-after-login "")))
-
 ;;
 ;; Login/logout:
 ;;
@@ -357,6 +356,7 @@
 ;;
 
 (defpage "/" [] (landing-page))
+(defpage "/sv" [] (landing-page "sv"))
 (defpage "/app/" [] (landing-page))
 (defpage [:get ["/app/:lang"  :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))
 (defpage [:get ["/app/:lang/" :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))
@@ -400,13 +400,13 @@
         session-user (get-in request [:session :user])
         expires (:expires session-user)
         expired? (and expires (not (user/virtual-user? session-user)) (< expires (now)))
-        updated-user (and expired? (user/get-user {:id (:id session-user), :enabled true}))
+        updated-user (and expired? (user/session-summary (user/get-user {:id (:id session-user), :enabled true})))
         user (or api-key-auth updated-user session-user)]
     (if (and expired? (not updated-user))
       (resp/status 401 "Unauthorized")
       (let [response (handler (assoc request :user user))]
         (if (and response updated-user)
-          (ssess/merge-to-session request response {:user (user/session-summary updated-user)})
+          (ssess/merge-to-session request response {:user updated-user})
           response)))))
 
 (defn wrap-authentication
@@ -448,7 +448,7 @@
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.56.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.98.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)
@@ -475,7 +475,7 @@
 ;; Proxy
 ;;
 
-(defpage [:any "/proxy/:srv"] {srv :srv}
+(defpage [:any ["/proxy/:srv" :srv #"[a-z/\-]+"]] {srv :srv}
   (if @env/proxy-off
     {:status 503}
     ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))))
@@ -486,13 +486,17 @@
 
 (defpage [:get "/api/token/:token-id"] {token-id :token-id}
   (if-let [token (token/get-token token-id :consume false)]
-    (resp/status 200 (resp/json {:ok true :token token}))
-    (resp/status 404 (resp/json {:ok false}))))
+    (resp/status 200 (resp/json (ok :token token)))
+    (resp/status 404 (resp/json (fail :error.unknown)))))
 
 (defpage [:post "/api/token/:token-id"] {token-id :token-id}
   (let [params (from-json (request/ring-request))
         response (token/consume-token token-id params :consume true)]
-    (or response (resp/status 404 (resp/json {:ok false})))))
+    (cond
+      (contains? response :status) response
+      (ok? response)   (resp/status 200 (resp/json response))
+      (fail? response) (resp/status 404 (resp/json response))
+      :else (resp/status 404 (resp/json (fail :error.unknown))))))
 
 ;;
 ;; Cross-site request forgery protection
@@ -600,14 +604,20 @@
         (resp/status 200 (str response))
         (resp/json response))))
 
-  (defpage "/dev/create" {:keys [infoRequest propertyId message]}
+  (defpage "/dev/create" {:keys [infoRequest propertyId message] :as query-params}
     (let [request (request/ring-request)
           property (p/to-property-id propertyId)
           params (assoc (from-query request) :propertyId property :messages (if message [message] []))
           response (execute-command "create-application" params request)]
       (if (core/ok? response)
-        (redirect "fi" (str (user/applicationpage-for (:role (user/current-user request)))
-                            "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
+        (do
+          (when-let [opt-data (not-empty (select-keys query-params [:state]))]
+            (do
+              (mongo/update-by-id :applications (:id response) {$set opt-data})))
+          (redirect "fi" (str (user/applicationpage-for (:role (user/current-user request)))
+                              "#!/" (if infoRequest "inforequest" "application") "/" (:id response))))
+
+
         (resp/status 400 (str response)))))
 
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
@@ -633,7 +643,7 @@
 
   (defpage "/dev/public/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
-      (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors/->public r)}))
+      (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors-api/->public r)}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
   (defpage [:get "/api/proxy-ctrl"] []

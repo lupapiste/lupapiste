@@ -1,7 +1,8 @@
 (ns lupapalvelu.logging-api
   (:require [taoensso.timbre :as timbre :refer [errorf]]
             [sade.env :as env]
-            [lupapalvelu.action :refer [defcommand]]
+            [sade.core :refer [ok fail]]
+            [lupapalvelu.action :refer [defcommand defquery]]
             [lupapalvelu.user :as user]
             [lupapalvelu.logging :as logging]))
 
@@ -20,3 +21,12 @@
         sanitized-msg   (sanitize (str message))]
     (errorf "FRONTEND: %s [%s] got an error on page %s (build=%s%s): %s"
             user sanitized-ua sanitized-page sanitized-build build-check sanitized-msg)))
+
+(defquery "newest-version"
+  {:user-roles #{:anonymous}
+   :parameters [frontendBuild]}
+  [_]
+  (let [currentBuild (:build-number env/buildinfo)]
+    (if (= frontendBuild currentBuild)
+      (ok)
+      (fail :frontend-too-old))))

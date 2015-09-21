@@ -3,7 +3,6 @@
             [clojure.java.io :as io]
             [clojure.walk :as walk]
             [pandect.core :as pandect]
-            [monger.collection :as mc]
             [monger.operators :refer :all]
             [schema.core :as sc]
             [cheshire.core :as json]
@@ -11,14 +10,14 @@
             [slingshot.slingshot :refer [throw+]]
             [noir.response :as resp]
             [sade.env :as env]
-            [sade.util :refer [max-length-string valid-email?]]
+            [sade.util :refer [max-length-string valid-email? valid-hetu?]]
             [sade.core :refer [ok]]
             [sade.crypt :as crypt]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.company :as c]
-            [lupapalvelu.user :as u]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.docx :as docx]))
 
 (set! *warn-on-reflection* true)
@@ -45,7 +44,8 @@
 (def Signer {(sc/optional-key :currentUser) (sc/pred mongo/valid-key? "valid key")
              :firstName (max-length-string 64)
              :lastName  (max-length-string 64)
-             :email     (sc/pred valid-email? "valid email")})
+             :email     (sc/pred valid-email? "valid email")
+             :personId  (sc/pred valid-hetu? "valid hetu")})
 
 ;
 ; Utils:
@@ -83,7 +83,8 @@
         process-id   (random-password 40)
         stamp        (random-password 40)
         company-name (:name company)
-        company-y    (:y company)]
+        company-y    (:y company)
+        hetu         (:personId signer)]
     (infof "sign:init-sign-process:%s: company-name [%s], y [%s], email [%s]" process-id company-name company-y (:email signer))
     (mongo/insert :sign-processes {:_id       process-id
                                    :stamp     stamp
@@ -97,7 +98,7 @@
      :data       (->> {:stamp           stamp
                        :return_success  (str success-url "/" process-id)
                        :document        (str document-url "/" process-id)
-                       :requirements    [{:type :company, :identifier company-y}]}
+                       :requirements    [{:type :person, :identifier hetu}]}
                       (json/encode)
                       (crypt/str->bytes)
                       (crypt/encrypt (-> crypto-key (crypt/str->bytes) (crypt/base64-decode)) crypto-iv)
@@ -147,13 +148,11 @@
 ; Success:
 ;
 
-(defmacro resp-assert! [result expected message]
-  `(when-not (= ~result ~expected)
-     (errorf "sing:success:%s: %s: expected '%s', got '%s'" ~'process-id ~message ~result ~expected)
-     (process-update! ~'process :error ~'ts)
-     (fail! :bad-request)))
+(notifications/defemail :onnistuu-success
+  {:model-fn  (fn [command conf recipient] command)
+   :recipients-fn (constantly [{:email (env/value :onnistuu :success :email)}])})
 
-(defn success [process-id data iv ts]
+(defn success! [process-id data iv ts]
   (let [process    (find-sign-process! process-id)
         signer     (:signer process)
         crypto-key (-> (env/value :onnistuu :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
@@ -163,20 +162,29 @@
                         (crypt/base64-decode)
                         (crypt/decrypt crypto-key crypto-iv)
                         (crypt/bytes->str)
-                        (json/decode))
-        {:strs [signatures stamp]} resp
-        {:strs [type identifier name timestamp uuid]} (first signatures)]
-    (resp-assert! (:stamp process)          stamp       "wrong stamp")
-    (resp-assert! (count signatures)        1           "number of signatures")
-    (resp-assert! type                      "company"   "wrong signature type")
-    (resp-assert! (-> process :company :y)  identifier  "wrong Y")
-    (process-update! process :done ts)
-    (infof "sign:success:%s: OK: y [%s], company: [%s]"
+                        (json/decode)
+                        walk/keywordize-keys)
+        {:keys [signatures stamp document]} resp
+        {:keys [type identifier name timestamp uuid]} (first signatures)
+        resp-assert! (fn [result expected message]
+                      (when-not (= result expected)
+                        (errorf "sing:success:%s: %s: expected '%s', got '%s'" process-id message result expected)
+                        (process-update! process :error ts)
+                        (fail! :bad-request)))]
+    (resp-assert! (:stamp process)          stamp              "wrong stamp")
+    (resp-assert! (count signatures)        1                  "number of signatures")
+    (resp-assert! type                      "person"           "wrong signature type")
+    (resp-assert! identifier                (:personId signer) "returned personId does not match original")
+    (process-update! process :done ts :document document)
+
+    (infof "sign:success:%s: OK: identifier [%s], company: [%s], document: [%s]"
            process-id
            identifier
-           name)
-    (let [company  (c/create-company (merge (:company process) {:name name, :process-id process-id}))
-          token-id (if (nil? (:currentUser signer)) (c/add-user-after-company-creation! signer company :admin))]
+           name
+           document)
+    (let [company  (c/create-company (merge (:company process) {:process-id process-id, :document document}))
+          token-id (if (nil? (:currentUser signer)) (c/add-user-after-company-creation! signer company :admin))
+          mail-model (assoc (select-keys process [:company :signer]) :document document :signature (first signatures))]
       (infof "sign:success:%s: company-created: y [%s], company: [%s], id: [%s], token: [%s]"
              process-id
              (:y company)
@@ -184,10 +192,11 @@
              (:id company)
              token-id)
       (when (:currentUser signer)
-        (u/link-user-to-company! (:currentUser signer) (:id company) :admin)
+        (c/link-user-to-company! (:currentUser signer) (:id company) :admin)
         (infof "added current user to created-company: company [%s], user [%s]"
                (:id company)
-               (:currentUser signer))))
+               (:currentUser signer)))
+      (notifications/notify! :onnistuu-success mail-model))
     process))
 
 ;

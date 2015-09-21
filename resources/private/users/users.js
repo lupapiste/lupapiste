@@ -8,7 +8,7 @@ var users = (function($) {
     if (_.isObject(data)) {
       return _.map(data, function(roles, org) {
         var localizedRoles = _.map(roles, function(role) {
-          return loc(role);
+          return loc(["authorityrole", role]);
         });
         return "<b>" + org + ":</b> " + localizedRoles.join(", ");
       }).join(", ");
@@ -81,8 +81,7 @@ var users = (function($) {
         .concat(_.map(self.filters, function(v, k) { return {name: "filter-" + k, value: v()}; }))
         .reduce(function(m, p) { m[p.name] = p.value; return m; }, {});
       ajax
-        .command("users-for-datatables")
-        .json({params: params})
+        .datatables("users-for-datatables", {params: params})
         .success(_.compose(callback, self.processResults))
         .call();
     };
@@ -116,11 +115,15 @@ var users = (function($) {
       if (!op || !email) {
         return false;
       }
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
+      if (op.rowOperationFn) {
+        op.rowOperationFn(self.dataTable.fnGetData(target.closest("tr")[0]));
+      } else {
+        LUPAPISTE.ModalDialog.showDynamicYesNo(
           loc(["users.op", op.name, "title"]),
           loc(["users.op", op.name, "message"], email),
           {title: loc("yes"), fn: function() { op.operation(email, self.redrawCallback); }},
           {title: loc("cancel")});
+      }
       return false;
     });
 

@@ -24,7 +24,7 @@
 
   (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kutsukatu 13")
         app    (query-application mikko application-id)
-        {hakija-doc :doc}  (command mikko :create-doc :id application-id :schemaName "hakija") => truthy
+        {hakija-doc :doc}  (command mikko :create-doc :id application-id :schemaName "hakija-r") => truthy
         suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija")) => truthy
         paasuunnittelija-doc (:id (domain/get-document-by-name app "paasuunnittelija")) => truthy]
 
@@ -51,7 +51,7 @@
         (count (:invites invs)) => 1
 
         (fact "invite response has correct application map keys"
-          (keys (:application (first (:invites invs)))) => (just [:id :municipality :address :operations] :in-any-order))
+          (keys (:application (first (:invites invs)))) => (just [:id :municipality :address :primaryOperation] :in-any-order))
 
         email => (partial contains-application-link? application-id "applicant")
         (:to email) => (contains (email-for-key teppo))
@@ -59,7 +59,7 @@
         (get-in email [:body :plain]) => (contains "Hei, sinut on kutsuttu")))
 
     (fact "Sonja must NOT be able to uninvite Teppo!"
-      (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => not-accessible?
+      (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => unauthorized?
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Mikko can't unsubscribe Teppo's notifications"
@@ -113,7 +113,7 @@
 
     (fact "Mikko is the applicant"
       (let [application  (query-application mikko application-id)
-            first-hakija (domain/get-document-by-name application "hakija")]
+            first-hakija (domain/get-applicant-document (:documents application))]
         (:id first-hakija) =not=> hakija-doc
         (get-in first-hakija [:data :henkilo :henkilotiedot :etunimi :value]) => ""
         (:applicant application ) => "Intonen Mikko"))

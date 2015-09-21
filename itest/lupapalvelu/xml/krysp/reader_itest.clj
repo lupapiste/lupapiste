@@ -23,26 +23,27 @@
        (count buildings) => 2)
 
       (fact "first building has correct data"
-        (first buildings) => {:propertyId "75300301050006"
-                              :buildingId "481123123R"
+        (first buildings) => {:propertyId  "75300301050006"
+                              :buildingId  "481123123R"
                               :localShortId "001"
-                              :nationalId "481123123R"
-                              :localId nil
-                              :usage      "039 muut asuinkerrostalot"
-                              :area "2682"
-                              :index nil
-                              :created    "1962"})
+                              :nationalId  "481123123R"
+                              ;; TODO: test localId  (i.e. kunnanSisainenPysyvaRakennusnumero). Add it to building.xml or create similar xml file.
+                              :localId     nil #_"481123124R"
+                              :usage       "039 muut asuinkerrostalot"
+                              :area        "2682"
+                              :index       nil
+                              :created     "1962"})
 
       (fact "second building has correct data"
-        (second buildings) => {:propertyId "75300301050006"
-                               :buildingId "478123123J"
+        (second buildings) => {:propertyId   "75300301050006"
+                               :buildingId   "478123123J"
                                :localShortId "002"
-                               :localId nil
-                               :nationalId "478123123J"
-                               :usage      "021 rivitalot"
-                               :area "281"
-                               :index nil
-                               :created    "1998"}))))
+                               :localId      nil #_"481123124R"        ;; TODO: test localId  (i.e. kunnanSisainenPysyvaRakennusnumero)
+                               :nationalId   "478123123J"
+                               :usage        "021 rivitalot"
+                               :area         "281"
+                               :index        nil
+                               :created     "1998"}))))
 
 (fact "converting building krysp to lupapiste domain model"
   (let [xml (building-xml local-krysp id)]
@@ -61,10 +62,11 @@
         (fact "omistajat is not empty" omistajat => truthy)
 
         (fact "without :huoneistot, :omistajat and :kiinttun everything matches"
-          (dissoc rakennus :huoneistot :rakennuksenOmistajat :kiinttun)
+          (dissoc rakennus :huoneistot :rakennuksenOmistajat :kiinttun :kunnanSisainenPysyvaRakennusnumero)      ;; TODO: test also "kunnanSisainenPysyvaRakennusnumero" (and remove it from here)
             => (just
                  {:rakennusnro "001"
                   :valtakunnallinenNumero "481123123R"
+;                  :kunnanSisainenPysyvaRakennusnumero "481123124R"
                   :manuaalinen_rakennusnro ""
                   :verkostoliittymat {:viemariKytkin true
                                       :maakaasuKytkin false

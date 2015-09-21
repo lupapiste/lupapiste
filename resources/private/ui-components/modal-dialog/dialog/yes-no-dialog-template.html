@@ -2,18 +2,15 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/html" id="yes-no-dialog-template">
+    <script type="text/x-jquery-tmpl" id="yes-no-dialog-template">
       <div class="content">
-        <p data-bind="lhtml: text" class="dialog-desc"></p>
+        <p data-bind="html: text" class="dialog-desc"></p>
       </div>
-      <div class="button-group">
-        <button class="btn btn-primary btn-dialog"
-                data-test-id="confirm-yes"
-                data-bind="enable: true, click: yes, ltext: 'yes'"></button>
-        <button class="btn btn-dialog close"
-                data-test-id="confirm-no"
-                data-bind="click: no, ltext: 'no'"></button>
-      </div>
+      <div data-bind="component: {name:'yes-no-button-group',
+                                  params: {yesFn: yes,
+                                           noFn:  no,
+                                           yesTitle: yesTitle,
+                                           noTitle: noTitle}}"></div>
     </script>
   </section>
 </body>

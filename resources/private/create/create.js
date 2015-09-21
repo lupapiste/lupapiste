@@ -14,20 +14,20 @@
     var self = this;
 
     self.goPhase1 = function() {
-      window.location.hash = "!/create-part-1";
+      pageutil.openPage("create-part-1");
       self.map.updateSize();
      };
 
 
     self.goPhase2 = function() {
       hub.send("track-click", {category:"Create", label:"map", event:"mapContinue"});
-      window.location.hash = "!/create-part-2";
+      pageutil.openPage("create-part-2");
       tree.reset(_.map(self.operations(), operations2tree));
       window.scrollTo(0, 0);
     };
 
     self.goPhase3 = function() {
-      window.location.hash = "!/create-part-3";
+      pageutil.openPage("create-part-3");
       if (!self.inforequestsDisabled()) {
         window.scrollTo(0, 0);
       } else {
@@ -39,7 +39,7 @@
     };
 
      self.returnPhase2 = function() {
-      window.location.hash = "!/create-part-2";
+      pageutil.openPage("create-part-2");
       window.scrollTo(0, 0);
     };
 
@@ -419,7 +419,7 @@
         error("No operation!", {selected: tree.getSelected(), stack: tree.getStack()});
       }
 
-      ajax.command("create-application", {
+      var params = {
         infoRequest: infoRequest,
         operation: op,
         y: self.y(),
@@ -427,12 +427,15 @@
         address: self.addressString(),
         propertyId: self.propertyId(),
         messages: isBlank(self.message()) ? [] : [self.message()]
-      })
+      };
+
+      ajax.command("create-application", params)
       .processing(self.processing)
       .pending(self.pending)
       .success(function(data) {
         self.clear();
-        window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;
+        params.id = data.id;
+        pageutil.openApplicationPage(params);
       })
       .call();
       hub.send("track-click", {category:"Create", label:"tree", event:"newApplication"});
@@ -483,7 +486,7 @@
       .pending(self.pending)
       .success(function(data) {
         self.clear();
-        window.location.hash = "!/application/" + data.id;
+        pageutil.openApplicationPage({id: data.id});
       })
       .error(function(d) {
         // If app creation failed because the "rakennuksen tiedot" data was not received in the xml message from municipality's backend,

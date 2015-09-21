@@ -6,7 +6,7 @@ LUPAPISTE.FillInfoModel = function(params) {
 
   self.fillUserInfo = function () {
     ajax
-      .command("set-user-to-document", params)
+      .command("set-current-user-to-document", params)
       .success(function () {
         repository.load(params.id);
         hub.send("documentChangedInBackend", {

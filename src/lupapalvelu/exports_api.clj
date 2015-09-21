@@ -6,6 +6,7 @@
             [sade.util :as util]
             [sade.core :refer [ok]]
             [lupapalvelu.action :refer [defexport] :as action]
+            [lupapalvelu.application :as application]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
@@ -18,20 +19,20 @@
   (let [doc (domain/get-document-by-operation application operation)
         [_ kayttotarkoitus] (first (tools/deep-find doc [:kayttotarkoitus :value]))]
     (if (ss/blank? kayttotarkoitus)
-      "C"
-      (get @kayttotarkoitus-hinnasto kayttotarkoitus))))
+      {:priceClass "C" :kayttotarkoitus nil}
+      {:priceClass (get @kayttotarkoitus-hinnasto kayttotarkoitus) :kayttotarkoitus kayttotarkoitus})))
 
 (def price-classes-for-operation
-  {:asuinrakennus               uuden-rakentaminen
+  {:asuinrakennus               uuden-rakentaminen ; old operation tree
    :vapaa-ajan-asuinrakennus    uuden-rakentaminen
    :varasto-tms                 uuden-rakentaminen
-   :julkinen-rakennus           uuden-rakentaminen
+   :julkinen-rakennus           uuden-rakentaminen ; old operation tree
    :muu-uusi-rakentaminen       uuden-rakentaminen
-   :laajentaminen               "C"
-   :perus-tai-kant-rak-muutos   "C"
+   :laajentaminen               "D"
+   :perus-tai-kant-rak-muutos   "D"
    :kayttotark-muutos           "D"
-   :julkisivu-muutos            "C"
-   :jakaminen-tai-yhdistaminen  "C"
+   :julkisivu-muutos            "D"
+   :jakaminen-tai-yhdistaminen  "D"
    :markatilan-laajentaminen    "D"
    :takka-tai-hormi             "D"
    :parveke-tai-terassi         "D"
@@ -51,89 +52,75 @@
    :paikoutysjarjestus-muutos   "D"
    :kortteli-yht-alue-muutos    "D"
    :muu-tontti-tai-kort-muutos  "D"
-   :poikkeamis                  "C"
+   :poikkeamis                  "D"
    :meluilmoitus                "D"
    :pima                        "D"
    :maa-aineslupa               "D"
    :aiemmalla-luvalla-hakeminen "D"
-   :tyonjohtajan-nimeaminen     "E"
+   :tyonjohtajan-nimeaminen     "E" ; old operation tree
    :tyonjohtajan-nimeaminen-v2  "E"
-   :suunnittelijan-nimeaminen   "E"
-   :jatkoaika                   "E"
-   :aloitusoikeus               "E"
-   :vvvl-vesijohdosta               "E"
-   :vvvl-viemarista                 "E"
-   :vvvl-vesijohdosta-ja-viemarista "E"
-   :vvvl-hulevesiviemarista         "E"
+   :suunnittelijan-nimeaminen   "D"
+   :jatkoaika                   "D"
+   :aloitusoikeus               "D"
+   :vvvl-vesijohdosta               "D"
+   :vvvl-viemarista                 "D"
+   :vvvl-vesijohdosta-ja-viemarista "D"
+   :vvvl-hulevesiviemarista         "D"
    :ya-kayttolupa-tapahtumat                                          "D"
    :ya-kayttolupa-harrastustoiminnan-jarjestaminen                    "D"
    :ya-kayttolupa-metsastys                                           "D"
    :ya-kayttolupa-vesistoluvat                                        "D"
-   :ya-kayttolupa-terassit                                            "D"
+   :ya-kayttolupa-terassit                                            "F"
    :ya-kayttolupa-kioskit                                             "D"
    :ya-kayttolupa-muu-kayttolupa                                      "D"
    :ya-kayttolupa-mainostus-ja-viitoitus                              "D"
    :ya-kayttolupa-nostotyot                                           "D"
-   :ya-kayttolupa-vaihtolavat                                         "D"
+   :ya-kayttolupa-vaihtolavat                                         "F"
    :ya-kayttolupa-kattolumien-pudotustyot                             "D"
    :ya-kayttolupa-muu-liikennealuetyo                                 "D"
    :ya-kayttolupa-talon-julkisivutyot                                 "D"
    :ya-kayttolupa-talon-rakennustyot                                  "D"
    :ya-kayttolupa-muu-tyomaakaytto                                    "D"
-   :ya-katulupa-vesi-ja-viemarityot                                   "C"
-   :ya-katulupa-maalampotyot                                          "C"
-   :ya-katulupa-kaukolampotyot                                        "C"
-   :ya-katulupa-kaapelityot                                           "C"
-   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat           "C"
-   :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen             "C"
-   :ya-sijoituslupa-maalampoputkien-sijoittaminen                     "C"
-   :ya-sijoituslupa-kaukolampoputkien-sijoittaminen                   "C"
-   :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen      "C"
-   :ya-sijoituslupa-rakennuksen-tai-sen-osan-sijoittaminen            "C"
-   :ya-sijoituslupa-ilmajohtojen-sijoittaminen                        "C"
-   :ya-sijoituslupa-muuntamoiden-sijoittaminen                        "C"
-   :ya-sijoituslupa-jatekatoksien-sijoittaminen                       "C"
-   :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen        "C"
-   :ya-sijoituslupa-rakennuksen-pelastuspaikan-sijoittaminen          "C"
-   :ya-sijoituslupa-muu-sijoituslupa                                  "C"
+   :ya-katulupa-vesi-ja-viemarityot                                   "D"
+   :ya-katulupa-maalampotyot                                          "D"
+   :ya-katulupa-kaukolampotyot                                        "D"
+   :ya-katulupa-kaapelityot                                           "D"
+   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat           "D"
+   :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen             "F"
+   :ya-sijoituslupa-maalampoputkien-sijoittaminen                     "F"
+   :ya-sijoituslupa-kaukolampoputkien-sijoittaminen                   "F"
+   :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen      "F"
+   :ya-sijoituslupa-rakennuksen-tai-sen-osan-sijoittaminen            "F"
+   :ya-sijoituslupa-ilmajohtojen-sijoittaminen                        "F"
+   :ya-sijoituslupa-muuntamoiden-sijoittaminen                        "F"
+   :ya-sijoituslupa-jatekatoksien-sijoittaminen                       "F"
+   :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen        "F"
+   :ya-sijoituslupa-rakennuksen-pelastuspaikan-sijoittaminen          "F"
+   :ya-sijoituslupa-muu-sijoituslupa                                  "F"
    :ya-jatkoaika                                                      "D"
    :yl-uusi-toiminta                                                  "B"
    :yl-olemassa-oleva-toiminta                                        "D"
    :yl-toiminnan-muutos                                               "D"
-   :tonttijaon-hakeminen                                              "D"
-   :tonttijaon-muutoksen-hakeminen                                    "D"
-   :tontin-lohkominen                                                 "D"
-   :tilan-rekisteroiminen-tontiksi                                    "D"
-   :yhdistaminen                                                      "D"
-   :halkominen                                                        "D"
+   :tonttijako                                                        "D"
    :rasitetoimitus                                                    "D"
-   :rajankaynnin-hakeminen                                            "D"
-   :rajannayton-hakeminen                                             "D"
-   :ya-lohkominen                                                     "D"
-   :tilusvaihto                                                       "D"
-   :rakennuksen-sijainti                                              "D"
-   :asemakaava-laadinta                                               "D"
-   :asemakaava-muutos                                                 "D"
-   :ranta-asemakaava-laadinta                                         "D"
-   :ranta-asemakaava-muutos                                           "D"
-   :yleiskaava-laadinta                                               "D"
-   :yleiskaava-muutos                                                 "D"
-
-   ;new additions to op-tree (TODO: possibly wrong price classes)
-
+   :rajankaynti                                                       "D"
+   :asemakaava                                                        "D"
+   :ranta-asemakaava                                                  "D"
+   :yleiskaava                                                        "D"
+   :kiinteistonmuodostus                                              "D"
    :kerrostalo-rivitalo                                               uuden-rakentaminen
    :pientalo                                                          uuden-rakentaminen
    :teollisuusrakennus                                                uuden-rakentaminen
-   :linjasaneeraus                                                    "C"
-   :rak-valm-tyo                                                      "C"
-   :raktyo-aloit-loppuunsaat                                          "C"
-   :sisatila-muutos                                                   "C"
-   :kerrostalo-rt-laaj                                                "C"
-   :pientalo-laaj                                                     "C"
-   :talousrakennus-laaj                                               "C"
-   :teollisuusrakennus-laaj                                           "C"
-   :vapaa-ajan-rakennus-laaj                                          "C"
-   :muu-rakennus-laaj                                                 "C"
+   :linjasaneeraus                                                    "D"
+   :rak-valm-tyo                                                      "D"
+   :raktyo-aloit-loppuunsaat                                          "D"
+   :sisatila-muutos                                                   "D"
+   :kerrostalo-rt-laaj                                                "D"
+   :pientalo-laaj                                                     "D"
+   :talousrakennus-laaj                                               "D"
+   :teollisuusrakennus-laaj                                           "D"
+   :vapaa-ajan-rakennus-laaj                                          "D"
+   :muu-rakennus-laaj                                                 "D"
    :tontin-jarjestelymuutos                                           "D"
    })
 
@@ -142,7 +129,14 @@
 
 (defn- resolve-price-class [application op]
   (let [price-class (get price-classes-for-operation (keyword (:name op)))]
-    (assoc op :priceClass (if (fn? price-class) (price-class application op) price-class))))
+    (if (fn? price-class)
+      (let [price (price-class application op)] ; get kayttotarkoitus
+        (-> op
+            (assoc :priceClass (get price :priceClass))
+            (assoc :use (get price :kayttotarkoitus))))
+      (-> op ; normal price class
+        (assoc :priceClass price-class)
+        (assoc :use nil)))))
 
 (defn- operation-mapper [application op]
   (util/assoc-when (resolve-price-class application op)
@@ -155,16 +149,24 @@
   [{{ts :modifiedAfterTimestampMillis} :data user :user}]
   (let [query (merge
                 (domain/application-query-for user)
-                {"operations.0" {$exists true}}
+                {"primaryOperation" {$exists true}}
                 (when (ss/numeric? ts)
                   {:modified {$gte (Long/parseLong ts 10)}}))
-        fields [:address :applicant :authority :closed :created :convertedToApplication :infoRequest :modified
-                :municipality :opened :openInfoRequest :operations :organization
-                :propertyId :permitSubtype :permitType :sent :started :state :submitted]
+        fields {:address 1 :applicant 1 :authority 1 :closed 1 :created 1 :convertedToApplication 1
+                :infoRequest 1 :modified 1 :municipality 1 :opened 1 :openInfoRequest 1
+                :primaryOperation 1 :secondaryOperations 1 :organization 1 :propertyId 1
+                :permitSubtype 1 :permitType 1 :sent 1 :started 1 :state 1 :submitted 1
+                :documents.data.kaytto.kayttotarkoitus.value 1
+                :documents.schema-info.op.id 1}
         raw-applications (mongo/select :applications query fields)
+        applications-with-operations (map
+                                       (fn [a] (assoc a :operations (application/get-operations a)))
+                                       raw-applications)
         applications (map
-                       (fn [a] (update-in a [:operations] #(map (partial operation-mapper a) %)))
-                       raw-applications)]
+                       (fn [a] (->
+                                 (update-in a [:operations] #(map (partial operation-mapper a) %))
+                                 (dissoc :documents))) ; documents not needed in DW
+                       applications-with-operations)]
     (ok :applications applications)))
 
 (defexport export-organizations

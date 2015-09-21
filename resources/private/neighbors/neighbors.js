@@ -11,6 +11,26 @@
     self.neighborId = ko.observable();
     self.map = null;
 
+    var neighborSkeleton = {propertyId: undefined,
+                            owner: {
+                                address: {
+                                  city: undefined,
+                                  street: undefined,
+                                  zip: undefined
+                                },
+                                businessID: undefined,
+                                email: undefined,
+                                name: undefined,
+                                nameOfDeceased: undefined,
+                                type: undefined
+                            }};
+
+    function ensureNeighbors(neighbor) { // ensure neighbors have correct properties defined
+      var n = _.defaults(neighbor, neighborSkeleton);
+      n.owner = _.defaults(n.owner, neighborSkeleton.owner); // _.defaults is not deep
+      return n;
+    }
+
     self.init = function(application) {
       if (!self.map) {
         self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
@@ -20,13 +40,13 @@
           y = location.y;
       self
         .applicationId(application.id)
-        .neighbors(application.neighbors)
+        .neighbors(_.map(application.neighbors, ensureNeighbors))
         .neighborId(null)
         .map.clear().updateSize().center(x, y, 13).add({x: x, y: y});
     };
 
     function openEditDialog(params) {
-      hub.send("show-dialog", {title: "neighbors.edit.title",
+      hub.send("show-dialog", {ltitle: "neighbors.edit.title",
                                component: "neighbors-edit-dialog",
                                componentParams: params,
                                size: "medium"});
@@ -41,7 +61,7 @@
     };
 
     self.click = function(x, y) {
-      hub.send("show-dialog", { title: "neighbor.owners.title",
+      hub.send("show-dialog", { ltitle: "neighbor.owners.title",
                                 size: "large",
                                 component: "neighbors-owners-dialog",
                                 componentParams: {x: x,
@@ -49,7 +69,7 @@
     };
 
     self.done = function() {
-      window.location.hash = "!/application/" + applicationId + "/statement";
+      pageutil.openApplicationPage({id: applicationId}, "statement");
     };
 
     self.remove = function(neighbor) {
@@ -79,7 +99,7 @@
     repository.load(applicationId);
   });
 
-  hub.onPageUnload("neighbors", function(e) {
+  hub.onPageUnload("neighbors", function() {
     model.map = null;
   });
 

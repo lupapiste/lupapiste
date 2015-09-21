@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.yleiset-alueet-kayttolupa-canonical-test
   (:require [lupapalvelu.document.yleiset-alueet-canonical-test-common :refer :all]
             [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.test-util :refer [xml-datetime-is-roughly?]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
@@ -11,27 +12,27 @@
             [sade.core :refer :all]))
 
 (def- operation {:id "52380c6894a74fc25bb4ba46",
-                          :created 1379404904514,
-                          :name "ya-kayttolupa-terassit"})
+                 :created 1379404904514,
+                 :name "ya-kayttolupa-terassit"})
 
 (def- hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a"
-                                :created 1379404904514
-                                :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
-                                              :removable false
-                                              :repeating false
-                                              :version 1
-                                              :type "group"
-                                              :order 60}
-                                :data {:kayttotarkoitus {:value "Hankkeen kuvaus."}
+                       :created 1379404904514
+                       :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
+                                     :removable false
+                                     :repeating false
+                                     :version 1
+                                     :type "group"
+                                     :order 60}
+                       :data {:kayttotarkoitus {:value "Hankkeen kuvaus."}
 ;                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00001"}
-                                       :varattava-pinta-ala {:value "333"}}})
+                              :varattava-pinta-ala {:value "333"}}})
 
 (def- tyoaika-kayttolupa (assoc-in tyoaika [:schema-info :op] operation))
 
 (def- documents [hakija
-                          tyoaika-kayttolupa
-                          maksaja
-                          hankkeen-kuvaus])
+                 tyoaika-kayttolupa
+                 maksaja
+                 hankkeen-kuvaus])
 
 (def kayttolupa-application {:schema-version 1,
                              :id "LP-753-2013-00002",
@@ -54,7 +55,8 @@
                              :address "Latokuja 1",
                              :location location,
                              :attachments [],
-                             :operations [operation],
+                             :primaryOperation operation,
+                             :secondaryOperations [],
                              :propertyId "75341600550007",
                              :documents documents,
                              :municipality municipality,
@@ -83,25 +85,10 @@
         Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
         Sijainti-piste (-> Kayttolupa :sijaintitieto first :Sijainti :piste :Point :pos) => truthy
-
-        PisteSijanti (-> Kayttolupa :sijaintitieto second :Sijainti :piste :Point :pos) => "530851.15649413 6972373.1564941"
-
-        LineString1 (-> Kayttolupa :sijaintitieto (nth 2) :Sijainti :viiva :LineString :pos) => '("530856.65649413 6972312.1564941"
-                                                                                                   "530906.40649413 6972355.6564941"
-                                                                                                   "530895.65649413 6972366.9064941"
-                                                                                                   "530851.15649413 6972325.9064941"
-                                                                                                   "530856.65649413 6972312.4064941")
-
-        LineString2 (-> Kayttolupa :sijaintitieto (nth 3) :Sijainti :viiva :LineString :pos) => '("530825.15649413 6972348.9064941"
-                                                                                                   "530883.65649413 6972370.1564941"
-                                                                                                   "530847.65649413 6972339.4064941"
-                                                                                                   "530824.90649413 6972342.4064941")
-
-
-        Alue (-> Kayttolupa :sijaintitieto (nth 4) :Sijainti :alue :Polygon :exterior :LinearRing :pos) => '("530859.15649413 6972389.4064941"
-                                                                                                              "530836.40649413 6972367.4064941"
-                                                                                                              "530878.40649413 6972372.6564941"
-                                                                                                              "530859.15649413 6972389.4064941")
+        PisteSijanti   (-> Kayttolupa :sijaintitieto second :Sijainti) => truthy
+        LineString1    (-> Kayttolupa :sijaintitieto (nth 2) :Sijainti) => truthy
+        LineString2    (-> Kayttolupa :sijaintitieto (nth 3) :Sijainti) => truthy
+        Alue           (-> Kayttolupa :sijaintitieto (nth 4) :Sijainti) => truthy
 
         osapuolet-vec (-> Kayttolupa :osapuolitieto) => truthy
         vastuuhenkilot-vec (-> Kayttolupa :vastuuhenkilotieto) => truthy
@@ -178,9 +165,36 @@
 
     ;; Sijainti
     (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id kayttolupa-application))
-;    (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => <now??>)              ;; TODO: Mita tahan?
+    (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => (partial xml-datetime-is-roughly? (util/to-xml-datetime (now))))
     (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address kayttolupa-application))
-    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> kayttolupa-application :location :x) " " (-> kayttolupa-application :location :y)))
+    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> kayttolupa-application :location first) " " (-> kayttolupa-application :location second)))
+    (fact "PisteSijanti" PisteSijanti => {:piste {:Point {:pos "530851.15649413 6972373.1564941"}}
+                                          :nimi "Piste"
+                                          :kuvaus "Piste jutska"
+                                          :korkeusTaiSyvyys "345"})
+    (fact "LineString 1" LineString1 => {:viiva {:LineString {:pos '("530856.65649413 6972312.1564941"
+                                                                     "530906.40649413 6972355.6564941"
+                                                                     "530895.65649413 6972366.9064941"
+                                                                     "530851.15649413 6972325.9064941"
+                                                                     "530856.65649413 6972312.4064941")}},
+                                         :nimi "alue"
+                                         :kuvaus "alue 1"
+                                         :korkeusTaiSyvyys "1000"})
+    (fact "LineString 2" LineString2 => {:viiva {:LineString {:pos '("530825.15649413 6972348.9064941"
+                                                                     "530883.65649413 6972370.1564941"
+                                                                     "530847.65649413 6972339.4064941"
+                                                                     "530824.90649413 6972342.4064941")}}
+                                         :nimi "Viiva"
+                                         :kuvaus "Viiiva"
+                                         :korkeusTaiSyvyys "111"})
+    (fact "Alue" Alue => {:alue {:Polygon {:exterior {:LinearRing {:pos '("530859.15649413 6972389.4064941"
+                                                                          "530836.40649413 6972367.4064941"
+                                                                          "530878.40649413 6972372.6564941"
+                                                                          "530859.15649413 6972389.4064941")}}}}
+                          :nimi "Alueen nimi"
+                          :kuvaus "Alueen kuvaus"
+                          :korkeusTaiSyvyys "333"
+                          :pintaAla "402"})
 
     ;; Maksajan tiedot
     (fact "maksaja-laskuviite" (:laskuviite Maksaja) => (:value _laskuviite))

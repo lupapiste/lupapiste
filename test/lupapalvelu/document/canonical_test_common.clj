@@ -3,7 +3,6 @@
             [lupapalvelu.document.ymparisto-schemas]
             [lupapalvelu.document.yleiset-alueet-schemas]
             [lupapalvelu.document.model :refer [validate get-document-schema]]
-            [lupapalvelu.test-util :refer [doc-result doc-check]]
             [midje.sweet :refer :all]))
 
 ;;
@@ -20,9 +19,8 @@
   (let [documents (:documents application)
         reduced-application (select-keys application [:auth])]
     (doseq [document documents]
-      (let [result (doc-result (validate-against-current-schema reduced-application document) document)]
-        (fact "Meta test: all documents in the application are valid"
-          result => (doc-check empty?))))))
+      (fact {:midje/description document}
+        (validate-against-current-schema reduced-application document) => empty?))))
 
 ;; Fixture
 
@@ -33,7 +31,7 @@
                            :email "sonja.sibbo@sipoo.fi"
                            :id "516560d6c2e6f603beb85147"}
                   :requested 1379423095616
-                  :status "yes"
+                  :status "puoltaa"
                   :text "Lausunto liitteen\u00e4."}])
 
 (def yrityshakija {:id "52f3676442067dc3ba4f1ba8",
@@ -122,6 +120,7 @@
                :category "123",
                :geometry "LINESTRING(530856.65649413 6972312.1564941,530906.40649413 6972355.6564941,530895.65649413 6972366.9064941,530851.15649413 6972325.9064941,530856.65649413 6972312.4064941)",
                :area "",
+               :length "1111",
                :height "1000"}
               {:id 2,
                :name "Viiva",
@@ -129,22 +128,24 @@
                :category "123",
                :geometry "LINESTRING(530825.15649413 6972348.9064941,530883.65649413 6972370.1564941,530847.65649413 6972339.4064941,530824.90649413 6972342.4064941)",
                :area "",
-               :height ""}
+               :length "1134",
+               :height "111"}
               {:id 3,
                :name "Piste",
                :desc "Piste jutska",
                :category "123",
                :geometry "POINT(530851.15649413 6972373.1564941)",
                :area "",
-               :height ""}
+               :length "",
+               :height "345"}
               {:id 4
                :name "Alueen nimi"
                :desc "Alueen kuvaus"
                :category "123"
                :geometry "POLYGON((530859.15649413 6972389.4064941,530836.40649413 6972367.4064941,530878.40649413 6972372.6564941,530859.15649413 6972389.4064941))",
                :area "402",
-               :height  ""
-               }])
+               :length "",
+               :height "333"}])
 
 (def neighbors [{:id "53158d0c42069e0c20033977"
                  :propertyId "75342600060211"

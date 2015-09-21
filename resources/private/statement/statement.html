@@ -12,14 +12,53 @@
           <span data-bind="text: person.text"></span>
         </span>
       </h1>
-      <button class="attachment-delete inline-block" data-bind="ltext: 'statement.delete', click: $root.statementModel.openDeleteDialog, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')" data-test-id="delete-statement">Poista lausunto</button>
+      <button class="attachment-delete inline-block"
+              data-bind="ltext: 'statement.delete', click: $root.statementModel.openDeleteDialog, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')"
+              data-test-id="delete-statement">Poista lausunto</button>
       <div data-bind="with: application">
-        <a class="btn btn-nav-back inline-block" data-test-id="statement-return" data-bind="attr: {href: '#!/application/' + id() + '/statement' }">
+        <a class="btn secondary inline-block"
+           data-test-id="statement-return"
+           data-bind="attr: {href: '#!/application/' + id() + (lupapisteApp.models.application.inPostVerdictState() ? '/applicationSummary' : '/statement') }">
+            <i class="lupicon-chevron-start"></i>
           <span data-bind ="ltext: 'application.return'"></span>
-          <span class="icon drill-left-black-bigger left-align"></span>
         </a>
       </div>
     </div>
+
+    <div class="statement-info">
+      <form data-bind="with: $root.statementModel">
+        <div class="form-entry">
+          <label for="statement-type-select" class="form-label">
+            <span data-bind="ltext: 'statement.title'">Puoltotieto</span>
+            <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="statement-type-select-loader" style="display: none;">
+          </label>
+          <select id="statement-type-select" class="form-input combobox" data-bind="options: statuses,
+                                                                                    optionsValue: 'id',
+                                                                                    optionsText: 'name',
+                                                                                    value: selectedStatus,
+                                                                                    valueAllowUnset: true,
+                                                                                    optionsCaption: loc('choose'),
+                                                                                    disable: !$root.authorization.ok('give-statement')"></select>
+        </div>
+        <div>
+          <label class="form-label" for="statement-text" data-bind="ltext: 'statement.text'"></label>
+          <textarea
+            data-bind="attr: {placeholder: loc('statement.message.placeholder')}, textInput: text, readonly: !$root.authorization.ok('give-statement')"
+            id="statement-text"
+            rows="20">
+          </textarea>
+        </div>
+        <button
+          data-bind="disable: disabled, click: submit, ltext: submitLtext, visible: $root.authorization.ok('give-statement')"
+          id="statement-submit"
+          type="submit"
+          class="btn btn-primary">
+          J&auml;t&auml; lausunto
+        </button>
+        <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
+      </form>
+    </div>
+
     <div data-bind="with: $root.attachmentsModel" class="statement-conversation">
       <div class="statement-attachments">
         <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
@@ -68,33 +107,24 @@
 
     </div>
 
-    <div class="statement-info">
-      <form data-bind="with: $root.statementModel">
-        <div class="form-entry">
-          <label for="statement-type-select" class="form-label">
-            <span data-bind="ltext: 'statement.title'">Puoltotieto</span>
-            <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="statement-type-select-loader" style="display: none;">
-          </label>
-          <select id="statement-type-select" class="form-input combobox" data-bind="options: statuses, optionsText: function(item) { return loc('statement.'+item);}, value: selectedStatus, valueAllowUnset: true, optionsCaption: loc('choose'), disable: !$root.authorization.ok('give-statement')"></select>
+    <!-- ko if: features.enabled('tiedonohjaus') && !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-attachment') -->
+    <div class="feature" style="margin-top: 15px;">
+      <button id="show-tos-metadata" class="btn"
+              data-bind="click: toggleTosMetadata, visible: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application')">
+        <i data-bind="css: {'lupicon-chevron-small-right': !showTosMetadata(),
+                                      'lupicon-chevron-small-down': showTosMetadata}"></i>
+        <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
+      </button>
+
+      <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: !_.isEmpty(metadata())">
+        <div data-bind="component: {name: 'metadata-editor',
+                                              params: {statementId: statementId, metadata: metadata, applicationId: applicationId}}">
         </div>
-        <div>
-          <label class="form-label" for="statement-text" data-bind="ltext: 'statement.text'"></label>
-          <textarea
-            data-bind="attr: {placeholder: loc('statement.message.placeholder')}, textInput: text, readonly: !$root.authorization.ok('give-statement')"
-            id="statement-text"
-            rows="20">
-          </textarea>
-        </div>
-        <button
-          data-bind="disable: disabled, click: submit, ltext: submitLtext, visible: $root.authorization.ok('give-statement')"
-          id="statement-submit"
-          type="submit"
-          class="btn btn-primary">
-          J&auml;t&auml; lausunto
-        </button>
-        <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
-      </form>
+      </div>
+
     </div>
+    <!-- /ko -->
+
     <!-- /ko -->
   </section>
 </body>

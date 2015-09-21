@@ -1,12 +1,16 @@
 *** Settings ***
 
 Documentation   Mikko registers
-Suite Setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 Resource        keywords.robot
 
 *** Test Cases ***
+
+Setup random email
+  [Tags]  integration  ie8
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${email}  ${secs}@example.com
 
 Cancelling vetuma return back to register page
   [Tags]  integration  ie8
@@ -47,10 +51,10 @@ Filling register form2
   Input text by test id  register-phone  +358554433221
   Submit is disabled
 
-  Input text by test id  register-email  vetuma@example.com
+  Input text by test id  register-email  ${email}
   Submit is disabled
 
-  Input text by test id  register-confirmEmail  vetuma@example.com
+  Input text by test id  register-confirmEmail  ${email}
   Submit is disabled
 
   Input text by test id  register-password  vetuma69
@@ -74,17 +78,17 @@ Filling register form2
 Submitting form gives confirmation
   [Tags]  integration  ie8
   Wait until  element should be visible  xpath=//*[@data-bind="ltext: 'register.activation-email-info1'"]
-  Element text should be  activation-email  vetuma@example.com
+  Element text should be  activation-email  ${email}
 
 Can not login before activation
   [Tags]  integration  ie8
   Go to login page
-  Login fails  vetuma@example.com  vetuma69
+  Login fails  ${email}  vetuma69
 
 Vetuma-guy activates his account
   [Tags]  integration  ie8
   Open last email
-  Wait Until  Page Should Contain  vetuma@example.com
+  Wait Until  Page Should Contain  ${email}
   Page Should Contain  /app/security/activate
   ## Click the first link
   Click link  xpath=//a
@@ -92,6 +96,7 @@ Vetuma-guy activates his account
 Vetuma-guy lands to empty applications page automaticly
   [Tags]  integration  ie8
   User should be logged in  Nordea Demo
+  Confirm notification dialog
   Applications page should be open
   Number of visible applications  0
 

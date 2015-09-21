@@ -29,6 +29,7 @@ Mikko changes the password back
 Change password
   [Arguments]  ${old}  ${new}
   Click Element  user-name
+  Open accordion by test id  mypage-change-password-accordion
   Wait Until  Element Should be visible  //*[@data-test-id='change-my-password']
   Input Text  oldPassword  ${old}
   Input Text  newPassword  ${new}

@@ -12,8 +12,8 @@
 
 (facts "verify that every operation has link-permit-required set"
   (doseq [[op propeties] operations]
-    (let [result (doc-result (contains? propeties :link-permit-required) op)]
-      (fact result => (doc-check truthy)))))
+    (fact {:midje/description op}
+      (contains? propeties :link-permit-required))))
 
 (facts "check that correct operations require a linkPermit"
   (fact "operation names"
@@ -56,48 +56,47 @@
 
   (fact "rakval, only addable operations included"
     (let [filtering-fn (fn [node] (= "R" (permit-type-of-operation node)))]
-      (operations-filtered filtering-fn true) => (filterv identity ; TODO remove filtering after pima feature is in production
-                                                   [["Rakentaminen ja purkaminen"
-                                                     [["Uuden rakennuksen rakentaminen"
-                                                       [["kerrostalo-rivitalo" :kerrostalo-rivitalo]
-                                                        ["pientalo" :pientalo]
-                                                        ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
-                                                        ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
-                                                        ["teollisuusrakennus" :teollisuusrakennus]
-                                                        ["Muun rakennuksen rakentaminen" :muu-uusi-rakentaminen]]]
-                                                      ["Rakennuksen-laajentaminen"
-                                                       [["kerrostalo-rt-laaj" :kerrostalo-rt-laaj]
-                                                        ["pientalo-laaj" :pientalo-laaj]
-                                                        ["vapaa-ajan-rakennus-laaj" :vapaa-ajan-rakennus-laaj]
-                                                        ["talousrakennus-laaj" :talousrakennus-laaj]
-                                                        ["teollisuusrakennus-laaj" :teollisuusrakennus-laaj]
-                                                        ["muu-rakennus-laaj" :muu-rakennus-laaj]]]
-                                                      ["Rakennuksen korjaaminen tai muuttaminen"
-                                                       [["kayttotark-muutos" :kayttotark-muutos]
-                                                        ["sisatila-muutos" :sisatila-muutos]
-                                                        ["Rakennuksen julkisivun tai katon muuttaminen" :julkisivu-muutos]
-                                                        ["Markatilan laajentaminen" :markatilan-laajentaminen]
-                                                        ["linjasaneeraus" :linjasaneeraus]
-                                                        ["Parvekkeen tai terassin lasittaminen" :parveke-tai-terassi]
-                                                        ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
-                                                        ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
-                                                        ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]]]
-                                                      ["Rakennelman rakentaminen"
-                                                       [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
-                                                        ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
-                                                        ["Mainoslaite" :mainoslaite]
-                                                        ["Aita" :aita]
-                                                        ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
-                                                        ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]]]
-                                                      ["Rakennuksen purkaminen" :purkaminen]
-                                                      ["Maisemaa muutava toimenpide"
-                                                       [["Puun kaataminen" :puun-kaataminen]
-                                                        ["tontin-jarjestelymuutos" :tontin-jarjestelymuutos]
-                                                        ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]
-                                                        ["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
-                                                        ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
-                                                      ["rakennustyo-muutostoimenpiteet"
-                                                       [["rak-valm-tyo" :rak-valm-tyo]]]]]])))
+      (operations-filtered filtering-fn true) => [["Rakentaminen ja purkaminen"
+                                                   [["Uuden rakennuksen rakentaminen"
+                                                     [["kerrostalo-rivitalo" :kerrostalo-rivitalo]
+                                                      ["pientalo" :pientalo]
+                                                      ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
+                                                      ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
+                                                      ["teollisuusrakennus" :teollisuusrakennus]
+                                                      ["Muun rakennuksen rakentaminen" :muu-uusi-rakentaminen]]]
+                                                    ["Rakennuksen-laajentaminen"
+                                                     [["kerrostalo-rt-laaj" :kerrostalo-rt-laaj]
+                                                      ["pientalo-laaj" :pientalo-laaj]
+                                                      ["vapaa-ajan-rakennus-laaj" :vapaa-ajan-rakennus-laaj]
+                                                      ["talousrakennus-laaj" :talousrakennus-laaj]
+                                                      ["teollisuusrakennus-laaj" :teollisuusrakennus-laaj]
+                                                      ["muu-rakennus-laaj" :muu-rakennus-laaj]]]
+                                                    ["Rakennuksen korjaaminen tai muuttaminen"
+                                                     [["kayttotark-muutos" :kayttotark-muutos]
+                                                      ["sisatila-muutos" :sisatila-muutos]
+                                                      ["Rakennuksen julkisivun tai katon muuttaminen" :julkisivu-muutos]
+                                                      ["Markatilan laajentaminen" :markatilan-laajentaminen]
+                                                      ["linjasaneeraus" :linjasaneeraus]
+                                                      ["Parvekkeen tai terassin lasittaminen" :parveke-tai-terassi]
+                                                      ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
+                                                      ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
+                                                      ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]]]
+                                                    ["Rakennelman rakentaminen"
+                                                     [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
+                                                      ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
+                                                      ["Mainoslaite" :mainoslaite]
+                                                      ["Aita" :aita]
+                                                      ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
+                                                      ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]]]
+                                                    ["Rakennuksen purkaminen" :purkaminen]
+                                                    ["Maisemaa muutava toimenpide"
+                                                     [["Puun kaataminen" :puun-kaataminen]
+                                                      ["tontin-jarjestelymuutos" :tontin-jarjestelymuutos]
+                                                      ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]
+                                                      ["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
+                                                      ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
+                                                    ["rakennustyo-muutostoimenpiteet"
+                                                     [["rak-valm-tyo" :rak-valm-tyo]]]]]]))
 
   (fact "poikkarit"
     (let [filtering-fn (fn [node] (= "P" (permit-type-of-operation node)))]

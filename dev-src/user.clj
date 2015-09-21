@@ -1,11 +1,5 @@
 (ns user
-  (:require [monger.operators :refer :all]
-            [monger.core :as m]
-            [monger.collection :as mc]
-            [monger.db :as db]
-            [monger.gridfs :as gfs]
-            [monger.command :refer [server-status]]
-            [clojure.java.io :as io])
+  (:require [clojure.java.io :as io])
   (:import  [java.util.zip ZipInputStream]))
 
 (defn disable-anti-csrf []
@@ -24,10 +18,11 @@
 
 (defn ktags [c & [children]] (mapv #(ktag % children) (clojure.string/split c #"\s")))
 
-(defn play-with-zip [path]
+(defn play-with-zip
   "http://docs.oracle.com/javase/8/docs/api/java/util/zip/ZipEntry.html
    http://docs.oracle.com/javase/8/docs/api/java/util/zip/ZipInputStream.html
    http://docs.oracle.com/javase/8/docs/api/java/util/zip/ZipFile.html"
+  [path]
   (let [zip-stream (ZipInputStream. (io/input-stream (io/file path)))
         to-zip-entries (fn [s result]
                          (if-let [entry (.getNextEntry s)]

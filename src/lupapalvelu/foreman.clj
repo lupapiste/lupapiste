@@ -2,9 +2,11 @@
   (:require [lupapalvelu.domain :as domain]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.core :refer [fail]]
+            [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.states :as states]
             [monger.operators :refer :all]))
 
 (defn other-project-document [application timestamp]
@@ -31,9 +33,9 @@
                        (get-foreman-hetu foreman-application)
                        foreman-hetu)]
     (when-not (ss/blank? foreman-hetu)
-      (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
-                                   :documents        {$elemMatch {"schema-info.name"              "tyonjohtaja-v2"
-                                                                  "data.henkilotiedot.hetu.value" foreman-hetu}}}))))
+      (mongo/select :applications {"primaryOperation.name" "tyonjohtajan-nimeaminen-v2"
+                                   :documents {$elemMatch {"schema-info.name"              "tyonjohtaja-v2"
+                                                           "data.henkilotiedot.hetu.value" foreman-hetu}}}))))
 
 (defn get-foreman-project-applications
   "Based on the passed foreman application, fetches all project applications that have the same foreman as in
@@ -87,9 +89,10 @@
     (map (partial get-history-data-from-app links) foreman-apps)))
 
 (defn- reduce-to-highlights [history-group]
-  (let [history-group (sort-by :created history-group)]
+  (let [history-group (sort-by :created history-group)
+        difficulty-values (vec (map :name (:body schema/patevyysvaatimusluokka)))]
     (reduce (fn [highlights group]
-              (if (pos? (util/compare-difficulty (first highlights) group))
+              (if (pos? (util/compare-difficulty :difficulty difficulty-values (first highlights) group))
                 (cons group highlights)
                 highlights))
             nil
@@ -104,4 +107,32 @@
   (-> (select-keys application [:id :state :auth :documents])
       (update-in [:documents] (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs)))))
 
-(defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :operations first :name keyword)))
+(defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword)))
+
+(defn notice?
+  "True if application is foreman application and of type notice (ilmoitus)"
+  [application]
+  (and
+    (foreman-app? application)
+    (= "tyonjohtaja-ilmoitus" (:permitSubtype application))))
+
+(defn- validate-notice-or-application [{subtype :permitSubtype :as application}]
+  (when (ss/blank? subtype)
+    (fail! :error.foreman.type-not-selected)))
+
+(defn- validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application}]
+  (when (notice? application)
+    (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
+      (when-not (states/post-verdict-states (keyword
+                                              (get
+                                                (mongo/select-one :applications {:_id (:id link)} {:state 1})
+                                                :state)))
+        (fail! :error.foreman.notice-not-submittable)))))
+
+(defn validate-application
+  "Validates foreman applications"
+  [application]
+  (when (foreman-app? application)
+    (or
+      (validate-notice-or-application application)
+      (validate-notice-submittable application))))

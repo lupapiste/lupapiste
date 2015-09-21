@@ -17,8 +17,11 @@ Mikko creates two new inforequests
   Create inforequest the fast way  ${inforequest-cancelling}  360603.153  6734222.95  ${propertyId}  kerrostalo-rivitalo  Jiihaa
   Logout
 
-Authority assigns an inforequest to herself
+Sonja sees comment indicator on applications list
   Sonja logs in
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${inforequest-handling}']//div[@class='unseen-comments']  1
+
+Authority assigns an inforequest to herself
   Inforequest is not assigned  ${inforequest-handling}
   Open inforequest  ${inforequest-handling}  ${propertyId}
   Click link  inforequest-assignee-edit
@@ -28,8 +31,12 @@ Authority assigns an inforequest to herself
   Wait Until  Element should not be visible  assignee-select
   Element should be visible  //*[@data-test-id='inforequest-cancel-btn']
 
-Now Sonja is marked as authority
+Comment indicator is no longer visible (LPK-454)
   Go to page  applications
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${inforequest-cancelling}']//div[@class='unseen-comments']  1
+  Page should not contain element  xpath=//table[@id='applications-list']//tr[@data-test-address='${inforequest-handling}']//div[@class='unseen-comments']
+
+Sonja is marked as authority
   Inforequest is assigned to  ${inforequest-handling}  Sibbo Sonja
   Logout
 

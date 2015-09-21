@@ -14,14 +14,14 @@ Sonja prepares the application
   Create application the fast way  ${appname}  ${propertyid}  kerrostalo-rivitalo
 
   Wait until  Application state should be  open
-  ${applicationTitle} =  Get Text  xpath=//span[@data-test-id='application-title']
-  Set Suite Variable  ${applicationTitle}
   ${applicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
   Set Suite Variable  ${applicationid}
 
 Sonja submits the application, approves it and gives it a verdict
   Submit application
-  Click enabled by test id  approve-application
+  Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
+  Element should be visible  xpath=//button[@data-test-id="approve-application"]
+  Click enabled by test id  approve-application-summaryTab
   Element should not be visible  xpath=//*[@data-test-id='change-permit-create-btn']
   Open tab  verdict
   Fetch verdict
@@ -44,18 +44,18 @@ Sonja creates a change permit
   Set Suite Variable  ${newApplicationid}
   Should Not Be Equal As Strings  ${newApplicationid}  ${applicationid}
 
-  Element Text Should Be  xpath=//span[@data-test-id='application-title']  ${applicationTitle}
+  Application address should be  ${appname}
   Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyid}
   Element Should Not Be Visible  xpath=//span[@data-test-id='application-submitted-date']
 
   Element Should Not Be Visible  xpath=//*[@data-test-id='test-application-app-linking-to-us']
   Element Should Be Visible  xpath=//*[@data-test-id='test-application-link-permit-lupapistetunnus']
-  Element Text Should Be  xpath=//*[@data-test-id='test-application-link-permit-lupapistetunnus']  ${applicationid}
+  Element Text Should Be  xpath=//*[@data-test-id='test-application-link-permit-lupapistetunnus']  ${applicationid} - Asuinkerrostalon tai rivitalon rakentaminen
 
   # Go to the link permit via link
   Click by test id  test-application-link-permit-lupapistetunnus
 
   Wait Until  Element should not be visible  xpath=//*[@data-test-id='test-application-link-permit-lupapistetunnus']
   Wait Until  Element should be visible  xpath=//*[@data-test-id='test-application-app-linking-to-us']
-  Element Text Should Be  xpath=//*[@data-test-id='test-application-app-linking-to-us']  ${newApplicationid}
+  Element Text Should Be  xpath=//*[@data-test-id='test-application-app-linking-to-us']  ${newApplicationid} - Asuinkerrostalon tai rivitalon rakentaminen
 

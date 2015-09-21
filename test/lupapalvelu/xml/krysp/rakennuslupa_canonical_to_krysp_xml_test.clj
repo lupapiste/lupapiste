@@ -5,13 +5,13 @@
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-suunnittelijan-nimeaminen
                                                                       jatkolupa-application
-                                                                      aloitusoikeus-hakemus
-                                                                      ]]
+                                                                      aloitusoikeus-hakemus]]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212
                                                                 rakennuslupa_to_krysp_213
                                                                 rakennuslupa_to_krysp_214
                                                                 rakennuslupa_to_krysp_215
                                                                 rakennuslupa_to_krysp_216
+                                                                rakennuslupa_to_krysp_218
                                                                 save-katselmus-as-krysp]]
             [lupapalvelu.xml.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
@@ -31,31 +31,36 @@
 (fact "2.1.4: :tag is set" (has-tag rakennuslupa_to_krysp_214) => true)
 (fact "2.1.5: :tag is set" (has-tag rakennuslupa_to_krysp_215) => true)
 (fact "2.1.6: :tag is set" (has-tag rakennuslupa_to_krysp_216) => true)
+(fact "2.1.8: :tag is set" (has-tag rakennuslupa_to_krysp_218) => true)
 
-(defn- do-test [application validate-tyonjohtaja? validate-pysyva-tunnus?]
+(defn- do-test [application validate-tyonjohtaja-type validate-pysyva-tunnus?]
   (let [canonical (application-to-canonical application "fi")
         xml_212 (rakennuslupa-element-to-xml canonical "2.1.2")
         xml_213 (rakennuslupa-element-to-xml canonical "2.1.3")
         xml_214 (rakennuslupa-element-to-xml canonical "2.1.4")
         xml_215 (rakennuslupa-element-to-xml canonical "2.1.5")
         xml_216 (rakennuslupa-element-to-xml canonical "2.1.6")
+        xml_218 (rakennuslupa-element-to-xml canonical "2.1.8")
         xml_212_s (indent-str xml_212)
         xml_213_s (indent-str xml_213)
         xml_214_s (indent-str xml_214)
         xml_215_s (indent-str xml_215)
-        xml_216_s (indent-str xml_216)]
+        xml_216_s (indent-str xml_216)
+        xml_218_s (indent-str xml_218)]
 
     (fact "2.1.2: xml exist" xml_212 => truthy)
     (fact "2.1.3: xml exist" xml_213 => truthy)
     (fact "2.1.4: xml exist" xml_214 => truthy)
     (fact "2.1.5: xml exist" xml_215 => truthy)
     (fact "2.1.6: xml exist" xml_216 => truthy)
+    (fact "2.1.8: xml exist" xml_218 => truthy)
 
 
 
     (let [lp-xml_212 (cr/strip-xml-namespaces (xml/parse xml_212_s))
           lp-xml_213 (cr/strip-xml-namespaces (xml/parse xml_213_s))
           lp-xml_216 (cr/strip-xml-namespaces (xml/parse xml_216_s))
+          lp-xml_218 (cr/strip-xml-namespaces (xml/parse xml_218_s))
           tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
           tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
           tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])]
@@ -65,19 +70,26 @@
           (xml/get-text lp-xml_212 [:luvanTunnisteTiedot :LupaTunnus :saapumisPvm]) => expected
           (xml/get-text lp-xml_213 [:luvanTunnisteTiedot :LupaTunnus :saapumisPvm]) => expected))
 
-      (if validate-tyonjohtaja?
+      (if validate-tyonjohtaja-type
         (do
-          (fact "In KRYSP 2.1.2, patevyysvaatimusluokka A is mapped to 'ei tiedossa'"
+          (fact "In KRYSP 2.1.2, patevyysvaatimusluokka/vaadittuPatevyysluokka A are mapped to 'ei tiedossa'"
+            (xml/get-text tyonjohtaja_212 :vaadittuPatevyysluokka) => "ei tiedossa"
             (xml/get-text tyonjohtaja_212 :patevyysvaatimusluokka) => "ei tiedossa")
 
-          (fact "In KRYSP 2.1.3, patevyysvaatimusluokka A not mapped"
-            (xml/get-text tyonjohtaja_213 :patevyysvaatimusluokka) => "A"))
+          (fact "In KRYSP 2.1.3, patevyysvaatimusluokka/vaadittuPatevyysluokka A is not mapped"
+            (xml/get-text tyonjohtaja_213 :patevyysvaatimusluokka) => "A"
+            (xml/get-text tyonjohtaja_213 :vaadittuPatevyysluokka) => "A")
+
+          (when (= :v2 validate-tyonjohtaja-type)
+            (fact "In KRYSP 2.1.6, :vainTamaHankeKytkin was added (Yhteiset schema was updated to 2.1.5 and tyonjohtaja along with it)"
+              (xml/get-text tyonjohtaja_216 :vainTamaHankeKytkin) => "true")))
         (do
            tyonjohtaja_212 => nil
-           tyonjohtaja_213 => nil
-           tyonjohtaja_216 => nil))
+           tyonjohtaja_213 => nil))
+
       (if validate-pysyva-tunnus?
-        (fact "pysyva rakennusmuero" (xml/get-text lp-xml_212 [:rakennustunnus :valtakunnallinenNumero]) => "1234567892")))
+        (fact "pysyva rakennusnumero" (xml/get-text lp-xml_212 [:rakennustunnus :valtakunnallinenNumero]) => "1234567892")))
+
 
     (let [lp-xml_215 (cr/strip-xml-namespaces (xml/parse xml_215_s))]
       ; Address format has changed in 2.1.5
@@ -89,101 +101,105 @@
       (xml/get-text lp-xml_215 [:osapuolitieto :Osapuoli :yritys :verkkolaskutustieto :Verkkolaskutus :verkkolaskuTunnus]) => "laskutunnus-1234"
       (xml/get-text lp-xml_215 [:osapuolitieto :Osapuoli :yritys :verkkolaskutustieto :Verkkolaskutus :valittajaTunnus]) => "BAWCFI22")
 
+
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
 
     (validator/validate xml_212_s (:permitType application) "2.1.2")
     (validator/validate xml_213_s (:permitType application) "2.1.3")
     (validator/validate xml_214_s (:permitType application) "2.1.4")
     (validator/validate xml_215_s (:permitType application) "2.1.5")
-    ; TODO patevyysvaatimusluokka enum ei tiedossa is now Ei tiedossa maybe mistake in xsd?
     (validator/validate xml_216_s (:permitType application) "2.1.6")
+    (validator/validate xml_218_s (:permitType application) "2.1.8")
     ))
+
 
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
 
   (fact "Rakennuslupa application -> canonical -> xml"
-    (do-test application-rakennuslupa true true))
+    (do-test application-rakennuslupa :v1 true))
 
   (fact "Ty\u00f6njohtaja application -> canonical -> xml"
-    (do-test application-tyonjohtajan-nimeaminen true false))
+    (do-test application-tyonjohtajan-nimeaminen :v2 false))
 
   (fact "Suunnittelija application -> canonical -> xml"
-    (do-test application-suunnittelijan-nimeaminen false false))
+    (do-test application-suunnittelijan-nimeaminen nil false))
 
   (fact "Aloitusoikeus -> canonical -> xml"
-    (do-test aloitusoikeus-hakemus false false)))
+    (do-test aloitusoikeus-hakemus nil false)))
 
 
-(let [application (assoc application-rakennuslupa
-                    :state "verdictGiven"
-                    :buildings [{:index "1" :propertyId "09100200990013" :localShortId "001" :nationalId "1234567892"}])
-      user        {:id "777777777777777777000017"
-                   :email "jussi.viranomainen@tampere.fi"
-                   :enabled true
-                   :role "authority"
-                   :username "jussi"
-                   :organizations ["837-YA"]
-                   :firstName "Jussi"
-                   :lastName "Viranomainen"
-                   :street "Katuosoite 1 a 1"
-                   :phone "1231234567"
-                   :zip "33456"
-                   :city "Tampere"}]
+(facts "Katselmus"
+  (let [application (assoc application-rakennuslupa
+                      :state "verdictGiven"
+                      :buildings [{:index "1" :propertyId "09100200990013" :localShortId "001" :nationalId "1234567892"}])
+        user        {:id "777777777777777777000017"
+                     :email "jussi.viranomainen@tampere.fi"
+                     :enabled true
+                     :role "authority"
+                     :username "jussi"
+                     :organizations ["837-YA"]
+                     :firstName "Jussi"
+                     :lastName "Viranomainen"
+                     :street "Katuosoite 1 a 1"
+                     :phone "1231234567"
+                     :zip "33456"
+                     :city "Tampere"}]
 
-  (fact "Katselmus data is parsed correctly from task. Not caring about actual mapping here."
-    (against-background
-      (#'lupapalvelu.xml.krysp.rakennuslupa-mapping/save-katselmus-xml
+    (fact "Katselmus data is parsed correctly from task. Not caring about actual mapping here."
+      (against-background
+        (#'lupapalvelu.xml.krysp.rakennuslupa-mapping/save-katselmus-xml
+          application
+          "fi"
+          "target"
+          "123" ; task id
+          "Pohjakatselmus 1" ; task name
+          "2.5.1974"
+          [{:tila {:tila "osittainen" :kayttoonottava true}
+            :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001" :valtakunnallinenNumero "1234567892"}}]
+          user
+          "pohjakatselmus" ; katselmuksen-nimi
+          :katselmus ;tyyppi
+          "pidetty" ;osittainen
+          "pitaja" ;pitaja
+          false ;lupaehtona
+          {:kuvaus "kuvaus"
+           :maaraAika "3.5.1974"
+           :toteaja "toteaja"
+           :toteamisHetki "1.5.1974"} ;huomautukset
+          "Tiivi Taavi, Hipsu ja Lala" ;lasnaolijat
+          "Ei poikkeamisia" ;poikkeamat
+          "2.1.2" ;krysp-version
+          "begin-of-link" ;begin-of-link
+          {:type "task" :id "123"} ;attachment-target
+          ) => nil)
+
+      (save-katselmus-as-krysp
         application
-        "fi"
-        "target"
-        "123" ; task id
-        "Pohjakatselmus 1" ; task name
-        "2.5.1974"
-        [{:tila {:tila "osittainen" :kayttoonottava true}
-          :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001" :valtakunnallinenNumero "1234567892"}}]
+        {:id "123"
+         :taskname "Pohjakatselmus 1"
+         :schema-info {:name "task-katselmus"}
+         :data {:katselmuksenLaji {:value "pohjakatselmus"},
+                :vaadittuLupaehtona {:value false}
+                :rakennus {:0
+                           {:rakennus
+                            {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"}}
+                            :tila {:tila {:value "osittainen"}
+                                   :kayttoonottava {:value true}}}}
+                :katselmus {:pitoPvm {:value "2.5.1974"}
+                            :pitaja {:value "pitaja"}
+                            :huomautukset {:kuvaus {:value "kuvaus"}
+                                           :maaraAika {:value "3.5.1974"}
+                                           :toteaja {:value "toteaja"}
+                                           :toteamisHetki {:value "1.5.1974"}}
+                            :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
+                            :poikkeamat {:value "Ei poikkeamisia"}
+                            :tila {:value "pidetty"}}}}
         user
-        "pohjakatselmus" ; katselmuksen-nimi
-        :katselmus ;tyyppi
-        "pidetty" ;osittainen
-        "pitaja" ;pitaja
-        false ;lupaehtona
-        {:kuvaus "kuvaus"
-         :maaraAika "3.5.1974"
-         :toteaja "toteaja"
-         :toteamisHetki "1.5.1974"} ;huomautukset
-        "Tiivi Taavi, Hipsu ja Lala" ;lasnaolijat
-        "Ei poikkeamisia" ;poikkeamat
-        "2.1.2" ;krysp-version
-        "begin-of-link" ;begin-of-link
-        {:type "task" :id "123"} ;attachment-target
-        ) => nil)
-
-    (save-katselmus-as-krysp
-      application
-      {:id "123"
-       :taskname "Pohjakatselmus 1"
-       :schema-info {:name "task-katselmus"}
-       :data {:katselmuksenLaji {:value "pohjakatselmus"},
-              :vaadittuLupaehtona {:value false}
-              :rakennus {:0
-                         {:rakennus
-                          {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"}}
-                          :tila {:tila {:value "osittainen"}
-                                 :kayttoonottava {:value true}}}}
-              :katselmus {:pitoPvm {:value "2.5.1974"}
-                          :pitaja {:value "pitaja"}
-                          :huomautukset {:kuvaus {:value "kuvaus"}
-                                         :maaraAika {:value "3.5.1974"}
-                                         :toteaja {:value "toteaja"}
-                                         :toteamisHetki {:value "1.5.1974"}}
-                          :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
-                          :poikkeamat {:value "Ei poikkeamisia"}
-                          :tila {:value "pidetty"}}}}
-      user
-      "fi"
-      "2.1.2"
-      "target"
-      "begin-of-link") => nil ))
+        "fi"
+        "2.1.2"
+        "target"
+        "begin-of-link") => nil
+      )))
 
 
 (facts "Tyonjohtajan sijaistus"
@@ -216,13 +232,11 @@
         (fact "5 vastuuta" (count vastuu) => 5)
         (fact "vastuun alkamisPvm" (xml/get-text tyonjohtaja [:alkamisPvm]) => "2014-02-13")
         (fact "vastuun paattymisPvm" (xml/get-text tyonjohtaja [:paattymisPvm]) => "2014-02-20")
-
-        (fact "vastattavaTyo" (map #(xml/get-text % [:vastattavaTyo]) vastuu)
-          => (just #{"Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen"
-                     "Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen"
-                     "Maanrakennusty\u00f6", "Muu tyotehtava", "Rakennelma tai laitos"}))
-
+        (fact "vastattavaTyo"
+          (map #(xml/get-text % [:vastattavaTyo]) vastuu) => (just #{"Rakennuksen purkaminen"
+                                                                     "IV-laitoksen korjaus- ja muutosty\u00f6"
+                                                                     "Uudisrakennusty\u00f6 ilman maanrakennust\u00f6it\u00e4"
+                                                                     "Maanrakennusty\u00f6t"
+                                                                     "Muu tyotehtava"}))
         (fact "postiosoite"
-          (xml/get-text tyonjohtaja [:yritys :postiosoitetieto :postiosoite :osoitenimi :teksti]) => "katu")
-        ))
-    ))
+          (xml/get-text tyonjohtaja [:yritys :postiosoitetieto :postiosoite :osoitenimi :teksti]) => "katu")))))

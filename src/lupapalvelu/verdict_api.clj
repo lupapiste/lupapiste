@@ -5,95 +5,33 @@
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.core :refer [ok fail fail!]]
+            [sade.core :refer [ok fail fail! ok?]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :as user]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader])
-  (:import [java.net URL]))
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]))
 
 ;;
 ;; KRYSP verdicts
 ;;
 
-(defn- get-poytakirja [application user timestamp verdict-id pk]
-  (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-    (do
-      (debug "Download" url)
-      (let [filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
-            resp            (try
-                              (http/get url :as :stream :throw-exceptions false)
-                              (catch Exception e {:status -1 :body (str e)}))
-            header-filename  (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
-                               (ss/replace content-disposition #"attachment;filename=" ""))
-            content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-            urlhash         (pandect/sha1 url)
-            attachment-id   urlhash
-            attachment-type {:type-group "muut" :type-id "muu"}
-            target          {:type "verdict" :id verdict-id :urlHash urlhash}
-            attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
-        ; If the attachment-id, i.e., hash of the URL matches
-        ; any old attachment, a new version will be added
-        (if (= 200 (:status resp))
-          (attachment/attach-file! {:application application
-                                    :filename (or header-filename filename)
-                                    :size content-length
-                                    :content (:body resp)
-                                    :attachment-id attachment-id
-                                    :attachment-type attachment-type
-                                    :target target
-                                    :required false
-                                    :locked true
-                                    :user user
-                                    :created attachment-time
-                                    :state :ok})
-          (error (str (:status resp) " - unable to download " url ": " resp)))
-        (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
-    pk))
-
-(defn verdict-attachments [application user timestamp verdict]
-  {:pre [application]}
-  (when (:paatokset verdict)
-    (let [verdict-id (mongo/create-id)]
-      (->
-        (assoc verdict :id verdict-id, :timestamp timestamp)
-        (update-in [:paatokset]
-          (fn [paatokset]
-            (filter seq
-              (map (fn [paatos]
-                     (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %)))
-                paatokset))))))))
-
-(defn- get-verdicts-with-attachments [application user timestamp xml]
-  (let [permit-type (:permitType application)
-        reader (permit/get-verdict-reader permit-type)
-        verdicts (krysp-reader/->verdicts xml reader)]
-    (filter seq (map (partial verdict-attachments application user timestamp) verdicts))))
-
-(defn find-verdicts-from-xml [{:keys [application user created] :as command} app-xml]
-  {:pre [(every? command [:application :user :created]) app-xml]}
-  (let [extras-reader (permit/get-verdict-extras-reader (:permitType application))]
-    (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml))]
-      (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-            tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
-            updates {$set (merge {:verdicts verdicts-with-attachments
-                                  :modified created
-                                  :state    :verdictGiven}
-                            (when-not has-old-verdict-tasks {:tasks tasks})
-                            (when extras-reader (extras-reader app-xml)))}]
-        (update-application command updates)
-        {:verdicts verdicts-with-attachments :tasks (get-in updates [$set :tasks])}))))
-
-(defn do-check-for-verdict [command]
+(defn do-check-for-verdict [{{op :primaryOperation :as application} :application :as command}]
   {:pre [(every? command [:application :user :created])]}
-  (when-let [app-xml (krysp-fetch-api/get-application-xml (:application command) :application-id)]
-    (find-verdicts-from-xml command app-xml)))
+  (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
+    (or
+      (let [validator-fn (permit/get-verdict-validator (permit/permit-type application))]
+        (validator-fn app-xml))
+      (let [updates (verdict/find-verdicts-from-xml command app-xml)]
+        (update-application command updates)
+        (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
+    (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} (:name op))
+      (verdict/fetch-tj-suunnittelija-verdict command))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
@@ -104,15 +42,16 @@
                  If the command is run more than once, existing verdicts are
                  replaced by the new ones."
    :parameters [:id]
-   :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
+   :states     #{:submitted :complement-needed :sent :verdictGiven :constructionStarted} ; states reviewed 2015-07-13
    :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-verdict)}
   [command]
-  (if-let [result (do-check-for-verdict command)]
-    (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)))
-    (fail :info.no-verdicts-found-from-backend)))
-
+  (let [result (do-check-for-verdict command)]
+    (cond
+      (nil? result) (fail :info.no-verdicts-found-from-backend)
+      (ok? result) (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)))
+      :else result)))
 
 ;;
 ;; Manual verdicts
@@ -124,11 +63,17 @@
 
 (defcommand new-verdict-draft
   {:parameters [:id]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :states     #{:submitted :complement-needed :sent :verdictGiven}
    :user-roles #{:authority}}
-  [command]
-  (let [blank-verdict (domain/->paatos {:draft true})]
+  [{:keys [application] :as command}]
+  (let [organization (get application :organization)
+        tosFunction (get application :tosFunction)
+        metadata (when (seq tosFunction) (t/metadata-for-document organization tosFunction "päätös"))
+        blank-verdict (cond-> (domain/->paatos {:draft true})
+                              (seq metadata) (assoc :metadata metadata))]
     (update-application command {$push {:verdicts blank-verdict}})
+    (debugf (str "DEBUG: blank-verdict= " blank-verdict ))
+
     (ok :verdictId (:id blank-verdict))))
 
 (defn- find-verdict [{verdicts :verdicts} id]
@@ -143,20 +88,25 @@
    :input-validators [validate-status
                       (partial action/non-blank-parameters [:verdictId])
                       (partial action/boolean-parameters [:agreement])]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
-   :user-roles #{:authority}}
+   :states     #{:submitted :complement-needed :sent :verdictGiven}
+   :user-roles #{:authority}
+   :pre-checks [(fn [{{:keys [verdictId]} :data} application]
+                  (when verdictId
+                    (when-not (:draft (find-verdict application verdictId))
+                      (fail :error.verdict.not-draft))))]}
   [{:keys [application created data] :as command}]
-  (let [old-verdict (find-verdict application verdictId)
-        verdict (domain/->paatos
+  (let [verdict (domain/->paatos
                   (merge
                     (select-keys data [:verdictId :backendId :status :name :section :agreement :text :given :official])
                     {:timestamp created, :draft true}))]
-
-    (when-not (:draft old-verdict) (fail! :error.unknown)) ; TODO error message
-
+    (debugf (str "  save-verdict mongo : " verdict))
     (update-application command
       {:verdicts {$elemMatch {:id verdictId}}}
-      {$set {(str "verdicts.$") verdict}})))
+      {$set {"verdicts.$.kuntalupatunnus" (:kuntalupatunnus verdict)
+             "verdicts.$.draft" true
+             "verdicts.$.timestamp" created
+             "verdicts.$.sopimus" (:sopimus verdict)
+             "verdicts.$.paatokset" (:paatokset verdict)}})))
 
 (defn- publish-verdict [{timestamp :created :as command} {:keys [id kuntalupatunnus]}]
   (if-not (ss/blank? kuntalupatunnus)
@@ -171,7 +121,7 @@
 
 (defcommand publish-verdict
   {:parameters [id verdictId]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :states     #{:submitted :complement-needed :sent :verdictGiven}
    :notified   true
    :on-success (notify :application-verdict)
    :user-roles #{:authority}}
@@ -183,7 +133,7 @@
 (defcommand delete-verdict
   {:parameters [id verdictId]
    :input-validators [(partial action/non-blank-parameters [:verdictId])]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :states     #{:submitted :complement-needed :sent :verdictGiven}
    :user-roles #{:authority}}
   [{:keys [application created] :as command}]
   (when-let [verdict (find-verdict application verdictId)]
@@ -206,7 +156,7 @@
 (defcommand sign-verdict
   {:description "Applicant/application owner can sign an application's verdict"
    :parameters [id verdictId password]
-   :states     [:verdictGiven :constructionStarted]
+   :states     #{:verdictGiven :constructionStarted}
    :pre-checks [domain/validate-owner-or-write-access]
    :user-roles #{:applicant :authority}}
   [{:keys [application created user] :as command}]

@@ -6,7 +6,7 @@
             [cheshire.core :as json]
             [sade.env :as env]
             [sade.core :refer :all]
-            [lupapiste-commons.i18n :as commons]))
+            [lupapiste-commons.i18n.core :as commons]))
 
 (def default-lang :fi)
 
@@ -90,7 +90,8 @@
 (def ^:dynamic *lang* nil)
 (def ^{:doc "Function that localizes provided term using the current language. Use within the \"with-lang\" block."
        :dynamic true}
-  loc)
+  loc
+  (fn [& args] (throw (Exception. (str "loc called outside with-lang context, args: " args)))))
 
 (defmacro with-lang [lang & body]
   `(binding [*lang* (keyword ~lang)

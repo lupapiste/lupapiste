@@ -2,8 +2,8 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/html" id="foreman-history-template" class="form-table">
-      <h2 data-bind="visible: !params.showAllProjects, ltext: 'tyonjohtaja.historia.otsikko'"></h2>
+    <script type="text/x-jquery-tmpl" id="foreman-history-template" class="form-table">
+      <label class="form-label form-label-table" data-bind="visible: !params.showAllProjects, ltext: 'tyonjohtaja.historia.otsikko'"></label>
       <table>
         <thead>
           <tr>
@@ -34,6 +34,7 @@
       <a data-bind="visible: !params.showAllProjects, click: showAllProjects">
         <span data-bind="ltext: 'tyonjohtaja.history.showAllProjects'"></span>
       </a>
+      <div data-bind="visible: params.showAllProjects, component: 'ok-button-group'"></div>
     </script>
 
   </section>

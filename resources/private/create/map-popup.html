@@ -33,18 +33,28 @@
                               optionsText: function(m) { return loc(['municipality', m.id]); },
                               optionsValue: 'id',
                               value: municipalityCode,
-                              optionsCaption: loc('choose')"
+                              optionsCaption: loc('choose'),
+                              valueAllowUnset: true"
                    data-test-id="create-municipality-select"
                    class="form-select form-input combobox"></select>
            <input data-bind="visible: !useManualEntry(), value: municipalityName"
                   disabled="disabled" type="text" class="form-input text"></input>
          </div>
 
-         <button data-bind="enable: addressOk() && propertyIdOk(), click: goPhase2"
-                 class="btn btn-primary btn-nav-forward"
+
+
+         <!-- ko if: !municipalitySupported() -->
+         <div>
+            <p class="error"
+               data-bind="ltext: 'municipality.unknown'">
+            </p>
+          </div>
+         <!-- /ko -->
+         <button data-bind="enable: addressOk() && propertyIdOk() && municipalitySupported(), click: goPhase2"
+                 class="positive"
                  data-test-id="create-continue" id="create-location-continue">
            <span data-bind="ltext: 'continue'"></span>
-           <span class="icon drill-right-white right-align"></span>
+           <i class="lupicon-chevron-right"></i>
          </button>
        </div>
      </div>

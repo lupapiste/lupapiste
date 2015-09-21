@@ -1,17 +1,21 @@
 ;(function() {
   "use strict";
 
+  var isLoading = false;
+
   function OrganizationModel() {
     var self = this;
     self.organization = ko.observable({});
     self.permanentArchiveEnabled = ko.observable(false);
-    self.indicator = ko.observable(false).extend({notify: "always"})
+    self.indicator = ko.observable(false).extend({notify: "always"});
 
     self.open = function(organization) {
       // date picker needs an obervable
       self.organization(ko.mapping.fromJS(organization));
-      self.permanentArchiveEnabled(organization['permanent-archive-enabled']);
-      window.location.hash = "!/organization";
+      isLoading = true;
+      self.permanentArchiveEnabled(organization["permanent-archive-enabled"]);
+      isLoading = false;
+      pageutil.openPage("organization");
       return false;
     };
 
@@ -50,14 +54,15 @@
     };
 
     self.permanentArchiveEnabled.subscribe(function(value) {
-      if (value !== undefined && value != self.organization()['permanent-archive-enabled']()) {
-        ajax.command("set-organization-permanent-archive-enabled", {organizationId: self.organization().id(), enabled: value})
-          .success(function() {
-            self.indicator(true);
-            self.organization()['permanent-archive-enabled'](value);
-          })
-          .call();
+      if (isLoading) {
+        return;
       }
+      ajax.command("set-organization-permanent-archive-enabled", {organizationId: self.organization().id(), enabled: value})
+        .success(function() {
+          self.indicator(true);
+          self.organization()["permanent-archive-enabled"](value);
+        })
+        .call();
     });
 
   }
@@ -86,6 +91,7 @@
 
   function LoginAsModel() {
     var self = this;
+    self.role = ko.observable("authority");
     self.password = ko.observable("");
     self.organizationId = null;
 
@@ -97,9 +103,9 @@
 
     self.login = function() {
       ajax
-        .command("impersonate-authority", {organizationId: self.organizationId, password: self.password()})
+        .command("impersonate-authority", {organizationId: self.organizationId, role: self.role(), password: self.password()})
         .success(function() {
-          window.location.href = "/app/fi/authority";
+          window.location.href = "/app/fi/" + _.kebabCase(self.role());
         })
         .call();
       return false;

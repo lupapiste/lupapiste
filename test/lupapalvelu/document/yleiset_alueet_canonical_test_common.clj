@@ -3,7 +3,7 @@
 
 (def municipality 753)
 
-(def location {:x 404335.789, :y 6693783.426})
+(def location [404335.789 6693783.426])
 
 
 (def pena {:id "777777777777777777000020",
@@ -141,7 +141,7 @@
 (def statements [{:id "52382cea94a74fc25bb4be5d"
                   :given 1379415837074
                   :requested 1379413226349
-                  :status "yes"
+                  :status "puoltaa"
                   :person statement-giver
                   :text "Annanpa luvan."}])
 
