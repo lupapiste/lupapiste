@@ -36,4 +36,7 @@
     (compose-resource :js :wordpress) => truthy)
 
   (fact "neighbor"
-    (compose-resource :js :neighbor) => truthy))
+    (compose-resource :js :neighbor) => truthy)
+
+  (fact "hashbang"
+    (compose-resource :js :hashbang) => truthy))

@@ -10,7 +10,7 @@ LUPAPISTE.AuthoritySelectModel = function(params) {
   self.authority = lupapisteApp.models.application.authority;
 
   self.edit = _.partial(hub.send, "show-dialog",
-                       {title: "application.assignee",
+                       {ltitle: "application.assignee",
                         size: "small",
                         component: "authority-select-dialog",
                         componentParams: params});

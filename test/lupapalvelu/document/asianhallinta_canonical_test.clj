@@ -119,7 +119,7 @@
               data    (tools/unwrapped (get-in application [:documents 4 :data]))
               yritys  (:Yritys maksaja)]
           (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
-            (keys maksaja) => (just [:Yritys :Laskuviite]))
+            (keys maksaja) => (just [:Yritys :Laskuviite] :in-any-order))
           (fact "Maksaja is not Henkilo"
             (keys keys) =not=> (contains [:Henkilo]))
           (facts "Yritys"
@@ -159,7 +159,7 @@
       (fact "Asiointikieli"
         (get-in canonical [:UusiAsia :Asiointikieli]) => "fi")
       (fact "Sijainti is correct"
-        (get-in canonical [:UusiAsia :Sijainti :Sijaintipiste]) => (str (-> application :location :x) " " (-> application :location :y)))
+        (get-in canonical [:UusiAsia :Sijainti :Sijaintipiste]) => (str (-> application :location first) " " (-> application :location second)))
       (fact "Kiinteistotunnus is human readable"
         (get-in canonical [:UusiAsia :Kiinteistotunnus]) => (p/to-human-readable-property-id (:propertyId application))))
 

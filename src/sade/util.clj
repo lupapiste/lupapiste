@@ -5,9 +5,13 @@
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [sade.core :refer :all]
             [clj-time.format :as timeformat]
+            [clj-time.core :refer [days weeks months years ago]]
             [clj-time.coerce :as tc]
-            [schema.core :as sc])
-  (:import [org.joda.time LocalDateTime]))
+            [schema.core :as sc]
+            [taoensso.timbre :as timbre :refer [debugf]]
+            [me.raynes.fs :as fs])
+  (:import [org.joda.time LocalDateTime]
+           [java.util.jar JarFile]))
 
 ;;
 ;; Nil-safe number utilities
@@ -89,14 +93,6 @@
   [id col]
   (some (fn [m] (when (= id (:id m)) m)) col))
 
-(defn update-in-repeating
-  ([m [k & ks] f & args]
-    (if (every? (comp ss/numeric? name) (keys m))
-      (apply hash-map (mapcat (fn [[repeat-k v]] [repeat-k (apply update-in-repeating v (conj ks k) f args)] ) m))
-      (if ks
-        (assoc m k (apply update-in-repeating (get m k) ks f args))
-        (assoc m k (apply f (get m k) args))))))
-
 ; From clojure.contrib/seq
 
 (defn indexed
@@ -143,9 +139,9 @@
         (or
           (contains-value? (first values) checker)
           (contains-value? (rest values) checker))))
-    (if checker
+    (if (fn? checker)
       (checker coll)
-      false)))
+      (= coll checker))))
 
 (defn ->int
   "Reads a integer from input. Returns default if not an integer.
@@ -264,8 +260,20 @@
                 4 "%02d:%02d:%02d.%d")]
       (apply format fmt (map ->int matches)))))
 
-(defn to-long [s]
+(defn get-timestamp-from-now
+  "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
+  [time-key amount]
+  {:pre [(#{:day :week :month} time-key)]}
+  (let [time-fn (case time-key
+                  :day days
+                  :week weeks
+                  :month months
+                  :years years)]
+    (tc/to-long (-> amount time-fn ago))))
+
+(defn to-long
   "Parses string to long. If string is not numeric returns nil."
+  [^String s]
   (when (numeric? s)
     (Long/parseLong s)))
 
@@ -326,11 +334,6 @@
     (re-matches #"^[a-zA-Z]{6}[a-zA-Z\d]{2,5}$" bic)
     false))
 
-(defn account-type? [account-type]
-  (cond
-    (nil? account-type) false
-    :else (re-matches   #"account(5|15|30)" account-type)))
-
 (defn rakennusnumero? [^String s]
   (and (not (nil? s)) (re-matches #"^\d{3}$" s)))
 
@@ -374,6 +377,22 @@
 
 (defn finnish-zip? [^String zip-code]
   (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
+
+(defn relative-local-url? [^String url]
+  (not (or (not (string? url)) (ss/starts-with url "//") (re-matches #"^\w+://.*" url))))
+
+(defn version-is-greater-or-equal
+  "True if given version string is greater than version defined in target map, else nil"
+  [^String source, ^clojure.lang.IPersistentMap target]
+  {:pre [(map? target) (every? #(target %) [:major :minor :micro]) (string? source)]}
+  (let [[source-major source-minor source-micro] (map #(->int %) (ss/split source #"\."))
+        source-major (or source-major 0)
+        source-minor (or source-minor 0)
+        source-micro (or source-micro 0)]
+    (or
+      (> source-major (:major target))
+      (and (= source-major (:major target)) (> source-minor (:minor target)))
+      (and (= source-major (:major target)) (= source-minor (:minor target)) (>= source-micro (:micro target))))))
 
 ;;
 ;; Schema utils:
@@ -424,8 +443,9 @@
   [pred coll]
   (first (filter pred coll)))
 
-(defn get-files-by-regex [path ^java.util.regex.Pattern regex]
+(defn get-files-by-regex
   "Takes all files (and folders) from given path and filters them by regex. Not recursive. Returns sequence of File objects."
+  [path ^java.util.regex.Pattern regex]
   {:pre [(instance? java.util.regex.Pattern regex) (string? path)]}
   (filter
     #(re-matches regex (.getName %))
@@ -445,8 +465,6 @@
   (-> (or ns (class *ns*))
     .getProtectionDomain .getCodeSource .getLocation .getPath))
 
-(import java.util.jar.JarFile)
-
 (defn list-jar [jar-path inner-dir]
   (if-let [jar         (JarFile. jar-path)]
     (let [inner-dir    (if (and (not= "" inner-dir) (not= "/" (last inner-dir)))
@@ -457,3 +475,27 @@
           snames       (filter (fn [x] (= 0 (.indexOf x inner-dir))) names)
           fsnames      (map #(subs % (count inner-dir)) snames)]
       fsnames)))
+
+(defmacro timing [msg body]
+  `(let [start# (System/currentTimeMillis)
+         result# ~body
+         end# (System/currentTimeMillis)]
+     (debugf (str ~msg ": %dms") (- end# start#))
+     result#))
+
+
+; Patched from me.raynes.fs.compression
+(defn unzip
+  "Takes the path to a zipfile source and unzips it to target-dir."
+  ([source]
+    (unzip source (name source)))
+  ([source target-dir]
+    (with-open [zip (java.util.zip.ZipFile. (fs/file source))]
+      (let [entries (enumeration-seq (.entries zip))
+            target-file #(fs/file target-dir (str %))]
+        (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
+                :let [f (target-file entry)]]
+          (fs/mkdirs (fs/parent f))
+          (io/copy (.getInputStream zip entry) f))))
+    target-dir))
+

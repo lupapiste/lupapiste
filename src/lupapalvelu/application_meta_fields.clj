@@ -2,20 +2,18 @@
   (:require [taoensso.timbre :as timbre :refer [tracef debug debugf info warn error]]
             [clojure.string :as s]
             [monger.operators :refer :all]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as user]
-            [lupapalvelu.organization :as organization]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.neighbors :as neighbors]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]))
 
-(def post-verdict-states #{:verdictGiven :constructionStarted :closed})
-(def post-submitted-states (conj post-verdict-states :sent))
 
-(defn in-post-verdict-state? [_ app] (contains? post-verdict-states (keyword (:state app))))
+(defn in-post-verdict-state? [_ app] (contains? states/post-verdict-states (keyword (:state app))))
 
 (defn- applicant-name-from-auth [application]
   (let [owner (first (domain/get-auths-by-role application :owner))
@@ -30,7 +28,7 @@
         (s/trim (str (:value last-name) \space (:value first-name)))))))
 
 (defn applicant-index [application]
-  (let [applicants (remove s/blank? (map applicant-name-from-doc (domain/get-applicant-documents application)))
+  (let [applicants (remove s/blank? (map applicant-name-from-doc (domain/get-applicant-documents (:documents application))))
         applicant (or (first applicants) (applicant-name-from-auth application))
         index (if (seq applicants) applicants [applicant])]
     (tracef "applicant: '%s', applicant-index: %s" applicant index)
@@ -99,9 +97,11 @@
   (let [org (organization/get-organization (:organization app))
         muni (:municipality app)
         permit-type (:permitType app)
-        scope (organization/resolve-organization-scope muni permit-type org)]
+        scope (organization/resolve-organization-scope muni permit-type org)
+        tags (:tags org)]
     {:name (organization/get-organization-name org)
      :links (:links org)
+     :tags (zipmap (map :id tags) (map :label tags))
      :requiredFieldsFillingObligatory (:app-required-fields-filling-obligatory org)
      :kopiolaitos {:kopiolaitosEmail (:kopiolaitos-email org)
                    :kopiolaitosOrdererAddress (:kopiolaitos-orderer-address org)
@@ -124,7 +124,6 @@
                    {:field :inPostVerdictState :fn in-post-verdict-state?}
                    {:field :applicantPhone :fn get-applicant-phone}
                    {:field :organizationMeta :fn organization-meta}
-                   {:field :neighbors :fn neighbors/normalize-neighbors}
                    {:field :submittable :fn (fn [_ _] true)}))
 
 (defn- enrich-with-meta-fields [fields user app]

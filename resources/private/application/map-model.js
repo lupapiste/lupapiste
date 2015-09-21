@@ -141,10 +141,12 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     var x = application.location.x;
     var y = application.location.y;
 
-    if (x === 0 && y === 0) {
+    if (!x && !y) {
       $("#application-map").css("display", "none");
+      $("#inforequest-map").css("display", "none");
     } else {
       $("#application-map").css("display", "inline-block");
+      $("#inforequest-map").css("display", "inline-block");
     }
 
     drawings = application.drawings;
@@ -176,7 +178,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       //   I.e. call "if (inforequestMarkerMap) inforequestMarkerMap.clear().destroy();" (create a forwarding destroy() method to gis.js)
       //   But this is even uglier than the jQuery option.
       //
-      if (authorizationModel.ok('inforequest-markers')) {
+      if (authorizationModel.ok("inforequest-markers")) {
         var irMarkersMap = getOrCreateMap("inforequest-markers");
         irMarkersMap.clear().updateSize().center(x, y, 14);
         setRelevantMarkersOntoMarkerMap(irMarkersMap, currentAppId, x, y);

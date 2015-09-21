@@ -1,14 +1,14 @@
 (ns lupapalvelu.document.asianhallinta_canonical
-  (require [lupapalvelu.document.canonical-common :refer :all]
-           [lupapalvelu.document.tools :as tools]
-           [lupapalvelu.xml.disk-writer :as writer]
-           [lupapalvelu.mongo :as mongo]
-           [clojure.string :as s]
-           [sade.core :refer :all]
-           [sade.util :as util]
-           [sade.property :as p]
-           [lupapalvelu.i18n :as i18n]
-           [lupapalvelu.document.schemas :as schemas]))
+  (:require [clojure.string :as s]
+            [sade.core :refer :all]
+            [sade.util :as util]
+            [sade.property :as p]
+            [lupapalvelu.document.canonical-common :as common]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.xml.disk-writer :as writer]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.i18n :as i18n]))
 
 
 ;; UusiAsia, functions prefixed with ua-
@@ -104,10 +104,11 @@
     {:Viitelupa (map ua-get-viitelupa linkPermitData)}))
 
 (defn- ua-get-sijaintipiste [{:keys [location]}]
-  {:Sijaintipiste (str (:x location) " " (:y location))})
+  {:Sijaintipiste (str (first location) " " (second location))})
 
-(defn- ua-get-liite [attachment link]
+(defn- ua-get-liite
   "Return attachment in canonical format, with provided link as LinkkiLiitteeseen"
+  [attachment link]
   (util/strip-nils
     {:Kuvaus (get-in attachment [:type :type-id])
      :Tyyppi (get-in attachment [:latestVersion :contentType])
@@ -155,24 +156,15 @@
 ;; AsianTunnusVastaus, prefix: atr-
 
 
-(defn- get-first-by-subtype [subtype documents]
-  (util/find-first
-    (fn [doc]
-      (let [doc (if (sequential? doc) (first doc) doc)
-            schema (schemas/get-schema (:schema-info doc))]
-        (= (keyword subtype) (get-in schema [:info :subtype]))))
-    (vals documents)))
-
-(defn application-to-asianhallinta-canonical [application lang]
+(defn application-to-asianhallinta-canonical
   "Return canonical, does not contain attachments"
-  (let [documents (tools/unwrapped (documents-by-type-without-blanks application))]
+  [application lang]
+  (let [documents (tools/unwrapped (common/documents-without-blanks application))]
     (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
-      (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (or (:hakija documents)
-                                                         (get-first-by-subtype :hakija documents))))
-      (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (first (or (:maksaja documents)
-                                                                (get-first-by-subtype :maksaja documents)))))
+      (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (domain/get-applicant-documents documents)))
+      (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (first (domain/get-documents-by-subtype documents "maksaja"))))
       (assoc-in [:UusiAsia :HakemusTunnus] (:id application))
       (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application)))
       (assoc-in [:UusiAsia :Asiointikieli] lang)
@@ -181,6 +173,7 @@
       (assoc-in [:UusiAsia :Kiinteistotunnus] (p/to-human-readable-property-id (:propertyId application)))
       (assoc-in [:UusiAsia :Viiteluvat] (ua-get-viiteluvat application)))))
 
-(defn application-to-asianhallinta-taydennys-asiaan-canonical [application]
+(defn application-to-asianhallinta-taydennys-asiaan-canonical
   "Return TaydennysAsiaan canonical"
-  (-> (assoc-in ta-root-element [:TaydennysAsiaan :HakemusTunnus] (:id application))))
+  [application]
+  (assoc-in ta-root-element [:TaydennysAsiaan :HakemusTunnus] (:id application)))

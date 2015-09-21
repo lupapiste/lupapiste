@@ -2,13 +2,13 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error fatal]]
             [clojure.string :as s]
             [clojure.java.io :as io]
-            [clojure.java.shell :as shell]
             [slingshot.slingshot :refer [throw+]]
             [me.raynes.fs :as fs]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
+            [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime])
   (:import [java.io InputStream OutputStream]
@@ -35,7 +35,7 @@
 ;; Generate stamp:
 ;;
 
-(defn qrcode ^BufferedImage [data size]
+(defn qrcode ^java.awt.image.BufferedImage [data size]
   (MatrixToImageWriter/toBufferedImage
     (.encode (QRCodeWriter.) data BarcodeFormat/QR_CODE size size)))
 
@@ -94,20 +94,14 @@
     (ss/starts-with content-type "image/")  (do (stamp-image stamp content-type in out x-margin y-margin transparency) nil)
     :else                                   nil))
 
-(defn- create-pdftk-file [in file-name]
-  (let [result (shell/sh "pdftk" "-" "output" file-name :in in)]
-    ; POSIX return code 0 signals success, others are failure codes
-    (when-not (zero? (:exit result))
-      (throw (RuntimeException. (str "pdftk returned " (:exit result) ", STDOUT: " (str (:out result) ", STDERR: " (:err result))))))))
-
-(def- tmp (str (System/getProperty "java.io.tmpdir") (System/getProperty "file.separator")))
+(def- tmp (str (System/getProperty "java.io.tmpdir") env/file-separator))
 
 (defn- retry-stamping [stamp-graphic file-id out x-margin y-margin transparency]
   (let [tmp-file-name (str tmp file-id "-" (now) ".pdf")]
     (debugf "Redownloading file %s from DB and running `pdftk - output %s`" file-id tmp-file-name)
     (try
       (with-open [in ((:content (mongo/download file-id)))]
-        (create-pdftk-file in tmp-file-name))
+        (pdftk/create-pdftk-file in tmp-file-name))
       (with-open [in (io/input-stream tmp-file-name)]
         (stamp-stream stamp-graphic "application/pdf" in out x-margin y-margin transparency))
       (finally

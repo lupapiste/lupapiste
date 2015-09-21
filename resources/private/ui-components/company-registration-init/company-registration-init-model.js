@@ -10,17 +10,17 @@ LUPAPISTE.CompanyRegistrationInitModel = function(params) {
   self.postTo = ko.observable();
   self.buttonEnabled = params.buttonEnabled;
 
-  hub.subscribe('company-info-submitted', function(data) {
+  hub.subscribe("company-info-submitted", function(data) {
     ajax
       .command("init-sign", {company: data.company, signer: data.signer, lang: loc.currentLanguage})
       .success(function(resp) {
-        self.customerId(resp['customer-id']);
-        self.data(resp['data']);
-        self.iv(resp['iv']);
-        self.returnFailure(resp['failure-url']);
-        self.postTo(resp['post-to']);
+        self.customerId(resp["customer-id"]);
+        self.data(resp.data);
+        self.iv(resp.iv);
+        self.returnFailure(resp["failure-url"]);
+        self.postTo(resp["post-to"]);
 
-        params.processIdCallback(resp['process-id']);
+        params.processIdCallback(resp["process-id"]);
       })
       .call();
   });

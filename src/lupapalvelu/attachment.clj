@@ -1,5 +1,6 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
+            [clojure.java.io :as io]
             [monger.operators :refer :all]
             [sade.util :as util]
             [sade.env :as env]
@@ -7,17 +8,35 @@
             [sade.core :refer :all]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
+            [lupapalvelu.states :as states]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapiste-commons.attachment-types :as attachment-types]
-            [clojure.java.io :as io])
+            [lupapalvelu.preview :as preview]
+            [lupapalvelu.pdf-conversion :as pdf-conversion])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File OutputStream FilterInputStream]))
+           [java.io File FilterInputStream]
+           [org.apache.commons.io FilenameUtils]
+           [java.util.concurrent Executors ThreadFactory]))
+
+(defn thread-factory []
+  (let [security-manager (System/getSecurityManager)
+        thread-group (if security-manager
+                       (.getThreadGroup security-manager)
+                       (.getThreadGroup (Thread/currentThread)))]
+    (reify
+      ThreadFactory
+      (newThread [this runnable]
+        (doto (Thread. thread-group runnable "preview-worker")
+          (.setDaemon true)
+          (.setPriority Thread/NORM_PRIORITY))))))
+
+(defonce preview-threadpool (Executors/newFixedThreadPool 1 (thread-factory)))
 
 ;;
 ;; Metadata
@@ -125,7 +144,9 @@
            :type attachment-type
            :modified now
            :locked locked?
-           :applicationState application-state
+           :applicationState (if (and (= "verdict" (:type target)) (not (states/post-verdict-states (keyword application-state))))
+                               "verdictGiven"
+                               application-state)
            :state :requires_user_action
            :target target
            :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
@@ -188,6 +209,18 @@
         sorted     (sort-by version-number stripped)
         latest     (last sorted)]
     latest))
+
+(defn get-version-by-file-id [attachment fileId]
+  (->> attachment
+       :versions
+       (filter #(= (:fileId %) fileId))
+       first))
+
+(defn get-version-number
+  [{:keys [attachments] :as application} attachment-id fileId]
+  (let [attachment (get-attachment-info application attachment-id)
+        version    (get-version-by-file-id attachment fileId)]
+    (:version version)))
 
 (defn set-attachment-version
   ([options]
@@ -343,7 +376,8 @@
     (update-application
       (application->command application)
       {:attachments {$elemMatch {:id attachment-id}}}
-      {$pull {:attachments.$.versions {:fileId fileId}}
+      {$pull {:attachments.$.versions {:fileId fileId}
+              :attachments.$.signatures {:version (get-version-number application attachment-id fileId)}}
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
@@ -378,13 +412,38 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
+(defn create-preview
+  [file-id filename content-type content application-id & [db-name]]
+  (when (and (env/feature? :preview) (preview/converter content-type))
+    (mongo/with-db (or db-name mongo/default-db-name)
+      (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
+      (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+                                              (with-open [content ((:content (mongo/download file-id)))]
+                                                (preview/create-preview content content-type)))]
+        (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
+        (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id)))))
+
+(defn output-attachment-preview
+  "Outputs attachment preview creating it if is it does not already exist"
+  [attachment-id attachment-fn]
+  (let [preview-id (str attachment-id "-preview")]
+    (when (= 0 (mongo/count :fs.files {:_id preview-id}))
+      (let [attachment (get-attachment attachment-id)
+            file-name (:file-name attachment)
+            content-type (:content-type attachment)
+            content ((:content attachment))
+            application-id (:application attachment)]
+        (create-preview attachment-id file-name content-type content application-id)))
+    (output-attachment preview-id false attachment-fn)))
+
 (defn attach-file!
   "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
    Content can be a file or input-stream.
    Returns attachment version."
   [options]
   {:pre [(map? (:application options))]}
-  (let [file-id (mongo/create-id)
+  (let [db-name mongo/*db-name* ; pass db-name to threadpool context
+        file-id (mongo/create-id)
         {:keys [filename content]} options
         application-id (-> options :application :id)
         sanitazed-filename (mime/sanitize-filename filename)
@@ -393,6 +452,7 @@
                                 :filename sanitazed-filename
                                 :content-type content-type})]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
+    (.submit preview-threadpool #(create-preview file-id sanitazed-filename content-type content application-id db-name))
     (update-or-create-attachment options)))
 
 (defn get-attachments-by-operation
@@ -439,3 +499,25 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
+(defn delete-file! [^File file] (try (.delete file) (catch Exception _)))
+
+(defn ensure-pdf-a
+  "Ensures PDF file PDF/A compatibility status based on original attachment status"
+  [temp-file valid-pdfa]
+  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
+  (if (not valid-pdfa)
+    (do (debugf "    no PDF/A required, no conversion") {:file temp-file :pdfa false})
+    (let [a-temp-file (File/createTempFile "lupapiste.stamp.a." ".tmp")
+          conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath temp-file) (.getAbsolutePath a-temp-file))]
+      (cond
+        (:already-valid-pdfa? conversion-result) (do (debugf "      file valid PDF/A, no conversion") {:file temp-file :pdfa true})
+        (:pdfa? conversion-result) (do (debug "      converting to PDF/A file: " (.getAbsolutePath a-temp-file)) (delete-file! temp-file) {:file a-temp-file :pdfa true})
+        :else (do (errorf "Ensuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
+
+(defn application-to-pdf-a
+  "Returns application data in PDF/A temp file"
+  [application lang]
+  (let [file (File/createTempFile "application-pdf-a-" ".tmp")
+        stream (pdf-export/generate application lang)]
+    (io/copy stream file)
+  (ensure-pdf-a file true)))

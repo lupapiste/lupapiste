@@ -4,7 +4,8 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
             [sade.xml :as xml]
-            [lupapalvelu.xml.krysp.reader :refer [property-equals ->verdicts ->buildings-summary ->rakennuksen-tiedot ->buildings  wfs-krysp-url rakval-case-type get-app-info-from-message]]
+            [lupapalvelu.xml.krysp.reader :refer [property-equals ->verdicts ->buildings-summary ->rakennuksen-tiedot ->buildings wfs-krysp-url rakval-case-type get-app-info-from-message]]
+            [sade.common-reader :as cr]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]))
@@ -12,7 +13,16 @@
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
 
-(testable-privates lupapalvelu.xml.krysp.reader ->standard-verdicts standard-verdicts-validator simple-verdicts-validator ->simple-verdicts pysyva-rakennustunnus)
+(testable-privates lupapalvelu.xml.krysp.reader
+  ->standard-verdicts
+  standard-verdicts-validator
+  simple-verdicts-validator
+  ->simple-verdicts
+  pysyva-rakennustunnus
+  tj-suunnittelija-verdicts-validator
+  party-with-paatos-data
+  valid-sijaistustieto?
+  osapuoli-path-key-mapping)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
@@ -34,9 +44,9 @@
                                      {:tag :paatoksentekija :content [""]}
                                      {:tag :paatospvm :content ["1970-01-01"]}]))
 
-(facts standard-verdicts-validator
+(facts "standard-verdicts-validator"
   (against-background
-    (sade.core/now) => 100)
+    (sade.util/get-timestamp-from-now :day 1) => (+ (to-timestamp "1970-01-01") 100))
   (fact "Missing details"
     (standard-verdicts-validator (verdict-skeleton [])) => {:ok false, :text "info.paatos-details-missing"})
   (fact "Future date"
@@ -53,7 +63,7 @@
              {:tag :paatostieto :content [{:tag :Paatos
                                            :content [{:tag :paatosdokumentinPvm :content [verdict-date]}]}]}]})
 
-(facts simple-verdicts-skeleton
+(facts "simple-verdicts-skeleton"
   (against-background
     (sade.core/now) => 100)
   (fact "Empty state"
@@ -72,22 +82,6 @@
   (fact (pysyva-rakennustunnus "") => nil)
   (fact (pysyva-rakennustunnus "123456") => nil)
   (fact (pysyva-rakennustunnus "1234567892") => "1234567892"))
-
-(facts "KRYSP verdict 2.1.8"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8.xml"))
-        cases (->verdicts xml ->standard-verdicts)]
-
-    (fact "xml is parsed" cases => truthy)
-    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
-
-    (let [verdict (first (:paatokset (last cases)))
-          lupamaaraykset (:lupamaaraykset verdict)
-          maaraykset     (:maaraykset lupamaaraykset)]
-      (facts "m\u00e4\u00e4r\u00e4ykset"
-            (count maaraykset) => 2
-            (:sisalto (first maaraykset)) => "Radontekninen suunnitelma"
-            (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
-            (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
 
 (facts "KRYSP verdict"
   (let [xml (xml/parse (slurp "resources/krysp/sample/verdict.xml"))
@@ -172,6 +166,53 @@
           (let [poytakirjat2 (-> cases last :paatokset last :poytakirjat)]
             (count poytakirjat2) => 1
             poytakirjat2 => sequential?))))))
+
+(facts "KRYSP verdict 2.1.8"
+  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8.xml"))
+        cases (->verdicts xml ->standard-verdicts)]
+
+    (fact "xml is parsed" cases => truthy)
+    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+
+    (let [verdict (first (:paatokset (last cases)))
+          lupamaaraykset (:lupamaaraykset verdict)
+          maaraykset     (:maaraykset lupamaaraykset)
+          vaaditut-erityissuunnitelmat (:vaaditutErityissuunnitelmat lupamaaraykset)]
+
+      (fact "vaaditut erityissuunnitelmat"
+          vaaditut-erityissuunnitelmat => sequential?
+          vaaditut-erityissuunnitelmat => (just ["ES 1" "ES 22" "ES 333"] :in-any-order))
+
+      (fact "m\u00e4\u00e4r\u00e4ykset"
+        (count maaraykset) => 2
+        (:sisalto (first maaraykset)) => "Radontekninen suunnitelma"
+        (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
+        (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
+
+;;
+;; HUOM: Teklalta saadussa QA:n testisanomassa on vaara encoding ("iso-8859-1").
+;;       Kyseinen file on tallessa nimella "verdict - 2.1.8 - Tekla (iso-8859-1).xml", jolla voi testailla.
+;;       (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml (iso-8859-1)") :encoding "iso-8859-1")
+;;       Readerkaan ei osaa tata lukea, vaan hukkaa skandit.
+;;       Tuotannossa naytti 26.6.2015 viela tulevan "utf-8-enkoodauksella", jota me tuemme.
+;;
+(facts "KRYSP verdict 2.1.8 - Tekla.xml"
+ (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml"))
+       cases (->verdicts xml ->standard-verdicts)]
+
+   (fact "xml is parsed" cases => truthy)
+   (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+
+   (let [verdict (first (:paatokset (last cases)))
+         lupamaaraykset (:lupamaaraykset verdict)
+         vaaditut-erityissuunnitelmat (:vaaditutErityissuunnitelmat lupamaaraykset)]
+
+     ;; In xml message, Tekla provides just one vaadittuErityissuunnitelma element
+     ;; where there are multiple "vaadittuErityissuunnitelma"s combined as one string, separated by line break.
+     ;; Testing here that the reader divides those as different elements properly.
+     (fact "vaaditut erityissuunnitelmat Tekla style"
+         vaaditut-erityissuunnitelmat => sequential?
+         vaaditut-erityissuunnitelmat => (just ["Rakennesuunnitelmat" "Vesi- ja viem\u00e4risuunnitelmat" "Ilmanvaihtosuunnitelmat"] :in-any-order)))))
 
 (facts "CGI sample verdict"
   (let [xml (xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
@@ -434,6 +475,15 @@
     (:rakennusnro building1) => "123"
     (:valtakunnallinenNumero building1) => "1234567892"))
 
+(facts "Maaraykset from verdict message"
+  (let [xml (xml/parse (slurp "resources/krysp/sample/sito-kajaani-LP-205-2015-00069-paatos-tyhja-maarays.xml"))
+        verdicts (->verdicts xml ->standard-verdicts)
+        paatokset (:paatokset (first verdicts))
+        lupamaaraykset (:lupamaaraykset (first paatokset))
+        maaraykset (:maaraykset lupamaaraykset)]
+    maaraykset =not=> (contains [nil])
+    (count maaraykset) => 3))
+
 (facts "wfs-krysp-url works correctly"
   (fact "without ? returns url with ?"
     (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
@@ -447,14 +497,10 @@
 (facts* "Testing information parsed from a verdict xml message for application creation"
   (let [xml (xml/parse (slurp "resources/krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml"))
         info (get-app-info-from-message xml "14-0241-R 3") => truthy
-        {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus hakijat
-                ; viitelupatiedot viimeisin-tila asioimiskieli
-                ]} info]
+        {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus hakijat]} info]
 
     (fact "info contains the needed keys" (every? (partial contains info)
-                                            [:id :kuntalupatunnus :municipality :rakennusvalvontaasianKuvaus :vahainenPoikkeaminen :rakennuspaikka :ensimmainen-rakennus :hakijat
-                                             ; :viitelupatiedot :viimeisin-tila :asioimiskieli
-                                             ]))
+                                            [:id :kuntalupatunnus :municipality :rakennusvalvontaasianKuvaus :vahainenPoikkeaminen :rakennuspaikka :ensimmainen-rakennus :hakijat]))
 
     (fact "invalid kuntalupatunnus" (get-app-info-from-message xml "invalid-kuntalupatunnus") => nil)
 
@@ -467,19 +513,52 @@
       (fact "with email address" (filter identity (map #(get-in % [:henkilo :sahkopostiosoite]) hakijat)) => (just #{"pena@example.com" "mikko@example.com" " \\t   "})))
 
     (facts "Rakennuspaikka"
-      (let [{:keys [x y address propertyId] :as rakennuspaikka} (:rakennuspaikka info)]
+      (let [{:keys [x y address propertyId] :as rakennuspaikka} rakennuspaikka]
         (fact "contains all the needed keys" (every? (-> rakennuspaikka keys set) [:x :y :address :propertyId]))
         (fact "x" x => #(and (instance? Double %) (= 393033.614 %)))
         (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
-        (fact "address" address => "Kylykuja")
-        (fact "propertyId" propertyId => "18600303560006")))
-
-    (facts "Rakennus"
-      (let [{:keys [x y address propertyId] :as rakennus} (:ensimmainen-rakennus info)]
-        (fact "contains all the needed keys" (every? (-> rakennus keys set) [:x :y :address :propertyId]))
-        (fact "x" x => #(and (instance? Double %) (= 393033.614 %)))
-        (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
-        (fact "address" address => "Kylykuja")
+        (fact "address" address => "Kylykuja 3-5 D 35b-c")
         (fact "propertyId" propertyId => "18600303560006")))))
+
+
+(facts* "Tests for TJ/suunnittelijan verdicts parsing"
+  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml"))
+        osapuoli {:alkamisPvm "2015-07-07"
+                  :paattymisPvm "2015-07-10"
+                  :sijaistettavaHlo "Pena Panaani"
+                  :paatosPvm 1435708800000 ; 01.07.2015
+                  :paatostyyppi "hyv\u00e4ksytty"}
+        sijaistus {:alkamisPvm "07.07.2015"
+                   :paattymisPvm "10.07.2015"
+                   :sijaistettavaHloEtunimi "Pena"
+                   :sijaistettavaHloSukunimi "Panaani"}]
+
+    (facts "Sijaistus"
+      (valid-sijaistustieto? nil nil) => falsey
+      (valid-sijaistustieto? nil sijaistus) => falsey
+      (valid-sijaistustieto? osapuoli nil) => truthy
+      (fact "True when values match"
+        (valid-sijaistustieto? osapuoli sijaistus) => truthy)
+      (fact "Dates must match"
+        (valid-sijaistustieto? (assoc osapuoli :alkamisPvm "2015-07-06") sijaistus) => falsey
+        (valid-sijaistustieto? osapuoli (assoc sijaistus :paattymisPvm "09.07.2015")) => falsey)
+      (fact "Name must match"
+        (valid-sijaistustieto? (assoc osapuoli :sijaistettavaHlo "Panaani Pena") sijaistus) => falsey
+        (valid-sijaistustieto? osapuoli (assoc sijaistus :sijaistettavaHloEtunimi "Paavo")) => falsey)
+      (fact "Name can have whitespace"
+        (valid-sijaistustieto? osapuoli (assoc sijaistus :sijaistettavaHloSukunimi "  Panaani ")) => truthy))
+
+    (facts "Osapuoli with paatos data"
+      (party-with-paatos-data nil nil) => falsey
+      (party-with-paatos-data [osapuoli] sijaistus) => osapuoli
+      (fact "PaatosPvm must be there"
+        (party-with-paatos-data [(dissoc osapuoli :paatosPvm)] anything) => nil)
+      (fact "Paatostyyppi must be correct"
+        (party-with-paatos-data [(assoc osapuoli :paatostyyppi "test")] anything) => nil
+        (party-with-paatos-data [(assoc osapuoli :paatostyyppi "hyl\u00e4tty")] sijaistus) => truthy)
+      (fact "Sijaistus can be nil"
+        (party-with-paatos-data [osapuoli] nil) => truthy)
+      (fact "Sijaistus can be empty"
+        (party-with-paatos-data [osapuoli] {}) => truthy))))
 
 

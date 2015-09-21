@@ -1,9 +1,10 @@
 (ns lupapalvelu.document.vesihuolto-canonical
-  (require [lupapalvelu.document.vesihuolto-schemas :as vh-schemas]
-           [lupapalvelu.document.canonical-common :refer :all]
-           [lupapalvelu.document.tools :as tools]
-           [lupapalvelu.i18n :as i18n]
-           [sade.strings :refer [lower-case]]))
+  (:require [lupapalvelu.document.vesihuolto-schemas :as vh-schemas]
+            [lupapalvelu.document.canonical-common :refer :all]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.permit :as permit]
+            [sade.strings :refer [lower-case]]))
 
 
 (defn- get-talousvedet [talousvedet]
@@ -53,7 +54,8 @@
         documents (documents-by-type-without-blanks application)
         kuvaus (-> (:hankkeen-kuvaus-vesihuolto documents) first :data :kuvaus)
         operation-name (->> (:primaryOperation application) :name (i18n/localize lang "operations"))
-        asian-kuvaus (str operation-name " / " kuvaus)]
+        asian-kuvaus (str operation-name " / " kuvaus)
+        hakija-key (keyword (permit/get-applicant-doc-schema (permit/permit-type application)))]
     {:Vesihuoltolaki
      {:toimituksenTiedot (toimituksen-tiedot application lang)
       :vapautukset
@@ -64,7 +66,7 @@
         :vapautusperuste ""
         :vapautushakemustieto
         {:Vapautushakemus
-         {:hakija (remove nil? (map get-yhteystiedot (:hakija documents)))
+         {:hakija (remove nil? (map get-yhteystiedot (get documents hakija-key)))
           :kohde (get-vapautus-kohde application documents)
           :sijaintitieto (get-sijaintitieto application)}}
         :asianKuvaus asian-kuvaus}}}})

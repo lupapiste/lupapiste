@@ -2,7 +2,8 @@
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
-Library        Selenium2Library   timeout=10  run_on_failure=Log Source
+Library        Selenium2Library   timeout=10  run_on_failure=Nothing
+Library        String
 
 *** Variables ***
 
@@ -23,19 +24,30 @@ ${CREATE URL}                   ${SERVER}/dev/create
 ${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
 ${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
 ${SELENIUM}                     ${EMPTY}
+${DB COOKIE}                    test_db_name
+${DB PREFIX}                    test_
 
 *** Keywords ***
-
 Browser
-  [Arguments]  ${url}
-  Open browser  ${url}  ${BROWSER}   remote_url=${SELENIUM}
+  [Arguments]
+  ${timestamp}=  Get Time  epoch
+  Set Test Variable  \${dbname}  ${DB PREFIX}${timestamp}
+  # Setting cookies on login page fails on IE8, perhaps bacause of
+  # caching headers:
+  # https://code.google.com/p/selenium/issues/detail?id=6985
+  # Open a static HTML page and set cookie there
+  Open browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
+  Add Cookie  ${DB COOKIE}  ${dbname}
+  Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
+  Log  Cookie: ${DB COOKIE} = ${dbname}
 
 Open browser to login page
-  Browser  ${LOGIN URL}
+  Browser
   Maximize browser window
   Set selenium speed  ${DEFAULT_SPEED}
-  Title should be  Lupapiste
-  Wait Until  Page should contain  Haluan kirjautua palveluun
+  Apply minimal fixture now
+  Set integration proxy on
+  Disable maps
 
 Go to login page
   Go to  ${LOGIN URL}
@@ -80,7 +92,7 @@ Wait and click
   # for IE8
   Wait until  Focus  ${element}
   Wait until  Element should be visible  ${element}
-  Click element  ${element}
+  Wait until  Click element  ${element}
 
 Wait until
   [Arguments]  ${keyword}  @{varargs}
@@ -91,6 +103,14 @@ Wait for jQuery
 
 Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
+
+Language To
+  [Arguments]  ${lang}
+  Element Should Not Contain  language-select  ${lang}
+  Click Link  xpath=//a[@data-test-id='language-link']
+  Wait Until  Element Should Be Visible  css=div.language-menu
+  Click Element  partial link=${lang}
+  Wait Until  Element Should Contain  language-select  ${lang}
 
 
 #
@@ -138,6 +158,21 @@ Close side panel
   Run keyword If  ${sidePanelOpen}  Click by id  open-${name}-side-panel
   Side panel should not be visible  ${name}
 
+Open accordions
+  [Arguments]  ${tab}
+  # The accordion-toggle class can either be in button or its container.
+  Execute Javascript  $("#application-${tab}-tab button.accordion-toggle.toggled").click();
+  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle.toggled [data-accordion-id]").click();
+  Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
+  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
+
+Open accordion by test id
+  [Arguments]  ${testId}
+  ${accordionIsClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@data-test-id="${testId}"]//div[@data-accordion-state="open"]
+  Run keyword If  ${accordionIsClosed}  Execute Javascript  $("div[data-test-id='${testId}'] button.accordion-toggle:not(.toggled)").click();
+
+Positive indicator should be visible
+  Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
 
 #
 # Login stuff
@@ -160,10 +195,12 @@ Login
   Input text  login-password  ${password}
   # for IE8
   Wait and click  login-button
+  Run Keyword And Ignore Error  Confirm Action
 
 Login fails
   [Arguments]  ${username}  ${password}
   Login  ${username}  ${password}
+  Run Keyword And Ignore Error  Confirm Action
   User should not be logged in
 
 User should be logged in
@@ -268,6 +305,9 @@ Naantali logs in
 Kuopio logs in
   Authority-admin logs in  kuopio-r  kuopio  Paakayttaja-R Kuopio
 
+Pena logs in
+  Applicant logs in  pena  pena  Pena Panaani
+
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until  Element should be visible  admin
@@ -280,13 +320,18 @@ Jarvenpaa authority logs in
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
 
+Input text with jQuery
+  [Arguments]  ${selector}  ${value}  ${leaveFocus}=${false}
+  Wait until page contains element  jquery=${selector}
+  Wait until  Element should be visible  jquery=${selector}
+  Wait until  Element should be enabled  jquery=${selector}
+  Execute Javascript  $('${selector}')[0].parentNode.scrollIntoView();
+  Execute Javascript  $('${selector}').focus().val("${value}").change();
+  Run Keyword Unless  ${leaveFocus}  Execute Javascript  $('${selector}').blur();
+
 Input text by test id
   [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
-  Wait until page contains element  xpath=//input[@data-test-id="${id}"]
-  Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
-  Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
-  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change();
-  Run Keyword Unless  ${leaveFocus}  Execute Javascript  $("input[data-test-id='${id}']").blur();
+  Input text with jQuery  input[data-test-id="${id}"]  ${value}  ${leaveFocus}
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
@@ -294,12 +339,25 @@ Select From List by test id
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
 
 Select From Autocomplete
-  [Arguments]  ${value}
-  Wait until  Element should be visible  xpath=//span[@class='autocomplete-selection']
-  Click Element  xpath=//span[@class='autocomplete-selection']
-  Input text by test id  autocomplete-input  ${value}  ${true}
-  Wait until  Element should be visible  xpath=//li/span[contains(text(), '${value}')]
-  Click Element  xpath=//li/span[contains(text(), '${value}')]
+  [Arguments]  ${container}  ${value}
+  Wait until  Element should be visible  xpath=//${container}//span[@class='autocomplete-selection']
+  Click Element  xpath=//${container}//span[@class='autocomplete-selection']
+  Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
+  Wait until  Element should be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
+  Click Element  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
+  Wait for jQuery
+
+Autocomplete selectable values should not contain
+  [Arguments]  ${container}  ${value}
+  # Open dropdown if it is not open
+  ${autocompleteListNotOpen} =  Element should not be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[@class="autocomplete-dropdown"]
+  Run Keyword If  '${autocompleteListNotOpen}' == 'PASS'  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//span[@class='autocomplete-selection']
+  Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
+
+Autocomplete option list should contain
+  [Arguments]  @{options}
+  :FOR  ${element}  IN  @{options}
+  \  Element should contain  xpath=//div[@data-test-id="operations-filter-component"]//ul[@class="autocomplete-result autocomplete-result-grouped"]  ${element}
 
 Click by id
   [Arguments]  ${id}
@@ -313,7 +371,7 @@ Click by test id
   ${selector} =   Set Variable  $("[data-test-id='${id}']:visible")
   # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
   Wait For Condition  return ${selector}.length===1;  10
-  Execute Javascript  ${selector}.click();
+  Execute Javascript  ${selector}[0].click();
 
 Click enabled by test id
   [Arguments]  ${id}
@@ -322,6 +380,10 @@ Click enabled by test id
   Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
 
+Primary operation is
+  [Arguments]  ${opId}
+  Element should be visible  xpath=//span[@data-test-primary-operation-id="${opId}"]
+
 #
 # Helper for inforequest and application crud operations:
 #
@@ -329,6 +391,12 @@ Click enabled by test id
 Create application the fast way
   [Arguments]  ${address}  ${propertyId}  ${operation}
   Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+  Kill dev-box
+
+Create application with state
+  [Arguments]  ${address}  ${propertyId}  ${operation}  ${state}
+  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
@@ -378,15 +446,16 @@ Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new
-  Do prepare new request
+  Do prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
 
 Prepare first request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new-inforequest
-  Do prepare new request
+  Do prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
 
 Do prepare new request
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Input Text  create-search  ${propertyId}
   Click enabled by test id  create-search-button
   Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
@@ -408,7 +477,7 @@ Do prepare new request
 Select attachment operation option from dropdown
   [Arguments]  ${optionName}
   Wait until  Element should be visible  xpath=//select[@data-test-id="attachment-operations-select-lower"]
-  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
+  Wait until  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
 
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
@@ -423,26 +492,33 @@ Add empty attachment template
   Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="${topCategory}.${subCategory}"]
 
 Add attachment
-  [Arguments]  ${path}  ${description}  ${operation}
-  Select attachment operation option from dropdown  attachmentsAdd
+  [Arguments]  ${kind}  ${path}  ${description}  ${operation}
+  Run Keyword If  '${kind}' == 'application'  Select attachment operation option from dropdown  attachmentsAdd
+  Run Keyword If  '${kind}' == 'inforequest'  Click enabled by test id  add-inforequest-attachment
+
   Wait until  Element should be visible  upload-dialog
 
   Select Frame      uploadFrame
   Wait until        Element should be visible  test-save-new-attachment
-  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
-  Select From List  attachmentType  muut.muu
-  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
-  Select From List  attachmentOperation  ${operation}
+
+  Run Keyword If  '${kind}' == 'application'  Set application attachment details on upload  ${operation}
+
   Input text        text  ${description}
   Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Focus             xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Choose File       xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
-  # Had to use 'Select Frame' another time to be able to use e.g. 'Element Should Be Enabled'
-  # Select Frame      uploadFrame
-  # Wait Until        Element Should Be Enabled  test-save-new-attachment
   Click element     test-save-new-attachment
   Unselect Frame
+  Wait until  Element should not be visible  upload-dialog
   Wait Until Page Contains  Muu liite
+  Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
+
+Set application attachment details on upload
+  [Arguments]  ${operation}
+  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
+  Select From List  attachmentType  muut.muu
+  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
+  Select From List  attachmentOperation  ${operation}
 
 Open attachment details
   [Arguments]  ${type}
@@ -538,6 +614,12 @@ Confirm yes no dialog
   Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
 
+Deny yes no dialog
+  Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
+  Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
+  Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
+
 Confirm
   [Arguments]  ${modalId}
   Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
@@ -570,24 +652,18 @@ Confirm notification dialog
 Open the request
   [Arguments]  ${address}
   Go to page  applications
-  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
+  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
   Wait for jQuery
 
 Open the request at index
   [Arguments]  ${address}  ${index}
   Go to page  applications
-  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}'][${index}]/td
+  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}'][${index}]
   Wait for jQuery
 
 Open application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
-  Wait until  Element Should Be Visible  application
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
-
-Open application at index
-  [Arguments]  ${address}  ${propertyId}  ${index}
-  Open the request at index  ${address}  ${index}
   Wait until  Element Should Be Visible  application
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
@@ -630,21 +706,21 @@ Input comment
   Open side panel  conversation
   Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
-  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'is-comment')]//span[text()='${message}']
   Close side panel  conversation
 
 Input inforequest comment
   [Arguments]  ${message}
   Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='inforequest']//button[@data-test-id='application-new-comment-btn']
-  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'is-comment')]//span[text()='${message}']
 
 Input comment and open to authorities
   [Arguments]  ${message}
   Open side panel  conversation
   Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-open-application-btn']
-  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'is-comment')]//span[text()='${message}']
   Close side panel  conversation
 
 Input comment and mark answered
@@ -654,7 +730,7 @@ Input comment and mark answered
   Wait until  element should be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
-  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'is-comment')]//span[text()='${message}']
 
 Mark answered
   Click element  xpath=//section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
@@ -663,9 +739,9 @@ Mark answered
   Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
 
 Comment count is
-  [Arguments]  ${section}  ${amount}
+  [Arguments]  ${amount}
   Open side panel  conversation
-  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class,'comment-text')]  ${amount}
+  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class,'is-comment')]  ${amount}
   Close side panel  conversation
 
 #
@@ -682,7 +758,11 @@ Invite count is
 
 Task count is
   [Arguments]  ${type}  ${amount}
-  Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr[@data-test-type="${type}"]  ${amount}
+  Wait until  Xpath Should Match X Times  //*[@data-bind="foreach: taskGroups"]//tbody/tr[@data-test-type="${type}"]  ${amount}
+
+Foreman count is
+  [Arguments]  ${amount}
+  Wait until  Xpath Should Match X Times  //table[@class="tasks-foreman"]/tbody/tr  ${amount}
 
 #
 # Quick, jettison the db...
@@ -706,22 +786,39 @@ Permit type should be
   [Arguments]  ${type}
   Element Text Should Be  xpath=//span[@data-bind='ltext: permitType']  ${type}
 
+Application address should be
+  [Arguments]  ${address}
+  ${a} =  Convert To Uppercase  ${address}
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//span[@data-test-id='application-title']
+  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  ${a}
+
+Neighbor application address should be
+  [Arguments]  ${address}
+  ${a} =  Convert To Uppercase  ${address}
+  Wait Until  Element Should Be Visible  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']
+  Wait Until  Element text should be  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']  ${a}
+
+
 #
 # Proxy control:
 #
 
+Enable maps
+  Execute Javascript  ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
+  Wait for jQuery
+
 Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
-  Wait for jQuery
-  Execute Javascript  ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
   Wait for jQuery
   Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
   Wait for jQuery
 
+Disable maps
+  Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
+  Wait for jQuery
+
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
-  Wait for jQuery
-  Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
   Wait for jQuery
   Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:true}).call();
   Wait for jQuery
@@ -802,13 +899,20 @@ Fill in new password
   Wait Until  Element Should Be Enabled  xpath=//section[@id='${section}']//button
   Click Element  xpath=//section[@id='${section}']//button
   Wait Until  Page should contain  Salasana asetettu.
-  Confirm  dynamic-ok-confirm-dialog
+  Confirm notification dialog
 
 Open company user listing
   Click Element  user-name
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
-  Element should be visible  //div[@data-test-id='my-company']
-  Click button  Hallinnoi yrityksen käyttäjiä
+  Open accordion by test id  mypage-company-accordion
+  Wait Until  Element should be visible  //div[@data-test-id='my-company']
+  Click by test id  company-edit-users
+  Wait until  Element should be visible  company
+
+Open company details
+  Click Element  user-name
+  Open accordion by test id  mypage-company-accordion
+  Wait Until  Element should be visible  //div[@data-test-id='my-company']
+  Click by test id  company-edit-info
   Wait until  Element should be visible  company
 
 

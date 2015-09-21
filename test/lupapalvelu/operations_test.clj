@@ -12,8 +12,8 @@
 
 (facts "verify that every operation has link-permit-required set"
   (doseq [[op propeties] operations]
-    (let [result (doc-result (contains? propeties :link-permit-required) op)]
-      (fact result => (doc-check truthy)))))
+    (fact {:midje/description op}
+      (contains? propeties :link-permit-required))))
 
 (facts "check that correct operations require a linkPermit"
   (fact "operation names"

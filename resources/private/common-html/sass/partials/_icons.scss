@@ -260,6 +260,26 @@ $spritegrid: 100px;
     width: 24px;
     height: 24px;
   }
+  &.toj {
+    background-position: 0px -6400px;
+    width: 24px;
+    height: 24px;
+  }
+  &.archive {
+    background-position: 0px -6500px;
+    width: 24px;
+    height: 24px;
+  }
+  &.star-selected {
+    background-position: 0px -6600px;
+    width: 18px;
+    height: 18px;
+  }
+  &.star-unselected {
+    background-position: 0px -6700px;
+    width: 18px;
+    height: 18px;
+  }
 
   //states
   &:hover {

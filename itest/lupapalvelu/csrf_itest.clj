@@ -1,7 +1,6 @@
 (ns lupapalvelu.csrf-itest
   (:require [lupapalvelu.itest-util :refer :all]
-            [midje.sweet :refer :all]
-            [sade.http :as http]))
+            [midje.sweet :refer :all]))
 
 (fact "Valid apikey bypasses CSRF check"
   (with-anti-csrf
@@ -15,7 +14,7 @@
 
 (fact "Calling a non-protected resource returns a csrf token"
   (with-anti-csrf
-    (let [resp (http/get (str (server-address) "/app/fi/welcome"))
+    (let [resp (http-get (str (server-address) "/app/fi/welcome") {})
           cookie (get-in resp [:cookies "anti-csrf-token"])]
       resp => http200?
       cookie => truthy
@@ -23,13 +22,13 @@
 
 (fact "Sending the cookie and a header passes CSRF protection"
   (with-anti-csrf
-    (http/get (str (server-address) "/api/query/allowed-actions")
+    (http-get (str (server-address) "/api/query/allowed-actions")
                  {:cookies {"anti-csrf-token" {:value "my-token"}}
                   :headers {"x-anti-forgery-token" "my-token"}}) => http200?))
 
 (fact "Failing to send the header fails CSRF check"
   (with-anti-csrf
-    (let [resp (http/get (str (server-address) "/api/query/allowed-actions")
+    (let [resp (http-get (str (server-address) "/api/query/allowed-actions")
                  {:cookies {"anti-csrf-token" {:value "my-token"}}
                   :query-params {:id 123}
                   :headers {"Referer" "http://attacker.example.com/"}

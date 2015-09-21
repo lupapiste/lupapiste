@@ -7,76 +7,86 @@
       <div class="attachment-info">
         <div class="container">
 
-          <div class="attachment-back">
-            <a class="btn left-align btn-nav-back"
-               data-bind="click: function() { window.location.hash = '!/application/' + application.id() + '/attachments'; repository.load(application.id()); }"
+          <div class="inner-margins">
+            <a class="btn secondary"
+               data-bind="click: goBackToApplication"
                data-test-id="back-to-application-from-attachment">
-              <span data-bind =" ltext: 'application.return'"></span>
-              <span class="icon drill-left-black-bigger left-align"></span>
+                <i class="lupicon-chevron-start"></i>
+                <span data-bind =" ltext: 'application.return'"></span>
             </a>
-            <div data-bind="with: $root.approve">
-              <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
-              <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
-            </div>
+            <button class="secondary" data-bind="enable: previousAttachmentPresent, click: previousAttachment">
+                <i class="lupicon-chevron-left"></i>
+                <span data-bind="ltext: 'previous'"></span>
+            </button>
+            <button class="secondary" data-bind="enable: nextAttachmentPresent, click: nextAttachment">
+                <span data-bind="ltext: 'next'"></span>
+                <i class="lupicon-chevron-right"></i>
+            </button>
           </div>
 
-          <div>
-            <div class="attachment-info-wrapper">
+          <div class="hr"></div>
+
+          <div class="inner-margins">
+              <!-- ko with: $root.approve -->
+              <button id="test-attachment-approve" data-bind="click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()"
+                      class="positive caps">
+                  <i class="lupicon-check"></i>
+                  <span data-bind="ltext: 'document.approve'"></span>
+              </button>
+              <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()"
+                      class="negative caps">Tarkennettavaa</button>
+              <!-- /ko -->
+              <button class="secondary" data-test-id="change-attachment-type"
+                      data-bind="click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized">
+                  <span data-bind="ltext: 'attachment.changeType'"></span>
+              </button>
+              <button class="secondary" data-test-id="delete-attachment"
+                      data-bind="click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable && authorized">
+                  <i class="lupicon-remove"></i>
+                  <span data-bind="ltext: 'attachment.delete'"></span>
+              </button>
+          </div>
+
+          <div class="attachment-info-wrapper">
               <div class="attachment-info-header">
-                <h1>
-                  <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
-                  <span data-bind="if: latestVersion">
-                    <span data-bind="ltext: 'attachment.version'">versio</span>
-                    <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
-                  </span>
-                </h1>
-                <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
+                  <h1>
+                      <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
+                      <span data-bind="if: latestVersion">
+                          <span data-bind="ltext: 'attachment.version'">versio</span>
+                          <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+                      </span>
+                  </h1>
+                  <span data-bind="component: {
+                                  name: 'help-toggle',
+                                   params: { flag: showHelp, lhtml: 'attachment.view.desc' }}"></span>
               </div>
-
-              <div class="tab-info" data-bind="slider: showHelp">
-                <p data-bind="lhtml: 'attachment.view.desc'"></p>
-              </div>
-            </div>
-
-            <div class="attachment-actions">
-              <button data-bind="enable: previousAttachmentPresent, click: previousAttachment">
-                <span data-bind="ltext: 'previous'"></span>
-                <span class="icon drill-left-black-bigger left-align"></span>
-              </button>
-              <button data-bind="enable: nextAttachmentPresent, click: nextAttachment">
-                <span data-bind="ltext: 'next'"></span>
-                <span class="icon drill-right-black left-align"></span>
-              </button>
-              <button data-test-id="change-attachment-type"
-                      data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized"></button>
-              <button data-test-id="delete-attachment"
-                      data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable && authorized">Poista liite</button>
-            </div>
           </div>
 
           <div class="clear"></div>
           <div class="col1">
             <div class="attachment-file-versions">
-              <div class="btn-container">
+              <div>
                 <button
                     id="add-new-attachment-version"
-                    class="btn-primary"
+                    class="positive"
                     data-bind="click: newAttachmentVersion, visible: $root.authorization.ok('upload-attachment') && editable">
-                  <span data-bind="ltext: 'attachment.addVersion', visible: latestVersion"></span>
-                  <span data-bind="ltext: 'attachment.addFile', visible: !latestVersion()"></span>
-                  <span class="icon add left-align"></span>
+                    <i class="lupicon-circle-plus"></i>
+                    <span data-bind="ltext: 'attachment.addVersion', visible: latestVersion"></span>
+                    <span data-bind="ltext: 'attachment.addFile', visible: !latestVersion()"></span>
                 </button>
                 <button id="show-attachment-versions"
                         class="btn"
                         data-bind="click: toggleAttachmentVersionHistory, visible: latestVersion">
+                    <i data-bind="css: {'lupicon-chevron-small-right': !showAttachmentVersionHistory(),
+                                  'lupicon-chevron-small-down': showAttachmentVersionHistory}"></i>
                   <span data-bind="ltext: 'attachment.showVersionHistory'"></span>
-                  <span class="left-align"
-                        data-bind="drill: showAttachmentVersionHistory, color: 'black'"></span>
+                  <!-- <span class="left-align" -->
+                  <!--       data-bind="drill: showAttachmentVersionHistory, color: 'black'"></span> -->
                 </button>
               </div>
               <div class="attachment-file-versions-content" data-bind="slider: showAttachmentVersionHistory">
                 <h3 data-bind="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
-                <table class="table table-striped">
+                <table class="table">
                   <thead>
                     <tr>
                       <th data-bind="ltext: 'attachment.file'">Tiedosto</th>
@@ -97,7 +107,7 @@
                         <span data-bind="fullName: user"></span>
                       </td>
                       <td>
-                        <a class="link-action" data-bind="click: $root.attachment.deleteVersion,
+                        <a data-bind="click: $root.attachment.deleteVersion,
                                                           ltext: 'remove',
                                                           visible: $root.authorization.ok('delete-attachment-version') && $parent.editable"></a>
                       </td>
@@ -107,7 +117,7 @@
               </div>
             </div>
 
-            <div data-bind="if: latestVersion">
+            <div>
               <div class="attachment-label">
                 <h4 data-bind="with: latestVersion">
                   <span class="attachment-label-header-item" id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}"></a></span>
@@ -119,7 +129,7 @@
                   <span class="attachment-label-header-item" data-bind="fullName: $data.user"></span>
                 </h4>
 
-                <div class="attachment-info-fields">
+                <div>
                   <div class="col1 attachment-info-field">
                     <label data-bind="ltext: 'attachment.label.contents'"></label>
                     <span data-bind="saveIndicator: indicator, name: 'contents'"></span>
@@ -167,7 +177,7 @@
                            data-bind="checked: isVerdictAttachment, enable: $root.authorization.ok('set-attachments-as-verdict-attachment')"></input>
                   </div>
 
-                  <div data-bind="if: features.enabled('arkistointi')">
+                  <div data-bind="if: features.enabled('arkistointi') && latestVersion">
                     <div class="feature archive-valid" data-bind="with: latestVersion">
                       <div>
                         <span data-bind="ltext: 'archive.valid-format'"></span>
@@ -186,7 +196,7 @@
                 </div>
               </div>
 
-              <div class="signatures clear">
+              <div class="signatures clear" data-bind="if: latestVersion">
                 <h3 data-bind="ltext: 'attachment.signatures'"></h3>
                 <div class="signature-table" data-bind="if: signatures && signatures().length > 0">
                   <!-- ko foreach: signatures -->
@@ -200,61 +210,29 @@
                     </div>
                     <!-- /ko -->
                 </div>
-                <button data-test-id="signLatestAttachmentVersion" class="btn-primary"
+                <button data-test-id="signLatestAttachmentVersion" class="positive"
                         data-bind="click: sign, visible: $root.authorization.ok('sign-attachments'), visible: versions().length && $root.authorization.ok('sign-attachments')">
-                    <span class="btn-label" data-bind="ltext: 'attachment.signLatest'"></span>
-                    <span class="icon signed-white left-align"></span>
+                    <i class="lupicon-circle-pen"></i>
+                    <span data-bind="ltext: 'attachment.signLatest'"></span>
                 </button>
               </div>
 
-              <button id="show-tos-metadata"
-                      class="btn"
-                      style="margin-top: 15px"
-                      data-bind="click: toggleTosMetadata, visible: metadata().length > 0">
-                <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
-                <span class="left-align"
-                      data-bind="drill: showTosMetadata, color: 'black'"></span>
-              </button>
+              <!-- ko if: features.enabled('tiedonohjaus') && !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-attachment') -->
+              <div class="feature" style="margin-top: 15px;">
+                <button id="show-tos-metadata" class="btn"
+                        data-bind="click: toggleTosMetadata, visible: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application')">
+                  <i data-bind="css: {'lupicon-chevron-small-right': !showTosMetadata(),
+                                      'lupicon-chevron-small-down': showTosMetadata}"></i>
+                  <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
+                </button>
 
-              <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: metadata().length > 0">
-                <h3 data-bind="ltext: 'attachment.tosMetadata'"></h3>
-                <table class="table table-striped">
-                  <thead>
-                  <tr>
-                    <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
-                    <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
-                  </tr>
-                  </thead>
-                  <tbody data-bind="foreach: metadata">
-                    <tr>
-                      <td data-bind="text: name"></td>
-                      <td>
-                        <div data-bind="if: typeof(value) == 'object'">
-                          <table class="subtable">
-                            <thead>
-                            <tr>
-                              <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
-                              <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
-                            </tr>
-                            </thead>
-                            <tbody data-bind="foreach: value">
-                            <tr>
-                              <td data-bind="text: name"></td>
-                              <td>
-                                <span data-bind="text: value"></span>
-                              </td>
-                            </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                        <span data-bind="if: typeof(value) != 'object'">
-                          <span data-bind="text: value"></span>
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: !_.isEmpty(metadata())">
+                  <div data-bind="component: {name: 'metadata-editor',
+                                              params: {attachmentId: id, metadata: metadata, applicationId: application.id}}">
+                  </div>
+                </div>
               </div>
+              <!-- /ko -->
 
             </div>
           </div>
@@ -269,18 +247,36 @@
                   </a>
                 </div>
               </div>
+
               <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
                 <div class="file-preview-content">
-                  <a class="filre-preview-btn btn btn-auto" data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}" target="file-preview-iframe-name">
-                    <span class="btn-label" data-bind="text: loc('attachment.pdf.preview.link')"></span>
+                  <a class="btn secondary" data-bind="attr: {href: previewUrl}, toggleClick: previewVisible" target="file-preview-iframe-name" data-test-id="file-preview">
+                    <i data-bind="css: {'lupicon-chevron-small-right': !previewVisible(), 'lupicon-chevron-small-down': previewVisible}"></i>
+                    <span data-bind="ltext: 'attachment.pdf.preview.link'"></span>
                   </a>
-                  <iframe id="file-preview-iframe" name="file-preview-iframe-name"></iframe>
+                  <div data-bind="visible: previewVisible">
+                    <div data-bind="if: $root.authorization.ok('rotate-pdf') && isPdf()" data-test-id="pdf-rotation-buttons">
+                      <button data-bind="click: _.partial(rotete, -90)">
+                        <i class="lupicon-rotate-left"></i>
+                        <span data-bind="ltext: 'rotate-left'"></span>
+                      </button>
+                      <button data-bind="click: _.partial(rotete, 180)">
+                        <i class="lupicon-refresh"></i>
+                        <span data-bind="ltext: 'rotate-over'"></span>
+                      </button>
+                      <button data-bind="click: _.partial(rotete, 90)">
+                        <i class="lupicon-rotate-right"></i>
+                        <span data-bind="ltext: 'rotate-right'"></span>
+                      </button>
+                    </div>
+                    <iframe id="file-preview-iframe" name="file-preview-iframe-name"></iframe>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div id="test-txt-file-preview" class="file-preview" data-bind="visible: !hasPreview()">
-              <p data-bind="ltext: 'attachment.noPreview'">Esikatselua ei saatavilla.</p>
+              <p data-bind="ltext: 'attachment.noPreview'"></p>
             </div>
           </div>
         </div>
@@ -290,7 +286,7 @@
     <div class="window autosized" id="change-type-dialog" data-bind="with: changeTypeDialogModel">
       <div class="dialog-header">
        <p data-bind="ltext: 'attachment.changeType'"></p>
-       <p class="dialog-close close">X</p>
+       <p class="dialog-close close lupicon-remove"></p>
       </div>
       <div class="form-entry change-type">
         <label for="attachment-type-select" class="form-label">

@@ -1,23 +1,28 @@
 *** Settings ***
 
 Documentation   Identity federation
-Suite Setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 Resource        keywords.robot
 
 *** Test Cases ***
 
+Setup random email
+  [Tags]  integration  ie8
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${email}  ${secs}@example.com
+
 Send mock identity to server
   [Tags]  integration  ie8
   Go to  ${SERVER}/dev-pages/idf.html
+  Execute Javascript  $("input[name='email']").val("${email}").change();
   Wait until  Page should contain  READY
   Click element  submit
 
 Got email
   [Tags]  integration  ie8
   Open last email
-  Wait Until  Page Should Contain  idf@example.com
+  Wait Until  Page Should Contain  ${email}
   Page Should Contain  /app/fi/welcome#!/link-account
   ## Click the first link
   Click link  xpath=//a
@@ -27,7 +32,7 @@ Federated user activates account via VETUMA
   [Tags]  integration  ie8
   Authenticate via Osuuspankki via Vetuma  vetuma-linking-init
   Wait until  Submit is disabled
-  Textfield should contain  xpath=//input[@data-test-id='link-account-street']  Sepänkatu 11 A 5
+  Wait until  Textfield should contain  xpath=//input[@data-test-id='link-account-street']  Sepänkatu 11 A 5
   Textfield should contain  xpath=//input[@data-test-id='link-account-zip']  70100
   Textfield should contain  xpath=//input[@data-test-id='link-account-city']  KUOPIO
   Textfield should contain  xpath=//input[@data-test-id='link-account-phone']  040

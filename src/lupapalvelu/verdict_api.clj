@@ -13,23 +13,25 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :as user]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]))
 
 ;;
 ;; KRYSP verdicts
 ;;
 
-(defn do-check-for-verdict [{application :application :as command}]
+(defn do-check-for-verdict [{{op :primaryOperation :as application} :application :as command}]
   {:pre [(every? command [:application :user :created])]}
-  (when-let [app-xml (krysp-fetch-api/get-application-xml application :application-id)]
+  (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
     (or
       (let [validator-fn (permit/get-verdict-validator (permit/permit-type application))]
         (validator-fn app-xml))
       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
         (update-application command updates)
-        (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))))
+        (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
+    (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} (:name op))
+      (verdict/fetch-tj-suunnittelija-verdict command))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
@@ -40,7 +42,7 @@
                  If the command is run more than once, existing verdicts are
                  replaced by the new ones."
    :parameters [:id]
-   :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
+   :states     #{:submitted :complement-needed :sent :verdictGiven :constructionStarted} ; states reviewed 2015-07-13
    :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-verdict)}
@@ -61,11 +63,17 @@
 
 (defcommand new-verdict-draft
   {:parameters [:id]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :states     #{:submitted :complement-needed :sent :verdictGiven}
    :user-roles #{:authority}}
-  [command]
-  (let [blank-verdict (domain/->paatos {:draft true})]
+  [{:keys [application] :as command}]
+  (let [organization (get application :organization)
+        tosFunction (get application :tosFunction)
+        metadata (when (seq tosFunction) (t/metadata-for-document organization tosFunction "päätös"))
+        blank-verdict (cond-> (domain/->paatos {:draft true})
+                              (seq metadata) (assoc :metadata metadata))]
     (update-application command {$push {:verdicts blank-verdict}})
+    (debugf (str "DEBUG: blank-verdict= " blank-verdict ))
+
     (ok :verdictId (:id blank-verdict))))
 
 (defn- find-verdict [{verdicts :verdicts} id]
@@ -80,7 +88,7 @@
    :input-validators [validate-status
                       (partial action/non-blank-parameters [:verdictId])
                       (partial action/boolean-parameters [:agreement])]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :states     #{:submitted :complement-needed :sent :verdictGiven}
    :user-roles #{:authority}
    :pre-checks [(fn [{{:keys [verdictId]} :data} application]
                   (when verdictId
@@ -91,9 +99,14 @@
                   (merge
                     (select-keys data [:verdictId :backendId :status :name :section :agreement :text :given :official])
                     {:timestamp created, :draft true}))]
+    (debugf (str "  save-verdict mongo : " verdict))
     (update-application command
       {:verdicts {$elemMatch {:id verdictId}}}
-      {$set {(str "verdicts.$") verdict}})))
+      {$set {"verdicts.$.kuntalupatunnus" (:kuntalupatunnus verdict)
+             "verdicts.$.draft" true
+             "verdicts.$.timestamp" created
+             "verdicts.$.sopimus" (:sopimus verdict)
+             "verdicts.$.paatokset" (:paatokset verdict)}})))
 
 (defn- publish-verdict [{timestamp :created :as command} {:keys [id kuntalupatunnus]}]
   (if-not (ss/blank? kuntalupatunnus)
@@ -108,7 +121,7 @@
 
 (defcommand publish-verdict
   {:parameters [id verdictId]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :states     #{:submitted :complement-needed :sent :verdictGiven}
    :notified   true
    :on-success (notify :application-verdict)
    :user-roles #{:authority}}
@@ -120,7 +133,7 @@
 (defcommand delete-verdict
   {:parameters [id verdictId]
    :input-validators [(partial action/non-blank-parameters [:verdictId])]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :states     #{:submitted :complement-needed :sent :verdictGiven}
    :user-roles #{:authority}}
   [{:keys [application created] :as command}]
   (when-let [verdict (find-verdict application verdictId)]
@@ -143,7 +156,7 @@
 (defcommand sign-verdict
   {:description "Applicant/application owner can sign an application's verdict"
    :parameters [id verdictId password]
-   :states     [:verdictGiven :constructionStarted]
+   :states     #{:verdictGiven :constructionStarted}
    :pre-checks [domain/validate-owner-or-write-access]
    :user-roles #{:applicant :authority}}
   [{:keys [application created user] :as command}]

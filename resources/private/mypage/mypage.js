@@ -6,6 +6,10 @@
 
   function makeSaveFn(commandName, propertyNames) {
     return function(model, event) {
+      if (!event) {
+        return;
+      }
+
       var img = $(event.target).parent().find("img");
       var t = setTimeout(img.show, 200);
       var params = _.reduce(propertyNames, function(m, n) {
@@ -19,8 +23,14 @@
       ajax
         .command(commandName, params)
         .pending(model.pending)
-        .success(function() { model.clear().saved(true).indicator({type: "saved"}); })
-        .error(function(d) { model.clear().saved(false).indicator({type: "err"}).error(d.text); })
+        .success(function(res) {
+          model.clear().saved(true);
+          util.showSavedIndicator(res);
+        })
+        .error(function(res) {
+          model.clear().saved(false).error(res.text);
+          util.showSavedIndicator(res);
+        })
         .complete(function() { clearTimeout(t); img.hide(); })
         .call();
     };
@@ -31,13 +41,13 @@
     var self = this;
 
     self.error = ko.observable();
-    self.saved = ko.observable();
+    self.saved = ko.observable(false);
     self.firstName = ko.observable().extend({ maxLength: 255 });
     self.lastName = ko.observable().extend({ maxLength: 255 });
     self.username = ko.observable();
     self.street = ko.observable().extend({ maxLength: 255 });
     self.city = ko.observable().extend({ maxLength: 255 });
-    self.zip = ko.observable().extend({number: true, maxLength: 5});
+    self.zip = ko.observable().extend({number: true, maxLength: 5, minLength: 5});
     self.phone = ko.observable().extend({ maxLength: 255 });
     self.role = ko.observable();
     self.architect = ko.observable();
@@ -66,7 +76,7 @@
 
     self.pending = ko.observable();
 
-    self.indicator = ko.observable().extend({notify: "always"});
+    self.processing = ko.observable();
 
     self.loadingAttachments = ko.observable();
 
@@ -76,6 +86,8 @@
       y:     ko.observable(),
       document: ko.observable()
     };
+
+    self.authority = ko.computed(function() { return self.role() === "authority"; });
 
     self.companyShow = ko.observable();
     self.showSimpleCompanyInfo = ko.computed(function () { return !self.companyShow(); });
@@ -179,11 +191,12 @@
     };
 
     self.editUsers = function() {
-      window.location.hash = "#!/company/" + self.company.id() + "/users/";
+
+      pageutil.openPage("company", self.company.id() + "/users/");
     };
 
     self.editCompany = function() {
-      window.location.hash = "#!/company/" + self.company.id();
+      pageutil.openPage("company", self.company.id());
     };
 
     self.saved.subscribe(self.updateUserName);
@@ -192,11 +205,11 @@
   function Password() {
     this.oldPassword = ko.observable("");
     this.newPassword = ko.observable("");
-    this.newPassword2 = ko.observable("");
+    this.newPassword2 = ko.observable("").extend({match: {params: this.newPassword, message: loc("mypage.noMatch")}});
     this.error = ko.observable(null);
     this.saved = ko.observable(false);
-    this.indicator = ko.observable().extend({ notify: "always" });
     this.pending = ko.observable();
+    this.processing = ko.observable();
 
     this.clear = function() {
       return this
@@ -296,6 +309,8 @@
     $("#mypage")
       .find("#own-info-form").applyBindings(ownInfo).end()
       .find("#pw-form").applyBindings(pw).end()
+      .find("#mypage-register-company").applyBindings(ownInfo).end()
+      .find("#mypage-company").applyBindings(ownInfo).end()
       .find("#dialog-userinfo-architect-upload")
         .applyBindings(uploadModel)
         .find("form")

@@ -105,6 +105,7 @@
                                       :repeating true
                                       :version 1
                                       :type "party"
+                                      :subtype "maksaja"
                                       :order 6}
                         :data {:_selected {:value "yritys"}
                                :laskuviite {:value "LVI99997"}
@@ -171,8 +172,7 @@
              :type "owner",
              :role "owner",
              :id "777777777777777777000020"}]
-     :location {:x 404174.92749023
-                :y 6690687.4923706}
+     :location [404174.92749023 6690687.4923706]
      :statements ctc/statements
      :organization "753-P"
      :title "S\u00f6derkullantie 146"

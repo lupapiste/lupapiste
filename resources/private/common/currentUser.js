@@ -23,7 +23,8 @@ LUPAPISTE.CurrentUser = function() {
       titleI18nkey:   undefined,
       message:        undefined,
       messageI18nkey: undefined
-    }
+    },
+    applicationFilters: []
   };
 
   function constructor(user) {
@@ -31,6 +32,10 @@ LUPAPISTE.CurrentUser = function() {
   }
 
   constructor({});
+
+  self.loaded = ko.pureComputed(function() {
+    return self.id();
+  });
 
   self.isAuthority = function() {
     return self.role() === "authority";
@@ -55,15 +60,13 @@ LUPAPISTE.CurrentUser = function() {
   function getNotificationFields(notification) {
     if(notification.titleI18nkey() && notification.messageI18nkey()) {
       return {
-        title: notification.titleI18nkey(),
-        msg: notification.messageI18nkey(),
-        localize: true
+        title: loc(notification.titleI18nkey()),
+        msg: loc(notification.messageI18nkey())
       };
     } else if (notification.title() && notification.message()) {
       return {
         title: notification.title(),
-        msg: notification.message(),
-        localize: false
+        msg: notification.message()
       };
     } else {
       return undefined;
@@ -78,12 +81,11 @@ LUPAPISTE.CurrentUser = function() {
     if (self.showNotification()) {
       var fields = getNotificationFields(self.notification);
       hub.send("show-dialog", {title: fields.title,
-                               localize: fields.localize,
                                id: "user-notification-dialog",
                                size: "medium",
                                component: "ok-dialog",
                                closeOnClick: true,
-                               componentParams: {text: fields.msg, localize: fields.localize}
+                               componentParams: {text: fields.msg}
                               });
     }
   });

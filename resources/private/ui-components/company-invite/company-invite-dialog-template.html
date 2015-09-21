@@ -2,18 +2,18 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/html" id="company-invite-dialog-template">
+    <script type="text/x-jquery-tmpl" id="company-invite-dialog-template">
 
       <div data-bind="ifnot: confirm">
         <div class="content">
           <p data-bind="ltext: 'company-invite.desc'" class="dialog-desc"></p>
-          <div data-bind="component: {name: 'autocomplete', params: {dataProvider: companiesProvider, value: selected}}"></div>
+          <div data-bind="component: {name: 'autocomplete', params: {options: companiesProvider.data, query: companiesProvider.query, selectedOptions: selected}}"></div>
         </div>
         <div data-bind="component: {name:'submit-button-group',
                                     params: { isSubmitVisible: isConfirmVisible,
                                               isSubmitEnabled: isConfirmEnabled,
                                               submit: openConfirm,
-                                              submitTitle: 'continue'}}"></div>
+                                              lSubmitTitle: 'continue'}}"></div>
       </div>
 
       <div data-bind="if: confirm">
@@ -24,7 +24,7 @@
                                     params: { isSubmitVisible: isSubmitVisible,
                                               isSubmitEnabled: isSubmitEnabled,
                                               submit: submit,
-                                              submitTitle: 'company-invite.invite'}}"></div>
+                                              lSubmitTitle: 'company-invite.invite'}}"></div>
       </div>
 
     </script>

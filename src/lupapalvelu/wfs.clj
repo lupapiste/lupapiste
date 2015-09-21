@@ -1,5 +1,7 @@
 (ns lupapalvelu.wfs
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn error errorf fatal]]
+            [ring.util.codec :as codec]
+            [net.cgrand.enlive-html :as enlive]
             [sade.http :as http]
             [clojure.string :as s]
             [clojure.xml :as xml]
@@ -10,6 +12,7 @@
             [sade.strings :as ss]
             [sade.util :refer [future*] :as util]
             [sade.core :refer :all]
+            [sade.common-reader :as reader]
             [lupapalvelu.logging :as logging]))
 
 
@@ -162,8 +165,7 @@
      :municipality (address-part feature :oso:kuntatunnus)
      :name {:fi (address-part feature :oso:kuntanimiFin)
             :sv (address-part feature :oso:kuntanimiSwe)}
-     :location {:x x
-                :y y}}))
+     :location {:x x :y y}}))
 
 (defn feature-to-simple-address-string [feature]
   (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)]
@@ -256,7 +258,7 @@
   "WMS query with error handling. Returns response body or nil."
   [url query-params]
   (let [{:keys [status body]} (http/get url {:query-params query-params})
-        error (when (ss/contains body "ServiceException")
+        error (when (ss/contains? body "ServiceException")
                 (-> body ss/trim
                   (->features startparse-sax-non-validating "UTF-8")
                   (xml-> :ServiceException)
@@ -398,21 +400,21 @@
 (defn general-plan-info-by-point [x y]
   (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]
         query {"REQUEST" "GetFeatureInfo"
-                             "EXCEPTIONS" "application/vnd.ogc.se_xml"
-                             "SERVICE" "WMS"
-                             "INFO_FORMAT" "application/vnd.ogc.gml"
-                             "QUERY_LAYERS" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
-                             "FEATURE_COUNT" "50"
-                             "Layers" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
-                             "WIDTH" "256"
-                             "HEIGHT" "256"
-                             "format" "image/png"
-                             "styles" ""
-                             "srs" "EPSG:3067"
-                             "version" "1.1.1"
-                             "x" "128"
-                             "y" "128"
-                             "BBOX" (s/join "," bbox)}]
+               "EXCEPTIONS" "application/vnd.ogc.se_xml"
+               "SERVICE" "WMS"
+               "INFO_FORMAT" "application/vnd.ogc.gml"
+               "QUERY_LAYERS" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
+               "FEATURE_COUNT" "50"
+               "Layers" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
+               "WIDTH" "256"
+               "HEIGHT" "256"
+               "format" "image/png"
+               "styles" ""
+               "srs" "EPSG:3067"
+               "version" "1.1.1"
+               "x" "128"
+               "y" "128"
+               "BBOX" (s/join "," bbox)}]
     (wms-get wms-url query)))
 
 (defn gfi-to-general-plan-features [gfi]
@@ -433,12 +435,28 @@
      :linkki (first (xml-> feature :lupapiste:linkki text))
      :type "yleiskaava"}))
 
+(defn get-rekisteriyksikontietojaFeatureAddress []
+  (let [url-for-get-ktj-capabilities (str ktjkii "?service=WFS&request=GetCapabilities&version=1.1.0")
+        namespace-stripped-xml (reader/strip-xml-namespaces (reader/get-xml url-for-get-ktj-capabilities (get auth ktjkii) false))
+        selector [:WFS_Capabilities :OperationsMetadata [:Operation (enlive/attr= :name "DescribeFeatureType")] :DCP :HTTP [:Get]]
+        attribute-to-get :xlink:href]
+    (sxml/select1-attribute-value namespace-stripped-xml selector attribute-to-get)))
+
+(defn rekisteritiedot-xml [rekisteriyksikon-tunnus]
+  (if (env/feature? :disable-ktj-on-create)
+    (infof "ktj-client is disabled - not getting rekisteritiedot for %s" rekisteriyksikon-tunnus)
+    (let [url (str (get-rekisteriyksikontietojaFeatureAddress) "SERVICE=WFS&REQUEST=GetFeature&VERSION=1.1.0&NAMESPACE=xmlns%28ktjkiiwfs%3Dhttp%3A%2F%2Fxml.nls.fi%2Fktjkiiwfs%2F2010%2F02%29&TYPENAME=ktjkiiwfs%3ARekisteriyksikonTietoja&PROPERTYNAME=ktjkiiwfs%3Akiinteistotunnus%2Cktjkiiwfs%3Aolotila%2Cktjkiiwfs%3Arekisteriyksikkolaji%2Cktjkiiwfs%3Arekisterointipvm%2Cktjkiiwfs%3Animi%2Cktjkiiwfs%3Amaapintaala%2Cktjkiiwfs%3Avesipintaala&FEATUREID=FI.KTJkii-RekisteriyksikonTietoja-" (codec/url-encode rekisteriyksikon-tunnus) "&SRSNAME=EPSG%3A3067&MAXFEATURES=100&RESULTTYPE=results")
+          ktj-xml (reader/get-xml url (get auth ktjkii) false)
+          features (-> ktj-xml reader/strip-xml-namespaces sxml/xml->edn)]
+      (get-in features [:FeatureCollection :featureMember :RekisteriyksikonTietoja]))))
+
 
 ;;
 ;; Raster images:
 ;;
 (defn raster-images [request service]
-  (let [layer (get-in request [:params :LAYER])]
+  (let [layer (or (get-in request [:params :LAYER])
+                  (get-in request [:params :layer]))]
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
               {:query-params (:params request)
@@ -456,10 +474,10 @@
                               "kiinteistotunnukset" "kiinteisto")
                    wmts-url (str "https://karttakuva.maanmittauslaitos.fi/" url-part "/wmts")]
                (http/get wmts-url
-                 {:query-params (:params request)
-                  :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-                  :basic-auth [username password]
-                  :as :stream}))
+                         {:query-params (:params request)
+                          :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+                          :basic-auth [username password]
+                          :as :stream}))
       "plandocument" (let [id (get-in request [:params :id])]
                        (assert (ss/numeric? id))
                        (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")

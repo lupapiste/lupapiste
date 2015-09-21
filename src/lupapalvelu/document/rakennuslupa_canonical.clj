@@ -38,74 +38,69 @@
   (when-let [osapuoli (get-osapuoli-data omistaja :rakennuksenomistaja)]
     {:Omistaja osapuoli}))
 
+(defn- get-rakennustunnus [toimenpide application]
+  (let [defaults {:jarjestysnumero nil :kiinttun (:propertyId application)}
+        {:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} toimenpide]
+    (cond
+      manuaalinen_rakennusnro (assoc defaults :rakennusnro manuaalinen_rakennusnro)
+      rakennusnro             (util/assoc-when defaults :rakennusnro rakennusnro :valtakunnallinenNumero valtakunnallinenNumero)
+      :default defaults)))
+
 (defn- get-rakennus [toimenpide application {id :id created :created}]
-  (let [{kuvaus   :toimenpiteenKuvaus
-         kaytto   :kaytto
-         mitat    :mitat
-         rakenne  :rakenne
-         lammitys :lammitys
-         luokitus :luokitus
-         huoneistot :huoneistot} toimenpide
-        kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (-> rakenne :muuRakennusaine)
-                                                  :rakennusaine (-> rakenne :kantavaRakennusaine))
+  (let [{:keys [kaytto mitat rakenne lammitys luokitus huoneistot]} toimenpide
+        kuvaus (:toimenpiteenKuvaus toimenpide)
+        kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (:muuRakennusaine rakenne)
+                                                  :rakennusaine (:kantavaRakennusaine rakenne))
         lammonlahde-map (muu-select-map
                           :muu (-> lammitys :muu-lammonlahde)
                           :polttoaine (if (= "kiviihiili koksi tms" (-> lammitys :lammonlahde))
-                                          (str (-> lammitys :lammonlahde) ".")
-                                          (-> lammitys :lammonlahde)))
-        julkisivu-map (muu-select-map :muuMateriaali (-> rakenne :muuMateriaali)
-                                      :julkisivumateriaali (-> rakenne :julkisivu))
-        lammitystapa (-> lammitys :lammitystapa)
-        huoneistot {:huoneisto (get-huoneisto-data huoneistot)}]
+                                        (str (-> lammitys :lammonlahde) ".")
+                                        (-> lammitys :lammonlahde)))
+        julkisivu-map (muu-select-map :muuMateriaali (:muuMateriaali rakenne)
+                                      :julkisivumateriaali (:julkisivu rakenne))
+        lammitystapa (:lammitystapa lammitys)
+        huoneistot {:huoneisto (get-huoneisto-data huoneistot)}
+        rakennuksen-tiedot-basic-info {:kayttotarkoitus (:kayttotarkoitus kaytto)
+                                       :rakentamistapa (:rakentamistapa rakenne)
+                                       :verkostoliittymat {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin))
+                                                           :maakaasuKytkin (true? (-> toimenpide :verkostoliittymat :maakaasuKytkin))
+                                                           :viemariKytkin (true? (-> toimenpide :verkostoliittymat :viemariKytkin))
+                                                           :vesijohtoKytkin (true? (-> toimenpide :verkostoliittymat :vesijohtoKytkin))
+                                                           :kaapeliKytkin (true? (-> toimenpide :verkostoliittymat :kaapeliKytkin))}
+                                       :lammitystapa (cond
+                                                       (= lammitystapa "suorasahk\u00f6") "suora s\u00e4hk\u00f6"
+                                                       (= lammitystapa "eiLammitysta") "ei l\u00e4mmityst\u00e4"
+                                                       :default lammitystapa)
+                                       :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin))
+                                                   :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin))
+                                                   :viemariKytkin (true? (-> toimenpide :varusteet :viemariKytkin))
+                                                   :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin))
+                                                   :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin))
+                                                   :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin))
+                                                   :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
+                                                   :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
+                                                   :saunoja (-> toimenpide :varusteet :saunoja)
+                                                   :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}
+                                       :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))
+                                       :rakennustunnus (get-rakennustunnus toimenpide application)}
+        rakennuksen-tiedot (merge
+                             (select-keys mitat [:tilavuus :kokonaisala :kellarinpinta-ala :kerrosluku :kerrosala])
+                             (select-keys luokitus [:energialuokka :energiatehokkuusluku :paloluokka])
+                             (when-not (ss/blank? (:energiatehokkuusluku luokitus))
+                               (select-keys luokitus [:energiatehokkuusluvunYksikko]))
+                             (when (util/not-empty-or-nil? (:huoneisto huoneistot))
+                               {:asuinhuoneistot huoneistot})
+                             (util/assoc-when rakennuksen-tiedot-basic-info
+                               :kantavaRakennusaine kantava-rakennus-aine-map
+                               :lammonlahde lammonlahde-map
+                               :julkisivu julkisivu-map))]
 
-    (util/assoc-when
-      {:yksilointitieto id
-       :alkuHetki (util/to-xml-datetime  created)
-       :sijaintitieto {:Sijainti {:tyhja empty-tag}}
-       :rakentajatyyppi (-> kaytto :rakentajaTyyppi)
-       :rakennuksenTiedot (merge {:kayttotarkoitus (-> kaytto :kayttotarkoitus)
-                                  :tilavuus (-> mitat :tilavuus)
-                                  :kokonaisala (-> mitat :kokonaisala)
-                                  :kellarinpinta-ala (-> mitat :kellarinpinta-ala)
-                                  ;:BIM empty-tag
-                                  :kerrosluku (-> mitat :kerrosluku)
-                                  :kerrosala (-> mitat :kerrosala)
-                                  :rakentamistapa (-> rakenne :rakentamistapa)
-                                  :verkostoliittymat {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin))
-                                                      :maakaasuKytkin (true? (-> toimenpide :verkostoliittymat :maakaasuKytkin))
-                                                      :viemariKytkin (true? (-> toimenpide :verkostoliittymat :viemariKytkin))
-                                                      :vesijohtoKytkin (true? (-> toimenpide :verkostoliittymat :vesijohtoKytkin))
-                                                      :kaapeliKytkin (true? (-> toimenpide :verkostoliittymat :kaapeliKytkin))}
-                                  :energialuokka (-> luokitus :energialuokka)
-                                  :energiatehokkuusluku (-> luokitus :energiatehokkuusluku)
-                                  :energiatehokkuusluvunYksikko (-> luokitus :energiatehokkuusluvunYksikko)
-                                  :paloluokka (-> luokitus :paloluokka)
-                                  :lammitystapa (cond (= lammitystapa "suorasahk\u00f6") "suora s\u00e4hk\u00f6"
-                                                      (= lammitystapa "eiLammitysta") "ei l\u00e4mmityst\u00e4"
-                                                  :default lammitystapa)
-                                  :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin))
-                                              :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin))
-                                              :viemariKytkin (true? (-> toimenpide :varusteet :viemariKytkin))
-                                              :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin))
-                                              :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin))
-                                              :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin))
-                                              :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
-                                              :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
-                                              :saunoja (-> toimenpide :varusteet :saunoja)
-                                              :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}
-                                  :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))}
-                                 (let [defaults {:jarjestysnumero nil, :kiinttun (:propertyId application)}
-                                       {:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} toimenpide]
-                                   (cond
-                                     manuaalinen_rakennusnro {:rakennustunnus (assoc defaults :rakennusnro manuaalinen_rakennusnro)}
-                                     rakennusnro {:rakennustunnus (util/assoc-when defaults :rakennusnro rakennusnro :valtakunnallinenNumero valtakunnallinenNumero)}
-                                     :default {:rakennustunnus defaults}))
-                                 (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
-                                 (when lammonlahde-map {:lammonlahde lammonlahde-map})
-                                 (when julkisivu-map {:julkisivu julkisivu-map})
-                                 (when (and huoneistot (not-empty (:huoneisto huoneistot)))
-                                   {:asuinhuoneistot huoneistot}))}
-       :omistajatieto (remove nil? (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))))))
+    (util/assoc-when {:yksilointitieto id
+                      :alkuHetki (util/to-xml-datetime  created)
+                      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
+                      :rakentajatyyppi (:rakentajaTyyppi kaytto)
+                      :rakennuksenTiedot rakennuksen-tiedot}
+      :omistajatieto (remove nil? (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))))))
 
 (defn- get-rakennus-data [toimenpide application doc]
   {:Rakennus (get-rakennus toimenpide application doc)})
@@ -193,30 +188,28 @@
                             %) toimenpide))
 
 
-(defn- get-operations [documents application]
-  (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents))
-                                               (map #(get-uusi-toimenpide % application) (:uusi-rakennus-ei-huoneistoa documents))
-                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents))
-                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja documents))
-                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia documents))
-                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
-                                               (map #(get-purku-toimenpide % application) (:purkaminen documents))
-                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))
-                                               (map #(get-maalampokaivo % application) (:maalampokaivo documents))))
+(defn- get-operations [documents-by-type application]
+  (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents-by-type))
+                                               (map #(get-uusi-toimenpide % application) (:uusi-rakennus-ei-huoneistoa documents-by-type))
+                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents-by-type))
+                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja documents-by-type))
+                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia documents-by-type))
+                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents-by-type))
+                                               (map #(get-purku-toimenpide % application) (:purkaminen documents-by-type))
+                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents-by-type))
+                                               (map #(get-maalampokaivo % application) (:maalampokaivo documents-by-type))))
         toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
     (not-empty (sort-by :created toimenpiteet))))
 
 
-(defn- get-lisatiedot [documents lang]
-  (let [lisatiedot (:data (first (:lisatiedot documents)))
-        aloitusoikeus (:data (first (:aloitusoikeus documents)))]
-    {:Lisatiedot {:asioimiskieli (if (= lang "sv")
-                                   "ruotsi"
-                                   "suomi")}}))
+(defn- get-lisatiedot [documents-by-type lang]
+  {:Lisatiedot {:asioimiskieli (case lang
+                                 "sv" "ruotsi"
+                                 "suomi")}})
 
-(defn- get-asian-tiedot [documents]
-  (let [maisematyo_documents (:maisematyo documents)
-        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents) (:hankkeen-kuvaus-minimum documents) (:aloitusoikeus documents))
+(defn- get-asian-tiedot [documents-by-type]
+  (let [maisematyo_documents (:maisematyo documents-by-type)
+        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents-by-type) (:hankkeen-kuvaus-minimum documents-by-type) (:aloitusoikeus documents-by-type))
         asian-tiedot (:data (first hankkeen-kuvaus-doc))
         maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
                                (str "\n\n" (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc))
@@ -227,8 +220,8 @@
       (assoc-in r [:Asiantiedot :vahainenPoikkeaminen] (or (-> asian-tiedot :poikkeamat) empty-tag))
       r)))
 
-(defn- get-kayttotapaus [documents toimenpiteet]
-  (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
+(defn- get-kayttotapaus [documents-by-type toimenpiteet]
+  (if (and (contains? documents-by-type :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
 
@@ -237,8 +230,8 @@
   [application lang]
   (let [application (tools/unwrapped application)
         link-permit-data (first (:linkPermitData application))
-        documents (documents-by-type-without-blanks application)
-        toimenpiteet (get-operations documents application)
+        documents-by-type (documents-by-type-without-blanks application)
+        toimenpiteet (get-operations documents-by-type application)
         operation-name (-> application :primaryOperation :name)
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
@@ -246,7 +239,7 @@
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus application)
-                      :osapuolettieto (osapuolet documents (:neighbors application) lang)
+                      :osapuolettieto (osapuolet application documents-by-type lang)
                       :kayttotapaus (if (= "muutoslupa" (:permitSubtype application))
                                       "Rakentamisen aikainen muutos"
                                       (condp = operation-name
@@ -256,9 +249,9 @@
                                         "jatkoaika" "Jatkoaikahakemus"
                                         "raktyo-aloit-loppuunsaat" "Jatkoaikahakemus"
                                         "aloitusoikeus" "Uusi aloitusoikeus"
-                                        (get-kayttotapaus documents toimenpiteet)))
-                      :asianTiedot (get-asian-tiedot documents)
-                      :lisatiedot (get-lisatiedot documents lang)}}}}
+                                        (get-kayttotapaus documents-by-type toimenpiteet)))
+                      :asianTiedot (get-asian-tiedot documents-by-type)
+                      :lisatiedot (get-lisatiedot documents-by-type lang)}}}}
         canonical (if link-permit-data
                     (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
                       (get-viitelupatieto link-permit-data))
@@ -269,7 +262,7 @@
                             (= operation-name "raktyo-aloit-loppuunsaat"))
                     (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
                       util/assoc-when
-                      :rakennuspaikkatieto (get-bulding-places (:rakennuspaikka documents) application)
+                      :rakennuspaikkatieto (get-bulding-places (:rakennuspaikka documents-by-type) application)
                       :toimenpidetieto toimenpiteet
                       :lausuntotieto (get-statements (:statements application)))
                     canonical)]
@@ -301,7 +294,7 @@
 
 (defn katselmus-canonical [application lang task-id task-name pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
   (let [application (tools/unwrapped application)
-        documents (documents-by-type-without-blanks application)
+        documents-by-type (documents-by-type-without-blanks application)
         katselmusTyyppi (katselmusnimi-to-type katselmuksen-nimi tyyppi)
         katselmus (util/strip-nils
                     (merge
@@ -353,25 +346,19 @@
                                                                                          :sahkopostiosoite (:email user)
                                                                                          :puhelin (:phone user)}}}}}
                       :katselmustieto {:Katselmus katselmus}
-                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
+                      :lisatiedot (get-lisatiedot (:lisatiedot documents-by-type) lang)
                       :kayttotapaus (katselmus-kayttotapaus katselmuksen-nimi tyyppi)
                       }}}}]
     canonical))
 
 (defn unsent-attachments-to-canonical [application lang]
   (let [application (tools/unwrapped application)
-        documents (documents-by-type-without-blanks application)
-        hakija-info (-> (filter #(= (-> % :Osapuoli :VRKrooliKoodi) "hakija") (get-parties documents))
-                      first
-                      (assoc-in [:Osapuoli :kuntaRooliKoodi] "ei tiedossa"))
-        canonical {:Rakennusvalvonta
-                   {:toimituksenTiedot (toimituksen-tiedot application lang)
-                    :rakennusvalvontaAsiatieto
-                    {:RakennusvalvontaAsia
-                     {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus application)
-                      :osapuolettieto {:Osapuolet {:osapuolitieto hakija-info}}
-                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
-                      :kayttotapaus "Liitetiedoston lis\u00e4ys"
-                      }}}}]
-    canonical))
+        documents-by-type (documents-by-type-without-blanks application)]
+    {:Rakennusvalvonta
+     {:toimituksenTiedot (toimituksen-tiedot application lang)
+      :rakennusvalvontaAsiatieto
+      {:RakennusvalvontaAsia
+       {:kasittelynTilatieto (get-state application)
+        :luvanTunnisteTiedot (lupatunnus application)
+        :lisatiedot (get-lisatiedot (:lisatiedot documents-by-type) lang)
+        :kayttotapaus "Liitetiedoston lis\u00e4ys"}}}}))

@@ -1,6 +1,6 @@
 (ns lupapalvelu.factlet-test
-  (:use lupapalvelu.factlet
-        midje.sweet))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.factlet :refer :all]))
 
 (def fact-call-count (atom 0))
 (def value-call-count (atom 0))

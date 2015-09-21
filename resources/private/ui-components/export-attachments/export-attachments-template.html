@@ -2,23 +2,23 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/html" id="export-attachments-template">
+    <script type="text/x-jquery-tmpl" id="export-attachments-template">
       <div>
-        <button class="btn btn-primary"
+        <button class="positive"
                 data-test-id="export-attachments-to-backing-system"
                 data-bind="visible: exportAttachmentsToBackingSystem,
                            click: startExportingAttachmentsToBackingSystem,
                            attr: {title: loc('application.attachmentsMoveToBackingSystem')}">
-          <span data-bind="ltext: 'application.exportAttachments'"></span>
-          <span class="icon approve left-align"></span>
+            <i class="lupicon-circle-arrow-right"></i>
+            <span data-bind="ltext: 'application.exportAttachments'"></span>
         </button>
-        <button class="btn btn-primary"
+        <button class="positive"
                 data-test-id="export-attachments-to-asianhallinta"
                 data-bind="visible: exportAttachmentsToAsianhallinta,
                            click: startExportingAttachmentsToAsianhallinta,
                            attr: {title: loc('application.attachmentsMoveToCaseManagement')}">
-          <span data-bind="ltext: 'application.exportAttachments',"></span>
-          <span class="icon approve left-align"></span>
+            <i class="lupicon-circle-arrow-right"></i>
+            <span data-bind="ltext: 'application.exportAttachments',"></span>
         </button>
       </div>
     </script>

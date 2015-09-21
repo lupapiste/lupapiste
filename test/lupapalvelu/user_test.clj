@@ -2,11 +2,13 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
-            [lupapalvelu.user :refer :all]
+            [schema.core :as sc]
             [slingshot.slingshot :refer [try+]]
+            [lupapalvelu.itest-util :refer [expected-failure? unauthorized?]]
+            [lupapalvelu.user :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [schema.core :as sc]))
+            [lupapalvelu.activation :as activation]))
 
 ;;
 ;; ==============================================================================
@@ -59,6 +61,149 @@
 (fact same-user?
   (same-user? {:id "foo"} {:id "foo"}) => truthy
   (same-user? {:id "foo"} {:id "bar"}) => falsey)
+
+
+;;
+;; ==============================================================================
+;; validate-create-new-user!
+;; ==============================================================================
+;;
+
+(testable-privates lupapalvelu.user validate-create-new-user!)
+
+(facts "validate-create-new-user!"
+  (against-background
+    [(mongo/by-id :organizations "o") => {:id "o"}
+     (mongo/by-id :organizations "other") => nil
+     (mongo/by-id :organizations "q") => {:id "q"}
+     (mongo/by-id :organizations "x") => {:id "x"}]
+
+  (fact (validate-create-new-user! nil nil) => (partial expected-failure? :error.missing-parameters))
+  (fact (validate-create-new-user! nil {})  => (partial expected-failure? :error.missing-parameters))
+  (fact (validate-create-new-user! {:role "admin"} {:role "applicant" :email "x"}) => unauthorized?)
+
+  (fact "only known roles are accepted"
+    (validate-create-new-user! {:role "admin"} {:role "x" :email "x"}) => (partial expected-failure? :error.invalid-role))
+
+  (fact (validate-create-new-user! {:role "applicant"}      {:role "authorityAdmin" :email "x"}) => unauthorized?)
+  (fact (validate-create-new-user! {:role "authority"}      {:role "authorityAdmin" :email "x"}) => unauthorized?)
+  (fact (validate-create-new-user! {:role "authorityAdmin"} {:role "authorityAdmin" :email "x"}) => unauthorized?)
+  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x"}) => (partial expected-failure? :error.missing-parameters))
+
+  (fact (validate-create-new-user! {:role "applicant"}      {:role "authority" :email "x"}) => unauthorized?)
+  (fact (validate-create-new-user! {:role "authority"}      {:role "authority" :email "x"}) => unauthorized?)
+  (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:o "authorityAdmin"}} {:role "authority" :email "x" :orgAuthz {:o ["authority"]}}) => truthy)
+  (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:o "authorityAdmin"}} {:role "authority" :email "x" :orgAuthz {:q ["authority"]}}) => unauthorized?)
+  (fact (validate-create-new-user! {:role "admin"}          {:role "authority" :email "x"}) => unauthorized?)
+  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x" :orgAuthz {:o ["authorityAdmin"]}}) => truthy)
+  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x" :orgAuthz {:other ["authorityAdmin"]}}) => (partial expected-failure? :error.organization-not-found))
+
+  (fact (validate-create-new-user! {:role "applicant"}      {:role "applicant" :email "x"}) => unauthorized?)
+  (fact (validate-create-new-user! {:role "authority"}      {:role "applicant" :email "x"}) => unauthorized?)
+  (fact (validate-create-new-user! {:role "authorityAdmin"} {:role "applicant" :email "x"}) => unauthorized?)
+  (fact (validate-create-new-user! {:role "admin"}          {:role "applicant" :email "x"}) => unauthorized?)
+  (fact (validate-create-new-user! nil                      {:role "applicant" :email "x"}) => truthy)
+
+  (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:o ["authorityAdmin"]}} {:role "dummy" :email "x" :orgAuthz {:o ["authority"]}}) => unauthorized?)
+
+  (fact "not even admin can create another admin"
+    (validate-create-new-user! {:role "admin"} {:role "admin" :email "x"}) => (partial expected-failure? :error.invalid-role))
+
+  (fact "authorityAdmin can create authority users to her own organization only"
+    (fact (validate-create-new-user! {:role "authorityAdmin"}                 {:role "authority" :orgAuthz {:x ["authority"]} :email "x"}) => unauthorized?)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz nil}   {:role "authority" :orgAuthz {:x ["authority"]} :email "x"}) => unauthorized?)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {}}    {:role "authority" :orgAuthz {:x ["authority"]} :email "x"}) => unauthorized?)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:y "authorityAdmin"}} {:role "authority" :orgAuthz {:x ["authority"]} :email "x"}) => unauthorized?)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:x "authorityAdmin"}} {:role "authority" :orgAuthz {:x ["authority"]} :email "x"}) => truthy))
+
+  (fact "invalid passwords are rejected"
+    (validate-create-new-user! {:role "admin"} {:password "z" :role "dummy" :email "x"}) => (partial expected-failure? :password-too-short)
+    (provided (security/valid-password? "z") => false))
+
+  (fact "valid passwords are ok"
+    (validate-create-new-user! {:role "admin"} {:password "z" :role "dummy" :email "x"}) => truthy
+    (provided (security/valid-password? "z") => true))
+
+  ))
+;;
+;; ==============================================================================
+;; create-new-user-entity
+;; ==============================================================================
+;;
+
+(testable-privates lupapalvelu.user create-new-user-entity)
+
+(facts "create-new-user-entity"
+
+  (facts "emails are converted to lowercase"
+    (fact (create-new-user-entity {:email "foo"})         => (contains {:email "foo"}))
+    (fact (create-new-user-entity {:email "Foo@Bar.COM"}) => (contains {:email "foo@bar.com"})))
+
+  (facts "default values"
+    (fact (create-new-user-entity {:email "Foo"}) => (contains {:email "foo"
+                                                                :username "foo"
+                                                                :firstName ""
+                                                                :lastName  ""
+                                                                :enabled   false}))
+    (fact (create-new-user-entity {:email "Foo" :username "bar"}) => (contains {:email "foo"
+                                                                                :username "bar"
+                                                                                :firstName ""
+                                                                                :lastName  ""
+                                                                                :enabled   false})))
+
+
+
+  (fact "password (if provided) is put under :private"
+    (fact (create-new-user-entity {:email "email"}) => (contains {:private {}}))
+    (fact (create-new-user-entity {:email "email" :password "foo"}) => (contains {:private {:password "bar"}})
+      (provided (security/get-hash "foo") => "bar")))
+
+  (fact "does not contain extra fields"
+    (-> (create-new-user-entity {:email "email" :foo "bar"}) :foo) => nil)
+
+  (facts "apikey is not created"
+    (fact (-> (create-new-user-entity  {:email "..anything.." :apikey "true"}) :private :apikey) => nil?)
+    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "false"}) :private) => {})
+    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "foo"}) :private :apikey) => nil?)))
+
+;;
+;; ==============================================================================
+;; Creating users:
+;; ==============================================================================
+;;
+
+(facts "create-new-user"
+
+  (fact "register new applicant user, user did not exists before"
+    (create-new-user nil {:email "email" :role "applicant"}) => ..result..
+    (provided
+      (get-user-by-email "email") =streams=> [nil ..result..]
+      (mongo/create-id) => ..id..
+      (mongo/insert :users (contains {:email "email" :id ..id..})) => nil
+      (mongo/update-by-id :users anything anything) => anything :times 0))
+
+  (fact "create new applicant user, user exists before as dummy user"
+    (create-new-user nil {:email "email" :role "applicant"}) => ..result..
+    (provided
+      (get-user-by-email "email") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
+      (mongo/insert :users anything) => anything :times 0
+      (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => nil))
+
+  (fact "create new authorityAdmin user, user exists before as dummy user"
+    (create-new-user {:role "admin"} {:email "email" :orgAuthz {:x ["authorityAdmin"]} :role "authorityAdmin"}) => ..result..
+    (provided
+      (get-user-by-email "email") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
+      (mongo/by-id :organizations "x") => {:id "x"}
+      (mongo/insert :users anything) => anything :times 0
+      (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => nil))
+
+  (fact "create new authorityAdmin user, user exists before, but role is not 'dummy'"
+    (create-new-user {:role "admin"} {:email "email" :orgAuthz {:x ["authorityAdmin"]} :role "authorityAdmin"}) => (partial expected-failure? :error.duplicate-email)
+    (provided
+      (get-user-by-email "email") => {:id ..old-id.. :role "authorityAdmin"} :times 1
+      (mongo/by-id :organizations "x") => {:id "x"}
+      (mongo/insert :users anything) => anything :times 0
+      (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => anything :times 0)))
 
 ;;
 ;; ==============================================================================

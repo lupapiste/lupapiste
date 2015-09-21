@@ -2,11 +2,12 @@
 
 Documentation   Mikko creates a new application
 Resource        ../../common_resource.robot
+Suite setup     Apply minimal fixture now
 
 *** Test Cases ***
 
-Setting maps enabled for these tests
-  Set integration proxy on
+#Setting maps enabled for these tests
+#  Set integration proxy on
 
 Mikko creates a new application
   [Tags]  ie8
@@ -97,6 +98,6 @@ Veikko sees application in list
   Request should be visible  create-veikko-auth-app
   [Teardown]  logout
 
-Setting maps disabled again after the tests
-  Set integration proxy off
+#Setting maps disabled again after the tests
+#  Set integration proxy off
 

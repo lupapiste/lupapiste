@@ -9,7 +9,6 @@
             [sade.email :as email]
             [sade.util :as util]
             [lupapalvelu.i18n :refer [loc] :as i18n]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as u]))
 
 ;;
@@ -40,11 +39,12 @@
 
 (defn- get-email-subject [{title :title, municipality :municipality}
                           & [subject-key show-municipality-in-subject]]
-  (let [title-postfix (when subject-key (if (i18n/has-term? "fi" "email.title" subject-key)
-                                        (i18n/localize "fi" "email.title" subject-key)
-                                        (i18n/localize "fi" subject-key)))
+  (let [title-postfix (when subject-key
+                        (if (i18n/has-term? "fi" "email.title" subject-key)
+                          (i18n/localize "fi" "email.title" subject-key)
+                          (i18n/localize "fi" subject-key)))
         title-begin (str (when show-municipality-in-subject
-                         (str (i18n/localize "fi" "municipality" municipality) ", ")) title)]
+                           (str (i18n/localize "fi" "municipality" municipality) ", ")) title)]
     (str "Lupapiste.fi: " title-begin (when (and title subject-key)" - ") (when subject-key title-postfix))))
 
 (defn- get-email-recipients-for-application

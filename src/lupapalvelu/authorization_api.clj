@@ -7,14 +7,16 @@
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! unauthorized]]
             [sade.util :as util]
-            [lupapalvelu.action :refer [defquery defcommand defraw update-application all-application-states notify] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw update-application notify] :as action]
+            [lupapalvelu.application :as application]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user-api :as user-api]
             [lupapalvelu.user :as user]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.commands :as commands]))
+            [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.states :as states]))
 
 ;;
 ;; Invites
@@ -99,8 +101,9 @@
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator
                       role-validator]
-   :states     (action/all-application-states-but [:closed :canceled])
+   :states     (states/all-application-states-but states/terminal-states)
    :user-roles #{:applicant :authority}
+   :pre-checks  [application/validate-authority-in-drafts]
    :notified   true}
   [command]
   (send-invite! command))
@@ -109,7 +112,7 @@
   {:parameters [id]
    :user-roles #{:applicant}
    :user-authz-roles action/default-authz-reader-roles
-   :states     action/all-application-states}
+   :states     states/all-application-states}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
     (let [role (or (:role my-invite) (:role (domain/get-auth application (:id user))))
@@ -122,7 +125,7 @@
         (let [application (domain/get-application-as id user :include-canceled-apps? true)]
           ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
           ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
-          (commands/do-set-user-to-document application document-id (:id user) (:path my-invite) created)))
+          (doc-persistence/do-set-user-to-document application document-id (:id user) (:path my-invite) created)))
       (ok))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
@@ -152,7 +155,7 @@
   {:parameters [:id]
    :user-roles #{:applicant :authority}
    :user-authz-roles action/default-authz-reader-roles
-   :states     action/all-application-states}
+   :states     states/all-application-states}
   [command]
   (do-remove-auth command (get-in command [:user :username])))
 
@@ -164,7 +167,8 @@
   {:parameters [:id username]
    :input-validators [(partial action/non-blank-parameters [:username])]
    :user-roles #{:applicant :authority}
-   :states     (action/all-application-states-but [:canceled])}
+   :states     (states/all-application-states-but [:canceled])
+   :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (do-remove-auth command username))
 
@@ -180,13 +184,15 @@
 (defcommand unsubscribe-notifications
   {:parameters [:id :username]
    :user-roles #{:applicant :authority}
-   :states all-application-states}
+   :states states/all-application-states
+   :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (manage-unsubscription command true))
 
 (defcommand subscribe-notifications
   {:parameters [:id :username]
    :user-roles #{:applicant :authority}
-   :states all-application-states}
+   :states states/all-application-states
+   :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (manage-unsubscription command false))

@@ -16,7 +16,9 @@
     ..application.. =contains=> {:id ..id..}
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
-(testable-privates lupapalvelu.application validate-x validate-y add-operation-allowed? is-link-permit-required)
+(testable-privates lupapalvelu.application-api validate-x validate-y add-operation-allowed?)
+(testable-privates lupapalvelu.application is-link-permit-required)
+
 
 (facts "coordinate validation"
   (validate-x {:data {:x nil}}) => nil
@@ -75,10 +77,17 @@
     (doseq [operation lupapalvelu.operations/operations]
       (let [[op {permit-type :permit-type}] operation
             application {:primaryOperation {:name (name op)} :permitSubtype nil}
-            operation-allowed (doc-result (add-operation-allowed? nil application) op)]
-        (if (or (not= permit-type "R") (not-allowed-for op))
-          (fact "Add operation not allowed" operation-allowed => (doc-check = error))
-          (fact "Add operation allowed" operation-allowed => (doc-check nil?)))))
+            operation-allowed (add-operation-allowed? nil application)]
+        (fact {:midje/description (name op)}
+          (if (or (not= permit-type "R") (not-allowed-for op))
+            (fact "Add operation not allowed" operation-allowed => error)
+            (fact "Add operation allowed" operation-allowed => nil?)))))
 
     (fact "Add operation not allowed for :muutoslupa"
-      (add-operation-allowed? nil {:operations [{:name "kerrostalo-rivitalo"}] :permitSubtype :muutoslupa}) => error)))
+      (add-operation-allowed? nil {:primaryOperation {:name "kerrostalo-rivitalo"} :permitSubtype :muutoslupa}) => error)))
+
+(fact "validate-has-subtypes"
+  (validate-has-subtypes nil {:permitType "P"}) => nil
+  (validate-has-subtypes nil {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => nil
+  (validate-has-subtypes nil {:permitType "R"}) => {:ok false :text "error.permit-has-no-subtypes"}
+  (validate-has-subtypes nil nil) => {:ok false :text "error.permit-has-no-subtypes"})

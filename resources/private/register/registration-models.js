@@ -8,120 +8,133 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
 
   var self = this;
 
-  self.keys = ks || ["stamp", "personId", "firstName", "lastName", "email", "confirmEmail", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city", "allowDirectMarketing", "rakentajafi"];
+  self.keys = ks || ["stamp", "email",
+                     "street", "city", "zip", "phone", "password",
+                     "allowDirectMarketing", "rakentajafi",
+                     "architect", "degree", "graduatingYear", "fise"];
 
-  self.plainModel = {
-    personId: ko.observable(""),
-    firstName: ko.observable(""),
-    lastName: ko.observable(""),
-    stamp: ko.observable(""),
-    tokenId: ko.observable(""),
-    street: ko.observable("").extend({required: true}),
-    city: ko.observable("").extend({required: true}),
-    zip: ko.observable("").extend({required: true, number: true, maxLength: 5}),
-    phone: ko.observable("").extend({required: true}),
-    allowDirectMarketing: ko.observable(false),
-    email: ko.observable("").extend({email: true}),
-    password: ko.observable("").extend({validPassword: true}),
-    rakentajafi: ko.observable(false),
-    acceptTerms: ko.observable(false),
-    disabled: ko.observable(true),
-    pending: ko.observable(false),
-    showRakentajafiInfo: function() {
+  var PlainModel = function(data, keys) {
+    var self = this;
+
+    var defaults = {
+      personId: "",
+      firstName: "",
+      lastName: "",
+      stamp: "",
+      tokenId: pageutil.subPage(),
+      street: "",
+      city: "",
+      zip: "",
+      phone: "",
+      email: "",
+      password: "",
+      degree: "",
+      graduatingYear: "",
+      fise: "",
+      architect: false,
+      allowDirectMarketing: false,
+      rakentajafi: false,
+      acceptTerms: false
+    };
+
+    self.showRakentajafiInfo = function() {
       LUPAPISTE.ModalDialog.open("#dialogRakentajafi");
-    },
-    submit: function() {
+    };
+
+    function json() {
+      return _.pick(ko.mapping.toJS(self), keys);
+    }
+
+    self.setData = function(data) {
+      ko.mapping.fromJS(_.defaults(data, defaults), {}, self);
+    };
+
+    self.reset = function() {
+      self.setData({});
+      return false;
+    };
+
+    self.submit = function() {
       var error$ = $(errorSelector);
       error$.text("");
-      self.plainModel.pending(true);
-      self.plainModel.disabled(true);
-      ajax.command(commandName, self.json())
+      self.pending(true);
+      ajax.command(commandName, json())
         .success(function() {
-          var email = _.clone(self.plainModel.email());
-          var password = _.clone(self.plainModel.password());
+          var email = _.clone(self.email());
+          var password = _.clone(self.password());
           self.reset();
-          self.plainModel.email(email);
-          self.plainModel.pending(false);
-          self.plainModel.disabled(false);
+          self.email(email);
+          self.pending(false);
           afterSuccessFn(email, password);
         })
         .error(function(e) {
-          self.plainModel.pending(false);
-          self.plainModel.disabled(false);
+          self.pending(false);
           error$.text(loc(e.text));
         })
         .call();
       return false;
-    },
-    cancel: function() {
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("areyousure"),
-        loc("register.confirm-cancel"),
-        {title: loc("yes"),
-         fn: function() {
-          self.reset();
-          window.location.hash = "";
-        }},
-        {title: loc("no")}
-      );
-    }
-  };
-  self.plainModel.confirmPassword = ko.observable().extend({equal: self.plainModel.password});
-  self.plainModel.confirmEmail = ko.observable().extend({equal: self.plainModel.email});
+    };
 
-  self.model = ko.validatedObservable(self.plainModel);
-  self.model.isValid.subscribe(function(valid) {
-    self.plainModel.disabled(!valid || !self.plainModel.acceptTerms());
+    self.cancel = function() {
+      hub.send("show-dialog", {ltitle: "areyousure",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "register.confirm-cancel",
+                                                 yesFn: function() {
+                                                   self.reset();
+                                                   pageutil.openPage("welcome");
+                                                 }}});
+    };
+
+    ko.mapping.fromJS(_.defaults(data, defaults), {}, self);
+    self.pending = ko.observable(false);
+
+    self.street.extend({required: true, maxLength: 255});
+    self.city.extend({required: true, maxLength: 255});
+    self.zip.extend({required: true, number: true, maxLength: 5, minLength: 5});
+    self.phone.extend({required: true, maxLength: 255});
+    self.email.extend({email: true});
+    self.password.extend({validPassword: true});
+    self.degree.extend({maxLength: 255});
+    self.graduatingYear.extend({number: true, minLength: 4, maxLength: 4});
+    self.fise.extend({maxLength: 255});
+
+    self.confirmPassword = ko.observable().extend({equal: self.password});
+    self.confirmEmail = ko.observable().extend({equal: self.email});
+
+    self.availableDegrees = _(LUPAPISTE.config.degrees).map(function(degree) {
+      return {id: degree, name: loc(["koulutus", degree])};
+    }).sortBy("name").value();
+  };
+
+  self.model = ko.validatedObservable(new PlainModel({}, self.keys));
+
+  self.model().disabled = ko.computed(function() {
+    return !self.model.isValid() || !self.model().acceptTerms();
   });
-  self.plainModel.acceptTerms.subscribe(function() {
-    self.plainModel.disabled(!self.model.isValid() || !self.plainModel.acceptTerms());
-  });
 
-  self.json = function() {
-    var d = {};
-    _.forEach(self.keys, function(key) {
-      var val = self.plainModel[key]();
-      d[key] = val !== undefined ? val : null;
-    });
-
-    d.confirmPassword = null;
-    d.confirmEmail = null;
-    return d;
-  };
-
-  self.reset = function() {
-    _.forEach(self.keys, function(key) {
-      if (self.plainModel[key] !== undefined) {
-        self.plainModel[key]("");
-        if (self.plainModel[key].isModified) {
-          self.plainModel[key].isModified(false);
-        }
-      }
-    });
-    self.plainModel.rakentajafi(false);
-    self.plainModel.acceptTerms(false);
-    self.plainModel.allowDirectMarketing(false);
-    self.plainModel.tokenId(pageutil.subPage());
-    return false;
-  };
+  self.reset = self.model().reset;
 
   self.setVetumaData = function(data) {
-    self.plainModel.personId(data.userid);
-    self.plainModel.firstName(data.firstName);
-    self.plainModel.lastName(data.lastName);
-    self.plainModel.stamp(data.stamp);
-    self.plainModel.city((data.city || ""));
-    self.plainModel.zip((data.zip || ""));
-    self.plainModel.street((data.street || ""));
+    // convert nulls to undefined
+    var d = {
+      personId: data.userid ? data.userid : undefined,
+      firstName: data.firstName ? data.firstName : undefined,
+      lastName: data.lastName ? data.lastName : undefined,
+      stamp: data.stamp ? data.stamp : undefined,
+      city: data.city ? data.city : undefined,
+      zip: data.zip ? data.zip : undefined,
+      street: data.street ? data.street : undefined
+    };
+    self.model().setData(d);
   };
 
   self.setPhone = function(phone) {
-    self.plainModel.phone(phone);
+    self.model().phone(phone);
   };
 
   self.setEmail = function(email) {
-    self.plainModel.email(email);
-    self.plainModel.confirmEmail(email);
+    self.model().email(email);
+    self.model().confirmEmail(email);
   };
-
 };

@@ -9,6 +9,7 @@
             [sade.core :refer [ok fail now]]
             [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand]]
+            [lupapalvelu.mongo :as mongo]
             [sade.crypt :as crypt])
   (:import [org.apache.commons.io IOUtils]))
 
@@ -16,11 +17,15 @@
 ;; Dummy email server:
 ;;
 
+(defmacro with-queue [& body]
+  `(let [~'queue (or mongo/*db-name* mongo/default-db-name)]
+     ~@body))
+
 (when (env/value :email :dummy-server)
 
   (info "Initializing dummy email server")
 
-  (defonce sent-messages (atom []))
+  (defonce sent-messages (atom {}))
 
   (defn attachment-as-base64-str [file]
     (with-open [i (io/input-stream file)]
@@ -44,21 +49,22 @@
     (assert (string? to) "must provide 'to'")
     (assert (string? subject) "must provide 'subject'")
     (assert body "must provide 'body'")
-    (swap! sent-messages conj {:to to
-                               :subject subject
-                               :body (reduce parse-body {} body)
-                               :time (now)})
+    (with-queue
+      (swap! sent-messages update queue conj
+        {:to to, :subject subject, :body (reduce parse-body {} body), :time (now)}))
     nil)
 
   (alter-var-root (var sade.email/deliver-email) (constantly deliver-email))
 
   (defn reset-sent-messages []
-    (reset! sent-messages []))
+    (with-queue
+      (swap! sent-messages assoc queue nil)))
 
   (defn messages [& {reset :reset :or {reset false}}]
-    (let [m @sent-messages]
-      (when reset (reset-sent-messages))
-      m))
+    (with-queue
+      (let [m (@sent-messages queue)]
+        (when reset (reset-sent-messages))
+        (reverse m))))
 
   (defn dump-sent-messages []
     (doseq [message (messages)]
@@ -84,7 +90,7 @@
 
   (defpage "/api/last-email" {reset :reset}
     (if-let [msg (last (messages :reset reset))]
-      (enlive/emit* (-> (enlive/html-resource (io/input-stream (.getBytes (get-in msg [:body :html]) "UTF-8")))
+      (enlive/emit* (-> (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8")))
                       (enlive/transform [:head] (enlive/append {:tag :title :content (:subject msg)}))
                       (enlive/transform [:body] (enlive/prepend [(msg-header msg)
                                                                  {:tag :hr}]))))
@@ -105,7 +111,7 @@
                                      :content
                                      (vector
                                        (msg-header msg)
-                                       (first (enlive/select (enlive/html-resource (io/input-stream (.getBytes (get-in msg [:body :html]) "UTF-8"))) [:body])))}
+                                       (first (enlive/select (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8"))) [:body])))}
                                    ) msgs)}]
          })
       {:status 404 :body "No emails"}))

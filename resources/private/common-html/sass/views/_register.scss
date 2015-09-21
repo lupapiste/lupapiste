@@ -5,7 +5,7 @@
   }
 }
 
-.register-form, #pw-form {
+.register-form {
   .error-message {
     font-style: italic;
     color: red;
@@ -27,8 +27,16 @@
 
   .register-error {
     position: relative;
+    margin: $marginS 0;
   }
 
+  .architect-toggle {
+    min-height: 36px;
+  }
+
+  .info-indicator {
+    cursor: pointer;
+  }
 
 }
 
@@ -200,23 +208,15 @@
     background-color: $color-dark-bg;
     color: white;
     position: relative;
+    span {
+      width: 100%;
+    }
   }
 
   .btn-primary {
     background-color: $lp-purple;
     &:hover {
       background-color: darken($lp-purple, 10%);
-    }
-    &:after {
-      content: " ";
-      position: absolute;
-      width: 0;
-      height: 0;
-      right: 12px;
-      top: 15px;
-      border-top: 15px solid transparent;
-      border-left: 30px solid white;
-      border-bottom: 15px solid transparent;
     }
     &:disabled {
       background-color: $lp-light-grey;

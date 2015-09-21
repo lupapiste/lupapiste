@@ -23,8 +23,12 @@
 
     self.data = ko.observable();
     self.application = ko.observable();
+    self.metadata = ko.observable();
+    self.statementId  = ko.observable();
+    self.applicationId  = ko.observable();
+    self.showTosMetadata = ko.observable(false);
 
-    self.statuses = ["yes", "no", "condition"];
+    self.statuses = ko.observableArray([]);
     self.selectedStatus = ko.observable();
     self.text = ko.observable();
     self.submitting = ko.observable(false);
@@ -45,9 +49,18 @@
       if(self.data() && self.data().status && self.data().status() !== value) { self.dirty(true); }
     });
 
+    self.toggleTosMetadata = function() {
+      self.showTosMetadata(!self.showTosMetadata());
+    };
+
     self.clear = function() {
       self.data(null);
+      self.metadata(null);
+      self.statementId(null);
+      self.applicationId(null);
+      self.showTosMetadata(false);
       self.application(null);
+      self.statuses([]);
       self.selectedStatus(null);
       self.text(null);
       self.dirty(false);
@@ -59,19 +72,33 @@
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
       if(statement) {
         self.data(ko.mapping.fromJS(statement));
+        self.metadata(statement.metadata);
+        self.statementId(statement.id);
+        self.applicationId(application.id);
 
-        // LUPA-482 part II
-        if (statement.status && !self.dirty()) {
-          self.selectedStatus(statement.status);
+        if (!self.dirty()) {
+          if (statement.status) {
+            self.selectedStatus(statement.status);  // LUPA-482 part II
+          }
+          if (statement.text) {
+            self.text(statement.text);
+          }
           self.dirty(false);
         }
-        if (statement.text && !self.dirty()) {
-          self.text(statement.text);
-          self.dirty(false);
-        }
+
+        ajax
+          .query("get-possible-statement-statuses", {id: applicationId})
+          .success(function(resp) {
+            var sorted = _(resp.data)
+              .map(function(item) { return {id: item, name: loc(["statement", item])}; })
+              .sortBy("name")
+              .value();
+            self.statuses(sorted);
+          })
+          .call();
 
       } else {
-        window.location.hash = "!/404";
+        pageutil.openPage("404");
       }
     };
 
@@ -89,7 +116,7 @@
       ajax
         .command("give-statement", {id: applicationId, statementId: statementId, status: self.selectedStatus(), text: self.text(), lang: loc.getCurrentLanguage()})
         .success(function() {
-          window.location.hash = "!/application/"+applicationId+"/statement";
+          pageutil.openApplicationPage({id: applicationId}, "statement");
           repository.load(applicationId);
           return false;
         })
@@ -108,7 +135,7 @@
       .command("delete-statement", {id: applicationId, statementId: statementId})
       .success(function() {
         repository.load(applicationId);
-        window.location.hash = "!/application/"+applicationId+"/statement";
+        pageutil.openApplicationPage({id: applicationId}, "statement");
         return false;
       })
       .call();
@@ -165,9 +192,10 @@
 
   repository.loaded(["statement"], function(application) {
     if (applicationId === application.id) {
-      authorizationModel.refresh(application, {statementId: statementId});
-      statementModel.refresh(application);
-      attachmentsModel.refresh(application);
+      authorizationModel.refresh(application, {statementId: statementId}, function() {
+        statementModel.refresh(application);
+        attachmentsModel.refresh(application);
+      });
     }
   });
 

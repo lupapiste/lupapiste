@@ -7,7 +7,7 @@
     [lupapalvelu.xml.disk-writer :as writer]))
 
 (def vesihuolto-to-krysp {:tag :Vesihuoltolaki :ns "ymv"
-                          :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/vesihuoltolaki" "2.1.3")
+                          :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :VVVL "2.1.3")
                                         :xmlns:ymv "http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"}
                                        mapping-common/common-namespaces)
                           :child

@@ -7,12 +7,13 @@
             [lupapalvelu.server]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
-            [lupapalvelu.action :refer :all])
+            [lupapalvelu.action :refer :all]
+            [lupapalvelu.states :as states])
   (:import [org.apache.commons.io.output NullWriter]))
 
 (defn returns [])
 
-(defcommand "test-command" {:description "jabba" :states all-states :user-roles #{:anonymous}} [command] (returns))
+(defcommand "test-command" {:description "jabba" :states states/all-states :user-roles #{:anonymous}} [command] (returns))
 
 (facts "get-meta"
   (get-meta "test-command") => (contains {:description "jabba"}))
@@ -46,7 +47,7 @@
 (facts "Test general validation in command execution"
   (against-background
     (get-actions) => {:test-command {:parameters [:id]
-                                     :states     all-states
+                                     :states     states/all-states
                                      :user-roles #{:authority}}})
 
   (fact (execute {})
@@ -86,7 +87,7 @@
     (get-actions) => {:test-command-auth {:parameters [:id]
                                           :user-roles #{:authority}
                                           :org-authz-roles #{:authority}
-                                          :states     all-states}}
+                                          :states     states/all-states}}
     (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :include-canceled-apps? true) =>  {:state "submitted" :organization "ankkalinna"}
     (domain/get-application-as "123" {:id "user123" :organizations ["hanhivaara"] :orgAuthz {:hanhivaara #{:authority}} :role :authority} :include-canceled-apps? true) =>  nil)
 
@@ -104,12 +105,12 @@
     (get-actions) => {:test-command-auth {:parameters [:id]
                                           :user-roles #{:authority}
                                           :org-authz-roles #{:authority}
-                                          :states all-states
+                                          :states states/all-states
                                           :user-authz-roles #{:someRole}}
                       :with-default-roles {:parameters [:id]
                                             :user-roles #{:authority}
                                             :org-authz-roles #{:authority}
-                                            :states all-states
+                                            :states states/all-states
                                             :user-authz-roles default-authz-writer-roles}}
     (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :authority} :include-canceled-apps? true) => {:organization "999-R"
                                                                                                                                                                 :state "submitted"

@@ -37,6 +37,10 @@
       (get-in email [:body :plain]) => (contains "Rakennusty\u00f6t aloitettu")
       email => (partial contains-application-link? application-id "authority")
 
+      (fact "Verdicts can be fetched even in construction started state, state doesn't change"
+        (command sonja :check-for-verdict :id application-id) => ok?
+        (:state (query-application sonja application-id)) => "constructionStarted")
+
       (command sonja :inform-construction-ready :id application-id :readyTimestampStr "31.12.2013" :lang "fi") => ok?
 
       ;; Closed application

@@ -1,6 +1,7 @@
 (ns lupapalvelu.xml.krysp.reader
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error]]
             [clojure.string :as s]
+            [clojure.set :refer [rename-keys]]
             [clojure.walk :refer [postwalk prewalk]]
             [clj-time.format :as timeformat]
             [net.cgrand.enlive-html :as enlive]
@@ -29,7 +30,7 @@
     (try
      (let [resp (http/get url {:query-params {:request "GetCapabilities"} :throw-exceptions false})]
        (or
-         (and (= 200 (:status resp)) (ss/contains (:body resp) "<?xml "))
+         (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
          (warn "Response not OK or did not contain XML. Response was: " resp)))
      (catch Exception e
        (warn (str "Could not connect to WFS: " url ", exception was " e))))))
@@ -89,8 +90,8 @@
        </wfs:GetFeature>")})
 
 (defn wfs-krysp-url [server object-type filter]
-  (let [server (if (.contains server "?")
-                 (if (.endsWith server "&")
+  (let [server (if (ss/contains? server "?")
+                 (if (ss/ends-with server "&")
                    server
                    (str server "&"))
                  (str server "?"))]
@@ -310,9 +311,25 @@
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
+(defn- extract-vaadittuErityissuunnitelma-elements [lupamaaraykset]
+  (let [vaadittuErityissuunnitelma-array (->> lupamaaraykset :vaadittuErityissuunnitelma (map ss/trim) (remove ss/blank?))]
+    ;; resolving Tekla way of giving vaadittuErityissuunnitelmas: one "vaadittuErityissuunnitelma" with line breaks is divided into multiple "vaadittuErityissuunnitelma"s
+    (if (and
+          (= 1 (count vaadittuErityissuunnitelma-array))
+          (-> vaadittuErityissuunnitelma-array first (.indexOf "\n") (>= 0)))
+      (-> vaadittuErityissuunnitelma-array first (ss/split #"\n") ((partial remove ss/blank?)))
+      vaadittuErityissuunnitelma-array)))
+
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
+
+    ;; KRYSP yhteiset 2.1.5+
+    (cr/ensure-sequential :vaadittuErityissuunnitelma)
+    (#(let [vaaditut-es (extract-vaadittuErityissuunnitelma-elements %)]
+        (if (seq vaaditut-es)
+          (-> % (assoc :vaaditutErityissuunnitelmat vaaditut-es) (dissoc % :vaadittuErityissuunnitelma))
+          (dissoc % :vaadittuErityissuunnitelma))))
 
     (cr/ensure-sequential :vaaditutKatselmukset)
     (#(let [kats (map :Katselmus (:vaaditutKatselmukset %))]
@@ -336,12 +353,12 @@
     (#(if (:maarays %)
         (let [maaraykset (cr/convert-keys-to-timestamps (:maarays %) [:maaraysaika :maaraysPvm :toteutusHetki])
               ;; KRYSP 2.1.5+ renamed :maaraysaika -> :maaraysPvm
-              maaraykset (mapv
+              maaraykset (remove nil? (mapv
                            (fn [maar]
                              (if (:maaraysPvm maar)
                                (-> maar (assoc :maaraysaika (:maaraysPvm maar)) (dissoc :maaraysPvm))
                                maar))
-                           maaraykset)]
+                           maaraykset))]
           (assoc % :maaraykset maaraykset))
         %))
     (dissoc :maarays)
@@ -387,11 +404,12 @@
 (defn- standard-verdicts-validator [xml]
   (let [poytakirjat (map ->paatospoytakirja (select (cr/strip-xml-namespaces xml) [:paatostieto :Paatos :poytakirja]))
         poytakirja (poytakirja-with-paatos-data poytakirjat)
-        paatospvm  (:paatospvm poytakirja)]
+        paatospvm  (:paatospvm poytakirja)
+        timestamp-1-day-from-now (util/get-timestamp-from-now :day 1)]
     (cond
-      (not (seq poytakirjat)) (fail :info.no-verdicts-found-from-backend)
-      (not (seq poytakirja))  (fail :info.paatos-details-missing)
-      (< (now) paatospvm)     (fail :info.paatos-future-date))))
+      (not (seq poytakirjat))                (fail :info.no-verdicts-found-from-backend)
+      (not (seq poytakirja))                 (fail :info.paatos-details-missing)
+      (< timestamp-1-day-from-now paatospvm) (fail :info.paatos-future-date))))
 
 (defn- ->standard-verdicts [xml-without-ns]
   (map (fn [paatos-xml-without-ns]
@@ -403,6 +421,95 @@
                                 [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
               :poytakirjat    (seq poytakirjat)})))
     (select xml-without-ns [:paatostieto :Paatos])))
+
+
+;; TJ/Suunnittelija verdict
+
+(def- tj-suunnittelija-verdict-statuses-to-loc-keys-mapping
+  {"hyv\u00e4ksytty" "hyvaksytty"
+   "hyl\u00e4tty" "hylatty"
+   "hakemusvaiheessa" "hakemusvaiheessa"
+   "ilmoitus hyv\u00e4ksytty" "ilmoitus-hyvaksytty"})
+
+(def- tj-suunnittelija-verdict-statuses
+  (-> tj-suunnittelija-verdict-statuses-to-loc-keys-mapping keys set))
+
+(defn- ->paatos-osapuoli [path-key osapuoli-xml-without-ns]
+  (-> (cr/all-of osapuoli-xml-without-ns path-key)
+    (cr/convert-keys-to-timestamps [:paatosPvm])))
+
+(defn- valid-sijaistustieto? [osapuoli sijaistus]
+  (when osapuoli
+    (or
+     (empty? sijaistus) ; sijaistus only used with foreman roles
+     (and ; sijaistettava must be empty in both, KRSYP and document
+       (ss/blank? (:sijaistettavaHlo osapuoli))
+       (and
+         (ss/blank? (:sijaistettavaHloEtunimi sijaistus))
+         (ss/blank? (:sijaistettavaHloSukunimi sijaistus))))
+     (and ; .. or dates and input values of KRYSP xml must match document values
+       (= (:alkamisPvm osapuoli) (util/to-xml-date-from-string (:alkamisPvm sijaistus)))
+       (= (:paattymisPvm osapuoli) (util/to-xml-date-from-string (:paattymisPvm sijaistus)))
+       (=
+         (ss/trim (:sijaistettavaHlo osapuoli))
+         (str ; original string build in canonical-common 'get-sijaistustieto'
+           (ss/trim (:sijaistettavaHloEtunimi sijaistus))
+           " "
+           (ss/trim (:sijaistettavaHloSukunimi sijaistus))))))))
+
+(defn- party-with-paatos-data [osapuolet sijaistus]
+  (some
+    #(when (and
+             (:paatosPvm %)
+             (tj-suunnittelija-verdict-statuses (:paatostyyppi %))
+             (valid-sijaistustieto? % sijaistus))
+       %)
+    osapuolet))
+
+(def- osapuoli-path-key-mapping
+  {"tyonjohtaja"   {:path [:tyonjohtajatieto :Tyonjohtaja]
+                    :key :tyonjohtajaRooliKoodi}
+   "suunnittelija" {:path [:suunnittelijatieto :Suunnittelija]
+                    :key :suunnittelijaRoolikoodi}})
+
+(defn- get-tj-suunnittelija-osapuolet
+  "Returns parties which match with given kuntaRoolikoodi and yhteystiedot, and have paatosPvm"
+  [xml-without-ns osapuoli-path osapuoli-key kuntaRoolikoodi-key kuntaRoolikoodi yhteystiedot]
+  (->> (select xml-without-ns osapuoli-path)
+    (map (partial ->paatos-osapuoli osapuoli-key))
+    (filter #(and
+               (= kuntaRoolikoodi (get % kuntaRoolikoodi-key))
+               (:paatosPvm %)
+               (= (:email yhteystiedot) (get-in % [:henkilo :sahkopostiosoite]))))))
+
+(defn tj-suunnittelija-verdicts-validator [{{:keys [yhteystiedot sijaistus]} :data} xml osapuoli-type kuntaRoolikoodi]
+  {:pre [xml (#{"tyonjohtaja" "suunnittelija"} osapuoli-type) kuntaRoolikoodi]}
+  (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
+        osapuoli-key (last osapuoli-path)
+        xml-without-ns (cr/strip-xml-namespaces xml)
+        osapuolet (get-tj-suunnittelija-osapuolet xml-without-ns osapuoli-path osapuoli-key kuntaRoolikoodi-key kuntaRoolikoodi yhteystiedot)
+        osapuoli (party-with-paatos-data osapuolet sijaistus)
+        paatospvm  (:paatosPvm osapuoli)
+        timestamp-1-day-from-now (util/get-timestamp-from-now :day 1)]
+    (cond
+      (not (seq osapuolet))                  (fail :info.no-verdicts-found-from-backend)
+      (not (seq osapuoli))                   (fail :info.tj-suunnittelija-paatos-details-missing)
+      (< timestamp-1-day-from-now paatospvm) (fail :info.paatos-future-date))))
+
+(defn ->tj-suunnittelija-verdicts [{{:keys [yhteystiedot sijaistus]} :data} osapuoli-type kuntaRoolikoodi xml-without-ns]
+  (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
+        osapuoli-key (last osapuoli-path)]
+    (map (fn [osapuolet-xml-without-ns]
+           (let [osapuolet (get-tj-suunnittelija-osapuolet xml-without-ns osapuoli-path osapuoli-key kuntaRoolikoodi-key kuntaRoolikoodi yhteystiedot)
+                 osapuoli (party-with-paatos-data osapuolet sijaistus)]
+           (when (and osapuoli (> (now) (:paatosPvm osapuoli)))
+             {:poytakirjat
+              [{:status (get tj-suunnittelija-verdict-statuses-to-loc-keys-mapping (:paatostyyppi osapuoli))
+                :paatospvm (:paatosPvm osapuoli)
+                :liite (:liite osapuoli)
+                }]
+              })))
+  (select xml-without-ns [:osapuolettieto :Osapuolet]))))
 
 (defn- application-state [xml-without-ns]
   (->> (select xml-without-ns [:Kasittelytieto])
@@ -439,7 +546,11 @@
                                    :muutMaaraykset (->lupamaaraukset-text paatos-xml-without-ns)}
                   :paivamaarat    {:paatosdokumentinPvm paatosdokumentinPvm-timestamp}
                   :poytakirjat    (when-let [liitetiedot (seq (select paatos-xml-without-ns [:liitetieto]))]
-                                    (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of liitetiedot))))})))
+                                    (map ->liite
+                                         (map #(-> %
+                                                 (cr/as-is :Liite)
+                                                 (rename-keys {:Liite :liite}))
+                                              liitetiedot)))})))
         (select xml-without-ns [:paatostieto :Paatos])))))
 
 (permit/register-function permit/R :verdict-krysp-reader ->standard-verdicts)
@@ -448,6 +559,8 @@
 (permit/register-function permit/YL :verdict-krysp-reader ->simple-verdicts)
 (permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdicts)
 (permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdicts)
+
+(permit/register-function permit/R :tj-suunnittelija-verdict-krysp-reader ->tj-suunnittelija-verdicts)
 
 (permit/register-function permit/R :verdict-krysp-validator standard-verdicts-validator)
 (permit/register-function permit/P :verdict-krysp-validator standard-verdicts-validator)
@@ -472,9 +585,7 @@
                            (->function)
                            (cleanup)
                            (filter seq))]
-        (if (seq verdicts)
-          (assoc verdict-model :paatokset verdicts)
-          verdict-model)))
+        (util/assoc-when verdict-model :paatokset verdicts)))
     (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector)))
 
 (defn- buildings-summary-for-application [xml]
@@ -509,11 +620,39 @@
         (coordinate/convert source-projection to-projection 3 coords)))
     (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
 
+
+(defn- extract-osoitenimi [osoitenimi-elem lang]
+  (let [osoitenimi-elem (or (select1 osoitenimi-elem [(enlive/attr= :xml:lang lang)])
+                            (select1 osoitenimi-elem [(enlive/attr= :xml:lang "fi")]))]
+    (cr/all-of osoitenimi-elem)))
+
+(defn- build-huoneisto [huoneisto jakokirjain jakokirjain2]
+  (when huoneisto
+    (str huoneisto
+         (cond
+           (and jakokirjain jakokirjain2) (str jakokirjain "-" jakokirjain2)
+           :else jakokirjain))))
+
+(defn- build-osoitenumero [osoitenumero osoitenumero2]
+  (cond
+    (and osoitenumero osoitenumero2) (str osoitenumero "-" osoitenumero2)
+    :else osoitenumero))
+
+(defn- build-address [osoite-elem lang]
+  (let [osoitenimi        (extract-osoitenimi (select osoite-elem [:osoitenimi :teksti]) lang)
+        osoite            (cr/all-of osoite-elem)
+        osoite-components [osoitenimi
+                           (apply build-osoitenumero (util/select-values osoite [:osoitenumero :osoitenumero2]))
+                           (:porras osoite)
+                           (apply build-huoneisto (util/select-values osoite [:huoneisto :jakokirjain :jakokirjain2]))]]
+    (clojure.string/join " " (remove nil? osoite-components))))
+
 ;;
 ;; Information parsed from verdict xml message for application creation
 ;;
 (defn get-app-info-from-message [xml kuntalupatunnus]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
+        kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
         asiat (enlive/select xml-no-ns case-elem-selector)
         ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
         asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)]
@@ -524,11 +663,6 @@
         (error "Creating application from previous permit. More than one RakennusvalvontaAsia element were received in the xml message with kuntalupatunnus " kuntalupatunnus "."))
 
       (let [asia (first asiat-with-kuntalupatunnus)
-            viitelupatiedot (map cr/all-of (select asia [:viitelupatieto :LupaTunnus]))
-            kasittelynTilatiedot (->> (select asia [:kasittelynTilatieto])
-                                   (map #(-> (cr/all-of % [:Tilamuutos]) (cr/convert-keys-to-timestamps [:pvm])))
-                                   (sort-by :pvm))
-            viimeisin-tila (last kasittelynTilatiedot)
             asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
             asioimiskieli-code (case asioimiskieli
                                  "suomi"  "fi"
@@ -537,74 +671,37 @@
             asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
 
             ;;
-            ;; TODO: _Kvintus 5.11.2014_: Rakennuspaikka osoitteen ja sijainnin oikea lahde.
-            ;;       Referenssipiste ei osoita nyt talla hetkella oikeaan pisteeseen.
+            ;; _Kvintus 5.11.2014_: Rakennuspaikka osoitteen ja sijainnin oikea lahde.
             ;;
-            ;; Referenssipiste
-            referenssiPiste-xml (select1 asia [:referenssiPiste])
-            coord-array-referenssipiste (resolve-coordinates
-                                          referenssiPiste-xml
-                                          (cr/all-of referenssiPiste-xml [:Point :pos])
-                                          kuntalupatunnus)
 
             ;; Rakennuspaikka
             Rakennuspaikka (cr/all-of asia [:rakennuspaikkatieto :Rakennuspaikka])
-            osoitteet-xml (select asia [:rakennuspaikkatieto :Rakennuspaikka :osoite :osoitenimi :teksti])
-            osoite-Rakennuspaikka (or (-> (select1 osoitteet-xml [(enlive/attr= :xml:lang asioimiskieli-code)]) cr/all-of)
-                                    (-> (select1 osoitteet-xml [(enlive/attr= :xml:lang "fi")]) cr/all-of))
+
+            osoite-xml     (select asia [:rakennuspaikkatieto :Rakennuspaikka :osoite])
+            osoite-Rakennuspaikka (build-address osoite-xml asioimiskieli-code)
+
             kiinteistotunnus (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus)
-            municipality (p/municipality-id-by-property-id kiinteistotunnus)
+            municipality (or (p/municipality-id-by-property-id kiinteistotunnus) kuntakoodi)
             coord-array-Rakennuspaikka (resolve-coordinates
                                          (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
                                          (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
                                          kuntalupatunnus)
 
-            ;; Rakennus tai Rakennelma
-            toimenpidetieto (-> (select asia [:toimenpidetieto]) first cr/all-of)
-            Rakennus (or
-                       (-> toimenpidetieto :Toimenpide :rakennustieto :Rakennus)
-                       (-> toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma))
-            osoite-Rakennus (-> Rakennus :rakennuksenTiedot :osoite :osoitenimi :teksti)
-            kiinteistotunnus-Rakennus (-> Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun)
-            coord-array-Rakennus (resolve-coordinates
-                                   (or
-                                     (select1 asia [:toimenpidetieto :Toimenpide :rakennustieto :Rakennus :sijaintitieto :Sijainti :piste])
-                                     (select1 asia [:toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma :sijaintitieto :Sijainti :piste]))
-                                   (-> Rakennus :sijaintitieto :Sijainti :piste :Point :pos)
-                                   kuntalupatunnus)
-
-            ;; Varaudu tallaiseen. Huomaa srsName ja pilkku koordinaattien valimerkkina! (kts. LP-734-2014-00001:n paatossanoma)
-;            <yht:pistesijainti>
-;              <gml:Point srsName="http://www.opengis.net/gml/srs/epsg.xml#3877">
-;                <gml:coordinates>23528933.213,6699629.937</gml:coordinates>
-;              </gml:Point>
-;            </yht:pistesijainti>
-
             osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
             hakijat (filter #(= "hakija" (:VRKrooliKoodi %)) osapuolet)]
 
-        ((comp cleanup cr/convert-booleans)
-          (merge
-            {:id (->lp-tunnus asia)
-             :kuntalupatunnus (->kuntalupatunnus asia)
-             :municipality municipality
-             :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
-             :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
-             :hakijat hakijat
-;             :viitelupatiedot viitelupatiedot
-;             :kasittelynTilatiedot kasittelynTilatiedot
-;             :viimeisin-tila viimeisin-tila
-;             :rakennusten-tiedot (->buildings xml)
-;             :toimenpidetieto toimenpidetieto
-;             :asioimiskieli asioimiskieli
-             }
-            (when (and coord-array-Rakennus osoite-Rakennus kiinteistotunnus-Rakennus)
-              {:ensimmainen-rakennus {:x (first coord-array-Rakennus)
-                                      :y (second coord-array-Rakennus)
-                                      :address osoite-Rakennus
-                                      :propertyId kiinteistotunnus-Rakennus}})
-            (when (and coord-array-Rakennuspaikka osoite-Rakennuspaikka kiinteistotunnus)
-              {:rakennuspaikka {:x (first coord-array-Rakennuspaikka)
-                                :y (second coord-array-Rakennuspaikka)
-                                :address osoite-Rakennuspaikka
-                                :propertyId kiinteistotunnus}})))))))
+        (-> (merge
+              {:id                          (->lp-tunnus asia)
+               :kuntalupatunnus             (->kuntalupatunnus asia)
+               :municipality                municipality
+               :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
+               :vahainenPoikkeaminen        (:vahainenPoikkeaminen asianTiedot)
+               :hakijat                     hakijat}
+
+              (when (and (seq coord-array-Rakennuspaikka) (not-any? ss/blank? [osoite-Rakennuspaikka kiinteistotunnus]))
+                {:rakennuspaikka {:x          (first coord-array-Rakennuspaikka)
+                                  :y          (second coord-array-Rakennuspaikka)
+                                  :address    osoite-Rakennuspaikka
+                                  :propertyId kiinteistotunnus}}))
+            cr/convert-booleans
+            cleanup)))))

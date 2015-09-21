@@ -38,7 +38,7 @@
 }
 
 @mixin spite-bg {
-  background-image: url('/img/icons-sprite-1.16.png');
+  background-image: url('/img/icons-sprite-1.18.png');
   background-repeat: no-repeat;
 }
 
@@ -53,6 +53,11 @@
 /* BASE
 ----------------------------------------------------------------------------- */
 @import "partials/_base";
+
+/* RUDIMENTARY RESPONSIVENESS SUPPORT
+----------------------------------------------------------------------------- */
+@import "partials/_responsive";
+
 
 /* THEME (colors and others)
 ----------------------------------------------------------------------------- */
@@ -76,6 +81,7 @@
 /* ICONS & ANIMATIONS
 ----------------------------------------------------------------------------- */
 @import "partials/_icons";
+@import "partials/_lupicons";
 
 /* NAV
 ----------------------------------------------------------------------------- */
@@ -104,6 +110,12 @@
 @import "partials/_screenmessage";
 @import "partials/_selectm";
 @import "partials/_user_notification";
+@import "partials/_tags_editor";
+@import "partials/_upload";
+@import "partials/_metadata-editor";
+@import "partials/_archival-summary";
+@import "partials/_applications_search";
+@import "partials/_indicator";
 
 /* VIEWS
 ------------------------------------------------------------------------------*/

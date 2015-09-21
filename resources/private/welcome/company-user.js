@@ -1,6 +1,8 @@
 (function() {
   "use strict";
 
+  var PW_CHANGED_DIALOG_ID = "company-user-password-reset-dialog";
+
   function NewCompanyUser() {
     var self = this;
 
@@ -45,24 +47,27 @@
         .password2("");
     };
 
-    var successOkButton = {title: loc("welcome.login"),
-                           fn: function() {
-                             LUPAPISTE.ModalDialog.close();
-                             pageutil.openFrontpage();}};
-
     self.send = function() {
       ajax
         .post("/api/token/" + self.token())
         .json({password: self.password1()})
         .success(function() {
           self.password1("").password2("");
-          LUPAPISTE.ModalDialog.showDynamicOk(loc("success.dialog.title"), loc("setpw.success"), successOkButton);
+
+          hub.send("show-dialog",
+              {id: PW_CHANGED_DIALOG_ID,
+               ltitle: "success.dialog.title",
+               size: "medium",
+               component: "ok-dialog",
+               componentParams: {ltext: "setpw.success", okTitle: loc("welcome.login")}});
         })
         .fail(function() {
           notify.error(loc("setpw.fail"));
         })
         .call();
     };
+
+    hub.subscribe({type: "dialog-close", id: PW_CHANGED_DIALOG_ID}, pageutil.openFrontpage);
 
     hub.onPageLoad("new-company-user", function(e) {
       self.reset().token(e.pagePath[0]);

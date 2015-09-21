@@ -57,6 +57,7 @@
                     {:tag :kokonaisala}
                     {:tag :kellarinpinta-ala}
                     {:tag :BIM :child []}
+                    ; <osoite> is not mapped, authority sets the address in backend system
                     {:tag :kerrosluku}
                     {:tag :kerrosala}
                     {:tag :rakentamistapa}
@@ -137,7 +138,7 @@
 (def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
    :ns "rakval"
-   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "rakennusvalvonta" "2.1.2")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :R "2.1.2")
                  :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
@@ -148,7 +149,7 @@
                               :child [mapping-common/lupatunnus]}
                              {:tag :viitelupatieto :child [mapping-common/lupatunnus]}
                              {:tag :osapuolettieto
-                              :child [mapping-common/osapuolet]}
+                              :child [mapping-common/osapuolet_210]}
                              {:tag :rakennuspaikkatieto
                               :child [mapping-common/rakennuspaikka]}
                              {:tag :toimenpidetieto
@@ -223,7 +224,7 @@
 
 (def rakennuslupa_to_krysp_213
   (-> rakennuslupa_to_krysp_212
-    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "rakennusvalvonta" "2.1.3"))
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :R "2.1.3"))
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
       katselmus_213)
@@ -240,7 +241,7 @@
 (def rakennuslupa_to_krysp_214
   (-> rakennuslupa_to_krysp_213
     (assoc-in [:attr :xsi:schemaLocation]
-      (mapping-common/schemalocation "rakennusvalvonta" "2.1.4"))
+      (mapping-common/schemalocation :R "2.1.4"))
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
       {:tag :osapuolettieto :child [mapping-common/osapuolet_212]})))
@@ -248,7 +249,7 @@
 (def rakennuslupa_to_krysp_215
   (-> rakennuslupa_to_krysp_214
     (assoc-in [:attr :xsi:schemaLocation]
-      (mapping-common/schemalocation "rakennusvalvonta" "2.1.5"))
+      (mapping-common/schemalocation :R "2.1.5"))
 
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
@@ -273,7 +274,7 @@
 (def rakennuslupa_to_krysp_216
   (-> rakennuslupa_to_krysp_215
       (assoc-in [:attr :xsi:schemaLocation]
-                (mapping-common/schemalocation "rakennusvalvonta" "2.1.6"))
+                (mapping-common/schemalocation :R "2.1.6"))
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
                  {:tag :osapuolettieto :child [mapping-common/osapuolet_215]})))
@@ -281,9 +282,9 @@
 (def rakennuslupa_to_krysp_218
   (-> rakennuslupa_to_krysp_216
    (assoc-in [:attr :xsi:schemaLocation]
-     (mapping-common/schemalocation "rakennusvalvonta" "2.1.8"))))
+     (mapping-common/schemalocation :R "2.1.8"))))
 
-(defn- get-mapping [krysp-version]
+(defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.2" rakennuslupa_to_krysp_212
@@ -337,7 +338,7 @@
                        (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
                        %)))
 
-        xml (element-to-xml canonical (get-mapping krysp-version))
+        xml (element-to-xml canonical (get-rakennuslupa-mapping krysp-version))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
@@ -346,7 +347,7 @@
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application katselmus user lang krysp-version output-dir begin-of-link]
   (let [find-national-id (fn [{:keys [kiinttun rakennusnro]}]
-                           (:nationalId (some #(when (and (= (:propertyId %)) (= rakennusnro (:localShortId %))) %) (:buildings application))))
+                           (:nationalId (some #(when (and (= kiinttun (:propertyId %)) (= rakennusnro (:localShortId %))) %) (:buildings application))))
         data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
@@ -397,19 +398,22 @@
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments-canonical)
 
-        xml (element-to-xml canonical (get-mapping krysp-version))
+        xml (element-to-xml canonical (get-rakennuslupa-mapping krysp-version))
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
 
+(defn- patevyysvaatimusluokka212 [luokka]
+  (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
+    "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
+    luokka))
+
 (defn- map-tyonjohtaja-patevyysvaatimusluokka [canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
     #(map (fn [tj]
-            (update-in tj [:Tyonjohtaja :patevyysvaatimusluokka]
-              (fn [luokka]
-                (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
-                  "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
-                  luokka))))
+            (-> tj
+              (update-in [:Tyonjohtaja :patevyysvaatimusluokka] patevyysvaatimusluokka212)
+              (update-in [:Tyonjohtaja :vaadittuPatevyysluokka] patevyysvaatimusluokka212)))
        %)))
 
 (defn- map-enums-212 [canonical]
@@ -425,7 +429,7 @@
     ))
 
 (defn- rakennuslupa-element-to-xml [canonical krysp-version]
-  (element-to-xml (map-enums canonical krysp-version) (get-mapping krysp-version)))
+  (element-to-xml (map-enums canonical krysp-version) (get-rakennuslupa-mapping krysp-version)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."

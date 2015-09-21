@@ -1,5 +1,30 @@
-(function() {
+(function($) {
   "use strict";
+
+  function displayTimingData() {
+    var data = [["fetch", "fetchStart", "requestStart"],
+                ["req", "requestStart", "responseStart"],
+                ["resp", "responseStart", "responseEnd"],
+                ["network", "fetchStart", "responseEnd"],
+                ["display", "responseEnd", "loadEventEnd"],
+                ["total", "navigationStart", "loadEventEnd"]];
+
+    var table = $("footer table.dev-debug-timing");
+
+    if (table.length) {
+      _.each(data, function(row) {
+        var name = row[0],
+        start = window.performance.timing[row[1]],
+        end = window.performance.timing[row[2]],
+        duration = end - start;
+        if (typeof start !== "number") {throw "Unknown timineg event: " + row[1]; }
+        if (typeof end !== "number") {throw "Unknown timineg event: " + row[2]; }
+        table.append($("<tr>").css("padding", "0px")
+             .append($("<td>").text(name).css("padding", "0px"))
+             .append($("<td>").text(duration).css("padding", "0px").css("text-align","right")));
+      });
+    }
+  }
 
   function loadTimingData() {
     if (!window.performance || window.location.pathname.match(/upload/)) {
@@ -11,26 +36,9 @@
       return;
     }
 
-    var table = $("footer table.dev-debug-timing");
-    var data = [["fetch", "fetchStart", "requestStart"],
-                ["req", "requestStart", "responseStart"],
-                ["resp", "responseStart", "responseEnd"],
-                ["network", "fetchStart", "responseEnd"],
-                ["display", "responseEnd", "loadEventEnd"],
-                ["total", "navigationStart", "loadEventEnd"]];
-
-    _.each(data, function(row) {
-      var name = row[0],
-          start = window.performance.timing[row[1]],
-          end = window.performance.timing[row[2]],
-          duration = end - start;
-      if (typeof start !== "number") {throw "Unknown timineg event: " + row[1]; }
-      if (typeof end !== "number") {throw "Unknown timineg event: " + row[2]; }
-      table
-        .append($("<tr>").css("padding", "0px")
-          .append($("<td>").text(name).css("padding", "0px"))
-          .append($("<td>").text(duration).css("padding", "0px").css("text-align","right")));
-    });
+    if (util.getIn(LUPAPISTE, ["config", "mode"]) === "dev") {
+      displayTimingData();
+    }
 
     ajax.command("browser-timing", {timing: window.performance.timing, pathname: window.location.pathname})
       .error(_.noop)
@@ -38,5 +46,6 @@
       .call();
   }
 
-  hub.subscribe("features-loaded", loadTimingData, true);
-})();
+  $(window).load(loadTimingData);
+
+})(jQuery);

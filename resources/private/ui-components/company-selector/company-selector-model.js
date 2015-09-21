@@ -5,6 +5,7 @@ LUPAPISTE.CompanySelectorModel = function(params) {
 
   self.indicator = ko.observable();
   self.result = ko.observable();
+  self.authorization = lupapisteApp.models.applicationAuthModel;
 
   function mapCompany(company) {
     company.displayName = ko.pureComputed(function() {

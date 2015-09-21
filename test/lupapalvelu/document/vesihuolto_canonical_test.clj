@@ -116,7 +116,7 @@
                                                   :tasks [],
                                                   :closedBy {},
                                                   :_verdicts-seen-by {},
-                                                  :location {:x 410169.875, :y 6692360.0},
+                                                  :location [410169.875, 6692360.0],
                                                   :attachments [],
                                                   :statements ctc/statements,
                                                   :organization "753-R",

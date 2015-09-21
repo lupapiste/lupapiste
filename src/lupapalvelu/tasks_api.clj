@@ -4,12 +4,13 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.states :as states]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
 
 ;; Helpers
@@ -33,6 +34,8 @@
 ;; API
 (def valid-source-types #{"verdict"})
 
+(def valid-states states/all-application-states-but-draft-or-terminal)
+
 (defn- valid-source [{:keys [id type]}]
   (when (and (string? id) (valid-source-types type))
     {:id id, :type type}))
@@ -41,7 +44,7 @@
   {:parameters [id taskName schemaName]
    :input-validators [(partial non-blank-parameters [:id :taskName :schemaName])]
    :user-roles #{:authority}
-   :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
+   :states     valid-states}
   [{:keys [created application user data] :as command}]
   (when-not (some #(let [{:keys [name type]} (:info %)] (and (= name schemaName ) (= type :task))) (tasks/task-schemas application))
     (fail! :illegal-schema))
@@ -55,7 +58,7 @@
   {:parameters [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
-   :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
+   :states     valid-states}
   [{created :created :as command}]
   (assert-task-state-in [:requires_user_action :requires_authority_action :ok] command)
   (update-application command
@@ -67,7 +70,7 @@
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
-   :states      [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
+   :states      valid-states}
   [command]
   (assert-task-state-in [:requires_user_action :requires_authority_action] command)
   (set-state command taskId :ok))
@@ -77,7 +80,7 @@
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
-   :states      [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
+   :states      valid-states}
   [command]
   (assert-task-state-in [:ok :requires_user_action :requires_authority_action] command)
   (set-state command taskId :requires_user_action))
@@ -88,7 +91,7 @@
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
    :pre-checks  [(permit/validate-permit-type-is permit/R)] ; KRYPS mapping currently implemented only for R
    :user-roles #{:authority}
-   :states      [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
+   :states      valid-states}
   [{application :application user :user created :created :as command}]
   (assert-task-state-in [:ok :sent] command)
   (let [task (get-task (:tasks application) taskId)]
@@ -102,6 +105,6 @@
   {:description "Returns a list of allowed schema names for current application and user"
    :parameters [:id]
    :user-roles #{:authority}
-   :states     action/all-states}
+   :states     states/all-states}
   [{application :application}]
   (ok :schemas (map (comp :name :info) (sort-by (comp :order :info) (tasks/task-schemas application)))))

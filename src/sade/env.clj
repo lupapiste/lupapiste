@@ -21,9 +21,11 @@
 (defn- parse-target-env [buildinfo] (or (re-find #"[PRODEVTSQA]+" (or buildinfo "")) "local"))
 (def target-env (parse-target-env (:build-tag buildinfo)))
 
+(def file-separator (System/getProperty "file.separator"))
+
 (def- master-password
   (or
-    (let [password-file (io/file (str (System/getProperty "user.home") (System/getProperty "file.separator") "application_master_password.txt"))]
+    (let [password-file (io/file (str (System/getProperty "user.home") file-separator "application_master_password.txt"))]
       (when (.exists password-file)
         (s/trim-newline (slurp password-file))))
     (System/getProperty "application.masterpassword")
@@ -61,6 +63,7 @@
                             [(io/resource "lupapiste.properties")
                              (io/resource (str (ss/lower-case target-env) ".properties"))
                              (io/file "lupapiste.properties")
+                             (io/file "user.properties")
                              (io/file (System/getProperty "lupapiste.properties"))
                              (io/file (System/getenv "LUPAPISTE_PROPERTIES"))])))
 

@@ -73,35 +73,33 @@
     lupapisteApp.setTitle(newTitle || util.getIn(applicationModel, ["_js", "title"]));
   }
 
-  function updatePermitSubtype(value){
-    if (isInitializing) { return; }
-
-    var element = $("#permitSubtypeSaveIndicator");
-    element.stop().hide();
+  function updatePermitSubtype(value) {
+    if (isInitializing || !authorizationModel.ok("change-permit-sub-type")) { return; }
 
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
-    .success(function() {
-      authorizationModel.refresh(currentId);
-      element.stop().show();
-      setTimeout(function() {
-        element.fadeOut("slow");
-      }, 2000);
-    })
-    .call();
+      .success(function() {
+        authorizationModel.refresh(currentId);
+        hub.send("indicator", {style: "positive"});
+      })
+      .call();
   }
 
   function updateTosFunction(value) {
     if (!isInitializing) {
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
-          repository.load(currentId, applicationModel.pending);
+          repository.load(currentId, applicationModel.pending, function(application) {
+            ko.mapping.fromJS(application.metadata, applicationModel.metadata);
+          });
         })
         .call();
     }
   }
 
-  applicationModel.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
+  applicationModel.permitSubtype.subscribe(function(v) { updatePermitSubtype(v); });
+
   applicationModel.tosFunction.subscribe(updateTosFunction);
 
   function initAuthoritiesSelectList(data) {
@@ -157,6 +155,7 @@
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
+      requestForStatementModel.setFunctionCode(app.tosFunction);
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
@@ -184,9 +183,22 @@
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
 
       var devMode = LUPAPISTE.config.mode === "dev";
-      docgen.displayDocuments("#applicationDocgen", app, applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
-      docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
-      docgen.displayDocuments("#applicationAndPartiesDocgen", app, applicationModel.summaryAvailable() ? sortedNonpartyDocs : [], authorizationModel, {dataTestSpecifiers: false, accordionCollapsed: true});
+      var isAuthority = lupapisteApp.models.currentUser.isAuthority();
+
+      docgen.displayDocuments("#applicationDocgen",
+                              app,
+                              applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
+                              authorizationModel,
+                              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+      docgen.displayDocuments("#partiesDocgen",
+                              app,
+                              sortedPartyDocs,
+                              authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+      docgen.displayDocuments("#applicationAndPartiesDocgen",
+                              app,
+                              applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
+                              authorizationModel,
+                              {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
 
       // Indicators
       function sumDocIndicators(sum, doc) {
@@ -194,10 +206,6 @@
       }
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
-
-      applicationModel.metadataList(_.sortBy(_.map(app.metadata, function(value, key) {
-        return metadata.translateMetaData(key, value);
-      }), "name"));
 
       isInitializing = false;
       pageutil.hideAjaxWait();
@@ -221,10 +229,11 @@
 
   function openTab(id) {
     // old conversation tab opens both info tab and side panel
-    if (id === "conversation") {
-      id = "info";
-      if (!$("#conversation-panel").is(":visible")) {
-        $("#open-conversation-side-panel").click();
+    if (_.includes(["conversation", "notice"], id)) {
+      var target = id;
+      id = "info"; // info tab is shown + side-panel
+      if (!$("#" + target + "-panel").is(":visible")) {
+        $("#open-" + target + "-side-panel").click();
       }
     }
     if(tabFlow) {
@@ -260,6 +269,13 @@
       selectTab(tab);
     } else {
       pageutil.showAjaxWait();
+      if (newId !== currentId) { // close sidepanel if it's open
+        var sidePanel = $("#side-panel div.content-wrapper > div").filter(":visible");
+        if (!_.isEmpty(sidePanel)) {
+          var target = sidePanel.attr("id").split("-")[0];
+          $("#open-" + target + "-side-panel").click();
+        }
+      }
       currentId = newId;
       repository.load(currentId, applicationModel.pending, function(application) {
         selectTab(tab || (application.inPostVerdictState ? "tasks" : "info"));
@@ -274,6 +290,7 @@
     showApplication(e.applicationDetails);
     updateWindowTitle(e.applicationDetails.application.title);
   });
+
 
   function NeighborStatusModel() {
     var self = this;
@@ -304,7 +321,7 @@
 
   var neighborActions = {
     manage: function(application) {
-      window.location.hash = "!/neighbors/" + application.id();
+      pageutil.openPage("neighbors", application.id());
       return false;
     },
     markDone: function(neighbor) {

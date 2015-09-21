@@ -24,25 +24,36 @@
         <!-- =================== -->
 
         <div data-bind="visible: tabs.visible('info')">
-          <div data-bind="with: info">
+          <div data-bind="with: info" data-test-id="company-info-tab">
             <div class="form-entry account-type-selector">
               <label class="form-label" for="account-type" data-bind="ltext: 'register.company.form.accountType'"></label>
+
+            <!-- ko ifnot: model().customAccountLimit -->
               <select name="account-type"
                       class="form-input combobox"
+                      data-test-id="company-account-select"
                       data-bind="options: accountTypes,
                                  optionsText: 'displayName',
                                  optionsValue: 'name',
                                  value: model().accountType,
                                  optionsAfterRender: setAccountTypeOptionDisable,
-                                 enable: edit"></select>
+                                 enable: edit,
+                                 valueAllowUnset: true"></select>
+            <!-- /ko -->
+            <!-- ko if: model().customAccountLimit -->
+            <div>
+              <span data-test-id="company-custom-account" data-bind="text: loc('register.company.' + model().accountType() + '.title')"></span>
+              <span data-test-id="company-custom-account-limit" data-bind="text: '(' + loc('company.custom.limit', model().customAccountLimit()) + ')'">
+            </div>
+            <!-- /ko -->
             </div>
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyName'"></label>
-              <input class="form-input text" data-bind="textInput: model().name, enable: edit" type="text" maxlength="64"/>
+              <input class="form-input text" data-bind="textInput: model().name, enable: edit" type="text" maxlength="64" data-test-id="edit-company-name" />
             </div>
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyY'"></label>
-              <input class="form-input text" data-bind="value: model().y, enable: false" type="text" maxlength="9"/>
+              <input class="form-input text" data-bind="value: model().y, enable: false" type="text" maxlength="9" data-test-id="edit-company-y" />
             </div>
 
             <h2 data-bind="ltext: 'register.company.form.billing'"></h2>
@@ -102,6 +113,11 @@
         <!-- =================== -->
 
         <div data-bind="visible: tabs.visible('users')">
+
+          <span data-bind="text: loc('company.users.count',
+                                      invitations().length + users().length,
+                                      info.accountType() ? info.accountType().limit : info.model().customAccountLimit())"></span>
+
           <table data-bind="visible: !pending()" class="table table-striped" data-test-id="company-users-table">
             <thead>
               <tr>
@@ -135,7 +151,6 @@
                 <td data-bind="ltext: 'company.user.role.' + role()" data-test-id="company-user-role"></td>
                 <td data-bind="visible: $parent.isAdmin">
                   <div data-bind="visible: opsEnabled">
-                    <a data-bind="click: toggleEnable, ltext: 'company.user.op.enabled.' + enabled()" href="#" data-test-id="company-user-toggle-enable"></a>
                     <a data-bind="click: toggleAdmin,  ltext: 'company.user.op.admin.' + admin()" href="#" data-test-id="company-user-toggle-admin"></a>
                     <a data-bind="click: deleteUser,   ltext: 'company.user.op.delete'" href="#" data-test-id="company-user-toggle-delete"></a>
                   </div>
@@ -160,7 +175,7 @@
     <div id="dialog-company-user-op" class="window autosized">
       <div class="dialog-header">
         <p data-bind="text: title"></p>
-        <p class="dialog-close close">X</p>
+        <p class="dialog-close close lupicon-remove"></p>
       </div>
       <div class="dialog-content">
 
@@ -176,13 +191,13 @@
         <button data-bind="click: ok,
                            enable: !pending(),
                            ltext: 'yes'"
-                class="btn btn-primary btn-dialog"
+                class="positive btn-dialog"
                 data-test-id="confirm-yes">
         </button>
         <button data-test-id="company-new-user-close-dialog"
                 data-bind="enable: !pending(),
                            ltext: 'no'"
-                class="btn btn-dialog close">
+                class="secondary btn-dialog close">
         </button>
 
       </div>
@@ -191,7 +206,7 @@
     <div id="dialog-company-new-user" class="window autosized">
       <div class="dialog-header">
         <p data-bind="ltext: 'register.company.add-user.message'"></p>
-        <p class="dialog-close close">X</p>
+        <p class="dialog-close close lupicon-remove"></p>
       </div>
       <div class="dialog-content">
          <form>
@@ -199,29 +214,29 @@
           <input data-bind="textInput: email, enable: emailEnabled" class="form-input" type="text" data-test-id="company-new-user-email"/>
 
           <div data-bind="visible: showSearchEmail">
-            <button data-bind="enable: canSearchUser, click: searchUser" type="submit" class="btn btn-dialog btn-primary" data-test-id="company-search-email">
+            <button data-bind="enable: canSearchUser, click: searchUser" type="submit" class="positive btn-dialog" data-test-id="company-search-email">
               <span data-bind="ltext: 'register.company.add-user.searchUser'"></span>
               <em data-bind="visible: pending" class="button-loader" style="position: relative;"></em>
             </button>
-            <button data-bind="enable: canCancel, ltext: 'cancel'" class="btn btn-dialog close"></button>
+            <button data-bind="ltext: 'cancel'" class="secondary btn-dialog close"></button>
           </div>
         </form>
 
         <div data-bind="visible: showUserInCompany">
           <span data-bind="ltext: 'register.company.add-user.already-in'"></span>
-            <button data-bind="ltext: 'ok'" class="btn btn-dialog close" data-test-id="company-add-user-already-in-close"></button>
+            <button data-bind="ltext: 'ok'" class="secondary btn-dialog close" data-test-id="company-add-user-already-in-close"></button>
           </div>
 
         <div data-bind="visible: showUserAlreadyInvited">
           <span data-bind="ltext: 'register.company.add-user.already-invited'"></span>
-          <button data-bind="ltext: 'ok'" class="btn btn-dialog close"></button>
+          <button data-bind="ltext: 'ok'" class="secondary btn-dialog close"></button>
         </div>
 
         <div data-bind="visible: showUserInvited">
           <h3 data-bind="ltext: 'register.company.add-user.done.header'" data-test-id="company-old-user-invited"></h3>
           <p data-bind="ltext: 'register.company.add-user.done.message'"></p>
           <p data-bind="ltext: 'register.company.add-user.done.canClose'"></p>
-          <button data-bind="ltext: 'ok'" class="btn btn-dialog close" data-test-id="company-old-user-invited-close-dialog"></button>
+          <button data-bind="ltext: 'ok'" class="secondary btn-dialog close" data-test-id="company-old-user-invited-close-dialog"></button>
         </div>
 
         <form data-bind="visible: showUserDetails" id="companyUserDetails">
@@ -249,8 +264,8 @@
           </div>
 
           <div>
-            <button data-bind="enable: canSubmit, click: submit, ltext: 'register.company.add-user.submit'" type="submit" class="btn btn-dialog btn-primary" data-test-id="company-user-submit"></button>
-            <button data-bind="enable: canClose, ltext: 'close'" class="btn btn-dialog close" data-test-id="company-new-user-invited-close-dialog"></button>
+            <button data-bind="enable: canSubmit, click: submit, ltext: 'register.company.add-user.submit'" type="submit" class="positive btn-dialog" data-test-id="company-user-submit"></button>
+            <button data-bind="enable: canClose, ltext: 'close'" class="secondary btn-dialog close" data-test-id="company-new-user-invited-close-dialog"></button>
           </div>
         </form>
       </div>

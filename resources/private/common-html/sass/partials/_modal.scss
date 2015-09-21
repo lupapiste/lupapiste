@@ -1,7 +1,7 @@
 // TODO knockout dialog to share same styles with legacy dialog
 #modal-dialog {
   .small {
-    width: 320px;
+    width: 360px;
   }
   .medium {
     width: 480px;
@@ -21,11 +21,11 @@
     z-index: 9999;
     padding: $marginM;
     background-color: #fff;
-    min-height: 250px;
+    min-height: 150px;
     .component {
       overflow: auto;
       margin: $marginM $marginM 75px $marginM;
-      min-height: 117px;
+      min-height: 50px;
       .button-group {
         position: absolute;
         bottom: $marginM;
@@ -57,10 +57,10 @@
       .close {
         position: absolute;
         right: $marginM;
-        cursor: pointer;
-        &:after {
-          content: "X";
-        }
+        /* cursor: pointer; */
+        /* &:after { */
+        /*   content: "X"; */
+        /* } */
       }
     }
   }
@@ -156,7 +156,7 @@
   }
 
   [type=submit], .btn, button {
-    padding: 4px $marginL;
+    //padding: 4px $marginL;
     min-width: $cols2;
     max-width: $cols3;
 
@@ -211,29 +211,40 @@
   padding-bottom:0;
 }
 
+// This seems to be used only in change-location.html
 .with-map {
-  display: table-row;
+  //min-width: 680px !important;
+  //display: table-row;
+  //display: inline-block;
 
-  .map-container {
-    padding: 0;
-  }
+  /* .map-container { */
+  /*   //padding: 0; */
+  /*   /\* float: left; *\/ */
+  /*   /\* width: 480px; *\/ */
+  /*   display: inline-block; */
+  /* } */
 
-  .btn-primary {
-    left: auto; right: 260px;
-    bottom: 5px;
-  }
-  a.btn-dialog {
-    right:-70px;
-    bottom: 10px;
-    width: 100px;
-  }
+  /* form { */
+  /*   /\* float: left; *\/ */
+  /*   /\* width: 200px; *\/ */
+  /*   display: inline-block; */
+  /* } */
+  /* .btn-primary { */
+  /*   left: auto; right: 260px; */
+  /*   bottom: 5px; */
+  /* } */
+  /* a.btn-dialog { */
+  /*   right:-70px; */
+  /*   bottom: 10px; */
+  /*   width: 100px; */
+  /* } */
 }
 
-.with-map > div {
-  display: table-cell;
-  vertical-align: top;
-  padding-left: $marginM;
-}
+/* .with-map > div { */
+/*   display: table-cell; */
+/*   vertical-align: top; */
+/*   padding-left: $marginM; */
+/* } */
 
 .neighbors-message {
   margin: $marginM;
@@ -266,5 +277,15 @@
 .company-invite-dialog {
   select {
     width: 100%;
+  }
+}
+
+
+.with-map-top {
+  margin: {
+    top: $marginS;
+    bottom: 0;
+    left: $marginS;
+    right: $marginS;
   }
 }
