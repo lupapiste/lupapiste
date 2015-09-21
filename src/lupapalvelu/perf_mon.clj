@@ -96,8 +96,8 @@
 
 (defn get-data [start end]
   (map (fn [row] (dissoc row :_id))
-       (mongo/find-maps "perf-mon" {$and [{:ts {$gte start}}
-                                       {:ts {$lte end}}]})))
+    (mongo/find-maps :perf-mon-timing {$and [{:ts {$gte start}}
+                                             {:ts {$lte end}}]})))
 
 (defn to-long [v]
   (when v
