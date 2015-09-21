@@ -26,7 +26,7 @@
 
   (let [ronja-email  (email-for "ronja")
         veikko-email (email-for "veikko")
-        application-id     (create-app-id sonja :municipality sonja-muni :address "Lausuntobulevardi 1 A 1")
+        application-id     (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         resp (command sipoo :create-statement-giver :email (email-for "ronja") :text "<b>bold</b>") => ok?
         statement-giver-ronja (:id resp)
         email (last-email)]
@@ -55,7 +55,7 @@
           (query veikko :application :id application-id) => not-accessible?)
 
         (let [application-before (query-application sonja application-id)
-              resp (command sonja :request-for-statement :id application-id :personIds [statement-giver-veikko]) => ok?
+              resp (command sonja :request-for-statement :functionCode nil :id application-id :personIds [statement-giver-veikko]) => ok?
               application-after  (query-application sonja application-id)
               emails (sent-emails)
               email (first emails)]
@@ -87,21 +87,31 @@
             (giver-emails ronja-email) => ronja-email
             (giver-emails veikko-email) => veikko-email))
 
-        (get-in statement [:person :email]) => veikko-email
-        (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => ok?
+        (fact "Veikko can see unsubmitted statements"
+          (query veikko :should-see-unsubmitted-statements :id application-id) => ok?)
 
-        (fact "Sonja got email"
+        (fact "Sonja can see unsubmitted statements"
+          (query sonja :should-see-unsubmitted-statements :id application-id) => ok?)
+
+        (fact "Applicant can not see unsubmitted statements"
+          (query mikko :should-see-unsubmitted-statements :id application-id) => unauthorized?)
+
+        (fact "Statement cannot be given with invalid status"
+          (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.unknown-statement-status"))
+
+        (get-in statement [:person :email]) => veikko-email
+        (command veikko :give-statement :id application-id :statementId (:id statement) :status "puoltaa" :text "I will approve" :lang "fi") => ok?
+
+        (fact "Applicant got email"
           (let [emails (sent-emails)
                 email  (first emails)]
           (count emails) => 1
-          (:to email) => (contains sonja-email)
-          email => (partial contains-application-link-with-tab? application-id "conversation" "authority")))
+          (:to email) => (contains "mikko@example.com")
+          email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")))
         ))
 
-    ; TODO facts about what Veikko can and can not do to application
-
     (fact "Statement person has access to application"
-      (let [resp (command sonja :request-for-statement :id application-id :personIds [statement-giver-ronja]) => ok?
+      (let [resp (command sonja :request-for-statement :functionCode nil :id application-id :personIds [statement-giver-ronja]) => ok?
             application (query-application (apikey-for "ronja") application-id)]
         (auth-contains-ronjas-statement application) => truthy
 

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="invoice-operator-selector-template">
+      <label class="form-label"
+             data-bind="ltext: 'register.company.form.billing.pop',
+                        css: { tip: required }"></label>
+      <select name="invoice-operator-select"
+              class="form-input combobox"
+              data-test-id="invoice-operator-selector"
+              data-bind="options: operators,
+                         optionsText: 'name',
+                         optionsValue: 'code',
+                         enable: enabled,
+                         optionsAfterRender: setOptionDisable,
+                         value: selected">
+        </select>
+    </script>
+  </section>
+</body>
+</html>

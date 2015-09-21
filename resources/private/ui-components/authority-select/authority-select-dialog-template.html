@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="authority-select-dialog-template">
+<div class="content"><form><p></p>
+  <select id="assignee-select"
+          data-bind="disable: pending, value: assigneeId, options: authorities,
+                     optionsText: function(item) { return item.lastName + ' ' + item.firstName; },
+                     optionsValue: 'id',
+                     optionsCaption: loc('choose')"></select></form></div>
+  <div data-bind="component: {name: 'submit-button-group',
+                              params: { isSubmitVisible: true,
+                                        isSubmitEnabled: true,
+                                        submitCssClasses: 'btn btn-primary btn-narrow',
+                                        submit: save,
+                                        lSubmitTitle: 'ok'}}"></div>
+    </script>
+  </section>
+</body>
+</html>

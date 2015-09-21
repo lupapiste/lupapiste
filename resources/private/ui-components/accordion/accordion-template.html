@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="accordion-template">
+      <section class="accordion">
+          <button onclick="accordion.click(this)" class="accordion-toggle secondary">
+              <i class="lupicon-chevron-down"></i>
+              <i class="lupicon-chevron-up toggle"></i>
+              <span class="bar-text" data-bind="lhtml: ltitle" style="margin-right: 0"></span>
+          </button>
+          <div class="accordion_content" data-accordion-state="closed">
+              <div class="accordion-fields">
+                  <div data-bind="template: {name: accordionContentTemplate, data: accordionContentTemplateData}"></div>
+              </div>
+          </div>
+      </section>
+    </script>
+  </section>
+</body>
+</html>

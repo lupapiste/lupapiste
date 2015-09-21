@@ -1,7 +1,8 @@
 (ns sade.http-test
   (:require [sade.core :refer :all]
             [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]))
+            [midje.util :refer [testable-privates]]
+            sade.http))
 
 (testable-privates sade.http merge-to-defaults)
 

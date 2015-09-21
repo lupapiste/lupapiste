@@ -61,8 +61,6 @@
   var permitSubtypes = ko.observableArray([]);
   var tosFunctions = ko.observableArray([]);
 
-  var inviteCompanyModel = new LUPAPISTE.InviteCompanyModel(applicationModel.id);
-
   var accordian = function(data, event) { accordion.toggle(event); };
 
   var AuthorityInfo = function(id, firstName, lastName) {
@@ -75,55 +73,34 @@
     lupapisteApp.setTitle(newTitle || util.getIn(applicationModel, ["_js", "title"]));
   }
 
-  //FIXME: why is this?
-  function updateAssignee(value) {
-    // do not update assignee if page is still initializing
-    if (isInitializing) { return; }
-
-    // The right is validated in the back-end. This check is just to prevent error.
-    if (!authorizationModel.ok("assign-application")) { return; }
-
-    var assigneeId = value ? value : null;
-
-    ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {
-        repository.load(currentId, applicationModel.pending);
-        })
-      .call();
-  }
-
-  function updatePermitSubtype(value){
-    if (isInitializing) { return; }
-
-    var element = $("#permitSubtypeSaveIndicator");
-    element.stop().hide();
+  function updatePermitSubtype(value) {
+    if (isInitializing || !authorizationModel.ok("change-permit-sub-type")) { return; }
 
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
-    .success(function() {
-      authorizationModel.refresh(currentId);
-      element.stop().show();
-      setTimeout(function() {
-        element.fadeOut("slow");
-      }, 2000);
-    })
-    .call();
+      .success(function() {
+        authorizationModel.refresh(currentId);
+        hub.send("indicator", {style: "positive"});
+      })
+      .call();
   }
 
   function updateTosFunction(value) {
     if (!isInitializing) {
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
+        .success(function() {
+          repository.load(currentId, applicationModel.pending, function(application) {
+            ko.mapping.fromJS(application.metadata, applicationModel.metadata);
+          });
+        })
         .call();
     }
   }
 
-  applicationModel.assignee.subscribe(function(v) { updateAssignee(v); });
-  applicationModel.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
-  applicationModel.tosFunction.subscribe(updateTosFunction);
+  applicationModel.permitSubtype.subscribe(function(v) { updatePermitSubtype(v); });
 
-  function resolveApplicationAssignee(authority) {
-    return (authority) ? new AuthorityInfo(authority.id, authority.firstName, authority.lastName) : null;
-  }
+  applicationModel.tosFunction.subscribe(updateTosFunction);
 
   function initAuthoritiesSelectList(data) {
     var authorityInfos = [];
@@ -169,7 +146,7 @@
       foremanModel.refresh(app);
 
       // Operations
-      applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
+      applicationModel.operationsCount(_.map(_.countBy(app.secondaryOperations, "name"), function(v, k) { return {name: k, count: v}; }));
 
       verdictAttachmentPrintsOrderModel.refresh(applicationModel);
       verdictAttachmentPrintsOrderHistoryModel.refresh(applicationModel);
@@ -178,6 +155,7 @@
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
+      requestForStatementModel.setFunctionCode(app.tosFunction);
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
@@ -205,9 +183,22 @@
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
 
       var devMode = LUPAPISTE.config.mode === "dev";
-      docgen.displayDocuments("#applicationDocgen", app, applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
-      docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
-      docgen.displayDocuments("#applicationAndPartiesDocgen", app, applicationModel.summaryAvailable() ? sortedNonpartyDocs : [], authorizationModel, {dataTestSpecifiers: false, accordionCollapsed: true});
+      var isAuthority = lupapisteApp.models.currentUser.isAuthority();
+
+      docgen.displayDocuments("#applicationDocgen",
+                              app,
+                              applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
+                              authorizationModel,
+                              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+      docgen.displayDocuments("#partiesDocgen",
+                              app,
+                              sortedPartyDocs,
+                              authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+      docgen.displayDocuments("#applicationAndPartiesDocgen",
+                              app,
+                              applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
+                              authorizationModel,
+                              {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
 
       // Indicators
       function sumDocIndicators(sum, doc) {
@@ -215,11 +206,6 @@
       }
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
-
-      // Set the value behind assignee selection list
-      var assignee = resolveApplicationAssignee(app.authority);
-      var assigneeId = assignee ? assignee.id : null;
-      applicationModel.assignee(assigneeId);
 
       isInitializing = false;
       pageutil.hideAjaxWait();
@@ -243,10 +229,11 @@
 
   function openTab(id) {
     // old conversation tab opens both info tab and side panel
-    if (id === "conversation") {
-      id = "info";
-      if (!$("#conversation-panel").is(":visible")) {
-        $("#open-conversation-side-panel").click();
+    if (_.includes(["conversation", "notice"], id)) {
+      var target = id;
+      id = "info"; // info tab is shown + side-panel
+      if (!$("#" + target + "-panel").is(":visible")) {
+        $("#open-" + target + "-side-panel").click();
       }
     }
     if(tabFlow) {
@@ -282,6 +269,13 @@
       selectTab(tab);
     } else {
       pageutil.showAjaxWait();
+      if (newId !== currentId) { // close sidepanel if it's open
+        var sidePanel = $("#side-panel div.content-wrapper > div").filter(":visible");
+        if (!_.isEmpty(sidePanel)) {
+          var target = sidePanel.attr("id").split("-")[0];
+          $("#open-" + target + "-side-panel").click();
+        }
+      }
       currentId = newId;
       repository.load(currentId, applicationModel.pending, function(application) {
         selectTab(tab || (application.inPostVerdictState ? "tasks" : "info"));
@@ -296,6 +290,7 @@
     showApplication(e.applicationDetails);
     updateWindowTitle(e.applicationDetails.application.title);
   });
+
 
   function NeighborStatusModel() {
     var self = this;
@@ -326,7 +321,7 @@
 
   var neighborActions = {
     manage: function(application) {
-      window.location.hash = "!/neighbors/" + application.id();
+      pageutil.openPage("neighbors", application.id());
       return false;
     },
     markDone: function(neighbor) {
@@ -410,7 +405,6 @@
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel,
       verdictModel: verdictModel,
-      openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
       attachmentsTab: attachmentsTab,
       selectedTabName: selectedTabName,
       tosFunctions: tosFunctions
@@ -429,7 +423,6 @@
     $(verdictAttachmentPrintsOrderHistoryModel.dialogSelector).applyBindings({
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel
     });
-    $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
     attachmentsTab.attachmentTemplatesModel.init();
   });
 

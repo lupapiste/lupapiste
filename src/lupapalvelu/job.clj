@@ -1,4 +1,5 @@
 (ns lupapalvelu.job
+  (:refer-clojure :exclude [update])
   (:require [slingshot.slingshot :refer [throw+]]))
 
 (defonce jobs (ref {}))

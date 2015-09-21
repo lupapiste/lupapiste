@@ -3,8 +3,7 @@
 <body>
 
   <section class="page container" id="new-company-user">
-    <form data-bind="submit: send">
-
+    <form data-bind="submit: send" class="register-contentbox register-form">
       <h1 data-bind="ltext: 'new-company-user.title'"></h1>
 
       <div data-bind="visible: loading">
@@ -16,24 +15,34 @@
         <p data-bind="lhtml: 'new-company-user.not-found.message'"></p>
       </div>
 
-      <div data-bind="visible: loaded">
+      <div data-bind="visible: loaded" class="form-group">
 
         <p data-bind="lhtml: 'new-company-user.info'"></p>
 
-        <label data-bind="ltext: 'new-company-user.company-name'" class="form-label"></label>
-        <span data-bind="text: companyName" class="form-input" ></span>
+        <div class="form-entry">
+          <label data-bind="ltext: 'new-company-user.company-name'" class="form-label"></label>
+          <span data-bind="text: companyName" class="form-input" ></span>
+        </div>
+        <div class="form-entry">
+          <label data-bind="ltext: 'new-company-user.company-y'" class="form-label"></label>
+          <span data-bind="text: companyY" class="form-input" ></span>
+        </div>
+        <br>
 
-        <label data-bind="ltext: 'new-company-user.company-y'" class="form-label"></label>
-        <span data-bind="text: companyY" class="form-input" ></span>
+        <div class="form-entry">
+          <label data-bind="ltext: 'new-company-user.firstName'" class="form-label"></label>
+          <span data-bind="text: firstName" class="form-input" ></span>
+        </div>
 
-        <label data-bind="ltext: 'new-company-user.firstName'" class="form-label"></label>
-        <span data-bind="text: firstName" class="form-input" ></span>
-
-        <label data-bind="ltext: 'new-company-user.lastName'" class="form-label"></label>
-        <span data-bind="text: lastName" class="form-input" ></span>
-
-        <label data-bind="ltext: 'new-company-user.email'" class="form-label"></label>
-        <span data-bind="text: email" class="form-input" ></span>
+        <div class="form-entry">
+          <label data-bind="ltext: 'new-company-user.lastName'" class="form-label"></label>
+          <span data-bind="text: lastName" class="form-input" ></span>
+        </div>
+        <br>
+        <div class="form-entry">
+          <label data-bind="ltext: 'new-company-user.email'" class="form-label"></label>
+          <span data-bind="text: email" class="form-input" ></span>
+        </div>
 
         <h2 data-bind="lhtml: 'new-company-user.setpw'"></h2>
 
@@ -41,8 +50,7 @@
         <input data-bind="textInput: password1, attr: {placeholder: loc('setpw.placeholder.1')}" class="form-input" type="password" autofocus="autofocus" data-test-id="company-user-password1">
         <div>
           <span data-bind="ltext: 'setpw.quality'"></span>
-          <span data-bind="visible: passwordQuality,
-                           attr: {'class': 'setpw-quality-' + passwordQuality()},
+          <span data-bind="attr: {'class': 'setpw-quality-' + passwordQuality()},
                            text: loc(['mypage.quality', passwordQuality()])"></span>
         </div>
 
@@ -54,12 +62,6 @@
         </div>
 
         <button data-bind="click: send, enable: ok, ltext: 'setpw.send'" class="btn btn-primary" id="testCompanyUserSubmitPassword"></button>
-
-        <div data-bind="visible: success">
-          <a data-bind="ltext: 'setpw.success'" href="#!/login"></a>
-        </div>
-
-        <div data-bind="ltext: 'setpw.fail', visible: fail"></div>
       </div>
 
     </form>

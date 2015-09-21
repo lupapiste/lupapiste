@@ -7,7 +7,7 @@
       list-style: none;
       display: inline-block;
       margin-bottom: -1px;
-   
+
       a {
         background-color: $lp-light-grey;
         color: $color-text;
@@ -21,7 +21,7 @@
       &.active {
         a {
           border-bottom: 1px solid $lp-light-grey;
-        }  
+        }
       }
     }
   }
@@ -30,4 +30,11 @@
     border: 1px solid lighten($lp-dark-grey, 20%);
     padding: 8px;
   }
+  .user-limit-reached {
+    color: $lp-orange;
+  }
+}
+
+.account-type-selector {
+  display: block;
 }

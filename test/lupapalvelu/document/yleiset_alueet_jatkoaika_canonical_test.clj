@@ -12,8 +12,8 @@
 
 
 (def- operation {:id "52aab3daad59b51c3e6d4adb"
-                          :created 1386918874564
-                          :name "ya-jatkoaika"})
+                 :created 1386918874564
+                 :name "ya-jatkoaika"})
 
 (def- link-permit-data {:lupapisteId "LP-753-2013-00003"
                         :id "523"
@@ -21,19 +21,19 @@
                         :operation "ya-katulupa-vesi-ja-viemarityot"})
 
 (def- hankkeen-kuvaus-jatkoaika {:id "Hankkeen kuvaus"
-                                          :schema-info {:name "hankkeen-kuvaus-jatkoaika" :version 1 :order 1}
-                                          :data {:kuvaus {:value "Kaksi viikkoa lisaaikaa hakkeelle LP-753-2013-00017."}}})
+                                 :schema-info {:name "hankkeen-kuvaus-jatkoaika" :version 1 :order 1}
+                                 :data {:kuvaus {:value "Kaksi viikkoa lisaaikaa hakkeelle LP-753-2013-00017."}}})
 
 (def- tyoaika-jatkoaika {:id "52ab1eedad593ba3e388e9af"
-                                  :created 1386946285742
-                                  :schema-info {:name "tyo-aika-for-jatkoaika" :version 1 :order 63}
-                                  :data {:tyoaika-alkaa-pvm {:value "28.12.2013"}
-                                         :tyoaika-paattyy-pvm {:value "30.12.2013"}}})
+                         :created 1386946285742
+                         :schema-info {:name "tyo-aika-for-jatkoaika" :version 1 :order 63}
+                         :data {:tyoaika-alkaa-pvm {:value "28.12.2013"}
+                                :tyoaika-paattyy-pvm {:value "30.12.2013"}}})
 
 (def-  documents [hakija
-                           (assoc-in maksaja [:data :_selected :value] "henkilo")
-                           hankkeen-kuvaus-jatkoaika
-                           tyoaika-jatkoaika])
+                  (assoc-in maksaja [:data :_selected :value] "henkilo")
+                  hankkeen-kuvaus-jatkoaika
+                  tyoaika-jatkoaika])
 
 (def jatkoaika-application {:id "LP-753-2013-00005"
                             :schema-version 1
@@ -58,7 +58,8 @@
                             :address "Latokuja 1"
                             :location location
                             :attachments []
-                            :operations [operation]
+                            :primaryOperation operation
+                            :secondaryOperations []
                             :propertyId "75342300010054"
                             :documents documents
                             :municipality "753"
@@ -160,7 +161,7 @@
     ;; Sijainti
     (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id jatkoaika-application))
     (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address jatkoaika-application))
-    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> jatkoaika-application :location :x) " " (-> jatkoaika-application :location :y)))
+    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> jatkoaika-application :location first) " " (-> jatkoaika-application :location second)))
 
     ;; Maksajan tiedot
     (fact "Henkilomaksaja 2.1.2"
@@ -210,9 +211,6 @@
     (fact "hakija-rooliKoodi" (:rooliKoodi hakija-Osapuoli) => rooliKoodi-Hakija)
 
     ;; Lisaaikatieto
-    ;;
-    ;;  *** TODO: Testaa paperisen version casea. ***
-    ;;
     (fact "Lisaaika-perustelu" perustelu => (-> hankkeen-kuvaus-jatkoaika :data :kuvaus :value))
     (fact "Lisaaika-alkuPvm" alkuPvm => (util/to-xml-date-from-string (-> tyoaika-jatkoaika :data :tyoaika-alkaa-pvm :value)))
     (fact "Lisaaika-loppuPvm" loppuPvm => (util/to-xml-date-from-string (-> tyoaika-jatkoaika :data :tyoaika-paattyy-pvm :value)))

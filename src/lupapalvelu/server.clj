@@ -1,5 +1,6 @@
 (ns lupapalvelu.server
   (:require [clojure.java.io :as io]
+            [clojure.string :as s]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [noir.core :refer [defpage]]
             [noir.server :as server]
@@ -13,13 +14,17 @@
             [sade.util :as util]
             [lupapalvelu.logging]
             [lupapalvelu.web :as web]
-            [lupapalvelu.vetuma]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.ua-compatible-header :as uach]
+            [lupapalvelu.migration.migration :as migration]
+            [lupapalvelu.perf-mon :as perf-mon]
             [scss-compiler.core :as scss]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.vetuma]
             [lupapalvelu.fixture.fixture-api]
             [lupapalvelu.fixture.minimal]
-            [lupapalvelu.fixture.municipality-test-users]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.document.commands]
+            [lupapalvelu.document.document-api]
+            [lupapalvelu.prev-permit-api]
             [lupapalvelu.user-api]
             [lupapalvelu.mml.yhteystiedot-api]
             [lupapalvelu.operations]
@@ -36,15 +41,14 @@
             [lupapalvelu.admin-api]
             [lupapalvelu.proxy-services]
             [lupapalvelu.exports-api]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.document.schema-repository-api]
             [lupapalvelu.actions-api]
-            [lupapalvelu.migration.migration :as migration]
             [lupapalvelu.screenmessage-api]
             [lupapalvelu.integrations-api]
             [lupapalvelu.construction-api]
             [lupapalvelu.asianhallinta-config-api]
+            [lupapalvelu.perf-mon-api]
+            [lupapalvelu.user-notification-api]
             [lupapalvelu.tiedonohjaus-api]))
 
 (defonce jetty (atom nil))
@@ -54,7 +58,11 @@
 
   (migration/update!)
   (when-let [failures (seq (migration/failing-migrations))]
-    (let [msg (str "Failing migration(s): " (clojure.string/join failures))]
+    (let [msg (format "%s build %s (%s)\nFailing migration(s): %s"
+                env/target-env
+                (:build-number env/buildinfo)
+                (:branch env/buildinfo)
+                (s/join failures))]
       (email/send-email-message "lupapalvelu@solita.fi" "Critical: Migration failure!" [msg msg])))
 
   (mongo/ensure-indexes)
@@ -67,16 +75,16 @@
   (server/add-middleware web/anti-csrf)
   (server/add-middleware web/wrap-authentication)
   (server/add-middleware web/session-timeout)
+  (env/in-dev
+   (server/add-middleware mongo/db-selection-middleware))
 
   (when-let [gemsdir (io/resource "gems")]
     (scss/initialize :gempath (.getPath gemsdir)))
 
-  (env/in-dev
-    (warn "*** Instrumenting performance monitoring")
-    (require 'lupapalvelu.perf-mon)
-    ((resolve 'lupapalvelu.perf-mon/init)))
+  (info "*** Instrumenting performance monitoring")
+  (perf-mon/init)
   (when (env/feature? :nrepl)
-    (warn "*** Starting nrepl")
+    (warn "*** Starting nrepl in port 9090")
     (require 'clojure.tools.nrepl.server)
     ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090)))
 
@@ -104,8 +112,8 @@
                      :session-store (session/cookie-store {:key (read-session-key)})
                      :session-cookie-attrs (env/value :cookie)}
           starting  (double (now))
-          jetty-instance (server/start env/port noir-opts)]
-      (.setGracefulShutdown jetty-instance 10000)
+          jetty-instance ^org.eclipse.jetty.server.Server (server/start env/port noir-opts)]
+      (.setStopTimeout jetty-instance 10000)
       (reset! jetty jetty-instance)
       (infof "Jetty startup took %.3f seconds" (/ (- (now) starting) 1000))
       "server running")

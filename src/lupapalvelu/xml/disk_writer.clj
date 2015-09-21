@@ -31,25 +31,31 @@
         (do
           (info "Content for attachment file-id " file-id " is nil")
           (fail! :error.attachment.no-content))
+        (do
         (with-open [out (io/output-stream attachment-file)
                     in (content)]
-          (io/copy in out))))))
+            (io/copy in out))
+          (fs/chmod "+rw" attachment-file))))))
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
         submitted-file (io/file (str output-dir "/" (get-submitted-filename id)))
         current-file (io/file (str output-dir "/" (get-current-filename id)))]
     (pdf-export/generate submitted-application lang submitted-file)
-    (pdf-export/generate application lang current-file)))
+    (pdf-export/generate application lang current-file)
+    (fs/chmod "+rw" submitted-file)
+    (fs/chmod "+rw" current-file)))
 
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing.
    Returns a sequence of attachment fileIds that were written to disk."
-  [application attachments xml schema-version output-dir & [submitted-application lang]]
+  [application attachments xml schema-version output-dir & [submitted-application lang file-suffix]]
   {:pre [(string? output-dir)]
    :post [%]}
 
-  (let [file-name  (str output-dir "/" (:id application) "_" (now))
+  (let [file-name  (if file-suffix
+                     (str output-dir "/" (:id application) "_" (now) "_" file-suffix)
+                     (str output-dir "/" (:id application) "_" (now)))
         tempfile   (io/file (str file-name ".tmp"))
         outfile    (io/file (str file-name ".xml"))
         xml-s      (indent-str xml)]
@@ -57,17 +63,19 @@
     (try
       (validator/validate xml-s (permit/permit-type application) schema-version)
       (catch org.xml.sax.SAXParseException e
-       (info e "Invalid XML message")
-       (fail! :error.integration.send :details (.getMessage e))))
+        (fail! :error.integration.send :details (.getMessage e))))
 
     (fs/mkdirs output-dir)
+
+
     (try
       (with-open [out-file-stream (io/writer tempfile)]
         (emit xml out-file-stream))
       (catch java.io.FileNotFoundException e
+        (when (fs/exists? tempfile)
+          (fs/delete tempfile))
         (error e (.getMessage e))
         (fail! :error.sftp.user.does.not.exist :details (.getMessage e))))
-
 
     (write-attachments attachments output-dir)
 
@@ -75,7 +83,8 @@
       (write-application-pdf-versions output-dir application submitted-application lang))
 
     (when (fs/exists? outfile) (fs/delete outfile))
-    (fs/rename tempfile outfile))
+    (fs/rename tempfile outfile)
+    (fs/chmod "+rw" outfile))
 
   (->>
     attachments

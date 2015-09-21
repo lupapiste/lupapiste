@@ -29,7 +29,7 @@ Om du &auml;nnu inte &auml;r anv&auml;ndare hos Lupapiste m&aring;ste du registr
 
 Klicka h&auml;r f&ouml;r att godk&auml;nna din roll och se uppgifterna om ans&ouml;kan:
 
-{{link-fi}}
+{{link-sv}}
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt. Kontrollera ocks&aring; att den inbjudna e-postadressen [{{recipient-email}}]({{recipient-email}}) motsvarar den e-postadress du anv&auml;nt f&ouml;r att registrera dig i tj&auml;nsten.
 

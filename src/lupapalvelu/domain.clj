@@ -6,7 +6,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [sade.core :refer [unauthorized]]
-            [sade.strings :refer [lower-case]]
+            [sade.strings :as ss]
             [sade.util :as util]
             [sade.env :as env]))
 
@@ -15,23 +15,25 @@
 ;;
 
 (defn basic-application-query-for [user]
-  (case (keyword (:role user))
-    :applicant (if-let [company-id (get-in user [:company :id])]
-                 {$or [{:auth.id (:id user)} {:auth.id company-id}]}
-                 {:auth.id (:id user)})
-    :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
-    :oirAuthority {:organization {$in (:organizations user)}}
-    :trusted-etl {}
-    (do
-      (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
-      {:_id nil}))) ; should not yield any results
+  (let [organizations (user/organization-ids-by-roles user #{:authority :reader})]
+    (case (keyword (:role user))
+      :applicant    (if-let [company-id (get-in user [:company :id])]
+                      {$or [{:auth.id (:id user)} {:auth.id company-id}]}
+                      {:auth.id (:id user)})
+      :authority    {$or [{:organization {$in organizations}} {:auth.id (:id user)}]}
+      :rest-api     {:organization {$in organizations}}
+      :oirAuthority {:organization {$in organizations}}
+      :trusted-etl {}
+      (do
+        (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
+        {:_id nil})))) ; should not yield any results
 
 (defn application-query-for [user]
   (merge
     (basic-application-query-for user)
     (case (keyword (:role user))
       :applicant {:state {$nin ["canceled"]}}
-      :authority {:state {$nin ["draft" "canceled"]}}
+      :authority {:state {$nin ["canceled"]}}
       :oirAuthority {:state {$in ["info" "answered"]} :openInfoRequest true}
       {})))
 
@@ -41,15 +43,37 @@
 (defn- only-authority-sees-drafts [user verdicts]
   (only-authority-sees user :draft verdicts))
 
-(defn- commented-attachment-exists [application]
+(defn- normalize-neighbors [user neighbors]
+  (mapv
+    (fn [neighbor]
+      (-> neighbor
+        (update-in [:status]
+          #(mapv
+             (fn [{vetuma :vetuma :as state}]
+               (if (and vetuma (not (user/authority? user)))
+                 (assoc-in state [:vetuma :userid] nil)
+                 state))
+             %))))
+    neighbors))
+
+(defn- filter-targeted-attachment-comments
+  "If comment target type is attachment, check that attachment exists.
+   If not, show only comments with non-blank text related to deleted attachment"
+  [application]
   (let [attachments (set (map :id (:attachments application)))]
     (update-in application [:comments]
-      #(filter (fn [{target :target}] (or (empty? target) (not= (:type target) "attachment") (attachments (:id target)))) %))))
+      #(filter (fn [{:keys [target text]}] (or
+                                             (empty? target)
+                                             (not= (:type target) "attachment")
+                                             (or
+                                               (attachments (:id target))
+                                               (not (ss/blank? text))))) %))))
 
 (defn- filter-notice-from-application [application user]
   (if (user/authority? user)
     application
     (dissoc application :urgency :authorityNotice)))
+
 
 (defn filter-application-content-for [application user]
   (when (seq application)
@@ -61,11 +85,12 @@
         (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (name (:role user)))) %))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
-        commented-attachment-exists
+        (update-in [:neighbors] (partial normalize-neighbors user))
+        filter-targeted-attachment-comments
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
         (filter-notice-from-application user)))))
 
-(defn get-application-as [query-or-id user & include-canceled-apps?]
+(defn get-application-as [query-or-id user & {:keys [include-canceled-apps?] :or {include-canceled-apps? false}}]
   {:pre [query-or-id (map? user)]}
   (let [query-id-part (if (map? query-or-id) query-or-id {:_id query-or-id})
         query-user-part (if include-canceled-apps?
@@ -92,69 +117,111 @@
 (defn has-auth? [{auth :auth} user-id]
   (or (some (partial = user-id) (map :id auth)) false))
 
-(defn get-auth [{auth :auth} user-id]
-  (some #(when (= (:id %) user-id) %) auth))
+(defn get-auths [{auth :auth} user-id]
+  (filter #(= (:id %) user-id) auth))
+
+(defn get-auth [application user-id]
+  (first (get-auths application user-id)))
 
 (defn has-auth-role? [{auth :auth} user-id role]
   (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
 
+(def owner-or-write-roles ["owner" "writer" "foreman"])
+
 (defn owner-or-write-access? [application user-id]
-  (or (has-auth-role? application user-id "owner")
-      (has-auth-role? application user-id "writer")
-      (has-auth-role? application user-id "foreman")))
+  (boolean (some (partial has-auth-role? application user-id) owner-or-write-roles)))
+
+(defn company-access? [application company-id]
+  (boolean (has-auth-role? application company-id "writer")))
 
 (defn validate-owner-or-write-access
   "Validator: current user must be owner or have write access.
    To be used in commands' :pre-checks vector."
   [command application]
-  (when-not (owner-or-write-access? application (-> command :user :id))
+  (when-not (or
+              (owner-or-write-access? application (-> command :user :id))
+              (company-access? application (-> command :user :company :id)))
     unauthorized))
+
+;;
+;; assignee
+;;
+
+(defn assigned? [{authority :authority :as application}]
+  {:pre [(map? authority)]}
+  (-> authority :id nil? not))
 
 ;;
 ;; documents
 ;;
 
+(defn- docs-from [application-or-documents]
+  {:post [(sequential? %)]}
+  (if (map? application-or-documents) (:documents application-or-documents) application-or-documents))
+
 (defn get-document-by-id
   "returns first document from application with the document-id"
-  [{documents :documents} document-id]
-  (first (filter #(= document-id (:id %)) documents)))
+  [application-or-documents document-id]
+  (let [documents (docs-from application-or-documents)]
+    (util/find-by-id document-id documents)))
+
+(defn- documents-by-schema-info [application-or-documents k v]
+  (let [documents (docs-from application-or-documents)]
+    (filter (comp (partial = (keyword v)) keyword k :schema-info) documents)))
 
 (defn get-documents-by-name
   "returns document from application by schema name"
-  [{documents :documents} schema-name]
-  (filter (comp (partial = (keyword schema-name)) keyword :name :schema-info) documents))
+  [application-or-documents schema-name]
+  (documents-by-schema-info application-or-documents :name schema-name))
 
 (defn get-documents-by-type
   "returns document from application by schema type"
-  [{documents :documents} schema-type]
-  (filter (comp (partial = (keyword schema-type)) keyword :type :schema-info) documents))
+  [application-or-documents schema-type]
+  (documents-by-schema-info application-or-documents :type schema-type))
 
 (defn get-document-by-name
   "returns first document from application by schema name"
-  [application schema-name]
-  (first (get-documents-by-name application schema-name)))
+  [application-or-documents schema-name]
+  (first (documents-by-schema-info application-or-documents :name schema-name)))
 
 (defn get-document-by-type
-  "returns first document from application by schema name"
-  [application type-to-find]
-  (first (get-documents-by-type application type-to-find)))
+  "returns first document from application by schema type"
+  [application-or-documents schema-type]
+  (first (documents-by-schema-info application-or-documents :type schema-type)))
 
 (defn get-document-by-operation
   "returns first document from application that is associated with the operation"
-  [{documents :documents} operation]
-  (let [op-id (if (map? operation) (:id operation) operation)]
+  [application-or-documents operation]
+  (let [op-id (if (map? operation) (:id operation) operation)
+        documents (docs-from application-or-documents)]
     (first (filter #(= op-id (get-in % [:schema-info :op :id])) documents))))
 
+(defn get-subtype [{schema-info :schema-info :as doc}]
+  (when (:subtype schema-info)
+    (name (:subtype schema-info))))
+
+(defn get-documents-by-subtype
+  "Returns documents of given subtype"
+  [documents subtype]
+  {:pre [(sequential? documents)]}
+  (filter (comp (partial = (name subtype)) get-subtype) documents))
+
 (defn get-applicant-documents
-  "returns applicant documents from application"
-  [application]
-  (filter (comp (partial = "hakija") :subtype :schema-info) (:documents application)))
+  "returns applicant documents from given application documents"
+  [documents]
+  {:pre [(sequential? documents)]}
+  (get-documents-by-subtype documents "hakija"))
+
+(defn get-applicant-document
+  "returns first applicant document from given application documents"
+  [documents]
+  (first (get-applicant-documents documents)))
 
 (defn invites [{auth :auth}]
   (map :invite (filter :invite auth)))
 
 (defn invite [application email]
-  (first (filter #(= (lower-case email) (:email %)) (invites application))))
+  (first (filter #(= (ss/lower-case email) (:email %)) (invites application))))
 
 (defn no-pending-invites? [application user-id]
   (not-any? #(= user-id (-> % :user :id)) (invites application)))
@@ -165,13 +232,14 @@
 
 (defn ->paatos
   "Returns a verdict data structure, compatible with KRYSP schema"
-  [{:keys [verdictId backendId timestamp name given status official text section draft agreement]}]
+  [{:keys [verdictId backendId timestamp name given status official text section draft agreement metadata]}]
   (let [verdict-id (or verdictId (mongo/create-id))]
     {:id verdict-id
     :kuntalupatunnus backendId
     :draft (if (nil? draft) false draft)
     :timestamp timestamp
     :sopimus agreement ; not in KRYSP
+    :metadata metadata ; not in KRYSP?
     :paatokset [{:paivamaarat {:anto             given
                                :lainvoimainen    official}
                  :poytakirjat [{:paatoksentekija name
@@ -214,7 +282,7 @@
    :applicant                ""
    :attachments              []
    :auth                     []
-   :authority                {}
+   :authority                {:firstName "", :lastName "", :id nil}
    :authorityNotice          ""
    :buildings                []
    :closed                   nil ; timestamp
@@ -231,7 +299,8 @@
    :neighbors                []
    :opened                   nil ; timestamp
    :openInfoRequest          false
-   :operations               []
+   :primaryOperation         nil
+   :secondaryOperations      []
    :organization             ""
    :propertyId               ""
    :permitSubtype            ""
@@ -249,6 +318,7 @@
    :transfers                []
    :urgency                  "normal"
    :verdicts                 []
-   :tosFunction              nil})
+   :tosFunction              nil
+   :metadata                 {}})
 
 

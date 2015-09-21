@@ -11,12 +11,13 @@ Mikko creates an application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  assign-to-me${secs}
   Set Suite Variable  ${propertyId}  753-416-25-30
-  Create application the fast way  ${appname}  753  ${propertyId}  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Open to authorities  hojo-hojo
   Element should not be visible  applicationUnseenComments
 
 Mikko sets himself as the applicant
   Open tab  parties
+  Open accordions  parties
   Select From List  henkilo.userId  Intonen Mikko
 
 Person ID is fully masked
@@ -33,10 +34,11 @@ Sonja sees comment indicator on applications list
 
 Application is not assigned
   Open application  ${appname}  ${propertyId}
-  Wait Until  Application is assigned to  Valitse..
+  Wait Until  Application is assigned to  ${EMPTY}
 
 Sonja sees Mikko's person ID masked
   Open tab  parties
+  Open accordions  parties
   Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  210281-****
 
 Sonja sees comment indicator on application
@@ -47,13 +49,18 @@ Sonja resets indicators
   Wait until  Element should not be visible  applicationUnseenComments
 
 Sonja assign application to herself
-  Select From List  xpath=//select[@data-test-id='application-assigneed-authority']  Sibbo Sonja
+  Click link  application-assignee-edit
+  Wait Until  Element should be visible  assignee-select
+  Wait Until  Select From List  assignee-select  Sibbo Sonja
+  Click enabled by test id  modal-dialog-submit-button
+  Wait Until  Element should not be visible  assignee-select
 
 Assignee has changed
   Wait Until  Application is assigned to  Sibbo Sonja
 
 Sonja sees Mikko's full person ID
   Open tab  parties
+  Open accordions  parties
   Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  210281-0002
 
 # LUPA-23
@@ -85,16 +92,13 @@ Application is shown after login
 Sonja cancels the application
   Sonja logs in
   Open application  ${appname}  ${propertyId}
-  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-cancel-authority-btn']
-  Click enabled by test id  application-cancel-authority-btn
-  Confirm  dialog-cancel-application
+  Close current application as authority
 
 
 *** Keywords ***
 
 Application is assigned to
   [Arguments]  ${to}
-  Wait until  Element should be visible  xpath=//select[@data-test-id='application-assigneed-authority']
-  ${assignee} =  Get selected list label  xpath=//select[@data-test-id='application-assigneed-authority']
-  Should be equal  ${assignee}  ${to}
-
+  ${path} =   Set Variable  xpath=//span[@class='application_summary_text']/span[@data-bind='fullName: authority']
+  Wait until  Element should be visible  ${path}
+  Wait until  Element text should be  ${path}  ${to}

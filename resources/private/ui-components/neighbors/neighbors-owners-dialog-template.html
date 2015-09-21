@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="neighbors-owners-dialog-template">
+      <div class="content">
+        <div>
+          <h3 data-bind="visible: isPropertyIdAvailable()">
+            <span data-bind="ltext: 'neighbors.edit.propertyId'"></span>:
+            <span data-bind="propertyId: propertyId"></span>
+          </h3>
+          <span data-bind="text: loc(['neighbors.owners.status', status()])"></span>
+          <img data-bind="visible: isSearching()" src="/img/ajax-loader-16.gif" alt=""/>
+        </div>
+        <div>
+          <table class="application-neighbors property-owners">
+            <thead>
+              <tr>
+                <th><input class="form-input" type="checkbox" data-test-id="select-all-owners" data-bind="checked: ownersGroup" /></th>
+                <th data-bind="ltext: 'neighbors.owner'"></th>
+                <th data-bind="ltext: 'neighbors.owner.address'"></th>
+                <th data-bind="ltext: 'neighbors.owner.type'"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: {data: owners, afterRender: function() {$(window).trigger('resize');}}">
+              <tr>
+                <td>
+                  <input class="form-input" type="checkbox" data-bind="value: $index, checked: selected, attr: {'data-test-id' : 'select-owner-' + $index()}" />
+                </td>
+                <td>
+                  <!-- ko if: nameOfDeceased -->
+                  <span data-bind="text: nameOfDeceased" class="owner-nameOfDeceased"></span>
+                  -<span data-bind="text: loc('neighbors.owner.type.kuolinpesa')"></span>
+                  <br/>
+                  <!-- /ko -->
+
+                  <span data-bind="text: name" class="owner-name"></span>
+
+                  <!-- ko if: businessID -->
+                  (<span data-bind="text: businessID" class="owner-businessID"></span>)
+                  <!-- /ko -->
+                </td>
+                <td>
+                  <span data-bind="text: street" class="owner-street"></span>
+                  <span data-bind="text: zip" class="owner-zip"></span>
+                  <span data-bind="text: city" class="owner-city"></span>
+                </td>
+                <td data-bind="text: loc(['neighbors.owner.type', type])">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div data-bind="component: {name: 'submit-button-group',
+                                  params: { isSubmitVisible: true,
+                                            isSubmitEnabled: isSubmitEnabled,
+                                            submit: addSelectedOwners,
+                                            lSubmitTitle: 'save'}}"></div>
+    </script>
+  </section>
+</body>
+</html>

@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Authority admin edits organization specific operation attachments
+Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
@@ -8,8 +9,7 @@ Resource        ../../common_resource.robot
 
 New applications have Asemapiirros, Pohjapiiros and no Rasitustodistus
   Mikko logs in
-  Apply minimal fixture now
-  Create application the fast way  Latokuja 1, Sipoo  753  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  Latokuja 1, Sipoo  753-416-25-30  kerrostalo-rivitalo
   Open tab  attachments
   Wait until  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-pre-attachments-table']
   Attachment template is visible  paapiirustus.asemapiirros
@@ -40,7 +40,7 @@ Admin removes Pohjapiirros template and adds Rasitustodistus template
 
 Now new applications have Asemapiirros and Rasitustodistus, but no Pohjapiirros
   Mikko logs in
-  Create application the fast way  Latokuja 1, Sipoo  753  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  Latokuja 1, Sipoo  753-416-25-30  kerrostalo-rivitalo
   Open tab  attachments
   Wait until  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-pre-attachments-table']
   Attachment template is visible  paapiirustus.asemapiirros

@@ -3,6 +3,7 @@
             [lupapalvelu.document.asianhallinta_canonical :as ah]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.xml.asianhallinta.asianhallinta_mapping :as ahm]
             [lupapalvelu.i18n :as i18n]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
@@ -10,7 +11,32 @@
             [lupapalvelu.document.rakennuslupa_canonical-test :as rakennus-test]
             [sade.core :refer :all]
             [sade.strings :as ss]
+            [sade.property :as p]
             [sade.util :as util]))
+
+(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta_mapping enrich-attachments-with-operation-data)
+
+(def test-attachments [{:id :attachment1
+                          :type {:type-group "paapiirustus"
+                                 :type-id    "asemapiirros"}
+                          :latestVersion {:version { :major 1 :minor 0 }
+                                          :fileId "file321"
+                                          :filename "asemapiirros.pdf"
+                                          :contentType "application/pdf"}
+                          :modified 1424248442767}
+                         {:id :attachment2
+                          :type {:type-group "hakija"
+                                 :type-id    "valtakirja"}
+                          :latestVersion {:version { :major 1 :minor 0 }
+                                          :fileId "file123"
+                                          :filename "valtakirja.pdf"
+                                          :contentType "application/pdf"}
+                          :op {:id "523844e1da063788effc1c56"}
+                          :modified 1424248442767}
+                         {:id :attachment3
+                          :type {:type-group "paapiirustus"
+                                 :type-id    "pohjapiirros"}
+                          :versions []}])
 
 (defn- has-attachment-types [meta]
   (fact "type-group and type-id"
@@ -40,15 +66,15 @@
             link1 (first links)
             link2 (second links)        ]
         (count links) => 2
+
         (keys link1) => (just [:MuuTunnus])
         (let [link1 (get-in link1 [:MuuTunnus])]
           (keys link1) => (just [:Tunnus :Sovellus])
           (:Tunnus link1) => (get-in application [:linkPermitData 0 :id])
           (:Sovellus link1) => "Lupapiste")
-        (let [link2 (get-in link2 [:MuuTunnus])]
-          (keys link2) => (just [:Tunnus :Sovellus])
-          (:Tunnus link2) => (get-in application [:linkPermitData 1 :id])
-          (:Sovellus link2) => "Taustaj\u00E4rjestelm\u00E4")))))
+
+        (fact "When link permit is not lupapistetunnus, AsianTunnus is used"
+          (get-in link2 [:AsianTunnus]) => (get-in application [:linkPermitData 1 :id]))))))
 
 (fl/facts* "UusiAsia canonical"
   (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy
@@ -93,7 +119,7 @@
               data    (tools/unwrapped (get-in application [:documents 4 :data]))
               yritys  (:Yritys maksaja)]
           (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
-            (keys maksaja) => (just [:Yritys :Laskuviite]))
+            (keys maksaja) => (just [:Yritys :Laskuviite] :in-any-order))
           (fact "Maksaja is not Henkilo"
             (keys keys) =not=> (contains [:Henkilo]))
           (facts "Yritys"
@@ -127,40 +153,21 @@
               op (first ops)]
           (count ops) => 1
           (keys op) => (just [:ToimenpideTunnus :ToimenpideTeksti])
-          (:ToimenpideTunnus op) => (get-in application [:operations 0 :name])
-          (:ToimenpideTeksti op) => (i18n/localize "fi" (str "operations." (get-in application [:operations 0 :name])))))
+          (:ToimenpideTunnus op) => (:name (:primaryOperation application))
+          (:ToimenpideTeksti op) => (i18n/localize "fi" (str "operations." (:name (:primaryOperation application))))))
 
       (fact "Asiointikieli"
         (get-in canonical [:UusiAsia :Asiointikieli]) => "fi")
       (fact "Sijainti is correct"
-        (get-in canonical [:UusiAsia :Sijainti :Sijaintipiste]) => (str (-> application :location :x) " " (-> application :location :y)))
+        (get-in canonical [:UusiAsia :Sijainti :Sijaintipiste]) => (str (-> application :location first) " " (-> application :location second)))
       (fact "Kiinteistotunnus is human readable"
-        (get-in canonical [:UusiAsia :Kiinteistotunnus]) => (sade.util/to-human-readable-property-id (:propertyId application))))
+        (get-in canonical [:UusiAsia :Kiinteistotunnus]) => (p/to-human-readable-property-id (:propertyId application))))
 
     (facts "Canonical with attachments"
       (let [begin-of-link "sftp://localhost/test/"
-            attachments [{:id :attachment1
-                          :type {:type-group "paapiirustus"
-                                 :type-id    "asemapiirros"}
-                          :latestVersion {:version { :major 1 :minor 0 }
-                                          :fileId "file321"
-                                          :filename "asemapiirros.pdf"
-                                          :contentType "application/pdf"}
-                          :modified 1424248442767}
-                         {:id :attachment2
-                          :type {:type-group "hakija"
-                                 :type-id    "valtakirja"}
-                          :latestVersion {:version { :major 1 :minor 0 }
-                                          :fileId "file123"
-                                          :filename "valtakirja.pdf"
-                                          :contentType "application/pdf"}
-                          :op {:name "poikkeamis"}
-                          :modified 1424248442767}
-                         {:id :attachment3
-                          :type {:type-group "paapiirustus"
-                                 :type-id    "pohjapiirros"}
-                          :versions []}]
+            attachments test-attachments
             application-with-attachments (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
+            application-with-attachments (ahm/enrich-application application-with-attachments)
             canonical-attachments (ah/get-attachments-as-canonical (:attachments application-with-attachments) begin-of-link)]
         (fact "Canonical has correct count of attachments"
           (count canonical-attachments) => 2)
@@ -178,12 +185,20 @@
               (doseq [meta metas]
                 (has-attachment-types meta)))
             (fact "Second attachment has operation meta"
-              (last (second metas)) => {:Avain "operation" :Arvo (get-in attachments [1 :op :name])}))))))
+              (last (second metas)) => {:Avain "operation" :Arvo (:name (:primaryOperation application-with-attachments))}))))))
 
   (fl/facts* "TaydennysAsiaan canonical"
-             (let [application poikkeus-test/poikkari-hakemus
-                   canonical (ah/application-to-asianhallinta-taydennys-asiaan-canonical application) => truthy]
-               (facts "TaydennysAsiaan canonical from poikkeus-test/poikkari-hakemus"
-                 (fact "TaydennysAsiaan not empty" (:TaydennysAsiaan canonical) => seq)
-                 (fact "TaydennysAsiaan keys" (keys (get-in canonical [:TaydennysAsiaan])) => (just [:HakemusTunnus] :in-any-order))
-                 (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:TaydennysAsiaan :HakemusTunnus]) => "LP-753-2013-00001")))))
+    (let [application poikkeus-test/poikkari-hakemus
+          canonical (ah/application-to-asianhallinta-taydennys-asiaan-canonical application) => truthy
+          canonical-attachments (ah/get-attachments-as-canonical
+                                  (enrich-attachments-with-operation-data test-attachments (conj (seq (:secondaryOperations application)) (:primaryOperation application)))
+                                  "sftp://localhost/test")]
+      (facts "TaydennysAsiaan canonical from poikkeus-test/poikkari-hakemus"
+        (fact "TaydennysAsiaan not empty" (:TaydennysAsiaan canonical) => seq)
+        (fact "TaydennysAsiaan keys" (keys (get-in canonical [:TaydennysAsiaan])) => (just [:HakemusTunnus] :in-any-order))
+        (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:TaydennysAsiaan :HakemusTunnus]) => "LP-753-2013-00001")
+
+        (facts "Attachments"
+          (count canonical-attachments) => 2
+          (fact "Second attachment has operation Metatieto"
+            (last (get-in (second canonical-attachments) [:Metatiedot :Metatieto])) => {:Avain "operation" :Arvo (:name (:primaryOperation application))}))))))

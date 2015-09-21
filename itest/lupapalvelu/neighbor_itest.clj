@@ -1,19 +1,24 @@
 (ns lupapalvelu.neighbor-itest
   (:require [midje.sweet  :refer :all]
+            [clojure.string :as s]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [clojure.string :as s]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
-            [sade.util :refer [find-by-id]]
-            [sade.util :refer [fn->]]))
+            [lupapalvelu.ttl :as ttl]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.fixture.core :as fixture]
+            [sade.core :refer [now]]
+            [sade.util :refer [fn->] :as util]))
+
+(mongo/with-db test-db-name (fixture/apply-fixture "minimal"))
 
 (defn invalid-token? [resp] (= resp {:ok false, :text "error.token-not-found"}))
 (defn invalid-response? [resp] (= (dissoc resp :response) {:ok false, :text "error.invalid-response"}))
 (defn invalid-vetuma? [resp] (= (dissoc resp :response) {:ok false, :text "error.invalid-vetuma-user"}))
 
 (facts "add neigbor with missing optional data"
-  (let [application-id (create-app-id pena :municipality sonja-muni)]
+  (let [application-id (create-app-id pena :propertyId sipoo-property-id)]
     (comment-application pena application-id true) => ok?
     (fact "no name"   (command sonja "neighbor-add" :id application-id :propertyId "p"           :street "s" :city "c" :zip "z" :email "e") => ok?)
     (fact "no street" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n"             :city "c" :zip "z" :email "e") => ok?)
@@ -33,7 +38,7 @@
 
 (facts "create app, add neighbor"
   (let [[application neighborId neighbors] (create-app-with-neighbor)
-        neighbor (find-by-id neighborId neighbors)]
+        neighbor (util/find-by-id neighborId neighbors)]
     (fact neighbor => (contains {:propertyId "p"
                                  :owner {:name "n"
                                          :businessID nil
@@ -50,7 +55,7 @@
         _ (command sonja "neighbor-update" :id application-id :neighborId neighborId :propertyId "p2" :name "n2" :street "s2" :city "c2" :zip "z2" :email "e2")
         application (query-application pena application-id)
         neighbors (:neighbors application)
-        neighbor (find-by-id neighborId neighbors)]
+        neighbor (util/find-by-id neighborId neighbors)]
     (fact (count neighbors) => 1)
     (fact neighbor => (contains {:propertyId "p2"
                                  :owner {:name "n2"
@@ -70,7 +75,7 @@
         neighbors (:neighbors application)]
     (fact (count neighbors) => 0)))
 
-(facts "neighbor invite email has correct link"
+(facts "neighbor invite email has..."
   (let [neighbor-email-addr       "abba@example.com"
         [application neighbor-id] (create-app-with-neighbor :address "Naapurikuja 3")
         application-id            (:id application)
@@ -79,13 +84,18 @@
                                                 :neighborId neighbor-id
                                                 :email neighbor-email-addr)
         email                     (last-email)
-        [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" (get-in email [:body :plain]))]
+        [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" (get-in email [:body :plain]))
+        expiration-date           (util/to-local-date (+ ttl/neighbor-token-ttl (now)))]
 
-    (:to email) => neighbor-email-addr
-    (:subject email) => "Lupapiste.fi: Naapurikuja 3 - naapurin kuuleminen"
-    a-id => application-id
-    n-id => neighbor-id
-    token => #"[A-Za-z0-9]{48}"))
+    (fact "correct to" (:to email) => neighbor-email-addr)
+    (fact "correct subject" (:subject email) => "Lupapiste.fi: Naapurikuja 3 - naapurin kuuleminen")
+    (fact "neighbor name field" (get-in email [:body :plain]) => (contains #"Hei( \w+)+,"))
+    (fact "correnct link"
+      a-id => application-id
+      n-id => neighbor-id
+      token => #"[A-Za-z0-9]{48}")
+    (fact "correct expiration date"
+      (get-in email [:body :plain]) => (contains expiration-date))))
 
 (facts* "neighbor invite & view on application"
   (let [[{application-id :id :as application} neighborId] (create-app-with-neighbor)
@@ -95,7 +105,7 @@
                                       :neighborId neighborId
                                       :email "abba@example.com") => ok?
         application     (query-application pena application-id)
-        hakija-doc-id   (:id (domain/get-document-by-name application "hakija"))
+        hakija-doc-id   (:id (domain/get-applicant-document (:documents application)))
         uusirak-doc-id  (:id (domain/get-document-by-name application "uusiRakennus"))]
 
         (command pena :update-doc
@@ -139,7 +149,6 @@
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => "Katuosoite"
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => "040-2345678"))
 
-    (fact "neighbor application query does not return hetu"
       (let [resp        (query pena :neighbor-application
                                     :applicationId application-id
                                     :neighborId neighborId
@@ -152,36 +161,46 @@
         resp => (contains {:ok true})
         application => truthy
 
-        (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
-        (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
-        (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil
-        (-> hakija-doc :data :henkilo :henkilotiedot :turvakieltoKytkin) => false
-        (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => nil
-        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
-        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
-        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => nil
-        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => nil
-        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => nil
-        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => nil
+        (fact "neighbor application query does not return hetu"
+          (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
+          (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
+          (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil
+          (-> hakija-doc :data :henkilo :henkilotiedot :turvakieltoKytkin) => false
+          (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => nil
 
-        (facts "random testing about content"
-          (:comments application) => nil
-          (count (:documents application)) => 5 ; evil
+            )
+        (fact "has no comments"
+          (:comments application) => empty?)
 
-          (fact "attachments"
-            (fact "there are some attachments"
-              (->> application :attachments count) => pos?)
-            (fact "everyone is paapiirustus"
-              (->> application :attachments (some (fn-> :type :type-group (not= "paapiirustus")))) => falsey)
+        (let [document-types (set (map (comp :name :schema-info) (:documents application)))
+              has-doc (fn [doc-schema-name] (document-types doc-schema-name))]
+          (fact "has hakija document" "hakija-r" => has-doc)
+          (fact "has hankkeen-kuvaus document" "hankkeen-kuvaus" => has-doc)
+          (fact "has rakennuspaikka document" "rakennuspaikka" => has-doc)
+          (fact "does not have paatoksen-toimitus-rakval document" "paatoksen-toimitus-rakval" =not=> has-doc))
 
-            (let [file-id (->> application :attachments first :latestVersion :fileId)]
-              (fact "downloading should be possible"
-                (raw nil "neighbor-download-attachment" :neighborId neighborId :token token :fileId file-id) => http200?)
 
-              (fact "downloading with wrong token should not be possible"
-                (raw nil "neighbor-download-attachment" :neighborId neighborId :token "h4x3d token" :fileId file-id) => http401?)))
+        (fact "attachments"
+          (fact "there are some attachments"
+            (->> application :attachments count) => pos?)
+          (fact "everyone is paapiirustus"
+            (->> application :attachments (some (fn-> :type :type-group (not= "paapiirustus")))) => falsey)
 
-          (:auth application) => nil)))
+          (let [file-id (->> application :attachments first :latestVersion :fileId)]
+            (fact "downloading should be possible"
+              (raw nil "neighbor-download-attachment" :neighborId neighborId :token token :fileId file-id) => http200?)
+
+            (fact "downloading with wrong token should not be possible"
+              (raw nil "neighbor-download-attachment" :neighborId neighborId :token "h4x3d token" :fileId file-id) => http401?)))
+
+        (fact "does not have auth information"
+          (:auth application) => empty?))
 
     (fact "without tupas, neighbor can't give response"
       (command pena :neighbor-response
@@ -212,6 +231,15 @@
             :token token
             :response "comments"
             :message "kehno suunta") => ok?)
+
+        (fact "applicant can not see neighbor's person id"
+          (let [application (query-application pena application-id)
+                userids (->> application
+                          :neighbors
+                          (map :status)
+                          flatten
+                          (map (comp :userid :vetuma)))]
+            userids => (partial every? nil?)))
 
         (fact "neighbor can't re-give response 'cos vetuma has expired"
           (command pena :neighbor-response

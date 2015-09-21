@@ -11,6 +11,26 @@
     self.neighborId = ko.observable();
     self.map = null;
 
+    var neighborSkeleton = {propertyId: undefined,
+                            owner: {
+                                address: {
+                                  city: undefined,
+                                  street: undefined,
+                                  zip: undefined
+                                },
+                                businessID: undefined,
+                                email: undefined,
+                                name: undefined,
+                                nameOfDeceased: undefined,
+                                type: undefined
+                            }};
+
+    function ensureNeighbors(neighbor) { // ensure neighbors have correct properties defined
+      var n = _.defaults(neighbor, neighborSkeleton);
+      n.owner = _.defaults(n.owner, neighborSkeleton.owner); // _.defaults is not deep
+      return n;
+    }
+
     self.init = function(application) {
       if (!self.map) {
         self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
@@ -20,18 +40,16 @@
           y = location.y;
       self
         .applicationId(application.id)
-        .neighbors(application.neighbors)
+        .neighbors(_.map(application.neighbors, ensureNeighbors))
         .neighborId(null)
-        .map.updateSize().clear().center(x, y, 13).add({x: x, y: y});
+        .map.clear().updateSize().center(x, y, 13).add({x: x, y: y});
     };
 
     function openEditDialog(params) {
-      var loc = { title: "neighbors.edit.title",
-                  submitButton: "save" };
-      hub.send("show-dialog", {loc: loc,
-                               component: "neighbors-edit",
+      hub.send("show-dialog", {ltitle: "neighbors.edit.title",
+                               component: "neighbors-edit-dialog",
                                componentParams: params,
-                               extraClass: "neighbors-edit"});
+                               size: "medium"});
     }
 
     self.edit = function(neighbor) {
@@ -43,16 +61,15 @@
     };
 
     self.click = function(x, y) {
-      var loc = { title: "neighbor.owners.title",
-                  submitButton: "save" };
-      hub.send("show-dialog", { loc: loc,
-                                component: "neighbors-owners",
+      hub.send("show-dialog", { ltitle: "neighbor.owners.title",
+                                size: "large",
+                                component: "neighbors-owners-dialog",
                                 componentParams: {x: x,
                                                   y: y} });
     };
 
     self.done = function() {
-      window.location.hash = "!/application/" + applicationId + "/statement";
+      pageutil.openApplicationPage({id: applicationId}, "statement");
     };
 
     self.remove = function(neighbor) {
@@ -80,6 +97,10 @@
   hub.onPageLoad("neighbors", function(e) {
     applicationId = e.pagePath[0];
     repository.load(applicationId);
+  });
+
+  hub.onPageUnload("neighbors", function() {
+    model.map = null;
   });
 
   repository.loaded(["neighbors"], function(application) {

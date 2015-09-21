@@ -138,25 +138,29 @@ LUPAPISTE.MapModel = function(authorizationModel) {
   self.refresh = function(application) {
     currentAppId = application.id;
 
-    location = application.location;
-    var x = location.x;
-    var y = location.y;
+    var x = application.location.x;
+    var y = application.location.y;
 
-    if (x === 0 && y === 0) {
+    if (!x && !y) {
       $("#application-map").css("display", "none");
+      $("#inforequest-map").css("display", "none");
     } else {
       $("#application-map").css("display", "inline-block");
+      $("#inforequest-map").css("display", "inline-block");
     }
 
     drawings = application.drawings;
 
     var map = getOrCreateMap(application.infoRequest ? "inforequest" : "application");
 
+    map.clear().updateSize().center(x, y).add({x: x, y: y});
+
     // In some cases, e.g. in location {x: 461586.443, y: 7472906.0969994}
     // map is initialized to wrong size in IE 11.
     // Workaround: initialize different zoom level and zoom into correct level.
-    map.clear().updateSize().center(x, y, 3).add({x: x, y: y});
-    map.zoomTo(14);
+    if (location === null || (x !== location.x && y !== location.y)) {
+      map.center(x, y, 3).zoomTo(14);
+    }
 
     if (drawings) {
       map.drawDrawings(drawings, {}, drawStyle);
@@ -174,7 +178,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       //   I.e. call "if (inforequestMarkerMap) inforequestMarkerMap.clear().destroy();" (create a forwarding destroy() method to gis.js)
       //   But this is even uglier than the jQuery option.
       //
-      if (authorizationModel.ok('inforequest-markers')) {
+      if (authorizationModel.ok("inforequest-markers")) {
         var irMarkersMap = getOrCreateMap("inforequest-markers");
         irMarkersMap.clear().updateSize().center(x, y, 14);
         setRelevantMarkersOntoMarkerMap(irMarkersMap, currentAppId, x, y);
@@ -184,13 +188,8 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       }
 
     }
-  };
 
-  self.updateMapSize = function(kind) {
-    getOrCreateMap(kind).updateSize();
-    if (kind === "inforequest") {
-      getOrCreateMap("inforequest-markers").updateSize();
-    }
+    location = application.location;
   };
 
 

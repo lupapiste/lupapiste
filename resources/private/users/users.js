@@ -1,10 +1,21 @@
 var users = (function($) {
   "use strict";
 
-  function toLoc(data) { return loc(data); }
   function toActive(data) { return loc(["users.data.enabled", data]); }
-  function toOrgs(data) { return data ? data.join(", ") : ""; }
   function rowCreated(row, data) { $(row).attr("data-user-email", data[0]); }
+
+  function toLocalizedOrgAuthz(data) {
+    if (_.isObject(data)) {
+      return _.map(data, function(roles, org) {
+        var localizedRoles = _.map(roles, function(role) {
+          return loc(["authorityrole", role]);
+        });
+        return "<b>" + org + ":</b> " + localizedRoles.join(", ");
+      }).join(", ");
+    } else {
+      return loc(data);
+    }
+  }
 
   function UsersModel(component, opts) {
     var self = this;
@@ -52,10 +63,9 @@ var users = (function($) {
       return {user: user,
               0: user.email,
               1: user.lastName + " " + user.firstName,
-              2: user.role,
-              3: user.organizations ? user.organizations : [],
-              4: user.enabled,
-              5: ""}; // column 5 will be set by toOps
+              2: user.orgAuthz ? user.orgAuthz : user.role,
+              3: user.enabled,
+              4: ""}; // column 4 will be set by toOps
     };
 
     self.processResults = function(r) {
@@ -71,8 +81,7 @@ var users = (function($) {
         .concat(_.map(self.filters, function(v, k) { return {name: "filter-" + k, value: v()}; }))
         .reduce(function(m, p) { m[p.name] = p.value; return m; }, {});
       ajax
-        .command("users-for-datatables")
-        .json({params: params})
+        .datatables("users-for-datatables", {params: params})
         .success(_.compose(callback, self.processResults))
         .call();
     };
@@ -106,11 +115,15 @@ var users = (function($) {
       if (!op || !email) {
         return false;
       }
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
+      if (op.rowOperationFn) {
+        op.rowOperationFn(self.dataTable.fnGetData(target.closest("tr")[0]));
+      } else {
+        LUPAPISTE.ModalDialog.showDynamicYesNo(
           loc(["users.op", op.name, "title"]),
           loc(["users.op", op.name, "message"], email),
           {title: loc("yes"), fn: function() { op.operation(email, self.redrawCallback); }},
           {title: loc("cancel")});
+      }
       return false;
     });
 
@@ -118,11 +131,10 @@ var users = (function($) {
       bProcessing:      true, // don't hide this, it brakes layout.
       bServerSide:      true,
       sAjaxSource:      "",
-      aoColumnDefs:     [{aTargets: [1,2,3,4,5], bSortable: false},
-                         {aTargets: [2], mRender: toLoc},
-                         {aTargets: [3], mRender: toOrgs},
-                         {aTargets: [4], mRender: toActive},
-                         {aTargets: [5], fnCreatedCell: self.toOps}],
+      aoColumnDefs:     [{aTargets: [1,2,3,4], bSortable: false},
+                         {aTargets: [2], mRender: toLocalizedOrgAuthz},
+                         {aTargets: [3], mRender: toActive},
+                         {aTargets: [4], fnCreatedCell: self.toOps}],
       aaSorting:        [[0, "desc"]],
       sDom:             "<t><<r><p><i><l>>", // <'table-filter' f>
       iDisplayLength:   10,

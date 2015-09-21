@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation   Admin edits authority admin users
-Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
@@ -22,7 +21,7 @@ Solita admin search Ronja and resets her password
   Confirm  dynamic-yes-no-confirm-dialog
 
 Ronja receives an email
-  Go to          ${SERVER}/api/last-email
-  Wait until     Element Text Should Be  xpath=//dd[@id='to']  ronja.sibbo@sipoo.fi
+  Open last email
+  Wait until     Element Text Should Be  xpath=//dd[@data-test-id='to']  ronja.sibbo@sipoo.fi
   Click element  xpath=//a
   Wait until     Element should be visible  xpath=//section[@id='setpw']

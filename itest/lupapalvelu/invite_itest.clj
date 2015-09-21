@@ -22,9 +22,9 @@
     (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
 
-  (let [application-id (create-app-id mikko :municipality sonja-muni :address "Kutsukatu 13")
+  (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kutsukatu 13")
         app    (query-application mikko application-id)
-        {hakija-doc :doc}  (command mikko :create-doc :id application-id :schemaName "hakija") => truthy
+        {hakija-doc :doc}  (command mikko :create-doc :id application-id :schemaName "hakija-r") => truthy
         suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija")) => truthy
         paasuunnittelija-doc (:id (domain/get-document-by-name app "paasuunnittelija")) => truthy]
 
@@ -43,18 +43,23 @@
     (fact "Mikko must be able to invite Teppo!"
       (last-email) ; Inbox zero
 
-      (invite mikko application-id suunnittelija-doc "suunnittelija" (email-for-key teppo) "Hei, sinut on kustuttu") => ok?
+      (invite mikko application-id suunnittelija-doc "suunnittelija" (email-for-key teppo) "Hei, sinut on kutsuttu") => ok?
 
-      (count (:invites (query teppo :invites))) => 1
+      (let [invs (query teppo :invites)
+            email (last-email)]
 
-      (let [email (last-email)]
+        (count (:invites invs)) => 1
+
+        (fact "invite response has correct application map keys"
+          (keys (:application (first (:invites invs)))) => (just [:id :municipality :address :primaryOperation] :in-any-order))
+
         email => (partial contains-application-link? application-id "applicant")
         (:to email) => (contains (email-for-key teppo))
         (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"
-        (get-in email [:body :plain]) => (contains "Hei, sinut on kustuttu")))
+        (get-in email [:body :plain]) => (contains "Hei, sinut on kutsuttu")))
 
     (fact "Sonja must NOT be able to uninvite Teppo!"
-      (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => not-accessible?
+      (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => unauthorized?
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Mikko can't unsubscribe Teppo's notifications"
@@ -91,6 +96,9 @@
     (fact "Teppo can read Mikko's application before accepting"
       (query teppo :application :id application-id) => ok?)
 
+    (fact "Teppo can not be se to document before he accepts invite"
+      (command mikko :set-user-to-document :id application-id :documentId hakija-doc :userId teppo-id :path "henkilo") => (partial expected-failure? "error.application-does-not-have-given-auth"))
+
     (fact "Teppo can not comment on Mikko's application before accepting the invite"
       (comment-application teppo application-id true) => unauthorized?)
 
@@ -105,7 +113,7 @@
 
     (fact "Mikko is the applicant"
       (let [application  (query-application mikko application-id)
-            first-hakija (domain/get-document-by-name application "hakija")]
+            first-hakija (domain/get-applicant-document (:documents application))]
         (:id first-hakija) =not=> hakija-doc
         (get-in first-hakija [:data :henkilo :henkilotiedot :etunimi :value]) => ""
         (:applicant application ) => "Intonen Mikko"))
@@ -151,7 +159,7 @@
     (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
 
-  (let [resp  (create-app sonja :municipality sonja-muni) => ok?
+  (let [resp  (create-app sonja :propertyId sipoo-property-id) => ok?
         id    (:id resp) => truthy
         app    (query-application sonja id)
         suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija"))]

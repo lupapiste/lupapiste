@@ -23,7 +23,7 @@
   position: fixed;
   right: -500px;
   top: 60px;
-  box-sizing: border-box;
+  bottom: 0;
 
   .comment-controls {
     margin-left: 0;
@@ -37,37 +37,38 @@
     .btn-conversation, .btn-notice {
       box-shadow: 1px 1px 3px darken($lp-dark-grey, 10%);
       padding: 1em;
-      outline: none;
-      background: fade-out($lp-orange, 0.1);
-      background: lighten($lp-orange, 20%) \9; /* IE 8 and below */
-      width: 40px;
-      text-align: center;
-      text-transform: uppercase;
+      margin-bottom: $marginM;
+      /* outline: none; */
+      /* background: fade-out($lp-orange, 0.1); */
+      /* background: lighten($lp-orange, 20%) \9; /\* IE 8 and below *\/ */
+      //width: 40px;
+      /* text-align: center; */
+      /* text-transform: uppercase; */
       display: block;
-      color: #fff;
-      text-shadow: 0px 1px 0px $lp-dark-grey;
+      /* color: #fff; */
+      /* text-shadow: 0px 1px 0px $lp-dark-grey; */
       font-weight: bold;
-      border: 1px solid darken($lp-orange, 10%);
-      border-right: 0;
-      word-break: break-all;
-      clear: both;
-      float: right;
-      span {
-        display: block;
-      }
+      /* border: 1px solid darken($lp-orange, 10%); */
+      /* border-right: 0; */
+      /* word-break: break-all; */
+      /* clear: both; */
+      /* float: right; */
+      /* span { */
+      /*   display: block; */
+      /* } */
       .btn-title {
-        @include disable-select;
-        word-break: break-all;
-        max-width: 12px;
-        letter-spacing: 2px;
+        //@include disable-select;
+        /* word-break: break-all; */
+        /* max-width: 12px; */
+        //letter-spacing: 2px;
       }
       .unseen-comments {
         @include spite-bg;
         background-position: 1px -5396px;
-        width: 23px;
+        width: $lupicon-size;
         height: 30px;
         padding-top: 3px;
-        margin-left: -6px;
+        //margin-left: -6px;
         margin-bottom: 4px;
         color: $color-text;
         text-shadow: none;
@@ -75,21 +76,22 @@
     }
 
     .btn-conversation.active, .btn-notice.active {
-      width: 46px;
-      box-shadow: 0 0 5px lighten($lp-orange, 10%);
-      &:before {
-        border-right: 6px solid darken($lp-orange, 15%);
-        display:block;
-        content:".";
-        color:transparent;
-        font-size:0;
-        height:100%;
-        position:absolute;
-        right:-1px;
-        padding:1px 0;
-        top:-1px;
-        bottom:-1px;
-      }
+      background-color: $orange-hover;
+    /*   width: 46px; */
+    /*   box-shadow: 0 0 5px lighten($lp-orange, 10%); */
+    /*   &:before { */
+    /*     border-right: 6px solid darken($lp-orange, 15%); */
+    /*     display:block; */
+    /*     content:"."; */
+    /*     color:transparent; */
+    /*     font-size:0; */
+    /*     height:100%; */
+    /*     position:absolute; */
+    /*     right:-1px; */
+    /*     padding:1px 0; */
+    /*     top:-1px; */
+    /*     bottom:-1px; */
+    /*   } */
     }
   }
 
@@ -100,7 +102,6 @@
     background: $lp-dark-grey \9; /* IE 8 and below */
     border: 1px solid darken($lp-dark-grey, 10%);
     padding: $marginS;
-    position: relative;
     width: 500px;
   }
 
@@ -109,6 +110,10 @@
     cursor: default;
     h1 {
       line-height: 30px;
+      overflow: auto;
+      clear: both;
+    }
+    .title {
       float: left;
     }
     .close-btn {
@@ -117,41 +122,66 @@
       height: 16px;
       background-position: 0px -2700px;
       cursor: pointer;
-      float: right;
-      margin-top: $marginS;
+      position: absolute;
+      top: $marginS;
+      right: $marginS;
     }
     .help {
       margin-left: $marginM;
+      float: left;
       &:after {
         border-bottom-color: lighten($lp-dark-grey, 15%);
       }
+    }
+    .icon.help.expanded {
+      margin-bottom: 22px;
     }
   }
 
   .content {
     overflow: auto;
-    position: absolute;
-    top: 44px;
-    bottom: $marginS;
-    right: $marginS;
-    left: $marginS;
-    width: auto;
+    height: 100%;
+
     .form-input.textarea {
       width: 100%;
       box-sizing: border-box;
     }
+
   }
 
-  .content.expanded {
+  .content-table {
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+    display: table;
+
+    .form-input.textarea {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .content-row {
+      display: table-row;
+    }
+
+    .content-cell {
+      display: table-cell;
+      padding-bottom: $marginS;
+      position: relative;
+    }
+  }
+
+  .content.expanded, .content-table.expanded {
     top: 200px;
   }
 
   .panel-info {
     background: lighten($lp-dark-grey, 15%);
     padding: $marginS;
+    clear: both;
   }
 
-  p, h1 {
+  h1 {
     color: #fff;
   }
 
@@ -167,12 +197,12 @@
     height: 100%;
 
     .application-urgency {
-      position: relative;
-      margin-bottom: $marginS;
       width: 215px;
+      position: relative;
     }
 
-    .application-notices {
+    .application-tags {
+      z-index: 1;
       position: relative;
     }
 
@@ -189,15 +219,15 @@
     label {
       vertical-align: bottom;
     }
+
     .textarea-wrapper {
-      position: absolute;
-      top: 86px;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      height: 100%;
+      padding-bottom: 62px;
     }
+
     .form-input.textarea {
       height: 100%;
+      height: 300px\9;
       margin: 0;
     }
 
@@ -218,12 +248,19 @@
 }
 
 #conversation-panel {
+  height: 100%;
   textarea {
     -webkit-transition: box-shadow 250ms ease;
     -moz-transition: box-shadow 250ms ease;
     -ms-transition: box-shadow 250ms ease;
     -o-transition: box-shadow 250ms ease;
     transition: box-shadow 250ms ease;
+  }
+  padding-bottom: 46px;
+  .header {
+    h1 {
+      margin-bottom: 0;
+    }
   }
 }
 
@@ -234,20 +271,32 @@
   }
 }
 
+#side-panel .message-buttons {
+  button {
+    margin-bottom: $marginS;
+  }
+}
+
 @media all and (max-width: 1280px) {
   #side-panel {
     .content-wrapper {
-      width: 300px;
+      width: 400px;
     }
   }
 
   #side-panel {
-    right: -300px;
+    right: -400px;
   }
 
   .comment-controls {
     .comment-request {
       margin-left: 0;
+    }
+  }
+  #side-panel .message-buttons {
+    @include stacked;
+    button {
+      margin-bottom: $marginS;
     }
   }
 }

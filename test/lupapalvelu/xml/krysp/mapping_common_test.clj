@@ -72,33 +72,33 @@
 
 (facts "schemalocation"
   (fact "rakval 2.1.2"
-    (schemalocation "rakennusvalvonta" "2.1.2") =>
+    (schemalocation :R "2.1.2") =>
     (str common-210 "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd"))
   (fact "rakval 2.1.4"
-    (schemalocation "rakennusvalvonta" "2.1.4") =>
+    (schemalocation :R "2.1.4") =>
     "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.2/yhteiset.xsd\nhttp://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd\nhttp://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.4/rakennusvalvonta.xsd")
 
   (fact "poikkari 2.1.2"
-    (schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.2") =>
+    (schemalocation :P "2.1.2") =>
     (str common-210 "http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu/2.1.2/poikkeamispaatos_ja_suunnittelutarveratkaisu.xsd"))
 
   (fact "YA 2.1.2"
-    (schemalocation "yleisenalueenkaytonlupahakemus" "2.1.2") =>
+    (schemalocation :YA "2.1.2") =>
     (str common-210 "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd"))
 
   (fact "MAL 2.1.2"
-    (schemalocation "ymparisto/maa_ainesluvat" "2.1.2")
+    (schemalocation :MAL "2.1.2")
     (str common-213 "http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat/2.1.2/maaAinesluvat.xsd"))
 
   (fact "YI 2.1.2"
-    (schemalocation "ymparisto/ilmoitukset" "2.1.2") =>
+    (schemalocation :YI "2.1.2") =>
     (str common-213 "http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset/2.1.2/ilmoitukset.xsd"))
 
   (fact "YL 2.1.2"
-    (schemalocation "ymparisto/ymparistoluvat" "2.1.2") =>
+    (schemalocation :YL "2.1.2") =>
     (str common-213 "http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat/2.1.2/ymparistoluvat.xsd"))
 
   (fact "VVVL 2.1.3"
-    (schemalocation "ymparisto/vesihuoltolaki" "2.1.3") =>
+    (schemalocation :VVVL "2.1.3") =>
     (str common-213 "http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki/2.1.3/vesihuoltolaki.xsd"))
   )

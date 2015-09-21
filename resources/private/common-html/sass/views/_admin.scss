@@ -17,3 +17,50 @@
     margin-top: $marginL;
   }
 }
+
+#link-to-vendor-backend-config {
+  table {
+    td { width: 50%; }
+    td.value {
+      input { width: 80%; }
+      .save-indicator { top: 0px; }
+      position: relative;
+    }
+  }
+}
+
+.permanent-archive-setting {
+  position: relative;
+  margin: $marginM 0;
+  input {
+    vertical-align: middle;
+  }
+  .form-indicator {
+    top: -5px;
+    right:auto;
+    left: 250px;
+  }
+}
+
+#notifications {
+  p {
+    margin-bottom: 0;
+  }
+
+  label {
+    display: block;
+  }
+
+  input[type=checkbox] + label {
+    display: inline-block;
+  }
+
+  input[type=text] {
+    width: 480px;
+    box-sizing: border-box;
+  }
+  textarea {
+    width: 480px;
+    box-sizing: border-box;
+  }
+}

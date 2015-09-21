@@ -35,7 +35,6 @@ var taskPageController = (function() {
   "use strict";
 
   var currentApplicationId = null;
-  var currentApplicationTitle = null; // TODO read from global application instance after that has been implemented
   var currentTaskId = null;
   var task = ko.observable();
   var processing = ko.observable(false);
@@ -51,7 +50,7 @@ var taskPageController = (function() {
 
   function returnToApplication() {
     reload();
-    window.location.hash = "!/application/" + currentApplicationId + "/tasks";
+    pageutil.openApplicationPage({id: currentApplicationId}, "tasks");
   }
 
   function deleteTask() {
@@ -98,10 +97,9 @@ var taskPageController = (function() {
    */
   function refresh(application, taskId) {
     currentApplicationId = application.id;
-    currentApplicationTitle = application.title;
     currentTaskId = taskId;
 
-    lupapisteApp.setTitle(currentApplicationTitle);
+    lupapisteApp.setTitle(lupapisteApp.models.application.title());
 
     attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
 
@@ -134,9 +132,9 @@ var taskPageController = (function() {
     }
   }
 
-  repository.loaded(["task"], function(app) {
-    if (currentApplicationId === app.id) {
-      refresh(app, currentTaskId);
+  hub.subscribe("application-model-updated", function(e) {
+    if (pageutil.getPage() === "task") {
+      refresh(lupapisteApp.models.application._js, currentTaskId);
     }
   });
 
@@ -147,19 +145,15 @@ var taskPageController = (function() {
     if (currentApplicationId !== applicationId) {
       repository.load(applicationId);
     } else {
-      lupapisteApp.setTitle(currentApplicationTitle);
+      lupapisteApp.setTitle(lupapisteApp.models.application.title());
     }
     currentApplicationId = applicationId;
   });
 
   hub.subscribe("update-task-success", function(e) {
     if (task() && currentApplicationId === e.appId && currentTaskId === e.documentId) {
-      if (!e.results && !e.results.length) {
-        taskSubmitOk(true);
-      } else {
-        var requiredErrors = util.extractRequiredErrors([e.results]);
-        taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && !requiredErrors.length);
-      }
+      var requiredErrors = util.extractRequiredErrors([e.results]);
+      taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && !requiredErrors.length);
     }
   });
 

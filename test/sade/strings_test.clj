@@ -1,6 +1,7 @@
 (ns sade.strings-test
   (:require [sade.strings :refer :all]
-            [midje.sweet :refer [facts fact => truthy falsey]]))
+            [midje.sweet :refer [facts fact => truthy falsey]])
+  (:refer-clojure :exclude [replace contains? empty?]))
 
 (facts "Test last-n"
   (fact "Nil-safe"
@@ -55,6 +56,13 @@
   (fact (remove-leading-zeros "0") => "0")
   (fact (remove-leading-zeros "0000000") => "0")
   (fact (remove-leading-zeros "0000009") => "9"))
+
+(facts "zero-pad"
+  (zero-pad 4 "1")     => "0001"
+  (zero-pad 4 "12")    => "0012"
+  (zero-pad 4 "123")   => "0123"
+  (zero-pad 4 "1234")  => "1234"
+  (zero-pad 4 "12345") => "12345")
 
 (facts
   (fact (starts-with "foo" "f")    => truthy)

@@ -16,7 +16,7 @@ Ongelmatilanteissa ota yhteytt&auml; [tuki@lupapiste.fi](tuki@lupapiste.fi).
 
 du kan &auml;ndra ditt l&ouml;senord genom att klicka p&aring; f&ouml;ljande l&auml;nk:
 
-{{link-fi}}
+{{link-sv}}
 
 Kom ih&aring;g att l&auml;nken endast g&auml;ller i 24 timmar!
 

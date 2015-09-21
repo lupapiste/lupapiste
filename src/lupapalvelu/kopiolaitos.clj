@@ -10,7 +10,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.action :as action]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.i18n :refer [with-lang loc]]))
+            [lupapalvelu.i18n :refer [with-lang loc localize]]))
 
 
 ;; Email contents generation
@@ -26,17 +26,17 @@
       "<th>" (loc "application.attachmentFile") "</th>"
       "<th>" (loc "verdict-attachment-prints-order.order-dialog.orderCount") "</th>")))
 
-(defn- get-kopiolaitos-html-table-content [lang attachments]
+(defn- get-kopiolaitos-html-table-content
   "Return attachments' type, content and amount as HTML table rows string."
+  [lang attachments]
   (reduce
     (fn [s att]
       (let [att-map (merge att (:type att))
             file-name (str (:fileId att-map) "_" (:filename att-map))
-            type-str (with-lang lang
-                       (loc
-                         (s/join
-                           "."
-                           ["attachmentType" (:type-group att-map) (:type-id att-map)])))
+            type-str (localize lang
+                       (s/join
+                         "."
+                         ["attachmentType" (:type-group att-map) (:type-id att-map)]))
             contents-str (or (:contents att-map) type-str)]
         (str s (format "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
                  type-str
@@ -81,8 +81,7 @@
 (defn- send-kopiolaitos-email [lang email-addresses attachments orderInfo]
   (let [zip (attachment/get-all-attachments attachments)
         email-attachment {:content zip :file-name zip-file-name}
-        email-subject (str (with-lang lang
-                             (loc :kopiolaitos-email-subject)) \space (:ordererOrganization orderInfo))
+        email-subject (str (localize lang :kopiolaitos-email-subject) \space (:ordererOrganization orderInfo))
         orderInfo (merge orderInfo {:titles (get-kopiolaitos-order-email-titles lang)
                                     :contentsTable (get-kopiolaitos-html-table lang attachments)})
         email-msg (email/apply-template "kopiolaitos-order.html" orderInfo)

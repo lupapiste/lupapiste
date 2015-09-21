@@ -6,7 +6,7 @@
 (fact* "Application can be set to Started state after verdict has been given, and after that to Closed state."
   (let [initial-application (create-and-submit-application sonja
                               :operation "ya-katulupa-vesi-ja-viemarityot"
-                              :municipality sonja-muni
+                              :propertyId sipoo-property-id
                               :address "Paatoskuja 11") => truthy
         application-id (:id initial-application)
         _              (generate-documents initial-application sonja)
@@ -37,6 +37,10 @@
       (get-in email [:body :plain]) => (contains "Rakennusty\u00f6t aloitettu")
       email => (partial contains-application-link? application-id "authority")
 
+      (fact "Verdicts can be fetched even in construction started state, state doesn't change"
+        (command sonja :check-for-verdict :id application-id) => ok?
+        (:state (query-application sonja application-id)) => "constructionStarted")
+
       (command sonja :inform-construction-ready :id application-id :readyTimestampStr "31.12.2013" :lang "fi") => ok?
 
       ;; Closed application
@@ -52,7 +56,7 @@
         email => (partial contains-application-link? application-id "authority")))))
 
 (fact* "Application cannot be set to Started state if it is not an YA type of application."
-  (let [application    (create-and-submit-application sonja :municipality sonja-muni :address "Paatoskuja 11") => truthy
+  (let [application    (create-and-submit-application sonja :propertyId sipoo-property-id :address "Paatoskuja 11") => truthy
         application-id (:id application)
         _              (command sonja :approve-application :id application-id :lang "fi") => ok?
         _              (give-verdict sonja application-id) => ok?

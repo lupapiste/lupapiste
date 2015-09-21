@@ -12,30 +12,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.infoRequest = ko.observable();
   self.openInfoRequest = ko.observable();
   self.state = ko.observable();
-  self.inPostVerdictState = ko.observable(false);
-  self.summaryAvailable = ko.computed(function() {
-    return self.inPostVerdictState() || self.state() === "canceled";
-  });
   self.submitted = ko.observable();
   self.location = ko.observable();
   self.municipality = ko.observable();
-  self.organizationMeta = ko.observable();
-  self.asianhallintaEnabled = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
-  });
-  self.organizationLinks = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().links() : "";
-  });
-  self.organizationName = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().name() : "";
-  });
-  self.requiredFieldsFillingObligatory = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().requiredFieldsFillingObligatory() : false;
-  });
-  self.incorrectlyFilledRequiredFields = ko.observable([]);
-  self.hasIncorrectlyFilledRequiredFields = ko.computed(function() {
-    return self.incorrectlyFilledRequiredFields() && self.incorrectlyFilledRequiredFields().length > 0;
-  });
   self.permitType = ko.observable("R");
   self.propertyId = ko.observable();
   self.title = ko.observable();
@@ -49,17 +28,68 @@ LUPAPISTE.ApplicationModel = function() {
     return _.some((ko.toJS(self.attachments) || []), function(a) {return a.versions && a.versions.length;});
   });
   self.address = ko.observable();
-  self.operations = ko.observable();
+  self.secondaryOperations = ko.observable();
+  self.primaryOperation = ko.observable();
+  self.allOperations = ko.observable();
   self.permitSubtype = ko.observable();
+  self.permitSubtypeHelp = ko.pureComputed(function() {
+    var opName = util.getIn(self, ["primaryOperation", "name"]);
+    if (loc.hasTerm(["help", opName ,"subtype"])) {
+      return "help." + opName + ".subtype"
+    }
+    return undefined;
+  });
+
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();
-  self.applicantPhone = ko.observable();
   self.assignee = ko.observable();
+  self.applicantPhone = ko.observable();
+  self.authority = ko.observable({});
   self.neighbors = ko.observable([]);
   self.statements = ko.observable([]);
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
-  self.taskGroups = ko.computed(function() {
+  self.metadata = ko.observable();
+
+  // Application indicator metadata fields
+  self.unseenStatements = ko.observable();
+  self.unseenVerdicts = ko.observable();
+  self.unseenComments = ko.observable();
+  self.attachmentsRequiringAction = ko.observable();
+
+  // Application metadata fields
+  self.inPostVerdictState = ko.observable(false);
+  self.inPostSubmittedState = ko.observable(false); // TODO: remove
+  self.vendorBackendId = ko.observable(); // TODO: remove
+  self.applicantPhone = ko.observable();
+  self.organizationMeta = ko.observable();
+  self.neighbors = ko.observable([]);
+  self.submittable = ko.observable(true);
+
+  self.organization = ko.observable([]);
+
+  self.asianhallintaEnabled = ko.pureComputed(function() {
+    return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
+  });
+  self.organizationLinks = ko.pureComputed(function() {
+    return self.organizationMeta() ? self.organizationMeta().links() : "";
+  });
+  self.organizationName = ko.pureComputed(function() {
+    return self.organizationMeta() ? self.organizationMeta().name() : "";
+  });
+  self.requiredFieldsFillingObligatory = ko.pureComputed(function() {
+    return self.organizationMeta() ? self.organizationMeta().requiredFieldsFillingObligatory() : false;
+  });
+  self.incorrectlyFilledRequiredFields = ko.observable([]);
+  self.hasIncorrectlyFilledRequiredFields = ko.pureComputed(function() {
+    return self.incorrectlyFilledRequiredFields() && self.incorrectlyFilledRequiredFields().length > 0;
+  });
+
+  self.summaryAvailable = ko.pureComputed(function() {
+    return self.inPostVerdictState() || self.state() === "canceled";
+  });
+
+  self.taskGroups = ko.pureComputed(function() {
     var tasks = ko.toJS(self.tasks) || [];
     // TODO query without foreman tasks
     tasks = _.filter(tasks, function(task) {
@@ -83,7 +113,7 @@ LUPAPISTE.ApplicationModel = function() {
             task.displayName = taskUtil.shortDisplayName(task);
             task.openTask = function() {
               taskPageController.setApplicationModelAndTaskId(self._js, task.id);
-              window.location.hash = "!/task/" + self.id() + "/" + task.id;
+              pageutil.openPage("task",  self.id() + "/" + task.id);
             };
             task.statusName = LUPAPISTE.statuses[task.state] || "unknown";
 
@@ -93,8 +123,15 @@ LUPAPISTE.ApplicationModel = function() {
       .valueOf();
   });
 
+  self.primaryOperationName = ko.pureComputed(function() {
+    var op = ko.unwrap(self.primaryOperation());
+    if (op) {
+      return "operations." + ko.unwrap(op.name);
+    }
+    return "";
+  });
+
   self.foremanTasks = ko.observable();
-  self.submittable = ko.observable(true);
 
   self.buildings = ko.observable([]);
   self.nonpartyDocumentIndicator = ko.observable(0);
@@ -103,17 +140,12 @@ LUPAPISTE.ApplicationModel = function() {
   self.appsLinkingToUs = ko.observable(null);
   self.pending = ko.observable(false);
   self.processing = ko.observable(false);
-
-  self.attachmentsRequiringAction = ko.observable();
-  self.unseenStatements = ko.observable();
-  self.unseenVerdicts = ko.observable();
-  self.unseenComments = ko.observable();
   self.invites = ko.observableArray([]);
-  self.showApplicationInfoHelp = ko.observable(false);
-  self.showPartiesInfoHelp = ko.observable(false);
-  self.showStatementsInfoHelp = ko.observable(false);
-  self.showNeighborsInfoHelp = ko.observable(false);
-  self.showVerdictInfoHelp = ko.observable(false);
+//  self.showApplicationInfoHelp = ko.observable(false);
+//  self.showPartiesInfoHelp = ko.observable(false);
+  // self.showStatementsInfoHelp = ko.observable(false);
+  // self.showNeighborsInfoHelp = ko.observable(false);
+  // self.showVerdictInfoHelp = ko.observable(false);
   self.showSummaryInfoHelp = ko.observable(false);
   self.showConstructionInfoHelp = ko.observable(false);
 
@@ -121,11 +153,18 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.allowedAttachmentTypes = ko.observableArray([]);
 
+  self.toBackingSystem = function() {
+    window.open("/api/raw/redirect-to-vendor-backend?id=" + self.id(), "_blank");
+  };
+
   self.updateInvites = function() {
     invites.getInvites(function(data) {
       self.invites(_.filter(data.invites, function(invite) {
-        return invite.application === self.id();
+        return invite.application.id === self.id();
       }));
+      if (self.hasInvites()) {
+        self.showAcceptInvitationDialog();
+      }
     });
   };
 
@@ -151,7 +190,7 @@ LUPAPISTE.ApplicationModel = function() {
     return function() {
       ajax
       .command("decline-invitation", {id: applicationId})
-      .success(function() {window.location.hash = "!/applications";})
+      .success(function() {pageutil.openPage("applications");})
       .call();
       return false;
     };
@@ -188,9 +227,15 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.roles = ko.computed(function() {
     var withRoles = function(r, i) {
-      var a = r[i.id()] || (i.roles = [], i);
-      a.roles.push(i.role());
-      r[i.id()] = a;
+      if (i.id() === "" && i.invite) {
+        i.id(util.getIn(i, ["invite", "user", "id"]));
+      }
+      var auth = r[i.id()] || (i.roles = [], i);
+      var role = i.role();
+      if (!_.contains(auth.roles, role)) {
+        auth.roles.push(role);
+      }
+      r[i.id()] = auth;
       return r;
     };
     var pimped = _.reduce(self.auth(), withRoles, {});
@@ -215,27 +260,28 @@ LUPAPISTE.ApplicationModel = function() {
       loc("application.submit.areyousure.message"),
       {title: loc("yes"),
        fn: function() {
-        ajax.command("submit-application", {id: self.id()})
-          .success(function() {
-            self.reload();
-          })
-          .processing(self.processing)
-          .call();
-        hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
-        return false;
-      }},
+            ajax.command("submit-application", {id: self.id()})
+              .success(self.reload)
+              .onError("error.foreman.notice-not-submittable", function() {
+                hub.send("show-dialog", {ltitle: "foreman.dialog.notice-submit-warning.title",
+                                         size: "medium",
+                                         component: "ok-dialog",
+                                         componentParams: {ltext: "foreman.dialog.notice-submit-warning.text"}});
+              })
+              .processing(self.processing)
+              .call();
+            hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
+            return false;
+          }},
       {title: loc("no")}
     );
     hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
     return false;
   };
 
-  self.requestForComplement = function(model) {
+  self.requestForComplement = function() {
     ajax.command("request-for-complement", { id: self.id()})
-      .success(function() {
-        notify.success("pyynt\u00F6 l\u00E4hetetty",model);
-        self.reload();
-      })
+      .success(self.reload)
       .processing(self.processing)
       .call();
     return false;
@@ -244,7 +290,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.convertToApplication = function() {
     ajax.command("convert-to-application", {id: self.id()})
       .success(function() {
-        window.location.hash = "!/application/" + self.id();
+        pageutil.openPage("application", self.id());
       })
       .processing(self.processing)
       .call();
@@ -263,18 +309,16 @@ LUPAPISTE.ApplicationModel = function() {
       .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
       .processing(self.processing)
       .call();
-    hub.send("track-click", {category:"Application", label:"", event:"approveApplication"}); 
+    hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
     return false;
   };
 
-  self.refreshKTJ = function(model) {
+  self.refreshKTJ = function() {
     ajax.command("refresh-ktj", {id: self.id()})
       .success(function() {
         self.reload();
-        //FIXME parempi tapa ilmoittaa onnistumisesta
-        notify.success("KTJ tiedot p\u00e4ivitetty",model);
-      })//FIXME parempi/tyylikaampi virheilmoitus
-      .error(function(resp) {alert(resp.text);})
+        LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("application.refreshed"));
+      })
       .processing(self.processing)
       .call();
       hub.send("track-click", {category:"Application", label:"", event:"refreshKTJ"});
@@ -307,7 +351,11 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.canSubscribe = function(model) {
-    return model.role() !== "statementGiver" && currentUser && (currentUser.isAuthority() || currentUser.id() ===  model.id());
+    return model.role() !== "statementGiver" &&
+           lupapisteApp.models.currentUser &&
+           (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.id() ===  model.id()) &&
+           lupapisteApp.models.applicationAuthModel.ok("subscribe-notifications") &&
+           lupapisteApp.models.applicationAuthModel.ok("unsubscribe-notifications");
   };
 
   self.manageSubscription = function(command, model) {
@@ -324,7 +372,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.unsubscribeNotifications = _.partial(self.manageSubscription, "unsubscribe-notifications");
 
   self.addOperation = function() {
-    window.location.hash = "!/add-operation/" + self.id();
+    pageutil.openPage("add-operation", self.id());
     hub.send("track-click", {category:"Application", label:"", event:"addOperation"});
     return false;
   };
@@ -338,7 +386,7 @@ LUPAPISTE.ApplicationModel = function() {
        fn: function() {
         ajax
           .command("cancel-inforequest", {id: self.id()})
-          .success(function() {window.location.hash = "!/applications";})
+          .success(function() {pageutil.openPage("applications");})
           .processing(self.processing)
           .call();
         hub.send("track-click", {category:"Inforequest", label:"", event:"infoRequestCanceled"});
@@ -358,7 +406,7 @@ LUPAPISTE.ApplicationModel = function() {
        fn: function() {
         ajax
           .command("cancel-application", {id: self.id()})
-          .success(function() {window.location.hash = "!/applications";})
+          .success(function() {pageutil.openPage("applications");})
           .processing(self.processing)
           .call();
         hub.send("track-click", {category:"Application", label:"", event:"ApplicationCanceled"});
@@ -380,10 +428,10 @@ LUPAPISTE.ApplicationModel = function() {
       {title: loc("yes"),
        fn: function() {
         ajax
-          .command("cancel-application-authority", {id: self.id(), text: self.cancelText()})
+          .command("cancel-application-authority", {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
           .success(function() {
             self.cancelText("");
-            window.location.hash = "!/applications";
+            pageutil.openPage("applications");
           })
           .processing(self.processing)
           .call();
@@ -420,7 +468,7 @@ LUPAPISTE.ApplicationModel = function() {
         ajax
           .command("create-change-permit", {id: self.id()})
           .success(function(data) {
-            window.location.hash = "!/application/" + data.id;
+            pageutil.openPage("application", data.id);
           })
           .processing(self.processing)
           .call();
@@ -438,7 +486,7 @@ LUPAPISTE.ApplicationModel = function() {
     ajax
       .command("create-continuation-period-permit", {id: self.id()})
       .success(function(data) {
-        window.location.hash = "!/application/" + data.id;
+        pageutil.openPage("application", data.id);
       })
       .processing(self.processing)
       .call();
@@ -462,6 +510,38 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
   };
 
+  function focusOnElement(id, retryLimit) {
+    var targetElem = document.getElementById(id);
+
+    if (!retryLimit) {
+      if (targetElem) {
+        // last chance: hope that the browser scrolls to somewhere near the focused element.
+        targetElem.focus();
+      }
+      // no more retries and no element: give up
+      return;
+    }
+
+    var offset = $(targetElem).offset();
+
+    if (!offset || offset.left === 0 || !targetElem) {
+      // Element is not yet visible, wait for a short moment.
+      // Because of the padding, offset left is never zero when
+      // the element is visible.
+      setTimeout(_.partial(focusOnElement, id, --retryLimit), 5);
+    } else {
+      var navHeight = $("nav").first().height() || 0;
+      var roomForLabel = (targetElem.nodeName === "UL") ? 0 : 30;
+      window.scrollTo(0, offset.top - navHeight - roomForLabel);
+      targetElem.focus();
+    }
+  }
+
+  self.open = function(tab) {
+    var suffix = self.infoRequest() ? null : tab;
+    pageutil.openApplicationPage(self, suffix);
+  };
+
   self.targetTab.subscribe(function(target) {
     if (target.tab === "requiredFieldSummary") {
       ajax
@@ -472,13 +552,10 @@ LUPAPISTE.ApplicationModel = function() {
         .processing(self.processing)
         .call();
     }
-    window.location.hash = "!/application/" + self.id() + "/" + target.tab;
+    self.open(target.tab);
     if (target.id) {
-      // The Nayta-links in "Puuttuvat pakolliset tiedot"-list do not work properly without using
-      // the setTimeout function with 0 time here.
-      setTimeout(function() {
-        window.scrollTo(0, $("#" + target.id).offset().top - 60);
-      }, 0);
+      var maxRetries = 10; // quite arbitrary, might need to increase for slower browsers
+      focusOnElement(target.id, maxRetries);
     }
   });
 
@@ -533,5 +610,17 @@ LUPAPISTE.ApplicationModel = function() {
       .error(function(e) {LUPAPISTE.showIntegrationError("integration.asianhallinta.title", e.text, e.details);})
       .processing(self.processing)
       .call();
+  };
+
+  self.showAcceptInvitationDialog = function() {
+    if (self.hasInvites() && lupapisteApp.models.applicationAuthModel.ok("approve-invite")) {
+      hub.send("show-dialog", {ltitle: "application.inviteSend",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "application.inviteDialogText",
+                                                 lyesTitle: "applications.approveInvite",
+                                                 lnoTitle: "application.showApplication",
+                                                 yesFn: self.approveInvite}});
+    }
   };
 };

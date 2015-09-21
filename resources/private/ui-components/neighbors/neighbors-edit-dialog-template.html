@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="neighbors-edit-dialog-template">
+      <div class="content">
+        <div>
+          <span data-bind="text: loc(['neighbors.edit.status', status()])"></span>
+        </div>
+        <form>
+          <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors.edit.propertyId"></label>
+          <input data-bind="textInput: editablePropertyId, enable: status() > statusInit, css: {'error': !propertyIdOk()}"
+                 class="form-input text long" type="text" id="neighbors.edit.propertyId" data-test-id="neighbors.edit.propertyId" />
+
+          <!-- ko if: type -->
+          <label data-bind="ltext: 'neighbors.owner.type'" class="form-label" for="neighbors.owner.type"></label>
+          <input data-bind="value: typeLabel(), enable: false" class="form-input text long" type="text" id="neighbors.owner.type" data-test-id="neighbors.edit.type" readonly/>
+          <!-- /ko -->
+
+          <!-- ko if: nameOfDeceased -->
+          <label data-bind="ltext: 'neighbors.owner.nameOfDeceased'" class="form-label" for="neighbors.owner.nameOfDeceased"></label>
+          <input data-bind="value: nameOfDeceased, enable: false" class="form-input text long" type="text" id="neighbors.owner.nameOfDeceased" data-test-id="neighbors.edit.nameOfDeceased" readonly/>
+          <!-- /ko -->
+
+          <!-- ko if: businessID -->
+          <label data-bind="ltext: 'neighbors.owner.businessID'" class="form-label" for="neighbors.owner.businessID"></label>
+          <input data-bind="value: businessID, enable: false" class="form-input text long" type="text" id="neighbors.owner.businessID" data-test-id="neighbors.edit.businessID" readonly/>
+          <!-- /ko -->
+
+          <label data-bind="ltext: 'neighbors.owner.name'" class="form-label" for="neighbors.owner.name"></label>
+          <input data-bind="value: name, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.name" data-test-id="neighbors.edit.name"/>
+
+          <label data-bind="ltext: 'neighbors.owner.address.street'" class="form-label" for="neighbors.owner.address.street"></label>
+          <input data-bind="value: street, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.address.street" />
+
+          <label data-bind="ltext: 'neighbors.owner.address.zip'" class="form-label" for="neighbors.owner.address.zip"></label>
+          <input data-bind="value: zip, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.address.zip" />
+
+          <label data-bind="ltext: 'neighbors.owner.address.city'" class="form-label" for="neighbors.owner.address.city"></label>
+          <input data-bind="value: city, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.address.city" />
+
+          <label data-bind="ltext: 'neighbors.owner.email'" class="form-label" for="neighbors.owner.email"></label>
+          <input data-bind="textInput: email, enable: status() > statusInit, css: {'error': !emailOk()}"
+                 class="form-input text long" type="text" id="neighbors.owner.email" data-test-id="neighbors.edit.email" />
+        </form>
+      </div>
+      <div data-bind="component: {name: 'submit-button-group',
+                                  params: { isSubmitVisible: true,
+                                            isSubmitEnabled: isSubmitEnabled,
+                                            submit: save,
+                                            lSubmitTitle: 'save'}}"></div>
+    </script>
+  </section>
+</body>
+</html>

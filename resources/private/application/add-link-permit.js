@@ -1,6 +1,9 @@
 LUPAPISTE.AddLinkPermitModel = function() {
   "use strict";
   var self = this;
+
+  var lpRegex = /^\s*LP-\d{3}-\d{4}-\d{5}\s*$/;
+
   self.dialogSelector = "#dialog-add-link-permit";
 
   self.appId = 0;
@@ -14,8 +17,10 @@ LUPAPISTE.AddLinkPermitModel = function() {
 
   self.ok = ko.computed(function() {
     // XOR in javascript
-    return (self.kuntalupatunnus() || self.selectedLinkPermit()) &&
-           !(self.kuntalupatunnus() && self.selectedLinkPermit());
+    var onlyOtherSelected = (self.kuntalupatunnus() || self.selectedLinkPermit()) &&
+                            !(self.kuntalupatunnus() && self.selectedLinkPermit());
+
+    return onlyOtherSelected && !lpRegex.test(self.kuntalupatunnus());
   });
 
   self.onError = function(resp) {
@@ -105,7 +110,7 @@ LUPAPISTE.AddLinkPermitModel = function() {
   //
 
   self.followAppLink = function(linkId) {
-    window.location.hash = "!/application/" + linkId;
+    pageutil.openPage("application", linkId);
     return false;
   };
 

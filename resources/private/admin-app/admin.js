@@ -1,11 +1,12 @@
 ;(function() {
   "use strict";
 
-  window.lupapisteApp = new LUPAPISTE.App("admin", false, true);
+  window.lupapisteApp = new LUPAPISTE.App({startPage: "admin",
+                                           allowAnonymous: false,
+                                           showUserMenu: true});
 
   $(function() {
-    window.lupapisteApp.domReady();
-    LUPAPISTE.ModalDialog.init();
+    lupapisteApp.domReady();
     $("#admin").applyBindings({});
   });
 

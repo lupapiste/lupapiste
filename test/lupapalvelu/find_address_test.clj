@@ -3,18 +3,6 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]))
 
-(testable-privates lupapalvelu.find-address pwz to-property-id)
-
-(facts "pwz"
-  (pwz 4 "1")     => "0001"
-  (pwz 4 "12")    => "0012"
-  (pwz 4 "123")   => "0123"
-  (pwz 4 "1234")  => "1234"
-  (pwz 4 "12345") => "12345")
-
-(facts "to-property-id"
-  (to-property-id "1" "2" "3" "4") => "00100200030004")
-
 (facts "search dispatch"
   (fact
     (prerequisite (search-property-id "12345678901234") => ...result...)

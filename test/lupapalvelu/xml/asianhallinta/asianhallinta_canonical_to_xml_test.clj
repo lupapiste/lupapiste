@@ -20,6 +20,7 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.property :as p]
             [sade.xml :as sxml]))
 
 (mu/testable-privates lupapalvelu.xml.asianhallinta.core begin-of-link)
@@ -45,7 +46,7 @@
                                    :fileId "file123"
                                    :filename "valtakirja.pdf"
                                    :contentType "application/pdf"}
-                   :op {:name "poikkeaminen"}
+                   :op {:id "523844e1da063788effc1c56"}
                    :modified 1424248442767}
                   {:id :attachment3
                    :type {:type-group "paapiirustus"
@@ -58,7 +59,10 @@
 
 (fl/facts*
   "UusiAsia xml from suunnittelija application"
-  (let [application    rakennus-test/application-suunnittelijan-nimeaminen
+  (let [application    (-> rakennus-test/application-suunnittelijan-nimeaminen
+                         (assoc-in [:primaryOperation :name] "poikkeamis")
+                         (assoc :permitType "P")
+                         ua-mapping/enrich-application)
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         schema-version "ah-1.1"
         mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
@@ -81,7 +85,11 @@
 
 (fl/facts*
   "UusiAsia xml from application with two link permits"
-  (let [application    (update-in rakennus-test/application-suunnittelijan-nimeaminen [:linkPermitData] conj link-permit-data-kuntalupatunnus)
+  (let [application    (-> rakennus-test/application-suunnittelijan-nimeaminen
+                         (assoc-in [:primaryOperation :name] "poikkeamis")
+                         (assoc :permitType "P")
+                         (update-in [:linkPermitData] conj link-permit-data-kuntalupatunnus)
+                         ua-mapping/enrich-application)
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         schema-version "ah-1.1"
         mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
@@ -95,14 +103,16 @@
       (let [links    (sxml/select1 xml-parsed [:UusiAsia :Viiteluvat])
             content  (sxml/children links)]
         (count content) => 2
-        (fact "Both have Tunnus and Sovellus"
+        (fact "Lupapistetunnus has Tunnus and Sovellus"
           (sxml/get-text (first content) [:Tunnus]) => (get-in application [:linkPermitData 0 :id])
-          (sxml/get-text (first content) [:Sovellus]) => "Lupapiste"
-          (sxml/get-text (second content) [:Tunnus]) => (get-in application [:linkPermitData 1 :id])
-          (sxml/get-text (second content) [:Sovellus]) => "Taustaj\u00E4rjestelm\u00E4")))))
+          (sxml/get-text (first content) [:Sovellus]) => "Lupapiste")
+
+        (fact "Other link permit is in AsianTunnus field"
+          (sxml/get-text (second content) [:AsianTunnus]) => (get-in application [:linkPermitData 1 :id]))))))
 
 (fl/facts* "UusiAsia xml from poikkeus"
-  (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
+  (let [application    (ua-mapping/enrich-application
+                         (assoc poikkeus-test/poikkari-hakemus :attachments attachments))
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         canonical      (assoc-in canonical
                          [:UusiAsia :Liitteet :Liite]
@@ -203,7 +213,7 @@
                     (sxml/get-text (:content (second metas)) [:Arvo]) => (get-in attachments [1 :type :type-id]))
                   (fact "Operation meta check"
                     (sxml/get-text (:content (last metas)) [:Avain]) => "operation"
-                    (sxml/get-text (:content (last metas)) [:Arvo]) => (get-in attachments [1 :op :name])))))))
+                    (sxml/get-text (:content (last metas)) [:Arvo]) => (-> application :primaryOperation :name)))))))
 
         (facts "Toimenpiteet"
           (let [operations (sxml/select1 xml-parsed [:UusiAsia :Toimenpiteet])
@@ -212,15 +222,15 @@
                 tteksti    (-> op :content second)]
             (count (:content operations)) => 1
             (fact "Toimenpide has ToimenpideTunnus and ToimenpideTeksti"
-              (sxml/get-text op [:Toimenpide :ToimenpideTunnus]) => (get-in application [:operations 0 :name])
+              (sxml/get-text op [:Toimenpide :ToimenpideTunnus]) => (:name (:primaryOperation application))
               (sxml/get-text op [:Toimenpide :ToimenpideTeksti]) => (i18n/localize "fi"
                                                                       (str "operations."
-                                                                        (get-in application [:operations 0 :name]))))))
+                                                                        (:name (:primaryOperation application)))))))
 
         (fact "Sijainti"
-          (sxml/get-text xml-parsed [:UusiAsia :Sijainti :Sijaintipiste]) => (str (get-in application [:location :x]) " " (get-in application [:location :y])))
+          (sxml/get-text xml-parsed [:UusiAsia :Sijainti :Sijaintipiste]) => (str (get-in application [:location 0]) " " (get-in application [:location 1])))
         (fact "Kiinteistotunnus"
-          (sxml/get-text xml-parsed [:UusiAsia :Kiinteistotunnus]) => (util/to-human-readable-property-id (:propertyId application)))))))
+          (sxml/get-text xml-parsed [:UusiAsia :Kiinteistotunnus]) => (p/to-human-readable-property-id (:propertyId application)))))))
 
 (fl/facts* "Application with two multiple documents (Hakija, Maksaja)"
   (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)

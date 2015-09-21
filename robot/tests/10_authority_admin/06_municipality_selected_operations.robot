@@ -1,17 +1,17 @@
 *** Settings ***
 
 Documentation   Authority admin edits organization specific selected operations
+Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
 
 *** Test Cases ***
 
-Setting maps enabled for these tests
-  Set integration proxy on
+#Setting maps enabled for these tests
+#  Set integration proxy on
 
 Operation tree does have 'Asuinkerrostalon tai rivitalon rakentaminen' in it
-  Apply minimal fixture now
   Mikko logs in
   Go to operation tree  Latokuja 1, Sipoo  753  753-416-25-30
   Click tree item by text  "Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"
@@ -25,12 +25,11 @@ Operation tree does have 'Asuinkerrostalon tai rivitalon rakentaminen' in it
 
 AuthAdmin removes 'Uuden rakennuksen rakentaminen' from selected operations
   Sipoo logs in
-  # Open dialog
 
   # => (ns lupapalvelu.operations)
   # => (count (filter (fn [[_ v]] (#{permit/R permit/P permit/YI permit/YL permit/MAL permit/VVVL permit/KT permit/MM} (:permit-type v) ))  operations))
-  # TODO 68 when tyonjohtaja-v2 is removed
-  Wait until  Xpath Should Match X Times  //section[@id='admin']//table[@data-test-id='organization-selected-operations']//tr[@class='sel-op-row']  77
+  Wait until  Xpath Should Match X Times  //section[@id='admin']//table[@data-test-id='organization-selected-operations']//tr[@class='sel-op-row']  66
+  Xpath Should Match X Times  //span[contains(text(),'Asuinkerrostalon tai rivitalon rakentaminen')]  1
 
   Click by test id  authadmin-edit-selected-operations
 
@@ -42,6 +41,9 @@ AuthAdmin removes 'Uuden rakennuksen rakentaminen' from selected operations
   # Save
   Click element  ${dialogPath}//button[@data-loc='selectm.ok']
   Wait until  Element should not be visible  ${dialogPath}
+
+  Wait until  Xpath Should Match X Times  //span[contains(text(),'Asuinkerrostalon tai rivitalon rakentaminen')]  0
+
   Logout
 
 Operation tree does not have 'Asuinkerrostalon tai rivitalon rakentaminen' in it
@@ -57,8 +59,8 @@ Operation tree does not have 'Asuinkerrostalon tai rivitalon rakentaminen' in it
 #  Wait until  Element should not be visible  ${element}
   Logout
 
-Setting maps disabled again after the tests
-  Set integration proxy off
+#Setting maps disabled again after the tests
+#  Set integration proxy off
 
 
 *** Keywords ***

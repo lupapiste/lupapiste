@@ -2,60 +2,68 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
+            [sade.core :refer [now]]
             [sade.dummy-email-server :as dummy-email-server]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as application]
             [lupapalvelu.integrations-api]
             [lupapalvelu.verdict-api]
             [lupapalvelu.fixture.minimal :as minimal]
+            [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
 
-(mongo/connect!)
-(mongo/remove-many :organizations {})
-(mongo/remove-many :applications {})
+(def db-name (str "test_autom-check-verdicts-itest_" (now)))
 
-(let [krysp-url (str (server-address) "/dev/krysp")
-      organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)]
-  (dorun (map (partial mongo/insert :organizations) organizations)))
+(mongo/connect!)
+(mongo/with-db db-name 
+  (fixture/apply-fixture "minimal")
+  (mongo/remove-many :organizations {})
+  (mongo/remove-many :applications {}))
+
+(mongo/with-db db-name 
+  (let [krysp-url (str (server-address) "/dev/krysp")
+        organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)]
+    (dorun (map (partial mongo/insert :organizations) organizations))))
+
 
 (facts "Automatic checking for verdicts"
- (let [application-submitted         (create-and-submit-local-application sonja :municipality sonja-muni :address "Paatoskuja 17")
-       application-id-submitted      (:id application-submitted)
-       application-sent              (create-and-submit-local-application sonja :municipality sonja-muni :address "Paatoskuja 18")
-       application-id-sent           (:id application-sent)
-       application-verdict-given     (create-and-submit-local-application sonja :municipality sonja-muni :address "Paatoskuja 19")
-       application-id-verdict-given  (:id application-verdict-given)]
+  (mongo/with-db db-name 
+    (let [application-submitted         (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 17")
+          application-id-submitted      (:id application-submitted)
+          application-sent              (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 18")
+          application-id-sent           (:id application-sent)
+          application-verdict-given     (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 19")
+          application-id-verdict-given  (:id application-verdict-given)]
 
-   (local-command sonja :approve-application :id application-id-sent :lang "fi") => ok?
-   (local-command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?
-   (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+      (local-command sonja :approve-application :id application-id-sent :lang "fi") => ok?
+      (local-command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?
+      (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
 
-   (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy
-         application-sent (query-application local-query sonja application-id-sent) => truthy
-         application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy]
-     (:state application-submitted) => "submitted"
-     (:state application-sent) => "sent"
-     (:state application-verdict-given) => "verdictGiven")
+      (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy
+            application-sent (query-application local-query sonja application-id-sent) => truthy
+            application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy]
+        (:state application-submitted) => "submitted"
+        (:state application-sent) => "sent"
+        (:state application-verdict-given) => "verdictGiven")
 
-   (dummy-email-server/messages :reset true) ; Inbox zero
+      (dummy-email-server/messages :reset true) ; Inbox zero
 
-   (fact "checking verdicts and sending emails to the authorities related to the applications"
-     (count (batchrun/fetch-verdicts)) => pos?)
+      (fact "checking verdicts and sending emails to the authorities related to the applications"
+        (count (batchrun/fetch-verdicts)) => pos?)
 
-   (fact "Verifying the sent emails"
-     (Thread/sleep 100) ; batchrun includes a parallel operation
-     (let [emails (dummy-email-server/messages :reset true)]
-       (fact "email count" (count emails) => 1)
-       (let [email (last emails)]
-         (fact "email check"
-           (:to email) => (contains (email-for-key sonja))
-           (:subject email) => "Lupapiste.fi: Paatoskuja 18 - p\u00e4\u00e4t\u00f6s"
-           email => (partial contains-application-link-with-tab? application-id-sent "verdict" "authority")
-           (get-in email [:body :plain]) => (contains "Hakemukseesi on annettu p\u00e4\u00e4t\u00f6s")))))
+      (fact "Verifying the sent emails"
+        (Thread/sleep 100) ; batchrun includes a parallel operation
+        (let [emails (dummy-email-server/messages :reset true)]
+          (fact "email count" (count emails) => 1)
+          (let [email (last emails)]
+            (fact "email check"
+              (:to email) => (contains (email-for-key sonja))
+              (:subject email) => "Lupapiste.fi: Paatoskuja 18 - p\u00e4\u00e4t\u00f6s"
+              email => (partial contains-application-link-with-tab? application-id-sent "verdict" "authority")
+              (get-in email [:body :plain]) => (contains "Hakemukseesi on annettu p\u00e4\u00e4t\u00f6s")))))
 
-   (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy
-         application-sent (query-application local-query sonja application-id-sent) => truthy
-         application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy]
-     (:state application-submitted) => "submitted"
-     (:state application-sent) => "verdictGiven"
-     (:state application-verdict-given) => "verdictGiven")))
+      (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy
+            application-sent (query-application local-query sonja application-id-sent) => truthy
+            application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy]
+        (:state application-submitted) => "submitted"
+        (:state application-sent) => "verdictGiven"
+        (:state application-verdict-given) => "verdictGiven"))))

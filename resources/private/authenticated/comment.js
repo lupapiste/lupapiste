@@ -14,7 +14,7 @@ var comments = (function() {
     self.processing = ko.observable();
     self.pending = ko.observable();
     self.to = ko.observable();
-    self.showAttachmentComments = ko.observable(false);
+    self.showAttachmentComments = ko.observable(true);
     self.showPreparationComments = ko.observable(false);
     self.isSelected = ko.observable();
 
@@ -34,7 +34,7 @@ var comments = (function() {
     };
 
     self.isForMe = function(model) {
-      return model.to && model.to.id && model.to.id() === currentUser.id();
+      return model.to && model.to.id && model.to.id() === lupapisteApp.models.currentUser.id();
     };
 
     self.disabled = ko.computed(function() {
@@ -79,26 +79,24 @@ var comments = (function() {
       return doAddComment(false, true);
     };
 
-    self.isForNewAttachment = function(model) {
-      return model && model.target && model.target.version && true;
-    };
     self.isAuthorityComment = function(model) {
-      return model.user && model.user.role && model.user.role() === "authority";
+      return util.getIn(model, ["user", "role"]) === "authority";
     };
+
     self.isForAttachment = function(model) {
-      return model && model.target && model.target.type && model.target.type() === "attachment";
+      return util.getIn(model, ["target", "type"]) === "attachment";
     };
 
     function isPreparationComment(model) {
+      // verdict's comments
       return model && model.roles().length === 1 && model.roles()[0] === "authority";
     }
 
     self.isVisible = function(model) {
       return !self.takeAll ||
-               ((!self.isForNewAttachment(model) || self.showAttachmentComments() ) &&
+               ((self.showAttachmentComments() || !self.isForAttachment(model)) &&
                 (!isPreparationComment(model)    || self.showPreparationComments()));
     };
-
   }
 
   return {

@@ -1,11 +1,24 @@
 (ns lupapalvelu.organization-itest
   (:require [midje.sweet :refer :all]
+            [clojure.java.io :as io]
             [lupapalvelu.organization :as local-org-api]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer :all]))
 
 (apply-remote-minimal)
+
+(facts
+  (let [uri "http://127.0.0.1:8000/dev/krysp"]
+    (fact "pena can't set krysp-url"
+      (command pena :set-krysp-endpoint :url uri :permitType "R" :version "1") => unauthorized?)
+
+    (fact "sipoo can set working krysp-url"
+      (command sipoo :set-krysp-endpoint :url uri :permitType "YA" :version "2") => ok?)
+
+    (fact "sipoo cant set incorrect krysp-url"
+      (command sipoo :set-krysp-endpoint :url "BROKEN_URL" :permitType "R"  :version "1") => fail?)))
+
 
 (facts* "users-in-same-organizations"
   (let [naantali (apikey-for "rakennustarkastaja@naantali.fi")
@@ -18,11 +31,11 @@
 
     ; Meta
     (fact "naantali user in naantali & jarvenpaa orgs"
-      (->> naantali-user :user :orgAuthz (map :org)) => ["529-R" "186-R"])
+      (->> naantali-user :user :orgAuthz keys) => (just [:529-R :186-R] :in-any-order))
     (fact "jarvenpaa just jarvenpaa"
-      (->> jarvenpaa-user :user :orgAuthz (map :org)) => ["186-R"])
+      (->> jarvenpaa-user :user :orgAuthz keys) => [:186-R])
     (fact "oulu user in oulu & naantali orgs"
-      (->> oulu-user :user :orgAuthz (map :org)) => ["564-R" "529-R" "564-YMP"])
+      (->> oulu-user :user :orgAuthz keys) => (just [:564-R :529-R :564-YMP] :in-any-order))
 
 
     (let [naantali-sees (:users (query naantali :users-in-same-organizations))
@@ -115,7 +128,7 @@
                                                ["terassit" "ya-kayttolupa-terassit"]]]]]]))
 
   (fact* "Query selected operations"
-    (let [id   (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
+    (let [id   (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
           resp (query pena "addable-operations" :id id) => ok?]
       (:operations resp) => [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["pientalo" "pientalo"]]] ["Rakennelman rakentaminen" [["Aita" "aita"]]]]]]))
 
@@ -125,7 +138,7 @@
       (get-in resp [:organization :selectedOperations]) => {:R ["aita" "pientalo"]}))
 
   (fact "An application query correctly returns the 'required fields filling obligatory' and 'kopiolaitos-email' info in the organization meta data"
-    (let [app-id (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
+    (let [app-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
           app    (query-application pena app-id)
           org    (query admin "organization-by-id" :organizationId  (:organization app))
           kopiolaitos-email "kopiolaitos@example.com"
@@ -203,6 +216,7 @@
       :applicationEnabled false
       :openInforequestEnabled false
       :openInforequestEmail "someone@localhost"
+
       :opening 123)
     (let [m (query pena :municipality-active :municipality "999")]
       (:applications m) => empty?
@@ -225,3 +239,78 @@
 
   (fact "Valid attachment is ok"
     (command sipoo :organization-operations-attachments :operation "pientalo" :attachments [["muut" "muu"]]) => ok?))
+
+(facts "permanent-archive-can-be-set"
+  (let [organization  (first (:organizations (query admin :organizations)))
+        id (:id organization)]
+
+    (fact "Permanent archive can be enabled"
+      (command admin "set-organization-permanent-archive-enabled" :enabled true :organizationId id) => ok?
+      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+        (:permanent-archive-enabled updated-org) => true))
+
+    (fact "Permanent archive can be disabled"
+      (command admin "set-organization-permanent-archive-enabled" :enabled false :organizationId id) => ok?
+      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+        (:permanent-archive-enabled updated-org) => false))))
+
+(facts "Organization names"
+  (let [{names :names :as resp} (query pena :get-organization-names)]
+    resp => ok?
+    (count names) => pos?
+    (-> names :753-R :fi) => "Sipoon rakennusvalvonta"))
+
+(facts "Organization tags"
+  (fact "only auth admin can add new tags"
+    (command sipoo :save-organization-tags :tags [{:id nil :label "makeja"} {:id nil :label "nigireja"}]) => ok?
+    (command sonja :save-organization-tags :tags [{:id nil :label "illegal"}] =not=> ok?)
+    (command pena :save-organization-tags :tags [{:id nil :label "makeja"}] =not=> ok?))
+  (fact "tags get ids when saved"
+    (:tags (query sipoo :get-organization-tags)) => (just {:753-R (just {:name (just {:fi string? :sv string?})
+                                                                         :tags (just [(just {:id string? :label "makeja"})
+                                                                                      (just {:id string? :label "nigireja"})])})}))
+
+  (fact "only authority can fetch available tags"
+    (query pena :get-organization-tags) =not=> ok?
+    (map :label (:tags (:753-R (:tags (query sonja :get-organization-tags))))) => ["makeja" "nigireja"])
+
+  (fact "Check tag deletion query"
+    (let [id (create-app-id sonja)
+          tag-id (-> (query sonja :get-organization-tags)
+                   :tags :753-R :tags first :id)]
+      (command sonja :add-application-tags :id id :tags [tag-id]) => ok?
+
+      (fact "when tag is used, application id is returned"
+        (let [res (query sipoo :remove-tag-ok :tagId tag-id)]
+          res =not=> ok?
+          (-> res :applications first :id) => id))
+
+      (fact "when tag is not used in applications, ok is returned"
+        (command sonja :add-application-tags :id id :tags []) => ok?
+        (query sipoo :remove-tag-ok :tagId tag-id) => ok?))))
+
+(defn- upload-area [apikey & [filename]]
+  (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
+        uploadfile  (io/file filename)
+        uri         (str (server-address) "/api/raw/organization-area")]
+    (http-post uri
+      {:headers {"authorization" (str "apikey=" apikey)}
+       :multipart [{:name "files[]" :content uploadfile}]
+       :throw-exceptions false})))
+
+(facts "Organization areas zip file upload"
+  (fact "only authorityAdmin can upload"
+    (:body (upload-area pena)) => "unauthorized"
+    (:body (upload-area sonja)) => "unauthorized")
+
+  (fact "text file is not ok (zip required)"
+    (->
+      (upload-area sipoo "dev-resources/test-attachment.txt")
+      :body) => "error.illegal-shapefile")
+
+  (let [resp (upload-area sipoo)
+        body (:body (decode-response resp))]
+
+    (fact "zip file with correct shape file can be uploaded by auth admin"
+      resp => http200?
+      body => ok?)))

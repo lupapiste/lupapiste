@@ -28,7 +28,6 @@ LUPAPISTE.ChangeLocationModel = function() {
   // Model
 
   self.id = 0;
-  self.municipalityCode = 0;
   self.x = 0;
   self.y = 0;
   self.address = ko.observable("");

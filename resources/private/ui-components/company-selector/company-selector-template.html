@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="company-selector-template">
+      <div>
+        <label class="form-label form-label-select"
+               for="company-select"
+               data-bind="ltext: 'company-selector.title'"></label>
+        <select name="company-select"
+                class="form-input combobox "
+                data-bind="options: companies,
+                           optionsText: 'displayName',
+                           optionsValue: 'id',
+                           optionsCaption: loc('choose'),
+                           optionsAfterRender: setOptionDisable,
+                           enable: authorization.ok('set-company-to-document'),
+                           value: selected">
+        </select>
+        <span data-bind="component: {name: 'company-invite'}"></span>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

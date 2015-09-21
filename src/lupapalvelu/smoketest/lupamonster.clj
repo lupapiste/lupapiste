@@ -1,11 +1,13 @@
 (ns lupapalvelu.smoketest.lupamonster
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.smoketest.core :refer :all]
-            [lupapalvelu.smoketest.application-smoke-tests]))
+            [lupapalvelu.smoketest.application-smoke-tests]
+            [lupapalvelu.smoketest.organization-smoke-tests]
+            [lupapalvelu.smoketest.user-smoke-tests]))
 
 
 (defn -main [& args]
-  (when @mongo/connected
+  (when @mongo/connection
     (println "Warning: disconnecting current MongoDB connection!")
     (mongo/disconnect!))
 

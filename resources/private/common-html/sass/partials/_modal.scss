@@ -1,35 +1,46 @@
 // TODO knockout dialog to share same styles with legacy dialog
 #modal-dialog {
+  .small {
+    width: 360px;
+  }
+  .medium {
+    width: 480px;
+  }
+  .large {
+    width: 980px;
+  }
+
   .dialog {
     display: none;
     position: fixed;
-    width: 980px;
     right: 0;
     left: 0;
-    top: 0;
-    bottom: 0;
-    margin: auto;
+    margin-top: 50px;
+    margin-left: auto;
+    margin-right: auto;
     z-index: 9999;
     padding: $marginM;
     background-color: #fff;
-    height: 700px;
     min-height: 150px;
-    .content {
+    .component {
       overflow: auto;
-      position: absolute;
-      top: 52px;
-      bottom: 70px;
-      left: $marginM;
-      right: $marginM;
-    }
-    .footer {
-      position: absolute;
-      bottom: $marginM;
-      right: $marginM;
-      left: $marginM;
-      .cancel {
-        float: right;
-        margin-right: $marginM;
+      margin: $marginM $marginM 75px $marginM;
+      min-height: 50px;
+      .button-group {
+        position: absolute;
+        bottom: $marginM;
+        right: $marginM;
+        left: $marginM;
+        .cancel {
+          float: right;
+          margin-right: $marginM;
+        }
+      }
+      .button-group.ok {
+        text-align: center;
+        .btn-dialog {
+          position: relative;
+        }
       }
     }
     .header {
@@ -38,22 +49,24 @@
       padding-left: 24px;
       border-bottom: 1px solid;
       font-size: 20px;
+      overflow: hidden;
+      text-overflow: ellipsis;
       .title {
         line-height: 24px;
       }
       .close {
         position: absolute;
         right: $marginM;
-        cursor: pointer;
-        &:after {
-          content: "X";
-        }
+        /* cursor: pointer; */
+        /* &:after { */
+        /*   content: "X"; */
+        /* } */
       }
     }
   }
   .mask {
     position: fixed;
-    display: none;
+    display: block;
     z-index: 9000;
     left: 0;
     right: 0;
@@ -61,7 +74,7 @@
     bottom: 0;
     background-color: #000;
     opacity: 0.5;
-    // filter: alpha(opacity=50);
+    filter: alpha(opacity=50)\9;
   }
 }
 
@@ -143,7 +156,7 @@
   }
 
   [type=submit], .btn, button {
-    padding: 4px $marginL;
+    //padding: 4px $marginL;
     min-width: $cols2;
     max-width: $cols3;
 
@@ -198,29 +211,40 @@
   padding-bottom:0;
 }
 
+// This seems to be used only in change-location.html
 .with-map {
-  display: table-row;
+  //min-width: 680px !important;
+  //display: table-row;
+  //display: inline-block;
 
-  .map-container {
-    padding: 0;
-  }
+  /* .map-container { */
+  /*   //padding: 0; */
+  /*   /\* float: left; *\/ */
+  /*   /\* width: 480px; *\/ */
+  /*   display: inline-block; */
+  /* } */
 
-  .btn-primary {
-    left: auto; right: 260px;
-    bottom: 5px;
-  }
-  a.btn-dialog {
-    right:-70px;
-    bottom: 10px;
-    width: 100px;
-  }
+  /* form { */
+  /*   /\* float: left; *\/ */
+  /*   /\* width: 200px; *\/ */
+  /*   display: inline-block; */
+  /* } */
+  /* .btn-primary { */
+  /*   left: auto; right: 260px; */
+  /*   bottom: 5px; */
+  /* } */
+  /* a.btn-dialog { */
+  /*   right:-70px; */
+  /*   bottom: 10px; */
+  /*   width: 100px; */
+  /* } */
 }
 
-.with-map > div {
-  display: table-cell;
-  vertical-align: top;
-  padding-left: $marginM;
-}
+/* .with-map > div { */
+/*   display: table-cell; */
+/*   vertical-align: top; */
+/*   padding-left: $marginM; */
+/* } */
 
 .neighbors-message {
   margin: $marginM;
@@ -241,5 +265,27 @@
 #dialog-cancel-application {
   div.application-cancel-text-content p {
     margin-bottom: 0;
+  }
+}
+
+.authority-select-dialog {
+  select {
+    width: 100%;
+  }
+}
+
+.company-invite-dialog {
+  select {
+    width: 100%;
+  }
+}
+
+
+.with-map-top {
+  margin: {
+    top: $marginS;
+    bottom: 0;
+    left: $marginS;
+    right: $marginS;
   }
 }

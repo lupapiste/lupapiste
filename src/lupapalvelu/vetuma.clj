@@ -1,19 +1,22 @@
 (ns lupapalvelu.vetuma
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
             [clojure.set :refer [rename-keys]]
-            [clojure.string :as string]
             [noir.core :refer [defpage]]
             [noir.request :as request]
             [noir.response :as response]
-            [hiccup.core :refer [html]]
+            [hiccup.core :as hiccup]
             [hiccup.form :as form]
+            [hiccup.element :as elem]
             [monger.operators :refer :all]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as format]
             [pandect.core :as pandect]
-            [sade.env :as env]
             [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.util :as util]
+            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.vtj :as vtj]))
 
 ;;
@@ -67,7 +70,7 @@
 (defn apply-template
   "changes all variables in braces {} with keywords with same name.
    for example (apply-template \"hi {name}\" {:name \"Teppo\"}) returns \"hi Teppo\""
-  [v m] (string/replace v #"\{(\w+)\}" (fn [[_ word]] (or (m (keyword word)) ""))))
+  [v m] (ss/replace v #"\{(\w+)\}" (fn [[_ word]] (or (m (keyword word)) ""))))
 
 (defn apply-templates
   "runs apply-template on all values, using the map as input"
@@ -86,7 +89,7 @@
     vec
     (conj (secret m))
     (conj "")
-    (->> (string/join "&"))
+    (->> (ss/join "&"))
     mac))
 
 (defn- with-mac [m]
@@ -103,19 +106,20 @@
 ;;
 
 (defn extract-subjectdata [{s :subjectdata}]
-  (-> s
-    (string/split #", ")
-    (->> (map #(string/split % #"=")))
-    (->> (into {}))
-    keys-as-keywords
-    (rename-keys {:etunimi :firstname})
-    (rename-keys {:sukunimi :lastname})))
+  (when (ss/contains? s ",")
+    (-> s
+      (ss/split #", ")
+      (->> (map #(ss/split % #"=")))
+      (->> (into {}))
+      keys-as-keywords
+      (rename-keys {:etunimi :firstname})
+      (rename-keys {:sukunimi :lastname}))))
 
 (defn- extract-vtjdata [{:keys [vtjdata]}]
   (vtj/extract-vtj vtjdata))
 
 (defn- extract-userid [{s :extradata}]
-  {:userid (last (string/split s #"="))})
+  {:userid (last (ss/split s #"="))})
 
 (defn- extract-request-id [{id :trid}]
   {:pre [id]}
@@ -131,8 +135,11 @@
 ;; Request & Response mapping to clojure
 ;;
 
-(defn request-data [host]
+(def supported-langs #{"fi" "sv" "en"})
+
+(defn request-data [host lang]
   (-> (config)
+    (assoc :lg lang)
     (assoc :trid (generate-stamp))
     (assoc :timestmp (timestamp))
     (assoc :host  host)
@@ -159,11 +166,9 @@
 (defn- field [[k v]]
   (form/hidden-field k v))
 
-(defn- non-local? [paths] (some #(not= -1 (.indexOf (or % "") ":")) (vals paths)))
-
 (defn host-and-ssl-port
   "returns host with port changed from 8000 to 8443. Shitty crap."
-  [host] (string/replace host #":8000" ":8443"))
+  [host] (ss/replace host #":8000" ":8443"))
 
 (defn host
   ([] (host :current))
@@ -177,21 +182,27 @@
                    (host :current)
                    (str "https://" (host-and-ssl-port hostie)))))))
 
-(defpage "/api/vetuma" {:keys [success, cancel, error] :as data}
-  (let [paths     {:success success :error error :cancel cancel}
+(defpage "/api/vetuma" {:keys [language] :as data}
+  (let [paths     (select-keys data [:success :cancel :error :y :vtj])
+        lang      (get supported-langs language (name i18n/default-lang))
         sessionid (session-id)
-        vetuma-request (request-data (host :secure))
-        trid      (vetuma-request "TRID")]
+        vetuma-request (request-data (host :secure) lang)
+        trid      (vetuma-request "TRID")
+        label     (i18n/localize lang "vetuma.continue")]
 
     (if sessionid
-      (if (non-local? paths)
-       (response/status 400 (response/content-type "text/plain" "invalid return paths"))
-       (do
-         (mongo/update-one-and-return :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :paths paths :trid trid :created-at (java.util.Date.)} :upsert true)
-         (html
-           (form/form-to [:post (:url (config))]
-             (map field vetuma-request)
-             (form/submit-button "submit")))))
+      (if (every? util/relative-local-url? (vals paths))
+        (do
+          (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :paths paths :trid trid :created-at (java.util.Date.)} :upsert true)
+          (->>
+            (hiccup/html
+              (form/form-to {:id "vf"} [:post (:url (config)) ]
+                (map field vetuma-request)
+                (form/submit-button {:id "btn"} label)
+                (elem/javascript-tag "document.getElementById('vf').submit();document.getElementById('btn').disabled = true;")))
+            (response/content-type "text/html")
+            (response/set-headers {"Cache-Control" "no-store, no-cache, must-revalidate"})))
+        (response/status 400 (response/content-type "text/plain" "invalid return paths")))
       (response/status 400 (response/content-type "test/plain" "Session not initialized")))))
 
 (defpage [:post "/api/vetuma"] []
@@ -212,19 +223,45 @@
    "ERROR" "Kutsu oli virheellinen."
    "FAILURE" "Kutsun palveleminen ep\u00e4onnistui jostain muusta syyst\u00e4 kuin siit\u00e4, ett\u00e4 taustapalvelu hylk\u00e4si suorittamisen."})
 
-(defpage [:any ["/api/vetuma/:status" :status #"(cancel|error)"]] {status :status}
-  (let [params       (:form-params (request/ring-request))
-        status-param (get params "STATUS")
-        trid         (get params "TRID")
-        data         (mongo/select-one :vetuma {:sessionid (session-id) :trid trid})
-        return-uri   (get-in data [:paths (keyword status)])
-        return-uri   (or return-uri "/")]
+(defn- redirect [cause vetuma-data]
+  {:pre [(keyword? cause)]}
+  (let [url (or (get-in vetuma-data [:paths cause]) (get-in vetuma-data [:paths :error] "/"))]
+    (response/redirect url)))
 
-    (case status
-      "cancel" (info "Vetuma cancel")
-      "error"  (error "Vetuma failure, STATUS =" status-param "=" (get error-status-codes status-param) "Request parameters:" (keys-as-keywords params)))
+(defn- handle-cancel [vetuma-data]
+  (info "Vetuma cancel")
+  (redirect :cancel vetuma-data))
 
-    (response/redirect return-uri)))
+(defn- handle-reject [vetuma-data]
+  (warn "Vetuma backend rejected authentication")
+  (redirect :error vetuma-data))
+
+(defn- handle-error [params vetuma-data]
+  (error "Vetuma returned ERROR! Request parameters:" params "Vetuma data:" vetuma-data)
+  (redirect :error vetuma-data))
+
+(defn- handle-failure [{:keys [extradata subjectdata] :as params} vetuma-data]
+  (let [cause (cond
+                (util/finnish-y? extradata) :y
+                (ss/contains? extradata "Cannot use VTJ") :vtj
+                :else :error)]
+    (case cause
+      :y      (warn  "Company account login attempted. Subject data:" subjectdata)
+      :vtj    (error "Vetuma could not use VTJ! Subject data:" subjectdata)
+      :error  (error "Unexpected Vetuma FAILURE! Request parameters:" params))
+
+    (redirect cause vetuma-data)))
+
+(defpage [:any ["/api/vetuma/:failure" :failure #"(cancel|error)"]] {failure :failure}
+  (let [{:keys [trid status] :as params} (-> (request/ring-request) :form-params keys-as-keywords)
+        data   (mongo/select-one :vetuma {:sessionid (session-id) :trid trid})]
+
+    (if (= failure "cancel")
+      (handle-cancel data)
+      (case status
+        "REJECTED" (handle-reject data)
+        "ERROR"    (handle-error params data)
+        "FAILURE"  (handle-failure params data)))))
 
 (defpage "/api/vetuma/user" []
   (let [data (last (mongo/select :vetuma {:sessionid (session-id), :user.stamp {$exists true}} [:user] {:created-at 1}))
@@ -252,8 +289,7 @@
 
 (env/in-dev
   (defpage "/dev/api/vetuma" {:as data}
-    (let [stamp (generate-stamp)
-          user  (select-keys data [:userid :firstname :lastname])
-          user  (assoc user :stamp stamp)]
-      (mongo/insert :vetuma {:user user :created-at (java.util.Date.)})
+    (let [user  (-> (select-keys data [:userid :firstname :lastname])
+                  (assoc :stamp (generate-stamp)))]
+      (mongo/insert :vetuma {:user user :created-at (java.util.Date.) :trid (generate-stamp)})
       (response/json user))))

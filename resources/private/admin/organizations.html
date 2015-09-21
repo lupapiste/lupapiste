@@ -12,6 +12,7 @@
               <th data-bind="ltext: 'organization.id'"></th>
               <th data-bind="ltext: 'organization.name'"></th>
               <th data-bind="ltext: 'login.with-rights'"></th>
+              <th data-bind="ltext: 'organization.archive.enabled'"></th>
               <th data-bind="ltext: 'admin.municipality'"></th>
               <th data-bind="ltext: 'organization.scope'"></th>
               <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
@@ -32,6 +33,9 @@
                 <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
                   [<a href="#" data-bind="click: $root.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
                 </td>
+                <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
+                  <span data-bind="text: $data['permanent-archive-enabled'] || false"></span>
+                </td>
               <!-- /ko -->
               <td><abbr data-bind="text: $data.municipality, attr: {'title': loc(['municipality',$data.municipality])}"></abbr></td>
               <td><abbr data-bind="text: $data.permitType, attr: {'title':loc($data.permitType)}"></abbr></td>
@@ -50,20 +54,31 @@
       <div id="dialog-login-as" class="window autosized" data-bind="with: loginAsModel">
         <div class="dialog-header">
           <p data-bind="ltext: 'loginframe.login'"></p>
-          <p class="dialog-close close">X</p>
+          <p class="dialog-close close lupicon-remove"></p>
         </div>
 
         <div class="dialog-content">
-          <div>
-            <label class="form-label" for="login-as-password" data-bind="ltext: 'admin.admin-password'"></label>
-            <input type="password" data-bind="textInput: password" class="form-input" id="login-as-password" ></input>
-          </div>
+          <form>
+            <div>
+              <input type="radio" name="role" value="authority" data-bind="checked: role" id="impersonateAuthority">
+              <label data-bind="ltext: 'authority'" for="impersonateAuthority"></label>
+            </div>
+            <div>
+              <input type="radio" name="role" value="authorityAdmin" data-bind="checked: role" id="impersonateAuthorityAdmin">
+              <label data-bind="ltext: 'authorityAdmin'" for="impersonateAuthorityAdmin"></label>
+            </div>
 
-          <button data-bind="click: login, ltext: 'loginframe.login'"
-                  data-test-id="submit-login-as"
-                  class="btn btn-primary btn-dialog" ></button>
+            <div>
+              <label class="form-label" for="login-as-password" data-bind="ltext: 'admin.admin-password'"></label>
+              <input type="password" data-bind="textInput: password" class="form-input" id="login-as-password" autofocus="autofocus">
+            </div>
 
-          <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+            <button data-bind="click: login, ltext: 'loginframe.login'"
+                    data-test-id="submit-login-as"
+                    class="positive btn-dialog" ></button>
+
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+          </form>
         </div>
       </div>
 

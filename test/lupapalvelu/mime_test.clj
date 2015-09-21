@@ -1,10 +1,10 @@
 (ns lupapalvelu.mime-test
-  (:use [lupapalvelu.mime]
-        [midje.sweet]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.mime :refer :all]))
 
 (facts "Facts about mime-type"
   (fact (mime-type "foo.exe") => "application/x-msdownload")
-  (fact (mime-type "foo.bar") => nil?) ; TODO: Should be application/octet-stream?
+  (fact (mime-type "foo.bar") => nil?)
   (fact (mime-type "foo.doc") => "application/msword")
   (fact (mime-type "foo.pdf") => "application/pdf"))
 
@@ -25,7 +25,7 @@
   (fact (allowed-file? "text.ods")     => truthy)
   (fact (allowed-file? "plan.zip")     => truthy)
   (fact (allowed-file? "plan.7z")      => truthy)
-  
+
   (fact (allowed-file? "virus.exe")    => falsey)
   (fact (allowed-file? "virus.bat")    => falsey)
   (fact (allowed-file? "virus.sh")     => falsey)

@@ -1,10 +1,10 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [error]]
+  (:require [taoensso.timbre :refer [debug error errorf]]
+            [me.raynes.fs :as fs]
+            [clojure.java.io :as io]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.neighbors :as neighbors]
+            [lupapalvelu.neighbors-api :as neighbors]
             [lupapalvelu.open-inforequest :as inforequest]
-            [clj-time.core :refer [days weeks months ago]]
-            [clj-time.coerce :refer [to-long]]
             [monger.operators :refer :all]
             [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
@@ -14,20 +14,13 @@
             [lupapalvelu.verdict-api :as verdict-api]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
             [sade.core :refer :all]))
 
-
-(defn get-timestamp-from-now [time-key amount]
-  {:pre [(#{:day :week :month} time-key)]}
-  (let [time-fn (case time-key
-                  :day days
-                  :week weeks
-                  :month months)]
-    (to-long (-> amount time-fn ago))))
 
 (defn- older-than [timestamp] {$lt timestamp})
 
@@ -69,7 +62,7 @@
 
 ;; "Lausuntopyynto: Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn statement-request-reminder []
-  (let [timestamp-1-week-ago (get-timestamp-from-now :week 1)
+  (let [timestamp-1-week-ago (util/get-timestamp-from-now :week 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
                                                                    :given nil
@@ -92,7 +85,7 @@
 
 ;; "Neuvontapyynto: Neuvontapyyntoon ei ole vastattu viikon kuluessa eli neuvontapyynnon tila on avoin. Lahetetaan viikoittain uudelleen."
 (defn open-inforequest-reminder []
-  (let [timestamp-1-week-ago (get-timestamp-from-now :week 1)
+  (let [timestamp-1-week-ago (util/get-timestamp-from-now :week 1)
         oirs (mongo/select :open-inforequest-token {:created (older-than timestamp-1-week-ago)
                                                     :last-used nil
                                                     $or [{:reminder-sent {$exists false}}
@@ -111,7 +104,7 @@
 
 ;; "Naapurin kuuleminen: Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Muistutus lahetetaan kerran."
 (defn neighbor-reminder []
-  (let [timestamp-1-week-ago (get-timestamp-from-now :week 1)
+  (let [timestamp-1-week-ago (util/get-timestamp-from-now :week 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :neighbors.status {$elemMatch {$and [{:state {$in ["email-sent"]}}
                                                                                {:created (older-than timestamp-1-week-ago)}
@@ -123,7 +116,8 @@
       (when (not-any? #(or
                          (= "reminder-sent" (:state %))
                          (= "response-given-ok" (:state %))
-                         (= "response-given-comments" (:state %))) statuses)
+                         (= "response-given-comments" (:state %))
+                         (= "mark-done" (:state %))) statuses)
 
         (doseq [status statuses]
 
@@ -147,7 +141,7 @@
 
 ;; "Hakemus: Hakemuksen tila on valmisteilla tai vireilla, mutta edellisesta paivityksesta on aikaa yli kuukausi. Lahetetaan kuukausittain uudelleen."
 (defn application-state-reminder []
-  (let [timestamp-1-month-ago (get-timestamp-from-now :month 1)
+  (let [timestamp-1-month-ago (util/get-timestamp-from-now :month 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :modified (older-than timestamp-1-month-ago)
                                           $or [{:reminder-sent {$exists false}}
@@ -183,16 +177,10 @@
         orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-some-scope)
         org-ids (keys orgs-by-id)
         apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
-        eraajo-user {:id "-"
-                     :enabled true
-                     :lastName "Er\u00e4ajo"
-                     :firstName "Lupapiste"
-                     :role "authority"
-                     :organizations org-ids}]
+        eraajo-user (user/batchrun-user org-ids)]
     (doall
       (pmap
         (fn [{:keys [id permitType organization] :as app}]
-
           (try
             (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
               (logging/with-logging-context {:applicationId id}
@@ -208,11 +196,48 @@
                   (logging/log-event :info {:run-by "Automatic verdicts checking"
                                             :event "No Krysp WFS url defined for organization"
                                             :organization {:id organization :permit-type permitType}}))))
-            (catch Exception e (error e))))
+            (catch Throwable t
+              (errorf "Unable to get verdict for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t)))))
         apps))))
 
 (defn check-for-verdicts [& args]
   (when (env/feature? :automatic-verdicts-checking)
     (mongo/connect!)
     (fetch-verdicts)
+    (mongo/disconnect!)))
+
+(defn- get-asianhallinta-ftp-users [organizations]
+  (->> (for [org organizations
+             scope (:scope org)]
+         (get-in scope [:caseManagement :ftpUser]))
+    (remove nil?)
+    distinct))
+
+(defn fetch-asianhallinta-verdicts []
+  (let [ah-organizations (mongo/select :organizations
+                                       {"scope.caseManagement.ftpUser" {$exists true}}
+                                       {"scope.caseManagement.ftpUser" 1})
+        ftp-users (get-asianhallinta-ftp-users ah-organizations)]
+    (doseq [user ftp-users
+            :let [path (str
+                         (env/value :outgoing-directory) "/"
+                         user "/"
+                         "asianhallinta/to_lupapiste/")]
+            zip (util/get-files-by-regex path #".+\.zip$")]
+      (fs/mkdirs (str path "archive"))
+      (fs/mkdirs (str path "error"))
+      (let [zip-path (.getPath zip)
+            result (try
+                     (ah-verdict/process-ah-verdict zip-path user)
+                     (catch Throwable e
+                       (error e "Error processing zip-file in asianhallinta verdict batchrun")
+                       (fail :error.unknown)))
+            target (str path (if (ok? result) "archive" "error") "/" (.getName zip))]
+        (when-not (fs/rename zip target)
+          (errorf "Failed to rename %s to %s" zip-path target))))))
+
+(defn check-for-asianhallinta-verdicts [& args]
+  (when (env/feature? :automatic-verdicts-checking)
+    (mongo/connect!)
+    (fetch-asianhallinta-verdicts)
     (mongo/disconnect!)))

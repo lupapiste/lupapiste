@@ -16,9 +16,9 @@
    :new-application-enabled false
    :open-inforequest false
    :open-inforequest-email ""
-   :opening nil
-   :caseManagement {:enabled false
-                    :version "1.1"}})
+   :opening nil})
+
+(def authority-roles [:authority :approver :reader :tos-editor :tos-publisher])
 
 (defn- with-scope-defaults [org]
   (when (seq org)
@@ -43,10 +43,6 @@
 (defn get-organization-attachments-for-operation [organization operation]
   (-> organization :operations-attachments ((-> operation :name keyword))))
 
-(defn municipality-by-propertyId [id]
-  (when (and (>= (count id) 3) (not (s/blank? id)))
-    (subs id 0 3)))
-
 (defn get-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
   ([{:keys [organization permitType] :as application}]
@@ -68,7 +64,7 @@
     (get-organizations {:scope {$elemMatch (merge {:municipality municipality} (when permit-type {:permitType permit-type}))}})))
 
 (defn resolve-organization [municipality permit-type]
-  {:pre  [municipality (not (s/blank? permit-type))]}
+  {:pre  [municipality (permit/valid-permit-type? permit-type)]}
   (when-let [organizations (resolve-organizations municipality permit-type)]
     (when (> (count organizations) 1)
       (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
@@ -94,3 +90,22 @@
 (defn has-ftp-user? [organization permit-type]
   (not (ss/blank? (get-in organization [:krysp (keyword permit-type) :ftpUser]))))
 
+(defn allowed-roles-in-organization [organization]
+  {:pre [(map? organization)]}
+  (if-not (:permanent-archive-enabled organization)
+    (remove #(ss/starts-with (name %) "tos-") authority-roles)
+    authority-roles)  )
+
+(defn filter-valid-user-roles-in-organization [organization roles]
+  (let [organization  (if (map? organization) organization (get-organization organization))
+        allowed-roles (set (allowed-roles-in-organization organization))]
+    (filter (comp allowed-roles keyword) roles)))
+
+(defn create-tag-ids
+  "Creates mongo id for tag if id is not present"
+  [tags]
+  (map
+    #(if (:id %)
+       %
+       (assoc % :id (mongo/create-id)))
+    tags))

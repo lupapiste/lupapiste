@@ -2,40 +2,36 @@
 <html>
 <body>
   <section class="page welcome_page" id="login">
-    <div class="welcome_top">
-      <div class="welcome_top_content">
-        <div class="welcome_sections">
-          <div id="login-form" class="welcome_section">
-            <img src="/img/icon-info.png" class="welcome_info" alt="?" width="55" height="62">
-            <section class="welcome-register-section">
-              <h3 data-bind="ltext: 'welcome.notRegistered.title'">Ei tunnuksia?</h3>
-              <p data-bind="ltext: 'welcome.notRegistered.desc'">Jos sinulla ei viel&auml; ole tunnuksia, aloita asiointi rekister&ouml;itym&auml;ll&auml; palveluun.</p>
-              <button id="register-button" data-bind="ltext: 'welcome.register'" class="btn btn-success">Rekister&ouml;idy</button>
-            </section>
-            <section class="welcome-login-section">
-              <h3 data-bind="ltext: 'welcome.login.title'">Haluan kirjautua palveluun</h3>
-              <p data-bind="ltext: 'welcome.login.desc'">
-                Voit tehd&auml; hakemuksia ja ilmoituksia s&auml;hk&ouml;isess&auml; asiointij&auml;rjestelm&auml;ss&auml;.
-                Asiointij&auml;rjestelm&auml;n k&auml;ytt&ouml; vaatii kirjautumisen. K&auml;ytt&auml;j&auml;tunnuksena toimii s&auml;hk&ouml;postiosoitteesi.
-              </p>
+    <!--[if lt IE 9 ]> <span class="old-ie"/> <![endif]-->
+    <div class="container">
+      <div class="welcome_sections">
+        <div id="login-form" class="welcome_section">
+          <section class="welcome-login-section">
+            <h3 data-bind="ltext: 'welcome.login.title'"></h3>
+            <p data-bind="ltext: 'welcome.login.desc'"></p>
+            <form data-bind="submit: handleLoginSubmit">
               <label class="form-label" for="login-username" data-bind="ltext: 'userinfo.email'"></label>
               <input class="form-input" id="login-username" type="text" data-bind="attr: {placeholder: loc('userinfo.username')}" name="username">
               <label class="form-label" for="login-password" data-bind="ltext: 'userinfo.password'"></label>
               <input class="form-input" id="login-password" type="password" data-bind="attr: {placeholder: loc('userinfo.password')}" name="password">
-              <label class="form-label" ><input class="form-input" type="checkbox" id="rememberme" data-bind="checked: rememberMe"><span data-bind="ltext: 'userinfo.rememberme'"></span></label>
-              <button id="login-button" class="btn btn-primary" data-bind="disable: processing">
+              <label class="form-label" ><input class="form-input checkbox" type="checkbox" id="rememberme" data-bind="checked: rememberMe"><span data-bind="ltext: 'userinfo.rememberme'"></span></label>
+              <button id="login-button" type="submit" class="positive no-icon-pad"
+                      data-bind="css: {waiting: pending},
+                                 disable: processing">
                 <span data-bind="ltext: 'welcome.login'"></span>
-                <em data-bind="visible: pending" class="button-loader"></em>
+                <i class="wait spin lupicon-refresh"></i>
               </button>
-              <span id="login-message" style="display: none; color: red"></span>
-              <div class="passwd-reset">
-                <a href="#!/reset" data-bind="ltext: 'login.reset-question'"></a>
-              </div>
-            </section>
-            <section class="welcome-licenses">
-              <a href="#!/licenses" data-bind="ltext: 'license.link'">Tietoja Lupapisteest&auml;</a>
-            </section>
-          </div>
+            </form>
+            <span id="login-message" style="display: none; color: red"></span>
+            <div class="passwd-reset">
+              <a href="#!/reset" data-bind="ltext: 'login.reset-question'"></a>
+            </div>
+          </section>
+          <section class="welcome-register-section">
+            <h3 data-bind="ltext: 'welcome.notRegistered.title'"></h3>
+            <p data-bind="ltext: 'welcome.notRegistered.desc'"></p>
+            <button id="register-button" data-bind="ltext: 'welcome.register'" class="function"></button>
+          </section>
         </div>
       </div>
     </div>

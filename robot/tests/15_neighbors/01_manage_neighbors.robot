@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation   Authority add neighbors to be heard
-Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
@@ -11,7 +10,7 @@ New applications does not have neighbors
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Jalkapesula_${secs}
-  Create application the fast way  ${appname}  753  753-416-25-22  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  753-416-25-22  kerrostalo-rivitalo
   Open to authorities  Jalkapesulaa rakentaisin
 
   Open tab  statement

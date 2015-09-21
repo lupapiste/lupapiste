@@ -9,7 +9,6 @@
             [pdfboxing.text :as pdfbox]
             [lupapalvelu.mongo :as mongo]))
 
-(mongo/connect!)
 (apply-remote-minimal)
 
 (defn- localize-value [value]
@@ -32,12 +31,13 @@
   )
 
 (fact "Generate PDF from an R application with dummy document values"
-  (let [test-municipality 444
-        test-address      "Testikuja 1234"
-        test-property-id  "44400100100100"
-        test-submitted    (clj-time.coerce/to-long "2014-01-01")
-        test-authority    {:firstName "Erkki" :lastName "Testihenkilo"}
-        test-operations   [{:name "kerrostalo-rivitalo"} {:name "aita"}]
+  (let [test-municipality        444
+        test-address             "Testikuja 1234"
+        test-property-id         "44400100100100"
+        test-submitted           (clj-time.coerce/to-long "2014-01-01")
+        test-authority           {:firstName "Erkki" :lastName "Testihenkilo"}
+        test-primaryOperation    {:name "kerrostalo-rivitalo"}
+        test-secondaryoperations [{:name "aita"}]
 
         application (create-and-submit-application pena)
         _           (generate-documents application pena)
@@ -45,12 +45,13 @@
 
         ; Add some manual test data to application common fields
         application (merge application
-                           {:municipality test-municipality
-                            :address      test-address
-                            :submitted    test-submitted
-                            :propertyId   test-property-id
-                            :authority    test-authority
-                            :operations   test-operations})
+                           {:municipality        test-municipality
+                            :address             test-address
+                            :submitted           test-submitted
+                            :propertyId          test-property-id
+                            :authority           test-authority
+                            :primaryOperation    test-primaryOperation
+                            :secondaryOperations test-secondaryoperations})
 
         lang        "fi"
         file        (java.io.File/createTempFile "test" ".pdf")]

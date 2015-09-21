@@ -1,15 +1,19 @@
 (ns lupapalvelu.wfs
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn error errorf fatal]]
+            [ring.util.codec :as codec]
+            [net.cgrand.enlive-html :as enlive]
             [sade.http :as http]
             [clojure.string :as s]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
             [clojure.data.zip.xml :refer [xml-> text attr=]]
             [sade.env :as env]
-            [sade.xml]
-            [sade.strings :refer [starts-with-i numeric?]]
+            [sade.xml :as sxml]
+            [sade.strings :as ss]
             [sade.util :refer [future*] :as util]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [sade.common-reader :as reader]
+            [lupapalvelu.logging :as logging]))
 
 
 ;; SAX options
@@ -161,8 +165,7 @@
      :municipality (address-part feature :oso:kuntatunnus)
      :name {:fi (address-part feature :oso:kuntanimiFin)
             :sv (address-part feature :oso:kuntanimiSwe)}
-     :location {:x x
-                :y y}}))
+     :location {:x x :y y}}))
 
 (defn feature-to-simple-address-string [feature]
   (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)]
@@ -175,7 +178,7 @@
         (str street ", " fi)))
     (fn [feature]
       (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)
-            municipality-name (if (starts-with-i fi city) fi sv)]
+            municipality-name (if (ss/starts-with-i fi city) fi sv)]
         (str street " " number ", " municipality-name)))))
 
 (defn feature-to-position [feature]
@@ -245,11 +248,24 @@
       :failure (do (errorf data "wfs failure: url=%s" url) nil)
       :ok      (let [features (-> data
                                 (s/replace "UTF-8" "ISO-8859-1")
-                                (->features sade.xml/startparse-sax-no-doctype "ISO-8859-1"))]
+                                (->features sxml/startparse-sax-no-doctype "ISO-8859-1"))]
                  (xml-> features :gml:featureMember)))))
 
 (defn post [url q]
   (exec :post url q))
+
+(defn wms-get
+  "WMS query with error handling. Returns response body or nil."
+  [url query-params]
+  (let [{:keys [status body]} (http/get url {:query-params query-params})
+        error (when (ss/contains? body "ServiceException")
+                (-> body ss/trim
+                  (->features startparse-sax-non-validating "UTF-8")
+                  (xml-> :ServiceException)
+                  first text ss/trim))]
+    (if (or (not= 200 status) error)
+      (errorf "Failed to get %s (status %s): %s" url status (logging/sanitize 1000 error))
+      body)))
 
 ;;
 ;; Public queries:
@@ -318,14 +334,11 @@
   (let [host (env/value :geoserver :host) ; local IP from Chef environment
         path (env/value :geoserver :wms :path)]
     (assert (and host path))
-    (:body (http/get (str host path)
-             {:query-params {"version" "1.1.1"
-                             "request" "GetCapabilities"}
-              :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}}))))
+    (:body (http/get (str host path) {:query-params {"version" "1.1.1", "request" "GetCapabilities"}}))))
 
 (defn capabilities-to-layers [capabilities]
   (when capabilities
-    (xml-> (->features capabilities startparse-sax-non-validating) :Capability :Layer :Layer)))
+    (xml-> (->features (s/trim capabilities) startparse-sax-non-validating "UTF-8") :Capability :Layer :Layer)))
 
 (defn layer-to-name [layer]
   (first (xml-> layer :Name text)))
@@ -338,24 +351,24 @@
 
 (defn plan-info-by-point [x y municipality]
   (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]
-        {:keys [url layers format]} (plan-info-config municipality)]
-    (:body (http/get url
-             {:query-params {"REQUEST" "GetFeatureInfo"
-                             "EXCEPTIONS" "application/vnd.ogc.se_xml"
-                             "SERVICE" "WMS"
-                             "INFO_FORMAT" format
-                             "QUERY_LAYERS" layers
-                             "FEATURE_COUNT" "50"
-                             "Layers" layers
-                             "WIDTH" "256"
-                             "HEIGHT" "256"
-                             "format" "image/png"
-                             "styles" ""
-                             "srs" "EPSG:3067"
-                             "version" "1.1.1"
-                             "x" "128"
-                             "y" "128"
-                             "BBOX" (s/join "," bbox)}}))))
+        {:keys [url layers format]} (plan-info-config municipality)
+        query {"REQUEST" "GetFeatureInfo"
+               "EXCEPTIONS" "application/vnd.ogc.se_xml"
+               "SERVICE" "WMS"
+               "INFO_FORMAT" format
+               "QUERY_LAYERS" layers
+               "FEATURE_COUNT" "50"
+               "Layers" layers
+               "WIDTH" "256"
+               "HEIGHT" "256"
+               "format" "image/png"
+               "styles" ""
+               "srs" "EPSG:3067"
+               "version" "1.1.1"
+               "x" "128"
+               "y" "128"
+               "BBOX" (s/join "," bbox)}]
+    (wms-get url query)))
 
 ;;; Mikkeli is special because it was done first and they use Bentley WMS
 (defn gfi-to-features-mikkeli [gfi _]
@@ -385,24 +398,24 @@
      :type "sito"}))
 
 (defn general-plan-info-by-point [x y]
-  (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]]
-    (:body (http/get wms-url
-             {:query-params {"REQUEST" "GetFeatureInfo"
-                             "EXCEPTIONS" "application/vnd.ogc.se_xml"
-                             "SERVICE" "WMS"
-                             "INFO_FORMAT" "application/vnd.ogc.gml"
-                             "QUERY_LAYERS" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
-                             "FEATURE_COUNT" "50"
-                             "Layers" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
-                             "WIDTH" "256"
-                             "HEIGHT" "256"
-                             "format" "image/png"
-                             "styles" ""
-                             "srs" "EPSG:3067"
-                             "version" "1.1.1"
-                             "x" "128"
-                             "y" "128"
-                             "BBOX" (s/join "," bbox)}}))))
+  (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]
+        query {"REQUEST" "GetFeatureInfo"
+               "EXCEPTIONS" "application/vnd.ogc.se_xml"
+               "SERVICE" "WMS"
+               "INFO_FORMAT" "application/vnd.ogc.gml"
+               "QUERY_LAYERS" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
+               "FEATURE_COUNT" "50"
+               "Layers" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
+               "WIDTH" "256"
+               "HEIGHT" "256"
+               "format" "image/png"
+               "styles" ""
+               "srs" "EPSG:3067"
+               "version" "1.1.1"
+               "x" "128"
+               "y" "128"
+               "BBOX" (s/join "," bbox)}]
+    (wms-get wms-url query)))
 
 (defn gfi-to-general-plan-features [gfi]
   (when gfi
@@ -422,12 +435,28 @@
      :linkki (first (xml-> feature :lupapiste:linkki text))
      :type "yleiskaava"}))
 
+(defn get-rekisteriyksikontietojaFeatureAddress []
+  (let [url-for-get-ktj-capabilities (str ktjkii "?service=WFS&request=GetCapabilities&version=1.1.0")
+        namespace-stripped-xml (reader/strip-xml-namespaces (reader/get-xml url-for-get-ktj-capabilities (get auth ktjkii) false))
+        selector [:WFS_Capabilities :OperationsMetadata [:Operation (enlive/attr= :name "DescribeFeatureType")] :DCP :HTTP [:Get]]
+        attribute-to-get :xlink:href]
+    (sxml/select1-attribute-value namespace-stripped-xml selector attribute-to-get)))
+
+(defn rekisteritiedot-xml [rekisteriyksikon-tunnus]
+  (if (env/feature? :disable-ktj-on-create)
+    (infof "ktj-client is disabled - not getting rekisteritiedot for %s" rekisteriyksikon-tunnus)
+    (let [url (str (get-rekisteriyksikontietojaFeatureAddress) "SERVICE=WFS&REQUEST=GetFeature&VERSION=1.1.0&NAMESPACE=xmlns%28ktjkiiwfs%3Dhttp%3A%2F%2Fxml.nls.fi%2Fktjkiiwfs%2F2010%2F02%29&TYPENAME=ktjkiiwfs%3ARekisteriyksikonTietoja&PROPERTYNAME=ktjkiiwfs%3Akiinteistotunnus%2Cktjkiiwfs%3Aolotila%2Cktjkiiwfs%3Arekisteriyksikkolaji%2Cktjkiiwfs%3Arekisterointipvm%2Cktjkiiwfs%3Animi%2Cktjkiiwfs%3Amaapintaala%2Cktjkiiwfs%3Avesipintaala&FEATUREID=FI.KTJkii-RekisteriyksikonTietoja-" (codec/url-encode rekisteriyksikon-tunnus) "&SRSNAME=EPSG%3A3067&MAXFEATURES=100&RESULTTYPE=results")
+          ktj-xml (reader/get-xml url (get auth ktjkii) false)
+          features (-> ktj-xml reader/strip-xml-namespaces sxml/xml->edn)]
+      (get-in features [:FeatureCollection :featureMember :RekisteriyksikonTietoja]))))
+
 
 ;;
 ;; Raster images:
 ;;
 (defn raster-images [request service]
-  (let [layer (get-in request [:params :LAYER])]
+  (let [layer (or (get-in request [:params :LAYER])
+                  (get-in request [:params :layer]))]
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
               {:query-params (:params request)
@@ -445,12 +474,12 @@
                               "kiinteistotunnukset" "kiinteisto")
                    wmts-url (str "https://karttakuva.maanmittauslaitos.fi/" url-part "/wmts")]
                (http/get wmts-url
-                 {:query-params (:params request)
-                  :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-                  :basic-auth [username password]
-                  :as :stream}))
+                         {:query-params (:params request)
+                          :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+                          :basic-auth [username password]
+                          :as :stream}))
       "plandocument" (let [id (get-in request [:params :id])]
-                       (assert (numeric? id))
+                       (assert (ss/numeric? id))
                        (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")
                          {:query-params (:params request)
                           :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}

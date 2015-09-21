@@ -33,6 +33,19 @@
     (fact (subtype-validation {:subtype :number :min -1 :max 12} "12") => nil?)
     (fact (subtype-validation {:subtype :number :min -1 :max 12} "13") => [:warn "illegal-number"])))
 
+(facts "Facts about decimal validation"
+  (fact (subtype-validation {:subtype :decimal} "0")    => nil?)
+  (fact (subtype-validation {:subtype :decimal} "0,0")  => nil?)
+  (fact (subtype-validation {:subtype :decimal} "-1,0") => nil?)
+  (fact (subtype-validation {:subtype :decimal} "1,0")  => nil?)
+  (fact (subtype-validation {:subtype :decimal} "abc")  => [:warn "illegal-decimal"])
+  (facts "with min and max"
+    (fact (subtype-validation {:subtype :decimal :min -1.1 :max 1.1} "0")    => nil?)
+    (fact (subtype-validation {:subtype :decimal :min -1.1 :max 1.1} "-1,1") => nil?)
+    (fact (subtype-validation {:subtype :decimal :min -1.1 :max 1.1} "1,1")  => nil?)
+    (fact (subtype-validation {:subtype :decimal :min -1.1 :max 1.1} "-1,2") => [:warn "illegal-decimal"])
+    (fact (subtype-validation {:subtype :decimal :min -1.1 :max 1.1} "1,2")  => [:warn "illegal-decimal"])))
+
 (facts "Facts about letter validation"
   (subtype-validation {:subtype :letter} "a") => nil?
   (subtype-validation {:subtype :letter} "A") => nil?

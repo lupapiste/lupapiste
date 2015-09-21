@@ -3,30 +3,36 @@ var LUPAPISTE = LUPAPISTE || {};
 (function($) {
   "use strict";
 
-  var startPageHref = window.location.href;
+  var startPageHref = window.location.href.replace(window.location.hash, "");
 
   /**
    * Prototype for Lupapiste Single Page Apps.
    *
-   * @param {String} startPage   ID of the landing page
-   * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
+   * params:
+   * startPage (String)        ID of the landing page
+   * allowAnonymous (Boolean)  Allow all users to access the app. Default: require login.
+   * showUserMenu (Boolean)    Default: complement of allowAnonymous, i.e., show menu for users tthat have logged in
+   * @param
    */
-   LUPAPISTE.App = function (startPage, allowAnonymous, showUserMenu) {
-
+  LUPAPISTE.App = function (params) {
     var self = this;
 
     self.defaultTitle = document.title;
 
-    self.startPage = startPage;
+    self.startPage = params.startPage;
+    self.logoPath = params.logoPath;
     self.currentPage = "";
     self.session = undefined;
-    self.allowAnonymous = allowAnonymous;
-    self.showUserMenu = (showUserMenu !== undefined) ? showUserMenu : !allowAnonymous;
+    self.allowAnonymous = params.allowAnonymous;
+    self.showUserMenu = (params.showUserMenu !== undefined) ? params.showUserMenu : !params.allowAnonymous;
     self.previousHash = "";
     self.currentHash = "";
 
     // Global models
     self.models = {};
+
+    // Gobal service
+    self.services = {};
 
     /**
      * Prepends given title to browser window title.
@@ -88,8 +94,18 @@ var LUPAPISTE = LUPAPISTE || {};
     self.hashChanged = function () {
       self.previousHash = self.currentHash;
       self.currentHash = (location.hash || "").substr(3);
+
+      var q = self.currentHash.indexOf("?");
+      if (q > -1) {
+        self.currentHash = self.currentHash.substring(0,q);
+      }
+
       if (self.currentHash === "") {
-        window.location.hash = "!/" + self.startPage;
+        if (_.isFunction(window.location.replace)) {
+          window.location.replace(startPageHref + "#!/" + self.startPage);
+        } else {
+          pageutil.openPage(self.startPage);
+        }
         return;
       }
 
@@ -100,7 +116,6 @@ var LUPAPISTE = LUPAPISTE || {};
           .success(function (e) {
             if (e.user) {
               self.session = true;
-              currentUser.set(e.user);
               hub.send("login", e);
               self.hashChanged();
             } else {
@@ -170,9 +185,9 @@ var LUPAPISTE = LUPAPISTE || {};
 
     hub.subscribe({type: "connection", status: "session-dead"}, function () {
       if (wasLoggedIn) {
-        LUPAPISTE.ModalDialog.mask.unbind("click");
         LUPAPISTE.ModalDialog.showDynamicOk(loc("session-dead.title"), loc("session-dead.message"),
             {title: loc("session-dead.logout"), fn: self.redirectToHashbang});
+        hub.subscribe("dialog-close", self.redirectToHashbang, true);
       }
     });
 
@@ -202,15 +217,17 @@ var LUPAPISTE = LUPAPISTE || {};
 
       $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
-      function openStartPage() {
-        if (self.startPage && self.startPage.charAt(0) !== "/") {
+        function openStartPage() {
+        if (self.logoPath) {
+          window.location = window.location.protocol + "//" + window.location.host + self.logoPath;
+        } else if (self.startPage && self.startPage.charAt(0) !== "/") {
           if (self.currentHash === self.startPage) {
             // trigger start page re-rendering
             self.previousHash = self.currentHash;
             self.openPage([self.startPage]);
           } else {
             // open normally
-            window.location.hash = "!/" + self.startPage;
+            pageutil.openPage(self.startPage);
           }
         } else {
           // fallback
@@ -219,20 +236,20 @@ var LUPAPISTE = LUPAPISTE || {};
       }
 
       var model = {
-        languages: loc.getSupportedLanguages(),
         currentLanguage: loc.getCurrentLanguage(),
-        changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
         openStartPage: openStartPage,
         showUserMenu: self.showUserMenu
       };
 
-      if (LUPAPISTE.Screenmessage) {
-        LUPAPISTE.Screenmessage.refresh();
-        model.screenMessage = LUPAPISTE.Screenmessage;
-      }
-
       $("#app").applyBindings(lupapisteApp.models.rootVMO);
-      $("nav").applyBindings(model).css("visibility", "visible");
+
+      if (LUPAPISTE.Screenmessage) {
+          LUPAPISTE.Screenmessage.refresh();
+          model.screenMessage = LUPAPISTE.Screenmessage;
+      }
+      $(".brand").applyBindings( model );
+      $(".header-menu").applyBindings( model ).css( "visibility", "visible");
+      $("#sys-notification").applyBindings( model );
       $("footer").applyBindings(model).css("visibility", "visible");
     };
   };

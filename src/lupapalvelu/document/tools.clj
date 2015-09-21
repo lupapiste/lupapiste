@@ -1,5 +1,7 @@
 (ns lupapalvelu.document.tools
-  (:require [clojure.walk :as walk]))
+  (:require [clojure.walk :as walk]
+            [clojure.zip :as zip]
+            [sade.strings :as ss]))
 
 (defn nil-values [_] nil)
 
@@ -12,9 +14,10 @@
 (defn default-values [{:keys [type default]}]
   (case (keyword type)
     :radioGroup       default
+    :select           default
     :checkbox         false
-    :string           ""
-    :text             ""
+    :string           (or default "")
+    :text             (or default "")
     :fillMyInfoButton nil
     :foremanHistory   nil
     nil))
@@ -28,6 +31,7 @@
     :select           (-> body first :name)
     :radioGroup       (-> body first :name)
     :personSelector   user-id
+    :companySelector  nil
     :buildingSelector "001"
     :newBuildingSelector "1"
     :hetu             "210281-9988"
@@ -38,6 +42,7 @@
                         :email            "example@example.com"
                         :tel              "012 123 4567"
                         :number           "4"
+                        :decimal          "6,9"
                         :digit            "1"
                         :kiinteistotunnus "09100200990013"
                         :zip              "33800"
@@ -174,3 +179,76 @@
                                           (concat result (deep-find v target (conj current-location k) result))
                                           result))))))))
 
+(defn update-in-repeating
+  ([m [k & ks] f & args]
+    (if (every? (comp ss/numeric? name) (keys m))
+      (apply hash-map (mapcat (fn [[repeat-k v]] [repeat-k (apply update-in-repeating v (conj ks k) f args)] ) m))
+      (if ks
+        (assoc m k (apply update-in-repeating (get m k) ks f args))
+        (assoc m k (apply f (get m k) args))))))
+
+(defn- schema-branch? [node]
+  (or
+    (seq? node)
+    (and
+      (map? node)
+      (not (= :select (:type node)))
+      (contains? node :body))))
+
+(def schema-leaf? (complement schema-branch?))
+
+(defn schema-zipper [doc-schema]
+  (let [branch? (fn [node]
+                  (and (map? node)
+                       (contains? node :body)))
+        children (fn [{body :body :as branch-node}]
+                   (assert (map? branch-node) (str "Assertion failed in schema-zipper/children, expected node to be a map:" branch-node))
+                   (assert (not (empty? body)) (str "Assertion failed in schema-zipper/children, branch node to have children:" branch-node))
+                   body)
+        make-node (fn [node, children]
+                    (assert (map? node) (str "Assertion failed in schema-zipper/make-node, expected node to be a map:" node))
+                    (assoc node :body children))]
+    (zip/zipper branch? children make-node doc-schema)))
+
+(defn- iterate-siblings-to-right [loc f]
+  (if (nil? (zip/right loc))
+    (-> (f loc)
+        zip/up)
+    (-> (f loc)
+        zip/right
+        (recur f))))
+
+(defn- get-root-path [loc]
+  (let [keyword-name (comp keyword :name)
+        root-path (->> (zip/path loc)
+                       (mapv keyword-name)
+                       (filterv identity))
+        node-name (-> (zip/node loc)
+                      keyword-name)]
+    (seq (conj root-path node-name))))
+
+(defn- add-whitelist-property [node new-whitelist]
+  (if-not (and (seq? node) (:whitelist node))
+    (assoc node :whitelist new-whitelist)
+    node))
+
+(defn whitelistify-schema
+  ([loc] (whitelistify-schema loc nil))
+  ([loc disabled-paths]
+   (if (zip/end? loc)
+     disabled-paths
+     (let [current-node (zip/node loc)
+           current-whitelist (:whitelist current-node)
+           propagate-wl? (and (schema-branch? current-node) current-whitelist)
+           loc (if propagate-wl?
+                 (iterate-siblings-to-right
+                   (zip/down loc)                           ;leftmost-child, starting point
+                   #(zip/edit % add-whitelist-property current-whitelist))
+                 loc)
+           whitelisted-leaf? (and
+                               (schema-leaf? current-node)
+                               current-whitelist)
+           disabled-paths (if whitelisted-leaf?
+                            (conj disabled-paths [(get-root-path loc) current-whitelist])
+                            disabled-paths)]
+       (recur (zip/next loc) disabled-paths)))))

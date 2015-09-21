@@ -6,8 +6,8 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-Setting maps enabled for these tests
-  Set integration proxy on
+#Setting maps enabled for these tests
+#  Set integration proxy on
 
 Mikko as applicant does not see the inforequest marker map
   Mikko logs in
@@ -16,7 +16,7 @@ Mikko as applicant does not see the inforequest marker map
   Set Suite Variable  ${inforequest-first}  ir-first-${secs}
   Set Suite Variable  ${propertyId-first}  433-405-3-427
   #Set Suite Variable  ${address-first}  Holvitie 4
-  Create inforequest the fast way  ${inforequest-first}  360383.382  6734086.21  433  ${propertyId-first}  kerrostalo-rivitalo  Jiihaa-first
+  Create inforequest the fast way  ${inforequest-first}  360383.382  6734086.21  ${propertyId-first}  kerrostalo-rivitalo  Jiihaa-first
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Intonen Mikko
   Element should not be visible  //div[@id='inforequest-marker-map']
   Element should not be visible  //div[@id='inforequest-marker-map-contents']
@@ -64,21 +64,21 @@ Arto creates three new inforequests
   Set Suite Variable  ${inforequest-same-loc}  ir-same-loc-${secs}
   Set Suite Variable  ${propertyId-same-loc}  433-405-3-427
   #Set Suite Variable  ${address-same-loc}  Holvitie 4
-  Create inforequest the fast way  ${inforequest-same-loc}  360383.382  6734086.21  433  ${propertyId-same-loc}  kerrostalo-rivitalo  Jiihaa-loc
+  Create inforequest the fast way  ${inforequest-same-loc}  360383.382  6734086.21  ${propertyId-same-loc}  kerrostalo-rivitalo  Jiihaa-loc
 
   # inforequest with same operation
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${inforequest-same-op}  ir-same-op-${secs}
   Set Suite Variable  ${propertyId-same-op}  433-405-57-8
   #Set Suite Variable  ${address-same-op}  Kauppatie 6
-  Create inforequest the fast way  ${inforequest-same-op}  360365.358  6734200.355  433  ${propertyId-same-op}  kerrostalo-rivitalo  Jiihaa-op
+  Create inforequest the fast way  ${inforequest-same-op}  360365.358  6734200.355  ${propertyId-same-op}  kerrostalo-rivitalo  Jiihaa-op
 
   # other inforequest
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${inforequest-other}  ir-other-${secs}
   Set Suite Variable  ${propertyId-other}  433-405-78-0
   #Set Suite Variable  ${address-other}  Kauppatie 4
-  Create inforequest the fast way  ${inforequest-other}  360414.396  6734197.77  433  ${propertyId-other}  vapaa-ajan-asuinrakennus  Jiihaa-other
+  Create inforequest the fast way  ${inforequest-other}  360414.396  6734197.77  ${propertyId-other}  vapaa-ajan-asuinrakennus  Jiihaa-other
 
 There are correct amount of correct type of markers on the marker map
   Total marker count is  3
@@ -91,8 +91,8 @@ Open the marker contents window and follow the link displayed in an info card
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']  ${first-app-id}
   Logout
 
-Setting maps disabled again after the tests
-  Set integration proxy off
+#Setting maps disabled again after the tests
+#  Set integration proxy off
 
 
 *** Keywords ***
