@@ -325,20 +325,20 @@
     (cleanup)
 
     ;; KRYSP yhteiset 2.1.5+
-    (cr/ensure-sequential :vaadittuErityissuunnitelma)
+    (util/ensure-sequential :vaadittuErityissuunnitelma)
     (#(let [vaaditut-es (extract-vaadittuErityissuunnitelma-elements %)]
         (if (seq vaaditut-es)
           (-> % (assoc :vaaditutErityissuunnitelmat vaaditut-es) (dissoc % :vaadittuErityissuunnitelma))
           (dissoc % :vaadittuErityissuunnitelma))))
 
-    (cr/ensure-sequential :vaaditutKatselmukset)
+    (util/ensure-sequential :vaaditutKatselmukset)
     (#(let [kats (map :Katselmus (:vaaditutKatselmukset %))]
         (if (seq kats)
           (assoc % :vaaditutKatselmukset kats)
           (dissoc % :vaaditutKatselmukset))))
 
     ; KRYSP yhteiset 2.1.1+
-    (cr/ensure-sequential :vaadittuTyonjohtajatieto)
+    (util/ensure-sequential :vaadittuTyonjohtajatieto)
     (#(let [tyonjohtajat (map (comp :tyonjohtajaLaji :VaadittuTyonjohtaja) (:vaadittuTyonjohtajatieto %))]
         (if (seq tyonjohtajat)
           (-> %
@@ -348,7 +348,7 @@
             (assoc :vaaditutTyonjohtajat (s/join ", " tyonjohtajat)))
           (dissoc % :vaadittuTyonjohtajatieto))))
 
-    (cr/ensure-sequential :maarays)
+    (util/ensure-sequential :maarays)
 
     (#(if (:maarays %)
         (let [maaraykset (cr/convert-keys-to-timestamps (:maarays %) [:maaraysaika :maaraysPvm :toteutusHetki])
@@ -376,7 +376,7 @@
       (-> lupaehdot
         (cleanup)
         ((fn [maar] (map #(get-text % :lupaehdotJaMaaraykset) maar)))
-        (cr/ensure-sequential :lupaehdotJaMaaraykset)))))
+        (util/ensure-sequential :lupaehdotJaMaaraykset)))))
 
 (defn- get-pvm-dates [paatos v]
   (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))]
