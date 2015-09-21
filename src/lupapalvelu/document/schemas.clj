@@ -1055,151 +1055,151 @@
     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-muutos)}
 
    {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia" :i18name "rakennuksen-muuttaminen" :approvable true}
-     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja-muutos)}
+    :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja-muutos)}
 
    {:info {:name "rakennuksen-muuttaminen" :approvable true}
-     :body (approvable-top-level-groups rakennuksen-muuttaminen-muutos)}
+    :body (approvable-top-level-groups rakennuksen-muuttaminen-muutos)}
 
-    {:info {:name "rakennuksen-laajentaminen" :approvable true}
-     :body (approvable-top-level-groups rakennuksen-laajentaminen)}
+   {:info {:name "rakennuksen-laajentaminen" :approvable true}
+    :body (approvable-top-level-groups rakennuksen-laajentaminen)}
 
-    {:info {:name "purkaminen" :i18name "purku" :approvable true}
-     :body (approvable-top-level-groups purku)}
+   {:info {:name "purkaminen" :i18name "purku" :approvable true}
+    :body (approvable-top-level-groups purku)}
 
-    {:info {:name "kaupunkikuvatoimenpide" :approvable true}
-     :body (approvable-top-level-groups rakennelma)}
+   {:info {:name "kaupunkikuvatoimenpide" :approvable true}
+    :body (approvable-top-level-groups rakennelma)}
 
-    {:info {:name "maalampokaivo"
-            :approvable true
-            :i18name "maalampokaivo"}
-     :body (approvable-top-level-groups maalampokaivo-rakennelma)}
+   {:info {:name "maalampokaivo"
+           :approvable true
+           :i18name "maalampokaivo"}
+    :body (approvable-top-level-groups maalampokaivo-rakennelma)}
 
-    {:info {:name "maisematyo" :approvable true}
-     :body (approvable-top-level-groups maisematyo)}
-    {:info {:name "rajankaynti" :approvable true}
-     :body (approvable-top-level-groups (body rajankaynti-tyyppi kuvaus))}
-    {:info {:name "maankayton-muutos" :approvable true}
-     :body (approvable-top-level-groups (body uusi-tai-muutos kuvaus))}
-    {:info {:name "rasitetoimitus" :approvable true}
-     :body [kt-rasitetoimitus]}
-    {:info {:name "kiinteistonmuodostus" :approvable true}
-     :body [kt-kiinteistonmuodostus]}
+   {:info {:name "maisematyo" :approvable true}
+    :body (approvable-top-level-groups maisematyo)}
+   {:info {:name "rajankaynti" :approvable true}
+    :body (approvable-top-level-groups (body rajankaynti-tyyppi kuvaus))}
+   {:info {:name "maankayton-muutos" :approvable true}
+    :body (approvable-top-level-groups (body uusi-tai-muutos kuvaus))}
+   {:info {:name "rasitetoimitus" :approvable true}
+    :body [kt-rasitetoimitus]}
+   {:info {:name "kiinteistonmuodostus" :approvable true}
+    :body [kt-kiinteistonmuodostus]}
 
 
-    {:info {:name "hakija"
-            :i18name "osapuoli"
-            :order 3
-            :removable true
-            :repeating true
-            :approvable true
-            :type :party
-            :subtype "hakija"
-            :group-help nil
-            :section-help nil
-            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
-            }
-     :body party}
+   {:info {:name "hakija"
+           :i18name "osapuoli"
+           :order 3
+           :removable true
+           :repeating true
+           :approvable true
+           :type :party
+           :subtype "hakija"
+           :group-help nil
+           :section-help nil
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           }
+    :body party}
 
-    {:info {:name "hakija-r"
-            :i18name "osapuoli"
-            :order 3
-            :removable true
-            :repeating true
-            :approvable true
-            :type :party
-            :subtype "hakija"
-            :group-help "hakija.group.help"
-            :section-help "party.section.help"
-            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
-            }
-     :body party}
+   {:info {:name "hakija-r"
+           :i18name "osapuoli"
+           :order 3
+           :removable true
+           :repeating true
+           :approvable true
+           :type :party
+           :subtype "hakija"
+           :group-help "hakija.group.help"
+           :section-help "party.section.help"
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           }
+    :body party}
 
-    {:info {:name "hakija-ya"
-            :i18name "osapuoli"
-            :order 3
-            :removable false
-            :repeating false
-            :approvable true
-            :type :party
-            :subtype "hakija"
-            :group-help nil
-            :section-help nil
-            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
-     :body (schema-body-without-element-by-name ya-party turvakielto)}
+   {:info {:name "hakija-ya"
+           :i18name "osapuoli"
+           :order 3
+           :removable false
+           :repeating false
+           :approvable true
+           :type :party
+           :subtype "hakija"
+           :group-help nil
+           :section-help nil
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
+    :body (schema-body-without-element-by-name ya-party turvakielto)}
 
-    {:info {:name "paasuunnittelija"
-            :i18name "osapuoli"
-            :order 4
-            :removable false
-            :approvable true
-            :type :party}
-     :body paasuunnittelija}
+   {:info {:name "paasuunnittelija"
+           :i18name "osapuoli"
+           :order 4
+           :removable false
+           :approvable true
+           :type :party}
+    :body paasuunnittelija}
 
-    {:info {:name "suunnittelija"
-            :i18name "osapuoli"
-            :repeating true
-            :order 5
-            :removable true
-            :approvable true
-            :type :party}
-     :body suunnittelija}
+   {:info {:name "suunnittelija"
+           :i18name "osapuoli"
+           :repeating true
+           :order 5
+           :removable true
+           :approvable true
+           :type :party}
+    :body suunnittelija}
 
-    {:info {:name "tyonjohtaja"
-            :i18name "osapuoli"
-            :order 5
-            :removable true
-            :repeating true
-            :approvable true
-            :type :party}
-     :body tyonjohtaja}
+   {:info {:name "tyonjohtaja"
+           :i18name "osapuoli"
+           :order 5
+           :removable true
+           :repeating true
+           :approvable true
+           :type :party}
+    :body tyonjohtaja}
 
-    {:info {:name "tyonjohtaja-v2"
-            :i18name "osapuoli"
-            :order 5
-            :removable false
-            :repeating false
-            :approvable true
-            :type :party}
-     :body tyonjohtaja-v2}
+   {:info {:name "tyonjohtaja-v2"
+           :i18name "osapuoli"
+           :order 5
+           :removable false
+           :repeating false
+           :approvable true
+           :type :party}
+    :body tyonjohtaja-v2}
 
-    {:info {:name "maksaja"
-            :i18name "osapuoli"
-            :repeating true
-            :order 6
-            :removable true
-            :approvable true
-            :subtype :maksaja
-            :type :party}
-     :body maksaja}
+   {:info {:name "maksaja"
+           :i18name "osapuoli"
+           :repeating true
+           :order 6
+           :removable true
+           :approvable true
+           :subtype :maksaja
+           :type :party}
+    :body maksaja}
 
-    {:info {:name "rakennuspaikka"
-            :approvable true
-            :order 2
-            :type :location}
-     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
+   {:info {:name "rakennuspaikka"
+           :approvable true
+           :order 2
+           :type :location}
+    :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
 
-    {:info {:name "kiinteisto"
-            :approvable true
-            :order 2
-            :type :location}
-     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
+   {:info {:name "kiinteisto"
+           :approvable true
+           :order 2
+           :type :location}
+    :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
-    {:info {:name "paatoksen-toimitus-rakval"
-            :removable false
-            :approvable true
-            :order 10}
-     :body (body
-             [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
-             simple-osoite
-             [{:name "yritys" :type :group
-               :body [{:name "yritysnimi" :type :string}]}]
-             tayta-omat-tiedot-button)}
+   {:info {:name "paatoksen-toimitus-rakval"
+           :removable false
+           :approvable true
+           :order 10}
+    :body (body
+           [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
+           simple-osoite
+           [{:name "yritys" :type :group
+             :body [{:name "yritysnimi" :type :string}]}]
+           tayta-omat-tiedot-button)}
 
-    {:info {:name "aloitusoikeus" :removable false :approvable true}
-     :body (body kuvaus)}
+   {:info {:name "aloitusoikeus" :removable false :approvable true}
+    :body (body kuvaus)}
 
-    {:info {:name "lisatiedot"
-            :order 100}
-     :body [{:name "suoramarkkinointikielto" ;THIS IS DEPRECATED!
-             :type :checkbox
-             :layout :full-width}]}])
+   {:info {:name "lisatiedot"
+           :order 100}
+    :body [{:name "suoramarkkinointikielto" ;THIS IS DEPRECATED!
+            :type :checkbox
+            :layout :full-width}]}])
