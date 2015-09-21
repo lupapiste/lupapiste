@@ -6,13 +6,12 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [defcommand]]
             [lupapalvelu.perf-mon :as perf])
-  (:import (com.mongodb WriteConcern)))
+  (:import (com.mongodb WriteConcern)
+           (java.util Date)))
 
 (defpage "/perfmon/data" {:keys [start end]}
-  (->> (perf/get-data (or (perf/to-long start) (- (System/currentTimeMillis) (* 5 60 1000)))
-                      (or (perf/to-long end) (System/currentTimeMillis)))
-       (group-by :uri)
-       (map perf/find-min-max-avg*)
+  (->> (perf/get-data (Date. (or (perf/to-long start) (- (System/currentTimeMillis) (* 60 60 1000))))
+                      (Date. (or (perf/to-long end) (System/currentTimeMillis))))
        (resp/json)
        (resp/status 200)))
 

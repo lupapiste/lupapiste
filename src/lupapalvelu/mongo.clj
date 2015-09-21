@@ -365,7 +365,6 @@
   ; Disabled TTL for now: (mc/ensure-index :sign-processes {:created 1} {:expireAfterSeconds (env/value :onnistuu :timeout)})
   (ensure-index :companies {:name 1} {:name "company-name"})
   (ensure-index :companies {:y 1} {:name "company-y"})
-  (ensure-index :perf-mon {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
   (ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
   (try
     (drop-index :organizations "areas.features.geometry_2dsphere")
