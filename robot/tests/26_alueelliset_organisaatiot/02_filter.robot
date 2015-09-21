@@ -28,6 +28,7 @@ Sonja opens search page
   Filter item should contain X number of tags  operations  0
   Filter item should contain X number of tags  organization  0
   Sorting Should Be Set As  Päivitetty  desc
+  Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
 
 Sonja selects application sorting
   Click sorting field  Tyyppi
@@ -75,6 +76,7 @@ Sonja selects MEGA filter
   Filter item should contain X number of tags  tags  1
   Filter item should contain X number of tags  operations  1
   Filter item should contain X number of tags  organization  1
+  Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
 
 Sonja removes all but operations filter
   Select From Autocomplete  div[@data-test-id="handlers-filter-component"]  ${all handlers}
