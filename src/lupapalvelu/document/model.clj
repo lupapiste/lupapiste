@@ -155,7 +155,7 @@
         (join "." (concat [(-> info :document :locKey)] (map name path)))
         (when (= :select (:type element)) "._group_label"))
       (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
-      (s/replace #"\.+" "."))))
+      (s/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
 
 (defn- ->validation-result [info data path element result]
   (when result
@@ -218,9 +218,6 @@
    :post [%]}
   (schemas/get-schema schema-info))
 
-;;
-;; TODO: tee talle testeja
-;;
 (defn- validate-document [schema document info data]
   (let [doc-validation-results (validator/validate document)]
     (map
