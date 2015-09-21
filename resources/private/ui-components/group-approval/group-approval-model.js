@@ -17,23 +17,6 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   var REJECTED = "rejected";
   var REJECT   = "reject";
 
-  function modelModifiedSince(model, timestamp) {
-    if (model) {
-      if (!timestamp) {
-        return true;
-      }
-      if (!_.isObject(model)) {
-        return false;
-        }
-      if (_.has(model, "value")) {
-        // Leaf
-        return model.modified && model.modified > timestamp;
-      }
-      return _.find(model, function (myModel) { return modelModifiedSince(myModel, timestamp); });
-    }
-    return false;
-  }
-
   self.remove = params.remove || {};
   self.docModel = params.docModel;
   self.model = params.model;
@@ -42,26 +25,18 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   var meta = self.docModel.getMeta( params.path );
   self.approval = ko.observable( meta ? meta._approved : null );
 
-  self.showStatus = ko.pureComputed(function () {
-    // Status is shown only if it applies to the current model state.
-    var result = self.approval() && !modelModifiedSince( self.model, self.approval().timestamp );
-    return result;
-  });
+  self.showStatus = ko.pureComputed( _.partial( self.docModel.isApprovalCurrent,
+                                                self.model,
+                                                self.approval ));
 
-  // check is either rejected or approved.
-  function isStatus( check ) {
-    var result = self.approval() && self.approval().value === check;
-    return result;
-  }
+  self.isApproved = ko.pureComputed(_.partial (self.docModel.approvalStatus,
+                                               self.approval,
+                                               APPROVED));
+  self.isRejected = ko.pureComputed(_.partial (self.docModel.approvalStatus,
+                                               self.approval,
+                                               REJECTED));
 
-  self.isApproved = ko.pureComputed(_.partial (isStatus, APPROVED));
-  self.isRejected = ko.pureComputed(_.partial (isStatus, REJECTED));
-
-  self.testId = function( verb ) {
-    return params.docModelOptions && params.docModelOptions.dataTestSpecifiers
-         ? [verb, "doc", _.first( params.path) || self.docModel.schemaName].join( "-" )
-         : "";
-  }
+  self.testId = _.partial( self.docModel.approvalTestId, params.path );
 
   function showButton( operation, excluder ) {
     return self.isApprovable
@@ -69,8 +44,8 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
         && (!excluder() || !self.showStatus());
   }
 
-  self.showReject   = ko.pureComputed(_.partial ( showButton, REJECT, self.isRejected ));
-  self.showApprove = ko.pureComputed(_.partial ( showButton, APPROVE, self.isApproved ));
+  self.showReject  = ko.pureComputed(_.partial( showButton, REJECT, self.isRejected ));
+  self.showApprove = ko.pureComputed(_.partial( showButton, APPROVE, self.isApproved ));
 
   function changeStatus( flag ) {
     self.docModel.updateApproval( params.path,
@@ -84,14 +59,6 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   self.reject  = _.partial( changeStatus, false );
   self.approve = _.partial( changeStatus, true );
 
-  self.details = ko.pureComputed( function() {
-    var app = self.approval();
-    if(app && app.user && app.timestamp) {
-      var text = loc(["document", app.value]);
-      text += " (" + app.user.lastName + " "
-            + app.user.firstName
-            + " " + moment(app.timestamp).format("D.M.YYYY HH:mm") + ")";
-      return text;
-    }
-  });
+  self.details = ko.pureComputed( _.partial( self.docModel.approvalInfo,
+                                             self.approval ));
 }

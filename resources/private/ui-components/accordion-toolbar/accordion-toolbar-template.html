@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container">
+      <script type="text/x-jquery-tmpl" id="accordion-toolbar-template">
+        <div class="accordion-toggle">
+          <button class="secondary"
+                  data-bind="css: {approved: isApproved,
+                                   rejected: isRejected,
+                                   toggled: isOpen},
+                             click: toggleAccordion">
+            <i class="lupicon-chevron-down"></i>
+            <i class="lupicon-chevron-up toggle"></i>
+            <span class="bar-text">
+              <span class="title"
+                    data-bind="attr: {'data-app-id': docModel.appId},
+                               ltext: title">
+              </span>
+              <span class="description"
+                    data-test-id="op-description"
+                    data-bind="text: description() ? ' - ' + description() : ''">
+              </span>
+            </span>
+            <span class="icons">
+              <i class="lupicon-circle-attention rejected"></i>
+              <i class="lupicon-circle-check approved"></i>
+            </span>
+          </button>
+          <span class="form-approval-status is-status no-border-bottom"
+                data-bind="css: {approved: isApproved,
+                           rejected: isRejected},
+                           visible: showStatus">
+            <div class="like-btn">
+              <i class="lupicon-circle-attention rejected"></i>
+              <i class="lupicon-circle-check approved"></i>
+              <span class="is-details"
+                    data-bind="text: details"></span>
+            </div>
+          </span>
+          <div class="group-buttons"
+               data-bind="visible: showToolbar">
+            <button class="secondary is-left"
+                    data-test-id="edit-op-description"
+                    data-bind="visible: showDescription">
+              <i class="lupicon-pen"></i>
+              <span data-bind="ltext: 'op-description.edit',
+                               event: {mousedown: toggleEditor}">
+              </span>
+            </button>
+            <button class="secondary is-left"
+                    data-bind="attr: {'data-op-name': operationName},
+                               disable: isPrimaryOperation,
+                               click: clickStar,
+                               visible: showStar">
+              <i class="lupicon-star"></i>
+              <span data-bind="ltext: starTitle"></span>
+            </button>
+            <button class="secondary is-right"
+                    data-bind="attr: {'data-test-id': rejectTestId},
+                               visible: showReject,
+                               ltext: 'document.reject',
+                               click: reject">
+            </button>
+            <button class="positive is-right"
+                    data-bind="attr: {'data-test-id': approveTestId},
+                               visible: showApprove,
+                               click: approve">
+              <i class="lupicon-check"></i>
+              <span data-bind="ltext: 'document.approve'"></span>
+            </button>
+            <div class="description-bubble"
+                 data-bind="visible: showEditor">
+              <input type="text"
+                     data-test-id="op-description-editor"
+                     data-bind="value: description,
+                                event: {keypress: specialKeys},
+                                hasFocus: showEditor">
+            </div>
+          </div>
+        </div>
+      </script>
+    </section>
+  </body>
+</html>

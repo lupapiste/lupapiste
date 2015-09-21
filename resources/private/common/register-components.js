@@ -51,6 +51,7 @@ jQuery(document).ready(function() {
     {name: "checkbox-field", model: "input-field"},
     {name: "select-field", model: "input-field"},
     {name: "password-field"},
+    {name: "accordion-toolbar"},
     {name: "group-approval"}
   ];
 

@@ -161,6 +161,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     });
   }
 
+  // ----------------------------------------------------------------------
+  // Approval and related utilities. Used by group-approval and section componenents.
+  // Note: approval arguments are functions. In practise, they are observables.
+
+  // Updates approval status in the backend.
+  // path: approval path
+  // flag: true is approved, false rejected.
+  // cb: callback function to be called on success.
   self.updateApproval = function( path, flag, cb ) {
     var verb = flag ? "approve" : "reject";
     ajax.command( verb + "-doc",
@@ -174,6 +182,63 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     })
     .call();
   }
+
+  // Textual representation of the approval status.
+  // Tiedot OK (Sibbo Sonja 21.9.2015 10:55)
+  self.approvalInfo = function( approvalFun ) {
+    var approval = approvalFun();
+    var text = null;
+    if(approval && approval.user && approval.timestamp) {
+      text = loc(["document", approval.value]);
+      text += " (" + approval.user.lastName + " "
+            + approval.user.firstName
+            + " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
+    }
+    return text;
+  }
+
+  // Approval is current if it has a value that is newer than
+  // than latest model change.
+  self.isApprovalCurrent = function( approvalModel, approvalFun ) {
+    function modelModifiedSince(model, timestamp) {
+      if (model) {
+        if (!timestamp) {
+          return true;
+        }
+        if (!_.isObject(model)) {
+          return false;
+        }
+        if (_.has(model, "value")) {
+          // Leaf
+          return model.modified && model.modified > timestamp;
+        }
+        return _.find(model, function (myModel) { return modelModifiedSince(myModel, timestamp); });
+      }
+      return false;
+    }
+    var approval = approvalFun();
+    return approval && !modelModifiedSince( approvalModel, approval.timestamp );
+  }
+
+  // Check is either approved or rejected.
+  // Note: if the approval is not set, then both types of check return false
+  self.approvalStatus = function( approvalFun, check ) {
+    var approval = approvalFun();
+    return approval && approval.value === check;
+  }
+
+  // Returns id if we are in the testing mode, otherwise null.
+  // Null because Knockout does not render null attributes.
+  self.testId = function( id ) {
+    return options && options.dataTestSpecifiers ? id : null;
+  }
+
+  self.approvalTestId = function( path, verb ) {
+    return self.testId( [verb, "doc", _.first( path) || self.schemaName].join ( "-" ));
+  }
+
+  // ----------------------------------------------------------------------
+
 
   function makeGroupHelpTextSpan(schema) {
     var span = document.createElement("span");
@@ -990,7 +1055,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       opts.approval = {};
     }
     opts.remove = resolveRemoveOptions( subSchema, path);
-    appendGroupButtons( $(div), path, myModel, opts );
+    //appendGroupButtons( $(div), path, myModel, opts );
     $(div).append(createComponent( "group-approval",
                                    {docModel: self,
                                     subSchema: subSchema,
@@ -1242,13 +1307,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }).join(", ");
   }
 
-  function createComponent(name, params, classes) {
+  function createComponent(name, params, classes, applyBindings) {
     // createElement works with IE8
     var element = document.createElement(name);
     $(element)
       .attr("params", paramsStr(params))
       .addClass(classes)
-      .applyBindings(params);
+    .applyBindings(params);
     return element;
   }
 
@@ -1537,7 +1602,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         table.appendChild(tbody);
 
         if (subSchema.approvable) {
-          appendGroupButtons( $(div), path, models, {approval: {}});
+          // TODO: Table approval
+          //appendGroupButtons( $(div), path, models, {approval: {}});
           //$(div).append(self.makeGroupButtons(path, models, {approval: {}}));
         }
 
@@ -2114,18 +2180,47 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return section;
   }
 
+  function buildSection() {
+    var section = $("<section>").addClass( "accordion").attr( "data-doc-type", self.schemaName );
+    var elements = document.createElement("div");
+    appendElements(elements, self.schema, self.model, []);
+    // Disable fields and hide if the form is not editable
+    if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
+      $(elements).find("input, textarea").attr("readonly", true).unbind("focus");
+      $(elements).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
+      // TODO a better way would be to hide each individual button based on authorizationModel.ok
+      $(elements).find("button").hide();
+    }
+
+    var contents = $("<div>").addClass( "accordion_conten");
+    function toggleContents( isOpen ) {
+      contents.toggleClass( "expandend");
+      contents.attr( "data-accordion-state",
+                     isOpen ? "open" : "closed");
+      contents.toggle( isOpen );
+
+    }
+    var sticky =  $("<div>").addClass( "sticky");
+    sticky.append(createComponent ( "accordion-toolbar",
+                                    {docModel: self,
+                                     docModelOptions: options,
+                                     openCallback: toggleContents
+                                    }));
+    section.append( sticky );
+    return section.append( contents.append( $(elements)));
+  }
+
   hub.subscribe("application-loaded", function() {
     while (self.subscriptions.length > 0) {
       hub.unsubscribe(self.subscriptions.pop());
     }
   }, true);
 
-  self.element = buildElement();
+  self.element = buildSection();
   // If doc.validationErrors is truthy, i.e. doc includes ready evaluated errors,
   // self.showValidationResults is called with in docgen.js after this docmodel has been appended to DOM.
   // So self.showValidationResults cannot be called here because of its jQuery lookups.
   if (!doc.validationErrors) {
     validate();
   }
-
 };
