@@ -527,16 +527,8 @@
                    {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
                    {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
 
-(def mitat-muutos {:name "mitat"
-                   :type :group
-                   :group-help "mitat-muutos.help"
-                   :whitelist {:roles [:authority]
-                               :otherwise :disabled}
-                   :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
-                          {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                          {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                          {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
-                          {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
+(def mitat-muutos (merge mitat {:group-help "mitat-muutos.help"
+                                :whitelist {:roles [:authority] :otherwise :disabled}}))
 
 (def rakenne {:name "rakenne"
               :type :group
@@ -786,8 +778,8 @@
                                olemassaoleva-rakennus))
 
 (def rakennuksen-muuttaminen-muutos (body
-                               muutostyonlaji
-                               olemassaoleva-rakennus-muutos))
+                                      muutostyonlaji
+                                      olemassaoleva-rakennus-muutos))
 
 (def rakennuksen-laajentaminen (body [{:name "laajennuksen-tiedot"
                                        :type :group
