@@ -179,7 +179,6 @@
            suunnittelija-henkilo
            (select-keys (:data tyonjohtaja) [:kuntaRoolikoodi :sijaistus :yritys])
            {:fillMyInfo {:value nil}
-            :ilmoitusHakemusValitsin {:value "hakemus"}
             :patevyysvaatimusluokka {:value "A"}
             :patevyys-tyonjohtaja {:koulutusvalinta {:value "arkkitehtiylioppilas"}
                                    :koulutus {:value ""}
@@ -327,7 +326,6 @@
                                                          :1 {:pintaAla {:value "10"}
                                                              :kayttotarkoitusKoodi {:value "varastotilaa"}}}}}})})
 
-
 (def- purku {:id "purku"
                       :created 4
                       :schema-info {:name "purkaminen"
@@ -406,8 +404,9 @@
            :username "pena"
            :type "owner"
            :role "owner"}]
-   :state "open"
+   :state "submitted"
    :opened 1354532324658
+   :submitted 1354532324658
    :location [408048 6693225]
    :attachments [],
    :authority {:id "777777777777777777000023"
@@ -442,6 +441,7 @@
                                    :primaryOperation {:name "tyonjohtajan-nimeaminen"
                                                       :id "5272668be8db5aaa01084601"
                                                       :created 1383229067483}
+                                   :permitSubtype "tyonjohtaja-hakemus"
                                    :documents [hakija-henkilo
                                                maksaja-henkilo
                                                tyonjohtaja-v2
@@ -596,7 +596,7 @@
 
 (facts "Canonical tyonjohtaja model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja))
-        tyonjohtaja-model (get-tyonjohtaja-data "fi" tyonjohtaja-unwrapped :tyonjohtaja)
+        tyonjohtaja-model (get-tyonjohtaja-data {} "fi" tyonjohtaja-unwrapped :tyonjohtaja)
         henkilo (:henkilo tyonjohtaja-model)
         yritys (:yritys tyonjohtaja-model)
         sijaistus-213 (get-in tyonjohtaja-model [:sijaistustieto :Sijaistus])]
@@ -627,7 +627,7 @@
 
 (facts "Canonical tyonjohtaja v2 model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-v2))
-        tyonjohtaja-model (get-tyonjohtaja-v2-data "fi" tyonjohtaja-unwrapped :tyonjohtaja)]
+        tyonjohtaja-model (get-tyonjohtaja-v2-data {:permitSubtype "tyonjohtaja-hakemus"} "fi" tyonjohtaja-unwrapped :tyonjohtaja)]
     (fact "tyonjohtajanHyvaksynta (vainTamaHankeKytkin)" (:vainTamaHankeKytkin tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :tyonjohtajanHyvaksynta :tyonjohtajanHyvaksynta :value))
     (fact "koulutus" (:koulutus tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :koulutusvalinta :value))
     (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :valmistumisvuosi :value))
@@ -647,7 +647,7 @@
 
 (facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-blank-role-and-blank-qualification))
-        tyonjohtaja-model (get-tyonjohtaja-data "fi" tyonjohtaja-unwrapped :tyonjohtaja)]
+        tyonjohtaja-model (get-tyonjohtaja-data {} "fi" tyonjohtaja-unwrapped :tyonjohtaja)]
     (fact "model" tyonjohtaja-model => truthy)
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => "ei tiedossa")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ei tiedossa")
@@ -657,7 +657,7 @@
 
 (facts "Canonical tyonjohtajan sijaistus model is correct"
   (let [tyonjohtaja       (tools/unwrapped (:data tyonjohtajan-sijaistus-blank-dates))
-        tyonjohtaja-model (get-tyonjohtaja-data "fi" tyonjohtaja :tyonjohtaja)
+        tyonjohtaja-model (get-tyonjohtaja-data {} "fi" tyonjohtaja :tyonjohtaja)
         sijaistus-213     (-> tyonjohtaja-model :sijaistustieto :Sijaistus)]
     (facts "model 2.1.3" sijaistus-213 => truthy
       (fact "missing alkamisPvm" (:alkamisPvm sijaistus-213) => nil)
@@ -667,7 +667,7 @@
 
 (facts "Canonical tyonjohtajan vastattavaTyotieto is correct"
   (let [tyonjohtaja       (-> tyonjohtaja :data (dissoc :sijaistus) tools/unwrapped)
-        tyonjohtaja-model (get-tyonjohtaja-data "fi" tyonjohtaja :tyonjohtaja)
+        tyonjohtaja-model (get-tyonjohtaja-data {} "fi" tyonjohtaja :tyonjohtaja)
         sijaistus-213     (-> tyonjohtaja-model :sijaistustieto)]
     (:sijaistustieto tyonjohtaja-model) => nil
     (fact "no dates" (-> tyonjohtaja-model :vastattavaTyotieto first :VastattavaTyo keys) => [:vastattavaTyo])
@@ -860,19 +860,19 @@
         tyonjohtajat (:tyonjohtajatieto osapuolet) => truthy
         tyonjohtajatieto (:Tyonjohtaja (last tyonjohtajat)) => truthy
 
-        naapuritieto (:naapuritieto osapuolet) => truthy
-        naapuricount (count naapuritieto) => 2
-        naapuri (first naapuritieto) => truthy
-        Naapuri (:Naapuri naapuri) => truthy
-        naapuri-henkilo (:henkilo Naapuri) => "PORTAALIA TESTAA"
-        kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600060211"
-        hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
+        ;naapuritieto (:naapuritieto osapuolet) => truthy
+        ;naapuricount (count naapuritieto) => 2
+        ;naapuri (first naapuritieto) => truthy
+        ;Naapuri (:Naapuri naapuri) => truthy
+        ;naapuri-henkilo (:henkilo Naapuri) => "PORTAALIA TESTAA"
+        ;kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600060211"
+        ;hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
 
-        naapuri (last naapuritieto) => truthy
-        Naapuri (:Naapuri naapuri) => truthy
-        naapuri-henkilo (:henkilo Naapuri) => "L\u00f6nnqvist, Rauno Georg Christian"
-        kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600090092"
-        hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
+        ;naapuri (last naapuritieto) => truthy
+        ;Naapuri (:Naapuri naapuri) => truthy
+        ;naapuri-henkilo (:henkilo Naapuri) => "L\u00f6nnqvist, Rauno Georg Christian"
+        ;kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600090092"
+        ;hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
 
         sijaistus (:sijaistustieto tyonjohtajatieto) => truthy
         sijaistus (:Sijaistus (last sijaistus)) = truthy
@@ -1192,27 +1192,12 @@
         luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-        mt (:MuuTunnus muuTunnustieto) => truthy
-
-        osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
-        Osapuolet (:Osapuolet osapuolettieto) => truthy
-        osapuolitieto (:osapuolitieto Osapuolet) => truthy
-        Osapuoli (:Osapuoli osapuolitieto) => truthy
-        henkilo (:henkilo Osapuoli) => truthy
-        nimi (:nimi henkilo) => truthy
-        osoite (:osoite henkilo) => truthy]
+        mt (:MuuTunnus muuTunnustieto) => truthy]
 
     (fact "tila" (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu")
     (fact "tunnus" (:tunnus mt) => "LP-753-2013-00001")
     (fact "sovellus" (:sovellus mt) => "Lupapiste")
-    (fact "kayttotapaus" (:kayttotapaus RakennusvalvontaAsia) => "Liitetiedoston lis\u00e4ys")
-
-    (facts "Osapuolet"
-      (fact "kuntaRooliKoodi" (:kuntaRooliKoodi Osapuoli) => "ei tiedossa")
-      (fact "etunimi" (:etunimi nimi) => "Pena")
-      (fact "sukunimi" (:sukunimi nimi) => "Penttil\u00e4")
-      (fact "osoitenimi" (-> osoite :osoitenimi :teksti) => "katu")
-      (fact "puhelin" (:puhelin henkilo) => "+358401234567"))))
+    (fact "kayttotapaus" (:kayttotapaus RakennusvalvontaAsia) => "Liitetiedoston lis\u00e4ys")))
 
 
 

@@ -3,13 +3,12 @@
             [midje.util :refer [testable-privates]]
             [net.cgrand.enlive-html :as e]
             [cheshire.core :as json]
-            [sade.http :as http]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer [->cookie-store server-address decode-response
-                                            admin query command
+                                            admin query command http-get http-post
                                             last-email apply-remote-minimal
                                             ok? fail? http200? redirects-to
                                             ]]
@@ -37,7 +36,7 @@
 
 (defn- register [base-opts user]
   (decode-body
-    (http/post
+    (http-post
       (str (server-address) "/api/command/register-user")
       (util/deep-merge
         base-opts
@@ -47,7 +46,7 @@
 
 (defn- login [u p]
   (decode-body
-    (http/post (str (server-address) "/api/login")
+    (http-post (str (server-address) "/api/login")
       {:follow-redirects false
        :throw-exceptions false
        :form-params {:username u :password p}})))
@@ -67,7 +66,7 @@
 
    (last-email) ; Inbox zero
 
-   (let [vetuma-data (decode-body (http/get (str (server-address) "/api/vetuma/user") params))
+   (let [vetuma-data (decode-body (http-get (str (server-address) "/api/vetuma/user") params))
          stamp (:stamp vetuma-data) => string?
          person-id (:userid vetuma-data) => string?
          new-user-email "jukka@example.com"
@@ -135,7 +134,7 @@
        (let [trid (vetuma-init params token-query)]
          (vetuma-finish params trid))
 
-       (let [stamp (:stamp (decode-body (http/get (str (server-address) "/api/vetuma/user") params))) => string?
+       (let [stamp (:stamp (decode-body (http-get (str (server-address) "/api/vetuma/user") params))) => string?
              new-user-email "jukka@example.com"
              new-user-pw "salasana"
              new-user-phone2 "046"
@@ -173,11 +172,11 @@
              (contains "/app/security/activate/"))
 
            (fact "Activate account"
-             (let [resp (http/get first-href {:follow-redirects false})]
+             (let [resp (http-get first-href {:follow-redirects false})]
                resp => (partial redirects-to "/app/fi/applicant")))
 
            (fact "Second activation attempt leads to login page"
-             (let [resp (http/get first-href {:follow-redirects false})]
+             (let [resp (http-get first-href {:follow-redirects false})]
                resp => (partial redirects-to "/app/fi/welcome")))
 
            (fact "Log in"

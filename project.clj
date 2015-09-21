@@ -10,7 +10,7 @@
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [bultitude "0.2.6"] ; noir requires 0.2.0, midje 1.6 requires 0.2.2
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
-                 [com.novemberain/monger "1.7.0"]
+                 [com.novemberain/monger "3.0.0"]
                  [com.taoensso/timbre "4.0.2"]
                  [org.slf4j/slf4j-log4j12 "1.7.7"]
                  [enlive "1.1.5"]
@@ -54,16 +54,17 @@
                  [org.clojure/core.memoize "0.5.7"]
                  [org.apache.pdfbox/pdfbox "1.8.9" :exclusions [commons-logging]]
                  [com.levigo.jbig2/levigo-jbig2-imageio "1.6.3"]
-                 [org.geotools/gt-main "13.1"]
-                 [org.geotools/gt-shapefile "13.1"]
-                 [org.geotools/gt-geojson "13.1"]
-                 [org.geotools/gt-referencing "13.1"]
-                 [org.geotools/gt-epsg-wkt "13.1"]
+                 [org.geotools/gt-main "12.4"]
+                 [org.geotools/gt-shapefile "12.4"]
+                 [org.geotools/gt-geojson "12.4"]
+                 [org.geotools/gt-referencing "12.4"]
+                 [org.geotools/gt-epsg-wkt "12.4"]
                  [org.clojure/data.json "0.2.6"]
-                 [lupapiste/commons "0.5.6-SNAPSHOT"]]
+                 [lupapiste/commons "0.5.7"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
+                                  [rhizome "0.2.5"]
                                   [pdfboxing "0.1.5"]]
                    :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.2.0"]
@@ -87,7 +88,7 @@
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
-              :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html" #"\/email-templates\/"]}
+              :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]
                  ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"

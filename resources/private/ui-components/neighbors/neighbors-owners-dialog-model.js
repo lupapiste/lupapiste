@@ -15,10 +15,9 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
 
   self.ownersGroup = ko.computed({
     read: function() {
-      var someSelected = _.find(self.owners(), function(owner) {
+      return _.some(self.owners(), function(owner) {
         return owner.selected();
       });
-      return someSelected !== undefined;
     },
     write: function(state) {
       self.owners().forEach(function(owner) {

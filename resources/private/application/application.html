@@ -6,14 +6,10 @@
                 <div class="container">
                     <div class="preamble">
                         <div class="application_summary_info" data-bind="with: application">
-                            <h1><span data-bind="text: address" data-test-id="application-title" class="address"></span>
-                                <a data-bind="click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
-                                   data-test-id="change-location-link">
-                                    <span class="icon edit"></span>
-                                    <span data-bind="ltext: 'edit.address'"></span></a>
-                            </h1>
-
-                            <h2 data-bind="if: primaryOperation">
+                          <h1 data-bind="component: {name: 'address',
+                                         params: { application: $parent,
+                                                   edit: 'edit'}}"></h1> <!-- TODO implement LPK-724 and change: edit: 'edit.address' -->
+                          <h2 data-bind="if: primaryOperation">
                                 <span data-test-id="test-application-primary-operation"
                                       data-bind="ltext: primaryOperationName, attr: {'data-test-primary-operation-id': primaryOperation().name}"></span>
                             </h2>
@@ -101,13 +97,12 @@
                                 <span class="application_summary_text">
                                     <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
                                                        enable: $root.authorization.ok('change-permit-sub-type'),
-                                                       optionsText: function(item) {return loc('permitSubtype.' + item); }"
+                                                       optionsText: function(item) {return item ? loc('permitSubtype.' + item) : loc('choose'); }"
                                             id="permitSubtypeSelect">
                                     </select>
-                                    <span id="permitSubtypeSaveIndicator" class="form-indicator form-input-saved" style="position: relative;top:0;left:0;color:#595959">
-                                        <span data-bind="ltext: 'form.saved'"></span>
-                                        <span class="icon"></span>
-                                    </span>
+                                    <!-- ko if: permitSubtypeHelp() -->
+                                    <span data-bind="component: { name: 'help-toggle', params: { lhtml: [permitSubtypeHelp()]}}"></span>
+                                    <!-- /ko -->
                                 </span>
                             </div>
                             <!-- /ko -->
@@ -140,10 +135,11 @@
                                             <span data-bind="ltext: 'operations.' + $data.operation()"></span>
                                         </a>
                                         <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
-                                                      ltext: 'application.linkPermitRemoveSelected',
                                                       click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
                                            data-test-id="test-remove-link-permit"
-                                           href="#" class="remove-link-permit"></a>
+                                           href="#" class="remove-link-permit link-btn">
+                                            <i class="lupicon-remove"></i>
+                                        </a>
                                     </span>
                                     <span data-bind="visible: $data.type() === 'kuntalupatunnus'" class="link-permit">
                                         <span data-bind="text: $data.id,
@@ -152,10 +148,11 @@
                                               class="link-permit-item">
                                         </span>
                                         <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
-                                                      ltext: 'application.linkPermitRemoveSelected',
                                                       click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
                                            data-test-id="test-remove-link-permit"
-                                           href="#" class="remove-link-permit"></a>
+                                           href="#" class="remove-link-permit link-btn">
+                                            <i class="lupicon-remove"></i>
+                                        </a>
                                     </span>
                                 </span>
                             </div>
@@ -297,58 +294,61 @@
                     <div class="tabs-container" data-bind="with: application">
                         <ul class="tabs" id="applicationTabs">
                             <li data-bind="if: !inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'info'}">
-                                <a data-bind="click: changeTab" href="#" data-target="info" data-test-id="application-open-info-tab">
+                                <a data-bind="click: changeTab" href="#" data-target="info" data-test-id="application-open-info-tab" class="link-btn">
                                     <span data-bind="ltext: 'application.tabInfo'"></span>
                                     <span data-bind="if: nonpartyDocumentIndicator">
-                                        <span data-bind="text: nonpartyDocumentIndicator" id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
-
+                                        <span data-bind="text: nonpartyDocumentIndicator" id="applicationNonpartyDocumentIndicator" class="indicator"></span>
+                                    </span></a></li>
                             <li data-bind="css: {'active': $parent.selectedTabName() === 'parties'}">
-                                <a data-bind="click: changeTab" href="#" data-target="parties" data-test-id="application-open-parties-tab">
+                                <a data-bind="click: changeTab" href="#" data-target="parties" data-test-id="application-open-parties-tab" class="link-btn">
                                     <span data-bind="ltext: 'application.tabParties'"></span>
                                     <span data-bind="if: partyDocumentIndicator">
                                         <span data-bind="text: partyDocumentIndicator" id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
-
                             <li data-bind="if: inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'tasks'}">
-                                <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
+                                <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab" class="link-btn">
                                     <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                                     <span data-bind="if: $data.tasksRequiringAction">
                                         <span data-bind="text: tasksRequiringAction" id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
 
                             <li data-bind="css: {'active': $parent.selectedTabName() === 'attachments'}">
-                                <a data-bind="click: changeTab" href="#" data-target="attachments" data-test-id="application-open-attachments-tab">
+                                <a data-bind="click: changeTab" href="#" data-target="attachments" data-test-id="application-open-attachments-tab" class="link-btn">
                                     <span data-bind="ltext: 'application.tabAttachments'"></span>
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
                             <li data-bind="if: _.contains(['draft', 'open', 'submitted', 'complement-needed'], state()),
                                            css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
-                                <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab">
+                                <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
+                                   class="link-btn">
                                     <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span></a></li>
 
                             <li data-bind="if: !inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'statement'}">
-                                <a data-bind="click: changeTab" href="#" data-target="statement" data-test-id="application-open-statement-tab">
+                                <a data-bind="click: changeTab" href="#" data-target="statement" data-test-id="application-open-statement-tab"
+                                   class="link-btn">
                                     <span data-bind="ltext: 'application.tabStatement'"></span>
                                     <span data-bind="if: unseenStatements">
                                         <span data-bind="text: unseenStatements" id="applicationUnseenStatements" class="indicator"></span></span></a></li>
 
                             <li data-bind="ifnot: _.contains(['draft', 'open'], state()),
                                            css: {'active': $parent.selectedTabName() === 'verdict'}">
-                                <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab">
+                                <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab"
+                                   class="link-btn">
                                     <span data-bind="ltext: 'application.tabVerdict'"></span>
                                     <span data-bind="if: unseenVerdicts">
                                         <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
                             <!-- In post-verdict states plus 'canceled' -->
-                                        <li data-bind="if: summaryAvailable(), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
-                                            <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab">
-                                                <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
+                            <li data-bind="if: summaryAvailable(), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
+                                <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab"
+                                   class="link-btn">
+                                    <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
-                                        <li data-bind="if: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application') && features.enabled('arkistointi'),
-                                                       css: {'active': $parent.selectedTabName() === 'metadata'}">
-                                            <a data-bind="click: changeTab" href="#" data-target="metadata" data-test-id="application-open-tasks-tab">
-                                                <span data-bind="ltext: 'attachment.tosMetadata'"></span>
-                                            </a></li>
-
+                            <li data-bind="if: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application') && features.enabled('arkistointi'),
+                                           css: {'active': $parent.selectedTabName() === 'metadata'}">
+                                <a data-bind="click: changeTab" href="#" data-target="metadata" data-test-id="application-open-tasks-tab"
+                                   class="link-btn">
+                                    <span data-bind="ltext: 'attachment.tosMetadata'"></span>
+                                </a></li>
                         </ul>
                     </div>
                 </div>
@@ -364,7 +364,7 @@
                             <h1 data-bind="ltext: 'application.tabInfo'"></h1>
                             <span data-bind="component: {
                                              name: 'help-toggle',
-                                             params: {lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc' }
+                                             params: {lhtml: 'help.' + permitType() + '.applicationInfoDesc' }
                                              }"></span>
                         </div>
                         <div data-bind="if: $root.application.state() == 'draft'">
@@ -373,7 +373,7 @@
                         <div class="operation-info">
 
                             <div data-bind="if: $root.authorization.ok('add-operation')">
-                                <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
+                                <p data-bind="lhtml: 'help.' + permitType() + '.AddOperations'"></p>
                                 <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="positive">
                                     <i class="lupicon-circle-plus"></i>
                                     <span data-bind="ltext: 'application.addOperation'"></span>
@@ -403,10 +403,7 @@
                         <p data-bind="lhtml: 'required.field.desc'"></p>
                         <!-- docgen generated content: -->
                         <div class="application_section">
-                            <div class="open-all-accordions">
-                                <a href="#" data-bind="click: function(data, event) { accordion.toggleAll(event.target); }, ltext: 'accordions.toggle-all'"></a>
-                            </div>
-                            <div id="applicationDocgen" class="docgen-content">
+                           <div id="applicationDocgen" class="docgen-content">
                                 <!-- This is where generated document will be placed. -->
                             </div>
                         </div>
@@ -424,7 +421,7 @@
                         <h1 data-bind="ltext: 'application.tabParties'"></h1>
                         <span data-bind="component: {
                                          name: 'help-toggle',
-                                         params: { lhtml: ['help.' + $root.application.permitType() + '.PartiesDesc',
+                                         params: { lhtml: ['help.' + permitType() + '.PartiesDesc',
                                          'company-invite.help']}
                                          }"></span>
                         <div class="application_section">
@@ -480,19 +477,19 @@
 
                         <!-- docgen generated content: -->
                         <div class="application_section">
-                            <div class="open-all-accordions">
-                                <a href="#" data-bind="click: function(data, event) { accordion.toggleAll(event.target); }, ltext: 'accordions.toggle-all'"></a>
-                            </div>
                             <div id="partiesDocgen" class="docgen-content">
                                 <!-- This is where generated document will be placed. -->
                             </div>
                             <!-- ko if: $root.foreman.isVisible -->
                             <section class="accordion" id="accordion-application-foreman">
-                                <h2 onclick="accordion.click(this)" data-test-id="accordion-application-foreman-header">
-                                    <span class="icon toggle-icon drill-down-white"></span>
-                                    <span data-bind="ltext: 'application.parties.foreman'"></span>
-                                </h2>
-                                <div class="accordion_content expanded" data-accordion-state="open">
+                                <button onclick="accordion.click(this)"
+                                        data-test-id="accordion-application-foreman-header"
+                                        class="accordion-toggle secondary">
+                                    <i class="lupicon-chevron-down"></i>
+                                    <i class="lupicon-chevron-up toggle"></i>
+                                    <span class="bar-text" data-bind="ltext: 'application.parties.foreman'"></span>
+                                </button>
+                                <div class="accordion_content" data-accordion-state="closed">
                                     <div class="accordion-fields">
                                         <div data-bind="template: {name: 'application-foreman-template', data: $root.foreman}"></div>
                                     </div>
@@ -727,19 +724,19 @@
                                          params: {lhtml: 'help.application.summary'}
                                          }"></span>
                         <div class="application_section">
-                            <div class="open-all-accordions">
-                                <a href="#" data-bind="click: function(data, event) { accordion.toggleAll(event.target); }, ltext: 'accordions.toggle-all'"></a>
-                            </div>
                             <div id="applicationAndPartiesDocgen" class="docgen-content">
                                 <!-- This is where the generated documents will be placed. -->
                             </div>
                         </div>
 
                         <section class="accordion" id="accordion-application-summary-statements">
-                            <h2 onclick="accordion.click(this)" data-test-id="accordion-application-summary-statements-header">
-                                <span class="icon toggle-icon drill-right-white"></span>
-                                <span data-bind="ltext: 'application.statements'" style="margin-right: 0">Lausunnot</span>
-                            </h2>
+                            <button onclick="accordion.click(this)"
+                                    data-test-id="accordion-application-summary-statements-header"
+                                    class="secondary accordion-toggle">
+                                <i class="lupicon-chevron-down"></i>
+                                <i class="lupicon-chevron-up toggle"></i>
+                                <span class="bar-text" data-bind="ltext: 'application.statements'" style="margin-right: 0">Lausunnot</span>
+                            </button>
                             <div class="accordion_content" data-accordion-state="closed">
                                 <div class="accordion-fields">
                                     <div data-bind="template: {name: 'statements-template', data: {statements: $data.statements, localisationKeys: {missing: 'application.statement.missing-from-prev-permit'}}}"></div>
@@ -748,10 +745,11 @@
                         </section>
 
                         <section class="accordion">
-                            <h2 onclick="accordion.click(this)">
-                                <span class="icon toggle-icon drill-right-white"></span>
-                                <span data-bind="lhtml: 'application.neighbors.hearings'" style="margin-right: 0">Kuulemiset</span>
-                            </h2>
+                            <button onclick="accordion.click(this)" class="accordion-toggle secondary">
+                                <i class="lupicon-chevron-down"></i>
+                                <i class="lupicon-chevron-up toggle"></i>
+                                <span class="bar-text" data-bind="lhtml: 'application.neighbors.hearings'" style="margin-right: 0">Kuulemiset</span>
+                            </button>
                             <div class="accordion_content" data-accordion-state="closed">
                                 <div class="accordion-fields">
                                     <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors, localisationKeys: {missing: 'neighbors.missing-from-prev-permit'}}}"></div>
@@ -789,21 +787,26 @@
                                     <span data-bind="text: $data.kuntalupatunnus, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></span>
                                     <span data-bind="visible: $data.draft" style="text-transform: lowercase;">(<span data-bind="ltext: 'draft'"></span>)</span>
 
-                                    <span class="icon remove-grey"
-                                          data-bind="click: $root.verdictModel.deleteVerdict,
-                                                     visible: $root.authorization.ok('delete-verdict'),
-                                                     enable: $root.authorization.ok('delete-verdict'),
-                                                     attr: {'title': loc('remove')}"></span>
+                                    <i class="primary lupicon-remove is-right"
+                                        data-bind="click: $root.verdictModel.deleteVerdict,
+                                        visible: $root.authorization.ok('delete-verdict'),
+                                        enable: $root.authorization.ok('delete-verdict'),
+                                                   attr: {'title': loc('remove')}">
+                                    </i>
                                 </h2>
 
                                 <!--  ko if:  $data.paatokset -->
                                 <div data-bind="foreach: paatokset, attr: {'data-test-id' : 'given-verdict-id-' + $index() + '-content'}">
                                     <div class="accordion">
-                                        <h2 onclick="accordion.click(this)">
-                                            <span class="icon toggle-icon drill-down-white"></span>
-                                            <span data-bind="ltext: 'application.verdict.title'" style="margin-right: 0"></span>
-                                            <span data-bind="text: $index() + 1"></span>
-                                        </h2>
+                                        <button onclick="accordion.click(this)"
+                                                class="accordion-toggle secondary toggled">
+                                            <i class="lupicon-chevron-down"></i>
+                                            <i class="lupicon-chevron-up toggle"></i>
+                                            <span class="bar-text">
+                                                <span data-bind="ltext: 'application.verdict.title'" style="margin-right: 0"></span>
+                                                <span data-bind="text: $index() + 1"></span>
+                                            </span>
+                                        </button>
                                         <div class="accordion_content expanded">
 
                                             <div data-bind="with: $parent" style="overflow: auto;">
@@ -992,6 +995,11 @@
                                                         <div data-bind="ltext: 'verdict.poytakirjat.missing'"></div>
                                                         <!-- /ko -->
                                                     </div>
+
+                                                    <!-- metadata -->
+
+
+
                                                 </div>
                                             </div>
                                         </div>
@@ -1282,7 +1290,9 @@
                             </table>
                         </div>
 
+                        <!-- ko if: $root.foreman.isVisible -->
                         <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
+                        <!-- /ko -->
 
                         <div>
                             <div data-bind="foreach: taskGroups">

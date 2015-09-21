@@ -12,6 +12,11 @@
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]))
 
+
+(def update-doc-states (states/all-application-states-but (conj states/terminal-states :sent :verdictGiven :constructionStarted)))
+
+(def approve-doc-states (states/all-application-states-but (conj states/terminal-states :draft :sent :verdictGiven :constructionStarted)))
+
 ;;
 ;; CRUD
 ;;
@@ -57,11 +62,10 @@
     (doc-persistence/remove! command docId "documents")
     (ok)))
 
-
 (defcommand update-doc
   {:parameters [id doc updates]
    :user-roles #{:applicant :authority}
-   :states     (states/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
+   :states     update-doc-states
    :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
@@ -69,7 +73,7 @@
 (defcommand update-task
   {:parameters [id doc updates]
    :user-roles #{:applicant :authority}
-   :states     (states/all-states-but [:sent :closed :canceled])
+   :states     (states/all-states-but (conj states/terminal-states :sent))
    :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (doc-persistence/update! command doc updates "tasks"))
@@ -132,35 +136,37 @@
 (defn- ->approval-mongo-model
   "Creates a mongo update map of approval data.
    To be used within model/with-timestamp."
-  [path status user]
+  [path approval]
   (let [mongo-path (if (ss/blank? path) "documents.$.meta._approved" (str "documents.$.meta." path "._approved"))]
-    {$set {mongo-path (model/->approved status user)
+    {$set {mongo-path approval
            :modified (model/current-timestamp)}}))
 
 (defn- approve [{{:keys [id doc path collection]} :data user :user created :created :as command} status]
   (or
-    (validate-approvability command)
-    (model/with-timestamp created
-      (update-application
+   (validate-approvability command)
+   (model/with-timestamp created
+     (let [approval (model/->approved status user)]
+       (update-application
         command
         {collection {$elemMatch {:id doc}}}
-        (->approval-mongo-model path status user)))))
+        (->approval-mongo-model path approval))
+       approval))))
 
 (defcommand approve-doc
   {:parameters [:id :doc :path :collection]
    :input-validators [doc-persistence/validate-collection]
    :user-roles #{:authority}
-   :states     (states/all-application-states-but [#_:info :draft :sent :verdictGiven :constructionStarted :closed :canceled])}
+   :states     approve-doc-states}
   [command]
-  (approve command "approved"))
+  (ok :approval (approve command "approved")))
 
 (defcommand reject-doc
   {:parameters [:id :doc :path :collection]
    :input-validators [doc-persistence/validate-collection]
    :user-roles #{:authority}
-   :states     (states/all-application-states-but [#_:info :draft :sent :verdictGiven :constructionStarted :closed :canceled])}
+   :states     approve-doc-states}
   [command]
-  (approve command "rejected"))
+  (ok :approval (approve command "rejected")))
 
 ;;
 ;; Set party to document
@@ -176,7 +182,7 @@
                   (when-not (or (ss/blank? user-id) (user-can-be-set? user-id application))
                     (fail :error.application-does-not-have-given-auth)))
                 application/validate-authority-in-drafts]
-   :states     (states/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])}
+   :states     update-doc-states}
   [{:keys [created application] :as command}]
   (doc-persistence/do-set-user-to-document application documentId userId path created))
 
@@ -185,14 +191,14 @@
    :user-roles #{:applicant :authority}
    :pre-checks [domain/validate-owner-or-write-access
                 application/validate-authority-in-drafts]
-   :states     (states/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])}
+   :states     update-doc-states}
   [{:keys [created application user] :as command}]
   (doc-persistence/do-set-user-to-document application documentId (:id user) path created))
 
 (defcommand set-company-to-document
   {:parameters [id documentId companyId path]
    :user-roles #{:applicant :authority}
-   :states     (states/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])
+   :states     update-doc-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]

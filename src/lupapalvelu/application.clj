@@ -4,7 +4,6 @@
             [clj-time.local :refer [local-now]]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
-            [clojure.zip :as zip]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
@@ -14,7 +13,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
@@ -29,6 +28,12 @@
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
 
+(defn resolve-valid-subtypes
+  "Returns a set of valid permit and operation subtypes for the application."
+  [{permit-type :permitType op :primaryOperation}]
+  (let [op-subtypes (operations/get-primary-operation-metadata {:primaryOperation op} :subtypes)
+        permit-subtypes (permit/permit-subtypes permit-type)]
+    (concat op-subtypes permit-subtypes)))
 
 ;;
 ;; Validators
@@ -60,6 +65,15 @@
   [{user :user} {state :state}]
   (when (and (= :draft (keyword state)) (user/authority? user))
     unauthorized))
+
+(defn validate-has-subtypes [_ application]
+  (when (empty? (resolve-valid-subtypes application))
+    (fail :error.permit-has-no-subtypes)))
+
+(defn pre-check-permit-subtype [{data :data} application]
+  (when-let [subtype (:permitSubtype data)]
+    (when-not (util/contains-value? (resolve-valid-subtypes application) (keyword subtype))
+      (fail :error.permit-has-no-such-subtype))))
 
 ;;
 ;; Helpers
@@ -100,16 +114,31 @@
   (let [mask-person-ids (person-id-masker-for-user user application)]
     (update-in application [:documents] (partial map mask-person-ids))))
 
-; Process
-(defn- with-current-schema-info [document]
-  (let [current-info (-> document :schema-info schemas/get-schema :info (select-keys schemas/immutable-keys))]
-    (update document :schema-info merge current-info)))
 
-(defn- process-documents [user {authority :authority :as application}]
-  (let [validate (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
+; whitelist-action
+(defn- prefix-with [prefix coll]
+  (conj (seq coll) prefix))
+
+(defn- enrich-single-doc-disabled-flag [{user-role :role} doc]
+  (let [doc-schema (model/get-document-schema doc)
+        zip-root (tools/schema-zipper doc-schema)
+        whitelisted-paths (tools/whitelistify-schema zip-root)]
+    (reduce (fn [new-doc [path whitelist]]
+              (if-not ((set (:roles whitelist)) (keyword user-role))
+                (tools/update-in-repeating new-doc (prefix-with :data path) merge {:whitelist-action (:otherwise whitelist)})
+                new-doc))
+            doc
+            whitelisted-paths)))
+
+; Process
+(defn- process-documents-and-tasks [user {authority :authority :as application}]
+  (let [validate        (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
         mask-person-ids (person-id-masker-for-user user application)
-        doc-mapper (comp with-current-schema-info mask-person-ids validate)]
-    (update application :documents (partial map doc-mapper))))
+        disabled-flag   (partial enrich-single-doc-disabled-flag user)
+        mapper          (comp disabled-flag schemas/with-current-schema-info mask-person-ids validate)]
+    (-> application
+      (update :documents (partial map mapper))
+      (update :tasks (partial map mapper)))))
 
 (defn ->location [x y]
   [(util/->double x) (util/->double y)])
@@ -142,106 +171,13 @@
     (assoc application :submittable (foreman-submittable? application))
     application))
 
-
-(defn- process-tasks [application]
-  (update-in application [:tasks] (partial map #(assoc % :validationErrors (model/validate application %)))))
-
-;; For enrich-docs-disabled-flag --> ; TODO should these be moved to own namespace, or to document related namespace?
-
-(defn- schema-branch? [node]
-  (or
-    (seq? node)
-    (and
-      (map? node)
-      (contains? node :body))))
-
-(def- schema-leaf?
-      (complement schema-branch?))
-
-(defn- schema-zipper [doc-schema]
-  (let [branch? (fn [node]
-                  (and (map? node)
-                       (contains? node :body)))
-        children (fn [{body :body :as branch-node}]
-                   (assert (map? branch-node) (str "Assertion failed in schema-zipper/children, expected node to be a map:" branch-node))
-                   (assert (not (empty? body)) (str "Assertion failed in schema-zipper/children, branch node to have children:" branch-node))
-                   body)
-        make-node (fn [node, children]
-                    (assert (map? node) (str "Assertion failed in schema-zipper/make-node, expected node to be a map:" node))
-                    (assoc node :body children))]
-    (zip/zipper branch? children make-node doc-schema)))
-
-(defn- iterate-siblings-to-right [loc f]
-  (if (nil? (zip/right loc))
-    (-> (f loc)
-        zip/up)
-    (-> (f loc)
-        zip/right
-        (recur f))))
-
-(defn- get-root-path [loc]
-  (let [keyword-name (comp keyword :name)
-        root-path (->> (zip/path loc)
-                       (mapv keyword-name)
-                       (filterv identity))
-        node-name (-> (zip/node loc)
-                      keyword-name)]
-    (seq (conj root-path node-name))))
-
-(defn- add-whitelist-property [node new-whitelist]
-  (if-not (and (seq? node) (:whitelist node))
-    (assoc node :whitelist new-whitelist)
-    node))
-
-(defn- walk-schema
-  ([loc] (walk-schema loc nil))
-  ([loc disabled-paths]
-   (if (zip/end? loc)
-     disabled-paths
-     (let [current-node (zip/node loc)
-           current-whitelist (:whitelist current-node)
-           propagate-wl? (and (schema-branch? current-node) current-whitelist)
-           loc (if propagate-wl?
-                 (iterate-siblings-to-right
-                   (zip/down loc)                           ;leftmost-child, starting point
-                   #(zip/edit % add-whitelist-property current-whitelist))
-                 loc)
-           whitelisted-leaf? (and
-                               (schema-leaf? current-node)
-                               current-whitelist)
-           disabled-paths (if whitelisted-leaf?
-                            (conj disabled-paths [(get-root-path loc) current-whitelist])
-                            disabled-paths)]
-       (recur (zip/next loc) disabled-paths)))))
-
-(defn- prefix-with [prefix coll]
-  (conj (seq coll) prefix))
-
-(defn- enrich-single-doc-disabled-flag [user-role doc]
-  (let [doc-schema (model/get-document-schema doc)
-        zip-root (schema-zipper doc-schema)
-        whitelisted-paths (walk-schema zip-root)]
-    (reduce (fn [new-doc [path whitelist]]
-              (if-not ((set (:roles whitelist)) (keyword user-role))
-                (util/update-in-repeating new-doc (prefix-with :data path) merge {:whitelist-action (:otherwise whitelist)})
-                new-doc))
-            doc
-            whitelisted-paths)))
-
-;; <-- For enrich-docs-disabled-flag
-
-(defn- enrich-docs-disabled-flag [{user-role :role} app]
-  (update-in app [:documents] (partial map (partial enrich-single-doc-disabled-flag user-role))))
-
 (defn post-process-app [app user]
   (->> app
        meta-fields/enrich-with-link-permit-data
        (meta-fields/with-meta-fields user)
        action/without-system-keys
        process-foreman-v2
-       (process-documents user)
-       process-tasks
-       (enrich-docs-disabled-flag user)
+       (process-documents-and-tasks user)
        location->object))
 
 ;;
@@ -270,7 +206,7 @@
         default-schema-datas (util/assoc-when {}
                                               op-schema-name (:schema-data op-info)
                                               "yleiset-alueet-maksaja" operations/schema-data-yritys-selected
-                                              "tyomaastaVastaava" operations/schema-data-yritys-selected)
+                                              "tyomaastaVastaava" operations/schema-data-henkilo-selected)
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
         make (fn [schema-name]
                (let [schema (schemas/get-schema schema-version schema-name)]
@@ -309,27 +245,28 @@
         counter (format "%05d" (mongo/get-next-sequence-value sequence-name))]
     (str "LP-" municipality "-" year "-" counter)))
 
-(defn make-application [id operation x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
-  {:pre [id operation address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
-  (let [permit-type (operations/permit-type-of-operation operation)
-        owner (user/user-in-role user :owner :type :owner)
-        op (make-op operation created)
+(defn make-application [id operation-name x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
+  {:pre [id operation-name address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
+  (let [permit-type (operations/permit-type-of-operation operation-name)
+        owner (merge (user/user-in-role user :owner :type :owner)
+                     {:unsubscribed (= (keyword operation-name) :aiemmalla-luvalla-hakeminen)})
+        op (make-op operation-name created)
         state (cond
                 info-request? :info
                 (or (user/authority? user) (user/rest-user? user)) :open
                 :else :draft)
         comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
-        tos-function (get-in organization [:operations-tos-functions (keyword operation)])
+        tos-function (get-in organization [:operations-tos-functions (keyword operation-name)])
+        classification {:permitType permit-type, :primaryOperation op}
         application (merge domain/application-skeleton
+                      classification
                       {:id                  id
                        :created             created
                        :opened              (when (#{:open :info} state) created)
                        :modified            created
-                       :permitType          permit-type
-                       :permitSubtype       (first (permit/permit-subtypes permit-type))
+                       :permitSubtype       (first (resolve-valid-subtypes classification))
                        :infoRequest         info-request?
                        :openInfoRequest     open-inforequest?
-                       :primaryOperation    op
                        :secondaryOperations []
                        :state               state
                        :municipality        municipality
@@ -402,5 +339,4 @@
                                                               (:primaryOperation)
                                                               (:name))}}
                         :upsert true)))
-
 

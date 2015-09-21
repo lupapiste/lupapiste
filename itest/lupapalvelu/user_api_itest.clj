@@ -3,7 +3,6 @@
             [monger.operators :refer :all]
             [midje.sweet :refer :all]
             [ring.util.codec :as codec]
-            [sade.http :as http]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.mongo :as mongo]
@@ -78,6 +77,19 @@
   (fact (command veikko :update-user :firstName "f" :lastName "l") => ok?)
   (fact (-> (query veikko :user) :user) => (contains {:firstName "f" :lastName "l"})))
 
+(facts update-default-application-filter
+  (apply-remote-minimal)
+
+  (fact (->> (command sonja :update-default-application-filter :filter {:handler (:id sonja)  :tags ["bar" "buzz"] :operations [] :organizations [] :areas ["1"]} :sort {:column "type" :asc false})) => ok?)
+
+  (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter) first :tags) => ["bar" "buzz"])
+
+  (fact "Overwrite default filter"
+      (->> (command sonja :update-default-application-filter :filter {:tags ["foo"]} :sort {:column "modified" :asc true})) => ok?)
+
+  (fact "Filter overwritten"
+      (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter)) => [{:tags ["foo"]}]))
+
 (facts update-user-organization
   (apply-remote-minimal)
 
@@ -102,7 +114,15 @@
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
       (:subject email) => "Lupapiste.fi: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
-      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
+      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))
+
+  (fact "add existing authority to new organization"
+
+    (command naantali :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add"  :roles ["authority"]) => ok?
+    (let [email (last-email)]
+      (:to email) => (contains "tonja.sibbo@sipoo.fi")
+      (:subject email) => "Lupapiste.fi: Ilmoitus k\u00e4ytt\u00e4j\u00e4tilin liitt\u00e4misest\u00e4 organisaation viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (get-in email [:body :plain]) => (contains "Naantalin rakennusvalvonta"))))
 
 (facts remove-user-organization
   (apply-remote-minimal)
@@ -115,9 +135,9 @@
 
 (fact update-user-roles
   (apply-remote-minimal)
-  (fact "Meta: check current roles" (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority"])
+  (fact "Meta: check current roles" (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority" "approver"])
   (fact (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "foobar"]) => fail?)
-  (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority"])
+  (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority" "approver"])
 
   (fact "Sipoo does not have permanent achive, can not set TOS roles but reader is OK"
     (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "tos-editor" "tos-publisher" "reader"]) => ok?
@@ -169,7 +189,7 @@
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/user-attachment")
-        resp        (http/post uri
+        resp        (http-post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart [{:name "attachmentType"  :content attachment-type}
                                    {:name "files[]"         :content uploadfile}]})
@@ -235,27 +255,27 @@
        params       {:cookie-store (->cookie-store store)
                      :follow-redirects false
                      :throw-exceptions false}
-       login        (http/post
+       login        (http-post
                       (str (server-address) "/api/login")
                       (assoc params :form-params {:username "admin" :password "admin"})) => http200?
        csrf-token   (-> (get @store "anti-csrf-token") .getValue codec/url-decode) => truthy
        params       (assoc params :headers {"x-anti-forgery-token" csrf-token})
        sipoo-rakval (-> "sipoo" find-user-from-minimal :orgAuthz keys first name)
        impersonate  (fn [password]
-                      (-> (http/post
+                      (-> (http-post
                             (str (server-address) "/api/command/impersonate-authority")
                             (assoc params
                               :form-params (merge {:organizationId sipoo-rakval :role "authority"} (when password {:password password}))
                               :content-type :json))
                         decode-response :body))
-       role         (fn [] (-> (http/get (str (server-address) "/api/query/user") params) decode-response :body :user :role))
-       actions      (fn [] (-> (http/get (str (server-address) "/api/query/allowed-actions") params) decode-response :body :actions))]
+       role         (fn [] (-> (http-get (str (server-address) "/api/query/user") params) decode-response :body :user :role))
+       actions      (fn [] (-> (http-get (str (server-address) "/api/query/allowed-actions") params) decode-response :body :actions))]
 
    (fact "impersonation action is available"
      (:impersonate-authority (actions)) => ok?)
 
    (fact "admin can not query property owners"
-     (-> (http/get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)
+     (-> (http-get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)
 
    (fact "fails without password"
      (impersonate nil) => fail?)
@@ -268,7 +288,7 @@
 
    (let [application (create-and-submit-application pena :propertyId sipoo-property-id) => truthy
          application-id (:id application)
-         query-as-admin (http/get (str (server-address) "/api/query/application?id=" application-id) params) => http200?]
+         query-as-admin (http-get (str (server-address) "/api/query/application?id=" application-id) params) => http200?]
 
      (fact "sonja sees the application"
        (query-application sonja application-id) => truthy)
@@ -283,7 +303,7 @@
        (impersonate "admin") => fail?)
 
      (fact "instead, application is visible"
-       (let [query-as-imposter (http/get (str (server-address) "/api/query/application?id=" application-id) params) => http200?
+       (let [query-as-imposter (http-get (str (server-address) "/api/query/application?id=" application-id) params) => http200?
              body (-> query-as-imposter decode-response :body) => ok?
              application (:application body)]
          (:id application) => application-id)))
@@ -299,7 +319,7 @@
        (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))
 
    (fact "still can not query property owners"
-     (-> (http/get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)))
+     (-> (http-get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)))
 
 (facts* "reset password email"
   (last-email) ; Inbox zero
@@ -308,7 +328,7 @@
                 :content-type :json
                 :follow-redirects false
                 :throw-exceptions false}
-        resp   (http/post (str (server-address) "/api/reset-password") params) => http200?
+        resp   (http-post (str (server-address) "/api/reset-password") params) => http200?
         email  (last-email)]
     (-> resp decode-response :body) => ok?
     (:to email) => (email-for "pena")

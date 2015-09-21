@@ -73,21 +73,15 @@
     lupapisteApp.setTitle(newTitle || util.getIn(applicationModel, ["_js", "title"]));
   }
 
-  function updatePermitSubtype(value){
-    if (isInitializing) { return; }
-
-    var element = $("#permitSubtypeSaveIndicator");
-    element.stop().hide();
+  function updatePermitSubtype(value) {
+    if (isInitializing || !authorizationModel.ok("change-permit-sub-type")) { return; }
 
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
-    .success(function() {
-      authorizationModel.refresh(currentId);
-      element.stop().show();
-      setTimeout(function() {
-        element.fadeOut("slow");
-      }, 2000);
-    })
-    .call();
+      .success(function() {
+        authorizationModel.refresh(currentId);
+        hub.send("indicator", {style: "positive"});
+      })
+      .call();
   }
 
   function updateTosFunction(value) {
@@ -97,14 +91,15 @@
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
           repository.load(currentId, applicationModel.pending, function(application) {
-            applicationModel.metadata(application.metadata);
+            ko.mapping.fromJS(application.metadata, applicationModel.metadata);
           });
         })
         .call();
     }
   }
 
-  applicationModel.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
+  applicationModel.permitSubtype.subscribe(function(v) { updatePermitSubtype(v); });
+
   applicationModel.tosFunction.subscribe(updateTosFunction);
 
   function initAuthoritiesSelectList(data) {
@@ -160,6 +155,7 @@
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
+      requestForStatementModel.setFunctionCode(app.tosFunction);
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
@@ -187,9 +183,22 @@
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
 
       var devMode = LUPAPISTE.config.mode === "dev";
-      docgen.displayDocuments("#applicationDocgen", app, applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
-      docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
-      docgen.displayDocuments("#applicationAndPartiesDocgen", app, applicationModel.summaryAvailable() ? sortedNonpartyDocs : [], authorizationModel, {dataTestSpecifiers: false, accordionCollapsed: true});
+      var isAuthority = lupapisteApp.models.currentUser.isAuthority();
+
+      docgen.displayDocuments("#applicationDocgen",
+                              app,
+                              applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
+                              authorizationModel,
+                              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+      docgen.displayDocuments("#partiesDocgen",
+                              app,
+                              sortedPartyDocs,
+                              authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+      docgen.displayDocuments("#applicationAndPartiesDocgen",
+                              app,
+                              applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
+                              authorizationModel,
+                              {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
 
       // Indicators
       function sumDocIndicators(sum, doc) {
@@ -282,11 +291,6 @@
     updateWindowTitle(e.applicationDetails.application.title);
   });
 
-  hub.subscribe("application-model-updated", function(e) {
-    if (pageutil.getPage() === "inforequest"  && authorizationModel.ok("mark-seen")) {
-      ajax.command("mark-seen", {id: e.applicationId, type: "comments"}).call();
-    }
-  });
 
   function NeighborStatusModel() {
     var self = this;

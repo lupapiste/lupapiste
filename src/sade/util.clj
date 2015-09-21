@@ -8,7 +8,8 @@
             [clj-time.core :refer [days weeks months years ago]]
             [clj-time.coerce :as tc]
             [schema.core :as sc]
-            [taoensso.timbre :as timbre :refer [debugf]])
+            [taoensso.timbre :as timbre :refer [debugf]]
+            [me.raynes.fs :as fs])
   (:import [org.joda.time LocalDateTime]
            [java.util.jar JarFile]))
 
@@ -92,14 +93,6 @@
   [id col]
   (some (fn [m] (when (= id (:id m)) m)) col))
 
-(defn update-in-repeating
-  ([m [k & ks] f & args]
-    (if (every? (comp ss/numeric? name) (keys m))
-      (apply hash-map (mapcat (fn [[repeat-k v]] [repeat-k (apply update-in-repeating v (conj ks k) f args)] ) m))
-      (if ks
-        (assoc m k (apply update-in-repeating (get m k) ks f args))
-        (assoc m k (apply f (get m k) args))))))
-
 ; From clojure.contrib/seq
 
 (defn indexed
@@ -146,9 +139,9 @@
         (or
           (contains-value? (first values) checker)
           (contains-value? (rest values) checker))))
-    (if checker
+    (if (fn? checker)
       (checker coll)
-      false)))
+      (= coll checker))))
 
 (defn ->int
   "Reads a integer from input. Returns default if not an integer.
@@ -489,3 +482,20 @@
          end# (System/currentTimeMillis)]
      (debugf (str ~msg ": %dms") (- end# start#))
      result#))
+
+
+; Patched from me.raynes.fs.compression
+(defn unzip
+  "Takes the path to a zipfile source and unzips it to target-dir."
+  ([source]
+    (unzip source (name source)))
+  ([source target-dir]
+    (with-open [zip (java.util.zip.ZipFile. (fs/file source))]
+      (let [entries (enumeration-seq (.entries zip))
+            target-file #(fs/file target-dir (str %))]
+        (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
+                :let [f (target-file entry)]]
+          (fs/mkdirs (fs/parent f))
+          (io/copy (.getInputStream zip entry) f))))
+    target-dir))
+

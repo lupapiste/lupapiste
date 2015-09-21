@@ -131,11 +131,16 @@
 (defn owner-or-write-access? [application user-id]
   (boolean (some (partial has-auth-role? application user-id) owner-or-write-roles)))
 
+(defn company-access? [application company-id]
+  (boolean (has-auth-role? application company-id "writer")))
+
 (defn validate-owner-or-write-access
   "Validator: current user must be owner or have write access.
    To be used in commands' :pre-checks vector."
   [command application]
-  (when-not (owner-or-write-access? application (-> command :user :id))
+  (when-not (or
+              (owner-or-write-access? application (-> command :user :id))
+              (company-access? application (-> command :user :company :id)))
     unauthorized))
 
 ;;
@@ -227,13 +232,14 @@
 
 (defn ->paatos
   "Returns a verdict data structure, compatible with KRYSP schema"
-  [{:keys [verdictId backendId timestamp name given status official text section draft agreement]}]
+  [{:keys [verdictId backendId timestamp name given status official text section draft agreement metadata]}]
   (let [verdict-id (or verdictId (mongo/create-id))]
     {:id verdict-id
     :kuntalupatunnus backendId
     :draft (if (nil? draft) false draft)
     :timestamp timestamp
     :sopimus agreement ; not in KRYSP
+    :metadata metadata ; not in KRYSP?
     :paatokset [{:paivamaarat {:anto             given
                                :lainvoimainen    official}
                  :poytakirjat [{:paatoksentekija name

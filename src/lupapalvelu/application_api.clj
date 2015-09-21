@@ -4,10 +4,11 @@
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
             [monger.operators :refer :all]
+            [sade.coordinate :as coord]
+            [sade.core :refer :all]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
-            [sade.core :refer :all]
             [sade.property :as p]
             [lupapalvelu.action :refer [defraw defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as a]
@@ -20,14 +21,15 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.ktj :as ktj]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.wfs :as wfs]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
+            [lupapalvelu.state-machine :as state-machine]
             [lupapalvelu.user :as user]))
 
 ;; Notifications
@@ -39,11 +41,11 @@
 ;; Validators
 
 (defn- validate-x [{{:keys [x]} :data}]
-  (when (and x (not (< 10000 (util/->double x) 800000)))
+  (when (and x (not (coord/valid-x? x)))
     (fail :error.illegal-coordinates)))
 
 (defn- validate-y [{{:keys [y]} :data}]
-  (when (and y (not (<= 6610000 (util/->double y) 7779999)))
+  (when (and y (not (coord/valid-y? y)))
     (fail :error.illegal-coordinates)))
 
 (defn operation-validator [{{operation :operation} :data}]
@@ -62,19 +64,19 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-roles
    :org-authz-roles  action/reader-org-authz-roles}
-  [{app :application user :user}]
-  (if app
-    (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
+  [{:keys [application user]}]
+  (if application
+    (let [app (assoc application :allowedAttachmentTypes (attachment/get-attachment-types-for-application application))]
       (ok :application (a/post-process-app app user)
           :authorities (if (user/authority? user)
                          (map #(select-keys % [:id :firstName :lastName]) (find-authorities-in-applications-organization app))
                          [])
-          :permitSubtypes (permit/permit-subtypes (:permitType app))))
+          :permitSubtypes (a/resolve-valid-subtypes app)))
     (fail :error.not-found)))
 
 (defquery application-authorities
   {:user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled]) ; the same as assign-application
+   :states     (states/all-states-but :draft)
    :parameters [:id]}
   [{application :application}]
   (let [authorities (find-authorities-in-applications-organization application)]
@@ -86,7 +88,7 @@
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
     (when-let [rakennuspaikka (domain/get-document-by-type application :location)]
-      (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
+      (when-let [ktj-tiedot (wfs/rekisteritiedot-xml (:propertyId application))]
         (let [updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
                        [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
                        [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
@@ -138,7 +140,7 @@
 (defcommand assign-application
   {:parameters [:id assigneeId]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft :closed :canceled])}
+   :states     (states/all-states-but :draft :canceled)}
   [{:keys [user created application] :as command}]
   (let [assignee (util/find-by-id assigneeId (find-authorities-in-applications-organization application))]
     (if (or assignee (ss/blank? assigneeId))
@@ -160,7 +162,7 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           #{:info}}
+   :pre-checks       [(partial state-machine/validate-state-transition :canceled)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified created
@@ -175,7 +177,8 @@
    :user-roles       #{:applicant}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           #{:draft :info :open :submitted}}
+   :states           #{:draft :info :open :submitted}
+   :pre-checks       [(partial state-machine/validate-state-transition :canceled)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified created
@@ -190,8 +193,8 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           (states/all-states-but [:canceled :closed :answered])
-   :pre-checks       [a/validate-authority-in-drafts]}
+   :pre-checks       [a/validate-authority-in-drafts
+                      (partial state-machine/validate-state-transition :canceled)]}
   [{:keys [created application] :as command}]
   (update-application command
     (util/deep-merge
@@ -221,7 +224,7 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           #{:sent}}
+   :pre-checks       [(partial state-machine/validate-state-transition :complement-needed)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified         created
@@ -240,7 +243,7 @@
                                             meta-fields/enrich-with-link-permit-data
                                             (dissoc :id)
                                             (assoc :_id (:id application))))
-    (catch com.mongodb.MongoException$DuplicateKey e
+    (catch com.mongodb.DuplicateKeyException e
       ; This is ok. Only the first submit is saved.
       )))
 
@@ -252,7 +255,8 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [domain/validate-owner-or-write-access
-                      a/validate-authority-in-drafts]}
+                      a/validate-authority-in-drafts
+                      (partial state-machine/validate-state-transition :submitted)]}
   [{:keys [application created] :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)]
     (or
@@ -407,30 +411,30 @@
     (when-not new-primary-op
       (fail! :error.unknown-operation))
     (update-application command {$set {:primaryOperation new-primary-op
-                                       :secondaryOperations new-secondary-ops}})))
+                                       :secondaryOperations new-secondary-ops}})
+    (ok)))
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :user-roles #{:applicant :authority}
    :states     states/pre-sent-application-states
-   :pre-checks [permit/validate-permit-has-subtypes
+   :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
+   :pre-checks [a/validate-has-subtypes
+                a/pre-check-permit-subtype
                 a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
-  (if-let [validation-errors (permit/is-valid-subtype (keyword permitSubtype) application)]
-    validation-errors
-    (update-application command
-                        {$set {:permitSubtype permitSubtype
-                               :modified      created}})))
+  (update-application command {$set {:permitSubtype permitSubtype, :modified created}})
+  (ok))
 
 (defn authority-if-post-verdict-state [{user :user} {state :state}]
   (when-not (or (user/authority? user)
-                (contains? states/pre-verdict-states (keyword state)))
+                (states/pre-verdict-states (keyword state)))
     (fail :error.unauthorized)))
 
 (defcommand change-location
   {:parameters       [id x y address propertyId]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :states           (states/all-states-but [:sent :canceled :closed])
+   :states           (states/all-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial a/property-id-parameters [:propertyId])
                       validate-x validate-y]
@@ -465,7 +469,7 @@
 (defquery app-matches-for-link-permits
           {:parameters [id]
            :user-roles #{:applicant :authority}
-           :states     (states/all-application-states-but [:sent :closed :canceled])}
+           :states     (states/all-application-states-but (conj states/terminal-states :sent))}
           [{{:keys [propertyId] :as application} :application user :user :as command}]
           (let [application (meta-fields/enrich-with-link-permit-data application)
                 ;; exclude from results the current application itself, and the applications that have a link-permit relation to it
@@ -514,7 +518,7 @@
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
    :user-roles       #{:applicant :authority}
-   :states           (states/all-application-states-but [:sent :closed :canceled]) ;; Pitaako olla myos 'sent'-tila?
+   :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
    :pre-checks       [validate-jatkolupa-zero-link-permits
                       validate-link-permit-id
                       a/validate-authority-in-drafts]
@@ -528,7 +532,7 @@
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
    :user-roles #{:applicant :authority}
-   :states     (states/all-application-states-but [:sent :closed :canceled])
+   :states     (states/all-application-states-but (conj states/terminal-states :sent))
    :pre-checks [a/validate-authority-in-drafts]} ;; Pitaako olla myos 'sent'-tila?
   [{application :application}]
   (if (mongo/remove :app-links (a/make-mongo-id-for-link-permit id linkPermitId))
@@ -547,18 +551,29 @@
    :pre-checks [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (a/make-application-id (:municipality application))
+        primary-op (:primaryOperation application)
+        secondary-ops (:secondaryOperations application)
+        op-id-mapping (into {} (map
+                                 #(vector (:id %) (mongo/create-id))
+                                 (conj secondary-ops primary-op)))
         muutoslupa-app (merge application
                               {:id            muutoslupa-app-id
                                :created       created
                                :opened        created
                                :modified      created
                                :documents     (into [] (map
-                                                         #(assoc % :id (mongo/create-id))
+                                                         (fn [doc]
+                                                           (let [doc (assoc doc :id (mongo/create-id))]
+                                                             (if (-> doc :schema-info :op)
+                                                               (update-in doc [:schema-info :op :id] op-id-mapping)
+                                                               doc)))
                                                          (:documents application)))
                                :state         (cond
                                                 (user/authority? user) :open
                                                 :else :draft)
-                               :permitSubtype :muutoslupa}
+                               :permitSubtype :muutoslupa
+                               :primaryOperation (assoc primary-op :id (op-id-mapping (:id primary-op)))
+                               :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops) }
                               (select-keys
                                 domain/application-skeleton
                                 [:attachments :statements :verdicts :comments :submitted :sent :neighbors

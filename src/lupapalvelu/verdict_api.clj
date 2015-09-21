@@ -13,6 +13,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]))
 
@@ -64,9 +65,15 @@
   {:parameters [:id]
    :states     #{:submitted :complement-needed :sent :verdictGiven}
    :user-roles #{:authority}}
-  [command]
-  (let [blank-verdict (domain/->paatos {:draft true})]
+  [{:keys [application] :as command}]
+  (let [organization (get application :organization)
+        tosFunction (get application :tosFunction)
+        metadata (when (seq tosFunction) (t/metadata-for-document organization tosFunction "p\u00e4\u00e4t\u00f6s"))
+        blank-verdict (cond-> (domain/->paatos {:draft true})
+                              (seq metadata) (assoc :metadata metadata))]
     (update-application command {$push {:verdicts blank-verdict}})
+    (debugf (str "DEBUG: blank-verdict= " blank-verdict ))
+
     (ok :verdictId (:id blank-verdict))))
 
 (defn- find-verdict [{verdicts :verdicts} id]
@@ -92,9 +99,14 @@
                   (merge
                     (select-keys data [:verdictId :backendId :status :name :section :agreement :text :given :official])
                     {:timestamp created, :draft true}))]
+    (debugf (str "  save-verdict mongo : " verdict))
     (update-application command
       {:verdicts {$elemMatch {:id verdictId}}}
-      {$set {(str "verdicts.$") verdict}})))
+      {$set {"verdicts.$.kuntalupatunnus" (:kuntalupatunnus verdict)
+             "verdicts.$.draft" true
+             "verdicts.$.timestamp" created
+             "verdicts.$.sopimus" (:sopimus verdict)
+             "verdicts.$.paatokset" (:paatokset verdict)}})))
 
 (defn- publish-verdict [{timestamp :created :as command} {:keys [id kuntalupatunnus]}]
   (if-not (ss/blank? kuntalupatunnus)

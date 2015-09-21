@@ -1,5 +1,7 @@
 (ns lupapalvelu.wfs
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn error errorf fatal]]
+            [ring.util.codec :as codec]
+            [net.cgrand.enlive-html :as enlive]
             [sade.http :as http]
             [clojure.string :as s]
             [clojure.xml :as xml]
@@ -10,6 +12,7 @@
             [sade.strings :as ss]
             [sade.util :refer [future*] :as util]
             [sade.core :refer :all]
+            [sade.common-reader :as reader]
             [lupapalvelu.logging :as logging]))
 
 
@@ -182,6 +185,18 @@
   (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
     {:x x :y y}))
 
+(defn extract-coordinates [ring]
+  (s/replace (first (xml-> ring :gml:LinearRing :gml:posList text)) #"(\d+\.*\d*)\s+(\d+\.*\d*)\s+" "$1 $2, "))
+
+(defn feature-to-area [feature]
+  (when feature 
+    (let [polygonpatch (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:sijainti :gml:Surface :gml:patches :gml:PolygonPatch))
+          exterior (extract-coordinates (first (xml-> polygonpatch :gml:exterior)))
+          interiors (map extract-coordinates (xml-> polygonpatch :gml:interior))]
+    {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))
+     :wkt (str "POLYGON ((" exterior ")" (apply str(map #(str ",(" % ")") interiors)) ")")
+     })))
+
 (defn feature-to-property-id [feature]
   (when feature
     {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))}))
@@ -292,6 +307,14 @@
       (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (property-name "ktjkiiwfs:tunnuspisteSijainti")
       (ogc-filter
+        (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
+
+(defn area-by-property-id [property-id]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (property-name "ktjkiiwfs:sijainti")
+      (filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
 (defn property-info-by-point [x y]
@@ -431,6 +454,21 @@
      :lisatieto (first (xml-> feature :lupapiste:lisatieto text))
      :linkki (first (xml-> feature :lupapiste:linkki text))
      :type "yleiskaava"}))
+
+(defn get-rekisteriyksikontietojaFeatureAddress []
+  (let [url-for-get-ktj-capabilities (str ktjkii "?service=WFS&request=GetCapabilities&version=1.1.0")
+        namespace-stripped-xml (reader/strip-xml-namespaces (reader/get-xml url-for-get-ktj-capabilities (get auth ktjkii) false))
+        selector [:WFS_Capabilities :OperationsMetadata [:Operation (enlive/attr= :name "DescribeFeatureType")] :DCP :HTTP [:Get]]
+        attribute-to-get :xlink:href]
+    (sxml/select1-attribute-value namespace-stripped-xml selector attribute-to-get)))
+
+(defn rekisteritiedot-xml [rekisteriyksikon-tunnus]
+  (if (env/feature? :disable-ktj-on-create)
+    (infof "ktj-client is disabled - not getting rekisteritiedot for %s" rekisteriyksikon-tunnus)
+    (let [url (str (get-rekisteriyksikontietojaFeatureAddress) "SERVICE=WFS&REQUEST=GetFeature&VERSION=1.1.0&NAMESPACE=xmlns%28ktjkiiwfs%3Dhttp%3A%2F%2Fxml.nls.fi%2Fktjkiiwfs%2F2010%2F02%29&TYPENAME=ktjkiiwfs%3ARekisteriyksikonTietoja&PROPERTYNAME=ktjkiiwfs%3Akiinteistotunnus%2Cktjkiiwfs%3Aolotila%2Cktjkiiwfs%3Arekisteriyksikkolaji%2Cktjkiiwfs%3Arekisterointipvm%2Cktjkiiwfs%3Animi%2Cktjkiiwfs%3Amaapintaala%2Cktjkiiwfs%3Avesipintaala&FEATUREID=FI.KTJkii-RekisteriyksikonTietoja-" (codec/url-encode rekisteriyksikon-tunnus) "&SRSNAME=EPSG%3A3067&MAXFEATURES=100&RESULTTYPE=results")
+          ktj-xml (reader/get-xml url (get auth ktjkii) false)
+          features (-> ktj-xml reader/strip-xml-namespaces sxml/xml->edn)]
+      (get-in features [:FeatureCollection :featureMember :RekisteriyksikonTietoja]))))
 
 
 ;;

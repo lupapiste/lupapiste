@@ -14,7 +14,7 @@ var attachment = (function() {
     ajax
       .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
       .success(function() {
-        repository.load(applicationId);
+        applicationModel.reload();
         applicationModel.open("attachments");
         model.previewDisabled(false);
         return false;
@@ -110,6 +110,7 @@ var attachment = (function() {
     type:                         ko.observable(),
     attachmentType:               ko.observable(),
     previewDisabled:              ko.observable(false),
+    previewVisible:               ko.observable(false),
     operation:                    ko.observable(),
     selectedOperationId:          ko.observable(),
     selectableOperations:         ko.observableArray(),
@@ -129,6 +130,7 @@ var attachment = (function() {
     changeTypeDialogModel:        undefined,
     metadata:                     ko.observable(),
     showTosMetadata:              ko.observable(false),
+    dirty:                        false,
 
     // toggleHelp: function() {
     //   model.showHelp(!model.showHelp());
@@ -186,6 +188,9 @@ var attachment = (function() {
       if (previousId) {
         pageutil.openPage("attachment", applicationId + "/" + previousId);
         hub.send("track-click", {category:"Attachments", label: "", event:"previousAttachment"});
+        if (model.dirty) {
+          repository.load(model.application.id());
+        }
       }
     },
 
@@ -194,6 +199,9 @@ var attachment = (function() {
       if (nextId) {
         pageutil.openPage("attachment", applicationId + "/" + nextId);
         hub.send("track-click", {category:"Attachments", label: "", event:"nextAttachment"});
+        if (model.dirty) {
+          repository.load(model.application.id());
+        }
       }
     },
 
@@ -227,6 +235,31 @@ var attachment = (function() {
 
     toggleTosMetadata: function() {
       model.showTosMetadata(!model.showTosMetadata());
+    },
+
+    previewUrl: ko.pureComputed(function() {
+      return "/api/raw/view-attachment?attachment-id=" + model.latestVersion().fileId;
+    }),
+
+    rotete: function(rotation) {
+      var iframe$ = $("#file-preview-iframe");
+      iframe$.attr("src","/img/ajax-loader.gif");
+      ajax.command("rotate-pdf", {id: applicationId, attachmentId: attachmentId, rotation: rotation})
+        .success(function() {
+          applicationModel.reload();
+          hub.subscribe("attachment-loaded", function() {
+            model.previewVisible(true);
+            iframe$.attr("src", model.previewUrl());
+          }, true);
+        })
+        .call();
+    },
+
+    goBackToApplication: function() {
+      model.application.open("attachments");
+      if (model.dirty) {
+        repository.load(model.application.id());
+      }
     }
   };
 
@@ -263,6 +296,7 @@ var attachment = (function() {
       .command("set-attachment-meta", data)
       .success(function() {
         model.indicator({name: name, type: "saved"});
+        model.dirty = true;
       })
       .error(function(e) {
         error(e.text);
@@ -403,6 +437,7 @@ var attachment = (function() {
     }
 
     $("#file-preview-iframe").attr("src","");
+    model.previewVisible(false);
 
     var isUserAuthorizedForAttachment = attachment.required ? lupapisteApp.models.currentUser.role() === "authority" : true;
     model.authorized(isUserAuthorizedForAttachment);
@@ -432,7 +467,7 @@ var attachment = (function() {
 
     pageutil.hideAjaxWait();
     model.indicator(false);
-
+    model.dirty = false;
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {
       model.init(true);
       if (!model.latestVersion()) {
@@ -461,8 +496,10 @@ var attachment = (function() {
       return att.id === model.id();
     }));
 
-    subscribe();
+    hub.send("attachment-loaded");
   }
+
+  hub.subscribe("attachment-loaded", subscribe);
 
   hub.onPageLoad("attachment", function() {
     pageutil.showAjaxWait();
@@ -471,7 +508,7 @@ var attachment = (function() {
     applicationId = pageutil.subPage();
     attachmentId = pageutil.lastSubPage();
 
-    if (applicationModel._js.id !== applicationId) {
+    if (applicationModel._js.id !== applicationId || model.dirty) {
       repository.load(applicationId);
     } else {
       showAttachment();

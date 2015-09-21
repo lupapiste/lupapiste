@@ -73,11 +73,12 @@
       (do-rest-fn nil))))
 
 (defcommand approve-application
-  {:parameters [id lang]
-   :user-roles #{:authority}
-   :notified   true
-   :on-success (notify :application-state-change)
-   :states     #{:submitted :complement-needed}}
+  {:parameters       [id lang]
+   :user-roles       #{:authority}
+   :notified         true
+   :on-success       (notify :application-state-change)
+   :states           #{:submitted :complement-needed}
+   :org-authz-roles  #{:approver}}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
         foreman-notice? (foreman/notice? application)
@@ -148,6 +149,8 @@
 ;; krysp enrichment
 ;;
 
+(def krysp-enrichment-states (states/all-application-states-but (conj states/terminal-states :sent :verdictGiven :constructionStarted)))
+
 (defn add-value-metadata [m meta-data]
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
@@ -163,7 +166,7 @@
                       (partial action/non-blank-parameters [:documentId :path])
                       (partial action/boolean-parameters [:overwrite])]
    :user-roles #{:applicant :authority}
-   :states     (states/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
+   :states     krysp-enrichment-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
   (let [{url :url} (organization/get-krysp-wfs application)
@@ -213,7 +216,7 @@
 (defcommand get-building-info-from-wfs
   {:parameters [id]
    :user-roles #{:applicant :authority}
-   :states     (states/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
+   :states     krysp-enrichment-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]

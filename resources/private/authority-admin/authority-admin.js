@@ -28,7 +28,7 @@
     self.tosFunctions = ko.observableArray();
     self.tosFunctionVisible = ko.observable(false);
     self.permanentArchiveEnabled = ko.observable(true);
-    self.features = ko.observableArray();
+    self.features = ko.observable();
     self.allowedRoles = ko.observable([]);
 
     self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };
@@ -132,7 +132,7 @@
         })
         .call();
 
-      self.features(util.getIn(organization, ["areas", "features"]) || []);
+      self.features(util.getIn(organization, ["areas"]));
 
       self.allowedRoles(organization.allowedRoles);
     };
@@ -145,8 +145,10 @@
         command: function(url, nameFi, nameSv) {
           ajax
             .command("update-organization-link", {index: index, url: url, nameFi: nameFi, nameSv: nameSv})
-            .success(self.load)
-            .complete(LUPAPISTE.ModalDialog.close)
+            .success(function() {
+              self.load();
+              LUPAPISTE.ModalDialog.close();
+            })
             .call();
         }
       });
@@ -159,8 +161,10 @@
         command: function(url, nameFi, nameSv) {
           ajax
             .command("add-organization-link", {url: url, nameFi: nameFi, nameSv: nameSv})
-            .success(self.load)
-            .complete(LUPAPISTE.ModalDialog.close)
+            .success(function() {
+              self.load();
+              LUPAPISTE.ModalDialog.close();
+            })
             .call();
         }
       });

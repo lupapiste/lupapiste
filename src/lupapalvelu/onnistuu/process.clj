@@ -3,7 +3,6 @@
             [clojure.java.io :as io]
             [clojure.walk :as walk]
             [pandect.core :as pandect]
-            [monger.collection :as mc]
             [monger.operators :refer :all]
             [schema.core :as sc]
             [cheshire.core :as json]
@@ -18,7 +17,6 @@
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.company :as c]
-            [lupapalvelu.user :as u]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.docx :as docx]))
 
@@ -194,7 +192,7 @@
              (:id company)
              token-id)
       (when (:currentUser signer)
-        (u/link-user-to-company! (:currentUser signer) (:id company) :admin)
+        (c/link-user-to-company! (:currentUser signer) (:id company) :admin)
         (infof "added current user to created-company: company [%s], user [%s]"
                (:id company)
                (:currentUser signer)))

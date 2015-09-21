@@ -90,7 +90,7 @@ var LUPAPISTE = LUPAPISTE || {};
   };
 
   LUPAPISTE.Modal.YesNoTemplate = "<div class='window autosized-yes-no'>" +
-    "<div class='dialog-header'><p class='dialog-title'></p><p class='dialog-close close'>X</p></div>" +
+    "<div class='dialog-header'><p class='dialog-title'></p><p class='dialog-close close lupicon-remove'></p></div>" +
     "<div class='dialog-content'><div class='dialog-user-content'></div>" +
     "<button class='positive btn-dialog close' data-test-id='confirm-yes'></button>" +
     "<button class='secondary btn-dialog close' data-test-id='confirm-no'></button></div></div>";

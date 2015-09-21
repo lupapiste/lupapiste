@@ -13,7 +13,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.security :as security]
             [lupapalvelu.states :as states]
@@ -52,7 +52,7 @@
 (defcommand neighbor-add
   {:parameters [id]
    :user-roles #{:authority}
-   :states     (states/all-application-states-but [:draft :closed :canceled])}
+   :states     states/all-application-states-but-draft-or-terminal}
   [command]
   (let [new-neighbor (params->new-neighbor (:data command))]
     (update-application command {$push {:neighbors new-neighbor}})
@@ -61,7 +61,7 @@
 (defcommand neighbor-add-owners
   {:parameters [id propertyId owners]
    :user-roles #{:authority}
-   :states     (states/all-application-states-but [:draft :closed :canceled])}
+   :states     states/all-application-states-but-draft-or-terminal}
   [command]
   (let [new-neighbors (mapv #(params->new-neighbor (assoc % :propertyId propertyId)) owners)]
     (update-application command {$push {:neighbors {$each new-neighbors}}})
@@ -70,7 +70,7 @@
 (defcommand neighbor-update
   {:parameters [id neighborId]
    :user-roles #{:authority}
-   :states     (states/all-application-states-but [:draft :closed :canceled])}
+   :states     states/all-application-states-but-draft-or-terminal}
   [command]
   (update-application command
     {:neighbors {$elemMatch {:id neighborId}}}
@@ -81,14 +81,14 @@
 (defcommand neighbor-remove
   {:parameters [id neighborId]
    :user-roles #{:authority}
-   :states     (states/all-application-states-but [:draft :closed :canceled])}
+   :states     states/all-application-states-but-draft-or-terminal}
   [command]
   (update-application command
     {$pull {:neighbors {:id neighborId}}}))
 
 (defn- neighbor-invite-model [{{token :token neighbor-id :neighborId expires :expires} :data {:keys [id address municipality neighbors]} :application} _ recipient]
   (letfn [(link-fn [lang] (str (env/value :host) "/app/" (name lang) "/neighbor/" id "/" neighbor-id "/" token))]
-    {:name    (get-in neighbors [(keyword neighbor-id) :neighbor :owner :name])
+    {:name    (get-in (util/find-by-id neighbor-id neighbors) [:owner :name])
      :address address
      :expires expires
      :city-fi (i18n/localize :fi "municipality" municipality)
@@ -106,7 +106,7 @@
                       action/email-validator]
    :notified   true
    :user-roles #{:applicant :authority}
-   :states     (states/all-application-states-but [:draft :closed :canceled])}
+   :states     states/all-application-states-but-draft-or-terminal}
   [{:keys [user created] :as command}]
   (let [token (token/make-token-id)
         email (user/canonize-email email)
@@ -123,7 +123,7 @@
 (defcommand neighbor-mark-done
   {:parameters [id neighborId]
    :user-roles #{:authority}
-   :states     (states/all-application-states-but [:draft :closed :canceled])}
+   :states     states/all-application-states-but-draft-or-terminal}
   [{:keys [user created] :as command}]
   (update-application command
     {:neighbors {$elemMatch {:id neighborId}}}

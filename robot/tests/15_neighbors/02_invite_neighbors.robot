@@ -15,6 +15,7 @@ Mikko wants to build a water slide
 
 Mikko sets turvakielto for himself
   Open tab  parties
+  Open accordions  parties
   Wait and click  xpath=//div[@id="application-parties-tab"]//input[@data-docgen-path="henkilo.henkilotiedot.turvakieltoKytkin"]
   Wait Until  Page Should Contain  Tallennettu
   [Teardown]  Logout
@@ -152,8 +153,7 @@ Mail is sent
 
 Neighbor clicks on email link and sees epplication
   Click element  xpath=//a
-  Wait until  Element should be visible  xpath=//*[@data-test-id='application-title']
-  Wait until  Element should contain  xpath=//*[@data-test-id='application-title']  ${appname}
+  Neighbor application address should be  ${appname}
   Element should contain  xpath=//*[@data-test-id='application-property-id']  753-416-25-22
   Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
 

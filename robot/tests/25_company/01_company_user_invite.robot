@@ -14,19 +14,19 @@ Company admin logs in
 Add existing dummy user
   Click enabled by test id  company-add-user
   Wait until  Element should be visible  dialog-company-new-user
-  Input text by test id  company-new-user-email  dummy@example.com
+  Input text by test id  company-new-user-email  dummy3@example.com
   Click enabled by test id  company-search-email
   Wait until  Element text should be  xpath=//h3[@data-test-id='company-old-user-invited']  Käyttäjä kutsuttu.
   Click enabled by test id  company-old-user-invited-close-dialog
-  Wait until  Element text should be  xpath=//td[@data-test-id='company-invited-user-email']  dummy@example.com
+  Wait until  Element text should be  xpath=//td[@data-test-id='company-invited-user-email']  dummy3@example.com
 
 New user is invited as a regular user
-  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']/td[@data-test-id='company-user-role']  Käyttäjä
-  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']/td[@data-test-id='company-user-invited']  Kutsuttu
+  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']/td[@data-test-id='company-user-role']  Käyttäjä
+  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']/td[@data-test-id='company-user-invited']  Kutsuttu
 
-Dummy user gets email
+Dummy user gets invite email
   Open last email
-  Wait Until  Page Should Contain  dummy@example.com
+  Wait Until  Page Should Contain  dummy3@example.com
   Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
   Click link  xpath=//a[contains(@href,'invite-company-user')]
 
@@ -34,31 +34,37 @@ Account is linked
   Wait Until  Page Should Contain  Tilisi on liitetty onnistuneesti yrityksen tiliin.
   Click link  Siirry Lupapiste-palveluun
 
+Dummy user gets password reset email
+  Open last email
+  Wait Until  Page Should Contain  dummy3@example.com
+  Page Should Contain  /app/fi/welcome#!/setpw/
+
 Admin logs in again
+  Go to login page
   Login  kaino@solita.fi  kaino123
   User should be logged in  Kaino Solita
 
-Dummy user is inactive in company
+Dummy user is active in company
   Open company user listing
-  Wait Until  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']/td[@data-test-id='company-user-invited']  Suljettu
+  Wait Until  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']/td[@data-test-id='company-user-invited']  Käytössä
 
 Conver dummy user to admin
-  Click link  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']//a[@data-test-id='company-user-toggle-admin']
+  Click link  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']//a[@data-test-id='company-user-toggle-admin']
   Confirm  dialog-company-user-op
-  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']/td[@data-test-id='company-user-role']  Ylläpitäjä
+  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']/td[@data-test-id='company-user-role']  Ylläpitäjä
 
 Can not add the same user again
   Click enabled by test id  company-add-user
   Wait until  Element should be visible  dialog-company-new-user
-  Input text by test id  company-new-user-email  dummy@example.com
+  Input text by test id  company-new-user-email  dummy3@example.com
   Click enabled by test id  company-search-email
-  Element should be visible  //div[@id="dialog-company-new-user"]//span[@data-bind="ltext: 'register.company.add-user.already-in'"]
+  Wait until  Element should be visible  //div[@id="dialog-company-new-user"]//span[@data-bind="ltext: 'register.company.add-user.already-in'"]
   Click enabled by test id  company-add-user-already-in-close
 
 Delete dummy user
-  Click link  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']//a[@data-test-id='company-user-toggle-delete']
+  Click link  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']//a[@data-test-id='company-user-toggle-delete']
   Confirm  dialog-company-user-op
-  Wait Until  Page should not contain element  //table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']//a[@data-test-id='company-user-toggle-delete']
+  Wait Until  Page should not contain element  //table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']//a[@data-test-id='company-user-toggle-delete']
 
 Add new user
   Click enabled by test id  company-add-user
@@ -109,11 +115,11 @@ User sees herself as company admin
 
 Solita admin sets custom account for company 'Solita Oy', max users 2
   SolitaAdmin logs in
-  Click element  xpath=//li/a[contains(text(), "Yritykset")]
-  Click element  xpath=//table[@data-test-id="corporations-table"]//tr[@data-test-id="company-row-solita"]//a[@data-test-id="company-edit"]
+  Wait until  Click element  xpath=//li/a[contains(text(), "Yritykset")]
+  Wait until  Click element  xpath=//table[@data-test-id="corporations-table"]//tr[@data-test-id="company-row-solita"]//a[@data-test-id="company-edit"]
   Wait until  Element text should be  xpath=//div[@data-test-id="modal-dialog-content"]/div[@class="header"]/span[@class="title"]  Muokkaa yritysta
   Select from list by value  xpath=//select[@name="account-type"]  custom
-  Input text  xpath=//input[@name="customAccountLimit"]  2
+  Input text with jQuery   input[name="customAccountLimit"]  2
   Focus  xpath=//button[@data-test-id="modal-dialog-submit-button"]
   Click by test id  modal-dialog-submit-button
   Wait Until  Element should not be visible  xpath=//div[@data-test-id="modal-dialog-content"]
@@ -123,7 +129,7 @@ Kaino logs in and sees account is custom, and it can't be changed by Kaino
   Login  kaino@solita.fi  kaino123
   User should be logged in  Kaino Solita
   Open company details
-  Element should be visible  xpath=//span[@data-test-id="company-custom-account"]
+  Wait until  Element should be visible  xpath=//span[@data-test-id="company-custom-account"]
   Element should not be visible  xpath=//select[@data-test-id="company-account-select"]
 
 Kaino wants to invite new users, but can't because account limit is reached

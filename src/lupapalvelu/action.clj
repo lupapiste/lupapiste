@@ -65,7 +65,7 @@
 
 (def default-org-authz-roles #{:authority})
 (def reader-org-authz-roles #{:authority :reader})
-(def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin :reader :tos-editor :tos-publisher))
+(def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin :reader :tos-editor :tos-publisher :approver))
 
 ;; Notificator
 
@@ -226,6 +226,7 @@
       (fail :error.command-illegal-state :state state))))
 
 (defn pre-checks-fail [command application]
+  {:post [(or (nil? %) (contains? % :ok))]}
   (when-let [pre-checks (:pre-checks (meta-data command))]
     (reduce #(or %1 (%2 command application)) nil pre-checks)))
 
@@ -433,8 +434,11 @@
   (assert (or (ss/ends-with ns-str "-api") (ss/ends-with ns-str "-test") (ss/starts-with (ss/suffix ns-str ".") "dummy"))
     (str "Please define actions in *-api namespaces. Offending action: " action-name " at " ns-str ":" line))
 
-  (assert (if (some #(= % :id) (:parameters meta-data)) (seq (:states meta-data)) true)
-    (str "You must define :states meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
+  (assert
+    (if (some #(= % :id) (:parameters meta-data))
+      (or (seq (:states meta-data)) (seq (:pre-checks meta-data)))
+      true)
+    (str "You must define :states or :pre-checks meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
 
   (let [action-keyword (keyword action-name)
         {:keys [user-roles user-authz-roles org-authz-roles]} meta-data]

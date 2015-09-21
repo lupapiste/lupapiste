@@ -20,8 +20,7 @@
 (def toimituksenTiedot-tila "keskener\u00e4inen")
 
 (def application-state-to-krysp-state
-  {:open "uusi lupa, ei k\u00e4sittelyss\u00e4"
-   :submitted "vireill\u00e4"
+  {:submitted "vireill\u00e4"
    :sent "vireill\u00e4"
    :complement-needed "odottaa asiakkaan toimenpiteit\u00e4"
    :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
@@ -29,8 +28,7 @@
    :closed "valmis"})
 
 (def ymp-application-state-to-krysp-state
-  {:open "1 Vireill\u00e4"
-   :sent "1 Vireill\u00e4"
+  {:sent "1 Vireill\u00e4"
    :submitted "1 Vireill\u00e4"
    :complement-needed "1 Vireill\u00e4"
    :verdictGiven "ei tiedossa"
@@ -38,8 +36,7 @@
    :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
 
 (def- state-timestamp-fn
-  {:open #(or (:opened %) (:created %))
-   :submitted :submitted
+  {:submitted :submitted
    :sent :submitted ; Enables XML to be formed from sent applications
    :complement-needed :complementNeeded
    :verdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
@@ -435,7 +432,7 @@
                         loc-s))}}))
            tyotehtavat))})))
 
-(defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
+(defn get-tyonjohtaja-data [application lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         ;; The mappings in backing system providers' end make us pass "muu" when "muu koulutus" is selected.
@@ -467,7 +464,7 @@
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
-(defn get-tyonjohtaja-v2-data [lang tyonjohtaja party-type]
+(defn get-tyonjohtaja-v2-data [application lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         koulutus (if (= "other" (:koulutusvalinta patevyys))
@@ -487,7 +484,7 @@
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
-       :tyonjohtajaHakemusKytkin (= "hakemus" (:ilmoitusHakemusValitsin tyonjohtaja))
+       :tyonjohtajaHakemusKytkin (= "tyonjohtaja-hakemus" (:permitSubtype application))
        :sijaistustieto (get-sijaistustieto sijaistus rooli)
        :vainTamaHankeKytkin (:tyonjohtajanHyvaksynta (:tyonjohtajanHyvaksynta tyonjohtaja))}
       (when-not (s/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
@@ -497,10 +494,10 @@
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
-(defn- get-foremen [documents lang]
-  (if (contains? documents :tyonjohtaja)
-    (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data lang))
-    (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data lang))))
+(defn- get-foremen [application documents-by-type lang]
+  (if (contains? documents-by-type :tyonjohtaja)
+    (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data application lang))
+    (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data application lang))))
 
 (defn- get-neighbor [neighbor-name property-id]
   {:Naapuri {:henkilo neighbor-name
@@ -516,12 +513,14 @@
                        "mark-done" (get-neighbor (-> neighbor :owner :name) propertyId)
                        nil)))))
 
-(defn osapuolet [documents-by-types neighbors lang]
+(defn osapuolet [{neighbors :neighbors :as application} documents-by-type lang]
+  {:pre [(map? documents-by-type) (string? lang)]}
   {:Osapuolet
-   {:osapuolitieto (get-parties documents-by-types)
-    :suunnittelijatieto (get-designers documents-by-types)
-    :tyonjohtajatieto (get-foremen documents-by-types lang)
-    :naapuritieto (get-neighbors neighbors)}})
+   {:osapuolitieto (get-parties documents-by-type)
+    :suunnittelijatieto (get-designers documents-by-type)
+    :tyonjohtajatieto (get-foremen application documents-by-type lang)
+    ;:naapuritieto (get-neighbors neighbors)LPK-215
+    }})
 
 (defn change-value-to-when [value to_compare new_val]
   (if (= value to_compare) new_val value))
@@ -695,3 +694,86 @@
                                       :piste {:Point {:pos (str (first (:location application)) " " (second (:location application)))}}}}
         drawings (drawings-as-krysp (:drawings application))]
     (cons app-location-info drawings)))
+
+;;
+;; The following definitions are used by maankayton-muutos and kiinteistotoimitus.
+;; Those two schemas (at least) have somewhat more peculiar structure than the more
+;; legacy operations.
+;;
+
+(defn entry [entry-key m & [force-key]]
+  (let [k (or force-key entry-key)
+        v (entry-key m)]
+    (when-not (nil? v)
+      {k v})))
+
+(defn schema-info-filter
+  ([docs prop]
+   (filter #(get-in % [:schema-info prop]) docs))
+  ([docs prop value]
+   (let [values (if (coll? value)
+                  (set value)
+                  #{value})]
+     (filter #(contains? values (get-in % [:schema-info prop])) docs))))
+
+(defn ->postiosoite-type [address]
+  (merge {:osoitenimi (entry :katu address :teksti)}
+         (entry :postinumero address)
+         (entry :postitoimipaikannimi address)))
+
+(defmulti osapuolitieto :_selected)
+
+(defmethod osapuolitieto "henkilo"
+  [{{contact :yhteystiedot personal :henkilotiedot address :osoite} :henkilo}]
+  (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
+         {:henkilotieto {:Henkilo
+                         (merge {:nimi (merge (entry :etunimi personal)
+                                              (entry :sukunimi personal))}
+                                {:osoite (->postiosoite-type address)}
+                                (entry :email contact :sahkopostiosoite)
+                                (entry :puhelin contact)
+                                (entry :hetu personal :henkilotunnus))}}))
+
+
+
+(defmethod osapuolitieto "yritys"
+  [data]
+  (let [company (:yritys data)
+        {contact :yhteystiedot personal :henkilotiedot} (:yhteyshenkilo company)
+        billing (get-verkkolaskutus {:data data})
+        billing-information (when billing
+                              {:verkkolaskutustieto billing})]
+    (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
+           {:yritystieto {:Yritys (merge (entry :yritysnimi company :nimi)
+                                         (entry :liikeJaYhteisoTunnus company :liikeJaYhteisotunnus )
+                                         {:postiosoitetieto {:postiosoite (->postiosoite-type (:osoite company))}}
+                                         (entry :puhelin contact)
+                                         (entry :email contact :sahkopostiosoite)
+                                         billing-information)}})))
+
+(defn- process-party [lang {{role :subtype} :schema-info data :data}]
+  {:Osapuoli (merge {:roolikoodi (s/capitalize role)
+                     :asioimiskieli lang
+                     :vainsahkoinenAsiointiKytkin false} (osapuolitieto data))})
+
+(defn process-parties [docs lang]
+  (map (partial process-party lang) (schema-info-filter docs :type "party")))
+
+(defn application-state [app]
+  (let [enums {:submitted "Vireill\u00e4"
+               :sent "Haettu"
+               :closed "P\u00e4\u00e4ttynyt"}
+        state (-> app :state keyword)
+        date (util/to-xml-date (state app))
+        {a-first :firstName a-last :lastName} (:authority app)]
+    {:Tila
+     {:pvm date
+      :kasittelija (format "%s %s" a-first a-last)
+      :hakemuksenTila (state enums)}}))
+
+(defn maaraalatunnus
+  "Returns maaraalatunnus in the correct format if the id is available
+  in the property, otherwise nil."
+  [app property]
+  (when-let [mat (:maaraalaTunnus property)]
+    (format "%sM%s" (:propertyId app) mat)))

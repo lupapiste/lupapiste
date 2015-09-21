@@ -63,6 +63,7 @@
                             [(io/resource "lupapiste.properties")
                              (io/resource (str (ss/lower-case target-env) ".properties"))
                              (io/file "lupapiste.properties")
+                             (io/file "user.properties")
                              (io/file (System/getProperty "lupapiste.properties"))
                              (io/file (System/getenv "LUPAPISTE_PROPERTIES"))])))
 

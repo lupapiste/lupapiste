@@ -34,32 +34,22 @@
         //overflow: auto;
         li {
           display: inline-block;
+          max-width: 100%;
           //padding: 3px;
           //top: 1px;
           &.tag {
             position: relative;
-            background-color: $lp-orange;
-            font-size: 16px;
+            background-color: $primary;
+            /* font-size: 16px; */
             margin-right: $marginS;
             white-space: nowrap;
             margin-bottom: $marginS;
 
             span.tag-label {
-              color: #fff;
-              margin-left: $marginL + $marginS / 2;
-              margin-right: $marginM;
-            }
-
-            span.tag-remove {
-              cursor: pointer;
-              position: absolute;
-              left: $marginS;
-              top: 0;
-              bottom: 0;
-              margin: auto;
+              text-overflow: ellipsis;
+              overflow: hidden;
             }
           }
-
           &.tag-ellipsis {
             color: $lp-orange;
             cursor: pointer;
@@ -72,12 +62,12 @@
     span.caption {
       cursor: default;
     }
-    span.autocomplete-selection-arrow {
+    i.autocomplete-selection-arrow{
       position: absolute;
       top: 0;
       bottom: 0;
       margin: auto;
-      right: 9px;
+      right: 0px;
       cursor: default;
     }
   }
@@ -108,20 +98,25 @@
       box-sizing: border-box;
       background-color: #fff;
       color: black;
+
+      &.autocomplete-result-grouped {
+        li.autocomplete-result-item {
+          padding: $marginS/2 $marginS*2;
+        }
+      }
+
       li.autocomplete-result-item, li.autocomplete-result-empty {
         cursor: default;
         display: list-item;
         list-style-type: none;
         padding: $marginS $marginS;
-        &.group-indent {
-          padding: $marginS/2 $marginS*2;
-          &:hover {
-            background-color: lighten($lp-orange, 40%);
-          }
-        }
       }
       li.autocomplete-result-item {
         cursor: pointer;
+        position: relative;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        padding-right: $marginS;
       }
       li.autocomplete-result-item.active {
         background-color: lighten($lp-orange, 40%);
@@ -132,8 +127,10 @@
       }
       li.autocomplete-group-header {
         font-weight: 700;
-        padding: $marginS/2 0 0 $marginS;
+        padding: $marginS/2 $marginS 0 $marginS;
         margin-top: $marginS/2;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
     }
   }

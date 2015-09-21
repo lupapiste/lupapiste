@@ -13,15 +13,15 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   self.applicationType = ko.observable("all");
 
   self.searchField = ko.observable("");
+
   self.searchFieldDelayed = ko.pureComputed(self.searchField).extend({rateLimit: {method: "notifyWhenChangesStop", timeout: 750}});
 
   self.handler = ko.observable();
 
-  self.applicationTags = ko.observableArray([]);
-
   self.limit = ko.observable(25);
 
-  self.sort = {field: ko.observable("modified"), asc: ko.observable(false)};
+  self.sort = util.getIn(lupapisteApp.models.currentUser, ["applicationFilters", 0, "sort"])
+              || {field: ko.observable("modified"), asc: ko.observable(false)};
 
   self.skip = ko.observable(0);
 
@@ -31,19 +31,24 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   });
 
   self.onSuccess = function(res) {
-        self.data(res.data);
-        self.applications(res.data.applications);
+    self.data(res.data);
+    self.applications(res.data.applications);
   };
 
   ko.computed(function() {
     ajax.datatables("applications-search",
-               {searchText: self.searchFieldDelayed(),
-                applicationTags: _.pluck(self.applicationTags(), "id"),
-                handler: self.handler() ? self.handler().id : undefined,
-                applicationType: self.applicationType(),
-                limit: self.limit(),
-                sort: ko.mapping.toJS(self.sort),
-                skip: self.skip()})
+      {
+        searchText: self.searchFieldDelayed(),
+        tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
+        organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
+        operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
+        handler: self.handler() ? self.handler().id : undefined,
+        applicationType: self.applicationType(),
+        areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
+        limit: self.limit(),
+        sort: ko.mapping.toJS(self.sort),
+        skip: self.skip()
+      })
       .success(self.onSuccess)
       .pending(self.pending)
     .call();
@@ -52,13 +57,18 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   hub.onPageLoad("applications", function() {
     ajax.datatables("applications-search",
-               {searchText: self.searchField(),
-                applicationTags: _.pluck(self.applicationTags(), "id"),
-                handler: self.handler() ? self.handler().id : undefined,
-                applicationType: self.applicationType(),
-                limit: self.limit(),
-                sort: ko.mapping.toJS(self.sort),
-                skip: self.skip()})
+      {
+        searchText: self.searchField(),
+        tags: _.pluck(lupapisteApp.services.tagFilterService.selected, "id"),
+        organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
+        operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
+        handler: self.handler() ? self.handler().id : undefined,
+        applicationType: self.applicationType(),
+        areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
+        limit: self.limit(),
+        sort: ko.mapping.toJS(self.sort),
+        skip: self.skip()
+      })
       .success(self.onSuccess)
     .call();
   });

@@ -10,14 +10,15 @@
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.states :as states]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapiste-commons.attachment-types :as attachment-types]
-            [lupapalvelu.preview :as preview])
+            [lupapalvelu.preview :as preview]
+            [lupapalvelu.pdf-conversion :as pdf-conversion])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
            [org.apache.commons.io FilenameUtils]
@@ -209,6 +210,18 @@
         latest     (last sorted)]
     latest))
 
+(defn get-version-by-file-id [attachment fileId]
+  (->> attachment
+       :versions
+       (filter #(= (:fileId %) fileId))
+       first))
+
+(defn get-version-number
+  [{:keys [attachments] :as application} attachment-id fileId]
+  (let [attachment (get-attachment-info application attachment-id)
+        version    (get-version-by-file-id attachment fileId)]
+    (:version version)))
+
 (defn set-attachment-version
   ([options]
     {:pre [(map? options)]}
@@ -363,7 +376,8 @@
     (update-application
       (application->command application)
       {:attachments {$elemMatch {:id attachment-id}}}
-      {$pull {:attachments.$.versions {:fileId fileId}}
+      {$pull {:attachments.$.versions {:fileId fileId}
+              :attachments.$.signatures {:version (get-version-number application attachment-id fileId)}}
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
@@ -399,14 +413,15 @@
      :body "404"}))
 
 (defn create-preview
-  [file-id filename content-type content application-id]
+  [file-id filename content-type content application-id & [db-name]]
   (when (and (env/feature? :preview) (preview/converter content-type))
-    (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
-    (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
-                                            (with-open [content ((:content (mongo/download file-id)))]
-                                              (preview/create-preview content content-type)))]
-      (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
-      (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id))))
+    (mongo/with-db (or db-name mongo/default-db-name)
+      (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
+      (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+                                              (with-open [content ((:content (mongo/download file-id)))]
+                                                (preview/create-preview content content-type)))]
+        (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
+        (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id)))))
 
 (defn output-attachment-preview
   "Outputs attachment preview creating it if is it does not already exist"
@@ -427,7 +442,8 @@
    Returns attachment version."
   [options]
   {:pre [(map? (:application options))]}
-  (let [file-id (mongo/create-id)
+  (let [db-name mongo/*db-name* ; pass db-name to threadpool context
+        file-id (mongo/create-id)
         {:keys [filename content]} options
         application-id (-> options :application :id)
         sanitazed-filename (mime/sanitize-filename filename)
@@ -436,7 +452,7 @@
                                 :filename sanitazed-filename
                                 :content-type content-type})]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
-    (.submit preview-threadpool #(create-preview file-id sanitazed-filename content-type content application-id))
+    (.submit preview-threadpool #(create-preview file-id sanitazed-filename content-type content application-id db-name))
     (update-or-create-attachment options)))
 
 (defn get-attachments-by-operation
@@ -482,3 +498,26 @@
         (proxy-super close)
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
+
+(defn delete-file! [^File file] (try (.delete file) (catch Exception _)))
+
+(defn ensure-pdf-a
+  "Ensures PDF file PDF/A compatibility status based on original attachment status"
+  [temp-file valid-pdfa]
+  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
+  (if (not valid-pdfa)
+    (do (debugf "    no PDF/A required, no conversion") {:file temp-file :pdfa false})
+    (let [a-temp-file (File/createTempFile "lupapiste.stamp.a." ".tmp")
+          conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath temp-file) (.getAbsolutePath a-temp-file))]
+      (cond
+        (:already-valid-pdfa? conversion-result) (do (debugf "      file valid PDF/A, no conversion") {:file temp-file :pdfa true})
+        (:pdfa? conversion-result) (do (debug "      converting to PDF/A file: " (.getAbsolutePath a-temp-file)) (delete-file! temp-file) {:file a-temp-file :pdfa true})
+        :else (do (errorf "Ensuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
+
+(defn application-to-pdf-a
+  "Returns application data in PDF/A temp file"
+  [application lang]
+  (let [file (File/createTempFile "application-pdf-a-" ".tmp")
+        stream (pdf-export/generate application lang)]
+    (io/copy stream file)
+  (ensure-pdf-a file true)))

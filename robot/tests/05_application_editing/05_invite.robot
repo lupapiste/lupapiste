@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation   Application invites
-Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
@@ -9,10 +8,15 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new application
   Mikko logs in
-  Create application the fast way  invite-app  753-423-2-159  kerrostalo-rivitalo
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname}  invite${secs}
+  Set Suite Variable  ${appnameUC}  INVITE${secs}
+  Set Suite Variable  ${propertyId}  753-416-5-5
+  Create application with state  ${appname}  ${propertyId}  kerrostalo-rivitalo  open
 
 Mikko can see the general invite button and opens invite dialog with it
   Open tab  parties
+  Open accordions  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-person']
   Click by test id  application-invite-person
   Wait until  Element should be visible  invite-email
@@ -29,6 +33,7 @@ Mikko invites Teppo
   Invite Teppo
 
 Mikko can't reinvite Teppo
+  Open accordions  parties
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
   Sleep  1
@@ -45,7 +50,7 @@ Mikko can't reinvite Teppo
 Teppo declines invitation
   Teppo logs in
   Wait until  Element should be visible  xpath=//*[@data-test-id='decline-invite-button']
-  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  invite-app, Sipoo,
+  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  ${appname}, Sipoo,
   Element Text Should Be  xpath=//div[@class='invitation'][1]//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
   Click by test id  decline-invite-button
   Confirm  dynamic-yes-no-confirm-dialog
@@ -54,8 +59,9 @@ Teppo declines invitation
 
 Mikko reinvites Teppo
   Mikko logs in
-  Open application  invite-app  753-423-2-159
+  Open application  ${appname}  ${propertyId}
   Open tab  parties
+  Open accordions  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
   Invite Teppo
   [Teardown]  logout
@@ -65,18 +71,19 @@ Teppo can view application
   Wait Until  Element should be visible  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
   Click element  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
   Deny yes no dialog
-  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  INVITE-APP
+  Application address should be  ${appnameUC}
   Go to page  applications
 
 Teppo accepts invitation
   Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
-  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  invite-app, Sipoo,
+  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  ${appname}, Sipoo,
   Element Text Should Be  xpath=//div[@class='invitation']//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
   Click by test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
 
 Teppo can edit Mikko's application
-  Open application  invite-app  753-423-2-159
+  Open application  ${appname}  ${propertyId}
+  Open accordions  info
   # OnChange event does not seem to get triggered. Do it manually.
   Execute Javascript  $("input[id$='kiinteisto-maaraalaTunnus']").val("1024").change();
   Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
@@ -84,11 +91,12 @@ Teppo can edit Mikko's application
 
 Mikko comes back and can see Teppos modification
   Mikko logs in
-  Open application  invite-app  753-423-2-159
+  Open application  ${appname}  ${propertyId}
   Wait Until  Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
 
 Mikko can see that Teppo has accepted invitation
   Open tab  parties
+  Open accordions  parties
   # Check that invite accepted timestamp span is present
   Element should be visible  xpath=//*[@data-test-id='invite-accepted-span']
 
@@ -105,9 +113,6 @@ Mikko can't invite himself
   Click by test id  application-invite-submit
   Error message is present on invite form
   Invite count is  0
-
-Mikko adds comment so thate application will be visible to admin
-  Open to authorities  Woe to you, Oh Earth and Sea, for the Devil sends the beast with wrath, because he knows the time is short...
 
 Mikko invites Solita
   # Click enabled by test id  company-invite
@@ -132,19 +137,20 @@ Solita accepts invite
 
 Kaino Solita logs in and opens the application
   User logs in  kaino@solita.fi  kaino123  Kaino Solita
-  Open application  invite-app  753-423-2-159
+  Open application  ${appname}  ${propertyId}
   [Teardown]  logout
 
 Sonja (the Authority) is not allowed to invite people
   Sonja logs in
-  Open application  invite-app  753-423-2-159
+  Open application  ${appname}  ${propertyId}
   Element should not be visible  xpath=//*[@data-test-id='application-add-invite']
   [Teardown]  logout
 
 Mikko invites previously unknown user Oskari as paasuunnittelija
   Mikko logs in
-  Open application  invite-app  753-423-2-159
+  Open application  ${appname}  ${propertyId}
   Open tab  parties
+  Open accordions  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
@@ -162,14 +168,12 @@ Mikko invites previously unknown user Oskari as paasuunnittelija
 #        Testataan tyonjohtajan kutsuminen erikseen omalla hakemuksellaan.
 Mikko creates a new tyonjohtaja application
   #Mikko logs in
-  Create application the fast way  invite-app-tyonjohtaja  753-423-2-159  tyonjohtajan-nimeaminen
-
-Mikko can see invite tyonjohtaja button in parties tab
-  Open tab  parties
-  Element should be visible  xpath=//*[@data-test-id='application-invite-tyonjohtaja']
+  Create application the fast way  ${appname}-tj  ${propertyId}  tyonjohtajan-nimeaminen
 
 Mikko invites previously unknown user Unto as tyonjohtaja
-  Element should be visible  xpath=//*[@data-test-id='application-invite-tyonjohtaja']
+  Open tab  parties
+  Open accordions  parties
+  Wait until  Element should be visible  xpath=//div[@id="application-parties-tab"]//*[@data-test-id='application-invite-tyonjohtaja']
   Click by test id  application-invite-tyonjohtaja
   Wait until  Element should be visible  invite-email
   Input Text  invite-email  unto@example.com

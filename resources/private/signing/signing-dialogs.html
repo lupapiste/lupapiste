@@ -7,7 +7,7 @@
         <div data-bind="with: $root.verdictSigningModel">
           <div class="dialog-header">
             <p data-bind="ltext: 'verdict.sign-dialog.header'"></p>
-            <p class="dialog-close close" data-test-id="verdict-signature-close-dialog">X</p>
+            <p class="dialog-close close lupicon-remove" data-test-id="verdict-signature-close-dialog"></p>
           </div>
           <div class="dialog-content">
             <p data-bind="ltext: 'verdict.sign-dialog.contentDescription'"></p>
@@ -67,38 +67,48 @@
             <p data-bind="lhtml: 'signAttachment.description'"></p>
 
             <div class="stamp-files">
-              <table>
+              <table class="header-table">
                 <thead>
                   <tr>
-                    <th data-bind="ltext: 'application.attachmentType'"></th>
-                    <th data-bind="ltext: 'application.attachmentFile'"></th>
-                    <th data-bind="ltext: 'application.attachmentVersion'"></th>
-                    <th data-bind="ltext: 'stamp.size'"></th>
-                    <th data-bind="ltext: 'signAttachment.select'"></th>
+                    <th class="width-30" data-bind="ltext: 'application.attachmentType'"></th>
+                    <th class="width-30" data-bind="ltext: 'application.attachmentFile'"></th>
+                    <th class="width-10" data-bind="ltext: 'application.attachmentVersion'"></th>
+                    <th class="width-10" data-bind="ltext: 'stamp.size'"></th>
+                    <th class="width-20" data-bind="ltext: 'signAttachment.select'"></th>
                   </tr>
                 </thead>
-                <tbody data-bind="foreach: attachments">
-                  <tr>
-                    <td data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></td>
-                    <td><label data-bind="text: filename"></label></td>
-                    <td>
-                      <span data-bind="version: version"></span>
-                    </td>
-                    <td data-bind="size: size"></td>
-                    <td style="text-align:center;">
-                      <input type="checkbox" data-bind="checked: selected, attr: {id: 'sign' + id}" />
-                    </td>
-                  </tr>
-                </tbody>
                 <tbody>
-                <tr>
-                <td colspan="5" style="text-align:right">
-                  <a data-bind="ltext: 'stamp.all', click: selectAll" href="#"></a>
-                  <span>/</span>
-                  <a data-bind="ltext: 'stamp.none', click: selectNone" href="#"></a>
-                </td>
-                </tr>
+                    <tr>
+                        <td colspan="5">
+                            <div class="scroll-20em">
+                                <table>
+                                    <tbody data-bind="foreach: attachments">
+                                        <tr>
+                                            <td class="width-30" data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></td>
+                                            <td class="width-30"> <label data-bind="text: filename"></label></td>
+                                            <td class="width-10">
+                                                <span data-bind="version: version"></span>
+                                            </td>
+                                            <td class="width-10" data-bind="size: size"></td>
+                                            <td class="width-20" style="text-align:center;">
+                                                <input type="checkbox" data-bind="checked: selected, attr: {id: 'sign' + id}" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" style="text-align:right">
+                            <a data-bind="ltext: 'stamp.all', click: selectAll" href="#"></a>
+                            <span>/</span>
+                            <a data-bind="ltext: 'stamp.none', click: selectNone" href="#"></a>
+                        </td>
+                    </tr>
+                </tfoot>
               </table>
             </div>
 

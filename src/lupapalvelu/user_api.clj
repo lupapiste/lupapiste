@@ -27,7 +27,9 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.attachment :as attachment]))
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.password-reset :as pw-reset]
+            ))
 
 ;;
 ;; ==============================================================================
@@ -86,23 +88,25 @@
 ;; ==============================================================================
 ;;
 
-(defn- reset-link [lang token]
-  (str (env/value :host) "/app/" lang "/welcome#!/setpw/" token))
-
 ;; Emails
-(def- base-email-conf
-  {:model-fn      (fn [{{token :token} :data} conf recipient]
-                {:link-fi (reset-link "fi" token), :link-sv (reset-link "sv" token)})})
+
 
 (notifications/defemail :invite-authority
-  (assoc base-email-conf :subject-key "authority-invite.title" :recipients-fn notifications/from-user))
+  (assoc pw-reset/base-email-conf :subject-key "authority-invite.title" :recipients-fn notifications/from-user))
 
-(notifications/defemail :reset-password
-  (assoc base-email-conf :subject-key "reset.email.title" :recipients-fn notifications/from-data))
+(notifications/defemail :notify-authority-added
+  {:model-fn (fn [{name :data} conf recipient] {:org-fi (:fi name), :org-sv (:sv name)}),
+   :subject-key "authority-notification.title",
+   :recipients-fn notifications/from-user})
 
 (defn- notify-new-authority [new-user created-by]
   (let [token (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))]
     (notifications/notify! :invite-authority {:user new-user, :data {:token token}})))
+
+(defn- notify-authority-added [email organization-id]
+  (let [user (user/get-user-by-email email)
+        org-name (:name (organization/get-organization organization-id))]
+    (notifications/notify! :notify-authority-added {:user user, :data org-name})))
 
 (defn- create-authority-user-with-organization [caller new-organization email firstName lastName roles]
   (let [org-authz {new-organization (into #{} roles)}
@@ -197,6 +201,15 @@
       (mongo/update :users {:email email} {$set {:role "authority"}})
       (fail :error.user-not-found))))
 
+(defcommand update-default-application-filter
+  {:parameters [filter sort]
+   :user-roles #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:filter]) (partial action/non-blank-parameters [:sort])]
+   :description "Adds/Updates user specific filters for the application search"}
+  [{{id :id} :user}]
+  (mongo/update-by-id :users id {$set {:applicationFilters [{:filter filter :sort sort}]}})
+  (ok))
+
 ;;
 ;; Change organization data:
 ;;
@@ -224,7 +237,9 @@
         email           (user/canonize-email email)
         result          (user/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})]
     (if (ok? result)
-      (ok :operation "add")
+      (do
+        (notify-authority-added email organization-id)
+        (ok :operation "add"))
       (if-not (user/get-user-by-email email)
         (create-authority-user-with-organization caller organization-id email firstName lastName actual-roles)
         (fail :error.user-not-found)))))
@@ -278,14 +293,6 @@
         (Thread/sleep 2000)
         (fail :mypage.old-password-does-not-match)))))
 
-(defn reset-password [{:keys [email role] :as user}]
-  (assert (and email role (not= "dummy" role)) "Can't reset dummy user's password")
-
-  (let [token (token/make-token :password-reset nil {:email email} :ttl ttl/reset-password-token-ttl)]
-    (infof "password reset request: email=%s, token=%s" email token)
-    (notifications/notify! :reset-password {:data {:email email :token token}})
-    token))
-
 (defcommand reset-password
   {:parameters    [email]
    :user-roles #{:anonymous}
@@ -294,12 +301,12 @@
    :notified      true}
   [_]
   (let [user (user/get-user-by-email email) ]
-      (if (and user (not= "dummy" (:role user)))
+    (if (and user (not (user/dummy? user)))
       (do
-        (reset-password user)
-         (ok))
-       (do
-         (warnf "password reset request: unknown email: email=%s" email)
+        (pw-reset/reset-password user)
+        (ok))
+      (do
+        (warnf "password reset request: unknown email: email=%s" email)
         (fail :error.email-not-found)))))
 
 (defcommand admin-reset-password
@@ -310,8 +317,8 @@
    :notified      true}
   [_]
   (let [user (user/get-user-by-email email) ]
-    (if (and user (not= "dummy" (:role user)))
-      (ok :link (reset-link "fi" (reset-password user)))
+    (if (and user (not (user/dummy? user)))
+      (ok :link (pw-reset/reset-link "fi" (pw-reset/reset-password user)))
       (fail :error.email-not-found))))
 
 (defmethod token/handle-token :password-reset [{data :data} {password :password}]
@@ -500,7 +507,7 @@
 
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
     (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
-    (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type))
+    (when-not (mime/allowed-file? filename) (fail! :error.illegal-file-type))
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
     (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
@@ -537,7 +544,9 @@
   {:parameters [id]
    :user-roles #{:applicant}
    :states     #{:draft :open :submitted :complement-needed}
-   :pre-checks [(fn [command application] (not (-> command :user :architect)))]}  ;;TODO: lisaa architect? check
+   :pre-checks [(fn [command _]
+                  (when-not (-> command :user :architect)
+                    unauthorized))]}
   [{application :application user :user}]
   (doseq [attachment (:attachments (mongo/by-id :users (:id user)))]
     (let [application-id id
@@ -564,12 +573,11 @@
    :input-validators [email-validator]
    :user-roles       #{:anonymous}}
   [_]
-  (let [user (user/get-user-by-email email)]
-    (if user
-      (ok)
-      (fail :email-not-in-use))))
+  (if (user/email-in-use? email)
+    (ok)
+    (fail :email-not-in-use)))
 
 (defcommand remove-user-notification
-  {:user-roles #{:applicant}}
+  {:user-roles #{:applicant :authority}}
   [{{id :id} :user}]
   (mongo/update-by-id :users id {$unset {:notification 1}}))

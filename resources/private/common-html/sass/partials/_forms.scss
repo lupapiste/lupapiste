@@ -16,25 +16,25 @@ legend {
   font-size: 0.875em;
   margin:0;
   outline: 0;
-  padding-left: 0.5em;
+  padding-left: $marginS;
 
 
-  -webkit-transition: border 125ms ease;
-  -moz-transition: border 125ms ease;
-  -ms-transition: border 125ms ease;
-  -o-transition: border 125ms ease;
-  transition: border 125ms ease;
+  // -webkit-transition: border 125ms ease;
+  // -moz-transition: border 125ms ease;
+  // -ms-transition: border 125ms ease;
+  // -o-transition: border 125ms ease;
+  // transition: border 125ms ease;
 
-  -webkit-box-shadow: inset 0 2px 3px darken($lp-light-grey, 10%), 0 1px 0 #fff;
-  box-shadow: inset 0 2px 3px darken($lp-light-grey, 10%), 0 1px 0 #fff;
+  // -webkit-box-shadow: inset 0 2px 3px darken($lp-light-grey, 10%), 0 1px 0 #fff;
+  // box-shadow: inset 0 2px 3px darken($lp-light-grey, 10%), 0 1px 0 #fff;
 
   &:hover {
-    border-color:#b5b5b5;
+//    border-color:#b5b5b5;
   }
 
   &:focus {
-    border-color: #17c;
-    -webkit-box-shadow: inset 0 2px 4px darken($lp-light-grey, 20%), 0 1px 0 #fff;
+    //border-color: #17c;
+    // -webkit-box-shadow: inset 0 2px 4px darken($lp-light-grey, 20%), 0 1px 0 #fff;
   }
   // newbies
   &.source-value-changed {
@@ -290,12 +290,17 @@ input.form-input.long {
 }
 .form-group, .form-choice, .form-table {
   overflow:visible;
-  border-radius: 3px;
+  //border-radius: 3px;
   display: block;
-  margin: 0 $marginS $marginS 0;
-  padding: $marginS $marginS 0 $marginS;
-  background: $lp-light-grey;
-  border-bottom: 1px solid darken($lp-light-grey, 5%);
+  //margin: 0 $marginS $marginS 0;
+  //padding: $marginS $marginS 0 $marginS;
+  //background: $lp-light-grey;
+  padding: {
+    left: $marginS;
+    right: $marginS;
+  }
+  box-sizing: border-box;
+  border-bottom: 1px solid $gray221;
   &:last-child
   {
     border-bottom: none;
@@ -321,8 +326,10 @@ input.form-input.long {
   .form-label-group, .form-label-table {
     width: 100%;
     display: block;
-    text-transform: uppercase;
+    //text-transform: uppercase;
     font-family: $font-heading;
+    font-weight: bold;
+    margin-bottom: $marginS;
   }
   .form-entry {
     display: inline-block;
@@ -554,9 +561,44 @@ input.form-input.long {
   }
 
   .button-group {
-    .btn, button {
-      margin-right: 10px
+    width: 100%;
+    padding: {
+      left: 10px;
+      right: 10px;
+      top: 10px;
+      bottom: 10px;
     }
+    background-color: $gray246;
+    border-bottom: 1px solid $gray221;
+    /* .btn, button { */
+    /*   margin-right: 10px */
+    /* } */
+  }
+}
+
+
+// Padding tweaks for special cases.
+.accordion-fields > .form-entry,
+.accordion-fields > .verdict-info-fields,
+.accordion-fields > div p {
+  padding: {
+    left: $marginS;
+    right: $marginS;
+  }
+}
+
+
+
+
+.accordion-fields button.margins-s {
+  margin-bottom: 0;
+}
+
+.accordion_content > .group-help-text {
+  display: block;
+  margin: {
+    left: $marginS;
+    right: $marginS;
   }
 }
 
@@ -572,10 +614,54 @@ input.form-input.long {
 
 }
 
-.form-approval-status {
-  text-transform: none;
+.group-buttons {
   width: 100%;
   display: block;
+  overflow-y: hidden;
+  text-transform: none;
+  .is-right {
+    float: right;
+    margin-left: $marginS;
+  }
+  .is-left {
+    float: left;
+    margin-right: $marginS;
+  }
+  padding-right: $marginS;
+  padding-left: $marginS;
+  margin: {
+    top: $marginS;
+    bottom: $marginS;
+
+  }
+}
+
+// Top-level group buttons tweaks
+.accordion-toggle > .group-buttons {
+  background-color: $gray246;
+  border: 1px solid $gray221;
+  border-top: none;
+  padding: {
+    top: $marginS;
+    bottom: $marginS;
+  }
+  margin: 0;
+}
+
+div.sticky {
+  background-color: $gray246;
+}
+
+
+
+.button-group button.is-right {
+  margin-right: 0;
+}
+
+.form-approval-status {
+  text-transform: none;
+  //width: 100%;
+  display: none;
   min-height: 32px;
 
   &.empty {
@@ -584,14 +670,160 @@ input.form-input.long {
   }
 
   .form-buttons {
-    display:inline-block;
+    //display:inline-block;
     text-align: right;
     float: right;
-    .btn {
-      margin: 0 $marginS $marginS 0;
+    min-width: 200px;
+  }
+  i.approved, i.rejected  {
+    display: none;
+  }
+  &.approved {
+    i.approved {
+      display: table-cell;
     }
   }
+  &.rejected {
+    i.rejected {
+      display: table-cell;
+    }
+  }
+}
 
+.form-approval-status.approved,
+.form-approval-status.rejected {
+  display: inline-block;
+}
+
+
+.form-approval-status.approved ~ button.approved {
+  display: none;
+}
+
+.form-approval-status.rejected ~ button.rejected {
+  display: none;
+}
+
+
+section.approved .group-buttons  {
+    button.approved {
+      display: none;
+    }
+    i.rejected {
+      display: none;
+    }
+    i.approved {
+      display: table-cell;
+    }
+    button.rejected {
+      display: table-cell;
+    }
+}
+
+.is-status > .like-btn {
+  @include btn-height;
+  min-width: 500px;
+  span {
+    color: $gray187;
+  }
+  .lupicon-circle-attention {
+    color: $red;
+  }
+  .lupicon-circle-check {
+    color: $green;
+  }
+  .approved {
+    padding-right: $icon-pad;
+  }
+}
+
+// Top-level form-approval-status
+
+div.sticky .form-approval-status.no-border-bottom {
+  border-left: 1px solid $gray221;
+  border-right: 1px solid $gray221;
+  border-bottom: 1px solid $gray221;
+  width: 100%;
+  .like-btn {
+    padding: {
+      left: 10px;
+      top: 4px;
+    }
+    min-height: initial;
+    line-height: initial;
+    span {
+      color: $gray153;
+    }
+  }
+}
+
+div.sticky .form-approval-status.no-border-bottom {
+  border-bottom: none;
+}
+
+
+// Top-level reject button should be invisible
+// when the bar is in rejected mode.
+button.rejected ~ .group-buttons .is-top.rejected {
+  display: none;
+}
+
+.is-middle {
+  vertical-align: middle;
+}
+
+.description-bubble {
+  //display: none;
+  display: block;
+  //overflow-y: visible;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid $orange-light;
+  padding: $marginS $marginS $marginS $marginS;
+  margin-top: 15px;
+  &:after, &:before {
+             bottom: 100%;
+             left: 5%;
+             border: solid transparent;
+             content: " ";
+             height: 0;
+             width: 0;
+             position: absolute;
+             pointer-events: none;
+           }
+
+  &:after {
+    border-color: rgba(255, 255, 255, 0);
+    border-bottom-color: #fff;
+    border-width: 10px;
+    margin-left: -10px;
+  }
+  &:before {
+    border-color: transparentize( $orange-light, 1 );
+    border-bottom-color: $orange-light;
+    border-width: 11px;
+    margin-left: -11px;
+  }
+  input {
+    box-sizing: border-box;
+    border: none;
+    font-size: 16px;
+    width: 100%;
+    box-shadow: none;
+    color: $gray51;
+    &:focus {
+      border: none;
+      box-shadow: none;
+    }
+  }
+}
+
+.description-bubble.is-closed {
+  display: none;
 }
 
 .form-help {
@@ -662,30 +894,6 @@ input.form-input.long {
   }
 }
 
-.approval-approved {
-  &:after {
-    content: " ";
-    @include spite-bg;
-    width: 16px;
-    height: 16px;
-    background-position: 0px -2500px;
-    display: inline-block;
-    margin-left: $marginS;
-    vertical-align: text-bottom;
-  }
-}
-.approval-rejected {
-  &:after {
-    content: " ";
-    @include spite-bg;
-    width: 16px;
-    height: 16px;
-    background-position: 0px -2400px;
-    display: inline-block;
-    margin-left: $marginS;
-    vertical-align: text-bottom;
-  }
-}
 
 
 #neighbor-show {
@@ -775,4 +983,220 @@ foreman-history {
 div.alleYli-radioGroup {
   display: inline-block;
   margin-top: $marginL;
+}
+
+
+// Grid styles
+
+$col: 25%;
+
+@mixin form-grid-clear {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+@mixin column ($size) {
+  position: relative;
+  float: left;
+  width: $size * $col;
+  min-width: $size * $col;
+  max-width: $size * $col;
+  padding-left: $grid-margin;
+
+  label.required:after {
+    content: "*";
+    color: $negative;
+  }
+
+  .col--vertical, .col--horizontal {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .col--vertical {
+    label {
+      display: block;
+    }
+  }
+}
+
+.form-grid {
+  overflow-y: hidden;
+  width: 100%;
+  border-top: 1px solid $grid-border-color;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:after {
+    @include form-grid-clear;
+  }
+
+  h2 {
+    padding-left: $grid-margin;
+    margin: $marginM 0;
+  }
+
+  // TODO could be removed after accordion styles are revamped
+  p {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .checkbox-wrapper {
+    border: 1px solid $checkbox-border-color;
+    padding: 7px;
+  }
+
+  select::-ms-expand {
+      display: none;
+  }
+
+  button::-moz-focus-inner {
+    border: 0;
+  }
+
+  input[type=text], input[type=password], select {
+    padding: 0 $marginM;
+    min-height: $grid-input-height;
+    height: $grid-input-height;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: $grid-font-size;
+    color: $input-color;
+    border: 1px solid $input-border-color;
+    -webkit-appearance: none;
+    -webkit-border-radius: 0px;
+    -moz-appearance:none;
+
+    &:focus {
+      color: $input-focus-color;
+      border-color: $input-focus-border-color;
+    }
+  }
+
+  input[type=checkbox] {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+  }
+
+  .checkbox-label:before {
+    @include lupicon-font;
+    content: "\e603";
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: top;
+    color: $checkbox-color;
+  }
+
+  input[type=checkbox]:checked + .checkbox-label:before {
+    @include lupicon-font;
+    content: "\e604";
+    color: $checkbox-selected-color;
+  }
+
+  select.required, input.required {
+    border-color: $input-required-border-color;
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+    color: $orange-dark;
+    pointer-events:none;
+
+    // show white box behind selector arrow to hide default select arrows on IE9
+    background-color: #fff;
+    height: $grid-input-height - 2px;
+    width: 30px;
+    line-height: $grid-input-height - 2px;
+    vertical-align: middle;
+  }
+
+  input[type=text].err, input[type=password].err {
+    border: 1px solid $negative;
+    color: $negative;
+  }
+
+  @for $i from 1 through 4 {
+    .col-#{$i} {
+      @include column($i);
+    }
+  }
+
+  .row {
+    @include form-grid-clear;
+    margin: $grid-margin 0;
+    overflow-y: hidden;
+  }
+
+  .info-message {
+    background-color: $negative;
+    color: #fff;
+    margin: 0;
+    padding: $marginS;
+    font-style: normal;
+    font-weight: bold;
+    display: block;
+    height: $grid-input-height;
+  }
+
+  // password field
+  .poor.info-message {
+    background-color: $red-dark;
+  }
+
+  .low.info-message {
+    background-color: $red-light;
+  }
+
+  .average.info-message {
+    background-color: $orange;
+  }
+
+  .good.info-message {
+    background-color: $green-light;
+  }
+
+  .excellent.info-message {
+    background-color: $green-dark;
+  }
+
+  input[type=password].poor {
+    border-color: $red-dark;
+  }
+
+  input[type=password].low {
+    border-color: $red-light
+  }
+
+  input[type=password].average {
+    border-color: $orange;
+  }
+
+  input[type=password].good {
+    border-color: $green-light;
+  }
+
+  input[type=password].excellent {
+    border-color: $green-dark;
+  }
+
+  .error-message {
+    background-color: $negative;
+    color: #fff;
+    margin: 0;
+    padding: $marginS;
+    font-style: normal;
+    font-weight: bold;
+    &:before {
+      @include lupicon-font;
+      content: "\e63c";
+      margin-right: $marginS;
+    }
+  }
 }

@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation   Admin edits authority admin users
-Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 

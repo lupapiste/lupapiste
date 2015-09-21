@@ -41,7 +41,8 @@
   {:parameters [company signer lang]
    :user-roles #{:anonymous}
    :input-validators [(fn [{{signer :signer} :data user :user}]
-                        (when (and (not= (:email signer) (:email user)) (u/get-user-by-email (:email signer)))
+                        (when (and (not= (:email signer) (:email user)) 
+                                   (u/email-in-use? (:email signer)))
                           (fail :email-in-use)))
                       (fn [{{lang :lang} :data}]
                         (when-not ((set (map name i18n/languages)) lang)
