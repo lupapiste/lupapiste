@@ -37,7 +37,7 @@ Account is linked
 Dummy user gets password reset email
   Open last email
   Wait Until  Page Should Contain  dummy3@example.com
-  Page Should Contain  /app/fi/welcome#!/reset-password
+  Page Should Contain  /app/fi/welcome#!/setpw/
 
 Admin logs in again
   Go to login page
@@ -46,7 +46,7 @@ Admin logs in again
 
 Dummy user is active in company
   Open company user listing
-  Wait Until  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy@example.com']/td[@data-test-id='company-user-invited']  Käyttäjä
+  Wait Until  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']/td[@data-test-id='company-user-invited']  Käytössä
 
 Conver dummy user to admin
   Click link  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']//a[@data-test-id='company-user-toggle-admin']
@@ -67,7 +67,6 @@ Delete dummy user
   Wait Until  Page should not contain element  //table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']//a[@data-test-id='company-user-toggle-delete']
 
 Add new user
-  [Tags]  fail
   Click enabled by test id  company-add-user
   Wait until  Element should be visible  dialog-company-new-user
   Input text by test id  company-new-user-email  USER2@solita.fi
@@ -82,19 +81,16 @@ Add new user
   Wait until  Element text should be  xpath=//td[@data-test-id='company-invited-user-email']  user2@solita.fi
 
 New user gets email
-  [Tags]  fail
   Open last email
   Wait Until  Page Should Contain  user2@solita.fi
   Page Should Contain  /app/fi/welcome#!/new-company-user/
   Click link  xpath=//a[contains(@href,'new-company-user')]
 
 Registration page opens
-  [Tags]  fail
   Wait until  Page should contain  Solita Oy
   Wait until  Page should contain  1060155-5
 
 Password must be at least 8 characters
-  [Tags]  fail
   Input text by test id  company-user-password1  lyhyt12
   Input text by test id  company-user-password2  lyhyt12
   Element should be disabled  testCompanyUserSubmitPassword
@@ -106,13 +102,11 @@ Password must be at least 8 characters
   Confirm notification dialog
 
 New user logs in
-  [Tags]  fail
   Go to page  login
   Applicant logs in  user2@solita.fi  pitka123  Ulla Ser
   Confirm notification dialog
 
 User sees herself as company admin
-  [Tags]  fail
   Open company user listing
   Wait Until  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-user2@solita.fi']/td[@data-test-id='company-user-role']  Ylläpitäjä
   [Teardown]  Logout
@@ -120,20 +114,18 @@ User sees herself as company admin
 # Custom account
 
 Solita admin sets custom account for company 'Solita Oy', max users 2
-  [Tags]  fail
   SolitaAdmin logs in
   Wait until  Click element  xpath=//li/a[contains(text(), "Yritykset")]
   Wait until  Click element  xpath=//table[@data-test-id="corporations-table"]//tr[@data-test-id="company-row-solita"]//a[@data-test-id="company-edit"]
   Wait until  Element text should be  xpath=//div[@data-test-id="modal-dialog-content"]/div[@class="header"]/span[@class="title"]  Muokkaa yritysta
   Select from list by value  xpath=//select[@name="account-type"]  custom
-  Input text  xpath=//input[@name="customAccountLimit"]  2
+  Input text with jQuery   input[name="customAccountLimit"]  2
   Focus  xpath=//button[@data-test-id="modal-dialog-submit-button"]
   Click by test id  modal-dialog-submit-button
   Wait Until  Element should not be visible  xpath=//div[@data-test-id="modal-dialog-content"]
   Logout
 
 Kaino logs in and sees account is custom, and it can't be changed by Kaino
-  [Tags]  fail
   Login  kaino@solita.fi  kaino123
   User should be logged in  Kaino Solita
   Open company details
@@ -141,7 +133,6 @@ Kaino logs in and sees account is custom, and it can't be changed by Kaino
   Element should not be visible  xpath=//select[@data-test-id="company-account-select"]
 
 Kaino wants to invite new users, but can't because account limit is reached
-  [Tags]  fail
   Open company user listing
   Element should be disabled  xpath=//button[@data-test-id="company-add-user"]
   Element should be visible  xpath=//span[@class="user-limit-reached"]
