@@ -1,5 +1,0 @@
-rasitetoimitus.rasitetoimitus.kayttaja: Oikeutettu (kiinteistötunnus)
-rasitetoimitus.rasitetoimitus.antaja: Rasitettu (kiinteistötunnus)
-application.KT.neighbors: Asianosaisten kuuleminen
-help.KT.neighborsDesc: Mikäli hanke edellyttää asianosaisten kuulemista, tekee viranomainen tarvittavat toimenpiteet, jonka jälkeen näet listan tiedotettavista asianosaisista tällä välilehdellä.
-Voit hoitaa tiedottamisen joko sähköpostitse Lupapisteen kautta tai paperilomakkeella, joka liitetään skannattuna suunnitelmat ja liitteet – välilehdelle.
