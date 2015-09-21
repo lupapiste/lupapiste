@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation  Stamping functionality for authority
-Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
@@ -17,26 +16,43 @@ Set stamping info variables
   Set Suite Variable  ${STAMP_TRANSPARENCY_IDX}  2
   Set Suite Variable  ${STAMP_EXTRATEXT}  Lisateksti
 
-Mikko creates application and goes to empty attachments tab
+Mikko creates & submits application and goes to empty attachments tab
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  stamping${secs}
   Mikko logs in
-  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
+  Create application the fast way  ${appname}  753-416-25-30  asuinrakennus
+  Submit application
   Open tab  attachments
 
 Mikko adds PDF attachment without comment
-  Add attachment  ${PDF_TESTFILE_PATH1}  ${EMPTY}  Uusi asuinrakennus
+  Add attachment  application  ${PDF_TESTFILE_PATH1}  ${EMPTY}  Uusi asuinrakennus
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME1}')]
-  Add attachment  ${PDF_TESTFILE_PATH2}  ${EMPTY}  Uusi asuinrakennus
+  Add attachment  application  ${PDF_TESTFILE_PATH2}  ${EMPTY}  Uusi asuinrakennus
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME2}')]
-  Add attachment  ${PDF_TESTFILE_PATH3}  ${EMPTY}  Yleisesti hankkeeseen
+  Add attachment  application  ${PDF_TESTFILE_PATH3}  ${EMPTY}  Yleisesti hankkeeseen
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME3}')]
 
 Mikko does not see stamping button
   Wait until  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='stampAttachments']
 
-Mikko submits application for authority
-  Submit application
+Mikko previews file
+  [Tags]  attachments
+  Open attachment details  muut.muu
+  Click by test id  file-preview
+  Wait Until  Element should be visible  file-preview-iframe
+
+Version number is 1.0
+  Wait until  Element text should be  //section[@id="attachment"]//span[@data-bind="version: $data.version"]  1.0
+
+Rotation buttons are visible
+  Xpath Should Match X Times  //section[@id="attachment"]//div[@data-test-id="pdf-rotation-buttons"]//button  3
+  Element should be visible   //section[@id="attachment"]//div[@data-test-id="pdf-rotation-buttons"]//button
+
+Click the first rotate button
+  Click element  //section[@id="attachment"]//div[@data-test-id="pdf-rotation-buttons"]//button
+
+Version number is 2.0
+  Wait until  Element text should be  //section[@id="attachment"]//span[@data-bind="version: $data.version"]  2.0
 
 Sonja logs in
   Logout
@@ -45,6 +61,9 @@ Sonja logs in
 Sonja goes to attachments tab
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
+
+Attachment is not stamped
+  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]
 
 Sonja sees stamping button
   Wait until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='stampAttachments']
@@ -111,6 +130,9 @@ Select all files and start stamping
   Xpath should match x times  //div[@id="stamping-container"]//span[@data-test-id="attachment-status-text"]  3
   Wait Until  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Leimaus valmis
 
+There were no errors
+  Page should not contain  Virhe
+
 Reset stamping, stamping page should be refreshed
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="stamp-reset"]
   Element should be visible  stamping-container
@@ -120,3 +142,8 @@ Reset stamping, stamping page should be refreshed
 Return from stamping to attachments tab
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="cancel-stamping"]
   Element should be visible  application-attachments-tab
+
+Attachment has stamped icon
+  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]
+  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]  3
+

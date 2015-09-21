@@ -14,8 +14,7 @@
               </tr>
             </thead>
             <tbody data-bind="foreach: $root.screenmessages.messages">
-              <!--   TODO: Tee uusi "message-row" "user-row":n tilalle. Missa user-row on maaritelty?  -->
-              <tr class="user-row">
+              <tr class="message-row">
                 <td data-bind="dateTimeString: added"></td>
                 <td data-bind="text: fi"></td>
                 <td data-bind="text: sv"></td>
@@ -36,19 +35,19 @@
             <textarea id="add-text-sv" rows="4" cols="50" data-bind="textInput: textSv"></textarea>
             <br />
 
+            <div class="stacked inner-margins">
             <button href="#"
               data-bind="click: addMessage,
                          ltext: 'admin.screenmessages.addScreenmessageButtonLabel',
                          disable: disabled"
-              class="modal btn btn-primary btn-narrow screenmessagebutton"
+              class="positive"
               data-test-id="test-add-screenmessage"></button>
-            <hr />
             <button href="#"
               data-bind="click: $root.screenmessages.reset,
                          ltext: 'admin.screenmessages.deleteScreenmessageButtonLabel'"
-              class="modal btn btn-primary btn-narrow screenmessagebutton"
+              class="positive"
               data-test-id="test-delete-screenmessage"></button>
-
+            </div>
           </div>
 
       </div>

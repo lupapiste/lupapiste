@@ -2,8 +2,10 @@
   (:require [clojure.string :as s]
             [monger.operators :refer :all]
             [clojure.data.zip.xml :refer [xml-> text]]
-            [lupapalvelu.i18n :refer [*lang* with-lang]]
+            [lupapalvelu.i18n :as i18n]
             [monger.query :as q]
+            [sade.strings :as ss]
+            [sade.property :as p]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.wfs :as wfs]))
 
@@ -45,13 +47,12 @@
 (defn search-poi [poi]
   (map
     (comp (fn [r] (dissoc r :_id)) (set-kind :poi))
-    (q/with-collection "poi"
-      (q/find {:name {$regex (str \^ (s/lower-case poi))}
-               :lang *lang*})
+    (mongo/with-collection "poi"
+      (q/find {:name {$regex (str \^ (s/lower-case poi))}})
       (q/sort (array-map :name 1 :priority 1))
       (q/limit max-entries))))
 
-(defn municipality-prop [] (if (= *lang* "sv") "oso:kuntanimiSwe" "oso:kuntanimiFin"))
+(defn municipality-prop [] (if (= i18n/*lang* "sv") "oso:kuntanimiSwe" "oso:kuntanimiFin"))
 
 (defn search-street [street]
   (map
@@ -107,16 +108,6 @@
 ;; Utils:
 ;;
 
-(defn- pwz
-  "Pad 's' with zeros so that its at least 'c' characters long"
-  [c s]
-  (apply str (conj (vec (repeat (- c (count s)) \0)) s)))
-
-(defn- to-property-id
-  "Convert property ID elements to 'database' format"
-  [a b c d]
-  (str (pwz 3 a) (pwz 3 b) (pwz 4 c) (pwz 4 d)))
-
 (defn- apply-search
   "Return a function that can be used as a target function in 'search' function.
    The returned function accepts the list as returned from clojure.core/re-find.
@@ -132,7 +123,7 @@
 (defn search [term]
   (condp re-find (s/trim term)
     #"^(\d{14})$"                                 :>> (apply-search search-property-id)
-    #"^(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})$"  :>> (fn [[_ a b c d]] (search-property-id (to-property-id a b c d)))
+    p/property-id-pattern                         :>> (fn [result] (search-property-id (p/to-property-id (first result))))
     #"^(\S+)$"                                    :>> (apply-search search-poi-or-street)
     #"^(\S+)\s+(\d+)\s*,?\s*$"                    :>> (apply-search search-street-with-number)
     #"^(\S+)\s+(\S+)$"                            :>> (apply-search search-street-with-city)

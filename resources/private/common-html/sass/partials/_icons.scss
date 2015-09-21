@@ -98,6 +98,16 @@ $spritegrid: 100px;
     width: 12px;
     height: 12px;
   }
+  &.drill-down-black-smaller {
+    background-position: 0px -3400px;
+    width: 9px;
+    height: 8px;
+  }
+  &.drill-up-black-smaller {
+    background-position: 0px -3300px;
+    width: 9px;
+    height: 8px;
+  }
   &.add {
     background-position: 0px -2200px;
     width: 15px;
@@ -215,7 +225,7 @@ $spritegrid: 100px;
     width: 25px;
   }
   &.mark-seen {
-    background-position: 0px -5200px;
+    background-position: 0px -5198px;
     width: 25px;
     height: 15px;
   }
@@ -238,6 +248,37 @@ $spritegrid: 100px;
     background-position: 0px -6100px;
     width: 24px;
     height: 19px;
+  }
+
+  &.approve-grey {
+    background-position: 0px -6200px;
+    width: 16px;
+    height: 16px;
+  }
+  &.help-new {
+    background-position: 0px -6300px;
+    width: 24px;
+    height: 24px;
+  }
+  &.toj {
+    background-position: 0px -6400px;
+    width: 24px;
+    height: 24px;
+  }
+  &.archive {
+    background-position: 0px -6500px;
+    width: 24px;
+    height: 24px;
+  }
+  &.star-selected {
+    background-position: 0px -6600px;
+    width: 18px;
+    height: 18px;
+  }
+  &.star-unselected {
+    background-position: 0px -6700px;
+    width: 18px;
+    height: 18px;
   }
 
   //states

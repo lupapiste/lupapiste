@@ -1,4 +1,4 @@
-body.welcome, body.welcome nav {
+body.welcome {
   @media (max-width:$breakpoint7){
     width: $cols7;
   }
@@ -10,75 +10,7 @@ body.welcome, body.welcome nav {
   }
 }
 
-.welcome_page {
-  margin-top: 0;
+.welcome-register-section {
+  margin-top: $marginL;
 }
 
-.welcome_top {
-  background: #01BEF5 url('/img/top-bg.jpg');
-  margin-top: $baseline * 2;
-  @include clearfix;
-}
-
-.welcome_top_content {
-  position: relative;
-  padding-top: $baseline * 2;
-}
-
-.welcome_top_text {
-  z-index:2;
-  position:absolute;
-  right:0;
-  top: $baseline * 2;
-  padding:$baseline;
-  width: $cols4;
-  background: white;
-  height: 500px - $baseline * 2;
-}
-
-.welcome_info {
-  z-index:3;
-  position:absolute;
-  top: -$marginL*2;
-  right: -$marginL*2;
-}
-
-.welcome_sections {
-  width: 80%;
-  margin: ($baseline * 3) auto;
-  padding: $cols1 / 2;
-  background: white;
-  @include clearfix;
-
-  .welcome_section {
-    float: left;
-    position: relative;
-    /* Defaults for old browsers */
-    width: 100%;
-    margin-right: $cols1 / 2;
-    @include clearfix;
-
-    .welcome-login-section {
-      border-right: 1px solid darken($lp-light-grey, 10%);
-      width: 49%;
-    }
-    .welcome-register-section {
-      width: 45%;
-      float: right;
-      margin-left: $marginL*2;
-    }
-  }
-}
-
-
-
-/* nth-child(3) that works in IE8 */
-.welcome_sections .welcome_section:first-child + .welcome_section + .welcome_section {
-  margin-right: 0;
-}
-
-.welcome_logo {
-  position: absolute;
-  top: $baseline *2;
-  padding:$baseline;
-}

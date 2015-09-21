@@ -1,8 +1,9 @@
 (ns lupapalvelu.notice-api
   (:require [sade.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
-            [monger.operators :refer :all])
-)
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.states :as states]
+            [monger.operators :refer :all]))
 
 (defn validate-urgency [{{urgency :urgency} :data}]
   (when-not (#{"normal" "urgent" "pending"} urgency)
@@ -10,17 +11,30 @@
 
 (defcommand change-urgency
   {:parameters [id urgency]
-   :roles [:authority]
-   :states action/all-states
-   :extra-auth-roles [:statementGiver]
+   :user-roles #{:authority}
+   :states (states/all-states-but [:draft])
+   :user-authz-roles #{:statementGiver}
    :input-validators [validate-urgency]}
   [command]
   (update-application command {$set {:urgency urgency}}))
 
 (defcommand add-authority-notice
   {:parameters [id authorityNotice]
-   :states action/all-states
-   :extra-auth-roles [:statementGiver]
-   :roles [:authority]}
+   :states (states/all-states-but [:draft])
+   :user-authz-roles #{:statementGiver}
+   :user-roles #{:authority}
+   :org-authz-roles action/reader-org-authz-roles}
   [command]
   (update-application command {$set {:authorityNotice authorityNotice}}))
+
+(defcommand add-application-tags
+  {:parameters [id tags]
+   :states (states/all-states-but [:draft])
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:tags])]
+   :user-authz-roles #{:statementGiver}
+   :user-roles #{:authority}}
+  [{{:keys [organization]} :application :as command}]
+  (let [org-tag-ids (map :id (:tags (org/get-organization organization)))]
+    (if (every? (set org-tag-ids) tags)
+      (update-application command {$set {:tags tags}})
+      (fail :error.unknown-tags))))

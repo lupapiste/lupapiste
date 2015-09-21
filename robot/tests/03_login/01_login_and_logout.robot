@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation   Login & Logout
-Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
 
 *** Variables ***
@@ -22,36 +21,29 @@ Login fails with invalid password
   Login fails  ${LOGIN}  invalid
 
 Login fails with invalid username
-  [Tags]  ie8
   Login fails  invalid  ${PASSWORD}
 
 Login fails with invalid username and password
-  [Tags]  ie8
   Login fails  invalid  whatever
 
 Username is locked after 3 failures
-  [Tags]  ie8
   Login fails  invalid  whatever
   Wait Until  Page Should Contain  Tunnus tai salasana on väärin
   Login fails  invalid  whatever
   Wait Until  Page Should Contain  Tunnus on lukittu
 
 Username lock expires after 10 seconds
-  [Tags]  ie8
   Sleep  10
   Login fails  invalid  whatever
   Page Should Not Contain  Tunnus on lukittu
 
 Login fails with empty username
-  [Tags]  ie8
   Login fails  ${EMPTY}  ${PASSWORD}
 
 Login fails with empty password
-  [Tags]  ie8
   Login fails  ${LOGIN}  ${EMPTY}
 
 Login fails with empty username and password
-  [Tags]  ie8
   Login fails  ${EMPTY}  ${EMPTY}
 
 Mikko logs in and wants us to remember him
@@ -60,6 +52,7 @@ Mikko logs in and wants us to remember him
   Checkbox Should Not Be Selected  rememberme
   Select Checkbox  rememberme
   Login  ${LOGIN}  ${PASSWORD}
+  Run Keyword And Ignore Error  Confirm Action
   User should be logged in  ${USERNAME}
   User role should be  applicant
   Applications page should be open
@@ -67,15 +60,11 @@ Mikko logs in and wants us to remember him
 
 Mikko thinks he's Swedish
   [Tags]  ie8
-  Page Should Not Contain  Suomeksi
-  Click link  xpath=//*[@data-test-id='lang-sv']
-  Wait Until  Page Should Contain  Suomeksi
+  Language To  SV
 
 Mikko remembers he's Finnish
   [Tags]  ie8
-  Page Should Not Contain  På svenska
-  Click link  xpath=//*[@data-test-id='lang-fi']
-  Wait Until  Page Should Contain  På svenska
+  Language To  FI
   [Teardown]  logout
 
 Mikko is logged out but remembered
@@ -96,7 +85,6 @@ Mikko logs in with username that has capital letters and wants to be forgotten
   Checkbox Should Not Be Selected  rememberme
 
 Solita Admin can log in
-  [Tags]  ie8
   SolitaAdmin logs in
   [Teardown]  logout
 

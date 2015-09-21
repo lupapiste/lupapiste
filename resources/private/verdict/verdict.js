@@ -95,7 +95,7 @@ LUPAPISTE.verdictPageController = (function($) {
 
     self.returnToApplication = function() {
       repository.load(currentApplicationId);
-      window.location.hash = "!/application/" + currentApplicationId + "/verdict";
+      pageutil.openApplicationPage({id:currentApplicationId}, "verdict");
     };
 
     self.save = function(onSuccess) {
@@ -105,11 +105,11 @@ LUPAPISTE.verdictPageController = (function($) {
         ajax
         .command("save-verdict-draft",
             {id: currentApplicationId, verdictId: currentVerdictId,
-          backendId: self.backendId(), status: self.status(),
-          name: self.name(), text: self.text(),
-          section: self.section(),
-          agreement: self.agreement() || false,
-          given: givenMillis, official: officialMillis})
+             backendId: self.backendId(), status: self.status(),
+             name: self.name(), text: self.text(),
+             section: self.section(),
+             agreement: self.agreement() || false,
+             given: givenMillis, official: officialMillis})
           .success(onSuccess)
           .processing(self.processing)
           .call();
@@ -146,8 +146,7 @@ LUPAPISTE.verdictPageController = (function($) {
       ajax
       .command(cmd, {id: currentApplicationId, verdictId: currentVerdictId})
       .success(function() {
-        repository.load(currentApplicationId);
-        window.location.hash = "!/application/" + currentApplicationId + "/verdict";
+        self.returnToApplication();
       })
       .processing(self.processing)
       .call();
@@ -167,7 +166,7 @@ LUPAPISTE.verdictPageController = (function($) {
   }
 
   var verdictModel = new VerdictEditModel();
-  var authorizationModel = authorization.create();
+  var authorizationModel = lupapisteApp.models.applicationAuthModel;
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({}, "muut.muu");
   var createTaskController = LUPAPISTE.createTaskController;
   var authorities = ko.observableArray([]);
@@ -180,7 +179,6 @@ LUPAPISTE.verdictPageController = (function($) {
 
     lupapisteApp.setTitle(application.title);
 
-    authorizationModel.refresh(application);
     verdictModel.refresh(application, verdictId);
     attachmentsModel.refresh(application, target);
     createTaskController.reset(currentApplicationId, target);

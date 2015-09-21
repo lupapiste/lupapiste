@@ -2,14 +2,16 @@
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [clojure.set :as set]
             [clojure.string :as s]
-            [clojure.set :refer [difference union]]
             [slingshot.slingshot :refer [try+]]
+            [schema.core :as sc]
             [sade.dns :as dns]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]
             [lupapalvelu.logging :as log]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.domain :as domain]))
@@ -18,7 +20,7 @@
 ;; construct command, query and raw
 ;;
 
-(defn- action [name & {:keys [user type data] :or {:user nil :type :action :data {}}}]
+(defn action [name & {:keys [user type data] :or {:user nil :type :action :data {}}}]
   {:action name
    :user user
    :type type
@@ -50,24 +52,20 @@
                     (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email))))
         (fail :error.email)))))
 
-;; State helpers
 
-(def all-application-states #{:draft :open :submitted :sent :complement-needed
-                              :verdictGiven :constructionStarted :closed :canceled})
-(def all-inforequest-states #{:info :answered})
-(def all-states             (union all-application-states all-inforequest-states))
+;; Role helpers
 
-(def pre-verdict-states #{:draft :info :answered :open :submitted :complement-needed})
-(def post-verdict-states (difference all-application-states pre-verdict-states))
+(def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin})
+(def all-user-roles (conj all-authenticated-user-roles :anonymous :rest-api :trusted-etl))
 
-(defn all-states-but [drop-states-array]
-  (difference all-states (set drop-states-array)))
+(def default-authz-writer-roles #{:owner :writer :foreman})
+(def default-authz-reader-roles (conj default-authz-writer-roles :reader))
+(def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
+(def all-authz-roles (conj all-authz-writer-roles :reader))
 
-(defn all-application-states-but [drop-states-array]
-  (difference all-application-states (set drop-states-array)))
-
-(defn all-inforequest-states-but [drop-states-array]
-  (difference all-inforequest-states (set drop-states-array)))
+(def default-org-authz-roles #{:authority})
+(def reader-org-authz-roles #{:authority :reader})
+(def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin :reader :tos-editor :tos-publisher :approver))
 
 ;; Notificator
 
@@ -102,6 +100,13 @@
       (partial some #(or (nil? %) (and (string? %) (s/blank? %))))
       :error.vector-parameters-with-blank-items )))
 
+(defn vector-parameters-with-at-least-n-non-blank-items [n params command]
+  (or
+    (vector-parameters-with-non-blank-items params command)
+    (filter-params-of-command params command
+      #(> n (count %))
+      :error.vector-parameters-with-items-missing-required-keys)))
+
 (defn vector-parameters-with-map-items-with-required-keys [params required-keys command]
   (or
     (vector-parameters params command)
@@ -113,8 +118,19 @@
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
 
+(defn number-parameters [params command]
+  (filter-params-of-command params command (complement number?) :error.illegal-number))
+
 (defn map-parameters [params command]
   (filter-params-of-command params command (complement map?) :error.unknown-type))
+
+(defn map-parameters-with-required-keys [params required-keys command]
+  (or
+    (map-parameters params command)
+    (filter-params-of-command params command
+      #(not (util/every-key-in-map? % required-keys))
+      :error.map-parameters-with-required-keys
+      {:required-keys required-keys})))
 
 (defn update-application
   "Get current application from command (or fail) and run changes into it.
@@ -159,11 +175,10 @@
 (defn missing-fields [{data :data} {parameters :parameters}]
   (map name (set/difference (set parameters) (set (keys data)))))
 
-(defn- has-required-role [command {roles :roles :as meta-data}]
-  {:pre [roles]}
-  (let [user-role      (-> command :user :role keyword)
-        roles-required (if (set? roles) roles (set roles))]
-    (or (roles-required :anonymous) (roles-required user-role))))
+(defn- has-required-user-role [command {user-roles :user-roles :as meta-data}]
+  (let [allowed-roles (or user-roles #{})
+        user-role (-> command :user :role keyword)]
+    (or (allowed-roles :anonymous) (allowed-roles user-role))))
 
 (defn meta-data [{command :action}]
   ((get-actions) (keyword command)))
@@ -184,7 +199,7 @@
     (fail :error.invalid-type)))
 
 (defn missing-roles [command]
-  (when-not (has-required-role command (meta-data command))
+  (when-not (has-required-user-role command (meta-data command))
     (tracef "command '%s' is unauthorized for role '%s'" (:action command) (-> command :user :role))
     unauthorized))
 
@@ -211,6 +226,7 @@
       (fail :error.command-illegal-state :state state))))
 
 (defn pre-checks-fail [command application]
+  {:post [(or (nil? %) (contains? % :ok))]}
   (when-let [pre-checks (:pre-checks (meta-data command))]
     (reduce #(or %1 (%2 command application)) nil pre-checks)))
 
@@ -256,18 +272,31 @@
   "if :id parameter is present read application from command
    (pre-loaded) or load application for user."
   [{{id :id} :data user :user application :application}]
-  (and id user (or application (domain/get-application-as id user true))))
+  (and id user (or application (domain/get-application-as id user :include-canceled-apps? true))))
+
+(defn- user-authz? [command-meta-data application user]
+  (let [allowed-roles (get command-meta-data :user-authz-roles #{})
+        roles-in-app  (map (comp keyword :role) (domain/get-auths application (:id user)))]
+    (some allowed-roles roles-in-app)))
+
+(defn- organization-authz? [command-meta-data {organization :organization} user]
+  (let [required-authz (:org-authz-roles command-meta-data)
+        user-org-authz (get-in user [:orgAuthz (keyword organization)])]
+    (and (user/authority? user) required-authz (some required-authz user-org-authz))))
+
+(defn- company-authz? [command-meta-data application user]
+  (domain/has-auth? application (get-in user [:company :id])))
 
 (defn- user-is-not-allowed-to-access?
-  "Current user must be owner, authority or writer OR have some other supplied extra-auth-roles"
+  "Current user must have correct role in application.auth, work in the organization or company that has been invited"
   [{user :user :as command} application]
-  (let [meta-data (meta-data command)
-        extra-auth-roles (set (:extra-auth-roles meta-data))]
-    (when-not (or (extra-auth-roles :any)
-                  (domain/owner-or-write-access? application (:id user))
-                  (and (= :authority (keyword (:role user))) ((set (:organizations user)) (:organization application)))
-                  (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
-      unauthorized)))
+  (let [meta-data (meta-data command)]
+    (when-not (or
+                (user-authz? meta-data application user)
+                (organization-authz? meta-data application user)
+                (company-authz? meta-data application user))
+
+     unauthorized)))
 
 (defn- not-authorized-to-application [command application]
   (when (-> command :data :id)
@@ -312,7 +341,7 @@
           (ok))))
     (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
       (do
-        (errorf "fail! in action: \"%s\" [%s:%d]: %s (%s)"
+        (errorf "fail! in action: \"%s\" [%s:%s]: %s (%s)"
           (:action command)
           (:sade.core/file all)
           (:sade.core/line all)
@@ -330,14 +359,13 @@
         (when execute? (log/log-event :error command))
         (fail :error.unknown)))))
 
-(defmacro logged [command & body]
-  `(let [response# (do ~@body)]
-     (debug (:action ~command) "->" (:ok response#))
-     response#))
-
-(defn execute [command]
-  (logged command
-    (run command execute-validators true)))
+(defn execute [{action :action :as command}]
+  (let [before   (System/currentTimeMillis)
+        response (run command execute-validators true)
+        after    (System/currentTimeMillis)]
+    (debug action "->" (:ok response) "(took" (- after before) "ms)")
+    (swap! actions update-in [(keyword action) :call-count] #(if % (inc %) 1))
+    response))
 
 (defn validate [command]
   (run command authorize-validators false))
@@ -346,47 +374,97 @@
 ;; Register actions
 ;;
 
-(def supported-action-meta-data
-  {:parameters  "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
-   :roles       "Vector of role keywords."
-   :extra-auth-roles  "Vector of role keywords."
-   :description "Documentation string."
-   :notified    "Boolean. Documents that the action will be sending (email) notifications."
-   :pre-checks  "Vector of functions."
-   :input-validators  "Vector of functions."
-   :states      "Vector of application state keywords"
-   :on-complete "Function or vector of functions."
-   :on-success  "Function or vector of functions."
-   :on-fail     "Function or vector of functions."
-   :feature     "Keyword: feature flag name. Action is run only if the feature flag is true.
-                 If you have feature.some-feature properties file, use :feature :some-feature in action meta data"})
+(def default-user-authz {:query default-authz-reader-roles
+                         :export default-authz-reader-roles
+                         :command default-authz-writer-roles
+                         :raw default-authz-writer-roles})
 
-(def- supported-action-meta-data-keys (set (keys supported-action-meta-data)))
+(defn- subset-of [reference-set]
+  {:pre [(set? reference-set)]}
+  (sc/pred (fn [x] (and (set? x) (every? reference-set x)))))
+
+(def ActionMetaData
+  {
+   ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
+   :user-roles (subset-of all-user-roles)
+   ; Parameters can be keywords or symbols. Symbols will be available in the action body.
+   ; If a parameter is missing from request, an error will be raised.
+   (sc/optional-key :parameters)  [(sc/either sc/Keyword sc/Symbol)]
+   ; Set of application context role keywords.
+   (sc/optional-key :user-authz-roles)  (subset-of all-authz-roles)
+   ; Set of application organization context role keywords
+   (sc/optional-key :org-authz-roles) (subset-of all-org-authz-roles)
+   ; Documentation string.
+   (sc/optional-key :description) sc/Str
+   ; Documents that the action will be sending (email) notifications.
+   (sc/optional-key :notified)    sc/Bool
+   ; Prechecks take two parameters: the command and the application.
+   ; Command does not have :data when pre-check is called on validation phase (allowed-actions)
+   ; but has :data when pre-check is called during action execution.
+   (sc/optional-key :pre-checks)  [(sc/either util/Fn sc/Symbol)]
+   ; Input validators take one parameter, the command. Application is not yet available.
+   (sc/optional-key :input-validators)  [(sc/either util/Fn sc/Symbol)]
+   ; Application state keywords
+   (sc/optional-key :states)      (subset-of states/all-states)
+   (sc/optional-key :on-complete) (sc/either util/Fn [util/Fn])
+   (sc/optional-key :on-success)  (sc/either util/Fn [util/Fn])
+   (sc/optional-key :on-fail)     (sc/either util/Fn [util/Fn])
+   ; Feature flag name. Action is run only if the feature flag is true.
+   ; If you have feature.some-feature properties file, use :feature :some-feature in action meta data
+   (sc/optional-key :feature)     sc/Keyword})
 
 (defn register-action [action-type action-name meta-data line ns-str handler]
+  {:pre [(keyword? action-type)
+         (not (ss/blank? (name action-name)))
+         (number? line)
+         (string? ns-str)
+         (fn? handler)]}
 
-  ;(assert (.endsWith ns-str "-api") (str "Actions must be defined in *-api namespaces"))
+  (when-let [res (sc/check ActionMetaData meta-data)]
+    (let [invalid-meta (merge-with
+                         (fn [val-in-result val-in-latter]
+                           (if-not (nil? val-in-latter)
+                             val-in-latter
+                             val-in-result))
+                         res
+                         (select-keys meta-data (keys res)))]
 
-  (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))
-  (assert (seq (:roles meta-data)) (str "You must define :roles meta data for " action-name ". Use :roles [:anonymous] to grant access to anyone."))
-  (assert (if (some #(= % :id) (:parameters meta-data)) (seq (:states meta-data)) true)
-    (str "You must define :states meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
+      (throw (AssertionError. (str "Action '" action-name "' has invalid meta data: " invalid-meta)))))
 
-  (let [action-keyword (keyword action-name)]
+  (assert (or (ss/ends-with ns-str "-api") (ss/ends-with ns-str "-test") (ss/starts-with (ss/suffix ns-str ".") "dummy"))
+    (str "Please define actions in *-api namespaces. Offending action: " action-name " at " ns-str ":" line))
+
+  (assert
+    (if (some #(= % :id) (:parameters meta-data))
+      (or (seq (:states meta-data)) (seq (:pre-checks meta-data)))
+      true)
+    (str "You must define :states or :pre-checks meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
+
+  (let [action-keyword (keyword action-name)
+        {:keys [user-roles user-authz-roles org-authz-roles]} meta-data]
+
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
     (swap! actions assoc
       action-keyword
-      (merge meta-data {:type action-type
-                        :ns ns-str
-                        :line line
-                        :handler handler}))))
+      (merge
+        {:user-authz-roles (if (= #{:authority} user-roles)
+                             #{} ; By default, authority gets authorization fron organization role
+                             (default-user-authz action-type))
+         :org-authz-roles (cond
+                            (some user-roles [:authority :oirAuthority]) default-org-authz-roles
+                            (user-roles :anonymous) all-org-authz-roles)}
+        meta-data
+        {:type action-type
+         :ns ns-str
+         :line line
+         :handler handler
+         :call-count 0}))))
 
 (defmacro defaction [form-meta action-type action-name & args]
   (let [doc-string  (when (string? (first args)) (first args))
         args        (if doc-string (rest args) args)
         meta-data   (when (map? (first args)) (first args))
         args        (if meta-data (rest args) args)
-        meta-data   (update-in (or meta-data {}) [:roles] set)
         bindings    (when (vector? (first args)) (first args))
         body        (if bindings (rest args) args)
         bindings    (or bindings ['_])

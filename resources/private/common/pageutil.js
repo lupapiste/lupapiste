@@ -56,6 +56,29 @@ var pageutil = (function($) {
     };
   }
 
+  var frontpage = LUPAPISTE.config.frontpage[loc.getCurrentLanguage()] || "/";
+
+  function openFrontpage() {
+    window.location = window.location.protocol + "//" + window.location.host + frontpage;
+  }
+
+  function openPage(page, suffix) {
+    var suffixStr = _.isString(suffix) ? "/" + suffix : "";
+    if (!page) {
+      openFrontpage();
+    } else if (page.indexOf("!/") === 0) {
+      window.location.hash = page + suffixStr;
+    } else {
+      window.location.hash = "!/" + page + suffixStr;
+    }
+  }
+
+  function openApplicationPage(application, suffix) {
+    var kind =  ko.unwrap(application.infoRequest) ? "inforequest" : "application";
+    hub.send("track-click", {category:"Applications", label: kind, event:"openApplication"});
+    openPage(kind + "/" +  ko.unwrap(application.id), suffix);
+  }
+
   $(function() {
     ajaxLoaderContainer = $("<div>").attr("id", "ajax-loader-container")
       .append($("<div>"))
@@ -70,7 +93,11 @@ var pageutil = (function($) {
     lastSubPage:          lastSubPage,
     showAjaxWait:         showAjaxWait,
     hideAjaxWait:         hideAjaxWait,
-    makePendingAjaxWait:  makePendingAjaxWait
+    makePendingAjaxWait:  makePendingAjaxWait,
+    openApplicationPage:  openApplicationPage,
+    openFrontpage:        openFrontpage,
+    openPage:             openPage,
+    frontpage:            frontpage
   };
 
 })(jQuery);

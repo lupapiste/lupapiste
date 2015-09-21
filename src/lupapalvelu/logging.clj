@@ -16,21 +16,28 @@
   `(binding [context (merge context ~logging-context)]
      (do ~@body)))
 
-(defn- log-prefix [{:keys [level timestamp ns]}]
-  (let [{:keys [sessionId applicationId userId]} context]
-    (str
-      (-> level name s/upper-case)
-      \space timestamp \space
-      \[ sessionId \] \space
-      \[ applicationId \] \space
-      \[ userId \] \space
-      ns)))
+(defn- output-fn
+  "Logging output function"
+  ([data] (output-fn nil data))
+  ([opts data]
+    (let [{:keys [session-id applicationId userId]} context
+          {:keys [level ?err_ msg_ ?ns-str timestamp_]} data]
+      (str
+        (-> level name s/upper-case)
+        \space (force timestamp_) \space
+        \[ session-id \] \space
+        \[ applicationId \] \space
+        \[ userId \] \space
+        (or ?ns-str "unknown namespace") " - "
+        (force msg_)
+        (when-let [err (force ?err_)]
+          (str "\n" (timbre/stacktrace err)))))))
 
 (def time-format "yyyy-MM-dd HH:mm:ss.SSS")
 
 (timbre/set-level! env/log-level)
-(timbre/set-config! [:timestamp-pattern] time-format)
-(timbre/set-config! [:prefix-fn] log-prefix)
+(timbre/merge-config! {:timestamp-opts {:pattern time-format}
+                       :output-fn output-fn})
 
 ;;
 ;; event log:
@@ -40,13 +47,16 @@
 (def- ^java.io.Writer event-log-out (io/writer (io/file (doto (io/file env/log-dir "logs") (.mkdirs)) "events.log") :append true))
 
 (defn- unsecure-log-event [level event]
-  (.write event-log-out (str (log-prefix {:level level :timestamp (.print time-fmt (System/currentTimeMillis)) :ns ""}) " - " event \newline))
+  (.write event-log-out (str (output-fn {:level level :timestamp_ (delay (.print time-fmt (System/currentTimeMillis))) :ns ""}) event \newline))
   (.flush event-log-out))
 
 (defn log-event [level event]
   (let [stripped (-> event
                    (dissoc :application)
-                   (util/dissoc-in [:data :tempfile])) ; Temporary java.io.File set by ring
+                   (util/dissoc-in [:data :tempfile]) ; Temporary java.io.File set by ring
+                   (update-in [:data :files] (partial map #(if (:tempfile %)
+                                                             (dissoc % :tempfile)
+                                                             %)))) ; data in multipart/form-data w/ POST
         jsoned   (json/generate-string stripped)]
     (try
       (unsecure-log-event level jsoned)

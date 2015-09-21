@@ -3,10 +3,11 @@
         [lupapalvelu.document.validators]
         [lupapalvelu.document.model]
         [lupapalvelu.itest-util]
-        [midje.sweet]
-        [sade.util])
+        [midje.sweet])
+  (:refer-clojure :exclude [pos? neg? zero?])
   (:require [lupapalvelu.document.validator :as v]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [sade.util :refer :all]))
 
 (defn check-validator
   "Runs generated facts of a single validator."
@@ -36,73 +37,3 @@
 
 (facts "Embedded validator facts"
   (check-all-validators))
-
-;; TODO: validate just one validator at a time to reduce hassle from side-effects
-
-(def uusi-rakennus
-  (->
-    "uusiRakennus"
-    dummy-doc
-    (apply-update [:mitat :tilavuus] "6")))
-
-(comment "old validations"
-  (facts "VRK-validations"
-
-    (fact "uusi rakennus is valid"
-      uusi-rakennus => valid?)
-
-    (fact "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
-      (-> uusi-rakennus
-        (apply-update [:kaytto :kayttotarkoitus] "032 luhtitalot")
-        (apply-update [:mitat :tilavuus] "100000")) => valid?
-      (-> uusi-rakennus
-        (apply-update [:kaytto :kayttotarkoitus] "032 luhtitalot")
-        (apply-update [:mitat :tilavuus] "100001")) => (invalid-with? [:warn "vrk:CR327"]))
-
-    (fact "Puutalossa saa olla korkeintaan 4 kerrosta"
-      (-> uusi-rakennus
-        (apply-update [:rakenne :kantavaRakennusaine] "puu")
-        (apply-update [:mitat :kerrosluku] "3")) => valid?
-      (-> uusi-rakennus
-        (apply-update [:rakenne :kantavaRakennusaine] "puu")
-        (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:BR106"]))
-
-    (fact "Jos lammitustapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
-      (-> uusi-rakennus
-        (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
-        (apply-update [:lammitys :lammonlahde] "s\u00e4hk\u00f6")) => valid?
-      (-> uusi-rakennus
-        (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
-        (apply-update [:lammitys :lammonlahde] "kaasu")) => (invalid-with? [:warn "vrk:CR343"]))
-
-    (fact "Sahko polttoaineena vaatii sahkoliittyman"
-      (-> uusi-rakennus
-        (apply-update [:lammitys :lammonlahde] "s\u00e4hk\u00f6")
-        (apply-update [:verkostoliittymat :sahkoKytkin] true)) => valid?
-      (-> uusi-rakennus
-        (apply-update [:lammitys :lammonlahde] "s\u00e4hk\u00f6")
-        (apply-update [:verkostoliittymat :sahkoKytkin] false)) => (invalid-with? [:warn "vrk:CR342"]))
-
-    (fact "Sahkolammitus vaatii sahkoliittyman"
-      (-> uusi-rakennus
-        (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
-        (apply-update [:verkostoliittymat :sahkoKytkin] true)) => (not-invalid-with? [:warn "vrk:CR341"])
-      (-> uusi-rakennus
-        (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
-        (apply-update [:verkostoliittymat :sahkoKytkin] false)) => (invalid-with? [:warn "vrk:CR341"]))
-
-    (fact "Kokonaisalan oltava vahintaan kerrosala"
-      (-> uusi-rakennus
-        (apply-update [:mitat :kerrosala] "4")
-        (apply-update [:mitat :kokonaisala] "4")) => valid?
-      (-> uusi-rakennus
-        (apply-update [:mitat :kerrosala] "6")
-        (apply-update [:mitat :kokonaisala] "4")) => (invalid-with? [:warn "vrk:CR326"]))
-
-    (fact "Sahko polttoaineena vaatii varusteeksi sahkon"
-      (-> uusi-rakennus
-        (apply-update [:lammitus :lammonlahde] "s\u00e4hk\u00f6")
-        (apply-update [:varusteet :sahkoKytkin] true)) => (not-invalid-with? [:warn "vrk:CR324"])
-      (-> uusi-rakennus
-        (apply-update [:lammitus :lammonlahde] "s\u00e4hk\u00f6")
-        (apply-update [:varusteet :sahkoKytkin] false)) => (invalid-with? [:warn "vrk:CR324"]))))

@@ -6,8 +6,8 @@ Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
-Setting maps enabled for these tests
-  Set integration proxy on
+#Setting maps enabled for these tests
+#  Set integration proxy on
 
 Admin adds new municipality link
   Sipoo logs in
@@ -71,5 +71,5 @@ User does not see link
   Prepare first request  Latokuja 103  753  753-423-2-160  R
   Element should not be visible  //a[text()='${name} fi']
 
-Setting maps disabled again after the tests
-  Set integration proxy off
+#Setting maps disabled again after the tests
+#  Set integration proxy off

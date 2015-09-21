@@ -7,7 +7,7 @@ Resource       ../../common_resource.robot
 
 Mikko creates application
   Mikko logs in
-  Create application the fast way  authority-cant-see-drafts  753  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  authority-cant-see-drafts  753-416-25-30  kerrostalo-rivitalo
   [Teardown]  logout
 
 Sonja should not see applications at this stage
@@ -51,7 +51,3 @@ Veikko should see only zero (Tampere) applications
   [Teardown]  logout
 
 *** Keywords ***
-
-Comment count is
-  [Arguments]  ${amount}
-  Xpath Should Match X Times  //section[@id='application']//div[@data-test-id='comments-table']//div[contains(@class, 'comment')]  ${amount}

@@ -3,6 +3,12 @@ var hub = (function() {
 
   var nextId = 0;
   var subscriptions = { };
+  var debugEvents = false;
+
+  function setDebug(b) {
+    debug("Hub debug setting is " + b);
+    debugEvents = b;
+  }
 
   function Subscription(listener, filter, oneshot) {
     this.listener = listener;
@@ -44,6 +50,10 @@ var hub = (function() {
     var count = 0;
     var event = makeEvent(type, data || {});
 
+    if (debugEvents) {
+      debug(event);
+    }
+
     for (var id in subscriptions) {
       var s = subscriptions[id];
       if (s.deliver(event)) {
@@ -58,10 +68,10 @@ var hub = (function() {
 
   // Helpers for page change events:
   function onPageLoad(pageId, listener, oneshot) {
-    hub.subscribe({type: "page-load", pageId: pageId}, listener, oneshot);
+    return hub.subscribe({type: "page-load", pageId: pageId}, listener, oneshot);
   }
   function onPageUnload(pageId, listener, oneshot) {
-    hub.subscribe({type: "page-unload", pageId: pageId}, listener, oneshot);
+    return hub.subscribe({type: "page-unload", pageId: pageId}, listener, oneshot);
   }
 
   return {
@@ -69,7 +79,8 @@ var hub = (function() {
     unsubscribe:    unsubscribe,
     send:           send,
     onPageLoad:     onPageLoad,
-    onPageUnload:   onPageUnload
+    onPageUnload:   onPageUnload,
+    setDebug:       setDebug
   };
 
 })();

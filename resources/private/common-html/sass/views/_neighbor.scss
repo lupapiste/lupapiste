@@ -7,3 +7,18 @@
     background-position: center center;
   }
 }
+
+.dialog.neighbors-edit {
+  width: 415px !important;
+  max-height: 590px !important;
+}
+
+.application_summary_info.neighbor {
+  float: left;
+  width: 50%;
+}
+
+.application-map-container.neighbor {
+    width: $map-width; // from _application.scss
+    float: left;
+}

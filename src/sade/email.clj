@@ -27,14 +27,17 @@
 ;; ---------
 ;;
 
-(def deliver-email (fn [to subject body]
-                     (assert (string? to) "must provide 'to'")
-                     (assert (string? subject) "must provide 'subject'")
-                     (assert body "must provide 'body'")
-                     (let [message (merge defaults {:to to :subject subject :body body})
-                           error (postal/send-message config message)]
-                       (when-not (= (:error error) :SUCCESS)
-                         error))))
+(declare deliver-email)
+
+(when-not (env/value :email :dummy-server)
+  (def deliver-email (fn [to subject body]
+                      (assert (string? to) "must provide 'to'")
+                      (assert (string? subject) "must provide 'subject'")
+                      (assert body "must provide 'body'")
+                      (let [message (merge defaults {:to to :subject subject :body body})
+                            error (postal/send-message config message)]
+                        (when-not (= (:error error) :SUCCESS)
+                          error)))))
 
 ;;
 ;; Sending 'raw' email messages:

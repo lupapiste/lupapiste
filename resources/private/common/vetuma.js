@@ -1,26 +1,18 @@
-vetuma = function(e$,success,urls) {
+var vetuma = (function() {
   "use strict";
-  ajax
-    .get("/api/vetuma/user")
-    .raw(true)
-    .success(function(user) {
-      if(user && user.userid) {
-        if(success) {
-          success(user);
-        } else {
-          debug("vetuma successful. no callback registered.");
-        }
-      } else {
-        if(!urls) {
-          var url = window.location.pathname + window.location.search + window.location.hash;
-          var urlmap = urls ? urls : {success: url, cancel: url, error: url};
-          jQuery.get("/api/vetuma", urlmap, function(form) {
-            e$.html(form).find(":submit").addClass("btn btn-primary")
-                                         .attr("value",loc("register.action"))
-                                         .attr("data-test-id", "vetuma-init");
-          });
-        }
-      }
-    })
-    .call();
-};
+
+  function wrapHandlers(onFound, onNotFound) {
+    return function (resp) {
+      return resp && resp.userid ? onFound(resp) : onNotFound(resp);
+    };
+  }
+
+  function getUser(onFound, onNotFound, onError) {
+    ajax.get("/api/vetuma/user").raw(true).success(wrapHandlers(onFound, onNotFound)).error(onError).call();
+  }
+
+  return {
+    getUser: getUser
+  };
+
+})();

@@ -99,14 +99,14 @@ var util = (function($) {
 
   function autofocus(baseElem$) {
     var base$ = baseElem$ || $("body");
-    return base$.find("[autofocus]:visible:first").focus();
+    return base$.find("[autofocus]:enabled:visible:first").focus();
   }
 
   function isNum(s) {
     return s && s.match(/^\s*\d+\s*$/) !== null;
   }
 
-  function getIn(m, keyArray) {
+  function getIn(m, keyArray, defaultValue) {
     if (m && keyArray && keyArray.length > 0) {
       var key = keyArray[0];
       if (m.hasOwnProperty(key)) {
@@ -114,13 +114,22 @@ var util = (function($) {
         if (keyArray.length === 1) {
           return val;
         }
-        return getIn(val, keyArray.splice(1, keyArray.length - 1));
+        return getIn(val, keyArray.splice(1, keyArray.length - 1), defaultValue);
+      }
+    }
+    return defaultValue;
+  }
+
+  function getFeatureName(feature) {
+    for(var key in feature.properties) { // properties to lower case
+      if (key.toLowerCase() === "nimi") {
+        return feature.properties[key];
       }
     }
     return undefined;
   }
 
-    function locKeyFromDocPath(pathStr) {
+  function locKeyFromDocPath(pathStr) {
     var res = (pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
     return res;
   }
@@ -133,8 +142,8 @@ var util = (function($) {
   function isPartyDoc(doc) { return doc["schema-info"].type === "party"; }
   function isNotPartyDoc(doc) { return !isPartyDoc(doc); }
 
-  function isValidFinnishY(y) {
-    var m = /^FI(\d{7})-(\d)$/.exec(y || ""),
+  function isValidY(y) {
+    var m = /^(\d{7})-(\d)$/.exec(y || ""),
         number = m && m[1],
         check  = m && m[2];
 
@@ -151,36 +160,78 @@ var util = (function($) {
     return cn === parseInt(check, 10);
   }
 
-  function isValidNonFinnishY(y) {
-    var m = /^([A-Z]{2})\w+/.exec(y),
-        c = m && m[1];
-    return c && c !== "FI";
-  }
-
-  function isValidY(y) {
-    return isValidFinnishY(y) || isValidFinnishY("FI" + y) || isValidNonFinnishY(y);
-  }
-
-  function coerceNationalY(y) {
-    return isValidFinnishY("FI" + y) ? "FI" + y : y;
-  }
-
-  function isValidFinnishOVT(ovt) {
+  function isValidOVT(ovt) {
     var m = /^0037(\d{7})(\d)\d{0,5}$/.exec(ovt || ""),
         y = m && m[1],
         c = m && m[2];
     if (!y || !c) { return false; }
-    return isValidY("FI" + y + "-" + c);
+    return isValidY(y + "-" + c);
   }
 
-  function isValidNonFinnishOVT(ovt) {
-    var m = /^(\d{4}).+/.exec(ovt),
-        c = m && m[1];
-    return c && c !== "0037";
+  var personIdCn = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D",
+    "E","F","H","J","K","L","M","N","P","R","S","T","U","V",
+    "W","X","Y"];
+
+  function isValidPersonId(personId) {
+    var m = /^(\d{6})[aA+-]([0-9]{3})([0-9A-Z])$/.exec(personId || ""),
+        n = m && m[1] + m[2],
+        c = m && m[3];
+
+    if(!m) { return false; }
+
+    return personIdCn[parseInt(n, 10) % 31] === c;
   }
 
-  function isValidOVT(ovt) {
-    return isValidFinnishOVT(ovt) || isValidNonFinnishOVT(ovt);
+  function extractRequiredErrors(errors) {
+    var errs = _.map(errors, function(errArray) {
+      return _.filter(errArray, function(err) {
+        var ret = _.includes(err.result, "illegal-value:required");
+        return ret;
+      });
+    });
+    errs = _.filter(errs, function(errArray) {
+      return errArray.length > 0;
+    });
+    return errs;
+  }
+
+  function dissoc(m, k) {
+    delete m[k];
+    return m;
+  }
+
+  function randomElementId(prefix) {
+    var random = _.random(Number.MAX_SAFE_INTEGER);
+    var id = prefix ? prefix + "-" + random : random.toString();
+    if ($(id).length) {
+      return randomElementId(prefix);
+    }
+    return id;
+  }
+
+  function withSuffix(strOrArr, suffix) {
+    if (_.isArray(strOrArr)) {
+      return _.map(strOrArr, function(s) {
+        return s + suffix;
+      });
+    }
+    return [strOrArr + suffix];
+  }
+
+  function filterDataByQuery(data, q, selected) {
+    return _.filter(data, function(item) {
+      return _.reduce(q.split(" "), function(result, word) {
+        return !_.some(selected, item) && _.contains(item.label.toUpperCase(), word.toUpperCase()) && result;
+      }, true);
+    });
+  }
+
+  function showSavedIndicator(response) {
+    if (response.ok) {
+      hub.send("indicator", {style: "positive"});
+    } else {
+      hub.send("indicator", {style: "negative"});
+    }
   }
 
   return {
@@ -190,8 +241,10 @@ var util = (function($) {
     isValidEmailAddress: isValidEmailAddress,
     isValidPassword:     isValidPassword,
     isValidY:            isValidY,
-    coerceNationalY:     coerceNationalY,
     isValidOVT:          isValidOVT,
+    isValidPersonId:     isValidPersonId,
+    lowerCase: function(s) {return _.isString(s) ? s.toLowerCase() : s;},
+    upperCase: function(s) {return _.isString(s) ? s.toUpperCase() : s;},
     prop: {
       isPropertyId:           isPropertyId,
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,
@@ -204,10 +257,17 @@ var util = (function($) {
     autofocus:    autofocus,
     isNum:        isNum,
     getIn:        getIn,
-        locKeyFromDocPath: locKeyFromDocPath,
+    getFeatureName: getFeatureName,
+    locKeyFromDocPath: locKeyFromDocPath,
     getDocumentOrder: getDocumentOrder,
     isPartyDoc: isPartyDoc,
-    isNotPartyDoc: isNotPartyDoc
+    isNotPartyDoc: isNotPartyDoc,
+    extractRequiredErrors: extractRequiredErrors,
+    dissoc: dissoc,
+    randomElementId: randomElementId,
+    withSuffix: withSuffix,
+    filterDataByQuery: filterDataByQuery,
+    showSavedIndicator: showSavedIndicator
   };
 
 })(jQuery);

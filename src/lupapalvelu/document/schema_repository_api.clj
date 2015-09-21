@@ -4,6 +4,6 @@
             [lupapalvelu.action :refer [defquery]]))
 
 (defquery schemas
-  {:roles [:applicant :authority]}
+  {:user-roles #{:applicant :authority :oirAuthority}}
   [_]
   (ok :schemas (schemas/get-all-schemas)))

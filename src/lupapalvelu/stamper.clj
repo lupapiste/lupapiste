@@ -2,13 +2,13 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error fatal]]
             [clojure.string :as s]
             [clojure.java.io :as io]
-            [clojure.java.shell :as shell]
             [slingshot.slingshot :refer [throw+]]
             [me.raynes.fs :as fs]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
+            [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime])
   (:import [java.io InputStream OutputStream]
@@ -35,7 +35,7 @@
 ;; Generate stamp:
 ;;
 
-(defn qrcode ^BufferedImage [data size]
+(defn qrcode ^java.awt.image.BufferedImage [data size]
   (MatrixToImageWriter/toBufferedImage
     (.encode (QRCodeWriter.) data BarcodeFormat/QR_CODE size size)))
 
@@ -94,20 +94,14 @@
     (ss/starts-with content-type "image/")  (do (stamp-image stamp content-type in out x-margin y-margin transparency) nil)
     :else                                   nil))
 
-(defn- create-pdftk-file [in file-name]
-  (let [result (shell/sh "pdftk" "-" "output" file-name :in in)]
-    ; POSIX return code 0 signals success, others are failure codes
-    (when-not (zero? (:exit result))
-      (throw (RuntimeException. (str "pdftk returned " (:exit result) ", STDOUT: " (str (:out result) ", STDERR: " (:err result))))))))
-
-(def- tmp (str (System/getProperty "java.io.tmpdir") (System/getProperty "file.separator")))
+(def- tmp (str (System/getProperty "java.io.tmpdir") env/file-separator))
 
 (defn- retry-stamping [stamp-graphic file-id out x-margin y-margin transparency]
   (let [tmp-file-name (str tmp file-id "-" (now) ".pdf")]
     (debugf "Redownloading file %s from DB and running `pdftk - output %s`" file-id tmp-file-name)
     (try
       (with-open [in ((:content (mongo/download file-id)))]
-        (create-pdftk-file in tmp-file-name))
+        (pdftk/create-pdftk-file in tmp-file-name))
       (with-open [in (io/input-stream tmp-file-name)]
         (stamp-stream stamp-graphic "application/pdf" in out x-margin y-margin transparency))
       (finally
@@ -154,17 +148,21 @@
   (let [visible-area (rotate-rectangle crop-box page-rotation)
         sides (get-sides visible-area)
         page-size (get-sides (rotate-rectangle page-box page-rotation))
-        rotate? (pos? (mod page-rotation 180))
         ; If the visible area does not fit into page, we must crop
-        max-x (if (or (< (:width page-size) (+ (:right sides) (:left sides)))
-                    (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270))
-                    )
-               (- (:right sides) (:left sides))
-               (:right sides))
-        min-y (:bottom sides)
+        max-x (if (or
+                    ; This is possibly better condition than the one below, as it does not trust that page's left side is at 0 position.
+                    ; Though, with it some 'problematic pdf' tests in stamper_test.clj will not pass.
+                    ;(< (+ (:left page-size) (:width page-size)) (+ (:left sides) (:width sides)))
+                    (and (< (:width page-size) (+ (:right sides) (:left sides))) (not= page-rotation 0))
+                    (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270)))
+                (- (:right sides) (:left sides))
+                (:right sides))
+        min-y (if (and (zero? (:bottom (get-sides crop-box))) (zero? (:bottom (get-sides page-box))))
+                (:bottom page-size)
+                (:bottom sides))
         x (- max-x stamp-width (mm->u x-margin))
         y (+ min-y (mm->u y-margin))]
-    (debugf "Rotation %s, visible-area with rotation: %s, page with rotation %s,  max-x/min-y: %s/%s, stamp location x/y: %s/%s"
+    (debugf "Rotation %s, crop-box with rotation: %s, page-box with rotation: %s,  max-x/min-y: %s/%s, stamp location x/y: %s/%s"
       page-rotation sides page-size max-x min-y x y)
     [x y]))
 
@@ -266,5 +264,15 @@
         (try
           (stamp-pdf my-stamp my-in my-out 10 100 0)
           (catch Throwable t (error t))))))
+
+  ; This REPL-snippet can be used to read metadata from a given pdf. Data is written to target/pdf-metadata-output.txt
+  (let [fpath       "problematic-pdfs/pohjapiirros.pdf"
+        output-path "target/pdf-metadata-output.txt"]
+    (with-open [in (io/input-stream fpath)
+                reader (PdfReader. in)
+                out (io/output-stream output-path)]
+      (.write out (.getMetadata reader))
+      ;(prn (.getInfo reader)) ; Sometimes PDF-metadata can be stored in the info dictionary
+      ))
 
   )

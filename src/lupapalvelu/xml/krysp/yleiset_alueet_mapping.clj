@@ -5,7 +5,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
             [lupapalvelu.document.yleiset-alueet-canonical :as ya-canonical]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]))
+            [lupapalvelu.xml.emit :refer [element-to-xml]]
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 ;; Tags changed in "yritys-child-modified":
 ;; :kayntiosoite -> :kayntiosoitetieto
@@ -15,17 +16,15 @@
 (def- yritys-child-modified_211
   (walk/prewalk
     (fn [m] (if (= (:tag m) :kayntiosoite)
-              (assoc
-                (assoc m :tag :kayntiosoitetieto)
-                :child
-                [{:tag :Kayntiosoite :child mapping-common/postiosoite-children-ns-yht}])
+              (assoc m
+                :tag :kayntiosoitetieto
+                :child [{:tag :Kayntiosoite :child mapping-common/postiosoite-children-ns-yht}])
               m))
     (walk/prewalk
       (fn [m] (if (= (:tag m) :postiosoite)
-                (assoc
-                  (assoc m :tag :postiosoitetieto)
-                  :child
-                  [{:tag :Postiosoite :child mapping-common/postiosoite-children-ns-yht}])
+                (assoc m
+                  :tag :postiosoitetieto
+                  :child [{:tag :Postiosoite :child mapping-common/postiosoite-children-ns-yht}])
                 m))
       mapping-common/yritys-child_211)))
 
@@ -45,6 +44,11 @@
                          :child yritys-child-modified_211}]}
                {:tag :rooliKoodi}])
 
+(def osapuoli-215
+  (-> osapuoli
+    (mapping-common/update-child-element [:henkilotieto :Henkilo] {:tag :Henkilo :child mapping-common/henkilo-child-ns-yht-215})
+    (mapping-common/update-child-element [:yritystieto :Yritys]   {:tag :Yritys :child mapping-common/yritys-child_215})))
+
 (def vastuuhenkilo [{:tag :Vastuuhenkilo
                      :child [{:tag :sukunimi}
                              {:tag :etunimi}
@@ -54,6 +58,11 @@
                              {:tag :puhelinnumero}
                              {:tag :sahkopostiosoite}
                              {:tag :rooliKoodi}]}])
+
+(def vastuuhenkilo-215
+  (mapping-common/update-child-element vastuuhenkilo
+    [:osoitetieto :osoite]
+    {:tag :osoite :child mapping-common/postiosoite-children-ns-yht-215}))
 
 (def liitetieto [{:tag :Liite
                   :child [{:tag :kuvaus :ns "yht"}
@@ -68,6 +77,11 @@
                                     :child [{:tag :metatietoArvo}
                                             {:tag :metatietoNimi}]}]}]}])
 
+(def liitetieto-215
+  (mapping-common/update-child-element liitetieto
+    [:Liite :tekija]
+    {:tag :tekija :child osapuoli-215}))
+
 (def lausunto [{:tag :Lausunto
                 :child [{:tag :viranomainen}
                         {:tag :pyyntoPvm }
@@ -81,6 +95,11 @@
                                           {:tag :puoltotieto
                                            :child [{:tag :Puolto
                                                     :child [{:tag :puolto}]}]}]}]}]}])
+
+(def lausunto-215
+  (mapping-common/update-child-element lausunto
+    [:Lausunto :lausuntotieto :Lausunto :liitetieto]
+    {:tag :liitetieto :child liitetieto-215}))
 
 (def kasittelytieto [{:tag :Kasittelytieto
                       :child [{:tag :muutosHetki :ns "yht"}
@@ -98,7 +117,7 @@
   {:pre [krysp-version]}
   (let [ya_to_krysp_2_1_2 {:tag :YleisetAlueet
                            :ns "yak"
-                           :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.1.2")
+                           :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :YA "2.1.2")
                                          :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"}
                                         mapping-common/common-namespaces)
 
@@ -111,8 +130,7 @@
                                                       :child [mapping-common/lupatunnus]}
                                                      {:tag :alkuPvm}
                                                      {:tag :loppuPvm}
-                                                     {:tag :sijaintitieto
-                                                      :child [mapping-common/sijantiType]}
+                                                     (mapping-common/sijaintitieto)
                                                      {:tag :pintaala}
                                                      {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa
                                                       :child [{:tag :Osapuoli
@@ -156,45 +174,42 @@
                                                                         ;:tag :tunniste
                                                                         }]}]}]}]}]}
         ya_to_krysp_2_1_3 (-> ya_to_krysp_2_1_2 (assoc-in [:attr :xsi:schemaLocation]
-                                                          (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.1.3"))
+                                                          (mapping-common/schemalocation :YA "2.1.3"))
                             (update-in [:child] mapping-common/update-child-element
-                                       [:yleinenAlueAsiatieto lupa-name-key :maksajatieto]
-                                       {:tag :maksajatieto
-                                        :child [{:tag :Maksaja
-                                                 :child mapping-common/maksajatype-children_213}]})
+                                       [:yleinenAlueAsiatieto lupa-name-key :maksajatieto :Maksaja]
+                                       {:tag :Maksaja :child mapping-common/maksajatype-children_213})
                             (update-in [:child] mapping-common/update-child-element
-                                       [:yleinenAlueAsiatieto lupa-name-key :osapuolitieto :Osapuoli :yritystieto :Yritys ]
-                                       {:tag :Yritys :child mapping-common/yritys-child_213}))]
-
-
-
+                                       [:yleinenAlueAsiatieto lupa-name-key :osapuolitieto :Osapuoli :yritystieto :Yritys]
+                                       {:tag :Yritys :child mapping-common/yritys-child_213}))
+        ya_to_krysp_2_2_0 (-> ya_to_krysp_2_1_3 (assoc-in [:attr :xsi:schemaLocation]
+                                                  (mapping-common/schemalocation :YA "2.2.0"))
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :sijaintitieto]
+                                       {:tag :sijaintitieto :child [mapping-common/sijantiType_215]})
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :maksajatieto :Maksaja]
+                                       {:tag :Maksaja :child mapping-common/maksajatype-children_215})
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :osapuolitieto :Osapuoli]
+                                       {:tag :Osapuoli :child osapuoli-215})
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :lausuntotieto]
+                                       {:tag :lausuntotieto :child lausunto-215})
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :liitetieto]
+                                       {:tag :liitetieto :child liitetieto-215})
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :vastuuhenkilotieto]
+                                       {:tag :vastuuhenkilotieto :child vastuuhenkilo-215}))
+        ya_to_krysp_2_2_1 (-> ya_to_krysp_2_2_0
+                            (assoc-in [:attr :xsi:schemaLocation]
+                              (mapping-common/schemalocation :YA "2.2.1")))]
     (case (name krysp-version)
-    "2.1.2" ya_to_krysp_2_1_2
-    "2.1.3" ya_to_krysp_2_1_3
-    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version))))))
-
-(defn- add-statement-attachments [lupa-name-key canonical statement-attachments]
-  ;; if we have no statement-attachments to add return the canonical map itself
-  (if (empty? statement-attachments)
-    canonical
-    (reduce
-      (fn [c a]
-        (let [lausuntotieto (get-in c [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto])
-              lausunto-id (name (first (keys a)))
-              paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id) %) lausuntotieto)
-              index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
-              paivitetty-lausunto (assoc-in
-                                    paivitettava-lausunto
-                                    [:Lausunto :lausuntotieto :Lausunto :liitetieto]
-                                    ((keyword lausunto-id) a))
-              paivitetty (assoc
-                           lausuntotieto
-                           index-of-paivitettava
-                           paivitetty-lausunto)]
-          (assoc-in c [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto] paivitetty)))
-      canonical
-      statement-attachments)))
-
+      "2.1.2" ya_to_krysp_2_1_2
+      "2.1.3" ya_to_krysp_2_1_3
+      "2.2.0" ya_to_krysp_2_2_0
+      "2.2.1" ya_to_krysp_2_2_1
+      (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version))))))
 
 (defn- map-kayttotarkoitus [canonical lupa-name-key]
   (update-in canonical [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :kayttotarkoitus]
@@ -227,27 +242,28 @@
    3rd parameter (submitted-application) is not used on YA applications."
   [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [lupa-name-key (ya-operation-type-to-schema-name-key
-                        (-> application :operations first :name keyword))
+                        (-> application :primaryOperation :name keyword))
         canonical-without-attachments (ya-canonical/application-to-canonical application lang)
-        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                 [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto]))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        canonical-with-statement-attachments (add-statement-attachments
-                                               lupa-name-key
+        canonical-with-statement-attachments (mapping-common/add-statement-attachments
                                                canonical-without-attachments
-                                               statement-attachments)
+                                               statement-attachments
+                                               [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto])
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
-                    attachments)
-        xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
+                    attachments-canonical)
+        xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)
+        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
-    (mapping-common/write-to-disk
+    (writer/write-to-disk
       application
-      attachments
-      statement-attachments
+      attachments-for-write
       xml
       krysp-version
       output-dir
@@ -266,4 +282,4 @@
           canonical (ya-canonical/jatkoaika-to-canonical application lang)
           xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
 
-      (mapping-common/write-to-disk application nil nil xml krysp-version output-dir)))
+      (writer/write-to-disk application nil xml krysp-version output-dir)))

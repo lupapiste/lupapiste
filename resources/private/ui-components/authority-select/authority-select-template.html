@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="authority-select-template">
+<p data-bind="ltext: 'application.assignee'"></p>
+<span class="application_summary_text">
+  <span data-bind="fullName: authority"></span>
+     <a data-bind="click: edit, visible: authorization.ok('assign-application'), attr: {id: kind + '-assignee-edit'}"
+     class="link-btn">
+     <i class="lupicon-pen"></i>
+     <span data-bind="ltext: 'choose'"></span></a>
+</span>
+    </script>
+  </section>
+</body>
+</html>

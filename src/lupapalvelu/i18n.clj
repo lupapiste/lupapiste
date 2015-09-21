@@ -5,7 +5,8 @@
             [ontodev.excel :as xls]
             [cheshire.core :as json]
             [sade.env :as env]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [lupapiste-commons.i18n.core :as commons]))
 
 (def default-lang :fi)
 
@@ -16,10 +17,7 @@
   (let [t (get row lang)]
     (if (seq t)
       (add-term k t result lang)
-      (do
-        (when-not (s/blank? default-t)
-          (errorf "Missing localization for %s in %s, defaulting to %s" k lang default-t))
-        (add-term k default-t result lang)))))
+      (add-term k default-t result lang))))
 
 (defn- process-row [langs-but-default result row]
   (let [k (get row "key")
@@ -34,18 +32,33 @@
 (defn- read-sheet [headers sheet]
   (->> sheet seq rest (map xls/read-row) (map (partial zipmap headers))))
 
-(defn- load-excel []
-  (with-open [in (io/input-stream (io/resource "i18n.xlsx"))]
-    (let [wb      (xls/load-workbook in)
-          langs   (-> wb seq first first xls/read-row rest)
-          headers (cons "key" langs)
-          data    (->> wb (map (partial read-sheet headers)) (apply concat))
-          langs-but-default (disj (set langs) (name default-lang))]
-      (reduce (partial process-row langs-but-default) {} data))))
+(defn- load-translations []
+  (merge-with conj
+              (-> (commons/read-translations (io/resource "shared_translations.txt"))
+                  commons/keys-by-language)
+              (with-open [in (io/input-stream (io/resource "i18n.xlsx"))]
+                (let [wb      (xls/load-workbook in)
+                      langs   (-> wb seq first first xls/read-row rest)
+                      headers (cons "key" langs)
+                      data    (->> wb (map (partial read-sheet headers)) (apply concat))
+                      langs-but-default (disj (set langs) (name default-lang))]
+                  (reduce (partial process-row langs-but-default) {} data)))))
 
-(def- excel-data (future (load-excel)))
+(def- localizations (atom nil))
+(def- excel-data (future (load-translations)))
 
-(defn get-localizations [] @excel-data)
+(defn reload! []
+  (if (seq @localizations)
+    (reset! localizations (load-translations))
+    (reset! localizations @excel-data)))
+
+(defn- get-or-load-localizations []
+  (if-not @localizations
+    (reload!)
+    @localizations))
+
+(defn get-localizations []
+  (get-or-load-localizations))
 
 (def languages (-> (get-localizations) keys set))
 
@@ -77,7 +90,8 @@
 (def ^:dynamic *lang* nil)
 (def ^{:doc "Function that localizes provided term using the current language. Use within the \"with-lang\" block."
        :dynamic true}
-  loc)
+  loc
+  (fn [& args] (throw (Exception. (str "loc called outside with-lang context, args: " args)))))
 
 (defmacro with-lang [lang & body]
   `(binding [*lang* (keyword ~lang)
@@ -100,24 +114,16 @@
     {}
     lines))
 
-(env/in-dev
-
-  ;;
-  ;; Re-define get-localizations so that i18n.txt is always loaded and merged to excel data.
-  ;;
-
-  (defn- load-add-ons []
-    (when-let [in (io/resource "i18n.txt")]
-      (with-open [in (io/reader in)]
-        (read-lines (line-seq in)))))
-
-  (defn get-localizations []
-    (update-in @excel-data [default-lang] merge (load-add-ons))))
-
 (defn- load-add-ons []
   (when-let [in (io/resource "i18n.txt")]
     (with-open [in (io/reader in)]
       (read-lines (line-seq in)))))
 
-(defn get-localizations []
-  (update-in @excel-data [default-lang] merge (load-add-ons)))
+(env/in-dev
+  ;;
+  ;; Re-define get-localizations so that i18n.txt is always loaded and merged to excel data.
+  ;;
+  (defn get-localizations []
+    (let [lz (get-or-load-localizations)]
+      (update-in lz [default-lang] merge (load-add-ons)))))
+

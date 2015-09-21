@@ -1,4 +1,4 @@
-body {padding-top: 1em;min-width:initial;}
+body {min-width:initial;}
 #initLoader {text-align:center;line-height:150px}
 #initLoader img {vertical-align:bottom}
 #attachmentUploadForm {display:none}

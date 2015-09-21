@@ -4,7 +4,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.maa-aines-canonical :as maa-aines-canonical]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]))
+            [lupapalvelu.xml.emit :refer [element-to-xml]]
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 (def maaAineslupaAsia
   [mapping-common/yksilointitieto
@@ -57,7 +58,7 @@
 (def maa-aines_to_krysp
   {:tag :MaaAinesluvat
    :ns "ymm"
-   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/maa_ainesluvat" "2.1.2")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :MAL "2.1.2")
                  :xmlns:ymm "http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
@@ -74,18 +75,19 @@
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
         canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:MaaAinesluvat :maaAineslupaAsiatieto :MaaAineslupaAsia :liitetieto]
-                    attachments)
-        xml (element-to-xml canonical maa-aines_to_krysp)]
+                    attachments-canonical)
+        xml (element-to-xml canonical maa-aines_to_krysp)
+        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
-    (mapping-common/write-to-disk
+    (writer/write-to-disk
       application
-      attachments
-      statement-attachments
+      attachments-for-write
       xml
       krysp-version
       output-dir

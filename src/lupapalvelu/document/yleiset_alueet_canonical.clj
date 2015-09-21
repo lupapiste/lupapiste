@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.yleiset-alueet-canonical
   (:require [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.domain :as domain]
             [sade.util :as util]
             [sade.core :refer :all]
             [clojure.walk :as walk]))
@@ -10,11 +11,10 @@
                     :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
                     :asiatunnus (:id application)
                     :paivaysPvm (util/to-xml-date (state-timestamp application))
-                    :kasittelija (let [handler (:authority application)]
-                                   (if (seq handler)
-                                     {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
-                                                                      :sukunimi (:lastName handler)}}}}
-                                     empty-tag))}})
+                    :kasittelija (if (domain/assigned? application)
+                                   {:henkilotieto {:Henkilo {:nimi {:etunimi  (get-in application [:authority :firstName])
+                                                                    :sukunimi (get-in application [:authority :lastName])}}}}
+                                   empty-tag)}})
 
 (defn- get-postiosoite [yritys]
   (let [teksti (util/assoc-when {} :teksti (-> yritys :osoite :katu))]
@@ -183,7 +183,7 @@
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
 
-        operation-name-key (-> application :operations first :name keyword)
+        operation-name-key (-> application :primaryOperation :name keyword)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
 
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
@@ -294,7 +294,7 @@
                    :yleinenAlueAsiatieto (permits application)}})
 
 
-(defn jatkoaika-to-canonical [application lang]
+(defn jatkoaika-to-canonical
   "Transforms continuation period application mongodb-document to canonical model."
   [application lang]
   (let [application (tools/unwrapped application)
@@ -323,7 +323,7 @@
         vastuuhenkilotieto (vec (filter :Vastuuhenkilo [;hakija
                                                         maksaja]))
         hankkeen-kuvaus (-> documents-by-type :hankkeen-kuvaus-jatkoaika first :data :kuvaus)
-        lisaaikatieto (when alku-pvm loppu-pvm hankkeen-kuvaus
+        lisaaikatieto (when alku-pvm
                         {:Lisaaika {:alkuPvm alku-pvm
                                     :loppuPvm loppu-pvm
                                     :perustelu hankkeen-kuvaus}})

@@ -13,10 +13,10 @@ The shared browser is opened for integration tests
   [Tags]  integration
   Open browser to login page
 
-Disable proxy
-  Set integration proxy off
+#Disable proxy
+#  Set integration proxy off
 
 Login page is in Finnish
   [Tags]  ie8
-  Page Should Not Contain  Suomeksi
-  Page Should Contain  På svenska
+  Element Should Not Contain  language-select  SV
+  Element Should Contain  language-select  FI

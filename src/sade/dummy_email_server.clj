@@ -9,6 +9,7 @@
             [sade.core :refer [ok fail now]]
             [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand]]
+            [lupapalvelu.mongo :as mongo]
             [sade.crypt :as crypt])
   (:import [org.apache.commons.io IOUtils]))
 
@@ -16,11 +17,15 @@
 ;; Dummy email server:
 ;;
 
+(defmacro with-queue [& body]
+  `(let [~'queue (or mongo/*db-name* mongo/default-db-name)]
+     ~@body))
+
 (when (env/value :email :dummy-server)
 
   (info "Initializing dummy email server")
 
-  (defonce sent-messages (atom []))
+  (defonce sent-messages (atom {}))
 
   (defn attachment-as-base64-str [file]
     (with-open [i (io/input-stream file)]
@@ -44,55 +49,71 @@
     (assert (string? to) "must provide 'to'")
     (assert (string? subject) "must provide 'subject'")
     (assert body "must provide 'body'")
-    (swap! sent-messages conj {:to to
-                               :subject subject
-                               :body (reduce parse-body {} body)
-                               :time (now)})
+    (with-queue
+      (swap! sent-messages update queue conj
+        {:to to, :subject subject, :body (reduce parse-body {} body), :time (now)}))
     nil)
 
   (alter-var-root (var sade.email/deliver-email) (constantly deliver-email))
 
   (defn reset-sent-messages []
-    (reset! sent-messages []))
+    (with-queue
+      (swap! sent-messages assoc queue nil)))
 
   (defn messages [& {reset :reset :or {reset false}}]
-    (let [m @sent-messages]
-      (when reset (reset-sent-messages))
-      m))
+    (with-queue
+      (let [m (@sent-messages queue)]
+        (when reset (reset-sent-messages))
+        (reverse m))))
 
   (defn dump-sent-messages []
     (doseq [message (messages)]
       (clojure.pprint/pprint message)))
 
-  (defcommand "send-email"
-    {:parameters [:to :subject :template]
-     :roles      [:anonymous]}
-    [{{:keys [to subject template] :as data} :data}]
-    (if-let [error (email/send-email-message to subject (email/apply-template template (dissoc data :from :to :subject :template)))]
-      (fail "send-email-message failed" error)
-      (ok)))
-
   (defquery "sent-emails"
-    {:roles [:anonymous]}
+    {:user-roles #{:anonymous}}
     [{{reset :reset :or {reset false}} :data}]
     (ok :messages (messages :reset reset)))
 
   (defquery "last-email"
-    {:roles [:anonymous]}
+    {:user-roles #{:anonymous}}
     [{{reset :reset :or {reset true}} :data}]
     (ok :message (last (messages :reset reset))))
 
+  (defn msg-header [msg]
+    {:tag :dl :content [{:tag :dt :content "To"}
+                        {:tag :dd :attrs {:data-test-id "to"} :content [(:to msg)]}
+                        {:tag :dt :content "Subject"}
+                        {:tag :dd :attrs {:data-test-id "subject"} :content [(:subject msg)]}
+                        {:tag :dt :content "Time"}
+                        {:tag :dd :attrs {:data-test-id "time"} :content [(util/to-local-datetime (:time msg))]}]})
+
   (defpage "/api/last-email" {reset :reset}
     (if-let [msg (last (messages :reset reset))]
-      (enlive/emit* (-> (enlive/html-resource (io/input-stream (.getBytes (get-in msg [:body :html]) "UTF-8")))
+      (enlive/emit* (-> (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8")))
                       (enlive/transform [:head] (enlive/append {:tag :title :content (:subject msg)}))
-                      (enlive/transform [:body] (enlive/prepend [{:tag :dl :content [{:tag :dt :content "To"}
-                                                                                     {:tag :dd :attrs {:id "to"} :content [(:to msg)]}
-                                                                                     {:tag :dt :content "Subject"}
-                                                                                     {:tag :dd :attrs {:id "subject"} :content [(:subject msg)]}
-                                                                                     {:tag :dt :content "Time"}
-                                                                                     {:tag :dd :attrs {:id "time"} :content [(util/to-local-datetime (:time msg))]}]}
+                      (enlive/transform [:body] (enlive/prepend [(msg-header msg)
                                                                  {:tag :hr}]))))
+      {:status 404 :body "No emails"}))
+
+
+
+  (defpage "/api/last-emails" {reset :reset}
+    (if-let [msgs (seq (messages :reset reset))]
+      (enlive/emit*
+        {:tag :html
+         :content [{:tag :head :content [{:tag :title, :content "Latest emails"}
+                                         {:tag :style, :content "* {font-family: sans-serif}\ndl {background-color: #eee}"}]}
+                   {:tag :body
+                    :content (map (fn [msg]
+                                    {:tag :div
+                                     :attrs {:style "border-bottom: 4px dashed black;margin: 2em"}
+                                     :content
+                                     (vector
+                                       (msg-header msg)
+                                       (first (enlive/select (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8"))) [:body])))}
+                                   ) msgs)}]
+         })
       {:status 404 :body "No emails"}))
 
   (info "Dummy email server initialized"))

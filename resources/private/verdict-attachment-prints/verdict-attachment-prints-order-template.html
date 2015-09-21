@@ -8,7 +8,8 @@
 
           <div class="dialog-header">
             <p data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.title'"></p>
-            <p class="dialog-close close" data-test-id="verdict-attachment-prints-order-close-dialog">X</p>
+            <p class="dialog-close close lupicon-remove"
+               data-test-id="verdict-attachment-prints-order-close-dialog"></p>
           </div>
           <div class="dialog-content">
 
@@ -95,7 +96,7 @@
                 </div>
                 <div class="col3">
                   <label for="printsOrderPropertyId" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.propertyId'"class="form-label"></label>
-                  <input id="printsOrderPropertyId" type="text" data-bind="textInput: propertyId"
+                  <input id="printsOrderPropertyId" type="text" data-bind="textInput: propertyIdHumanReadable"
                          data-test-id="verdict-attachment-prints-order-propertyId" class="form-input text"/>
                 </div>
               </fieldset>
@@ -104,16 +105,16 @@
 
             <div class="clear">
               <div data-bind="if: errorMessage" >
-                <div data-bind="ltext: errorMessage" class="context-error" data-test-id="verdict-attachment-prints-order-error-message"></div>
+                <div data-bind="text: errorMessage" class="context-error" data-test-id="verdict-attachment-prints-order-error-message"></div>
               </div>
 
               <button data-bind="click: orderAttachmentPrints, enable: ok"
-                      class="btn btn-primary btn-dialog" data-test-id="test-order-verdict-attachment-prints">
+                      class="btn btn-primary btn-dialog btn-prints-dialog-ok" data-test-id="test-order-verdict-attachment-prints">
                 <span data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.submit'"></span>
                 <em data-bind="visible: pending" class="button-loader"></em>
               </button>
 
-              <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
+              <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#" data-test-id="test-order-verdict-attachment-prints-cancel"></a>
             </div>
 
           </div>

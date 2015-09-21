@@ -22,13 +22,10 @@ var stamping = (function() {
 
     cancelStamping: function() {
       model.stampingMode(false);
-      var id = model.appModel.id();
+      model.appModel.open("attachments");
       model.appModel = null;
       model.attachments = null;
       model.authorization = null;
-
-      window.location.hash="!/application/" + id + "/attachments";
-      repository.load(id);
     },
 
     resetStamping: function() {
@@ -69,12 +66,11 @@ var stamping = (function() {
   function initStamp(appModel) {
     model.appModel = appModel;
     model.attachments = model.appModel.attachments();
-    model.authorization = authorization.create();
-    model.authorization.refresh(model.appModel.id());
+    model.authorization = lupapisteApp.models.applicationAuthModel;
 
     setStampFields();
 
-    window.location.hash="!/stamping/" + model.appModel.id();
+    pageutil.openPage("stamping", model.appModel.id());
   }
 
   hub.onPageLoad("stamping", function() {
@@ -84,12 +80,11 @@ var stamping = (function() {
         model.stampingMode(false);
 
         var appId = pageutil.subPage();
-        repository.load(appId, null, function(application) {
+        repository.load(appId, _.noop, function(application) {
           lupapisteApp.setTitle(application.title);
 
-          model.authorization = authorization.create();
-          model.appModel = new LUPAPISTE.ApplicationModel();
-          model.authorization.refresh(application);
+          model.authorization = lupapisteApp.models.applicationAuthModel;
+          model.appModel = lupapisteApp.models.application;
 
           ko.mapping.fromJS(application, {}, model.appModel);
 
@@ -107,6 +102,13 @@ var stamping = (function() {
       error("No application ID provided for stamping");
       LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
     }
+  });
+
+  hub.onPageUnload("stamping", function() {
+    model.stampingMode(false);
+    model.appModel = null;
+    model.attachments = null;
+    model.authorization = null;
   });
 
   hub.subscribe("start-stamping", function(param) {

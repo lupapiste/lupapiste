@@ -1,7 +1,75 @@
 ;(function() {
   "use strict";
 
-  function OrganizationsModel() {
+  var isLoading = false;
+
+  function OrganizationModel() {
+    var self = this;
+    self.organization = ko.observable({});
+    self.permanentArchiveEnabled = ko.observable(false);
+    self.indicator = ko.observable(false).extend({notify: "always"});
+
+    self.open = function(organization) {
+      // date picker needs an obervable
+      self.organization(ko.mapping.fromJS(organization));
+      isLoading = true;
+      self.permanentArchiveEnabled(organization["permanent-archive-enabled"]);
+      isLoading = false;
+      pageutil.openPage("organization");
+      return false;
+    };
+
+    self.convertOpenInforequests = function() {
+      ajax.command("convert-to-normal-inforequests", {organizationId: self.organization().id()})
+        .success(function(resp) {
+          var msg = loc("admin.converted.inforequests", resp.n);
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("infoRequests"), msg);})
+        .call();
+    };
+
+    self.openInfoRequests = ko.pureComputed(function() {
+      return self.organization().scope && _.reduce(self.organization().scope(), function(result, s) {return result || s["open-inforequest"]();}, false);
+    });
+
+    self.saveRow = function(s) {
+      var scope = ko.mapping.toJS(s);
+
+      var openingMills = null;
+      if (scope.opening) {
+        openingMills = new Date(scope.opening).getTime();
+      }
+
+      var data = {permitType: scope.permitType,
+                  municipality: scope.municipality,
+                  inforequestEnabled: scope["inforequest-enabled"],
+                  applicationEnabled: scope["new-application-enabled"],
+                  openInforequestEnabled: scope["open-inforequest"],
+                  openInforequestEmail: scope["open-inforequest-email"],
+                  opening: openingMills};
+
+      ajax.command("update-organization", data)
+        .success(function() {LUPAPISTE.ModalDialog.showDynamicOk(util.getIn(self.organization(), ["name", loc.getCurrentLanguage()]), loc("saved"));})
+        .call();
+      return false;
+    };
+
+    self.permanentArchiveEnabled.subscribe(function(value) {
+      if (isLoading) {
+        return;
+      }
+      ajax.command("set-organization-permanent-archive-enabled", {organizationId: self.organization().id(), enabled: value})
+        .success(function() {
+          self.indicator(true);
+          self.organization()["permanent-archive-enabled"](value);
+        })
+        .call();
+    });
+
+  }
+
+  var organizationModel = new OrganizationModel();
+
+  function OrganizationsModel(orgModel) {
     var self = this;
 
     self.organizations = ko.observableArray([]);
@@ -12,91 +80,18 @@
         .query("organizations")
         .pending(self.pending)
         .success(function(d) {
-          self.organizations(_.sortBy(d.organizations, function(d) { return d.name[loc.getCurrentLanguage()]; }));
+          var organizations = _.map(d.organizations, function(o) {o.open = _.partial(orgModel.open, o); return o;});
+          self.organizations(_.sortBy(organizations, function(o) { return o.name[loc.getCurrentLanguage()]; }));
         })
         .call();
     };
   }
 
-  var organizationsModel = new OrganizationsModel();
-
-  function EditOrganizationModel() {
-    var self = this;
-    self.dialogSelector = "#dialog-edit-organization";
-    self.errorMessage = ko.observable(null);
-
-    // Model
-
-    self.organizationScope = null;
-    self.applicationEnabled = ko.observable(false);
-    self.inforequestEnabled = ko.observable(false);
-    self.openInforequestEnabled = ko.observable(false);
-    self.openInforequestEmail = ko.observable("");
-    self.opening = ko.observable("");
-    self.processing = ko.observable();
-    self.pending = ko.observable();
-
-    self.reset = function(organizationScope) {
-      self.organizationScope = organizationScope;
-      self.applicationEnabled(organizationScope["new-application-enabled"] || false);
-      self.inforequestEnabled(organizationScope["inforequest-enabled"] || false);
-      self.openInforequestEnabled(organizationScope["open-inforequest"] || false);
-      self.openInforequestEmail(organizationScope["open-inforequest-email"] || "");
-      self.opening(organizationScope.opening || "");
-      self.processing(false);
-      self.pending(false);
-    };
-
-    self.ok = ko.computed(function() {
-      return true;
-    });
-
-    // Open the dialog
-
-    self.open = function(organizationScope) {
-      self.reset(organizationScope);
-      LUPAPISTE.ModalDialog.open(self.dialogSelector);
-    };
-
-    self.onSuccess = function() {
-      self.errorMessage(null);
-      LUPAPISTE.ModalDialog.close();
-      organizationsModel.load();
-    };
-
-    self.onError = function(resp) {
-      self.errorMessage(resp.text);
-    };
-
-    self.updateOrganization = function() {
-      var opening = self.opening();
-      var openingMills = null;
-      if (opening) {
-        openingMills = new Date(opening).getTime();
-      }
-
-      var data = {permitType: self.organizationScope.permitType,
-                  municipality: self.organizationScope.municipality,
-                  inforequestEnabled: self.inforequestEnabled(),
-                  applicationEnabled: self.applicationEnabled(),
-                  openInforequestEnabled: self.openInforequestEnabled(),
-                  openInforequestEmail: self.openInforequestEmail(),
-                  opening: openingMills};
-      ajax.command("update-organization", data)
-        .processing(self.processing)
-        .pending(self.pending)
-        .success(self.onSuccess)
-        .error(self.onError)
-        .call();
-      return false;
-    };
-
-  }
-
-  var editOrganizationModel = new EditOrganizationModel();
+  var organizationsModel = new OrganizationsModel(organizationModel);
 
   function LoginAsModel() {
     var self = this;
+    self.role = ko.observable("authority");
     self.password = ko.observable("");
     self.organizationId = null;
 
@@ -108,9 +103,9 @@
 
     self.login = function() {
       ajax
-        .command("impersonate-authority", {organizationId: self.organizationId, password: self.password()})
+        .command("impersonate-authority", {organizationId: self.organizationId, role: self.role(), password: self.password()})
         .success(function() {
-          window.location.href = "/app/fi/authority";
+          window.location.href = "/app/fi/" + _.kebabCase(self.role());
         })
         .call();
       return false;
@@ -123,9 +118,9 @@
   $(function() {
     $("#organizations").applyBindings({
       "organizationsModel": organizationsModel,
-      "editOrganizationModel": editOrganizationModel,
       "loginAsModel": loginAsModel
     });
+    $("#organization").applyBindings({organizationModel:organizationModel});
   });
 
 })();

@@ -1,12 +1,17 @@
 (ns sade.util
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
-            [clojure.string :refer [join]]
-            [sade.strings :refer [numeric? decimal-number?] :as ss]
+            [clojure.java.io :as io]
+            [sade.strings :refer [numeric? decimal-number? trim] :as ss]
+            [sade.core :refer :all]
             [clj-time.format :as timeformat]
+            [clj-time.core :refer [days weeks months years ago]]
             [clj-time.coerce :as tc]
-            [schema.core :as sc])
-  (:import [org.joda.time LocalDateTime]))
+            [schema.core :as sc]
+            [taoensso.timbre :as timbre :refer [debugf]]
+            [me.raynes.fs :as fs])
+  (:import [org.joda.time LocalDateTime]
+           [java.util.jar JarFile]))
 
 ;;
 ;; Nil-safe number utilities
@@ -88,14 +93,6 @@
   [id col]
   (some (fn [m] (when (= id (:id m)) m)) col))
 
-(defn update-in-repeating
-  ([m [k & ks] f & args]
-    (if (every? (comp ss/numeric? name) (keys m))
-      (apply hash-map (mapcat (fn [[repeat-k v]] [repeat-k (apply update-in-repeating v (conj ks k) f args)] ) m))
-      (if ks
-        (assoc m k (apply update-in-repeating (get m k) ks f args))
-        (assoc m k (apply f (get m k) args))))))
-
 ; From clojure.contrib/seq
 
 (defn indexed
@@ -142,12 +139,12 @@
         (or
           (contains-value? (first values) checker)
           (contains-value? (rest values) checker))))
-    (if checker
+    (if (fn? checker)
       (checker coll)
-      false)))
+      (= coll checker))))
 
 (defn ->int
-  "Reads a integer from input. Returns default if not a integer.
+  "Reads a integer from input. Returns default if not an integer.
    Default default is 0"
   ([x] (->int x 0))
   ([x default]
@@ -157,12 +154,19 @@
                           (number? x)  (str (int x))
                           :else        (str x))
                         10)
-      (catch Exception e
+      (catch Exception _
         default))))
 
-(defn ->double [v]
-  (let [s (str v)]
-    (if (or (numeric? s) (decimal-number? s)) (Double/parseDouble s) 0.0)))
+(defn ->double
+  "Reads a double from input. Return default if not a double.
+  Default is 0.0"
+  ([v] (->double v 0.0))
+  ([v default]
+   (let [s (str v)]
+     (try
+       (Double/parseDouble s)
+       (catch Exception _
+         default)))))
 
 (defn abs [n]
   {:pre [(number? n)]}
@@ -256,23 +260,22 @@
                 4 "%02d:%02d:%02d.%d")]
       (apply format fmt (map ->int matches)))))
 
-(def property-id-pattern
-  "Regex for property id human readable format"
-  #"^(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})$")
+(defn get-timestamp-from-now
+  "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
+  [time-key amount]
+  {:pre [(#{:day :week :month} time-key)]}
+  (let [time-fn (case time-key
+                  :day days
+                  :week weeks
+                  :month months
+                  :years years)]
+    (tc/to-long (-> amount time-fn ago))))
 
-(defn to-property-id [^String human-readable]
-  (let [parts (map #(Integer/parseInt % 10) (rest (re-matches property-id-pattern human-readable)))]
-    (apply format "%03d%03d%04d%04d" parts)))
-
-(def human-readable-property-id-pattern
-  "Regex for splitting db-saved property id to human readable form"
-  #"^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$")
-
-(defn to-human-readable-property-id [property-id]
-  (->> (re-matches human-readable-property-id-pattern property-id)
-       (rest)
-       (map ->int)
-       (join "-")))
+(defn to-long
+  "Parses string to long. If string is not numeric returns nil."
+  [^String s]
+  (when (numeric? s)
+    (Long/parseLong s)))
 
 (defn valid-email? [email]
   (try
@@ -307,37 +310,61 @@
   (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
 
 (defn finnish-y? [y]
-  (if-let [[_ number check] (re-matches #"FI(\d{7})-(\d)" y)]
-    (let [cn (mod (reduce + (map * [7 9 10 5 8 4 2] (map #(Long/parseLong (str %)) number))) 11)
-          cn (if (zero? cn) 0 (- 11 cn))]
-      (= (Long/parseLong check) cn))))
+  (if y
+    (if-let [[_ number check] (re-matches #"(\d{7})-(\d)" y)]
+      (let [cn (mod (reduce + (map * [7 9 10 5 8 4 2] (map #(Long/parseLong (str %)) number))) 11)
+            cn (if (zero? cn) 0 (- 11 cn))]
+        (= (Long/parseLong check) cn)))
+    false))
 
-(defn y? [y]
-  (cond
-    (nil? y)              false
-    (.startsWith y "FI")  (finnish-y? y)
-    :else                 (re-matches #"[A-Z]{2}.+" y)))
+(defn finnish-ovt?
+  "OVT-tunnus SFS 5748 standardin mukainen OVT-tunnus rakentuu ISO6523 -standardin
+   mukaisesta Suomen verohallinnon tunnuksesta 0037, Y-tunnuksesta
+   (8 merkki\u00e4 ilman v\u00e4liviivaa) sek\u00e4 vapaamuotoisesta 5 merkist\u00e4,
+   jolla voidaan antaa organisaation alataso tai kustannuspaikka.
+   http://www.tieke.fi/pages/viewpage.action?pageId=17104927"
+  [ovt]
+  (if ovt
+    (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\w{0,5}" ovt)]
+      (finnish-y? (str y \- c)))
+    false))
 
-(defn finnish-ovt? [ovt]
-  (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\d{0,5}" ovt)]
-    (finnish-y? (str "FI" y \- c))))
-
-(defn ovt? [ovt]
-  (cond
-    (nil? ovt)                false
-    (.startsWith ovt "0037")  (finnish-ovt? ovt)
-    :else                     (re-matches #"\d{4}.+" ovt)))
+(defn bic? [bic]
+  (if bic
+    (re-matches #"^[a-zA-Z]{6}[a-zA-Z\d]{2,5}$" bic)
+    false))
 
 (defn rakennusnumero? [^String s]
   (and (not (nil? s)) (re-matches #"^\d{3}$" s)))
 
 (def vrk-checksum-chars ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"])
 
+(def finnish-hetu-regex #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$")
+
 (defn vrk-checksum [^Long l]
   (nth vrk-checksum-chars (mod l 31)))
 
 (defn hetu-checksum [^String hetu]
   (vrk-checksum (Long/parseLong (str (subs hetu 0 6) (subs hetu 7 10)))))
+
+(defn- validate-hetu-date [hetu]
+  (let [dateparts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
+        yy (last (butlast dateparts))
+        yyyy (str (case (last dateparts) "+" "18" "-" "19" "20") yy)
+        basic-date (str yyyy (second dateparts) (first dateparts))]
+    (try
+      (timeformat/parse (timeformat/formatters :basic-date) basic-date)
+      true
+      (catch Exception e
+        false))))
+
+(defn- validate-hetu-checksum [hetu]
+  (= (subs hetu 10 11) (hetu-checksum hetu)))
+
+(defn valid-hetu? [^String hetu]
+  (if hetu
+    (and (validate-hetu-date hetu) (validate-hetu-checksum hetu))
+    false))
 
 (defn- rakennustunnus-checksum [^String prt]
   (vrk-checksum (Long/parseLong (subs prt 0 9))))
@@ -347,6 +374,25 @@
 
 (defn rakennustunnus? [^String prt]
   (and (not (nil? prt)) (re-matches #"^\d{9}[0-9A-FHJ-NPR-Y]$" prt) (rakennustunnus-checksum-matches? prt)))
+
+(defn finnish-zip? [^String zip-code]
+  (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
+
+(defn relative-local-url? [^String url]
+  (not (or (not (string? url)) (ss/starts-with url "//") (re-matches #"^\w+://.*" url))))
+
+(defn version-is-greater-or-equal
+  "True if given version string is greater than version defined in target map, else nil"
+  [^String source, ^clojure.lang.IPersistentMap target]
+  {:pre [(map? target) (every? #(target %) [:major :minor :micro]) (string? source)]}
+  (let [[source-major source-minor source-micro] (map #(->int %) (ss/split source #"\."))
+        source-major (or source-major 0)
+        source-minor (or source-minor 0)
+        source-micro (or source-micro 0)]
+    (or
+      (> source-major (:major target))
+      (and (= source-major (:major target)) (> source-minor (:minor target)))
+      (and (= source-major (:major target)) (= source-minor (:minor target)) (>= source-micro (:micro target))))))
 
 ;;
 ;; Schema utils:
@@ -372,14 +418,84 @@
 (defn max-length-string [max-len]
   (sc/both sc/Str (max-length max-len)))
 
-(def difficulty-values ["AA" "A" "B" "C" "ei tiedossa"])    ;TODO: move this to schemas?
-(defn compare-difficulty [a b]                              ;TODO: make this function more generic by taking the key and comparison values as param? E.g. compare-against [a b key ref-values]
-  (let [a (:difficulty a)
-        b (:difficulty b)]
+(def Fn (sc/pred fn? "Function"))
+
+(def IFn (sc/pred ifn? "Function"))
+
+(defn compare-difficulty [accessor-keyword values a b]
+  {:pre [(keyword? accessor-keyword) (vector? values)]}
+  (let [a (accessor-keyword a)
+        b (accessor-keyword b)]
     (cond
       (nil? b) -1
       (nil? a) 1
-      :else (- (.indexOf difficulty-values a) (.indexOf difficulty-values b)))))
+      :else (- (.indexOf values a) (.indexOf values b)))))
 
 (defn every-key-in-map? [target-map required-keys]
   (every? (-> target-map keys set) required-keys))
+
+(defn separate-emails [^String email-str]
+  (->> (ss/split email-str #"[,;]") (map ss/trim) set))
+
+(defn find-first
+  "Returns first element from coll for which (pred item)
+   returns true. pred must be free of side-effects."
+  [pred coll]
+  (first (filter pred coll)))
+
+(defn get-files-by-regex
+  "Takes all files (and folders) from given path and filters them by regex. Not recursive. Returns sequence of File objects."
+  [path ^java.util.regex.Pattern regex]
+  {:pre [(instance? java.util.regex.Pattern regex) (string? path)]}
+  (filter
+    #(re-matches regex (.getName %))
+    (-> path io/file (.listFiles) seq)))
+
+(defn select-values [m keys]
+  (map #(get m %) keys))
+
+(defn validate-url [url]
+  ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
+  (when-not (re-matches #"^(https?)://[^\s/$.?#].[^\s]*$" url)
+    (fail :error.invalid.url)))
+
+(defn this-jar
+  "utility function to get the name of jar in which this function is invoked"
+  [& [ns]]
+  (-> (or ns (class *ns*))
+    .getProtectionDomain .getCodeSource .getLocation .getPath))
+
+(defn list-jar [jar-path inner-dir]
+  (if-let [jar         (JarFile. jar-path)]
+    (let [inner-dir    (if (and (not= "" inner-dir) (not= "/" (last inner-dir)))
+                         (str inner-dir "/")
+                         inner-dir)
+          entries      (enumeration-seq (.entries jar))
+          names        (map (fn [x] (.getName x)) entries)
+          snames       (filter (fn [x] (= 0 (.indexOf x inner-dir))) names)
+          fsnames      (map #(subs % (count inner-dir)) snames)]
+      fsnames)))
+
+(defmacro timing [msg body]
+  `(let [start# (System/currentTimeMillis)
+         result# ~body
+         end# (System/currentTimeMillis)]
+     (debugf (str ~msg ": %dms") (- end# start#))
+     result#))
+
+
+; Patched from me.raynes.fs.compression
+(defn unzip
+  "Takes the path to a zipfile source and unzips it to target-dir."
+  ([source]
+    (unzip source (name source)))
+  ([source target-dir]
+    (with-open [zip (java.util.zip.ZipFile. (fs/file source))]
+      (let [entries (enumeration-seq (.entries zip))
+            target-file #(fs/file target-dir (str %))]
+        (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
+                :let [f (target-file entry)]]
+          (fs/mkdirs (fs/parent f))
+          (io/copy (.getInputStream zip entry) f))))
+    target-dir))
+

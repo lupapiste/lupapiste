@@ -33,11 +33,12 @@
                               maksaja]
                   :drawings ctc/drawings
                   :infoRequest false
-                  :location {:x 428195.77099609 :y 6686701.3931274}
+                  :location [428195.77099609 6686701.3931274]
                   :neighbors []
                   :modified 1391415696674
                   :municipality "638"
-                  :operations [{:id "abba1" :name "maa-aineslupa" :created 1391415025497}]
+                  :primaryOperation {:id "abba1" :name "maa-aineslupa" :created 1391415025497}
+                  :secondaryOperations []
                   :openInfoRequest false
                   :opened 1391415025497
                   :organization "638-R"

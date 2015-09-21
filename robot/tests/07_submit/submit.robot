@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation   Sonja can't submit application
-Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 Variables       ../06_attachments/variables.py
@@ -10,7 +9,11 @@ Variables       ../06_attachments/variables.py
 
 Mikko creates a new application
   Mikko logs in
-  Create application the fast way  submit-app  753  753-416-25-30  kerrostalo-rivitalo
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname}  submit${secs}
+  Set Suite Variable  ${propertyId}  753-416-7-1
+
+  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Set Suite Variable  ${attachment-not-needed-test-id-hakija-valtakirja}  attachment-not-needed-hakija-valtakirja
   Set Suite Variable  ${attachment-not-needed-test-id-sonja}  attachment-not-needed-muut-muu
   Open to authorities  huba huba
@@ -22,7 +25,7 @@ Mikko could submit application
 
 Sonja can not submit application
   Sonja logs in
-  Open application  submit-app  753-416-25-30
+  Open application  ${appname}  ${propertyId}
   Wait until  Element should not be visible  application-requiredFieldSummary-tab
   Logout
 
@@ -30,7 +33,6 @@ Sonja can not submit application
 # Testing the missing required fields and attachments, plus the "attachment not needed" functionality
 #
 
-# - Paakayttajalla (Sipoo) merkkaa puuttuvat tiedot pakollisiksi   ( data-test-id=required-fields-obligatory-enabled ) -> hakemuksen jattaminen ei onnistu
 Sipoo marks required fields obligatory
   Sipoo logs in
   Wait until Element is visible  xpath=//input[@data-test-id='required-fields-obligatory-enabled']
@@ -41,17 +43,14 @@ Sipoo marks required fields obligatory
   Wait Until  Checkbox Should Be Selected  id=required-fields-obligatory-enabled
   Logout
 
-# - (luo Mikolla uusi hakemus ->) hakemuksella ei rakseja "ei tarvita"-checkboxeissa, ja kaikki boxit ovat enabloituina
 Mikko logs in, goes to attachments tab and sees all "not needed" checkboxes as enabled and not selected
   Mikko logs in
-  Open application  submit-app  753-416-25-30
+  Open application  ${appname}  ${propertyId}
   Open tab  attachments
   Wait Until  Element should be visible  xpath=//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Asuinkerrostalon tai rivitalon rakentaminen')]
   Element should not be visible  xpath=//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Yleiset hankkeen liitteet')]
   Xpath Should Match X Times  //table[@data-test-id='attachments-template-table']//input[@notneeded='true']  0
 
-# - requiredFieldSummary-tabin Submit-napilla ei voi jattaa hakemusta, kun on puuttuvia tietoja
-# - requiredFieldSummary-tabilla listattuna puuttuvat kentat ja liitteet
 Mikko can not submit application with Submit button and there are items on the requiredFieldSummary tab
   Open tab  requiredFieldSummary
   Wait Until  Element Should Be Visible  xpath=//i[@class='error-text']
@@ -60,7 +59,6 @@ Mikko can not submit application with Submit button and there are items on the r
   Set Suite Variable  ${missingRequiredCount}
   Logout
 
-# - Mene paakayttajalla (sipoo) merkkaamaan puuttuvat tiedot EI-pakollisiksi
 Sipoo marks required fields not obligatory
   Sipoo logs in
   Wait until Element is visible  xpath=//input[@data-test-id='required-fields-obligatory-enabled']
@@ -72,44 +70,42 @@ Sipoo marks required fields not obligatory
   Wait Until  Checkbox Should Not Be Selected  id=required-fields-obligatory-enabled
   Logout
 
-# - Mene Sonjalla lisaamaan uusi liitepohja "Pyyda liite" -toiminnolla
 Sonja logs in and adds new attachment template
   Sonja logs in
-  Open application  submit-app  753-416-25-30
+  Open application  ${appname}  ${propertyId}
   Open tab  attachments
   Add empty attachment template  Muu liite  muut  muu
 
 Sonja sees that new attachment template is visible in attachments list
   Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
 
-# - Sonjan lisaaman liitepohjan "ei tarvita"-checkboxi on tyhja ja enabloituna
 For that template, the "not needed" checkbox is enabled and not selected
-  Checkbox Should Not Be Selected  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
-  Element should be enabled  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
+  Checkbox Should Not Be Selected  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
+  Element should be enabled  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
   Logout
 
-# - Mikolla takaisin hakemukselle ja attachments tabille
 Mikko logs back in and browses to the Attachments tab
   Mikko logs in
-  Open application  submit-app  753-416-25-30
+  Open application  ${appname}  ${propertyId}
   Open tab  attachments
-  Wait Until  Element should be visible  xpath=//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Yleiset hankkeen liitteet')]
+  Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id="attachments-template-table"]//td
+  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Yleiset hankkeen liitteet')]
 
-# - Sonjan lisaaman liitepohjan "ei tarvita"-checkboxi on tyhja ja disabloituna
 For the added attachment template added by Sonja, Mikko sees the "not needed" checkbox as disabled and not selected
-  ${checkbox-path-sonja} =  Set Variable  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
+  ${checkbox-path-sonja} =  Set Variable  //div[@id="application-attachments-tab"]//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
+  Wait Until  Xpath Should Match X Times  ${checkbox-path-sonja}  1
   Element should be disabled  ${checkbox-path-sonja}
   Checkbox Should Not Be Selected  ${checkbox-path-sonja}
 
-# - klikkaa attachments-tabin jonkin liitteen "ei tarvita"-checkboxia
 Mikko selects the "not needed" checkbox of some other attachment template than the one of Sonja's
-  ${checkbox-path-hakija-valtakirja} =  Set Variable  xpath=//div[@id='application-attachments-tab']//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
+  ${checkbox-path-hakija-valtakirja} =  Set Variable  //div[@id='application-attachments-tab']//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
+  Wait Until  Xpath Should Match X Times  ${checkbox-path-hakija-valtakirja}  1
+  Wait Until  Element should be visible  ${checkbox-path-hakija-valtakirja}
   Element should be enabled  ${checkbox-path-hakija-valtakirja}
   Checkbox Should Not Be Selected  ${checkbox-path-hakija-valtakirja}
   Select Checkbox  ${checkbox-path-hakija-valtakirja}
-  Checkbox Should Be Selected  ${checkbox-path-hakija-valtakirja}
+  Wait Until  Checkbox Should Be Selected  ${checkbox-path-hakija-valtakirja}
 
-# - attachments-tabilla syota liiteversio Sonjan lisaamalle liitepohjalle
 Mikko adds txt attachment to the attachment template added by Sonja
   Open attachment details  muut.muu
   Add first attachment version  ${TXT_TESTFILE_PATH}
@@ -117,17 +113,16 @@ Mikko adds txt attachment to the attachment template added by Sonja
   Wait Until  Tab should be visible  attachments
   Page Should Not Contain  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
 
-# - tayta osapuolet-tabilla jokin puuttuva vaadittu kentta
 Mikko fills up first name for the hakija party in the parties tab
   Open tab  parties
-  ${hakija-etunimi-path} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='hakija']//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']
+  Open accordions  parties
+  ${hakija-etunimi-path} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']
   Wait until  Element should be visible  xpath=${hakija-etunimi-path}
-  Input text  ${hakija-etunimi-path}  Elmeri
+  Execute Javascript  $('#application-parties-tab').find('section[data-doc-type="hakija-r"]').find('input[data-docgen-path="henkilo.henkilotiedot.etunimi"]').val("Elmeri").change().blur();
   Wait Until  Textfield value should be  xpath=${hakija-etunimi-path}  Elmeri
-  Focus  xpath=//div[@id='application-parties-tab']//section[@data-doc-type='hakija']//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']
+  Focus  xpath=//div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']
   Wait until  Element should be visible  xpath=//span[contains(@class,'form-input-saved')]
 
-#     -> ks liiteiden ja ks kentan virheilmoitukset katoavat requiredFieldSummary-tabilta
 The filled-up of the party info and added attachment cause corresponding items to disappear from the "missing required" list in the requiredFieldSummary tab
   Open tab  requiredFieldSummary
   Wait for jQuery
@@ -135,7 +130,6 @@ The filled-up of the party info and added attachment cause corresponding items t
   ${missingRequiredCountAfter} =  Evaluate  ${missingRequiredCount} - 2
   Wait Until  Xpath Should Match X Times  //*[@class='requiredField-line']  ${missingRequiredCountAfter}
 
-# - hakemuksen jattaminen onnistuu nyt
 Mikko could submit application after missing stuff have been added
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
 

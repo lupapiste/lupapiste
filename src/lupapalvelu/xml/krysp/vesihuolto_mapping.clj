@@ -3,10 +3,11 @@
     [lupapalvelu.xml.emit :refer [element-to-xml]]
     [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
     [lupapalvelu.permit :as permit]
-    [lupapalvelu.document.vesihuolto-canonical :as vesihuolto-canonical]))
+    [lupapalvelu.document.vesihuolto-canonical :as vesihuolto-canonical]
+    [lupapalvelu.xml.disk-writer :as writer]))
 
 (def vesihuolto-to-krysp {:tag :Vesihuoltolaki :ns "ymv"
-                          :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/vesihuoltolaki" "2.1.3")
+                          :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :VVVL "2.1.3")
                                         :xmlns:ymv "http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"}
                                        mapping-common/common-namespaces)
                           :child
@@ -61,18 +62,19 @@
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
         canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:Vesihuoltolaki :vapautukset :Vapautus :liitetieto]
-                    attachments)
-        xml (element-to-xml canonical vesihuolto-to-krysp)]
+                    attachments-canonical)
+        xml (element-to-xml canonical vesihuolto-to-krysp)
+        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
-    (mapping-common/write-to-disk
+    (writer/write-to-disk
       application
-      attachments
-      statement-attachments
+      attachments-for-write
       xml
       krysp-version
       output-dir

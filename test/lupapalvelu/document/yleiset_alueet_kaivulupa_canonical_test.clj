@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test
   (:require [lupapalvelu.document.yleiset-alueet-canonical-test-common :refer :all]
             [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.test-util :refer [xml-datetime-is-roughly?]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
@@ -30,10 +31,10 @@
 (def- tyomaasta-vastaava-kaivulupa (assoc-in tyomaasta-vastaava [:schema-info :op] operation))
 
 (def- documents [hakija
-                          tyomaasta-vastaava-kaivulupa
-                          maksaja
-                          hankkeen-kuvaus
-                          tyoaika])
+                 tyomaasta-vastaava-kaivulupa
+                 maksaja
+                 hankkeen-kuvaus
+                 tyoaika])
 
 (def kaivulupa-application {:id "LP-753-2013-00001"
                             :permitType "YA"
@@ -53,11 +54,13 @@
                             :address "Latokuja 1"
                             :location location
                             :attachments []
-                            :operations [operation]
+                            :primaryOperation operation
+                            :secondaryOperations []
                             :propertyId "75341600550007"
                             :documents documents
                             :municipality municipality
-                            :statements statements})
+                            :statements statements
+                            :drawings ctc/drawings})
 
 (ctc/validate-all-documents kaivulupa-application)
 
@@ -188,9 +191,9 @@
 
       ;; Sijainti
       (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id kaivulupa-application))
-;      (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => <now??>)              ;; TODO: Mita tahan?
+      (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => (partial xml-datetime-is-roughly? (util/to-xml-datetime (now))))
       (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address kaivulupa-application))
-      (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> kaivulupa-application :location :x) " " (-> kaivulupa-application :location :y)))
+      (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> kaivulupa-application :location first) " " (-> kaivulupa-application :location second)))
 
       ;; Maksajan tiedot
       (fact "maksaja-laskuviite" (:laskuviite Maksaja) => (:value _laskuviite))

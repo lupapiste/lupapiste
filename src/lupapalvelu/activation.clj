@@ -31,5 +31,5 @@
         updated-user (mongo/update-one-and-return :users {:_id userid} {$set {:enabled true}})]
     (when updated-user
       (user/clear-logins (:username updated-user))
-      (mongo/remove :activation (:_id act))
+      (mongo/remove :activation (:id act))
       (merge (user/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))

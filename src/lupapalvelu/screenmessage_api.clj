@@ -6,13 +6,13 @@
 
 
 (defquery screenmessages
-  {:roles [:anonymous]}
+  {:user-roles #{:anonymous}}
   [_]
   (ok :screenmessages (mongo/select :screenmessages)))
 
 (defcommand screenmessages-add
   {:parameters [fi sv]
-   :roles      [:admin]}
+   :user-roles #{:admin}}
   [{created :created}]
   (mongo/insert :screenmessages {:id (mongo/create-id)
                                  :added created
@@ -20,6 +20,6 @@
                                  :sv (if-not (empty? sv) sv fi)}))
 
 (defcommand screenmessages-reset
-  {:roles      [:admin]}
+  {:user-roles #{:admin}}
   [_]
   (mongo/drop-collection :screenmessages))

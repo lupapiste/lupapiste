@@ -1,12 +1,24 @@
 (ns lupapalvelu.smoketest.application-smoke-tests
   (:require [lupapalvelu.smoketest.core :refer [defmonster]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.states :as states]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.application :as a]
             [lupapalvelu.server] ; ensure all namespaces are loaded
             ))
 
-(def applications (delay (mongo/select :applications)))
-(def submitted-applications (delay (mongo/select :submitted-applications)))
+(def application-keys [:infoRequest
+                       :operations :secondaryOperations :primaryOperation
+                       :documents :schema-version :attachments :auth
+                       :state :modified  :created :opened :submitted :sent :started :closed
+                       :organization :municipality :propertyId :location])
+
+(def applications (delay (mongo/select :applications {} application-keys)))
+(def submitted-applications (delay (mongo/select :submitted-applications {} application-keys)))
+
+(defn- resolve-operations [application]
+  ; Support the old and the new application schema
+  (or (:operations application) (a/get-operations application)))
 
 (defn- validate-doc [ignored-errors application {id :id schema-info :schema-info :as doc}]
   (if (and (:name schema-info) (:version schema-info))
@@ -52,15 +64,16 @@
 
 ;; Documents have operation information
 
-(defn- application-schemas-have-ops [{documents :documents operations :operations :as application}]
+(defn- application-schemas-have-ops [{documents :documents :as application}]
   (when-not (:infoRequest application)
-    (let [docs-with-op (count (filter #(get-in % [:schema-info :op]) documents))
+    (let [operations (resolve-operations application)
+          docs-with-op (count (filter #(get-in % [:schema-info :op]) documents))
           ops          (count operations)]
       (when-not (= docs-with-op ops)
         (:id application)))))
 
 (defn- schemas-have-ops [apps]
-  (let [app-ids-with-invalid-docs (filter identity (map application-schemas-have-ops apps))]
+  (let [app-ids-with-invalid-docs (remove nil? (map application-schemas-have-ops apps))]
     (when (seq app-ids-with-invalid-docs)
       {:ok false :results (into [] app-ids-with-invalid-docs)})))
 
@@ -88,15 +101,52 @@
 (defmonster municipality-is-set
   (nil-property :municipality))
 
-;; task source is set
+(defmonster schema-version-is-set
+  (nil-property :schema-version))
 
-(defn every-task-refers-verdict [{:keys [verdicts tasks id]}]
-  (let [verdict-ids (set (map :id verdicts))]
-     (when-not (every? (fn [{:keys [source]}] (or (not= "verdict" (:type source)) (verdict-ids (:id source)))) tasks)
-       id)))
+(defn timestamp-is-set [ts-key states]
+  (if-let [results (seq (remove nil? (map #(when (and (states (keyword (:state %))) (nil? (ts-key %))) (:id %)) @applications)))]
+    {:ok false :results results}
+    {:ok true}))
+
+(defmonster opened-timestamp
+  (timestamp-is-set :opened (states/all-states-but [:draft :canceled])))
+
+;;
+;; Skips applications with operation "aiemmalla-luvalla-hakeminen" (previous permit aka paperilupa)
+;;
+(defmonster submitted-timestamp
+ (if-let [results (seq (remove nil? (map
+                                      (fn [app]
+                                        (when (and
+                                                ((states/all-application-states-but [:canceled :draft :open]) (keyword (:state app)))
+                                                (when-not (some #(#{"aiemmalla-luvalla-hakeminen"} (:name %)) (resolve-operations app))
+                                                  (nil? (:submitted app))))
+                                          (:id app)))
+                                      @applications)))]
+   {:ok false :results results}
+   {:ok true}))
+
+; Fails with 255 applications
+;(defmonster canceled-timestamp
+;  (timestamp-is-set :canceled #{:canceled}))
+
+(defmonster sent-timestamp
+  (timestamp-is-set :sent #{:sent :complement-needed}))
+
+(defmonster closed-timestamp
+  (timestamp-is-set :closed #{:closed}))
+
 
 ; Not a valid test anymore. Fails if a verdict is replaced.
 (comment
+
+  ;; task source is set
+  (defn every-task-refers-verdict [{:keys [verdicts tasks id]}]
+    (let [verdict-ids (set (map :id verdicts))]
+       (when-not (every? (fn [{:keys [source]}] (or (not= "verdict" (:type source)) (verdict-ids (:id source)))) tasks)
+         id)))
+
   (defmonster task-source-refers-verdict
        (if-let [results (seq (remove nil? (map every-task-refers-verdict @applications)))]
          {:ok false :results results}

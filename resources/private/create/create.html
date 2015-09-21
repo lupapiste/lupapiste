@@ -8,9 +8,11 @@
     <h1 data-bind="ltext: 'newRequest.topic'"></h1>
     <div class="create-application-search-box">
       <p data-bind="ltext: 'newRequest.locationInfo'"></p>
-      <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}" id="create-search" type="text" class="form-input text address-search" autofocus="autofocus" />
-      <button data-bind="click: searchNow" class="btn btn-primary" data-test-id="create-search-button">
-        <span data-bind="ltext: 'search'"></span><span class="icon search left-align"></span>
+      <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}"
+             id="create-search" type="text" class="form-input text address-search" autofocus="autofocus" />
+      <button data-bind="click: searchNow" class="positive" data-test-id="create-search-button">
+          <i class="lupicon-search"></i>
+          <span data-bind="ltext: 'search'"></span>
       </button>
     </div>
     <div id="create-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
@@ -21,7 +23,7 @@
   <section class="page container" id="create-part-2">
     <h1 data-bind="ltext: 'newRequest.descTitle'"></h1>
     <p data-bind="ltext: 'newRequest.descInfo'" class="create-info-text"></p>
-    <span class="icon info-big right-align" style="vertical-align: top"></span>
+    <span class="create-help lupicon-circle-question primary no-hand"></span>
 
     <div class="operation-tree tree-control"></div>
 
@@ -44,17 +46,18 @@
             data-test-id="create-inforequest-message">
         </textarea>
         <button
-            data-bind="click: createInfoRequest, enable: message().length > 0"
-            class="btn btn-primary"
+            data-bind="click: createInfoRequest, enable: message().length > 0,
+                       css: {waiting: pending}"
+            class="positive no-icon-pad"
             data-test-id="create-inforequest">
             <span data-bind="ltext: 'application.startConversation'"></span>
-            <em data-bind="visible: pending" class="button-loader"></em>
+            <i class="wait spin lupicon-refresh"></i>
         </button>
       </form>
       <br>
-       <button data-bind="click: returnPhase2" class="btn btn-nav-back" data-test-id="create-back" id="create-inforequest-back">
-         <span data-bind="ltext: 'tree.back'">Takaisin</span>
-         <span class="icon drill-left-black-bigger left-align"></span>
+      <button data-bind="click: returnPhase2" class="secondary" data-test-id="create-back" id="create-inforequest-back">
+          <i class="lupicon-chevron-left"></i>
+          <span data-bind="ltext: 'tree.back'">Takaisin</span>
       </button>
     </div>
   </section>
@@ -62,17 +65,17 @@
   <section class="page" id="create-templates">
 
     <div class="tree-title" style="padding-left: 10px;">
-      <span data-bind="visible: stack().length == 0, ltext: 'create.choose-op'">
+      <span data-bind="visible: !$data.stack || $data.stack().length == 0, ltext: 'create.choose-op'">
       </span>
-      <span data-bind="visible: stack().length > 0, foreach: stack">
+      <span data-bind="visible: $data.stack && $data.stack().length > 0, foreach: $data.stack">
         <span data-bind="visible: $index"> / </span>
         <span data-bind="text: loc(['operations.tree', op])"></span>
       </span>
     </div>
 
-    <div class="tree-link">
+    <div class="tree-link btn function">
       <span data-bind="text: loc(['operations.tree', op])"></span>
-      <span class="icon drill-right-orange inline-right"></span>
+      <i class="lupicon-chevron-right"></i>
     </div>
 
     <div class="tree-last">
@@ -97,13 +100,19 @@
       </div>
 
       <div class="create-buttons">
-        <button data-bind="click: goPhase3, disable: processing"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary">
-          <span data-bind="ltext: 'newRequest.newInforequest'"></span><span class="icon add left-align"></span>
-        </button>
-        <button data-bind="click: createApplication, disable: processing" data-test-id="create-application" class="btn btn-primary">
-          <em data-bind="visible: pending" class="button-loader"></em>
-          <span data-bind="ltext: 'newRequest.newApplication'"></span><span class="icon add left-align"></span>
-        </button>
+          <button data-bind="click: goPhase3, enable: createOK"
+                  data-test-id="create-proceed-to-inforequest"
+                  class="positive">
+              <i class="lupicon-circle-plus"></i>
+              <span data-bind="ltext: 'newRequest.newInforequest'"></span>
+          </button>
+          <button data-bind="click: createApplication, enable: createOK,
+                             css: {waiting: pending}"
+                  data-test-id="create-application" class="positive">
+              <i class="lupicon-circle-plus"></i>
+              <i class="wait spin lupicon-refresh"></i>
+              <span data-bind="ltext: 'newRequest.newApplication'"></span>
+          </button>
       </div>
 
     </div>
@@ -124,14 +133,14 @@
       </div>
 
       <div data-bind="visible: !needMorePrevPermitInfo()">
-        <label data-bind="ltext: 'prev-permit-label-municipality'" class="form-label" for="prev-permit-municipality"></label>
-        <select data-bind="options: municipalities.municipalitiesWithBackendSystem,
-                           optionsText: function(m) { return loc(['municipality', m.id]); },
+        <label data-bind="ltext: 'prev-permit-label-organization'" class="form-label" for="prev-permit-organization-select"></label>
+        <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
+                class="form-select form-input combobox"
+                data-bind="options: organizationOptions,
+                           optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]) || org.name.fi; },
                            optionsValue: 'id',
-                           value: municipalityCode,
-                           optionsCaption: loc('choose')"
-                id="prev-permit-municipality-select" data-test-id="test-prev-permit-municipality-select"
-                class="form-select form-input combobox">
+                           value: selectedPrevPermitOrganization,
+                           optionsCaption: loc('choose')">
         </select>
       </div>
 
@@ -141,10 +150,14 @@
         <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}"
                id="prev-permit-address-search" type="text" class="form-input text" autofocus="autofocus" />
       </div><br>
-      <button data-bind="click: createApplicationWithPrevPermit, enable: creatingAppWithPrevPermitOk"
+      <button data-bind="click: createApplicationWithPrevPermit,
+                         enable: creatingAppWithPrevPermitOk,
+                         css: {waiting: pending}"
               data-test-id="test-prev-permit-create-button" id="prev-permit-create-button" class="btn btn-primary">
-        <em data-bind="visible: pending" class="button-loader"></em>
-        <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span><span class="icon search left-align"></span>
+          <i class="lupicon-search"></i>
+          <i class="wait spin lupicon-refresh"></i>
+
+          <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span>
       </button>
     </div>
 

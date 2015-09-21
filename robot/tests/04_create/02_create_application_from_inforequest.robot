@@ -8,7 +8,7 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new inforequest
   Mikko logs in
-  Create inforequest the fast way  create-app-from-info  360603.153  6734222.95  753  753-416-25-30  kerrostalo-rivitalo  Jiihaa
+  Create inforequest the fast way  create-app-from-info  360603.153  6734222.95  753-416-25-30  kerrostalo-rivitalo  Jiihaa
 
 There are no attachments at this stage
   Element should not be visible  xpath=//*[@data-test-id='inforequest-attachments-table']

@@ -1,8 +1,8 @@
 (ns lupapalvelu.generate-demo-users
-  (require [lupapalvelu.mongo :as mongo]
-           [lupapalvelu.user-api :as user-api]
-           [monger.operators :refer :all]
-           [slingshot.slingshot :refer [try+]]))
+  (:require [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as user]
+            [monger.operators :refer :all]
+            [slingshot.slingshot :refer [try+]]))
 
 
 ;luo testikayttajia
@@ -17,16 +17,16 @@
         #(let [full-email (str email % "@" kuntano ".fi")]
            (if (lupapalvelu.user/get-user-by-email full-email)
              (println "user exits " full-email)
-             (user-api/create-new-user
+             (user/create-new-user
                {:role "authorityAdmin"
-                :organizations [id]}
+                :orgAuthz {(keyword id) ["authorityAdmin"]}}
                {:email full-email
                 :username full-email
                 :role "authority"
                 :firstName (str "Koulutus " %)
                 :lastName (str "Kayttaja " %)
                 :enabled true
-                :organization id
+                :orgAuthz {(keyword id) ["authority"]}
                 :password "koulutus"}
                :send-email false)))
         (range 1 21)))))
@@ -363,24 +363,28 @@
    "989"
    "992"])
 
+(defn ymp-org [kuntano base-scope]
+  (let [org-id (str kuntano "-YMP")]
+    {:_id org-id
+     :name {:fi (str (lupapalvelu.i18n/localize "fi" (str "municipality." kuntano)) " ymp\u00e4rist\u00f6toimi")
+            :sv (str (lupapalvelu.i18n/localize "sv" (str "municipality." kuntano)) " ymp\u00e4rist\u00f6toimi")}
+     :scope [(merge base-scope {:municipality kuntano :permitType "YI"})
+             (merge base-scope {:municipality kuntano :permitType "YL"})
+             (merge base-scope {:municipality kuntano :permitType "VVVL"})
+             (merge base-scope {:municipality kuntano :permitType "MAL"})]
+     :links []}))
+
 (defn generate-ymp! []
   (doseq [kuntano kuntakoodit]
     (let [org-id (str kuntano "-YMP")
           email  (str "ymp-admin@" kuntano ".fi")
-          org {:_id org-id
-               :name {:fi (str (lupapalvelu.i18n/localize "fi" (str "municipality." kuntano)) " ymp\u00e4rist\u00f6toimi")}
-               :scope [{:municipality kuntano :permitType "YI" :inforequest-enabled true :new-application-enabled true}
-                       {:municipality kuntano :permitType "YL" :inforequest-enabled true :new-application-enabled true}
-                       {:municipality kuntano :permitType "VVVL" :inforequest-enabled true :new-application-enabled true}
-                       {:municipality kuntano :permitType "MAL" :inforequest-enabled true :new-application-enabled true}]
-               :links []
-               :krysp {:YI {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
-                       :YL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
-                       :VVVL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
-                       :MAL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}}}
-          ]
+          org (assoc (ymp-org kuntano {:inforequest-enabled true :new-application-enabled true})
+                :krysp {:YI {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
+                        :YL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
+                        :VVVL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
+                        :MAL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}})]
       (mongo/insert :organizations org)
-      (user-api/create-new-user
+      (user/create-new-user
         {:role "admin"}
         {:email email
          :username email
@@ -388,7 +392,7 @@
          :firstName (str "Ymp\u00e4rist\u00f6toimi")
          :lastName (str "P\u00e4\u00e4k\u00e4ytt\u00e4j\u00e4 " kuntano)
          :enabled true
-         :organization org-id
+         :orgAuthz {(keyword org-id) ["authorityAdmin"]}
          :password "koulutus"}
         :send-email false)
       (generate-users-for-organization {:id org-id}))))
@@ -398,7 +402,7 @@
           i (range 1 (inc 25))]
     (let [full-email (str "hakija-" i "@" kuntano ".fi")]
       (try+
-        (let [user (user-api/create-new-user nil
+        (let [user (user/create-new-user nil
                      {:email full-email
                       :username full-email
                       :role "applicant"

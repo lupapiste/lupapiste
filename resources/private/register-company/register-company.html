@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="register-company">
+    <div class="content company-account-register">
+      <div class="register-progress">
+        <div class="register-phase done">
+          <a class="phase-number" href="#!/register-company-account-type">1</a>
+          <span class="phase-title" data-bind="ltext: 'register.company.phase.1'"></span>
+        </div>
+        <div class="register-phase done active">
+          <span class="phase-number">2</span>
+          <span class="phase-title" data-bind="ltext: 'register.company.phase.2'"></span>
+        </div>
+        <div class="register-phase">
+          <span class="phase-number">3</span>
+          <span class="phase-title" data-bind="ltext: 'register.company.phase.3'"></span>
+        </div>
+        <div class="register-phase">
+          <span class="phase-number">4</span>
+          <span class="phase-title" data-bind="ltext: 'register.company.phase.4'"></span>
+        </div>
+      </div>
+
+      <form class="register-form">
+
+        <div class="form-group" data-bind="with: model">
+          <h2 data-bind="ltext: 'register.company.form.company'"></h2>
+
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.companyName'"></label>
+            <input class="form-input text" data-bind="textInput: name" data-test-id="register-company-name" type="text" maxlength="64"/>
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.companyY'"></label>
+            <input class="form-input text" data-bind="textInput: y" data-test-id="register-company-y" type="text" placeholder="0001234-3" maxlength="9"/>
+          </div>
+
+          <h2 data-bind="ltext: 'register.company.form.billing'"></h2>
+
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.address'"></label>
+            <input class="form-input text" data-bind="value: address1" data-test-id="register-company-address1" type="text" maxlength="64"/>
+          </div>
+
+          <br>
+
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.zip'"></label>
+            <input class="form-input text" data-bind="value: zip" data-test-id="register-company-zip" type="text" maxlength="5"/>
+          </div>
+
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.po'"></label>
+            <input class="form-input text" data-bind="value: po" data-test-id="register-company-po" type="text" maxlength="64"/>
+          </div>
+
+          <div class="form-entry">
+            <label class="form-label" data-bind="ltext: 'register.company.form.billing.country'"></label>
+            <input class="form-input text" data-bind="value: country" data-test-id="register-company-country" type="text" maxlength="64"/>
+          </div>
+
+          <div class="form-entry">
+            <label class="form-label" data-bind="ltext: 'register.company.form.billing.ovt'"></label>
+            <input class="form-input text" data-bind="textInput: ovt" data-test-id="register-company-ovt" type="text" maxlength="17"/>
+          </div>
+
+          <div class="form-entry">
+            <span data-test-id="register-company-pop"
+                  data-bind="component: {name: 'invoice-operator-selector', params: { selected: pop }}"></span>
+          </div>
+
+          <div class="form-entry">
+            <label class="form-label" data-bind="ltext: 'register.company.form.billing.reference'"></label>
+            <input class="form-input text" data-bind="value: reference" data-test-id="register-company-reference" type="text" maxlength="64"/>
+          </div>
+
+          <h2 data-bind="ltext: 'register.company.form.applicant'"></h2>
+
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.firstName'"></label>
+            <input class="form-input text"
+                   data-bind="textInput: firstName, readonly: $parent.userLoggedIn"
+                   data-test-id="register-company-firstName" type="text" placeholder="Etunimi" maxlength="255"/>
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.lastName'"></label>
+            <input class="form-input text"
+                   data-bind="textInput: lastName, readonly: $parent.userLoggedIn"
+                   data-test-id="register-company-lastName" type="text" placeholder="Sukunimi" maxlength="255"/>
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.email'"></label>
+            <input class="form-input text"
+                   data-bind="textInput: email, readonly: $parent.userLoggedIn"
+                   data-test-id="register-company-email" type="text" placeholder="etu.suku@yritys.fi" maxlength="255"/>
+          </div>
+          <div class="form-entry" data-bind="visible: $parent.userNotLoggedIn">
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.personId'"></label>
+            <input class="form-input text"
+                   data-bind="textInput: personId"
+                   data-test-id="register-company-personId" type="text" placeholder="112233-123A" maxlength="11"/>
+          </div>
+        </div>
+
+        <div>
+            <button data-bind="enable: canSubmitInfo,
+                               click: submitInfo,
+                               css: {waiting: pending}"
+                    data-test-id="register-company-submit"
+                    type="submit"
+                    class="btn-primary">
+                <span data-bind="ltext: 'continue'"></span>
+                <i class="wait spin lupicon-refresh"></i>
+                <i class="lupicon-chevron-right"></i>
+          </button>
+          <button data-bind="enable: canCancelInfo, click: cancelInfo, ltext: 'cancel'" data-test-id="register-company-cancel"  type="button"
+                  class="btn"></button>
+        </div>
+
+      </form>
+
+
+    </div>
+
+  </section>
+</body>
+</html>

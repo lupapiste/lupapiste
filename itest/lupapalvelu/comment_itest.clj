@@ -3,16 +3,26 @@
             [lupapalvelu.itest-util :refer :all]))
 
 (fact "adding comments"
-  (let [{:keys [id state]}  (create-and-submit-application pena)]
+  (let [id  (create-app-id pena)]
 
-    (fact "...to a submitted application"
-      state => "submitted")
+    (fact "authority can see the draft application, but can't comment draft"
+      (query sonja :application :id id) => ok?
+      sonja =not=> (allowed? :add-comment :id id :to irrelevant))
+
+    (fact "applicant asks for help using add-comment"
+      (comment-application pena id true) => ok?)
+
+    (fact "application is now in open state"
+      (:state (query-application pena id)) => "open")
+
+    (fact "authority can now see the application"
+      (query sonja :application :id id) => ok?)
 
     (fact "applicant can't comment with to"
-      pena =not=> (allowed? :can-target-comment-to-authority :id id)
+      (command pena :can-target-comment-to-authority :id id) => fail?
       pena =not=> (allowed? :add-comment :id id :to irrelevant)
       (comment-application pena id false) => ok?
-      (comment-application pena id false sonja-id) =not=> ok?)
+      (comment-application pena id false sonja-id) => fail?)
 
     (fact "authority can comment and applicant gets email"
       (comment-application sonja id false) => ok?
@@ -21,7 +31,7 @@
         email => (partial contains-application-link-with-tab? id "conversation" "applicant")))
 
     (fact "authority can comment with to"
-      sonja => (allowed? :can-target-comment-to-authority :id id)
+      (command sonja :can-target-comment-to-authority :id id) => ok?
       sonja => (allowed? :add-comment :id id :to sonja-id))
 
     (fact "when sonja adds comment, both pena and ronja will receive email"

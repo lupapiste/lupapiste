@@ -23,8 +23,8 @@
            showFor: function(user) { return user.enabled; },
            operation: function(email, callback) {
              ajax
-               .command("reset-password", {email: email})
-               .success(function() { callback(true); })
+               .command("admin-reset-password", {email: email})
+               .success(function(e) { callback(e); })
                .call();
            }},
           {name: "toAuthority",

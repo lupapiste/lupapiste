@@ -14,7 +14,7 @@
           <div id="add-authority-admin-user-to-organization-dialog" class="window autosized">
             <div class="dialog-header">
               <p data-bind="ltext: 'admin.add-dialog.title'"></p>
-              <p class="dialog-close close">X</p>
+              <p class="dialog-close close lupicon-remove"></p>
             </div>
             <div class="dialog-content" data-bind="with: authorityAdminUsers">
               <div data-bind="visible: phase() === 1">
@@ -44,7 +44,7 @@
                    </div>
 
                   <button data-bind="click: next, enable: userDetailsOk, ltext: 'admin.add-dialog.continue'"
-                          class="btn btn-primary btn-dialog"></button>
+                          class="positive btn-dialog"></button>
                 </form>
               </div>
               <div data-bind="visible: phase() === 2">
@@ -58,7 +58,7 @@
                     <a href="#" data-bind="text: createdUserlinkSv, attr: {href: createdUserlinkSv}"></a>
                   </p>
                 </div>
-                <button data-bind="enable: !searching(), ltext: 'ok'" class="btn btn-primary btn-dialog close"></button>
+                <button data-bind="enable: !searching(), ltext: 'ok'" class="positive btn-dialog close"></button>
               </div>
             </div>
           </div>

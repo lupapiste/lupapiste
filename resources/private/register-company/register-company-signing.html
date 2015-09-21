@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="register-company-signing">
+    <div class="content company-account-register">
+      <div class="register-progress">
+        <div class="register-phase done">
+          <a class="phase-number" href="#!/register-company-account-type">1</a>
+          <span class="phase-title" data-bind="ltext: 'register.company.phase.1'"></span>
+        </div>
+        <div class="register-phase done">
+          <a class="phase-number" href="#!/register-company">2</a>
+          <span class="phase-title" data-bind="ltext: 'register.company.phase.2'"></span>
+        </div>
+        <div class="register-phase done active">
+          <span class="phase-number">3</span>
+          <span class="phase-title" data-bind="ltext: 'register.company.phase.3'"></span>
+        </div>
+        <div class="register-phase">
+          <span class="phase-number">4</span>
+          <span class="phase-title" data-bind="ltext: 'register.company.phase.4'"></span>
+        </div>
+      </div>
+      <div class="register-contentbox">
+        <p data-bind="ltext: 'register.company.sign.info'"></p>
+        <p data-bind="ltext: 'register.company.sign.info2'"></p>
+        <a data-bind="ltext: 'register.company.sign.download-contract', attr: { href: termsDocumentLink }" target="_blank"/>
+
+        <div class="register-terms">
+          <input id="termsAccepted" type="checkbox" data-bind="checked: termsAccepted" class="form-input checkbox"/>
+          <label for="termsAccepted" data-bind="ltext: 'register.company.sign.terms-accepted'" class="form-label-checkbox"/>
+        </div>
+        <span data-bind="component: {name: 'company-registration-init', params: { processIdCallback: initSignCallback,
+                                                                                  buttonEnabled: termsAccepted }}"></span>
+        <button data-bind="click: cancelSign, ltext: 'cancel'" data-test-id="register-company-cancel-sign" type="button" class="btn"></button>
+
+        <h1 data-bind="ltext: 'register.company.onnistuu.title'"></h1>
+        <p data-bind="ltext: 'register.company.onnistuu.desc'"></p>
+        <p data-bind="ltext: 'register.company.onnistuu.poweredby'"></p>
+        <a href="http://www.onnistuu.fi" target="_blank">
+          <img src="/img/onnistuu.png" height="69" width="254" alt="www.onnistuu.fi"></img>
+        </a>
+
+      </div>
+    </div>
+  </section>
+</body>
+</html>

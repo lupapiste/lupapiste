@@ -3,7 +3,6 @@
             [monger.operators :refer :all]
             [midje.sweet :refer :all]
             [ring.util.codec :as codec]
-            [sade.http :as http]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.mongo :as mongo]
@@ -26,21 +25,21 @@
     (query pena :users) =not=> ok?)
 
   ; It's not nice to test the number of users, but... well, this is relly easy:
-  (fact (-> (query admin :users :role "admin") :users count) => 2)
-  (fact (-> (query admin :users :organization "753-R") :users count) => 3)
-  (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 2))
+  (fact (-> (query admin :users :role "admin") :users count) => 1)
+  (fact (-> (query admin :users :organization "753-R") :users count) => 4)
+  (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 3))
 
 (facts users-for-datatables
- (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
+ (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
    => (contains {:ok true
-                 :data (contains {:rows (comp (partial = 3) count)
-                                  :total 3
-                                  :display 3
+                 :data (contains {:rows (comp (partial = 4) count)
+                                  :total 4
+                                  :display 4
                                   :echo "123"})}))
- (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
+ (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 1) count)
-                                  :total 3
+                                  :total 4
                                   :display 1
                                   :echo "123"})})))
 ;;
@@ -55,7 +54,7 @@
   (fact (command admin :create-user :email "x@example.com" :role "authorityAdmin" :enabled true
           :organization "753-R" :password "foobarbozbiz") => ok?)
   ; Check that user was created
-  (fact (-> (query admin :users :email "x@example.com") :users first) => (contains {:role "authorityAdmin" :email "x@example.com" :enabled true}))
+  (fact (-> (query admin :users :email "x@example.com") :users first) => (contains {:role "authorityAdmin" :email "x@example.com" :enabled true :orgAuthz {:753-R ["authorityAdmin"]}}))
 
   ; Inbox zero
   (last-email)
@@ -65,7 +64,7 @@
   (fact "newly created authority receives mail"
     (let [email (last-email)]
       (:to email) => "foo@example.com"
-      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste.fi palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
       (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
 
 ;;
@@ -74,42 +73,80 @@
 ;; ==============================================================================
 ;;
 
-(facts update-user
+(facts "Veikko updates his name"
+  (fact (command veikko :update-user :firstName "f" :lastName "l") => ok?)
+  (fact (-> (query veikko :user) :user) => (contains {:firstName "f" :lastName "l"})))
+
+(facts update-default-application-filter
   (apply-remote-minimal)
-  (fact (command admin :create-user :email "foo@example.com" :role "authorityAdmin" :enabled "true" :organization "753-R" :apikey "xyz") => ok?)
-  (fact (command "xyz" :update-user :firstName "f" :lastName "l") => ok?)
-  (fact (-> (query "xyz" :user) :user) => (contains {:firstName "f" :lastName "l"})))
+
+  (fact (->> (command sonja :update-default-application-filter :filter {:handler (:id sonja)  :tags ["bar" "buzz"] :operations [] :organizations [] :areas ["1"]} :sort {:column "type" :asc false})) => ok?)
+
+  (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter) first :tags) => ["bar" "buzz"])
+
+  (fact "Overwrite default filter"
+      (->> (command sonja :update-default-application-filter :filter {:tags ["foo"]} :sort {:column "modified" :asc true})) => ok?)
+
+  (fact "Filter overwritten"
+      (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter)) => [{:tags ["foo"]}]))
 
 (facts update-user-organization
   (apply-remote-minimal)
 
   (fact (command naantali :create-user :email "foo@example.com" :role "authority" :enabled "true" :organization "529-R") => ok?)
 
-  (fact (-> (query admin :user-by-email :email "foo@example.com") :user :organizations) => ["529-R"])
-  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add") => ok?)
+  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"])
+  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :roles ["authority"]) => ok?)
 
-  (fact (-> (query admin :user-by-email :email "foo@example.com") :user :organizations) => ["529-R" "753-R"])
-  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add") => ok?)
+  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => (just ["529-R" "753-R"] :in-any-order))
+  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :roles ["authority"]) => ok?)
 
-  (fact (-> (query admin :user-by-email :email "foo@example.com") :user :organizations) => ["529-R" "753-R"])
-  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "remove") => ok?)
-  (fact (-> (query admin :user-by-email :email "foo@example.com") :user :organizations) => ["529-R"])
+  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :roles []) => (contains {:ok false, :parameters ["roles"], :text "error.vector-parameters-with-items-missing-required-keys"}))
 
-  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "xxx") => (contains {:ok false :text "bad-request"}))
+  (fact (command sipoo :update-user-organization :email (email-for-key teppo) :firstName "Teppo" :lastName "Example" :roles ["authority"]) => fail?)
 
-  (fact (command sipoo :update-user-organization :email (email-for-key teppo) :firstName "Teppo" :lastName "Example" :operation "add") => fail?)
-
-  (fact (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :operation "add") => (contains {:ok false :parameters ["lastName"], :text "error.missing-parameters"}))
+  (fact (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :roles ["authority"]) => (contains {:ok false :parameters ["lastName"], :text "error.missing-parameters"}))
 
   (fact "invite new user Tonja to Sipoo"
 
-    (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add") => ok?
+    (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add"  :roles ["authority"]) => ok?
 
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
-      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste.fi palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
-      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
+      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))
 
+  (fact "add existing authority to new organization"
+
+    (command naantali :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add"  :roles ["authority"]) => ok?
+    (let [email (last-email)]
+      (:to email) => (contains "tonja.sibbo@sipoo.fi")
+      (:subject email) => "Lupapiste.fi: Ilmoitus k\u00e4ytt\u00e4j\u00e4tilin liitt\u00e4misest\u00e4 organisaation viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (get-in email [:body :plain]) => (contains "Naantalin rakennusvalvonta"))))
+
+(facts remove-user-organization
+  (apply-remote-minimal)
+
+  (fact (command naantali :create-user :email "foo@example.com" :role "authority" :enabled "true" :organization "529-R") => ok?)
+  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add" :roles ["authority"]) => ok?)
+  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => (just ["529-R" "753-R"] :in-any-order))
+  (fact (command sipoo :remove-user-organization :email "foo@example.com") => ok?)
+  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"]))
+
+(fact update-user-roles
+  (apply-remote-minimal)
+  (fact "Meta: check current roles" (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority" "approver"])
+  (fact (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "foobar"]) => fail?)
+  (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority" "approver"])
+
+  (fact "Sipoo does not have permanent achive, can not set TOS roles but reader is OK"
+    (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "tos-editor" "tos-publisher" "reader"]) => ok?
+    (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority" "reader"])
+
+  (fact "Jarvenpaa has permanent achive, can set TOS roles"
+    (fact "Meta: check current roles" (-> (query admin :user-by-email :email "rakennustarkastaja@jarvenpaa.fi") :user :orgAuthz :186-R) => ["authority"])
+    (command jarvenpaa :update-user-roles :email "rakennustarkastaja@jarvenpaa.fi" :roles ["authority" "tos-editor" "tos-publisher"]) => ok?
+    (-> (query admin :user-by-email :email "rakennustarkastaja@jarvenpaa.fi") :user :orgAuthz :186-R) => ["authority" "tos-editor" "tos-publisher"]))
 
 (fact "changing user info"
   (apply-remote-minimal)
@@ -122,9 +159,7 @@
                                                         :firstName "Teppo"
                                                         :id "5073c0a1c2e6c470aef589a5"
                                                         :lastName "Nieminen"
-                                                        :personId "210281-0002"
                                                         :phone "0505503171"
-                                                        :postalCode "33200"
                                                         :role "applicant"
                                                         :street "Mutakatu 7"
                                                         :username "teppo@example.com"
@@ -138,11 +173,11 @@
                 :phone "0505503171"
                 :architect true
                 :allowDirectMarketing true
-                :degree "d"
-                :graduatingYear 2000
+                :degree "kirvesmies"
+                :graduatingYear "2000"
                 :fise "f"
                 :companyName "cn"
-                :companyId "cid"}]
+                :companyId "1060155-5"}]
       (apply command teppo :update-user (flatten (seq data))) => ok?
       (query teppo :user) => (contains {:user (contains data)}))))
 
@@ -154,7 +189,7 @@
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/user-attachment")
-        resp        (http/post uri
+        resp        (http-post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart [{:name "attachmentType"  :content attachment-type}
                                    {:name "files[]"         :content uploadfile}]})
@@ -182,6 +217,12 @@
   ; Pena uploads a tutkintotodistus:
   ;
 
+  (fact "Applicant Pena can upload user attachment"
+    (query pena :add-user-attachment-allowed) => ok?)
+
+  (fact "Auhtority Sonja can't upload user attachment"
+    (query sonja :add-user-attachment-allowed) => unauthorized?)
+
   (let [attachment-id (:attachment-id (upload-user-attachment pena "osapuolet.tutkintotodistus" true))]
 
     ; Now Pena has attachment
@@ -192,14 +233,12 @@
     (let [resp (raw pena "download-user-attachment" :attachment-id attachment-id) => http200?]
       (:body resp) => "This is test file for file upload in itest.")
 
-    ; Sonja can not get attachment
+    (fact "Sonja can not get attachment"
+      (raw sonja "download-user-attachment" :attachment-id attachment-id) => http401?)
 
-    (raw sonja "download-user-attachment" :attachment-id attachment-id) => http401?
-
-    ; Sonja can not delete attachment
-
-    (command sonja "remove-user-attachment" :attachment-id attachment-id)
-    (get (:attachments (query pena "user-attachments")) 0) =not=> nil?
+    (fact "Sonja can not delete attachment"
+      (command sonja "remove-user-attachment" :attachment-id attachment-id)
+      (get (:attachments (query pena "user-attachments")) 0) =not=> nil?)
 
     ; Pena can delete attachment
 
@@ -216,27 +255,27 @@
        params       {:cookie-store (->cookie-store store)
                      :follow-redirects false
                      :throw-exceptions false}
-       login        (http/post
+       login        (http-post
                       (str (server-address) "/api/login")
                       (assoc params :form-params {:username "admin" :password "admin"})) => http200?
        csrf-token   (-> (get @store "anti-csrf-token") .getValue codec/url-decode) => truthy
        params       (assoc params :headers {"x-anti-forgery-token" csrf-token})
-       sipoo-rakval (-> "sipoo" find-user-from-minimal :organizations first)
+       sipoo-rakval (-> "sipoo" find-user-from-minimal :orgAuthz keys first name)
        impersonate  (fn [password]
-                      (-> (http/post
+                      (-> (http-post
                             (str (server-address) "/api/command/impersonate-authority")
                             (assoc params
-                              :form-params (merge {:organizationId sipoo-rakval} (when password {:password password}))
+                              :form-params (merge {:organizationId sipoo-rakval :role "authority"} (when password {:password password}))
                               :content-type :json))
                         decode-response :body))
-       role         (fn [] (-> (http/get (str (server-address) "/api/query/user") params) decode-response :body :user :role))
-       actions      (fn [] (-> (http/get (str (server-address) "/api/query/allowed-actions") params) decode-response :body :actions))]
+       role         (fn [] (-> (http-get (str (server-address) "/api/query/user") params) decode-response :body :user :role))
+       actions      (fn [] (-> (http-get (str (server-address) "/api/query/allowed-actions") params) decode-response :body :actions))]
 
    (fact "impersonation action is available"
      (:impersonate-authority (actions)) => ok?)
 
    (fact "admin can not query property owners"
-     (-> (http/get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)
+     (-> (http-get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)
 
    (fact "fails without password"
      (impersonate nil) => fail?)
@@ -247,9 +286,9 @@
    (fact "role remains admin"
      (role) => "admin")
 
-   (let [application (create-and-submit-application pena :municipality sonja-muni) => truthy
+   (let [application (create-and-submit-application pena :propertyId sipoo-property-id) => truthy
          application-id (:id application)
-         query-as-admin (http/get (str (server-address) "/api/query/application?id=" application-id) params) => http200?]
+         query-as-admin (http-get (str (server-address) "/api/query/application?id=" application-id) params) => http200?]
 
      (fact "sonja sees the application"
        (query-application sonja application-id) => truthy)
@@ -264,7 +303,7 @@
        (impersonate "admin") => fail?)
 
      (fact "instead, application is visible"
-       (let [query-as-imposter (http/get (str (server-address) "/api/query/application?id=" application-id) params) => http200?
+       (let [query-as-imposter (http-get (str (server-address) "/api/query/application?id=" application-id) params) => http200?
              body (-> query-as-imposter decode-response :body) => ok?
              application (:application body)]
          (:id application) => application-id)))
@@ -280,7 +319,7 @@
        (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))
 
    (fact "still can not query property owners"
-     (-> (http/get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)))
+     (-> (http-get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)))
 
 (facts* "reset password email"
   (last-email) ; Inbox zero
@@ -289,7 +328,7 @@
                 :content-type :json
                 :follow-redirects false
                 :throw-exceptions false}
-        resp   (http/post (str (server-address) "/api/reset-password") params) => http200?
+        resp   (http-post (str (server-address) "/api/reset-password") params) => http200?
         email  (last-email)]
     (-> resp decode-response :body) => ok?
     (:to email) => (email-for "pena")

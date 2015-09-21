@@ -3,14 +3,11 @@
             [monger.operators :refer :all]
             [sade.env :as env]
             [sade.core :refer [now fail fail!]]
+            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.notifications :as notifications]))
-
-(defn not-open-inforequest-user-validator [{user :user} _]
-  (when (:oir user)
-    (fail :error.not-allowed-for-oir)))
 
 (defn- base-email-model [{{token :token-id} :data} _ __]
   (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
@@ -28,8 +25,8 @@
 (notifications/defemail :open-inforequest-invite (assoc base-email-conf :template "open-inforequest-invite.html"))
 (notifications/defemail :open-inforequest-commented (assoc base-email-conf :template "new-comment.md"))
 
-(defn notify-on-comment [{application :application user :user} _]
-  (when (:openInfoRequest application)
+(defn notify-on-comment [{application :application user :user data :data} _]
+  (when (and (:openInfoRequest application) (not (ss/blank? (:text data))))
     (if-let [token (mongo/select-one :open-inforequest-token {:application-id (:id application)})]
       (when (not= (:email user) (:email token))
         (notifications/notify! :open-inforequest-commented {:data {:email (:email token) :token-id (:id token)} :application application}))

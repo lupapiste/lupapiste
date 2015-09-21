@@ -1,10 +1,11 @@
 (ns lupapalvelu.foreman-api
   (:require [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
+            [lupapalvelu.application :as application]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as application]
-            [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.states :as states]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -17,20 +18,20 @@
 
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole]
-   :roles [:applicant :authority]
-   :states action/all-application-states}
+   :user-roles #{:applicant :authority}
+   :states states/all-application-states
+   :pre-checks [application/validate-authority-in-drafts]}
   [{:keys [created user application] :as command}]
   (let [original-open? (util/pos? (:opened application))
         foreman-app (-> (application/do-create-application
                          (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
-                                               :x (-> application :location :x)
-                                               :y (-> application :location :y)
+                                               :x (-> application :location first)
+                                               :y (-> application :location second)
                                                :address (:address application)
                                                :propertyId (:propertyId application)
                                                :municipality (:municipality application)
                                                :infoRequest false
                                                :messages []}))
-                      (assoc :state (if original-open? :open :draft))
                       (assoc :opened (if original-open? created nil)))
 
         task                 (util/find-by-id taskId (:tasks application))
@@ -46,11 +47,11 @@
                                (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] foremanRole)
                                tyonjohtaja-doc)
 
-        hakija-docs          (domain/get-documents-by-name application "hakija")
+        hakija-docs          (domain/get-applicant-documents (:documents application))
         hakija-docs          (map cleanup-hakija-doc hakija-docs)
 
         new-application-docs (->> (:documents foreman-app)
-                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja-v2"} (-> % :schema-info :name)))
+                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija-r" "tyonjohtaja-v2"} (-> % :schema-info :name)))
                                   (concat (remove nil? [hakija-docs hankkeen-kuvaus-doc tyonjohtaja-doc]))
                                   flatten)
 
@@ -60,13 +61,14 @@
     (application/insert-application foreman-app)
     (when task
       (let [updates [[[:asiointitunnus] (:id foreman-app)]]]
-        (commands/persist-model-updates application "tasks" task updates created)))
-    (ok :id (:id foreman-app))))
+        (doc-persistence/persist-model-updates application "tasks" task updates created)))
+    (ok :id (:id foreman-app) :auth (:auth foreman-app))))
 
 (defcommand update-foreman-other-applications
-  {:roles [:applicant :authority]
-   :states action/all-states
-   :parameters [:id foremanHetu]}
+  {:user-roles #{:applicant :authority}
+   :states states/all-states
+   :parameters [:id foremanHetu]
+   :pre-checks [application/validate-authority-in-drafts]}
   [{application :application user :user :as command}]
   (when-let [foreman-applications (seq (foreman/get-foreman-project-applications application foremanHetu))]
     (let [other-applications (map (fn [app] (foreman/other-project-document app (:created command))) foreman-applications)
@@ -82,14 +84,27 @@
       (update-application command {$set {:documents documents}}))
     (ok)))
 
+(defcommand link-foreman-task
+  {:user-roles #{:applicant :authority}
+   :states states/all-states
+   :parameters [id taskId foremanAppId]
+   :pre-checks [application/validate-authority-in-drafts]}
+  [{:keys [created application] :as command}]
+  (let [task (util/find-by-id taskId (:tasks application))]
+    (if task
+      (let [updates [[[:asiointitunnus] foremanAppId]]]
+        (doc-persistence/persist-model-updates application "tasks" task updates created))
+      (fail :error.not-found))))
+
 (defn foreman-app-check [_ application]
   (when-not (foreman/foreman-app? application)
     (fail :error.not-foreman-app)))
 
 (defquery foreman-history
-  {:roles            [:authority :applicant]
-   :states           action/all-states
-   :extra-auth-roles [:any]
+  {:user-roles #{:authority}
+   :states           states/all-states
+   :user-authz-roles action/all-authz-roles
+   :org-authz-roles  action/reader-org-authz-roles
    :parameters       [:id]
    :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
@@ -98,9 +113,10 @@
     (fail :error.not-found)))
 
 (defquery reduced-foreman-history
-  {:roles            [:authority :applicant]
-   :states           action/all-states
-   :extra-auth-roles [:any]
+  {:user-roles #{:authority}
+   :states           states/all-states
+   :user-authz-roles action/all-authz-roles
+   :org-authz-roles  action/reader-org-authz-roles
    :parameters       [:id]
    :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
@@ -109,9 +125,10 @@
     (fail :error.not-found)))
 
 (defquery foreman-applications
-  {:roles            [:applicant :authority]
-   :states           action/all-states
-   :extra-auth-roles [:any]
+  {:user-roles #{:applicant :authority :oirAuthority}
+   :states           states/all-states
+   :user-authz-roles action/all-authz-roles
+   :org-authz-roles  action/reader-org-authz-roles
    :parameters       [:id]}
   [{application :application user :user :as command}]
   (if application

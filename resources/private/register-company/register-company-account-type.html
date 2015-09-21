@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="register-company-account-type">
+    <div class="content company-account-register">
+      <div class="register-progress">
+        <div class="register-phase done active">
+          <span class="phase-number">1</span>
+          <span class="phase-title" data-bind="ltext: 'register.company.phase.1'"></span>
+        </div>
+        <div class="register-phase">
+          <span class="phase-number">2</span>
+          <span class="phase-title" data-bind="ltext: 'register.company.phase.2'"></span>
+        </div>
+        <div class="register-phase">
+          <span class="phase-number">3</span>
+          <span class="phase-title" data-bind="ltext: 'register.company.phase.3'"></span>
+        </div>
+        <div class="register-phase">
+          <span class="phase-number">4</span>
+          <span class="phase-title" data-bind="ltext: 'register.company.phase.4'"></span>
+        </div>
+      </div>
+
+      <h3 class="account-select-help" data-bind="ltext: 'register.company.accountselect.help'"></h3>
+
+      <form id="account-type-selection">
+        <div class="account-box" data-bind="css: { selected: model().accountType() === 'account5' }">
+          <h4 data-bind="ltext: 'register.company.account5.title'"></h4>
+          <span class="price" data-bind="ltext: 'register.company.account5.price'"></span>
+          <span class="bullet" data-bind="ltext: 'register.company.account5.bullet1'"></span>
+          <span class="bullet" data-bind="ltext: 'register.company.account5.bullet2'"></span>
+          <label data-test-id="account-type-account5" for="account5" data-bind="click: accountSelected, checked: model().accountType"></label>
+          <input type="radio" id="account5" name="account-selection" value="account5" data-bind="checked: model().accountType"></input>
+        </div>
+        <div class="account-box" data-bind="css: { selected: model().accountType() === 'account15' }">
+          <h4 data-bind="ltext: 'register.company.account15.title'"></h4>
+          <span class="price" data-bind="ltext: 'register.company.account15.price'"></span>
+          <span class="bullet" data-bind="ltext: 'register.company.account15.bullet1'"></span>
+          <span class="bullet" data-bind="ltext: 'register.company.account15.bullet2'"></span>
+          <label data-test-id="account-type-account15" for="account15" data-bind="click: accountSelected, checked: model().accountType"></label>
+          <input type="radio" id="account15" name="account-selection" value="account15" data-bind="checked: model().accountType"></input>
+        </div>
+        <div class="account-box" data-bind="css: { selected: model().accountType() === 'account30' }">
+          <h4 data-bind="ltext: 'register.company.account30.title'"></h4>
+          <span class="price" data-bind="ltext: 'register.company.account30.price'"></span>
+          <span class="bullet" data-bind="ltext: 'register.company.account30.bullet1'"></span>
+          <span class="bullet" data-bind="ltext: 'register.company.account30.bullet2'"></span>
+          <label data-test-id="account-type-account30" for="account30" data-bind="click: accountSelected, checked: model().accountType"></label>
+          <input type="radio" id="account30" name="account-selection" value="account30" data-bind="checked: model().accountType"></input>
+        </div>
+      </form>
+      <button class="btn-primary"
+              data-bind="click: continueToCompanyInfo, enable: model().accountType"
+              id="continueToCompanyInfo" data-test-id="account-type-submit">
+          <span data-bind="ltext: 'continue'"></span>
+          <i class="lupicon-chevron-right"></i>
+      </button>
+      <button data-bind="enable: canCancelInfo, click: cancelInfo, ltext: 'cancel'" data-test-id="account-type-cancel"></button>
+    </div>
+  </section>
+</body>
+</html>

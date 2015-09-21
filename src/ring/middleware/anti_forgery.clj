@@ -41,11 +41,13 @@
   (or (get-in request [:params token-key])
       (get-in request [:headers "x-anti-forgery-token"])))
 
+; Backported
+; https://github.com/ring-clojure/ring/commit/be1eac9667fef18800a874fa0b61b350263b6f3f
 (defn- secure-eql? [^String a ^String b]
-  (if (and a b (= (.length a) (.length b)))
-    (zero? (reduce bit-or
-                   (map bit-xor (.getBytes a) (.getBytes b))))
-    false))
+  (let [a (map int a), b (map int b)]
+    (if (and (not-empty a) (= (count a) (count b)))
+      (zero? (reduce bit-or (map bit-xor a b)))
+      false)))
 
 (defn- valid-request? [request token-gen-fn log-fn]
   (let [request-token (request-token request)

@@ -3,12 +3,13 @@
     [lupapalvelu.xml.emit :refer [element-to-xml]]
     [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
     [lupapalvelu.document.ymparisto-ilmoitukset-canonical :as ct]
-    [lupapalvelu.permit :as permit]))
+    [lupapalvelu.permit :as permit]
+    [lupapalvelu.xml.disk-writer :as writer]))
 
 (def ilmoitus_to_krysp
   {:tag :Ilmoitukset
    :ns "ymi"
-   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/ilmoitukset" "2.1.2")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :YI "2.1.2")
                  :xmlns:ymi "http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset"}
            mapping-common/common-namespaces)
 
@@ -66,18 +67,19 @@
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
         canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:Ilmoitukset :melutarina :Melutarina :liitetieto]
-                    attachments)
-        xml (element-to-xml canonical ilmoitus_to_krysp)]
+                    attachments-canonical)
+        xml (element-to-xml canonical ilmoitus_to_krysp)
+        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
-    (mapping-common/write-to-disk
+    (writer/write-to-disk
       application
-      attachments
-      statement-attachments
+      attachments-for-write
       xml
       krysp-version
       output-dir

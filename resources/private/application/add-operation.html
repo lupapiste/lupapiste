@@ -13,9 +13,8 @@
       <img src="/img/ajax-loader.gif" alt="..." width="66" height="66"/>
     </div>
 
-    <a href="#" data-bind="attr: {href: url}" class="btn">
-      <span class="icon drill-left-black-bigger inline-left"></span>
-      <span data-bind="ltext: 'cancel'"></span>
+    <a href="#" data-bind="attr: {href: url}" class="btn secondary">
+        <span data-bind="ltext: 'cancel'"></span>
     </a>
 
   </section>
@@ -26,10 +25,13 @@
 
       <div data-bind="text: loc('operations.selected') + ' ' + loc(['operations',op])"></div>
 
-      <button data-bind="click: addOperation, disable: processing" class="btn btn-primary" data-test-id="add-operation-to-application">
-        <span data-bind="ltext: 'operations.add'"></span>
-        <span class="icon add left-align"></span>
-        <em data-bind="visible: pending" class="button-loader"></em>
+      <button data-bind="click: addOperation,
+                         disable: processing,
+                         css: {waiting: pending}" class="positive"
+              data-test-id="add-operation-to-application">
+          <i class="lupicon-circle-plus"></i>
+          <i class="wait spin lupicon-refresh"></i>
+          <span data-bind="ltext: 'operations.add'"></span>
       </button>
     </div>
 

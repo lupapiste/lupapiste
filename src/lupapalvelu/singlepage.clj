@@ -7,7 +7,6 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
-            [sade.scss-compiler :refer [scss->css]]
             [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
@@ -40,7 +39,7 @@
     (env/feature? :no-minification) (IOUtils/copy in out)
     (= kind :js) (let [c (JavaScriptCompressor. in error-reporter)]
                    ; no linebreaks, obfuscate locals, no verbose,
-                   (.compress c out -1 true false
+                   (.compress c out -1 true false;
                      ; preserve semicolons, disable optimizations
                      true true))
     (= kind :css) (let [c (CssCompressor. in)]
@@ -57,7 +56,7 @@
         (if (fn? src)
           (.write (write-header kind out (str "fn: " (fn-name src))) (src))
           (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
-            (if (or (ss/contains src "debug") (ss/contains src ".min."))
+            (if (or (ss/contains? src "debug") (ss/contains? src ".min."))
               (IOUtils/copy in (write-header kind out src))
               (minified kind in (write-header kind out src)))))))
     (.toByteArray stream)))
@@ -65,8 +64,8 @@
 (defn parse-html-resource [c resource]
   (let [h (enlive/html-resource resource)]
     (assoc c
-      :header (concat (:header c) (enlive/select h [:header]))
       :nav    (concat (:nav c)    (enlive/select h [:nav]))
+      :info   (concat (:info c)   (enlive/select h [:div.notification]))
       :footer (concat (:footer c) (enlive/select h [:footer]))
       :page   (concat (:page  c)  (enlive/select h [:section.page])))))
 
@@ -81,11 +80,11 @@
           (tc/to-date (tc/from-long (:time env/buildinfo)))
           (:build-number env/buildinfo)))
 
-(defn inject-content [t {:keys [header nav page footer]} component]
+(defn inject-content [t {:keys [nav info page footer]} component]
   (enlive/emit* (-> t
                   (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
-                  (enlive/transform [:header] (constantly (first header)))
                   (enlive/transform [:nav] (enlive/content (map :content nav)))
+                  (enlive/transform [:div.notification] (enlive/content (map :content info)))
                   (enlive/transform [:section] (enlive/content page))
                   (enlive/transform [:footer] (enlive/content (map :content footer)))
                   (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (resource-url :common :js)) e)))
@@ -116,16 +115,8 @@
       (.write out (ss/utf8-bytes element)))
     (-> out (.toString (.name ss/utf8)) (compress-html) (ss/utf8-bytes))))
 
-(defn compose-scss [component]
-  (let [stream (ByteArrayOutputStream.)]
-    (with-open [out (io/writer stream)]
-      (doseq [src (c/get-resources ui-components :scss component)]
-        (.write out (scss->css (.getPath (-> src c/path io/resource))))))
-    (.toByteArray stream)))
-
 (defn compose [kind component]
   (tracef "Compose %s%s" component kind)
-  (case kind
-    :html (compose-html component)
-    :css  (compose-resource kind component) #_(byte-array (concat (compose-scss component) (compose-resource kind component)))
-    :js   (compose-resource kind component)))
+  (if (= :html kind)
+    (compose-html component)
+    (compose-resource kind component)))

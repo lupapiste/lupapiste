@@ -20,14 +20,12 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
     .call();
 
   self.followAppLink = function(project) {
-    window.location.hash = "!/application/" + project.linkedAppId;
+    pageutil.openApplicationPage({id: project.linkedAppId});
   };
 
   self.showAllProjects = function() {
-    var newParams = params;
-    newParams.showAllProjects = true;
-    hub.send("show-dialog", { titleLoc: "tyonjohtaja.historia.otsikko",
-                              contentName: "foreman-history",
-                              contentParams: newParams });
+    hub.send("show-dialog", { ltitle: "tyonjohtaja.historia.otsikko",
+                              component: "foreman-history",
+                              componentParams: _.defaults({showAllProjects: true}, params)});
   };
 };

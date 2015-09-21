@@ -1,7 +1,7 @@
 (ns lupapalvelu.comment
-  (:require [clojure.string :refer [blank?]]
-            [monger.operators :refer :all]
+  (:require [monger.operators :refer :all]
             [sade.util :as util]
+            [sade.strings :as ss]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]))
@@ -16,7 +16,7 @@
       (util/deep-merge
         {$set  {:modified timestamp}}
 
-        (when-not (and answered? (blank? text))
+        (when-not (and answered? (ss/blank? text))
           {$push {:comments (domain/->comment text target type user to-user timestamp roles)}})
 
         (case (keyword current-app-state)

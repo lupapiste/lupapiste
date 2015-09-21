@@ -1,16 +1,21 @@
 # Hei {{user.firstName}} {{user.lastName}},
 
-Sinut on kutsuttu [Lupapiste.fi](https://lupapiste.fi) palveluun yrityksen **{{company.name}}** tilin k&auml;ytt&auml;j&auml;ksi.
+**{{company.name}}** -yritystilin p&auml;&auml;k&auml;ytt&auml;j&auml; on lis&auml;nnyt sinut yritystilin k&auml;ytt&auml;j&auml;ksi. Yritystilin k&auml;ytt&auml;j&auml;n&auml; n&auml;et yrityksen kaikki hakemukset ja jaat tekem&auml;si hakemukset kollegoidesi kanssa.
 
-{{company.name}} yritystilin k&auml;ytt&auml;j&auml;n&auml; p&auml;&auml;set n&auml;kem&auml;&auml;n ja k&auml;sittelem&auml;&auml;n kaikkia {{company.name}} yrityksen hakemuksia.
-Samoin uudet hakemukset jotka teet Lupapaiste palvelussa ovat yrityksen muiden k&auml;ytt&auml;jien n&auml;ht&auml;viss&auml; ja k&auml;sitelt&auml;viss&auml;.
+Voit hyv&auml;ksy&auml; liitt&auml;misen oheisella linkill&auml;:
 
-Mik&auml;li haluat liitt&auml;&auml; tilisi {{company.name}} tiliin, klikkaa alla olevaa linkki&auml;:
-
-  [{{ok-fi}}]({{ok-fi}})
+[{{ok-fi}}]({{ok-fi}})
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 ---
 
 # Hej {{user.firstName}} {{user.lastName}},
+
+Huvudanv&auml;ndaren f&ouml;r **{{company.name}}** -f&ouml;retagskontot har lagt till dig som anv&auml;ndare av f&ouml;retagskontot. Som anv&auml;ndare av f&ouml;retagskontot ser du alla f&ouml;retagets ans&ouml;kningar och delar de ans&ouml;kningar du sj&auml;lv har gjort med dina kolleger.
+
+Ditt konto aktiveras genom l&auml;nken nedan:
+
+ [{{ok-sv}}]({{ok-sv}})
+
+Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.

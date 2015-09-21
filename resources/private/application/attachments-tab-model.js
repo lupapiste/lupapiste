@@ -1,10 +1,12 @@
-LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
+LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachmentPrintsOrderModel) {
   "use strict";
 
   var self = this;
 
+  self.authorizationModel = lupapisteApp.models.applicationAuthModel;
   self.appModel = appModel;
   self.signingModel = signingModel;
+  self.verdictAttachmentPrintsOrderModel = verdictAttachmentPrintsOrderModel;
 
   self.preAttachmentsByOperation = ko.observableArray();
   self.postAttachmentsByOperation = ko.observableArray();
@@ -12,71 +14,82 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
   self.attachmentsOperation = ko.observable();
   self.attachmentsOperations = ko.observable([]);
 
-  function getPreAttachments(source) {
-    return _.filter(source, function(attachment) {
-          return !_.contains(LUPAPISTE.config.postVerdictStates, attachment.applicationState);
-      });
-  }
-
-  function getPostAttachments(source) {
-    return _.filter(source, function(attachment) {
-          return _.contains(LUPAPISTE.config.postVerdictStates, attachment.applicationState);
-      });
-  }
-
-  function unsentAttachmentFound(attachments) {
-    return _.some(attachments, function(a) {
-      var lastVersion = _.last(a.versions);
-      return lastVersion &&
-             (!a.sent || lastVersion.created > a.sent) &&
-             (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
-    });
-  }
+  self.showPostAtachmentsActions = ko.pureComputed(function() {
+    return (!appModel.inPostVerdictState() && self.preAttachmentsByOperation().length > 0) ||
+           (appModel.inPostVerdictState()  && self.postAttachmentsByOperation().length > 0);
+  });
 
   var attachmentsOperationsMapping = {
       "attachmentsAdd": {
-        command: "upload-attachment",
+        loc: loc("application.attachmentsAdd"),
         clickCommand: function() {
           return self.newAttachment();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("upload-attachment");
         }
       },
       "attachmentsCopyOwn": {
-        command: "copy-user-attachments-to-application",
+        loc: loc("application.attachmentsCopyOwn"),
         clickCommand: function() {
           return self.copyOwnAttachments();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("copy-user-attachments-to-application");
         }
       },
       "newAttachmentTemplates": {
-        command: "create-attachments",
+        loc: loc("application.newAttachmentTemplates"),
         clickCommand: function() {
           return self.attachmentTemplatesModel.show();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("create-attachments");
         }
       },
       "stampAttachments": {
-        command: "stamp-attachments",
+        loc: loc("application.stampAttachments"),
         clickCommand: function() {
           return self.startStamping();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("stamp-attachments") && self.appModel.hasAttachment();
         }
       },
       "markVerdictAttachments": {
-        command: "set-attachments-as-verdict-attachment",
+        loc: loc("application.markVerdictAttachments"),
         clickCommand: function() {
           return self.startMarkingVerdictAttachments();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("set-attachments-as-verdict-attachment") && self.appModel.hasAttachment();
+        }
+      },
+      "orderVerdictAttachments": {
+        loc: loc("verdict.orderAttachmentPrints.button"),
+        clickCommand: function() {
+          self.verdictAttachmentPrintsOrderModel.openDialog({application: self.appModel});
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("order-verdict-attachment-prints") && self.verdictAttachmentPrintsOrderModel.attachments().length;
         }
       },
       "signAttachments": {
-        command: "sign-attachments",
+        loc: loc("application.signAttachments"),
         clickCommand: function() {
           return self.signingModel.init(self.appModel);
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("sign-attachments") && self.appModel.hasAttachment();
         }
       },
-      "attachmentsMoveToBackingSystem": {
-        command: "move-attachments-to-backing-system",
+      "downloadAll": {
+        loc: loc("download-all"),
         clickCommand: function() {
-          return self.sendUnsentAttachmentsToBackingSystem();
+          window.location = "/api/raw/download-all-attachments?id=" + self.appModel.id() + "&lang=" + loc.getCurrentLanguage();
         },
-        visibleFunc: function (rawAttachments) {
-          return unsentAttachmentFound(rawAttachments);
+        visibleFn: function (rawAttachments) {
+          return self.appModel.hasAttachment();
         }
       }
   };
@@ -85,18 +98,20 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
     var commands = [];
     _.forEach(_.keys(attachmentsOperationsMapping), function(k) {
       var operationData = attachmentsOperationsMapping[k];
-      var visibleFuncResult = (operationData && operationData.visibleFunc) ? operationData.visibleFunc(rawAttachments) : true;
-      var isOptionVisible = self.authorizationModel ? self.authorizationModel.ok(operationData.command) && visibleFuncResult : false;
-      if (isOptionVisible){
-        commands.push(k);
+      if (!operationData) { error("Invalid attachment operations action: " + k); return [];}
+      if (!operationData.visibleFn) { error("No visibility resolving method defined for attachment operations action: " + k); return [];}
+
+      var isOptionVisible = (self.authorizationModel) ? operationData.visibleFn(rawAttachments) : false;
+      if (isOptionVisible) {
+        commands.push({name: k, loc: operationData.loc});
       }
     });
     return commands;
   }
 
-  self.attachmentsOperation.subscribe(function(selectedCommandName) {
-    if (selectedCommandName) {
-      attachmentsOperationsMapping[selectedCommandName].clickCommand();
+  self.attachmentsOperation.subscribe(function(opName) {
+    if (opName) {
+      attachmentsOperationsMapping[opName].clickCommand();
       self.attachmentsOperation(undefined);
     }
   });
@@ -105,17 +120,17 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
     self.showHelp(!self.showHelp());
   };
 
-  self.refresh = function(appModel, authorizationModel) {
+  self.refresh = function(appModel) {
     self.appModel = appModel;
-    self.authorizationModel = authorizationModel;
-    var rawAttachments = ko.mapping.toJS(appModel.attachments);
 
-    var preAttachments = getPreAttachments(rawAttachments);
-    var postAttachments = getPostAttachments(rawAttachments);
+    var rawAttachments = ko.mapping.toJS(appModel.attachments);
+    var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
+    var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);
 
     // pre verdict attachments are not editable after verdict has been given
-    var preGroupEditable = currentUser.isAuthority() || !_.contains(LUPAPISTE.config.postVerdictStates, appModel.state());
+    var preGroupEditable = lupapisteApp.models.currentUser.isAuthority() || !_.contains(LUPAPISTE.config.postVerdictStates, appModel.state());
     var preGrouped = attachmentUtils.getGroupByOperation(preAttachments, preGroupEditable, self.appModel.allowedAttachmentTypes());
+
     var postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, self.appModel.allowedAttachmentTypes());
 
     if (self.authorizationModel.ok("set-attachment-not-needed")) {
@@ -143,22 +158,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
     self.attachmentsOperations(updatedAttachmentsOperations(rawAttachments));
   };
 
-  self.sendUnsentAttachmentsToBackingSystem = function() {
-    var doSendAttachments = function() {
-      ajax.command("move-attachments-to-backing-system", {id: self.appModel.id(), lang: loc.getCurrentLanguage()})
-      .success(self.appModel.reload)
-      .processing(self.appModel.processing)
-      .pending(self.appModel.pending)
-      .call();
-    };
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("application.attachmentsMoveToBackingSystem"),
-      loc("application.attachmentsMoveToBackingSystem.confirmationMessage"),
-      {title: loc("yes"), fn: doSendAttachments},
-      {title: loc("no")}
-    );
-  };
-
   self.newAttachment = function() {
     attachment.initFileUpload({
       applicationId: self.appModel.id(),
@@ -178,12 +177,11 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
         .call();
       return false;
     };
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("application.attachmentsCopyOwn"),
-      loc("application.attachmentsCopyOwn.confirmationMessage"),
-      {title: loc("yes"), fn: doSendAttachments},
-      {title: loc("no")}
-    );
+    hub.send("show-dialog", {ltitle: "application.attachmentsCopyOwn",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: "application.attachmentsCopyOwn.confirmationMessage",
+                                               yesFn: doSendAttachments}});
   };
 
   self.deleteSingleAttachment = function(a) {
@@ -193,18 +191,16 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
         .success(function() {
           self.appModel.reload();
         })
-        .error(function (e) {
-          LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(e.text));
-        })
         .processing(self.appModel.processing)
         .call();
+        hub.send("track-click", {category:"Application", label: "", event:"deleteSingleAttachment"});
       return false;
     };
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("attachment.delete.header"),
-      loc("attachment.delete.message"),
-      {title: loc("yes"), fn: doDelete},
-      {title: loc("no")});
+    hub.send("show-dialog", {ltitle: "attachment.delete.header",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: "attachment.delete.message",
+                                               yesFn: doDelete}});
   };
 
   self.startStamping = function() {
@@ -217,6 +213,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
 
   self.attachmentTemplatesModel = new function() {
     var templateModel = this;
+
     templateModel.ok = function(ids) {
       ajax.command("create-attachments", {id: self.appModel.id(), attachmentTypes: ids})
         .success(function() { repository.load(self.appModel.id()); })
@@ -226,7 +223,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
 
     templateModel.init = function() {
       templateModel.selectm = $("#dialog-add-attachment-templates .attachment-templates").selectm();
-      templateModel.selectm.ok(templateModel.ok).cancel(LUPAPISTE.ModalDialog.close);
+      templateModel.selectm
+        .allowDuplicates(true)
+        .ok(templateModel.ok)
+        .cancel(LUPAPISTE.ModalDialog.close);
       return templateModel;
     };
 
@@ -253,12 +253,12 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
     var desc = e["op-desc"];
 
     _.each(self.appModel.attachments(), function(attachment) {
-      if ( ko.unwrap(attachment.op) && attachment.op.id() === opid ) {
+      if (ko.unwrap(attachment.op) && attachment.op.id() === opid && typeof attachment.op.description === "function") {
         attachment.op.description(desc);
       }
     });
 
-    self.refresh(self.appModel, self.authorizationModel);
+    self.refresh(self.appModel);
   });
 
 };

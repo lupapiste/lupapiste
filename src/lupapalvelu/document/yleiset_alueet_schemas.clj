@@ -73,7 +73,8 @@
            :type :party
            :removable false
            :repeating false
-           :order 62}
+           :order 62
+           :subtype :maksaja}
     :body yleiset-alueet-maksaja}
    {:info {:name "tyoaika"                                                 ;; alkuPvm / loppuPvm
            :type :group

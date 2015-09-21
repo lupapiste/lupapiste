@@ -5,14 +5,11 @@
   }
 }
 
-.register-form, #pw-form {
-
+.register-form {
   .error-message {
     font-style: italic;
     color: red;
-    position: absolute;
-    bottom: 0;
-    left: 0;
+    margin: -10px 0 0 0;
 
   }
 
@@ -21,7 +18,6 @@
   }
 
   .form-entry {
-    height: 78px;
     &.register-checkbox {
       width: 100%;
       height: auto;
@@ -31,8 +27,16 @@
 
   .register-error {
     position: relative;
+    margin: $marginS 0;
   }
 
+  .architect-toggle {
+    min-height: 36px;
+  }
+
+  .info-indicator {
+    cursor: pointer;
+  }
 
 }
 
@@ -41,4 +45,256 @@
   p {
    margin-bottom: $baseline/2;
   }
+}
+
+.account-select-help {
+  margin-top: $marginL;
+  margin-left: $marginL;
+}
+
+#account-type-selection {
+  .account-box {
+    width: 33%;
+    display: inline-block;
+    height: 400px;
+    position: relative;
+    padding: $marginL;
+    cursor: pointer;
+    margin-bottom: $marginL;
+    &:hover {
+      background-color: $lp-purple-light;
+    }
+    &.selected {
+      background-color: $lp-purple;
+      .price {
+        color: white;
+      }
+      .bullet {
+        border-top: 3px dotted white;
+      }
+      &:after {
+        content: " ";
+        @include spite-bg;
+        width: 100px;
+        height: 100px;
+        background-position: 0px -6000px;
+        position: absolute;
+        left:0;
+        right:0;
+        bottom: $marginL;
+        margin-left:auto;
+        margin-right:auto;
+      }
+    }
+    label {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    h4 {
+      font-size: 2em;
+      margin: 0 0 $marginL *2;
+      text-align: center;
+    }
+    .price {
+      font-size: 4em;
+      display: block;
+      text-align: center;
+      margin: $marginL 0 $marginL *2;
+      color: $lp-purple;
+      font-weight: bold;
+    }
+    .bullet {
+      display: block;
+      font-size: 1em;
+      padding: $marginM;
+      text-align: center;
+      border-top: 3px dotted $lp-purple;
+    }
+    input {
+      display: none;
+    }
+  }
+
+}
+
+.register-progress {
+  padding: 0 $marginL;
+  $phase-number-radius: 50px;
+  height: $phase-number-radius * 3 + $marginM;
+  .register-phase {
+    display: inline-block;
+    width: 24%;
+    position: relative;
+    margin-bottom: 40px;
+    height: $phase-number-radius * 2;
+
+    a {
+      text-decoration: none;
+      color: $lp-purple;
+    }
+
+    .phase-number {
+      width: $phase-number-radius * 2;
+      height: $phase-number-radius * 2;
+      border-radius: $phase-number-radius;
+      color: $lp-purple;
+      border: solid 3px $lp-purple;
+      font-size: 3em;
+      display: block;
+      text-align: center;
+      padding: $phase-number-radius - 20px 0;
+      font-weight: bold;
+      position: absolute;
+      left:0;
+      right:0;
+      margin-left:auto;
+      margin-right:auto;
+      box-sizing: border-box;
+
+    }
+    .phase-title {
+      font-weight: bold;
+      font-size: 1.4em;
+      margin-top: $marginM;
+      text-align: center;
+      position: absolute;
+      left:0;
+      right:0;
+      margin-left:auto;
+      margin-right:auto;
+      top: $phase-number-radius * 2 - $marginM;
+    }
+
+    &.active {
+      &::after {
+        content: " ";
+        display: block;
+        position: absolute;
+        bottom: -$phase-number-radius - $marginS;
+        margin: 0 auto;
+        width: 0;
+        height: 0;
+        border-left: 15px solid transparent;
+        border-right: 15px solid transparent;
+        border-top: 20px solid $lp-purple;
+        left:0;
+        right:0;
+        margin-left:auto;
+        margin-right:auto;
+      }
+    }
+    &.done {
+      .phase-number {
+        background-color: $lp-purple;
+        color: white;
+      }
+    }
+  }
+}
+
+.company-account-register, .register-contentbox {
+  button, .btn {
+    font-size: 18px;
+    text-shadow: none;
+    height: 60px;
+    box-sizing: border-box;
+    text-align: left;
+    width: 240px;
+    margin-right: $marginL;
+    background-color: $color-dark-bg;
+    color: white;
+    position: relative;
+    span {
+      width: 100%;
+    }
+  }
+
+  .btn-primary {
+    background-color: $lp-purple;
+    &:hover {
+      background-color: darken($lp-purple, 10%);
+    }
+    &:disabled {
+      background-color: $lp-light-grey;
+      color: $color-dark-bg;
+      &:after {
+        border-left: 30px solid $color-dark-bg;
+        color: $color-dark-bg;
+      }
+    }
+  }
+}
+
+.register-contentbox {
+  background-color: $lp-purple-light;
+  padding: $marginL;
+  p, h1 {
+    color: black;
+    width: 60%;
+  }
+  .register-terms {
+    margin: auto;
+    padding-bottom: 14px;
+    label {
+      cursor: pointer;
+      color: black;
+    }
+    input[type="checkbox"] {
+      cursor: pointer;
+      -moz-transform: scale(1.5);
+      -ms-transform: scale(1.5);
+      -o-transform: scale(1.5);
+      -webkit-transform: scale(1.5);
+      transform: scale(1.5);
+      vertical-align: middle;
+    }
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+#register-company, #new-company-user {
+  .register-form {
+    background-color: $lp-purple-light;
+    padding: $marginS;
+    .form-group {
+      background-color: inherit;
+      display: block;
+      border: none;
+      padding: 0;
+      h2 {
+        text-transform: uppercase;
+        font-weight: 400;
+        color: black;
+      }
+      .form-entry {
+        width: 32%;
+        box-sizing: border-box;
+        padding-right: $marginL;
+        display: inline-block;
+        .form-label {
+          color: black;
+          &.tip {
+            color: black;
+          }
+        }
+        .form-input {
+          height: 40px;
+          width: 100%;
+          border: none;
+          box-shadow: none;
+        }
+
+      }
+    }
+  }
+}
+
+#onnistuu-start-form {
+  display: inline-block;
 }

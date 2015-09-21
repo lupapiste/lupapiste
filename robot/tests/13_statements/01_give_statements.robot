@@ -31,7 +31,7 @@ New applications does not have statements
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Salibandyhalli${secs}
-  Create application the fast way  ${appname}  753  753-416-25-22  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  753-416-25-22  kerrostalo-rivitalo
   Open to authorities  Salibandyhalli FTW!
 
   Open tab  statement
@@ -40,8 +40,8 @@ New applications does not have statements
 
 Sonja sees indicators from pre-filled fields
   Sonja logs in
-  # The unseen changes count includes changes in "Rakennuksen kayttotarkoitus" and "Huoneistotiedot".
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  3
+  # The unseen changes count includes changes in property information + "Rakennuksen kayttotarkoitus" and "Huoneistotiedot" documents.
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  7
 
 Sonja adds four statement persons to application
   Open application  ${appname}  753-416-25-22
@@ -71,32 +71,29 @@ Sonja can't give statement to Ronjas statement
   Statement is disabled
 
 Sonja can comment on Ronjas statement
-  Wait until  Comment count is  statement  0
+  Wait until  Comment count is  0
   Input comment  kas kummaa.
-  Wait until  Comment count is  statement  1
+  Wait until  Comment count is  1
   [Teardown]  Return from statement
 
 Sonja can give statement to own request
   Open statement  2
-  Sleep  1
-  Select From List  statement-type-select  yes
+  Wait until  Select From List  statement-type-select  puoltaa
   Input text  statement-text  salibandy on the rocks.
   Wait and click  statement-submit
 
 Comment is added
   Open statement  2
-  Sleep  1
-  Wait until  Comment count is  statement  1
+  Wait until  Comment count is  1
 
 Sonja can regive statement to own statement
-  Select From List  statement-type-select  yes
+  Select From List  statement-type-select  puoltaa
   Input text  statement-text  salibandy on the rocks.
   Wait and click  statement-submit
 
 Another comment is added
   Open statement  2
-  Sleep  1
-  Wait until  Comment count is  statement  2
+  Wait until  Comment count is  2
 
 Veikko can see statements as he is beeing requested a statement to the application
   Logout
@@ -108,7 +105,7 @@ Veikko from Tampere can give verdict to own statement
   Open statement  1
   Wait Until  element should be enabled  statement-text
   Input text  statement-text  uittotunnelin vieressa on tilaa.
-  Select From List  statement-type-select  condition
+  Select From List  statement-type-select  ehdoilla
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//td[@data-test-name='Veikko Viranomainen']  Puoltaa ehdoilla
@@ -116,7 +113,7 @@ Veikko from Tampere can give verdict to own statement
 
 Sonja can see statement indicator
   Sonja logs in
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  4
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  8
 
 # add attachment
 
@@ -131,8 +128,6 @@ Return from statement
 
 Open statement
   [Arguments]  ${number}
-  # FIXME: for some weird reason xpath query gets stuck
-  Sleep  1
   Wait and Click  xpath=//div[@id='application-statement-tab']//a[@data-test-id='open-statement-${number}']
   Wait until  element should be visible  statement-type-select
 

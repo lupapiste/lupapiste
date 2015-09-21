@@ -27,9 +27,9 @@
     y => (roughly (:left crop-box))))
 
 (fact "problematic-pdfs/003P2U-A.pdf"
-  (let [page-box-box {:left 0.0, :bottom 0.0, :right 1728.0, :top 3456.0}
+  (let [page-box {:left 0.0, :bottom 0.0, :right 1728.0, :top 3456.0}
         crop-box {:left 11.3639, :bottom 1068.41, :right 1692.55, :top 3448.4}
-        [x y] (calculate-x-y page-box-box crop-box 270 0.0 0 0)]
+        [x y] (calculate-x-y page-box crop-box 270 0.0 0 0)]
     x => (roughly (- (:top crop-box) (:bottom crop-box)))
     y => (roughly (:left crop-box))))
 
@@ -56,8 +56,22 @@
 
 (fact "problematic-pdfs/scan.pdf"
    (let [page-box {:left 0.0, :bottom -2990.52, :right 841.68, :top 0.0}
-        crop-box {:left 0.0, :bottom -2990.52, :right 841.68, :top 0.0}
-        [x y] (calculate-x-y page-box crop-box 270 0.0 0 0)]
+         crop-box {:left 0.0, :bottom -2990.52, :right 841.68, :top 0.0}
+         [x y] (calculate-x-y page-box crop-box 270 0.0 0 0)]
      x => (roughly (- (:top crop-box) (:bottom crop-box)))
      y => (roughly (:left crop-box))))
+
+(fact "problematic-pdfs/01_Talo_Huhtala_asemapiirustus.pdf"
+   (let [crop-box {:left  819.063, :bottom 0.0, :right 1682.0, :top 2380.4}
+         page-box {:left 0.0, :bottom 0.0, :right 1684.0, :top 2384.0}
+         [x y] (calculate-x-y page-box crop-box 90 0.0 0 0)]
+     x => (roughly (:top crop-box))
+     y => (roughly (:bottom crop-box))))
+
+(fact "problematic-pdfs/1432-7_asemapiirros_Talo_Pohjola.pdf"
+   (let [crop-box {:left 1513.16 :bottom 865.446 :right 3300.79 :top 1708.25}
+         page-box {:left 0.0 :bottom 0.0 :right 4787.72 :top 2551.18}
+         [x y] (calculate-x-y page-box crop-box 0 0.0 0 0)]
+     x => (roughly (:right crop-box))
+     y => (roughly (:bottom crop-box))))
 

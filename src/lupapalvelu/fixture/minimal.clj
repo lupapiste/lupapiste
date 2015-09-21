@@ -20,15 +20,6 @@
     :private {:password "$2a$10$WHPur/hjvaOTlm41VFjtjuPI5hBoIMm8Y1p2vL4KqRi7QUvHMS1Ie"
               :apikey "5087ba34c2e667024fbd5992"}}
 
-   ;; Admin
-   {:id "505718b0aa24a1c901e6ba24"
-    :enabled true
-    :firstName "Judge"
-    :lastName "Dread"
-    :email "judge.dread@example.com"
-    :role "admin"
-    :private {:apikey "505718b0aa24a1c901e6ba24"}}
-
    ;; ETL export user: solita-etl / solita-etl
    {:id "solita-etl"
     :username "solita-etl"
@@ -50,10 +41,10 @@
     :username "tampere-ya"
     :street "Paapankuja 12"
     :phone "0102030405"
-    :email "tampere-ya"
+    :email "tampere-ya@example.com"
     :role "authorityAdmin"
     :zip "10203"
-    :organizations ["837-YA"]
+    :orgAuthz {:837-YA #{:authorityAdmin}}
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}}
 
    ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti:  veikko / veikko
@@ -61,7 +52,7 @@
     :email "veikko.viranomainen@tampere.fi"
     :enabled true
     :role "authority"
-    :organizations ["837-R"]
+    :orgAuthz {:837-R #{:authority}}
     :firstName "Veikko"
     :lastName "Viranomainen"
     :phone "03121991"
@@ -75,7 +66,7 @@
     :enabled true
     :role "authority"
     :username "jussi"
-    :organizations ["837-YA"]
+    :orgAuthz {:837-YA #{:authority}}
     :firstName "Jussi"
     :lastName "Viranomainen"
     :phone "1231234567"
@@ -93,7 +84,7 @@
     :enabled true
     :role "authority"
     :username "sakari"
-    :organizations ["297-YA"]
+    :orgAuthz {:297-YA #{:authority}}
     :firstName "Sakari"
     :lastName "Viranomainen"
     :phone "1231234567"
@@ -101,6 +92,7 @@
     :zip "33456"
     :city "Kuopio"
     :private {:password "$2a$10$VnwROer5dhRJCQxoZusOney/hyN7Vk4ILQMSVqT8iZMO4XiQz.8Cm"}}
+
    ;; Kuopio YA-paakayttaja:  kuopio-ya / kuopio
    {:id "297-YA"
     :enabled true
@@ -110,25 +102,72 @@
     :username "kuopio-ya"
     :street "Paapankuja 12"
     :phone "0102030405"
-    :email "kuopio-ya"
+    :email "kuopio-ya@example.com"
     :role "authorityAdmin"
     :zip "10203"
-    :organizations ["297-YA"]
+    :orgAuthz {:297-YA #{:authorityAdmin}}
     :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"}}
+
+   ;; Velho Viranomainen - Kuopio R viranomaien:  velho / velho
+   {:id "77777777777777777700645"
+    :email "velho.viranomainen@kuopio.fi"
+    :enabled true
+    :role "authority"
+    :username "velho"
+    :orgAuthz {:297-R #{:authority :approver}
+               :297-YA #{:authority :approver}}
+    :firstName "Velho"
+    :lastName "Viranomainen"
+    :phone "1231234567"
+    :street "Katuosoite 2 a 4"
+    :zip "33456"
+    :personId "180495-754N"
+    :city "Kuopio"
+    :private {:password "$2a$10$me2UOXOUfEbseJeLUBde8u2rlqOwHuqxbFT00q70QEvTpskHKol2m"
+              :apikey   "e1vshYravGWKA1QXL3NeWMmyzzBJmcgq6IUqKZmh"}}
+
+   ;; Kuopio R-paakayttaja:  kuopio-r / kuopio
+
+   {:id "297-R"
+    :enabled true
+    :lastName "Kuopio"
+    :firstName "Paakayttaja-R"
+    :city "Kuopio"
+    :username "kuopio-r"
+    :street "Paapankuja 12"
+    :phone "0102030405"
+    :email "kuopio-r@kuopio.fi"
+    :role "authorityAdmin"
+    :zip "10203"
+    :orgAuthz {:297-R #{:authorityAdmin}}
+    :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"
+              :apikey   "lhIqT1YwOMH8HuiCGcjBtGggfeRaxZL5OUNd3r4u"}}
 
    ;; Sipoo
 
-   ;; Simo Sippo - Sipoon R paakayttaja:  sipoo / sipoo
+   ;; Simo Suurvisiiri - Sipoon R paakayttaja:  sipoo / sipoo
    {:id "50ac77ecc2e6c2ea6e73f83e"
     :email "admin@sipoo.fi"
     :enabled true
     :role "authorityAdmin"
-    :organizations ["753-R"]
+    :orgAuthz {:753-R #{:authorityAdmin}}
     :firstName "Simo"
     :lastName "Suurvisiiri"
     :username "sipoo"
     :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
               :apikey "50ac788ec2e6c2ea6e73f83f"}}
+
+   ;; Simo YA-Suurvisiiri - Sipoon YA paakayttaja:  sipoo-ya / sipoo
+   {:id "50ac77eaf2e6c2ea6e73f81e"
+    :email "admin-ya@sipoo.fi"
+    :enabled true
+    :role "authorityAdmin"
+    :orgAuthz {:753-YA #{:authorityAdmin}}
+    :firstName "Simo"
+    :lastName "YA-Suurvisiiri"
+    :username "sipoo-ya"
+    :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
+              :apikey "55cdafd8abc1d91e7ccd60b2"}}
 
    ;; Sonja Sibbo - Sipoon lupa-arkkitehti:  sonja / sonja
    {:id "777777777777777777000023"
@@ -136,7 +175,9 @@
     :role "authority"
     :enabled true
     :email "sonja.sibbo@sipoo.fi"
-    :organizations ["753-R" "753-YA" "998-R-TESTI-2"]
+    :orgAuthz {:753-R #{:authority :approver}
+               :753-YA #{:authority :approver}
+               :998-R-TESTI-2 #{:authority :approver}}
     :firstName "Sonja"
     :lastName "Sibbo"
     :phone "03121991"
@@ -151,7 +192,7 @@
     :role "authority"
     :enabled true
     :email "ronja.sibbo@sipoo.fi"
-    :organizations ["753-R"]
+    :orgAuthz {:753-R #{:authority}}
     :firstName "Ronja"
     :lastName "Sibbo"
     :phone "03121991"
@@ -160,7 +201,21 @@
     :city "Sipoo"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
-
+   ;; Luukas Lukija - Sipoon katselija:  luukas / luukas
+   {:id "777777777777777777000025"
+    :username "luukas"
+    :role "authority"
+    :enabled true
+    :email "luukas.lukija@sipoo.fi"
+    :orgAuthz {:753-R #{:reader}}
+    :firstName "Luukas"
+    :lastName "Lukija"
+    :phone "03121992"
+    :street "Katuosoite 1 a 2"
+    :zip "04130"
+    :city "Sipoo"
+    :private {:password "$2a$10$YM2XkcJVjM5JiqqR2qg7U.iUuY10LPYexYTfV/21RHOayn1xIf2sS"
+              :apikey "5056e6d3aa24a1c901e6b9de"}}
    ;; Porvoo
 
    ;; Pekka Borga - Porvoon lupa-arkkitehti:  pekka / pekka
@@ -168,7 +223,7 @@
      :email "pekka.borga@porvoo.fi"
      :enabled true
      :role "authority"
-     :organizations ["638-R"]
+     :orgAuthz {:638-R #{:authority}}
      :firstName "Pekka"
      :lastName "Borga"
      :phone "121212"
@@ -179,11 +234,14 @@
    ;; Oulu
 
    ;; Olli Ule\u00E5borg - Oulun lupa-arkkitehti:  olli / olli
+   ;; Viranomaisena myos Naantalissa
    {:id "777777777777777777000034"
      :email "olli.uleaborg@ouka.fi"
      :enabled true
      :role "authority"
-     :organizations ["564-R"]
+     :orgAuthz {:564-R #{:authority}
+                :529-R #{:authority}
+                :564-YMP #{:authority}}
      :firstName "Olli"
      :lastName "Ule\u00E5borg"
      :phone "121212"
@@ -198,18 +256,20 @@
     :email "admin@naantali.fi"
     :enabled true
     :role "authorityAdmin"
-    :organizations ["529-R"]
+    :orgAuthz {:529-R #{:authorityAdmin}}
     :firstName "Admin"
     :lastName "Naantali"
     :username "admin@naantali.fi"
     :private {:password "$2a$10$4pvNDXk2g5XgxT.whx1Ua.RKkAoyjOb8C91r7aBMrgf7zNPMjhizq"
               :apikey "a0ac77ecd2e6c2ea6e73f83f"}}
    ;; rakennustarkastaja@naantali.fi / naantali
+   ;; Viranomainen myos Jarvenpaassa
    {:id "50ac77ecd2e6c2ea6e73f840"
     :email "rakennustarkastaja@naantali.fi"
     :enabled true
     :role "authority"
-    :organizations ["529-R"]
+    :orgAuthz {:529-R #{:authority}
+               :186-R #{:authority}}
     :firstName "Rakennustarkastaja"
     :lastName "Naantali"
     :username "rakennustarkastaja@naantali.fi"
@@ -220,7 +280,7 @@
     :email "lupasihteeri@naantali.fi"
     :enabled true
     :role "authority"
-    :organizations ["529-R"]
+    :orgAuthz {:529-R #{:authority}}
     :firstName "Lupasihteeri"
     :lastName "Naantali"
     :username "lupasihteeri@naantali.fi"
@@ -234,7 +294,7 @@
     :email "admin@jarvenpaa.fi"
     :enabled true
     :role "authorityAdmin"
-    :organizations ["186-R"]
+    :orgAuthz {:186-R #{:authorityAdmin}}
     :firstName "Admin"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "admin@jarvenpaa.fi"
@@ -245,7 +305,7 @@
     :email "rakennustarkastaja@jarvenpaa.fi"
     :enabled true
     :role "authority"
-    :organizations ["186-R"]
+    :orgAuthz {:186-R #{:authority}}
     :firstName "Rakennustarkastaja"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "rakennustarkastaja@jarvenpaa.fi"
@@ -256,12 +316,22 @@
     :email "lupasihteeri@jarvenpaa.fi"
     :enabled true
     :role "authority"
-    :organizations ["186-R"]
+    :orgAuthz {:186-R #{:authority}}
     :firstName "Lupasihteeri"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "lupasihteeri@jarvenpaa.fi"
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f852"}}
+
+   {:id "jarvenpaa-backend"
+    :username "jarvenpaa-backend"
+    :email "jarvenpaa@example.com"
+    :firstName "J\u00E4rvenp\u00E4\u00E4"
+    :lastName "Taustaj\u00E4rjestelm\u00E4"
+    :enabled true
+    :role "rest-api"
+    :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"} ;jarvenpaa
+    :orgAuthz {:186-R #{:authority}}}
 
    ;; Loppi
 
@@ -271,7 +341,7 @@
     :enabled true
     :role "authority"
     :username "arto"
-    :organizations ["433-R"]
+    :orgAuthz {:433-R #{:authority}}
     :firstName "Arto"
     :lastName "Viranomainen"
     :phone "1231234567"
@@ -286,7 +356,6 @@
    {:lastName "Nieminen"
     :firstName "Teppo"
     :enabled true
-    :postalCode "33200"
     :username "teppo@example.com"
     :private {:password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"
               :apikey "502cb9e58426c613c8b85abb"}
@@ -312,7 +381,7 @@
     :city "Sipoo"
     :phone "0505503171"
     :architect true
-    :degree "Tutkinto"
+    :degree "kirvesmies"
     :graduatingYear "2000"
     :companyName "Yritys Oy"
     :companyId "1234567-1"
@@ -364,7 +433,7 @@
     :lastName "Dummy3"
     :email  "dummy3@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
-    :role "applicant"}
+    :role "dummy"}
 
    ;; Yrityksen admin
 
@@ -374,7 +443,8 @@
     :firstName "Kaino"
     :lastName "Solita"
     :email "kaino@solita.fi"
-    :private {:password "$2a$10$QjKZTnJy77sxiWaBKR0jQezFf1LSpKfg/sljmsSq4YIq05HRZI.l."}
+    :private {:password "$2a$10$QjKZTnJy77sxiWaBKR0jQezFf1LSpKfg/sljmsSq4YIq05HRZI.l."
+              :apikey "502cb9e58426c613c8b85abe"}
     :role "applicant"
     :architect true
     :company {:id "solita", :role "admin"}}
@@ -422,7 +492,8 @@
                      (partial merge default-keys-for-organizations)
                      [;; Jarvenpaa R
                       {:id "186-R"
-                       :name {:fi "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"}
+                       :name {:fi "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"
+                              :sv "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"}
                        :scope [{:municipality "186"
                                 :permitType "R"
                                 :inforequest-enabled true
@@ -431,18 +502,22 @@
                                 :url "http://www.jarvenpaa.fi"}
                                {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                 :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]
-                       :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}}
+                       :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled true}
 
                       ;; Sipoo R
                       {:id "753-R"
-                       :name {:fi "Sipoon rakennusvalvonta"}
+                       :name {:fi "Sipoon rakennusvalvonta"
+                              :sv "Sipoon rakennusvalvonta"}
                        :scope [{:municipality "753" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "P" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YI" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YL" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "MAL" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "VVVL" :inforequest-enabled true :new-application-enabled true}
-                               {:municipality "753" :permitType "KT" :inforequest-enabled true :new-application-enabled true}]
+                               {:municipality "753" :permitType "KT" :inforequest-enabled true :new-application-enabled true}
+                               {:municipality "753" :permitType "MM" :inforequest-enabled true :new-application-enabled true}]
                        :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                                 :url "http://sipoo.fi"}
                                {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
@@ -466,7 +541,9 @@
                                :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.2"}
                                :YL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.2"}
                                :MAL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.2"}
-                               :VVVL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.3"}}
+                               :VVVL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.3"}
+                               :KT {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "1.0.2"}
+                               :MM {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "1.0.1"}}
                        :statementGivers [{:id "516560d6c2e6f603beb85147"
                                           :text "Paloviranomainen",
                                           :email "sonja.sibbo@sipoo.fi",
@@ -474,12 +551,30 @@
                        :kopiolaitos-email "sipoo@example.com"
                        :kopiolaitos-orderer-address "Testikatu 2, 12345 Sipoo"
                        :kopiolaitos-orderer-email "tilaaja@example.com"
-                       :kopiolaitos-orderer-phone "0501231234"}
+                       :kopiolaitos-orderer-phone "0501231234"
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P" "YI" "YL" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false
+                       :tags [{:id "111" :label "yl\u00E4maa"} {:id "222" :label "ullakko"}]
+                       :areas {:type "FeatureCollection"
+                               :features [{:id "sipoo_keskusta",
+                                           :properties {:nimi "Keskusta", :id 3},
+                                           :geometry
+                                           {:coordinates
+                                            [[[[402644.2941 6693912.6002]
+                                               [401799.0131 6696356.5649]
+                                               [406135.6722 6695272.4001]
+                                               [406245.9263 6693673.7164]
+                                               [404059.221 6693545.0867]
+                                               [404059.221 6693545.0867]
+                                               [402644.2941 6693912.6002]]]],
+                                            :type "MultiPolygon"},
+                                           :type "Feature"}]}}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.
                       {:id "753-YA"
-                       :name {:fi "Sipoon yleisten alueiden rakentaminen"}
+                       :name {:fi "Sipoon yleisten alueiden rakentaminen"
+                              :sv "Sipoon yleisten alueiden rakentaminen"}
                        :scope [{:municipality "753"
                                 :permitType "YA"
                                 :inforequest-enabled true
@@ -491,15 +586,23 @@
                                            :text "Paloviranomainen",
                                            :email "sonja.sibbo@sipoo.fi",
                                            :name "Sonja Sibbo"}]
-                       :operations-attachments ya-default-attachments-for-operations}
+                       :selected-operations [:ya-katulupa-vesi-ja-viemarityot
+                                             :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen
+                                             :ya-kayttolupa-mainostus-ja-viitoitus
+                                             :ya-kayttolupa-terassit]
+                       :operations-attachments ya-default-attachments-for-operations
+                       :permanent-archive-enabled false
+                       :tags [{:id "735YA001" :label "YA kadut"} {:id "735YA002" :label "YA ojat"}]}
 
                       ;; Kuopio YA
                       {:id "297-YA"
-                       :name {:fi "Kuopio yleisten alueiden kaytto"}
+                       :name {:fi "Kuopio yleisten alueiden kaytto"
+                              :sv "Kuopio yleisten alueiden kaytto"}
                        :scope [{:municipality "297"
                                 :permitType "YA"
                                 :inforequest-enabled true
-                                :new-application-enabled true}]
+                                :new-application-enabled true
+                                :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}]
                        :links [{:name {:fi "Kuopio", :sv "Kuopio"}
                                 :url "http://www.kuopio.fi"}]
                        :krysp {:YA {:url local-krysp :version "2.1.2" :ftpUser "dev_ya_kuopio"}}
@@ -507,12 +610,15 @@
                                            :text "Paloviranomainen",
                                            :email "sonja.sibbo@sipoo.fi",
                                            :name "Sonja Sibbo"}]
-                       :operations-attachments ya-default-attachments-for-operations}
+                       :operations-attachments ya-default-attachments-for-operations
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
 
                       ;; Tampere R
                       {:id "837-R"
-                       :name {:fi "Tampereen rakennusvalvonta"}
+                       :name {:fi "Tampereen rakennusvalvonta"
+                              :sv "Tampereen rakennusvalvonta"}
                        :scope [{:municipality "837"
                                 :permitType "R"
                                 :inforequest-enabled true
@@ -531,7 +637,9 @@
                                                                            [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                            [:muut :vaestonsuojasuunnitelma]
                                                                            [:muut :valaistussuunnitelma]]}
-                       :krysp {:R {:url local-krysp :version "2.1.4" :ftpUser "dev_tampere"}}}
+                       :krysp {:R {:url local-krysp :version "2.1.4" :ftpUser "dev_tampere"}}
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
                       ;; Tampere YA
                       {:id "837-YA",
@@ -546,59 +654,123 @@
                                           :email "jussi.viranomainen@tampere.fi"
                                           :name "Jussi Viranomainen"}]
                        :krysp {:YA {:url local-krysp :ftpUser "dev_ya_tampere" :version "2.1.2"}}
-                       :operations-attachments ya-default-attachments-for-operations}
+                       :operations-attachments ya-default-attachments-for-operations
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
                       ;; Porvoo R
                       {:id "638-R"
-                       :name {:fi "Porvoon rakennusvalvonta"}
+                       :name {:fi "Porvoon rakennusvalvonta"
+                              :sv "Porvoon rakennusvalvonta"}
                        :scope [{:municipality "638" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "638" :permitType "YI" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "638" :permitType "YL" :inforequest-enabled true :new-application-enabled true}]
                        :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
                                 :url "http://www.porvoo.fi"}
                                {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                                :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
+                                :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R" "YI" "YL"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
                       ;; Oulu R
                       {:id "564-R"
-                       :name {:fi "Oulun rakennusvalvonta"}
+                       :name {:fi "Oulun rakennusvalvonta"
+                              :sv "Oulun rakennusvalvonta"}
                        :scope [{:municipality "564" :permitType "R" :inforequest-enabled true :new-application-enabled true}]
                        :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
                                 :url "http://www.ouka.fi"}
                                {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
-                                :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}
+                                :url "http://oulu.ouka.fi/rakennusvalvonta/"}]
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
                       ;; Naantali R
                       {:id "529-R"
-                       :name {:fi "Naantalin rakennusvalvonta"}
-                       :scope [{:municipality "529" :permitType "R" :inforequest-enabled true :new-application-enabled true}]}
+                       :name {:fi "Naantalin rakennusvalvonta"
+                              :sv "Naantalin rakennusvalvonta"}
+                       :scope [{:municipality "529" :permitType "R" :inforequest-enabled true :new-application-enabled true}]
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
                       ;; Peruspalvelukuntayhtyma Selanne R
                       {:id "069-R"
-                       :name {:fi "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne"}
+                       :name {:fi "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne"
+                              :sv "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne"}
                        :scope [{:municipality "069" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "317" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "626" :permitType "R" :inforequest-enabled true :new-application-enabled true}
-                               {:municipality "691" :permitType "R" :inforequest-enabled true :new-application-enabled true}]}
-
-                      ;; Mikkeli Y
-                      {:id "491-Y"
-                       :name {:fi "Mikkeli ymp\u00E4rist\u00F6toimi" :sv "S:t Michel ymp\u00E4rist\u00F6toimi"}
-                       :scope [{:municipality "491" :permitType "Y" :inforequest-enabled true :new-application-enabled true}]}
+                               {:municipality "691" :permitType "R" :inforequest-enabled true :new-application-enabled true}]
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
                       ;; Loppi R
                       ;; Organisation for municipality "Loppi" that uses the "neuvontapyynnon-avaus" system.
                       ;; Nice address for testing "Ojatie 1, Loppi"
                       {:id "433-R"
-                       :name {:fi "Loppi rakennusvalvonta"}
+                       :name {:fi "Loppi rakennusvalvonta"
+                              :sv "Loppi rakennusvalvonta"}
                        :scope [{:municipality "433"
                                 :permitType "R"
                                 :new-application-enabled false
                                 :inforequest-enabled true
                                 :open-inforequest true
                                 :open-inforequest-email "erajorma@example.com"}]
-                       :links []}
+                       :links []
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
+
+                      ;; Kuopio R, has case management (asianhallinta) enabled
+                      {:id "297-R"
+                       :name {:fi "Kuopio rakennusvalvonta" :sv "Kuopio byggnadstillsyn"}
+                       :scope [{:open-inforequest-email nil
+                                :open-inforequest false
+                                :new-application-enabled true
+                                :inforequest-enabled true
+                                :municipality "297"
+                                :permitType "R"}
+                               {:open-inforequest-email nil
+                                :open-inforequest false
+                                :new-application-enabled true
+                                :inforequest-enabled true
+                                :municipality "297"
+                                :permitType "P"
+                                :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}]
+                       :links [{:name
+                                {:fi "Rakentamisen s\u00E4hk\u00F6iset lupapalvelut Kuopiossa"
+                                 :sv "Rakentamisen s\u00E4hk\u00F6iset lupapalvelut Kuopiossa"}
+                                :url
+                                "http://www.kuopio.fi/web/tontit-ja-rakentaminen/rakentamisen-sahkoiset-lupapalvelut"}
+                               {:name
+                                {:fi "Kuopion alueellinen rakennusvalvonta"
+                                 :sv "Kuopion alueellinen rakennusvalvonta"}
+                                :url "http://www.kuopio.fi/web/tontit-ja-rakentaminen/rakennusvalvonta"}
+                               {:name
+                                {:fi "Kuopion kaupunki"
+                                 :sv "Kuopion kaupunki"}
+                                :url "http://www.kuopio.fi"}]
+                       :krysp {:R
+                               {:ftpUser "dev_kuopio"
+                                :url "http://localhost:8000/dev/krysp"
+                                :version "2.1.5"}}
+                       :operations-attachments {:poikkeamis [[:paapiirustus :asemapiirros]]}
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
+
+                      ;;
+                      ;; Ymparisto organisaatiot
+                      ;;
+                      {:id "564-YMP"
+                       :name {:fi "Oulun ymparisto"
+                              :sv "Oulun ymparisto"}
+                       :scope [{:municipality "564" :permitType "YI" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
+                               {:municipality "564" :permitType "YL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
+                               {:municipality "564" :permitType "MAL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
+                               {:municipality "564" :permitType "VVVL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}]
+                       :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
+                                :url "http://www.ouka.fi"}]
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"YI" "YL" "MAL" "VVVL"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
                       ;;
                       ;; Testeissa kaytettavia organisaatioita
@@ -606,7 +778,8 @@
 
                       ;; Sipoo R - New applications disabled
                       {:id "997-R-TESTI-1"
-                       :name {:fi "Sipoon rakennusvalvonta"}
+                       :name {:fi "Sipoon rakennusvalvonta"
+                              :sv "Sipoon rakennusvalvonta"}
                        :scope [{:municipality "997" :permitType "R" :inforequest-enabled true :new-application-enabled false}]
                        :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                                 :url "http://sipoo.fi"}
@@ -617,11 +790,14 @@
                        :statementGivers [{:id "516560d6c2e6f603beb85147"
                                            :text "Paloviranomainen",
                                            :email "sonja.sibbo@sipoo.fi",
-                                           :name "Sonja Sibbo"}]}
+                                           :name "Sonja Sibbo"}]
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
                       ;; Sipoo R - Inforequests disabled
                       {:id "998-R-TESTI-2"
-                       :name {:fi "Sipoon rakennusvalvonta"}
+                       :name {:fi "Sipoon rakennusvalvonta"
+                              :sv "Sipoon rakennusvalvonta"}
                        :scope [{:municipality "998" :permitType "R" :inforequest-enabled false :new-application-enabled true}]
                        :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                                 :url "http://sipoo.fi"}
@@ -631,11 +807,14 @@
                        :statementGivers [{:id "516560d6c2e6f603beb85147"
                                            :text "Paloviranomainen",
                                            :email "sonja.sibbo@sipoo.fi",
-                                           :name "Sonja Sibbo"}]}
+                                           :name "Sonja Sibbo"}]
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
                       ;; Sipoo R - Both new applications and inforequests disabled
                       {:id "999-R-TESTI-3"
-                       :name {:fi "Sipoon rakennusvalvonta"}
+                       :name {:fi "Sipoon rakennusvalvonta"
+                              :sv "Sipoon rakennusvalvonta"}
                        :scope [{:municipality "999" :permitType "R" :inforequest-enabled false :new-application-enabled false}]
                        :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                                 :url "http://sipoo.fi"}
@@ -645,17 +824,20 @@
                        :statementGivers [{:id "516560d6c2e6f603beb85147"
                                            :text "Paloviranomainen",
                                            :email "sonja.sibbo@sipoo.fi",
-                                           :name "Sonja Sibbo"}]}]))
+                                           :name "Sonja Sibbo"}]
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}]))
 
-(def companies [{:_id "solita",
+(def companies [{:_id "solita"
+                 :accountType "account5"
+                 :customAccountLimit nil
                  :created 1412959886600
                  :name "Solita Oy"
-                 :address1 "Tulli Business Park"
-                 :address2 "\u00c5kerlundinkatu 11"
+                 :address1 "\u00c5kerlundinkatu 11"
                  :zip "33100"
                  :po "Tampere"
                  :country "FINLAND"
-                 :y "FI1060155-5"
+                 :y "1060155-5"
                  :ovt "003710601555"
                  :pop "BAWCFI22"
                  :reference "Lupis"

@@ -1,6 +1,8 @@
 (function() {
   "use strict";
 
+  var PW_CHANGED_DIALOG_ID = "company-user-password-reset-dialog";
+
   function NewCompanyUser() {
     var self = this;
 
@@ -42,19 +44,30 @@
         .email("")
         .pending(true)
         .password1("")
-        .password2("")
-        .success(false)
-        .fail(false);
+        .password2("");
     };
 
     self.send = function() {
       ajax
         .post("/api/token/" + self.token())
         .json({password: self.password1()})
-        .success(function() { self.success(true).fail(false).password1("").password2(""); })
-        .fail(function() { self.success(false).fail(true); })
+        .success(function() {
+          self.password1("").password2("");
+
+          hub.send("show-dialog",
+              {id: PW_CHANGED_DIALOG_ID,
+               ltitle: "success.dialog.title",
+               size: "medium",
+               component: "ok-dialog",
+               componentParams: {ltext: "setpw.success", okTitle: loc("welcome.login")}});
+        })
+        .fail(function() {
+          notify.error(loc("setpw.fail"));
+        })
         .call();
     };
+
+    hub.subscribe({type: "dialog-close", id: PW_CHANGED_DIALOG_ID}, pageutil.openFrontpage);
 
     hub.onPageLoad("new-company-user", function(e) {
       self.reset().token(e.pagePath[0]);
@@ -88,49 +101,40 @@
   // Invite:
   //
 
-  function InviteCompanyUser() {
-    this.result   = ko.observable("pending");
-    this.pending  = ko.computed(function() { return this.result() === "pending"; }, this);
-    this.ok       = ko.computed(function() { return this.result() === "ok"; }, this);
-    this.fail     = ko.computed(function() { return this.result() === "fail"; }, this);
-    hub.onPageLoad("invite-company-user", this.open.bind(this));
+  function AcceptInviteModel(pageName, tokenIndex) {
+    var self = this;
+    self.result   = ko.observable("pending");
+
+    self.pending  = ko.pureComputed(function() {
+      return self.result() === "pending";
+    });
+    self.ok = ko.pureComputed(function() {
+      return self.result() === "ok";
+    });
+    self.fail = ko.pureComputed(function() {
+      return self.result() === "fail";
+    });
+
+    self.open = function(e) {
+      self.result("pending");
+      ajax
+        .post("/api/token/" + e.pagePath[tokenIndex])
+        .json({ok: true})
+        .success(_.partial(self.result, "ok"))
+        .fail(_.partial(self.result, "fail"))
+        .call();
+    };
+
+    hub.onPageLoad(pageName, self.open);
   }
-
-  InviteCompanyUser.prototype.open = function(e) {
-    this.result("pending");
-    ajax
-      .post("/api/token/" + e.pagePath[1])
-      .json({ok: true})
-      .success(this.result.bind(this, "ok"))
-      .fail(this.result.bind(this, "fail"))
-      .call();
-  };
-
-  function AcceptCompanyInvitation() {
-    this.result   = ko.observable("pending");
-    this.pending  = ko.computed(function() { return this.result() === "pending"; }, this);
-    this.ok       = ko.computed(function() { return this.result() === "ok"; }, this);
-    this.fail     = ko.computed(function() { return this.result() === "fail"; }, this);
-    hub.onPageLoad("accept-company-invitation", this.open.bind(this));
-  }
-
-  AcceptCompanyInvitation.prototype.open = function(e) {
-    this.result("pending");
-    ajax
-      .post("/api/token/" + e.pagePath[0])
-      .json({ok: true})
-      .success(this.result.bind(this, "ok"))
-      .fail(this.result.bind(this, "fail"))
-      .call();
-  };
 
   //
   // Initialize:
   //
 
   var newCompanyUser = new NewCompanyUser();
-  var inviteCompanyUser = new InviteCompanyUser();
-  var acceptCompanyInvitation = new AcceptCompanyInvitation();
+  var inviteCompanyUser = new AcceptInviteModel("invite-company-user", 1);
+  var acceptCompanyInvitation = new AcceptInviteModel("accept-company-invitation", 0);
 
   $(function() {
     $("section#new-company-user").applyBindings(newCompanyUser);

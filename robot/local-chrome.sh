@@ -6,7 +6,7 @@ if [ -z $target ] ; then
   target="tests"
 fi
 
-# download lastest chromedriver from https://code.google.com/p/chromedriver/downloads/list
+# download lastest chromedriver from http://chromedriver.storage.googleapis.com/index.html
 # put it to your path and maek it executablez
 
 pybot --exclude integration --exclude fail --RunEmptySuite --variable BROWSER:chrome -d target $target

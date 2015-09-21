@@ -10,7 +10,7 @@
             [sade.strings :as ss]))
 
 ;;
-;; parsing time (TODO: might be copy-pasted from krysp)
+;; parsing time
 ;;
 
 (defn parse-date
@@ -74,7 +74,7 @@
   "Changes recursively all string values to timestamps (longs)"
   [m keys] (convert-values-of-keys m keys to-timestamp))
 
-(defn ensure-sequental
+(defn ensure-sequential
   "Makes sure that the value of key k in map m is sequental"
   [m k] (let [v (k m)] (if (and v (not (sequential? v))) (assoc m k [v]) m)))
 
@@ -96,7 +96,8 @@
   [xml & selector] (-> (select1 xml (-> selector vector flatten)) xml->edn strip-keys))
 
 (defn all-of
-  "read one element from xml with enlive selector, converts it's val to edn and strip namespaces."
+  "read one element from xml with enlive selector, converts it's vals to edn and strip namespaces.
+   Be careful not to use for getting adjacent elements, as this function uses as-is and select1."
   [xml & selector] (-> xml (as-is (-> selector vector flatten)) vals first))
 
 (defn map-index
@@ -107,8 +108,10 @@
   "transform a form with replacing all sequential collections with keyword-indexed maps."
   [m] (postwalk-map (partial map (fn [[k v]] [k (if (sequential? v) (map-index v) v)])) m))
 
-(defn- do-get-xml [http-fn url options raw?]
-  (let [raw (:body (if options (http-fn url options) (http-fn url)))]
+(defn- do-get-xml [http-fn url opts raw?]
+  ; Set default timeout to 120 s
+  (let [options (merge {:socket-timeout 120000, :conn-timeout 120000} opts)
+        raw (:body (http-fn url options))]
     (if-not (s/blank? raw)
       (if raw? raw (parse raw))
       (do

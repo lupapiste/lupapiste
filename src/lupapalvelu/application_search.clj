@@ -6,13 +6,15 @@
             [monger.query :as query]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.property :as p]
             [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.user :refer [applicant?]]
-            [lupapalvelu.application-meta-fields :as meta-fields]))
+            [lupapalvelu.user :refer [applicant?] :as user]
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.geojson :as geo]))
 
 ;; Operations
 
@@ -35,42 +37,8 @@
   (let [normalized (normalize-operation-name filter-search)]
     (map :op
       (filter
-        (fn [{locs :locs}] (some (fn [i18n-text] (.contains i18n-text normalized)) locs))
+        (fn [{locs :locs}] (some (fn [i18n-text] (ss/contains? i18n-text normalized)) locs))
         operation-index))))
-
-;;
-;; Table definition
-;;
-
-(def- col-sources [(fn [app] (select-keys app [:urgency :authorityNotice]))
-                            :indicators
-                            :attachmentsRequiringAction
-                            :unseenComments
-                            (fn [app] (if (:infoRequest app) "inforequest" "application"))
-                            (juxt :address :municipality)
-                            meta-fields/get-application-operation
-                            :applicant
-                            :submitted
-                            :modified
-                            :state
-                            :authority])
-
-(def- order-by (assoc col-sources
-                          0 nil
-                          1 nil
-                          2 nil
-                          3 nil
-                          4 :infoRequest
-                          5 :address
-                          6 nil
-                          ; 7 applicant - sorted as is
-                          ; 8 submitted - sorted as is
-                          ; 9 modified - sorted as is
-                          ; 10 state - sorted as is
-                          11 ["authority.lastName" "authority.firstName"]
-                          ))
-
-(def- col-map (zipmap col-sources (map str (range))))
 
 ;;
 ;; Query construction
@@ -82,85 +50,110 @@
                        {:_applicantIndex {$regex filter-search $options "i"}}]}
         ops (operation-names filter-search)]
     (if (seq ops)
-      (update-in or-query [$or] conj {:operations.name {$in ops}})
+      (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}} {:secondaryOperations.name {$in ops}}])
       or-query)))
 
 (defn- make-text-query [filter-search]
   {:pre [filter-search]}
   (cond
     (re-matches #"^([Ll][Pp])-\d{3}-\d{4}-\d{5}$" filter-search) {:_id (ss/upper-case filter-search)}
-    (re-matches util/property-id-pattern filter-search) {:propertyId (util/to-property-id filter-search)}
+    (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
     :else (make-free-text-query filter-search)))
 
-(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user filter-username]} user]
+(defn- make-area-query [areas user]
+  {:pre [(sequential? areas)]}
+  (let [orgs (user/organization-ids-by-roles user #{:authority})
+        orgs-with-areas (mongo/select :organizations {:_id {$in orgs} :areas.features.id {$in areas}} [:areas])
+        features (flatten (map (comp :features :areas) orgs-with-areas))
+        selected-areas (set areas)
+        filtered-features (filter (comp selected-areas :id) features)
+        coordinates (apply concat (map geo/resolve-polygons filtered-features))]
+    (when (seq coordinates)
+      {$or (map (fn [c] {:location {$geoWithin {"$polygon" c}}}) coordinates)})))
+
+(defn make-query [query {:keys [searchText kind applicationType handler tags organizations operations areas]} user]
   {$and
    (filter seq
      [query
-      (when-not (ss/blank? filter-search) (make-text-query (ss/trim filter-search)))
-      (merge
-        (case filter-kind
-          "applications" {:infoRequest false}
-          "inforequests" {:infoRequest true}
-          nil) ; defaults to both
-        (let [all (if (applicant? user) {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})]
-          (case filter-state
-           "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
-           "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
-           "canceled"          {:state "canceled"}
-           all))
-        (when-not (ss/blank? filter-username)
-          {$or [{"auth.username" filter-username}
-                {"authority.username" filter-username}]})
-        (when-not (contains? #{nil "0"} filter-user)
-          {$or [{"auth.id" filter-user}
-                {"authority.id" filter-user}]}))])})
+      (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
+      (if (applicant? user)
+        (case applicationType
+          "inforequest"       {:state {$in ["answered" "info"]}}
+          "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "draft"]}}
+          "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
+          "canceled"          {:state "canceled"}
+          {:state {$ne "canceled"}})
+        (case applicationType
+          "inforequest"       {:state {$in ["open" "answered" "info"]}}
+          "application"       {:state {$in ["submitted" "sent" "complement-needed"]}}
+          "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
+          "canceled"          {:state "canceled"}
+          {:state {$nin ["draft" "canceled"]}}))
+      (when-not (contains? #{nil "0"} handler)
+        {$or [{"auth.id" handler}
+              {"authority.id" handler}]})
+      (when-not (empty? tags)
+        {:tags {$in tags}})
+      (when-not (empty? organizations)
+        {:organization {$in organizations}})
+      (when-not (empty? operations)
+        {:primaryOperation.name {$in operations}})
+      (when-not (empty? areas)
+        (make-area-query areas user))])})
 
-(defn- make-sort [params]
-  (let [col (get order-by (:iSortCol_0 params))
-        dir (if (= "asc" (:sSortDir_0 params)) 1 -1)]
-    (cond
-      (nil? col) {}
-      (sequential? col) (zipmap col (repeat dir))
-      :else {col dir})))
-
-;;
-;; Result presentation
-;;
-
-(defn- add-field [application data [app-field data-field]]
-  (assoc data data-field (app-field application)))
-
-(defn- make-row [application]
-  (let [base {"id" (:_id application)
-              "kind" (if (:infoRequest application) "inforequest" "application")}]
-    (reduce (partial add-field application) base col-map)))
 
 ;;
 ;; Public API
 ;;
 
-(defn applications-for-user [user params]
+(defn- enrich-row [{:keys [permitSubtype infoRequest] :as app}]
+  (assoc app :kind (cond
+                     (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
+                     infoRequest "applications.inforequest"
+                     :else       "applications.application")))
+
+(def- sort-field-mapping {"applicant" :applicant
+                          "handler" ["authority.lastName" "authority.firstName"]
+                          "location" :address
+                          "modified" :modified
+                          "submitted" :submitted
+                          "state" :state})
+
+(defn- dir [asc] (if asc 1 -1))
+
+(defn- make-sort [{{:keys [field asc]} :sort}]
+  (let [sort-field (sort-field-mapping field)]
+    (cond
+      (= "type" field) (array-map :permitSubtype (dir asc) :infoRequest (dir (not asc)))
+      (nil? sort-field) {}
+      (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
+      :else (array-map sort-field (dir asc)))))
+
+(defn applications-for-user [user {application-type :applicationType :as params}]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
         query-total (mongo/count :applications query)
-        skip        (or (:iDisplayStart params) 0)
-        limit       (or (:iDisplayLength params) 10)
-        apps        (query/with-collection "applications"
+        skip        (or (:skip params) 0)
+        limit       (or (:limit params) 10)
+        apps        (mongo/with-collection "applications"
                       (query/find query)
                       (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
-        rows        (map (comp make-row (partial meta-fields/with-indicators user) #(domain/filter-application-content-for % user) ) apps)
-        echo        (str (util/->int (str (:sEcho params))))] ; Prevent XSS
-    {:aaData                rows
-     :iTotalRecords         user-total
-     :iTotalDisplayRecords  query-total
-     :sEcho                 echo}))
+        rows        (map
+                      (comp
+                        enrich-row
+                        (partial meta-fields/with-indicators user)
+                        #(domain/filter-application-content-for % user)
+                        mongo/with-id)
+                      apps)]
+    {:userTotalCount user-total
+     :totalCount query-total
+     :applications rows}))
 
-
-(defn public-fields [{:keys [municipality submitted operations]}]
-  (let [op-name (-> operations first :name)]
+(defn public-fields [{:keys [municipality submitted primaryOperation]}]
+  (let [op-name (:name primaryOperation)]
     {:municipality municipality
      :timestamp submitted
      :operation (i18n/localize :fi "operations" op-name)

@@ -1,14 +1,79 @@
 /* application section styles*/
 
+// Map dimensions are hard-coded in application.html?
+$map-width:  320px;
+$map-height: 200px;
+$side-panel-width: 60px;
+
+// Convenience grays. Please, do not use
+// outside this file.
+$app-gray-bg:    $gray238;
+$app-gray-light: $gray246;
+$app-gray-dark:  $gray221;
+$app-gray-darkest: $gray187;
+
+
 /*Summary styles*/
 .application_summary {
-  background-color: $lp-dark-grey;
+  background-color: $app-gray-bg;
+  border-bottom: 2px solid $app-gray-darkest;
   min-height: 320px + $marginM;
   padding: $marginS 0 0 0;
   position:  relative;
-  z-index: 5;
+  //z-index: 5;
   display: block;
   float: none;
+  .container {
+    margin-bottom: 0;
+  }
+  // Since flexbox is not supported widely enough,
+  // we make the div ordering with absolute positioning.
+  // Preamble is not used in neighbors' view (no actions).
+  .preamble {
+    position: relative;
+    /* float: left; */
+    //width: 100%;
+    padding: {
+      left: $map-width;
+      right: 24%;
+    }
+    margin-right: $side-panel-width + 1px;
+    .application-map-container, .application_actions {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+    }
+    .application-map-container {
+      left: 0;
+      width: $map-width;
+      // To prevent accidental map clicks for some
+      // browsers/resolutions.
+      margin-bottom: $marginM;
+    }
+    .application_actions {
+      right: 0;
+      width: 24%;
+    }
+    @media (max-width: $narrow-breakpoint) {
+      padding: 0;
+      .application-map-container, .application_actions {
+        position: relative;
+        width: auto;
+        float: left;
+      }
+      .application-map-container {
+        float: left;
+        margin: {
+          left: $marginL; // Align with summary info.
+          //bottom: $marginM; // Especially needed when no tabs.
+        }
+      }
+      .application_actions {
+        float: right;
+        margin-right: $marginL; // Align with summary info.
+      }
+    }
+  }
   li {
    display: inline;
   }
@@ -18,10 +83,10 @@
     line-height: 24px;
     margin-bottom: $marginS;
   }
-  button {
-    margin: 0;
-    margin-bottom: $marginS;
-  }
+  /* button { */
+  /*   margin: 0; */
+  /*   margin-bottom: $marginS; */
+  /* } */
 
   .application-map-container {
     position: relative;
@@ -32,63 +97,84 @@
     .application-map-actions {
       position: absolute;
       z-index: 1000;
-      width: 28px;
-      height: 28px;
-      left: 320px - $marginL * 1.5;
-      top: 280px - $marginL * 1.5;
+      left: 0;
+      top: 256px;
+      //bottom: 0;
       text-align: center;
       display:block;
-      background: #130085;
-      background: rgba(0, 60, 136, 0.5);
-      border-radius: 4px;
+      background: $lp-green;
       .map-search-button {
-        height: 28px;
-        width: 28px;
-        margin: $marginS;
+        color: white;
+        padding: 0 $marginL;
       }
     }
   }
 
-  .application_summary_info{
+  .application_summary_info {
     margin: 0 $marginL $marginL $marginL;
-    float: left;
-    width: 40%;
+    color: $gray51;
+    //float: left;
+    //width: 50%;
     h1 {
       width: 100%;
+      color: $gray51;
       .address {
-        white-space: nowrap;
+        //white-space: nowrap;
       }
       a {
-        color: white;
-        font-size: $font-size-body;
-        text-transform: none;
         padding-left: 32px;
-        width: auto;
-        height: auto;
         background-position: 8px -4200px;
       }
+    }
+    h2 {
+      color: $gray51;
+    }
+    a {
+        //color: white;
+        font-size: $font-size-body;
+        text-transform: none;
+        height: auto;
+        width: auto;
+    }
+    .summary-help {
+      width: 100%;
+      background-color: $app-gray-bg;
+      font-size: 0.8em;
+      font-style: italic;
+    }
+    .help-text p, .summary-help p {
+      width: 100%;
     }
 
     .link-permit {
       display: block;
     }
 
-    .link-permit-item, .remove-link-permit {
-      color: rgb(242,242,242);
+    .remove-link-permit {
+      //color: rgb(242,242,242);
     }
-    div:nth-child(odd) {
-      background:rgb(127,127,127);
+
+    .link-permit-item {
+      //color: rgb(242,242,242);
+      text-decoration: none;
     }
+
+    /* div:nth-child(even) { */
+    /*   background:rgb(127,127,127); */
+    /* } */
     p, .application_summary_text, ul {
       vertical-align: top;
       display: inline-block;
       width: 30%;
       margin-bottom: 0;
       padding: 6px;
-      color: rgb(242,242,242);
+      //color: rgb(242,242,242);
+    }
+    select {
+      vertical-align: top;
     }
     .application_summary_text, ul {
-      width: auto;
+      width: 69%;
     }
     ul {
       li {
@@ -100,32 +186,31 @@
       }
     }
     .state-indication {
-      background-color: $lp-dark-grey;
+      background-color: $app-gray-light;
       margin: 0 0 0 0;
       overflow: hidden;
+      white-space: nowrap;
       height: 32px;
-      @mixin past-state {
-          background-color: white;
-          color: darken($lp-light-grey, 60%);
-          &:after {
-            border-left: 11px solid white;
-          }
+      @mixin past-state{
+        // The passed states are hidden in order to
+        // make sure that the future steps are all visible.
+        display: none;
       }
       @mixin active-state {
         color: white;
-        background-color: $lp-green;
+        background-color: $green-dark;
         display: inline-block;
         &:after {
-            border-left: 11px solid $lp-green;
+            border-left: 11px solid $green-dark;
           }
 
       }
 
       div {
-        background-color: $lp-dark-grey;
+        //background-color: $lp-dark-grey;
         height: 24px;
         span {
-          color: darken($lp-light-grey, 10%);
+          //color: darken($lp-light-grey, 10%);
           position: relative;
           padding: 4px 8px 4px 24px;
           display: inline-block;
@@ -143,7 +228,7 @@
             top: -1px;
             right: -10px;
             border-top: 17px solid transparent;
-            border-left: 11px solid $lp-dark-grey;
+            border-left: 11px solid $app-gray-light;
             border-bottom: 17px solid transparent;
             z-index: 1;
           }
@@ -241,11 +326,11 @@
   }
 
   .application_actions {
-    background-color: $lp-dark-grey;
+    //background-color: $lp-dark-grey;
     position: absolute;
     right: 0;
     top: $marginM;
-    width: $cols3;
+    //width: $cols3;
     .muncipality-info {
       background: darken($lp-light-grey, 15%);
       width: 100%;
@@ -270,31 +355,49 @@
        color: rgb(242,242,242);
       }
     }
-    button {
-      width: 100%;
-    }
+    /* button { */
+    /*   width: 100%; */
+    /* } */
   }
 }
 
-.attachment-legend {
-  position: relative;
-  span {
-    height: 20px;
-  }
-  span + span {
-      position: absolute;
-      top:-3px;
-      left: 30px;
-  }
+.application_summary_info > div {
+  border-bottom: 1px solid $app-gray-dark;
 }
 
-.task-legend {
-  span {
-    display: inline-block;
+.application_summary_info > div.state-indication,
+.application_summary_info > div.summary-help {
+  border-bottom: none;
+}
+
+@mixin icon-colorizer( $id ) {
+  ##{$id} {
+  i.lupicon-circle-check,
+  i.lupicon-circle-pen,
+  i.lupicon-circle-arrow-up,
+  i.lupicon-circle-stamp,
+  i.lupicon-circle-section-sign {
+    color: $positive;
   }
-  span + span {
-      margin-top: 9px;
-      vertical-align: top;
+  i.lupicon-circle-star {
+    color: $primary;
+  }
+  i.lupicon-circle-attention {
+    color: $negative
+  }
+}
+}
+
+@include icon-colorizer( application-attachments-tab );
+@include icon-colorizer( application-tasks-tab );
+
+#application-tasks-tab {
+  .stacked.legends {
+    margin-bottom: $marginM;
+    margin-left: $marginM;
+  }
+  table {
+    margin-bottom: $marginS;
   }
 }
 
@@ -324,9 +427,9 @@
   margin-top: $baseline;
   .process-next {
     float: right;
-    span {
-      margin-right: -$marginS;
-    }
+    /* span { */
+    /*   margin-right: -$marginS; */
+    /* } */
   }
   .process-previous {
   }
@@ -366,8 +469,6 @@
     vertical-align: top;
     a.command {
       display: block;
-      &:before { content: "["; }
-      &:after { content: "]"; }
     }
     .owner-name {
       font-weight: bold;
@@ -393,56 +494,60 @@
   }
 }
 
-#dialog-stamp-attachments {
-  .dialog-content {
-    max-height: 500px;
-    overflow-y: scroll;
-    .btn-dialog {
-      position: relative;
-      width: 10em;
-      margin-left: 6px;
-    }
-    .stamp-files {
-      a {
-        font-size: 13px;
-        display: inline-block;
-      }
-    }
-    .select-all {
-      margin-left: 360px;
-    }
-  }
-}
-
-#dialog-verdict-attachment-prints-order {
+#dialog-verdict-attachment-prints-order, #dialog-verdict-attachment-prints-order-history {
   .dialog-content {
     padding-left: 15px;
   }
   .order-amount {
-    width: 15px;
+    width: 18px;
+  }
+  .btn-prints-dialog-ok {
+    margin-left: 15px;
+  }
+
+  .context-error {
+    max-width: 820px;
+    word-wrap: break-word;
   }
 
   // With these, making table's attachment list scrollable
 
   $table_body_height: 200px;
-  $table_width: 800px;
+  $table_width: 820px;
   $column_one_width: 200px;
   $column_two_width: 200px;
   $column_three_width: 300px;
-  $column_four_width: 100px;
+  $column_four_width: 120px;
 
   .fixed-headers {
     width: $table_width;
     table-layout: fixed;
+    margin-right: 20px;
 
     .center {
       text-align: center;
     }
 
-    td:nth-child(1), th:nth-child(1) { min-width: $column_one_width; }
-    td:nth-child(2), th:nth-child(2) { min-width: $column_two_width; }
-    td:nth-child(3), th:nth-child(3) { width: $column_three_width; }
-    td:nth-child(4), th:nth-child(4) { width: $column_four_width; }
+    td {
+      word-wrap: break-word;
+    }
+
+    td:nth-child(1), th:nth-child(1) {
+      width: $column_one_width;
+      max-width: $column_one_width;
+    }
+    td:nth-child(2), th:nth-child(2) {
+      width: $column_two_width;
+      max-width: $column_two_width;
+    }
+    td:nth-child(3), th:nth-child(3) {
+      width: $column_three_width;
+      max-width: $column_three_width;
+    }
+    td:nth-child(4), th:nth-child(4) {
+      width: $column_four_width;
+      max-width: $column_four_width;
+    }
 
     thead {
       tr {
@@ -464,6 +569,22 @@
     overflow-x: hidden;
     overflow-y: auto;
     tbody { height: auto; }
+  }
+}
+
+#dialog-verdict-attachment-prints-order-history {
+  .history-dialog-description {
+    margin-bottom: $marginM;
+  }
+
+  .history-items {
+    margin-top: $marginS;
+    overflow-y: auto;
+    max-height: 500px;
+
+    .history-item {
+      margin: $marginS 0;
+    }
   }
 }
 
@@ -490,6 +611,7 @@
   margin-bottom: $marginL;
   h3 {
     margin-top: 12px;
+    font-weight: bold;
   }
 }
 
@@ -596,24 +718,27 @@
 }
 
 .requiredField-line {
-  margin-bottom: $marginS;
-  vertical-align: top;
+  /* margin-bottom: $marginS; */
+  /* vertical-align: top; */
   display: table-row;
-  padding: $marginS;
-  height: 24px;
+  /* padding: $marginS; */
+  /* height: 24px; */
   span, a {
-    vertical-align: top;
-    line-height: 14px;
-    max-height: 16px;
+  /*   vertical-align: top; */
+  /*   line-height: 14px; */
+  /*   max-height: 16px; */
     display: table-cell;
   }
   a {
     padding-left: $marginM;
-    font-size: 14px;
+//    font-size: 14px;
 
   }
   .required-field-error-element-name {
     padding-left: $marginS;
+  }
+  .lupicon-circle-attention {
+    color: $red;
   }
 }
 
@@ -639,6 +764,19 @@
 }
 
 .tasks-foreman {
+  position: relative;
+
+  .form-input {
+    display: inline-block;
+    margin: 0 6px 0 0;
+  }
+
+  .form-input.combobox, select {
+    &.long {
+     width: $cols7;
+    }
+  }
+
   thead tr:first-child td {
     padding-left: 0
   }
@@ -680,8 +818,33 @@
       }
     }
   }
+}
 
+#application-metadata-tab {
+  h1 {
+    float: none;
+  }
+  .table-metadata {
+      max-width: 875px;
+    .metadata-key {
+      width: 175px;
+    }
+  }
+}
+
+#application-requiredFieldSummary-tab {
+  .auth-actions button {
+    display: block;
+  }
 }
 
 
+// Can be removed when the buttons are removed
+// from H2 bar.
+/* h2.sticky { */
+/*   margin-bottom: $marginM; */
+/* } */
 
+h2 > i.is-right {
+  float: right;
+}

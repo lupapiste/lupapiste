@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="organization">
+      <div class="container">
+        <a class="btn btn-nav-back" href="#!/organizations">Organisaatiolistaus</a>
+
+        <div data-bind="with: organizationModel">
+          <h1 data-bind="text: util.getIn($data, ['organization', 'name', loc.getCurrentLanguage()])"></h1>
+
+
+          <h2>Asetukset</h2>
+          <div class="permanent-archive-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">
+            <label data-bind="ltext: 'organization.archive.enabled'" for="permanentArchiveEnabled"></label>
+            <input type="checkbox" data-bind="checked: permanentArchiveEnabled" class="form-input" id="permanentArchiveEnabled">
+            <span data-bind="saveIndicator: indicator"></span>
+          </div>
+
+          <h2>Hakemustyypit</h2>
+          <div data-bind="with: organization"><div data-bind="foreach: $data.scope">
+            <h3><span data-bind="text: loc(['municipality', $data.municipality()])"></span>: <span data-bind="ltext: $data.permitType"></span></h3>
+            <table data-test-id="organization-table">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
+                  <th data-bind="ltext: 'organization.application.enabled'"></th>
+                  <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
+                  <th data-bind="ltext: 'organization.openinforequest.email'"></th>
+                  <th>Palvelu avataan</th>
+                  <th>Tallenna rivi</th>
+                </tr>
+              </thead>
+              <tbody data-bind="if: $data">
+                <tr >
+                  <td data-bind="attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality() + '-' + $data.permitType()}">
+                    <input type="checkbox" data-bind="checked: $data['inforequest-enabled']" class="form-input" >
+                  </td>
+                  <td data-bind="attr: {'data-test-id': 'application-enabled-' + $data.municipality() + '-' + $data.permitType()}">
+                    <input type="checkbox" data-bind="checked: $data['new-application-enabled']" class="form-input" >
+                  </td>
+                  <td data-bind="attr: {'data-test-id': 'open-inforequest-' + $data.municipality() + '-' + $data.permitType()}">
+                    <input type="checkbox" data-bind="checked: $data['open-inforequest']" class="form-input" >
+                  </td>
+                  <td data-bind="">
+                    <input type="text" data-bind="value: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality() + '-' + $data.permitType()}" class="form-input" >
+                  </td>
+                  <td data-bind="attr: {'data-test-id': 'opening-' + $data.municipality() + '-' + $data.permitType()}">
+                    <input type="text" data-bind="datepicker: $data['opening']" class="form-input">
+                  </td>
+                  <td><button class="btn btn-primary btn-narrow" data-bind="click: $root.organizationModel.saveRow, attr: {'data-test-id': 'save-' + $data.municipality() + '-' + $data.permitType()}">Tallenna</button></td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div></div>
+
+          <button data-bind="visible: !openInfoRequests(), click: convertOpenInforequests" class="btn btn-primary">Muuta avoimet neuvontapyynn&ouml;t tavallisiksi</button>
+
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

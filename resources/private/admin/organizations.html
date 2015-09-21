@@ -12,9 +12,9 @@
               <th data-bind="ltext: 'organization.id'"></th>
               <th data-bind="ltext: 'organization.name'"></th>
               <th data-bind="ltext: 'login.with-rights'"></th>
+              <th data-bind="ltext: 'organization.archive.enabled'"></th>
               <th data-bind="ltext: 'admin.municipality'"></th>
               <th data-bind="ltext: 'organization.scope'"></th>
-              <th data-bind="ltext: 'edit'"></th>
               <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
               <th data-bind="ltext: 'organization.application.enabled'"></th>
               <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
@@ -27,16 +27,18 @@
             <tr>
               <!-- ko if: $data.municipality == organization.scope[0].municipality && $data.permitType == organization.scope[0].permitType-->
                 <td data-bind="text: organization.id, attr: {'rowspan': organization.scope.length}"></td>
-                <td data-bind="text: organization.name[loc.getCurrentLanguage()], attr: {'rowspan': organization.scope.length}"></td>
+                <td data-bind="attr: {'rowspan': organization.scope.length}">
+                  <a data-bind="text: organization.name[loc.getCurrentLanguage()], click: $parent.open, attr: {'data-test-id': 'edit-organization-' + organization.id}" href="#"></a>
+                </td>
                 <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
                   [<a href="#" data-bind="click: $root.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
                 </td>
+                <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
+                  <span data-bind="text: $data['permanent-archive-enabled'] || false"></span>
+                </td>
               <!-- /ko -->
-              <td data-bind="text: $data.municipality"></td>
-              <td data-bind="text: $data.permitType"></td>
-              <td>
-                [<a href="#" data-bind="click: $root.editOrganizationModel.open, ltext: 'edit', attr: {'data-test-id': 'edit-organization-' + $data.municipality + '-' + $data.permitType}" class="modal"></a>]
-              </td>
+              <td><abbr data-bind="text: $data.municipality, attr: {'title': loc(['municipality',$data.municipality])}"></abbr></td>
+              <td><abbr data-bind="text: $data.permitType, attr: {'title':loc($data.permitType)}"></abbr></td>
               <td data-bind="text: $data['inforequest-enabled'] || false, attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="text: $data['new-application-enabled'] || false, attr: {'data-test-id': 'application-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="text: $data['open-inforequest'] || false, attr: {'data-test-id': 'open-inforequest-' + $data.municipality + '-' + $data.permitType}"></td>
@@ -49,65 +51,34 @@
 
       </div>
 
-      <div id="dialog-edit-organization" class="window autosized" data-bind="with: editOrganizationModel">
-        <div class="dialog-header">
-          <p data-bind="ltext: 'edit'"></p>
-          <p class="dialog-close close">X</p>
-        </div>
-
-        <div class="dialog-content">
-          <div>
-            <input type="checkbox" data-bind="checked: inforequestEnabled" data-test-id="inforequest-enabled" class="form-input" id="inforequest-enabled"></input>
-            <label for="inforequest-enabled" class="form-label" data-bind ="ltext: 'organization.inforequest.enabled'"></label>
-          </div>
-
-          <div>
-            <input type="checkbox" data-bind="checked: applicationEnabled" data-test-id="application-enabled" class="form-input" id="application-enabled"></input>
-            <label class="form-label" for="application-enabled" data-bind ="ltext: 'organization.application.enabled'"></label>
-          </div>
-
-          <div>
-            <input type="checkbox" data-bind="checked: openInforequestEnabled" class="form-input" id="open-inforequest"></input>
-            <label class="form-label" for="open-inforequest" data-bind ="ltext: 'organization.openinforequest.enabled'"></label>
-          </div>
-
-          <div>
-            <label class="form-label" for="open-inforequest-email" data-bind ="ltext: 'organization.openinforequest.email'"></label>
-            <input type="text" data-bind="value: openInforequestEmail" class="form-input" id="open-inforequest-email" data-test-id="open-inforequest-email"></input>
-          </div>
-
-          <div>
-            <label class="form-label" for="opening">Palvelu avataan</label>
-            <input type="text" data-bind="datepicker: opening" class="form-input" id="opening" data-test-id="opening"></input>
-          </div>
-
-          <button data-bind="click: updateOrganization, enable: ok, disable: processing" class="btn btn-primary btn-dialog" data-test-id="save-organization">
-            <span data-bind="ltext: 'save'"></span>
-            <em data-bind="visible: pending" class="button-loader"></em>
-          </button>
-
-          <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
-        </div>
-      </div>
-
-
       <div id="dialog-login-as" class="window autosized" data-bind="with: loginAsModel">
         <div class="dialog-header">
           <p data-bind="ltext: 'loginframe.login'"></p>
-          <p class="dialog-close close">X</p>
+          <p class="dialog-close close lupicon-remove"></p>
         </div>
 
         <div class="dialog-content">
-          <div>
-            <label class="form-label" for="login-as-password" data-bind="ltext: 'admin.admin-password'"></label>
-            <input type="password" data-bind="textInput: password" class="form-input" id="login-as-password" ></input>
-          </div>
+          <form>
+            <div>
+              <input type="radio" name="role" value="authority" data-bind="checked: role" id="impersonateAuthority">
+              <label data-bind="ltext: 'authority'" for="impersonateAuthority"></label>
+            </div>
+            <div>
+              <input type="radio" name="role" value="authorityAdmin" data-bind="checked: role" id="impersonateAuthorityAdmin">
+              <label data-bind="ltext: 'authorityAdmin'" for="impersonateAuthorityAdmin"></label>
+            </div>
 
-          <button data-bind="click: login, ltext: 'loginframe.login'"
-                  data-test-id="submit-login-as"
-                  class="btn btn-primary btn-dialog" ></button>
+            <div>
+              <label class="form-label" for="login-as-password" data-bind="ltext: 'admin.admin-password'"></label>
+              <input type="password" data-bind="textInput: password" class="form-input" id="login-as-password" autofocus="autofocus">
+            </div>
 
-          <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+            <button data-bind="click: login, ltext: 'loginframe.login'"
+                    data-test-id="submit-login-as"
+                    class="positive btn-dialog" ></button>
+
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+          </form>
         </div>
       </div>
 

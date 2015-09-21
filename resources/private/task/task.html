@@ -2,29 +2,35 @@
 <html >
 <body>
   <section class="page container" id="task" data-bind="with: task">
-  <h1><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span><span data-bind="text: displayName"></span></h1>
-  <div class="clear-fix">
-    <a class="btn btn-nav-back"
-       data-bind="click: returnToApplication"
-       data-test-id="back-to-application-from-task">
-       <span data-bind ="ltext: 'application.return'"></span>
-       <span class="icon drill-left-black-bigger left-align"></span>
-    </a>
-    <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: $root.authorization.ok('approve-task')" class="btn btn-primary"></button>
-    <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="btn btn-decline"></button>
-    <button data-test-id="send-task"    data-bind="click: sendTask, visible: $root.authorization.ok('send-task'), enable: sendable && !$root.processing()" class="btn btn-primary">
-      <em data-bind="visible: $root.pending" class="button-loader"></em>
-      <span data-bind="ltext: 'task.send'"></span>
-    </button>
-    <button data-test-id="delete-task"  data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')" class="btn" style="float:right"></button>
-  </div>
+    <h1><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span><span data-bind="text: displayName"></span></h1>
+    <div class="clear-fix">
+      <a class="btn secondary"
+         data-bind="click: returnToApplication"
+         data-test-id="back-to-application-from-task">
+          <i class="lupicon-chevron-start"></i>
+         <span data-bind ="ltext: 'application.return'"></span>
+      </a>
+      <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: $root.authorization.ok('approve-task')" class="positive"></button>
+      <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="btn-decline"></button>
+      <button data-test-id="send-task"
+              data-bind="click: sendTask,
+                         visible: $root.authorization.ok('send-task'),
+                         enable: $root.taskSubmitOk() && !$root.processing(),
+                         css: {waiting: $root.pending}"
+              class="positive">
+          <i class="wait spin lupicon-refresh"></i>
+          <span data-bind="ltext: 'task.send'"></span>
+      </button>
+      <button data-test-id="delete-task"
+              data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')"
+              class="secondary" style="float:right"></button>
+    </div>
 
-  <div id="taskAttachments" >
-    <div data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, authorization: $root.authorization}}"></div>
-  </div>
+    <div id="taskAttachments" >
+      <div data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, authorization: $root.authorization}}"></div>
+    </div>
 
-  <div id="taskDocgen" class="docgen-content" ></div>
-
+    <div id="taskDocgen" class="docgen-content" ></div>
   </section>
 </body>
 </html>

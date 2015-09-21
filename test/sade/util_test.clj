@@ -1,7 +1,9 @@
 (ns sade.util-test
+  (:refer-clojure :exclude [pos? neg? zero?])
   (:require [sade.util :refer :all]
             [midje.sweet :refer :all]
-            [schema.core :as sc])
+            [schema.core :as sc]
+            [lupapalvelu.document.schemas :as schema])
   (:import [org.apache.commons.io.output NullWriter]))
 
 (facts "strip-nils"
@@ -83,8 +85,12 @@
     (assoc-in {} [:a :b :d] 5)) => {:a {:b {:c 2 :d 5}}}))
 
 (facts "Contains value"
-  (fact (contains-value? nil nil) => false)
   (fact (contains-value? [] nil) => false)
+  (fact (contains-value? nil nil) => true)
+  (fact (contains-value? [nil] nil) => true)
+  (fact (contains-value? :a :a) => true)
+  (fact (contains-value? #{:a} :a) => true)
+  (fact (contains-value? #{:a} :b) => false)
   (fact (contains-value? nil true?) => false)
   (fact (contains-value? [] true?) => false)
   (fact (contains-value? [nil] true?) => false)
@@ -146,6 +152,7 @@
 
 (facts "to-xml-date-from-string"
   (fact "nil -> nil" (to-xml-date-from-string nil) => nil)
+  (fact "'' -> nil" (to-xml-date-from-string "") => nil)
   (fact "valid date" (to-xml-date-from-string "1.1.2013") => "2013-01-01")
   (fact "invalid date" (to-xml-date-from-string "1.2013") => (throws java.lang.IllegalArgumentException)))
 
@@ -168,16 +175,6 @@
     (to-xml-time-from-string "0:0") => "00:00:00"
     (to-xml-time-from-string "0:10") => "00:10:00"
     (to-xml-time-from-string "1:0") => "01:00:00"))
-
-(facts "to-property-id"
-  (to-property-id "245-003-0105-0006") => "24500301050006"
-  (to-property-id "245-3-105-6") => "24500301050006"
-  (to-property-id "245-03-0105-06") => "24500301050006"
-  (to-property-id "05-03-0105-006") => "00500301050006")
-
-(facts "to-human-readable-property-id"
-  (to-human-readable-property-id "24500301050006") => "245-3-105-6"
-  (to-human-readable-property-id "00500301050006") => "5-3-105-6")
 
 (facts sequable?
   (sequable? [])        => true
@@ -216,30 +213,33 @@
   (assoc-when {:a nil :b :b} :a :a, :b nil, :c :c)
   => {:a :a, :b :b, :c :c})
 
-(facts y?
-  (fact (y? nil)           => falsey)
-  (fact (y? "")            => falsey)
-  (fact (y? "foo")         => falsey)
-  (fact (y? "FI2341529-4") => falsey)
-  (fact (y? "FI2341528-4") => truthy)
-  (fact (y? "SW123456789") => truthy))
+(facts finnish-y?
+  (fact (finnish-y? nil)           => falsey)
+  (fact (finnish-y? "")            => falsey)
+  (fact (finnish-y? "foo")         => falsey)
+  (fact (finnish-y? "2341529-4")   => falsey)
+  (fact (finnish-y? "2341528-4")   => truthy))
 
-(facts ovt?
-  (fact (ovt? nil)             => falsey)
-  (fact (ovt? "")              => falsey)
-  (fact (ovt? "foo")           => falsey)
-  (fact (ovt? "1234")          => falsey)
-  (fact (ovt? "12345")         => truthy) ; foreign OVT
-  (fact (ovt? "003712345")     => falsey)
-  (fact (ovt? "003723415284")  => truthy)
-  (fact (ovt? "0037234152841") => truthy)
-  (fact (ovt? "00372341528412") => truthy)
-  (fact (ovt? "003723415284123") => truthy)
-  (fact (ovt? "0037234152841234") => truthy)
-  (fact (ovt? "00372341528412345") => truthy)
-  (fact (ovt? "003723415284123456") => falsey)
-  (fact (ovt? "003701902735") => truthy)
-  (fact (ovt? "003710601555") => truthy))
+(facts finnish-ovt?
+  (fact (finnish-ovt? nil)             => falsey)
+  (fact (finnish-ovt? "")              => falsey)
+  (fact (finnish-ovt? "foo")           => falsey)
+  (fact (finnish-ovt? "1234")          => falsey)
+  (fact (finnish-ovt? "12345")         => falsey)
+  (fact (finnish-ovt? "003712345")     => falsey)
+  (fact (finnish-ovt? "003723415284")  => truthy)
+  (fact (finnish-ovt? "0037234152841") => truthy)
+  (fact (finnish-ovt? "00372341528412") => truthy)
+  (fact (finnish-ovt? "003723415284123") => truthy)
+  (fact (finnish-ovt? "0037234152841234") => truthy)
+  (fact (finnish-ovt? "00372341528412345") => truthy)
+  (fact (finnish-ovt? "003723415284123456") => falsey)
+  (fact (finnish-ovt? "003701902735") => truthy)
+  (fact (finnish-ovt? "003710601555") => truthy)
+  (fact "invalid y"
+    (finnish-ovt? "003723415294")  => falsey)
+  (facts "Alphabetic suffix"
+    (fact (finnish-ovt? "003718523029101CZ") => truthy)))
 
 (facts "rakennustunnus?"
   (fact (rakennustunnus? nil) => falsey)
@@ -262,9 +262,47 @@
   (fact (sc/check (max-length-string 1) [1]) =not=> nil))
 
 (facts "comparing history item difficulties"
-  (fact "nil and item"          (compare-difficulty nil {:difficulty "A"})                => pos?)
-  (fact "item and nil"          (compare-difficulty {:difficulty "A"} nil)                => neg?)
-  (fact "old more difficult"    (compare-difficulty {:difficulty "A"} {:difficulty "B"})  => neg?)
-  (fact "new more difficult"    (compare-difficulty {:difficulty "B"} {:difficulty "A"})  => pos?)
-  (fact "tricky difficulty val" (compare-difficulty {:difficulty "A"} {:difficulty "AA"}) => pos?)
-  (fact "equality"              (compare-difficulty {:difficulty "B"} {:difficulty "B"})  => zero?))
+  (let [values (vec (map :name (:body schema/patevyysvaatimusluokka)))]
+    (fact "nil and item"          (compare-difficulty :difficulty values nil {:difficulty "A"})                => pos?)
+    (fact "item and nil"          (compare-difficulty :difficulty values {:difficulty "A"} nil)                => neg?)
+    (fact "old more difficult"    (compare-difficulty :difficulty values {:difficulty "A"} {:difficulty "B"})  => neg?)
+    (fact "new more difficult"    (compare-difficulty :difficulty values {:difficulty "B"} {:difficulty "A"})  => pos?)
+    (fact "tricky difficulty val" (compare-difficulty :difficulty values {:difficulty "A"} {:difficulty "AA"}) => pos?)
+    (fact "equality"              (compare-difficulty :difficulty values {:difficulty "B"} {:difficulty "B"})  => zero?)))
+
+(facts select-values
+  (let [m {:foo "foo" :bar "bar" :baz "baz"}]
+    (fact (select-values m [])                    => [])
+    (fact (select-values m [:foo :bar])           => ["foo" "bar"])
+    (fact (select-values m [:bar :foo])           => ["bar" "foo"])
+    (fact (select-values m [:foo :unknown :bar])  => ["foo" nil "bar"])
+    (fact (select-values m [:unknown1 :unknown2]) => [nil nil])))
+
+(facts "to-long"
+  (fact (to-long "1234") => truthy)
+  (fact (to-long "213asd2") => nil)
+  (fact (to-long "") => nil)
+  (fact (to-long 1234) => nil))
+
+(facts "relative-local-url?"
+  (relative-local-url? nil) => false
+  (relative-local-url? "") => true
+  (relative-local-url? "http://localhost") => false
+  (relative-local-url? "//localhost") => false
+  (relative-local-url? "/localhost") => true
+  (relative-local-url? "../localhost") => true)
+
+(facts "version-is-greater-or-equal"
+  (fact "source (evaluated) version"
+    (version-is-greater-or-equal "2"     {:major 2 :minor 1 :micro 5}) => false
+    (version-is-greater-or-equal "2.1"   {:major 2 :minor 1 :micro 5}) => false
+    (version-is-greater-or-equal "2.1.4" {:major 2 :minor 1 :micro 5}) => false
+    (version-is-greater-or-equal "2.1.5" {:major 2 :minor 1 :micro 5}) => true
+    (version-is-greater-or-equal "2.1.6" {:major 2 :minor 1 :micro 5}) => true
+
+    (version-is-greater-or-equal "2"     {:major 2 :minor 0 :micro 0}) => true
+    (version-is-greater-or-equal "2.1"   {:major 2 :minor 1 :micro 0}) => true)
+  (fact "target version"
+    (version-is-greater-or-equal 2.1     {:major 2 :minor 1 :micro 5}) => (throws AssertionError)
+    (version-is-greater-or-equal "2.1.4" "2.1.5")                      => (throws AssertionError)
+    (version-is-greater-or-equal "2.1.4" {:major 2 :minor 1})          => (throws AssertionError)))

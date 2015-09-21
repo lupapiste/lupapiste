@@ -1,8 +1,8 @@
 (ns lupapalvelu.document.model-test
-  (:use [lupapalvelu.document.model]
-        [lupapalvelu.document.validators]
-        [midje.sweet])
-  (:require [lupapalvelu.document.schemas :as schemas]
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.document.model :refer :all]
+            [lupapalvelu.document.validators :refer [valid-against? invalid-with? valid?]]
+            [lupapalvelu.document.schemas :as schemas]
             [sade.util :as util]))
 
 ;; Define a "random" timestamp used in test.
@@ -23,6 +23,7 @@
                             {:name "c" :type :group
                              :body [{:name "ca" :type :string}
                                     {:name "cb" :type :checkbox}]}
+                            {:name "partytype" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}] :default "henkilo"}
                             {:name "d" :type :select :sortBy :displayname
                              :body [{:name "A"}
                                     {:name "B"}
@@ -123,6 +124,16 @@
       (apply-update document [:a :d] "")  => (valid-against? schema)
       (apply-update document [:a :d] "D") => (invalid-with? schema [:warn "illegal-value:select"]))))
 
+(facts "Radio group"
+  (with-timestamp some-time
+    (let [document (new-document schema ..now..)]
+      (facts "valid cases"
+        (apply-update document [:a :partytype] "henkilo") => (valid-against? schema)
+        (apply-update document [:a :partytype] "yritys") => (valid-against? schema)
+        (apply-update document [:a :partytype] "")  => (valid-against? schema))
+      (fact "invalid value"
+        (apply-update document [:a :partytype] "neither") => (invalid-with? schema [:warn "illegal-value:select"])))))
+
 (facts "with real schemas - important field for paasuunnittelija"
   (with-timestamp some-time
     (let [document (new-document (schemas/get-schema (schemas/get-latest-schema-version) "paasuunnittelija") ..now..)]
@@ -135,7 +146,8 @@
         (apply-update [:osoite :katu] "katu")
         (apply-update [:osoite :postinumero] "12345")
         (apply-update [:osoite :postitoimipaikannimi] "Demola")
-        (apply-update [:patevyys :koulutus] "Demotehti")
+        (apply-update [:patevyys :koulutusvalinta] "rakennusmestari")
+        (apply-update [:patevyys :koulutus] "tekniikan kandidaatti")
         (apply-update [:patevyys :patevyysluokka] "AA")
         (apply-update [:yhteystiedot :email] "tauno@example.com")
         (apply-update [:yhteystiedot :puhelin] "050")) => valid?
@@ -611,10 +623,29 @@
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :3]) => (:data stripped-hakija)))))
 
 (facts "hetu-mask"
-  (let [masked (mask-person-ids hakija)]
-    (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value])
-    (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
-    (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "010203-****"))
+  (fact "ending is masked"
+    (let [masked (mask-person-id-ending hakija)]
+      (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
+      (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "010203-****"
+      (fact "non-related field is not changed"
+        (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]))))
+  (fact "birthday is masked"
+    (let [masked (mask-person-id-birthday hakija)]
+      (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
+      (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "******-040A"
+      (fact "non-related field is not changed"
+        (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]))))
+  (fact "combination"
+    (let [masked (-> hakija mask-person-id-ending mask-person-id-birthday)]
+      (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "******-****")))
+
+(facts without-user-id
+  (without-user-id nil) => nil
+  (without-user-id {}) => {}
+  (without-user-id {:a nil}) => {:a nil}
+  (without-user-id {:userId nil}) => {}
+  (without-user-id {:data {:userId nil}, :schema-info {}}) => {:data {}, :schema-info {}}
+  (without-user-id {:data {:henkilo {:userId {:value "x"} :henkilotiedot {}}}}) => {:data {:henkilo {:henkilotiedot {}}}})
 
 (facts
   (fact "all fields are mapped"
@@ -635,19 +666,23 @@
                                                  :postitoimipaikannimi {:value "city"}}})
 
   (fact "all fields are mapped - empty defaults"
-    (->henkilo {:id "id", :lastName  "lastName", :city "city"} :with-empty-defaults true)
+    (->henkilo {:id "id" :lastName "lastName" :city "city"} :with-empty-defaults? true)
     => {:userId                        {:value "id"}
         :henkilotiedot {:etunimi       {:value ""}
                         :sukunimi      {:value "lastName"}
-                        :hetu          {:value ""}}
+                        :hetu          {:value ""}
+                        :turvakieltoKytkin {:value false}}
         :yhteystiedot {:email          {:value ""}
                        :puhelin        {:value ""}}
         :osoite {:katu                 {:value ""}
                  :postinumero          {:value ""}
                  :postitoimipaikannimi {:value "city"}}
         :patevyys {:fise {:value ""}
-                   :koulutus {:value ""}
+                   :koulutusvalinta {:value ""}
                    :valmistumisvuosi {:value ""}}
+        :patevyys-tyonjohtaja {:fise {:value ""}
+                               :koulutusvalinta {:value ""}
+                               :valmistumisvuosi {:value ""}}
         :yritys   {:liikeJaYhteisoTunnus {:value ""}
                    :yritysnimi {:value ""}}} )
 
@@ -656,8 +691,10 @@
 
   (fact "some fields are mapped"
     (->henkilo {:firstName "firstName"
-                :zip       "zip"}) => {:henkilotiedot {:etunimi  {:value "firstName"}}
-                                       :osoite {:postinumero     {:value "zip"}}})
+                :zip       "zip"
+                :turvakieltokytkin true}) => {:henkilotiedot {:etunimi {:value "firstName"}
+                                                              :turvakieltoKytkin {:value true}}
+                                              :osoite {:postinumero {:value "zip"}}})
 
   (fact "hetu is mapped"
     (->henkilo {:id       "id"

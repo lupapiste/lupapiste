@@ -5,7 +5,7 @@
   }
 
   function filtered(page, message) {
-    var pageFilter = /^(resource:\/|https:\/\/[a-z1-9]+\.checkpoint\.com\/)/;
+    var pageFilter = /^(resource:\/|Unknown script code|https:\/\/[a-z1-9]+\.checkpoint\.com\/)/;
     return pageFilter.test(page) || _.include(message, "NPObject");
   }
 
@@ -22,7 +22,7 @@
 
     var page = location.pathname + location.hash;
     if (level >= serverLimit && typeof ajax !== "undefined" && !filtered(page, message)) {
-      ajax.command("frontend-error", {page: page, message: message}).fail(nop).error(nop).call();
+      ajax.command("frontend-error", {page: page, message: message, build: LUPAPISTE.config.build}).fail(nop).error(nop).call();
     }
   };
 
@@ -36,9 +36,20 @@
 
   if (LUPAPISTE.config.mode !== "dev") {
     window.onerror = function(msg, url, line, col, error) {
-      var sourcePosition = (col === undefined) ? line : line + ":" + col;
-      var message = (error === undefined || !error.stack) ? msg : msg + " -- Stack: " + error.stack;
-      window.error(url + ":" + sourcePosition + " " + message);
+      ajax.query("newest-version", {frontendBuild: LUPAPISTE.config.build})
+        .onError("frontend-too-old", function() {
+          if (confirm(loc("error.frontend-outdated"))) {
+            window.location.reload();
+          }
+        })
+        .success(_.noop)
+        .call();
+
+      if (url) {
+        var sourcePosition = (col === undefined) ? line : line + ":" + col;
+        var message = (error === undefined || !error.stack) ? msg : msg + " -- Stack: " + error.stack;
+        window.error(url + ":" + sourcePosition + " " + message);
+      }
       return true;
     };
   }

@@ -4,23 +4,27 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]))
 
-; TODO test that document data is copied to foreman application
 (apply-remote-minimal)
 
 (facts* "Foreman application"
   (let [apikey                       mikko
         {application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
-        {foreman-application-id :id} (command apikey :create-foreman-application :id application-id :taskId "" :foremanRole "") => truthy
+        application                  (query-application apikey application-id)
+        _                            (generate-documents application apikey)
+        {foreman-application-id :id} (command apikey :create-foreman-application :id application-id :taskId "" :foremanRole "ei tiedossa") => truthy
 
         foreman-application          (query-application apikey foreman-application-id)
         foreman-link-permit-data     (first (foreman-application :linkPermitData))
-        foreman-doc                  (lupapalvelu.domain/get-document-by-name foreman-application "tyonjohtaja-v2")
+        foreman-doc                  (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
         application                  (query-application apikey application-id)
         link-to-application          (first (application :appsLinkingToUs))
         foreman-applications         (query apikey :foreman-applications :id application-id) => truthy]
 
-    (fact "Update ilmoitusHakemusValitsin to 'ilmoitus'"
-      (command apikey :update-doc :id foreman-application-id :doc (:id foreman-doc) :updates [["ilmoitusHakemusValitsin" "ilmoitus"]]) => ok?)
+    (fact "Initial permit subtype is 'tyonjohtaja-hakemus'"
+      (:permitSubtype foreman-application) => "tyonjohtaja-hakemus")
+
+    (fact "Update subtype to 'tyonjohtaja-ilmoitus'"
+      (command apikey :change-permit-sub-type :id foreman-application-id :permitSubtype "tyonjohtaja-ilmoitus") => ok?)
 
     (fact "Foreman application contains link to application"
       (:id foreman-link-permit-data) => application-id)
@@ -33,19 +37,73 @@
         (count applications) => 1
         (:id (first applications)) => foreman-application-id))
 
-    (fact "Submit link-permit app"
-      (command apikey :submit-application :id application-id) => ok?)
+    (fact "Document data is copied to foreman application"
+      (fact "Hankkeen kuvaus"
+        (let [foreman-hankkeen-kuvaus (domain/get-document-by-name foreman-application "hankkeen-kuvaus-minimum")
+              app-hankkeen-kuvaus     (domain/get-document-by-name application "hankkeen-kuvaus")]
 
-    (fact "Submit foreman-app"
-      (command apikey :submit-application :id foreman-application-id) => ok?)
+          (get-in app-hankkeen-kuvaus [:data :kuvaus :value]) => (get-in foreman-hankkeen-kuvaus [:data :kuvaus :value])))
+
+      (fact "Tyonjohtaja doc has value from the command"
+        (get-in foreman-doc [:data :kuntaRoolikoodi :value]) => "ei tiedossa")
+
+      (fact "Hakija docs are equal, expect the userId"
+        (let [hakija-doc-data         (:henkilo (:data (domain/get-document-by-name application "hakija-r")))
+              foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija-r")))]
+
+          hakija-doc-data => map?
+          foreman-hakija-doc-data => map?
+
+          (dissoc hakija-doc-data :userId) => (dissoc foreman-hakija-doc-data :userId))))
+
+    (fact "Can't submit foreman app before original link-permit-app is submitted"
+      (:submittable (query-application apikey foreman-application-id)) => false)
+
+    (fact "Submit link-permit app"
+      (command apikey :submit-application :id application-id) => ok?
+      (:submittable (query-application apikey foreman-application-id)) => true)
+
+    (facts "Can't submit foreman notice app if link permit doesn't have verdict"
+      (fact "gives error about foreman notice"
+        (command apikey :submit-application :id foreman-application-id) => (partial expected-failure? :error.foreman.notice-not-submittable))
+      (command sonja :check-for-verdict :id application-id) => ok?
+      (fact "ok after link-permit has verdict"
+        (command apikey :submit-application :id foreman-application-id) => ok?))
+
+
+
+    (fact "Link foreman application to task"
+      (let [apikey                       mikko
+            application (create-and-submit-application apikey)
+            _ (command sonja :check-for-verdict :id (:id application))
+            application (query-application apikey (:id application))
+            {foreman-application-id :id} (command apikey :create-foreman-application :id (:id application) :taskId "" :foremanRole "")
+            tasks (:tasks application)
+            foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") tasks))]
+        (command apikey :link-foreman-task :id (:id application) :taskId (:id foreman-task) :foremanAppId foreman-application-id) => ok?
+        (let [app (query-application apikey (:id application))
+              updated-tasks (:tasks app)
+              updated-foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") updated-tasks))]
+          (get-in updated-foreman-task [:data :asiointitunnus :value]) => foreman-application-id)))
+
+    ; delete verdict for next steps
+    (let [app (query-application mikko application-id)
+          verdict-id (-> app :verdicts first :id)
+          verdict-id2 (-> app :verdicts second :id)]
+     (command sonja :delete-verdict :id application-id :verdictId verdict-id) => ok?
+     (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
+     (fact "is submitted" (:state (query-application mikko application-id)) => "submitted"))
 
     (facts "approve foreman"
-      (let [_ (command sonja :approve-application :id application-id :lang "fi") => ok?
-            ; TODO no need to give verdict after implementing LUPA-1819
-            _ (give-verdict sonja application-id) => ok?]
-        (fact "when foreman application is of type 'ilmoitus', after approval its state is closed"
-          (command sonja :approve-application :id foreman-application-id :lang "fi") => ok?
-          (:state (query-application apikey foreman-application-id)) => "closed")))
+      (fact "Can't approve foreman application before actual application"
+        (command sonja :approve-application :id foreman-application-id :lang "fi") => (partial expected-failure? "error.link-permit-app-not-in-post-sent-state"))
+
+      (fact "After approving actual application, foreman can be approved. No need for verdict"
+        (command sonja :approve-application :id application-id :lang "fi") => ok?
+        (command sonja :approve-application :id foreman-application-id :lang "fi") => ok?)
+
+      (fact "when foreman application is of type 'ilmoitus', after approval its state is closed"
+        (:state (query-application apikey foreman-application-id)) => "closed"))
 
     (facts "updating other foreman projects to current foreman application"
       (let [{application1-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
@@ -61,8 +119,8 @@
             foreman-doc2                  (domain/get-document-by-name foreman-application2 "tyonjohtaja-v2")]
 
         (fact "other project is updated into current foreman application"
-          (command apikey :set-user-to-document :id foreman-application1-id :documentId (:id foreman-doc1) :userId mikko-id :path "" :collection "documents" => truthy)
-          (command apikey :set-user-to-document :id foreman-application2-id :documentId (:id foreman-doc2) :userId mikko-id :path "" :collection "documents" => truthy)
+          (command apikey :set-current-user-to-document :id foreman-application1-id :documentId (:id foreman-doc1) :userId mikko-id :path "" :collection "documents" => truthy)
+          (command apikey :set-current-user-to-document :id foreman-application2-id :documentId (:id foreman-doc2) :userId mikko-id :path "" :collection "documents" => truthy)
           (command apikey :update-foreman-other-applications :id foreman-application2-id :foremanHetu "")
 
           (let [updated-application (query-application apikey foreman-application2-id)
@@ -84,33 +142,33 @@
 
         (facts "reduced"
           (fact "reduced history should contain reduced history"
-            (let [reduced-history (query apikey :reduced-foreman-history :id base-foreman-app-id) => ok?
+            (let [reduced-history (query sonja :reduced-foreman-history :id base-foreman-app-id) => ok?
                   history-ids (map :foremanAppId (:projects reduced-history))]
               history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
               (some #{foreman-app-id4} history-ids) => nil?))
 
           (fact "reduced history should depend on the base application"
-            (let [reduced-history (query apikey :reduced-foreman-history :id foreman-app-id1) => ok?
+            (let [reduced-history (query sonja :reduced-foreman-history :id foreman-app-id1) => ok?
                   history-ids (map :foremanAppId (:projects reduced-history))]
               history-ids =>     (just [foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
               history-ids =not=> (has some #{foreman-app-id4 base-foreman-app-id})))
 
           (fact "Unknown foreman app id"
-            (query apikey :reduced-foreman-history :id "foobar") => fail?))
+            (query sonja :reduced-foreman-history :id "foobar") => fail?))
 
           (fact "Should be queriable only with a foreman application"
-            (let [resp (query apikey :foreman-history :id application-id) => fail?]
+            (let [resp (query sonja :foreman-history :id application-id) => fail?]
               (:text resp) => "error.not-foreman-app"))
 
         (facts "unreduced"
           (fact "unreduced history should not reduce history"
-            (let [unreduced-history (query apikey :foreman-history :id base-foreman-app-id) => ok?
+            (let [unreduced-history (query sonja :foreman-history :id base-foreman-app-id) => ok?
                   history-ids       (map :foremanAppId (:projects unreduced-history))]
               history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id4 foreman-app-id5] :in-any-order)))
 
           (fact "Unknown foreman app id"
-            (query apikey :foreman-history :id "foobar") => fail?)
+            (query sonja :foreman-history :id "foobar") => fail?)
 
           (fact "Should be queriable only with a foreman application"
-            (let [resp (query apikey :reduced-foreman-history :id application-id) => fail?]
+            (let [resp (query sonja :reduced-foreman-history :id application-id) => fail?]
               (:text resp) => "error.not-foreman-app")))))))

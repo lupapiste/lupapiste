@@ -1,154 +1,56 @@
-LUPAPISTE.VerdictAttachmentsMultiselectModel = function(params) {
-    "use strict";
-    var self = this;
 
-    function markableAttachment(a) {
-      return a.versions && a.versions.length;
-    }
-
-    function enhanceAttachment(a) {
-      a.forPrinting = ko.observable(a.forPrinting);
-    }
-
-    function mapAttachmentGroup(group) {
-      group.attachments = _(group.attachments).each(enhanceAttachment).value();
-      return {
-        attachments: group.attachments,
-        groupName: group.groupName,
-        groupDesc: group.groupDesc,
-        name: group.name,
-        isGroupSelected: ko.computed(function() {
-          return _.every(group.attachments, function(a) {
-            return a.forPrinting();
-          });
-        })
-      };
-    }
-
-    function getSelectedAttachments(files) {
-      return _(files).pluck("attachments").flatten().filter(function(f) {
-        return f.forPrinting();
-      }).value();
-    }
-
-    function getNonSelectedAttachments(files) {
-      return _(files).pluck("attachments").flatten().filter(function(f) {
-        return !f.forPrinting();
-      }).value();
-    }
-
-    function eachSelected(files) {
-      return _(files).pluck("attachments").flatten().every(function(f) {
-        return f.forPrinting();
-      });
-    }
-
-
-    // Init
-    self.application = params.application;
-    self.attachments = params.attachments;
-    self.filteredFiles = _(ko.mapping.toJS(self.attachments)).filter(markableAttachment).value();
-
-    // group by post/pre verdict attachments
-    var grouped = _.groupBy(self.filteredFiles, function(a) {
-      return _.contains(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
-    });
-
-    // group attachments by operation
-    grouped.pre = attachmentUtils.getGroupByOperation(grouped.pre, true, self.application.allowedAttachmentTypes);
-    grouped.post = attachmentUtils.getGroupByOperation(grouped.post, true, self.application.allowedAttachmentTypes);
-
-    // map files for marking
-    self.preFiles = ko.observableArray(_.map(grouped.pre, mapAttachmentGroup));
-    self.postFiles = ko.observableArray(_.map(grouped.post, mapAttachmentGroup));
-
-    self.selectedFiles = ko.computed(function() {
-      return getSelectedAttachments(self.preFiles()).concat(getSelectedAttachments(self.postFiles()));
-    });
-
-    self.nonSelectedFiles = ko.computed(function() {
-      return getNonSelectedAttachments(self.preFiles()).concat(getNonSelectedAttachments(self.postFiles()));
-    });
-
-    self.allSelected = ko.computed(function() {
-      return eachSelected(self.preFiles()) && eachSelected(self.postFiles());
-    });
-
-
-    self.start = function() {
-      var id = self.application.id();
-      ajax.command("set-attachments-as-verdict-attachment", {
-        id: id,
-        selectedAttachmentIds: _.map(self.selectedFiles(), "id"),
-        unSelectedAttachmentIds: _.map(self.nonSelectedFiles(), "id")
-      })
-      .success(function() {
-        window.location.hash = "!/application/" + id + "/attachments";
-        repository.load(id);
-        return false;
-      })
-      .error(function(e) {
-        notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
-        repository.load(id);
-      })
-      .call();
-      return false;
-    };
-
-
-    self.selectRow = function(row) {
-        row.forPrinting(!row.forPrinting());
-    };
-
-
-    function selectAllFiles(value) {
-        _(self.preFiles()).pluck("attachments").flatten().each(function(f) { f.forPrinting(value); }).value();
-        _(self.postFiles()).pluck("attachments").flatten().each(function(f) { f.forPrinting(value); }).value();
-    }
-
-    self.selectAll = _.partial(selectAllFiles, true);
-    self.selectNone = _.partial(selectAllFiles, false);
-
-    self.toggleGroupSelect = function(group) {
-        var sel = group.isGroupSelected();
-        _.each(group.attachments, function(a) {
-            a.forPrinting(!sel);
-        });
-    };
-  };
-
-
-
-
-
-var verdictAttachmentsMarking = (function() {
+(function() {
   "use strict";
 
   var model = {
     selectingMode: ko.observable(false),
-    authorization: null,
-    appModel: null,
-    attachments: null,
+    authorization: undefined,
+    appModel: undefined,
+    filteredAttachments: undefined,
+
+    setAttachmentsAsVerdictAttachment: function(selectedAttachmentsIds, unSelectedAttachmentsIds) {
+      var id = model.appModel.id();
+      ajax.command("set-attachments-as-verdict-attachment", {
+        id: id,
+        lang: loc.getCurrentLanguage(),
+        selectedAttachmentIds: selectedAttachmentsIds,
+        unSelectedAttachmentIds: unSelectedAttachmentsIds
+      })
+      .success(function() {
+        model.appModel.open("attachments");
+        model.appModel.reload();
+      })
+      .error(function() {
+        notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
+        repository.load(id);
+      })
+      .call();
+    },
 
     cancelSelecting: function() {
-      var id = model.appModel.id();
       model.selectingMode(false);
-      model.appModel = null;
       model.attachments = null;
       model.authorization = null;
 
-      window.location.hash="!/application/" + id + "/attachments";
-      repository.load(id);
+      model.appModel.open("attachments");
+      model.appModel = null;
     }
   };
 
+  function filterAttachments(attachments) {
+    return _(attachments)
+      .each(function(a) {
+        a.selected = a.forPrinting ? a.forPrinting : false;
+      })
+      .value();
+  }
+
   function initMarking(appModel) {
     model.appModel = appModel;
-    model.attachments = model.appModel.attachments();
-    model.authorization = authorization.create();
-    model.authorization.refresh(model.appModel.id());
+    model.filteredAttachments = filterAttachments(ko.mapping.toJS(appModel.attachments()));
+    model.authorization = lupapisteApp.models.applicationAuthModel;
 
-    window.location.hash="!/verdict-attachments-select/" + model.appModel.id();
+    pageutil.openPage("verdict-attachments-select", model.appModel.id());
   }
 
   hub.onPageLoad("verdict-attachments-select", function() {
@@ -158,16 +60,15 @@ var verdictAttachmentsMarking = (function() {
         model.selectingMode(false);
 
         var appId = pageutil.subPage();
-        repository.load(appId, null, function(application) {
+        repository.load(appId, _.noop, function(application) {
           lupapisteApp.setTitle(application.title);
 
-          model.authorization = authorization.create();
-          model.appModel = new LUPAPISTE.ApplicationModel();
-          model.authorization.refresh(application);
+          model.authorization = lupapisteApp.models.applicationAuthModel;
+          model.appModel = lupapisteApp.models.application;
 
           ko.mapping.fromJS(application, {}, model.appModel);
 
-          model.attachments = model.appModel.attachments();
+          model.filteredAttachments = filterAttachments(application.attachments);
 
           model.selectingMode(true);
         });
@@ -181,16 +82,16 @@ var verdictAttachmentsMarking = (function() {
     }
   });
 
+  hub.onPageUnload("verdict-attachments-select", function() {
+    model.selectingMode(false);
+  });
+
   hub.subscribe("start-marking-verdict-attachments", function(param) {
     initMarking(param.application);
   });
 
-  ko.components.register("verdict-attachments-multiselect-component", {
-    viewModel: LUPAPISTE.VerdictAttachmentsMultiselectModel,
-    template: {element: "verdict-attachments-multiselect-template"}
-  });
 
   $(function() {
-    $("#verdict-attachment-prints-multiselect-container").applyBindings(model);
+    $("#verdict-attachments-select").applyBindings(model);
   });
 })();

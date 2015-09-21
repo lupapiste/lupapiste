@@ -1,6 +1,8 @@
 (function($) {
   "use strict";
 
+  var self = this;
+
   var rememberMeCookieName = "my-email";
 
   var rememberMe = ko.observable(false);
@@ -19,10 +21,15 @@
     }
   }
 
+  function clearError() {
+    $("#login-message").text("").css("display", "none");
+  }
+
   function login() {
+    clearError();
+
     var username = _.trim($("#login-username").val());
     var password = $("#login-password").val();
-    $("#login-message").text("").css("display", "none");
 
     if (rememberMe()) {
       $.cookie(rememberMeCookieName, username.toLowerCase(), { expires: 365, path: "/", secure: LUPAPISTE.config.cookie.secure});
@@ -35,12 +42,16 @@
       .processing(processing)
       .pending(pending)
       .success(function(e) {
-        var applicationpage = e.applicationpage;
-        var redirectLocation = "/app/" + loc.getCurrentLanguage() + "/" + applicationpage;
-        // get the server-stored hashbang to redirect to right page (see web.clj for details)
-        ajax.get("/api/hashbang")
-          .success(function(e) { window.parent.location = redirectLocation + "#!/" + e.bang; })
-          .error(function() { window.parent.location = redirectLocation; })
+        var baseUrl = "/app/" + loc.getCurrentLanguage() + "/" + e.applicationpage;
+        // get the server-stored hashbang or redirect URL to redirect to right page (see web.clj for details)
+        ajax.query("redirect-after-login")
+          .success(function(e) {
+            var redirectLocation = baseUrl;
+            if (e.url) {
+              redirectLocation = _.startsWith(e.url, "/") ? e.url : baseUrl + "#!/" + e.url;
+            }
+            window.parent.location = redirectLocation;
+          })
           .call();
       })
       .error(function(e) { hub.send("login-failure", e); })
@@ -57,25 +68,25 @@
 
   hub.onPageLoad("login", recallMe);
 
+  function ie8OrOlder() {
+    return $("span.old-ie").length !== 0;
+  }
+
+  var handleLoginSubmit = function() {
+    if (!ie8OrOlder() || confirm(loc("error.old-ie"))) {
+      login();
+    }
+  };
+
   $(function() {
     recallMe();
     if (document.getElementById("login")) {
-      $("#login").applyBindings({rememberMe: rememberMe, processing: processing, pending: pending});
-      $("#login-button").click(login);
+      $("#login").applyBindings({rememberMe: rememberMe, processing: processing, pending: pending, handleLoginSubmit: handleLoginSubmit});
+      // Refactor to use Knockout at some point. Changes must be synchronized with WordPress theme deployment.
+      $("#login-username").keypress(clearError).change(clearError);
+      $("#login-password").keypress(clearError).change(clearError);
       $("#register-button").click(function() {
-        window.location.hash = "!/register";
-      });
-      $("#login-username").keypress(function(e) {
-        if (e.which === 13) {
-          $("#login-password").focus();
-          return false;
-        }
-      });
-      $("#login-password").keypress(function(e) {
-        if (e.which === 13) {
-          login();
-          return false;
-        }
+        pageutil.openPage("register");
       });
     }
   });

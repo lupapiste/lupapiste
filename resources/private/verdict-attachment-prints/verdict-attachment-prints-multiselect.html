@@ -2,159 +2,23 @@
 <html>
   <body>
     <section class="page container" id="verdict-attachments-select">
-      <div id="verdict-attachment-prints-multiselect-container" >
-        <div class="nav-back-container">
-          <a class="btn left-align btn-nav-back"
-             data-bind="click: cancelSelecting"
-             data-test-id="back-to-application-from-prints-multiselect">
-            <span data-bind="ltext: 'application.return'"></span>
-            <span class="icon drill-left-black-bigger left-align"></span>
-          </a>
-        </div>
-        <div class="stamp-content" data-bind="if: selectingMode">
-          <h1 data-bind="ltext: 'application.select-verdict-attachments'"></h1>
-          <div id="verdict-attachments-multiselect-component-container"
-               data-bind="component: {name: 'verdict-attachments-multiselect-component',
-                                      params: {application: appModel, attachments: attachments}}"></div>
-        </div>
+      <div class="nav-back-container">
+        <a class="btn left-align secondary"
+           data-bind="click: cancelSelecting"
+           data-test-id="back-to-application-from-multiselect">
+            <i class="lupicon-chevron-start"></i>
+          <span data-bind="ltext: 'application.return'"></span>
+        </a>
       </div>
-
-      <script type="text/html" id="verdict-attachments-multiselect-template">
-        <div class="clear">
-            <div data-bind="if: postFiles().length > 0">
-              <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
-              <div class="clear" data-bind="template: {name: 'verdict-attachments-multiselect-table', data: postFiles()}"></div>
-            </div>
-            <div data-bind="if: preFiles().length > 0">
-              <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
-              <div class="clear" data-bind="template: {name: 'verdict-attachments-multiselect-table', data: preFiles()}"></div>
-            </div>
-          <div class="right">
-            <!-- ko ifnot: allSelected -->
-            <a href="#" data-bind="ltext: 'verdict-attachments-multiselect.select-all', click: selectAll" data-test-id="stamp-select-all"></a>
-            <!-- /ko -->
-            <!-- ko if: allSelected -->
-            <a href="#" data-bind="ltext: 'verdict-attachments-multiselect.select-none', click: selectNone" data-test-id="stamp-select-none"></a>
-            <!-- /ko -->
-          </div>
-        </div>
-
-<!-- TODO: Muokkaa class -->
-        <div class="stamp-buttons">
-          <button data-bind="
-              click: start,
-              ltext: 'verdict-attachments-multiselect.mark-selected-as-verdict-attachments',
-              enable: $parent.authorization.ok('set-attachments-as-verdict-attachment')"
-            class="btn btn-primary"
-            data-test-id="mark-selected-as-verdict-attachments">
-          </button>
-          <button data-bind="ltext: 'application.return', click: $parent.cancelSelecting"
-            class="btn close"
-            data-test-id="cancel-verdict-attachments-selecting">
-          </button>
-        </div>
-      </script>
-
-<!-- TODO: Muokkaa classit -->
-      <script type="text/html" id="verdict-attachments-multiselect-table">
-        <table class="table attachments-template-table">
-          <tbody data-bind="foreach: $data">
-            <tr class="attachment-group-header" data-bind="attr: {'data-test-id': $data.groupName}">
-              <td data-bind="text: name" colspan="4" data-test-id="attachment-group-header-text"></td>
-              <td colspan="3" class="attachment-group-select">
-                <!-- ko ifnot: isGroupSelected -->
-                <a href="#" data-bind="ltext: 'attachments.group.select', click: $parents[1].toggleGroupSelect"
-                            data-test-id="attachments-group-select"></a>
-                <!-- /ko -->
-                <!-- ko if: isGroupSelected -->
-                <a href="#" data-bind="ltext: 'attachments.group.deselect', click: $parents[1].toggleGroupSelect"
-                            data-test-id="attachments-group-deselect"></a>
-                <!-- /ko -->
-              </td>
-            </tr>
-            <tr>
-              <th data-bind="ltext: 'application.attachmentState'">Tila</th>
-              <th colspan="2" data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
-              <th data-bind="ltext: 'application.attachmentInfo'">Milloin tarvitaan</th>
-              <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
-              <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
-              <th></th>
-            </tr>
-
-            <!-- ko foreach: attachments -->
-            <tr class="attachment-row stamp-attachment-row" data-bind="click: $parents[2].selectRow, clickBubble: false, css: {selected: forPrinting}">
-              <td class="attachmentState">
-
-                <span data-bind="attr: {'class': statusName + ' icon',
-                                        'data-test-state': state,
-                                        'data-test-type': type['type-group'] + '.' + type['type-id'],
-                                        'title': loc(statusName + '.title')}">
-                </span>
-                <span data-bind="visible: $data.signed,
-                                 attr: {'class': 'icon signed',
-                                        'title': loc('attachment.signed'),
-                                        'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
-                </span>
-                <span data-bind="visible: $data.isSent,
-                                 attr: {'class': 'icon transfered',
-                                        'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
-                                        'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">
-                </span>
-                <span data-bind="visible: $data.forPrinting,
-                                 attr: {'class': 'icon verdict-attachment',
-                                        'title': loc('attachment.verdict-attachment'),
-                                        'data-test-icon': 'verdict-attachment-' + type['type-group'] + '.' + type['type-id']}">
-                </span>
-              </td>
-              <td class="attachment-type-group">
-                  <span data-bind="if: type">
-                    <span data-bind="text: loc(['attachmentType', type['type-group'], '_group_label'])"></span>
-                  </span>
-                  <span data-bind="if: !type">
-                    <i data-bind="ltext: 'attachment.noName'"></i>
-                  </span>
-              </td>
-              <td class="attachment-type-id">
-                  <span data-bind="if: type">
-                    <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
-                  </span>
-                  <span data-bind="if: !type">
-                    <i data-bind="ltext: 'attachment.noName'"></i>
-                  </span>
-                  <div class="attachment-content-desc" data-bind="if: $data.contents"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
-              </td>
-              <td class="attachment-help-info">
-                <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
-              </td>
-              <td class="attachment-file-info">
-                <span data-bind="if: $data.latestVersion">
-                  <a href="#" data-bind="text: latestVersion.filename,
-                                         attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.latestVersion.fileId,
-                                                title: loc('download')},
-                                         click: function() {return true;},
-                                         clickBubble: false"></a><br/>
-                  <i data-bind="ltext: latestVersion.contentType"></i>
-                  <i data-bind="size: latestVersion.size"></i>
-                </span>
-                <!-- ko ifnot: $data.latestVersion -->
-                <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
-                <!-- /ko -->
-              </td>
-              <td class="attachment-file-changed">
-                <span data-bind="if: $data.latestVersion">
-                  <span data-bind="dateString: modified"></span>
-                  <span data-bind="fullName: latestVersion.user"></span>
-                </span>
-              </td>
-              <td>
-                <input type="checkbox" data-bind="checked: $data.forPrinting, click: function() {return true;}, clickBubble: false" />
-              </td>
-            </tr>
-
-            <!-- /ko -->
-          </tbody>
-        </table>
-     </script>
+      <div class="attachment-multiselect-content" data-bind="if: selectingMode">
+        <div id="attachments-multiselect-component-container"
+             data-bind="component: {name: 'attachments-multiselect',
+                                    params: {attachments: filteredAttachments,
+                                             titleLoc: 'application.select-verdict-attachments',
+                                             okLoc: 'verdict-attachments-multiselect.mark-selected-as-verdict-attachments',
+                                             saveFn: setAttachmentsAsVerdictAttachment,
+                                             authKey: 'set-attachments-as-verdict-attachment'}}"></div>
+      </div>
     </section>
   </body>
 </html>

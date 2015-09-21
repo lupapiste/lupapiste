@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.subtype
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [sade.util :refer [->int] :as util]
+            [sade.util :refer [->int ->double] :as util]
             [clojure.string :refer [blank?]]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
@@ -25,6 +25,14 @@
       (when-not (and number (<= min-int number max-int))
         [:warn "illegal-number"]))))
 
+(defmethod subtype-validation :decimal [{:keys [min max]} v]
+  (when-not (blank? v)
+    (let [min-double (->double min (java.lang.Integer/MIN_VALUE))
+          max-double (->double max (java.lang.Integer/MAX_VALUE))
+          number (->double (clojure.string/replace v "," ".") nil)]
+      (when-not (and number (<= min-double number max-double))
+        [:warn "illegal-decimal"]))))
+
 (defmethod subtype-validation :digit [_ v]
   (cond
     (blank? v) nil
@@ -47,26 +55,16 @@
     (re-matches #"^\d{14}$" v) nil
     :else [:warn "illegal-kiinteistotunnus"]))
 
-(defn- y-tunnus? [s]
-  (when-let [[_ checksum] (re-matches #"[0-9]{7}-([0-9])" s)]
-    (let [sum (->> s
-                (map ->int)
-                (map * [7 9 10 5 8 4 2])
-                (reduce +))
-          mod (mod sum 11)
-          chk (if (zero? mod) 0 (- 11 mod))]
-      (= (str chk) checksum))))
-
 (defmethod subtype-validation :y-tunnus [_ v]
   (cond
     (blank? v) nil
-    (y-tunnus? v) nil
+    (util/finnish-y? v) nil
     :else [:warn "illegal-y-tunnus"]))
 
 (defmethod subtype-validation :zip [_ v]
   (cond
     (blank? v) nil
-    (re-matches #"^\d{5}$" v) nil
+    (util/finnish-zip? v) nil
     :else [:warn "illegal-zip"]))
 
 (defmethod subtype-validation :rakennusnumero [_ v]
@@ -103,7 +101,7 @@
 (defmethod subtype-validation :ovt [_ v]
   (cond
     (blank? v) nil
-    (re-matches #"^\d{12}.{0,5}$" v) nil
+    util/finnish-ovt? nil
     :else [:warn "illegal-ovt-tunnus"]))
 
 (defmethod subtype-validation nil [_ _]

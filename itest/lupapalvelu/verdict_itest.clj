@@ -7,14 +7,13 @@
 (fact* "Give verdict"
   (last-email) ; Inbox zero
 
-  (let [application-id  (create-app-id pena :municipality sonja-muni :address "Paatoskuja 9")
-        resp            (command pena :submit-application :id application-id) => ok?
-        application     (query-application pena application-id)
+  (let [application    (create-and-submit-application pena :propertyId sipoo-property-id :address "Paatoskuja 9")
+        application-id (:id application)
         email           (last-email) => truthy]
     (:state application) => "submitted"
     (:to email) => (contains (email-for-key pena))
     (:subject email) => "Lupapiste.fi: Paatoskuja 9 - hakemuksen tila muuttunut"
-    (get-in email [:body :plain]) => (contains "Vireill\u00e4")
+    (get-in email [:body :plain]) => (contains "Hakemus j\u00e4tetty")
     email => (partial contains-application-link? application-id "applicant")
 
     (let [new-verdict-resp (command sonja :new-verdict-draft :id application-id) => ok?
@@ -48,9 +47,13 @@
           (count (keep :latestVersion attachments)) => 0))
 
       (fact "Sonja sees comment and attachment"
-        (let [{:keys [comments attachments]} (query-application sonja application-id)]
+        (let [{:keys [comments attachments]} (query-application sonja application-id)
+              attachments-with-versions (filter (comp seq :latestVersion) attachments)]
           (count comments) => 2 ; comment and new attachment auto-comment
-          (count (keep :latestVersion attachments)) => 1))
+          (count attachments-with-versions) => 1
+
+          (fact "Attachment application state"
+            (-> attachments-with-versions first :applicationState) => "verdictGiven")))
 
       (fact "Comment verdict, target is Ronja"
         (command sonja :add-comment :id application-id :text "hello" :to ronja-id :target {:type "verdict" :id verdict-id} :openApplication false :roles [:authority]) => ok?
@@ -80,7 +83,7 @@
 (facts* "Fetch verdict from KRYSP backend"
   (last-email) ; Inbox zero
 
-  (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
+  (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
         application-id (:id application)
         attachment-count (-> application :attachments count)
         _ (command sonja :check-for-verdict :id application-id) => ok?
@@ -91,6 +94,10 @@
         app-with-verdict (query-application mikko application-id)]
 
     (:organization application) => "753-R"
+
+    (fact "Application states"
+      (:state application) => "submitted"
+      (:state app-with-verdict) => "verdictGiven")
 
     (fact "No verdicts in the beginnig"
       (-> application :verdicts count) => 0)
@@ -123,6 +130,8 @@
      (command sonja :delete-verdict :id application-id :verdictId verdict-id1) => ok?
      (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
      (let [app-without-verdict (query-application mikko application-id)]
+       (fact "State stepped back"
+         (:state app-without-verdict) => "submitted")
        (fact "Tasks have been deleted"
          (-> app-without-verdict :tasks count) => 0)
        (fact "Attachment has been deleted"
@@ -135,7 +144,7 @@
     ))
 
 (fact "Rakennus & rakennelma"
-  (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
+  (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
         application-id (:id application)
         _ (command sonja :check-for-verdict :id application-id) => ok?
         application (query-application mikko application-id)

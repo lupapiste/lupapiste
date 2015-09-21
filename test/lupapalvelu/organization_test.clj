@@ -1,6 +1,6 @@
 (ns lupapalvelu.organization-test
-  (:use [lupapalvelu.organization]
-        [midje.sweet]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.organization :refer :all]))
 
 (facts
   (let [organization {:operations-attachments {:kikka ..stuff..}}
