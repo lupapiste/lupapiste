@@ -1,13 +1,13 @@
 (ns lupapalvelu.document.vrk-test
-  (:use [lupapalvelu.document.tools]
-        [lupapalvelu.document.validators]
-        [lupapalvelu.document.model]
-        [lupapalvelu.itest-util]
-        [midje.sweet])
   (:refer-clojure :exclude [pos? neg? zero?])
-  (:require [lupapalvelu.document.validator :as v]
+  (:require [midje.sweet :refer :all]
             [clojure.string :as s]
-            [sade.util :refer :all]))
+            [sade.util :refer :all]
+            [lupapalvelu.document.tools :refer :all]
+            [lupapalvelu.document.validators :refer :all]
+            [lupapalvelu.document.model :refer :all]
+            [lupapalvelu.document.validator :as v]
+            [lupapalvelu.itest-util :refer :all]))
 
 (defn check-validator
   "Runs generated facts of a single validator."
@@ -15,6 +15,7 @@
   (when (and ok fail)
     (let [dummy  (dummy-doc schema)
           doc    (s/replace doc #"\s+" " ")
+          code-without-schema-name (subs (name code) (inc (count schema)))
           update (fn [values]
                    (reduce
                      (fn [d i]
@@ -27,7 +28,7 @@
         (doseq [values ok]
           (validate-fn (update values)) => nil?)
         (doseq [values fail]
-          (validate-fn (update values)) => (has some (contains {:result [level (name code)]})))))))
+          (validate-fn (update values)) => (has some (contains {:result [level code-without-schema-name]})))))))
 
 (defn check-all-validators []
   (let [validators (->> v/validators deref vals (filter (fn-> :facts nil? not)))]

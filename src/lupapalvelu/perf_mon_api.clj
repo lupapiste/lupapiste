@@ -3,16 +3,16 @@
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [sade.core :refer :all]
+            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.action :refer [defcommand]]
+            [lupapalvelu.action :refer [defcommand] :as action]
             [lupapalvelu.perf-mon :as perf])
-  (:import (com.mongodb WriteConcern)))
+  (:import (com.mongodb WriteConcern)
+           (java.util Date)))
 
 (defpage "/perfmon/data" {:keys [start end]}
-  (->> (perf/get-data (or (perf/to-long start) (- (System/currentTimeMillis) (* 5 60 1000)))
-                      (or (perf/to-long end) (System/currentTimeMillis)))
-       (group-by :uri)
-       (map perf/find-min-max-avg*)
+  (->> (perf/get-data (Date. (or (perf/to-long start) (- (System/currentTimeMillis) (* 60 60 1000))))
+                      (Date. (or (perf/to-long end) (System/currentTimeMillis))))
        (resp/json)
        (resp/status 200)))
 
@@ -27,12 +27,34 @@
 
 (defcommand browser-timing
   {:parameters [timing pathname]
+   :input-validators [(partial action/non-blank-parameters [:pathname])
+                      (partial action/map-parameters [:timing])]
    :user-roles #{:anonymous}}
   [command]
   (info "browser-timing called from" pathname)
-  (mongo/insert "perf-mon-timing"
-                {:ts     (java.util.Date.)
-                 :ua     (get-in command [:web :user-agent])
-                 :timing timing}
-                WriteConcern/UNACKNOWLEDGED)
+  (let [ua (ss/limit (get-in command [:web :user-agent]) 256)
+        ts (java.util.Date.)
+        timing-events (->
+                        (into {} (filter (fn [[k v]] (number? v)) timing))
+                        (select-keys [:navigationStart
+                                      :unloadEventStart
+                                      :unloadEventEnd
+                                      :redirectStart
+                                      :redirectEnd
+                                      :fetchStart
+                                      :domainLookupStart
+                                      :domainLookupEnd
+                                      :connectStart
+                                      :connectEnd
+                                      :requestStart
+                                      :responseStart
+                                      :responseEnd
+                                      :domLoading
+                                      :domInteractive
+                                      :domContentLoadedEventStart
+                                      :domContentLoadedEventEnd
+                                      :domComplete
+                                      :loadEventStart
+                                      :loadEventEnd]))]
+    (mongo/insert :perf-mon-timing {:ts ts, :ua ua, :timing timing-events} WriteConcern/UNACKNOWLEDGED))
   (ok))

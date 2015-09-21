@@ -1,0 +1,2 @@
+error.rakennusvalitsin-muu: Manuaalinen rakennusnumero syötettävä
+application.warningsInDocument: Lomakkeilla olevat varoitukset
