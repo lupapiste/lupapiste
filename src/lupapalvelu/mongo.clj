@@ -129,9 +129,8 @@
 
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
-  [collection data]
-  (mc/insert (get-db) collection (with-_id (remove-null-chars data)))
-  nil)
+  ([collection data] (insert collection data WriteConcern/ACKNOWLEDGED))
+  ([collection data concern] (mc/insert (get-db) collection (with-_id (remove-null-chars data))) nil))
 
 (defn by-id
   ([collection id]
