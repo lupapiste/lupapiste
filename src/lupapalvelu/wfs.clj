@@ -185,6 +185,18 @@
   (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
     {:x x :y y}))
 
+(defn extract-coordinates [ring]
+  (s/replace (first (xml-> ring :gml:LinearRing :gml:posList text)) #"(\d+\.*\d*)\s+(\d+\.*\d*)\s+" "$1 $2, "))
+
+(defn feature-to-area [feature]
+  (when feature 
+    (let [polygonpatch (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:sijainti :gml:Surface :gml:patches :gml:PolygonPatch))
+          exterior (extract-coordinates (first (xml-> polygonpatch :gml:exterior)))
+          interiors (map extract-coordinates (xml-> polygonpatch :gml:interior))]
+    {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))
+     :wkt (str "POLYGON ((" exterior ")" (apply str(map #(str ",(" % ")") interiors)) ")")
+     })))
+
 (defn feature-to-property-id [feature]
   (when feature
     {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))}))
@@ -295,6 +307,14 @@
       (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (property-name "ktjkiiwfs:tunnuspisteSijainti")
       (ogc-filter
+        (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
+
+(defn area-by-property-id [property-id]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (property-name "ktjkiiwfs:sijainti")
+      (filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
 (defn property-info-by-point [x y]
