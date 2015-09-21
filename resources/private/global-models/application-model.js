@@ -216,12 +216,12 @@ LUPAPISTE.ApplicationModel = function() {
     return self.missingRequiredAttachments() && self.missingRequiredAttachments().length > 0;
   });
 
-  self.missingRequiredInfo = ko.computed(function() {
-    return self.hasIncorrectlyFilledRequiredFields() || self.hasFieldWarnings() || self.hasMissingRequiredAttachments();
+  self.missingSomeInfo = ko.computed(function() {
+    return self.hasFieldWarnings() || self.hasIncorrectlyFilledRequiredFields() || self.hasMissingRequiredAttachments();
   });
 
   self.submitButtonEnabled = ko.computed(function() {
-    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingRequiredInfo()) && self.submittable();
+    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && self.submittable();
   });
 
 
