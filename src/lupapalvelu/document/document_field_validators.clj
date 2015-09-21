@@ -15,7 +15,8 @@
              "purkaminen"]
    :fields [buildingId [:buildingId]
             muu        [:manuaalinen_rakennusnro]]
-   :facts {:ok   []
+   :facts {:ok   [["abc"   "building-num"]
+                  ["other" "building-num"]]
            :fail [["other" nil]
                   ["other" ""]
                   ["other" "    "]]}}
