@@ -197,7 +197,7 @@ var util = (function($) {
   }
 
   var extractRequiredErrors = _.partial(extractErrors, function(errResult) {
-    return _.includes(errResult, "tip") && _.includes(errResult, "illegal-value:required");
+    return _.includes(errResult, "illegal-value:required");
   });
 
   var extractWarnErrors = _.partial(extractErrors, function(errResult) {
