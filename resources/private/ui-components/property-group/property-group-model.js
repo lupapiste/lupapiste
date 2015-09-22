@@ -17,6 +17,7 @@ LUPAPISTE.PropertyGroupModel = function(params) {
   self.otherSchemas = _.last(partitionedSchemas);
 
   console.log(self.maaraalaSchema);
+  console.log(self.otherSchemas);
     
   // remove maaraala component
   // self.maaraalaSchema = self.subSchemas[0];

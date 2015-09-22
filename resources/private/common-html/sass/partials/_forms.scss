@@ -335,6 +335,11 @@ input.form-input.inline {
     font-weight: bold;
     margin-bottom: $marginS;
   }
+  .form-label-property-group {
+    @extend .form-label-group;
+    width: auto;
+    display: inline;
+  }
   .form-entry {
     display: inline-block;
     width: 300px;

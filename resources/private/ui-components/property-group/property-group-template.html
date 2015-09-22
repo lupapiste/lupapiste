@@ -4,13 +4,14 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="property-group-template">
       <div class="form-group" data-bind="attr: {id: self.groupId}">
-        <label class="form-label form-label-group" data-bind="ltext: groupLabel"></label>
         <div>
-          <label>
-            <input id="" data-bind="checked: isMaaraala" type="checkbox"></input>
-            Kyseessä määräala
+          <label class="form-label form-label-property-group" data-bind="ltext: groupLabel"></label>
+          <input id="asdasd" data-bind="checked: isMaaraala" type="checkbox"></input> <!-- TODO: generate id/for properly -->
+          <label for="asdasd">
+            Kyseessä määräala <!-- TODO: loc -->
           </label>
         </div>
+
 
         <div class="form-entry"
              data-bind="component: { name: 'maaraala-tunnus',
@@ -18,6 +19,17 @@
                                                path: path,
                                                model: maaraalaSchema.model,
                                                isMaaraala: isMaaraala }}"></div>
+
+        <span data-bind="foreach: otherSchemas">
+          <div class="form-entry"
+               data-bind="component: { name: uicomponent,
+                                       params: { schema: $data,
+                                                 path: path,
+                                                 model: model }}"></div>
+        </span>
+        
+
+
 
 
         <!-- <div data-bind="foreach: subSchemas">
