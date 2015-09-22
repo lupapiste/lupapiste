@@ -38,7 +38,6 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   function wrapData(data) {
     data.applications = _.map(data.applications, function(item) {
-      console.log("item", item);
       switch(item.urgency) {
         case "urgent":
           item.urgencyClass = "lupicon-warning";
