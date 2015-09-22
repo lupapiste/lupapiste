@@ -335,10 +335,15 @@ input.form-input.inline {
     font-weight: bold;
     margin-bottom: $marginS;
   }
-  .form-label-property-group {
-    @extend .form-label-group;
-    width: auto;
-    display: inline;
+  .property-group-header {
+    .form-label-property-group {
+      @extend .form-label-group;
+      width: auto;
+      display: inline;
+    }
+    .maaraala-checkbox {
+      margin-right: 0;
+    }
   }
   .form-entry {
     display: inline-block;
