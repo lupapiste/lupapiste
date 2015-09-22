@@ -84,8 +84,17 @@ Mikko logs in with username that has capital letters and wants to be forgotten
   Wait Until  Element Should Be Visible  rememberme
   Checkbox Should Not Be Selected  rememberme
 
-Solita Admin can log in
-  SolitaAdmin logs in
+Trying to open my page without logging in opens a help page
+  [Tags]  ie8
+  Go to  ${SERVER}/app/fi/applicant#!/mypage
+  Wait Until  Element Should Be Visible  hashbang
+
+My page opens after login
+  [Tags]  ie8
+  Click by test id  login
+  Login  mikko@example.com  ${PASSWORD}
+  Wait Until  Element Should Be Visible  mypage
+  User should be logged in  ${USERNAME}
   [Teardown]  logout
 
 Cleanup cookies
