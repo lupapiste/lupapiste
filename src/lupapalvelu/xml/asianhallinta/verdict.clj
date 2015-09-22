@@ -83,7 +83,7 @@
       ; parse XML
       (let [parsed-xml (-> (first xmls) slurp xml/parse cr/strip-xml-namespaces xml/xml->edn)
             attachments (-> (get-in parsed-xml [:AsianPaatos :Liitteet])
-                            (cr/ensure-sequential :Liite)
+                            (util/ensure-sequential :Liite)
                             :Liite)
             application-id (get-in parsed-xml [:AsianPaatos :HakemusTunnus])]
         ; Check that all referenced attachments were included in zip
