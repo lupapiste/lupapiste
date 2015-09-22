@@ -137,6 +137,8 @@
 
 (defn get-submitted-application-pdf [{:keys [id submitted]} begin-of-link]
   {:Kuvaus "Vireille tullut hakemus"
+   :KuvausFi "Vireille tullut hakemus"
+   :KuvausSv "Ans\u00f6kan under behandling"
    :Tyyppi "application/pdf"
    :LinkkiLiitteeseen (str begin-of-link (writer/get-submitted-filename id))
    :Luotu (util/to-xml-date submitted)
@@ -145,6 +147,8 @@
 
 (defn get-current-application-pdf [{:keys [id]} begin-of-link]
   {:Kuvaus "J\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
+   :KuvausFi "J\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
+   :KuvausSv "I system\u00f6verf\u00f6ring"
    :Tyyppi "application/pdf"
    :LinkkiLiitteeseen (str begin-of-link (writer/get-current-filename id))
    :Luotu (util/to-xml-date (sade.core/now))
