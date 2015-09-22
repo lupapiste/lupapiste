@@ -224,12 +224,11 @@ LUPAPISTE.ForemanModel = function() {
     function getHakijat() {
       var hakijaDocs = _.where(self.application().documents, {"schema-info": {"subtype": "hakija"}});
       return _(hakijaDocs).map(function(doc) {
-        var email = util.getIn(doc, ["data", "henkilo", "yhteystiedot", "email", "value"]);
-        var companyId = util.getIn(doc, ["data", "yritys", "companyId", "value"]);
         // check if hakija is company or person
         var type = util.getIn(doc, ["data", "_selected", "value"]);
 
         if (type === "henkilo") {
+          var email = util.getIn(doc, ["data", "henkilo", "yhteystiedot", "email", "value"]);
           var auth = _.find(self.application().auth, function(a) {
             return a.username === email;
           });
@@ -241,9 +240,17 @@ LUPAPISTE.ForemanModel = function() {
           };
         }
         else if (type === "yritys") {
-          return {
-            companyId: companyId
-          };
+          var companyId = util.getIn(doc, ["data", "yritys", "companyId", "value"]);
+          var contactEmail = util.getIn(doc, ["data", "yritys", "yhteyshenkilo", "yhteystiedot", "email", "value"]);
+          if (companyId) {
+            return { companyId: companyId };
+          } else if (contactEmail) {
+            // If contact email is authorized to application, invite to foreman application
+            var contactAuth = _.find(self.application().auth, function(a) {
+              return a.username === contactEmail;
+            });
+            return { email: util.getIn(contactAuth, ["username"]) };
+          }
         }
       }).filter(_.identity).value();
     }
