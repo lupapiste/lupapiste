@@ -7858,30 +7858,35 @@ div.search i {
 }
 
 /* line 115, ../sass/partials/_applications_search.scss */
+.application-row {
+  height: 45px;
+}
+
+/* line 118, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator {
   color: #f39129;
   padding-left: 6px;
   padding-right: 6px;
 }
-/* line 119, ../sass/partials/_applications_search.scss */
+/* line 122, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div {
   text-align: center;
   height: auto !important;
   padding: 3px 0 0 0 !important;
 }
-/* line 123, ../sass/partials/_applications_search.scss */
+/* line 126, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div.first {
   text-align: right;
 }
-/* line 126, ../sass/partials/_applications_search.scss */
+/* line 129, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div.second {
   text-align: left;
 }
-/* line 131, ../sass/partials/_applications_search.scss */
+/* line 134, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.urgent {
   color: #df3215;
 }
-/* line 134, ../sass/partials/_applications_search.scss */
+/* line 137, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.pending {
   color: #f39129;
 }
