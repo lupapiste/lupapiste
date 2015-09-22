@@ -78,8 +78,10 @@
            (sc/optional-key :partnerApplications) {:rakentajafi {:id sc/Str
                                                                  :created sc/Int
                                                                  :origin sc/Bool}}
-           (sc/optional-key :notification)        {:messageI18nkey sc/Str
-                                                   :titleI18nkey   sc/Str}
+           (sc/optional-key :notification)        {(sc/optional-key :messageI18nkey) sc/Str
+                                                   (sc/optional-key :titleI18nkey)   sc/Str
+                                                   (sc/optional-key :message)        sc/Str
+                                                   (sc/optional-key :title)          sc/Str}
            (sc/optional-key :applicationFilters)  [{(sc/optional-key :title) sc/Str
                                                     :sort                    {:field     (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler")
                                                                               :asc       sc/Bool}
