@@ -694,3 +694,86 @@
                                       :piste {:Point {:pos (str (first (:location application)) " " (second (:location application)))}}}}
         drawings (drawings-as-krysp (:drawings application))]
     (cons app-location-info drawings)))
+
+;;
+;; The following definitions are used by maankayton-muutos and kiinteistotoimitus.
+;; Those two schemas (at least) have somewhat more peculiar structure than the more
+;; legacy operations.
+;;
+
+(defn entry [entry-key m & [force-key]]
+  (let [k (or force-key entry-key)
+        v (entry-key m)]
+    (when-not (nil? v)
+      {k v})))
+
+(defn schema-info-filter
+  ([docs prop]
+   (filter #(get-in % [:schema-info prop]) docs))
+  ([docs prop value]
+   (let [values (if (coll? value)
+                  (set value)
+                  #{value})]
+     (filter #(contains? values (get-in % [:schema-info prop])) docs))))
+
+(defn ->postiosoite-type [address]
+  (merge {:osoitenimi (entry :katu address :teksti)}
+         (entry :postinumero address)
+         (entry :postitoimipaikannimi address)))
+
+(defmulti osapuolitieto :_selected)
+
+(defmethod osapuolitieto "henkilo"
+  [{{contact :yhteystiedot personal :henkilotiedot address :osoite} :henkilo}]
+  (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
+         {:henkilotieto {:Henkilo
+                         (merge {:nimi (merge (entry :etunimi personal)
+                                              (entry :sukunimi personal))}
+                                {:osoite (->postiosoite-type address)}
+                                (entry :email contact :sahkopostiosoite)
+                                (entry :puhelin contact)
+                                (entry :hetu personal :henkilotunnus))}}))
+
+
+
+(defmethod osapuolitieto "yritys"
+  [data]
+  (let [company (:yritys data)
+        {contact :yhteystiedot personal :henkilotiedot} (:yhteyshenkilo company)
+        billing (get-verkkolaskutus {:data data})
+        billing-information (when billing
+                              {:verkkolaskutustieto billing})]
+    (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
+           {:yritystieto {:Yritys (merge (entry :yritysnimi company :nimi)
+                                         (entry :liikeJaYhteisoTunnus company :liikeJaYhteisotunnus )
+                                         {:postiosoitetieto {:postiosoite (->postiosoite-type (:osoite company))}}
+                                         (entry :puhelin contact)
+                                         (entry :email contact :sahkopostiosoite)
+                                         billing-information)}})))
+
+(defn- process-party [lang {{role :subtype} :schema-info data :data}]
+  {:Osapuoli (merge {:roolikoodi (s/capitalize role)
+                     :asioimiskieli lang
+                     :vainsahkoinenAsiointiKytkin false} (osapuolitieto data))})
+
+(defn process-parties [docs lang]
+  (map (partial process-party lang) (schema-info-filter docs :type "party")))
+
+(defn application-state [app]
+  (let [enums {:submitted "Vireill\u00e4"
+               :sent "Haettu"
+               :closed "P\u00e4\u00e4ttynyt"}
+        state (-> app :state keyword)
+        date (util/to-xml-date (state app))
+        {a-first :firstName a-last :lastName} (:authority app)]
+    {:Tila
+     {:pvm date
+      :kasittelija (format "%s %s" a-first a-last)
+      :hakemuksenTila (state enums)}}))
+
+(defn maaraalatunnus
+  "Returns maaraalatunnus in the correct format if the id is available
+  in the property, otherwise nil."
+  [app property]
+  (when-let [mat (:maaraalaTunnus property)]
+    (format "%sM%s" (:propertyId app) mat)))

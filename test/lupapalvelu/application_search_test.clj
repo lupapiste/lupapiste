@@ -61,62 +61,6 @@
   (-> (make-query {} {:organizations ["753-R" "753-YA"]} {}) (get "$and") last :organization) => {"$in" ["753-R" "753-YA"]})
 
 
-(def multi-feature-simple {:id "multi-simple",
-                           :properties {:nimi "simple multi"},
-                           :type "Feature"
-                           :geometry
-                           {:type "MultiPolygon"
-                            :coordinates
-                            [[[[402644.2941 6693912.6002]
-                               [401799.0131 6696356.5649]
-                               [406135.6722 6695272.4001]
-                               [406245.9263 6693673.7164]
-                               [404059.221 6693545.0867]
-                               [404059.221 6693545.0867]
-                               [402644.2941 6693912.6002]]]]}})
-
-(def multi-feature {:id "multi-polygon",
-                    :properties {:nimi "multi polygon"},
-                    :type "Feature"
-                    :geometry
-                    {:type "MultiPolygon"
-                     :coordinates
-                     [[[[402644.2941 6693912.6002]
-                        [401799.0131 6696356.5649]
-                        [406135.6722 6695272.4001]
-                        [406245.9263 6693673.7164]
-                        [404059.221 6693545.0867]
-                        [404059.221 6693545.0867]
-                        [402644.2941 6693912.6002]]]
-                      [[[409884.3098 6694316.865]
-                        [413394.0636 6688105.8871]
-                        [410894.9719 6687076.8493]
-                        [409094.1558 6685367.9116]
-                        [407421.9694 6683989.736]
-                        [403985.7183 6689300.3059]
-                        [404114.348 6693140.8219]
-                        [409884.3098 6694316.865]]]]}})
-
-(def polygon-feature {:id "polygon",
-                      :properties {:nimi "Test"},
-                      :type "Feature"
-                      :geometry
-                      {:type "Polygon"
-                       :coordinates
-                       [[[402644.2941 6693912.6002]
-                         [401799.0131 6696356.5649]
-                         [406135.6722 6695272.4001]
-                         [406245.9263 6693673.7164]
-                         [404059.221 6693545.0867]
-                         [404059.221 6693545.0867]
-                         [402644.2941 6693912.6002]]]}})
-
-(fact "Multimethod for features' MultiPolygon/Polygon coordinates"
-  (fact "Returns Polygon from MultiPolygon when only one Polygon is present"
-    (geo/resolve-polygons multi-feature-simple) => (geo/resolve-polygons polygon-feature))
-  (fact "returns two Polygons"
-    (count (geo/resolve-polygons multi-feature)) => 2))
-
 (facts "Area query is in correct form"
   (make-area-query ["polygon" "multi-polygon"] {:orgAuthz {:753-R #{:authority}}}) =>
   {"$or" ; two polygons are extracted from MultiPolygon
@@ -154,7 +98,42 @@
   (provided
     (lupapalvelu.mongo/select
       :organizations
-      {:_id {$in #{"753-R"}} :areas.features.id {$in ["polygon" "multi-polygon"]}} [:areas]) => [{:id "753-R"
-                                                                                                 :areas {:type "FeatureCollection"
-                                                                                                         :features [multi-feature polygon-feature]}}]))
+      {:_id {$in #{"753-R"}}
+       :areas.features.id {$in ["polygon" "multi-polygon"]}}
+      [:areas]) =>  [{:id "753-R"
+                      :areas {:type "FeatureCollection"
+                              :features [{:id "multi-polygon",
+                                          :properties {:nimi "multi polygon"},
+                                          :type "Feature"
+                                          :geometry
+                                          {:type "MultiPolygon"
+                                           :coordinates
+                                           [[[[402644.2941 6693912.6002]
+                                              [401799.0131 6696356.5649]
+                                              [406135.6722 6695272.4001]
+                                              [406245.9263 6693673.7164]
+                                              [404059.221 6693545.0867]
+                                              [404059.221 6693545.0867]
+                                              [402644.2941 6693912.6002]]]
+                                            [[[409884.3098 6694316.865]
+                                              [413394.0636 6688105.8871]
+                                              [410894.9719 6687076.8493]
+                                              [409094.1558 6685367.9116]
+                                              [407421.9694 6683989.736]
+                                              [403985.7183 6689300.3059]
+                                              [404114.348 6693140.8219]
+                                              [409884.3098 6694316.865]]]]}},
+                                         {:id "polygon"
+                                          :properties {:nimi "Test"}
+                                          :type "Feature"
+                                          :geometry
+                                          {:type "Polygon"
+                                           :coordinates
+                                           [[[402644.2941 6693912.6002]
+                                             [401799.0131 6696356.5649]
+                                             [406135.6722 6695272.4001]
+                                             [406245.9263 6693673.7164]
+                                             [404059.221 6693545.0867]
+                                             [404059.221 6693545.0867]
+                                             [402644.2941 6693912.6002]]]}}]}}]))
 
