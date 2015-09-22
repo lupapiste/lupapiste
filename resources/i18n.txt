@@ -1,3 +1,0 @@
-login.existing-account.title: Minulla on jo tunnukset Lupapisteeseen
-login.no-account.title: En ole vielä rekisteröitynyt Lupapisteeseen
-login.no-account.help: Rekisteröityminen tehdään samalla osoitteella, johon kutsu saapui.
