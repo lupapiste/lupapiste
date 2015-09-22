@@ -105,6 +105,7 @@
                        "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                        "rakennuksen-muuttaminen"
                        "rakennuksen-laajentaminen"
+                       "rakennuksen-laajentaminen-ei-huoneistoja"
                        "purkaminen"])
 
 (def ei-lammitysta "ei l\u00e4mmityst\u00e4")
