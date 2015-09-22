@@ -482,3 +482,24 @@ button {
     outline:0;
   }
 }
+
+.remove-button {
+  position: relative;
+  .remove-button__row {
+    position: absolute;
+    top: 0;
+    white-space: nowrap;
+    width: 0px;
+    overflow: hidden;
+    &.remove-button--show {
+      width: auto;
+    }
+    button {
+      display: inline-block;
+      width: 100px !important;
+      margin-right: -3px;
+    }
+  }
+}
+
+

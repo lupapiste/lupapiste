@@ -3181,6 +3181,29 @@ button:focus {
   outline: 0;
 }
 
+/* line 486, ../sass/partials/_buttons.scss */
+.remove-button {
+  position: relative;
+}
+/* line 488, ../sass/partials/_buttons.scss */
+.remove-button .remove-button__row {
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  width: 0px;
+  overflow: hidden;
+}
+/* line 494, ../sass/partials/_buttons.scss */
+.remove-button .remove-button__row.remove-button--show {
+  width: auto;
+}
+/* line 497, ../sass/partials/_buttons.scss */
+.remove-button .remove-button__row button {
+  display: inline-block;
+  width: 100px !important;
+  margin-right: -3px;
+}
+
 /* line 1, ../sass/partials/_forms.scss */
 legend {
   font-size: 21.6px;
