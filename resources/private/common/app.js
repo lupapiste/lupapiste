@@ -151,16 +151,20 @@ var LUPAPISTE = LUPAPISTE || {};
         .call();
     };
 
-    self.redirectToHashbang = function() {
+    self.getHashbangUrl = function() {
       var href = window.location.href;
       var hash = window.location.hash;
       if (hash && hash.length > 0) {
         var withoutHash = href.substring(0, href.indexOf("#"));
-        window.location = withoutHash + "?redirect-after-login=" + encodeURIComponent(hash.substring(1, hash.length));
+        return withoutHash + "?redirect-after-login=" + encodeURIComponent(hash.substring(1, hash.length));
       } else {
         // No hashbang. Go directly to front page.
-        window.location = "/app/" + loc.getCurrentLanguage();
+        return "/app/" + loc.getCurrentLanguage();
       }
+    };
+
+    self.redirectToHashbang = function() {
+      window.location = self.getHashbangUrl();
       return false;
     };
 
