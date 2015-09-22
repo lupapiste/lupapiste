@@ -208,6 +208,7 @@
 (defvalidator :vrk:CR328:viemari
   {:doc    "Verkostoliittymat ja rakennuksen varusteet tasmattava: Viemari"
    :schemas rakennus-schemas
+   :level :tip
    :fields [liittyma [:verkostoliittymat :viemariKytkin]
             varuste  [:varusteet         :viemariKytkin]]
    :facts  {:ok   [[true true]]
@@ -217,6 +218,7 @@
 (defvalidator :vrk:CR328:vesijohto
   {:doc    "Verkostoliittymat ja rakennuksen varusteet tasmattava: Vesijohto"
    :schemas rakennus-schemas
+   :level  :tip
    :fields [liittyma [:verkostoliittymat :vesijohtoKytkin]
             varuste  [:varusteet         :vesijohtoKytkin]]
    :facts   {:ok   [[true true]]
