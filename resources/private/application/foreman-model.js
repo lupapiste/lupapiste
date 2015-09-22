@@ -154,22 +154,25 @@ LUPAPISTE.ForemanModel = function() {
   };
 
   self.inviteForeman = function(taskId) {
-    if (_.isString(taskId)) {
-      self.taskId(taskId);
-      var foremanTask = _.find(self.application().tasks, { "id": taskId });
-      if (foremanTask && foremanTask.taskname) {
-        self.selectedRole(foremanTask.taskname.toLowerCase());
+    // load application to get latest document data
+    repository.load(self.application().id, self.pending, function() {
+      if (_.isString(taskId)) {
+        self.taskId(taskId);
+        var foremanTask = _.find(self.application().tasks, { "id": taskId });
+        if (foremanTask && foremanTask.taskname) {
+          self.selectedRole(foremanTask.taskname.toLowerCase());
+        } else {
+          self.selectedRole(undefined);
+        }
       } else {
+        self.taskId(undefined);
         self.selectedRole(undefined);
       }
-    } else {
-      self.taskId(undefined);
-      self.selectedRole(undefined);
-    }
-    self.email(undefined);
-    self.finished(false);
-    self.error(undefined);
-    LUPAPISTE.ModalDialog.open("#dialog-invite-foreman");
+      self.email(undefined);
+      self.finished(false);
+      self.error(undefined);
+      LUPAPISTE.ModalDialog.open("#dialog-invite-foreman");
+    });
   };
 
   self.openApplication = function(id) {
@@ -292,7 +295,7 @@ LUPAPISTE.ForemanModel = function() {
         .success(function(data) {
           // 3. invite foreman to new application
           if (self.email()) {
-            inviteToApplication({
+            inviteToApplication({ // TODO do invites in backend
                 id: data.id,
                 email: self.email(),
                 role: "foreman",
