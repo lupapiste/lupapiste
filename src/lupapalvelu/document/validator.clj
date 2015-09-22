@@ -51,12 +51,11 @@
 
 (defmacro defvalidator
   "Macro to create document-level validators. Unwraps data etc."
-  [code validator-data & body]
+  [code {:keys [doc schemas level fields facts] :or {level :warn} :as validator-data} & body]
   {:pre (keyword? code)}
-  (let [validator-data (util/ensure-sequential validator-data :schemas)
+  (let [validator-data (update-in validator-data [:schemas] eval)  ;; needed to handle possible def given in :schemas
         validator-result (sc/check Validator validator-data)
         _ (assert (nil? validator-result) (str code validator-result))
-        {:keys [doc schemas level fields facts] :or {level :warn}} validator-data
         paths (->> fields (partition 2) (map last) (map starting-keywords) vec)]
     `(doseq [schema# ~schemas]
        (let [validator-code# (keyword (str schema# "-" (name ~code)))]
