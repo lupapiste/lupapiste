@@ -53,7 +53,8 @@ jQuery(document).ready(function() {
     {name: "checkbox-field", model: "input-field"},
     {name: "select-field", model: "input-field"},
     {name: "password-field"},
-    {name: "submit-button"}
+    {name: "submit-button"},
+    {name: "remove-button"}
   ];
 
   _.forEach(components, function(component) {

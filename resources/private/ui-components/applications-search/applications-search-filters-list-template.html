@@ -45,12 +45,7 @@
                 </button>
               </div>
 
-              <div class="applications-search-filters-list__filter-item">
-                <button class="function" data-bind="click: $data.removeFilter">
-                  <i class="lupicon-remove"></i>
-                  <span data-bind="ltext: 'remove'"></span>
-                </button>
-              </div>
+              <div class="applications-search-filters-list__filter-item" data-bind="component: { name: 'remove-button', params: {removeFn: function() {$data.removeFilter($data);} }}"></div>
             </div>
           </div>
           <!-- /ko -->
