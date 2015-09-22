@@ -17,7 +17,11 @@
         <div class="col-2">
           <label data-bind="ltext: 'application.filter.search.select.saved.filter'"></label>
           <div data-test-id="select-advanced-filter"
-               data-bind="component: {name: 'autocomplete', params: {options: savedFilters, query: query, optionsText: 'title', selectedOption: lupapisteApp.services.applicationFiltersService.selected, nullable: true}}"></div>
+               data-bind="component: {name: 'autocomplete', params: {options: savedFilters,
+                                                                     query: query,
+                                                                     optionsText: 'title',
+                                                                     selectedOption: lupapisteApp.services.applicationFiltersService.selected,
+                                                                     nullable: true}}"></div>
         </div>
         <div class="col-1 stacked">
           <br/>
