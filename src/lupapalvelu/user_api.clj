@@ -218,7 +218,7 @@
   {:parameters [title filter sort]
    :user-roles #{:authority}
    :input-validators [(partial action/non-blank-parameters [:title :filter :sort])]
-   :description "Atomically adds/updates application filter for the user"}
+   :description "Adds/updates application filter for the user"}
   [{{user-id :id} :user {filter-id :filter-id} :data}]
   (let [filter-id        (or filter-id (mongo/create-id))
         app-filters      (user/get-application-filters user-id)
@@ -234,6 +234,8 @@
     (when title-collision?
       (fail! :error.filter-title-collision))
     (mongo/update-by-id :users user-id {$set {:applicationFilters updated-filters}})
+    (when (empty? app-filters)
+      (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filter-id}}}))
     (ok :filter filter)))
 
 (defcommand remove-application-filter
