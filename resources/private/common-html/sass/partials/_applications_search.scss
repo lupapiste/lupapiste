@@ -111,3 +111,28 @@ div.search {
     }
   }
 }
+
+.applications-search-results__indicator {
+  color: $primary;
+  padding-left: $marginS;
+  padding-right: $marginS;
+  div {
+    text-align: center;
+    height: auto !important;
+    padding: 3px 0 0 0 !important;
+    &.first {
+      text-align: right;
+    }
+    &.second {
+      text-align: left;
+    }
+  }
+  .application-search-results__urgency {
+    &.urgent {
+      color: $red-dark;
+    }
+    &.pending {
+      color: $orange-dark;
+    }
+  }
+}

@@ -7857,6 +7857,35 @@ div.search i {
   width: 100%;
 }
 
+/* line 115, ../sass/partials/_applications_search.scss */
+.applications-search-results__indicator {
+  color: #f39129;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+/* line 119, ../sass/partials/_applications_search.scss */
+.applications-search-results__indicator div {
+  text-align: center;
+  height: auto !important;
+  padding: 3px 0 0 0 !important;
+}
+/* line 123, ../sass/partials/_applications_search.scss */
+.applications-search-results__indicator div.first {
+  text-align: right;
+}
+/* line 126, ../sass/partials/_applications_search.scss */
+.applications-search-results__indicator div.second {
+  text-align: left;
+}
+/* line 131, ../sass/partials/_applications_search.scss */
+.applications-search-results__indicator .application-search-results__urgency.urgent {
+  color: #df3215;
+}
+/* line 134, ../sass/partials/_applications_search.scss */
+.applications-search-results__indicator .application-search-results__urgency.pending {
+  color: #f39129;
+}
+
 /* line 2, ../sass/partials/_indicator.scss */
 #indicator .indicator-bar {
   display: none;
@@ -8140,7 +8169,7 @@ div.search i {
   padding-left: 0;
   padding-right: 0;
   font-weight: bold;
-  color: #fff;
+  color: #f39129;
   text-align: center;
   width: 22px;
   padding: 3px;
@@ -8149,51 +8178,6 @@ div.search i {
 #applications-list div, .applications-table div {
   padding-top: 3px;
   height: 30px;
-}
-/* line 199, ../sass/views/_applications.scss */
-#applications-list .urgent, .applications-table .urgent {
-  background-image: url("/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-  background-position: 0 -5300px;
-  height: 24px;
-  width: 24px;
-}
-/* line 205, ../sass/views/_applications.scss */
-#applications-list .pending, .applications-table .pending {
-  background-image: url("/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-  background-position: 0 -5500px;
-  width: 24px;
-  height: 24px;
-}
-/* line 211, ../sass/views/_applications.scss */
-#applications-list .normal, .applications-table .normal {
-  background-image: url("/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-  background-position: 0 -5600px;
-  width: 24px;
-  height: 24px;
-}
-/* line 217, ../sass/views/_applications.scss */
-#applications-list .unseen-comments, .applications-table .unseen-comments {
-  background-image: url("/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-  background-position: 0 -4295px;
-  width: 21px;
-}
-/* line 222, ../sass/views/_applications.scss */
-#applications-list .unseen-indicators, .applications-table .unseen-indicators {
-  background-image: url("/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-  background-position: 0 -4597px;
-  width: 25px;
-}
-/* line 227, ../sass/views/_applications.scss */
-#applications-list .unseen-attachments, .applications-table .unseen-attachments {
-  background-image: url("/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-  background-position: 0 -4496px;
-  width: 21px;
 }
 
 /* line 234, ../sass/views/_applications.scss */

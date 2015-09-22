@@ -36,9 +36,26 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     return self.pending() ? pageutil.showAjaxWait(loc("applications.loading")) : pageutil.hideAjaxWait();
   });
 
+  function wrapData(data) {
+    data.applications = _.map(data.applications, function(item) {
+      console.log("item", item);
+      switch(item.urgency) {
+        case "urgent":
+          item.urgencyClass = "lupicon-warning";
+          break;
+        case "pending":
+          item.urgencyClass = "lupicon-circle-minus";
+          break;
+      }
+      return item;
+    });
+    return data;
+  }
+
   self.onSuccess = function(res) {
-    self.data(res.data);
-    self.applications(res.data.applications);
+    var data = wrapData(res.data);
+    self.data(data);
+    self.applications(data.applications);
   };
 
   function searchFields() {
