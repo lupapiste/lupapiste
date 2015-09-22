@@ -225,17 +225,16 @@ LUPAPISTE.ForemanModel = function() {
       var hakijaDocs = _.where(self.application().documents, {"schema-info": {"name": "hakija"}});
       hakijaDocs = hakijaDocs.concat(_.where(self.application().documents, {"schema-info": {"name": "hakija-r"}}));
       return _(hakijaDocs).map(function(doc) {
-        var userId = util.getIn(doc, ["data", "henkilo", "userId", "value"]);
+        var email = util.getIn(doc, ["data", "henkilo", "yhteystiedot", "email", "value"]);
         var companyId = util.getIn(doc, ["data", "yritys", "companyId", "value"]);
         // check if hakija is company or person
         var type = util.getIn(doc, ["data", "_selected", "value"]);
 
         if (type === "henkilo") {
           var auth = _.find(self.application().auth, function(a) {
-            return a.id === userId;
+            return a.username === email;
           });
           return {
-            userId: userId,
             docId: doc.id,
             docName: util.getIn(doc, ["schema-info", "name"]),
             path: "henkilo",
@@ -255,7 +254,7 @@ LUPAPISTE.ForemanModel = function() {
 
       var deferreds = [];
       _.forEach(hakijat, function(hakija) {
-        if (hakija.userId && hakija.email) {
+        if (hakija.email) {
           deferreds.push(inviteToApplication({
             id: id,
             documentId: hakija.docId,
