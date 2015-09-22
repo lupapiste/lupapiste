@@ -6,13 +6,6 @@ LUPAPISTE.TagFilterService = function(tagsService, applicationFiltersService) {
 
   self.selected = ko.observableArray([]);
 
-  var defaultFilter = ko.pureComputed(function() {
-    var applicationFilters = _.find(applicationFiltersService.savedFilters(), function(f) {
-      return f.isDefaultFilter();
-    });
-    return util.getIn(applicationFilters, ["filter", "tags"]) || [];
-  });
-
   var savedFilter = ko.pureComputed(function() {
     return util.getIn(applicationFiltersService.selected(), ["filter", "tags"]);
   });
@@ -26,8 +19,6 @@ LUPAPISTE.TagFilterService = function(tagsService, applicationFiltersService) {
         .filter(function(tag) {
           if (savedFilter()) {
             return  _.contains(savedFilter(), tag.id);
-          } else {
-            return _.contains(defaultFilter(), tag.id);
           }
         })
         .value());

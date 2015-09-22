@@ -8,13 +8,6 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
   self.noAuthority = {id: "no-authority", fullName: loc("applications.search.handler.no-authority"), behaviour: "singleSelection"};
   self.all = {id: "all", fullName: loc("all"), behaviour: "clearSelected"};
 
-  var defaultFilter = ko.pureComputed(function() {
-    var applicationFilters = _.find(applicationFiltersService.savedFilters(), function(f) {
-      return f.isDefaultFilter();
-    });
-    return util.getIn(applicationFilters, ["filter", "handlers"]) || [];
-  });
-
   var savedFilter = ko.pureComputed(function() {
     return util.getIn(applicationFiltersService.selected(), ["filter", "handlers"]);
   });
@@ -24,15 +17,11 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
   ko.computed(function() {
     if (savedFilter() && _.contains(savedFilter(), "no-authority")) {
       self.selected([self.noAuthority]);
-    } else if (!savedFilter() && _.contains(defaultFilter(), "no-authority")) {
-      self.selected([self.noAuthority]);
     } else {
       self.selected(_.filter(usersInSameOrganizations(),
         function (user) {
           if (savedFilter()) {
             return _.contains(savedFilter(), user.id);
-          } else {
-            return _.contains(defaultFilter(), user.id);
           }
         }));
     }
