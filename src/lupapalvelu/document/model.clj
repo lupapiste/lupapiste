@@ -10,7 +10,8 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.document.vrk]
+            [lupapalvelu.document.vrk :refer :all]
+            [lupapalvelu.document.document-field-validators :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
@@ -147,15 +148,14 @@
         (find-by-name (:body elem) ks)))))
 
 (defn- resolve-element-loc-key [info element path]
-  (let [loc-key (str (-> info :document :locKey) "." (join "." (map name path)))]
-    (if (:i18nkey element)
-      (:i18nkey element)
-      (-> (if (= :select (:type element))
-            (str loc-key "._group_label")
-            loc-key)
-        (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
-        (s/replace #"\.+" ".")))     ;; removes multiple dots: "a..b" => "a.b"
-    ))
+  (if (:i18nkey element)
+    (:i18nkey element)
+    (->
+      (str
+        (join "." (concat [(-> info :document :locKey)] (map name path)))
+        (when (= :select (:type element)) "._group_label"))
+      (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
+      (s/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
 
 (defn- ->validation-result [info data path element result]
   (when result
@@ -218,6 +218,13 @@
    :post [%]}
   (schemas/get-schema schema-info))
 
+(defn- validate-document [schema document info data]
+  (let [doc-validation-results (validator/validate document)]
+    (map
+      #(let [element (find-by-name (:schema-body info) (:path %))]
+         (->validation-result info data (:path %) element (:result %)))
+      doc-validation-results)))
+
 (defn validate
   "Validates document against schema and document level rules. Returns list of validation errors.
    If schema is not given, uses schema defined in document."
@@ -227,10 +234,9 @@
     {:pre [(map? application) (map? document)]}
     (let [data (:data document)
           schema (or schema (get-document-schema document))
-          document-loc-key (or (-> schema :info :i18name) (-> schema :info :name))
           info {:document {:id (:id document)
                            :name (-> schema :info :name)
-                           :locKey document-loc-key
+                           :locKey (or (-> schema :info :i18name) (-> schema :info :name))
                            :type (-> schema :info :type)}
                 :schema-body (:body schema)}]
       (when data
@@ -238,7 +244,7 @@
           (concat
             (validate-fields application info nil data [])
             (validate-required-fields info [] data [])
-            (validator/validate document)))))))
+            (validate-document schema document info data)))))))
 
 (defn has-errors?
   [results]

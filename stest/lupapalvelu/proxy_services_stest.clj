@@ -172,11 +172,11 @@
                     "BBOX"   "208384,6715136,208640,6715392"}
                    {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Naantali"
                     "BBOX"   "226816,6713856,227328,6714368"}]]
-      (let [request {:query-params (merge base-params layer)
-                     :headers {"accept-encoding" "gzip, deflate"}
-                     :as :stream}]
-        (println "Checking" (get layer "LAYERS"))
-        (http-get (env/value :maps :geoserver) request) => http200?))))
+      (fact {:midje/description (get layer "LAYERS")}
+        (let [request {:query-params (merge base-params layer)
+                       :headers {"accept-encoding" "gzip, deflate"}
+                       :as :stream}]
+          (http-get (env/value :maps :geoserver) request) => http200?)))))
 
 (facts "WMTS layers"
   (let [base-params {:FORMAT "image/png"
@@ -191,10 +191,10 @@
     (doseq [layer [{:LAYER "taustakartta"}
                    {:LAYER "kiinteistojaotus"}
                    {:LAYER "kiinteistotunnukset"}]]
-      (let [request {:params (merge base-params layer)
-                     :headers {"accept-encoding" "gzip, deflate"}}]
-        (println "Checking" (get layer :LAYER))
-        (wfs/raster-images request "wmts") => http200?))))
+      (fact {:midje/description (get layer "LAYERS")}
+        (let [request {:params (merge base-params layer)
+                       :headers {"accept-encoding" "gzip, deflate"}}]
+          (wfs/raster-images request "wmts") => http200?)))))
 
 (facts "WMS layers"
   (let [base-params {"FORMAT" "image/png"
@@ -214,10 +214,10 @@
                    {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}
                    {"LAYERS" "yleiskaava"}
                    {"LAYERS" "yleiskaava_poikkeavat"}]]
-      (let [request {:params (merge base-params layer)
-                     :headers {"accept-encoding" "gzip, deflate"}}]
-        (println "Checking" (get layer "LAYERS"))
-        (wfs/raster-images request "wms") => http200?))))
+      (fact {:midje/description (get layer "LAYERS")}
+        (let [request {:params (merge base-params layer)
+                       :headers {"accept-encoding" "gzip, deflate"}}]
+         (wfs/raster-images request "wms") => http200?)))))
 
 (fact "WMS capabilites"
   (http-get (str (server-address) "/proxy/wmscap")
@@ -227,5 +227,4 @@
 (fact "General plan documents"
   (let [request {:params {:id "0911001"}
                  :headers {"accept-encoding" "gzip, deflate"}}]
-    (println "Checking plandocument 0911001")
     (wfs/raster-images request "plandocument") => http200?))
