@@ -74,6 +74,9 @@
             </tr>
           </tbody>
         </table>
+        <!-- ko ifnot: gotResults -->
+        <p data-bind="ltext: 'applications.search.no-results'"></p>
+        <!-- /ko -->
       </div>
     </script>
   </section>

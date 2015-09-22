@@ -6,3 +6,4 @@ applications.search.save-filter:  Tallenna hakuehdot
 applications.search.set-default-filter:  Aseta oletushakuehdoksi
 applications.search.filter-name-already-in-use:  Nimi on jo käytössä
 applications.search.handler.no-authority:  Ei käsittelijää
+applications.search.no-results:  Annetuilla hakuehdoilla ei löytynyt hakemuksia
