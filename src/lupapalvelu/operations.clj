@@ -439,7 +439,7 @@
                                    :link-permit-required false
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
-     :teollisuusrakennus-laaj     {:schema "rakennuksen-laajentaminen-ei-huoneistoja"
+     :teollisuusrakennus-laaj     {:schema "rakennuksen-laajentaminen"
                                    :permit-type permit/R
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
