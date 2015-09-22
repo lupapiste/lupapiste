@@ -7,6 +7,7 @@
   $(function() {
     lupapisteApp.domReady();
     var model = {continueUrl: lupapisteApp.getHashbangUrl(),
+                 continueHandler: lupapisteApp.redirectToHashbang,
                  registerUrl: "/app/" + loc.getCurrentLanguage() + "/welcome#!/register"};
     $("#hashbang").applyBindings(model);
   });
