@@ -211,8 +211,8 @@
   {:parameters [filter-id]
    :user-roles #{:authority}
    :description "Adds/Updates users default filter for the application search"}
-  [{{id :id} :user}]
-  (mongo/update-by-id :users id {$set {:defaultFilter {:id filter-id}}}))
+  [{{user-id :id} :user}]
+  (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filter-id}}}))
 
 (defcommand save-application-filter
   {:parameters [title filter sort]
@@ -243,8 +243,8 @@
    :user-roles #{:authority}
    :input-validators [(partial action/non-blank-parameters [:filter-id])]
    :description "Removes users application filter"}
-  [{{id :id} :user}]
-  (mongo/update-by-id :users id {$pull {:applicationFilters {:id filter-id}}}))
+  [{{user-id :id} :user}]
+  (mongo/update-by-id :users user-id {$pull {:applicationFilters {:id filter-id}}}))
 
 ;;
 ;; Change organization data:
