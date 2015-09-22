@@ -41,40 +41,28 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     self.applications(res.data.applications);
   };
 
+  function searchFields() {
+    return { searchText: self.searchFieldDelayed(),
+             tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
+             organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
+             operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
+             handlers: _.pluck(lupapisteApp.services.handlerFilterService.selected(), "id"),
+             applicationType: self.applicationType(),
+             areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
+             limit: self.limit(),
+             sort: ko.mapping.toJS(self.sort),
+             skip: self.skip() };
+  }
+
   ko.computed(function() {
-    ajax.datatables("applications-search",
-      {
-        searchText: self.searchFieldDelayed(),
-        tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
-        organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
-        operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
-        handlers: _.pluck(lupapisteApp.services.handlerFilterService.selected(), "id"),
-        applicationType: self.applicationType(),
-        areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
-        limit: self.limit(),
-        sort: ko.mapping.toJS(self.sort),
-        skip: self.skip()
-      })
+    ajax.datatables("applications-search", searchFields())
       .success(self.onSuccess)
       .pending(self.pending)
     .call();
   }).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
 
-
   hub.onPageLoad("applications", function() {
-    ajax.datatables("applications-search",
-      {
-        searchText: self.searchField(),
-        tags: _.pluck(lupapisteApp.services.tagFilterService.selected, "id"),
-        organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
-        operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
-        handlers: _.pluck(lupapisteApp.services.handlerFilterService.selected(), "id"),
-        applicationType: self.applicationType(),
-        areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
-        limit: self.limit(),
-        sort: ko.mapping.toJS(self.sort),
-        skip: self.skip()
-      })
+    ajax.datatables("applications-search", searchFields())
       .success(self.onSuccess)
     .call();
   });
