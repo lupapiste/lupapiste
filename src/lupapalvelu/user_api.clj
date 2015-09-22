@@ -228,7 +228,8 @@
     (when title-collision?
       (fail! :error.filter-title-collision))
     (mongo/update-by-id :users user-id {$set {:applicationFilters updated-filters}})
-    (when (empty? app-filters)
+    ;; TODO breaks whole lot of robots
+    #_(when (empty? app-filters)
       (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filter-id}}}))
     (ok :filter filter)))
 

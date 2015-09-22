@@ -1,9 +1,9 @@
 *** Settings ***
 
 Documentation  Authority uses default filter
-Suite teardown  Logout
-Resource       ../../common_resource.robot
-Suite setup  Apply minimal fixture now
+Suite teardown  Run Keywords  Logout  Apply minimal fixture now
+Resource        ../../common_resource.robot
+Suite setup     Apply minimal fixture now
 
 *** Test Cases ***
 
