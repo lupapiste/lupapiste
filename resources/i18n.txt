@@ -1,2 +1,3 @@
 error.rakennusvalitsin-muu: Manuaalinen rakennusnumero syötettävä
 application.warningsInDocument: Lomakkeilla olevat varoitukset
+rakennuksen-laajentaminen-ei-huoneistoja._group_label: Laajennettava rakennus
