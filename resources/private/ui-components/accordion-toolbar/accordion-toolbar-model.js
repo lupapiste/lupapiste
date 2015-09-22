@@ -10,11 +10,14 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   self.docModel = params.docModel;
   var auth = self.docModel.authorizationModel;
-  self.contents = params.contents;
-  var initialOpen = !params.docModelOptions
-                 || !params.docModelOptions.accordionCollapsed;
-  self.isOpen = ko.observable( initialOpen );
-  params.openCallback( initialOpen );
+  self.isOpen = ko.observable( !params.docModelOptions
+                            || !params.docModelOptions.accordionCollapsed );
+  self.notifier = ko.computed( function() {
+    params.openCallback( self.isOpen());
+  })
+
+  AccordionState.register( self.docModel.docId, self.isOpen );
+
   self.info = self.docModel.schema.info;
   var meta = self.docModel.getMeta( params.path );
   self.approval = ko.observable( meta ? meta._approved : null );
@@ -24,7 +27,6 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.title = ((op && op.name) || self.info.name) + "._group_label";
   self.toggleAccordion = function() {
     self.isOpen( !self.isOpen());
-    params.openCallback( self.isOpen());
   }
 
   // Pen
@@ -105,5 +107,9 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.details = ko.pureComputed( _.partial( self.docModel.approvalInfo,
                                              self.approval ));
 
-  self.showToolbar = self.showStar || self.showDescription || self.isApprovable;
+  self.showToolbar = self.showStar
+                  || self.showDescription
+                  || self.showStatus()
+                  || self.showReject()
+                  || self.showApprove();
 }

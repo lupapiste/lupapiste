@@ -2197,8 +2197,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       contents.toggleClass( "expandend");
       contents.attr( "data-accordion-state",
                      isOpen ? "open" : "closed");
-      contents.toggle( isOpen );
-
+      if( LUPAPISTE.config.features.animations ) {
+        var opts = {duration: 200,
+                    easing: "easeInOutCubic"};
+        var fun = isOpen ? "slideDown" : "slideUp";
+        contents[fun]( opts );
+      } else {
+        contents.toggle( isOpen );
+      }
     }
     var sticky =  $("<div>").addClass( "sticky");
     sticky.append(createComponent ( "accordion-toolbar",

@@ -570,6 +570,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.moveToIncorrectlyFilledRequiredField = function(fieldInfo) {
+    AccordionState.set( fieldInfo.document.id, true );
     var targetId = fieldInfo.document.id + "-" + fieldInfo.path.join("-");
     self.targetTab({tab: (fieldInfo.document.type !== "party") ? "info" : "parties", id: targetId});
   };
