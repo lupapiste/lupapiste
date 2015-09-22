@@ -737,20 +737,22 @@ section.approved .group-buttons  {
   }
 }
 
+
 // Top-level form-approval-status
 
 div.sticky .form-approval-status.no-border-bottom {
-  border-left: 1px solid $gray221;
-  border-right: 1px solid $gray221;
+  /* border-left: 1px solid $gray221; */
+  /* border-right: 1px solid $gray221; */
   border-bottom: 1px solid $gray221;
-  width: 100%;
+  //width: 100%;
+  float: left;
   .like-btn {
     padding: {
       left: 10px;
-      top: 4px;
+      //top: 4px;
     }
-    min-height: initial;
-    line-height: initial;
+    /* min-height: initial; */
+    /* line-height: initial; */
     span {
       color: $gray153;
     }
@@ -761,6 +763,20 @@ div.sticky .form-approval-status.no-border-bottom {
   border-bottom: none;
 }
 
+div.sticky .form-approval-status.no-border-bottom.own-line {
+  width: 100%;
+  .like-btn {
+    padding: {
+//      left: 10px;
+      top: 4px;
+    }
+    min-height: initial;
+    line-height: initial;
+    span {
+      color: $gray153;
+    }
+  }
+}
 
 // Top-level reject button should be invisible
 // when the bar is in rejected mode.

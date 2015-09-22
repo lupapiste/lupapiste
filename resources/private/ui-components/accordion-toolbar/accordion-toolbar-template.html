@@ -26,19 +26,21 @@
               <i class="lupicon-circle-check approved"></i>
             </span>
           </button>
-          <span class="form-approval-status is-status no-border-bottom"
-                data-bind="css: {approved: isApproved,
-                           rejected: isRejected},
-                           visible: showStatus">
-            <div class="like-btn">
-              <i class="lupicon-circle-attention rejected"></i>
-              <i class="lupicon-circle-check approved"></i>
-              <span class="is-details"
-                    data-bind="text: details"></span>
-            </div>
-          </span>
+
           <div class="group-buttons"
                data-bind="visible: showToolbar">
+            <span class="form-approval-status is-status no-border-bottom"
+                  data-bind="css: {approved: isApproved,
+                                   rejected: isRejected,
+                                   'own-line': showDescription || showStar},
+                             visible: showStatus">
+              <div class="like-btn">
+                <i class="lupicon-circle-attention rejected"></i>
+                <i class="lupicon-circle-check approved"></i>
+                <span class="is-details"
+                      data-bind="text: details"></span>
+              </div>
+            </span>
             <button class="secondary is-left"
                     data-test-id="edit-op-description"
                     data-bind="visible: showDescription">
@@ -54,6 +56,13 @@
                                visible: showStar">
               <i class="lupicon-star"></i>
               <span data-bind="ltext: starTitle"></span>
+            </button>
+            <button class="secondary is-right"
+                data-bind="visible: remove.fun,
+                           data-test-class: remove.testClass,
+                           click: remove.fun">
+              <i class="lupicon-remove"></i>
+          <span data-bind="ltext: 'remove'"></span>
             </button>
             <button class="secondary is-right"
                     data-bind="attr: {'data-test-id': rejectTestId},

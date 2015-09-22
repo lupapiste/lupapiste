@@ -10,13 +10,13 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   self.docModel = params.docModel;
   var auth = self.docModel.authorizationModel;
-  self.isOpen = ko.observable( !params.docModelOptions
-                            || !params.docModelOptions.accordionCollapsed );
-  self.notifier = ko.computed( function() {
-    params.openCallback( self.isOpen());
-  })
+  self.isOpen = ko.observable();
+  self.isOpen.subscribe( params.openCallback );
+  self.isOpen( !params.docModelOptions
+            || !params.docModelOptions.accordionCollapsed);
 
   AccordionState.register( self.docModel.docId, self.isOpen );
+
 
   self.info = self.docModel.schema.info;
   var meta = self.docModel.getMeta( params.path );
@@ -36,14 +36,28 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.showEditor = ko.observable( false );
   self.toggleEditor = function() {
     self.showEditor( !self.showEditor());
+    window.Stickyfill.rebuild();
   }
   self.specialKeys = function( data, event ) {
     // Enter closes bubble
     if( event.keyCode === 13 ) {
       self.showEditor( false );
+      window.Stickyfill.rebuild();
     }
     return true;
   }
+
+  self.description.subscribe( function( desc ) {
+    ajax.command ("update-op-description", {id: self.docModel.appId,
+                                            "op-id": op.id,
+                                            desc: desc  })
+    .success (function() {
+      hub.send("op-description-changed", {apId: self.docModel.appId,
+                                          "op-id": op.id,
+                                          "op-desc": desc  });
+    })
+    .call();
+  })
 
   // Star
   // Primary vs. secondary operation.
@@ -66,6 +80,17 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     })
     .call();
     return false;
+  }
+
+  self.remove = {};
+  // Remove
+  if (self.info.removable
+    && !self.docModel.isDisabled
+    && auth.ok("remove-doc")
+    && !self.isPrimaryOperation()) {
+    self.remove.fun = self.docModel.removeDocument;
+    self.remove.testClass = self.docModel.testId( "delete-schemas."
+                                                + self.docModel.schemaName )
   }
 
   // Approval functionality
@@ -109,6 +134,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   self.showToolbar = self.showStar
                   || self.showDescription
+                  || self.remove.fun
                   || self.showStatus()
                   || self.showReject()
                   || self.showApprove();

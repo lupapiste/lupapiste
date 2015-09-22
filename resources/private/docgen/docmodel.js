@@ -237,6 +237,42 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return self.testId( [verb, "doc", _.first( path) || self.schemaName].join ( "-" ));
   }
 
+  self.removeDocument = function() {
+    var op = self.schema.info.op;
+
+    var documentName = "";
+    if (op) {
+      documentName = loc([op.name, "_group_label"]);
+    } else {
+      documentName = loc([self.schema.info.name, "_group_label"]);
+    }
+
+    function onRemovalConfirmed() {
+      ajax.command("remove-doc", { id: self.appId, docId: self.docId, collection: self.getCollection() })
+        .success(function () {
+          //n$.slideUp(function () { n$.remove(); });
+          // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
+          // Just the "operations" list should be changed.
+          repository.load(self.appId);
+        })
+        .call();
+     // return false;
+    }
+
+    var message = "<div>"
+                + loc("removeDoc.message1")
+                + " <strong>" + documentName + ".</strong></div><div>"
+                + loc("removeDoc.message2") + "</div>";
+    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"),
+                                           message,
+                                           { title: loc("removeDoc.ok"),
+                                             fn: onRemovalConfirmed },
+                                           {title: loc("removeDoc.cancel") },
+                                           {html: true });
+
+    //return false;
+  }
+
   // ----------------------------------------------------------------------
 
 
@@ -1602,6 +1638,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         table.appendChild(tbody);
 
         if (subSchema.approvable) {
+          $(div).append(createComponent( "group-approval",
+                                         {docModel: self,
+                                          subSchema: subSchema,
+                                          model: models,
+                                          path: path}))
           // TODO: Table approval
           //appendGroupButtons( $(div), path, models, {approval: {}});
           //$(div).append(self.makeGroupButtons(path, models, {approval: {}}));
@@ -2019,13 +2060,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       }
 
       ajax.command("update-op-description", {id: self.appId, "op-id": operation.id, desc: value })
-        .success(function() {
-          // TODO: Show indicator in a reasonable position, where?
-          // var indicator = createIndicator(descriptionInput, "accordion-indicator" );
-          // showIndicator(indicator, "accordion-input-saved", "form.saved");
-          hub.send("op-description-changed", {appId: self.appId, "op-id": operation.id, "op-desc": value});
-        })
-        .call();
+      .success(function() {
+        // TODO: Show indicator in a reasonable position, where?
+        // var indicator = createIndicator(descriptionInput, "accordion-indicator" );
+        // showIndicator(indicator, "accordion-input-saved", "form.saved");
+        hub.send("op-description-changed", {appId: self.appId, "op-id": operation.id, "op-desc": value});
+      })
+      .call();
 
       bubble.addClass( "is-closed");
       window.Stickyfill.rebuild();
@@ -2183,6 +2224,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildSection() {
     var section = $("<section>").addClass( "accordion").attr( "data-doc-type", self.schemaName );
     var elements = document.createElement("div");
+    elements.className = "accordion-fields";
     appendElements(elements, self.schema, self.model, []);
     // Disable fields and hide if the form is not editable
     if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
@@ -2192,7 +2234,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(elements).find("button").hide();
     }
 
-    var contents = $("<div>").addClass( "accordion_conten");
+    var contents = $("<div>").addClass( "accordion_content");
     function toggleContents( isOpen ) {
       contents.toggleClass( "expandend");
       contents.attr( "data-accordion-state",
@@ -2206,6 +2248,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         contents.toggle( isOpen );
       }
     }
+    contents.append( makeSectionHelpTextSpan(self.schema) );
     var sticky =  $("<div>").addClass( "sticky");
     sticky.append(createComponent ( "accordion-toolbar",
                                     {docModel: self,
