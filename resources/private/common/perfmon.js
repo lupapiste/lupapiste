@@ -46,5 +46,6 @@
       .call();
   }
 
-  hub.subscribe("features-loaded", loadTimingData, true);
+  $(window).load(loadTimingData);
+
 })(jQuery);

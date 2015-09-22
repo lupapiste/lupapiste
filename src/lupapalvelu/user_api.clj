@@ -27,7 +27,9 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.attachment :as attachment]))
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.password-reset :as pw-reset]
+            ))
 
 ;;
 ;; ==============================================================================
@@ -86,24 +88,16 @@
 ;; ==============================================================================
 ;;
 
-(defn- reset-link [lang token]
-  (str (env/value :host) "/app/" lang "/welcome#!/setpw/" token))
-
 ;; Emails
-(def- base-email-conf
-  {:model-fn      (fn [{{token :token} :data} conf recipient]
-                {:link-fi (reset-link "fi" token), :link-sv (reset-link "sv" token)})})
+
 
 (notifications/defemail :invite-authority
-  (assoc base-email-conf :subject-key "authority-invite.title" :recipients-fn notifications/from-user))
+  (assoc pw-reset/base-email-conf :subject-key "authority-invite.title" :recipients-fn notifications/from-user))
 
 (notifications/defemail :notify-authority-added
   {:model-fn (fn [{name :data} conf recipient] {:org-fi (:fi name), :org-sv (:sv name)}),
    :subject-key "authority-notification.title",
    :recipients-fn notifications/from-user})
-
-(notifications/defemail :reset-password
-  (assoc base-email-conf :subject-key "reset.email.title" :recipients-fn notifications/from-data))
 
 (defn- notify-new-authority [new-user created-by]
   (let [token (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))]
@@ -329,14 +323,6 @@
         (Thread/sleep 2000)
         (fail :mypage.old-password-does-not-match)))))
 
-(defn reset-password [{:keys [email role] :as user}]
-  (assert (and email role (not= "dummy" role)) "Can't reset dummy user's password")
-
-  (let [token (token/make-token :password-reset nil {:email email} :ttl ttl/reset-password-token-ttl)]
-    (infof "password reset request: email=%s, token=%s" email token)
-    (notifications/notify! :reset-password {:data {:email email :token token}})
-    token))
-
 (defcommand reset-password
   {:parameters    [email]
    :user-roles #{:anonymous}
@@ -345,12 +331,12 @@
    :notified      true}
   [_]
   (let [user (user/get-user-by-email email) ]
-      (if (and user (not= "dummy" (:role user)))
+    (if (and user (not (user/dummy? user)))
       (do
-        (reset-password user)
-         (ok))
-       (do
-         (warnf "password reset request: unknown email: email=%s" email)
+        (pw-reset/reset-password user)
+        (ok))
+      (do
+        (warnf "password reset request: unknown email: email=%s" email)
         (fail :error.email-not-found)))))
 
 (defcommand admin-reset-password
@@ -361,8 +347,8 @@
    :notified      true}
   [_]
   (let [user (user/get-user-by-email email) ]
-    (if (and user (not= "dummy" (:role user)))
-      (ok :link (reset-link "fi" (reset-password user)))
+    (if (and user (not (user/dummy? user)))
+      (ok :link (pw-reset/reset-link "fi" (pw-reset/reset-password user)))
       (fail :error.email-not-found))))
 
 (defmethod token/handle-token :password-reset [{data :data} {password :password}]

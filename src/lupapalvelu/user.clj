@@ -340,7 +340,7 @@
   (get-user {:email email}))
 
 (defn email-in-use? [email]
-  (as-> email $ 
+  (as-> email $
     (get-user-by-email $)
     (and $ (not (dummy? $)))))
 
@@ -560,15 +560,3 @@
         (ok)
         (fail :error.user-not-found)))))
 
-;;
-;; ==============================================================================
-;; Other:
-;; ==============================================================================
-;;
-
-;;
-;; Link user to company:
-;;
-
-(defn link-user-to-company! [user-id company-id role]
-  (mongo/update :users {:_id user-id} {$set {:company {:id company-id, :role role}}}))

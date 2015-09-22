@@ -57,6 +57,10 @@
   "removes recursively all keys from map which have value of nil"
   [m] (postwalk-map (partial filter (comp not nil? val)) m))
 
+(defn ensure-sequential
+  "Makes sure that the value of key k in map m is sequental"
+  [m k] (let [v (k m)] (if (and v (not (sequential? v))) (assoc m k [v]) m)))
+
 ; from clojure.contrib/core
 
 (defn dissoc-in
@@ -263,7 +267,7 @@
 (defn get-timestamp-from-now
   "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
   [time-key amount]
-  {:pre [(#{:day :week :month} time-key)]}
+  {:pre [(#{:day :week :month :years} time-key)]}
   (let [time-fn (case time-key
                   :day days
                   :week weeks

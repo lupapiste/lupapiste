@@ -135,9 +135,9 @@
 
 (fact update-user-roles
   (apply-remote-minimal)
-  (fact "Meta: check current roles" (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority"])
+  (fact "Meta: check current roles" (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority" "approver"])
   (fact (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "foobar"]) => fail?)
-  (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority"])
+  (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority" "approver"])
 
   (fact "Sipoo does not have permanent achive, can not set TOS roles but reader is OK"
     (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "tos-editor" "tos-publisher" "reader"]) => ok?

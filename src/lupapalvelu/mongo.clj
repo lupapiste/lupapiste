@@ -23,6 +23,8 @@
 
 (def operators (set (map name (keys (ns-publics 'monger.operators)))))
 
+(def default-write-concern WriteConcern/JOURNALED)
+
 (defonce connection (atom nil))
 (defonce ^:private dbs (atom {}))
 
@@ -107,7 +109,7 @@
 (defn update-n
   "Updates data into collection by query, returns a number of updated documents."
   [collection query data & {:as opts}]
-  (let [options (-> (merge {:write-concern WriteConcern/ACKNOWLEDGED} opts) seq flatten)]
+  (let [options (-> (merge {:write-concern default-write-concern} opts) seq flatten)]
     (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) options))))
 
 (defn update
@@ -129,9 +131,8 @@
 
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
-  [collection data]
-  (mc/insert (get-db) collection (with-_id (remove-null-chars data)))
-  nil)
+  ([collection data] (insert collection data default-write-concern))
+  ([collection data concern] (mc/insert (get-db) collection (with-_id (remove-null-chars data))) nil))
 
 (defn by-id
   ([collection id]
@@ -298,7 +299,7 @@
                     (let [[host port] (clojure.string/split servers #":")]
                       [(m/server-address host (Long/parseLong port))])
                     servers)
-          options (m/mongo-options {:write-concern WriteConcern/JOURNALED})]
+          options (m/mongo-options {:write-concern default-write-concern})]
       (if @connection
        (debug "Already connected!")
        (do
@@ -366,7 +367,6 @@
   ; Disabled TTL for now: (mc/ensure-index :sign-processes {:created 1} {:expireAfterSeconds (env/value :onnistuu :timeout)})
   (ensure-index :companies {:name 1} {:name "company-name"})
   (ensure-index :companies {:y 1} {:name "company-y"})
-  (ensure-index :perf-mon {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
   (ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
   (try
     (drop-index :organizations "areas.features.geometry_2dsphere")
