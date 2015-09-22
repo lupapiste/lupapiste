@@ -3,3 +3,5 @@ secondary-kiinteistot._append_label: Lisää lisäkohdekiinteistö
 application.dialog.add-property.title: Lisää kiinteistö hakemukseen
 application.dialog.add-property.submit: Lisää hakemukseen
 kiinteisto.kiinteisto.kiinteistoTunnus: Kiinteistötunnus
+error.rakennusvalitsin-muu: Manuaalinen rakennusnumero syötettävä
+application.warningsInDocument: Lomakkeilla olevat varoitukset

@@ -29,7 +29,7 @@ LUPAPISTE.OrganizationUserModel = function(organization) {
       .searching(false)
       .userAdded(false)
       .invitationSent(false)
-      .userRoles(["authority"]);
+      .userRoles(["authority", "approver"]);
   };
 
   self.dialog = function() {

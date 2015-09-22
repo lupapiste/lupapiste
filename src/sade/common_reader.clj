@@ -74,10 +74,6 @@
   "Changes recursively all string values to timestamps (longs)"
   [m keys] (convert-values-of-keys m keys to-timestamp))
 
-(defn ensure-sequential
-  "Makes sure that the value of key k in map m is sequental"
-  [m k] (let [v (k m)] (if (and v (not (sequential? v))) (assoc m k [v]) m)))
-
 (defn strip-xml-namespaces
   "strips namespace-part of xml-element-keys"
   [xml] (postwalk-map (partial map (fn [[k v]] [k (if (= :tag k) (strip-key v) v)])) xml))
