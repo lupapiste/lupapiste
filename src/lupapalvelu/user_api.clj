@@ -202,13 +202,44 @@
       (fail :error.user-not-found))))
 
 (defcommand update-default-application-filter
-  {:parameters [filter sort]
+  {:parameters [filter-id]
    :user-roles #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:filter]) (partial action/non-blank-parameters [:sort])]
-   :description "Adds/Updates user specific filters for the application search"}
-  [{{id :id} :user}]
-  (mongo/update-by-id :users id {$set {:applicationFilters [{:filter filter :sort sort}]}})
-  (ok))
+   :description "Adds/Updates users default filter for the application search"}
+  [{{user-id :id} :user}]
+  (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filter-id}}}))
+
+(defcommand save-application-filter
+  {:parameters [title filter sort]
+   :user-roles #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:title :filter :sort])]
+   :description "Adds/updates application filter for the user"}
+  [{{user-id :id} :user {filter-id :filter-id} :data}]
+  (let [filter-id        (or filter-id (mongo/create-id))
+        app-filters      (user/get-application-filters user-id)
+        title-collision? (->> app-filters
+                              (clojure.core/filter #(= (:title %) title))
+                              (map :id)
+                              (some (partial not= filter-id)))
+        filter           {:id filter-id :title title :filter filter :sort sort}
+        updated-filters  (as-> app-filters $
+                               (zipmap (map :id $) (range))
+                               (get $ filter-id (count $))
+                               (assoc-in app-filters [$] filter))]
+    (when title-collision?
+      (fail! :error.filter-title-collision))
+    (mongo/update-by-id :users user-id {$set {:applicationFilters updated-filters}})
+    ;; TODO breaks whole lot of robots
+    #_(when (empty? app-filters)
+      (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filter-id}}}))
+    (ok :filter filter)))
+
+(defcommand remove-application-filter
+  {:parameters [filter-id]
+   :user-roles #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:filter-id])]
+   :description "Removes users application filter"}
+  [{{user-id :id} :user}]
+  (mongo/update-by-id :users user-id {$pull {:applicationFilters {:id filter-id}}}))
 
 ;;
 ;; Change organization data:

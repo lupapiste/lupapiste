@@ -1,15 +1,11 @@
-LUPAPISTE.OrganizationFilterService = function() {
+LUPAPISTE.OrganizationFilterService = function(applicationFiltersService) {
   "use strict";
   var self = this;
 
   self.selected = ko.observableArray([]);
 
-  var defaultFilter = ko.pureComputed(function() {
-    var applicationFilters = _.first(lupapisteApp.models.currentUser.applicationFilters());
-    return applicationFilters &&
-           applicationFilters.filter.organizations &&
-           applicationFilters.filter.organizations() ||
-           [];
+  var savedFilter = ko.pureComputed(function() {
+    return util.getIn(applicationFiltersService.selected(), ["filter", "organizations"]);
   });
 
   var organizationNames = ko.observable();
@@ -28,9 +24,12 @@ LUPAPISTE.OrganizationFilterService = function() {
 
   // add default filter items when data or filter updates
   ko.computed(function() {
+    self.selected([]);
     ko.utils.arrayPushAll(self.selected,
       _.filter(self.data(), function(org) {
-        return _.contains(defaultFilter(), org.id);
+        if (savedFilter()) {
+          return  _.contains(savedFilter(), org.id);
+        }
       }));
   });
 
