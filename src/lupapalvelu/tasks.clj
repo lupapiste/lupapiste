@@ -6,6 +6,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.tools :as tools]))
@@ -129,9 +130,9 @@
     (flatten (map #(verdict->tasks % meta) (:verdicts application)))))
 
 (defn task-schemas [{:keys [schema-version permitType]}]
-  (let [ignored-schema-name (if (= :YA (keyword permitType)) "task-katselmus" "task-katselmus-ya")]
+  (let [allowed-task-schemas (permit/get-metadata permitType :allowed-task-schemas)]
     (filter
       #(and
          (= :task (-> % :info :type))
-         (not= ignored-schema-name (-> % :info :name)))
+         (allowed-task-schemas (-> % :info :name)))
       (vals (schemas/get-schemas schema-version)))))
