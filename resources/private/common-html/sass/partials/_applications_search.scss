@@ -1,3 +1,30 @@
+.applications-search-top {
+  background-color: $gray238;
+  border-bottom: 2px solid $gray221;
+  .container {
+    margin-bottom: 0;
+  }
+  .button-group {
+    float: right;
+    button {
+      margin-left: $grid-margin;
+    }
+    margin-bottom: $grid-margin;
+  }
+}
+
+#invitations {
+  background-color: $gray238;
+  margin-bottom: -$marginL;
+  .container {
+    margin-bottom: 0;
+  }
+}
+
+
+.applications-search-component {
+  clear: both;
+}
 
 .search-tabs {
   ul {
@@ -47,59 +74,68 @@
   }
 }
 
-div.filter-row {
-  margin-bottom: $marginM;
-  > div {
-    display: inline-block;
+div.search {
+  position: relative;
+  input {
+    padding-right: 40px !important;
   }
-  label {
-    display: block
+
+  i {
+    color: $primary;
+    position: absolute;
+    top: 8px;
+    right: 8px;
   }
-  input.search {
-    ~ span.icon {
-      position: relative;
-      left: -22px;
-      top: 4px;
+}
+
+.applications-search-filters-list {
+
+  .applications-search-filters-list__filters {
+    display: table;
+  }
+
+  .applications-search-filters-list__filter-row {
+    display: table-row;
+  }
+
+  .applications-search-filters-list__filter-item {
+    background-color: #fff;
+    display: table-cell;
+    vertical-align: top;
+    height: $grid-input-height;
+    &:first-child {
+      width: 100%;
     }
-    line-height: $baseline;
-    padding: $marginS/2 $marginL $marginS/2 $marginS;
-    border: 1px solid #dddddd;
-    box-shadow: none;
-  }
-  .autocomplete-component > .autocomplete-selection-wrapper > span.autocomplete-selection {
-    border-radius: 0;
-  }
-  .filter-item {
-    margin-right: $marginM;
-  }
-}
-
-div.filter-row.advanced {
-  .autocomplete-component {
-    width: 600px;
-  }
-}
-
-@media (max-width:1260px) {
-  div.filter-row.advanced {
-    .autocomplete-component {
-      width: 460px;
+    button {
+      width: 100%;
     }
   }
 }
 
-@media (max-width:990px) {
-  div.filter-row.advanced {
-    .autocomplete-component {
-      width:390px;
+.application-row {
+  height: 45px;
+}
+.applications-search-results__indicator {
+  color: $primary;
+  padding-left: $marginS;
+  padding-right: $marginS;
+  div {
+    text-align: center;
+    height: auto !important;
+    padding: 3px 0 0 0 !important;
+    &.first {
+      text-align: right;
+    }
+    &.second {
+      text-align: left;
     }
   }
-}
-
-@media (max-width:990px) {
-  div.filter-row.advanced {
-    .autocomplete-component {
-      width:790px;
+  .application-search-results__urgency {
+    &.urgent {
+      color: $red-dark;
+    }
+    &.pending {
+      color: $orange-dark;
     }
   }
 }

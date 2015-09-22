@@ -15,6 +15,8 @@ LUPAPISTE.InputFieldModel = function(params) {
     self.value.extend({required: true});
   }
 
+  self.disable = params.disable || ko.observable(false);
+
   self.infoMsg = params.infoMsg || "";
   self.infoStyle = params.infoStyle || "";
 
