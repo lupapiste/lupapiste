@@ -11,7 +11,7 @@
           <span data-bind="component: {name: 'docgen-inline-string',
                                        params: {schema: schema,
                                                 path: path }},
-                           visible: isMaaraala"></div>
+                           style: {visibility: isMaaraala() ? 'visible' : 'hidden'}"></div>
         </span>
       </span>
     </script>
