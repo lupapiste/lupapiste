@@ -222,8 +222,7 @@ LUPAPISTE.ForemanModel = function() {
     }
 
     function getHakijat() {
-      var hakijaDocs = _.where(self.application().documents, {"schema-info": {"name": "hakija"}});
-      hakijaDocs = hakijaDocs.concat(_.where(self.application().documents, {"schema-info": {"name": "hakija-r"}}));
+      var hakijaDocs = _.where(self.application().documents, {"schema-info": {"subtype": "hakija"}});
       return _(hakijaDocs).map(function(doc) {
         var email = util.getIn(doc, ["data", "henkilo", "yhteystiedot", "email", "value"]);
         var companyId = util.getIn(doc, ["data", "yritys", "companyId", "value"]);
