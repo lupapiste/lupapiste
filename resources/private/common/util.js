@@ -106,6 +106,10 @@ var util = (function($) {
     return s && s.match(/^\s*-??\d+\s*$/) !== null;
   }
 
+  function isNonNegative(s) {
+    return s && s.match(/^\s*\d+\s*$/) !== null;
+  }
+
   function getIn(m, keyArray, defaultValue) {
     if (m && keyArray && keyArray.length > 0) {
       var key = keyArray[0];
@@ -280,7 +284,8 @@ var util = (function($) {
     randomElementId: randomElementId,
     withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery,
-    showSavedIndicator: showSavedIndicator
+    showSavedIndicator: showSavedIndicator,
+    isNonNegative: isNonNegative
   };
 
 })(jQuery);
