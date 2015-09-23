@@ -103,7 +103,7 @@ var util = (function($) {
   }
 
   function isNum(s) {
-    return s && s.match(/^\s*\d+\s*$/) !== null;
+    return s && s.match(/^\s*-??\d+\s*$/) !== null;
   }
 
   function getIn(m, keyArray, defaultValue) {
