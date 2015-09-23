@@ -446,7 +446,7 @@ Do create inforequest
 Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
-  Click by test id  applications-create-new
+  Click by test id  applications-create-new-application
   Do prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
 
 Prepare first request
