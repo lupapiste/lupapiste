@@ -1107,18 +1107,17 @@
 
 (defmigration rip-rakennus-schema-part-from-ya-katselmukset
   {:apply-when (pos? (mongo/count :applications {:permitType "YA"
-                                                 :tasks {$elemMatch {:schema-info.name "task-katselmus"
-                                                                     :data.rakennus {$exists true}}}}))}
+                                                 :tasks {$elemMatch {:schema-info.name "task-katselmus"}}}))}
   (update-applications-array
     :tasks
     (fn [task]
       (if (= "task-katselmus" (-> task :schema-info :name))
         (-> task
-          (update-in [:data] dissoc :rakennus)
+          (dissoc-in [:data :rakennus])
           (assoc-in [:schema-info :name] "task-katselmus-ya"))
         task))
     {:permitType "YA"
-     :tasks {$elemMatch {:schema-info.name "task-katselmus" :data.rakennus {$exists true}}}}))
+     :tasks {$elemMatch {:schema-info.name "task-katselmus"}}}))
 
 ;;
 ;; ****** NOTE! ******
