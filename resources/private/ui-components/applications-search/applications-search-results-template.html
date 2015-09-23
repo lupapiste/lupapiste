@@ -46,7 +46,7 @@
               <td class="applications-search-results__indicator"
                   data-bind="if: $data.authorityNotice || $data.urgency !== 'normal'"
                   data-test-col-name="urgent">
-                <div class="application-search-results__urgency first"
+                <div class="application-search-results__urgency"
                      data-bind="click: _.partialRight($parent.openApplication, 'notice'), clickBubble: false,
                                 attr: {title: _.trim($data.authorityNotice) ? loc('notice.prompt') + ': ' + _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency])},
                                 css: $data.urgency">
@@ -54,6 +54,14 @@
                 </div>
               </td>
               <!-- /ko -->
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.indicators > 0"
+                  data-test-col-name="indicators">
+                <div data-bind="attr: {title: loc('info.title')}">
+                  <i class="lupicon-circle-star"></i>
+                </div>
+              </td>
 
               <td class="applications-search-results__indicator"
                   data-bind="if: $data.attachmentsRequiringAction > 0,
@@ -72,14 +80,6 @@
                 <div data-bind="attr: {title: loc('conversation.title')}">
                   <i class="lupicon-conversation"></i>
                   <span data-bind="text: $data.unseenComments"></span>
-                </div>
-              </td>
-
-              <td class="applications-search-results__indicator"
-                  data-bind="if: $data.indicators > 0"
-                  data-test-col-name="indicators">
-                <div class="last" data-bind="attr: {title: loc('info.title')}">
-                  <i class="lupicon-circle-star"></i>
                 </div>
               </td>
 
