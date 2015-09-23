@@ -162,6 +162,20 @@ Sonja trys to overwrite MEGA filter
   Input text  new-filter-name  MEGA
   Wait Until  Element Should Be Visible  //div[@data-test-id="new-filter-submit-button"]//span[contains(text(), "Nimi on jo käytössä")]
 
+Sonja removes sort-by-location filter
+  Click by test id  toggle-saved-filters
+  Wait Until  Element should be visible  xpath=//div[@data-test-id="advanced-filters"]
+  Wait Until  Click Element  //div[@data-test-id="remove-filter-sort-by-location"]//button[@data-test-id="remove-button"]
+  Wait Until  Click Element  //div[@data-test-id="remove-filter-sort-by-location"]//button[@data-test-id="cancel-remove-button"]
+  Wait Until  Click Element  //div[@data-test-id="remove-filter-sort-by-location"]//button[@data-test-id="remove-button"]
+  Wait Until  Click Element  //div[@data-test-id="remove-filter-sort-by-location"]//button[@data-test-id="confirm-remove-button"]
+  Wait Until  Element should not be visible  //div[@data-test-id="saved-filter-row-sort-by-location"]
+
+Sonja saves foobar filter
+  Save advanced filter  foobar
+  Wait Until  Element should be visible  //div[@data-test-id="saved-filter-row-foobar"]
+  Wait Until  Element should not be visible  //div[@data-test-id="saved-filter-row-sort-by-location"]
+
 
 *** Keywords ***
 Handler filter should contain text
