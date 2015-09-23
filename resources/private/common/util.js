@@ -103,6 +103,10 @@ var util = (function($) {
   }
 
   function isNum(s) {
+    return s && s.match(/^\s*-??\d+\s*$/) !== null;
+  }
+
+  function isNonNegative(s) {
     return s && s.match(/^\s*\d+\s*$/) !== null;
   }
 
@@ -229,10 +233,11 @@ var util = (function($) {
     return [strOrArr + suffix];
   }
 
-  function filterDataByQuery(data, q, selected) {
+  function filterDataByQuery(data, q, selected, label) {
+    label = label || "label";
     return _.filter(data, function(item) {
       return _.reduce(q.split(" "), function(result, word) {
-        return !_.some(selected, item) && _.contains(item.label.toUpperCase(), word.toUpperCase()) && result;
+        return !_.some(selected, item) && _.contains(item[label].toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
   }
@@ -279,7 +284,8 @@ var util = (function($) {
     randomElementId: randomElementId,
     withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery,
-    showSavedIndicator: showSavedIndicator
+    showSavedIndicator: showSavedIndicator,
+    isNonNegative: isNonNegative
   };
 
 })(jQuery);
