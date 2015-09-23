@@ -126,8 +126,7 @@
                                 <p data-bind="ltext: 'application.linkPermits'" class="link-permit-title"></p>
                                 <span class="application_summary_text" data-bind="foreach: $data">
                                     <span data-bind="visible: $data.type() === 'lupapistetunnus'" class="link-permit">
-                                        <a data-bind="click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
-                                                      attr: {'data-test-app-link-permit': $data.id}"
+                                        <a data-bind="attr: {'data-test-app-link-permit': $data.id, href: '#!/application/' + $data.id()}"
                                            data-test-id="test-application-link-permit-lupapistetunnus"
                                            class="link-permit-item">
                                             <span data-bind="text: $data.id"></span>
@@ -164,10 +163,9 @@
                                 <p data-bind="ltext: 'application.appsLinkingToUs'" class="link-permit-title"></p>
                                 <span class="application_summary_text" data-bind="foreach: $data">
                                     <span class="link-permit">
-                                        <a data-bind="click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
-                                                      attr: {'data-test-app-linking-to-us': $data.id}"
+                                        <a data-bind="attr: {'data-test-app-linking-to-us': $data.id, href: '#!/application/' + $data.id()}"
                                            data-test-id="test-application-app-linking-to-us"
-                                           href="#" class="link-permit-item">
+                                           class="link-permit-item">
                                             <span data-bind="text: $data.id"></span>
                                             -
                                             <span data-bind="ltext: 'operations.' + $data.operation()"></span>
