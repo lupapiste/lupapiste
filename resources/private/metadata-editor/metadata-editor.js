@@ -132,7 +132,6 @@
       if (self.attachmentId()) command = "store-tos-metadata-for-attachment";
       if (self.statementId()) command = "store-tos-metadata-for-statement";
       if (self.verdictId()) command = "store-tos-metadata-for-verdict";
-      console.log(" metadata save calling command: " + command + ", applicationId: " + self.applicationId() + ", verdictId: " + self.verdictId() );
       ajax.command(command)
         .json({id: self.applicationId(), attachmentId: self.attachmentId(), statementId: self.statementId(), verdictId: self.verdictId(), metadata: metadata})
         .success(function() {
