@@ -12,10 +12,19 @@ LUPAPISTE.PropertyGroupModel = function(params) {
     return [self.documentId, "maaraalaTunnus"].join("-");
   });
 
+  self.propertyId = ko.pureComputed(function() {
+    return util.getIn(params, ["model", "kiinteistoTunnus", "value"]) ||
+           lupapisteApp.models.application.propertyId();
+  });
+
   var partitionedSchemas = _.partition(self.subSchemas, function(schema) {
     return schema.name === "maaraalaTunnus";
   });
   // maaraalaSchema: [[{name: "maaraalaTunnus", ...}], [{name: "..."}, {...}]] -> {name: "maaraalaTunnus"}
   self.maaraalaSchema = _.first(_.first(partitionedSchemas));
   self.otherSchemas = _.last(partitionedSchemas);
+
+  self.otherSchemas = _.filter(self.otherSchemas, function(schema) {
+    return schema.hidden !== "true";
+  });
 };

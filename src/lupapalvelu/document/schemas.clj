@@ -870,6 +870,7 @@
                                 :type :group
                                 :uicomponent :propertyGroup
                                 :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size "s"}
+                                       {:name "kiinteistoTunnus" :type :string :hidden :true}
                                        ;{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                                        {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}
                                        {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-string}

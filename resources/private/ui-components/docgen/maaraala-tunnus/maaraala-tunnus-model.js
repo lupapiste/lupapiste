@@ -11,7 +11,7 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
 
   self.isMaaraala = params.isMaaraala;
 
-  var propertyId = params.propertyId || lupapisteApp.models.application.propertyId();
+  var propertyId = params.propertyId();
   self.applicationId = params.applicationId || lupapisteApp.models.application.id();
   
   self.propertyId = ko.pureComputed(function() {
