@@ -60,7 +60,7 @@
                  [org.geotools/gt-referencing "12.4"]
                  [org.geotools/gt-epsg-wkt "12.4"]
                  [org.clojure/data.json "0.2.6"]
-                 [lupapiste/commons "0.5.7"]]
+                 [lupapiste/commons "0.5.10"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
