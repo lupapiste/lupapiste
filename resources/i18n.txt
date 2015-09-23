@@ -5,3 +5,6 @@ application.dialog.add-property.submit: Lisää hakemukseen
 kiinteisto.kiinteisto.kiinteistoTunnus: Kiinteistötunnus
 error.rakennusvalitsin-muu: Manuaalinen rakennusnumero syötettävä
 application.warningsInDocument: Lomakkeilla olevat varoitukset
+kiinteisto.maaraala: Kyseessä määräala
+kiinteisto.maaraala.label: Määräala
+kiinteisto.kiinteisto.label: Kiinteistö

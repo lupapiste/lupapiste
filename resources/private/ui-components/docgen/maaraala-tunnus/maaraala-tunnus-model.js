@@ -16,10 +16,10 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   
   self.propertyId = ko.pureComputed(function() {
     var humanizedPropId = util.prop.toHumanFormat(propertyId);
-    return self.isMaaraala() ? humanizedPropId + "-M" : humanizedPropId; // TODO: loc
+    return self.isMaaraala() ? humanizedPropId + "-M" : humanizedPropId;
   });
 
   self.propertyIdLabel = ko.pureComputed(function() {
-    return self.isMaaraala() ? "Määräala" : "Kiinteistötunnus"; // TODO: loc
+    return self.isMaaraala() ? loc("kiinteisto.maaraala.label") : loc("kiinteisto.kiinteisto.label");
   });
 };
