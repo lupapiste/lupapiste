@@ -8,6 +8,10 @@ LUPAPISTE.PropertyGroupModel = function(params) {
   self.isMaaraala = ko.observable(false);
   self.documentId = params.documentId;
 
+  self.checkboxId = ko.pureComputed(function() {
+    return [self.documentId, "maaraalaTunnus"].join("-");
+  });
+
   var partitionedSchemas = _.partition(self.subSchemas, function(schema) {
     return schema.name === "maaraalaTunnus";
   });
