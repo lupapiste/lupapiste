@@ -7865,28 +7865,20 @@ div.search i {
 /* line 118, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator {
   color: #f39129;
-  padding-left: 6px;
-  padding-right: 6px;
+  padding: 6px 0 0 0 !important;
 }
-/* line 122, ../sass/partials/_applications_search.scss */
+/* line 121, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div {
   text-align: center;
   height: auto !important;
-  padding: 3px 0 0 0 !important;
+  padding: 0 6px !important;
+  white-space: nowrap;
 }
-/* line 126, ../sass/partials/_applications_search.scss */
-.applications-search-results__indicator div.first {
-  text-align: right;
-}
-/* line 129, ../sass/partials/_applications_search.scss */
-.applications-search-results__indicator div.last {
-  text-align: left;
-}
-/* line 134, ../sass/partials/_applications_search.scss */
+/* line 128, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.urgent {
   color: #df3215;
 }
-/* line 137, ../sass/partials/_applications_search.scss */
+/* line 131, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.pending {
   color: #f39129;
 }
