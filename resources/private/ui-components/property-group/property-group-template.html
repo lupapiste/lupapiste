@@ -6,7 +6,8 @@
       <div class="form-group" data-bind="attr: {id: self.groupId}">
         <div class="property-group-header">
           <label class="form-label form-label-property-group" data-bind="ltext: groupLabel"></label>
-          <input id="asdasd" class="maaraala-checkbox" type="checkbox" data-bind="checked: isMaaraala"></input> <!-- TODO: generate id/for properly -->
+          
+          <input id="asdasd" class="maaraala-checkbox" type="checkbox" data-bind="checked: isMaaraala"><!-- TODO: generate id/for properly -->
           <label for="asdasd">
             Kyseessä määräala <!-- TODO: loc -->
           </label>  
@@ -17,6 +18,7 @@
              data-bind="component: { name: 'maaraala-tunnus',
                                      params: { schema: maaraalaSchema,
                                                path: path,
+                                               documentId: documentId,
                                                model: maaraalaSchema.model,
                                                isMaaraala: isMaaraala }}"></div>
 

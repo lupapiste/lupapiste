@@ -2,6 +2,8 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   "use strict";
   var self = this;
 
+  self.documentId = params.documentId;
+
   self.schema = _.extend(_.cloneDeep(params.schema), {
     label: false
   });
@@ -10,19 +12,14 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   self.isMaaraala = params.isMaaraala;
 
   var propertyId = params.propertyId || lupapisteApp.models.application.propertyId();
+  self.applicationId = params.applicationId || lupapisteApp.models.application.id();
   
   self.propertyId = ko.pureComputed(function() {
     var humanizedPropId = util.prop.toHumanFormat(propertyId);
-    return self.isMaaraala() ? humanizedPropId + "-M" : humanizedPropId;
+    return self.isMaaraala() ? humanizedPropId + "-M" : humanizedPropId; // TODO: loc
   });
 
   self.propertyIdLabel = ko.pureComputed(function() {
-    return self.isMaaraala() ? "Määräala" : "Kiinteistötunnus";
+    return self.isMaaraala() ? "Määräala" : "Kiinteistötunnus"; // TODO: loc
   });
-  
-  self.maaraalaTunnus = ko.observable("");
-  var saveFun = function() {
-    console.log("saving maaraalaTunnus");
-  };
-  self.maaraalaTunnus.subscribe(_.debounce(saveFun, 500));
 };
