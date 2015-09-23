@@ -29,29 +29,29 @@
     <div>
       <form>
         <label class="form-label" data-bind="ltext: 'verdict.id', css: {tip: !backendId()}"></label><br/>
-        <input type="text" class="form-input long" data-bind="attr: {placeholder: loc('verdict.id.hint')}, value: backendId, disable: !$root.authorization.ok('save-verdict-draft')" id="backend-id"></input>
+        <input type="text" class="form-input long" data-bind="attr: {placeholder: loc('verdict.id.hint')}, value: backendId, disable: !$root.authorization.ok('save-verdict-draft')" id="backend-id"/>
 
         <label for="verdict-type-select" class="form-label" data-bind="ltext: 'verdict.status', css: {tip: !status()}"></label><br/>
         <select id="verdict-type-select" class="form-input combobox" data-bind="options: statuses, optionsText: function(item) { return loc('verdict.status.'+item);}, value: status, optionsCaption: loc('choose'), disable: !$root.authorization.ok('save-verdict-draft')"></select>
 
         <label class="form-label" data-bind="ltext: 'verdict.name', css: {tip: !name()}"></label><br/>
-        <input type="text" class="form-input long" data-bind="value: name, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-name"></input>
+        <input type="text" class="form-input long" data-bind="value: name, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-name"/>
 
         <label class="form-label" data-bind="ltext: 'verdict.given', css: {tip: !given()}"></label><br/>
-        <input type="text" class="form-input long" data-bind="datepicker: given, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-given"></input>
+        <input type="text" class="form-input long" data-bind="datepicker: given, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-given"/>
 
         <label class="form-label" data-bind="ltext: 'verdict.official', css: {tip: !official()}"></label><br/>
-        <input type="text" class="form-input long" data-bind="datepicker: official, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-official"></input>
+        <input type="text" class="form-input long" data-bind="datepicker: official, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-official"/>
 
         <label class="form-label" data-bind="ltext: 'verdict.text'"></label><br/>
         <textarea data-bind="value: text" rows=10 class="form-input textarea really-long high"></textarea>
 
         <label class="form-label" data-bind="ltext: 'verdict.section'"></label><br/>
-        <input type="text" class="form-input" data-bind="value: section, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-section"></input>
+        <input type="text" class="form-input" data-bind="value: section, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-section"/>
 
         <div>
           <label class="form-entry form-label">
-            <input type="checkbox" data-bind="checked: agreement, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-agreement"></input>
+            <input type="checkbox" data-bind="checked: agreement, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-agreement"/>
             <span data-bind="ltext: 'verdict.agreement'"></span>
           </label>
         </div>

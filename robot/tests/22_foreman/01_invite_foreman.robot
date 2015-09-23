@@ -151,8 +151,8 @@ Pena can link existing foreman application to foreman task
   Select From List By Value  foreman-selection  ${foremanAppId}
 
 Pena can move to linked foreman application and back
-  Wait until  Click element  xpath=//a[@data-test-id='foreman-application-link-${foremanAppId}']
-  Wait until  Element should contain  xpath=//span[@data-test-id='application-id']  ${foremanAppId}
+  Click by test id  foreman-application-link-${foremanAppId}
+  Wait until  Element text should be  xpath=//span[@data-test-id='application-id']  ${foremanAppId}
   Click by test id  test-application-link-permit-lupapistetunnus
 
 Pena can start invite flow from tasks tab

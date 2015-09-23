@@ -8,7 +8,7 @@
           <thead>
             <tr> <!-- TODO refactor with foreach and add operation sorter -->
               <th colspan="2" data-bind="ltext: 'applications.indicators',
-                                         attr: {colspan: lupapisteApp.models.currentUser.isAuthority() ? '2' : '1'}"></th>
+                                         attr: {colspan: lupapisteApp.models.currentUser.isAuthority() ? '3' : '2'}"></th>
               <th class="sorting" data-bind="click: _.partial(sortBy, 'type'),
                                              ltext: 'applications.type',
                                              css: {asc: dataProvider.sort.field() === 'type' ? dataProvider.sort.asc() : false,
@@ -43,18 +43,31 @@
           <tbody data-bind="foreach: data">
             <tr class="application-row" data-bind="click: $parent.openApplication, attr: {'data-id': $data.id, 'data-test-address': $data.address}">
               <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
-              <td data-bind="if: $data.authorityNotice || $data.urgency !== 'normal'" class="applications-search-results__indicator" data-test-col-name="urgent">
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.authorityNotice || $data.urgency !== 'normal'"
+                  data-test-col-name="urgent">
                 <div class="application-search-results__urgency first"
                      data-bind="click: _.partialRight($parent.openApplication, 'notice'), clickBubble: false,
                                 attr: {title: _.trim($data.authorityNotice) ? loc('notice.prompt') + ': ' + _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency])},
                                 css: $data.urgency">
-                  <i  data-bind="css: $data.urgencyClass"></i>
+                  <i data-bind="css: $data.urgencyClass"></i>
                 </div>
               </td>
               <!-- /ko -->
-              <td data-bind="if: $data.indicators > 0" class="applications-search-results__indicator" data-test-col-name="indicators">
-                <div class="second">
-                  <i class="lupicon-circle-star" data-bind="attr: {title: loc('info.title')}"></i>
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.unseenComments > 0,
+                             click: _.partialRight($parent.openApplication, 'conversation'), clickBubble: false"
+                  data-test-col-name="unseenComments">
+                <div data-bind="attr: {title: loc('conversation.title')}">
+                  <i class="lupicon-comment"></i>
+                </div>
+              </td>
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.indicators > 0"
+                  data-test-col-name="indicators">
+                <div class="last" data-bind="attr: {title: loc('info.title')}">
+                  <i class="lupicon-circle-star"></i>
                 </div>
               </td>
               <td data-bind="ltext: $data.kind" data-test-col-name="type"></td>
