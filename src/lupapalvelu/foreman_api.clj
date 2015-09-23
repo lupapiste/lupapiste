@@ -4,6 +4,7 @@
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [sade.core :refer :all]
@@ -20,7 +21,13 @@
   (let [foreman-app (foreman/new-foreman-application command)
         new-application-docs (foreman/create-foreman-docs application foreman-app foremanRole)
         foreman-app (assoc foreman-app :documents new-application-docs)
-        task                 (util/find-by-id taskId (:tasks application))]
+        task                 (util/find-by-id taskId (:tasks application))
+
+        applicants (tools/unwrapped
+                     (domain/get-applicant-documents new-application-docs))
+        auth (:auth application)
+        applicant-invites (foreman/applicant-invites applicants auth)
+        ]
 
     (application/do-add-link-permit foreman-app (:id application))
     (application/insert-application foreman-app)

@@ -174,3 +174,27 @@
       (remove #(#{"hankkeen-kuvaus-minimum" "hakija-r" "tyonjohtaja-v2"} (-> % :schema-info :name)))
       (concat (remove nil? [hakija-docs hankkeen-kuvaus-doc tyonjohtaja-doc]))
       flatten)))
+
+(defn- henkilo-invite [applicant auth]
+  (when-let [email (get-in applicant [:data :henkilo :yhteystiedot :email])]
+    (when (some #(= email (:username %)) auth)
+      {:email email
+       :role "writer"})))
+
+(defn- yritys-invite [applicant auth]
+  (if-let [company-id (get-in applicant [:data :yritys :companyId])]
+    {:company-id company-id}
+    (when-let [contact-email (get-in applicant [:data :yritys :yhteyshenkilo :yhteystiedot :email])]
+      (some
+        #(when (= contact-email (:username %))
+           {:email email
+            :role "writer"})
+        auth))))
+
+(defn applicant-invites [applicants auth]
+  (remove nil? (map
+                 #(condp = (-> % :data :_selected)
+                    "henkilo" (henkilo-invite % auth)
+                    "yritys" (yritys-invite % auth)
+                    nil)
+                 applicants)))
