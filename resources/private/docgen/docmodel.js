@@ -1443,13 +1443,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return div;
   }
 
-  function getPropertyId(model) {
-    if (model.kiinteistoTunnus) {
-      return model.kiinteistoTunnus.value;
-    }
-    return undefined;
-  }
-
   var builders = {
     group: buildGroup,
     docgenGroup: buildDocgenGroup,
