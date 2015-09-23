@@ -17,7 +17,7 @@
       (assoc-in [:data :henkilo :userId] {:value nil})))
 
 (defcommand create-foreman-application
-  {:parameters [id taskId foremanRole]
+  {:parameters [id taskId foremanRole foremanEmail]
    :user-roles #{:applicant :authority}
    :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}

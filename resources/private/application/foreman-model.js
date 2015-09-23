@@ -289,7 +289,8 @@ LUPAPISTE.ForemanModel = function() {
       // 2. create "tyonjohtajan ilmoitus" application
       ajax.command("create-foreman-application", { "id": self.application().id,
                                                    "taskId": self.taskId() ? self.taskId() : "",
-                                                   "foremanRole": self.selectedRole() ? self.selectedRole() : "" })
+                                                   "foremanRole": self.selectedRole() ? self.selectedRole() : "",
+                                                   "foremanEmail": self.email() ? self.email() : "" })
         .processing(self.processing)
         .pending(self.pending)
         .success(function(data) {
