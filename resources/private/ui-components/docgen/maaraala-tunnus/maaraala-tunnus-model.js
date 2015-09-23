@@ -2,6 +2,7 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   "use strict";
   var self = this;
 
+  self.model = params.model;
   self.documentId = params.documentId;
 
   self.schema = _.extend(_.cloneDeep(params.schema), {
@@ -10,6 +11,9 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   self.path = params.path;
 
   self.isMaaraala = params.isMaaraala;
+  if(params.model && !_.isEmpty(params.model.value)) {
+    self.isMaaraala(true);
+  }
 
   var propertyId = params.propertyId();
   self.applicationId = params.applicationId || lupapisteApp.models.application.id();

@@ -9,10 +9,11 @@
         <span class="kiintun-and-maaraalatunnus">
           <span class="form-maaraala" data-bind="text: propertyId"></span>
           <span data-bind="component: {name: 'docgen-inline-string',
-                                       params: {schema: schema,
-                                                applicationId: applicationId,
-                                                documentId: documentId,
-                                                path: path }},
+                                       params: { schema: schema,
+                                                 applicationId: applicationId,
+                                                 documentId: documentId,
+                                                 path: path,
+                                                 model: model }},
                            style: {visibility: isMaaraala() ? 'visible' : 'hidden'}"></div>
         </span>
       </span>
