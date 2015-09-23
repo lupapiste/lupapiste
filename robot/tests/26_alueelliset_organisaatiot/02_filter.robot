@@ -36,36 +36,29 @@ Sonja selects application sorting
   Click sorting field  Tyyppi
   Sorting Should Be Set As  Tyyppi  asc
 
-Sonja selects handler
+...selects handler
   Select From Autocomplete  div[@data-test-id="handlers-filter-component"]  ${sonja name}
 
-Sonja adds item into areas filter
+...adds item into areas filter
   Select From Autocomplete  div[@data-test-id="areas-filter-component"]  Keskusta
 
-Sonja adds item into organizations filter
+...adds item into organizations filter
   Select From Autocomplete  div[@data-test-id="organization-filter-component"]  Sipoon yleisten alueiden rakentaminen
 
-Sonja adds item into operations filter
+...adds item into operations filter
   Select From Autocomplete  div[@data-test-id="operations-filter-component"]  Asuinkerrostalon tai rivitalon rakentaminen
 
-Sonja adds item into tags filter
+...adds item into tags filter
   Select From Autocomplete  div[@data-test-id="tags-filter-component"]  ylämaa
 
-Sonja saves MEGA filter
+...saves MEGA filter
   Save advanced filter  MEGA
 
-Refresh the page
+Sonja reloads the page and expects that saved filter is applied as default
   Reload Page
-  Click by test id  toggle-advanced-filters
-  Wait Until  Element should be visible  xpath=//div[@data-test-id="advanced-filters"]
-  Filter item should contain X number of tags  handler  0
-  Filter item should contain X number of tags  areas  0
-  Filter item should contain X number of tags  tags  0
-  Filter item should contain X number of tags  operations  0
-  Filter item should contain X number of tags  organization  0
+  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "MEGA")]
 
-Sonja selects MEGA filter
-  Select From Autocomplete  div[@data-test-id="select-advanced-filter"]  MEGA
+...filter setup should be shown as default
   Filter should contain tag  handler  ${sonja name}
   Filter should contain tag  areas  Keskusta
   Filter should contain tag  tags  ylämaa
@@ -114,7 +107,6 @@ Filter should be set as before visiting application
   Filter item should contain X number of tags  operations  1
   Filter item should contain X number of tags  organization  0
   Sorting Should Be Set As  Tyyppi  asc
-  Element Should Not Be Visible  //div[@data-test-id="handlers-filter-component"]//span[contains(text(), "MEGA")]
 
 Sonja removes the operations filter
   Wait until  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//ul[@class="tags"]//li[@class="tag"]//i
@@ -129,36 +121,42 @@ Sonja sets sorting by location
 Sonja saves sort-by-location filter
   Save advanced filter  sort-by-location
 
-Saved filters should be open
+...saved filters should be open
   Wait Until  Element Should Be Visible  //div[@data-test-id="saved-filter-row-sort-by-location"]
   Wait Until  Element Should Be Visible  //div[@data-test-id="saved-filter-row-MEGA"]
 
-Sonja sets mega filter as default
-  Wait Until  Click by test id  set-MEGA-as-default-filter
+Sonja sets sort-by-location filter as default
+  Wait Until  Click by test id  set-sort-by-location-as-default-filter
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "sort-by-location")]
 
 Sonja closes saved filters
   Click by test id  toggle-saved-filters
   Wait Until  Element Should Not Be Visible  //div[@data-test-id="saved-filter-row-MEGA"]
 
-Default filter should be mega filter
+Default filter should be sort-by-location filter
   Reload page
-  Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "MEGA")]
-  Wait Until  Element should be visible  xpath=//div[@data-test-id="advanced-filters"]
-  Handler filter should contain text  ${sonja name}
-  Filter item should contain X number of tags  areas  1
-  Filter item should contain X number of tags  tags  1
-  Filter item should contain X number of tags  operations  1
-  Filter item should contain X number of tags  organization  1
+  Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "sort-by-location")]
 
-Sonja selects sort-by-location filter
-  Select From Autocomplete  div[@data-test-id="select-advanced-filter"]  sort-by-location
+...no advanced filters shown
+  Wait Until  Element should Not be visible  xpath=//div[@data-test-id="advanced-filters"]
+
+...filters and sorting are set
+  Click by test id  toggle-advanced-filters
+  Wait Until  Element should be visible  xpath=//div[@data-test-id="advanced-filters"]
   Handler filter should contain text  ${all handlers}
   Filter item should contain X number of tags  areas  0
   Filter item should contain X number of tags  tags  0
   Filter item should contain X number of tags  operations  0
   Filter item should contain X number of tags  organization  0
   Sorting Should Be Set As  Sijainti  asc
+
+Sonja selects MEGA filter
+  Select From Autocomplete  div[@data-test-id="select-advanced-filter"]  MEGA
+  Wait Until  Handler filter should contain text  ${sonja name}
+  Filter item should contain X number of tags  areas  1
+  Filter item should contain X number of tags  tags  1
+  Filter item should contain X number of tags  operations  1
+  Filter item should contain X number of tags  organization  1
 
 Sonja trys to overwrite MEGA filter
   Input text  new-filter-name  MEGA
