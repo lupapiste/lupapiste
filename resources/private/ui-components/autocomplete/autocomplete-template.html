@@ -30,7 +30,7 @@
         </div>
         <div class="autocomplete-dropdown" data-bind="visible: false, fader: dropdownVisible, duration: 100">
           <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
-                 data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, blur: blur}"></input>
+                 data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, blur: blur}"/>
           <!-- ko if: data().length > 0 -->
           <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}, css: {'autocomplete-result-grouped': groupedResults}">
             <!-- ko foreach: data -->
