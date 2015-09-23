@@ -88,6 +88,7 @@
     var self = this;
     self.attachmentId = params.attachmentId ? params.attachmentId : ko.observable(null);
     self.statementId = params.statementId ? params.statementId : ko.observable(null);
+    self.verdictId = params.verdictId ? params.verdictId : ko.observable(null);
     self.applicationId = params.applicationId;
     self.metadata = params.metadata;
     self.editable = ko.observable(false);
@@ -127,10 +128,13 @@
 
     self.save = function() {
       var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap);
-      var command = self.attachmentId() ? "store-tos-metadata-for-attachment" : self.statementId() ? "store-tos-metadata-for-statement" : "store-tos-metadata-for-application";
+      var command = "store-tos-metadata-for-application";
+      if (self.attachmentId()) command = "store-tos-metadata-for-attachment";
+      if (self.statementId()) command = "store-tos-metadata-for-statement";
+      if (self.verdictId()) return;
 
       ajax.command(command)
-        .json({id: self.applicationId(), attachmentId: self.attachmentId(), statementId: self.statementId(), metadata: metadata})
+        .json({id: self.applicationId(), attachmentId: self.attachmentId(), statementId: self.statementId(), verdictId: self.verdictId(), metadata: metadata})
         .success(function() {
           self.metadata(ko.mapping.fromJS(ko.mapping.toJS(self.editedMetadata)));
           self.editable(false);

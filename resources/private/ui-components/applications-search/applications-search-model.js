@@ -16,59 +16,69 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.searchFieldDelayed = ko.pureComputed(self.searchField).extend({rateLimit: {method: "notifyWhenChangesStop", timeout: 750}});
 
-  self.handler = ko.observable();
-
   self.limit = ko.observable(25);
 
-  self.sort = util.getIn(lupapisteApp.models.currentUser, ["applicationFilters", 0, "sort"])
-              || {field: ko.observable("modified"), asc: ko.observable(false)};
+  self.sort = util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]) ||
+              {field: ko.observable("modified"), asc: ko.observable(false)};
+
+  lupapisteApp.services.applicationFiltersService.selected.subscribe(function(selected) {
+    if (selected) {
+      self.sort.field(selected.sort.field());
+      self.sort.asc(selected.sort.asc());
+    }
+  });
 
   self.skip = ko.observable(0);
 
   self.pending = ko.observable(false);
+
   ko.computed(function() {
     return self.pending() ? pageutil.showAjaxWait(loc("applications.loading")) : pageutil.hideAjaxWait();
   });
 
+  function wrapData(data) {
+    data.applications = _.map(data.applications, function(item) {
+      switch(item.urgency) {
+        case "urgent":
+          item.urgencyClass = "lupicon-warning";
+          break;
+        case "pending":
+          item.urgencyClass = "lupicon-circle-minus";
+          break;
+      }
+      return item;
+    });
+    return data;
+  }
+
   self.onSuccess = function(res) {
-    self.data(res.data);
-    self.applications(res.data.applications);
+    var data = wrapData(res.data);
+    self.data(data);
+    self.applications(data.applications);
   };
 
+  function searchFields() {
+    return { searchText: self.searchFieldDelayed(),
+             tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
+             organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
+             operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
+             handlers: _.pluck(lupapisteApp.services.handlerFilterService.selected(), "id"),
+             applicationType: self.applicationType(),
+             areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
+             limit: self.limit(),
+             sort: ko.mapping.toJS(self.sort),
+             skip: self.skip() };
+  }
+
   ko.computed(function() {
-    ajax.datatables("applications-search",
-      {
-        searchText: self.searchFieldDelayed(),
-        tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
-        organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
-        operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
-        handler: self.handler() ? self.handler().id : undefined,
-        applicationType: self.applicationType(),
-        areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
-        limit: self.limit(),
-        sort: ko.mapping.toJS(self.sort),
-        skip: self.skip()
-      })
+    ajax.datatables("applications-search", searchFields())
       .success(self.onSuccess)
       .pending(self.pending)
     .call();
   }).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
 
-
   hub.onPageLoad("applications", function() {
-    ajax.datatables("applications-search",
-      {
-        searchText: self.searchField(),
-        tags: _.pluck(lupapisteApp.services.tagFilterService.selected, "id"),
-        organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
-        operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
-        handler: self.handler() ? self.handler().id : undefined,
-        applicationType: self.applicationType(),
-        areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
-        limit: self.limit(),
-        sort: ko.mapping.toJS(self.sort),
-        skip: self.skip()
-      })
+    ajax.datatables("applications-search", searchFields())
       .success(self.onSuccess)
     .call();
   });

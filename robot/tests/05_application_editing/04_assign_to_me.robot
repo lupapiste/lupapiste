@@ -30,7 +30,7 @@ Mikko could add an operation
 
 Sonja sees comment indicator on applications list
   Sonja logs in
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-comments']  1
+  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-comment']
 
 Application is not assigned
   Open application  ${appname}  ${propertyId}
@@ -77,10 +77,11 @@ Open latest email
   Page Should Contain  ${appname}
   Page Should Contain  mikko@example.com
 
-Clicking the first link in email should redirect to front page
+Clicking the first link in email should redirect 'login required' page
   Click link  xpath=//a
-  Wait until page contains element  login-username
   Wait Until  Title should be  Lupapiste
+  Wait Until  Element Should Be Visible  hashbang
+  Click by test id  login
 
 Application is shown after login
   # Manual login because 'Mikko logs in' checks a different landing page

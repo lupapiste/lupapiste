@@ -827,6 +827,20 @@
                                     </i>
                                 </h2>
 
+                                <!-- metadata -->
+                                <!-- ko if: features.enabled('tiedonohjaus') && !_.isEmpty($data.metadata) && $root.authorization.ok('store-tos-metadata-for-attachment') -->
+                                <div class="feature" style="margin-top: 15px;">
+                                    <button id="show-tos-metadata" class="btn" data-bind="click: $data.toggleTosMetadata, visible: !_.isEmpty(metadata) && $root.authorization.ok('store-tos-metadata-for-application')">
+                                        <i data-bind="css: {'lupicon-chevron-small-right': !showTosMetadata(), 'lupicon-chevron-small-down': showTosMetadata}"></i>
+                                        <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
+                                    </button>
+
+                                    <div class="tos-metadata-content" data-bind="slider: $data.showTosMetadata, visible: !_.isEmpty($data.metadata)">
+                                        <div data-bind="component: {name: 'metadata-editor', params: {verdictId: $data.id, metadata: ko.observable($data.metadata), applicationId: $data.applicationId}}"></div>
+                                    </div>
+                                </div>
+                                <!-- /ko -->
+
                                 <!--  ko if:  $data.paatokset -->
                                 <div data-bind="foreach: paatokset, attr: {'data-test-id' : 'given-verdict-id-' + $index() + '-content'}">
                                     <div class="accordion">
@@ -1027,11 +1041,6 @@
                                                         <div data-bind="ltext: 'verdict.poytakirjat.missing'"></div>
                                                         <!-- /ko -->
                                                     </div>
-
-                                                    <!-- metadata -->
-
-
-
                                                 </div>
                                             </div>
                                         </div>

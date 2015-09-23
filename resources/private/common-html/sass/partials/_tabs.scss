@@ -9,9 +9,8 @@ $tab-size: 2px;
   background: white;
   color: $gray51;
   padding: {
-    left: $marginS;
-    right: $marginS;
-    top: $marginS / 2;
+    left: $marginM;
+    right: $marginM;
     /* top: $marginS; */
     /* bottom: $marginS; */
   }
@@ -69,6 +68,7 @@ $indicator-size: 24px;
     a {
       @include tab-style;
       position: relative;
+      outline: 0;
     }
 
     &.active a {

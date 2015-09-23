@@ -117,7 +117,7 @@ Stamping page opens, verdict details can be seen
 
 Mikko sees that the application has verdicts
   Mikko logs in
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  3
+  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-circle-star']
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
   Verdict is given  2013-01  0
