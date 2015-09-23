@@ -870,13 +870,12 @@
                                 :type :group
                                 :uicomponent :propertyGroup
                                 :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size "s"}
-                                       {:name "kiinteistoTunnus" :type :string :readonly true}
                                        ;{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
-                                       {:name "tilanNimi" :type :string :readonly true}
-                                       {:name "rekisterointipvm" :type :string :readonly true}
-                                       {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
-                                       {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}
-                                       {:name "rantaKytkin" :type :checkbox}]}
+                                       {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}
+                                       {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-string}
+                                       {:name "maapintaala" :type :string :readonly true :unit "hehtaaria" :uicomponent :docgen-string}
+                                       {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria" :uicomponent :docgen-string}
+                                       {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-checkbox}]}
                                {:name "hallintaperuste" :type :select :sortBy :displayname :required true
                                 :body [{:name "oma"}
                                        {:name "vuokra"}
