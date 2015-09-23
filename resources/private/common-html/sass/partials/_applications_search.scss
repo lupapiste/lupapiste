@@ -117,12 +117,11 @@ div.search {
 }
 .applications-search-results__indicator {
   color: $primary;
-  padding-left: $marginS;
-  padding-right: $marginS;
+  padding: $marginS 0 0 0 !important;
   div {
     text-align: center;
     height: auto !important;
-    padding: 3px 0 0 0 !important;
+    padding: 0 $marginS !important;
     &.first {
       text-align: right;
     }

@@ -8,7 +8,7 @@
           <thead>
             <tr> <!-- TODO refactor with foreach and add operation sorter -->
               <th colspan="2" data-bind="ltext: 'applications.indicators',
-                                         attr: {colspan: lupapisteApp.models.currentUser.isAuthority() ? '3' : '2'}"></th>
+                                         attr: {colspan: lupapisteApp.models.currentUser.isAuthority() ? '4' : '3'}"></th>
               <th class="sorting" data-bind="click: _.partial(sortBy, 'type'),
                                              ltext: 'applications.type',
                                              css: {asc: dataProvider.sort.field() === 'type' ? dataProvider.sort.asc() : false,
@@ -54,12 +54,24 @@
                 </div>
               </td>
               <!-- /ko -->
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.attachmentsRequiringAction > 0,
+                             click: _.partialRight($parent.openApplication, 'attachments'), clickBubble: false"
+                  data-test-col-name="newAttachments">
+                <div data-bind="attr: {title: loc('attachments.title')}">
+                  <i class="lupicon-paperclip"></i>
+                  <span data-bind="text: $data.attachmentsRequiringAction"></span>
+                </div>
+              </td>
+
               <td class="applications-search-results__indicator"
                   data-bind="if: $data.unseenComments > 0,
                              click: _.partialRight($parent.openApplication, 'conversation'), clickBubble: false"
                   data-test-col-name="unseenComments">
                 <div data-bind="attr: {title: loc('conversation.title')}">
-                  <i class="lupicon-comment"></i>
+                  <i class="lupicon-conversation"></i>
+                  <span data-bind="text: $data.unseenComments"></span>
                 </div>
               </td>
 
@@ -70,6 +82,7 @@
                   <i class="lupicon-circle-star"></i>
                 </div>
               </td>
+
               <td data-bind="ltext: $data.kind" data-test-col-name="type"></td>
               <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
               <td data-bind="text: $data.primaryOperation ? loc('operations.' + $data.primaryOperation.name) : ''" data-test-col-name="operation"></td>
