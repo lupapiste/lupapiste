@@ -22,12 +22,14 @@
               <span data-bind="ltext: 'newRequest.newApplication'"></span>
             </button>
 
+            <!-- ko if: authorizationModel.ok('create-application-from-previous-permit') -->
             <button data-bind="click: createWithPrevPermit"
-                    data-test-id="applications-create-with-prev-permit"
+                    data-test-id="applications-create-new-with-prev-permit"
                     class="positive application-create">
               <i class="lupicon-circle-plus"></i>
               <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span>
             </button>
+            <!-- /ko -->
           </div>
 
           <div data-bind="component: {name: 'applications-search-filter', params: {dataProvider: dataProvider}}" class="applications-search-component"></div>
