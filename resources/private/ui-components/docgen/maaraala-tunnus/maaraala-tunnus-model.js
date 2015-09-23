@@ -5,6 +5,7 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   self.model = params.model;
   self.documentId = params.documentId;
 
+  // hide input label always
   self.schema = _.extend(_.cloneDeep(params.schema), {
     label: false
   });
@@ -14,6 +15,10 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   if(params.model && !_.isEmpty(params.model.value)) {
     self.isMaaraala(true);
   }
+
+  self.visibilityState = ko.pureComputed(function () {
+    return self.isMaaraala() ? "visible" : "hidden";
+  });
 
   var propertyId = params.propertyId();
   self.applicationId = params.applicationId || lupapisteApp.models.application.id();
