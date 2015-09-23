@@ -82,14 +82,16 @@
                                                    (sc/optional-key :titleI18nkey)   sc/Str
                                                    (sc/optional-key :message)        sc/Str
                                                    (sc/optional-key :title)          sc/Str}
-           (sc/optional-key :applicationFilters)  [{(sc/optional-key :title) sc/Str
-                                                    :sort                    {:field     (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler")
-                                                                              :asc       sc/Bool}
-                                                    :filter                  {(sc/optional-key :handler) sc/Str
-                                                                              (sc/optional-key :tags) (sc/pred vector? "Tag filter should have ids in a vector")
-                                                                              (sc/optional-key :operations) (sc/pred vector? "Op filter should have ids in a vector")
-                                                                              (sc/optional-key :organizations) (sc/pred vector? "Org filter should have ids in a vector")
-                                                                              (sc/optional-key :areas) (sc/pred vector? "Area filter should have ids in a vector")}}]})
+           (sc/optional-key :defaultFilter)       {:id sc/Str}
+           (sc/optional-key :applicationFilters)  [{:id        sc/Str
+                                                    :title     sc/Str
+                                                    :sort     {:field (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler")
+                                                               :asc    sc/Bool}
+                                                    :filter   {(sc/optional-key :handlers) (sc/pred vector? "Handler filter should have ids in a vector")
+                                                               (sc/optional-key :tags) (sc/pred vector? "Tag filter should have ids in a vector")
+                                                               (sc/optional-key :operations) (sc/pred vector? "Op filter should have ids in a vector")
+                                                               (sc/optional-key :organizations) (sc/pred vector? "Org filter should have ids in a vector")
+                                                               (sc/optional-key :areas) (sc/pred vector? "Area filter should have ids in a vector")}}]})
 
 (def RegisterUser {:email     (sc/both
                                 (sc/pred util/valid-email? "Not valid email")
@@ -362,6 +364,9 @@
        (debugf "user '%s' not found with email" ~email)
        (fail! :error.user-not-found :email ~email))
      ~@body))
+
+(defn get-application-filters [id]
+  (or (:applicationFilters (get-user-by-id id)) []))
 
 ;;
 ;; ==============================================================================

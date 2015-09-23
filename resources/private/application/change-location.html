@@ -20,11 +20,11 @@
                     <div class="with-map-top">
                         <label class="form-label" data-bind ="ltext: 'newRequest.propertyId'"></label>
                         <input data-bind="textInput: propertyId, readonly: !lupapisteApp.models.currentUser.isAuthority()" data-test-id="application-new-propertyid"
-                               type="text" maxlength="20" class="form-input text long" ></input>
-                        
+                               type="text" maxlength="20" class="form-input text long" />
+
                         <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
-                        <input data-bind="textInput: address" data-test-id="application-new-address" type="text" maxlength="100" class="form-input text long" autofocus="autofocus"></input>
-                
+                        <input data-bind="textInput: address" data-test-id="application-new-address" type="text" maxlength="100" class="form-input text long" autofocus="autofocus"/>
+
                         <div data-bind="if: errorMessage" ><div data-bind="ltext: errorMessage" class="context-error"></div></div>
                     </div>
                     <div class="with-map-bottom">
@@ -35,10 +35,10 @@
                                 class="positive no-icon-pad btn-dialog"
                                 data-test-id="change-location-save">
                             <span data-bind="ltext: 'save'"></span>
-                            
+
                             <i class="wait spin lupicon-refresh"></i>
                         </button>
-                        
+
                         <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
                     </div>
               </form>
