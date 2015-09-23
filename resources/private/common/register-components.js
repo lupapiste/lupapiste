@@ -43,19 +43,19 @@ jQuery(document).ready(function() {
     {name: "applications-search-filter"},
     {name: "applications-search-filters-list"},
     {name: "applications-search-paging"},
-    {name: "autocomplete-tags", template: "autocomplete-tags-components"},
-    {name: "autocomplete-operations", template: "autocomplete-tags-components"},
-    {name: "autocomplete-organizations", template: "autocomplete-tags-components"},
-    {name: "autocomplete-areas", template: "autocomplete-tags-components"},
+    {name: "autocomplete-tags", template: "autocomplete-tags-components-template"},
+    {name: "autocomplete-operations", template: "autocomplete-tags-components-template"},
+    {name: "autocomplete-organizations", template: "autocomplete-tags-components-template"},
+    {name: "autocomplete-areas", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-handlers"},
-    {name: "autocomplete-application-tags", template: "autocomplete-tags-components"},
+    {name: "autocomplete-application-tags", template: "autocomplete-tags-components-template"},
     {name: "add-property"},
     {name: "add-property-dialog"},
     {name: "indicator"},
     {name: "accordion"},
-    {name: "text-field", model: "input-field"},
-    {name: "checkbox-field", model: "input-field"},
-    {name: "select-field", model: "input-field"},
+    {name: "text-field", model: "input-field-model"},
+    {name: "checkbox-field", model: "input-field-model"},
+    {name: "select-field", model: "input-field-model"},
     {name: "maaraala-tunnus"},
     {name: "property-group"},
     {name: "password-field"},
@@ -65,8 +65,8 @@ jQuery(document).ready(function() {
 
   _.forEach(components, function(component) {
     ko.components.register(component.name, {
-      viewModel: LUPAPISTE[_.capitalize(_.camelCase(component.model ? component.model : component.name)) + "Model"],
-      template: { element: (component.template ? component.template : component.name) + "-template"}
+      viewModel: LUPAPISTE[_.capitalize(_.camelCase(component.model ? component.model : component.name + "Model"))],
+      template: { element: (component.template ? component.template : component.name + "-template")}
     });
   });
 });
