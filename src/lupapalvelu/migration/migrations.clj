@@ -1102,8 +1102,22 @@
        (assoc user :orgAuthz)))
 
 (defmigration approver-roles-for-authorities
-  (doseq [authority (mongo/select :users {:role "authority" :orgAuthz {$exists true}})] 
+  (doseq [authority (mongo/select :users {:role "authority" :orgAuthz {$exists true}})]
     (mongo/update-by-id :users (:id authority) (add-approver-roles-for-authority authority))))
+
+(defmigration rip-rakennus-schema-part-from-ya-katselmukset
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                                 :tasks {$elemMatch {:schema-info.name "task-katselmus"}}}))}
+  (update-applications-array
+    :tasks
+    (fn [task]
+      (if (= "task-katselmus" (-> task :schema-info :name))
+        (-> task
+          (dissoc-in [:data :rakennus])
+          (assoc-in [:schema-info :name] "task-katselmus-ya"))
+        task))
+    {:permitType "YA"
+     :tasks {$elemMatch {:schema-info.name "task-katselmus"}}}))
 
 ;;
 ;; ****** NOTE! ******
