@@ -103,6 +103,10 @@ var util = (function($) {
   }
 
   function isNum(s) {
+    return s && s.match(/^\s*-??\d+\s*$/) !== null;
+  }
+
+  function isNonNegative(s) {
     return s && s.match(/^\s*\d+\s*$/) !== null;
   }
 
@@ -280,7 +284,8 @@ var util = (function($) {
     randomElementId: randomElementId,
     withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery,
-    showSavedIndicator: showSavedIndicator
+    showSavedIndicator: showSavedIndicator,
+    isNonNegative: isNonNegative
   };
 
 })(jQuery);
