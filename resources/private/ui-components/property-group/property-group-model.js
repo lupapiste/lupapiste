@@ -22,8 +22,10 @@ LUPAPISTE.PropertyGroupModel = function(params) {
   });
   // maaraalaSchema: [[{name: "maaraalaTunnus", ...}], [{name: "..."}, {...}]] -> {name: "maaraalaTunnus"}
   self.maaraalaSchema = _.first(_.first(partitionedSchemas));
-  var other = _.last(partitionedSchemas); // TODO: chain?
-  self.otherSchemas = _.reject(other, "hidden");
-
-
+  
+  self.otherSchemas = _(partitionedSchemas) // [[{name: "maaraalaTunnus", ...}], [{name: "..."}, {...}]]
+    .rest() // [[{name: "..."}, {...}]]
+    .flatten() // [{name: "..."}, {...}]
+    .reject("hidden") // remove hidden
+    .value();
 };
