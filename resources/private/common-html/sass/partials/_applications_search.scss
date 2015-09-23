@@ -117,13 +117,22 @@ div.search {
 }
 .applications-search-results__indicator {
   color: $primary;
-  padding: $marginS 0 0 0 !important;
+  padding: 3px 0 0 0 !important;
   word-wrap: break-word;
   div {
     text-align: center;
     height: auto !important;
     padding: 0 $marginS !important;
     white-space: nowrap;
+    i {
+      display: table-cell;
+    }
+    span {
+      padding-left: 2px;
+      display: table-cell;
+      vertical-align: middle;
+      color: $grey-text;
+    }
   }
   .application-search-results__urgency {
     &.urgent {
@@ -152,13 +161,12 @@ table.applications-table {
     width: 10%;
   }
   th.sixth {
-
   }
   th.seventh {
-
+    width: 5%;
   }
   th.eight {
-
+    width: 5%;
   }
   th.ninth {
     width: 10%;
