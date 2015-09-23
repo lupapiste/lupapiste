@@ -118,6 +118,7 @@ div.search {
 .applications-search-results__indicator {
   color: $primary;
   padding: $marginS 0 0 0 !important;
+  word-wrap: break-word;
   div {
     text-align: center;
     height: auto !important;
@@ -131,5 +132,35 @@ div.search {
     &.pending {
       color: $orange-dark;
     }
+  }
+}
+
+table.applications-table {
+  th.first {
+
+  }
+  th.second {
+
+  }
+  th.third {
+
+  }
+  th.fourth {
+
+  }
+  th.fifth {
+    width: 10%;
+  }
+  th.sixth {
+
+  }
+  th.seventh {
+
+  }
+  th.eight {
+
+  }
+  th.ninth {
+    width: 10%;
   }
 }
