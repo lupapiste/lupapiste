@@ -122,12 +122,7 @@ div.search {
     text-align: center;
     height: auto !important;
     padding: 0 $marginS !important;
-    &.first {
-      text-align: right;
-    }
-    &.last {
-      text-align: left;
-    }
+    white-space: nowrap;
   }
   .application-search-results__urgency {
     &.urgent {

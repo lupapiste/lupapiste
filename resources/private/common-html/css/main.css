@@ -7872,20 +7872,13 @@ div.search i {
   text-align: center;
   height: auto !important;
   padding: 0 6px !important;
-}
-/* line 125, ../sass/partials/_applications_search.scss */
-.applications-search-results__indicator div.first {
-  text-align: right;
+  white-space: nowrap;
 }
 /* line 128, ../sass/partials/_applications_search.scss */
-.applications-search-results__indicator div.last {
-  text-align: left;
-}
-/* line 133, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.urgent {
   color: #df3215;
 }
-/* line 136, ../sass/partials/_applications_search.scss */
+/* line 131, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.pending {
   color: #f39129;
 }
