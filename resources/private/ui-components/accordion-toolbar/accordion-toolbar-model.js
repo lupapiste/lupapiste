@@ -7,6 +7,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   var APPROVE  = "approve";
   var REJECTED = "rejected";
   var REJECT   = "reject";
+  var NEUTRAL  = "neutral";
 
   self.docModel = params.docModel;
   var auth = self.docModel.authorizationModel;
@@ -20,7 +21,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   self.info = self.docModel.schema.info;
   var meta = self.docModel.getMeta( params.path );
-  self.approval = ko.observable( meta ? meta._approved : null );
+  var masterApproval = ko.observable( meta ? meta._approved : null );
 
   var op = self.info.op;
 
@@ -29,20 +30,86 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     self.isOpen( !self.isOpen());
   }
 
+  // Approval resolution
+  // Abundance of alternatives causes some complexity.
+  // APPROVED: either master approval is the latest action or
+  //           master has been approved and all the (known) groups
+  //           are approved, too.
+  // REJECTED: similar to approved.
+  // NEUTRAL: if master is neutral or the groups are ambigious.
+
+  var groupApprovals = ko.observable( {});
+
+  function safeMaster() {
+    return self.docModel.safeApproval( self.model, masterApproval);
+  }
+  function laterGroups() {
+    var master = safeMaster();
+    return _.pick( groupApprovals(),
+                   function( a ) {
+                     return a && a.timestamp > master.timestamp;
+                   } );
+  }
+
+  var lastSent = {};
+  self.approval = ko.computed( function() {
+    var groups = groupApprovals();
+    var master = safeMaster();
+    var result = _.every( laterGroups(),
+                          function( a ) {
+                            return a.value === master.value;
+                          })
+               ? master
+               : {value: NEUTRAL};
+    if( !_.isEqual(lastSent, result)) {
+      lastSent = result;
+      self.docModel.approvalHubSend( result, []);
+    }
+    return result;
+  })
+
+  // Exclamation icon on the accordion should be visible
+  // if the master or any of the groups is REJECTED. Typical
+  // master overrides apply.
+  self.isSummaryRejected = ko.pureComputed( function() {
+    var master = safeMaster();
+    return master.value === REJECTED
+        || _.some( laterGroups(), function( a ) {
+          return a.value === REJECTED;
+        });
+  })
+
+  self.docModel.approvalHubSubscribe( function( data ) {
+    //console.log( "Master sub:", data.path);
+    var g = _.clone( groupApprovals() );
+    g["path" + data.path.join("-")] = data.approval;
+    groupApprovals( g );
+    // We always respond to the sender regardless whether
+    // the update triggers full broadcast.
+    self.docModel.approvalHubSend( self.approval(), [], data.path )
+    //console.log( "Group approvals:", groupApprovals());
+  } )
+
   // Pen
   // Operation description.
   self.description = ko.observable( op ? op.description : null);
   self.showDescription = op && auth.ok( "update-op-description");
   self.showEditor = ko.observable( false );
+  // It seems that _.delay (even with zero timer) has the side-effect
+  // that allows KO update the rest of the UI before Stickyfill update.
+  self.showEditor.subscribe( _.partial( _.delay, window.Stickyfill.rebuild, 0 ));
   self.toggleEditor = function() {
     self.showEditor( !self.showEditor());
-    window.Stickyfill.rebuild();
   }
   self.specialKeys = function( data, event ) {
-    // Enter closes bubble
-    if( event.keyCode === 13 ) {
+    // Enter and Esc also close the bubble. Since clicking outside
+    // the bubble will save description Esc is not undo either.
+    // However, it would be easy to handle Esc as undo here.
+    switch( event.keyCode ) {
+      case 13: // Enter
+      case 27: // Esc
       self.showEditor( false );
-      window.Stickyfill.rebuild();
+      break;
     }
     return true;
   }
@@ -64,12 +131,16 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.operationName = op ? op.name : "";
   self.isPrimaryOperation = ko.pureComputed( function() {
     var id = op && op.id;
-    return id && id === _.get( self.docModel, ["application", "primaryOperation", "id"] );
+    return id && id === _.get( self.docModel, ["application",
+                                               "primaryOperation",
+                                               "id"] );
   });
 
   self.showStar = op && auth.ok( "change-primary-operation");
   self.starTitle = ko.pureComputed( function() {
-    return self.isPrimaryOperation() ? "operations.primary" : "operations.primary.select";
+    return self.isPrimaryOperation()
+         ? "operations.primary"
+         : "operations.primary.select";
   });
   self.clickStar = function() {
     ajax.command("change-primary-operation",
@@ -122,7 +193,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     self.docModel.updateApproval( [],
                                   flag,
                                   function( approval ) {
-                                    self.approval( approval );
+                                    masterApproval( approval );
                                   } );
   }
 
@@ -138,4 +209,5 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                   || self.showStatus()
                   || self.showReject()
                   || self.showApprove();
+
 }

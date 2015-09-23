@@ -3872,33 +3872,26 @@ div.sticky {
   display: inline-block;
 }
 
-/* line 699, ../sass/partials/_forms.scss */
-.form-approval-status.approved ~ button.approved {
-  display: none;
-}
-
-/* line 703, ../sass/partials/_forms.scss */
-.form-approval-status.rejected ~ button.rejected {
-  display: none;
-}
-
-/* line 709, ../sass/partials/_forms.scss */
-section.approved .group-buttons button.approved {
-  display: none;
-}
-/* line 712, ../sass/partials/_forms.scss */
-section.approved .group-buttons i.rejected {
-  display: none;
-}
-/* line 715, ../sass/partials/_forms.scss */
-section.approved .group-buttons i.approved {
-  display: table-cell;
-}
-/* line 718, ../sass/partials/_forms.scss */
-section.approved .group-buttons button.rejected {
-  display: table-cell;
-}
-
+/* .form-approval-status.approved ~ button.approved { */
+/*   display: none; */
+/* } */
+/* .form-approval-status.rejected ~ button.rejected { */
+/*   display: none; */
+/* } */
+/* section.approved .group-buttons  { */
+/*     button.approved { */
+/*       display: none; */
+/*     } */
+/*     i.rejected { */
+/*       display: none; */
+/*     } */
+/*     i.approved { */
+/*       display: table-cell; */
+/*     } */
+/*     button.rejected { */
+/*       display: table-cell; */
+/*     } */
+/* } */
 /* line 723, ../sass/partials/_forms.scss */
 .is-status > .like-btn, .is-status > a.link-btn {
   min-height: 40px;
@@ -3961,11 +3954,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   color: #999999;
 }
 
-/* line 783, ../sass/partials/_forms.scss */
-button.rejected ~ .group-buttons .is-top.rejected {
-  display: none;
-}
-
+/* button.rejected ~ .group-buttons .is-top.rejected { */
+/*   display: none; */
+/* } */
 /* line 787, ../sass/partials/_forms.scss */
 .is-middle {
   vertical-align: middle;
@@ -7014,11 +7005,11 @@ ul.attachments-list li.mandatory-attachments {
   text-transform: uppercase;
 }
 /* line 43, ../sass/partials/_accordion.scss */
-.accordion div.sticky > button.approved > .icons > .approved {
+.accordion div.sticky button.positive > span.icons > .approved {
   display: table-cell;
 }
 /* line 47, ../sass/partials/_accordion.scss */
-.accordion div.sticky > button.rejected > .icons > .rejected {
+.accordion div.sticky button.rejected > span.icons > .rejected {
   display: table-cell;
 }
 /* line 53, ../sass/partials/_accordion.scss */

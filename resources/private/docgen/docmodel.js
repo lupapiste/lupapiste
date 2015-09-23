@@ -169,6 +169,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   // path: approval path
   // flag: true is approved, false rejected.
   // cb: callback function to be called on success.
+  var groupApprovalStates = {};
+
+
+
+
   self.updateApproval = function( path, flag, cb ) {
     var verb = flag ? "approve" : "reject";
     ajax.command( verb + "-doc",
@@ -178,6 +183,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                  collection: self.getCollection()})
     .success( function( result ) {
       cb( result.approval );
+      self.approvalHubSend( result.approval, path )
       window.Stickyfill.rebuild();
     })
     .call();
@@ -220,6 +226,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return approval && !modelModifiedSince( approvalModel, approval.timestamp );
   }
 
+  // Returns always "core" approval object (value, timestamp properties.)
+  // If approvalFun does not yield correct, up-to-date approval then
+  // NEUTRAL with zero timestamp is returned.
+  self.safeApproval = function( approvalModel, approvalFun) {
+    return self.isApprovalCurrent( approvalModel, approvalFun)
+    ? approvalFun() : {value: "neutral", timestamp: 0}
+  }
+
   // Check is either approved or rejected.
   // Note: if the approval is not set, then both types of check return false
   self.approvalStatus = function( approvalFun, check ) {
@@ -250,13 +264,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     function onRemovalConfirmed() {
       ajax.command("remove-doc", { id: self.appId, docId: self.docId, collection: self.getCollection() })
         .success(function () {
-          //n$.slideUp(function () { n$.remove(); });
-          // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
-          // Just the "operations" list should be changed.
+          // This causes full re-rendering, all accordions change
+          // state etc. Figure a better way to update UI.  Just the
+          // "operations" list should be changed.
           repository.load(self.appId);
         })
         .call();
-     // return false;
     }
 
     var message = "<div>"
@@ -269,8 +282,23 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                              fn: onRemovalConfirmed },
                                            {title: loc("removeDoc.cancel") },
                                            {html: true });
+  }
 
-    //return false;
+  self.approvalHubSubscribe = function(fun, listenBroadcasts) {
+    //console.log( "Hubscribe:", fun, Boolean(listenBroadcasts));
+    var filter = {type: "approval-status-" + self.docId,
+                  broadcast: Boolean(listenBroadcasts) };
+    self.subscriptions.push(hub.subscribe( filter, fun ));
+  }
+
+  // Receiver path can be falsey for broadcast messages.
+  self.approvalHubSend = function( approval, senderPath, receiverPath ) {
+    //console.log( "Hubsend:", senderPath);
+    hub.send( "approval-status-" + self.docId,
+              { broadcast: _.isEmpty(senderPath),
+                approval: _.clone(approval),
+                path: senderPath,
+                receiver: receiverPath});
   }
 
   // ----------------------------------------------------------------------
@@ -2223,16 +2251,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildSection() {
     var section = $("<section>").addClass( "accordion").attr( "data-doc-type", self.schemaName );
-    var elements = document.createElement("div");
-    elements.className = "accordion-fields";
-    appendElements(elements, self.schema, self.model, []);
-    // Disable fields and hide if the form is not editable
-    if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
-      $(elements).find("input, textarea").attr("readonly", true).unbind("focus");
-      $(elements).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
-      // TODO a better way would be to hide each individual button based on authorizationModel.ok
-      $(elements).find("button").hide();
-    }
 
     var contents = $("<div>").addClass( "accordion_content");
     function toggleContents( isOpen ) {
@@ -2256,6 +2274,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                      openCallback: toggleContents
                                     }));
     section.append( sticky );
+    var elements = document.createElement("div");
+    elements.className = "accordion-fields";
+    appendElements(elements, self.schema, self.model, []);
+    // Disable fields and hide if the form is not editable
+    if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
+      $(elements).find("input, textarea").attr("readonly", true).unbind("focus");
+      $(elements).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
+      // TODO a better way would be to hide each individual button based on authorizationModel.ok
+      $(elements).find("button").hide();
+    }
+
     return section.append( contents.append( $(elements)));
   }
 

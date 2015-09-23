@@ -116,9 +116,15 @@ var AccordionState = function() {
       obs( Boolean( flag ));
     }
   }
+  function toggleAll( flag ) {
+    _.each(_.values(observables), function( obs ) {
+      obs( Boolean( flag ));
+    })
+  }
   return {
     get: get,
     register: register,
-    set: set
+    set: set,
+    toggleAll: toggleAll
   }
 }()

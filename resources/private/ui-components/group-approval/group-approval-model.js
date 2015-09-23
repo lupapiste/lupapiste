@@ -2,7 +2,6 @@
 // and visualization.
 // Parameters [optional]:
 //  docModel: DocModel instance.
-//  docModelOptions: options originally passed to DocModel.
 //  subSchema: Schema for the group.
 //  path: Group path within the document schema.
 //  model: model for the group
@@ -16,6 +15,8 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   var APPROVE  = "approve";
   var REJECTED = "rejected";
   var REJECT   = "reject";
+  // Neutral status is only used in front-end.
+  var NEUTRAL  = "neutral";
 
   self.remove = params.remove || {};
   self.docModel = params.docModel;
@@ -23,8 +24,35 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   self.isApprovable = Boolean(params.subSchema.approvable) ;
   self.hasContents = params.remove || self.isApprovable;
   var meta = self.docModel.getMeta( params.path );
-  self.approval = ko.observable( meta ? meta._approved : null );
+  var myApproval = ko.observable( meta ? meta._approved : null );
 
+  // Approval status resolution
+  var masterApproval = ko.observable();
+
+  self.approval = ko.pureComputed( function() {
+    var approval = _.clone( self.docModel.safeApproval( self.model, myApproval));
+    console.log( "Approval:", approval);
+    var master = masterApproval();
+    console.log( "Master:", master );
+    if( master && master.value !== NEUTRAL && master.timestamp > approval.timestamp ) {
+      _.merge( approval, master );
+    }
+    //console.log( "Group approval:", approval );
+    return approval;
+  });
+
+  self.docModel.approvalHubSubscribe( function( data ) {
+    if( !data.receiver || _.isEqual( data.receiver, params.path)) {
+      console.log ( "Group sub:", data.path );
+      masterApproval ( data.approval )
+    };
+    // We always respond with our approval. Thus, there
+    // is no need for specific request message.
+
+    //self.docModel.approvalHubSend( myApproval(), params.path );
+  }, true);
+
+  // UI
   self.showStatus = ko.pureComputed( _.partial( self.docModel.isApprovalCurrent,
                                                 self.model,
                                                 self.approval ));
@@ -51,7 +79,7 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
     self.docModel.updateApproval( params.path,
                                   flag,
                                   function( approval ) {
-                                    self.approval( approval );
+                                    myApproval( approval );
                                   } )
 
   }
@@ -60,5 +88,9 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   self.approve = _.partial( changeStatus, true );
 
   self.details = ko.pureComputed( _.partial( self.docModel.approvalInfo,
-                                             self.approval ));
+                                             myApproval ));
+
+
+  self.docModel.approvalHubSend( myApproval(), params.path );
+
 }

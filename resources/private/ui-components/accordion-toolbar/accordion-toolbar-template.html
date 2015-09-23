@@ -5,8 +5,8 @@
       <script type="text/x-jquery-tmpl" id="accordion-toolbar-template">
         <div class="accordion-toggle">
           <button class="secondary"
-                  data-bind="css: {approved: isApproved,
-                                   rejected: isRejected,
+                  data-bind="css: {positive: isApproved,
+                                   rejected: isSummaryRejected,
                                    toggled: isOpen},
                              click: toggleAccordion">
             <i class="lupicon-chevron-down"></i>
@@ -82,7 +82,7 @@
               <input type="text"
                      data-test-id="op-description-editor"
                      data-bind="value: description,
-                                event: {keypress: specialKeys},
+                                event: {keydown: specialKeys},
                                 hasFocus: showEditor">
             </div>
           </div>
