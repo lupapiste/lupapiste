@@ -7865,30 +7865,51 @@ div.search i {
 /* line 118, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator {
   color: #f39129;
-  padding-left: 6px;
-  padding-right: 6px;
+  padding: 3px 0 0 0 !important;
+  word-wrap: break-word;
 }
 /* line 122, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div {
   text-align: center;
   height: auto !important;
-  padding: 3px 0 0 0 !important;
+  padding: 0 6px !important;
+  white-space: nowrap;
 }
-/* line 126, ../sass/partials/_applications_search.scss */
-.applications-search-results__indicator div.first {
-  text-align: right;
+/* line 127, ../sass/partials/_applications_search.scss */
+.applications-search-results__indicator div i {
+  display: table-cell;
 }
-/* line 129, ../sass/partials/_applications_search.scss */
-.applications-search-results__indicator div.last {
-  text-align: left;
+/* line 130, ../sass/partials/_applications_search.scss */
+.applications-search-results__indicator div span {
+  padding-left: 2px;
+  display: table-cell;
+  vertical-align: middle;
+  color: #595959;
 }
-/* line 134, ../sass/partials/_applications_search.scss */
+/* line 138, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.urgent {
   color: #df3215;
 }
-/* line 137, ../sass/partials/_applications_search.scss */
+/* line 141, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.pending {
   color: #f39129;
+}
+
+/* line 160, ../sass/partials/_applications_search.scss */
+table.applications-table th.fifth {
+  width: 10%;
+}
+/* line 165, ../sass/partials/_applications_search.scss */
+table.applications-table th.seventh {
+  width: 5%;
+}
+/* line 168, ../sass/partials/_applications_search.scss */
+table.applications-table th.eight {
+  width: 5%;
+}
+/* line 171, ../sass/partials/_applications_search.scss */
+table.applications-table th.ninth {
+  width: 10%;
 }
 
 /* line 2, ../sass/partials/_indicator.scss */

@@ -12,6 +12,7 @@
              "rakennuksen-muuttaminen-ei-huoneistoja"
              "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
              "rakennuksen-laajentaminen"
+             "rakennuksen-laajentaminen-ei-huoneistoja"
              "purkaminen"]
    :fields [buildingId [:buildingId]
             muu        [:manuaalinen_rakennusnro]]

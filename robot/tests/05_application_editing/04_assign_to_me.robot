@@ -28,12 +28,11 @@ Mikko could add an operation
   It is possible to add operation
   Logout
 
-# Sonja sees comment indicator on applications list
-#   Sonja logs in
-#   Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-comments']  1
+Sonja sees comment indicator on applications list
+  Sonja logs in
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@data-test-id='unseen-comments']  1
 
 Application is not assigned
-  Sonja logs in
   Open application  ${appname}  ${propertyId}
   Wait Until  Application is assigned to  ${EMPTY}
 

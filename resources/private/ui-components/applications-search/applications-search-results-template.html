@@ -7,34 +7,34 @@
         <table id="applications-list" class="applications-table" data-bind="if: gotResults()">
           <thead>
             <tr> <!-- TODO refactor with foreach and add operation sorter -->
-              <th colspan="2" data-bind="ltext: 'applications.indicators',
-                                         attr: {colspan: lupapisteApp.models.currentUser.isAuthority() ? '3' : '2'}"></th>
-              <th class="sorting" data-bind="click: _.partial(sortBy, 'type'),
+              <th class="first" colspan="2" data-bind="ltext: 'applications.indicators',
+                                         attr: {colspan: lupapisteApp.models.currentUser.isAuthority() ? '4' : '3'}"></th>
+              <th class="sorting second" data-bind="click: _.partial(sortBy, 'type'),
                                              ltext: 'applications.type',
                                              css: {asc: dataProvider.sort.field() === 'type' ? dataProvider.sort.asc() : false,
                                                    desc: dataProvider.sort.field() === 'type' ? !dataProvider.sort.asc() : false}"></th>
-              <th class="sorting" data-bind="click: _.partial(sortBy, 'location'),
+              <th class="sorting third" data-bind="click: _.partial(sortBy, 'location'),
                                              ltext: 'applications.location',
                                              css: {asc: dataProvider.sort.field() === 'location' ? dataProvider.sort.asc() : false,
                                                    desc: dataProvider.sort.field() === 'location' ? !dataProvider.sort.asc() : false}"></th>
-              <th data-bind="ltext: 'applications.operation'"></th>
-              <th class="sorting" data-bind="click: _.partial(sortBy, 'applicant'),
+              <th class="fourth" data-bind="ltext: 'applications.operation'"></th>
+              <th class="sorting fifth" data-bind="click: _.partial(sortBy, 'applicant'),
                                              ltext: 'applications.applicant',
                                              css: {asc: dataProvider.sort.field() === 'applicant' ? dataProvider.sort.asc() : false,
                                                    desc: dataProvider.sort.field() === 'applicant' ? !dataProvider.sort.asc() : false}"></th>
-              <th class="sorting" data-bind="click: _.partial(sortBy, 'submitted'),
+              <th class="sorting sixth" data-bind="click: _.partial(sortBy, 'submitted'),
                                              ltext: 'applications.sent',
                                              css: {asc: dataProvider.sort.field() === 'submitted' ? dataProvider.sort.asc() : false,
                                                    desc: dataProvider.sort.field() === 'submitted' ? !dataProvider.sort.asc() : false}"></th>
-              <th class="sorting" data-bind="click: _.partial(sortBy, 'modified'),
+              <th class="sorting seventh" data-bind="click: _.partial(sortBy, 'modified'),
                                              ltext: 'applications.updated',
                                              css: {asc: dataProvider.sort.field() === 'modified' ? dataProvider.sort.asc() : false,
                                                    desc: dataProvider.sort.field() === 'modified' ? !dataProvider.sort.asc() : false}"></th>
-              <th class="sorting" data-bind="click: _.partial(sortBy, 'state'),
+              <th class="sorting eight" data-bind="click: _.partial(sortBy, 'state'),
                                              ltext: 'applications.status',
                                              css: {asc: dataProvider.sort.field() === 'state' ? dataProvider.sort.asc() : false,
                                                    desc: dataProvider.sort.field() === 'state' ? !dataProvider.sort.asc() : false}"></th>
-              <th class="sorting" data-bind="click: _.partial(sortBy, 'handler'),
+              <th class="sorting ninth" data-bind="click: _.partial(sortBy, 'handler'),
                                              ltext: 'applications.authority',
                                              css: {asc: dataProvider.sort.field() === 'handler' ? dataProvider.sort.asc() : false,
                                                    desc: dataProvider.sort.field() === 'handler' ? !dataProvider.sort.asc() : false}"></th>
@@ -46,7 +46,7 @@
               <td class="applications-search-results__indicator"
                   data-bind="if: $data.authorityNotice || $data.urgency !== 'normal'"
                   data-test-col-name="urgent">
-                <div class="application-search-results__urgency first"
+                <div class="application-search-results__urgency"
                      data-bind="click: _.partialRight($parent.openApplication, 'notice'), clickBubble: false,
                                 attr: {title: _.trim($data.authorityNotice) ? loc('notice.prompt') + ': ' + _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency])},
                                 css: $data.urgency">
@@ -54,22 +54,35 @@
                 </div>
               </td>
               <!-- /ko -->
-              <td class="applications-search-results__indicator"
-                  data-bind="if: $data.unseenComments > 0,
-                             click: _.partialRight($parent.openApplication, 'conversation'), clickBubble: false"
-                  data-test-col-name="unseenComments">
-                <div data-bind="attr: {title: loc('conversation.title')}">
-                  <i class="lupicon-comment"></i>
-                </div>
-              </td>
 
               <td class="applications-search-results__indicator"
                   data-bind="if: $data.indicators > 0"
                   data-test-col-name="indicators">
-                <div class="last" data-bind="attr: {title: loc('info.title')}">
-                  <i class="lupicon-circle-star"></i>
+                <div data-bind="attr: {title: loc('info.title')}">
+                  <i class="lupicon-star"></i>
                 </div>
               </td>
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.attachmentsRequiringAction > 0,
+                             click: _.partialRight($parent.openApplication, 'attachments'), clickBubble: false"
+                  data-test-col-name="newAttachments">
+                <div data-bind="attr: {title: loc('attachments.title')}">
+                  <i class="lupicon-paperclip"></i>
+                  <span data-bind="text: $data.attachmentsRequiringAction"></span>
+                </div>
+              </td>
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.unseenComments > 0,
+                             click: _.partialRight($parent.openApplication, 'conversation'), clickBubble: false"
+                  data-test-col-name="unseenComments">
+                <div data-test-id="unseen-comments" data-bind="attr: {title: loc('conversation.title')}">
+                  <i class="lupicon-conversation"></i>
+                  <span data-bind="text: $data.unseenComments"></span>
+                </div>
+              </td>
+
               <td data-bind="ltext: $data.kind" data-test-col-name="type"></td>
               <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
               <td data-bind="text: $data.primaryOperation ? loc('operations.' + $data.primaryOperation.name) : ''" data-test-col-name="operation"></td>

@@ -99,6 +99,15 @@
                                 :999 50000})
 
 
+(def rakennus-schemas ["uusiRakennus"
+                       "uusi-rakennus-ei-huoneistoa"
+                       "rakennuksen-muuttaminen-ei-huoneistoja"
+                       "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
+                       "rakennuksen-muuttaminen"
+                       "rakennuksen-laajentaminen"
+                       "rakennuksen-laajentaminen-ei-huoneistoja"
+                       "purkaminen"])
+
 (def ei-lammitysta "ei l\u00e4mmityst\u00e4")
 
 ;;
@@ -120,10 +129,10 @@
   ([n body]
     (for [i (take n (range))]
       {(-> i str keyword) body})))
+
 ;;
 ;; Validators
 ;;
-
 
 (defvalidator :vrk:CR335
   {:doc "Jos lammitystapa ei ole 5 (ei kiinteaa lammitystapaa), on polttoaine ilmoitettava"
@@ -199,7 +208,8 @@
 
 (defvalidator :vrk:CR328:viemari
   {:doc    "Verkostoliittymat ja rakennuksen varusteet tasmattava: Viemari"
-   :schemas ["uusiRakennus"]
+   :schemas rakennus-schemas
+   :level :tip
    :fields [liittyma [:verkostoliittymat :viemariKytkin]
             varuste  [:varusteet         :viemariKytkin]]
    :facts  {:ok   [[true true]]
@@ -208,7 +218,8 @@
 
 (defvalidator :vrk:CR328:vesijohto
   {:doc    "Verkostoliittymat ja rakennuksen varusteet tasmattava: Vesijohto"
-   :schemas ["uusiRakennus"]
+   :schemas rakennus-schemas
+   :level  :tip
    :fields [liittyma [:verkostoliittymat :vesijohtoKytkin]
             varuste  [:varusteet         :vesijohtoKytkin]]
    :facts   {:ok   [[true true]]
@@ -217,7 +228,7 @@
 
 (defvalidator :vrk:CR312
   {:doc     "Jos rakentamistoimenpide on 691 tai 111, on kerrosluvun oltava 1"
-   :schemas ["uusiRakennus"]
+   :schemas rakennus-schemas
    :fields  [toimenpide [:kaytto :kayttotarkoitus ->kayttotarkoitus]
              kerrosluku [:mitat :kerrosluku ->int]]
    :facts   {:ok   [["111 myym\u00e4l\u00e4hallit" 1]]
@@ -324,7 +335,7 @@
 (defvalidator :vrk:CR333:kerrosala
   {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia.
              - Kerrosala voi olla 0, jos kayttotarkoitus on 162, 163, 169, 611, 613, 712, 719, 722 tai 941."
-   :schemas ["uusiRakennus"]
+   :schemas rakennus-schemas
    :level   :tip
    :fields  [kerrosala       [:mitat :kerrosala ->int]
              kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
@@ -353,7 +364,7 @@
 (defvalidator :vrk:CR333:kerrosluku
   {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia.
              Kerrosluku voi olla 0, jos kayttotarkoitus = 162, 163, 169, 611, 613, 712, 719, 722 tai >729."
-   :schemas ["uusiRakennus"]
+   :schemas rakennus-schemas
    :level   :tip
    :fields  [kerrosluku      [:mitat :kerrosluku ->int]
              kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
@@ -449,7 +460,7 @@
 
 (defvalidator :vrk:CR343
   {:doc "Jos lammitystapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
-   :schemas ["uusiRakennus"]
+   :schemas rakennus-schemas
    :fields [lammitystapa [:lammitys :lammitystapa]
             lammonlahde  [:lammitys :lammonlahde]]
    :facts {:ok [["suora s\u00e4hk\u00f6" "s\u00e4hk\u00f6"]]
@@ -458,7 +469,7 @@
 
 (defvalidator :vrk:CR342
   {:doc "Sahko polttoaineena vaatii sahkoliittyman"
-   :schemas ["uusiRakennus"]
+   :schemas rakennus-schemas
    :fields [lammonlahde [:lammitys :lammonlahde]
             sahkoliittyma?  [:verkostoliittymat :sahkoKytkin]]
    :facts {:ok [["s\u00e4hk\u00f6" true]]
@@ -467,7 +478,7 @@
 
 (defvalidator :vrk:CR341
   {:doc "Sahkolammitys vaatii sahkoliittyman"
-   :schemas ["uusiRakennus"]
+   :schemas rakennus-schemas
    :fields [lammitystapa [:lammitys :lammitystapa]
             sahkoliittyma?  [:verkostoliittymat :sahkoKytkin]]
    :facts {:ok [["suora s\u00e4hk\u00f6" true]]

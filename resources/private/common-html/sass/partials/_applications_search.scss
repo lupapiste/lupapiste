@@ -117,17 +117,21 @@ div.search {
 }
 .applications-search-results__indicator {
   color: $primary;
-  padding-left: $marginS;
-  padding-right: $marginS;
+  padding: 3px 0 0 0 !important;
+  word-wrap: break-word;
   div {
     text-align: center;
     height: auto !important;
-    padding: 3px 0 0 0 !important;
-    &.first {
-      text-align: right;
+    padding: 0 $marginS !important;
+    white-space: nowrap;
+    i {
+      display: table-cell;
     }
-    &.last {
-      text-align: left;
+    span {
+      padding-left: 2px;
+      display: table-cell;
+      vertical-align: middle;
+      color: $grey-text;
     }
   }
   .application-search-results__urgency {
@@ -137,5 +141,34 @@ div.search {
     &.pending {
       color: $orange-dark;
     }
+  }
+}
+
+table.applications-table {
+  th.first {
+
+  }
+  th.second {
+
+  }
+  th.third {
+
+  }
+  th.fourth {
+
+  }
+  th.fifth {
+    width: 10%;
+  }
+  th.sixth {
+  }
+  th.seventh {
+    width: 5%;
+  }
+  th.eight {
+    width: 5%;
+  }
+  th.ninth {
+    width: 10%;
   }
 }

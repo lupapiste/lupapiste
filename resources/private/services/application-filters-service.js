@@ -35,13 +35,13 @@ LUPAPISTE.ApplicationFiltersService = function() {
   function wrapFilter(filter) {
     filter.edit = ko.observable(false);
     filter.isSelected = ko.observable();
-    filter.isDefaultFilter = ko.observable(filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "id"]));
+    filter.isDefaultFilter = ko.pureComputed(function () {return filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "id"]);});
     filter.removeFilter = function(filter) {
       ajax
       .command("remove-application-filter", {"filter-id": filter.id()})
       .error(util.showSavedIndicator)
       .success(function() {
-        _savedFilters.remove(function(f) {
+        lupapisteApp.models.currentUser.applicationFilters.remove(function(f) {
           return ko.unwrap(f.id) === ko.unwrap(filter.id);
         });
       })
@@ -84,6 +84,9 @@ LUPAPISTE.ApplicationFiltersService = function() {
     _savedFilters.remove(function(f) {
       return ko.unwrap(f.id) === ko.unwrap(filter.id);
     });
+    if (_.isEmpty(_savedFilters())) {
+      lupapisteApp.models.currentUser.defaultFilter({id: filter.id});
+    }
     var wrapped = wrapFilter(ko.mapping.fromJS(filter));
     _savedFilters.unshift(wrapped);
     self.selected(wrapped);
