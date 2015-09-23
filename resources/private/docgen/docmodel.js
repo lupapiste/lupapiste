@@ -1450,17 +1450,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return undefined;
   }
 
-  function buildMaaraalaTunnus (subschema, model, path) {
-    var schema = _.extend(subschema, {
-      size: "s",
-      label: false
-    });
-    return createComponent("maaraala-tunnus",
-      {propertyId: getPropertyId(model),
-       schema: schema,
-       path: path});
-  }
-
   var builders = {
     group: buildGroup,
     docgenGroup: buildDocgenGroup,
@@ -1482,7 +1471,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     personSelector: buildPersonSelector,
     companySelector: buildCompanySelector,
     table: buildTableRow,
-    maaraalaTunnus: buildMaaraalaTunnus,
     unknown: buildUnknown
   };
 
