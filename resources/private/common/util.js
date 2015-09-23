@@ -198,7 +198,7 @@ var util = (function($) {
       return errArray.length > 0;
     });
     return errs;
-  }
+  };
 
   var extractRequiredErrors = _.partial(extractErrors, function(errResult) {
     return _.includes(errResult, "illegal-value:required");

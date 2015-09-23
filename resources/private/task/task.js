@@ -132,7 +132,7 @@ var taskPageController = (function() {
     }
   }
 
-  hub.subscribe("application-model-updated", function(e) {
+  hub.subscribe("application-model-updated", function() {
     if (pageutil.getPage() === "task") {
       refresh(lupapisteApp.models.application._js, currentTaskId);
     }
