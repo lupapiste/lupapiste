@@ -11,7 +11,7 @@
                type="text"
                data-bind="textInput: value,
                           css: classes,
-                          event: { mouseover: function() { showMessagePanel(true); }, mouseout: function() { showMessagePanel(false) } },
+                          event: events,
                           disable: disabled,
                           attr: { readonly: readonly,
                                   'data-test-id': path.join('.') }"/>
