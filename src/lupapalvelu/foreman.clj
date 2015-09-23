@@ -3,6 +3,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
+            [lupapalvelu.application :as application]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schema]
@@ -136,3 +137,40 @@
     (or
       (validate-notice-or-application application)
       (validate-notice-submittable application))))
+
+(defn new-foreman-application [{:keys [created user application] :as command}]
+  (-> (application/do-create-application
+        (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
+                              :x (-> application :location first)
+                              :y (-> application :location second)
+                              :address (:address application)
+                              :propertyId (:propertyId application)
+                              :municipality (:municipality application)
+                              :infoRequest false
+                              :messages []}))
+    (assoc :opened (if (util/pos? (:opened application)) created nil))))
+
+
+(defn cleanup-hakija-doc [doc]
+  (-> doc
+      (assoc :id (mongo/create-id))
+      (assoc-in [:data :henkilo :userId] {:value nil})))
+
+(defn create-foreman-docs [application foreman-app role]
+  (let [hankkeen-kuvaus      (get-in (domain/get-document-by-name application "hankkeen-kuvaus") [:data :kuvaus :value])
+        hankkeen-kuvaus-doc  (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum")
+        hankkeen-kuvaus-doc  (if hankkeen-kuvaus
+                               (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
+                               hankkeen-kuvaus-doc)
+
+        tyonjohtaja-doc      (domain/get-document-by-name foreman-app "tyonjohtaja-v2")
+        tyonjohtaja-doc      (if-not (ss/blank? role)
+                               (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] role)
+                               tyonjohtaja-doc)
+
+        hakija-docs          (domain/get-applicant-documents (:documents application))
+        hakija-docs          (map cleanup-hakija-doc hakija-docs)]
+    (->> (:documents foreman-app)
+      (remove #(#{"hankkeen-kuvaus-minimum" "hakija-r" "tyonjohtaja-v2"} (-> % :schema-info :name)))
+      (concat (remove nil? [hakija-docs hankkeen-kuvaus-doc tyonjohtaja-doc]))
+      flatten)))

@@ -11,51 +11,16 @@
             [sade.util :as util]
             [monger.operators :refer :all]))
 
-(defn cleanup-hakija-doc [doc]
-  (-> doc
-      (assoc :id (mongo/create-id))
-      (assoc-in [:data :henkilo :userId] {:value nil})))
-
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole foremanEmail]
    :user-roles #{:applicant :authority}
    :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{:keys [created user application] :as command}]
-  (let [original-open? (util/pos? (:opened application))
-        foreman-app (-> (application/do-create-application
-                         (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
-                                               :x (-> application :location first)
-                                               :y (-> application :location second)
-                                               :address (:address application)
-                                               :propertyId (:propertyId application)
-                                               :municipality (:municipality application)
-                                               :infoRequest false
-                                               :messages []}))
-                      (assoc :opened (if original-open? created nil)))
-
-        task                 (util/find-by-id taskId (:tasks application))
-
-        hankkeen-kuvaus      (get-in (domain/get-document-by-name application "hankkeen-kuvaus") [:data :kuvaus :value])
-        hankkeen-kuvaus-doc  (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum")
-        hankkeen-kuvaus-doc  (if hankkeen-kuvaus
-                               (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
-                               hankkeen-kuvaus-doc)
-
-        tyonjohtaja-doc      (domain/get-document-by-name foreman-app "tyonjohtaja-v2")
-        tyonjohtaja-doc      (if-not (ss/blank? foremanRole)
-                               (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] foremanRole)
-                               tyonjohtaja-doc)
-
-        hakija-docs          (domain/get-applicant-documents (:documents application))
-        hakija-docs          (map cleanup-hakija-doc hakija-docs)
-
-        new-application-docs (->> (:documents foreman-app)
-                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija-r" "tyonjohtaja-v2"} (-> % :schema-info :name)))
-                                  (concat (remove nil? [hakija-docs hankkeen-kuvaus-doc tyonjohtaja-doc]))
-                                  flatten)
-
-        foreman-app (assoc foreman-app :documents new-application-docs)]
+  (let [foreman-app (foreman/new-foreman-application command)
+        new-application-docs (foreman/create-foreman-docs application foreman-app foremanRole)
+        foreman-app (assoc foreman-app :documents new-application-docs)
+        task                 (util/find-by-id taskId (:tasks application))]
 
     (application/do-add-link-permit foreman-app (:id application))
     (application/insert-application foreman-app)
