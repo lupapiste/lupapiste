@@ -77,7 +77,7 @@
                   data-bind="if: $data.unseenComments > 0,
                              click: _.partialRight($parent.openApplication, 'conversation'), clickBubble: false"
                   data-test-col-name="unseenComments">
-                <div data-bind="attr: {title: loc('conversation.title')}">
+                <div data-test-id="unseen-comments" data-bind="attr: {title: loc('conversation.title')}">
                   <i class="lupicon-conversation"></i>
                   <span data-bind="text: $data.unseenComments"></span>
                 </div>
