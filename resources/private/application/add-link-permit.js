@@ -105,15 +105,6 @@ LUPAPISTE.AddLinkPermitModel = function() {
       );
   };
 
-
-  // Follow link to app that is linking to us
-  //
-
-  self.followAppLink = function(linkId) {
-    pageutil.openPage("application", linkId);
-    return false;
-  };
-
   //Open the dialog
 
   self.openAddLinkPermitDialog = function(app) {

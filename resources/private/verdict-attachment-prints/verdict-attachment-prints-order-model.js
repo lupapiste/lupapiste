@@ -33,7 +33,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   self.ok = ko.computed(function() {
     var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {
-      return util.isNum(a.orderAmount());
+      return util.isNonNegative(a.orderAmount());
     });
     var dialogFieldValues = [self.ordererOrganization(),
                              self.ordererEmail(),
