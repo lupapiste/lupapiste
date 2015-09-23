@@ -46,7 +46,9 @@
                 </button>
               </div>
 
-              <div class="applications-search-filters-list__filter-item" data-bind="component: { name: 'remove-button', params: {removeFn: function() {$data.removeFilter($data);} }}"></div>
+              <div class="applications-search-filters-list__filter-item" 
+                   data-bind="attr: {'data-test-id': 'remove-filter-' + $data.title()},
+                              component: { name: 'remove-button', params: {removeFn: function() {$data.removeFilter($data);} }}"></div>
             </div>
           </div>
           <!-- /ko -->

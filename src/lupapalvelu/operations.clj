@@ -424,7 +424,7 @@
                                    :link-permit-required false
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
-     :vapaa-ajan-rakennus-laaj    {:schema "rakennuksen-laajentaminen"
+     :vapaa-ajan-rakennus-laaj    {:schema "rakennuksen-laajentaminen-ei-huoneistoja"
                                    :permit-type permit/R
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
@@ -432,7 +432,7 @@
                                    :link-permit-required false
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
-     :talousrakennus-laaj         {:schema "rakennuksen-laajentaminen"
+     :talousrakennus-laaj         {:schema "rakennuksen-laajentaminen-ei-huoneistoja"
                                    :permit-type permit/R
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet

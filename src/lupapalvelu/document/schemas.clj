@@ -116,17 +116,17 @@
                                     {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}]}])
 
 (def rakennuksen-osoite [{:name "osoite"
-                   :type :group
-                   :body [{:name "kunta" :type :string}
-                          {:name "lahiosoite" :type :string}
-                          {:name "osoitenumero" :type :string :subtype :number :min 0 :max 9999}
-                          {:name "osoitenumero2" :type :string}
-                          {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s" :hidden true :readonly true}
-                          {:name "jakokirjain2" :type :string :size "s" :hidden true :readonly true}
-                          {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s" :hidden true :readonly true}
-                          {:name "huoneisto" :type :string :size "s" :hidden true :readonly true}
-                          {:name "postinumero" :type :string :subtype :zip :size "s"}
-                          {:name "postitoimipaikannimi" :type :string :size "m"}]}])
+                          :type :group
+                          :body [{:name "kunta" :type :string}
+                                 {:name "lahiosoite" :type :string}
+                                 {:name "osoitenumero" :type :string :subtype :number :min 0 :max 9999}
+                                 {:name "osoitenumero2" :type :string}
+                                 {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s" :hidden true :readonly true}
+                                 {:name "jakokirjain2" :type :string :size "s" :hidden true :readonly true}
+                                 {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s" :hidden true :readonly true}
+                                 {:name "huoneisto" :type :string :size "s" :hidden true :readonly true}
+                                 {:name "postinumero" :type :string :subtype :zip :size "s"}
+                                 {:name "postitoimipaikannimi" :type :string :size "m"}]}])
 
 (def yhteystiedot [{:name "yhteystiedot"
                     :type :group
@@ -191,34 +191,33 @@
                                [henkilotiedot-minimal]
                                yhteystiedot)}))
 
-(def e-invoice-operators
-  [{:name "BAWCFI22"} ; Basware Oyj
-   {:name "003714377140"} ; Enfo Zender Oy
-   {:name "003708599126"} ; Liaison Technologies Oy
-   {:name "HELSFIHH"} ; Aktia S\u00e4\u00e4st\u00f6pankki Oyj
-   {:name "POPFFI22"} ; Paikallisosuuspankit
-   {:name "HANDFIHH"} ; Handelsbanken
-   {:name "003721291126"} ; Maventa
-   {:name "003723327487"} ; Apix Messaging Oy
-   {:name "003717203971"} ; Notebeat Oy
-   {:name "003723609900"} ; (tai PAGERO) Pagero
-   {:name "003701150617"} ; Str\u00e5lfors Oy
-   {:name "FIYAPSOL"} ; YAP Solutions Oy
-   {:name "00885060259470028"} ; Tradeshift
-   {:name "TAPIFI22"} ; S-Pankki Oy (vanha, ent L\u00e4hiTapiola)
-   {:name "INEXCHANGE"} ; InExchange Factorum AB
-   {:name "DNBAFIHX"} ; DNB Bank ASA
-   {:name "ITELFIHH"} ; S\u00e4\u00e4st\u00f6pankit
-   {:name "003710948874"} ; OpusCapita Group Oy
-   {:name "00885790000000418"} ; HighJump AS
-   {:name "NDEAFIHH"} ; Nordea
-   {:name "OKOYFIHH"} ; OP-Pohjola-ryhm\u00e4
-   {:name "003701011385"} ; Tieto Oyj
-   {:name "DABAFIHH"} ; Danske Bank Oyj
-   {:name "003703575029"} ; CGI / TeliaSonera Finland Oyj
-   {:name "AABAFI22"} ; \u00c5landsbanken Abp
-   {:name "SBANFIHH"} ; S-Pankki Oy (uusi)
-   ])
+(def e-invoice-operators [{:name "BAWCFI22"} ; Basware Oyj
+                          {:name "003714377140"} ; Enfo Zender Oy
+                          {:name "003708599126"} ; Liaison Technologies Oy
+                          {:name "HELSFIHH"} ; Aktia S\u00e4\u00e4st\u00f6pankki Oyj
+                          {:name "POPFFI22"} ; Paikallisosuuspankit
+                          {:name "HANDFIHH"} ; Handelsbanken
+                          {:name "003721291126"} ; Maventa
+                          {:name "003723327487"} ; Apix Messaging Oy
+                          {:name "003717203971"} ; Notebeat Oy
+                          {:name "003723609900"} ; (tai PAGERO) Pagero
+                          {:name "003701150617"} ; Str\u00e5lfors Oy
+                          {:name "FIYAPSOL"} ; YAP Solutions Oy
+                          {:name "00885060259470028"} ; Tradeshift
+                          {:name "TAPIFI22"} ; S-Pankki Oy (vanha, ent L\u00e4hiTapiola)
+                          {:name "INEXCHANGE"} ; InExchange Factorum AB
+                          {:name "DNBAFIHX"} ; DNB Bank ASA
+                          {:name "ITELFIHH"} ; S\u00e4\u00e4st\u00f6pankit
+                          {:name "003710948874"} ; OpusCapita Group Oy
+                          {:name "00885790000000418"} ; HighJump AS
+                          {:name "NDEAFIHH"} ; Nordea
+                          {:name "OKOYFIHH"} ; OP-Pohjola-ryhm\u00e4
+                          {:name "003701011385"} ; Tieto Oyj
+                          {:name "DABAFIHH"} ; Danske Bank Oyj
+                          {:name "003703575029"} ; CGI / TeliaSonera Finland Oyj
+                          {:name "AABAFI22"} ; \u00c5landsbanken Abp
+                          {:name "SBANFIHH"} ; S-Pankki Oy (uusi)
+                          ])
 
 (def verkkolaskutustieto [{:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
                           {:name "verkkolaskuTunnus" :type :string}
@@ -344,13 +343,12 @@
                                           {:name "ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.ty\u00f6njohtaja"}
                                           {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
 
-(def patevyysvaatimusluokka
-  {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required true
-   :body [{:name "AA"}
-          {:name "A"}
-          {:name "B"}
-          {:name "C"}
-          {:name "ei tiedossa"}]})
+(def patevyysvaatimusluokka {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required true
+                             :body [{:name "AA"}
+                                    {:name "A"}
+                                    {:name "B"}
+                                    {:name "C"}
+                                    {:name "ei tiedossa"}]})
 
 (def patevyys-tyonjohtaja [koulutusvalinta
                            {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
@@ -418,21 +416,20 @@
                                     {:name "kaytettavaAika" :type :string :size "s" :unit "tuntiaviikko" :subtype :number :min 0 :max 168} ; 7*24 = 168h :)
                                     {:name "kayntienMaara" :type :string :size "s" :unit "kpl" :subtype :number :min 0 :max 9999999}]})
 
-(def hanke-row
-  [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
-   {:name "katuosoite" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
-   {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.rakennustoimenpide"}
-   {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
-   {:name "vaihe" :type :select :size "t" :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe"
-    :body [{:name "R" :i18nkey "muutHankkeet.R"}
-           {:name "A" :i18nkey "muutHankkeet.A"}
-           {:name "K" :i18nkey "muutHankkeet.K"}]}
-   {:name "3kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.3kk"}
-   {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.6kk"}
-   {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.9kk"}
-   {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.12kk"}
-   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :docgen-checkbox :whitelist {:roles [:none]
-                                                                                                                            :otherwise :disabled}}])
+(def hanke-row [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
+                {:name "katuosoite" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
+                {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.rakennustoimenpide"}
+                {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
+                {:name "vaihe" :type :select :size "t" :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe"
+                 :body [{:name "R" :i18nkey "muutHankkeet.R"}
+                        {:name "A" :i18nkey "muutHankkeet.A"}
+                        {:name "K" :i18nkey "muutHankkeet.K"}]}
+                {:name "3kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.3kk"}
+                {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.6kk"}
+                {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.9kk"}
+                {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.12kk"}
+                {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :docgen-checkbox :whitelist {:roles [:none]
+                                                                                                                                                :otherwise :disabled}}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
                                   :type :foremanOtherApplications
@@ -527,16 +524,9 @@
                    {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
                    {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
 
-(def mitat-muutos {:name "mitat"
-                   :type :group
-                   :group-help "mitat-muutos.help"
-                   :whitelist {:roles [:authority]
-                               :otherwise :disabled}
-                   :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
-                          {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                          {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                          {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
-                          {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
+(def mitat-muutos (merge mitat
+                    {:group-help "mitat-muutos.help"
+                     :whitelist {:roles [:authority] :otherwise :disabled}}))
 
 (def rakenne {:name "rakenne"
               :type :group
@@ -765,17 +755,17 @@
         rakennuksen-osoite
         rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja-muutos))
 
-#_(def rakennuksen-muuttaminen-ei-huoneistoja (body
-                                               muutostyonlaji
-                                               olemassaoleva-rakennus-ei-huoneistoja))
+(def rakennuksen-muuttaminen-ei-huoneistoja (body
+                                              muutostyonlaji
+                                              olemassaoleva-rakennus-ei-huoneistoja))
 
 (def rakennuksen-muuttaminen-ei-huoneistoja-muutos (body
                                                      muutostyonlaji
                                                      olemassaoleva-rakennus-ei-huoneistoja-muutos))
 
-#_(def rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja (body
-                                                                     muutostyonlaji
-                                                                     olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
+(def rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja (body
+                                                                    muutostyonlaji
+                                                                    olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
 
 (def rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja-muutos (body
                                                                            muutostyonlaji
@@ -1135,6 +1125,8 @@
    
    {:info {:name "kiinteistonmuodostus" :approvable true}
     :body [kt-kiinteistonmuodostus]}
+
+
 
 
    {:info {:name "hakija"
