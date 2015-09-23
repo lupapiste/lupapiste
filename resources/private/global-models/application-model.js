@@ -35,7 +35,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.permitSubtypeHelp = ko.pureComputed(function() {
     var opName = util.getIn(self, ["primaryOperation", "name"]);
     if (loc.hasTerm(["help", opName ,"subtype"])) {
-      return "help." + opName + ".subtype"
+      return "help." + opName + ".subtype";
     }
     return undefined;
   });

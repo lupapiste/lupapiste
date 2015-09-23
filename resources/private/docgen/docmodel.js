@@ -350,7 +350,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         return dic.approval.timestamp;
       } );
       _.each( sorted, function( dic ) {
-        dic.fun()
+        dic.fun();
       });
     }
     function setText( name ) {
@@ -360,9 +360,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var approval = stats[name].approval;
         var text = loc(["document", approval.value]);
         if(approval && approval.user && approval.timestamp) {
-          text += " (" + approval.user.lastName + " "
-                + approval.user.firstName
-                + " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
+          text += " (" + approval.user.lastName + " " + approval.user.firstName +
+                  " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
         sel.text( text );
       }
@@ -373,13 +372,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     function setStatusClass( name, cls ) {
       var items = name ? [stats[name]] : stats;
       _.each( items, function( item ) {
-        var sel = statusSelector( item.name )
+        var sel = statusSelector( item.name );
         if( sel ) {
           sel.removeClass( "approved rejected" );
           sel.addClass( cls ? cls : item.approval.value );
           setText( item.name);
         }
-      })
+      });
     }
 
     // Updates the section and the bar classes with some
@@ -397,7 +396,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var bar = self.section$.find("button[data-status-key=" + self.sectionId + "]");
       //var section = $("[data-section-id=" + self.sectionId + "]");
       if( cls ) {
-        var isApproved = cls === 'approved';
+        var isApproved = cls === "approved";
         // Section is never rejected.
         self.section$.toggleClass( "approved", isApproved );
         if( bar ) {
@@ -413,17 +412,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           _.each(  _.pluck( stats, "approval"), function( a ) {
             switch( a.value ) {
               case "rejected":
-              bar.addClass( "rejected");
-              return false;
-              break;
+                bar.addClass( "rejected");
+                return false;
               case "approved":
-              goods++;
-              break;
+                goods++;
+                break;
             }
           });
-          if( goods == _.size( stats)
-           && stats[self.sectionId]
-           && stats[self.sectionId].approval.value == "approved") {
+          if( goods === _.size( stats) &&
+              stats[self.sectionId] &&
+              stats[self.sectionId].approval.value === "approved") {
             // Everything is approved.
             setSectionStatus( self.sectionId, "approved");
           }
@@ -436,7 +434,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       setOrdered: setOrdered,
       setStatusClass: setStatusClass,
       setSectionStatus: setSectionStatus
-    }
+    };
   }();
 
   function barStatusHandler( approval ) {
@@ -449,7 +447,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     // rejecting the whole.
     self.statusOrder.setSectionStatus( self.sectionId, cls );
     self.statusOrder.setStatusClass( self.sectionId, cls );
-  };
+  }
 
   function makeApprovalContainer( statusKey ) {
     var statusContainer$ = $("<div>").addClass( "like-btn");
@@ -602,14 +600,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       buttons$.append( btnHelper( opts.description,
                                   "secondary is-left",
                                   "lupicon-pen",
-                                  loc( "op-description.edit")))
+                                  loc( "op-description.edit")));
     }
     if( opts.star ) {
       buttons$.append( btnHelper( opts.star,
                                   "secondary is-left",
                                   "lupicon-star",
-                                  opts.star.text))
-    }if ( opts.remove ) {
+                                  opts.star.text));
+    }
+    if ( opts.remove ) {
       buttons$.append( btnHelper( opts.remove,
                                   "secondary is-right",
                                   "lupicon-remove",
@@ -1397,7 +1396,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       _.each( rm.attr || {}, function( v, k ) {
         icon$.attr( k, v );
       });
-      $(row).append( $("<td>").append( icon$ ))
+      $(row).append( $("<td>").append( icon$ ));
     }
     return row;
   }
@@ -1917,7 +1916,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           window.Stickyfill.rebuild();
         },
         bubble: bubble
-    }
+    };
 
     // test ids
     if (options && options.dataTestSpecifiers) {
@@ -1992,12 +1991,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     toggle.appendChild( iconUp );
     toggle.className = "secondary";
     var descId = _.uniqueId( "data-desc-");
-    var barDesc = $("<span>").addClass( "description").attr( descId, "1")
+    var barDesc = $("<span>").addClass( "description").attr( descId, "1");
     if( op && _.size(  op.description ) ) {
       barDesc.text( " - " + op.description );
     }
     barText.append( $(title)).append(barDesc);
-    $(toggle).append( barText )
+    $(toggle).append( barText );
     var icons = $("<span>").addClass( "icons").append( iconRejected ).append( iconApproved );
     $(toggle).append( icons );
 
@@ -2016,7 +2015,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok("remove-doc") && notPrimaryOperation) {
       removeOpts = {fun: removeDoc};
       if (options && options.dataTestSpecifiers) {
-        removeOpts.attr = {"data-test-class": "delete-schemas." + self.schemaName}
+        removeOpts.attr = {"data-test-class": "delete-schemas." + self.schemaName};
       }
     }
 
@@ -2025,7 +2024,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if( authorizationModel.ok("change-primary-operation")) {
       if (!notPrimaryOperation) {
         opts.star = {attr: {"data-op-name": op.name},
-                     text: loc( "operations.primary")}
+                     text: loc( "operations.primary")};
       }
 
       if (isSecondaryOperation) {
