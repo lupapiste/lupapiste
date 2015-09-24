@@ -103,12 +103,23 @@ div.search {
     display: table-cell;
     vertical-align: top;
     height: $grid-input-height;
+    overflow: hidden;
     &:first-child {
       width: 100%;
     }
     button {
       width: 100%;
     }
+  }
+  .applications-search-filters-list__filter-item--default-filter {
+    min-width: 250px;
+    max-width: 250px;
+    width: 250px;
+  }
+  .applications-search-filters-list__filter-item--remove {
+    min-width: 105px;
+    max-width: 105px;
+    width: 105px;
   }
 }
 
