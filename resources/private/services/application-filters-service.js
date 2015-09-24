@@ -44,6 +44,9 @@ LUPAPISTE.ApplicationFiltersService = function() {
         lupapisteApp.models.currentUser.applicationFilters.remove(function(f) {
           return ko.unwrap(f.id) === ko.unwrap(filter.id);
         });
+        if (util.getIn(self.selected(), ["id"]) === ko.unwrap(filter.id)) {
+          self.selected(null);
+        }
       })
       .call();
     };
@@ -54,11 +57,8 @@ LUPAPISTE.ApplicationFiltersService = function() {
       .command("update-default-application-filter", {"filter-id": id})
       .error(util.showSavedIndicator)
       .success(function() {
-        _.forEach(_savedFilters(), function(f) {
-          f.isDefaultFilter(false);
-        });
-        if (id) {
-          filter.isDefaultFilter(true);
+        if (ko.isObservable(lupapisteApp.models.currentUser.defaultFilter) && ko.isObservable(lupapisteApp.models.currentUser.defaultFilter().id)) {
+          lupapisteApp.models.currentUser.defaultFilter().id(id);
         }
       })
       .call();
@@ -88,7 +88,7 @@ LUPAPISTE.ApplicationFiltersService = function() {
       lupapisteApp.models.currentUser.defaultFilter({id: filter.id});
     }
     var wrapped = wrapFilter(ko.mapping.fromJS(filter));
-    _savedFilters.unshift(wrapped);
+    lupapisteApp.models.currentUser.applicationFilters.push(wrapped);
     self.selected(wrapped);
   };
 };

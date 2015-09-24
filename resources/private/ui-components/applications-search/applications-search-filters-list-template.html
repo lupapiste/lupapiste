@@ -37,7 +37,7 @@
                 </div>
               </div>
 
-              <div class="applications-search-filters-list__filter-item">
+              <div class="applications-search-filters-list__filter-item applications-search-filters-list__filter-item--default-filter">
                 <button class="function" data-bind="attr: {'data-test-id': 'set-' + $data.title() + '-as-default-filter'},
                                                     click: $data.defaultFilter, css: {primary: $data.isDefaultFilter, function: !$data.isDefaultFilter() }">
                   <i class="lupicon-star"></i>
@@ -46,7 +46,7 @@
                 </button>
               </div>
 
-              <div class="applications-search-filters-list__filter-item" 
+              <div class="applications-search-filters-list__filter-item applications-search-filters-list__filter-item--remove"
                    data-bind="attr: {'data-test-id': 'remove-filter-' + $data.title()},
                               component: { name: 'remove-button', params: {removeFn: function() {$data.removeFilter($data);} }}"></div>
             </div>

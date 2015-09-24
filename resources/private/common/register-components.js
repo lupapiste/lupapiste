@@ -47,6 +47,7 @@ jQuery(document).ready(function() {
     {name: "autocomplete-areas", template: "autocomplete-tags-components"},
     {name: "autocomplete-handlers"},
     {name: "autocomplete-application-tags", template: "autocomplete-tags-components"},
+    {name: "autocomplete-saved-filters"},
     {name: "indicator"},
     {name: "accordion"},
     {name: "text-field", model: "input-field"},

@@ -3215,7 +3215,7 @@ button:focus {
 /* line 497, ../sass/partials/_buttons.scss */
 .remove-button .remove-button__row button {
   display: inline-block;
-  width: 100px !important;
+  width: 105px !important;
   margin-right: -3px;
 }
 
@@ -7862,67 +7862,80 @@ div.search i {
   display: table-cell;
   vertical-align: top;
   height: 40px;
+  overflow: hidden;
 }
-/* line 106, ../sass/partials/_applications_search.scss */
+/* line 107, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item:first-child {
   width: 100%;
 }
-/* line 109, ../sass/partials/_applications_search.scss */
+/* line 110, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item button {
   width: 100%;
 }
+/* line 114, ../sass/partials/_applications_search.scss */
+.applications-search-filters-list .applications-search-filters-list__filter-item--default-filter {
+  min-width: 250px;
+  max-width: 250px;
+  width: 250px;
+}
+/* line 119, ../sass/partials/_applications_search.scss */
+.applications-search-filters-list .applications-search-filters-list__filter-item--remove {
+  min-width: 105px;
+  max-width: 105px;
+  width: 105px;
+}
 
-/* line 115, ../sass/partials/_applications_search.scss */
+/* line 126, ../sass/partials/_applications_search.scss */
 .application-row {
   height: 45px;
 }
 
-/* line 118, ../sass/partials/_applications_search.scss */
+/* line 129, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator {
   color: #f39129;
   padding: 3px 0 0 0 !important;
   word-wrap: break-word;
 }
-/* line 122, ../sass/partials/_applications_search.scss */
+/* line 133, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div {
   text-align: center;
   height: auto !important;
   padding: 0 6px !important;
   white-space: nowrap;
 }
-/* line 127, ../sass/partials/_applications_search.scss */
+/* line 138, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div i {
   display: table-cell;
 }
-/* line 130, ../sass/partials/_applications_search.scss */
+/* line 141, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div span {
   padding-left: 2px;
   display: table-cell;
   vertical-align: middle;
   color: #595959;
 }
-/* line 138, ../sass/partials/_applications_search.scss */
+/* line 149, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.urgent {
   color: #df3215;
 }
-/* line 141, ../sass/partials/_applications_search.scss */
+/* line 152, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.pending {
   color: #f39129;
 }
 
-/* line 160, ../sass/partials/_applications_search.scss */
+/* line 171, ../sass/partials/_applications_search.scss */
 table.applications-table th.fifth {
   width: 10%;
 }
-/* line 163, ../sass/partials/_applications_search.scss */
+/* line 174, ../sass/partials/_applications_search.scss */
 table.applications-table th.sixth {
   width: 5%;
 }
-/* line 166, ../sass/partials/_applications_search.scss */
+/* line 177, ../sass/partials/_applications_search.scss */
 table.applications-table th.seventh {
   width: 5%;
 }
-/* line 171, ../sass/partials/_applications_search.scss */
+/* line 182, ../sass/partials/_applications_search.scss */
 table.applications-table th.ninth {
   width: 10%;
 }
