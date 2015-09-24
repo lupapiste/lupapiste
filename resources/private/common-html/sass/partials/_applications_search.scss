@@ -103,7 +103,6 @@ div.search {
     display: table-cell;
     vertical-align: top;
     height: $grid-input-height;
-    overflow: hidden;
     &:first-child {
       width: 100%;
     }
@@ -115,6 +114,7 @@ div.search {
     min-width: 250px;
     max-width: 250px;
     width: 250px;
+    overflow: hidden;
   }
   .applications-search-filters-list__filter-item--remove {
     min-width: 105px;
