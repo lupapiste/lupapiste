@@ -15,7 +15,7 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   var APPROVE  = "approve";
   var REJECTED = "rejected";
   var REJECT   = "reject";
-  // Neutral status is only used in front-end.
+  // Neutral status is only used in the front-end.
   var NEUTRAL  = "neutral";
 
   self.remove = params.remove || {};
@@ -30,26 +30,18 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   var masterApproval = ko.observable();
 
   self.approval = ko.pureComputed( function() {
-    var approval = _.clone( self.docModel.safeApproval( self.model, myApproval));
-    console.log( "Approval:", approval);
+    var approval = _.cloneDeep( self.docModel.safeApproval( self.model, myApproval));
     var master = masterApproval();
-    console.log( "Master:", master );
     if( master && master.value !== NEUTRAL && master.timestamp > approval.timestamp ) {
       _.merge( approval, master );
     }
-    //console.log( "Group approval:", approval );
     return approval;
   });
 
   self.docModel.approvalHubSubscribe( function( data ) {
     if( !data.receiver || _.isEqual( data.receiver, params.path)) {
-      console.log ( "Group sub:", data.path );
-      masterApproval ( data.approval )
-    };
-    // We always respond with our approval. Thus, there
-    // is no need for specific request message.
-
-    //self.docModel.approvalHubSend( myApproval(), params.path );
+      masterApproval ( _.cloneDeep(data.approval) );
+    }
   }, true);
 
   // UI
@@ -90,7 +82,7 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   self.details = ko.pureComputed( _.partial( self.docModel.approvalInfo,
                                              myApproval ));
 
-
-  self.docModel.approvalHubSend( myApproval(), params.path );
+  self.docModel.approvalHubSend( self.docModel.safeApproval( self.model, myApproval),
+                                 params.path );
 
 }

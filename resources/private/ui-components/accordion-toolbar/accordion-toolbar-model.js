@@ -18,7 +18,6 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   AccordionState.register( self.docModel.docId, self.isOpen );
 
-
   self.info = self.docModel.schema.info;
   var meta = self.docModel.getMeta( params.path );
   var masterApproval = ko.observable( meta ? meta._approved : null );
@@ -41,7 +40,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   var groupApprovals = ko.observable( {});
 
   function safeMaster() {
-    return self.docModel.safeApproval( self.model, masterApproval);
+    return self.docModel.safeApproval( self.docModel.model, masterApproval);
   }
   function laterGroups() {
     var master = safeMaster();
@@ -55,18 +54,20 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.approval = ko.computed( function() {
     var groups = groupApprovals();
     var master = safeMaster();
-    var result = _.every( laterGroups(),
+    var later = laterGroups();
+    var result = _.every( later,
                           function( a ) {
                             return a.value === master.value;
                           })
                ? master
                : {value: NEUTRAL};
     if( !_.isEqual(lastSent, result)) {
-      lastSent = result;
+      lastSent = _.cloneDeep(result);
       self.docModel.approvalHubSend( result, []);
     }
     return result;
   })
+
 
   // Exclamation icon on the accordion should be visible
   // if the master or any of the groups is REJECTED. Typical
@@ -80,15 +81,13 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   })
 
   self.docModel.approvalHubSubscribe( function( data ) {
-    //console.log( "Master sub:", data.path);
     var g = _.clone( groupApprovals() );
     g["path" + data.path.join("-")] = data.approval;
     groupApprovals( g );
     // We always respond to the sender regardless whether
     // the update triggers full broadcast.
     self.docModel.approvalHubSend( self.approval(), [], data.path )
-    //console.log( "Group approvals:", groupApprovals());
-  } )
+  })
 
   // Pen
   // Operation description.

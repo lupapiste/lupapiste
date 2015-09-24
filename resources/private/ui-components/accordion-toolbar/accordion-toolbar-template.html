@@ -13,7 +13,8 @@
             <i class="lupicon-chevron-up toggle"></i>
             <span class="bar-text">
               <span class="title"
-                    data-bind="attr: {'data-app-id': docModel.appId},
+                    data-bind="attr: {'data-app-id': docModel.appId,
+                                      'data-doc-id': docModel.docId},
                                ltext: title">
               </span>
               <span class="description"
@@ -42,8 +43,8 @@
               </div>
             </span>
             <button class="secondary is-left"
-                    data-test-id="edit-op-description"
-                    data-bind="visible: showDescription">
+                    data-bind="attr: {'data-test-id': docModel.testId('edit-op-description') },
+                               visible: showDescription">
               <i class="lupicon-pen"></i>
               <span data-bind="ltext: 'op-description.edit',
                                event: {mousedown: toggleEditor}">
