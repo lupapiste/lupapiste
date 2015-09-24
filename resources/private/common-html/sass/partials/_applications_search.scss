@@ -64,8 +64,11 @@
 }
 
 .paging {
-  p {
+  color: $gray51;
+  label {
+    color: $gray51;
     margin-bottom: $marginS;
+    display: inline-block;
   }
   button {
     margin-right: $grid-margin;
