@@ -1088,6 +1088,37 @@
         {$set {:permitSubtype subtype}
          $unset {:documents.$.data.ilmoitusHakemusValitsin 1}}))))
 
+(defn- add-approver-role-for-authority-in-org
+  [[org org-roles]]
+  [org (if (some (partial = "authority") org-roles)
+         (conj org-roles "approver")
+         org-roles)])
+
+(defn- add-approver-roles-for-authority
+  [{org-authz :orgAuthz :as user}]
+  (->> org-authz
+       (map add-approver-role-for-authority-in-org)
+       (into {})
+       (assoc user :orgAuthz)))
+
+(defmigration approver-roles-for-authorities
+  (doseq [authority (mongo/select :users {:role "authority" :orgAuthz {$exists true}})]
+    (mongo/update-by-id :users (:id authority) (add-approver-roles-for-authority authority))))
+
+(defmigration rip-rakennus-schema-part-from-ya-katselmukset
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                                 :tasks {$elemMatch {:schema-info.name "task-katselmus"}}}))}
+  (update-applications-array
+    :tasks
+    (fn [task]
+      (if (= "task-katselmus" (-> task :schema-info :name))
+        (-> task
+          (dissoc-in [:data :rakennus])
+          (assoc-in [:schema-info :name] "task-katselmus-ya"))
+        task))
+    {:permitType "YA"
+     :tasks {$elemMatch {:schema-info.name "task-katselmus"}}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

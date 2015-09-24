@@ -1006,15 +1006,21 @@ div.alleYli-radioGroup {
 
 $col: 25%;
 
-@mixin form-grid-clear {
-  content: "";
-  display: block;
-  clear: both;
+@mixin clearfix() {
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
 }
 
 @mixin column ($size) {
   position: relative;
   float: left;
+  // display: inline-block;;
   width: $size * $col;
   min-width: $size * $col;
   max-width: $size * $col;
@@ -1037,16 +1043,12 @@ $col: 25%;
 }
 
 .form-grid {
-  overflow-y: hidden;
+  // overflow-y: hidden;
   width: 100%;
   border-top: 1px solid $grid-border-color;
 
   &:last-child {
     border-bottom: none;
-  }
-
-  &:after {
-    @include form-grid-clear;
   }
 
   h2 {
@@ -1133,9 +1135,35 @@ $col: 25%;
     vertical-align: middle;
   }
 
+  input[type=text]:disabled {
+    border-color: $input-disabled-border-color
+  }
+
   input[type=text].err, input[type=password].err {
     border: 1px solid $negative;
     color: $negative;
+  }
+
+  .submit-button {
+    display: table-row;
+    .submit-button__item {
+      display: table-cell;
+      &:first-child {
+        width: 100%;
+      }
+    }
+
+    .submittable {
+      input {
+        border-color: $positive;
+      }
+    }
+  }
+
+  button.input-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
   }
 
   @for $i from 1 through 4 {
@@ -1145,9 +1173,17 @@ $col: 25%;
   }
 
   .row {
-    @include form-grid-clear;
+    @include clearfix;
     margin: $grid-margin 0;
-    overflow-y: hidden;
+    // overflow-y: hidden;
+  }
+
+  .row--no-margin {
+    margin: 0;
+  }
+
+  .autocomplete-component {
+    width: 100%;
   }
 
   .info-message {
@@ -1213,6 +1249,16 @@ $col: 25%;
       @include lupicon-font;
       content: "\e63c";
       margin-right: $marginS;
+    }
+  }
+}
+
+.form-grid--no-border {
+  border: none;
+
+  .col-1, .col-2, .col-3, .col-4 {
+    &:first-child {
+      padding-left: 0;
     }
   }
 }

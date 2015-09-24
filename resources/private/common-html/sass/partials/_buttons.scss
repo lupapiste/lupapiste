@@ -224,7 +224,7 @@ i.btn-small {
     color: $hover-text;
     background-color: $hover-bg
   }
-  &:active {
+  &:active, &.active {
     color: $active-text;
     background-color: $active-bg
   }
@@ -476,3 +476,30 @@ i.toggle {
   text-align: center;
   width: 200px;
 }
+
+button {
+  &:focus {
+    outline:0;
+  }
+}
+
+.remove-button {
+  position: relative;
+  .remove-button__row {
+    position: absolute;
+    top: 0;
+    white-space: nowrap;
+    width: 0px;
+    overflow: hidden;
+    &.remove-button--show {
+      width: auto;
+    }
+    button {
+      display: inline-block;
+      width: 100px !important;
+      margin-right: -3px;
+    }
+  }
+}
+
+

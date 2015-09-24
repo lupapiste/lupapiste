@@ -103,6 +103,10 @@ var util = (function($) {
   }
 
   function isNum(s) {
+    return s && s.match(/^\s*-??\d+\s*$/) !== null;
+  }
+
+  function isNonNegative(s) {
     return s && s.match(/^\s*\d+\s*$/) !== null;
   }
 
@@ -182,18 +186,29 @@ var util = (function($) {
     return personIdCn[parseInt(n, 10) % 31] === c;
   }
 
-  function extractRequiredErrors(errors) {
+
+
+  var extractErrors = function(filterFn, errors) {
     var errs = _.map(errors, function(errArray) {
       return _.filter(errArray, function(err) {
-        var ret = _.includes(err.result, "illegal-value:required");
-        return ret;
+        return filterFn(err.result);
       });
     });
     errs = _.filter(errs, function(errArray) {
       return errArray.length > 0;
     });
     return errs;
-  }
+  };
+
+  var extractRequiredErrors = _.partial(extractErrors, function(errResult) {
+    return _.includes(errResult, "illegal-value:required");
+  });
+
+  var extractWarnErrors = _.partial(extractErrors, function(errResult) {
+    return _.includes(errResult, "warn");
+  });
+
+
 
   function dissoc(m, k) {
     delete m[k];
@@ -218,10 +233,11 @@ var util = (function($) {
     return [strOrArr + suffix];
   }
 
-  function filterDataByQuery(data, q, selected) {
+  function filterDataByQuery(data, q, selected, label) {
+    label = label || "label";
     return _.filter(data, function(item) {
       return _.reduce(q.split(" "), function(result, word) {
-        return !_.some(selected, item) && _.contains(item.label.toUpperCase(), word.toUpperCase()) && result;
+        return !_.some(selected, item) && _.contains(item[label].toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
   }
@@ -263,11 +279,13 @@ var util = (function($) {
     isPartyDoc: isPartyDoc,
     isNotPartyDoc: isNotPartyDoc,
     extractRequiredErrors: extractRequiredErrors,
+    extractWarnErrors: extractWarnErrors,
     dissoc: dissoc,
     randomElementId: randomElementId,
     withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery,
-    showSavedIndicator: showSavedIndicator
+    showSavedIndicator: showSavedIndicator,
+    isNonNegative: isNonNegative
   };
 
 })(jQuery);

@@ -145,10 +145,12 @@
                    "tag-filter-service.js"
                    "operation-filter-service.js"
                    "organization-filter-service.js"
-                   "organization-tags-service.js"]}
+                   "organization-tags-service.js"
+                   "handler-filter-service.js"
+                   "application-filters-service.js"]}
 
    :global-models {:depends [:services]
-                   :js ["root-model.js" "application-model.js" "register-models.js"]}
+                   :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
 
    :screenmessages  {:js   ["screenmessage.js"]
                      :html ["screenmessage.html"]}
@@ -304,7 +306,8 @@
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
-   :hashbang     {:depends [:common-html]
+   :hashbang     {:depends [:common-html :ui-components :header]
+                  :js ["hashbang.js"]
                   :html ["index.html"]}
 
    :upload       {:depends [:iframe :attachment-utils]

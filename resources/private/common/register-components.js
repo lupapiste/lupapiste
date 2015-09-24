@@ -36,8 +36,10 @@ jQuery(document).ready(function() {
     {name: "help-toggle"},
     {name: "address"},
     {name: "applications-search"},
+    {name: "applications-search-tabs"},
     {name: "applications-search-results"},
     {name: "applications-search-filter"},
+    {name: "applications-search-filters-list"},
     {name: "applications-search-paging"},
     {name: "autocomplete-tags", template: "autocomplete-tags-components"},
     {name: "autocomplete-operations", template: "autocomplete-tags-components"},
@@ -52,7 +54,9 @@ jQuery(document).ready(function() {
     {name: "select-field", model: "input-field"},
     {name: "password-field"},
     {name: "accordion-toolbar"},
-    {name: "group-approval"}
+    {name: "group-approval"},
+    {name: "submit-button"},
+    {name: "remove-button"}
   ];
 
   _.forEach(components, function(component) {

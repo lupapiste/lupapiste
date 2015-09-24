@@ -353,16 +353,27 @@
     };
 
     self.load = function() {
-      ajax
-        .query("company", {company: self.id(), users: true})
-        .pending(self.pending)
-        .success(self.update)
-        .call();
-      return self;
+      if (self.id()) {
+        ajax
+          .query("company", {company: self.id(), users: true})
+          .pending(self.pending)
+          .success(self.update)
+          .error(function() {
+            notify.error(loc("error.dialog.title"), loc("error.company-not-accessible"));
+            self.id(null);
+            pageutil.openPage("applications");
+          })
+          .call();
+        return self;
+      }
     };
 
     self.show = function(id, tab) {
-      if (self.id() !== id) { self.clear().id(id).load(); }
+      if (!id) {
+        pageutil.openPage("register-company-account-type");
+      } else if (self.id() !== id) {
+        self.clear().id(id).load();
+      }
       self.tabs.show(tab);
       return self;
     };

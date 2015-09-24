@@ -27,7 +27,6 @@ Sonja logs in
 Sonja fetches verdict from municipality KRYSP service
   Open tab  verdict
   Fetch verdict
-  Verdict is given  2013-01  0
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
   Page Should Contain Element  //div[@data-test-id="given-verdict-id-0-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
@@ -117,7 +116,7 @@ Stamping page opens, verdict details can be seen
 
 Mikko sees that the application has verdicts
   Mikko logs in
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  3
+  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
   Verdict is given  2013-01  0
@@ -144,11 +143,6 @@ Mikko signs the verdict
   Element should Contain  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']  ${CURRENT_DATE}
 
 *** Keywords ***
-
-Verdict is given
-  [Arguments]  ${kuntalupatunnus}  ${i}
-  Wait until  Element should be visible  application-verdict-details
-  Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
 
 Verdict count is
   [Arguments]  ${amount}

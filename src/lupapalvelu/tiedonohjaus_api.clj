@@ -103,6 +103,27 @@
                           [new-k new-v])))
        (into {})))
 
+(defcommand store-tos-metadata-for-verdict
+  {:parameters [:id verdictId metadata]
+   :user-roles #{:authority}
+   :states     states/all-but-draft-or-terminal}
+  [{:keys [application created] :as command}]
+  (when (env/feature? :tiedonohjaus)
+    (try
+      (if-let [verdict (first (filter #(= (:id %) verdictId) (:verdicts application)))]
+        (let [metadata (->> (keywordize-keys-and-some-values metadata [])
+                            (#(assoc % :tila (or (get-in verdict [:metadata :tila]) "Valmis")))
+                            (tms/sanitize-metadata))
+              updated-verdict (assoc verdict :metadata metadata)
+              updated-verdicts (-> (remove #(= % verdict) (:verdicts application))
+                                     (conj updated-verdict))]
+          (action/update-application command {$set {:modified created
+                                                    :verdicts updated-verdicts}}))
+        (fail "error.attachment.id"))
+      (catch RuntimeException e
+        (timbre/error e)
+        (fail "error.invalid.metadata")))))
+
 (defcommand store-tos-metadata-for-statement
   {:parameters [:id statementId metadata]
    :user-roles #{:authority}
