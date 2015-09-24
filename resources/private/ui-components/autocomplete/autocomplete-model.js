@@ -204,6 +204,11 @@ LUPAPISTE.AutocompleteModel = function(params) {
     self.inputSelected(false);
   };
 
+  self.clearQuery = function() {
+    self.query("");
+    self.retainFocus();
+  };
+
   self.dispose = function() {
     while(self.subscriptions.length !== 0) {
       self.subscriptions.pop().dispose();

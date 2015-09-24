@@ -7858,7 +7858,11 @@ div.search {
 div.search input {
   padding-right: 40px !important;
 }
-/* line 84, ../sass/partials/_applications_search.scss */
+/* line 85, ../sass/partials/_applications_search.scss */
+div.search.active i {
+  color: #fbc732;
+}
+/* line 89, ../sass/partials/_applications_search.scss */
 div.search i {
   color: #f39129;
   position: absolute;
@@ -7866,94 +7870,94 @@ div.search i {
   right: 8px;
 }
 
-/* line 94, ../sass/partials/_applications_search.scss */
+/* line 99, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filters {
   display: table;
 }
-/* line 98, ../sass/partials/_applications_search.scss */
+/* line 103, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-row {
   display: table-row;
 }
-/* line 102, ../sass/partials/_applications_search.scss */
+/* line 107, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item {
   background-color: #fff;
   display: table-cell;
   vertical-align: top;
   height: 40px;
 }
-/* line 107, ../sass/partials/_applications_search.scss */
+/* line 112, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item:first-child {
   width: 100%;
 }
-/* line 110, ../sass/partials/_applications_search.scss */
+/* line 115, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item button {
   width: 100%;
 }
-/* line 114, ../sass/partials/_applications_search.scss */
+/* line 119, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item--default-filter {
   min-width: 250px;
   max-width: 250px;
   width: 250px;
   overflow: hidden;
 }
-/* line 120, ../sass/partials/_applications_search.scss */
+/* line 125, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item--remove {
   min-width: 105px;
   max-width: 105px;
   width: 105px;
 }
 
-/* line 127, ../sass/partials/_applications_search.scss */
+/* line 132, ../sass/partials/_applications_search.scss */
 .application-row {
   height: 45px;
 }
 
-/* line 130, ../sass/partials/_applications_search.scss */
+/* line 135, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator {
   color: #f39129;
   padding: 3px 0 0 0 !important;
   word-wrap: break-word;
 }
-/* line 134, ../sass/partials/_applications_search.scss */
+/* line 139, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div {
   text-align: center;
   height: auto !important;
   padding: 0 6px !important;
   white-space: nowrap;
 }
-/* line 139, ../sass/partials/_applications_search.scss */
+/* line 144, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div i {
   display: table-cell;
 }
-/* line 142, ../sass/partials/_applications_search.scss */
+/* line 147, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div span {
   padding-left: 2px;
   display: table-cell;
   vertical-align: middle;
   color: #595959;
 }
-/* line 150, ../sass/partials/_applications_search.scss */
+/* line 155, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.urgent {
   color: #df3215;
 }
-/* line 153, ../sass/partials/_applications_search.scss */
+/* line 158, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.pending {
   color: #f39129;
 }
 
-/* line 172, ../sass/partials/_applications_search.scss */
+/* line 177, ../sass/partials/_applications_search.scss */
 table.applications-table th.fifth {
   width: 10%;
 }
-/* line 175, ../sass/partials/_applications_search.scss */
+/* line 180, ../sass/partials/_applications_search.scss */
 table.applications-table th.sixth {
   width: 5%;
 }
-/* line 178, ../sass/partials/_applications_search.scss */
+/* line 183, ../sass/partials/_applications_search.scss */
 table.applications-table th.seventh {
   width: 5%;
 }
-/* line 183, ../sass/partials/_applications_search.scss */
+/* line 188, ../sass/partials/_applications_search.scss */
 table.applications-table th.ninth {
   width: 10%;
 }
