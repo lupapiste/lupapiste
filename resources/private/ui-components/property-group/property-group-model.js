@@ -22,7 +22,6 @@ LUPAPISTE.PropertyGroupModel = function(params) {
   });
   
   self.maaraalaSchema = _.first(_.first(partitionedSchemas));
-  
   self.otherSchemas = _(partitionedSchemas)
     .rest()
     .flatten()

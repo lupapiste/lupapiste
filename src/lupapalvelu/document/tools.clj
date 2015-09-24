@@ -37,6 +37,7 @@
     :hetu             "210281-9988"
     :fillMyInfoButton nil
     :foremanHistory   nil
+    :maaraalaTunnus   nil
     :string           (condp = (keyword subtype)
                         :maaraala-tunnus   "0003"
                         :email            "example@example.com"
