@@ -131,14 +131,14 @@
 
     (facts "foreman history"
       (apply-remote-minimal) ; clean mikko before history tests
-      (let [{application-id :id} (create-app apikey :operation "kerrostalo-rivitalo")
-            foreman-app-id1      (create-foreman-application application-id apikey mikko-id "KVV-ty\u00F6njohtaja" "B"); -> should be visible
-            foreman-app-id2      (create-foreman-application application-id apikey mikko-id "KVV-ty\u00F6njohtaja" "A") ; -> should be visible
-            foreman-app-id3      (create-foreman-application application-id apikey mikko-id "vastaava ty\u00F6njohtaja" "B") ; -> should be visible
-            foreman-app-id4      (create-foreman-application application-id apikey mikko-id "vastaava ty\u00F6njohtaja" "B") ; -> should *NOT* be visible
-            foreman-app-id5      (create-foreman-application application-id apikey mikko-id "vastaava ty\u00F6njohtaja" "A") ; -> should be visible
+      (let [{history-base-app-id :id} (create-app apikey :operation "kerrostalo-rivitalo")
+            foreman-app-id1      (create-foreman-application history-base-app-id apikey mikko-id "KVV-ty\u00F6njohtaja" "B"); -> should be visible
+            foreman-app-id2      (create-foreman-application history-base-app-id apikey mikko-id "KVV-ty\u00F6njohtaja" "A") ; -> should be visible
+            foreman-app-id3      (create-foreman-application history-base-app-id apikey mikko-id "vastaava ty\u00F6njohtaja" "B") ; -> should be visible
+            foreman-app-id4      (create-foreman-application history-base-app-id apikey mikko-id "vastaava ty\u00F6njohtaja" "B") ; -> should *NOT* be visible
+            foreman-app-id5      (create-foreman-application history-base-app-id apikey mikko-id "vastaava ty\u00F6njohtaja" "A") ; -> should be visible
 
-            base-foreman-app-id  (create-foreman-application application-id apikey mikko-id "vastaava ty\u00F6njohtaja" "B") => truthy] ;for calling history
+            base-foreman-app-id  (create-foreman-application history-base-app-id apikey mikko-id "vastaava ty\u00F6njohtaja" "B") => truthy] ;for calling history
 
         (facts "reduced"
           (fact "reduced history should contain reduced history"
@@ -157,7 +157,7 @@
             (query sonja :reduced-foreman-history :id "foobar") => fail?))
 
           (fact "Should be queriable only with a foreman application"
-            (let [resp (query sonja :foreman-history :id application-id) => fail?]
+            (let [resp (query sonja :foreman-history :id history-base-app-id) => fail?]
               (:text resp) => "error.not-foreman-app"))
 
         (facts "unreduced"
@@ -170,5 +170,10 @@
             (query sonja :foreman-history :id "foobar") => fail?)
 
           (fact "Should be queriable only with a foreman application"
-            (let [resp (query sonja :reduced-foreman-history :id application-id) => fail?]
-              (:text resp) => "error.not-foreman-app")))))))
+            (let [resp (query sonja :reduced-foreman-history :id history-base-app-id) => fail?]
+              (:text resp) => "error.not-foreman-app")))
+
+        (fact "can not link foreman applications to each other"
+          (command apikey :add-link-permit :id foreman-app-id4 :linkPermitId foreman-app-id5) => fail?)
+
+        ))))
