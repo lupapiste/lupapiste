@@ -281,6 +281,7 @@
                                            :add-operation-allowed false
                                            :link-permit-required true
                                            :link-permit-verdict-required true
+                                           :max-link-permits 1
                                            :asianhallinta true}})
 
 (def- ymparistolupa-attachments []) ; TODO
@@ -314,6 +315,7 @@
    :link-permit-verdict-required sc/Bool
    :add-operation-allowed sc/Bool
    :required [sc/Str]
+   (sc/optional-key :max-link-permits) sc/Num
    (sc/optional-key :subtypes) [(sc/maybe sc/Keyword)]
    (sc/optional-key :state-graph-resolver) util/Fn
    (sc/optional-key :schema-data) [sc/Any]})
@@ -768,6 +770,7 @@
                                   :add-operation-allowed false
                                   :link-permit-required true
                                   :link-permit-verdict-required true
+                                  :max-link-permits 1
                                   :asianhallinta false}
 
     :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
@@ -779,6 +782,7 @@
                                   :add-operation-allowed false
                                   :link-permit-required true
                                   :link-permit-verdict-required false
+                                  :max-link-permits 1
                                   :asianhallinta false}
 
     :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"
