@@ -7862,21 +7862,21 @@ div.search i {
   display: table-cell;
   vertical-align: top;
   height: 40px;
-  overflow: hidden;
 }
-/* line 107, ../sass/partials/_applications_search.scss */
+/* line 106, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item:first-child {
   width: 100%;
 }
-/* line 110, ../sass/partials/_applications_search.scss */
+/* line 109, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item button {
   width: 100%;
 }
-/* line 114, ../sass/partials/_applications_search.scss */
+/* line 113, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item--default-filter {
   min-width: 250px;
   max-width: 250px;
   width: 250px;
+  overflow: hidden;
 }
 /* line 119, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item--remove {
