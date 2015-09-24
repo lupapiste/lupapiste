@@ -3215,7 +3215,7 @@ button:focus {
 /* line 497, ../sass/partials/_buttons.scss */
 .remove-button .remove-button__row button {
   display: inline-block;
-  width: 100px !important;
+  width: 105px !important;
   margin-right: -3px;
 }
 
@@ -3450,16 +3450,21 @@ input.form-input.long {
 }
 
 /* line 249, ../sass/partials/_forms.scss */
+input.form-input.inline {
+  display: inline;
+}
+
+/* line 253, ../sass/partials/_forms.scss */
 .form-add {
   display: block;
 }
 
-/* line 253, ../sass/partials/_forms.scss */
+/* line 257, ../sass/partials/_forms.scss */
 .form-input.file {
   height: 24px;
 }
 
-/* line 257, ../sass/partials/_forms.scss */
+/* line 261, ../sass/partials/_forms.scss */
 .form-input.checkbox, [type="checkbox"], .form-input.radio, [type="radio"] {
   width: auto;
   display: inline-block;
@@ -3469,31 +3474,31 @@ input.form-input.long {
   height: 14px;
   padding: 0;
 }
-/* line 265, ../sass/partials/_forms.scss */
+/* line 269, ../sass/partials/_forms.scss */
 .form-input.checkbox.error, [type="checkbox"].error, .form-input.radio.error, [type="radio"].error {
   outline: 3px solid red;
 }
-/* line 268, ../sass/partials/_forms.scss */
+/* line 272, ../sass/partials/_forms.scss */
 .form-input.checkbox.warning, [type="checkbox"].warning, .form-input.radio.warning, [type="radio"].warning {
   outline: 3px solid #f39129;
 }
-/* line 271, ../sass/partials/_forms.scss */
+/* line 275, ../sass/partials/_forms.scss */
 .form-input.checkbox.source-value-changed, [type="checkbox"].source-value-changed, .form-input.radio.source-value-changed, [type="radio"].source-value-changed {
   outline: 2px solid #04c714;
 }
 
-/* line 276, ../sass/partials/_forms.scss */
+/* line 280, ../sass/partials/_forms.scss */
 .form-input.combobox, select {
   width: 16.25em;
   height: 30px;
   padding: 4px;
 }
-/* line 280, ../sass/partials/_forms.scss */
+/* line 284, ../sass/partials/_forms.scss */
 .form-input.combobox.long, select.long {
   width: 28.75em;
 }
 
-/* line 285, ../sass/partials/_forms.scss */
+/* line 289, ../sass/partials/_forms.scss */
 .form-input.other {
   display: inline;
   margin-top: -40px;
@@ -3501,7 +3506,7 @@ input.form-input.long {
   width: 16.25em;
 }
 
-/* line 291, ../sass/partials/_forms.scss */
+/* line 295, ../sass/partials/_forms.scss */
 .form-group, .form-choice, .form-table {
   overflow: visible;
   display: block;
@@ -3510,75 +3515,84 @@ input.form-input.long {
   box-sizing: border-box;
   border-bottom: 1px solid #dddddd;
 }
-/* line 304, ../sass/partials/_forms.scss */
+/* line 308, ../sass/partials/_forms.scss */
 .form-group:last-child, .form-choice:last-child, .form-table:last-child {
   border-bottom: none;
 }
-/* line 308, ../sass/partials/_forms.scss */
+/* line 312, ../sass/partials/_forms.scss */
 .form-group table, .form-choice table, .form-table table {
   width: auto;
 }
-/* line 311, ../sass/partials/_forms.scss */
+/* line 315, ../sass/partials/_forms.scss */
 .form-group .form-group, .form-choice .form-group, .form-table .form-group {
   margin: 6px;
 }
-/* line 314, ../sass/partials/_forms.scss */
+/* line 318, ../sass/partials/_forms.scss */
 .form-group .form-input, .form-choice .form-input, .form-table .form-input {
   display: block;
 }
-/* line 317, ../sass/partials/_forms.scss */
+/* line 321, ../sass/partials/_forms.scss */
 .form-group .form-input.checkbox, .form-group .form-input.radio, .form-choice .form-input.checkbox, .form-choice .form-input.radio, .form-table .form-input.checkbox, .form-table .form-input.radio {
   margin: 0 6px 2px 0;
   display: inline-block;
 }
-/* line 321, ../sass/partials/_forms.scss */
+/* line 325, ../sass/partials/_forms.scss */
 .form-group .form-label-checkbox, .form-choice .form-label-checkbox, .form-table .form-label-checkbox {
   vertical-align: middle;
   width: 262px;
   margin-right: 4px;
 }
-/* line 326, ../sass/partials/_forms.scss */
-.form-group .form-label-group, .form-group .form-label-table, .form-choice .form-label-group, .form-choice .form-label-table, .form-table .form-label-group, .form-table .form-label-table {
+/* line 330, ../sass/partials/_forms.scss */
+.form-group .form-label-group, .form-group .property-group-header .form-label-property-group, .form-choice .property-group-header .form-group .form-label-property-group, .form-table .property-group-header .form-group .form-label-property-group, .form-group .form-label-table, .form-choice .form-label-group, .form-group .property-group-header .form-choice .form-label-property-group, .form-choice .property-group-header .form-label-property-group, .form-table .property-group-header .form-choice .form-label-property-group, .form-choice .form-label-table, .form-table .form-label-group, .form-group .property-group-header .form-table .form-label-property-group, .form-choice .property-group-header .form-table .form-label-property-group, .form-table .property-group-header .form-label-property-group, .form-table .form-label-table {
   width: 100%;
   display: block;
   font-family: "Source Sans Pro", sans-serif;
   font-weight: bold;
   margin-bottom: 6px;
 }
-/* line 334, ../sass/partials/_forms.scss */
+/* line 339, ../sass/partials/_forms.scss */
+.form-group .property-group-header .form-label-property-group, .form-choice .property-group-header .form-label-property-group, .form-table .property-group-header .form-label-property-group {
+  width: auto;
+  display: inline;
+}
+/* line 344, ../sass/partials/_forms.scss */
+.form-group .property-group-header .maaraala-checkbox, .form-choice .property-group-header .maaraala-checkbox, .form-table .property-group-header .maaraala-checkbox {
+  margin-right: 0;
+}
+/* line 348, ../sass/partials/_forms.scss */
 .form-group .form-entry, .form-choice .form-entry, .form-table .form-entry {
   display: inline-block;
   width: 300px;
   min-height: 48px;
 }
 
-/* line 341, ../sass/partials/_forms.scss */
+/* line 355, ../sass/partials/_forms.scss */
 .form-choice .form-entry {
   display: inline-block;
   min-width: 45%;
 }
-/* line 344, ../sass/partials/_forms.scss */
+/* line 358, ../sass/partials/_forms.scss */
 .form-choice .form-entry .form-input {
   display: inline-block;
 }
-/* line 347, ../sass/partials/_forms.scss */
+/* line 361, ../sass/partials/_forms.scss */
 .form-choice .form-entry .form-input.textarea {
   height: 72px;
   width: 80%;
 }
-/* line 351, ../sass/partials/_forms.scss */
+/* line 365, ../sass/partials/_forms.scss */
 .form-choice .form-entry .form-indicator {
   top: 0;
 }
 
-/* line 356, ../sass/partials/_forms.scss */
+/* line 370, ../sass/partials/_forms.scss */
 .form-info {
   display: inline;
   color: red;
   margin: 12px;
 }
 
-/* line 362, ../sass/partials/_forms.scss */
+/* line 376, ../sass/partials/_forms.scss */
 .form-error {
   display: inline;
   color: red;
@@ -3586,56 +3600,56 @@ input.form-input.long {
   font-weight: bold;
 }
 
-/* line 369, ../sass/partials/_forms.scss */
+/* line 383, ../sass/partials/_forms.scss */
 .form-input-warn {
   font-weight: bold;
 }
 
-/* line 373, ../sass/partials/_forms.scss */
+/* line 387, ../sass/partials/_forms.scss */
 .form-input-err {
   font-weight: bold;
 }
 
-/* line 377, ../sass/partials/_forms.scss */
+/* line 391, ../sass/partials/_forms.scss */
 .form-input.textarea {
   height: 168px;
   width: 80%;
 }
 
-/* line 382, ../sass/partials/_forms.scss */
+/* line 396, ../sass/partials/_forms.scss */
 .form-input-and-unit {
   display: block;
   margin-right: 12px;
 }
 
-/* line 386, ../sass/partials/_forms.scss */
+/* line 400, ../sass/partials/_forms.scss */
 .form-input-and-unit .form-input {
   display: inline-block;
   margin-right: 12px;
 }
 
-/* line 393, ../sass/partials/_forms.scss */
+/* line 407, ../sass/partials/_forms.scss */
 .form-input.tiny {
   width: 1.875em;
 }
 
-/* line 397, ../sass/partials/_forms.scss */
+/* line 411, ../sass/partials/_forms.scss */
 .form-input.short {
   width: 3.75em;
 }
 
-/* line 401, ../sass/partials/_forms.scss */
+/* line 415, ../sass/partials/_forms.scss */
 .form-input.medium {
   width: 10em;
 }
 
-/* line 406, ../sass/partials/_forms.scss */
+/* line 420, ../sass/partials/_forms.scss */
 .docgen-content {
   transition: width 600ms;
   -webkit-transition: width 600ms;
   /* Safari */
 }
-/* line 410, ../sass/partials/_forms.scss */
+/* line 424, ../sass/partials/_forms.scss */
 .docgen-content .form-choice .form-entry {
   min-height: 38px;
   display: inline-block;
@@ -3644,99 +3658,99 @@ input.form-input.long {
   margin-top: 8px;
   height: auto;
 }
-/* line 417, ../sass/partials/_forms.scss */
+/* line 431, ../sass/partials/_forms.scss */
 .docgen-content .form-choice .form-entry label {
   vertical-align: top;
   width: 90%;
 }
-/* line 421, ../sass/partials/_forms.scss */
+/* line 435, ../sass/partials/_forms.scss */
 .docgen-content .form-choice .form-entry input {
   vertical-align: text-top;
 }
-/* line 424, ../sass/partials/_forms.scss */
+/* line 438, ../sass/partials/_forms.scss */
 .docgen-content .form-choice .form-entry .form-input-and-unit {
   display: inline-block;
   margin-right: 12px;
 }
-/* line 427, ../sass/partials/_forms.scss */
+/* line 441, ../sass/partials/_forms.scss */
 .docgen-content .form-choice .form-entry .form-input-and-unit input {
   width: 3.75em;
 }
-/* line 433, ../sass/partials/_forms.scss */
+/* line 447, ../sass/partials/_forms.scss */
 .docgen-content .form-entry {
   min-width: 300px;
   min-height: 64px;
 }
-/* line 437, ../sass/partials/_forms.scss */
+/* line 451, ../sass/partials/_forms.scss */
 .docgen-content .form-entry.long {
   min-width: 480px;
 }
-/* line 440, ../sass/partials/_forms.scss */
+/* line 454, ../sass/partials/_forms.scss */
 .docgen-content .form-entry.personSelector, .docgen-content .form-entry.companySelector {
   display: block;
   width: auto;
 }
-/* line 443, ../sass/partials/_forms.scss */
+/* line 457, ../sass/partials/_forms.scss */
 .docgen-content .form-entry.personSelector label, .docgen-content .form-entry.companySelector label {
   display: block;
 }
-/* line 446, ../sass/partials/_forms.scss */
+/* line 460, ../sass/partials/_forms.scss */
 .docgen-content .form-entry.personSelector .form-input, .docgen-content .form-entry.companySelector .form-input {
   display: inline-block;
 }
-/* line 451, ../sass/partials/_forms.scss */
+/* line 465, ../sass/partials/_forms.scss */
 .docgen-content .form-entry.radioGroup {
   min-height: 32px;
 }
-/* line 454, ../sass/partials/_forms.scss */
+/* line 468, ../sass/partials/_forms.scss */
 .docgen-content .form-full-width {
   width: 80%;
 }
-/* line 457, ../sass/partials/_forms.scss */
+/* line 471, ../sass/partials/_forms.scss */
 .docgen-content .form-group {
   overflow: visible;
 }
-/* line 462, ../sass/partials/_forms.scss */
+/* line 476, ../sass/partials/_forms.scss */
 .docgen-content .form-group .form-entry .form-label-string-choice, .docgen-content .form-group .form-entry .form-label-select, .docgen-content .form-group .form-entry .form-label-date {
   vertical-align: text-bottom;
 }
-/* line 466, ../sass/partials/_forms.scss */
+/* line 480, ../sass/partials/_forms.scss */
 .docgen-content .form-group .form-entry.personSelector .form-label-select {
   bottom: 80px;
 }
-/* line 471, ../sass/partials/_forms.scss */
+/* line 485, ../sass/partials/_forms.scss */
 .docgen-content .long {
   width: 16.25em;
 }
-/* line 474, ../sass/partials/_forms.scss */
+/* line 488, ../sass/partials/_forms.scss */
 .docgen-content .really-long {
   width: 28.75em;
 }
-/* line 478, ../sass/partials/_forms.scss */
+/* line 492, ../sass/partials/_forms.scss */
 .docgen-content .form-table td, .docgen-content .form-table th {
   padding: 6px 12px;
 }
-/* line 483, ../sass/partials/_forms.scss */
+/* line 497, ../sass/partials/_forms.scss */
 .docgen-content #table-huoneistot td, .docgen-content #table-huoneistot th, .docgen-content #table-muutHankkeet td, .docgen-content #table-muutHankkeet th {
   padding: 6px;
 }
-/* line 487, ../sass/partials/_forms.scss */
+/* line 501, ../sass/partials/_forms.scss */
 .docgen-content #table-huoneistot td, .docgen-content #table-muutHankkeet td {
   text-align: center;
 }
-/* line 490, ../sass/partials/_forms.scss */
+/* line 504, ../sass/partials/_forms.scss */
 .docgen-content #table-huoneistot tr:hover, .docgen-content #table-muutHankkeet tr:hover {
   background-color: white;
 }
-/* line 492, ../sass/partials/_forms.scss */
+/* line 506, ../sass/partials/_forms.scss */
 .docgen-content #table-huoneistot tr:hover:nth-child(even), .docgen-content #table-muutHankkeet tr:hover:nth-child(even) {
   background: whitesmoke;
 }
-/* line 498, ../sass/partials/_forms.scss */
+/* line 512, ../sass/partials/_forms.scss */
 .docgen-content .form-table th:first-child {
   border-left: none;
 }
-/* line 502, ../sass/partials/_forms.scss */
+/* line 516, ../sass/partials/_forms.scss */
 .docgen-content .form-table th {
   vertical-align: bottom;
   border-style: solid;
@@ -3745,20 +3759,20 @@ input.form-input.long {
   border-bottom: none;
   border-right: none;
 }
-/* line 511, ../sass/partials/_forms.scss */
+/* line 525, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-input {
   display: inline;
   margin: 0;
 }
-/* line 517, ../sass/partials/_forms.scss */
+/* line 531, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-input .text {
   height: 25px;
 }
-/* line 522, ../sass/partials/_forms.scss */
+/* line 536, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-input.combobox, .docgen-content select {
   width: 10em;
 }
-/* line 526, ../sass/partials/_forms.scss */
+/* line 540, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator {
   right: auto;
   top: 0;
@@ -3766,7 +3780,7 @@ input.form-input.long {
   width: 28px;
   padding: 0;
 }
-/* line 533, ../sass/partials/_forms.scss */
+/* line 547, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator .icon {
   position: absolute;
   top: 0px;
@@ -3774,26 +3788,26 @@ input.form-input.long {
   padding: 0;
   margin: 0;
 }
-/* line 542, ../sass/partials/_forms.scss */
+/* line 556, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator .form-input-saved .icon {
   background-position: 4px -2494px;
 }
-/* line 548, ../sass/partials/_forms.scss */
+/* line 562, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-entry {
   display: block;
   width: 100%;
   min-width: 50px;
   min-height: 30px;
 }
-/* line 555, ../sass/partials/_forms.scss */
+/* line 569, ../sass/partials/_forms.scss */
 .docgen-content .form-table .errorPanel {
   top: 38px;
 }
-/* line 559, ../sass/partials/_forms.scss */
+/* line 573, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-help {
   bottom: 45px;
 }
-/* line 563, ../sass/partials/_forms.scss */
+/* line 577, ../sass/partials/_forms.scss */
 .docgen-content .button-group {
   width: 100%;
   padding-left: 10px;
@@ -3807,7 +3821,7 @@ input.form-input.long {
   /* } */
 }
 
-/* line 581, ../sass/partials/_forms.scss */
+/* line 595, ../sass/partials/_forms.scss */
 .accordion-fields > .form-entry,
 .accordion-fields > .verdict-info-fields,
 .accordion-fields > div p {
@@ -3815,30 +3829,30 @@ input.form-input.long {
   padding-right: 6px;
 }
 
-/* line 593, ../sass/partials/_forms.scss */
+/* line 607, ../sass/partials/_forms.scss */
 .accordion-fields button.margins-s {
   margin-bottom: 0;
 }
 
-/* line 597, ../sass/partials/_forms.scss */
+/* line 611, ../sass/partials/_forms.scss */
 .accordion_content > .group-help-text {
   display: block;
   margin-left: 6px;
   margin-right: 6px;
 }
 
-/* line 606, ../sass/partials/_forms.scss */
+/* line 620, ../sass/partials/_forms.scss */
 .kiintun-and-maaraalatunnus .form-maaraala {
   display: inline;
 }
-/* line 609, ../sass/partials/_forms.scss */
+/* line 623, ../sass/partials/_forms.scss */
 .kiintun-and-maaraalatunnus .form-input.text {
   display: inline;
   width: 48px;
   margin: 0 4px;
 }
 
-/* line 617, ../sass/partials/_forms.scss */
+/* line 631, ../sass/partials/_forms.scss */
 .group-buttons {
   width: 100%;
   display: block;
@@ -3849,18 +3863,18 @@ input.form-input.long {
   margin-top: 6px;
   margin-bottom: 6px;
 }
-/* line 622, ../sass/partials/_forms.scss */
+/* line 636, ../sass/partials/_forms.scss */
 .group-buttons .is-right {
   float: right;
   margin-left: 6px;
 }
-/* line 626, ../sass/partials/_forms.scss */
+/* line 640, ../sass/partials/_forms.scss */
 .group-buttons .is-left {
   float: left;
   margin-right: 6px;
 }
 
-/* line 640, ../sass/partials/_forms.scss */
+/* line 654, ../sass/partials/_forms.scss */
 .accordion-toggle > .group-buttons {
   background-color: #f6f6f6;
   border: 1px solid #dddddd;
@@ -3870,106 +3884,106 @@ input.form-input.long {
   margin: 0;
 }
 
-/* line 651, ../sass/partials/_forms.scss */
+/* line 665, ../sass/partials/_forms.scss */
 div.sticky {
   background-color: #f6f6f6;
 }
 
-/* line 657, ../sass/partials/_forms.scss */
+/* line 671, ../sass/partials/_forms.scss */
 .button-group button.is-right {
   margin-right: 0;
 }
 
-/* line 661, ../sass/partials/_forms.scss */
+/* line 675, ../sass/partials/_forms.scss */
 .form-approval-status {
   text-transform: none;
   display: none;
   min-height: 32px;
 }
-/* line 667, ../sass/partials/_forms.scss */
+/* line 681, ../sass/partials/_forms.scss */
 .form-approval-status.empty {
   display: none;
   height: 0;
 }
-/* line 672, ../sass/partials/_forms.scss */
+/* line 686, ../sass/partials/_forms.scss */
 .form-approval-status .form-buttons {
   text-align: right;
   float: right;
   min-width: 200px;
 }
-/* line 678, ../sass/partials/_forms.scss */
+/* line 692, ../sass/partials/_forms.scss */
 .form-approval-status i.approved, .form-approval-status i.rejected {
   display: none;
 }
-/* line 682, ../sass/partials/_forms.scss */
+/* line 696, ../sass/partials/_forms.scss */
 .form-approval-status.approved i.approved {
   display: table-cell;
 }
-/* line 687, ../sass/partials/_forms.scss */
+/* line 701, ../sass/partials/_forms.scss */
 .form-approval-status.rejected i.rejected {
   display: table-cell;
 }
 
-/* line 693, ../sass/partials/_forms.scss */
+/* line 707, ../sass/partials/_forms.scss */
 .form-approval-status.approved,
 .form-approval-status.rejected {
   display: inline-block;
 }
 
-/* line 699, ../sass/partials/_forms.scss */
+/* line 713, ../sass/partials/_forms.scss */
 .is-status > .like-btn, .is-status > a.link-btn {
   min-height: 40px;
   max-height: 40px;
   line-height: 40px;
   min-width: 500px;
 }
-/* line 702, ../sass/partials/_forms.scss */
+/* line 716, ../sass/partials/_forms.scss */
 .is-status > .like-btn span, .is-status > a.link-btn span {
   color: #bbbbbb;
 }
-/* line 705, ../sass/partials/_forms.scss */
+/* line 719, ../sass/partials/_forms.scss */
 .is-status > .like-btn .lupicon-circle-attention, .is-status > a.link-btn .lupicon-circle-attention {
   color: #e34319;
 }
-/* line 708, ../sass/partials/_forms.scss */
+/* line 722, ../sass/partials/_forms.scss */
 .is-status > .like-btn .lupicon-circle-check, .is-status > a.link-btn .lupicon-circle-check {
   color: #46b02d;
 }
-/* line 711, ../sass/partials/_forms.scss */
+/* line 725, ../sass/partials/_forms.scss */
 .is-status > .like-btn .approved, .is-status > a.link-btn .approved {
   padding-right: 10px;
 }
 
-/* line 719, ../sass/partials/_forms.scss */
+/* line 733, ../sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom {
   border-bottom: 1px solid #dddddd;
   float: left;
 }
-/* line 722, ../sass/partials/_forms.scss */
+/* line 736, ../sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom .like-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn {
   padding-left: 10px;
 }
-/* line 726, ../sass/partials/_forms.scss */
+/* line 740, ../sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom .like-btn span, div.sticky .form-approval-status.no-border-bottom a.link-btn span {
   color: #999999;
 }
 
-/* line 732, ../sass/partials/_forms.scss */
+/* line 746, ../sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom {
   border-bottom: none;
 }
 
-/* line 736, ../sass/partials/_forms.scss */
+/* line 750, ../sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line {
   width: 100%;
 }
-/* line 738, ../sass/partials/_forms.scss */
+/* line 752, ../sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn {
   padding-top: 4px;
   min-height: initial;
   line-height: initial;
 }
-/* line 745, ../sass/partials/_forms.scss */
+/* line 759, ../sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span {
   color: #999999;
 }
@@ -3977,12 +3991,12 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
 /* button.rejected ~ .group-buttons .is-top.rejected { */
 /*   display: none; */
 /* } */
-/* line 757, ../sass/partials/_forms.scss */
+/* line 771, ../sass/partials/_forms.scss */
 .is-middle {
   vertical-align: middle;
 }
 
-/* line 761, ../sass/partials/_forms.scss */
+/* line 775, ../sass/partials/_forms.scss */
 .description-bubble {
   display: block;
   position: relative;
@@ -3995,7 +4009,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   padding: 6px 6px 6px 6px;
   margin-top: 15px;
 }
-/* line 774, ../sass/partials/_forms.scss */
+/* line 788, ../sass/partials/_forms.scss */
 .description-bubble:after, .description-bubble:before {
   bottom: 100%;
   left: 5%;
@@ -4006,21 +4020,21 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   position: absolute;
   pointer-events: none;
 }
-/* line 785, ../sass/partials/_forms.scss */
+/* line 799, ../sass/partials/_forms.scss */
 .description-bubble:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 791, ../sass/partials/_forms.scss */
+/* line 805, ../sass/partials/_forms.scss */
 .description-bubble:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 797, ../sass/partials/_forms.scss */
+/* line 811, ../sass/partials/_forms.scss */
 .description-bubble input {
   box-sizing: border-box;
   border: none;
@@ -4029,18 +4043,18 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   box-shadow: none;
   color: #333333;
 }
-/* line 804, ../sass/partials/_forms.scss */
+/* line 818, ../sass/partials/_forms.scss */
 .description-bubble input:focus {
   border: none;
   box-shadow: none;
 }
 
-/* line 811, ../sass/partials/_forms.scss */
+/* line 825, ../sass/partials/_forms.scss */
 .description-bubble.is-closed {
   display: none;
 }
 
-/* line 815, ../sass/partials/_forms.scss */
+/* line 829, ../sass/partials/_forms.scss */
 .form-help {
   min-height: 100px;
   padding: 6px 24px 6px 6px;
@@ -4055,7 +4069,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   box-shadow: 2px 2px 3px #4f4f4f;
   text-align: left;
 }
-/* line 828, ../sass/partials/_forms.scss */
+/* line 842, ../sass/partials/_forms.scss */
 .form-help:after {
   content: " ";
   width: 0;
@@ -4068,7 +4082,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   border-right: 14px solid transparent;
   border-top: 14px solid #4f4f4f;
 }
-/* line 840, ../sass/partials/_forms.scss */
+/* line 854, ../sass/partials/_forms.scss */
 .form-help:before {
   content: " ";
   background-image: url("/img/icons-sprite-1.18.png");
@@ -4081,14 +4095,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   right: 6px;
 }
 
-/* line 852, ../sass/partials/_forms.scss */
+/* line 866, ../sass/partials/_forms.scss */
 .form-full-width .form-help {
   top: 4px;
   left: 85%;
   bottom: auto;
   width: 55%;
 }
-/* line 857, ../sass/partials/_forms.scss */
+/* line 871, ../sass/partials/_forms.scss */
 .form-full-width .form-help:after {
   content: " ";
   width: 0;
@@ -4102,7 +4116,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   border-bottom: 14px solid transparent;
   border-right: 14px solid #4f4f4f;
 }
-/* line 870, ../sass/partials/_forms.scss */
+/* line 884, ../sass/partials/_forms.scss */
 .form-full-width .form-help:before {
   content: " ";
   background-image: url("/img/icons-sprite-1.18.png");
@@ -4115,12 +4129,12 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   right: 6px;
 }
 
-/* line 888, ../sass/partials/_forms.scss */
+/* line 902, ../sass/partials/_forms.scss */
 #neighbor-show [type="checkbox"]:disabled {
   position: relative;
   visibility: hidden;
 }
-/* line 891, ../sass/partials/_forms.scss */
+/* line 905, ../sass/partials/_forms.scss */
 #neighbor-show [type="checkbox"]:disabled:checked {
   visibility: visible;
   opacity: 1;
@@ -4134,113 +4148,114 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   background: #f6f6f6 url(https://cdn2.iconfinder.com/data/icons/flat-ui-icons-24-px/24/checkmark-24-512.png) center center no-repeat;
   background-size: 12px 12px;
 }
-/* line 908, ../sass/partials/_forms.scss */
+/* line 922, ../sass/partials/_forms.scss */
 #neighbor-show [type="radio"]:disabled {
   position: relative;
   visibility: hidden;
 }
-/* line 911, ../sass/partials/_forms.scss */
+/* line 925, ../sass/partials/_forms.scss */
 #neighbor-show [type="radio"]:disabled:checked {
   visibility: visible;
   opacity: 1;
 }
 
-/* line 919, ../sass/partials/_forms.scss */
+/* line 933, ../sass/partials/_forms.scss */
 .three-col {
   width: 100%;
 }
-/* line 922, ../sass/partials/_forms.scss */
+/* line 936, ../sass/partials/_forms.scss */
 .three-col .form-input {
   width: 17.25em;
 }
-/* line 926, ../sass/partials/_forms.scss */
+/* line 940, ../sass/partials/_forms.scss */
 .three-col .col1 {
   float: left;
   padding-right: 12px;
 }
-/* line 931, ../sass/partials/_forms.scss */
+/* line 945, ../sass/partials/_forms.scss */
 .three-col .col2 {
   float: left;
   padding-left: 12px;
   padding-right: 12px;
 }
-/* line 936, ../sass/partials/_forms.scss */
+/* line 950, ../sass/partials/_forms.scss */
 .three-col .col3 {
   float: left;
   padding-left: 12px;
 }
 
-/* line 943, ../sass/partials/_forms.scss */
+/* line 957, ../sass/partials/_forms.scss */
 foreman-history h2 {
   background-color: #f6f6f6 !important;
 }
-/* line 946, ../sass/partials/_forms.scss */
+/* line 960, ../sass/partials/_forms.scss */
 foreman-history th.first {
   width: 10%;
 }
-/* line 949, ../sass/partials/_forms.scss */
+/* line 963, ../sass/partials/_forms.scss */
 foreman-history th.second {
   width: 15%;
 }
-/* line 952, ../sass/partials/_forms.scss */
+/* line 966, ../sass/partials/_forms.scss */
 foreman-history th.third {
   width: 10%;
 }
-/* line 955, ../sass/partials/_forms.scss */
+/* line 969, ../sass/partials/_forms.scss */
 foreman-history th.fourth {
   width: 20%;
 }
-/* line 958, ../sass/partials/_forms.scss */
+/* line 972, ../sass/partials/_forms.scss */
 foreman-history th.fifth {
   width: 45%;
 }
 
-/* line 963, ../sass/partials/_forms.scss */
+/* line 977, ../sass/partials/_forms.scss */
 .indicator-wrapper {
   position: relative;
   display: inline-block;
   width: 100%;
 }
 
-/* line 969, ../sass/partials/_forms.scss */
+/* line 983, ../sass/partials/_forms.scss */
 div.alleYli-radioGroup {
   display: inline-block;
   margin-top: 24px;
 }
 
-/* line 1015, ../sass/partials/_forms.scss */
+/* line 1029, ../sass/partials/_forms.scss */
 .form-grid {
   width: 100%;
   border-top: 1px solid #dddddd;
+  color: #333333;
 }
-/* line 1020, ../sass/partials/_forms.scss */
+/* line 1035, ../sass/partials/_forms.scss */
 .form-grid:last-child {
   border-bottom: none;
 }
-/* line 1024, ../sass/partials/_forms.scss */
+/* line 1039, ../sass/partials/_forms.scss */
 .form-grid h2 {
   padding-left: 20px;
   margin: 12px 0;
 }
-/* line 1030, ../sass/partials/_forms.scss */
+/* line 1045, ../sass/partials/_forms.scss */
 .form-grid p {
   padding: 0 !important;
   margin: 0 !important;
 }
-/* line 1035, ../sass/partials/_forms.scss */
+/* line 1050, ../sass/partials/_forms.scss */
 .form-grid .checkbox-wrapper {
   border: 1px solid #dddddd;
   padding: 7px;
 }
-/* line 1040, ../sass/partials/_forms.scss */
+/* line 1055, ../sass/partials/_forms.scss */
 .form-grid select::-ms-expand {
   display: none;
 }
-/* line 1044, ../sass/partials/_forms.scss */
+/* line 1059, ../sass/partials/_forms.scss */
 .form-grid button::-moz-focus-inner {
   border: 0;
 }
-/* line 1048, ../sass/partials/_forms.scss */
+/* line 1063, ../sass/partials/_forms.scss */
 .form-grid input[type=text], .form-grid input[type=password], .form-grid select {
   padding: 0 12px;
   min-height: 40px;
@@ -4254,19 +4269,19 @@ div.alleYli-radioGroup {
   -webkit-border-radius: 0px;
   -moz-appearance: none;
 }
-/* line 1061, ../sass/partials/_forms.scss */
+/* line 1076, ../sass/partials/_forms.scss */
 .form-grid input[type=text]:focus, .form-grid input[type=password]:focus, .form-grid select:focus {
   color: #333333;
   border-color: #fbc732;
 }
-/* line 1067, ../sass/partials/_forms.scss */
+/* line 1082, ../sass/partials/_forms.scss */
 .form-grid input[type=checkbox] {
   opacity: 0;
   width: 0;
   height: 0;
   margin: 0;
 }
-/* line 1074, ../sass/partials/_forms.scss */
+/* line 1089, ../sass/partials/_forms.scss */
 .form-grid .checkbox-label:before {
   font-family: 'lupapiste';
   speak: none;
@@ -4285,7 +4300,7 @@ div.alleYli-radioGroup {
   vertical-align: top;
   color: #bbbbbb;
 }
-/* line 1083, ../sass/partials/_forms.scss */
+/* line 1098, ../sass/partials/_forms.scss */
 .form-grid input[type=checkbox]:checked + .checkbox-label:before {
   font-family: 'lupapiste';
   speak: none;
@@ -4301,11 +4316,11 @@ div.alleYli-radioGroup {
   content: "\e604";
   color: #fbc732;
 }
-/* line 1089, ../sass/partials/_forms.scss */
+/* line 1104, ../sass/partials/_forms.scss */
 .form-grid select.required, .form-grid input.required {
   border-color: #f39129;
 }
-/* line 1093, ../sass/partials/_forms.scss */
+/* line 1108, ../sass/partials/_forms.scss */
 .form-grid .select-arrow {
   position: absolute;
   right: 1px;
@@ -4318,38 +4333,38 @@ div.alleYli-radioGroup {
   line-height: 38px;
   vertical-align: middle;
 }
-/* line 1108, ../sass/partials/_forms.scss */
+/* line 1123, ../sass/partials/_forms.scss */
 .form-grid input[type=text]:disabled {
   border-color: #dddddd;
 }
-/* line 1112, ../sass/partials/_forms.scss */
+/* line 1127, ../sass/partials/_forms.scss */
 .form-grid input[type=text].err, .form-grid input[type=password].err {
   border: 1px solid #df3215;
   color: #df3215;
 }
-/* line 1117, ../sass/partials/_forms.scss */
+/* line 1132, ../sass/partials/_forms.scss */
 .form-grid .submit-button {
   display: table-row;
 }
-/* line 1119, ../sass/partials/_forms.scss */
+/* line 1134, ../sass/partials/_forms.scss */
 .form-grid .submit-button .submit-button__item {
   display: table-cell;
 }
-/* line 1121, ../sass/partials/_forms.scss */
+/* line 1136, ../sass/partials/_forms.scss */
 .form-grid .submit-button .submit-button__item:first-child {
   width: 100%;
 }
-/* line 1127, ../sass/partials/_forms.scss */
+/* line 1142, ../sass/partials/_forms.scss */
 .form-grid .submit-button .submittable input {
   border-color: #2ca92c;
 }
-/* line 1133, ../sass/partials/_forms.scss */
+/* line 1148, ../sass/partials/_forms.scss */
 .form-grid button.input-button {
   position: absolute;
   bottom: 0;
   right: 0;
 }
-/* line 1140, ../sass/partials/_forms.scss */
+/* line 1155, ../sass/partials/_forms.scss */
 .form-grid .col-1 {
   position: relative;
   float: left;
@@ -4358,21 +4373,21 @@ div.alleYli-radioGroup {
   max-width: 25%;
   padding-left: 20px;
 }
-/* line 999, ../sass/partials/_forms.scss */
+/* line 1013, ../sass/partials/_forms.scss */
 .form-grid .col-1 label.required:after {
   content: "*";
   color: #df3215;
 }
-/* line 1004, ../sass/partials/_forms.scss */
+/* line 1018, ../sass/partials/_forms.scss */
 .form-grid .col-1 .col--vertical, .form-grid .col-1 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 1009, ../sass/partials/_forms.scss */
+/* line 1023, ../sass/partials/_forms.scss */
 .form-grid .col-1 .col--vertical label {
   display: block;
 }
-/* line 1140, ../sass/partials/_forms.scss */
+/* line 1155, ../sass/partials/_forms.scss */
 .form-grid .col-2 {
   position: relative;
   float: left;
@@ -4381,21 +4396,21 @@ div.alleYli-radioGroup {
   max-width: 50%;
   padding-left: 20px;
 }
-/* line 999, ../sass/partials/_forms.scss */
+/* line 1013, ../sass/partials/_forms.scss */
 .form-grid .col-2 label.required:after {
   content: "*";
   color: #df3215;
 }
-/* line 1004, ../sass/partials/_forms.scss */
+/* line 1018, ../sass/partials/_forms.scss */
 .form-grid .col-2 .col--vertical, .form-grid .col-2 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 1009, ../sass/partials/_forms.scss */
+/* line 1023, ../sass/partials/_forms.scss */
 .form-grid .col-2 .col--vertical label {
   display: block;
 }
-/* line 1140, ../sass/partials/_forms.scss */
+/* line 1155, ../sass/partials/_forms.scss */
 .form-grid .col-3 {
   position: relative;
   float: left;
@@ -4404,21 +4419,21 @@ div.alleYli-radioGroup {
   max-width: 75%;
   padding-left: 20px;
 }
-/* line 999, ../sass/partials/_forms.scss */
+/* line 1013, ../sass/partials/_forms.scss */
 .form-grid .col-3 label.required:after {
   content: "*";
   color: #df3215;
 }
-/* line 1004, ../sass/partials/_forms.scss */
+/* line 1018, ../sass/partials/_forms.scss */
 .form-grid .col-3 .col--vertical, .form-grid .col-3 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 1009, ../sass/partials/_forms.scss */
+/* line 1023, ../sass/partials/_forms.scss */
 .form-grid .col-3 .col--vertical label {
   display: block;
 }
-/* line 1140, ../sass/partials/_forms.scss */
+/* line 1155, ../sass/partials/_forms.scss */
 .form-grid .col-4 {
   position: relative;
   float: left;
@@ -4427,42 +4442,42 @@ div.alleYli-radioGroup {
   max-width: 100%;
   padding-left: 20px;
 }
-/* line 999, ../sass/partials/_forms.scss */
+/* line 1013, ../sass/partials/_forms.scss */
 .form-grid .col-4 label.required:after {
   content: "*";
   color: #df3215;
 }
-/* line 1004, ../sass/partials/_forms.scss */
+/* line 1018, ../sass/partials/_forms.scss */
 .form-grid .col-4 .col--vertical, .form-grid .col-4 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 1009, ../sass/partials/_forms.scss */
+/* line 1023, ../sass/partials/_forms.scss */
 .form-grid .col-4 .col--vertical label {
   display: block;
 }
-/* line 1145, ../sass/partials/_forms.scss */
+/* line 1160, ../sass/partials/_forms.scss */
 .form-grid .row {
   margin: 20px 0;
 }
-/* line 980, ../sass/partials/_forms.scss */
+/* line 994, ../sass/partials/_forms.scss */
 .form-grid .row:before, .form-grid .row:after {
   content: " ";
   display: table;
 }
-/* line 985, ../sass/partials/_forms.scss */
+/* line 999, ../sass/partials/_forms.scss */
 .form-grid .row:after {
   clear: both;
 }
-/* line 1151, ../sass/partials/_forms.scss */
+/* line 1166, ../sass/partials/_forms.scss */
 .form-grid .row--no-margin {
   margin: 0;
 }
-/* line 1155, ../sass/partials/_forms.scss */
+/* line 1170, ../sass/partials/_forms.scss */
 .form-grid .autocomplete-component {
   width: 100%;
 }
-/* line 1159, ../sass/partials/_forms.scss */
+/* line 1174, ../sass/partials/_forms.scss */
 .form-grid .info-message {
   background-color: #df3215;
   color: #fff;
@@ -4473,47 +4488,47 @@ div.alleYli-radioGroup {
   display: block;
   height: 40px;
 }
-/* line 1171, ../sass/partials/_forms.scss */
+/* line 1186, ../sass/partials/_forms.scss */
 .form-grid .poor.info-message {
   background-color: #df3215;
 }
-/* line 1175, ../sass/partials/_forms.scss */
+/* line 1190, ../sass/partials/_forms.scss */
 .form-grid .low.info-message {
   background-color: #e7541d;
 }
-/* line 1179, ../sass/partials/_forms.scss */
+/* line 1194, ../sass/partials/_forms.scss */
 .form-grid .average.info-message {
   background-color: #f7ac2e;
 }
-/* line 1183, ../sass/partials/_forms.scss */
+/* line 1198, ../sass/partials/_forms.scss */
 .form-grid .good.info-message {
   background-color: #61b72f;
 }
-/* line 1187, ../sass/partials/_forms.scss */
+/* line 1202, ../sass/partials/_forms.scss */
 .form-grid .excellent.info-message {
   background-color: #2ca92c;
 }
-/* line 1191, ../sass/partials/_forms.scss */
+/* line 1206, ../sass/partials/_forms.scss */
 .form-grid input[type=password].poor {
   border-color: #df3215;
 }
-/* line 1195, ../sass/partials/_forms.scss */
+/* line 1210, ../sass/partials/_forms.scss */
 .form-grid input[type=password].low {
   border-color: #e7541d;
 }
-/* line 1199, ../sass/partials/_forms.scss */
+/* line 1214, ../sass/partials/_forms.scss */
 .form-grid input[type=password].average {
   border-color: #f7ac2e;
 }
-/* line 1203, ../sass/partials/_forms.scss */
+/* line 1218, ../sass/partials/_forms.scss */
 .form-grid input[type=password].good {
   border-color: #61b72f;
 }
-/* line 1207, ../sass/partials/_forms.scss */
+/* line 1222, ../sass/partials/_forms.scss */
 .form-grid input[type=password].excellent {
   border-color: #2ca92c;
 }
-/* line 1211, ../sass/partials/_forms.scss */
+/* line 1226, ../sass/partials/_forms.scss */
 .form-grid .error-message {
   background-color: #df3215;
   color: #fff;
@@ -4522,7 +4537,7 @@ div.alleYli-radioGroup {
   font-style: normal;
   font-weight: bold;
 }
-/* line 1218, ../sass/partials/_forms.scss */
+/* line 1233, ../sass/partials/_forms.scss */
 .form-grid .error-message:before {
   font-family: 'lupapiste';
   speak: none;
@@ -4539,11 +4554,11 @@ div.alleYli-radioGroup {
   margin-right: 6px;
 }
 
-/* line 1226, ../sass/partials/_forms.scss */
+/* line 1241, ../sass/partials/_forms.scss */
 .form-grid--no-border {
   border: none;
 }
-/* line 1230, ../sass/partials/_forms.scss */
+/* line 1245, ../sass/partials/_forms.scss */
 .form-grid--no-border .col-1:first-child, .form-grid--no-border .col-2:first-child, .form-grid--no-border .col-3:first-child, .form-grid--no-border .col-4:first-child {
   padding-left: 0;
 }
@@ -4552,93 +4567,88 @@ div.alleYli-radioGroup {
 table {
   width: 100%;
   margin-bottom: 24px;
+  color: #333333;
 }
 
-/* line 9, ../sass/partials/_tables.scss */
+/* line 10, ../sass/partials/_tables.scss */
 th {
   background: #dddddd;
-  font-family: "Source Sans Pro", sans-serif;
-  font-size: 0.85em;
-  font-weight: 700;
-  letter-spacing: 0.125em;
+  padding-left: 12px;
+  padding-right: 12px;
+  height: 40px;
+  vertical-align: middle;
 }
 
-/* line 17, ../sass/partials/_tables.scss */
+/* line 22, ../sass/partials/_tables.scss */
 tr {
   background: white;
-  border-bottom: 1px solid #e9e9e9;
-}
-/* line 20, ../sass/partials/_tables.scss */
-tr:nth-child(even) {
-  background: whitesmoke;
-}
-/* line 23, ../sass/partials/_tables.scss */
-tr:hover {
-  background-color: #fef4ea;
+  border-bottom: 1px #dddddd;
 }
 /* line 25, ../sass/partials/_tables.scss */
-tr:hover:active {
-  background-color: #f8c38a;
-  color: black;
+tr:nth-child(even) {
+  background: #f6f6f6;
+}
+/* line 28, ../sass/partials/_tables.scss */
+tr:hover {
+  background-color: #eeeeee;
 }
 /* line 30, ../sass/partials/_tables.scss */
+tr:hover:active {
+  background-color: #dddddd;
+}
+/* line 34, ../sass/partials/_tables.scss */
 tr.attachment-row {
   cursor: pointer;
 }
-/* line 33, ../sass/partials/_tables.scss */
+/* line 37, ../sass/partials/_tables.scss */
 tr.attachment-row td:last-child {
   text-align: right;
 }
-/* line 38, ../sass/partials/_tables.scss */
+/* line 42, ../sass/partials/_tables.scss */
 tr.attachment-multiselect-row.selected {
   background-color: #f8c38a;
   color: black;
 }
-/* line 41, ../sass/partials/_tables.scss */
+/* line 45, ../sass/partials/_tables.scss */
 tr.attachment-multiselect-row.selected:hover {
   background-color: #f7b671;
   color: black;
 }
-/* line 48, ../sass/partials/_tables.scss */
+/* line 52, ../sass/partials/_tables.scss */
 tr.attachment-multiselect-row td.attachment-file-info span.attachment-file-name {
   display: block;
 }
 
-/* line 55, ../sass/partials/_tables.scss */
+/* line 59, ../sass/partials/_tables.scss */
 th, td {
-  padding: 6px 16px;
+  padding: 6px 12px;
   text-align: left;
 }
-/* line 58, ../sass/partials/_tables.scss */
+/* line 62, ../sass/partials/_tables.scss */
 th.btn, th.like-btn, .dataTables_paginate th.paginate_disabled_previous, .dataTables_paginate th.paginate_disabled_next, td.btn, td.like-btn, .dataTables_paginate td.paginate_disabled_previous, .dataTables_paginate td.paginate_disabled_next {
   margin-bottom: 0px;
 }
-/* line 61, ../sass/partials/_tables.scss */
+/* line 65, ../sass/partials/_tables.scss */
 th .icon, td .icon {
   margin: 12px 12px 6px 12px;
 }
 
-/* line 67, ../sass/partials/_tables.scss */
+/* line 71, ../sass/partials/_tables.scss */
 th.action-column .icon, td.action-column .icon {
   margin: 0;
 }
 
-/* line 72, ../sass/partials/_tables.scss */
-tbody, tfoot {
-  color: #555;
-  font-size: 0.875em;
-}
-/* line 75, ../sass/partials/_tables.scss */
+/* line 77, ../sass/partials/_tables.scss */
 tbody td, tfoot td {
   vertical-align: middle;
 }
 
-/* line 81, ../sass/partials/_tables.scss */
+/* line 83, ../sass/partials/_tables.scss */
 .dataTables_wrapper {
   position: relative;
 }
 
-/* line 84, ../sass/partials/_tables.scss */
+/* line 86, ../sass/partials/_tables.scss */
 .table-filter {
   float: right;
   position: absolute;
@@ -4646,973 +4656,973 @@ tbody td, tfoot td {
   right: 0;
 }
 
-/* line 91, ../sass/partials/_tables.scss */
+/* line 93, ../sass/partials/_tables.scss */
 table.tasks thead tr:first-child td {
   padding-left: 0;
 }
 
-/* line 96, ../sass/partials/_tables.scss */
+/* line 98, ../sass/partials/_tables.scss */
 table.tasks .task-state {
   width: 22px;
 }
-/* line 98, ../sass/partials/_tables.scss */
+/* line 100, ../sass/partials/_tables.scss */
 table.tasks .task-state .icon {
   margin: 12px 6px 6px 6px;
 }
 
-/* line 106, ../sass/partials/_tables.scss */
+/* line 108, ../sass/partials/_tables.scss */
 table.attachments-template-table .center {
   text-align: center;
 }
-/* line 110, ../sass/partials/_tables.scss */
+/* line 112, ../sass/partials/_tables.scss */
 table.attachments-template-table th {
   padding-left: 6px;
   padding-right: 6px;
 }
-/* line 114, ../sass/partials/_tables.scss */
+/* line 116, ../sass/partials/_tables.scss */
 table.attachments-template-table th:first-child {
   padding-left: 16px;
 }
-/* line 117, ../sass/partials/_tables.scss */
+/* line 119, ../sass/partials/_tables.scss */
 table.attachments-template-table th:last-child {
   padding-right: 16px;
 }
-/* line 122, ../sass/partials/_tables.scss */
+/* line 124, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachmentState {
   padding: 0 0 0 12px;
   white-space: nowrap;
 }
-/* line 126, ../sass/partials/_tables.scss */
+/* line 128, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachmentState .icon {
   margin: 6px;
   vertical-align: middle;
 }
-/* line 131, ../sass/partials/_tables.scss */
+/* line 133, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-type-group, table.attachments-template-table td.attachment-type-id, table.attachments-template-table td.attachment-help-info, table.attachments-template-table td.attachment-not-needed, table.attachments-template-table td.attachment-file-info, table.attachments-template-table td.attachment-file-changed {
   padding-left: 6px;
   padding-right: 6px;
 }
-/* line 136, ../sass/partials/_tables.scss */
+/* line 138, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-group-select a {
   font-size: 15px;
   font-weight: normal;
   float: right;
 }
-/* line 142, ../sass/partials/_tables.scss */
+/* line 144, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-type-group, table.attachments-template-table td.attachment-type-id {
   max-width: 150px;
   word-wrap: break-word;
 }
-/* line 146, ../sass/partials/_tables.scss */
+/* line 148, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-help-info {
   max-width: 200px;
   word-wrap: break-word;
 }
-/* line 150, ../sass/partials/_tables.scss */
+/* line 152, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-file-info, table.attachments-template-table td.attachment-file-changed {
   max-width: 230px;
   word-wrap: break-word;
 }
-/* line 154, ../sass/partials/_tables.scss */
+/* line 156, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-version-info {
   max-width: 60px;
   word-wrap: break-word;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-5 {
   min-width: 5%;
   max-width: 5%;
   width: 5%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-50px {
   max-height: 50px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-10 {
   min-width: 10%;
   max-width: 10%;
   width: 10%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-100px {
   max-height: 100px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-15 {
   min-width: 15%;
   max-width: 15%;
   width: 15%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-150px {
   max-height: 150px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-20 {
   min-width: 20%;
   max-width: 20%;
   width: 20%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-200px {
   max-height: 200px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-25 {
   min-width: 25%;
   max-width: 25%;
   width: 25%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-250px {
   max-height: 250px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-30 {
   min-width: 30%;
   max-width: 30%;
   width: 30%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-300px {
   max-height: 300px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-35 {
   min-width: 35%;
   max-width: 35%;
   width: 35%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-350px {
   max-height: 350px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-40 {
   min-width: 40%;
   max-width: 40%;
   width: 40%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-400px {
   max-height: 400px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-45 {
   min-width: 45%;
   max-width: 45%;
   width: 45%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-450px {
   max-height: 450px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-50 {
   min-width: 50%;
   max-width: 50%;
   width: 50%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-500px {
   max-height: 500px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-55 {
   min-width: 55%;
   max-width: 55%;
   width: 55%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-550px {
   max-height: 550px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-60 {
   min-width: 60%;
   max-width: 60%;
   width: 60%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-600px {
   max-height: 600px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-65 {
   min-width: 65%;
   max-width: 65%;
   width: 65%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-650px {
   max-height: 650px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-70 {
   min-width: 70%;
   max-width: 70%;
   width: 70%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-700px {
   max-height: 700px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-75 {
   min-width: 75%;
   max-width: 75%;
   width: 75%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-750px {
   max-height: 750px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-80 {
   min-width: 80%;
   max-width: 80%;
   width: 80%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-800px {
   max-height: 800px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-85 {
   min-width: 85%;
   max-width: 85%;
   width: 85%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-850px {
   max-height: 850px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-90 {
   min-width: 90%;
   max-width: 90%;
   width: 90%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-900px {
   max-height: 900px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-95 {
   min-width: 95%;
   max-width: 95%;
   width: 95%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-950px {
   max-height: 950px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-100 {
   min-width: 100%;
   max-width: 100%;
   width: 100%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-1000px {
   max-height: 1000px;
   overflow-y: auto;
 }
 
-/* line 164, ../sass/partials/_tables.scss */
+/* line 166, ../sass/partials/_tables.scss */
 .width-105 {
   min-width: 105%;
   max-width: 105%;
   width: 105%;
 }
 
-/* line 169, ../sass/partials/_tables.scss */
+/* line 171, ../sass/partials/_tables.scss */
 .scroll-1050px {
   max-height: 1050px;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-1em {
   max-height: 1em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-2em {
   max-height: 2em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-3em {
   max-height: 3em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-4em {
   max-height: 4em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-5em {
   max-height: 5em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-6em {
   max-height: 6em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-7em {
   max-height: 7em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-8em {
   max-height: 8em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-9em {
   max-height: 9em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-10em {
   max-height: 10em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-11em {
   max-height: 11em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-12em {
   max-height: 12em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-13em {
   max-height: 13em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-14em {
   max-height: 14em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-15em {
   max-height: 15em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-16em {
   max-height: 16em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-17em {
   max-height: 17em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-18em {
   max-height: 18em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-19em {
   max-height: 19em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-20em {
   max-height: 20em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-21em {
   max-height: 21em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-22em {
   max-height: 22em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-23em {
   max-height: 23em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-24em {
   max-height: 24em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-25em {
   max-height: 25em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-26em {
   max-height: 26em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-27em {
   max-height: 27em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-28em {
   max-height: 28em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-29em {
   max-height: 29em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-30em {
   max-height: 30em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-31em {
   max-height: 31em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-32em {
   max-height: 32em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-33em {
   max-height: 33em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-34em {
   max-height: 34em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-35em {
   max-height: 35em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-36em {
   max-height: 36em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-37em {
   max-height: 37em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-38em {
   max-height: 38em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-39em {
   max-height: 39em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-40em {
   max-height: 40em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-41em {
   max-height: 41em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-42em {
   max-height: 42em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-43em {
   max-height: 43em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-44em {
   max-height: 44em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-45em {
   max-height: 45em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-46em {
   max-height: 46em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-47em {
   max-height: 47em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-48em {
   max-height: 48em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-49em {
   max-height: 49em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-50em {
   max-height: 50em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-51em {
   max-height: 51em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-52em {
   max-height: 52em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-53em {
   max-height: 53em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-54em {
   max-height: 54em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-55em {
   max-height: 55em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-56em {
   max-height: 56em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-57em {
   max-height: 57em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-58em {
   max-height: 58em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-59em {
   max-height: 59em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-60em {
   max-height: 60em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-61em {
   max-height: 61em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-62em {
   max-height: 62em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-63em {
   max-height: 63em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-64em {
   max-height: 64em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-65em {
   max-height: 65em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-66em {
   max-height: 66em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-67em {
   max-height: 67em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-68em {
   max-height: 68em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-69em {
   max-height: 69em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-70em {
   max-height: 70em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-71em {
   max-height: 71em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-72em {
   max-height: 72em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-73em {
   max-height: 73em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-74em {
   max-height: 74em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-75em {
   max-height: 75em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-76em {
   max-height: 76em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-77em {
   max-height: 77em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-78em {
   max-height: 78em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-79em {
   max-height: 79em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-80em {
   max-height: 80em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-81em {
   max-height: 81em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-82em {
   max-height: 82em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-83em {
   max-height: 83em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-84em {
   max-height: 84em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-85em {
   max-height: 85em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-86em {
   max-height: 86em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-87em {
   max-height: 87em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-88em {
   max-height: 88em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-89em {
   max-height: 89em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-90em {
   max-height: 90em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-91em {
   max-height: 91em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-92em {
   max-height: 92em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-93em {
   max-height: 93em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-94em {
   max-height: 94em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-95em {
   max-height: 95em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-96em {
   max-height: 96em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-97em {
   max-height: 97em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-98em {
   max-height: 98em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-99em {
   max-height: 99em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-100em {
   max-height: 100em;
   overflow-y: auto;
 }
 
-/* line 177, ../sass/partials/_tables.scss */
+/* line 179, ../sass/partials/_tables.scss */
 .scroll-101em {
   max-height: 101em;
   overflow-y: auto;
 }
 
-/* line 183, ../sass/partials/_tables.scss */
+/* line 185, ../sass/partials/_tables.scss */
 .header-table {
   margin: 0;
 }
-/* line 185, ../sass/partials/_tables.scss */
+/* line 187, ../sass/partials/_tables.scss */
 .header-table table {
   margin: 0;
 }
 
-/* line 190, ../sass/partials/_tables.scss */
+/* line 192, ../sass/partials/_tables.scss */
 .header-table > tbody > tr > td {
   padding: 0;
 }
 
-/* line 194, ../sass/partials/_tables.scss */
+/* line 196, ../sass/partials/_tables.scss */
 .header-table > tfoot > tr:hover {
   background-color: transparent;
 }
@@ -6781,23 +6791,22 @@ ul.tabs {
   height: 100%;
   min-height: 38px;
   display: inline-block;
-  color: black;
   box-sizing: border-box;
   background-color: #fff;
 }
-/* line 37, ../sass/partials/_autocomplete.scss */
+/* line 35, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags {
   list-style: none;
   padding: 0;
 }
-/* line 40, ../sass/partials/_autocomplete.scss */
+/* line 38, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li {
   display: inline-block;
   max-width: 100%;
   margin-bottom: -7px;
   margin-right: -4px;
 }
-/* line 47, ../sass/partials/_autocomplete.scss */
+/* line 45, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag {
   cursor: pointer;
   position: relative;
@@ -6810,25 +6819,25 @@ ul.tabs {
   overflow: hidden;
   color: #f39129;
 }
-/* line 60, ../sass/partials/_autocomplete.scss */
+/* line 58, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag span.tag-label {
   line-height: 36px;
   vertical-align: top;
   margin-right: 6px;
 }
-/* line 65, ../sass/partials/_autocomplete.scss */
+/* line 63, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag .tag-remove {
   color: #f39129;
   line-height: 36px;
   margin: 0 6px;
 }
-/* line 74, ../sass/partials/_autocomplete.scss */
+/* line 72, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.caption, .autocomplete-component .autocomplete-selection-wrapper span.selection-text {
   cursor: default;
   line-height: 38px;
   padding-left: 6px;
 }
-/* line 79, ../sass/partials/_autocomplete.scss */
+/* line 77, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {
   position: absolute;
   bottom: 8px;
@@ -6837,17 +6846,17 @@ ul.tabs {
   color: #f39129;
   margin: 0;
 }
-/* line 86, ../sass/partials/_autocomplete.scss */
+/* line 84, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle {
   color: #fbc732;
 }
-/* line 92, ../sass/partials/_autocomplete.scss */
+/* line 90, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown {
   width: inherit;
   position: absolute;
   z-index: 1;
 }
-/* line 96, ../sass/partials/_autocomplete.scss */
+/* line 94, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown input.autocomplete-input {
   width: 100%;
   height: 40px;
@@ -6855,7 +6864,7 @@ ul.tabs {
   display: block;
   box-sizing: border-box;
 }
-/* line 103, ../sass/partials/_autocomplete.scss */
+/* line 101, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
   position: absolute;
   top: 38px;
@@ -6871,23 +6880,23 @@ ul.tabs {
   background-color: #fff;
   color: black;
 }
-/* line 119, ../sass/partials/_autocomplete.scss */
+/* line 117, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result.autocomplete-result-grouped li.autocomplete-result-item {
   padding: 0 12px;
 }
-/* line 124, ../sass/partials/_autocomplete.scss */
+/* line 122, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li {
   height: 40px;
   line-height: 40px;
 }
-/* line 129, ../sass/partials/_autocomplete.scss */
+/* line 127, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
   cursor: default;
   display: list-item;
   list-style-type: none;
   padding: 0 6px;
 }
-/* line 135, ../sass/partials/_autocomplete.scss */
+/* line 133, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
   position: relative;
@@ -6895,16 +6904,16 @@ ul.tabs {
   overflow: hidden;
   padding-right: 6px;
 }
-/* line 142, ../sass/partials/_autocomplete.scss */
+/* line 140, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #f7ac2e;
   color: #fff;
 }
-/* line 145, ../sass/partials/_autocomplete.scss */
+/* line 143, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #fbc732;
 }
-/* line 149, ../sass/partials/_autocomplete.scss */
+/* line 147, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-group-header {
   font-weight: 700;
   padding-left: 6px;
@@ -7528,12 +7537,12 @@ ul.attachments-list li.mandatory-attachments {
 .metadata-editor-container .editor .editor-buttons {
   padding-top: 15px;
 }
-/* line 980, ../sass/partials/_forms.scss */
+/* line 994, ../sass/partials/_forms.scss */
 .metadata-editor-container .editor .editor-buttons:before, .metadata-editor-container .editor .editor-buttons:after {
   content: " ";
   display: table;
 }
-/* line 985, ../sass/partials/_forms.scss */
+/* line 999, ../sass/partials/_forms.scss */
 .metadata-editor-container .editor .editor-buttons:after {
   clear: both;
 }
@@ -7567,12 +7576,12 @@ ul.attachments-list li.mandatory-attachments {
 .archival-summary-table i.disabled {
   color: #da6ded;
 }
-/* line 980, ../sass/partials/_forms.scss */
+/* line 994, ../sass/partials/_forms.scss */
 .archival-summary-table .attachment-type-container:before, .archival-summary-table .attachment-type-container:after {
   content: " ";
   display: table;
 }
-/* line 985, ../sass/partials/_forms.scss */
+/* line 999, ../sass/partials/_forms.scss */
 .archival-summary-table .attachment-type-container:after {
   clear: both;
 }
@@ -7608,12 +7617,12 @@ ul.attachments-list li.mandatory-attachments {
   cursor: pointer;
   padding: 6px 0 5px 0;
 }
-/* line 980, ../sass/partials/_forms.scss */
+/* line 994, ../sass/partials/_forms.scss */
 .archival-summary-table .attachment-row .attachment-row-top:before, .archival-summary-table .attachment-row .attachment-row-top:after {
   content: " ";
   display: table;
 }
-/* line 985, ../sass/partials/_forms.scss */
+/* line 999, ../sass/partials/_forms.scss */
 .archival-summary-table .attachment-row .attachment-row-top:after {
   clear: both;
 }
@@ -7621,12 +7630,12 @@ ul.attachments-list li.mandatory-attachments {
 .archival-summary-table .attachment-row .attachment-row-top div {
   vertical-align: top;
 }
-/* line 980, ../sass/partials/_forms.scss */
+/* line 994, ../sass/partials/_forms.scss */
 .archival-summary-table .attachment-row .additional-controls:before, .archival-summary-table .attachment-row .additional-controls:after {
   content: " ";
   display: table;
 }
-/* line 985, ../sass/partials/_forms.scss */
+/* line 999, ../sass/partials/_forms.scss */
 .archival-summary-table .attachment-row .additional-controls:after {
   clear: both;
 }
@@ -7802,26 +7811,34 @@ ul.attachments-list li.mandatory-attachments {
   margin-right: 12px;
 }
 
-/* line 67, ../sass/partials/_applications_search.scss */
-.paging button:first-child {
-  margin-right: 6px;
+/* line 66, ../sass/partials/_applications_search.scss */
+.paging {
+  color: #333333;
 }
-/* line 70, ../sass/partials/_applications_search.scss */
-.paging select {
-  width: 5.625em;
-  margin-left: 12px;
-  margin-right: 6px;
+/* line 68, ../sass/partials/_applications_search.scss */
+.paging label {
+  color: #333333;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+/* line 73, ../sass/partials/_applications_search.scss */
+.paging button {
+  margin-right: 20px;
 }
 
-/* line 77, ../sass/partials/_applications_search.scss */
+/* line 78, ../sass/partials/_applications_search.scss */
 div.search {
   position: relative;
 }
-/* line 79, ../sass/partials/_applications_search.scss */
+/* line 80, ../sass/partials/_applications_search.scss */
 div.search input {
   padding-right: 40px !important;
 }
-/* line 83, ../sass/partials/_applications_search.scss */
+/* line 85, ../sass/partials/_applications_search.scss */
+div.search.active i {
+  color: #fbc732;
+}
+/* line 89, ../sass/partials/_applications_search.scss */
 div.search i {
   color: #f39129;
   position: absolute;
@@ -7829,81 +7846,94 @@ div.search i {
   right: 8px;
 }
 
-/* line 93, ../sass/partials/_applications_search.scss */
+/* line 99, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filters {
   display: table;
 }
-/* line 97, ../sass/partials/_applications_search.scss */
+/* line 103, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-row {
   display: table-row;
 }
-/* line 101, ../sass/partials/_applications_search.scss */
+/* line 107, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item {
   background-color: #fff;
   display: table-cell;
   vertical-align: top;
   height: 40px;
 }
-/* line 106, ../sass/partials/_applications_search.scss */
+/* line 112, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item:first-child {
   width: 100%;
 }
-/* line 109, ../sass/partials/_applications_search.scss */
+/* line 115, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item button {
   width: 100%;
 }
+/* line 119, ../sass/partials/_applications_search.scss */
+.applications-search-filters-list .applications-search-filters-list__filter-item--default-filter {
+  min-width: 250px;
+  max-width: 250px;
+  width: 250px;
+  overflow: hidden;
+}
+/* line 125, ../sass/partials/_applications_search.scss */
+.applications-search-filters-list .applications-search-filters-list__filter-item--remove {
+  min-width: 105px;
+  max-width: 105px;
+  width: 105px;
+}
 
-/* line 115, ../sass/partials/_applications_search.scss */
+/* line 132, ../sass/partials/_applications_search.scss */
 .application-row {
   height: 45px;
 }
 
-/* line 118, ../sass/partials/_applications_search.scss */
+/* line 135, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator {
   color: #f39129;
   padding: 3px 0 0 0 !important;
   word-wrap: break-word;
 }
-/* line 122, ../sass/partials/_applications_search.scss */
+/* line 139, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div {
   text-align: center;
   height: auto !important;
   padding: 0 6px !important;
   white-space: nowrap;
 }
-/* line 127, ../sass/partials/_applications_search.scss */
+/* line 144, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div i {
   display: table-cell;
 }
-/* line 130, ../sass/partials/_applications_search.scss */
+/* line 147, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div span {
   padding-left: 2px;
   display: table-cell;
   vertical-align: middle;
   color: #595959;
 }
-/* line 138, ../sass/partials/_applications_search.scss */
+/* line 155, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.urgent {
   color: #df3215;
 }
-/* line 141, ../sass/partials/_applications_search.scss */
+/* line 158, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.pending {
   color: #f39129;
 }
 
-/* line 160, ../sass/partials/_applications_search.scss */
+/* line 177, ../sass/partials/_applications_search.scss */
 table.applications-table th.fifth {
   width: 10%;
 }
-/* line 163, ../sass/partials/_applications_search.scss */
+/* line 180, ../sass/partials/_applications_search.scss */
 table.applications-table th.sixth {
   width: 5%;
 }
-/* line 166, ../sass/partials/_applications_search.scss */
+/* line 183, ../sass/partials/_applications_search.scss */
 table.applications-table th.seventh {
   width: 5%;
 }
-/* line 171, ../sass/partials/_applications_search.scss */
+/* line 188, ../sass/partials/_applications_search.scss */
 table.applications-table th.ninth {
   width: 10%;
 }

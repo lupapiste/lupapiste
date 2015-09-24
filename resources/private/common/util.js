@@ -237,7 +237,7 @@ var util = (function($) {
     label = label || "label";
     return _.filter(data, function(item) {
       return _.reduce(q.split(" "), function(result, word) {
-        return !_.some(selected, item) && _.contains(item[label].toUpperCase(), word.toUpperCase()) && result;
+        return !_.some(selected, item) && _.contains(ko.unwrap(item[label]).toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
   }

@@ -7,8 +7,8 @@
       <div class="row">
         <div class="col-1">
           <label data-bind="ltext: 'application.filter.search'"></label>
-          <div class="search" data-bind="css: {toggled: dataProvider.searchField()}">
-            <input type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField"/>
+          <div class="search" data-bind="css: {toggled: dataProvider.searchField(), active: searchFieldSelected}">
+            <input type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField, hasFocus: searchFieldSelected"/>
             <i class="search-icon lupicon-search"></i>
             <i class="search-icon lupicon-remove toggle" data-bind="click: _.partial(dataProvider.searchField, ''), attr: {title: loc('applications.filter.search.clear')}"></i>
           </div>
@@ -16,19 +16,14 @@
         <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.isAuthority() -->
         <div class="col-2">
           <label data-bind="ltext: 'application.filter.search.select.saved.filter'"></label>
-          <div data-test-id="select-advanced-filter"
-               data-bind="component: {name: 'autocomplete', params: {options: savedFilters,
-                                                                     query: query,
-                                                                     optionsText: 'title',
-                                                                     selectedOption: lupapisteApp.services.applicationFiltersService.selected,
-                                                                     nullable: true}}"></div>
+          <div data-test-id="select-advanced-filter" data-bind="component: {name: 'autocomplete-saved-filters', params: {selectedValue: lupapisteApp.services.applicationFiltersService.selected}}"></div>
         </div>
         <div class="col-1 stacked">
           <br/>
           <button class="secondary" data-test-id="toggle-advanced-filters" data-bind="toggleClick: showAdvancedFilters, css: {toggled: showAdvancedFilters}">
             <i class="lupicon-chevron-down"></i>
             <i class="lupicon-chevron-up toggle"></i>
-            <span data-bind="ltext: advancedFiltersText"></span>
+            <span data-bind="ltext: 'applications.filter.advancedFilters'"></span>
           </button>
         </div>
         <!-- /ko -->

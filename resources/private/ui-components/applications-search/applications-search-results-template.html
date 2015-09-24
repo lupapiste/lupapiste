@@ -6,7 +6,7 @@
       <div class="tabs-content">
         <table id="applications-list" class="applications-table" data-bind="if: gotResults()">
           <thead>
-            <tr> <!-- TODO refactor with foreach and add operation sorter -->
+            <tr> <!-- TODO refactor with foreach and add operation sorter remember to use new chevron icon -->
               <th class="first" colspan="2" data-bind="ltext: 'applications.indicators',
                                          attr: {colspan: lupapisteApp.models.currentUser.isAuthority() ? '4' : '3'}"></th>
               <th class="sorting second" data-bind="click: _.partial(sortBy, 'type'),
