@@ -281,7 +281,7 @@
                                            :add-operation-allowed false
                                            :link-permit-required true
                                            :link-permit-verdict-required true
-                                           :max-link-permits 1
+                                           :max-incoming-link-permits 1
                                            :asianhallinta true}})
 
 (def- ymparistolupa-attachments []) ; TODO
@@ -315,6 +315,8 @@
    :link-permit-verdict-required sc/Bool
    :add-operation-allowed sc/Bool
    :required [sc/Str]
+   (sc/optional-key :max-incoming-link-permits) sc/Num
+   (sc/optional-key :max-outgoing-link-permits) sc/Num
    (sc/optional-key :max-link-permits) sc/Num
    (sc/optional-key :subtypes) [(sc/maybe sc/Keyword)]
    (sc/optional-key :state-graph-resolver) util/Fn
@@ -770,6 +772,8 @@
                                   :add-operation-allowed false
                                   :link-permit-required true
                                   :link-permit-verdict-required true
+                                  :max-incoming-link-permits 1
+                                  :max-outgoing-link-permits 1
                                   :max-link-permits 1
                                   :asianhallinta false}
 
@@ -782,6 +786,8 @@
                                   :add-operation-allowed false
                                   :link-permit-required true
                                   :link-permit-verdict-required false
+                                  :max-incoming-link-permits 1
+                                  :max-outgoing-link-permits 1
                                   :max-link-permits 1
                                   :asianhallinta false}
 
