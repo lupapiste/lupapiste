@@ -10,8 +10,11 @@ Mikko creates application
   Create application the fast way  application-papplication  753-416-25-30  kerrostalo-rivitalo
 
 Mikko edits operation description
+  ${v} =  'edit-op-description'
   Open application  application-papplication  753-416-25-30
-  Wait and click  xpath=//div[@id='application-info-tab']//button[@data-test-id='edit-op-description']
+  Wait until  Element should be visible  jquery=button[data-test-id=${v}]
+  Execute Javascript  $('[data-test-id=edit-op-description] span').mousedown();
+  #Wait and click xpath=//div[@id='application-info-tab']//button[@data-test-id='edit-op-description']
   Input text by test id  op-description-editor  Talo A
   Wait for jQuery
   Wait until  Page should contain  Tallennettu

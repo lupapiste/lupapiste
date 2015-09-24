@@ -81,10 +81,10 @@
             <div class="description-bubble"
                  data-bind="visible: showEditor">
               <input type="text"
-                     data-test-id="op-description-editor"
                      data-bind="value: description,
                                 event: {keydown: specialKeys},
-                                hasFocus: showEditor">
+                                hasFocus: showEditor,
+                                attr: {'data-test-id': docModel.testId( 'op-description-editor)}">
             </div>
           </div>
         </div>

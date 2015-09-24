@@ -728,7 +728,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   // Note: function does not append (unneeded) elements to container$.
   // function appendGroupButtons(container$, path, model, opts ) {
 
-<<<<<<< variant A
   //   function btnHelper( subOpts, cls, icon, text ) {
   //     var b = $("<button>").addClass( cls );
   //     _.each( subOpts.attr || {}, function( v, k ) {
@@ -784,114 +783,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   //     container$.append( buttons$ );
   //   }
   // }
->>>>>>> variant B
-    function btnHelper( subOpts, cls, icon, text ) {
-      var b = $("<button>").addClass( cls );
-      _.each( subOpts.attr || {}, function( v, k ) {
-        b.attr( k, v );
-      });
-      var span = b;
-      if( icon ) {
-        b.append( $("<i>").addClass( icon ));
-        span = $("<span>");
-        b.append( span );
-      }
-      span.text( text );
-      if( subOpts.fun ) {
-        b.click( subOpts.fun );
-      } else {
-        b.prop( "disabled", true );
-      }
-      return b;
-    }
-    var groupButtons = $("<div>").addClass( "group-buttons" );
-    if( opts.description ) {
-      groupButtons.append(
-        btnHelper(opts.description, "secondary is-left", "lupicon-pen", loc( "op-description.edit")));
-    }
-    if( opts.star ) {
-      groupButtons.append(
-        btnHelper(opts.star, "secondary is-left", "lupicon-star", opts.star.text));
-    }
-    if ( opts.remove ) {
-      groupButtons.append(
-        btnHelper(opts.remove, "secondary is-right", "lupicon-remove", loc( "remove")));
-    }
-
-    if (opts.approval) {
-      var approvalElements = self.makeApprovalButtons(path, model, opts.approval);
-      var elemCount = _.size(approvalElements);
-      if (elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ))) {
-        _.each(( approvalElements ), function( elem ) {
-          groupButtons.append( elem );
-        });
-      }
-    }
-    if( opts.description ) {
-      groupButtons.append( opts.description.bubble );
-    }
-
-    if( groupButtons.children().length ) {
-      container$.append( groupButtons );
-    }
-  }
-####### Ancestor
-    function btnHelper( subOpts, cls, icon, text ) {
-      var b = $("<button>").addClass( cls );
-      _.each( subOpts.attr || {}, function( v, k ) {
-        b.attr( k, v );
-      });
-      var span = b;
-      if( icon ) {
-        b.append( $("<i>").addClass( icon ));
-        span = $("<span>");
-        b.append( span );
-      }
-      span.text( text );
-      if( subOpts.fun ) {
-        b.click( subOpts.fun );
-      } else {
-        b.prop( "disabled", true );
-      }
-      return b;
-    }
-    var buttons$ = $("<div>").addClass( "group-buttons" );
-    if( opts.description ) {
-      buttons$.append( btnHelper( opts.description,
-                                  "secondary is-left",
-                                  "lupicon-pen",
-                                  loc( "op-description.edit")));
-    }
-    if( opts.star ) {
-      buttons$.append( btnHelper( opts.star,
-                                  "secondary is-left",
-                                  "lupicon-star",
-                                  opts.star.text));
-    }
-    if ( opts.remove ) {
-      buttons$.append( btnHelper( opts.remove,
-                                  "secondary is-right",
-                                  "lupicon-remove",
-                                  loc( "remove")));
-    }
-    if( opts.approval ) {
-      var approvalElements = self.makeApprovalButtons(path, model, opts.approval);
-      var elemCount = _.size( approvalElements );
-      if( elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ))) {
-        _.each(( approvalElements ), function( elem ) {
-          buttons$.append( elem );
-        });
-      }
-    }
-    if( opts.description ) {
-      buttons$.append( opts.description.bubble );
-    }
-
-    if( buttons$.children().length ) {
-      container$.append( buttons$ );
-    }
-  }
-======= end
 
   // Form field builders
 

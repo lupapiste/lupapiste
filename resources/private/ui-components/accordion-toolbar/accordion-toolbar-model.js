@@ -67,7 +67,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                           function( a ) {
                             return a.value === master.value;
                           })
-               ? {value: master.value, timestamp: master.timestamp}
+               ? master
                : {value: NEUTRAL};
     if( !_.isEqual(lastSent, result)) {
       lastSent = result;
@@ -215,7 +215,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.approve = _.partial( changeStatus, true );
 
   self.details = ko.pureComputed( _.partial( self.docModel.approvalInfo,
-                                             self.approval ));
+                                             self.approval));
 
   self.showToolbar = self.showStar
                   || self.showDescription
