@@ -24,7 +24,7 @@ var docgen = (function () {
         docModel.showValidationResults(doc.validationErrors);
       }
 
-      if (schema.info.repeating && !isDisabled && authorizationModel.ok("create-doc")) {
+      if (schema.info.repeating && !schema.info["no-repeat-button"] && !isDisabled && authorizationModel.ok("create-doc")) {
         var icon = $("<i>", {"class": "lupicon-circle-plus"});
         var span = $("<span>").text( loc(schema.info.name + "._append_label"));
         var btn = $("<button>",

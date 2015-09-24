@@ -390,6 +390,7 @@
    ; Parameters can be keywords or symbols. Symbols will be available in the action body.
    ; If a parameter is missing from request, an error will be raised.
    (sc/optional-key :parameters)  [(sc/either sc/Keyword sc/Symbol)]
+   (sc/optional-key :optional-parameters)  [(sc/either sc/Keyword sc/Symbol)]
    ; Set of application context role keywords.
    (sc/optional-key :user-authz-roles)  (subset-of all-authz-roles)
    ; Set of application organization context role keywords
@@ -468,10 +469,12 @@
         bindings    (when (vector? (first args)) (first args))
         body        (if bindings (rest args) args)
         bindings    (or bindings ['_])
-        parameters  (:parameters meta-data)
-        letkeys     (filter symbol? parameters)
-        parameters  (map (comp keyword name) parameters)
-        meta-data   (assoc meta-data :parameters (vec parameters))
+        letkeys     (->> (util/select-values meta-data [:parameters :optional-parameters])
+                         (apply concat)
+                         (filter symbol?))
+        keywordize  (comp keyword name)
+        meta-data   (assoc meta-data :parameters (mapv keywordize (:parameters meta-data))
+                                     :optional-parameters (mapv keywordize (:optional-parameters meta-data)))
         line-number (:line form-meta)
         ns-str      (str *ns*)
         defname     (symbol (str (name action-type) "-" action-name))
