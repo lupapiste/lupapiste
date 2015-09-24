@@ -16,12 +16,7 @@
         <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.isAuthority() -->
         <div class="col-2">
           <label data-bind="ltext: 'application.filter.search.select.saved.filter'"></label>
-          <div data-test-id="select-advanced-filter"
-               data-bind="component: {name: 'autocomplete', params: {options: savedFilters,
-                                                                     query: query,
-                                                                     optionsText: 'title',
-                                                                     selectedOption: lupapisteApp.services.applicationFiltersService.selected,
-                                                                     nullable: true}}"></div>
+          <div data-test-id="select-advanced-filter" data-bind="component: {name: 'autocomplete-saved-filters', params: {selectedValue: lupapisteApp.services.applicationFiltersService.selected}}"></div>
         </div>
         <div class="col-1 stacked">
           <br/>

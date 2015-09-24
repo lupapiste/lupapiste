@@ -198,7 +198,7 @@ var util = (function($) {
       return errArray.length > 0;
     });
     return errs;
-  }
+  };
 
   var extractRequiredErrors = _.partial(extractErrors, function(errResult) {
     return _.includes(errResult, "illegal-value:required");
@@ -237,7 +237,7 @@ var util = (function($) {
     label = label || "label";
     return _.filter(data, function(item) {
       return _.reduce(q.split(" "), function(result, word) {
-        return !_.some(selected, item) && _.contains(item[label].toUpperCase(), word.toUpperCase()) && result;
+        return !_.some(selected, item) && _.contains(ko.unwrap(item[label]).toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
   }

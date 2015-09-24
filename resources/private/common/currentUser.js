@@ -24,7 +24,7 @@ LUPAPISTE.CurrentUser = function() {
       message:        undefined,
       messageI18nkey: undefined
     },
-    defaultFilter: "",
+    defaultFilter: {id: ""},
     applicationFilters: []
   };
 

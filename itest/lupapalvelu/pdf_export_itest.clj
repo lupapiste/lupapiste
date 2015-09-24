@@ -35,7 +35,7 @@
         test-address             "Testikuja 1234"
         test-property-id         "44400100100100"
         test-submitted           (clj-time.coerce/to-long "2014-01-01")
-        test-authority           {:firstName "Erkki" :lastName "Testihenkilo"}
+        test-authority           {:id "foo" :firstName "Erkki" :lastName "Testihenkilo"}
         test-primaryOperation    {:name "kerrostalo-rivitalo"}
         test-secondaryoperations [{:name "aita"}]
 

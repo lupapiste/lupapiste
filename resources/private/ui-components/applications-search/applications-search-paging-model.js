@@ -7,6 +7,8 @@ LUPAPISTE.ApplicationsSearchPagingModel = function(params) {
   self.limits = params.limits;
   self.count = params.count;
 
+  self.limit = params.dataProvider.limit;
+
   self.paging = function(direction) {
     var limit = self.dataProvider.limit();
     var skipVal = self.dataProvider.skip();
@@ -33,4 +35,16 @@ LUPAPISTE.ApplicationsSearchPagingModel = function(params) {
   });
 
   self.dispose = self.limitSubscription;
+
+  self.enablePrevButton = ko.pureComputed(function() {
+    return self.count() > self.limit() && self.start() > self.limit();
+  });
+
+  self.enableNextButton = ko.pureComputed(function() {
+    return self.count() > self.limit() && self.count() > self.end();
+  });
+
+  self.setLimit = function(value) {
+    self.limit(value);
+  };
 };

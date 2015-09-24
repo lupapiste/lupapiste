@@ -834,7 +834,7 @@
                                     </button>
 
                                     <div class="tos-metadata-content" data-bind="slider: $data.showTosMetadata, visible: !_.isEmpty($data.metadata)">
-                                        <div data-bind="component: {name: 'metadata-editor', params: {verdictId: $data.id, metadata: ko.observable($data.metadata), applicationId: $data.applicationId}}"></div>
+                                        <div data-bind="component: {name: 'metadata-editor', params: {verdictId: ko.observable($data.id), metadata: ko.observable($data.metadata), applicationId: $root.application.id}}"></div>
                                     </div>
                                 </div>
                                 <!-- /ko -->

@@ -64,13 +64,14 @@
 }
 
 .paging {
-  button:first-child {
-    margin-right: $marginS;
+  color: $gray51;
+  label {
+    color: $gray51;
+    margin-bottom: $marginS;
+    display: inline-block;
   }
-  select {
-    width: $cols1*1.5;
-    margin-left: $marginM;
-    margin-right: $marginS;
+  button {
+    margin-right: $grid-margin;
   }
 }
 
@@ -110,6 +111,17 @@ div.search {
       width: 100%;
     }
   }
+  .applications-search-filters-list__filter-item--default-filter {
+    min-width: 250px;
+    max-width: 250px;
+    width: 250px;
+    overflow: hidden;
+  }
+  .applications-search-filters-list__filter-item--remove {
+    min-width: 105px;
+    max-width: 105px;
+    width: 105px;
+  }
 }
 
 .application-row {
@@ -117,12 +129,22 @@ div.search {
 }
 .applications-search-results__indicator {
   color: $primary;
-  padding: $marginS 0 0 0 !important;
+  padding: 3px 0 0 0 !important;
+  word-wrap: break-word;
   div {
     text-align: center;
     height: auto !important;
     padding: 0 $marginS !important;
     white-space: nowrap;
+    i {
+      display: table-cell;
+    }
+    span {
+      padding-left: 2px;
+      display: table-cell;
+      vertical-align: middle;
+      color: $grey-text;
+    }
   }
   .application-search-results__urgency {
     &.urgent {
@@ -131,5 +153,34 @@ div.search {
     &.pending {
       color: $orange-dark;
     }
+  }
+}
+
+table.applications-table {
+  th.first {
+
+  }
+  th.second {
+
+  }
+  th.third {
+
+  }
+  th.fourth {
+
+  }
+  th.fifth {
+    width: 10%;
+  }
+  th.sixth {
+    width: 5%;
+  }
+  th.seventh {
+    width: 5%;
+  }
+  th.eight {
+  }
+  th.ninth {
+    width: 10%;
   }
 }

@@ -43,7 +43,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
           item.urgencyClass = "lupicon-warning";
           break;
         case "pending":
-          item.urgencyClass = "lupicon-circle-minus";
+          item.urgencyClass = "lupicon-circle-dash";
           break;
       }
       return item;
