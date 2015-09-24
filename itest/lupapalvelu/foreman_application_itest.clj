@@ -178,19 +178,20 @@
           (:text resp) => "error.not-foreman-app")))
 
     (fact "can not link foreman applications to each other"
-      (command mikko :add-link-permit :id foreman-app-id4 :linkPermitId foreman-app-id5) => fail?)
+      (fact "Setup: remove old link"
+        (command mikko :remove-link-permit-by-app-id :id foreman-app-id4 :linkPermitId history-base-app-id) => ok?)
+      (fact "try to link foreman application"
+        (command mikko :add-link-permit :id foreman-app-id4 :linkPermitId foreman-app-id5) => fail?))
 
     (fact "can not link second application to foreman application"
       (command mikko :add-link-permit :id foreman-app-id4 :linkPermitId other-r-app-id) => fail?)
 
-    (fact "can not link other permit types than R"
-      (fact "Setup: remove old link" (command mikko :remove-link-permit-by-app-id :id foreman-app-id4 :linkPermitId history-base-app-id) => ok?)
-      (fact "YA" (command mikko :add-link-permit :id foreman-app-id4 :linkPermitId ya-app-id) => fail?)
-      (fact "R" (command mikko :add-link-permit :id foreman-app-id4 :linkPermitId other-r-app-id) => ok?))
-
     (fact "Link permit may be a single paper permit"
-      (fact "Setup: remove old link" (command mikko :remove-link-permit-by-app-id :id foreman-app-id5 :linkPermitId history-base-app-id) => ok?)
-      (fact "1st succeeds" (command mikko :add-link-permit :id foreman-app-id5 :linkPermitId "other ID 1") => ok?)
-      (fact "2nd fails" (command mikko :add-link-permit :id foreman-app-id5 :linkPermitId "other ID 2") => fail?))
+      (fact "Setup: remove old link"
+        (command mikko :remove-link-permit-by-app-id :id foreman-app-id5 :linkPermitId history-base-app-id) => ok?)
+      (fact "1st succeeds"
+        (command mikko :add-link-permit :id foreman-app-id5 :linkPermitId "other ID 1") => ok?)
+      (fact "2nd fails"
+        (command mikko :add-link-permit :id foreman-app-id5 :linkPermitId "other ID 2") => fail?))
 
     ))
