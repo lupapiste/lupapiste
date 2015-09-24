@@ -4,13 +4,19 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="applications-search-paging-template">
       <div class="paging">
-        <div>
-          <span data-bind="text: loc('applications.results', start(), end(), count())"></span>
-        </div>
-        <div>
-          <button class="btn btn-narrow" data-bind="click: prev, enable: count() > dataProvider.limit() && start() > dataProvider.limit(), ltext: 'previous'"></button>
-          <button class="btn btn-narrow" data-bind="click: next, enable: count() > dataProvider.limit() && count() > end(), ltext: 'next'"></button>
-          <select data-bind="options: limits, value: dataProvider.limit"></select>
+        <p data-bind="text: loc('applications.results', start(), end(), count())"></p>
+        <div data-bind="if: count() > _.first(limits())">
+          <button class="btn secondary" data-bind="click: prev, enable: enablePrevButton">
+            <i class="lupicon-chevron-left"></i>
+            <span data-bind="ltext: 'previous'"></span>
+          </button>
+          <button class="btn secondary" data-bind="click: next, enable: enableNextButton">
+            <span data-bind="ltext: 'next'"></span>
+            <i class="lupicon-chevron-right"></i>
+          </button>
+          <!-- ko foreach: limits -->
+          <button class="btn secondary" data-bind="text: $data, css: {active: $component.limit() === $data}, click: $component.setLimit"></button>
+          <!-- /ko -->
           <label data-bind="ltext: 'applications.lengthMenu'"></label>
         </div>
       </div>

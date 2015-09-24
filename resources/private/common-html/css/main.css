@@ -4231,35 +4231,36 @@ div.alleYli-radioGroup {
 .form-grid {
   width: 100%;
   border-top: 1px solid #dddddd;
+  color: #333333;
 }
-/* line 1034, ../sass/partials/_forms.scss */
+/* line 1035, ../sass/partials/_forms.scss */
 .form-grid:last-child {
   border-bottom: none;
 }
-/* line 1038, ../sass/partials/_forms.scss */
+/* line 1039, ../sass/partials/_forms.scss */
 .form-grid h2 {
   padding-left: 20px;
   margin: 12px 0;
 }
-/* line 1044, ../sass/partials/_forms.scss */
+/* line 1045, ../sass/partials/_forms.scss */
 .form-grid p {
   padding: 0 !important;
   margin: 0 !important;
 }
-/* line 1049, ../sass/partials/_forms.scss */
+/* line 1050, ../sass/partials/_forms.scss */
 .form-grid .checkbox-wrapper {
   border: 1px solid #dddddd;
   padding: 7px;
 }
-/* line 1054, ../sass/partials/_forms.scss */
+/* line 1055, ../sass/partials/_forms.scss */
 .form-grid select::-ms-expand {
   display: none;
 }
-/* line 1058, ../sass/partials/_forms.scss */
+/* line 1059, ../sass/partials/_forms.scss */
 .form-grid button::-moz-focus-inner {
   border: 0;
 }
-/* line 1062, ../sass/partials/_forms.scss */
+/* line 1063, ../sass/partials/_forms.scss */
 .form-grid input[type=text], .form-grid input[type=password], .form-grid select {
   padding: 0 12px;
   min-height: 40px;
@@ -4273,19 +4274,19 @@ div.alleYli-radioGroup {
   -webkit-border-radius: 0px;
   -moz-appearance: none;
 }
-/* line 1075, ../sass/partials/_forms.scss */
+/* line 1076, ../sass/partials/_forms.scss */
 .form-grid input[type=text]:focus, .form-grid input[type=password]:focus, .form-grid select:focus {
   color: #333333;
   border-color: #fbc732;
 }
-/* line 1081, ../sass/partials/_forms.scss */
+/* line 1082, ../sass/partials/_forms.scss */
 .form-grid input[type=checkbox] {
   opacity: 0;
   width: 0;
   height: 0;
   margin: 0;
 }
-/* line 1088, ../sass/partials/_forms.scss */
+/* line 1089, ../sass/partials/_forms.scss */
 .form-grid .checkbox-label:before {
   font-family: 'lupapiste';
   speak: none;
@@ -4304,7 +4305,7 @@ div.alleYli-radioGroup {
   vertical-align: top;
   color: #bbbbbb;
 }
-/* line 1097, ../sass/partials/_forms.scss */
+/* line 1098, ../sass/partials/_forms.scss */
 .form-grid input[type=checkbox]:checked + .checkbox-label:before {
   font-family: 'lupapiste';
   speak: none;
@@ -4320,11 +4321,11 @@ div.alleYli-radioGroup {
   content: "\e604";
   color: #fbc732;
 }
-/* line 1103, ../sass/partials/_forms.scss */
+/* line 1104, ../sass/partials/_forms.scss */
 .form-grid select.required, .form-grid input.required {
   border-color: #f39129;
 }
-/* line 1107, ../sass/partials/_forms.scss */
+/* line 1108, ../sass/partials/_forms.scss */
 .form-grid .select-arrow {
   position: absolute;
   right: 1px;
@@ -4337,38 +4338,38 @@ div.alleYli-radioGroup {
   line-height: 38px;
   vertical-align: middle;
 }
-/* line 1122, ../sass/partials/_forms.scss */
+/* line 1123, ../sass/partials/_forms.scss */
 .form-grid input[type=text]:disabled {
   border-color: #dddddd;
 }
-/* line 1126, ../sass/partials/_forms.scss */
+/* line 1127, ../sass/partials/_forms.scss */
 .form-grid input[type=text].err, .form-grid input[type=password].err {
   border: 1px solid #df3215;
   color: #df3215;
 }
-/* line 1131, ../sass/partials/_forms.scss */
+/* line 1132, ../sass/partials/_forms.scss */
 .form-grid .submit-button {
   display: table-row;
 }
-/* line 1133, ../sass/partials/_forms.scss */
+/* line 1134, ../sass/partials/_forms.scss */
 .form-grid .submit-button .submit-button__item {
   display: table-cell;
 }
-/* line 1135, ../sass/partials/_forms.scss */
+/* line 1136, ../sass/partials/_forms.scss */
 .form-grid .submit-button .submit-button__item:first-child {
   width: 100%;
 }
-/* line 1141, ../sass/partials/_forms.scss */
+/* line 1142, ../sass/partials/_forms.scss */
 .form-grid .submit-button .submittable input {
   border-color: #2ca92c;
 }
-/* line 1147, ../sass/partials/_forms.scss */
+/* line 1148, ../sass/partials/_forms.scss */
 .form-grid button.input-button {
   position: absolute;
   bottom: 0;
   right: 0;
 }
-/* line 1154, ../sass/partials/_forms.scss */
+/* line 1155, ../sass/partials/_forms.scss */
 .form-grid .col-1 {
   position: relative;
   float: left;
@@ -4391,7 +4392,7 @@ div.alleYli-radioGroup {
 .form-grid .col-1 .col--vertical label {
   display: block;
 }
-/* line 1154, ../sass/partials/_forms.scss */
+/* line 1155, ../sass/partials/_forms.scss */
 .form-grid .col-2 {
   position: relative;
   float: left;
@@ -4414,7 +4415,7 @@ div.alleYli-radioGroup {
 .form-grid .col-2 .col--vertical label {
   display: block;
 }
-/* line 1154, ../sass/partials/_forms.scss */
+/* line 1155, ../sass/partials/_forms.scss */
 .form-grid .col-3 {
   position: relative;
   float: left;
@@ -4437,7 +4438,7 @@ div.alleYli-radioGroup {
 .form-grid .col-3 .col--vertical label {
   display: block;
 }
-/* line 1154, ../sass/partials/_forms.scss */
+/* line 1155, ../sass/partials/_forms.scss */
 .form-grid .col-4 {
   position: relative;
   float: left;
@@ -4460,7 +4461,7 @@ div.alleYli-radioGroup {
 .form-grid .col-4 .col--vertical label {
   display: block;
 }
-/* line 1159, ../sass/partials/_forms.scss */
+/* line 1160, ../sass/partials/_forms.scss */
 .form-grid .row {
   margin: 20px 0;
 }
@@ -4473,15 +4474,15 @@ div.alleYli-radioGroup {
 .form-grid .row:after {
   clear: both;
 }
-/* line 1165, ../sass/partials/_forms.scss */
+/* line 1166, ../sass/partials/_forms.scss */
 .form-grid .row--no-margin {
   margin: 0;
 }
-/* line 1169, ../sass/partials/_forms.scss */
+/* line 1170, ../sass/partials/_forms.scss */
 .form-grid .autocomplete-component {
   width: 100%;
 }
-/* line 1173, ../sass/partials/_forms.scss */
+/* line 1174, ../sass/partials/_forms.scss */
 .form-grid .info-message {
   background-color: #df3215;
   color: #fff;
@@ -4492,47 +4493,47 @@ div.alleYli-radioGroup {
   display: block;
   height: 40px;
 }
-/* line 1185, ../sass/partials/_forms.scss */
+/* line 1186, ../sass/partials/_forms.scss */
 .form-grid .poor.info-message {
   background-color: #df3215;
 }
-/* line 1189, ../sass/partials/_forms.scss */
+/* line 1190, ../sass/partials/_forms.scss */
 .form-grid .low.info-message {
   background-color: #e7541d;
 }
-/* line 1193, ../sass/partials/_forms.scss */
+/* line 1194, ../sass/partials/_forms.scss */
 .form-grid .average.info-message {
   background-color: #f7ac2e;
 }
-/* line 1197, ../sass/partials/_forms.scss */
+/* line 1198, ../sass/partials/_forms.scss */
 .form-grid .good.info-message {
   background-color: #61b72f;
 }
-/* line 1201, ../sass/partials/_forms.scss */
+/* line 1202, ../sass/partials/_forms.scss */
 .form-grid .excellent.info-message {
   background-color: #2ca92c;
 }
-/* line 1205, ../sass/partials/_forms.scss */
+/* line 1206, ../sass/partials/_forms.scss */
 .form-grid input[type=password].poor {
   border-color: #df3215;
 }
-/* line 1209, ../sass/partials/_forms.scss */
+/* line 1210, ../sass/partials/_forms.scss */
 .form-grid input[type=password].low {
   border-color: #e7541d;
 }
-/* line 1213, ../sass/partials/_forms.scss */
+/* line 1214, ../sass/partials/_forms.scss */
 .form-grid input[type=password].average {
   border-color: #f7ac2e;
 }
-/* line 1217, ../sass/partials/_forms.scss */
+/* line 1218, ../sass/partials/_forms.scss */
 .form-grid input[type=password].good {
   border-color: #61b72f;
 }
-/* line 1221, ../sass/partials/_forms.scss */
+/* line 1222, ../sass/partials/_forms.scss */
 .form-grid input[type=password].excellent {
   border-color: #2ca92c;
 }
-/* line 1225, ../sass/partials/_forms.scss */
+/* line 1226, ../sass/partials/_forms.scss */
 .form-grid .error-message {
   background-color: #df3215;
   color: #fff;
@@ -4541,7 +4542,7 @@ div.alleYli-radioGroup {
   font-style: normal;
   font-weight: bold;
 }
-/* line 1232, ../sass/partials/_forms.scss */
+/* line 1233, ../sass/partials/_forms.scss */
 .form-grid .error-message:before {
   font-family: 'lupapiste';
   speak: none;
@@ -4558,11 +4559,11 @@ div.alleYli-radioGroup {
   margin-right: 6px;
 }
 
-/* line 1240, ../sass/partials/_forms.scss */
+/* line 1241, ../sass/partials/_forms.scss */
 .form-grid--no-border {
   border: none;
 }
-/* line 1244, ../sass/partials/_forms.scss */
+/* line 1245, ../sass/partials/_forms.scss */
 .form-grid--no-border .col-1:first-child, .form-grid--no-border .col-2:first-child, .form-grid--no-border .col-3:first-child, .form-grid--no-border .col-4:first-child {
   padding-left: 0;
 }
@@ -6800,23 +6801,22 @@ ul.tabs {
   height: 100%;
   min-height: 38px;
   display: inline-block;
-  color: black;
   box-sizing: border-box;
   background-color: #fff;
 }
-/* line 37, ../sass/partials/_autocomplete.scss */
+/* line 35, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags {
   list-style: none;
   padding: 0;
 }
-/* line 40, ../sass/partials/_autocomplete.scss */
+/* line 38, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li {
   display: inline-block;
   max-width: 100%;
   margin-bottom: -7px;
   margin-right: -4px;
 }
-/* line 47, ../sass/partials/_autocomplete.scss */
+/* line 45, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag {
   cursor: pointer;
   position: relative;
@@ -6829,25 +6829,25 @@ ul.tabs {
   overflow: hidden;
   color: #f39129;
 }
-/* line 60, ../sass/partials/_autocomplete.scss */
+/* line 58, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag span.tag-label {
   line-height: 36px;
   vertical-align: top;
   margin-right: 6px;
 }
-/* line 65, ../sass/partials/_autocomplete.scss */
+/* line 63, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag .tag-remove {
   color: #f39129;
   line-height: 36px;
   margin: 0 6px;
 }
-/* line 74, ../sass/partials/_autocomplete.scss */
+/* line 72, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.caption, .autocomplete-component .autocomplete-selection-wrapper span.selection-text {
   cursor: default;
   line-height: 38px;
   padding-left: 6px;
 }
-/* line 79, ../sass/partials/_autocomplete.scss */
+/* line 77, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {
   position: absolute;
   bottom: 8px;
@@ -6856,17 +6856,17 @@ ul.tabs {
   color: #f39129;
   margin: 0;
 }
-/* line 86, ../sass/partials/_autocomplete.scss */
+/* line 84, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle {
   color: #fbc732;
 }
-/* line 92, ../sass/partials/_autocomplete.scss */
+/* line 90, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown {
   width: inherit;
   position: absolute;
   z-index: 1;
 }
-/* line 96, ../sass/partials/_autocomplete.scss */
+/* line 94, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown input.autocomplete-input {
   width: 100%;
   height: 40px;
@@ -6874,7 +6874,7 @@ ul.tabs {
   display: block;
   box-sizing: border-box;
 }
-/* line 103, ../sass/partials/_autocomplete.scss */
+/* line 101, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
   position: absolute;
   top: 38px;
@@ -6890,23 +6890,23 @@ ul.tabs {
   background-color: #fff;
   color: black;
 }
-/* line 119, ../sass/partials/_autocomplete.scss */
+/* line 117, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result.autocomplete-result-grouped li.autocomplete-result-item {
   padding: 0 12px;
 }
-/* line 124, ../sass/partials/_autocomplete.scss */
+/* line 122, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li {
   height: 40px;
   line-height: 40px;
 }
-/* line 129, ../sass/partials/_autocomplete.scss */
+/* line 127, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
   cursor: default;
   display: list-item;
   list-style-type: none;
   padding: 0 6px;
 }
-/* line 135, ../sass/partials/_autocomplete.scss */
+/* line 133, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
   position: relative;
@@ -6914,16 +6914,16 @@ ul.tabs {
   overflow: hidden;
   padding-right: 6px;
 }
-/* line 142, ../sass/partials/_autocomplete.scss */
+/* line 140, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #f7ac2e;
   color: #fff;
 }
-/* line 145, ../sass/partials/_autocomplete.scss */
+/* line 143, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #fbc732;
 }
-/* line 149, ../sass/partials/_autocomplete.scss */
+/* line 147, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-group-header {
   font-weight: 700;
   padding-left: 6px;
@@ -7822,25 +7822,23 @@ ul.attachments-list li.mandatory-attachments {
 }
 
 /* line 67, ../sass/partials/_applications_search.scss */
-.paging button:first-child {
-  margin-right: 6px;
+.paging p {
+  margin-bottom: 6px;
 }
 /* line 70, ../sass/partials/_applications_search.scss */
-.paging select {
-  width: 5.625em;
-  margin-left: 12px;
-  margin-right: 6px;
+.paging button {
+  margin-right: 20px;
 }
 
-/* line 77, ../sass/partials/_applications_search.scss */
+/* line 75, ../sass/partials/_applications_search.scss */
 div.search {
   position: relative;
 }
-/* line 79, ../sass/partials/_applications_search.scss */
+/* line 77, ../sass/partials/_applications_search.scss */
 div.search input {
   padding-right: 40px !important;
 }
-/* line 83, ../sass/partials/_applications_search.scss */
+/* line 81, ../sass/partials/_applications_search.scss */
 div.search i {
   color: #f39129;
   position: absolute;
@@ -7848,94 +7846,94 @@ div.search i {
   right: 8px;
 }
 
-/* line 93, ../sass/partials/_applications_search.scss */
+/* line 91, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filters {
   display: table;
 }
-/* line 97, ../sass/partials/_applications_search.scss */
+/* line 95, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-row {
   display: table-row;
 }
-/* line 101, ../sass/partials/_applications_search.scss */
+/* line 99, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item {
   background-color: #fff;
   display: table-cell;
   vertical-align: top;
   height: 40px;
 }
-/* line 106, ../sass/partials/_applications_search.scss */
+/* line 104, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item:first-child {
   width: 100%;
 }
-/* line 109, ../sass/partials/_applications_search.scss */
+/* line 107, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item button {
   width: 100%;
 }
-/* line 113, ../sass/partials/_applications_search.scss */
+/* line 111, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item--default-filter {
   min-width: 250px;
   max-width: 250px;
   width: 250px;
   overflow: hidden;
 }
-/* line 119, ../sass/partials/_applications_search.scss */
+/* line 117, ../sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item--remove {
   min-width: 105px;
   max-width: 105px;
   width: 105px;
 }
 
-/* line 126, ../sass/partials/_applications_search.scss */
+/* line 124, ../sass/partials/_applications_search.scss */
 .application-row {
   height: 45px;
 }
 
-/* line 129, ../sass/partials/_applications_search.scss */
+/* line 127, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator {
   color: #f39129;
   padding: 3px 0 0 0 !important;
   word-wrap: break-word;
 }
-/* line 133, ../sass/partials/_applications_search.scss */
+/* line 131, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div {
   text-align: center;
   height: auto !important;
   padding: 0 6px !important;
   white-space: nowrap;
 }
-/* line 138, ../sass/partials/_applications_search.scss */
+/* line 136, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div i {
   display: table-cell;
 }
-/* line 141, ../sass/partials/_applications_search.scss */
+/* line 139, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator div span {
   padding-left: 2px;
   display: table-cell;
   vertical-align: middle;
   color: #595959;
 }
-/* line 149, ../sass/partials/_applications_search.scss */
+/* line 147, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.urgent {
   color: #df3215;
 }
-/* line 152, ../sass/partials/_applications_search.scss */
+/* line 150, ../sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.pending {
   color: #f39129;
 }
 
-/* line 171, ../sass/partials/_applications_search.scss */
+/* line 169, ../sass/partials/_applications_search.scss */
 table.applications-table th.fifth {
   width: 10%;
 }
-/* line 174, ../sass/partials/_applications_search.scss */
+/* line 172, ../sass/partials/_applications_search.scss */
 table.applications-table th.sixth {
   width: 5%;
 }
-/* line 177, ../sass/partials/_applications_search.scss */
+/* line 175, ../sass/partials/_applications_search.scss */
 table.applications-table th.seventh {
   width: 5%;
 }
-/* line 182, ../sass/partials/_applications_search.scss */
+/* line 180, ../sass/partials/_applications_search.scss */
 table.applications-table th.ninth {
   width: 10%;
 }
