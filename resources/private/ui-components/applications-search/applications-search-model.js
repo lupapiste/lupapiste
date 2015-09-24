@@ -30,6 +30,32 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.skip = ko.observable(0);
 
+  function searchFields() {
+    return { searchText: self.searchFieldDelayed(),
+             tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
+             organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
+             operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
+             handlers: _.pluck(lupapisteApp.services.handlerFilterService.selected(), "id"),
+             applicationType: self.applicationType(),
+             areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
+             limit: self.limit(),
+             sort: ko.mapping.toJS(self.sort),
+             skip: self.skip() };
+  }
+
+  ko.computed(function() {
+    self.searchFieldDelayed();
+    lupapisteApp.services.tagFilterService.selected();
+    lupapisteApp.services.organizationFilterService.selected();
+    lupapisteApp.services.operationFilterService.selected();
+    lupapisteApp.services.handlerFilterService.selected();
+    self.applicationType();
+    lupapisteApp.services.areaFilterService.selected();
+    self.limit();
+
+    self.skip(0); // when above filters change, set table view to first page
+  });
+
   self.pending = ko.observable(false);
 
   ko.computed(function() {
@@ -56,19 +82,6 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     self.data(data);
     self.applications(data.applications);
   };
-
-  function searchFields() {
-    return { searchText: self.searchFieldDelayed(),
-             tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
-             organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
-             operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
-             handlers: _.pluck(lupapisteApp.services.handlerFilterService.selected(), "id"),
-             applicationType: self.applicationType(),
-             areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
-             limit: self.limit(),
-             sort: ko.mapping.toJS(self.sort),
-             skip: self.skip() };
-  }
 
   ko.computed(function() {
     ajax.datatables("applications-search", searchFields())
