@@ -5,7 +5,7 @@
 //  subSchema: Schema for the group.
 //  path: Group path within the document schema.
 //  model: model for the group
-//  [remove]: {fun, testClass}. See resolveRemoveOptions is docmodel.js
+//  [remove]: {fun, testClass}. See resolveRemoveOptions in docmodel.js
 //            for details.
 
 LUPAPISTE.GroupApprovalModel = function( params ) {
@@ -30,12 +30,12 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   var masterApproval = ko.observable();
 
   self.approval = ko.pureComputed( function() {
-    var approval = _.cloneDeep( self.docModel.safeApproval( self.model, myApproval));
+    var approval = self.docModel.safeApproval( self.model, myApproval);
     var master = masterApproval();
     if( master && master.value !== NEUTRAL && master.timestamp > approval.timestamp ) {
-      _.merge( approval, master );
+      approval = master;
     }
-    return approval;
+    return {value: approval.value, timestamp: approval.timestamp}
   });
 
   self.docModel.approvalHubSubscribe( function( data ) {
@@ -82,6 +82,7 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   self.details = ko.pureComputed( _.partial( self.docModel.approvalInfo,
                                              myApproval ));
 
+  // Send the initial approval status to the master.
   self.docModel.approvalHubSend( self.docModel.safeApproval( self.model, myApproval),
                                  params.path );
 

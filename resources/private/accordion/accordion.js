@@ -96,6 +96,7 @@ var accordion = (function() {
 
 // Collection of accordion isOpen observables.
 // See accordion-toolbar component for details.
+// Flag values: true is open and false closed.
 var AccordionState = function() {
   var observables = {};
 

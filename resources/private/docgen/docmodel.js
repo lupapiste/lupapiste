@@ -161,8 +161,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   // ----------------------------------------------------------------------
-  // Approval and related utilities. Used by group-approval and section componenents.
-  // Note: approval arguments are functions. In practise, they are observables.
+  // Approval and related utilities. Used by group-approval and
+  // section components.
+  // Note: approval arguments are functions.
+  //       In practise, they are observables.
 
   // Updates approval status in the backend.
   // path: approval path
@@ -197,45 +199,45 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return text;
   }
 
+  // Returns the latest modification time of the model or
+  // zero if no modifications.
+    function modelTimestamp( model ) {
+    if( _.isObject( model )) {
+      return !_.isUndefined(model.value)
+                ? model.modified || 0
+                : _.spread(Math.max)(_.map( model, modelTimestamp));
+    }
+    return 0;
+  }
+
   // Approval is current if it has a value that is newer than
   // than latest model change.
   self.isApprovalCurrent = function( approvalModel, approvalFun ) {
-        function modelModifiedSince(model, timestamp) {
-      if (model) {
-        if (!timestamp) {
-          return true;
-        }
-        if (!_.isObject(model)) {
-          return false;
-        }
-        if (_.has(model, "value")) {
-          // Leaf
-          return model.modified && model.modified > timestamp;
-        }
-        return _.find(model, function (myModel) { return modelModifiedSince(myModel, timestamp); });
-      }
-      return false;
-    }
+    // function modelModifiedSince(model, timestamp) {
+    //   if (model) {
+    //     if (!timestamp) {
+    //       return true;
+    //     }
+    //     if (!_.isObject(model)) {
+    //       return false;
+    //     }
+    //     if (_.has(model, "value")) {
+    //       // Leaf
+    //       return model.modified && model.modified > timestamp;
+    //     }
+    //     return _.find(model, function (myModel) { return modelModifiedSince(myModel, timestamp); });
+    //   }
+    //   return false;
+    // }
     var approval = approvalFun();
-    return approval && !modelModifiedSince( approvalModel, approval.timestamp );
+    return approval && approval.timestamp > modelTimestamp( approvalModel )
   }
 
   // Returns always "core" approval object (value, timestamp properties.)
   // If approvalFun does not yield correct, up-to-date approval then
   // NEUTRAL with the latest model timestamp is returned.
   self.safeApproval = function( approvalModel, approvalFun) {
-    function modelTimestamp( model ) {
-      if( _.isObject( model )) {
-        var result = !_.isUndefined(model.value)
-                   ? model.modified || 0
-                   : _.reduce(_.map( model, modelTimestamp),
-                              function( a, b ) {
-                                return Math.max( a, b);
-                              });
-        return result;
-      }
-      return 0;
-    }
+
     var approval = approvalFun();
     var ts = modelTimestamp( approvalModel );
     return approval && approval.timestamp > ts

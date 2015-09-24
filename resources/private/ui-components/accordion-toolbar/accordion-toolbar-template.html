@@ -60,7 +60,7 @@
             </button>
             <button class="secondary is-right"
                 data-bind="visible: remove.fun,
-                           data-test-class: remove.testClass,
+                           attr: {'data-test-class': remove.testClass},
                            click: remove.fun">
               <i class="lupicon-remove"></i>
           <span data-bind="ltext: 'remove'"></span>

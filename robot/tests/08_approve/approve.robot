@@ -38,6 +38,7 @@ Mikko still can't approve application
 Ronja tries to approve application without permission
   Ronja logs in
   Open application  ${appname}  753-416-25-30
+  Sleep  600s
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
   Kill session
 
@@ -127,7 +128,7 @@ Mikko comes back, fills in missing parts and no submit button enabled
 
 Accordion approved
   [Arguments]  ${name}
-  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky button.positive.approved i.approved
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky button.positive i.approved
   Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status i.approved
   Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status span:contains('Sibbo Sonja')
   # Every group is approved or neutral

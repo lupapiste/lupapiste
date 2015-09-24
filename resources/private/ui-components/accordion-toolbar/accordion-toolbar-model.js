@@ -1,5 +1,13 @@
+// Accordion button and toolbar component.
+// Parameters:
 // docMdodel: DocModel instance
-// options: DocModel options
+// docModelOptions: Options originally passed to DocModel
+// openCallback: Callback that is called whan accordion opens/closes.
+//               The callback takes care of showing/hding accordion
+//               contents. It would be nicer, if the contents were
+//               part of the component, but currently that is not
+//               possible due to binding mismatches (contents contain
+//               created components as well).
 LUPAPISTE.AccordionToolbarModel = function( params ) {
   "use strict";
   var self = this;
@@ -19,7 +27,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   AccordionState.register( self.docModel.docId, self.isOpen );
 
   self.info = self.docModel.schema.info;
-  var meta = self.docModel.getMeta( params.path );
+  var meta = self.docModel.getMeta( [] );
   var masterApproval = ko.observable( meta ? meta._approved : null );
 
   var op = self.info.op;
@@ -59,33 +67,40 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                           function( a ) {
                             return a.value === master.value;
                           })
-               ? master
+               ? {value: master.value, timestamp: master.timestamp}
                : {value: NEUTRAL};
     if( !_.isEqual(lastSent, result)) {
-      lastSent = _.cloneDeep(result);
+      lastSent = result;
+      // Master (this) has changed, let's notify every group.
       self.docModel.approvalHubSend( result, []);
     }
     return result;
   })
 
 
-  // Exclamation icon on the accordion should be visible
-  // if the master or any of the groups is REJECTED. Typical
-  // master overrides apply.
+  // Exclamation icon on the accordion should be visible, if...
+  // 1. The master or any "later group" is REJECTED
+  // 2. The master is NEUTRAL but any group is REJECTED
   self.isSummaryRejected = ko.pureComputed( function() {
+    function groupRejected( groups) {
+      return _.find( groups, {"value": REJECTED})
+    }
     var master = safeMaster();
     return master.value === REJECTED
-        || _.some( laterGroups(), function( a ) {
-          return a.value === REJECTED;
-        });
+        || groupRejected( laterGroups())
+        || (master.value === NEUTRAL && groupRejected( groupApprovals()) );
   })
 
+
+  // A group sends its approval to the master (this) when
+  // the approval status changes (and also during the initialization).
   self.docModel.approvalHubSubscribe( function( data ) {
     var g = _.clone( groupApprovals() );
     g["path" + data.path.join("-")] = data.approval;
     groupApprovals( g );
     // We always respond to the sender regardless whether
-    // the update triggers full broadcast.
+    // the update triggers full broadcast. This is done to make sure
+    // the group receives the master status during initialization.
     self.docModel.approvalHubSend( self.approval(), [], data.path )
   })
 
@@ -118,7 +133,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                                             "op-id": op.id,
                                             desc: desc  })
     .success (function() {
-      hub.send("op-description-changed", {apId: self.docModel.appId,
+      hub.send("op-description-changed", {appId: self.docModel.appId,
                                           "op-id": op.id,
                                           "op-desc": desc  });
     })
