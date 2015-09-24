@@ -57,9 +57,7 @@ LUPAPISTE.ApplicationFiltersService = function() {
       .command("update-default-application-filter", {"filter-id": id})
       .error(util.showSavedIndicator)
       .success(function() {
-        if (ko.isObservable(lupapisteApp.models.currentUser.defaultFilter) && ko.isObservable(lupapisteApp.models.currentUser.defaultFilter().id)) {
-          lupapisteApp.models.currentUser.defaultFilter().id(id);
-        }
+        lupapisteApp.models.currentUser.defaultFilter.id(id);
       })
       .call();
     };
@@ -85,7 +83,8 @@ LUPAPISTE.ApplicationFiltersService = function() {
       return ko.unwrap(f.id) === ko.unwrap(filter.id);
     });
     if (_.isEmpty(_savedFilters())) {
-      lupapisteApp.models.currentUser.defaultFilter({id: filter.id});
+      console.log("defaultFilter", lupapisteApp.models.currentUser.defaultFilter.id());
+      lupapisteApp.models.currentUser.defaultFilter.id(ko.unwrap(filter.id));
     }
     var wrapped = wrapFilter(ko.mapping.fromJS(filter));
     lupapisteApp.models.currentUser.applicationFilters.push(wrapped);
