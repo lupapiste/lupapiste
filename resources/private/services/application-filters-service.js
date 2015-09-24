@@ -83,7 +83,6 @@ LUPAPISTE.ApplicationFiltersService = function() {
       return ko.unwrap(f.id) === ko.unwrap(filter.id);
     });
     if (_.isEmpty(_savedFilters())) {
-      console.log("defaultFilter", lupapisteApp.models.currentUser.defaultFilter.id());
       lupapisteApp.models.currentUser.defaultFilter.id(ko.unwrap(filter.id));
     }
     var wrapped = wrapFilter(ko.mapping.fromJS(filter));
