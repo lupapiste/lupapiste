@@ -39,7 +39,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.nullable = params.nullable;
 
-  self.placeholder = params.placeholder || loc("application.filter.search") + "...";
+  self.placeholder = params.lPlaceholder ? loc(params.lPlaceholder) : (params.placeholder || loc("application.filter.search") + "...");
 
   // Observables
   self.index = ko.observable(0);

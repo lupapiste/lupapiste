@@ -1,6 +1,8 @@
-LUPAPISTE.AutocompleteOrganizationsModel = function() {
+LUPAPISTE.AutocompleteOrganizationsModel = function(params) {
   "use strict";
   var self = this;
+
+  self.lPlaceholder = params.lPlaceholder;
 
   self.selected = lupapisteApp.services.organizationFilterService.selected;
 
