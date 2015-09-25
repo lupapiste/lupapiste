@@ -1,6 +1,8 @@
-LUPAPISTE.AutocompleteTagsModel = function() {
+LUPAPISTE.AutocompleteTagsModel = function(params) {
   "use strict";
   var self = this;
+
+  self.lPlaceholder = params.lPlaceholder;
 
   self.selected = lupapisteApp.services.tagFilterService.selected;
 

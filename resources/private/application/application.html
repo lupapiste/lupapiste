@@ -406,9 +406,7 @@
                             </div>
                         </div>
 
-                        <!-- ko if: $root.application.permitType() == 'KT' && $parent.authorization.ok('create-doc') -->
-                        <div data-bind="component: 'add-property'"></div>
-                        <!-- /ko -->
+                        <div data-bind="component: 'add-property', visible: showAddPropertyButton"></div>
 
                         <div class="process-nav">
                             <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="parties">

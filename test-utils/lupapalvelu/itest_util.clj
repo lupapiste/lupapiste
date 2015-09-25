@@ -58,6 +58,8 @@
 (def sonja-muni  "753")
 (def ronja       (apikey-for "ronja"))
 (def ronja-id    (id-for "ronja"))
+(def luukas      (apikey-for "luukas"))
+(def luukas-id   (id-for "luukas"))
 (def sipoo       (apikey-for "sipoo"))
 (def tampere-ya  (apikey-for "tampere-ya"))
 (def naantali    (apikey-for "admin@naantali.fi"))

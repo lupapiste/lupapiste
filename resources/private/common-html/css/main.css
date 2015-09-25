@@ -3204,18 +3204,23 @@ button:focus {
 .remove-button .remove-button__row {
   position: absolute;
   top: 0;
+  right: 0;
   white-space: nowrap;
   width: 0px;
   overflow: hidden;
+  z-index: 1;
 }
-/* line 494, ../sass/partials/_buttons.scss */
+/* line 496, ../sass/partials/_buttons.scss */
 .remove-button .remove-button__row.remove-button--show {
   width: auto;
 }
-/* line 497, ../sass/partials/_buttons.scss */
+/* line 499, ../sass/partials/_buttons.scss */
 .remove-button .remove-button__row button {
   display: inline-block;
   width: 105px !important;
+}
+/* line 502, ../sass/partials/_buttons.scss */
+.remove-button .remove-button__row button.primary {
   margin-right: -3px;
 }
 
@@ -4460,7 +4465,13 @@ div.alleYli-radioGroup {
 .form-grid .row {
   margin: 20px 0;
 }
+<<<<<<< variant A
 /* line 994, ../sass/partials/_forms.scss */
+>>>>>>> variant B
+/* line 1008, ../sass/partials/_forms.scss */
+####### Ancestor
+/* line 1009, ../sass/partials/_forms.scss */
+======= end
 .form-grid .row:before, .form-grid .row:after {
   content: " ";
   display: table;
@@ -7537,7 +7548,13 @@ ul.attachments-list li.mandatory-attachments {
 .metadata-editor-container .editor .editor-buttons {
   padding-top: 15px;
 }
+<<<<<<< variant A
 /* line 994, ../sass/partials/_forms.scss */
+>>>>>>> variant B
+/* line 1008, ../sass/partials/_forms.scss */
+####### Ancestor
+/* line 1009, ../sass/partials/_forms.scss */
+======= end
 .metadata-editor-container .editor .editor-buttons:before, .metadata-editor-container .editor .editor-buttons:after {
   content: " ";
   display: table;
@@ -7576,7 +7593,13 @@ ul.attachments-list li.mandatory-attachments {
 .archival-summary-table i.disabled {
   color: #da6ded;
 }
+<<<<<<< variant A
 /* line 994, ../sass/partials/_forms.scss */
+>>>>>>> variant B
+/* line 1008, ../sass/partials/_forms.scss */
+####### Ancestor
+/* line 1009, ../sass/partials/_forms.scss */
+======= end
 .archival-summary-table .attachment-type-container:before, .archival-summary-table .attachment-type-container:after {
   content: " ";
   display: table;
@@ -7617,7 +7640,13 @@ ul.attachments-list li.mandatory-attachments {
   cursor: pointer;
   padding: 6px 0 5px 0;
 }
+<<<<<<< variant A
 /* line 994, ../sass/partials/_forms.scss */
+>>>>>>> variant B
+/* line 1008, ../sass/partials/_forms.scss */
+####### Ancestor
+/* line 1009, ../sass/partials/_forms.scss */
+======= end
 .archival-summary-table .attachment-row .attachment-row-top:before, .archival-summary-table .attachment-row .attachment-row-top:after {
   content: " ";
   display: table;
@@ -7630,7 +7659,13 @@ ul.attachments-list li.mandatory-attachments {
 .archival-summary-table .attachment-row .attachment-row-top div {
   vertical-align: top;
 }
+<<<<<<< variant A
 /* line 994, ../sass/partials/_forms.scss */
+>>>>>>> variant B
+/* line 1008, ../sass/partials/_forms.scss */
+####### Ancestor
+/* line 1009, ../sass/partials/_forms.scss */
+======= end
 .archival-summary-table .attachment-row .additional-controls:before, .archival-summary-table .attachment-row .additional-controls:after {
   content: " ";
   display: table;
