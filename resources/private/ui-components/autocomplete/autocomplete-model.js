@@ -8,19 +8,21 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   var pauseUpdatingOption = ko.observable(false);
 
+  var subscriptions = [];
+
   if (params.selectedOption) {
-    params.selectedOption.subscribe(function(val) {
+    subscriptions.push(params.selectedOption.subscribe(function(val) {
       pauseUpdatingOption(true);
       self.selectedOptions(_.filter([val]));
       pauseUpdatingOption(false);
-    });
+    }));
   }
 
-  self.selectedOptions.subscribe(function(val) {
+  subscriptions.push(self.selectedOptions.subscribe(function(val) {
     if (params.selectedOption && !pauseUpdatingOption()) {
       params.selectedOption(_.first(val));
     }
-  });
+  }));
   // end TODO
 
 
@@ -89,8 +91,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.showSingleSelection = ko.pureComputed(function() {
     return !self.showTags();
   });
-
-  self.subscriptions = [];
 
   // Helpers
   function getCurrentItem() {
@@ -211,8 +211,8 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.dispose = function() {
-    while(self.subscriptions.length !== 0) {
-      self.subscriptions.pop().dispose();
+    while(subscriptions.length !== 0) {
+      subscriptions.pop().dispose();
     }
   };
 };
