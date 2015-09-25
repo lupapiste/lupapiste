@@ -171,6 +171,15 @@
     (assoc application :submittable (foreman-submittable? application))
     application))
 
+(def- operation-meta-fields-to-enrich #{:optional})
+
+(defn- enrich-primary-operation-with-metadata [app]
+  (let [primaryOperation (:primaryOperation app)
+        primaryOpName    (-> primaryOperation :name keyword)
+        operationMeta    (-> operations/operations primaryOpName)
+        primaryOperation (merge primaryOperation (select-keys operationMeta operation-meta-fields-to-enrich))]
+    (assoc-in app [:primaryOperation] primaryOperation)))
+
 (defn post-process-app [app user]
   (->> app
        meta-fields/enrich-with-link-permit-data
@@ -178,7 +187,8 @@
        action/without-system-keys
        process-foreman-v2
        (process-documents-and-tasks user)
-       location->object))
+       location->object
+       enrich-primary-operation-with-metadata))
 
 ;;
 ;; Application creation
