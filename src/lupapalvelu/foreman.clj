@@ -8,6 +8,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]
             [monger.operators :refer :all]))
 
 (defn other-project-document [application timestamp]
@@ -176,7 +177,7 @@
       flatten)))
 
 (defn- henkilo-invite [applicant auth]
-  (when-let [email (get-in applicant [:data :henkilo :yhteystiedot :email])]
+  (when-let [email (user/canonize-email (get-in applicant [:data :henkilo :yhteystiedot :email]))]
     (when (some #(= email (:username %)) auth)
       {:email email
        :role "writer"})))
@@ -184,7 +185,8 @@
 (defn- yritys-invite [applicant auth]
   (if-let [company-id (get-in applicant [:data :yritys :companyId])]
     {:company-id company-id}
-    (when-let [contact-email (get-in applicant [:data :yritys :yhteyshenkilo :yhteystiedot :email])]
+    (when-let [contact-email (user/canonize-email
+                               (get-in applicant [:data :yritys :yhteyshenkilo :yhteystiedot :email]))]
       (some
         #(when (= contact-email (:username %))
            {:email contact-email
