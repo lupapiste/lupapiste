@@ -8,6 +8,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
@@ -45,7 +46,7 @@
   ([command] (email-validator :email command))
   ([email-param-name command]
     (let [email (get-in command [:data email-param-name])]
-      (when-not (util/email-and-domain-valid? email)
+      (when-not (v/email-and-domain-valid? email)
         (fail :error.email)))))
 
 

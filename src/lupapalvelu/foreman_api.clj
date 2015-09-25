@@ -26,7 +26,7 @@
         unwrapped-applicants (tools/unwrapped
                                (domain/get-applicant-documents new-application-docs))
         auth (:auth application)
-        applicant-invites (foreman/applicant-invites applicants auth)
+        applicant-invites (foreman/applicant-invites unwrapped-applicants auth)
 
 
         ]

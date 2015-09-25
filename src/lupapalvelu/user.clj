@@ -11,6 +11,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.validators :as v]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
@@ -42,7 +43,7 @@
                                                            "rest-api"
                                                            "trusted-etl")
            :email                                 (sc/both
-                                                    (sc/pred util/valid-email? "Not valid email")
+                                                    (sc/pred v/valid-email? "Not valid email")
                                                     (util/max-length-string 255))
            :username                              (util/max-length-string 255)
            :enabled                               sc/Bool
@@ -94,7 +95,7 @@
                                                                (sc/optional-key :areas) (sc/pred vector? "Area filter should have ids in a vector")}}]})
 
 (def RegisterUser {:email     (sc/both
-                                (sc/pred util/valid-email? "Not valid email")
+                                (sc/pred v/valid-email? "Not valid email")
                                 (util/max-length-string 255))
                    :street    (sc/maybe (util/max-length-string 255))
                    :city      (sc/maybe (util/max-length-string 255))
