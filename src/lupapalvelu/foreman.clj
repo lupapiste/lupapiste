@@ -187,14 +187,13 @@
     (when-let [contact-email (get-in applicant [:data :yritys :yhteyshenkilo :yhteystiedot :email])]
       (some
         #(when (= contact-email (:username %))
-           {:email email
+           {:email contact-email
             :role "writer"})
         auth))))
 
-(defn applicant-invites [applicants auth]
+(defn applicant-invites [unwrapped-applicants auth]
   (remove nil? (map
-                 #(condp = (-> % :data :_selected)
+                 #(case (-> % :data :_selected)
                     "henkilo" (henkilo-invite % auth)
-                    "yritys" (yritys-invite % auth)
-                    nil)
-                 applicants)))
+                    "yritys" (yritys-invite % auth))
+                 unwrapped-applicants)))

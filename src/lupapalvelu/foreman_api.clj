@@ -23,10 +23,12 @@
         foreman-app (assoc foreman-app :documents new-application-docs)
         task                 (util/find-by-id taskId (:tasks application))
 
-        applicants (tools/unwrapped
-                     (domain/get-applicant-documents new-application-docs))
+        unwrapped-applicants (tools/unwrapped
+                               (domain/get-applicant-documents new-application-docs))
         auth (:auth application)
         applicant-invites (foreman/applicant-invites applicants auth)
+
+
         ]
 
     (application/do-add-link-permit foreman-app (:id application))
