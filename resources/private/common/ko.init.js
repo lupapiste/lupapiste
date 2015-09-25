@@ -458,4 +458,11 @@
     }
   };
 
+  ko.bindingHandlers.humanizedPropId = {
+    update: function(element, valueAccessor) {
+      var val = ko.unwrap(valueAccessor());
+      $(element).text(util.prop.toHumanFormat(val));
+    }
+  };
+
 })(jQuery);
