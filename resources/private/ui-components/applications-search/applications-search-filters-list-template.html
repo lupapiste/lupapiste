@@ -47,7 +47,7 @@
 
               <div class="applications-search-filters-list__filter-item applications-search-filters-list__filter-item--default-filter">
                 <button class="function" data-bind="attr: {'data-test-id': 'set-' + $data.title() + '-as-default-filter'},
-                                                    click: $data.defaultFilter, css: {primary: $data.isDefaultFilter, function: !$data.isDefaultFilter() }">
+                                                    click: $data.defaultFilter, css: {active: $data.isDefaultFilter}">
                   <i class="lupicon-star"></i>
                   <span data-bind="ltext: 'applications.search.set-default-filter', visible: !$data.isDefaultFilter()"></span>
                   <span data-bind="ltext: 'applications.search.set-as-default-filter', visible: $data.isDefaultFilter"></span>
