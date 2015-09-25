@@ -71,9 +71,6 @@
                           :application :validate-doc :fetch-validation-errors
                           :get-organization-tags :get-organization-areas
                           :reduced-foreman-history :foreman-history :foreman-applications
-                          ; commands
-                          :add-comment :add-authority-notice
-
                           ; raw
                           :preview-attachment :view-attachment :download-attachment :download-all-attachments}]
     (doseq [command (ca/foreach-action user {} application)

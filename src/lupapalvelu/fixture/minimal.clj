@@ -186,6 +186,7 @@
     :city "Sipoo"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :apikey "5056e6d3aa24a1c901e6b9d1"}}
+
    ;; Ronja Sibbo - Sipoon lupa-arkkitehti:  ronja / sonja
    {:id "777777777777777777000024"
     :username "ronja"
@@ -201,6 +202,7 @@
     :city "Sipoo"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
+
    ;; Luukas Lukija - Sipoon katselija:  luukas / luukas
    {:id "777777777777777777000025"
     :username "luukas"
