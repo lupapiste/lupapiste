@@ -204,33 +204,43 @@
 (defcommand update-default-application-filter
   {:parameters [filter-id]
    :user-roles #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:filter-id])
+                      (fn [{{filter-id :filter-id} :data {user-id :id} :user}]
+                        (let [app-filter (user/get-application-filters user-id)]
+                          (when-not (util/find-by-id filter-id app-filter)
+                            (fail :error.filter-not-found))))]
    :description "Adds/Updates users default filter for the application search"}
   [{{user-id :id} :user}]
+
   (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filter-id}}}))
 
 (defcommand save-application-filter
-  {:parameters [title filter sort]
-   :user-roles #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:title :filter :sort])]
-   :description "Adds/updates application filter for the user"}
-  [{{user-id :id} :user {filter-id :filter-id} :data}]
+  {:parameters       [title :filter sort]
+   :user-roles       #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:title :filter :sort])
+                      (fn [{{filter-id :filter-id} :data}]
+                        (when (and filter-id (not (mongo/valid-key? filter-id)))
+                          (fail :error.illegal-key)))]
+   :description      "Adds/updates application filter for the user"}
+  [{{user-id :id} :user {filter-data :filter filter-id :filter-id} :data}]
   (let [filter-id        (or filter-id (mongo/create-id))
         app-filters      (user/get-application-filters user-id)
         title-collision? (->> app-filters
-                              (clojure.core/filter #(= (:title %) title))
+                              (filter #(= (:title %) title))
                               (map :id)
                               (some (partial not= filter-id)))
-        filter           {:id filter-id :title title :filter filter :sort sort}
+        search-filter    {:id filter-id :title title :filter filter-data :sort sort}
+        ; enable editing existing filter
         updated-filters  (as-> app-filters $
                                (zipmap (map :id $) (range))
                                (get $ filter-id (count $))
-                               (assoc-in app-filters [$] filter))]
+                               (assoc-in app-filters [$] search-filter))]
     (when title-collision?
       (fail! :error.filter-title-collision))
     (mongo/update-by-id :users user-id {$set {:applicationFilters updated-filters}})
     (when (empty? app-filters)
       (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filter-id}}}))
-    (ok :filter filter)))
+    (ok :filter search-filter)))
 
 (defcommand remove-application-filter
   {:parameters [filter-id]
@@ -238,7 +248,11 @@
    :input-validators [(partial action/non-blank-parameters [:filter-id])]
    :description "Removes users application filter"}
   [{{user-id :id} :user}]
-  (mongo/update-by-id :users user-id {$pull {:applicationFilters {:id filter-id}}}))
+  (let [user (user/get-user-by-id user-id)
+        update (merge {$pull {:applicationFilters {:id filter-id}}}
+                      (when (= (get-in user [:defaultFilter :id]) filter-id)
+                        {$set {:defaultFilter {:id nil}}}))]
+    (mongo/update-by-id :users user-id update)))
 
 ;;
 ;; Change organization data:
