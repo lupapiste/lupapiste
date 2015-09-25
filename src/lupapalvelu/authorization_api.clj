@@ -9,6 +9,7 @@
             [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application notify] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
@@ -58,19 +59,6 @@
 (defn- valid-role [role]
   (#{:writer :foreman} (keyword role)))
 
-(defn- create-invite-auth [inviter invited application-id text document-name document-id path role timestamp]
-  (let [invite {:application  application-id
-                :text         text
-                :path         path
-                :documentName document-name
-                :documentId   document-id
-                :created      timestamp
-                :email        (:email invited)
-                :role         role
-                :user         (user/summary invited)
-                :inviter      (user/summary inviter)}]
-    (assoc (user/user-in-role invited :reader) :invite invite)))
-
 (defn send-invite! [{{:keys [email text documentName documentId path role notification]} :data
                      timestamp :created
                      inviter :user
@@ -82,7 +70,7 @@
     (if (or (domain/invite application email) (domain/has-auth? application (:id existing-user)))
       (fail :invite.already-has-auth)
       (let [invited (user-api/get-or-create-user-by-email email inviter)
-            auth    (create-invite-auth inviter invited (:id application) text documentName documentId path role timestamp)]
+            auth    (auth/create-invite-auth inviter invited (:id application) text documentName documentId path role timestamp)]
         (update-application command
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
           {$push {:auth     auth}
