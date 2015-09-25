@@ -172,7 +172,7 @@
 
 (def- common-rakval-schemas ["hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"])
 
-(def- common-maanmittaus-schemas ["maksaja" "kiinteisto" "secondary-kiinteistot"])
+(def- common-maanmittaus-schemas ["maksaja" "kiinteisto"])
 
 (def- common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka"])
 
