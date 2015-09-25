@@ -677,6 +677,7 @@
                                    :asianhallinta false}
      :kiinteistonmuodostus         {:schema "kiinteistonmuodostus"
                                     :permit-type permit/KT
+                                    :optional #{"secondary-kiinteistot"}
                                     :required (conj common-maanmittaus-schemas "rasitetoimitus")
                                     :attachments []
                                     :add-operation-allowed false
@@ -685,6 +686,7 @@
                                     :asianhallinta false}
      :rasitetoimitus                {:schema "rasitetoimitus"
                                      :permit-type permit/KT
+                                     :optional #{"secondary-kiinteistot"}
                                      :required (conj common-maanmittaus-schemas "kiinteistonmuodostus")
                                      :attachments []
                                      :add-operation-allowed false
@@ -693,6 +695,7 @@
                                      :asianhallinta false}
      :rajankaynti                  {:schema "rajankaynti"
                                     :permit-type permit/KT
+                                    :optional #{"secondary-kiinteistot"}
                                     :required common-maanmittaus-schemas
                                     :attachments []
                                     :add-operation-allowed false
