@@ -3,14 +3,11 @@ LUPAPISTE.AddPropertyDialogModel = function() {
   var self = this;
 
   var app = lupapisteApp.models.application;
-  var humanize = util.prop.toHumanFormat;
 
   self.x = app.location().x();
   self.y = app.location().y();
   self.propertyId = ko.observable(app.propertyId());
-  self.humanizedPropertyId = ko.pureComputed(function() {
-    return humanize(self.propertyId());
-  });
+  
   self.selectedNotAppProperty = ko.pureComputed(function() {
     return self.propertyId() !== app.propertyId();
   });
