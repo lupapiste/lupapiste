@@ -6,20 +6,20 @@ LUPAPISTE.AutocompleteModel = function(params) {
   // TODO rethink how we handle single selection in autocomplete component
   self.selectedOptions = params.selectedOptions || ko.observableArray(_.filter([ko.unwrap(params.selectedOption)]));
 
-  var pauseUpdatingOption = ko.observable(false);
+  var pauseUpdatingOption = false;
 
   var subscriptions = [];
 
   if (params.selectedOption) {
     subscriptions.push(params.selectedOption.subscribe(function(val) {
-      pauseUpdatingOption(true);
+      pauseUpdatingOption = true;
       self.selectedOptions(_.filter([val]));
-      pauseUpdatingOption(false);
+      pauseUpdatingOption = false;
     }));
   }
 
   subscriptions.push(self.selectedOptions.subscribe(function(val) {
-    if (params.selectedOption && !pauseUpdatingOption()) {
+    if (params.selectedOption && !pauseUpdatingOption) {
       params.selectedOption(_.first(val));
     }
   }));
