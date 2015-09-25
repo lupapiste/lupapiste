@@ -135,12 +135,6 @@
           :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
           :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))))
 
-(defn get-or-create-user-by-email [email current-user]
-  (let [email (user/canonize-email email)]
-    (or
-      (user/get-user-by-email email)
-      (user/create-new-user current-user {:email email :role "dummy"}))))
-
 ;;
 ;; ==============================================================================
 ;; Updating user data:

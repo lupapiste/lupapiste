@@ -13,7 +13,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user-api :as user-api]
             [lupapalvelu.user :as user]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]

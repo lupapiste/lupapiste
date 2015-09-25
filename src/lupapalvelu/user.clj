@@ -481,6 +481,12 @@
             (warn e "Inserting new user failed")
             (fail! :cant-insert)))))))
 
+(defn get-or-create-user-by-email [email current-user]
+  (let [email (canonize-email email)]
+    (or
+      (get-user-by-email email)
+      (create-new-user current-user {:email email :role "dummy"}))))
+
 ;;
 ;; ==============================================================================
 ;; User role:
