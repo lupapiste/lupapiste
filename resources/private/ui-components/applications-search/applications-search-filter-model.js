@@ -18,12 +18,5 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
            _.size(ko.unwrap(lupapisteApp.services.areaFilterService.selected));
   });
 
-  self.showAdvancedFilters = ko.observable(self.filterCount() > 0);
-  self.advancedFiltersText = ko.computed(function() {
-    return self.showAdvancedFilters() ? "applications.filter.advancedFilter.hide" : "applications.filter.advancedFilter.show";
-  });
-
-  hub.onPageLoad("applications", function() {
-    self.showAdvancedFilters(self.filterCount() > 0);
-  });
+  self.showAdvancedFilters = ko.observable(false);
 };
