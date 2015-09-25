@@ -77,7 +77,6 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     return result;
   })
 
-
   // Exclamation icon on the accordion should be visible, if...
   // 1. The master or any "later group" is REJECTED
   // 2. The master is NEUTRAL but any group is REJECTED
@@ -103,6 +102,12 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     // the group receives the master status during initialization.
     self.docModel.approvalHubSend( self.approval(), [], data.path )
   })
+
+  // Test ids must contain document name in order to avoid
+  // hard to track selector conflicts in Robot tests.
+  self.testId = function( id ) {
+    return self.docModel.testId( id + "-" + self.docModel.schemaName);
+  }
 
   // Pen
   // Operation description.

@@ -18,8 +18,8 @@
                                ltext: title">
               </span>
               <span class="description"
-                    data-test-id="op-description"
-                    data-bind="text: description() ? ' - ' + description() : ''">
+                    data-bind="text: description() ? ' - ' + description() : '',
+                               attr: {'data-test-id': testId( 'op-description')}">
               </span>
             </span>
             <span class="icons">
@@ -29,7 +29,8 @@
           </button>
 
           <div class="group-buttons"
-               data-bind="visible: showToolbar">
+               data-bind="if: showToolbar,
+                          visible: showToolbar">
             <span class="form-approval-status is-status no-border-bottom"
                   data-bind="css: {approved: isApproved,
                                    rejected: isRejected,
@@ -43,11 +44,11 @@
               </div>
             </span>
             <button class="secondary is-left"
-                    data-bind="attr: {'data-test-id': docModel.testId('edit-op-description') },
-                               visible: showDescription">
-              <i class="lupicon-pen"></i>
-              <span data-bind="ltext: 'op-description.edit',
+                    data-bind="attr: {'data-test-id': testId('edit-op-description') },
+                               visible: showDescription,
                                event: {mousedown: toggleEditor}">
+              <i class="lupicon-pen"></i>
+              <span data-bind="ltext: 'op-description.edit'">
               </span>
             </button>
             <button class="secondary is-left"
@@ -84,7 +85,7 @@
                      data-bind="value: description,
                                 event: {keydown: specialKeys},
                                 hasFocus: showEditor,
-                                attr: {'data-test-id': docModel.testId( 'op-description-editor)}">
+                                attr: {'data-test-id': testId( 'op-description-editor')}">
             </div>
           </div>
         </div>

@@ -10,17 +10,18 @@ Mikko creates application
   Create application the fast way  application-papplication  753-416-25-30  kerrostalo-rivitalo
 
 Mikko edits operation description
-  ${v} =  'edit-op-description'
   Open application  application-papplication  753-416-25-30
-  Wait until  Element should be visible  jquery=button[data-test-id=${v}]
-  Execute Javascript  $('[data-test-id=edit-op-description] span').mousedown();
-  #Wait and click xpath=//div[@id='application-info-tab']//button[@data-test-id='edit-op-description']
-  Input text by test id  op-description-editor  Talo A
+  Wait until element is visible  jquery=div#application-info-tab button[data-test-id=edit-op-description-uusiRakennus]
+  Execute Javascript  $('div#application-info-tab [data-test-id=edit-op-description-uusiRakennus]').mousedown();
+  Input text by test id  op-description-editor-uusiRakennus  Talo A
+  # Just in case...
+  Press Key  jquery=div#application-info-tab input[data-test-id=op-description-editor-uusiRakennus]  \\13
   Wait for jQuery
   Wait until  Page should contain  Tallennettu
-  Wait until  Element should not be visible  xpath=//div[@id='application-info-tab']//input[@data-test-id="op-description-editor"]
+  Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-uusiRakennus]
+
 
 Mikko can see new operation description
   Reload Page
-  Wait until  Element text should be  xpath=//div[@id='application-info-tab']//span[@data-test-id='op-description']  - Talo A
+  Wait until  Element text should be  xpath=//div[@id='application-info-tab']//span[@data-test-id='op-description-uusiRakennus']  - Talo A
   [Teardown]  logout
