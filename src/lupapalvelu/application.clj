@@ -172,13 +172,10 @@
     application))
 
 (def- operation-meta-fields-to-enrich #{:optional})
-
 (defn- enrich-primary-operation-with-metadata [app]
-  (let [primaryOperation (:primaryOperation app)
-        primaryOpName    (-> primaryOperation :name keyword)
-        operationMeta    (-> operations/operations primaryOpName)
-        primaryOperation (merge primaryOperation (select-keys operationMeta operation-meta-fields-to-enrich))]
-    (assoc-in app [:primaryOperation] primaryOperation)))
+  (let [enrichable-fields (-> (operations/get-primary-operation-metadata app)
+                              (select-keys operation-meta-fields-to-enrich))]
+    (update app :primaryOperation merge enrichable-fields)))
 
 (defn post-process-app [app user]
   (->> app
