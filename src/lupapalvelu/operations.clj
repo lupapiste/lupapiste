@@ -172,7 +172,7 @@
 
 (def- common-rakval-schemas ["hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"])
 
-(def- common-maanmittaus-schemas ["maksaja" "kiinteisto"])
+(def- common-maanmittaus-schemas ["maksaja" "kiinteisto" "secondary-kiinteistot"])
 
 (def- common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka"])
 
@@ -318,6 +318,7 @@
    (sc/optional-key :max-incoming-link-permits) sc/Num
    (sc/optional-key :max-outgoing-link-permits) sc/Num
    (sc/optional-key :max-link-permits) sc/Num
+   (sc/optional-key :optional) #{sc/Str}
    (sc/optional-key :subtypes) [(sc/maybe sc/Keyword)]
    (sc/optional-key :state-graph-resolver) util/Fn
    (sc/optional-key :schema-data) [sc/Any]})

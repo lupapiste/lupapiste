@@ -246,6 +246,10 @@ input.form-input.long {
   width: $cols5;
 }
 
+input.form-input.inline {
+  display: inline;
+}
+
 .form-add {
   display: block;
 }
@@ -330,6 +334,16 @@ input.form-input.long {
     font-family: $font-heading;
     font-weight: bold;
     margin-bottom: $marginS;
+  }
+  .property-group-header {
+    .form-label-property-group {
+      @extend .form-label-group;
+      width: auto;
+      display: inline;
+    }
+    .maaraala-checkbox {
+      margin-right: 0;
+    }
   }
   .form-entry {
     display: inline-block;

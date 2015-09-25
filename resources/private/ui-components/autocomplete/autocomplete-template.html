@@ -29,8 +29,13 @@
           </span>
         </div>
         <div class="autocomplete-dropdown" data-bind="visible: false, fader: dropdownVisible, duration: 100">
-          <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
-                 data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, blur: blur}"/>
+          <div class="search" data-bind="css: {toggled: query(), active: inputSelected}">
+            <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
+                   data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, blur: blur}, attr: {placeholder: placeholder}"/>
+            <i class="search-icon lupicon-search"></i>
+            <i class="search-icon lupicon-remove toggle" data-bind="event: {mousedown: clearQuery}, attr: {title: loc('applications.filter.search.clear')}"></i>
+          </div>
+
           <!-- ko if: data().length > 0 -->
           <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}, css: {'autocomplete-result-grouped': groupedResults}">
             <!-- ko foreach: data -->

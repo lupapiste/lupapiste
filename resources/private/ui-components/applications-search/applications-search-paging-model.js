@@ -30,12 +30,6 @@ LUPAPISTE.ApplicationsSearchPagingModel = function(params) {
     return self.count() < endValue ? self.count() : endValue;
   });
 
-  self.limitSubscription = self.dataProvider.limit.subscribe(function() {
-    self.dataProvider.skip(0); // reset skip when limits change
-  });
-
-  self.dispose = self.limitSubscription;
-
   self.enablePrevButton = ko.pureComputed(function() {
     return self.count() > self.limit() && self.start() > self.limit();
   });
