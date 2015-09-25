@@ -68,8 +68,8 @@
         existing-user (user/get-user-by-email email)]
     (if (or (domain/invite application email) (domain/has-auth? application (:id existing-user)))
       (fail :invite.already-has-auth)
-      (let [invited (user-api/get-or-create-user-by-email email inviter)
-            auth    (auth/create-invite-auth inviter invited (:id application) text documentName documentId path role timestamp)]
+      (let [invited (user/get-or-create-user-by-email email inviter)
+            auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)]
         (update-application command
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
           {$push {:auth     auth}
