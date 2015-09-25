@@ -4,6 +4,7 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.application :as application]
+            [lupapalvelu.company :as company]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schema]
@@ -199,3 +200,11 @@
                     "henkilo" (henkilo-invite % auth)
                     "yritys" (yritys-invite % auth))
                  unwrapped-applicants)))
+
+(defn create-company-auth [company-id]
+  (when-let [c (company/find-company-by-id company-id)]
+    (assoc
+      (company/company->auth company)
+      :id "" ; prevents access to application before accepting invite
+      :role ""
+      :invite {:user {:id company-id}})))
