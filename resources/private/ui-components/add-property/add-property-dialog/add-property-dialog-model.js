@@ -51,7 +51,8 @@ LUPAPISTE.AddPropertyDialogModel = function() {
     ajax
       .command("create-doc", { id: app.id(),
                                schemaName: "secondary-kiinteistot",
-                               updates: updates })
+                               updates: updates,
+                               fetchRakennuspaikka: true })
       .success(function() { repository.load(app.id()); })
       .call();
     hub.send("close-dialog");
