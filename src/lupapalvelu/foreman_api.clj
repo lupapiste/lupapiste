@@ -1,13 +1,17 @@
 (ns lupapalvelu.foreman-api
   (:require [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.notifications :as notif]
             [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [monger.operators :refer :all]))
@@ -28,8 +32,26 @@
                                (domain/get-applicant-documents new-application-docs))
         auth (:auth application)
         applicant-invites (foreman/applicant-invites unwrapped-applicants auth)
-
-
+        auths (remove
+                nil?
+                (map (fn [inv]
+                      (if (:company-id inv)
+                        (foreman/create-company-auth (:company-id inv))
+                        (when-let [invited (user/get-or-create-user-by-email (:email inv) user)]
+                          (auth/create-invite-auth user invited (:id foreman-app) (:role inv) created)))
+                      ) applicant-invites))
+        grouped (group-by #(if (not= "company" (:type %))
+                             :company
+                             :other) auths)
+         #_(notif/notify! :invite {:application foreman-app :recipients (:other grouped)})
+         #_(doseq [auth (:company grouped)
+                  :let [company-id (-> auth :invite :user :id)
+                        token-id (company/company-invitation-token user company-id (:id foreman-app))]]
+            (notif/notify! :accept-company-invitation {:admins     (company/find-company-admins )
+                                                       :caller     user
+                                                       :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
+                                                       :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)}))
+        foreman-app (update-in foreman-app [:auth] (partial apply conj) auths)
         ]
 
     (application/do-add-link-permit foreman-app (:id application))
