@@ -54,6 +54,9 @@ Sonja selects application sorting
 ...saves MEGA filter
   Save advanced filter  MEGA
 
+...sets MEGA as default
+  Click by test id  set-MEGA-as-default-filter
+
 Sonja reloads the page and expects that saved filter is applied as default
   Reload Page
   Click by test id  toggle-advanced-filters
