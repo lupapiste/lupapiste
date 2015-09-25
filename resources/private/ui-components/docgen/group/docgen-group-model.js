@@ -6,6 +6,8 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.groupId = "group-" + params.documentId + "-" + self.path.join("-");
   self.groupLabel = self.path.join(".") + "._group_label";
 
+  var model = params.model || {};
+
   function buildLocKey(subSchema, path) {
     return subSchema.i18nkey || path.concat(subSchema.name).join(".");
   }
@@ -15,7 +17,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
     return _.extend(schema, {
       path: subSchemaPath,
       label: [buildLocKey(params.subSchema, self.path), schema.name].join("."),
-      model: params.model[schema.name]
+      model: model[schema.name]
     });
   });
 };
