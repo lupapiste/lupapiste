@@ -61,7 +61,7 @@
     (let [msg (format "%s build %s (%s)\nFailing migration(s): %s"
                 env/target-env
                 (:build-number env/buildinfo)
-                (:branch env/buildinfo)
+                (:hg-branch env/buildinfo)
                 (s/join failures))]
       (email/send-email-message "lupapalvelu@solita.fi" "Critical: Migration failure!" [msg msg])))
 
