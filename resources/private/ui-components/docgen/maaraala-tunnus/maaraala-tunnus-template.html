@@ -7,7 +7,7 @@
 
         <label style="display: block;" class="form-label" data-bind="text: propertyIdLabel"></label> <!-- TODO: style -->
         <span class="kiintun-and-maaraalatunnus">
-          <span class="form-maaraala" data-bind="humanizedPropId: propertyId"></span>
+          <span class="form-maaraala" data-bind="propertyId: propertyId"></span>
           <span data-bind="visible: isMaaraala">-M</span>
           <span data-bind="component: {name: 'docgen-inline-string',
                                        params: { schema: schema,
