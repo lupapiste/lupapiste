@@ -20,6 +20,5 @@ LUPAPISTE.OrganizationTagsService = function() {
   .success(function(res) {
     _data(res.tags);
   })
-  .error(_.noop)
   .call();
 };

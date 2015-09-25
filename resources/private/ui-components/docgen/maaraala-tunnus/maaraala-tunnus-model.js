@@ -3,7 +3,16 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   var self = this;
 
   self.model = params.model;
+  self.applicationId = params.applicationId || lupapisteApp.models.application.id();
   self.documentId = params.documentId;
+  self.propertyId = ko.unwrap(params.propertyId);
+  self.propertyIdLabel = ko.pureComputed(function() {
+    return self.isMaaraala() ? loc("kiinteisto.maaraala.label") : loc("kiinteisto.kiinteisto.label");
+  });
+  self.isMaaraala = params.isMaaraala;
+  if(params.model && !_.isEmpty(params.model.value)) {
+    self.isMaaraala(true);
+  }
 
   // hide input label always
   self.schema = _.extend(_.cloneDeep(params.schema), {
@@ -11,24 +20,7 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   });
   self.path = params.path;
 
-  self.isMaaraala = params.isMaaraala;
-  if(params.model && !_.isEmpty(params.model.value)) {
-    self.isMaaraala(true);
-  }
-
   self.visibilityState = ko.pureComputed(function () {
     return self.isMaaraala() ? "visible" : "hidden";
-  });
-
-  var propertyId = params.propertyId();
-  self.applicationId = params.applicationId || lupapisteApp.models.application.id();
-  
-  self.propertyId = ko.pureComputed(function() {
-    var humanizedPropId = util.prop.toHumanFormat(propertyId);
-    return self.isMaaraala() ? humanizedPropId + "-M" : humanizedPropId;
-  });
-
-  self.propertyIdLabel = ko.pureComputed(function() {
-    return self.isMaaraala() ? loc("kiinteisto.maaraala.label") : loc("kiinteisto.kiinteisto.label");
   });
 };

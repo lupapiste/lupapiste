@@ -1,6 +1,8 @@
-LUPAPISTE.AutocompleteOperationsModel = function() {
+LUPAPISTE.AutocompleteOperationsModel = function(params) {
   "use strict";
   var self = this;
+
+  self.lPlaceholder = params.lPlaceholder;
 
   self.selected = lupapisteApp.services.operationFilterService.selected;
 

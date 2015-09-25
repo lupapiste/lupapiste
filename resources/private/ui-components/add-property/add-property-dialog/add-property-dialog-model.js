@@ -3,14 +3,11 @@ LUPAPISTE.AddPropertyDialogModel = function() {
   var self = this;
 
   var app = lupapisteApp.models.application;
-  var humanize = util.prop.toHumanFormat;
 
   self.x = app.location().x();
   self.y = app.location().y();
   self.propertyId = ko.observable(app.propertyId());
-  self.humanizedPropertyId = ko.pureComputed(function() {
-    return humanize(self.propertyId());
-  });
+  
   self.selectedNotAppProperty = ko.pureComputed(function() {
     return self.propertyId() !== app.propertyId();
   });
@@ -54,7 +51,8 @@ LUPAPISTE.AddPropertyDialogModel = function() {
     ajax
       .command("create-doc", { id: app.id(),
                                schemaName: "secondary-kiinteistot",
-                               updates: updates })
+                               updates: updates,
+                               fetchRakennuspaikka: true })
       .success(function() { repository.load(app.id()); })
       .call();
     hub.send("close-dialog");

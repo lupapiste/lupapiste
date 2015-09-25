@@ -6,21 +6,23 @@ LUPAPISTE.AutocompleteModel = function(params) {
   // TODO rethink how we handle single selection in autocomplete component
   self.selectedOptions = params.selectedOptions || ko.observableArray(_.filter([ko.unwrap(params.selectedOption)]));
 
-  var pauseUpdatingOption = ko.observable(false);
+  var pauseUpdatingOption = false;
+
+  var subscriptions = [];
 
   if (params.selectedOption) {
-    params.selectedOption.subscribe(function(val) {
-      pauseUpdatingOption(true);
+    subscriptions.push(params.selectedOption.subscribe(function(val) {
+      pauseUpdatingOption = true;
       self.selectedOptions(_.filter([val]));
-      pauseUpdatingOption(false);
-    });
+      pauseUpdatingOption = false;
+    }));
   }
 
-  self.selectedOptions.subscribe(function(val) {
-    if (params.selectedOption && !pauseUpdatingOption()) {
+  subscriptions.push(self.selectedOptions.subscribe(function(val) {
+    if (params.selectedOption && !pauseUpdatingOption) {
       params.selectedOption(_.first(val));
     }
-  });
+  }));
   // end TODO
 
 
@@ -37,7 +39,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.nullable = params.nullable;
 
-  self.placeholder = params.placeholder || loc("application.filter.search") + "...";
+  self.placeholder = params.lPlaceholder ? loc(params.lPlaceholder) : (params.placeholder || loc("application.filter.search") + "...");
 
   // Observables
   self.index = ko.observable(0);
@@ -89,8 +91,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.showSingleSelection = ko.pureComputed(function() {
     return !self.showTags();
   });
-
-  self.subscriptions = [];
 
   // Helpers
   function getCurrentItem() {
@@ -211,8 +211,8 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.dispose = function() {
-    while(self.subscriptions.length !== 0) {
-      self.subscriptions.pop().dispose();
+    while(subscriptions.length !== 0) {
+      subscriptions.pop().dispose();
     }
   };
 };

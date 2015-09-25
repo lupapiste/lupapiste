@@ -28,7 +28,6 @@ LUPAPISTE.OperationFilterService = function(applicationFiltersService) {
 
   ajax
     .query("get-application-operations")
-    .error(_.noop)
     .success(function(res) {
       _data(res.operationsByPermitType);
     })

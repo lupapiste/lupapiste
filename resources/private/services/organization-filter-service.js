@@ -37,7 +37,6 @@ LUPAPISTE.OrganizationFilterService = function(applicationFiltersService) {
   // async updates (get-organization-names command and currentUser.orgAuthz)
   ajax
     .query("get-organization-names")
-    .error(_.noop)
     .success(function(res) {
       organizationNames(res);
     })

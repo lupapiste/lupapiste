@@ -54,9 +54,13 @@ Sonja selects application sorting
 ...saves MEGA filter
   Save advanced filter  MEGA
 
+...sets MEGA as default
+  Click by test id  set-MEGA-as-default-filter
+
 Sonja reloads the page and expects that saved filter is applied as default
   Reload Page
-  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "MEGA")]
+  Click by test id  toggle-advanced-filters
+  Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "MEGA")]
 
 ...filter setup should be shown as default
   Filter should contain tag  handler  ${sonja name}
@@ -94,7 +98,7 @@ Sonja closes and opens advanced filters
   Filter item should contain X number of tags  organization  0
   Sorting Should Be Set As  Tyyppi  asc
 
-Sonja opens an application and returns to application page
+Sonja opens an application and returns to applications page
   Wait Until  Click Element  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
   Go to page  applications
 
