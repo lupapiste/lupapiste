@@ -15,6 +15,7 @@
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole foremanEmail]
    :user-roles #{:applicant :authority}
+   :input-validators [(partial action/email-validator :foremanEmail)]
    :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{:keys [created user application] :as command}]
