@@ -202,14 +202,13 @@
       (fail :error.user-not-found))))
 
 (defcommand update-default-application-filter
-  {:parameters [filter-id]
-   :user-roles #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:filter-id])
-                      (fn [{{filter-id :filter-id} :data {user-id :id} :user}]
+  {:parameters       [filter-id]
+   :user-roles       #{:authority}
+   :input-validators [(fn [{{filter-id :filter-id} :data {user-id :id} :user}]
                         (let [app-filter (user/get-application-filters user-id)]
-                          (when-not (util/find-by-id filter-id app-filter)
+                          (when-not (or (nil? filter-id) (util/find-by-id filter-id app-filter))
                             (fail :error.filter-not-found))))]
-   :description "Adds/Updates users default filter for the application search"}
+   :description      "Adds/Updates users default filter for the application search"}
   [{{user-id :id} :user}]
 
   (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filter-id}}}))
