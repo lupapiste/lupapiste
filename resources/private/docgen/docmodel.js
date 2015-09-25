@@ -595,40 +595,35 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       }
       return b;
     }
-    var buttons$ = $("<div>").addClass( "group-buttons" );
+    var groupButtons = $("<div>").addClass( "group-buttons" );
     if( opts.description ) {
-      buttons$.append( btnHelper( opts.description,
-                                  "secondary is-left",
-                                  "lupicon-pen",
-                                  loc( "op-description.edit")));
+      groupButtons.append(
+        btnHelper(opts.description, "secondary is-left", "lupicon-pen", loc( "op-description.edit")));
     }
     if( opts.star ) {
-      buttons$.append( btnHelper( opts.star,
-                                  "secondary is-left",
-                                  "lupicon-star",
-                                  opts.star.text));
+      groupButtons.append(
+        btnHelper(opts.star, "secondary is-left", "lupicon-star", opts.star.text));
     }
     if ( opts.remove ) {
-      buttons$.append( btnHelper( opts.remove,
-                                  "secondary is-right",
-                                  "lupicon-remove",
-                                  loc( "remove")));
+      groupButtons.append(
+        btnHelper(opts.remove, "secondary is-right", "lupicon-remove", loc( "remove")));
     }
-    if( opts.approval ) {
+
+    if (opts.approval) {
       var approvalElements = self.makeApprovalButtons(path, model, opts.approval);
-      var elemCount = _.size( approvalElements );
-      if( elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ))) {
+      var elemCount = _.size(approvalElements);
+      if (elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ))) {
         _.each(( approvalElements ), function( elem ) {
-          buttons$.append( elem );
+          groupButtons.append( elem );
         });
       }
     }
     if( opts.description ) {
-      buttons$.append( opts.description.bubble );
+      groupButtons.append( opts.description.bubble );
     }
 
-    if( buttons$.children().length ) {
-      container$.append( buttons$ );
+    if( groupButtons.children().length ) {
+      container$.append( groupButtons );
     }
   }
 
@@ -991,6 +986,30 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return div;
   }
 
+  function buildDocgenGroup (subSchema, model, path) {
+    var name = subSchema.name;
+
+    var params = {
+      path: path,
+      subSchema: subSchema,
+      documentId: self.docId,
+      model: model[name]
+    };
+    return createComponent("docgen-group", params);
+  }
+
+  function buildPropertyGroup (subSchema, model, path) {
+    var name = subSchema.name;
+
+    var params = {
+      path: path,
+      subSchema: subSchema,
+      documentId: self.docId,
+      model: model[name]
+    };
+    return createComponent("property-group", params);
+  }
+
   function buildRadioGroup(subSchema, model, path) {
     var myPath = path.join(".");
     var myModel;
@@ -1224,6 +1243,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function createComponent(name, params, classes) {
     // createElement works with IE8
     var element = document.createElement(name);
+    
     $(element)
       .attr("params", paramsStr(params))
       .addClass(classes)
@@ -1411,6 +1431,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   var builders = {
     group: buildGroup,
+    docgenGroup: buildDocgenGroup,
+    propertyGroup: buildPropertyGroup,
     string: buildString,
     hetu: buildString,
     text: buildText,
@@ -1456,7 +1478,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var myName = subSchema.name;
     var myPath = path.concat([myName]);
-    var builder = builders[subSchema.type] || buildUnknown;
+    var builder = builders[subSchema.uicomponent] || builders[subSchema.type] || buildUnknown;
     var repeatingId = myPath.join("-");
 
     function makeElem(myModel, id) {
@@ -1694,7 +1716,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var p = _.isArray(paths) ? paths : [paths];
     var v = _.isArray(values) ? values : [values];
     var updates = _.zip(
-        _.map(p, function(path) {return path.replace(new RegExp("^" + self.docId + "."), "");}),
+        _.map(p, function(path) {
+          return path.replace(new RegExp("^" + self.docId + "."), "");
+        }),
         v);
     var updateCommand = getUpdateCommand();
 

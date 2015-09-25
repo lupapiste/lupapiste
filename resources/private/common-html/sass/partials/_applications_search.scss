@@ -64,13 +64,14 @@
 }
 
 .paging {
-  button:first-child {
-    margin-right: $marginS;
+  color: $gray51;
+  label {
+    color: $gray51;
+    margin-bottom: $marginS;
+    display: inline-block;
   }
-  select {
-    width: $cols1*1.5;
-    margin-left: $marginM;
-    margin-right: $marginS;
+  button {
+    margin-right: $grid-margin;
   }
 }
 
@@ -80,6 +81,11 @@ div.search {
     padding-right: 40px !important;
   }
 
+  &.active {
+    i {
+      color: $orange-light;
+    }
+  }
   i {
     color: $primary;
     position: absolute;

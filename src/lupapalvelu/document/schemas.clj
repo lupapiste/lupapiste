@@ -17,7 +17,7 @@
                  :approvable :removable :deny-removing-last-document
                  :group-help :section-help
                  :after-update
-                 :repeating :order})
+                 :repeating :no-repeat-button :order})
 
 (def updateable-keys #{:removable})
 (def immutable-keys (set/difference info-keys updateable-keys) )
@@ -818,7 +818,7 @@
              {:name "poistumanAjankohta" :type :date}
              olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
 
-(def rakennuspaikka [{:name "kiinteisto"
+(def rakennuspaikka [#_{:name "kiinteisto"
                       :type :group
                       :body [{:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
                              {:name "tilanNimi" :type :string :readonly true}
@@ -826,6 +826,17 @@
                              {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
                              {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}
                              {:name "rantaKytkin" :type :checkbox}]}
+
+                     {:name "kiinteisto"
+                      :type :group
+                      :uicomponent :propertyGroup
+                      :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size "s"}
+                             ;{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
+                             {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}
+                             {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-string}
+                             {:name "maapintaala" :type :string :readonly true :unit "hehtaaria" :uicomponent :docgen-string}
+                             {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria" :uicomponent :docgen-string}
+                             {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-checkbox}]}
                      {:name "hallintaperuste" :type :select :sortBy :displayname :required true
                       :body [{:name "oma"}
                              {:name "vuokra"}
@@ -844,6 +855,36 @@
                              {:name "asemakaava"}
                              {:name "ranta-asemakaava"}
                              {:name "ei kaavaa"}]}])
+
+(def lisakohde-rakennuspaikka [{:name "kiinteisto"
+                                :type :group
+                                :uicomponent :propertyGroup
+                                :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size "s"}
+                                       {:name "kiinteistoTunnus" :type :string :hidden true}
+                                       ;{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
+                                       {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}
+                                       {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-string}
+                                       {:name "maapintaala" :type :string :readonly true :unit "hehtaaria" :uicomponent :docgen-string}
+                                       {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria" :uicomponent :docgen-string}
+                                       {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-checkbox}]}
+                               {:name "hallintaperuste" :type :select :sortBy :displayname :required true
+                                :body [{:name "oma"}
+                                       {:name "vuokra"}
+                                       {:name "ei tiedossa"}]}
+                               {:name "kaavanaste" :type :select :sortBy :displayname :hidden true
+                                :body [{:name "asema"}
+                                       {:name "ranta"}
+                                       {:name "rakennus"}
+                                       {:name "yleis"}
+                                       {:name "ei kaavaa"}
+                                       {:name "ei tiedossa"}]}
+                               {:name "kaavatilanne" :type :select :sortBy :displayname
+                                :body [{:name "maakuntakaava"}
+                                       {:name "oikeusvaikutteinen yleiskaava"}
+                                       {:name "oikeusvaikutukseton yleiskaava"}
+                                       {:name "asemakaava"}
+                                       {:name "ranta-asemakaava"}
+                                       {:name "ei kaavaa"}]}])
 
 (def rajankaynti-tyyppi {:name "rajankayntiTyyppi"
                          :type :select
@@ -1185,6 +1226,17 @@
            :order 2
            :type :location}
     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
+
+   {:info {:name "secondary-kiinteistot"
+           :i18name "kiinteisto"
+           :approvable true
+           :order 3
+           :repeating true
+           :no-repeat-button true
+           :removable true
+           :type :location}
+    :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
+
 
    {:info {:name "paatoksen-toimitus-rakval"
            :removable false

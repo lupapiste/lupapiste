@@ -30,12 +30,13 @@
 
 (defcommand create-doc
   {:parameters [:id :schemaName]
+   :optional-parameters [updates]
    :user-roles #{:applicant :authority}
    :states     #{:draft :answered :open :submitted :complement-needed}
    :pre-checks [create-doc-validator
                 application/validate-authority-in-drafts]}
   [command]
-  (ok :doc (:id (doc-persistence/do-create-doc command))))
+  (ok :doc (:id (doc-persistence/do-create-doc command updates))))
 
 (defn- deny-remove-of-primary-operation [document application]
   (= (get-in document [:schema-info :op :id]) (get-in application [:primaryOperation :id])))

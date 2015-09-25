@@ -21,6 +21,10 @@ LUPAPISTE.DocgenInputModel = function(params) {
   });
 
   self.showMessagePanel = ko.observable(false);
+  self.events = {
+    mouseover: function() { self.showMessagePanel(true); },
+    mouseout: function() { self.showMessagePanel(false); }
+  };
 
   self.helpMessage = ko.observable();
 

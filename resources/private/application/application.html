@@ -405,6 +405,11 @@
                                 <!-- This is where generated document will be placed. -->
                             </div>
                         </div>
+
+                        <!-- ko if: $root.application.permitType() == 'KT' && $parent.authorization.ok('create-doc') -->
+                        <div data-bind="component: 'add-property'"></div>
+                        <!-- /ko -->
+
                         <div class="process-nav">
                             <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="parties">
                                 <span data-bind="ltext: 'application.next-tab'"></span>
