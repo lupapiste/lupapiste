@@ -1,0 +1,1 @@
+applications.search.clear-filters:  Tyhjennä hakuehdot
