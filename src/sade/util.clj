@@ -3,8 +3,6 @@
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.java.io :as io]
             [sade.core :refer :all]
-            [sade.dns :as dns]
-            [sade.env :as env]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [clj-time.format :as timeformat]
             [clj-time.core :refer [days weeks months years ago]]
@@ -282,19 +280,6 @@
   [^String s]
   (when (numeric? s)
     (Long/parseLong s)))
-
-(defn valid-email? [email]
-  (try
-    (javax.mail.internet.InternetAddress. email)
-    (boolean (re-matches #".+@.+\..+" email))
-    (catch Exception _
-      false)))
-
-(defn email-and-domain-valid? [email]
-  (or (ss/blank? email)
-    (and
-      (valid-email? email)
-      (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email)))))
 
 (defn sequable?
   "Returns true if x can be converted to sequence."
