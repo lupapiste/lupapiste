@@ -222,12 +222,13 @@
                                    created))}))
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
-        new-docs (-<>> (:documents application)
-                       (map (comp :name :schema-info))      ;; existing schema names
-                       set
-                       (remove <> (:required op-info))      ;; required schema names
-                       (map make)                           ;; required docs
-                       (cons op-doc))]                      ;; new docs
+        existing-schemas (->> (:documents application)
+                              (map (comp :name :schema-info))      ;; existing schema names
+                              set)
+        new-docs (->> (:required op-info)
+                      (remove existing-schemas)      ;; required schema names
+                      (map make)                           ;; required docs
+                      (cons op-doc))]                      ;; new docs
     (if-not user
       new-docs
       (conj new-docs (make (permit/get-applicant-doc-schema (permit/permit-type application)))))))

@@ -172,7 +172,7 @@
 
 (def- common-rakval-schemas ["hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"])
 
-(def- common-maanmittaus-schemas ["maksaja" "kiinteisto"])
+(def- common-maanmittaus-schemas ["maksaja" "kiinteisto" "secondary-kiinteistot"])
 
 (def- common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka"])
 
@@ -314,6 +314,7 @@
    :link-permit-verdict-required sc/Bool
    :add-operation-allowed sc/Bool
    :required [sc/Str]
+   (sc/optional-key :optional) #{sc/Str}
    (sc/optional-key :subtypes) [(sc/maybe sc/Keyword)]
    (sc/optional-key :state-graph-resolver) util/Fn
    (sc/optional-key :schema-data) [sc/Any]})
@@ -423,7 +424,7 @@
                                    :link-permit-required false
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
-     :vapaa-ajan-rakennus-laaj    {:schema "rakennuksen-laajentaminen"
+     :vapaa-ajan-rakennus-laaj    {:schema "rakennuksen-laajentaminen-ei-huoneistoja"
                                    :permit-type permit/R
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
@@ -431,7 +432,7 @@
                                    :link-permit-required false
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
-     :talousrakennus-laaj         {:schema "rakennuksen-laajentaminen"
+     :talousrakennus-laaj         {:schema "rakennuksen-laajentaminen-ei-huoneistoja"
                                    :permit-type permit/R
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet

@@ -83,9 +83,10 @@ $gray238: make-gray( 238 );
 $gray246: make-gray( 246 );
 $gray255: make-gray( 255 );
 
+$grid-min-height: 40px;
 
 $grid-border-color: $gray221;
-$grid-input-height: 40px;
+$grid-input-height: $grid-min-height;
 $grid-margin: 20px;
 $grid-font-size: 16px;
 
@@ -97,6 +98,7 @@ $input-color:       $gray51;
 $input-focus-color: $gray51;
 
 $input-border-color: $gray187;
+$input-disabled-border-color: $gray221;
 $input-focus-border-color: $orange-light;
 $input-required-border-color: $orange-dark;
 

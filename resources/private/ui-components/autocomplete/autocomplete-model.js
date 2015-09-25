@@ -3,11 +3,29 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   var self = this;
 
-  self.selectedOptions = params.selectedOptions;
+  // TODO rethink how we handle single selection in autocomplete component
+  self.selectedOptions = params.selectedOptions || ko.observableArray(_.filter([ko.unwrap(params.selectedOption)]));
+
+  var pauseUpdatingOption = ko.observable(false);
+
+  if (params.selectedOption) {
+    params.selectedOption.subscribe(function(val) {
+      pauseUpdatingOption(true);
+      self.selectedOptions(_.filter([val]));
+      pauseUpdatingOption(false);
+    });
+  }
+
+  self.selectedOptions.subscribe(function(val) {
+    if (params.selectedOption && !pauseUpdatingOption()) {
+      params.selectedOption(_.first(val));
+    }
+  });
+  // end TODO
+
 
   // Parameters
-  // tagging support
-  self.tags = params.tags;
+  self.tags = params.tags; // tagging support
 
   self.optionsText = params.optionsText || "label";
 
@@ -17,25 +35,39 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.optionsCaption = params.optionsCaption || loc("choose");
 
+  self.nullable = params.nullable;
+
+  self.placeholder = params.placeholder || loc("application.filter.search") + "...";
+
   // Observables
-  self.selected = ko.observable("");
-
-  self.data = ko.observableArray(self.options());
-
   self.index = ko.observable(0);
-
-  self.selectedTags = ko.observableArray();
 
   self.inputSelected = ko.observable(false);
 
   self.dropdownClick = ko.observable(false);
+
+  // Computed
+  self.data = ko.pureComputed(function() {
+    if (self.nullable && !self.tags) {
+      // add nullable parameter to copy  of array
+      var copy = self.options().slice();
+      var item = {behaviour: "clearSelected"};
+      item[self.optionsText] = self.optionsCaption;
+      copy.unshift(item);
+      return copy;
+    } else {
+      return self.options();
+    }
+    // reset index
+    initIndex();
+  });
 
   self.dropdownVisible = ko.pureComputed(function() {
     return self.inputSelected() || self.dropdownClick(); // works in IE when scrollbar is clicked
   });
 
   self.showCaption = ko.pureComputed(function() {
-    return !self.selected() && self.selectedTags().length === 0;
+    return _.isEmpty(self.selectedOptions());
   });
 
   self.groupedResults = ko.pureComputed(function() {
@@ -46,12 +78,17 @@ LUPAPISTE.AutocompleteModel = function(params) {
     });
   });
 
-  // set initial value
-  if (self.tags) {
-    self.selectedTags = self.selectedOptions;
-  } else {
-    self.selected = self.selectedOptions;
-  }
+  self.showTags = ko.pureComputed(function() {
+    return self.tags && !_.find(self.selectedOptions(), {behaviour: "singleSelection"});
+  });
+
+  self.selectionText = ko.pureComputed(function() {
+    return self.optionsText ? util.getIn(self.selectedOptions(), [0, self.optionsText]) : self.selectedOptions()[0];
+  });
+
+  self.showSingleSelection = ko.pureComputed(function() {
+    return !self.showTags();
+  });
 
   self.subscriptions = [];
 
@@ -67,21 +104,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
       self.index(1);
     }
   }
-
-  // set initial index
-  initIndex();
-
-  // set initial Data from options
-  self.subscriptions.push(self.options.subscribe(function() {
-    if (params.nullable) {
-      // add nullable parameter
-      self.data([null].concat(self.options()));
-    } else {
-      self.data(self.options());
-    }
-    // reset index
-    initIndex();
-  }));
 
   // view model functions
   self.selectInput = function() {
@@ -105,10 +127,19 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.selectItem = function(item) {
-    if (self.tags) {
-      self.selectedOptions.push(item);
+    if (item.behaviour === "clearSelected") {
+      self.selectedOptions([]);
+    } else if (item.behaviour === "singleSelection") {
+      self.selectedOptions([item]);
     } else {
-      self.selectedOptions(item);
+      if (self.tags) {
+        self.selectedOptions.remove(function(item) {
+          return item.behaviour === "singleSelection";
+        });
+        self.selectedOptions.push(item);
+      } else {
+        self.selectedOptions([item]);
+      }
     }
     self.dropdownClick(false); // set to false so dropdown closes
     self.inputSelected(false);
@@ -170,8 +201,13 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.removeTag = function(tag) {
-    self.selectedTags.remove(tag);
+    self.selectedOptions.remove(tag);
     self.inputSelected(false);
+  };
+
+  self.clearQuery = function() {
+    self.query("");
+    self.retainFocus();
   };
 
   self.dispose = function() {

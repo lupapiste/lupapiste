@@ -303,23 +303,25 @@
   };
 
   ko.bindingHandlers.transition = {
-    init: function(element, valueAccessor, allBindings) {
+    init: function(element, valueAccessor, allBindingsAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      var className = allBindings()["class"];
+      var className = allBindingsAccessor()["class"];
       if (className) {
         $(element).toggleClass(className, value);
       }
     },
-    update: function(element, valueAccessor, allBindings) {
+    update: function(element, valueAccessor, allBindingsAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      var className = allBindings()["class"];
-      var type = allBindings().type;
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      var className = bindings["class"];
+      var type = bindings.type;
+      var duration = bindings.duration || 100;
 
       if (LUPAPISTE.config.features.animations) {
         if (type) {
           $(element)[type + "Toggle"](1000);
         } else {
-          $(element).toggleClass(className, value, 100);
+          $(element).toggleClass(className, value, duration);
         }
       } else {
         $(element).toggleClass(className, value);

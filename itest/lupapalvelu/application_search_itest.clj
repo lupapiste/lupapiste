@@ -115,20 +115,20 @@
                        :operation "purkaminen")
         application-id2 (:id application2)]
 
-    (count (get-in (datatables sonja :applications-search :handler sonja-id) [:data :applications])) => 2
+    (count (get-in (datatables sonja :applications-search :handlers [sonja-id]) [:data :applications])) => 2
     (command sonja :assign-application :id application-id :assigneeId ronja-id) => ok?
 
     (fact "Handler filter"
-      (count (get-in (datatables sonja :applications-search :handler ronja-id) [:data :applications])) => 1
-      (get-in (datatables sonja :applications-search :handler ronja-id) [:data :applications 0 :id]) => application-id)
+      (count (get-in (datatables sonja :applications-search :handlers [ronja-id]) [:data :applications])) => 1
+      (get-in (datatables sonja :applications-search :handlers [ronja-id]) [:data :applications 0 :id]) => application-id)
 
     (command sonja :add-application-tags :id application-id :tags ["222"]) => ok?
     (fact "$and query returns 1"
-      (count (get-in (datatables sonja :applications-search :handler ronja-id :tags ["222"]) [:data :applications])) => 1)
+      (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222"]) [:data :applications])) => 1)
 
     (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
     (fact "$and query returns 0 when handler is returning 0 matches"
-      (count (get-in (datatables sonja :applications-search :handler ronja-id :tags ["222"]) [:data :applications])) => 0)
+      (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222"]) [:data :applications])) => 0)
 
     (fact "Tags filter"
       (get-in (datatables sonja :applications-search :tags ["222"]) [:data :applications 0 :id]) => application-id)
@@ -141,7 +141,7 @@
     (fact "Combined"
       (let [res (datatables sonja :applications-search
                   :areas ["sipoo_keskusta"]
-                  :handler sonja-id
+                  :handlers [sonja-id]
                   :tags ["222" "111"])]
         (count (get-in res [:data :applications])) => 1
         (get-in res [:data :applications 0 :id]) => application-id))))

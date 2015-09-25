@@ -129,6 +129,7 @@ nav {
       height: $header-height;
       a {
         max-width: 300px;
+        outline: 0;
       }
       a, span {
         line-height: $header-height;

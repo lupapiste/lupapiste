@@ -126,8 +126,7 @@
                                 <p data-bind="ltext: 'application.linkPermits'" class="link-permit-title"></p>
                                 <span class="application_summary_text" data-bind="foreach: $data">
                                     <span data-bind="visible: $data.type() === 'lupapistetunnus'" class="link-permit">
-                                        <a data-bind="click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
-                                                      attr: {'data-test-app-link-permit': $data.id}"
+                                        <a data-bind="attr: {'data-test-app-link-permit': $data.id, href: '#!/application/' + $data.id()}"
                                            data-test-id="test-application-link-permit-lupapistetunnus"
                                            class="link-permit-item">
                                             <span data-bind="text: $data.id"></span>
@@ -164,10 +163,9 @@
                                 <p data-bind="ltext: 'application.appsLinkingToUs'" class="link-permit-title"></p>
                                 <span class="application_summary_text" data-bind="foreach: $data">
                                     <span class="link-permit">
-                                        <a data-bind="click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
-                                                      attr: {'data-test-app-linking-to-us': $data.id}"
+                                        <a data-bind="attr: {'data-test-app-linking-to-us': $data.id, href: '#!/application/' + $data.id()}"
                                            data-test-id="test-application-app-linking-to-us"
-                                           href="#" class="link-permit-item">
+                                           class="link-permit-item">
                                             <span data-bind="text: $data.id"></span>
                                             -
                                             <span data-bind="ltext: 'operations.' + $data.operation()"></span>
@@ -407,6 +405,11 @@
                                 <!-- This is where generated document will be placed. -->
                             </div>
                         </div>
+
+                        <!-- ko if: $root.application.permitType() == 'KT' && $parent.authorization.ok('create-doc') -->
+                        <div data-bind="component: 'add-property'"></div>
+                        <!-- /ko -->
+
                         <div class="process-nav">
                             <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="parties">
                                 <span data-bind="ltext: 'application.next-tab'"></span>
@@ -822,6 +825,20 @@
                                     </i>
                                 </h2>
 
+                                <!-- metadata -->
+                                <!-- ko if: features.enabled('tiedonohjaus') && !_.isEmpty($data.metadata) && $root.authorization.ok('store-tos-metadata-for-attachment') -->
+                                <div class="feature" style="margin-top: 15px;">
+                                    <button id="show-tos-metadata" class="btn" data-bind="click: $data.toggleTosMetadata, visible: !_.isEmpty(metadata) && $root.authorization.ok('store-tos-metadata-for-application')">
+                                        <i data-bind="css: {'lupicon-chevron-small-right': !showTosMetadata(), 'lupicon-chevron-small-down': showTosMetadata}"></i>
+                                        <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
+                                    </button>
+
+                                    <div class="tos-metadata-content" data-bind="slider: $data.showTosMetadata, visible: !_.isEmpty($data.metadata)">
+                                        <div data-bind="component: {name: 'metadata-editor', params: {verdictId: ko.observable($data.id), metadata: ko.observable($data.metadata), applicationId: $root.application.id}}"></div>
+                                    </div>
+                                </div>
+                                <!-- /ko -->
+
                                 <!--  ko if:  $data.paatokset -->
                                 <div data-bind="foreach: paatokset, attr: {'data-test-id' : 'given-verdict-id-' + $index() + '-content'}">
                                     <div class="accordion">
@@ -1022,11 +1039,6 @@
                                                         <div data-bind="ltext: 'verdict.poytakirjat.missing'"></div>
                                                         <!-- /ko -->
                                                     </div>
-
-                                                    <!-- metadata -->
-
-
-
                                                 </div>
                                             </div>
                                         </div>
