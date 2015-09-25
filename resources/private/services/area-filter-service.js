@@ -34,7 +34,6 @@ LUPAPISTE.AreaFilterService = function(applicationFiltersService) {
 
   ajax
     .query("get-organization-areas")
-    .error(_.noop)
     .success(function(res) {
       _data(res.areas);
     })

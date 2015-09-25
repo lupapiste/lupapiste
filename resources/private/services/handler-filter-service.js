@@ -38,7 +38,6 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
 
   ajax
     .query("users-in-same-organizations")
-    .error(_.noop)
     .success(function(res) {
       usersInSameOrganizations(_(res.users).map(mapUser).sortBy("fullName").value());
     })
