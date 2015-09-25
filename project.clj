@@ -68,7 +68,7 @@
                                   [pdfboxing "0.1.5"]]
                    :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.2.0"]
-                             [lein-nitpicker "0.4.0"]
+                             [lupapiste/lein-nitpicker "0.5.1"]
                              [lein-hgnotes "0.2.0-SNAPSHOT"]
                              [jonase/eastwood "0.2.1" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]
                              [lein-scss-compiler "0.1.4"]]

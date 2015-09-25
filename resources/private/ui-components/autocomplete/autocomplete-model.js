@@ -25,8 +25,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
 
   // Parameters
-  // tagging support
-  self.tags = params.tags;
+  self.tags = params.tags; // tagging support
 
   self.optionsText = params.optionsText || "label";
 
@@ -37,6 +36,8 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.optionsCaption = params.optionsCaption || loc("choose");
 
   self.nullable = params.nullable;
+
+  self.placeholder = params.placeholder || loc("application.filter.search") + "...";
 
   // Observables
   self.index = ko.observable(0);
@@ -202,6 +203,11 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.removeTag = function(tag) {
     self.selectedOptions.remove(tag);
     self.inputSelected(false);
+  };
+
+  self.clearQuery = function() {
+    self.query("");
+    self.retainFocus();
   };
 
   self.dispose = function() {
