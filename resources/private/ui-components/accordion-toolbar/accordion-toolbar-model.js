@@ -35,7 +35,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.title = ((op && op.name) || self.info.name) + "._group_label";
   self.toggleAccordion = function() {
     self.isOpen( !self.isOpen());
-  }
+  };
 
   // Approval resolution
   // Abundance of alternatives causes some complexity.
@@ -60,7 +60,6 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   var lastSent = {};
   self.approval = ko.computed( function() {
-    var groups = groupApprovals();
     var master = safeMaster();
     var later = laterGroups();
     var result = _.every( later,
@@ -75,20 +74,20 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
       self.docModel.approvalHubSend( result, []);
     }
     return result;
-  })
+  });
 
   // Exclamation icon on the accordion should be visible, if...
   // 1. The master or any "later group" is REJECTED
   // 2. The master is NEUTRAL but any group is REJECTED
   self.isSummaryRejected = ko.pureComputed( function() {
     function groupRejected( groups) {
-      return _.find( groups, {"value": REJECTED})
+      return _.find( groups, {"value": REJECTED});
     }
     var master = safeMaster();
     return master.value === REJECTED
         || groupRejected( laterGroups())
         || (master.value === NEUTRAL && groupRejected( groupApprovals()) );
-  })
+  });
 
 
   // A group sends its approval to the master (this) when
@@ -100,14 +99,14 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     // We always respond to the sender regardless whether
     // the update triggers full broadcast. This is done to make sure
     // the group receives the master status during initialization.
-    self.docModel.approvalHubSend( self.approval(), [], data.path )
-  })
+    self.docModel.approvalHubSend( self.approval(), [], data.path );
+  });
 
   // Test ids must contain document name in order to avoid
   // hard to track selector conflicts in Robot tests.
   self.testId = function( id ) {
     return self.docModel.testId( id + "-" + self.docModel.schemaName);
-  }
+  };
 
   // Pen
   // Operation description.
@@ -119,7 +118,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.showEditor.subscribe( _.partial( _.delay, window.Stickyfill.rebuild, 0 ));
   self.toggleEditor = function() {
     self.showEditor( !self.showEditor());
-  }
+  };
   self.specialKeys = function( data, event ) {
     // Enter and Esc also close the bubble. Since clicking outside
     // the bubble will save description Esc is not undo either.
@@ -131,7 +130,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
       break;
     }
     return true;
-  }
+  };
 
   self.description.subscribe( function( desc ) {
     ajax.command ("update-op-description", {id: self.docModel.appId,
@@ -143,7 +142,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                                           "op-desc": desc  });
     })
     .call();
-  })
+  });
 
   // Star
   // Primary vs. secondary operation.
@@ -170,7 +169,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     })
     .call();
     return false;
-  }
+  };
 
   self.remove = {};
   // Remove
@@ -180,7 +179,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     && !self.isPrimaryOperation()) {
     self.remove.fun = self.docModel.removeDocument;
     self.remove.testClass = self.docModel.testId( "delete-schemas."
-                                                + self.docModel.schemaName )
+                                                + self.docModel.schemaName );
   }
 
   // Approval functionality
@@ -229,4 +228,4 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                   || self.showReject()
                   || self.showApprove();
 
-}
+};

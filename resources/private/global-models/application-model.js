@@ -632,8 +632,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.showAddPropertyButton = ko.pureComputed(function () {
     var primaryOp = lupapisteApp.models.application.primaryOperation();
-
     return lupapisteApp.models.applicationAuthModel.ok("create-doc") &&
-      primaryOp && _.includes(primaryOp.optional(), "secondary-kiinteistot");
+      primaryOp && primaryOp.optional && _.includes(primaryOp.optional(), "secondary-kiinteistot");
   });
 };

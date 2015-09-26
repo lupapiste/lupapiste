@@ -35,7 +35,7 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
     if( master && master.value !== NEUTRAL && master.timestamp > approval.timestamp ) {
       approval = master;
     }
-    return {value: approval.value, timestamp: approval.timestamp}
+    return {value: approval.value, timestamp: approval.timestamp};
   });
 
   self.docModel.approvalHubSubscribe( function( data ) {
@@ -72,7 +72,7 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
                                   flag,
                                   function( approval ) {
                                     myApproval( approval );
-                                  } )
+                                  } );
 
   }
 
@@ -86,4 +86,4 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   self.docModel.approvalHubSend( self.docModel.safeApproval( self.model, myApproval),
                                  params.path );
 
-}
+};
