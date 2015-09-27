@@ -205,6 +205,10 @@
 (defn org-authz-match [organization-ids & [role]]
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
 
+(defn can-use-archive-functionality? [user]
+  (let [org-set (organization-ids-by-roles user #{:authority})]
+    (organization/some-organization-has-archive-enabled? org-set)))
+
 (defn batchrun-user [org-ids]
   {:id "-"
    :enabled true

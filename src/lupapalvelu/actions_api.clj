@@ -1,7 +1,8 @@
 (ns lupapalvelu.actions-api
   (:require [sade.env :as env]
             [sade.core :refer :all]
-            [lupapalvelu.action :refer [defquery] :as action]))
+            [lupapalvelu.action :refer [defquery] :as action]
+            [lupapalvelu.user :as user]))
 
 ;;
 ;; Default actions
@@ -26,7 +27,8 @@
   :user-authz-roles action/all-authz-roles
   :org-authz-roles  action/reader-org-authz-roles}
  [{:keys [data user application]}]
- (let [results  (map validated (foreach-action user data application))
+ (let [results  (-> (map validated (foreach-action user data application))
+                    (conj {:permanent-archive-available {:ok (user/can-use-archive-functionality? user)}}))
        filtered (if (env/dev-mode?)
                   results
                   (filter (comp :ok first vals) results))
