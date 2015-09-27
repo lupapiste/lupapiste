@@ -178,11 +178,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                  collection: self.getCollection()})
     .success( function( result ) {
       cb( result.approval );
-      self.approvalHubSend( result.approval, path )
+      self.approvalHubSend( result.approval, path );
       window.Stickyfill.rebuild();
     })
     .call();
-  }
+  };
 
   // Textual representation of the approval status.
   // Tiedot OK (Sibbo Sonja 21.9.2015 10:55)
@@ -196,7 +196,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
             + " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
     }
     return text;
-  }
+  };
 
   // Returns the latest modification time of the model or
   // zero if no modifications.
@@ -213,8 +213,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   // than latest model change.
   self.isApprovalCurrent = function( approvalModel, approvalFun ) {
     var approval = approvalFun();
-    return approval && approval.timestamp > modelTimestamp( approvalModel )
-  }
+    return approval && approval.timestamp > modelTimestamp( approvalModel );
+  };
 
   // Returns always "core" approval object (value, timestamp properties.)
   // If approvalFun does not yield correct, up-to-date approval then
@@ -226,24 +226,24 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return approval && approval.timestamp > ts
          ? approval
          : {value: "neutral", timestamp: ts};
-  }
+  };
 
   // Check is either approved or rejected.
   // Note: if the approval is not set, then both types of check return false
   self.approvalStatus = function( approvalFun, check ) {
     var approval = approvalFun();
     return approval && approval.value === check;
-  }
+  };
 
   // Returns id if we are in the testing mode, otherwise null.
   // Null because Knockout does not render null attributes.
   self.testId = function( id ) {
     return options && options.dataTestSpecifiers ? id : null;
-  }
+  };
 
   self.approvalTestId = function( path, verb ) {
     return self.testId( [verb, "doc", _.first( path) || self.schemaName].join ( "-" ));
-  }
+  };
 
   self.removeDocument = function() {
     var op = self.schema.info.op;
@@ -276,13 +276,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                              fn: onRemovalConfirmed },
                                            {title: loc("removeDoc.cancel") },
                                            {html: true });
-  }
+  };
 
   self.approvalHubSubscribe = function(fun, listenBroadcasts) {
     var filter = {type: "approval-status-" + self.docId,
                   broadcast: Boolean(listenBroadcasts) };
     self.subscriptions.push(hub.subscribe( filter, fun ));
-  }
+  };
 
   // Receiver path can be falsey for broadcast messages.
   self.approvalHubSend = function( approval, senderPath, receiverPath ) {
@@ -291,7 +291,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                 approval: _.clone(approval),
                 path: senderPath,
                 receiver: receiverPath});
-  }
+  };
 
   // ----------------------------------------------------------------------
 
@@ -816,7 +816,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                     subSchema: subSchema,
                                     model: myModel,
                                     path: path,
-                                    remove: opts.remove }))
+                                    remove: opts.remove }));
 
     var label = makeLabel(subSchema, "group", myPath, true);
     div.appendChild(label);
@@ -1387,7 +1387,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                          {docModel: self,
                                           subSchema: subSchema,
                                           model: models,
-                                          path: myPath}))
+                                          path: myPath}));
         }
 
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
