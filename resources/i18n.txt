@@ -1,0 +1,3 @@
+
+EMAIL-TEMPLATE-reminder-ya-work-time-is-expiring: Sinulla on Lupapiste-palvelussa yleisten alueiden lupahakemus {{ link-fi }} osoitteessa [Osoite]. Hakemukselle on merkitty luvan päättymisajankohdaksi {{ tyoaika-paattyy }}. Mikäli tarvitset toiminnallesi jatkoaikaa, tee siitä hakemus Lupapisteessä.
+ya-work-time-is-expiring-reminder: Yleisten alueiden lupasi päättymisajankohta lähestyy
