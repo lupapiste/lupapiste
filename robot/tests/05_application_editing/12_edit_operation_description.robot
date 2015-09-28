@@ -12,9 +12,9 @@ Mikko creates application
 Mikko edits operation description
   Open application  application-papplication  753-416-25-30
   Wait until element is visible  jquery=div#application-info-tab button[data-test-id=edit-op-description-uusiRakennus]
-  Execute Javascript  $('div#application-info-tab [data-test-id=edit-op-description-uusiRakennus]').mousedown();
+  Mouse Down  jquery=div#application-info-tab [data-test-id=edit-op-description-uusiRakennus]
   Input text by test id  op-description-editor-uusiRakennus  Talo A
-  # Just in case...
+  # Close the input bubble
   Press Key  jquery=div#application-info-tab input[data-test-id=op-description-editor-uusiRakennus]  \\13
   Wait for jQuery
   Wait until  Page should contain  Tallennettu
