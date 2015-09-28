@@ -14,12 +14,14 @@
 ;; Getting user and users:
 ;; ==============================================================================
 ;;
+(apply-remote-minimal)
 
 (facts "Getting user"
-  (fact (query pena :user) => (contains {:user (contains {:email "pena@example.com"})})))
+       (fact (let [response (query pena :user)]
+               response => ok?
+               (get-in response [:user :email]) => "pena@example.com")))
 
 (facts "Getting users"
-  (apply-remote-minimal)
 
   (fact "applicants are not allowed to call this"
     (query pena :users) =not=> ok?)

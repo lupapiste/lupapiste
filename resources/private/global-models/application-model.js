@@ -628,4 +628,11 @@ LUPAPISTE.ApplicationModel = function() {
                                                  yesFn: self.approveInvite}});
     }
   };
+
+  self.showAddPropertyButton = ko.pureComputed(function () {
+    var primaryOp = lupapisteApp.models.application.primaryOperation();
+
+    return lupapisteApp.models.applicationAuthModel.ok("create-doc") &&
+      _.includes(util.getIn(primaryOp, ["optional"]), "secondary-kiinteistot");
+  });
 };

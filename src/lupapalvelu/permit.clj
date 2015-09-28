@@ -41,7 +41,7 @@
   {:subtypes             []
    :sftp-directory       "/yleiset_alueet"
    :applicant-doc-schema "hakija-ya"
-   :allowed-task-schemas #{"task-katselmus-ya" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
+   :allowed-task-schemas #{"task-katselmus-ya" "task-lupamaarays"}
    :multiple-parties-allowed false
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "yleisenalueenkaytonlupahakemus"
