@@ -330,9 +330,11 @@
   {:pre [(mongo/valid-key? link-permit-id)
          (not= id link-permit-id)]}
   (let [db-id (make-mongo-id-for-link-permit id link-permit-id)
-        is-lupapiste-app (mongo/any? :applications {:_id link-permit-id})
-        linked-app (when is-lupapiste-app
-                     (domain/get-application-no-access-checking link-permit-id))]
+        linked-app (some-> link-permit-id
+                     domain/get-application-no-access-checking
+                     meta-fields/enrich-with-link-permit-data)
+        op-meta (operations/get-primary-operation-metadata linked-app)]
+
     (mongo/update-by-id :app-links db-id
                         {:_id           db-id
                          :link          [id link-permit-id]
@@ -340,11 +342,9 @@
                                          :apptype    (:name primaryOperation)
                                          :propertyId propertyId}
                          link-permit-id {:type           "linkpermit"
-                                         :linkpermittype (if is-lupapiste-app
+                                         :linkpermittype (if linked-app
                                                            "lupapistetunnus"
                                                            "kuntalupatunnus")
-                                         :apptype        (->> linked-app
-                                                              (:primaryOperation)
-                                                              (:name))}}
+                                         :apptype (get-in linked-app [:primaryOperation :name])}}
                         :upsert true)))
 
