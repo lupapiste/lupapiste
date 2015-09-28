@@ -927,13 +927,6 @@
                                              {:name "yleisen-alueen-lohkominen" }]}
                                      kuvaus]})
 
-;; (def kt-lohkominen [{:name "lohkomisenTyypi"
-;;                      :type :select
-;;                      :required true
-;;                      :body [{:name "Tonttijaon mukainen tontti"}
-;;                             {:name "Ohjeellisen tonttijaon mukainen rakennuspaikka"}]}
-;;                     kuvaus])
-
 (def kt-rasitetoimitus {:name "rasitetoimitus"
                         :type :group
                         :repeating true
