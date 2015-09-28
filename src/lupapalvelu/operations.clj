@@ -208,7 +208,7 @@
                                        "tyoaika")
                            :attachments []
                            :add-operation-allowed false
-                           :link-permit-required false
+                           :min-outgoing-link-permits 0
                            :link-permit-verdict-required false
                            :asianhallinta true})
 
@@ -218,7 +218,7 @@
                                          "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
                              :attachments []
                              :add-operation-allowed false
-                             :link-permit-required false
+                             :min-outgoing-link-permits 0
                              :link-permit-verdict-required false
                              :asianhallinta true})
 
@@ -230,7 +230,7 @@
                                         :required common-yleiset-alueet-schemas
                                         :attachments []
                                         :add-operation-allowed false
-                                        :link-permit-required false
+                                        :min-outgoing-link-permits 0
                                         :link-permit-verdict-required false
                                         :asianhallinta true})
 
@@ -247,7 +247,7 @@
                                            :required common-yleiset-alueet-schemas
                                            :attachments []
                                            :add-operation-allowed false
-                                           :link-permit-required false
+                                           :min-outgoing-link-permits 0
                                            :link-permit-verdict-required false
                                            :asianhallinta true}
    :ya-kayttolupa-nostotyot                                           ya-kayttolupa-with-tyomaastavastaava
@@ -279,7 +279,7 @@
                                                        "tyo-aika-for-jatkoaika")
                                            :attachments []
                                            :add-operation-allowed false
-                                           :link-permit-required true
+                                           :min-outgoing-link-permits 1
                                            :link-permit-verdict-required true
                                            :max-incoming-link-permits 1
                                            :asianhallinta true}})
@@ -292,7 +292,7 @@
    :required common-ymparistolupa-schemas
    :attachments ymparistolupa-attachments
    :add-operation-allowed false
-   :link-permit-required false
+   :min-outgoing-link-permits 0
    :link-permit-verdict-required false
    :asianhallinta true})
 
@@ -311,12 +311,12 @@
    :permit-type (sc/pred permit/valid-permit-type?)
    :attachments [sc/Any]
    :asianhallinta sc/Bool
-   :link-permit-required sc/Bool
-   :link-permit-verdict-required sc/Bool
+   :min-outgoing-link-permits sc/Num
+   (sc/optional-key :max-outgoing-link-permits) sc/Num
+   :link-permit-verdict-required sc/Bool ;Unused?!
+   (sc/optional-key :max-incoming-link-permits) sc/Num
    :add-operation-allowed sc/Bool
    :required [sc/Str]
-   (sc/optional-key :max-incoming-link-permits) sc/Num
-   (sc/optional-key :max-outgoing-link-permits) sc/Num
    (sc/optional-key :max-link-permits) sc/Num
    (sc/optional-key :optional) #{sc/Str}
    (sc/optional-key :subtypes) [(sc/maybe sc/Keyword)]
@@ -333,7 +333,7 @@
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false} ;TODO old op-tree, remove later
      :kerrostalo-rivitalo         {:schema "uusiRakennus"
@@ -344,7 +344,7 @@
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :pientalo                    {:schema "uusiRakennus"
@@ -355,7 +355,7 @@
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :vapaa-ajan-asuinrakennus    {:schema "uusi-rakennus-ei-huoneistoa"
@@ -364,7 +364,7 @@
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :varasto-tms                 {:schema "uusi-rakennus-ei-huoneistoa"
@@ -373,7 +373,7 @@
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :julkinen-rakennus           {:schema "uusiRakennus"
@@ -383,7 +383,7 @@
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false} ;TODO old op-tree, remove later
      :teollisuusrakennus          {:schema "uusiRakennus"
@@ -391,7 +391,7 @@
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :muu-uusi-rakentaminen       {:schema "uusiRakennus"
@@ -401,7 +401,7 @@
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :laajentaminen               {:schema "rakennuksen-laajentaminen"
@@ -409,7 +409,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false} ;TODO old op-tree, remove later
      :kerrostalo-rt-laaj          {:schema "rakennuksen-laajentaminen"
@@ -417,7 +417,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :pientalo-laaj               {:schema "rakennuksen-laajentaminen"
@@ -425,7 +425,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :vapaa-ajan-rakennus-laaj    {:schema "rakennuksen-laajentaminen-ei-huoneistoja"
@@ -433,7 +433,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :talousrakennus-laaj         {:schema "rakennuksen-laajentaminen-ei-huoneistoja"
@@ -441,7 +441,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :teollisuusrakennus-laaj     {:schema "rakennuksen-laajentaminen"
@@ -449,7 +449,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :muu-rakennus-laaj           {:schema "rakennuksen-laajentaminen"
@@ -457,7 +457,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :perus-tai-kant-rak-muutos   {:schema "rakennuksen-muuttaminen-ei-huoneistoja"
@@ -466,7 +466,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :kayttotark-muutos           {:schema "rakennuksen-muuttaminen"
@@ -475,7 +475,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_muutos_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :sisatila-muutos             {:schema "rakennuksen-muuttaminen"
@@ -484,7 +484,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_muutos_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :julkisivu-muutos            {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
@@ -493,7 +493,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :jakaminen-tai-yhdistaminen  {:schema "rakennuksen-muuttaminen"
@@ -502,7 +502,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
@@ -511,7 +511,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :linjasaneeraus              {:schema "rakennuksen-muuttaminen"
@@ -520,7 +520,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :takka-tai-hormi             {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
@@ -529,7 +529,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
@@ -538,7 +538,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :muu-laajentaminen           {:schema "rakennuksen-muuttaminen"
@@ -547,7 +547,7 @@
                                    :required common-rakval-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :auto-katos                  {:schema "kaupunkikuvatoimenpide"
@@ -555,7 +555,7 @@
                                    :required common-rakval-schemas
                                    :attachments kaupunkikuva_toimenpide_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :masto-tms                   {:schema "kaupunkikuvatoimenpide"
@@ -563,7 +563,7 @@
                                    :required common-rakval-schemas
                                    :attachments kaupunkikuva_toimenpide_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :mainoslaite                 {:schema "kaupunkikuvatoimenpide"
@@ -571,7 +571,7 @@
                                    :required common-rakval-schemas
                                    :attachments kaupunkikuva_toimenpide_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :aita                        {:schema "kaupunkikuvatoimenpide"
@@ -579,7 +579,7 @@
                                    :required common-rakval-schemas
                                    :attachments kaupunkikuva_toimenpide_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :maalampo                    {:schema "maalampokaivo"
@@ -587,7 +587,7 @@
                                    :required common-rakval-schemas
                                    :attachments kaupunkikuva_toimenpide_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :jatevesi                    {:schema "kaupunkikuvatoimenpide"
@@ -595,7 +595,7 @@
                                    :required common-rakval-schemas
                                    :attachments kaupunkikuva_toimenpide_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :muu-rakentaminen            {:schema "kaupunkikuvatoimenpide"
@@ -603,7 +603,7 @@
                                    :required common-rakval-schemas
                                    :attachments kaupunkikuva_toimenpide_liitteet
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :purkaminen                  {:schema "purkaminen"
@@ -612,7 +612,7 @@
                                    :attachments [:muut [:selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
                                                         :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta]]
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :kaivuu                      {:schema "maisematyo"
@@ -620,7 +620,7 @@
                                    :required common-rakval-schemas
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :puun-kaataminen             {:schema "maisematyo"
@@ -628,7 +628,7 @@
                                    :required common-rakval-schemas
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :tontin-jarjestelymuutos     {:schema "maisematyo"
@@ -636,7 +636,7 @@
                                    :required  common-rakval-schemas
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :muu-maisema-toimenpide      {:schema "maisematyo"
@@ -644,7 +644,7 @@
                                    :required  common-rakval-schemas
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :tontin-ajoliittyman-muutos  {:schema "maisematyo"
@@ -652,7 +652,7 @@
                                    :required  common-rakval-schemas
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :paikoutysjarjestus-muutos   {:schema "maisematyo"
@@ -660,7 +660,7 @@
                                    :required  common-rakval-schemas
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :kortteli-yht-alue-muutos    {:schema "maisematyo"
@@ -668,7 +668,7 @@
                                    :required  common-rakval-schemas
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :muu-tontti-tai-kort-muutos  {:schema "maisematyo"
@@ -676,7 +676,7 @@
                                    :required  common-rakval-schemas
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed true
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
      :kiinteistonmuodostus         {:schema "kiinteistonmuodostus"
@@ -685,7 +685,7 @@
                                     :required (conj common-maanmittaus-schemas "rasitetoimitus")
                                     :attachments []
                                     :add-operation-allowed false
-                                    :link-permit-required false
+                                    :min-outgoing-link-permits 0
                                     :link-permit-verdict-required false
                                     :asianhallinta false}
      :rasitetoimitus                {:schema "rasitetoimitus"
@@ -694,7 +694,7 @@
                                      :required (conj common-maanmittaus-schemas "kiinteistonmuodostus")
                                      :attachments []
                                      :add-operation-allowed false
-                                     :link-permit-required false
+                                     :min-outgoing-link-permits 0
                                      :link-permit-verdict-required false
                                      :asianhallinta false}
      :rajankaynti                  {:schema "rajankaynti"
@@ -703,7 +703,7 @@
                                     :required common-maanmittaus-schemas
                                     :attachments []
                                     :add-operation-allowed false
-                                    :link-permit-required false
+                                    :min-outgoing-link-permits 0
                                     :link-permit-verdict-required false
                                     :asianhallinta false}
      :poikkeamis                  {:schema "rakennushanke"
@@ -711,7 +711,7 @@
                                    :required  (conj common-poikkeamis-schemas "suunnittelutarveratkaisun-lisaosa")
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed false
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta true}
      :meluilmoitus                {:schema "meluilmoitus"
@@ -719,7 +719,7 @@
                                    :required ["ymp-ilm-kesto"]
                                    :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                    :add-operation-allowed false
-                                   :link-permit-required false
+                                   :min-outgoing-link-permits 0
                                    :link-permit-verdict-required false
                                    :asianhallinta true}
      ;     :pima                        {:schema "pima"
@@ -727,13 +727,13 @@
      ;                                   :required ["ymp-ilm-kesto-mini"]
      ;                                   :attachments []
      ;                                   :add-operation-allowed true
-     ;                                   :link-permit-required false
+     ;                                   :min-outgoing-link-permits 0
     :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
                                   :permit-type permit/MAL
                                   :required ["ymp-maksaja" "rakennuspaikka"]
                                   :attachments []
                                   :add-operation-allowed false
-                                  :link-permit-required false
+                                  :min-outgoing-link-permits 0
                                   :link-permit-verdict-required false
                                   :asianhallinta true}
     :vvvl-vesijohdosta           {:schema "talousvedet"
@@ -741,7 +741,7 @@
                                   :required common-vvvl-schemas
                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                   :add-operation-allowed false
-                                  :link-permit-required false
+                                  :min-outgoing-link-permits 0
                                   :link-permit-verdict-required false
                                   :asianhallinta true}
     :vvvl-viemarista             {:schema "jatevedet"
@@ -749,7 +749,7 @@
                                   :required common-vvvl-schemas
                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                   :add-operation-allowed false
-                                  :link-permit-required false
+                                  :min-outgoing-link-permits 0
                                   :link-permit-verdict-required false
                                   :asianhallinta true}
     :vvvl-vesijohdosta-ja-viemarista {:schema "talousvedet"
@@ -757,7 +757,7 @@
                                       :required (conj common-vvvl-schemas "jatevedet")
                                       :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                       :add-operation-allowed false
-                                      :link-permit-required false
+                                      :min-outgoing-link-permits 0
                                       :link-permit-verdict-required false
                                       :asianhallinta true}
     :vvvl-hulevesiviemarista    {:schema "hulevedet"
@@ -765,7 +765,7 @@
                                  :required common-vvvl-schemas
                                  :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                  :add-operation-allowed false
-                                 :link-permit-required false
+                                 :min-outgoing-link-permits 0
                                  :link-permit-verdict-required false
                                  :asianhallinta true}
 
@@ -774,9 +774,9 @@
                                   :required ["tyonjohtaja" "maksaja"]
                                   :attachments []
                                   :add-operation-allowed false
-                                  :link-permit-required true
+                                  :min-outgoing-link-permits 1
                                   :link-permit-verdict-required true
-                                  :max-incoming-link-permits 1
+                                  :max-incoming-link-permits 0
                                   :max-outgoing-link-permits 1
                                   :max-link-permits 1
                                   :asianhallinta false}
@@ -788,9 +788,9 @@
                                   :required ["hankkeen-kuvaus-minimum"]
                                   :attachments []
                                   :add-operation-allowed false
-                                  :link-permit-required true
+                                  :min-outgoing-link-permits 1
                                   :link-permit-verdict-required false
-                                  :max-incoming-link-permits 1
+                                  :max-incoming-link-permits 0
                                   :max-outgoing-link-permits 1
                                   :max-link-permits 1
                                   :asianhallinta false}
@@ -800,7 +800,7 @@
                                   :required ["suunnittelija" "maksaja"]
                                   :attachments []
                                   :add-operation-allowed false
-                                  :link-permit-required true
+                                  :min-outgoing-link-permits 1
                                   :link-permit-verdict-required true
                                   :asianhallinta false}
 
@@ -809,7 +809,7 @@
                                   :required ["maksaja"]
                                   :attachments []
                                   :add-operation-allowed false
-                                  :link-permit-required true
+                                  :min-outgoing-link-permits 1
                                   :link-permit-verdict-required true
                                   :asianhallinta false}
 
@@ -818,7 +818,7 @@
                                   :required []
                                   :attachments []
                                   :add-operation-allowed false
-                                  :link-permit-required false
+                                  :min-outgoing-link-permits 0
                                   :link-permit-verdict-required false
                                   :asianhallinta false}
 
@@ -827,7 +827,7 @@
                                   :required common-rakval-schemas
                                   :attachments [:paapiirustus [:asemapiirros]]
                                   :add-operation-allowed true
-                                  :link-permit-required false
+                                  :min-outgoing-link-permits 0
                                   :link-permit-verdict-required false
                                   :asianhallinta false}
 
@@ -836,7 +836,7 @@
                                   :required ["maksaja"]
                                   :attachments []
                                   :add-operation-allowed false
-                                  :link-permit-required true
+                                  :min-outgoing-link-permits 1
                                   :link-permit-verdict-required true
                                   :asianhallinta false}
     :raktyo-aloit-loppuunsaat   {:schema "hankkeen-kuvaus-minimum"
@@ -844,7 +844,7 @@
                                  :required ["maksaja"]
                                  :attachments []
                                  :add-operation-allowed false
-                                 :link-permit-required true
+                                 :min-outgoing-link-permits 1
                                  :link-permit-verdict-required true
                                  :asianhallinta false}
     :tonttijako                 {:schema "maankayton-muutos"
@@ -852,7 +852,7 @@
                                  :required common-maanmittaus-schemas
                                  :attachments []
                                  :add-operation-allowed false
-                                 :link-permit-required false
+                                 :min-outgoing-link-permits 0
                                  :link-permit-verdict-required false
                                  :asianhallinta false}
     :asemakaava                 {:schema "maankayton-muutos"
@@ -860,7 +860,7 @@
                                  :required common-maanmittaus-schemas
                                  :attachments []
                                  :add-operation-allowed false
-                                 :link-permit-required false
+                                 :min-outgoing-link-permits 0
                                  :link-permit-verdict-required false
                                  :asianhallinta true}
      :ranta-asemakaava          {:schema "maankayton-muutos"
@@ -868,7 +868,7 @@
                                  :required common-maanmittaus-schemas
                                  :attachments []
                                  :add-operation-allowed false
-                                 :link-permit-required false
+                                 :min-outgoing-link-permits 0
                                  :link-permit-verdict-required false
                                  :asianhallinta true}
      :yleiskaava                {:schema "maankayton-muutos"
@@ -876,7 +876,7 @@
                                  :required common-maanmittaus-schemas
                                  :attachments []
                                  :add-operation-allowed false
-                                 :link-permit-required false
+                                 :min-outgoing-link-permits 0
                                  :link-permit-verdict-required false
                                  :asianhallinta true}
      }
@@ -893,7 +893,7 @@
 
 (def link-permit-required-operations
   (reduce (fn [result [operation metadata]]
-            (if (:link-permit-required metadata)
+            (if (pos? (:min-outgoing-link-permits metadata))
               (conj result operation)
               result)) #{} operations))
 
