@@ -222,17 +222,17 @@
                                                ["Kaivu: Alkukatselmus pidett\u00e4v\u00e4."
                                                 "Kaivu: Viheralueet rakennettava."],
                                                :takuuaikaPaivat "760"}}]}],
-      :documents [{:schema-info {:version 1,
+      :documents [{:id "560524f2dacf322aecce8633",
+                   :created 1443177714333,
+                   :meta {:_indicator_reset {:timestamp 1443177770260}},
+                   :schema-info {:version 1,
                                  :order 63,
                                  :repeating false,
                                  :removable false,
                                  :type "group",
                                  :name "tyoaika"},
-                   :meta {:_indicator_reset {:timestamp 1443177770260}},
-                   :id "560524f2dacf322aecce8633",
                    :data {:tyoaika-paattyy-pvm {:value "25.09.2015", :modified 1443177751909},
-                          :tyoaika-alkaa-pvm {:value "30.09.2015", :modified 1443177749608}},
-                   :created 1443177714333}]}))
+                          :tyoaika-alkaa-pvm {:value "30.09.2015", :modified 1443177749608}}}]}))
 
 
 (defn- check-sent-reminder-email [to subject bodyparts & [application-id link-role]]
