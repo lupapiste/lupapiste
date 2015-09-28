@@ -633,6 +633,6 @@ LUPAPISTE.ApplicationModel = function() {
     var primaryOp = lupapisteApp.models.application.primaryOperation();
 
     return lupapisteApp.models.applicationAuthModel.ok("create-doc") &&
-      primaryOp && _.includes(primaryOp.optional(), "secondary-kiinteistot");
+      _.includes(util.getIn(primaryOp, ["optional"]), "secondary-kiinteistot");
   });
 };
