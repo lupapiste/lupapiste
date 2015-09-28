@@ -60,6 +60,8 @@ jQuery(document).ready(function() {
     {name: "maaraala-tunnus"},
     {name: "property-group"},
     {name: "password-field"},
+    {name: "accordion-toolbar"},
+    {name: "group-approval"},
     {name: "submit-button"},
     {name: "remove-button"}
   ];

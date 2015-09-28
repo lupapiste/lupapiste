@@ -38,6 +38,7 @@ Mikko still can't approve application
 Ronja tries to approve application without permission
   Ronja logs in
   Open application  ${appname}  753-416-25-30
+  #Sleep  600s
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
   Kill session
 
@@ -84,12 +85,11 @@ Mikko logs in and sees correct approval state
   Group approved  lammitys
   [Teardown]  Kill session
 
-Sonja logs in and approves groups kaytto and mitat
+Sonja logs in and approves group kaytto: uusiRakennus is now approved.
   Sonja logs in
   Open application  ${appname}  753-416-25-30
   Open accordions  info
   Approve group  kaytto
-  Approve group  mitat
   Sonja accordion approved  uusiRakennus
 
 Party tab has indicators
@@ -127,20 +127,36 @@ Mikko comes back, fills in missing parts and no submit button enabled
 
 Accordion approved
   [Arguments]  ${name}
-  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky button.positive.approved i.approved
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky button.positive i.approved
   Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status i.approved
   Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status span:contains('Sibbo Sonja')
   # Every group is approved or neutral
   Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}] i.rejected
 
 
+Approve button visible
+  [Arguments]  ${name}
+  Element should be visible  jquery=section[data-doc-type=${name}] button[data-test-id=approve-doc-${name}]
+
+Reject button visible
+  [Arguments]  ${name}
+  Element should be visible  jquery=section[data-doc-type=${name}] button[data-test-id=reject-doc-${name}]
+
+Approve button not visible
+  [Arguments]  ${name}
+  Element should not be visible  jquery=section[data-doc-type=${name}] button[data-test-id=approve-doc-${name}]
+
+Reject button not visible
+  [Arguments]  ${name}
+  Element should not be visible  jquery=section[data-doc-type=${name}] button[data-test-id=reject-doc-${name}]
+
 Sonja accordion approved
   [Arguments]  ${name}
   Accordion approved  ${name}
-  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.rejected
-  Element should not be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.approved
-  # Every group is approved or neutral
-  Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}] .accordion_content button.approved
+  Approve button not visible  ${name}
+  Reject button visible  ${name}
+  # Every group is approved
+  Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}] .accordion_content i.lupicon-check
 
 
 Accordion rejected
@@ -153,8 +169,8 @@ Accordion rejected
 Sonja accordion rejected
   [Arguments]  ${name}
   Accordion rejected  ${name}
-  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.approved
-  Element should not be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.rejected
+  Approve button visible  ${name}
+  Reject button not visible  ${name}
 
 # If a subgroup is rejected, the approved accordion is negated: it is no longer positive, has reject icon
 # but both buttons are visible.
@@ -167,8 +183,10 @@ Accordion negated
 Sonja accordion negated
   [Arguments]  ${name}
   Accordion negated  ${name}
-  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.approved
-  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.rejected
+  Approve button visible  ${name}
+  Reject button visible  ${name}
+  # Element should be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.approved
+  # Element should be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.rejected
 
 Group neutral
   [Arguments]  ${name}

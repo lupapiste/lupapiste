@@ -164,7 +164,7 @@
       model.status(hash);
       scrollToResponse();
     } else {
-      vetuma.getUser(gotUser, util.nop);
+      vetuma.getUser(gotUser, _.noop);
     }
   });
 

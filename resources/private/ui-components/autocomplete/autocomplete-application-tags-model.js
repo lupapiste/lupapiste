@@ -2,6 +2,8 @@ LUPAPISTE.AutocompleteApplicationTagsModel = function(params) {
   "use strict";
   var self = this;
 
+  self.lPlaceholder = params.lPlaceholder;
+
   self.selected = params.selectedValues;
 
   self.query = ko.observable("");

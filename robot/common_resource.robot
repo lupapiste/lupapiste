@@ -160,11 +160,13 @@ Close side panel
 
 Open accordions
   [Arguments]  ${tab}
-  # The accordion-toggle class can either be in button or its container.
-  Execute Javascript  $("#application-${tab}-tab button.accordion-toggle.toggled").click();
-  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle.toggled [data-accordion-id]").click();
-  Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
-  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
+  # Open all accordions regardless of tab.
+  Execute Javascript  AccordionState.toggleAll( true );
+  # # The accordion-toggle class can either be in button or its container.
+  # Execute Javascript  $("#application-${tab}-tab button.accordion-toggle.toggled").click();
+  # Execute Javascript  $("#application-${tab}-tab div.accordion-toggle.toggled [data-accordion-id]").click();
+  # Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
+  # Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
 
 Open accordion by test id
   [Arguments]  ${testId}

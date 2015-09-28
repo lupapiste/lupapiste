@@ -126,15 +126,12 @@
    :states           states/all-states
    :user-authz-roles action/all-authz-roles
    :org-authz-roles  action/reader-org-authz-roles
-   :parameters       [:id]}
+   :parameters       [id]}
   [{application :application user :user :as command}]
-  (if application
-    (let [application-id (:id application)
-          app-link-resp (mongo/select :app-links {:link {$in [application-id]}})
-          apps-linking-to-us (filter #(= (:type ((keyword application-id) %)) "linkpermit") app-link-resp)
-          foreman-application-links (filter #(= (:apptype (first (:link %)) "tyonjohtajan-nimeaminen")) apps-linking-to-us)
-          foreman-application-ids (map (fn [link] (first (:link link))) foreman-application-links)
-          applications (mongo/select :applications {:_id {$in foreman-application-ids}})
-          mapped-applications (map (fn [app] (foreman/foreman-application-info app)) applications)]
-      (ok :applications (sort-by :id mapped-applications)))
-    (fail :error.not-found)))
+  (let [app-link-resp (mongo/select :app-links {:link {$in [id]}})
+        apps-linking-to-us (filter #(= (:type ((keyword id) %)) "linkpermit") app-link-resp)
+        foreman-application-links (filter #(= (:apptype (first (:link %)) "tyonjohtajan-nimeaminen")) apps-linking-to-us)
+        foreman-application-ids (map (fn [link] (first (:link link))) foreman-application-links)
+        applications (mongo/select :applications {:_id {$in foreman-application-ids}})
+        mapped-applications (map (fn [app] (foreman/foreman-application-info app)) applications)]
+    (ok :applications (sort-by :id mapped-applications))))
