@@ -16,7 +16,7 @@
 (def db-name (str "test_reminders-itest_" (now)))
 
 (mongo/connect!)
-(mongo/with-db db-name 
+(mongo/with-db db-name
   (dummy-email-server/messages :reset true)  ;; clears inbox
   (fixture/apply-fixture "minimal"))
 
@@ -99,8 +99,6 @@
    :requested timestamp-the-beginning-of-time
    :status nil})
 
-(def- app-id "LP-753-2014-12345")
-
 (def- reminder-application
   (merge
     domain/application-skeleton
@@ -131,7 +129,7 @@
      :modified timestamp-the-beginning-of-time
      :address "Naapurikuja 3"
      :permitType "R"
-     :id app-id
+     :id "LP-753-2014-12345"
      :municipality "753"}))
 
 (def- reminder-application-non-matching-neighbors
@@ -157,11 +155,11 @@
     :state "canceled"))
 
 (def- open-inforequest-entry-non-matching {:_id "0yqaV2vEcGDH9LYaLFOlxSTpLidKI7xWbuJ9IGGv0iPM0Rrd"
-                                                    :application-id (:id reminder-application-matching-to-inforequest)
-                                                    :created timestamp-1-day-ago
-                                                    :email "reba.skebamies@example.com"
-                                                    :last-used nil
-                                                    :organization-id "732-R"})
+                                           :application-id (:id reminder-application-matching-to-inforequest)
+                                           :created timestamp-1-day-ago
+                                           :email "reba.skebamies@example.com"
+                                           :last-used nil
+                                           :organization-id "732-R"})
 
 (def- open-inforequest-entry-matching
   (-> open-inforequest-entry-non-matching
@@ -217,7 +215,7 @@
 
          (batchrun/statement-request-reminder)
 
-         (let [app (mongo/by-id :applications app-id)]
+         (let [app (mongo/by-id :applications (:id reminder-application))]
            (> (-> app :statements second :reminder-sent) now-timestamp) => true?
            (-> app :statements first :reminder-sent) => nil?
            )
@@ -226,7 +224,7 @@
           (-> statement-matching :person :email)
           "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
           "Sinulta on pyydetty lausuntoa lupahakemukseen"
-          app-id "authority")
+          (:id reminder-application) "authority")
          )))
 
    (fact "the \"reminder-sent\" timestamp already exists"
@@ -238,14 +236,14 @@
 
        (batchrun/statement-request-reminder)
 
-       (let [app (mongo/by-id :applications app-id)]
+       (let [app (mongo/by-id :applications (:id reminder-application))]
          (> (-> app :statements second :reminder-sent) timestamp-the-beginning-of-time) => true?)
 
        (check-sent-reminder-email
         (-> statement-matching :person :email)
         "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
         "Sinulta on pyydetty lausuntoa lupahakemukseen"
-        app-id "authority"))
+        (:id reminder-application) "authority"))
      ))
 
 
@@ -295,7 +293,7 @@
 
          (batchrun/neighbor-reminder)
 
-         (let [app (mongo/by-id :applications app-id)
+         (let [app (mongo/by-id :applications (:id reminder-application))
                reminder-sent-statuses (filter
                                        #(= "reminder-sent" (:state %))
                                        (-> app :neighbors second :status))]
@@ -327,7 +325,7 @@
 
          (batchrun/application-state-reminder)
 
-         (let [app (mongo/by-id :applications app-id)]
+         (let [app (mongo/by-id :applications (:id reminder-application))]
            (> (:reminder-sent app) now-timestamp) => true?
 
            (check-sent-reminder-email
@@ -343,7 +341,7 @@
 
        (batchrun/application-state-reminder)
 
-       (let [app (mongo/by-id :applications app-id)]
+       (let [app (mongo/by-id :applications (:id reminder-application))]
          (> (:reminder-sent app) timestamp-the-beginning-of-time) => true?
 
          (check-sent-reminder-email
