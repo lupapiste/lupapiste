@@ -201,6 +201,7 @@
     (open-inforequest-reminder)
     (neighbor-reminder)
     (application-state-reminder)
+    (ya-work-time-is-expiring-reminder)
 
     (mongo/disconnect!)))
 
