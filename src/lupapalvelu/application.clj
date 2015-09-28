@@ -333,7 +333,10 @@
         linked-app (some-> link-permit-id
                      domain/get-application-no-access-checking
                      meta-fields/enrich-with-link-permit-data)
-        op-meta (operations/get-primary-operation-metadata linked-app)]
+        linked-op-meta (operations/get-primary-operation-metadata linked-app)]
+
+    (when (>= (count (:appsLinkingToUs linked-app)) (:max-incoming-link-permits linked-op-meta))
+      (fail! :error.max-incoming-link-permits))
 
     (mongo/update-by-id :app-links db-id
                         {:_id           db-id
