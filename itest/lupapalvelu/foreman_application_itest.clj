@@ -180,6 +180,12 @@
     (fact "can not link foreman application with a second application"
       (command mikko :add-link-permit :id foreman-app-id3 :linkPermitId other-r-app-id) => fail?)
 
+    (fact "can not link foreman application with YA application"
+      (fact "Setup: remove old link"
+        (command mikko :remove-link-permit-by-app-id :id foreman-app-id3 :linkPermitId history-base-app-id) => ok?)
+
+      (command mikko :add-link-permit :id foreman-app-id3 :linkPermitId ya-app-id) => fail?)
+
     (fact "can not link foreman applications to each other"
       (fact "Setup: remove old link"
         (command mikko :remove-link-permit-by-app-id :id foreman-app-id4 :linkPermitId history-base-app-id) => ok?)
