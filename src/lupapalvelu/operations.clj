@@ -321,6 +321,8 @@
    :min-outgoing-link-permits sc/Num
    (sc/optional-key :max-outgoing-link-permits) sc/Num
    (sc/optional-key :max-incoming-link-permits) sc/Num
+   ; allowed permit types of link permit
+   (sc/optional-key :allowed-link-permit-types) #{sc/Str}
 
    :asianhallinta sc/Bool
    })
@@ -728,6 +730,7 @@
                                   :min-outgoing-link-permits 1
                                   :max-outgoing-link-permits 1
                                   :max-incoming-link-permits 0
+                                  :allowed-link-permit-types #{permit/R permit/P}
                                   :asianhallinta false}
 
     :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
@@ -740,6 +743,7 @@
                                   :min-outgoing-link-permits 1
                                   :max-outgoing-link-permits 1
                                   :max-incoming-link-permits 0
+                                  :allowed-link-permit-types #{permit/R permit/P}
                                   :asianhallinta false}
 
     :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"

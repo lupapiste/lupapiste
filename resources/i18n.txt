@@ -1,5 +1,5 @@
 error.max-incoming-link-permits: Kohdehakimukseen ei voi lisätä enempää viitteitä
 error.max-outgoing-link-permits: Hakimukseen ei voi lisätä enempää viitteitä
-error.max-link-permits: Tähän tai kohdehakimukseen ei voi lisätä enempää viitteitä
+error.link-permit-wrong-type: Kohdehakemus on väärää tyyppiä
 
 error.jatkolupa-can-only-be-added-one-link-permit POISTA AVAIN
