@@ -18,7 +18,7 @@
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
             [sade.env :as env]
-            [sade.dummy-email-server]
+            [sade.dummy-email-server :refer :all]
             [sade.core :refer :all]))
 
 
