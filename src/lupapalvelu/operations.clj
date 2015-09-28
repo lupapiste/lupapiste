@@ -317,7 +317,6 @@
    (sc/optional-key :max-incoming-link-permits) sc/Num
    :add-operation-allowed sc/Bool
    :required [sc/Str]
-   (sc/optional-key :max-link-permits) sc/Num
    (sc/optional-key :optional) #{sc/Str}
    (sc/optional-key :subtypes) [(sc/maybe sc/Keyword)]
    (sc/optional-key :state-graph-resolver) util/Fn
@@ -778,7 +777,6 @@
                                   :max-outgoing-link-permits 1
                                   :link-permit-verdict-required true
                                   :max-incoming-link-permits 0
-                                  :max-link-permits 1
                                   :asianhallinta false}
 
     :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
@@ -792,7 +790,6 @@
                                   :max-outgoing-link-permits 1
                                   :link-permit-verdict-required false
                                   :max-incoming-link-permits 0
-                                  :max-link-permits 1
                                   :asianhallinta false}
 
     :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"

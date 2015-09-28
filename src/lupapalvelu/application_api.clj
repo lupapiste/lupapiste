@@ -500,7 +500,7 @@
 (defn- validate-linking [command app]
   (let [link-permit-id (ss/trim (get-in command [:data :linkPermitId]))
         {:keys [appsLinkingToUs linkPermitData]} (meta-fields/enrich-with-link-permit-data app)
-        {:keys [max-link-permits max-incoming-link-permits max-outgoing-link-permits]} (operations/get-primary-operation-metadata app)
+        {:keys [max-incoming-link-permits max-outgoing-link-permits]} (operations/get-primary-operation-metadata app)
         links    (concat appsLinkingToUs linkPermitData)
         illegal-apps (conj links app)]
     (cond
@@ -513,8 +513,7 @@
       (and max-outgoing-link-permits (= max-outgoing-link-permits (count linkPermitData)))
       (fail :error.max-outgoing-link-permits)
 
-      (and max-link-permits (= max-link-permits (count links)))
-      (fail :error.max-link-permits))))
+      )))
 
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
