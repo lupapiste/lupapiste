@@ -14,6 +14,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.validators :as v]
             [monger.operators :refer :all]))
 
 (defcommand create-foreman-application
@@ -32,14 +33,24 @@
                                (domain/get-applicant-documents new-application-docs))
         auth (:auth application)
         applicant-invites (foreman/applicant-invites unwrapped-applicants auth)
+        foreman-invite (when (v/valid-email? foremanEmail)
+                         (auth/create-invite-auth
+                           user
+                           (user/get-or-create-user-by-email foremanEmail user)
+                           (:id foreman-app)
+                           "foreman"
+                           created))
         auths (remove
                 nil?
-                (map (fn [inv]
+                (conj
+                  (map
+                    (fn [inv]
                       (if (:company-id inv)
                         (foreman/create-company-auth (:company-id inv))
                         (when-let [invited (user/get-or-create-user-by-email (:email inv) user)]
-                          (auth/create-invite-auth user invited (:id foreman-app) (:role inv) created)))
-                      ) applicant-invites))
+                          (auth/create-invite-auth user invited (:id foreman-app) (:role inv) created))))
+                    applicant-invites)
+                  foreman-invite))
         grouped (group-by #(if (not= "company" (:type %))
                              :company
                              :other) auths)
