@@ -18,14 +18,11 @@
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
             [sade.env :as env]
-            [sade.dummy-email-server :refer :all]
+            [sade.dummy-email-server]
             [sade.core :refer :all]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
-(defn- newer-than [timestamp] {$gt timestamp})
-(defn- older-newer-than [start-timestamp end-timestamp] {$gt start-timestamp
-                                                         $lt end-timestamp})
 
 (defn- get-app-owner [application]
   (let [owner (domain/get-auths-by-role application :owner)]
