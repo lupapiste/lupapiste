@@ -301,19 +301,29 @@
     states/tj-hakemus-state-graph))
 
 (def Operation
-  {:schema sc/Str
-   :permit-type (sc/pred permit/valid-permit-type?)
+  {; Documents
+   :schema sc/Str
+   :required [sc/Str]
+   (sc/optional-key :optional) #{sc/Str}
+   (sc/optional-key :schema-data) [sc/Any]
+
    :attachments [sc/Any]
-   :asianhallinta sc/Bool
+
+   ; Type and workflow
+   :permit-type (sc/pred permit/valid-permit-type?)
+   (sc/optional-key :subtypes) [(sc/maybe sc/Keyword)]
+   (sc/optional-key :state-graph-resolver) util/Fn
+
+   ; Can be added to existing application (or only created with a new application)
+   :add-operation-allowed sc/Bool
+
+   ; Link permits
    :min-outgoing-link-permits sc/Num
    (sc/optional-key :max-outgoing-link-permits) sc/Num
    (sc/optional-key :max-incoming-link-permits) sc/Num
-   :add-operation-allowed sc/Bool
-   :required [sc/Str]
-   (sc/optional-key :optional) #{sc/Str}
-   (sc/optional-key :subtypes) [(sc/maybe sc/Keyword)]
-   (sc/optional-key :state-graph-resolver) util/Fn
-   (sc/optional-key :schema-data) [sc/Any]})
+
+   :asianhallinta sc/Bool
+   })
 
 (def operations
   (merge
