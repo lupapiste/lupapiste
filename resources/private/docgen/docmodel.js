@@ -369,8 +369,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return label;
   }
 
-  function sourceValueChanged(input, value, sourceValue, localizedSourceValue) {
-    if (sourceValue === value) {
+  function sourceValueChanged(input, value, sourceValue, source, localizedSourceValue) {
+    if (sourceValue === value || !source) {
       input.removeAttribute("title");
       $(input).removeClass("source-value-changed");
     } else if (sourceValue !== undefined && sourceValue !== value){
@@ -382,6 +382,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function makeInput(type, pathStr, modelOrValue, subSchema) {
     var value = _.isObject(modelOrValue) ? getModelValue(modelOrValue, subSchema.name) : modelOrValue;
     var sourceValue = _.isObject(modelOrValue) ? getModelSourceValue(modelOrValue, subSchema.name) : undefined;
+    var source = _.isObject(modelOrValue) ? getModelSource(modelOrValue, subSchema.name) : undefined;
     var extraClass = self.sizeClasses[subSchema.size] || "";
     var readonly = subSchema.readonly || getModelDisabled(modelOrValue, subSchema.name);
 
@@ -404,9 +405,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else {
       input.onchange = function(e) {
         if (type === "checkbox") {
-          sourceValueChanged(input, input.checked, sourceValue, sourceValue ? loc("selected") : loc("notSelected"));
+          sourceValueChanged(input, input.checked, sourceValue, source, sourceValue ? loc("selected") : loc("notSelected"));
         } else {
-          sourceValueChanged(input, input.value, sourceValue);
+          sourceValueChanged(input, input.value, sourceValue, source);
         }
         save(e, function() {
           if (subSchema) {
@@ -418,10 +419,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (type === "checkbox") {
       input.checked = value;
-      sourceValueChanged(input, value, sourceValue, sourceValue ? loc("selected") : loc("notSelected"));
+      sourceValueChanged(input, value, sourceValue, source, sourceValue ? loc("selected") : loc("notSelected"));
     } else {
       input.value = value || "";
-      sourceValueChanged(input, value, sourceValue);
+      sourceValueChanged(input, value, sourceValue, source);
     }
     return input;
   }
@@ -569,6 +570,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return util.getIn(model, [name, "sourceValue"]);
   }
 
+  function getModelSource(model, name) {
+    return util.getIn(model, [name, "source"]);
+  }
+
   function getModelDisabled(model, name) {
     return util.getIn(model, [name, "whitelist-action"]) === "disabled";
   }
@@ -598,14 +603,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var value = getModelValue(model, subSchema.name);
     input.value = value;
     var sourceValue = _.isObject(model) ? getModelSourceValue(model, subSchema.name) : undefined;
+    var source = _.isObject(model) ? getModelSource(model, subSchema.name) : undefined;
 
-    sourceValueChanged(input, value, sourceValue);
+    sourceValueChanged(input, value, sourceValue, source);
 
     if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
       input.readOnly = true;
     } else {
       input.onchange = function(e) {
-        sourceValueChanged(input, input.value, sourceValue);
+        sourceValueChanged(input, input.value, sourceValue, source);
         save(e);
       };
     }
@@ -638,14 +644,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     });
 
     var sourceValue = getModelSourceValue(model, subSchema.name);
+    var source = getModelSource(model, subSchema.name);
 
-    sourceValueChanged(input.get(0), value, sourceValue);
+    sourceValueChanged(input.get(0), value, sourceValue, source);
 
     if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
       input.attr("readonly", true);
     } else {
       input.datepicker($.datepicker.regional[lang]).change(function(e) {
-        sourceValueChanged(input.get(0), input.val(), sourceValue);
+        sourceValueChanged(input.get(0), input.val(), sourceValue, source);
         save(e);
       });
     }
@@ -675,6 +682,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var selectedOption = getModelValue(model, subSchema.name);
     var sourceValue = getModelSourceValue(model, subSchema.name);
+    var source = getModelSource(model, subSchema.name);
     var span = makeEntrySpan(subSchema, myPath);
     var sizeClass = self.sizeClasses[subSchema.size] || "";
 
@@ -752,13 +760,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       return e.name === sourceValue;
     });
 
-    sourceValueChanged(select, selectedOption, sourceValue, locSelectedOption ? locSelectedOption[1] : undefined);
+    sourceValueChanged(select, selectedOption, sourceValue, source, locSelectedOption ? locSelectedOption[1] : undefined);
 
     if (subSchema.readonly) {
       select.readOnly = true;
     } else {
       select.onchange = function(e) {
-        sourceValueChanged(select, select.value, sourceValue, locSelectedOption ? locSelectedOption[1] : undefined);
+        sourceValueChanged(select, select.value, sourceValue, source, locSelectedOption ? locSelectedOption[1] : undefined);
         save(e);
         emit(getEvent(e).target, subSchema);
       };
