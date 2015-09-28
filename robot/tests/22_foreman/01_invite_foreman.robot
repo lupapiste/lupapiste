@@ -12,12 +12,12 @@ Pena creates new application
 
 Pena invites Mikko
   Open tab  parties
-  Open accordions  parties
+  Open foreman accordions
   Invite Mikko
 
 Pena invites Solita
   Open tab  parties
-  Open accordions  parties
+  Open foreman accordions
   Wait Until  Click Element  xpath=//div[@class='parties-list']//button[@data-test-id='company-invite']
   Wait Until  Element should be visible  xpath=//div[@data-test-id='modal-dialog-content']
   Element should not be visible  xpath=//div[@data-test-id='company-invite-confirm-help']
@@ -47,7 +47,7 @@ Mikko accepts invitation
 #   Pena logs in
 #   Open application  ${appname}  753-416-25-22
 #   Open tab  parties
-#   Open accordions  parties
+#   Open foreman accordions
 #   Select From List  xpath=//section[@data-doc-type="hakija-r"]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]  Intonen Mikko
 #   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
 
@@ -55,7 +55,7 @@ Pena sets Solita as hakija
   Pena logs in
   Open application  ${appname}  753-416-25-22
   Open tab  parties
-  Open accordions  parties
+  Open foreman accordions
   Wait until  Click Element  xpath=//section[@data-doc-type="hakija-r"]//input[@value="yritys"]
   Wait until  Select From List  xpath=//section[@data-doc-type="hakija-r"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="yritys.yritysnimi"]  Solita Oy
@@ -72,13 +72,13 @@ Pena invites foreman to application
 Pena sees sent invitation on the original application
   Go back to project application
   Open tab  parties
-  Open accordions  parties
+  Open foreman accordions
   Wait until  Element text should be  xpath=//ul[@data-test-id='invited-foremans']//span[@data-test-id='foreman-email']  (teppo@example.com)
 
 Pena sees sent invitations on the foreman application
   Open application by id  ${foremanAppId}
   Open tab  parties
-  Open accordions  parties
+  Open foreman accordions
   Wait until  Xpath Should Match X Times  //ul/li[@class="party"]  3
   [Teardown]  logout
 
@@ -128,8 +128,6 @@ Authority can view draft foreman application, but can't use commands
   Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-add-link-permit-btn"]
   Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-cancel-btn"]
   Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-cancel-authority-btn"]
-
-
 
 
 Original application is approved and given a verdict
