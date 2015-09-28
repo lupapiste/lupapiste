@@ -36,10 +36,21 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
     return user;
   }
 
-  ajax
-    .query("users-in-same-organizations")
-    .success(function(res) {
-      usersInSameOrganizations(_(res.users).map(mapUser).sortBy("fullName").value());
-    })
-    .call();
+  function load() {
+    if (lupapisteApp.models.globalAuthModel.ok("users-in-same-organizations")) {
+      ajax
+        .query("users-in-same-organizations")
+        .success(function(res) {
+          usersInSameOrganizations(_(res.users).map(mapUser).sortBy("fullName").value());
+        })
+        .call();
+      return true;
+    }
+    return false;
+  }
+
+  if (!load()) {
+    hub.subscribe("global-auth-model-loaded", load, true);
+  }
+
 };
