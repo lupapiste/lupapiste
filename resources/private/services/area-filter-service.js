@@ -32,10 +32,15 @@ LUPAPISTE.AreaFilterService = function(applicationFiltersService) {
         .value());
   });
 
-  ajax
-    .query("get-organization-areas")
-    .success(function(res) {
-      _data(res.areas);
-    })
-    .call();
+  hub.subscribe("global-auth-model-loaded", function(){
+    if (lupapisteApp.models.globalAuthModel.ok("get-organization-areas")) {
+      ajax
+        .query("get-organization-areas")
+        .success(function(res) {
+          _data(res.areas);
+        })
+        .call();
+    }
+  }, true);
+
 };
