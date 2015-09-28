@@ -775,9 +775,9 @@
                                   :attachments []
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 1
+                                  :max-outgoing-link-permits 1
                                   :link-permit-verdict-required true
                                   :max-incoming-link-permits 0
-                                  :max-outgoing-link-permits 1
                                   :max-link-permits 1
                                   :asianhallinta false}
 
@@ -789,9 +789,9 @@
                                   :attachments []
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 1
+                                  :max-outgoing-link-permits 1
                                   :link-permit-verdict-required false
                                   :max-incoming-link-permits 0
-                                  :max-outgoing-link-permits 1
                                   :max-link-permits 1
                                   :asianhallinta false}
 
