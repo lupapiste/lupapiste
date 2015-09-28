@@ -134,7 +134,7 @@ Sonja sets sort-by-location filter as default
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "sort-by-location")]
 
 Sonja closes saved filters
-  Click by test id  toggle-saved-filters
+  Wait Until  Click Element  //div[@data-test-id="advanced-filters"]//button[@data-test-id="toggle-saved-filters"]
   Wait Until  Element Should Not Be Visible  //div[@data-test-id="saved-filter-row-MEGA"]
 
 Default filter should be sort-by-location filter
@@ -167,7 +167,7 @@ Sonja trys to overwrite MEGA filter
   Wait Until  Element Should Be Visible  //div[@data-test-id="new-filter-submit-button"]//span[contains(text(), "Nimi on jo käytössä")]
 
 Sonja removes sort-by-location filter
-  Click by test id  toggle-saved-filters
+  Wait Until  Click Element  //div[@data-test-id="advanced-filters"]//button[@data-test-id="toggle-saved-filters"]
   Wait Until  Element should be visible  xpath=//div[@data-test-id="advanced-filters"]
   Wait Until  Click Element  //div[@data-test-id="remove-filter-sort-by-location"]//button[@data-test-id="remove-button"]
   Wait Until  Click Element  //div[@data-test-id="remove-filter-sort-by-location"]//button[@data-test-id="cancel-remove-button"]
