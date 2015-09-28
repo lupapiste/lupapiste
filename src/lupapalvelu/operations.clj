@@ -896,8 +896,8 @@
 
 (defn get-operation-metadata
   "First form returns all metadata for operation. Second form returns value of given metadata."
-  ([operation] (operations (keyword operation)))
-  ([operation metadata-key] ((keyword metadata-key) (operations (keyword operation)))))
+  ([operation-name] (when operation-name (operations (keyword operation-name))))
+  ([operation-name metadata-key] (when operation-name ((keyword metadata-key) (operations (keyword operation-name))))))
 
 (defn get-primary-operation-metadata
   ([{op :primaryOperation}] (get-operation-metadata (:name op)))
