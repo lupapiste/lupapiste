@@ -23,6 +23,9 @@
 
 
 (defn- older-than [timestamp] {$lt timestamp})
+(defn- newer-than [timestamp] {$gt timestamp})
+(defn- older-newer-than [start-timestamp end-timestamp] {$gt start-timestamp
+                                                         $lt end-timestamp})
 
 (defn- get-app-owner [application]
   (let [owner (domain/get-auths-by-role application :owner)]
@@ -138,6 +141,46 @@
 (notifications/defemail :reminder-application-state
   {:subject-key    "active-application-reminder"
    :recipients-fn  notifications/from-user})
+
+
+;; Email definition for the "YA work time is expiring"
+
+(defn- ya-work-time-is-expiring-reminder-email-model [{{work-time-expires-date :work-time-expires-date :as data} :data application :application :as command} _ recipient]
+  {:link-fi (notifications/get-application-link application nil "fi" recipient)
+   :link-sv (notifications/get-application-link application nil "sv" recipient)
+   :address (:address application)
+   :work-time-expires-date work-time-expires-date})
+
+(notifications/defemail :reminder-ya-work-time-is-expiring
+  {:subject-key    "ya-work-time-is-expiring-reminder"
+   :model-fn       ya-work-time-is-expiring-reminder-email-model})
+
+;; "YA hakemus: Hakemukselle merkitty tyoaika umpeutuu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
+(defn ya-work-time-is-expiring-reminder []
+  (let [timestamp-1-week-ago (util/get-timestamp-from-now :week 1)
+        apps (mongo/select :applications {:permitType "YA"
+                                          :state {$in ["verdictGiven" "constructionStarted"]}
+                                          ;; Cannot compare timestamp directly against date string here (e.g against "08.10.2015"). Must do it in function body.
+                                          :documents {$elemMatch {:schema-info.name "tyoaika"}}
+                                          :work-time-expiring-reminder-sent {$exists false}})]
+    (doseq [app apps
+            :let [tyoaika-doc (some
+                                (fn [doc]
+                                  (when (= "tyoaika" (-> doc :schema-info :name)) doc))
+                                (:documents app))
+                  work-time-expires-str (-> tyoaika-doc :data :tyoaika-paattyy-pvm :value)
+                  work-time-expires-timestamp (util/to-millis-from-local-date-string work-time-expires-str)]
+            :when (and
+                    work-time-expires-timestamp
+                    (> work-time-expires-timestamp timestamp-1-week-ago)
+                    (< work-time-expires-timestamp (now)))]
+      (notifications/notify! :reminder-ya-work-time-is-expiring {:application app
+                                                                 :user (get-app-owner app)
+                                                                 :data {:work-time-expires-date work-time-expires-str}})
+      (update-application (application->command app)
+        {$set {:work-time-expiring-reminder-sent (now)}}))))
+
+
 
 ;; "Hakemus: Hakemuksen tila on valmisteilla tai vireilla, mutta edellisesta paivityksesta on aikaa yli kuukausi. Lahetetaan kuukausittain uudelleen."
 (defn application-state-reminder []
