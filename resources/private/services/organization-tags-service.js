@@ -16,13 +16,19 @@ LUPAPISTE.OrganizationTagsService = function() {
     return [];
   });
 
-  hub.subscribe("global-auth-model-loaded", function(){
+  function load(){
     if (lupapisteApp.models.globalAuthModel.ok("get-organization-tags")) {
       ajax.query("get-organization-tags")
         .success(function(res) {
           _data(res.tags);
         })
         .call();
+      return true;
     }
-  }, true);
+    return false;
+  }
+
+  if (!load()) {
+    hub.subscribe("global-auth-model-loaded", load, true);
+  }
 };

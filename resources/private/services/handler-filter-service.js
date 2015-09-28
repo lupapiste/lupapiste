@@ -36,7 +36,7 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
     return user;
   }
 
-  hub.subscribe("global-auth-model-loaded", function(){
+  function load() {
     if (lupapisteApp.models.globalAuthModel.ok("users-in-same-organizations")) {
       ajax
         .query("users-in-same-organizations")
@@ -44,6 +44,13 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
           usersInSameOrganizations(_(res.users).map(mapUser).sortBy("fullName").value());
         })
         .call();
+      return true;
     }
-  }, true);
+    return false;
+  }
+
+  if (!load()) {
+    hub.subscribe("global-auth-model-loaded", load, true);
+  }
+
 };

@@ -35,7 +35,7 @@ LUPAPISTE.OrganizationFilterService = function(applicationFiltersService) {
 
   // TODO maybe get organizations with names with a single query, now we depend on two separate
   // async updates (get-organization-names command and currentUser.orgAuthz)
-  hub.subscribe("global-auth-model-loaded", function(){
+  function load() {
     if (lupapisteApp.models.globalAuthModel.ok("get-organization-names")) {
       ajax
         .query("get-organization-names")
@@ -43,6 +43,12 @@ LUPAPISTE.OrganizationFilterService = function(applicationFiltersService) {
           organizationNames(res);
         })
         .call();
+      return true;
     }
-  }, true);
+    return false;
+  }
+
+  if (!load()) {
+    hub.subscribe("global-auth-model-loaded", load, true);
+  }
 };
