@@ -1,6 +1,8 @@
-LUPAPISTE.AutocompleteSavedFiltersModel = function() {
+LUPAPISTE.AutocompleteSavedFiltersModel = function(params) {
   "use strict";
   var self = this;
+
+  self.lPlaceholder = params.lPlaceholder;
 
   self.selected = lupapisteApp.services.applicationFiltersService.selected;
 

@@ -19,6 +19,10 @@
       pena =not=> (allowed? :add-authority-notice :id id :authorityNotice "foobar")
       (add-authority-notice pena id "foobar") =not=> ok?)
 
+    (fact "read-only authority can't set notice message"
+      luukas =not=> (allowed? :add-authority-notice :id id :authorityNotice "foobar")
+      (add-authority-notice luukas id "foobar") =not=> ok?)
+
     (fact "authority can set notice message"
       sonja => (allowed? :add-authority-notice :id id :authorityNotice "respect my authority")
       (add-authority-notice sonja id "respect my athority") => ok?

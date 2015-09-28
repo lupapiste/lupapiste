@@ -327,7 +327,7 @@
     markDone: function(neighbor) {
       ajax
         .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.id()})
-        .complete(_.partial(repository.load, currentId, util.nop))
+        .complete(_.partial(repository.load, currentId, _.noop))
         .call();
     },
     statusCompleted: function(neighbor) {

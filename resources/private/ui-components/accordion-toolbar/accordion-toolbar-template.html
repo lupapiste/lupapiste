@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container">
+      <script type="text/x-jquery-tmpl" id="accordion-toolbar-template">
+        <div class="accordion-toggle">
+          <button class="secondary"
+                  data-bind="css: {positive: isApproved,
+                                   rejected: isSummaryRejected,
+                                   toggled: isOpen},
+                             click: toggleAccordion">
+            <i class="lupicon-chevron-down"></i>
+            <i class="lupicon-chevron-up toggle"></i>
+            <span class="bar-text">
+              <span class="title"
+                    data-bind="attr: {'data-app-id': docModel.appId,
+                                      'data-doc-id': docModel.docId},
+                               ltext: title">
+              </span>
+              <span class="description"
+                    data-bind="text: description() ? ' - ' + description() : '',
+                               attr: {'data-test-id': testId( 'op-description')}">
+              </span>
+            </span>
+            <span class="icons">
+              <i class="lupicon-circle-attention rejected"></i>
+              <i class="lupicon-circle-check approved"></i>
+            </span>
+          </button>
+
+          <div class="group-buttons"
+               data-bind="if: showToolbar,
+                          visible: showToolbar">
+            <span class="form-approval-status is-status no-border-bottom"
+                  data-bind="css: {approved: isApproved,
+                                   rejected: isRejected,
+                                   'own-line': showDescription || showStar},
+                             visible: showStatus">
+              <div class="like-btn">
+                <i class="lupicon-circle-attention rejected"></i>
+                <i class="lupicon-circle-check approved"></i>
+                <span class="is-details"
+                      data-bind="text: details"></span>
+              </div>
+            </span>
+            <button class="secondary is-left"
+                    data-bind="attr: {'data-test-id': testId('edit-op-description') },
+                               visible: showDescription,
+                               event: {mousedown: toggleEditor}">
+              <i class="lupicon-pen"></i>
+              <span data-bind="ltext: 'op-description.edit'">
+              </span>
+            </button>
+            <button class="secondary is-left"
+                    data-bind="attr: {'data-op-name': operationName},
+                               disable: isPrimaryOperation,
+                               click: clickStar,
+                               visible: showStar">
+              <i class="lupicon-star"></i>
+              <span data-bind="ltext: starTitle"></span>
+            </button>
+            <button class="secondary is-right"
+                data-bind="visible: remove.fun,
+                           attr: {'data-test-class': remove.testClass},
+                           click: remove.fun">
+              <i class="lupicon-remove"></i>
+          <span data-bind="ltext: 'remove'"></span>
+            </button>
+            <button class="secondary is-right"
+                    data-bind="attr: {'data-test-id': rejectTestId},
+                               visible: showReject,
+                               ltext: 'document.reject',
+                               click: reject">
+            </button>
+            <button class="positive is-right"
+                    data-bind="attr: {'data-test-id': approveTestId},
+                               visible: showApprove,
+                               click: approve">
+              <i class="lupicon-check"></i>
+              <span data-bind="ltext: 'document.approve'"></span>
+            </button>
+            <div class="description-bubble"
+                 data-bind="visible: showEditor">
+              <input type="text"
+                     data-bind="value: description,
+                                event: {keydown: specialKeys},
+                                hasFocus: showEditor,
+                                attr: {'data-test-id': testId( 'op-description-editor')}">
+            </div>
+          </div>
+        </div>
+      </script>
+    </section>
+  </body>
+</html>

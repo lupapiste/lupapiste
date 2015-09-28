@@ -6,9 +6,12 @@
       <div class="form-group" data-bind="attr: {id: self.groupId}">
         <div class="property-group-header">
           <label class="form-label form-label-property-group" data-bind="ltext: groupLabel"></label>
-          <input class="maaraala-checkbox" type="checkbox" data-bind="checked: isMaaraala, attr: { id: checkboxId }"
-                 data-test-id="maaraala-checkbox">
-          <label data-bind="attr: { for: checkboxId }, ltext: 'kiinteisto.maaraala'"></label>  
+          <input class="maaraala-checkbox" type="checkbox"
+                 data-test-id="maaraala-checkbox"
+                 data-bind="checked: isMaaraala,
+                            attr: { id: checkboxId },
+                            enable: lupapisteApp.models.applicationAuthModel.ok('update-doc')">
+          <label data-bind="attr: { 'for': checkboxId }, ltext: 'kiinteisto.maaraala'"></label>
         </div>
 
         <div class="form-entry"
@@ -18,7 +21,7 @@
                                                documentId: documentId,
                                                model: maaraalaSchema.model,
                                                isMaaraala: isMaaraala,
-                                               propertyId: propertyId }}"></div>
+                                               propertyId: propertyId() }}"></div>
 
         <span data-bind="foreach: otherSchemas">
           <div class="form-entry"

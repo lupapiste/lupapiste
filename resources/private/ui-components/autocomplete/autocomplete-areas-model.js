@@ -1,6 +1,8 @@
-LUPAPISTE.AutocompleteAreasModel = function() {
+LUPAPISTE.AutocompleteAreasModel = function(params) {
   "use strict";
   var self = this;
+
+  self.lPlaceholder = params.lPlaceholder;
 
   self.selected = lupapisteApp.services.areaFilterService.selected;
 

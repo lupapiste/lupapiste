@@ -1,6 +1,8 @@
-LUPAPISTE.AutocompleteHandlersModel = function() {
+LUPAPISTE.AutocompleteHandlersModel = function(params) {
   "use strict";
   var self = this;
+
+  self.lPlaceholder = params.lPlaceholder;
 
   self.selected = lupapisteApp.services.handlerFilterService.selected;
 

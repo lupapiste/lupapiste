@@ -5,17 +5,18 @@
             [lupapalvelu.permit :as permit]
             [sade.util :as util]))
 
-(defn operation-name
+(defn- operation-name
   "Operation name to schema element name.
   Special cases are handled explcitly, others are converted:
   'this-is-operation' -> :ThisIsOperation"
   [name]
-  (let [specials {"lohkominen-tonttijako" :Lohkominen
-                  "lohkominen-ohjeellinen" :Lohkominen}
-        name->xml (fn [n]
-                    (let [parts (str/split n #"-")]
-                      (->> parts (map str/capitalize) str/join keyword)))]
-    (or (get specials name) (name->xml name))))
+  (when name
+    (let [specials {"lohkominen-tonttijako" :Lohkominen
+                    "lohkominen-ohjeellinen" :Lohkominen}
+          name->xml (fn [n]
+                      (let [parts (str/split n #"-")]
+                        (->> parts (map str/capitalize) str/join keyword)))]
+      (or (get specials name) (name->xml name)))))
 
 (defmulti kiinteistonmuodostus-details (fn [name _] name))
 

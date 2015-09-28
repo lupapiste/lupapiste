@@ -42,4 +42,15 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
     .call();
   };
 
+  self.clearFilters = function() {
+    lupapisteApp.services.handlerFilterService.selected([]);
+    lupapisteApp.services.tagFilterService.selected([]);
+    lupapisteApp.services.operationFilterService.selected([]);
+    lupapisteApp.services.organizationFilterService.selected([]);
+    lupapisteApp.services.areaFilterService.selected([]);
+    lupapisteApp.services.applicationFiltersService.selected(undefined);
+    dataProvider.searchField("");
+    self.newFilterName("");
+  };
+
 };

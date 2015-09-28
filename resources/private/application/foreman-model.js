@@ -142,7 +142,6 @@ LUPAPISTE.ForemanModel = function() {
           foremanApplications(data.applications);
           loadForemanTasks();
         })
-        .error(util.nop)
         .call();
     }
 
