@@ -177,14 +177,14 @@
         (let [resp (query sonja :reduced-foreman-history :id history-base-app-id) => fail?]
           (:text resp) => "error.not-foreman-app")))
 
+    (fact "can not link foreman application with a second application"
+      (command mikko :add-link-permit :id foreman-app-id3 :linkPermitId other-r-app-id) => fail?)
+
     (fact "can not link foreman applications to each other"
       (fact "Setup: remove old link"
         (command mikko :remove-link-permit-by-app-id :id foreman-app-id4 :linkPermitId history-base-app-id) => ok?)
       (fact "try to link foreman application"
         (command mikko :add-link-permit :id foreman-app-id4 :linkPermitId foreman-app-id5) => fail?))
-
-    (fact "can not link second application to foreman application"
-      (command mikko :add-link-permit :id foreman-app-id4 :linkPermitId other-r-app-id) => fail?)
 
     (fact "Link permit may be a single paper permit"
       (fact "Setup: remove old link"
