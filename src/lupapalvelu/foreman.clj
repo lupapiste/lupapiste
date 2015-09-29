@@ -178,14 +178,16 @@
       flatten)))
 
 (defn- henkilo-invite [applicant auth]
-  {:pre [(= "henkilo" (get-in applicant [:data :_selected]))]}
+  {:pre [(= "henkilo" (get-in applicant [:data :_selected]))
+         (sequential? auth)]}
   (when-let [email (user/canonize-email (get-in applicant [:data :henkilo :yhteystiedot :email]))]
     (when (some #(= email (:username %)) auth)
       {:email email
        :role "writer"})))
 
 (defn- yritys-invite [applicant auth]
-  {:pre [(= "yritys" (get-in applicant [:data :_selected]))]}
+  {:pre [(= "yritys" (get-in applicant [:data :_selected]))
+         (sequential? auth)]}
   (if-let [company-id (get-in applicant [:data :yritys :companyId])]
     {:company-id company-id}
     (when-let [contact-email (user/canonize-email
