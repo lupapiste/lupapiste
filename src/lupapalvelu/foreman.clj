@@ -202,7 +202,7 @@
                  unwrapped-applicants)))
 
 (defn create-company-auth [company-id]
-  (when-let [c (company/find-company-by-id company-id)]
+  (when-let [company (company/find-company-by-id company-id)]
     (assoc
       (company/company->auth company)
       :id "" ; prevents access to application before accepting invite
