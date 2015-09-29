@@ -18,21 +18,24 @@
             [sade.validators :as v]
             [monger.operators :refer :all]))
 
+(defn invites-to-auths [inv app-id inviter timestamp]
+  (if (:company-id inv)
+    (foreman/create-company-auth (:company-id inv))
+    (when-let [invited (user/get-or-create-user-by-email (:email inv) inviter)]
+      (auth/create-invite-auth inviter invited app-id (:role inv) timestamp))))
+
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole foremanEmail]
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/email-validator :foremanEmail)]
    :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
-  [{:keys [created user {:keys [auth] :as application}] :as command}]
+  [{:keys [created user application] :as command}]
   (let [foreman-app          (foreman/new-foreman-application command)
         new-application-docs (foreman/create-foreman-docs application foreman-app foremanRole)
         foreman-app          (assoc foreman-app :documents new-application-docs)
         task                 (util/find-by-id taskId (:tasks application))
 
-        unwrapped-applicants (tools/unwrapped
-                               (domain/get-applicant-documents new-application-docs))
-        applicant-invites (foreman/applicant-invites unwrapped-applicants auth)
         foreman-invite (when (v/valid-email? foremanEmail)
                          (auth/create-invite-auth
                            user
@@ -40,15 +43,15 @@
                            (:id foreman-app)
                            "foreman"
                            created))
+
+        unwrapped-applicants (tools/unwrapped
+                               (domain/get-applicant-documents new-application-docs))
+        applicant-invites (foreman/applicant-invites unwrapped-applicants (:auth application))
+
         auths (remove nil?
-                      (conj
-                        (map (fn [inv]
-                               (if (:company-id inv)
-                                 (foreman/create-company-auth (:company-id inv))
-                                 (when-let [invited (user/get-or-create-user-by-email (:email inv) user)]
-                                   (auth/create-invite-auth user invited (:id foreman-app) (:role inv) created))))
-                             applicant-invites)
-                        foreman-invite))
+                     (conj
+                       (map #(invites-to-auths % (:id foreman-app) user created) applicant-invites)
+                       foreman-invite))
         grouped-auths (group-by #(if (not= "company" (:type %))
                                    :company
                                    :other) auths)
@@ -61,12 +64,12 @@
     ; Send notifications for authed
     (notif/notify! :invite {:application foreman-app :recipients (:other grouped-auths)})
     (doseq [auth (:company grouped-auths)
-                 :let [company-id (-> auth :invite :user :id)
-                       token-id (company/company-invitation-token user company-id (:id foreman-app))]]
-           (notif/notify! :accept-company-invitation {:admins     (company/find-company-admins company-id)
-                                                      :caller     user
-                                                      :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
-                                                      :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)}))
+            :let [company-id (-> auth :invite :user :id)
+                  token-id (company/company-invitation-token user company-id (:id foreman-app))]]
+      (notif/notify! :accept-company-invitation {:admins     (company/find-company-admins company-id)
+                                                 :caller     user
+                                                 :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
+                                                 :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)}))
 
     (when task
       (let [updates [[[:asiointitunnus] (:id foreman-app)]]]
