@@ -295,10 +295,17 @@
    :link-permit-verdict-required false
    :asianhallinta true})
 
-(def yl-operations
+(def- yl-operations
   {:yl-uusi-toiminta ymparistolupa-operation
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
-   :yl-toiminnan-muutos ymparistolupa-operation})
+   :yl-toiminnan-muutos ymparistolupa-operation
+;   :pima {:schema "pima"
+;          :permit-type permit/YL
+;          :required ["ymp-ilm-kesto-mini"]
+;          :attachments []
+;          :add-operation-allowed true
+;          :link-permit-required false}
+   })
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
   (if (= :tyonjohtaja-ilmoitus (keyword subtype))
@@ -718,12 +725,6 @@
                                    :link-permit-required false
                                    :link-permit-verdict-required false
                                    :asianhallinta true}
-     ;     :pima                        {:schema "pima"
-     ;                                   :permit-type permit/YL
-     ;                                   :required ["ymp-ilm-kesto-mini"]
-     ;                                   :attachments []
-     ;                                   :add-operation-allowed true
-     ;                                   :link-permit-required false
     :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
                                   :permit-type permit/MAL
                                   :required ["ymp-maksaja" "rakennuspaikka"]
