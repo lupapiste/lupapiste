@@ -36,19 +36,18 @@
         foreman-app          (assoc foreman-app :documents new-application-docs)
         task                 (util/find-by-id taskId (:tasks application))
 
-        foreman-invite (when (v/valid-email? foremanEmail)
-                         (auth/create-invite-auth
-                           user
-                           (user/get-or-create-user-by-email foremanEmail user)
-                           (:id foreman-app)
-                           "foreman"
-                           created))
-        applicant-invites (foreman/applicant-invites new-application-docs (:auth application))
+        foreman-user   (when (v/valid-email? foremanEmail) (user/get-or-create-user-by-email foremanEmail user))
+        foreman-invite (when foreman-user
+                         (auth/create-invite-auth user foreman-user (:id foreman-app) "foreman" created))
+        invite-to-original? (and
+                              foreman-user
+                              (not (domain/has-auth? application (:id foreman-user))))
 
-        auths (remove nil?
-                     (conj
-                       (map #(invites-to-auths % (:id foreman-app) user created) applicant-invites)
-                       foreman-invite))
+        applicant-invites (foreman/applicant-invites new-application-docs (:auth application))
+        auths             (remove nil?
+                                 (conj
+                                   (map #(invites-to-auths % (:id foreman-app) user created) applicant-invites)
+                                   foreman-invite))
         grouped-auths (group-by #(if (not= "company" (:type %))
                                    :company
                                    :other) auths)
@@ -64,6 +63,13 @@
 
     ; Send notifications for authed
     (try
+      (when invite-to-original?
+        (update-application command
+          {:auth {$not {$elemMatch {:invite.user.username (:email foreman-user)}}}}
+          {$push {:auth (auth/create-invite-auth user foreman-user (:id application) "foreman" created)}
+           $set  {:modified created}})
+        (notif/notify! :invite {:application application :recipients [foreman-user]}))
+
       (notif/notify! :invite {:application foreman-app :recipients (:other grouped-auths)})
       (doseq [auth (:company grouped-auths)
               :let [company-id (-> auth :invite :user :id)
