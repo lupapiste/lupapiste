@@ -15,10 +15,13 @@
 
 (defn in-post-verdict-state? [_ app] (contains? states/post-verdict-states (keyword (:state app))))
 
+(defn- full-name [first-name last-name]
+  (s/trim (str last-name \space first-name)))
+
 (defn- applicant-name-from-auth [application]
   (let [owner (first (domain/get-auths-by-role application :owner))
         {first-name :firstName last-name :lastName} owner]
-    (s/trim (str last-name \space first-name))))
+    (full-name first-name last-name)))
 
 (defn- applicant-name-from-doc [document]
   (when-let [body (:data document)]
@@ -42,6 +45,19 @@
   (let [owner (first (domain/get-auths-by-role app :owner))
         user (user/get-user-by-id (:id owner))]
     (:phone user)))
+
+(defn foreman-name-from-doc [doc]
+  (let [first-name (get-in doc [:data :henkilotiedot :etunimi :value])
+        last-name (get-in doc [:data :henkilotiedot :sukunimi :value])]
+    (full-name first-name last-name)))
+
+(defn foreman-index [application]
+  (let [foreman-doc (or (domain/get-document-by-name application :tyonjohtaja-v2)
+                      (domain/get-document-by-name application :tyonjohtaja))]
+    {:foreman (foreman-name-from-doc foreman-doc)}))
+
+(defn foreman-index-update [application]
+  {$set (foreman-index application)})
 
 (defn- count-unseen-comments [user app]
   (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]

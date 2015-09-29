@@ -2,7 +2,8 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.domain :as domain]
+            [sade.strings :as ss]))
 
 (apply-remote-minimal)
 
@@ -55,6 +56,12 @@
           foreman-hakija-doc-data => map?
 
           (dissoc hakija-doc-data :userId) => (dissoc foreman-hakija-doc-data :userId))))
+
+    (fact "Foreman name index is updated"
+      (command apikey :update-doc :id (:id foreman-application) :doc (:id foreman-doc)  :collection "documents" :updates [["henkilotiedot.etunimi" "foo"]["henkilotiedot.sukunimi" "bar"]]) => ok?
+      (let [application-after-update (query-application apikey (:id foreman-application))]
+        (:foreman foreman-application) => ss/blank?
+        (:foreman application-after-update) => "bar foo"))
 
     (fact "Can't submit foreman app before original link-permit-app is submitted"
       (:submittable (query-application apikey foreman-application-id)) => false)
