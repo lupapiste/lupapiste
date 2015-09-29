@@ -33,6 +33,16 @@ LUPAPISTE.ApplicationsSearchModel = function() {
 
   self.limits = ko.observableArray([10, 25, 50, 100]);
 
+  self.searchType = ko.observable("applications");
+
+  self.showForemanSearch = ko.pureComputed(function() {
+    return self.searchType() === "foreman";
+  });
+
+  self.showApplicationsSearch = ko.pureComputed(function() {
+    return self.searchType() === "applications";
+  });
+
   self.create = function() {
     hub.send("track-click", {category:"Applications", label:"create", event:"create"});
     pageutil.openPage("create-part-1");

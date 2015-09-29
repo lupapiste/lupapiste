@@ -6,7 +6,16 @@
       <!-- ko ifnot: noApplications() -->
       <div class="applications-search-top">
         <div class="container">
-          <h1 data-bind="ltext: 'navigation'"></h1>
+          <h1>
+            <div class="application-search-link">
+                <a class="link active" href="#" data-bind="ltext: 'navigation', click: _.partial(searchType, 'applications'), visible: !showApplicationsSearch()"></a>
+                <span href="#" data-bind="ltext: 'navigation', visible: showApplicationsSearch"></span>
+            </div>
+            <div class="application-search-link">
+                <a class="link" href="#" data-bind="ltext: 'applications.search.foremen', click: _.partial(searchType, 'foreman'), visible: !showForemanSearch()"></a>
+                <span data-bind="ltext: 'applications.search.foremen', visible: showForemanSearch"></span>
+            </div>
+          </h1>
           <div class="button-group">
             <button data-bind="click: create"
                     data-test-id="applications-create-new-inforequest"
