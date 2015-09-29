@@ -42,11 +42,11 @@ var docgen = (function () {
                 };
                 var newElem = new DocModel(schema, newDoc, application, authorizationModel).element;
                 $(self).before(newElem);
+                $(".sticky", newElem).Stickyfill();
               })
               .call();
           });
         btn.append( [icon, span]);
-
         docgenDiv.append(btn);
       }
     });
