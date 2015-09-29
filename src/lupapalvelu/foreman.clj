@@ -201,14 +201,15 @@
             :role "writer"})
         auth))))
 
-(defn applicant-invites [unwrapped-applicants auth]
-  (->>
-    unwrapped-applicants
-    (map
-      #(case (-> % :data :_selected)
-       "henkilo" (henkilo-invite % auth)
-       "yritys" (yritys-invite % auth)))
-    (remove nil?)))
+(defn applicant-invites [documents auth]
+  (let [unwrapped-applicants (tools/unwrapped
+                               (domain/get-applicant-documents documents))]
+    (->> unwrapped-applicants
+        (map
+          #(case (-> % :data :_selected)
+             "henkilo" (henkilo-invite % auth)
+             "yritys" (yritys-invite % auth)))
+        (remove nil?))))
 
 (defn create-company-auth [company-id]
   (when-let [company (company/find-company-by-id company-id)]

@@ -6,7 +6,6 @@
             [lupapalvelu.company :as company]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notif]
@@ -44,16 +43,12 @@
                            (:id foreman-app)
                            "foreman"
                            created))
-
-        unwrapped-applicants (tools/unwrapped
-                               (domain/get-applicant-documents new-application-docs))
-        applicant-invites (foreman/applicant-invites unwrapped-applicants (:auth application))
+        applicant-invites (foreman/applicant-invites new-application-docs (:auth application))
 
         auths (remove nil?
                      (conj
                        (map #(invites-to-auths % (:id foreman-app) user created) applicant-invites)
                        foreman-invite))
-
         grouped-auths (group-by #(if (not= "company" (:type %))
                                    :company
                                    :other) auths)
@@ -79,7 +74,6 @@
                                                    :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)}))
       (catch Exception e
         (error "Error when inviting to foreman application:" e)))
-
 
     (ok :id (:id foreman-app) :auth (:auth foreman-app))))
 
