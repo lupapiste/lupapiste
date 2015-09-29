@@ -58,10 +58,14 @@
           (dissoc hakija-doc-data :userId) => (dissoc foreman-hakija-doc-data :userId))))
 
     (fact "Foreman name index is updated"
-      (command apikey :update-doc :id (:id foreman-application) :doc (:id foreman-doc)  :collection "documents" :updates [["henkilotiedot.etunimi" "foo"]["henkilotiedot.sukunimi" "bar"]]) => ok?
+      (command apikey :update-doc :id (:id foreman-application) :doc (:id foreman-doc) :collection "documents"
+        :updates [["henkilotiedot.etunimi" "foo"] ["henkilotiedot.sukunimi" "bar"] ["kuntaRoolikoodi" "erityisalojen ty\u00F6njohtaja"]]) => ok?
+
       (let [application-after-update (query-application apikey (:id foreman-application))]
         (:foreman foreman-application) => ss/blank?
-        (:foreman application-after-update) => "bar foo"))
+        (:foremanRole foreman-application) => ss/blank?
+        (:foreman application-after-update) => "bar foo"
+        (:foremanRole application-after-update) => "erityisalojen ty\u00F6njohtaja"))
 
     (fact "Can't submit foreman app before original link-permit-app is submitted"
       (:submittable (query-application apikey foreman-application-id)) => false)
