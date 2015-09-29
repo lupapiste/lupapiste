@@ -52,6 +52,7 @@
                      (conj
                        (map #(invites-to-auths % (:id foreman-app) user created) applicant-invites)
                        foreman-invite))
+
         grouped-auths (group-by #(if (not= "company" (:type %))
                                    :company
                                    :other) auths)
@@ -60,6 +61,10 @@
 
     (application/do-add-link-permit foreman-app (:id application))
     (application/insert-application foreman-app)
+
+    (when task
+      (let [updates [[[:asiointitunnus] (:id foreman-app)]]]
+        (doc-persistence/persist-model-updates application "tasks" task updates created)))
 
     ; Send notifications for authed
     (notif/notify! :invite {:application foreman-app :recipients (:other grouped-auths)})
@@ -71,9 +76,6 @@
                                                  :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
                                                  :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)}))
 
-    (when task
-      (let [updates [[[:asiointitunnus] (:id foreman-app)]]]
-        (doc-persistence/persist-model-updates application "tasks" task updates created)))
     (ok :id (:id foreman-app) :auth (:auth foreman-app))))
 
 (defcommand update-foreman-other-applications
