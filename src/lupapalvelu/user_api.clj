@@ -252,16 +252,23 @@
                               (some (partial not= filter-id)))
         search-filter    {:id filter-id :title title :filter filter-data :sort sort}
         ; enable editing existing filter
-        updated-filters  (as-> filters $
-                               (zipmap (map :id $) (range))
-                               (get $ filter-id (count $))
-                               (assoc-in filters [$] search-filter))
+        updated-filters  (if (empty? filters)
+                           [search-filter]
+                           (as-> filters $
+                                (zipmap (map :id $) (range))
+                                (get $ filter-id (count $))
+                                (assoc-in filters [$] search-filter)))
         update {$set (merge {storage-key updated-filters}
                        (when (empty? filters)
                          {:defaultFilter {id-key filter-id}}))}]
 
     (when title-collision?
       (fail! :error.filter-title-collision))
+
+    (doseq [filter updated-filters]
+      ; Should always  pass, but if not, throws exception which will be caught
+      ; by our action framework. User gets an unexpected error.
+      (sc/validate user/SearchFilter filter))
 
     (mongo/update-by-id :users user-id update)
     (ok :filter search-filter)))

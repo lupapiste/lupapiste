@@ -79,15 +79,25 @@
   (fact (command veikko :update-user :firstName "f" :lastName "l") => ok?)
   (fact (-> (query veikko :user) :user) => (contains {:firstName "f" :lastName "l"})))
 
+(facts "save-application-filter"
+  (apply-remote-minimal)
+
+  (fact (command ronja :save-application-filter :title "titteli" :filter {} :sort {:field "applicant" :asc true} :filterId "beefcace" :filterType "application") => ok?)
+  (fact "Filter is saved"
+    (let [{user :user} (query admin :user-by-email :email "ronja.sibbo@sipoo.fi")]
+      (get-in user [:applicationFilters 0 :title]) => "titteli"
+      (fact "as default"
+        (->> user :defaultFilter :id) => "beefcace"))))
+
 (facts update-default-application-filter
   (apply-remote-minimal)
 
-  (fact (->> (command sonja :update-default-application-filter :filterId "foobar" :filterType "application")) => ok?)
+  (fact (command sonja :update-default-application-filter :filterId "foobar" :filterType "application") => ok?)
 
   (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "foobar")
 
   (fact "Overwrite default filter"
-      (->> (command sonja :update-default-application-filter :filterId "barfoo" :filterType "application")) => ok?)
+    (command sonja :update-default-application-filter :filterId "barfoo" :filterType "application") => ok?)
 
   (fact "Filter overwritten"
       (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "barfoo"))
