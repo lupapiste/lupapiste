@@ -49,8 +49,8 @@
                                    (map #(invites-to-auths % (:id foreman-app) user created) applicant-invites)
                                    foreman-invite))
         grouped-auths (group-by #(if (not= "company" (:type %))
-                                   :company
-                                   :other) auths)
+                                   :other
+                                   :company) auths)
 
         foreman-app (update-in foreman-app [:auth] (partial apply conj) auths)]
 
