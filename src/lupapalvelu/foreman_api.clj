@@ -1,5 +1,6 @@
 (ns lupapalvelu.foreman-api
-  (:require [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
+  (:require [taoensso.timbre :as timbre :refer [error]]
+            [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as company]
@@ -67,14 +68,18 @@
         (doc-persistence/persist-model-updates application "tasks" task updates created)))
 
     ; Send notifications for authed
-    (notif/notify! :invite {:application foreman-app :recipients (:other grouped-auths)})
-    (doseq [auth (:company grouped-auths)
-            :let [company-id (-> auth :invite :user :id)
-                  token-id (company/company-invitation-token user company-id (:id foreman-app))]]
-      (notif/notify! :accept-company-invitation {:admins     (company/find-company-admins company-id)
-                                                 :caller     user
-                                                 :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
-                                                 :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)}))
+    (try
+      (notif/notify! :invite {:application foreman-app :recipients (:other grouped-auths)})
+      (doseq [auth (:company grouped-auths)
+              :let [company-id (-> auth :invite :user :id)
+                    token-id (company/company-invitation-token user company-id (:id foreman-app))]]
+        (notif/notify! :accept-company-invitation {:admins     (company/find-company-admins company-id)
+                                                   :caller     user
+                                                   :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
+                                                   :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)}))
+      (catch Exception e
+        (error "Error when inviting to foreman application:" e)))
+
 
     (ok :id (:id foreman-app) :auth (:auth foreman-app))))
 
