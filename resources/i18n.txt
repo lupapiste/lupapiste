@@ -1,5 +1,0 @@
-error.max-incoming-link-permits: Kohdehakemukseen ei voi lisätä enempää viitteitä
-error.max-outgoing-link-permits: Hakemukseen ei voi lisätä enempää viitteitä
-error.link-permit-wrong-type: Kohdehakemus on väärää tyyppiä
-
-error.jatkolupa-can-only-be-added-one-link-permit POISTA AVAIN
