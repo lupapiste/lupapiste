@@ -92,8 +92,9 @@
                                                    (sc/optional-key :titleI18nkey)   sc/Str
                                                    (sc/optional-key :message)        sc/Str
                                                    (sc/optional-key :title)          sc/Str}
-           (sc/optional-key :defaultFilter)       {:id sc/Str}
-           (sc/optional-key :applicationFilters)  [SearchFilter]})
+           (sc/optional-key :defaultFilter)       {:id sc/Str, :foremanFilterId sc/Str}
+           (sc/optional-key :applicationFilters)  [SearchFilter]
+           (sc/optional-key :foremanFilters)      [SearchFilter]})
 
 (def RegisterUser {:email     (sc/both
                                 (sc/pred util/valid-email? "Not valid email")
@@ -366,9 +367,6 @@
        (debugf "user '%s' not found with email" ~email)
        (fail! :error.user-not-found :email ~email))
      ~@body))
-
-(defn get-application-filters [id]
-  (or (:applicationFilters (get-user-by-id id)) []))
 
 ;;
 ;; ==============================================================================

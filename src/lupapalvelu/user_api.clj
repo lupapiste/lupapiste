@@ -209,13 +209,22 @@
   (when-not (#{"application" "foreman"} filter-type)
     (fail :error.invalid-type)))
 
+(def filter-storage-key
+  {"application" :applicationFilters
+   "foreman" :foremanFilters})
+
+(def default-filter-storage-key
+  {"application" :id
+   "foreman" :foremanFilterId})
+
 (defcommand update-default-application-filter
   {:parameters       [filterId filterType]
    :user-roles       #{:authority}
    :input-validators [validate-filter-type
-                      (fn [{{filter-id :filterId} :data {user-id :id} :user}]
-                        (let [app-filter (user/get-application-filters user-id)]
-                          (when-not (or (nil? filter-id) (util/find-by-id filter-id app-filter))
+                      (fn [{{filter-id :filterId filter-type :filterType} :data {user-id :id} :user}]
+                        (let [user (user/get-user-by-id user-id)
+                              filters (get user (filter-storage-key filter-type))]
+                          (when-not (or (nil? filter-id) (util/find-by-id filter-id filters))
                             (fail :error.filter-not-found))))]
    :description      "Adds/Updates users default filter for the application search"}
   [{{user-id :id} :user}]
@@ -233,22 +242,28 @@
    :description      "Adds/updates application filter for the user"}
   [{{user-id :id} :user {filter-data :filter filter-id :filterId} :data}]
   (let [filter-id        (or filter-id (mongo/create-id))
-        app-filters      (user/get-application-filters user-id)
-        title-collision? (->> app-filters
+        storage-key      (filter-storage-key filterType)
+        id-key           (default-filter-storage-key filterType)
+        user             (user/get-user-by-id user-id)
+        filters          (get user storage-key)
+        title-collision? (->> filters
                               (filter #(= (:title %) title))
                               (map :id)
                               (some (partial not= filter-id)))
         search-filter    {:id filter-id :title title :filter filter-data :sort sort}
         ; enable editing existing filter
-        updated-filters  (as-> app-filters $
+        updated-filters  (as-> filters $
                                (zipmap (map :id $) (range))
                                (get $ filter-id (count $))
-                               (assoc-in app-filters [$] search-filter))]
+                               (assoc-in filters [$] search-filter))
+        update {$set (merge {storage-key updated-filters}
+                       (when (empty? filters)
+                         {:defaultFilter {id-key filter-id}}))}]
+
     (when title-collision?
       (fail! :error.filter-title-collision))
-    (mongo/update-by-id :users user-id {$set {:applicationFilters updated-filters}})
-    (when (empty? app-filters)
-      (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filter-id}}}))
+
+    (mongo/update-by-id :users user-id update)
     (ok :filter search-filter)))
 
 (defcommand remove-application-filter
@@ -259,9 +274,11 @@
    :description "Removes users application filter"}
   [{{user-id :id} :user}]
   (let [user (user/get-user-by-id user-id)
-        update (merge {$pull {:applicationFilters {:id filterId}}}
-                      (when (= (get-in user [:defaultFilter :id]) filterId)
-                        {$set {:defaultFilter {:id nil}}}))]
+        storage-key (filter-storage-key filterType)
+        id-key (default-filter-storage-key filterType)
+        update (merge {$pull {storage-key {:id filterId}}}
+                      (when (= (get-in user [:defaultFilter id-key]) filterId)
+                        {$set {:defaultFilter {id-key nil}}}))]
     (mongo/update-by-id :users user-id update)))
 
 ;;
