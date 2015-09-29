@@ -985,21 +985,9 @@ div.alleYli-radioGroup {
   margin-top: $marginL;
 }
 
-
 // Grid styles
 
 $col: 25%;
-
-@mixin clearfix() {
-  &:before,
-  &:after {
-    content: " ";
-    display: table;
-  }
-  &:after {
-    clear: both;
-  }
-}
 
 @mixin column ($size) {
   position: relative;
