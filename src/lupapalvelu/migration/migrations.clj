@@ -1114,7 +1114,7 @@
      :tasks {$elemMatch {:schema-info.name "task-katselmus"}}}))
 
 
-(defmigration foreman-index
+(defmigration foreman-index-v2
   (reduce + 0
     (for [collection [:applications :submitted-applications]]
       (let [applications (mongo/select collection {} [:documents])]

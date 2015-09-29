@@ -13,9 +13,16 @@
         tj-v2 (assoc-in (itest-util/dummy-doc "tyonjohtaja-v2") [:data :henkilotiedot :etunimi :value] expected-firstname)]
 
     (fact "TJ v1"
-      (get-in (amf/foreman-index-update {:documents [tj-v1]}) ["$set" :foreman]) => expected-name)
+      (let [update (amf/foreman-index-update {:documents [tj-v1]})]
+        (get-in update ["$set" :foreman]) => expected-name
+        ; Dummy doc contais first value for select in schema
+        (get-in update ["$set" :foremanRole]) => "KVV-ty\u00F6njohtaja"))
+
     (fact "TJ v2"
-      (get-in (amf/foreman-index-update {:documents [tj-v2]}) ["$set" :foreman]) => expected-name)))
+      (let [update (amf/foreman-index-update {:documents [tj-v2]})]
+        (get-in update ["$set" :foreman]) => expected-name
+        ; Dummy doc contais first value for select in schema
+        (get-in update ["$set" :foremanRole]) => "vastaava ty\u00F6njohtaja"))))
 
 (facts "count-unseen-comments"
   (count-unseen-comments nil nil) => 0
