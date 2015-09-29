@@ -19,7 +19,6 @@ Create project application
   Create application the fast way  ${appname}  753-416-25-22  kerrostalo-rivitalo
   ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
   Append To List  ${applicationIds}  ${newApplicationId}
-  Set Suite Variable  ${applicationIds}
 
 Go back to project application
   Click by test id  test-application-link-permit-lupapistetunnus
