@@ -292,6 +292,7 @@
    :created                  nil ; timestamp
    :documents                []
    :drawings                 []
+   :foreman                  ""
    :infoRequest              false
    :location                 {}
    :modified                 nil ; timestamp

@@ -1,9 +1,26 @@
 (ns lupapalvelu.application-meta-fields-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.application-meta-fields]))
+            [lupapalvelu.itest-util :as itest-util]
+            [lupapalvelu.application-meta-fields :as amf]))
 
 (testable-privates lupapalvelu.application-meta-fields count-unseen-comments count-unseen-statements count-unseen-verdicts count-attachments-requiring-action indicator-sum)
+
+(defn- create-doc [schema-name]
+  (let [schema (schemas/get-schema {:name schema-name})]
+    {:schema-info (:info schema)
+     :data (tools/create-document-data schema)}))
+
+(facts "foreman-index-update"
+  (let [expected-firstname "Etunimi"
+        expected-name (str "Ilkka " expected-firstname) ; Ilkka from dummy doc genaration
+        tj-v1 (assoc-in (itest-util/dummy-doc "tyonjohtaja") [:data :henkilotiedot :etunimi :value] expected-firstname)
+        tj-v2 (assoc-in (itest-util/dummy-doc "tyonjohtaja-v2") [:data :henkilotiedot :etunimi :value] expected-firstname)]
+
+    (fact "TJ v1"
+      (get-in (amf/foreman-index-update {:documents [tj-v1]}) ["$set" :foreman]) => expected-name)
+    (fact "TJ v2"
+      (get-in (amf/foreman-index-update {:documents [tj-v2]}) ["$set" :foreman]) => expected-name)))
 
 (facts "count-unseen-comments"
   (count-unseen-comments nil nil) => 0
