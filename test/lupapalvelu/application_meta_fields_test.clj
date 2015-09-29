@@ -6,11 +6,6 @@
 
 (testable-privates lupapalvelu.application-meta-fields count-unseen-comments count-unseen-statements count-unseen-verdicts count-attachments-requiring-action indicator-sum)
 
-(defn- create-doc [schema-name]
-  (let [schema (schemas/get-schema {:name schema-name})]
-    {:schema-info (:info schema)
-     :data (tools/create-document-data schema)}))
-
 (facts "foreman-index-update"
   (let [expected-firstname "Etunimi"
         expected-name (str "Ilkka " expected-firstname) ; Ilkka from dummy doc genaration
