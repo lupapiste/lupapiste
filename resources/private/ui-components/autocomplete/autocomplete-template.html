@@ -4,32 +4,38 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="autocomplete-template">
       <div class="autocomplete-component" data-bind="css: {'has-tags': tags}">
-        <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}">
-          <span class="autocomplete-selection">
-            <!-- ko if: selected -->
-            <span data-bind="text: optionsText ? selected()[optionsText] : selected()"></span>
+        <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}, css: {active: inputSelected()}">
+          <span class="autocomplete-selection" data-bind="css: {toggled: inputSelected()}">
+            <!-- ko if: showSingleSelection -->
+            <span class="caption" data-bind="visible: selectionText, text: selectionText"></span>
             <!-- /ko -->
-            <span class="caption" data-bind="visible: showCaption, text: optionsCaption"></span>
-            <!-- ko if: tags -->
-            <ul data-bind="visible: selectedTags().length > 0" class="tags">
-              <!-- ko foreach: selectedTags -->
-              <li class="tag">
-                <i class="btn btn-small primary lupicon-circle-remove"
-                   data-bind="click: $component.removeTag,
-                              clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false"></i>
-                <span class="btn btn-small primary tag-label"
+            <span class="selection-text" data-bind="visible: showCaption, text: optionsCaption"></span>
+
+            <!-- ko if: showTags -->
+            <ul class="tags" data-bind="visible: selectedOptions().length > 0">
+              <!-- ko foreach: selectedOptions -->
+              <li class="tag" data-bind="click: $component.removeTag,
+                                         clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false">
+                <i class="tag-remove lupicon-remove"></i>
+                <span class="primary tag-label"
                       data-bind="text: $component.optionsText ? $data[$component.optionsText] : $data,
                                  titleWhenOverflow: $component.optionsText ? $data[$component.optionsText] : $data"></span>
               </li>
               <!-- /ko -->
             </ul>
             <!-- /ko -->
+            <i class="tag-chevron lupicon-chevron-small-down"></i>
+            <i class="tag-chevron lupicon-chevron-small-up toggle"></i>
           </span>
-          <i data-bind="visible: showCaption" class="autocomplete-selection-arrow btn lupicon-chevron-small-down"></i>
         </div>
         <div class="autocomplete-dropdown" data-bind="visible: false, fader: dropdownVisible, duration: 100">
-          <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
-                 data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, blur: blur}"></input>
+          <div class="search" data-bind="css: {toggled: query(), active: inputSelected}">
+            <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
+                   data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, blur: blur}, attr: {placeholder: placeholder}"/>
+            <i class="search-icon lupicon-search"></i>
+            <i class="search-icon lupicon-remove toggle" data-bind="event: {mousedown: clearQuery}, attr: {title: loc('applications.filter.search.clear')}"></i>
+          </div>
+
           <!-- ko if: data().length > 0 -->
           <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}, css: {'autocomplete-result-grouped': groupedResults}">
             <!-- ko foreach: data -->

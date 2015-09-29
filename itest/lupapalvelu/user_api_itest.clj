@@ -14,12 +14,14 @@
 ;; Getting user and users:
 ;; ==============================================================================
 ;;
+(apply-remote-minimal)
 
 (facts "Getting user"
-  (fact (query pena :user) => (contains {:user (contains {:email "pena@example.com"})})))
+       (fact (let [response (query pena :user)]
+               response => ok?
+               (get-in response [:user :email]) => "pena@example.com")))
 
 (facts "Getting users"
-  (apply-remote-minimal)
 
   (fact "applicants are not allowed to call this"
     (query pena :users) =not=> ok?)
@@ -80,15 +82,15 @@
 (facts update-default-application-filter
   (apply-remote-minimal)
 
-  (fact (->> (command sonja :update-default-application-filter :filter {:handler (:id sonja)  :tags ["bar" "buzz"] :operations [] :organizations [] :areas ["1"]} :sort {:column "type" :asc false})) => ok?)
+  (fact (->> (command sonja :update-default-application-filter :filter-id "foobar")) => ok?)
 
-  (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter) first :tags) => ["bar" "buzz"])
+  (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "foobar")
 
   (fact "Overwrite default filter"
-      (->> (command sonja :update-default-application-filter :filter {:tags ["foo"]} :sort {:column "modified" :asc true})) => ok?)
+      (->> (command sonja :update-default-application-filter :filter-id "barfoo")) => ok?)
 
   (fact "Filter overwritten"
-      (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter)) => [{:tags ["foo"]}]))
+      (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "barfoo"))
 
 (facts update-user-organization
   (apply-remote-minimal)

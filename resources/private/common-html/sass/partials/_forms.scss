@@ -246,6 +246,10 @@ input.form-input.long {
   width: $cols5;
 }
 
+input.form-input.inline {
+  display: inline;
+}
+
 .form-add {
   display: block;
 }
@@ -330,6 +334,16 @@ input.form-input.long {
     font-family: $font-heading;
     font-weight: bold;
     margin-bottom: $marginS;
+  }
+  .property-group-header {
+    .form-label-property-group {
+      @extend .form-label-group;
+      width: auto;
+      display: inline;
+    }
+    .maaraala-checkbox {
+      margin-right: 0;
+    }
   }
   .form-entry {
     display: inline-block;
@@ -696,30 +710,6 @@ div.sticky {
 }
 
 
-.form-approval-status.approved ~ button.approved {
-  display: none;
-}
-
-.form-approval-status.rejected ~ button.rejected {
-  display: none;
-}
-
-
-section.approved .group-buttons  {
-    button.approved {
-      display: none;
-    }
-    i.rejected {
-      display: none;
-    }
-    i.approved {
-      display: table-cell;
-    }
-    button.rejected {
-      display: table-cell;
-    }
-}
-
 .is-status > .like-btn {
   @include btn-height;
   min-width: 500px;
@@ -737,20 +727,16 @@ section.approved .group-buttons  {
   }
 }
 
+
 // Top-level form-approval-status
 
 div.sticky .form-approval-status.no-border-bottom {
-  border-left: 1px solid $gray221;
-  border-right: 1px solid $gray221;
   border-bottom: 1px solid $gray221;
-  width: 100%;
+  float: left;
   .like-btn {
     padding: {
       left: 10px;
-      top: 4px;
     }
-    min-height: initial;
-    line-height: initial;
     span {
       color: $gray153;
     }
@@ -761,12 +747,26 @@ div.sticky .form-approval-status.no-border-bottom {
   border-bottom: none;
 }
 
+div.sticky .form-approval-status.no-border-bottom.own-line {
+  width: 100%;
+  .like-btn {
+    padding: {
+//      left: 10px;
+      top: 4px;
+    }
+    min-height: initial;
+    line-height: initial;
+    span {
+      color: $gray153;
+    }
+  }
+}
 
 // Top-level reject button should be invisible
 // when the bar is in rejected mode.
-button.rejected ~ .group-buttons .is-top.rejected {
-  display: none;
-}
+/* button.rejected ~ .group-buttons .is-top.rejected { */
+/*   display: none; */
+/* } */
 
 .is-middle {
   vertical-align: middle;
@@ -990,15 +990,10 @@ div.alleYli-radioGroup {
 
 $col: 25%;
 
-@mixin form-grid-clear {
-  content: "";
-  display: block;
-  clear: both;
-}
-
 @mixin column ($size) {
   position: relative;
   float: left;
+  // display: inline-block;;
   width: $size * $col;
   min-width: $size * $col;
   max-width: $size * $col;
@@ -1021,16 +1016,13 @@ $col: 25%;
 }
 
 .form-grid {
-  overflow-y: hidden;
+  // overflow-y: hidden;
   width: 100%;
   border-top: 1px solid $grid-border-color;
+  color: $gray51;
 
   &:last-child {
     border-bottom: none;
-  }
-
-  &:after {
-    @include form-grid-clear;
   }
 
   h2 {
@@ -1117,9 +1109,35 @@ $col: 25%;
     vertical-align: middle;
   }
 
+  input[type=text]:disabled {
+    border-color: $input-disabled-border-color
+  }
+
   input[type=text].err, input[type=password].err {
     border: 1px solid $negative;
     color: $negative;
+  }
+
+  .submit-button {
+    display: table-row;
+    .submit-button__item {
+      display: table-cell;
+      &:first-child {
+        width: 100%;
+      }
+    }
+
+    .submittable {
+      input {
+        border-color: $positive;
+      }
+    }
+  }
+
+  button.input-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
   }
 
   @for $i from 1 through 4 {
@@ -1129,9 +1147,17 @@ $col: 25%;
   }
 
   .row {
-    @include form-grid-clear;
+    @include clearfix;
     margin: $grid-margin 0;
-    overflow-y: hidden;
+    // overflow-y: hidden;
+  }
+
+  .row--no-margin {
+    margin: 0;
+  }
+
+  .autocomplete-component {
+    width: 100%;
   }
 
   .info-message {
@@ -1197,6 +1223,16 @@ $col: 25%;
       @include lupicon-font;
       content: "\e63c";
       margin-right: $marginS;
+    }
+  }
+}
+
+.form-grid--no-border {
+  border: none;
+
+  .col-1, .col-2, .col-3, .col-4 {
+    &:first-child {
+      padding-left: 0;
     }
   }
 }

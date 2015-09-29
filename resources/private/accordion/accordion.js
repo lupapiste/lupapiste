@@ -93,3 +93,41 @@ var accordion = (function() {
   };
 
 })();
+
+// Collection of accordion isOpen observables.
+// See accordion-toolbar component for details.
+// Flag values: true is open and false closed.
+var AccordionState = function() {
+  "use strict";
+
+  var observables = {};
+
+  function get( docId ) {
+    var obs = observables[docId];
+    return obs ? Boolean( obs()) : null;
+  }
+  function register( docId, obs  ) {
+    var old = get( docId );
+    if( _.isBoolean( old )) {
+      obs( old );
+    }
+    observables[docId] = obs;
+  }
+  function set( docId, flag ) {
+    var obs = observables[docId];
+    if( obs && get( docId ) !== flag ) {
+      obs( Boolean( flag ));
+    }
+  }
+  function toggleAll( flag ) {
+    _.each(_.values(observables), function( obs ) {
+      obs( Boolean( flag ));
+    })
+  }
+  return {
+    get: get,
+    register: register,
+    set: set,
+    toggleAll: toggleAll
+  }
+}()

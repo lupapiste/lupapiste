@@ -71,7 +71,6 @@ There should be now one verdict attachment
 Sonja gives verdict
   Open tab  verdict
   Fetch verdict
-  Wait until  Element text should be  xpath=//div[@id='application-verdict-tab']//span[@data-test-id='given-verdict-id-0']  2013-01
 
 An option to order verdict attachments has appeared into the Toiminnot dropdown in the Attachments tab
   Open tab  attachments

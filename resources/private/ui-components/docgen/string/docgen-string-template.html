@@ -6,15 +6,15 @@
       <span class="form-entry">
         <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
         <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
-        <label data-bind="visible: params.schema.label">String</label>
+        <label data-bind="visible: params.schema.label, ltext: params.schema.label"></label>
         <input class="form-input"
                type="text"
                data-bind="textInput: value,
                           css: classes,
-                          event: { mouseover: function() { showMessagePanel(true); }, mouseout: function() { showMessagePanel(false) } },
+                          event: events,
                           disable: disabled,
                           attr: { readonly: readonly,
-                                  'data-test-id': path.join('.') }"></input>
+                                  'data-test-id': path.join('.') }"/>
         <span data-bind="saveIndicator: indicator, label: false"></span>
       </span>
     </script>

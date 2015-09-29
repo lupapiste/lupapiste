@@ -7,9 +7,11 @@ jQuery(document).ready(function() {
     {name: "fill-info"},
     {name: "foreman-history"},
     {name: "foreman-other-applications"},
-    {name: "docgen-checkbox"},
-    {name: "docgen-select"},
-    {name: "docgen-string"},
+    {name: "docgen-group"},
+    {name: "docgen-checkbox", model: "docgen-input-model"},
+    {name: "docgen-select", model: "docgen-input-model"},
+    {name: "docgen-string", model: "docgen-input-model"},
+    {name: "docgen-inline-string", model: "docgen-input-model"},
     {name: "attachments-multiselect"},
     {name: "authority-select"},
     {name: "authority-select-dialog"},
@@ -36,27 +38,38 @@ jQuery(document).ready(function() {
     {name: "help-toggle"},
     {name: "address"},
     {name: "applications-search"},
+    {name: "applications-search-tabs"},
     {name: "applications-search-results"},
     {name: "applications-search-filter"},
+    {name: "applications-search-filters-list"},
     {name: "applications-search-paging"},
-    {name: "autocomplete-tags", template: "autocomplete-tags-components"},
-    {name: "autocomplete-operations", template: "autocomplete-tags-components"},
-    {name: "autocomplete-organizations", template: "autocomplete-tags-components"},
-    {name: "autocomplete-areas", template: "autocomplete-tags-components"},
+    {name: "autocomplete-tags", template: "autocomplete-tags-components-template"},
+    {name: "autocomplete-operations", template: "autocomplete-tags-components-template"},
+    {name: "autocomplete-organizations", template: "autocomplete-tags-components-template"},
+    {name: "autocomplete-areas", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-handlers"},
-    {name: "autocomplete-application-tags", template: "autocomplete-tags-components"},
+    {name: "autocomplete-application-tags", template: "autocomplete-tags-components-template"},
+    {name: "add-property"},
+    {name: "add-property-dialog"},
+    {name: "autocomplete-saved-filters"},
     {name: "indicator"},
     {name: "accordion"},
-    {name: "text-field", model: "input-field"},
-    {name: "checkbox-field", model: "input-field"},
-    {name: "select-field", model: "input-field"},
-    {name: "password-field"}
+    {name: "text-field", model: "input-field-model"},
+    {name: "checkbox-field", model: "input-field-model"},
+    {name: "select-field", model: "input-field-model"},
+    {name: "maaraala-tunnus"},
+    {name: "property-group"},
+    {name: "password-field"},
+    {name: "accordion-toolbar"},
+    {name: "group-approval"},
+    {name: "submit-button"},
+    {name: "remove-button"}
   ];
 
   _.forEach(components, function(component) {
     ko.components.register(component.name, {
-      viewModel: LUPAPISTE[_.capitalize(_.camelCase(component.model ? component.model : component.name)) + "Model"],
-      template: { element: (component.template ? component.template : component.name) + "-template"}
+      viewModel: LUPAPISTE[_.capitalize(_.camelCase(component.model ? component.model : component.name + "Model"))],
+      template: { element: (component.template ? component.template : component.name + "-template")}
     });
   });
 });

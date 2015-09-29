@@ -408,7 +408,7 @@
                                   [:tags :name])
           result (map (juxt :id #(select-keys % [:tags :name])) organization-tags)]
       (ok :tags (into {} result)))
-    (fail :error.organization-not-found)))
+    (ok :tags {})))
 
 (defquery get-organization-areas
   {:user-authz-roles #{:statementGiver}
@@ -422,7 +422,7 @@
                                [:areas :name])
           result (map (juxt :id #(select-keys % [:areas :name])) organization-areas)]
       (ok :areas (into {} result)))
-    (fail :error.organization-not-found)))
+    (ok :areas {})))
 
 (defn-
   ^org.geotools.data.simple.SimpleFeatureCollection

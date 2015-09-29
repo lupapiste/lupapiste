@@ -60,7 +60,7 @@
       (fail :error.permit-must-have-link-permit))))
 
 (defn validate-authority-in-drafts
-  "Validator: Restric authority access in draft application.
+  "Validator: Restrict authority access in draft application.
    To be used in commands' :pre-checks vector."
   [{user :user} {state :state}]
   (when (and (= :draft (keyword state)) (user/authority? user))
@@ -171,6 +171,12 @@
     (assoc application :submittable (foreman-submittable? application))
     application))
 
+(def- operation-meta-fields-to-enrich #{:optional})
+(defn- enrich-primary-operation-with-metadata [app]
+  (let [enrichable-fields (-> (operations/get-primary-operation-metadata app)
+                              (select-keys operation-meta-fields-to-enrich))]
+    (update app :primaryOperation merge enrichable-fields)))
+
 (defn post-process-app [app user]
   (->> app
        meta-fields/enrich-with-link-permit-data
@@ -178,7 +184,8 @@
        action/without-system-keys
        process-foreman-v2
        (process-documents-and-tasks user)
-       location->object))
+       location->object
+       enrich-primary-operation-with-metadata))
 
 ;;
 ;; Application creation
@@ -222,12 +229,13 @@
                                    created))}))
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
-        new-docs (-<>> (:documents application)
-                       (map (comp :name :schema-info))      ;; existing schema names
-                       set
-                       (remove <> (:required op-info))      ;; required schema names
-                       (map make)                           ;; required docs
-                       (cons op-doc))]                      ;; new docs
+        existing-schemas (->> (:documents application)
+                              (map (comp :name :schema-info))      ;; existing schema names
+                              set)
+        new-docs (->> (:required op-info)
+                      (remove existing-schemas)      ;; required schema names
+                      (map make)                           ;; required docs
+                      (cons op-doc))]                      ;; new docs
     (if-not user
       new-docs
       (conj new-docs (make (permit/get-applicant-doc-schema (permit/permit-type application)))))))
@@ -318,13 +326,23 @@
     (str app-id "|" link-permit-id)
     (str link-permit-id "|" app-id)))
 
-(defn do-add-link-permit [{:keys [id propertyId primaryOperation]} link-permit-id]
+(defn do-add-link-permit [{:keys [id propertyId primaryOperation] :as application} link-permit-id]
   {:pre [(mongo/valid-key? link-permit-id)
          (not= id link-permit-id)]}
   (let [db-id (make-mongo-id-for-link-permit id link-permit-id)
-        is-lupapiste-app (mongo/any? :applications {:_id link-permit-id})
-        linked-app (when is-lupapiste-app
-                     (domain/get-application-no-access-checking link-permit-id))]
+        link-application (some-> link-permit-id
+                     domain/get-application-no-access-checking
+                     meta-fields/enrich-with-link-permit-data)
+        max-incoming-link-permits (operations/get-primary-operation-metadata link-application :max-incoming-link-permits)
+        allowed-link-permit-types (operations/get-primary-operation-metadata application :allowed-link-permit-types)]
+
+    (when link-application
+      (if (and max-incoming-link-permits (>= (count (:appsLinkingToUs link-application)) max-incoming-link-permits))
+        (fail! :error.max-incoming-link-permits))
+
+      (if (and allowed-link-permit-types (not (allowed-link-permit-types (permit/permit-type link-application))))
+        (fail! :error.link-permit-wrong-type)))
+
     (mongo/update-by-id :app-links db-id
                         {:_id           db-id
                          :link          [id link-permit-id]
@@ -332,11 +350,9 @@
                                          :apptype    (:name primaryOperation)
                                          :propertyId propertyId}
                          link-permit-id {:type           "linkpermit"
-                                         :linkpermittype (if is-lupapiste-app
+                                         :linkpermittype (if link-application
                                                            "lupapistetunnus"
                                                            "kuntalupatunnus")
-                                         :apptype        (->> linked-app
-                                                              (:primaryOperation)
-                                                              (:name))}}
+                                         :apptype (get-in link-application [:primaryOperation :name])}}
                         :upsert true)))
 

@@ -137,7 +137,7 @@
                            data-test-id="attachment-contents-input"
                            data-bind="value: contents,
                                       valueUpdate: 'afterkeydown',
-                                      enable: $root.authorization.ok('set-attachment-meta') && editable"></input>
+                                      enable: $root.authorization.ok('set-attachment-meta') && editable" />
                   </div>
                   <div class="col2 attachment-info-field">
                     <label data-bind="ltext: 'attachment.label.operation'"></label>
@@ -174,7 +174,7 @@
                   <div class="col1 attachment-info-field" data-bind="if: $root.authorization.ok('set-attachments-as-verdict-attachment')">
                     <label for="attachment-is-verdict-attachment" class="form-label" data-bind="ltext: 'attachment.label.verdictAttachment'"></label>
                     <input type="checkbox" id="attachment-is-verdict-attachment" class="form-input" data-test-id="is-verdict-attachment"
-                           data-bind="checked: isVerdictAttachment, enable: $root.authorization.ok('set-attachments-as-verdict-attachment')"></input>
+                           data-bind="checked: isVerdictAttachment, enable: $root.authorization.ok('set-attachments-as-verdict-attachment')"/>
                   </div>
 
                   <div data-bind="if: features.enabled('arkistointi') && latestVersion">

@@ -129,46 +129,75 @@
             (fact "first project is in other projects document"
               project-id => application1-id)))))
 
-    (facts "foreman history"
-      (apply-remote-minimal) ; clean mikko before history tests
-      (let [{application-id :id} (create-app apikey :operation "kerrostalo-rivitalo")
-            foreman-app-id1      (create-foreman-application application-id apikey mikko-id "KVV-ty\u00F6njohtaja" "B"); -> should be visible
-            foreman-app-id2      (create-foreman-application application-id apikey mikko-id "KVV-ty\u00F6njohtaja" "A") ; -> should be visible
-            foreman-app-id3      (create-foreman-application application-id apikey mikko-id "vastaava ty\u00F6njohtaja" "B") ; -> should be visible
-            foreman-app-id4      (create-foreman-application application-id apikey mikko-id "vastaava ty\u00F6njohtaja" "B") ; -> should *NOT* be visible
-            foreman-app-id5      (create-foreman-application application-id apikey mikko-id "vastaava ty\u00F6njohtaja" "A") ; -> should be visible
+    ))
 
-            base-foreman-app-id  (create-foreman-application application-id apikey mikko-id "vastaava ty\u00F6njohtaja" "B") => truthy] ;for calling history
+(facts "foreman history"
+  (apply-remote-minimal) ; clean mikko before history tests
+  (let [{history-base-app-id :id} (create-app mikko :operation "kerrostalo-rivitalo")
+        {other-r-app-id :id} (create-app mikko :operation "kerrostalo-rivitalo")
+        {ya-app-id :id}      (create-app mikko :operation "ya-kayttolupa-muu-tyomaakaytto")
+        foreman-app-id1      (create-foreman-application history-base-app-id mikko mikko-id "KVV-ty\u00F6njohtaja" "B"); -> should be visible
+        foreman-app-id2      (create-foreman-application history-base-app-id mikko mikko-id "KVV-ty\u00F6njohtaja" "A") ; -> should be visible
+        foreman-app-id3      (create-foreman-application history-base-app-id mikko mikko-id "vastaava ty\u00F6njohtaja" "B") ; -> should be visible
+        foreman-app-id4      (create-foreman-application history-base-app-id mikko mikko-id "vastaava ty\u00F6njohtaja" "B") ; -> should *NOT* be visible
+        foreman-app-id5      (create-foreman-application history-base-app-id mikko mikko-id "vastaava ty\u00F6njohtaja" "A") ; -> should be visible
 
-        (facts "reduced"
-          (fact "reduced history should contain reduced history"
-            (let [reduced-history (query sonja :reduced-foreman-history :id base-foreman-app-id) => ok?
-                  history-ids (map :foremanAppId (:projects reduced-history))]
-              history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
-              (some #{foreman-app-id4} history-ids) => nil?))
+        base-foreman-app-id  (create-foreman-application history-base-app-id mikko mikko-id "vastaava ty\u00F6njohtaja" "B")] ;for calling history
 
-          (fact "reduced history should depend on the base application"
-            (let [reduced-history (query sonja :reduced-foreman-history :id foreman-app-id1) => ok?
-                  history-ids (map :foremanAppId (:projects reduced-history))]
-              history-ids =>     (just [foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
-              history-ids =not=> (has some #{foreman-app-id4 base-foreman-app-id})))
+    (facts "reduced"
+      (fact "reduced history should contain reduced history"
+        (let [reduced-history (query sonja :reduced-foreman-history :id base-foreman-app-id) => ok?
+              history-ids (map :foremanAppId (:projects reduced-history))]
+          history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
+          (some #{foreman-app-id4} history-ids) => nil?))
 
-          (fact "Unknown foreman app id"
-            (query sonja :reduced-foreman-history :id "foobar") => fail?))
+      (fact "reduced history should depend on the base application"
+        (let [reduced-history (query sonja :reduced-foreman-history :id foreman-app-id1) => ok?
+              history-ids (map :foremanAppId (:projects reduced-history))]
+          history-ids =>     (just [foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
+          history-ids =not=> (has some #{foreman-app-id4 base-foreman-app-id})))
 
-          (fact "Should be queriable only with a foreman application"
-            (let [resp (query sonja :foreman-history :id application-id) => fail?]
-              (:text resp) => "error.not-foreman-app"))
+      (fact "Unknown foreman app id"
+        (query sonja :reduced-foreman-history :id "foobar") => fail?))
 
-        (facts "unreduced"
-          (fact "unreduced history should not reduce history"
-            (let [unreduced-history (query sonja :foreman-history :id base-foreman-app-id) => ok?
-                  history-ids       (map :foremanAppId (:projects unreduced-history))]
-              history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id4 foreman-app-id5] :in-any-order)))
+    (fact "Should be queriable only with a foreman application"
+      (let [resp (query sonja :foreman-history :id history-base-app-id) => fail?]
+        (:text resp) => "error.not-foreman-app"))
 
-          (fact "Unknown foreman app id"
-            (query sonja :foreman-history :id "foobar") => fail?)
+    (facts "unreduced"
+      (fact "unreduced history should not reduce history"
+        (let [unreduced-history (query sonja :foreman-history :id base-foreman-app-id) => ok?
+              history-ids       (map :foremanAppId (:projects unreduced-history))]
+          history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id4 foreman-app-id5] :in-any-order)))
 
-          (fact "Should be queriable only with a foreman application"
-            (let [resp (query sonja :reduced-foreman-history :id application-id) => fail?]
-              (:text resp) => "error.not-foreman-app")))))))
+      (fact "Unknown foreman app id"
+        (query sonja :foreman-history :id "foobar") => fail?)
+
+      (fact "Should be queriable only with a foreman application"
+        (let [resp (query sonja :reduced-foreman-history :id history-base-app-id) => fail?]
+          (:text resp) => "error.not-foreman-app")))
+
+    (fact "can not link foreman application with a second application"
+      (command mikko :add-link-permit :id foreman-app-id3 :linkPermitId other-r-app-id) => fail?)
+
+    (fact "can not link foreman application with YA application"
+      (fact "Setup: remove old link"
+        (command mikko :remove-link-permit-by-app-id :id foreman-app-id3 :linkPermitId history-base-app-id) => ok?)
+
+      (command mikko :add-link-permit :id foreman-app-id3 :linkPermitId ya-app-id) => fail?)
+
+    (fact "can not link foreman applications to each other"
+      (fact "Setup: remove old link"
+        (command mikko :remove-link-permit-by-app-id :id foreman-app-id4 :linkPermitId history-base-app-id) => ok?)
+      (fact "try to link foreman application"
+        (command mikko :add-link-permit :id foreman-app-id4 :linkPermitId foreman-app-id5) => fail?))
+
+    (fact "Link permit may be a single paper permit"
+      (fact "Setup: remove old link"
+        (command mikko :remove-link-permit-by-app-id :id foreman-app-id5 :linkPermitId history-base-app-id) => ok?)
+      (fact "1st succeeds"
+        (command mikko :add-link-permit :id foreman-app-id5 :linkPermitId "other ID 1") => ok?)
+      (fact "2nd fails"
+        (command mikko :add-link-permit :id foreman-app-id5 :linkPermitId "other ID 2") => fail?))
+
+    ))

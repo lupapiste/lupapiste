@@ -35,7 +35,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.permitSubtypeHelp = ko.pureComputed(function() {
     var opName = util.getIn(self, ["primaryOperation", "name"]);
     if (loc.hasTerm(["help", opName ,"subtype"])) {
-      return "help." + opName + ".subtype"
+      return "help." + opName + ".subtype";
     }
     return undefined;
   });
@@ -83,6 +83,10 @@ LUPAPISTE.ApplicationModel = function() {
   self.incorrectlyFilledRequiredFields = ko.observable([]);
   self.hasIncorrectlyFilledRequiredFields = ko.pureComputed(function() {
     return self.incorrectlyFilledRequiredFields() && self.incorrectlyFilledRequiredFields().length > 0;
+  });
+  self.fieldWarnings = ko.observable([]);
+  self.hasFieldWarnings = ko.computed(function() {
+    return self.fieldWarnings() && self.fieldWarnings().length > 0;
   });
 
   self.summaryAvailable = ko.pureComputed(function() {
@@ -212,12 +216,12 @@ LUPAPISTE.ApplicationModel = function() {
     return self.missingRequiredAttachments() && self.missingRequiredAttachments().length > 0;
   });
 
-  self.missingRequiredInfo = ko.computed(function() {
-    return self.hasIncorrectlyFilledRequiredFields() || self.hasMissingRequiredAttachments();
+  self.missingSomeInfo = ko.computed(function() {
+    return self.hasFieldWarnings() || self.hasIncorrectlyFilledRequiredFields() || self.hasMissingRequiredAttachments();
   });
 
   self.submitButtonEnabled = ko.computed(function() {
-    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingRequiredInfo()) && self.submittable();
+    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && self.submittable();
   });
 
 
@@ -570,6 +574,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.moveToIncorrectlyFilledRequiredField = function(fieldInfo) {
+    AccordionState.set( fieldInfo.document.id, true );
     var targetId = fieldInfo.document.id + "-" + fieldInfo.path.join("-");
     self.targetTab({tab: (fieldInfo.document.type !== "party") ? "info" : "parties", id: targetId});
   };
@@ -595,6 +600,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.updateMissingApplicationInfo = function(errors) {
     self.incorrectlyFilledRequiredFields(util.extractRequiredErrors(errors));
+    self.fieldWarnings(util.extractWarnErrors(errors));
     self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
   };
 
@@ -623,4 +629,11 @@ LUPAPISTE.ApplicationModel = function() {
                                                  yesFn: self.approveInvite}});
     }
   };
+
+  self.showAddPropertyButton = ko.pureComputed(function () {
+    var primaryOp = lupapisteApp.models.application.primaryOperation();
+
+    return lupapisteApp.models.applicationAuthModel.ok("create-doc") &&
+      _.includes(util.getIn(primaryOp, ["optional"]), "secondary-kiinteistot");
+  });
 };

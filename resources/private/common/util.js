@@ -1,8 +1,6 @@
 var util = (function($) {
   "use strict";
 
-  function nop() {}
-
   function zeropad(len, val) {
     return _.sprintf("%0" + len + "d", _.isString(val) ? parseInt(val, 10) : val);
   }
@@ -103,21 +101,19 @@ var util = (function($) {
   }
 
   function isNum(s) {
+    return s && s.match(/^\s*-??\d+\s*$/) !== null;
+  }
+
+  function isNonNegative(s) {
     return s && s.match(/^\s*\d+\s*$/) !== null;
   }
 
-  function getIn(m, keyArray, defaultValue) {
-    if (m && keyArray && keyArray.length > 0) {
-      var key = keyArray[0];
-      if (m.hasOwnProperty(key)) {
-        var val = ko.unwrap(m[key]);
-        if (keyArray.length === 1) {
-          return val;
-        }
-        return getIn(val, keyArray.splice(1, keyArray.length - 1), defaultValue);
-      }
+  function getIn(m, ks, defaultValue) {
+    var value = ko.unwrap(m);
+    if (!value) {
+      return defaultValue;
     }
-    return defaultValue;
+    return _.isEmpty(ks) ? value : getIn(value[_.first(ks)], _.rest(ks), defaultValue);
   }
 
   function getFeatureName(feature) {
@@ -182,18 +178,29 @@ var util = (function($) {
     return personIdCn[parseInt(n, 10) % 31] === c;
   }
 
-  function extractRequiredErrors(errors) {
+
+
+  var extractErrors = function(filterFn, errors) {
     var errs = _.map(errors, function(errArray) {
       return _.filter(errArray, function(err) {
-        var ret = _.includes(err.result, "illegal-value:required");
-        return ret;
+        return filterFn(err.result);
       });
     });
     errs = _.filter(errs, function(errArray) {
       return errArray.length > 0;
     });
     return errs;
-  }
+  };
+
+  var extractRequiredErrors = _.partial(extractErrors, function(errResult) {
+    return _.includes(errResult, "illegal-value:required");
+  });
+
+  var extractWarnErrors = _.partial(extractErrors, function(errResult) {
+    return _.includes(errResult, "warn");
+  });
+
+
 
   function dissoc(m, k) {
     delete m[k];
@@ -218,10 +225,11 @@ var util = (function($) {
     return [strOrArr + suffix];
   }
 
-  function filterDataByQuery(data, q, selected) {
+  function filterDataByQuery(data, q, selected, label) {
+    label = label || "label";
     return _.filter(data, function(item) {
       return _.reduce(q.split(" "), function(result, word) {
-        return !_.some(selected, item) && _.contains(item.label.toUpperCase(), word.toUpperCase()) && result;
+        return !_.some(selected, item) && _.contains(ko.unwrap(item[label]).toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
   }
@@ -252,7 +260,6 @@ var util = (function($) {
       toDbFormat:             propertyIdToDbFormat
     },
     buildingName: buildingName,
-    nop:          nop,
     constantly:   function(value) { return function() { return value; }; },
     autofocus:    autofocus,
     isNum:        isNum,
@@ -263,11 +270,13 @@ var util = (function($) {
     isPartyDoc: isPartyDoc,
     isNotPartyDoc: isNotPartyDoc,
     extractRequiredErrors: extractRequiredErrors,
+    extractWarnErrors: extractWarnErrors,
     dissoc: dissoc,
     randomElementId: randomElementId,
     withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery,
-    showSavedIndicator: showSavedIndicator
+    showSavedIndicator: showSavedIndicator,
+    isNonNegative: isNonNegative
   };
 
 })(jQuery);

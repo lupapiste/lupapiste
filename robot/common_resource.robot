@@ -160,11 +160,13 @@ Close side panel
 
 Open accordions
   [Arguments]  ${tab}
-  # The accordion-toggle class can either be in button or its container.
-  Execute Javascript  $("#application-${tab}-tab button.accordion-toggle.toggled").click();
-  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle.toggled [data-accordion-id]").click();
-  Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
-  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
+  # Open all accordions regardless of tab.
+  Execute Javascript  AccordionState.toggleAll( true );
+  # # The accordion-toggle class can either be in button or its container.
+  # Execute Javascript  $("#application-${tab}-tab button.accordion-toggle.toggled").click();
+  # Execute Javascript  $("#application-${tab}-tab div.accordion-toggle.toggled [data-accordion-id]").click();
+  # Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
+  # Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
 
 Open accordion by test id
   [Arguments]  ${testId}
@@ -340,18 +342,19 @@ Select From List by test id
 
 Select From Autocomplete
   [Arguments]  ${container}  ${value}
-  Wait until  Element should be visible  xpath=//${container}//span[@class='autocomplete-selection']
-  Click Element  xpath=//${container}//span[@class='autocomplete-selection']
+  Wait until  Element should be visible  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
+  Click Element  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
   Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
   Wait until  Element should be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
   Click Element  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
+  Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]
   Wait for jQuery
 
 Autocomplete selectable values should not contain
   [Arguments]  ${container}  ${value}
   # Open dropdown if it is not open
   ${autocompleteListNotOpen} =  Element should not be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[@class="autocomplete-dropdown"]
-  Run Keyword If  '${autocompleteListNotOpen}' == 'PASS'  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//span[@class='autocomplete-selection']
+  Run Keyword If  '${autocompleteListNotOpen}' == 'PASS'  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//span[contains(@class, "autocomplete-selection")]
   Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
 
 Autocomplete option list should contain
@@ -380,9 +383,32 @@ Click enabled by test id
   Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
 
+#
+# The following do not take data-test-id as argument
+#
+
 Primary operation is
   [Arguments]  ${opId}
   Element should be visible  xpath=//span[@data-test-primary-operation-id="${opId}"]
+
+# This only works if there is only one applicable document.
+Edit operation description
+  [Arguments]  ${doc}  ${text}
+  Wait until element is visible  jquery=div#application-info-tab button[data-test-id=edit-op-description-${doc}]
+  Mouse Down  jquery=div#application-info-tab [data-test-id=edit-op-description-${doc}] :visible
+  Wait until element is visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
+  Input text by test id  op-description-editor-${doc}  ${text}
+  # Close the input bubble. Press key fails if the bubble has already been closed.
+  Run Keyword And Ignore Error  Press Key  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]  \\13
+
+  Wait for jQuery
+  Wait until  Page should contain  Tallennettu
+  Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
+
+# This only works if there is only one applicable document.
+Operation description is
+  [Arguments]  ${doc}  ${text}
+  Wait until  Element text should be  xpath=//div[@id='application-info-tab']//span[@data-test-id='op-description-${doc}']  - ${text}
 
 #
 # Helper for inforequest and application crud operations:
@@ -445,7 +471,7 @@ Do create inforequest
 Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
-  Click by test id  applications-create-new
+  Click by test id  applications-create-new-application
   Do prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
 
 Prepare first request
@@ -882,11 +908,26 @@ Submit empty verdict
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  verdictGiven
 
-Fetch verdict
+Do fetch verdict
+  [Arguments]  ${fetchConfirmationText}
   Click enabled by test id  fetch-verdict
   Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
-  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
+  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  ${fetchConfirmationText}
   Confirm  dynamic-ok-confirm-dialog
+
+Fetch verdict
+  Do fetch verdict  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
+  Verdict is given  2013-01  0
+
+Fetch YA verdict
+  Do fetch verdict  Taustajärjestelmästä haettiin 1 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 2 uutta vaatimusta Rakentaminen-välilehdelle.
+  Verdict is given  523  0
+
+Verdict is given
+  [Arguments]  ${kuntalupatunnus}  ${i}
+  Wait until  Element should be visible  application-verdict-details
+  Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
+
 
 # User management
 

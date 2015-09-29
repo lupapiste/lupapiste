@@ -52,16 +52,30 @@ LUPAPISTE.AddLinkPermitModel = function() {
     getAppMatchesForLinkPermitsSelect(app.id());
   };
 
+  self.onSuccess = function() {
+    self.errorMessage(null);
+    repository.load(self.appId);
+    LUPAPISTE.ModalDialog.close();
+  };
+
   self.addLinkPermit = function() {
     var lupatunnus = self.selectedLinkPermit() || self.kuntalupatunnus();
-    var data = {id: self.appId, linkPermitId: lupatunnus, propertyId: self.propertyId()};
-    ajax.command("add-link-permit", data)
+    var params = {id: self.appId, linkPermitId: lupatunnus};
+    ajax.command("add-link-permit", params)
       .processing(self.processing)
       .pending(self.pending)
-      .success(function() {
-        self.errorMessage(null);
-        repository.load(self.appId);
-        LUPAPISTE.ModalDialog.close();
+      .success(self.onSuccess)
+      .onError("error.max-incoming-link-permits", function(originalErrorResp) {
+        // Retry with inverted params
+        var invertedParams = {id: lupatunnus, linkPermitId: self.appId};
+        ajax.command("add-link-permit", invertedParams)
+          .processing(self.processing)
+          .pending(self.pending)
+          .success(self.onSuccess)
+          .error(function() {
+            self.onError(originalErrorResp);
+          })
+          .call();
       })
       .error(self.onError)
       .call();
@@ -103,15 +117,6 @@ LUPAPISTE.AddLinkPermitModel = function() {
         {title: loc("yes"), fn: self.doRemove},
         {title: loc("no")}
       );
-  };
-
-
-  // Follow link to app that is linking to us
-  //
-
-  self.followAppLink = function(linkId) {
-    pageutil.openPage("application", linkId);
-    return false;
   };
 
   //Open the dialog

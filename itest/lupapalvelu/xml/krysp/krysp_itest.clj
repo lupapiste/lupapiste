@@ -115,8 +115,8 @@
         permit-type-dir (permit/get-sftp-directory permit-type)
         output-dir  (str "target/" sftp-user permit-type-dir "/")
 
-        linkkiliitteeseen  (xml/get-text liite [:linkkiliitteeseen])
-        tyyppi (xml/get-text liite [:tyyppi])
+        linkkiliitteeseen (:linkkiliitteeseen liite)
+        tyyppi (:tyyppi liite)
         linkki-as-uri (when linkkiliitteeseen (URI. linkkiliitteeseen))
         attachment-file-name  (last (s/split linkkiliitteeseen #"/"))
         attachment-file-name-with-directory (str output-dir attachment-file-name)
@@ -199,20 +199,17 @@
       (let [take-liite-fn  (case permit-type
                              :YA first
                              last)
-            liite          (-> liitetieto take-liite-fn (xml/select1 [:Liite]))
-            kuvaus         (xml/get-text liite [:kuvaus])
-            metatiedot     (xml/select liite [:metatietotieto])
-            metatiedot-edn (map
-                             (comp
-                               #(or (get-in % [:metatietotieto :metatieto]) (get-in % [:metatietotieto :Metatieto]))
-                               xml/xml->edn)
-                             metatiedot)
-            liite-id       (some #(when (= "liiteId" (:metatietoNimi %)) (:metatietoArvo %)) metatiedot-edn)
+            liite-edn      (-> liitetieto take-liite-fn (xml/select1 [:Liite]) xml/xml->edn :Liite (util/ensure-sequential :metatietotieto))
+            kuvaus         (:kuvaus liite-edn)
+            liite-id       (->> liite-edn
+                             :metatietotieto
+                             (map #(or (:metatieto %) (:Metatieto %)))
+                             (some #(when (= "liiteId" (:metatietoNimi %)) (:metatietoArvo %))))
             app-attachment (some #(when (= liite-id (:id %)) %) app-attachments)
             expected-type  (get-in app-attachment [:type :type-id])]
 
         (fact "XML has corresponding attachment in app" app-attachment => truthy)
-        (validate-attachment liite expected-type application)))
+        (validate-attachment liite-edn expected-type application)))
 
     (when (fn? additional-validator)
       (additional-validator xml))))
@@ -410,8 +407,9 @@
           2 ; the other should be katselmuspoytakirja
           (fn [xml]
             (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
-                  poytakirja (xml/select1 katselmus [:katselmuspoytakirja])]
-              (validate-attachment poytakirja "katselmuksen_tai_tarkastuksen_poytakirja" application)
+                  poytakirja-edn (-> katselmus (xml/select1 [:katselmuspoytakirja]) xml/xml->edn :katselmuspoytakirja)]
+
+              (validate-attachment poytakirja-edn "katselmuksen_tai_tarkastuksen_poytakirja" application)
               (fact "task name is transferred for muu katselmus type"
                 (xml/get-text katselmus [:tarkastuksenTaiKatselmuksenNimi]) => task-name))))
 

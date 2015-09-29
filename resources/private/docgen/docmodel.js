@@ -23,7 +23,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.propertyId = application.propertyId;
   self.isDisabled = options && options.disabled;
   self.events = [];
-  self.sectionId = _.uniqueId( "section");
 
   self.subscriptions = [];
 
@@ -38,7 +37,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (path.length === 1) {
         return val;
       }
-      return self.getMeta(path.splice(1, path.length - 1), val);
+      return self.getMeta( _.rest( path ), val );
     }
   };
 
@@ -160,6 +159,143 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     });
   }
 
+  // ----------------------------------------------------------------------
+  // Approval and related utilities. Used by group-approval and
+  // section components.
+  // Note: approval arguments are functions.
+  //       In practise, they are observables.
+
+  // Updates approval status in the backend.
+  // path: approval path
+  // flag: true is approved, false rejected.
+  // cb: callback function to be called on success.
+  self.updateApproval = function( path, flag, cb ) {
+    var verb = flag ? "approve" : "reject";
+    ajax.command( verb + "-doc",
+                {id: self.appId,
+                 doc: self.docId,
+                 path: path.join("."),
+                 collection: self.getCollection()})
+    .success( function( result ) {
+      cb( result.approval );
+      self.approvalHubSend( result.approval, path );
+      window.Stickyfill.rebuild();
+    })
+    .call();
+  };
+
+  // Textual representation of the approval status.
+  // Tiedot OK (Sibbo Sonja 21.9.2015 10:55)
+  self.approvalInfo = function( approvalFun ) {
+    var approval = approvalFun();
+    var text = null;
+    if(approval && approval.user && approval.timestamp) {
+      text = loc(["document", approval.value]);
+      text += " (" + approval.user.lastName + " "
+            + approval.user.firstName
+            + " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
+    }
+    return text;
+  };
+
+  // Returns the latest modification time of the model or
+  // zero if no modifications.
+    function modelTimestamp( model ) {
+    if( _.isObject( model )) {
+      return !_.isUndefined(model.value)
+                ? model.modified || 0
+                : _.spread(Math.max)(_.map( model, modelTimestamp));
+    }
+    return 0;
+  }
+
+  // Approval is current if it has a value that is newer than
+  // than latest model change.
+  self.isApprovalCurrent = function( approvalModel, approvalFun ) {
+    var approval = approvalFun();
+    return approval && approval.timestamp > modelTimestamp( approvalModel );
+  };
+
+  // Returns always "core" approval object (value, timestamp properties.)
+  // If approvalFun does not yield correct, up-to-date approval then
+  // NEUTRAL with the latest model timestamp is returned.
+  self.safeApproval = function( approvalModel, approvalFun) {
+
+    var approval = approvalFun();
+    var ts = modelTimestamp( approvalModel );
+    return approval && approval.timestamp > ts
+         ? approval
+         : {value: "neutral", timestamp: ts};
+  };
+
+  // Check is either approved or rejected.
+  // Note: if the approval is not set, then both types of check return false
+  self.approvalStatus = function( approvalFun, check ) {
+    var approval = approvalFun();
+    return approval && approval.value === check;
+  };
+
+  // Returns id if we are in the testing mode, otherwise null.
+  // Null because Knockout does not render null attributes.
+  self.testId = function( id ) {
+    return options && options.dataTestSpecifiers ? id : null;
+  };
+
+  self.approvalTestId = function( path, verb ) {
+    return self.testId( [verb, "doc", _.first( path) || self.schemaName].join ( "-" ));
+  };
+
+  self.removeDocument = function() {
+    var op = self.schema.info.op;
+
+    var documentName = "";
+    if (op) {
+      documentName = loc([op.name, "_group_label"]);
+    } else {
+      documentName = loc([self.schema.info.name, "_group_label"]);
+    }
+
+    function onRemovalConfirmed() {
+      ajax.command("remove-doc", { id: self.appId, docId: self.docId, collection: self.getCollection() })
+        .success(function () {
+          // This causes full re-rendering, all accordions change
+          // state etc. Figure a better way to update UI.  Just the
+          // "operations" list should be changed.
+          repository.load(self.appId);
+        })
+        .call();
+    }
+
+    var message = "<div>"
+                + loc("removeDoc.message1")
+                + " <strong>" + documentName + ".</strong></div><div>"
+                + loc("removeDoc.message2") + "</div>";
+    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"),
+                                           message,
+                                           { title: loc("removeDoc.ok"),
+                                             fn: onRemovalConfirmed },
+                                           {title: loc("removeDoc.cancel") },
+                                           {html: true });
+  };
+
+  self.approvalHubSubscribe = function(fun, listenBroadcasts) {
+    var filter = {type: "approval-status-" + self.docId,
+                  broadcast: Boolean(listenBroadcasts) };
+    self.subscriptions.push(hub.subscribe( filter, fun ));
+  };
+
+  // Receiver path can be falsey for broadcast messages.
+  self.approvalHubSend = function( approval, senderPath, receiverPath ) {
+    hub.send( "approval-status-" + self.docId,
+              { broadcast: _.isEmpty(senderPath),
+                approval: _.clone(approval),
+                path: senderPath,
+                receiver: receiverPath});
+  };
+
+  // ----------------------------------------------------------------------
+
+
   function makeGroupHelpTextSpan(schema) {
     var span = document.createElement("span");
     span.className = "group-help-text";
@@ -233,8 +369,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return label;
   }
 
-  function sourceValueChanged(input, value, sourceValue, localizedSourceValue) {
-    if (sourceValue === value) {
+  function sourceValueChanged(input, value, sourceValue, source, localizedSourceValue) {
+    if (sourceValue === value || !source) {
       input.removeAttribute("title");
       $(input).removeClass("source-value-changed");
     } else if (sourceValue !== undefined && sourceValue !== value){
@@ -246,6 +382,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function makeInput(type, pathStr, modelOrValue, subSchema) {
     var value = _.isObject(modelOrValue) ? getModelValue(modelOrValue, subSchema.name) : modelOrValue;
     var sourceValue = _.isObject(modelOrValue) ? getModelSourceValue(modelOrValue, subSchema.name) : undefined;
+    var source = _.isObject(modelOrValue) ? getModelSource(modelOrValue, subSchema.name) : undefined;
     var extraClass = self.sizeClasses[subSchema.size] || "";
     var readonly = subSchema.readonly || getModelDisabled(modelOrValue, subSchema.name);
 
@@ -268,9 +405,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else {
       input.onchange = function(e) {
         if (type === "checkbox") {
-          sourceValueChanged(input, input.checked, sourceValue, sourceValue ? loc("selected") : loc("notSelected"));
+          sourceValueChanged(input, input.checked, sourceValue, source, sourceValue ? loc("selected") : loc("notSelected"));
         } else {
-          sourceValueChanged(input, input.value, sourceValue);
+          sourceValueChanged(input, input.value, sourceValue, source);
         }
         save(e, function() {
           if (subSchema) {
@@ -282,10 +419,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (type === "checkbox") {
       input.checked = value;
-      sourceValueChanged(input, value, sourceValue, sourceValue ? loc("selected") : loc("notSelected"));
+      sourceValueChanged(input, value, sourceValue, source, sourceValue ? loc("selected") : loc("notSelected"));
     } else {
       input.value = value || "";
-      sourceValueChanged(input, value, sourceValue);
+      sourceValueChanged(input, value, sourceValue, source);
     }
     return input;
   }
@@ -331,307 +468,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  self.statusOrder = function() {
-    var stats = {};
-
-    function statusSelector( name ) {
-      var sel = self.section$.find("[data-status-key=" + name + "]");
-      return sel.length ? sel : null;
-    }
-
-    function update( name, statusFun, approval ) {
-      stats[name] = {fun: _.wrap(approval, statusFun),
-                     approval: approval,
-                     name: name
-                    };
-    }
-    function setOrdered() {
-      var sorted = _.sortBy( _.values( stats ), function( dic ) {
-        return dic.approval.timestamp;
-      } );
-      _.each( sorted, function( dic ) {
-        dic.fun()
-      });
-    }
-    function setText( name ) {
-      var sel = statusSelector( name );
-      if( sel && stats[name] ) {
-        sel = sel.find( "span.is-details");
-        var approval = stats[name].approval;
-        var text = loc(["document", approval.value]);
-        if(approval && approval.user && approval.timestamp) {
-          text += " (" + approval.user.lastName + " "
-                + approval.user.firstName
-                + " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
-        }
-        sel.text( text );
-      }
-    }
-
-    //  If name is null, every item's class is changed.
-    // If cls is null, the approval class is used
-    function setStatusClass( name, cls ) {
-      var items = name ? [stats[name]] : stats;
-      _.each( items, function( item ) {
-        var sel = statusSelector( item.name )
-        if( sel ) {
-          sel.removeClass( "approved rejected" );
-          sel.addClass( cls ? cls : item.approval.value );
-          setText( item.name);
-        }
-      })
-    }
-
-    // Updates the section and the bar classes with some
-    // deduction. The idea is to provide the user immediate
-    // feedback if either the whole is approved or any is rejected.
-    //  name: key for stats (element)
-    //  cls: Class to be applied. There are three variants:
-    //       approved: both section and bar to approved and bar to positive.
-    //       rejected: removal of approved from section (but no adding rejected)
-    //                 rejected to bar.
-    //       null: If section is approved then do nothing. Otherwise, add rejected
-    //             to bar if any of the stats is rejected. However, if every (non-neutral) stat
-    //             and self.sectionId is approved, call setSectionStatus( self.sectionId, "approved")
-    function setSectionStatus( name, cls ) {
-      var bar = self.section$.find("button[data-status-key=" + self.sectionId + "]");
-      //var section = $("[data-section-id=" + self.sectionId + "]");
-      if( cls ) {
-        var isApproved = cls === 'approved';
-        // Section is never rejected.
-        self.section$.toggleClass( "approved", isApproved );
-        if( bar ) {
-          bar.removeClass( "approved rejected");
-          bar.addClass( cls );
-          bar.toggleClass( "positive", isApproved );
-          setText( self.sectionId );
-        }
-      } else {
-        if( !self.section$.hasClass( "approved") && bar ) {
-          bar.removeClass( "approved rejected");
-          var goods = 0;
-          _.each(  _.pluck( stats, "approval"), function( a ) {
-            switch( a.value ) {
-              case "rejected":
-              bar.addClass( "rejected");
-              return false;
-              break;
-              case "approved":
-              goods++;
-              break;
-            }
-          });
-          if( goods == _.size( stats)
-           && stats[self.sectionId]
-           && stats[self.sectionId].approval.value == "approved") {
-            // Everything is approved.
-            setSectionStatus( self.sectionId, "approved");
-          }
-        }
-      }
-    }
-
-    return {
-      update: update,
-      setOrdered: setOrdered,
-      setStatusClass: setStatusClass,
-      setSectionStatus: setSectionStatus
-    }
-  }();
-
-  function barStatusHandler( approval ) {
-    self.statusOrder.update( self.sectionId, barStatusHandler, approval );
-    var cls = approval.value;
-
-    // Approving the whole approves the details.
-    // Rejecting the whole resets the details. In other words
-    // details should be intact after approving and immediately
-    // rejecting the whole.
-    self.statusOrder.setSectionStatus( self.sectionId, cls );
-    self.statusOrder.setStatusClass( self.sectionId, cls );
-  };
-
-  function makeApprovalContainer( statusKey ) {
-    var statusContainer$ = $("<div>").addClass( "like-btn");
-    statusContainer$.append( $("<i>").addClass( "lupicon-circle-attention rejected"));
-    statusContainer$.append( $("<i>").addClass( "lupicon-circle-check approved"));
-    statusContainer$.append( $("<span>").addClass( "is-details"));
-    return $("<span>")
-           .attr( "data-status-key", statusKey)
-           .addClass("form-approval-status is-status")
-           .append(statusContainer$);
-  }
-
-
-  // Opts can have the following (optional) properties:
-  //   self.sectionId: denotes the accordion horizontal bar.
-  //        It is an object with two properties:
-  //        selector: jQuery selector for bar.
-  //        fun: function to be called when status changes.
-  //        Note: The bar's order name (see above) is self.sectionId, because
-  //        it needs to be known by the detail status indicators.
-  //   statusKey: If truthy then the bar form approval status details are inline
-  //        with buttons and the value is used as data-status-key.
-  // Returns an array of elements: approval container (icons and details), reject button, approve button.
-  self.makeApprovalButtons = function (path, model, opts ) {
-    opts = opts || {};
-    var statusKey = _.uniqueId( "status");
-    var approvalContainer$ = null;
-    if( !opts[self.sectionId] || opts.statusKey ) {
-      approvalContainer$ = makeApprovalContainer( opts.statusKey || statusKey);
-    }
-    var approveButton$ = null;
-    var rejectButton$ = null;
-    var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: self.getCollection() };
-
-    if (_.isEmpty(model)) {
-      return [];
-    }
-
-    function setStatus(approval) {
-      if (approval) {
-        if( opts[self.sectionId] ) {
-          opts[self.sectionId].fun( approval );
-        } else {
-          self.statusOrder.update( statusKey, setStatus, approval );
-          self.statusOrder.setStatusClass( statusKey, approval.value );
-          self.statusOrder.setSectionStatus( statusKey, approval.value === "rejected" ? "rejected" : null );
-        }
-      }
-    }
-
-    function makeApprovalButton(verb, noun, cssClass) {
-      var cmd = verb + "-doc";
-      var title = loc(["document", verb]);
-      var opts = {className: cssClass + " " + (verb === "approve" ? "approved" : "rejected"),
-                  icon: verb === "approve" ? "lupicon-check" : null};
-      var button =
-            $(makeButton(self.docId + "_" + verb, title, opts ))
-          .click(function () {
-            ajax.command(cmd, cmdArgs)
-              .success(function (result) {
-                setStatus(result.approval);
-                window.Stickyfill.rebuild();
-              })
-              .call();
-          });
-      if (options && options.dataTestSpecifiers) {
-        button.attr("data-test-id", verb + "-doc-" + (_.first ( path ) || self.schemaName ));
-      }
-      return button;
-    }
-
-    function modelModifiedSince(model, timestamp) {
-      if (model) {
-        if (!timestamp) {
-          return true;
-        }
-        if (!_.isObject(model)) {
-          return false; // whitelist-action : "disabled"
-        }
-        if (_.has(model, "value")) {
-          // Leaf
-          return model.modified && model.modified > timestamp;
-        }
-        return _.find(model, function (myModel) { return modelModifiedSince(myModel, timestamp); });
-      }
-      return false;
-    }
-
-    var meta = self.getMeta(path);
-    var approval = meta ? meta._approved : null;
-    var requiresApproval = !approval || modelModifiedSince(model, approval.timestamp);
-    var result = [approvalContainer$];
-
-    if (self.authorizationModel.ok("reject-doc")) {
-      rejectButton$ = makeApprovalButton("reject", "rejected", "secondary").addClass( "is-right");
-      if( opts.bar ) {
-        rejectButton$.addClass( "is-top");
-      }
-      result.push( rejectButton$ );
-    }
-    if (self.authorizationModel.ok("approve-doc")) {
-      approveButton$ = makeApprovalButton("approve", "approved", "positive").addClass( "is-right");
-      result.push( approveButton$);
-    }
-    if (!requiresApproval) {
-      setStatus(approval);
-    }
-    return result; //approvalContainer$;
-  };
-
-  // Appends group buttons (description, primary, approve, reject, remove)
-  // and approval icons. The particular set of elements depends of authorization
-  // and options (opts).
-  // Opts can have approval property that denotes the opts for
-  // makeApprovalButtons. Note that opts.approval must by truthy
-  // (at least empty object) for approval buttons to be created.
-  // Other options:
-  //  remove: Object modeling the remove button
-  //          fun: Function to be bound on the remove button.
-  //          attr: Extra attributes object.
-  //  star: Set/signal primary operation
-  //          attr: Extra attibutes object
-  //          text: Button text
-  //          fun: If given, button is enabled and fun is the click handler.
-  //
-  // Note: function does not append (unneeded) elements to container$.
-  function appendGroupButtons(container$, path, model, opts ) {
-
-    function btnHelper( subOpts, cls, icon, text ) {
-      var b = $("<button>").addClass( cls );
-      _.each( subOpts.attr || {}, function( v, k ) {
-        b.attr( k, v );
-      });
-      var span = b;
-      if( icon ) {
-        b.append( $("<i>").addClass( icon ));
-        span = $("<span>");
-        b.append( span );
-      }
-      span.text( text );
-      if( subOpts.fun ) {
-        b.click( subOpts.fun );
-      } else {
-        b.prop( "disabled", true );
-      }
-      return b;
-    }
-    var buttons$ = $("<div>").addClass( "group-buttons" );
-    if( opts.description ) {
-      buttons$.append( btnHelper( opts.description,
-                                  "secondary is-left",
-                                  "lupicon-pen",
-                                  loc( "op-description.edit")))
-    }
-    if( opts.star ) {
-      buttons$.append( btnHelper( opts.star,
-                                  "secondary is-left",
-                                  "lupicon-star",
-                                  opts.star.text))
-    }if ( opts.remove ) {
-      buttons$.append( btnHelper( opts.remove,
-                                  "secondary is-right",
-                                  "lupicon-remove",
-                                  loc( "remove")));
-    }
-    if( opts.approval ) {
-      var approvalElements = self.makeApprovalButtons(path, model, opts.approval);
-      var elemCount = _.size( approvalElements );
-      if( elemCount && (_.size( approvalElements ) > 1 || _.first( approvalElements ))) {
-        _.each(( approvalElements ), function( elem ) {
-          buttons$.append( elem );
-        });
-      }
-    }
-    if( opts.description ) {
-      buttons$.append( opts.description.bubble );
-    }
-
-    if( buttons$.children().length ) {
-      container$.append( buttons$ );
-    }
-  }
 
   // Form field builders
 
@@ -734,6 +570,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return util.getIn(model, [name, "sourceValue"]);
   }
 
+  function getModelSource(model, name) {
+    return util.getIn(model, [name, "source"]);
+  }
+
   function getModelDisabled(model, name) {
     return util.getIn(model, [name, "whitelist-action"]) === "disabled";
   }
@@ -763,14 +603,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var value = getModelValue(model, subSchema.name);
     input.value = value;
     var sourceValue = _.isObject(model) ? getModelSourceValue(model, subSchema.name) : undefined;
+    var source = _.isObject(model) ? getModelSource(model, subSchema.name) : undefined;
 
-    sourceValueChanged(input, value, sourceValue);
+    sourceValueChanged(input, value, sourceValue, source);
 
     if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
       input.readOnly = true;
     } else {
       input.onchange = function(e) {
-        sourceValueChanged(input, input.value, sourceValue);
+        sourceValueChanged(input, input.value, sourceValue, source);
         save(e);
       };
     }
@@ -803,14 +644,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     });
 
     var sourceValue = getModelSourceValue(model, subSchema.name);
+    var source = getModelSource(model, subSchema.name);
 
-    sourceValueChanged(input.get(0), value, sourceValue);
+    sourceValueChanged(input.get(0), value, sourceValue, source);
 
     if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
       input.attr("readonly", true);
     } else {
       input.datepicker($.datepicker.regional[lang]).change(function(e) {
-        sourceValueChanged(input.get(0), input.val(), sourceValue);
+        sourceValueChanged(input.get(0), input.val(), sourceValue, source);
         save(e);
       });
     }
@@ -840,6 +682,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var selectedOption = getModelValue(model, subSchema.name);
     var sourceValue = getModelSourceValue(model, subSchema.name);
+    var source = getModelSource(model, subSchema.name);
     var span = makeEntrySpan(subSchema, myPath);
     var sizeClass = self.sizeClasses[subSchema.size] || "";
 
@@ -917,13 +760,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       return e.name === sourceValue;
     });
 
-    sourceValueChanged(select, selectedOption, sourceValue, locSelectedOption ? locSelectedOption[1] : undefined);
+    sourceValueChanged(select, selectedOption, sourceValue, source, locSelectedOption ? locSelectedOption[1] : undefined);
 
     if (subSchema.readonly) {
       select.readOnly = true;
     } else {
       select.onchange = function(e) {
-        sourceValueChanged(select, select.value, sourceValue, locSelectedOption ? locSelectedOption[1] : undefined);
+        sourceValueChanged(select, select.value, sourceValue, source, locSelectedOption ? locSelectedOption[1] : undefined);
         save(e);
         emit(getEvent(e).target, subSchema);
       };
@@ -940,8 +783,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  // Returns object with fun and attr properties (see makeGroupButtons for details) or null,
-  // if the given subSchema/path does not support/require remove functionality.
+  // Returns object with fun and attr properties or null, if the given
+  // subSchema/path does not support/require remove functionality.
   function resolveRemoveOptions( subSchema, path ) {
     var opts = null;
     if(subSchema.repeating && !self.isDisabled && authorizationModel.ok("remove-document-data")) {
@@ -976,8 +819,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       opts.approval = {};
     }
     opts.remove = resolveRemoveOptions( subSchema, path);
-    appendGroupButtons( $(div), path, myModel, opts );
-    //$(div).append(self.makeGroupButtons(path, myModel, opts ));
+    $(div).append(createComponent( "group-approval",
+                                   {docModel: self,
+                                    subSchema: subSchema,
+                                    model: myModel,
+                                    path: path,
+                                    remove: opts.remove }));
 
     var label = makeLabel(subSchema, "group", myPath, true);
     div.appendChild(label);
@@ -990,6 +837,30 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     listen(subSchema, myPath, div);
     return div;
+  }
+
+  function buildDocgenGroup (subSchema, model, path) {
+    var name = subSchema.name;
+
+    var params = {
+      path: path,
+      subSchema: subSchema,
+      documentId: self.docId,
+      model: model[name]
+    };
+    return createComponent("docgen-group", params);
+  }
+
+  function buildPropertyGroup (subSchema, model, path) {
+    var name = subSchema.name;
+
+    var params = {
+      path: path,
+      subSchema: subSchema,
+      documentId: self.docId,
+      model: model[name]
+    };
+    return createComponent("property-group", params);
   }
 
   function buildRadioGroup(subSchema, model, path) {
@@ -1225,6 +1096,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function createComponent(name, params, classes) {
     // createElement works with IE8
     var element = document.createElement(name);
+
     $(element)
       .attr("params", paramsStr(params))
       .addClass(classes)
@@ -1397,7 +1269,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       _.each( rm.attr || {}, function( v, k ) {
         icon$.attr( k, v );
       });
-      $(row).append( $("<td>").append( icon$ ))
+      $(row).append( $("<td>").append( icon$ ));
     }
     return row;
   }
@@ -1412,6 +1284,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   var builders = {
     group: buildGroup,
+    docgenGroup: buildDocgenGroup,
+    propertyGroup: buildPropertyGroup,
     string: buildString,
     hetu: buildString,
     text: buildText,
@@ -1420,7 +1294,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     radioGroup: buildRadioGroup,
     date: buildDate,
     time: buildTime,
-    element: buildElement,
+    // element: buildElement,
     buildingSelector: buildBuildingSelector,
     newBuildingSelector: buildNewBuildingSelector,
     fillMyInfoButton: buildFillMyInfoButton,
@@ -1457,7 +1331,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var myName = subSchema.name;
     var myPath = path.concat([myName]);
-    var builder = builders[subSchema.type] || buildUnknown;
+    var builder = builders[subSchema.uicomponent] || builders[subSchema.type] || buildUnknown;
     var repeatingId = myPath.join("-");
 
     function makeElem(myModel, id) {
@@ -1517,8 +1391,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         table.appendChild(tbody);
 
         if (subSchema.approvable) {
-          appendGroupButtons( $(div), path, models, {approval: {}});
-          //$(div).append(self.makeGroupButtons(path, models, {approval: {}}));
+          $(div).append(createComponent( "group-approval",
+                                         {docModel: self,
+                                          subSchema: subSchema,
+                                          model: models,
+                                          path: myPath}));
         }
 
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
@@ -1695,7 +1572,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var p = _.isArray(paths) ? paths : [paths];
     var v = _.isArray(values) ? values : [values];
     var updates = _.zip(
-        _.map(p, function(path) {return path.replace(new RegExp("^" + self.docId + "."), "");}),
+        _.map(p, function(path) {
+          return path.replace(new RegExp("^" + self.docId + "."), "");
+        }),
         v);
     var updateCommand = getUpdateCommand();
 
@@ -1860,229 +1739,36 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     emit(target, subSchema, true);
   }
 
-  function removeDoc(e) {
-    var n$ = $(e.target).parent();
-    while (!n$.is("section")) {
-      n$ = n$.parent();
-    }
-    var op = self.schema.info.op;
+  function buildSection() {
+    var section = $("<section>").addClass( "accordion").attr( "data-doc-type", self.schemaName );
 
-    var documentName = "";
-    if (op) {
-      documentName = loc([op.name, "_group_label"]);
-    } else {
-      documentName = loc([self.schema.info.name, "_group_label"]);
-    }
-
-    function onRemovalConfirmed() {
-      ajax.command("remove-doc", { id: self.appId, docId: self.docId, collection: self.getCollection() })
-        .success(function () {
-          n$.slideUp(function () { n$.remove(); });
-          // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
-          // Just the "operations" list should be changed.
-          repository.load(self.appId);
-        })
-        .call();
-      return false;
-    }
-
-    var message = "<div>" + loc("removeDoc.message1") + " <strong>" + documentName + ".</strong></div><div>" + loc("removeDoc.message2") + "</div>";
-    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"), message,
-        { title: loc("removeDoc.ok"), fn: onRemovalConfirmed }, { title: loc("removeDoc.cancel") }, { html: true });
-
-    return false;
-  }
-
-
-  // operation: operation that contains the description
-  // descId: identifier attribute that binds the bubble and bar description together.
-  // barDesc: span that shows the description on the accordion bar.
-  function descriptionSupport(operation, descId, barDesc ) {
-
-    function descIdSelector( prefix ) {
-      return $( prefix + "[" + descId + "]");
-    }
-
-    function updateBarDescription( text ) {
-     descIdSelector("span.description", descId).text( _.size( text ) ? " - " + text : "" );
-    }
-
-    var descriptionInput = $("<input>").prop( "type", "text").val( operation.description );
-    var bubble = $("<div>").addClass( "description-bubble is-closed" ).attr( descId, "1");
-    bubble.append( descriptionInput );
-    var descOpts = {
-        fun: function() {
-          bubble.toggleClass( "is-closed");
-          descriptionInput.focus();
-          window.Stickyfill.rebuild();
-        },
-        bubble: bubble
-    }
-
-    // test ids
-    if (options && options.dataTestSpecifiers) {
-      barDesc.attr("data-test-id", "op-description");
-      descOpts.attr = {"data-test-id": "edit-op-description"};
-      descriptionInput.attr("data-test-id", "op-description-editor");
-    }
-
-    var saveInput = _.debounce(function() {
-      var value = _.trim(descriptionInput.val());
-      if (value === "") {
-        value = null;
-      }
-
-      ajax.command("update-op-description", {id: self.appId, "op-id": operation.id, desc: value })
-        .success(function() {
-          // TODO: Show indicator in a reasonable position, where?
-          // var indicator = createIndicator(descriptionInput, "accordion-indicator" );
-          // showIndicator(indicator, "accordion-input-saved", "form.saved");
-          hub.send("op-description-changed", {appId: self.appId, "op-id": operation.id, "op-desc": value});
-        })
-        .call();
-
-      bubble.addClass( "is-closed");
-      window.Stickyfill.rebuild();
-      updateBarDescription( value );
-    }, 250);
-
-    descriptionInput.blur( saveInput );
-
-    descriptionInput.keyup( function(e) {
-      // trigger save on enter and esc keypress
-      var event = getEvent(e);
-      event.stopPropagation();
-      if (event.keyCode === 13 || event.keyCode === 27) {
-        saveInput();
-      }
-    });
-
-    return descOpts;
-  }
-
-  function buildElement() {
-    var op = self.schema.info.op;
-
-    var section = document.createElement("section");
-    self.section$ = $(section);
-    var sticky = $("<div>").addClass( "sticky accordion-toggle");
-    var iconUp = document.createElement("i");
-    var iconDown = document.createElement("i");
-    var toggle = document.createElement("button");
-    var title = document.createElement( "span");
-    var barText = $("<span>").addClass( "bar-text");
-    var iconRejected = $("<i>").addClass( "lupicon-circle-attention rejected");
-    var iconApproved = $("<i>").addClass( "lupicon-circle-check approved");
-
-    var sectionContainer = document.createElement("div");
-    var elements = document.createElement("div");
-
-    var accordionCollapsed = (options && options.accordionCollapsed) ? true : false;
-
-    sticky.toggleClass( "toggled", !accordionCollapsed);
-
-    section.className = "accordion is-status";
-    section.setAttribute("data-doc-type", self.schemaName);
-    section.setAttribute( "data-section-id", self.sectionId );
-    elements.className = "accordion-fields";
-
-    iconUp.className = "lupicon-chevron-up toggle";
-    iconDown.className = "lupicon-chevron-down";
-    toggle.appendChild( iconDown );
-    toggle.appendChild( iconUp );
-    toggle.className = "secondary";
-    var descId = _.uniqueId( "data-desc-");
-    var barDesc = $("<span>").addClass( "description").attr( descId, "1")
-    if( op && _.size(  op.description ) ) {
-      barDesc.text( " - " + op.description );
-    }
-    barText.append( $(title)).append(barDesc);
-    $(toggle).append( barText )
-    var icons = $("<span>").addClass( "icons").append( iconRejected ).append( iconApproved );
-    $(toggle).append( icons );
-
-    title.setAttribute("data-doc-id", self.docId);
-    title.setAttribute("data-app-id", self.appId);
-    title.className = "title";
-    $(toggle).attr( "data-accordion-id", (op && op.id) || self.schema.info.name );
-    $(toggle).click(accordion.click);
-    sticky.append( $(toggle));
-    var docId = util.getIn(self, ["schema", "info", "op", "id"]);
-    var notPrimaryOperation = (!docId || docId !== util.getIn(self.application, ["primaryOperation", "id"]));
-
-    var isSecondaryOperation = (docId && !_.isEmpty(_.where(self.application.secondaryOperations, {id: docId})));
-    var removeOpts = null;
-
-    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok("remove-doc") && notPrimaryOperation) {
-      removeOpts = {fun: removeDoc};
-      if (options && options.dataTestSpecifiers) {
-        removeOpts.attr = {"data-test-class": "delete-schemas." + self.schemaName}
-      }
-    }
-
-    var opts = {};
-
-    if( authorizationModel.ok("change-primary-operation")) {
-      if (!notPrimaryOperation) {
-        opts.star = {attr: {"data-op-name": op.name},
-                     text: loc( "operations.primary")}
-      }
-
-      if (isSecondaryOperation) {
-        opts.star = {attr: {"data-op-name": op.name},
-                     text: loc( "operations.primary.select"),
-                     fun: function() {
-                       ajax.command("change-primary-operation", {id: self.appId, secondaryOperationId: docId})
-                       .success(function() {
-                         repository.load(self.appId);
-                       })
-                       .call();
-                       return false;
-                     }
-                    };
-      }
-    }
-
-    opts.remove = removeOpts;
-
-    if (op) {
-      title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      if( authorizationModel.ok("update-op-description") ) {
-        opts.description = descriptionSupport( op, descId, barDesc );
-      }
-    } else {
-      title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
-    }
-
-    if (self.schema.info.approvable) {
-      $(toggle).attr( "data-status-key", self.sectionId);
-      opts.approval = {};
-      opts.approval[self.sectionId] = {fun: barStatusHandler};
-      if( !opts.star && !opts.description ) {
-        opts.approval.statusKey = self.sectionId;
+    var contents = $("<div>").addClass( "accordion_content");
+    // id is used to remove validation indicators in showValidationResults
+    contents.attr("id", "document-" + self.docId);
+    function toggleContents( isOpen ) {
+      contents.toggleClass( "expandend");
+      contents.attr( "data-accordion-state",
+                     isOpen ? "open" : "closed");
+      if( LUPAPISTE.config.features.animations ) {
+        var opts = {duration: 200,
+                    easing: "easeInOutCubic"};
+        var fun = isOpen ? "slideDown" : "slideUp";
+        contents[fun]( opts );
       } else {
-        sticky. append ( makeApprovalContainer( self.sectionId ).addClass( "no-border-bottom"));
+        contents.toggle( isOpen );
       }
     }
-
-
-    appendGroupButtons( sticky, [], self.model, opts );
-
-    sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
-    sectionContainer.setAttribute("data-accordion-state", (accordionCollapsed ? "closed" : "open"));
-    sectionContainer.id = "document-" + self.docId;
-
-    var sectionHelpText = makeSectionHelpTextSpan(self.schema);
-    sectionContainer.appendChild(sectionHelpText);
-
+    contents.append( makeSectionHelpTextSpan(self.schema) );
+    var sticky =  $("<div>").addClass( "sticky");
+    sticky.append(createComponent ( "accordion-toolbar",
+                                    {docModel: self,
+                                     docModelOptions: options,
+                                     openCallback: toggleContents
+                                    }));
+    section.append( sticky );
+    var elements = document.createElement("div");
+    elements.className = "accordion-fields";
     appendElements(elements, self.schema, self.model, []);
-
-    sectionContainer.appendChild(elements);
-    $(section).append(sticky);
-    section.appendChild(sectionContainer);
-    self.statusOrder.setOrdered();
-    accordion.reset( $(toggle) );
-
     // Disable fields and hide if the form is not editable
     if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
       $(elements).find("input, textarea").attr("readonly", true).unbind("focus");
@@ -2091,7 +1777,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(elements).find("button").hide();
     }
 
-    return section;
+    return section.append( contents.append( $(elements)));
   }
 
   hub.subscribe("application-loaded", function() {
@@ -2100,12 +1786,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }, true);
 
-  self.element = buildElement();
+  self.element = buildSection();
   // If doc.validationErrors is truthy, i.e. doc includes ready evaluated errors,
   // self.showValidationResults is called with in docgen.js after this docmodel has been appended to DOM.
   // So self.showValidationResults cannot be called here because of its jQuery lookups.
   if (!doc.validationErrors) {
     validate();
   }
-
 };

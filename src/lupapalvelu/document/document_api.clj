@@ -10,7 +10,9 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.user :as user]
             [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.document.model :as model]))
+            [lupapalvelu.document.model :as model]
+            [lupapalvelu.wfs :as wfs]
+            [clj-time.format :as tf]))
 
 
 (def update-doc-states (states/all-application-states-but (conj states/terminal-states :sent :verdictGiven :constructionStarted)))
@@ -30,12 +32,27 @@
 
 (defcommand create-doc
   {:parameters [:id :schemaName]
+   :optional-parameters [updates fetchRakennuspaikka]
    :user-roles #{:applicant :authority}
    :states     #{:draft :answered :open :submitted :complement-needed}
    :pre-checks [create-doc-validator
                 application/validate-authority-in-drafts]}
   [command]
-  (ok :doc (:id (doc-persistence/do-create-doc command))))
+  (let [document (doc-persistence/do-create-doc command updates)]
+    (when fetchRakennuspaikka
+      (let [propertyId (get-in command [:application :propertyId])
+            ktj-tiedot (wfs/rekisteritiedot-xml propertyId)
+            updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
+                     [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
+                     [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
+                     [[:kiinteisto :rekisterointipvm] (or
+                                                        (try
+                                                          (tf/unparse (tf/formatter "dd.MM.yyyy") (tf/parse (tf/formatter "yyyyMMdd") (:rekisterointipvm ktj-tiedot)))
+                                                          (catch Exception e (:rekisterointipvm ktj-tiedot)))
+                                                        "")]]]
+        (println updates)
+        (doc-persistence/persist-model-updates (:application command) "documents" document updates (sade.core/now))))
+    (ok :doc (:id document))))
 
 (defn- deny-remove-of-primary-operation [document application]
   (= (get-in document [:schema-info :op :id]) (get-in application [:primaryOperation :id])))

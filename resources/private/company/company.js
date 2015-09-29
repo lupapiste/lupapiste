@@ -353,14 +353,14 @@
     };
 
     self.load = function() {
-      if (self.id()!=="" && self.id()!=undefined) {
+      if (self.id()) {
         ajax
           .query("company", {company: self.id(), users: true})
           .pending(self.pending)
           .success(self.update)
           .error(function() {
             notify.error(loc("error.dialog.title"), loc("error.company-not-accessible"));
-            self.id(null)
+            self.id(null);
             pageutil.openPage("applications");
           })
           .call();
@@ -369,9 +369,9 @@
     };
 
     self.show = function(id, tab) {
-      if (id==="" || id==undefined) {
+      if (!id) {
         pageutil.openPage("register-company-account-type");
-      } else if (self.id() !== id) { 
+      } else if (self.id() !== id) {
         self.clear().id(id).load();
       }
       self.tabs.show(tab);
