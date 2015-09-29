@@ -16,10 +16,10 @@
 ;;
 (apply-remote-minimal)
 
-(facts "Getting user"
-       (fact (let [response (query pena :user)]
-               response => ok?
-               (get-in response [:user :email]) => "pena@example.com")))
+(fact "user query"
+  (let [response (query pena :user)]
+    response => ok?
+    (get-in response [:user :email]) => "pena@example.com"))
 
 (facts "Getting users"
 
