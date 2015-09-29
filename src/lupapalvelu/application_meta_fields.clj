@@ -51,10 +51,14 @@
         last-name (get-in doc [:data :henkilotiedot :sukunimi :value])]
     (full-name first-name last-name)))
 
+(defn foreman-role-from-doc [doc]
+  (get-in doc [:data :kuntaRoolikoodi :value]))
+
 (defn foreman-index [application]
   (let [foreman-doc (or (domain/get-document-by-name application :tyonjohtaja-v2)
                       (domain/get-document-by-name application :tyonjohtaja))]
-    {:foreman (foreman-name-from-doc foreman-doc)}))
+    {:foreman (foreman-name-from-doc foreman-doc)
+     :foremanRole (foreman-role-from-doc foreman-doc)}))
 
 (defn foreman-index-update [application]
   {$set (foreman-index application)})
