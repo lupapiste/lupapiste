@@ -108,18 +108,12 @@ var util = (function($) {
     return s && s.match(/^\s*\d+\s*$/) !== null;
   }
 
-  function getIn(m, keyArray, defaultValue) {
-    if (m && keyArray && keyArray.length > 0) {
-      var key = keyArray[0];
-      if (m.hasOwnProperty(key)) {
-        var val = ko.unwrap(m[key]);
-        if (keyArray.length === 1) {
-          return val;
-        }
-        return getIn(val, keyArray.splice(1, keyArray.length - 1), defaultValue);
-      }
+  function getIn(m, ks, defaultValue) {
+    var value = ko.unwrap(m);
+    if (!value) {
+      return defaultValue;
     }
-    return defaultValue;
+    return _.isEmpty(ks) ? value : getIn(value[_.first(ks)], _.rest(ks), defaultValue);
   }
 
   function getFeatureName(feature) {

@@ -19,7 +19,6 @@ Create project application
   Create application the fast way  ${appname}  753-416-25-22  kerrostalo-rivitalo
   ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
   Append To List  ${applicationIds}  ${newApplicationId}
-  Set Suite Variable  ${applicationIds}
 
 Go back to project application
   Click by test id  test-application-link-permit-lupapistetunnus
@@ -31,9 +30,13 @@ Open foreman application
   Open application by id  ${foremanAppId}
   Page should contain  Työnjohtajan nimeäminen
 
+Open foreman accordions
+  Open accordions  parties
+  Execute Javascript  $("button[data-test-id=accordion-application-foreman-header]:not(.toggled)").click();
+
 Mikko invites foreman to application
   Open tab  parties
-  Open accordions  parties
+  Open foreman accordions
   Click by test id  invite-foreman-button
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
@@ -48,7 +51,7 @@ Foreman applies personal information to the foreman application
   Wait until  Confirm yes no dialog
   Open tab  parties
   Wait until  Page should contain  Hyväksynyt valtuutuksen
-  Open accordions  parties
+  Open foreman accordions
   Wait until  Click by test id  fill-info-button
   Wait for jQuery
 
@@ -56,17 +59,17 @@ Foreman accepts invitation and fills info
   Wait until  Click by test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//section[@id='application']//button[@data-test-id='accept-invite-button']
   Wait for jQuery
-  Open accordions  parties
+  Open foreman accordions
   Wait until  Click by test id  fill-info-button
   Wait for jQuery
-  Open accordions  parties
+  Open foreman accordions
 
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}
   Open foreman application  ${index}
   Deny yes no dialog
   Open tab  parties
-  Open accordions  parties
+  Open foreman accordions
   Foreman accepts invitation and fills info
   Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
   Wait until  Select From List by test id  patevyysvaatimusluokka  ${difficulty}
@@ -74,7 +77,8 @@ Foreman sets role and difficulty to foreman application
 Open application by id
   [Arguments]  ${appId}
   Go to page  applications
-  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-id='${appId}']/td
+  Wait until element is visible  xpath=//table[@id='applications-list']//tr[@data-id='${appId}']
+  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-id='${appId}']
   Wait for jQuery
 
   Wait until  Element Should Be Visible  application
@@ -111,5 +115,3 @@ Add työnjohtaja task to current application
   Input text  create-task-name  ${role}
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task
-
-

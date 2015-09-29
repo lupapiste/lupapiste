@@ -40,11 +40,11 @@
   }
 
 
-  div.sticky > button.approved > .icons > .approved {
+  div.sticky button.positive > span.icons > .approved {
     display: table-cell;
   }
 
-  div.sticky > button.rejected > .icons >  .rejected {
+  div.sticky button.rejected > span.icons >  .rejected {
     display: table-cell;
   }
 
