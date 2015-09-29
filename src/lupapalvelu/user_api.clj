@@ -201,27 +201,37 @@
       (mongo/update :users {:email email} {$set {:role "authority"}})
       (fail :error.user-not-found))))
 
+;;
+;; Saved search filters
+;;
+
+(defn- validate-filter-type [{{filter-type :filterType} :data}]
+  (when-not (#{"application" "foreman"} filter-type)
+    (fail :error.invalid-type)))
+
 (defcommand update-default-application-filter
-  {:parameters       [filter-id]
+  {:parameters       [filterId filterType]
    :user-roles       #{:authority}
-   :input-validators [(fn [{{filter-id :filter-id} :data {user-id :id} :user}]
+   :input-validators [validate-filter-type
+                      (fn [{{filter-id :filterId} :data {user-id :id} :user}]
                         (let [app-filter (user/get-application-filters user-id)]
                           (when-not (or (nil? filter-id) (util/find-by-id filter-id app-filter))
                             (fail :error.filter-not-found))))]
    :description      "Adds/Updates users default filter for the application search"}
   [{{user-id :id} :user}]
 
-  (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filter-id}}}))
+  (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filterId}}}))
 
 (defcommand save-application-filter
-  {:parameters       [title :filter sort]
+  {:parameters       [title :filter sort filterType]
    :user-roles       #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:title :filter :sort])
-                      (fn [{{filter-id :filter-id} :data}]
+   :input-validators [validate-filter-type
+                      (partial action/non-blank-parameters [:title :filter :sort])
+                      (fn [{{filter-id :filterId} :data}]
                         (when (and filter-id (not (mongo/valid-key? filter-id)))
                           (fail :error.illegal-key)))]
    :description      "Adds/updates application filter for the user"}
-  [{{user-id :id} :user {filter-data :filter filter-id :filter-id} :data}]
+  [{{user-id :id} :user {filter-data :filter filter-id :filterId} :data}]
   (let [filter-id        (or filter-id (mongo/create-id))
         app-filters      (user/get-application-filters user-id)
         title-collision? (->> app-filters
@@ -242,14 +252,15 @@
     (ok :filter search-filter)))
 
 (defcommand remove-application-filter
-  {:parameters [filter-id]
+  {:parameters [filterId filterType]
    :user-roles #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:filter-id])]
+   :input-validators [validate-filter-type
+                      (partial action/non-blank-parameters [:filterId])]
    :description "Removes users application filter"}
   [{{user-id :id} :user}]
   (let [user (user/get-user-by-id user-id)
-        update (merge {$pull {:applicationFilters {:id filter-id}}}
-                      (when (= (get-in user [:defaultFilter :id]) filter-id)
+        update (merge {$pull {:applicationFilters {:id filterId}}}
+                      (when (= (get-in user [:defaultFilter :id]) filterId)
                         {$set {:defaultFilter {:id nil}}}))]
     (mongo/update-by-id :users user-id update)))
 

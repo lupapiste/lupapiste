@@ -82,12 +82,12 @@
 (facts update-default-application-filter
   (apply-remote-minimal)
 
-  (fact (->> (command sonja :update-default-application-filter :filter-id "foobar")) => ok?)
+  (fact (->> (command sonja :update-default-application-filter :filterId "foobar" :filterType "application")) => ok?)
 
   (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "foobar")
 
   (fact "Overwrite default filter"
-      (->> (command sonja :update-default-application-filter :filter-id "barfoo")) => ok?)
+      (->> (command sonja :update-default-application-filter :filterId "barfoo" :filterType "application")) => ok?)
 
   (fact "Filter overwritten"
       (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "barfoo"))
