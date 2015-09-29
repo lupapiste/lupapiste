@@ -1117,7 +1117,7 @@
 (defmigration foreman-index
   (reduce + 0
     (for [collection [:applications :submitted-applications]]
-      (let [applications (mongo/select collection [:documents])]
+      (let [applications (mongo/select collection {} [:documents])]
         (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/foreman-index-update %)) applications))))))
 
 ;;
