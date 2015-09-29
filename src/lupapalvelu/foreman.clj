@@ -189,7 +189,10 @@
   {:pre [(= "yritys" (get-in applicant [:data :_selected]))
          (sequential? auth)]}
   (if-let [company-id (get-in applicant [:data :yritys :companyId])]
-    {:company-id company-id}
+    (some
+      #(when (= company-id (or (:id %) (get-in % [:invite :user :id])))
+         {:company-id company-id})
+      auth)
     (when-let [contact-email (user/canonize-email
                                (get-in applicant [:data :yritys :yhteyshenkilo :yhteystiedot :email]))]
       (some
