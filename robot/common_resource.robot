@@ -383,9 +383,32 @@ Click enabled by test id
   Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
 
+#
+# The following do not take data-test-id as argument
+#
+
 Primary operation is
   [Arguments]  ${opId}
   Element should be visible  xpath=//span[@data-test-primary-operation-id="${opId}"]
+
+# This only works if there is only one applicable document.
+Edit operation description
+  [Arguments]  ${doc}  ${text}
+  Wait until element is visible  jquery=div#application-info-tab button[data-test-id=edit-op-description-${doc}]
+  Mouse Down  jquery=div#application-info-tab [data-test-id=edit-op-description-${doc}] :visible
+  Wait until element is visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
+  Input text by test id  op-description-editor-${doc}  ${text}
+  # Close the input bubble. Press key fails if the bubble has already been closed.
+  Run Keyword And Ignore Error  Press Key  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]  \\13
+
+  Wait for jQuery
+  Wait until  Page should contain  Tallennettu
+  Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
+
+# This only works if there is only one applicable document.
+Operation description is
+  [Arguments]  ${doc}  ${text}
+  Wait until  Element text should be  xpath=//div[@id='application-info-tab']//span[@data-test-id='op-description-${doc}']  - ${text}
 
 #
 # Helper for inforequest and application crud operations:

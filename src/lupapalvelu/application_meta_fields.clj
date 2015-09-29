@@ -137,42 +137,38 @@
   "Enriches application with all meta fields. Causes database lookups."
   (partial enrich-with-meta-fields meta-fields))
 
-(defn enrich-with-link-permit-data [app]
-  (let [app-id (:id app)
-        resp (mongo/select :app-links {:link {$in [app-id]}})]
-    (if (seq resp)
-      ;; Link permit data was found
-      (let [our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
-            apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)
-            convert-fn (fn [link-data]
-                         (let [link-array (:link link-data)
-                               link-permit-id ((if (-> link-array (.indexOf app-id) zero?) second first)
-                                                link-array)
-                               link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
+(defn enrich-with-link-permit-data [{application-id :id :as application}]
+  (if-let [links (seq (when application-id (mongo/select :app-links {:link {$in [application-id]}})))]
 
-                           (if (= (:type ((keyword app-id) link-data)) "application")
+    ;; Link permit data was found
+    (let [our-link-permits (filter #(= (:type ((keyword application-id) %)) "application") links)
+          apps-linking-to-us (filter #(= (:type ((keyword application-id) %)) "linkpermit") links)
+          convert-fn (fn [link-data]
+                       (let [link-array (:link link-data)
+                             link-permit-id ((if (-> link-array (.indexOf application-id) zero?) second first)
+                                              link-array)
+                             link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
 
-                             ;; TODO: Jos viiteluvan tyyppi on myos jatkolupa, niin sitten :operation pitaa hakea
-                             ;;       viela kauempaa, eli viiteluvan viiteluvalta. Eli looppia tahan?
-                             ;; TODO: Jos viitelupa on kuntalupatunnus, ei saada operaatiota!
-                             ;;
-                             (let [link-permit-app-op (when (= link-permit-type "lupapistetunnus")
-                                                        (-> (mongo/by-id "applications" link-permit-id {:primaryOperation 1})
-                                                            :primaryOperation :name))]
-                               {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
+                         (if (= (:type ((keyword application-id) link-data)) "application")
 
-                             (let [link-permit-app-op (when (= (:type ((keyword link-permit-id) link-data)) "application")
-                                                        (-> (mongo/by-id "applications" link-permit-id {:primaryOperation 1})
+                           ;; TODO: Jos viiteluvan tyyppi on myos jatkolupa, niin sitten :operation pitaa hakea
+                           ;;       viela kauempaa, eli viiteluvan viiteluvalta. Eli looppia tahan?
+                           ;; TODO: Jos viitelupa on kuntalupatunnus, ei saada operaatiota!
+                           ;;
+                           (let [link-permit-app-op (when (= link-permit-type "lupapistetunnus")
+                                                      (-> (mongo/by-id "applications" link-permit-id {:primaryOperation 1})
                                                           :primaryOperation :name))]
-                               {:id link-permit-id :type link-permit-type :operation link-permit-app-op}))))]
+                             {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
 
-        (-> app
-          (assoc :linkPermitData (when (seq our-link-permits)
-                                   (vec (map convert-fn our-link-permits))))
-          (assoc :appsLinkingToUs (when (seq apps-linking-to-us)
-                                    (vec (map convert-fn apps-linking-to-us))))))
-      ;; No link permit data found
-      (-> app
-        (assoc :linkPermitData nil)
-        (assoc :appsLinkingToUs nil)))))
+                           (let [link-permit-app-op (when (= (:type ((keyword link-permit-id) link-data)) "application")
+                                                      (-> (mongo/by-id "applications" link-permit-id {:primaryOperation 1})
+                                                        :primaryOperation :name))]
+                             {:id link-permit-id :type link-permit-type :operation link-permit-app-op}))))]
+
+      (assoc application
+        :linkPermitData  (when (seq our-link-permits) (mapv convert-fn our-link-permits))
+        :appsLinkingToUs (when (seq apps-linking-to-us) (mapv convert-fn apps-linking-to-us))))
+
+    ;; No link permit data found
+    (assoc application :linkPermitData nil, :appsLinkingToUs nil)))
 

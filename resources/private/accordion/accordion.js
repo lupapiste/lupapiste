@@ -98,6 +98,8 @@ var accordion = (function() {
 // See accordion-toolbar component for details.
 // Flag values: true is open and false closed.
 var AccordionState = function() {
+  "use strict";
+
   var observables = {};
 
   function get( docId ) {
