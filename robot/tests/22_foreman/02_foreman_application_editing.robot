@@ -27,14 +27,12 @@ Submit the base app
   Submit application
 
 Foreman sees his other foreman jobs
-  #[Tags]  fail
   Foreman logs in
   Foreman applies personal information to the foreman application  0
   Foreman applies personal information to the foreman application  1
   Foreman can see the first related construction info on the second foreman application
 
 Foreman gets error message when trying to submit foreman notice before link permit has verdict
-  #[Tags]  fail
   Select from list by value  permitSubtypeSelect  tyonjohtaja-ilmoitus
   Open tab  requiredFieldSummary
   Click enabled by test id  application-submit-btn
@@ -45,7 +43,6 @@ Foreman gets error message when trying to submit foreman notice before link perm
   Wait Until  Application state should be  draft
 
 Can not link base app to foreman application
-  #[Tags]  fail
   Open project application
   Click by test id  accept-invite-button
 
@@ -58,7 +55,7 @@ Can not link base app to foreman application
   List Selection Should Be  xpath=//select[@data-test-id="choose-linkPermit-select"]  ${app}, ${linkPermitAppId}
   Click enabled by test id  button-link-permit-dialog-add
   Wait Until  Element should be visible  xpath=//div[@id="dialog-add-link-permit"]//div[@data-bind="ltext: errorMessage"]
-  Element Text Should Be  xpath=//div[@id="dialog-add-link-permit"]//div[@data-bind="ltext: errorMessage"]  Kohdehakimukseen ei voi lisätä enempää viitteitä
+  Element Text Should Be  xpath=//div[@id="dialog-add-link-permit"]//div[@data-bind="ltext: errorMessage"]  Kohdehakemukseen ei voi lisätä enempää viitteitä
 
 Create blank foreman application
   Create application the fast way  ${appname}  753-416-25-22  tyonjohtajan-nimeaminen-v2
