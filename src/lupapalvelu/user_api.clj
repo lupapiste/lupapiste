@@ -44,7 +44,7 @@
     (ok :user user)
     (if-let [full-user (user/get-user-by-id (:id user))]
       (ok :user (dissoc full-user :private :personId))
-     (fail))))
+      (fail))))
 
 (defquery users
   {:user-roles #{:admin}}
