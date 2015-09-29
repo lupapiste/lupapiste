@@ -195,11 +195,13 @@
         auth))))
 
 (defn applicant-invites [unwrapped-applicants auth]
-  (remove nil? (map
-                 #(case (-> % :data :_selected)
-                    "henkilo" (henkilo-invite % auth)
-                    "yritys" (yritys-invite % auth))
-                 unwrapped-applicants)))
+  (->>
+    unwrapped-applicants
+    (map
+      #(case (-> % :data :_selected)
+       "henkilo" (henkilo-invite % auth)
+       "yritys" (yritys-invite % auth)))
+    (remove nil?)))
 
 (defn create-company-auth [company-id]
   (when-let [company (company/find-company-by-id company-id)]
