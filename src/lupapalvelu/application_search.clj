@@ -133,6 +133,13 @@
       (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
       :else (array-map sort-field (dir asc)))))
 
+(def- projection [:_comments-seen-by :_statements-seen-by :_verdicts-seen-by
+                  :_attachment_indicator_reset :address :applicant :attachments
+                  :auth :authority :authorityNotice :comments :created :documents
+                  :foreman :foremanRole :infoRequest :modified :municipality
+                  :neighbors :permitSubtype :primaryOperation :state :statements
+                  :submitted :tasks :urgency :verdicts])
+
 (defn applications-for-user [user {application-type :applicationType :as params}]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
@@ -142,6 +149,7 @@
         limit       (or (:limit params) 10)
         apps        (mongo/with-collection "applications"
                       (query/find query)
+                      (query/fields projection)
                       (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
