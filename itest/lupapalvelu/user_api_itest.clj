@@ -82,6 +82,9 @@
 (facts "save-application-filter"
   (apply-remote-minimal)
 
+  (fact "fails with invalid filter type"
+    (command ronja :save-application-filter :title "titteli" :filter {} :sort {:field "applicant" :asc true} :filterId "beefcace" :filterType "a") => fail?)
+
   (fact (command ronja :save-application-filter :title "titteli" :filter {} :sort {:field "applicant" :asc true} :filterId "beefcace" :filterType "application") => ok?)
   (fact "Filter is saved"
     (let [{user :user} (query admin :user-by-email :email "ronja.sibbo@sipoo.fi")]

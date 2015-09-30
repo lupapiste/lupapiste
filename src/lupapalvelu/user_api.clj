@@ -205,10 +205,6 @@
 ;; Saved search filters
 ;;
 
-(defn- validate-filter-type [{{filter-type :filterType} :data}]
-  (when-not (#{"application" "foreman"} filter-type)
-    (fail :error.invalid-type)))
-
 (def filter-storage-key
   {"application" :applicationFilters
    "foreman" :foremanFilters})
@@ -216,6 +212,10 @@
 (def default-filter-storage-key
   {"application" :id
    "foreman" :foremanFilterId})
+
+(defn- validate-filter-type [{{filter-type :filterType} :data}]
+  (when-not (contains? filter-storage-key filter-type)
+    (fail :error.invalid-type)))
 
 (defcommand update-default-application-filter
   {:parameters       [filterId filterType]
