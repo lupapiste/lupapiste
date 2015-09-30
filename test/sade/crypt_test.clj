@@ -15,8 +15,8 @@
   (let [plain       "Hello, world!"
         crypto-key  (range 32)
         crypto-iv   (range 16)
-        encrypted   (c/encrypt crypto-key crypto-iv (.getBytes plain "UTF-8") :aes)
-        decrypted   (c/decrypt crypto-key crypto-iv encrypted :aes)
+        encrypted   (c/encrypt crypto-key crypto-iv :aes (.getBytes plain "UTF-8"))
+        decrypted   (c/decrypt crypto-key crypto-iv :aes encrypted)
         result      (String. decrypted "UTF-8")]
     plain => result))
 
