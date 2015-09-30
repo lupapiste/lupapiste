@@ -121,7 +121,8 @@
 (def- frontend-fields
   [:id :address :applicant :authority :authorityNotice
    :infoRequest :kind :modified :municipality
-   :primaryOperation :state :submitted :urgency :verdicts])
+   :primaryOperation :state :submitted :urgency :verdicts
+   :foreman :foremanRole])
 
 (defn- select-fields [application]
   (select-keys
