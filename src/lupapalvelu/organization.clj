@@ -59,7 +59,7 @@
         creds        (->> (:credentials krysp-config)
                           (crypt/str->bytes)
                           (crypt/base64-decode)
-                          (crypt/decrypt crypto-key crypto-iv)
+                          (crypt/decrypt crypto-key crypto-iv :aes)
                           (crypt/bytes->str)
                           (json/decode)
                           (walk/keywordize-keys))]
@@ -78,7 +78,7 @@
                          :password password}
                         (json/encode)
                         (crypt/str->bytes)
-                        (crypt/encrypt crypto-key crypto-iv)
+                        (crypt/encrypt crypto-key crypto-iv :aes)
                         (crypt/base64-encode)
                         (crypt/bytes->str))
         iv         (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))]

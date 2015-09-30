@@ -42,14 +42,16 @@
 
 (defn encrypt 
   ([crypto-key crypto-iv data]
-   (encrypt crypto-key crypto-iv data :default))
-  ([crypto-key crypto-iv data cipher]
+   (encrypt crypto-key crypto-iv :default data))
+  ([crypto-key crypto-iv cipher data]
+   {:pre (keyword? cipher)}
    (crypt ((cipher ciphers) true crypto-key crypto-iv) data)))
 
 (defn decrypt 
   ([crypto-key crypto-iv data]
-   (decrypt crypto-key crypto-iv data :default))
-  ([crypto-key crypto-iv data cipher]
+   (decrypt crypto-key crypto-iv :default data))
+  ([crypto-key crypto-iv cipher data]
+   {:pre (keyword? cipher)}
    (crypt ((cipher ciphers) false crypto-key crypto-iv) data)))
 
 (defn str->bytes ^bytes [^String s] (.getBytes s "UTF-8"))
