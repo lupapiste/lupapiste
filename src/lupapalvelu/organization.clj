@@ -55,14 +55,16 @@
   (let [organization (get-organization organization-id)
         krysp-config (get-in organization [:krysp (keyword permit-type)])
         crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
-        crypto-iv    (-> (:crypto-iv krysp-config) (crypt/str->bytes) (crypt/base64-decode))
-        creds        (->> (:credentials krysp-config)
-                          (crypt/str->bytes)
-                          (crypt/base64-decode)
-                          (crypt/decrypt crypto-key crypto-iv :aes)
-                          (crypt/bytes->str)
-                          (json/decode)
-                          (walk/keywordize-keys))]
+        crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
+                       (-> iv (crypt/str->bytes) (crypt/base64-decode)))
+        creds        (when-let [creds (and crypto-iv (:credentials krysp-config))]
+                       (->> creds
+                            (crypt/str->bytes)
+                            (crypt/base64-decode)
+                            (crypt/decrypt crypto-key crypto-iv :aes)
+                            (crypt/bytes->str)
+                            (json/decode)
+                            (walk/keywordize-keys)))]
     (when-not (s/blank? (:url krysp-config))
       (->> creds
            ((juxt :username :password))
