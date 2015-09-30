@@ -2,7 +2,7 @@ LUPAPISTE.ApplicationsForemanSearchTabsModel = function(params) {
   "use strict";
   var self = this;
 
-  self.dataProvider = params.dataProvider;
+  ko.utils.extend(self, new LUPAPISTE.ApplicationsSearchTabsModel(params));
 
   // TODO check query for notice and verdict
   self.tabs = ko.observableArray(["all",
@@ -11,12 +11,4 @@ LUPAPISTE.ApplicationsForemanSearchTabsModel = function(params) {
                                   "inforequest",
                                   "verdict",
                                   "canceled"]);
-
-  self.selectedTab = self.dataProvider.applicationType;
-
-  self.selectTab = function(item) {
-    hub.send("track-click", {category:"Applications", label: item, event:"radioTab"});
-    self.dataProvider.applicationType(item);
-    self.dataProvider.skip(0);
-  };
 };
