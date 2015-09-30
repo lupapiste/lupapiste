@@ -1,1 +1,3 @@
 applications.search.foremen:  Työnjohtajat
+applications.filter.notice:  Ilmoitukset
+applications.filter.verdict:  Päätökset

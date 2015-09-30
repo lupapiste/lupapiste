@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="applications-foreman-search-filter-template">
+    <div class="form-grid form-grid--no-border">
+      <div class="row">
+        <div class="col-1">
+          <label data-bind="ltext: 'application.filter.search'"></label>
+          <div class="search" data-bind="css: {toggled: dataProvider.searchField(), active: searchFieldSelected}">
+            <input type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField, hasFocus: searchFieldSelected"/>
+            <i class="search-icon lupicon-search"></i>
+            <i class="search-icon lupicon-remove toggle" data-bind="click: _.partial(dataProvider.searchField, ''), attr: {title: loc('applications.filter.search.clear')}"></i>
+          </div>
+        </div>
+        <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
+        <div class="col-2">
+          <label data-bind="ltext: 'application.filter.search.select.saved.filter'"></label>
+          <div data-test-id="select-advanced-filter" data-bind="component: {name: 'autocomplete-saved-filters', params: {lPlaceholder: 'application.filter.search.placeholder.saved-filter', foreman: true}}"></div>
+        </div>
+        <div class="col-1 stacked">
+          <br/>
+          <button class="secondary" data-test-id="toggle-advanced-filters" data-bind="toggleClick: showAdvancedFilters, css: {toggled: showAdvancedFilters}">
+            <i class="lupicon-chevron-down"></i>
+            <i class="lupicon-chevron-up toggle"></i>
+            <span data-bind="ltext: 'applications.filter.advancedFilters'"></span>
+          </button>
+        </div>
+        <!-- /ko -->
+      </div>
+
+      <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
+      <div class="row" data-test-id="advanced-filters" data-bind="slider: showAdvancedFilters">
+        <div class="form-grid form-grid--no-border">
+          <div class="row row--no-margin">
+            <div class="col-2"  data-test-id="handler-filter-component">
+              <label data-bind="ltext: 'applications.filter.handler'" />
+              <div data-test-id="handlers-filter-component" data-bind="component: {name: 'autocomplete-handlers', params: {lPlaceholder: 'application.filter.search.placeholder.handlers-filter'}}"></div>
+            </div>
+
+            <div class="col-2" data-test-id="tag-filter-item">
+              <label data-bind="ltext: 'applications.filter.tags'" />
+              <div data-test-id="tags-filter-component" data-bind="component: {name: 'autocomplete-tags', params: {lPlaceholder: 'application.filter.search.placeholder.tags-filter'}}"></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-2">
+              <label data-bind="ltext: 'applications.filter.areas'" />
+              <div data-test-id="areas-filter-component" data-bind="component: {name: 'autocomplete-areas', params: {lPlaceholder: 'application.filter.search.placeholder.areas-filter'}}"></div>
+            </div>
+
+            <!-- ko if: _.keys(lupapisteApp.models.currentUser.orgAuthz()).length > 1 -->
+            <div class="col-2" data-test-id="organization-filter-item">
+              <label data-bind="ltext: 'applications.filter.organizations'" />
+              <div data-test-id="organization-filter-component" data-bind="component: {name: 'autocomplete-organizations', params: {lPlaceholder: 'application.filter.search.placeholder.organizations-filter'}}"></div>
+            </div>
+            <!-- /ko -->
+          </div>
+        </div>
+        <div data-bind="component: {name: 'applications-search-filters-list', params: {dataProvider: dataProvider}}" class="applications-search-component"></div>
+      </div>
+      <!-- /ko -->
+
+    </div>
+    </script>
+  </section>
+</body>
+</html>

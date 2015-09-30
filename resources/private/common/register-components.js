@@ -43,6 +43,8 @@ jQuery(document).ready(function() {
     {name: "applications-search-filter"},
     {name: "applications-search-filters-list"},
     {name: "applications-search-paging"},
+    {name: "applications-foreman-search-filter", model: "applications-search-filter-model"},
+    {name: "applications-foreman-search-tabs", template: "applications-search-tabs-template"},
     {name: "autocomplete-tags", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-operations", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-organizations", template: "autocomplete-tags-components-template"},
