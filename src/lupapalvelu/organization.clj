@@ -64,7 +64,11 @@
                           (json/decode)
                           (walk/keywordize-keys))]
     (when-not (s/blank? (:url krysp-config))
-      (select-keys (merge krysp-config creds) [:url :username :password :version])))))
+      (->> creds
+           ((juxt :username :password))
+           (when (not (empty? (:username creds))))
+           (hash-map :credentials)
+           (merge (select-keys krysp-config [:url :version])))))))
 
 (defn set-krysp-endpoint
   [id url username password permitType version]

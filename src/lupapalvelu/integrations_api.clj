@@ -169,8 +169,7 @@
    :states     krysp-enrichment-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
-  (let [{url :url username :username password :password} (organization/get-krysp-wfs application)
-        credentials  (when (not (empty? username)) [username password])
+  (let [{url :url credentials :credentials} (organization/get-krysp-wfs application)
         clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
     (if (or clear-ids? url)
       (let [document     (doc-persistence/by-id application collection documentId)
@@ -220,10 +219,9 @@
    :states     krysp-enrichment-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
-  (if-let [{url :url username :username password :password} (organization/get-krysp-wfs application)]
+  (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
     (try
-      (let [credentials (when (not (empty? username)) [username password])
-            kryspxml    (krysp-reader/building-xml url credentials propertyId)
+      (let [kryspxml    (krysp-reader/building-xml url credentials propertyId)
             buildings   (krysp-reader/->buildings-summary kryspxml)]
         (ok :data buildings))
       (catch java.io.IOException e
