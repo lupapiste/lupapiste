@@ -2,5 +2,5 @@ applications.search.foremen:  Työnjohtajat
 applications.filter.notice:  Ilmoitukset
 applications.filter.verdict:  Päätökset
 applications.id:  Tunnus
-applications.foreman-name:  Nimi
+applications.foreman-name:  Työnjohtaja
 applications.foreman-role:  Rooli
