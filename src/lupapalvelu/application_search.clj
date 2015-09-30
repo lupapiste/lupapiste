@@ -103,19 +103,31 @@
       (when-not (empty? areas)
         (make-area-query areas user))])})
 
+;;
+;; Fields
+;;
 
-;;
-;; Public API
-;;
+(def- db-fields ; projection
+  [:_comments-seen-by :_statements-seen-by :_verdicts-seen-by
+   :_attachment_indicator_reset :address :applicant :attachments
+   :auth :authority :authorityNotice :comments :created :documents
+   :foreman :foremanRole :infoRequest :modified :municipality
+   :neighbors :permitSubtype :primaryOperation :state :statements
+   :submitted :tasks :urgency :verdicts])
+
+(def- indicator-fields
+  (map :field meta-fields/indicator-meta-fields))
+
+(def- frontend-fields
+  [:id :address :applicant :authority :authorityNotice
+   :infoRequest :kind :modified :municipality
+   :primaryOperation :state :submitted :urgency :verdicts])
 
 (defn- select-fields [application]
   (select-keys
     application
-    (apply conj
-      [:id :address :applicant :authority :authorityNotice
-       :infoRequest :kind :modified :municipality
-       :primaryOperation :state :submitted :urgency]
-      (map :field meta-fields/indicator-meta-fields))))
+    (concat frontend-fields indicator-fields)))
+
 
 (defn- enrich-row [{:keys [permitSubtype infoRequest] :as app}]
   (assoc app :kind (cond
@@ -142,13 +154,6 @@
       (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
       :else (array-map sort-field (dir asc)))))
 
-(def- projection [:_comments-seen-by :_statements-seen-by :_verdicts-seen-by
-                  :_attachment_indicator_reset :address :applicant :attachments
-                  :auth :authority :authorityNotice :comments :created :documents
-                  :foreman :foremanRole :infoRequest :modified :municipality
-                  :neighbors :permitSubtype :primaryOperation :state :statements
-                  :submitted :tasks :urgency :verdicts])
-
 (defn applications-for-user [user {application-type :applicationType :as params}]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
@@ -158,7 +163,7 @@
         limit       (or (:limit params) 10)
         apps        (mongo/with-collection "applications"
                       (query/find query)
-                      (query/fields projection)
+                      (query/fields db-fields)
                       (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
@@ -173,6 +178,10 @@
     {:userTotalCount user-total
      :totalCount query-total
      :applications rows}))
+
+;;
+;; Public API
+;;
 
 (defn public-fields [{:keys [municipality submitted primaryOperation]}]
   (let [op-name (:name primaryOperation)]
