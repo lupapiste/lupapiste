@@ -30,8 +30,9 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
       areas:         _.map(ko.unwrap(lupapisteApp.services.areaFilterService.selected), "id")
     };
 
+    // TODO foreman
     ajax
-    .command("save-application-filter", {title: title, filter: filter, sort: ko.toJS(dataProvider.sort)})
+    .command("save-application-filter", {filterType: "application", title: title, filter: filter, sort: ko.toJS(dataProvider.sort)})
     .error(util.showSavedIndicator)
     .success(function(res) {
       util.showSavedIndicator(res);

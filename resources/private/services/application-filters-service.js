@@ -40,7 +40,7 @@ LUPAPISTE.ApplicationFiltersService = function() {
     filter.isDefaultFilter = ko.pureComputed(function () {return filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "id"]);});
     filter.removeFilter = function(filter) {
       ajax
-      .command("remove-application-filter", {"filter-id": filter.id()})
+      .command("remove-application-filter", {filterId: filter.id(), filterType: "application"}) // TODO foreman
       .error(util.showSavedIndicator)
       .success(function() {
         lupapisteApp.models.currentUser.applicationFilters.remove(function(f) {
@@ -56,7 +56,7 @@ LUPAPISTE.ApplicationFiltersService = function() {
       // unset old or set new default filter
       var id = filter.isDefaultFilter() ? null : filter.id();
       ajax
-      .command("update-default-application-filter", {"filter-id": id})
+      .command("update-default-application-filter", {filterId: id, filterType: "application"}) // TODO foreman
       .error(util.showSavedIndicator)
       .success(function() {
         lupapisteApp.models.currentUser.defaultFilter.id(id);

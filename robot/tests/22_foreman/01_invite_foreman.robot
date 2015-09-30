@@ -74,6 +74,8 @@ Pena sees sent invitation on the original application
   Open tab  parties
   Open foreman accordions
   Wait until  Element text should be  xpath=//ul[@data-test-id='invited-foremans']//span[@data-test-id='foreman-email']  (teppo@example.com)
+  # Also in auth array
+  Wait until  Element should be visible  xpath=//div[@class='parties-list']/ul//li/span[@class='person']/span[contains(., 'teppo@example.com')]
 
 Pena sees sent invitations on the foreman application
   Open application by id  ${foremanAppId}

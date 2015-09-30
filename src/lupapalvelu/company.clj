@@ -293,6 +293,14 @@
                  :firstName (:name company)
                  :lastName  "")))
 
+(defn company-invitation-token [caller company-id application-id]
+  (token/make-token
+    :accept-company-invitation
+    nil
+    {:caller caller, :company-id company-id, :application-id application-id}
+    :auto-consume false
+    :ttl ttl/company-invite-ttl))
+
 (defn company-invite [caller application company-id]
   {:pre [(map? caller) (map? application) (string? company-id)]}
   (let [company   (find-company! {:id company-id})
@@ -302,7 +310,7 @@
                     :invite {:user {:id company-id}})
         admins    (find-company-admins company-id)
         application-id (:id application)
-        token-id  (token/make-token :accept-company-invitation nil {:caller caller, :company-id company-id, :application-id application-id} :auto-consume false :ttl ttl/company-invite-ttl)
+        token-id  (company-invitation-token caller company-id application-id)
         update-count (update-application
                        (application->command application)
                        {:auth {$not {$elemMatch {:invite.user.id company-id}}}}
