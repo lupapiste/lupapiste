@@ -42,7 +42,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
              limit: self.limit(),
              sort: ko.mapping.toJS(self.sort),
              skip: self.skip() };
-  });
+  }).extend({rateLimit: 0});
 
   ko.computed(function() {
     self.searchFieldDelayed();
