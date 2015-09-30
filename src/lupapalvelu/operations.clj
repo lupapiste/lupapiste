@@ -316,8 +316,7 @@
                                   :required ["ymp-ilm-kesto"]
                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                   :add-operation-allowed false
-                                  :link-permit-required false
-                                  :link-permit-verdict-required false
+                                  :min-outgoing-link-permits 0
                                   :asianhallinta true}
    })
 
