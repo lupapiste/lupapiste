@@ -84,6 +84,16 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     self.applications(data.applications);
   };
 
+  self.clearFilters = function() {
+    lupapisteApp.services.handlerFilterService.selected([]);
+    lupapisteApp.services.tagFilterService.selected([]);
+    lupapisteApp.services.operationFilterService.selected([]);
+    lupapisteApp.services.organizationFilterService.selected([]);
+    lupapisteApp.services.areaFilterService.selected([]);
+    lupapisteApp.services.applicationFiltersService.selected(undefined);
+    self.searchField("");
+  };
+
   ko.computed(function() {
     ajax.datatables("applications-search", searchFields())
       .success(self.onSuccess)

@@ -8,7 +8,6 @@ LUPAPISTE.ApplicationsForemanSearchFiltersListModel = function(params) {
 
   self.savedFilters = lupapisteApp.services.applicationFiltersService.savedForemanFilters;
 
-  // TODO override save
   self.saveFilter = function() {
     var title = self.newFilterName();
 
@@ -31,17 +30,4 @@ LUPAPISTE.ApplicationsForemanSearchFiltersListModel = function(params) {
     })
     .call();
   };
-
-  // clear filters as well?
-  self.clearFilters = function() {
-    lupapisteApp.services.handlerFilterService.selected([]);
-    lupapisteApp.services.tagFilterService.selected([]);
-    lupapisteApp.services.operationFilterService.selected([]);
-    lupapisteApp.services.organizationFilterService.selected([]);
-    lupapisteApp.services.areaFilterService.selected([]);
-    lupapisteApp.services.applicationFiltersService.selected(undefined);
-    dataProvider.searchField("");
-    self.newFilterName("");
-  };
-
 };
