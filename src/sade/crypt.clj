@@ -12,6 +12,9 @@
 (defn make-iv []
   (cr/bytes 32))
 
+(defn make-iv-128 []
+  (cr/bytes 16))
+
 (def ^:private ciphers
   {:default (fn [encrypt? crypto-key crypto-iv]
               (doto (-> (RijndaelEngine. 256)
