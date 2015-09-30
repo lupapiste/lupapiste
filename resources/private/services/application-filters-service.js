@@ -31,7 +31,12 @@ LUPAPISTE.ApplicationFiltersService = function() {
   function wrapFilter(filterType) {
     return function(filter) {
       filter.edit = ko.observable(false);
-      filter.isDefaultFilter = ko.pureComputed(function () {return filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "id"]);});
+      filter.isDefaultFilter = ko.pureComputed(function () {
+        if (filterType === "foreman") {
+          return filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "foremanFilterId"]);
+        }
+        return filter.id() === util.getIn(lupapisteApp.models.currentUser, ["defaultFilter", "id"]);
+      });
       filter.removeFilter = function(filter) {
         ajax
         .command("remove-application-filter", {filterId: filter.id(), filterType: filterType})
@@ -54,7 +59,11 @@ LUPAPISTE.ApplicationFiltersService = function() {
         .command("update-default-application-filter", {filterId: id, filterType: filterType})
         .error(util.showSavedIndicator)
         .success(function() {
-          lupapisteApp.models.currentUser.defaultFilter.id(id);
+          if (filterType === "foreman") {
+            lupapisteApp.models.currentUser.defaultFilter.foremanFilterId(id);
+          } else {
+            lupapisteApp.models.currentUser.defaultFilter.id(id);
+          }
         })
         .call();
       };
@@ -75,6 +84,20 @@ LUPAPISTE.ApplicationFiltersService = function() {
       .reverse()
       .value());
   });
+
+  self.reloadDefaultFilter = function() {
+    var filter = _.find(_savedFilters(), function(f){
+      return f.isDefaultFilter();
+    });
+    self.selected(filter);
+  };
+
+  self.reloadDefaultForemanFilter = function() {
+    var filter = _.find(_savedForemanFilters(), function(f){
+      return f.isDefaultFilter();
+    });
+    self.selected(filter);
+  };
 
   self.addFilter = function(filter) {
     _savedFilters.remove(function(f) {

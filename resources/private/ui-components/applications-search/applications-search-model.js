@@ -41,6 +41,9 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     self.dataProvider.clearFilters();
     if (val === "foreman") {
       lupapisteApp.services.operationFilterService.selected([{id: "tyonjohtajan-nimeaminen-v2", label: ""}, {id: "tyonjohtajan-nimeaminen", label: ""}]);
+      lupapisteApp.services.applicationFiltersService.reloadDefaultForemanFilter();
+    } else {
+      lupapisteApp.services.applicationFiltersService.reloadDefaultFilter();
     }
   });
 
