@@ -102,26 +102,35 @@
 
 (defn building-xml
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
-  [server property-id]
+  [server credentials property-id]
   (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
     (trace "Get building: " url)
-    (or (cr/get-xml url) {})))
+    (or (cr/get-xml url credentials) {})))
 
-(defn- application-xml [type-name id-path server id raw?]
-  (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))
-        credentials nil]
+(defn- application-xml [type-name id-path server credentials id raw?]
+  (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))]
     (trace "Get application: " url)
     (cr/get-xml url credentials raw?)))
 
-(defn rakval-application-xml [server id search-type raw?] (application-xml rakval-case-type (get-tunnus-path permit/R search-type) server id raw?))
-(defn poik-application-xml   [server id search-type raw?] (application-xml poik-case-type   (get-tunnus-path permit/P search-type) server id raw?))
-(defn yl-application-xml     [server id search-type raw?] (application-xml yl-case-type     (get-tunnus-path permit/YL search-type) server id raw?))
-(defn mal-application-xml    [server id search-type raw?] (application-xml mal-case-type    (get-tunnus-path permit/MAL search-type) server id raw?))
-(defn vvvl-application-xml   [server id search-type raw?] (application-xml vvvl-case-type   (get-tunnus-path permit/VVVL search-type) server id raw?))
-(defn ya-application-xml     [server id search-type raw?] (let [options (post-body-for-ya-application id (get-tunnus-path permit/YA search-type))
-                                                                credentials nil]
-                                                            (trace "Get application: " server " with post body: " options )
-                                                            (cr/get-xml-with-post server options credentials raw?)))
+(defn rakval-application-xml [server credentials id search-type raw?]
+  (application-xml rakval-case-type (get-tunnus-path permit/R search-type)    server credentials id raw?))
+
+(defn poik-application-xml   [server credentials id search-type raw?]
+  (application-xml poik-case-type   (get-tunnus-path permit/P search-type)    server credentials id raw?))
+
+(defn yl-application-xml     [server credentials id search-type raw?]
+  (application-xml yl-case-type     (get-tunnus-path permit/YL search-type)   server credentials id raw?))
+
+(defn mal-application-xml    [server credentials id search-type raw?]
+  (application-xml mal-case-type    (get-tunnus-path permit/MAL search-type)  server credentials id raw?))
+
+(defn vvvl-application-xml   [server credentials id search-type raw?]
+  (application-xml vvvl-case-type   (get-tunnus-path permit/VVVL search-type) server credentials id raw?))
+
+(defn ya-application-xml     [server credentials id search-type raw?] 
+  (let [options (post-body-for-ya-application id (get-tunnus-path permit/YA search-type))]
+    (trace "Get application: " server " with post body: " options )
+    (cr/get-xml-with-post server options credentials raw?)))
 
 (permit/register-function permit/R    :xml-from-krysp rakval-application-xml)
 (permit/register-function permit/P    :xml-from-krysp poik-application-xml)

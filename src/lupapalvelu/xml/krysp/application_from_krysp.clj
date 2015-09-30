@@ -5,9 +5,9 @@
             [sade.core :refer [fail!]]))
 
 (defn get-application-xml [{:keys [id permitType] :as application} search-type & [raw?]]
-  (if-let [{url :url} (organization/get-krysp-wfs application)]
+  (if-let [{url :url username :username password :password} (organization/get-krysp-wfs application)]
     (if-let [fetch-fn (permit/get-application-xml-getter permitType)]
-      (fetch-fn url id search-type raw?)
+      (fetch-fn url (when (not (empty? username)) [username password]) id search-type raw?)
       (do
         (error "No fetch function for" permitType (:organization application))
         (fail! :error.unknown)))
