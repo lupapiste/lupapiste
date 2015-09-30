@@ -108,6 +108,15 @@
 ;; Public API
 ;;
 
+(defn- select-fields [application]
+  (select-keys
+    application
+    (apply conj
+      [:id :address :applicant :authority :authorityNotice
+       :infoRequest :kind :modified :municipality
+       :primaryOperation :state :submitted :urgency]
+      (map :field meta-fields/indicator-meta-fields))))
+
 (defn- enrich-row [{:keys [permitSubtype infoRequest] :as app}]
   (assoc app :kind (cond
                      (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
@@ -155,6 +164,7 @@
                       (query/limit limit))
         rows        (map
                       (comp
+                        select-fields
                         enrich-row
                         (partial meta-fields/with-indicators user)
                         #(domain/filter-application-content-for % user)
