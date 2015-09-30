@@ -53,9 +53,18 @@
     (get-krysp-wfs organization permitType))
   ([organization-id permit-type]
   (let [organization (get-organization organization-id)
-        krysp-config (get-in organization [:krysp (keyword permit-type)])]
+        krysp-config (get-in organization [:krysp (keyword permit-type)])
+        crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
+        crypto-iv    (-> (:crypto-iv krysp-config) (crypt/str->bytes) (crypt/base64-decode))
+        creds        (->> (:credentials krysp-config)
+                          (crypt/str->bytes)
+                          (crypt/base64-decode)
+                          (crypt/decrypt crypto-key crypto-iv)
+                          (crypt/bytes->str)
+                          (json/decode)
+                          (walk/keywordize-keys))]
     (when-not (s/blank? (:url krysp-config))
-      (select-keys krysp-config [:url :version])))))
+      (select-keys (merge krysp-config creds) [:url :username :password :version])))))
 
 (defn set-krysp-endpoint
   [id url username password permitType version]
