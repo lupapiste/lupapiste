@@ -4,20 +4,9 @@ LUPAPISTE.ApplicationsForemanSearchFiltersListModel = function(params) {
 
   var dataProvider = params.dataProvider || {};
 
-  self.showSavedFilters = ko.observable(false);
+  ko.utils.extend(self, new LUPAPISTE.ApplicationsSearchFiltersListModel(params));
 
   self.savedFilters = lupapisteApp.services.applicationFiltersService.savedForemanFilters;
-
-  self.newFilterName = ko.observable().extend({
-    validation: {
-      validator: function (val) {
-        return _.isEmpty(_.find(self.savedFilters(), function(f) {
-          return val === ko.unwrap(f.title);
-        }));
-      },
-      message: loc("applications.search.filter-name-already-in-use")
-    }
-  });
 
   // TODO override save
   self.saveFilter = function() {
@@ -26,17 +15,17 @@ LUPAPISTE.ApplicationsForemanSearchFiltersListModel = function(params) {
     var filter = {
       handlers:      _.map(ko.unwrap(lupapisteApp.services.handlerFilterService.selected), "id"), //util.getIn(self.dataProvider, ["handler", "id"]),
       tags:          _.map(ko.unwrap(lupapisteApp.services.tagFilterService.selected), "id"),
-      operations:    _.map(ko.unwrap(lupapisteApp.services.operationFilterService.selected), "id"),
+      operations:    ["tyonjohtajan-nimeaminen-v2"],
       organizations: _.map(ko.unwrap(lupapisteApp.services.organizationFilterService.selected), "id"),
       areas:         _.map(ko.unwrap(lupapisteApp.services.areaFilterService.selected), "id")
     };
 
     ajax
-    .command("save-application-filter", {title: title, filter: filter, sort: ko.toJS(dataProvider.sort)})
+    .command("save-application-filter", {title: title, filter: filter, sort: ko.toJS(dataProvider.sort), filterType: "foreman"})
     .error(util.showSavedIndicator)
     .success(function(res) {
       util.showSavedIndicator(res);
-      lupapisteApp.services.applicationFiltersService.addFilter(res.filter);
+      lupapisteApp.services.applicationFiltersService.addForemanFilter(res.filter);
       self.newFilterName("");
       self.showSavedFilters(true);
     })
