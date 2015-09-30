@@ -119,6 +119,8 @@
                           "location" :address
                           "modified" :modified
                           "submitted" :submitted
+                          "foreman" :foreman
+                          "foremanRole" :foremanRole
                           "state" :state})
 
 (defn- dir [asc] (if asc 1 -1))

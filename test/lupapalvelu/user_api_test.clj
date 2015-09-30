@@ -15,6 +15,9 @@
 
 (testable-privates lupapalvelu.user-api validate-update-user!)
 
+(fact "filter-storage-key and default-filter-storage-key keys match"
+  (set (keys filter-storage-key)) => (set (keys default-filter-storage-key)))
+
 (def admin-data {:role "admin" :email "admin"})
 
 (facts "validate-update-user!"

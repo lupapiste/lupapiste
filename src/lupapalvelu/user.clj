@@ -11,6 +11,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.validators :as v]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
@@ -29,6 +30,16 @@
    :username  "dummy@example.com"
    :enabled   false})
 
+(def SearchFilter
+  {:id        sc/Str
+   :title     sc/Str
+   :sort     {:field (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole")
+              :asc    sc/Bool}
+   :filter   {(sc/optional-key :handlers) (sc/pred vector? "Handler filter should have ids in a vector")
+              (sc/optional-key :tags) (sc/pred vector? "Tag filter should have ids in a vector")
+              (sc/optional-key :operations) (sc/pred vector? "Op filter should have ids in a vector")
+              (sc/optional-key :organizations) (sc/pred vector? "Org filter should have ids in a vector")
+              (sc/optional-key :areas) (sc/pred vector? "Area filter should have ids in a vector")}})
 
 (def User {:id                                    sc/Str
            :firstName                             (util/max-length-string 255)
@@ -42,7 +53,7 @@
                                                            "rest-api"
                                                            "trusted-etl")
            :email                                 (sc/both
-                                                    (sc/pred util/valid-email? "Not valid email")
+                                                    (sc/pred v/valid-email? "Not valid email")
                                                     (util/max-length-string 255))
            :username                              (util/max-length-string 255)
            :enabled                               sc/Bool
@@ -82,19 +93,12 @@
                                                    (sc/optional-key :titleI18nkey)   sc/Str
                                                    (sc/optional-key :message)        sc/Str
                                                    (sc/optional-key :title)          sc/Str}
-           (sc/optional-key :defaultFilter)       {:id sc/Str}
-           (sc/optional-key :applicationFilters)  [{:id        sc/Str
-                                                    :title     sc/Str
-                                                    :sort     {:field (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler")
-                                                               :asc    sc/Bool}
-                                                    :filter   {(sc/optional-key :handlers) (sc/pred vector? "Handler filter should have ids in a vector")
-                                                               (sc/optional-key :tags) (sc/pred vector? "Tag filter should have ids in a vector")
-                                                               (sc/optional-key :operations) (sc/pred vector? "Op filter should have ids in a vector")
-                                                               (sc/optional-key :organizations) (sc/pred vector? "Org filter should have ids in a vector")
-                                                               (sc/optional-key :areas) (sc/pred vector? "Area filter should have ids in a vector")}}]})
+           (sc/optional-key :defaultFilter)       {:id sc/Str, :foremanFilterId sc/Str}
+           (sc/optional-key :applicationFilters)  [SearchFilter]
+           (sc/optional-key :foremanFilters)      [SearchFilter]})
 
 (def RegisterUser {:email     (sc/both
-                                (sc/pred util/valid-email? "Not valid email")
+                                (sc/pred v/valid-email? "Not valid email")
                                 (util/max-length-string 255))
                    :street    (sc/maybe (util/max-length-string 255))
                    :city      (sc/maybe (util/max-length-string 255))
@@ -365,9 +369,6 @@
        (fail! :error.user-not-found :email ~email))
      ~@body))
 
-(defn get-application-filters [id]
-  (or (:applicationFilters (get-user-by-id id)) []))
-
 ;;
 ;; ==============================================================================
 ;; Create user:
@@ -479,6 +480,12 @@
           (do
             (warn e "Inserting new user failed")
             (fail! :cant-insert)))))))
+
+(defn get-or-create-user-by-email [email current-user]
+  (let [email (canonize-email email)]
+    (or
+      (get-user-by-email email)
+      (create-new-user current-user {:email email :role "dummy"}))))
 
 ;;
 ;; ==============================================================================

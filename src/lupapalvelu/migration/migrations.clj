@@ -564,12 +564,6 @@
                             doc)) (:documents application))]
         (mongo/update-by-id collection id {$set {:documents documents}})))))
 
-#_(defmigration applicant-index-regeneration
-   (reduce + 0
-    (for [collection [:applications :submitted-applications]]
-      (let [applications (mongo/select collection)]
-        (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-update %)) applications))))))
-
 (def- operation-mappings
   {:asuinrakennus         [:kerrostalo-rivitalo :pientalo]
    :muu-uusi-rakentaminen [:muu-uusi-rakentaminen :teollisuusrakennus]
@@ -1118,6 +1112,13 @@
         task))
     {:permitType "YA"
      :tasks {$elemMatch {:schema-info.name "task-katselmus"}}}))
+
+
+(defmigration foreman-index-v2
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {} [:documents])]
+        (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/foreman-index-update %)) applications))))))
 
 ;;
 ;; ****** NOTE! ******
