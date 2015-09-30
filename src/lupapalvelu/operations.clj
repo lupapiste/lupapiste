@@ -294,12 +294,13 @@
   {:yl-uusi-toiminta ymparistolupa-operation
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
    :yl-toiminnan-muutos ymparistolupa-operation
-   :pima                          {:schema "pima"
-                                   :permit-type permit/YL
-                                   :required ["ymp-ilm-kesto-mini"]
-                                   :attachments []
-                                   :add-operation-allowed true
-                                   :min-outgoing-link-permits 0}
+;   :pima                          {:schema "pima"
+;                                   :permit-type permit/YL
+;                                   :required ["ymp-ilm-kesto-mini"]
+;                                   :attachments []
+;                                   :add-operation-allowed true
+;                                   :min-outgoing-link-permits 0
+;                                   :asianhallinta false}
    :muistomerkin-rauhoittaminen   {:schema "muistomerkki-perustelut-rauhoitukselle"
                                    :permit-type permit/YL
                                    :required ["muistomerkki-kaytto-ja-hoito"]
