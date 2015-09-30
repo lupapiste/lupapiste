@@ -35,6 +35,15 @@ LUPAPISTE.ApplicationsSearchModel = function() {
 
   self.searchType = ko.observable("applications");
 
+  // clear filters when search type is changed
+  // TODO default filter?
+  self.searchType.subscribe(function(val) {
+    self.dataProvider.clearFilters();
+    if (val === "foreman") {
+      lupapisteApp.services.operationFilterService.selected([{id: "tyonjohtajan-nimeaminen-v2", label: ""}]);
+    }
+  });
+
   self.showForemanSearch = ko.pureComputed(function() {
     return self.searchType() === "foreman";
   });
