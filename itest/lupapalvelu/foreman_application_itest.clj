@@ -227,12 +227,13 @@
 
         has-auth? (fn [email auth]
                         (or (some (partial = email) (map :username auth)) false))]
+    (sent-emails) ; clear email box
+
     (fact "Create foreman application with correct auths"
-      (let [{foreman-application-id :id} (command apikey :create-foreman-application :id application-id
-                                           :taskId "" :foremanRole "ei tiedossa" :foremanEmail "heppu@example.com") => truthy
-            {auth-array :auth} (query-application pena foreman-application-id) => truthy
-            {orig-auth :auth}  (query-application pena application-id)
-            _ (>pprint (sent-emails))]
+      (let [{foreman-app-id :id} (command apikey :create-foreman-application :id application-id
+                                   :taskId "" :foremanRole "ei tiedossa" :foremanEmail "heppu@example.com") => truthy
+            {auth-array :auth} (query-application pena foreman-app-id) => truthy
+            {orig-auth :auth}  (query-application pena application-id)]
         (fact "applicant 'foo@example.com' is authed to foreman application"
           (has-auth? "foo@example.com" auth-array) => true)
         (fact "applicant 'unknown@example.com' is not authed to foreman app"
@@ -243,16 +244,31 @@
           (has-auth? "1060155-5" auth-array) => true)
         (fact "foreman is authed, also to original application"
           (has-auth? "heppu@example.com" auth-array)
-          (has-auth? "heppu@exampe.com" orig-auth))))
+          (has-auth? "heppu@exampe.com" orig-auth))
 
-    (fact "Contact person is added to new foreman app, when auth is added to original application"
+        (fact "Emails are sent correctly to recipients"
+          (let [recipients (map :to (sent-emails))]
+            recipients => (just ["heppu@example.com" ; foreman is invited to original application also
+                                 "heppu@example.com"
+                                 "foo@example.com"
+                                 "Kaino Solita <kaino@solita.fi>"])))))
+
+    (fact "Contact person is added to new foreman app, when its auth is added to original application"
       (let [_ (command apikey :invite-with-role :id application-id :email "contact@example.com" :text "" :documentName ""
                      :documentId "" :path "" :role "writer") => ok?
-            {foreman-application-id :id} (command apikey :create-foreman-application :id application-id
-                                           :taskId "" :foremanRole "ei tiedossa" :foremanEmail "") => truthy
-            {auth-array :auth} (query-application pena foreman-application-id) => truthy]
+            _ (command apikey :remove-doc :id application-id :docId hakija1) => ok? ; remove one applicant
+            _ (sent-emails) ; reset email box
+            {foreman-app-id :id} (command apikey :create-foreman-application :id application-id
+                                   :taskId "" :foremanRole "ei tiedossa" :foremanEmail "heppu@example.com") => truthy
+            {auth-array :auth} (query-application pena foreman-app-id) => truthy]
         (has-auth? "contact@example.com" auth-array) => true
+        (has-auth? "foo@example.com" auth-array) => false
 
-        (fact "foreman from earlier application is not authed to new foreman app"
-          (has-auth? "heppu@example.com" auth-array) => false)))))
+        (fact "Emails are correctly sent"
+          (let [recipients (map :to (sent-emails))]
+            (fact "only one email is sent to foreman, as he is already authed to original"
+              (count (filter (partial = "heppu@example.com") recipients)) => 1)
+            recipients => (just ["heppu@example.com"
+                                 "contact@example.com"
+                                 "Kaino Solita <kaino@solita.fi>"])))))))
 
