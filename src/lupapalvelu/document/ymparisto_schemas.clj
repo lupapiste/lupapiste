@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.ymparisto-schemas
-  (:require [lupapalvelu.document.schemas :refer :all]))
+  (:require [lupapalvelu.document.schemas :refer :all]
+            [lupapalvelu.document.tools :refer :all]))
 
 (def sijainti (body simple-osoite
                 {:name "karttapiirto" :type :text :max-len 4000}))
@@ -12,9 +13,8 @@
                          {:name "sunnuntai", :type :group, :body [{:name "sunnuntaiAlkuAika" :type :time} {:name "sunnuntaiLoppuAika" :type :time}]}]}))
 
 
-(def kesto-mini (body {:name "kesto" :type :group
-                       :body [{:name "alku" :type :date}
-                              {:name "loppu" :type :date}]}))
+(def kesto-mini
+  (schema-body-without-element-by-name kesto "arki" "lauantai" "sunnuntai"))
 
 (def meluilmoitus (body
                     {:name "rakentaminen" :type :group
