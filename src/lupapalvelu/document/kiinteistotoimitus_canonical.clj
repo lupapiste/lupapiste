@@ -1,9 +1,9 @@
 (ns lupapalvelu.document.kiinteistotoimitus-canonical
-  (:require [clojure.string :as str]
-            [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
+  (:require [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
             [lupapalvelu.document.tools :as tools ]
             [lupapalvelu.permit :as permit]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.strings :as str]))
 
 (defn- operation-name
   "Operation name to schema element name.
@@ -36,25 +36,12 @@
 
 (defmethod operation-details :kiinteistonmuodostus
   [doc]
-  (let [groups (-> doc :data :kiinteistonmuodostus vals)]
-    (for [g groups
-          :let [name (:kiinteistonmuodostusTyyppi g)]]
-      {:name (operation-name name)
-       :details (merge (kiinteistonmuodostus-details name doc)
-                       {:kuvaus (:kuvaus g)})})))
+  (let [group (-> doc :data :kiinteistonmuodostus)
+        name  (:kiinteistonmuodostusTyyppi group)]
+    {:name (operation-name name)
+     :details (merge (kiinteistonmuodostus-details name doc)
+                     {:kuvaus (:kuvaus group)})}))
 
-(defmethod operation-details :rasitetoimitus
-  [doc]
-  (let [groups (-> doc :data :rasitetoimitus vals)]
-    (for [g groups
-          :let [date (-> g :paattymispvm util/to-xml-date-from-string)]]
-      {:name :Rasitetoimitus
-       :details {:kayttooikeustieto
-                 {:KayttoOikeus
-                  (merge (select-keys g [:kayttooikeuslaji :kayttaja :antaja])
-                         (when date
-                           {:paattymispvm date})
-                         {:valiaikainenKytkin (not (str/blank? date))})}}})))
 
 (defmethod operation-details :rajankaynti
   [{data :data}]
@@ -62,13 +49,36 @@
     :details {:selvitettavaAsia (:rajankayntiTyyppi data)
               :kuvaus (:kuvaus data)}}])
 
+(defn rt-details
+  "All the rasitetoimitus operations are combined into one Rasitetoimitus,
+  with kayttooikeustieto sequence."
+  [docs from-property]
+  (let [rt-docs (canonical-common/schema-info-filter docs :name #{"rasitetoimitus"})
+        to-properties (map #(-> % :data :kiinteisto :kiinteistoTunnus)
+                           (canonical-common/schema-info-filter docs :name #{"secondary-kiinteistot"}))]
+    {:name :Rasitetoimitus
+     :details {:kayttooikeustieto
+               (flatten (for [doc rt-docs
+                              :let [group (-> doc :data :rasitetoimitus)
+                                    date  (-> group :paattymispvm util/to-xml-date-from-string)]]
+                          (map (fn [p] {:KayttoOikeus
+                                        (merge {:kayttooikeuslaji (:kayttooikeuslaji group)
+                                                :kayttaja p
+                                                :antaja from-property}
+                                               (when date
+                                                 {:paattymispvm date})
+                                               {:valiaikainenKytkin (not (str/blank? date))})})
+                               to-properties)))}}))
+
+
 (defn kiinteistotoimitus-canonical [application lang]
   (let [app (tools/unwrapped application)
         docs  (canonical-common/documents-without-blanks app)
-        op-docs (canonical-common/schema-info-filter docs :name #{"kiinteistonmuodostus" "rasitetoimitus" "rajankaynti"})
+        property-id (:propertyId application)
+        op-docs (canonical-common/schema-info-filter docs :name #{"kiinteistonmuodostus" "rajankaynti"})
+        op-details (concat (map operation-details op-docs) [(rt-details docs property-id)])
         parties (canonical-common/process-parties docs lang)
         [{{property :kiinteisto} :data}] (canonical-common/schema-info-filter docs :name "kiinteisto")
-        property-id (:propertyId application)
         toimitus-fn (fn [{:keys [:name :details]}]
                       (merge {:toimituksenTiedottieto
                               {:ToimituksenTiedot (canonical-common/toimituksen-tiedot application lang)}
@@ -84,14 +94,10 @@
                              details))]
     {:Kiinteistotoimitus
      {:featureMembers
-      (reduce (fn [acc doc]
-                (let [doc-ops (reduce (fn [all-details op-details]
-                                        (let [op-name  (:name op-details)
-                                              ops      (get all-details op-name (get acc op-name []))
-                                              toimitus (toimitus-fn op-details)]
-                                          (assoc all-details op-name (conj ops toimitus))))
-                                      {}
-                                      (operation-details doc))]
-                  (merge acc doc-ops)))
+      (reduce (fn [acc details]
+                (let [op-name  (:name details)
+                      ops      (get acc op-name [])
+                      toimitus (toimitus-fn details)]
+                  (assoc acc op-name (conj ops toimitus))))
               {}
-              op-docs)}}))
+              op-details)}}))

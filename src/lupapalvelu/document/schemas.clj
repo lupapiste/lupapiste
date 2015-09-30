@@ -910,7 +910,6 @@
 
 (def kt-kiinteistonmuodostus {:name "kiinteistonmuodostus"
                               :type :group
-                              :repeating true
                               :approvable true
                               :removable true
                               :body [{:name "kiinteistonmuodostusTyyppi"
@@ -929,7 +928,6 @@
 
 (def kt-rasitetoimitus {:name "rasitetoimitus"
                         :type :group
-                        :repeating true
                         :approvable true
                         :removable true
                         :body [{:name "kayttooikeuslaji"
@@ -1043,14 +1041,6 @@
                                         {:name "Yhteisrasite"}
                                         {:name "Yksityinen hauta"}
                                         {:name "Talousveden ottaminen"}]}
-                               {:name "kayttaja"
-                                :required true
-                                :type :string :subtype :kiinteistotunnus
-                                }
-                               {:name "antaja"
-                                :required true
-                                :type :string :subtype :kiinteistotunnus
-                                }
                                {:name "paattymispvm"
                                 :type :date}]})
 

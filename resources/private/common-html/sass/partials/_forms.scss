@@ -189,6 +189,10 @@ input[readonly], textarea[readonly] {
   }
 }
 
+.form-full-width > select {
+  width: 50% !important;
+}
+
 .form-single-line {
   display: block;
 }
