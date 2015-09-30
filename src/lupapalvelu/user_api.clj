@@ -624,3 +624,13 @@
   {:user-roles #{:applicant :authority}}
   [{{id :id} :user}]
   (mongo/update-by-id :users id {$unset {:notification 1}}))
+
+(defquery permanent-archive-enabled
+  {:user-roles #{:authority}
+   :pre-checks [(fn [command application]
+                  (let [org-set (user/organization-ids-by-roles (:user command) #{:authority})]
+                    (if-not application
+                      (when-not (organization/some-organization-has-archive-enabled? org-set)
+                        unauthorized)
+                      unauthorized)))]}
+  [_])

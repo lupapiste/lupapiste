@@ -111,4 +111,4 @@
     tags))
 
 (defn some-organization-has-archive-enabled? [organization-ids]
-  (not (nil? (mongo/select-one :organizations {:_id {$in organization-ids} :permanent-archive-enabled true}))))
+  (pos? (mongo/count :organizations {:_id {$in organization-ids} :permanent-archive-enabled true})))
