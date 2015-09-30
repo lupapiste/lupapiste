@@ -14,7 +14,7 @@ LUPAPISTE.ApplicationsForemanSearchFiltersListModel = function(params) {
     var filter = {
       handlers:      _.map(ko.unwrap(lupapisteApp.services.handlerFilterService.selected), "id"), //util.getIn(self.dataProvider, ["handler", "id"]),
       tags:          _.map(ko.unwrap(lupapisteApp.services.tagFilterService.selected), "id"),
-      operations:    ["tyonjohtajan-nimeaminen-v2"],
+      operations:    ["tyonjohtajan-nimeaminen-v2", "tyonjohtajan-nimeaminen"],
       organizations: _.map(ko.unwrap(lupapisteApp.services.organizationFilterService.selected), "id"),
       areas:         _.map(ko.unwrap(lupapisteApp.services.areaFilterService.selected), "id")
     };

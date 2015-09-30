@@ -40,7 +40,7 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   self.searchType.subscribe(function(val) {
     self.dataProvider.clearFilters();
     if (val === "foreman") {
-      lupapisteApp.services.operationFilterService.selected([{id: "tyonjohtajan-nimeaminen-v2", label: ""}]);
+      lupapisteApp.services.operationFilterService.selected([{id: "tyonjohtajan-nimeaminen-v2", label: ""}, {id: "tyonjohtajan-nimeaminen", label: ""}]);
     }
   });
 
