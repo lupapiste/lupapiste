@@ -8,6 +8,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
                      userTotalCount: -1};
 
   self.data = ko.observable(defaultData);
+
   self.applications = ko.observableArray([]);
 
   self.applicationType = ko.observable("all");
