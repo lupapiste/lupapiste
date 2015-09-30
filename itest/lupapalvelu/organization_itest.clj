@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [lupapalvelu.organization :as local-org-api]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer :all]))
 
@@ -11,13 +12,28 @@
 (facts
   (let [uri "http://127.0.0.1:8000/dev/krysp"]
     (fact "pena can't set krysp-url"
-      (command pena :set-krysp-endpoint :url uri :permitType "R" :version "1") => unauthorized?)
+      (command pena :set-krysp-endpoint :url uri :username "" :password "" :permitType "R" :version "1") => unauthorized?)
 
     (fact "sipoo can set working krysp-url"
-      (command sipoo :set-krysp-endpoint :url uri :permitType "YA" :version "2") => ok?)
+      (command sipoo :set-krysp-endpoint :url uri :username "" :password "" :permitType "YA" :version "2") => ok?)
+
+    (fact "sipoo can set working krysp-url with credentials"
+      (command sipoo :set-krysp-endpoint :url uri :username "foo" :password "bar" :permitType "R" :version "2") => ok?)
 
     (fact "sipoo cant set incorrect krysp-url"
-      (command sipoo :set-krysp-endpoint :url "BROKEN_URL" :permitType "R"  :version "1") => fail?)))
+      (command sipoo :set-krysp-endpoint :url "BROKEN_URL" :username "" :password "" :permitType "R"  :version "1") => fail?)
+
+    (fact "get-krysp-wfs - credentials not et for YMP endpoint"
+      (mongo/with-db test-db-name
+        (-> (local-org-api/get-krysp-wfs "753-R" "YMP") :credentials)) => nil)
+
+    (fact "get-krysp-wfs - credentials not et for YA endpoint"
+      (mongo/with-db test-db-name
+        (-> (local-org-api/get-krysp-wfs "753-R" "YA") :credentials)) => nil)
+
+    (fact "get-krysp-wfs - credentials set for R endpoint"
+      (mongo/with-db test-db-name
+        (-> (local-org-api/get-krysp-wfs "753-R" "R") :credentials)) => ["foo" "bar"])))
 
 
 (facts* "users-in-same-organizations"
