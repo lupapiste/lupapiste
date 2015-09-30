@@ -4,6 +4,7 @@ LUPAPISTE.ApplicationsForemanSearchTabsModel = function(params) {
 
   self.dataProvider = params.dataProvider;
 
+  // TODO check query for notice and verdict
   self.tabs = ko.observableArray(["all",
                                   "application",
                                   "notice",

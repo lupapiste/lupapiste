@@ -64,9 +64,9 @@
         <!-- /ko -->
         <!-- ko if: showForemanSearch -->
           <!-- ko ifnot: noApplications() -->
-            <div></div>
+            <div data-bind="component: {name: 'applications-foreman-search-results', params: {dataProvider: dataProvider, gotResults: gotResults}}" class="applications-search-component"></div>
             <!-- ko if: gotResults() -->
-            <div></div>
+            <div data-bind="component: {name: 'applications-search-paging', params: {dataProvider: dataProvider, limits: limits, count: totalCount}}" class="applications-search-component"></div>
             <!-- /ko -->
           <!-- /ko -->
         <!-- /ko -->

@@ -20,7 +20,7 @@ LUPAPISTE.ApplicationFiltersService = function() {
     return _savedFilters();
   });
 
-  self.savedForemanFilters = ko.observable();
+  self.savedForemanFilters = ko.observable([]);
 
   self.defaultFilter = ko.pureComputed(function() {
     return _.find(_savedFilters(), function(f){
