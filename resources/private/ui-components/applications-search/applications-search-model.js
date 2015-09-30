@@ -47,6 +47,7 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     hub.send("track-click", {category:"Applications", label:"create", event:"create"});
     pageutil.openPage("create-part-1");
   };
+
   self.createWithPrevPermit = function() {
     hub.send("track-click", {category:"Applications", label:"create", event:"createWithPrevPermit"});
     pageutil.openPage("create-page-prev-permit");

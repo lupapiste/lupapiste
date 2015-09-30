@@ -31,7 +31,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.skip = ko.observable(0);
 
-  function searchFields() {
+  var searchFields = ko.pureComputed(function() {
     return { searchText: self.searchFieldDelayed(),
              tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
              organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
@@ -42,7 +42,7 @@ LUPAPISTE.ApplicationsDataProvider = function() {
              limit: self.limit(),
              sort: ko.mapping.toJS(self.sort),
              skip: self.skip() };
-  }
+  });
 
   ko.computed(function() {
     self.searchFieldDelayed();
