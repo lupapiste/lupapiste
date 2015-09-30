@@ -307,13 +307,12 @@
       (fail :error.unknown-organization))))
 
 (defcommand set-krysp-endpoint
-  {:parameters [url permitType version]
+  {:parameters [url username password permitType version]
    :user-roles #{:authorityAdmin}
    :input-validators [permit/permit-type-validator]}
   [{user :user}]
   (if (or (s/blank? url) (krysp/wfs-is-alive? url))
-    (mongo/update-by-id :organizations (user/authority-admins-organization-id user) {$set {(str "krysp." permitType ".url") url
-                                                                                           (str "krysp." permitType ".version") version}})
+    (o/set-krysp-endpoint (user/authority-admins-organization-id user) url username password permitType version)
     (fail :auth-admin.legacyNotResponding)))
 
 (defcommand set-kopiolaitos-info

@@ -1,10 +1,14 @@
 (ns lupapalvelu.organization
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.string :as s]
+            [clojure.walk :as walk]
             [monger.operators :refer :all]
+            [cheshire.core :as json]
             [sade.core :refer [fail]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.crypt :as crypt]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]))
@@ -52,6 +56,23 @@
         krysp-config (get-in organization [:krysp (keyword permit-type)])]
     (when-not (s/blank? (:url krysp-config))
       (select-keys krysp-config [:url :version])))))
+
+(defn set-krysp-endpoint
+  [id url username password permitType version]
+  (let [crypto-key (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
+        crypto-iv  (crypt/make-iv-128)
+        creds      (->> {:username username
+                         :password password}
+                        (json/encode)
+                        (crypt/str->bytes)
+                        (crypt/encrypt crypto-key crypto-iv)
+                        (crypt/base64-encode)
+                        (crypt/bytes->str))
+        iv         (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))]
+    (update-organization id {$set {(str "krysp." permitType ".url") url
+                                   (str "krysp." permitType ".version") version
+                                   (str "krysp." permitType ".credentials") creds
+                                   (str "krysp." permitType ".crypto-iv") iv}})))
 
 (defn get-organization-name [organization]
   (let [default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
