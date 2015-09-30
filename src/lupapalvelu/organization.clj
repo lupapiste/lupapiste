@@ -57,7 +57,7 @@
         crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
         crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
                        (-> iv (crypt/str->bytes) (crypt/base64-decode)))
-        creds        (when-let [creds (and crypto-iv (:credentials krysp-config))]
+        credentials  (when-let [creds (and crypto-iv (:credentials krysp-config))]
                        (->> creds
                             (crypt/str->bytes)
                             (crypt/base64-decode)
@@ -66,27 +66,27 @@
                             (json/decode)
                             (walk/keywordize-keys)))]
     (when-not (s/blank? (:url krysp-config))
-      (->> creds
+      (->> credentials
            ((juxt :username :password))
-           (when-not (s/blank? (:username creds)))
+           (when-not (s/blank? (:username credentials)))
            (hash-map :credentials)
            (merge (select-keys krysp-config [:url :version])))))))
 
 (defn set-krysp-endpoint
   [id url username password permitType version]
-  (let [crypto-key (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
-        crypto-iv  (crypt/make-iv-128)
-        creds      (->> {:username username
-                         :password password}
-                        (json/encode)
-                        (crypt/str->bytes)
-                        (crypt/encrypt crypto-key crypto-iv :aes)
-                        (crypt/base64-encode)
-                        (crypt/bytes->str))
+  (let [crypto-key  (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
+        crypto-iv   (crypt/make-iv-128)
+        credentials (->> {:username username
+                          :password password}
+                         (json/encode)
+                         (crypt/str->bytes)
+                         (crypt/encrypt crypto-key crypto-iv :aes)
+                         (crypt/base64-encode)
+                         (crypt/bytes->str))
         iv         (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))]
     (update-organization id {$set {(str "krysp." permitType ".url") url
                                    (str "krysp." permitType ".version") version
-                                   (str "krysp." permitType ".credentials") creds
+                                   (str "krysp." permitType ".credentials") credentials
                                    (str "krysp." permitType ".crypto-iv") iv}})))
 
 (defn get-organization-name [organization]
