@@ -57,6 +57,8 @@
 (defquery comments
   {:parameters [id]
    :user-roles #{:applicant :authority :oirAuthority}
+   :user-authz-roles action/all-authz-writer-roles
+   :org-authz-roles #{:authority}
    :states states/all-states}
   [{application :application}]
   (:comments application))
