@@ -66,7 +66,7 @@
     (when-not (s/blank? (:url krysp-config))
       (->> creds
            ((juxt :username :password))
-           (when (not (empty? (:username creds))))
+           (when-not (s/blank? (:username creds)))
            (hash-map :credentials)
            (merge (select-keys krysp-config [:url :version])))))))
 
