@@ -434,7 +434,7 @@
   (apply give-verdict-with-fn local-command apikey application-id args))
 
 (defn create-foreman-application [project-app-id apikey userId role difficulty]
-  (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role)
+  (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role :foremanEmail "")
         foreman-app          (query-application apikey foreman-app-id)
         foreman-doc          (domain/get-document-by-name foreman-app "tyonjohtaja-v2")]
     (command apikey :set-user-to-document :id foreman-app-id :documentId (:id foreman-doc) :userId userId :path "" :collection "documents")
