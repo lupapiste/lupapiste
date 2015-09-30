@@ -8,7 +8,7 @@
             <button id="open-conversation-side-panel"
                     class="primary vertical caps btn-conversation"
                     data-bind="click: toggleConversationPanel,
-                               visible: authorization.ok('add-comment') || authorization.ok('can-target-comment-to-authority') || authorization.ok('can-mark-answered'),
+                               visible: authorization.ok('comments') || authorization.ok('can-target-comment-to-authority') || authorization.ok('can-mark-answered'),
                                css: {active: showConversationPanel}">
                 <i class="lupicon-conversation"></i>
                 <span data-bind="if: unseenComments,
