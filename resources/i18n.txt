@@ -1,0 +1,3 @@
+auth-admin.legacyUsername: Taustajärjestelmän käyttäjätunnus
+auth-admin.legacyPassword: Taustajärjestelmän salasana
+if-required: Tarvittaessa
