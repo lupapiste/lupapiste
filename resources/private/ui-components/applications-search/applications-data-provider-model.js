@@ -69,6 +69,9 @@ LUPAPISTE.ApplicationsDataProvider = function() {
         case "urgent":
           item.urgencyClass = "lupicon-warning";
           break;
+        case "normal":
+          item.urgencyClass = "lupicon-document-list";
+          break;
         case "pending":
           item.urgencyClass = "lupicon-circle-dash";
           break;
