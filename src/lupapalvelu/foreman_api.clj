@@ -70,7 +70,7 @@
            $set  {:modified created}})
         (notif/notify! :invite {:application application :recipients [foreman-user]}))
 
-      (notif/notify! :invite {:application foreman-app :recipients (:other grouped-auths)})
+      (notif/notify! :invite {:application foreman-app :recipients (map :invite (:other grouped-auths))})
       (doseq [auth (:company grouped-auths)
               :let [company-id (-> auth :invite :user :id)
                     token-id (company/company-invitation-token user company-id (:id foreman-app))]]
