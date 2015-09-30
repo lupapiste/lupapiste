@@ -9,6 +9,9 @@ LUPAPISTE.AutocompleteSavedFiltersModel = function(params) {
   self.query = ko.observable("");
 
   self.data = ko.pureComputed(function() {
+    if (params.foreman) {
+      return util.filterDataByQuery(lupapisteApp.services.applicationFiltersService.savedForemanFilters(), self.query() || "", self.selected(), "title");
+    }
     return util.filterDataByQuery(lupapisteApp.services.applicationFiltersService.savedFilters(), self.query() || "", self.selected(), "title");
   });
 };
