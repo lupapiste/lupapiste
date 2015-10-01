@@ -11,10 +11,12 @@
                 <a class="link active" href="#" data-bind="ltext: 'navigation', click: _.partial(searchType, 'applications'), visible: !showApplicationsSearch()"></a>
                 <span href="#" data-bind="ltext: 'navigation', visible: showApplicationsSearch"></span>
             </div>
+            <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
             <div class="application-search-link">
                 <a class="link" href="#" data-bind="ltext: 'applications.search.foremen', click: _.partial(searchType, 'foreman'), visible: !showForemanSearch()"></a>
                 <span data-bind="ltext: 'applications.search.foremen', visible: showForemanSearch"></span>
             </div>
+            <!-- /ko -->
           </h1>
           <div class="button-group">
             <button data-bind="click: create"
