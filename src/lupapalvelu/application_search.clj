@@ -13,6 +13,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.user :refer [applicant?] :as user]
+            [lupapalvelu.states :as states]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.geojson :as geo]))
 
@@ -82,11 +83,13 @@
           "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "draft"]}}
           "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
           "canceled"          {:state "canceled"}
+          "verdict"           {:state {$in states/post-verdict-states}}
           {:state {$ne "canceled"}})
         (case applicationType
           "inforequest"       {:state {$in ["open" "answered" "info"]}}
           "application"       {:state {$in ["submitted" "sent" "complement-needed"]}}
           "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
+          "verdict"           {:state {$in states/post-verdict-states}}
           "canceled"          {:state "canceled"}
           {:state {$nin ["draft" "canceled"]}}))
       (when-not (empty? handlers)
