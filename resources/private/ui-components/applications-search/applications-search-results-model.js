@@ -51,7 +51,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
     return { click: sortable ? _.partial(self.sortBy, sortField) : _.noop,
              css: css.join(" "),
              ltext: text,
-             attr: {colspan: colspan},
+             attr: {colspan: colspan, "data-test-id": "search-column-" + loc(text)},
              isDescending: ko.pureComputed(function() {
                return self.dataProvider.sort.field() === sortField && !self.dataProvider.sort.asc();
              }),
