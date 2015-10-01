@@ -2,8 +2,8 @@
   (:require [lupapalvelu.document.schemas :refer :all]
             [lupapalvelu.document.tools :refer :all]))
 
-(def sijainti (body simple-osoite
-                {:name "karttapiirto" :type :text :max-len 4000}))
+#_(def sijainti (body simple-osoite
+                 {:name "karttapiirto" :type :text :max-len 4000}))
 
 (def kesto (body {:name "kesto" :type :group
                   :body [{:name "alku" :type :date}
@@ -62,6 +62,22 @@
                                    {:name "Rahaa"}
                                    {:name "Pankkitakaus"}]}))
 
+(def luonnonmuistomerkin-rauhoittaminen
+  (body
+    {:name "muistomerkki-perustelut-rauhoitukselle" :type :group
+     :body [{:name "kohteen-nimi" :type :string :size "l" :required true
+             :group-help "muistomerkki-perustelut-rauhoitukselle.help"
+             }
+           kuvaus
+           {:name "muita-tietoja" :type :text :max-len 4000 :required false :layout :full-width}]}
+
+   {:name "muistomerkki-kaytto-ja-hoito" :type :group :required true
+    :body [{:name "nahtavyyskohde" :type :checkbox
+            :group-help "muistomerkki-kaytto-ja-hoito.help"
+;            :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :docgen-checkbox :whitelist {:roles [:none] :otherwise :disabled}
+;            :i18nkey "nahtavyyskohde"
+            }]}
+  ))
 
 
 (defschemas
@@ -110,6 +126,14 @@
    {:info {:name "maa-aineslupa-kuvaus"
            :order 1}
     :body [kuvaus]}
+
+   {:info {:name "luonnonmuistomerkin-rauhoittaminen"
+;           :i18name "osapuoli"
+;           :removable false
+;           :approvable false
+           :order 1}
+    :body luonnonmuistomerkin-rauhoittaminen}
+
    {:info {:name "paatoksen-toimitus"
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
