@@ -72,22 +72,29 @@
            (hash-map :credentials)
            (merge (select-keys krysp-config [:url :version])))))))
 
+(defn- encode-credentials
+  [username password]
+  (when-not (s/blank? username)
+    (let [crypto-key  (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
+          crypto-iv   (crypt/make-iv-128)
+          credentials (->> {:username username
+                            :password password}
+                           (json/encode)
+                           (crypt/str->bytes)
+                           (crypt/encrypt crypto-key crypto-iv :aes)
+                           (crypt/base64-encode)
+                           (crypt/bytes->str))
+          crypto-iv   (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))]
+      {:credentials credentials :crypto-iv crypto-iv})))
+
 (defn set-krysp-endpoint
   [id url username password permitType version]
-  (let [crypto-key  (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
-        crypto-iv   (crypt/make-iv-128)
-        credentials (->> {:username username
-                          :password password}
-                         (json/encode)
-                         (crypt/str->bytes)
-                         (crypt/encrypt crypto-key crypto-iv :aes)
-                         (crypt/base64-encode)
-                         (crypt/bytes->str))
-        iv         (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))]
-    (update-organization id {$set {(str "krysp." permitType ".url") url
-                                   (str "krysp." permitType ".version") version
-                                   (str "krysp." permitType ".credentials") credentials
-                                   (str "krysp." permitType ".crypto-iv") iv}})))
+  (->> (encode-credentials username password)
+       (merge {:url url :version version})
+       (map (fn [[k v]] [(str "krysp." permitType "." (name k)) v]))
+       (into {})
+       (hash-map $set)
+       (update-organization id)))
 
 (defn get-organization-name [organization]
   (let [default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
