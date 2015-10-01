@@ -122,6 +122,7 @@
    :vapaa-ajan-rakennus-laaj                                          "D"
    :muu-rakennus-laaj                                                 "D"
    :tontin-jarjestelymuutos                                           "D"
+   :jatteen-keraystoiminta                                            "D"
    })
 
 (defn- export [collection query fields]
