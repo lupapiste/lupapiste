@@ -33,7 +33,7 @@
 (def SearchFilter
   {:id        sc/Str
    :title     sc/Str
-   :sort     {:field (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole")
+   :sort     {:field (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole" "id")
               :asc    sc/Bool}
    :filter   {(sc/optional-key :handlers) (sc/pred vector? "Handler filter should have ids in a vector")
               (sc/optional-key :tags) (sc/pred vector? "Tag filter should have ids in a vector")
