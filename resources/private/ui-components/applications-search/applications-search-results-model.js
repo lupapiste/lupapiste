@@ -5,7 +5,12 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
 
 
   self.dataProvider = params.dataProvider;
-  self.data = self.dataProvider.applications;
+  self.data = ko.pureComputed(function() {
+    return _.map(self.dataProvider.applications(), function(item) {
+      item.kuntalupatunnus = util.getIn(item, ["verdicts", 0, "kuntalupatunnus"]);
+      return item;
+    });
+  });
   self.gotResults = params.gotResults;
 
   self.selectedTab = self.dataProvider.applicationType;

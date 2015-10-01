@@ -57,8 +57,11 @@
                 </div>
               </td>
 
-              <!-- TODO ensimmäinen kuntalupatunnus -->
-              <td data-bind="text: $data.id" data-test-col-name="id"></td>
+              <td data-test-col-name="id">
+                <span data-bind="text: $data.id"></span>
+                </br>
+                <span data-bind="text: $data.kuntalupatunnus"></span>
+              </td>
               <td data-bind="ltext: $data.kind" data-test-col-name="type"></td>
               <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
               <td data-bind="text: $data.foreman" data-test-col-name="foreman"></td>
