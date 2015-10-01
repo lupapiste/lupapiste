@@ -4,46 +4,14 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="applications-foreman-search-results-template">
       <div class="tabs-content">
-        <table id="applications-list" class="applications-table foreman-applications-tabls" data-bind="if: gotResults()">
+        <table id="applications-list" class="application-foreman-search-result__table" data-bind="if: gotResults()">
           <thead>
-            <tr> <!-- TODO refactor with foreach and add operation sorter remember to use new chevron icon -->
-              <th class="first" data-bind="ltext: 'applications.indicators',
-                                         attr: {colspan: lupapisteApp.models.currentUser.isAuthority() ? '4' : '3'}"></th>
-
-              <th class="sorting second" data-bind="click: _.partial(sortBy, 'id'),
-                                             ltext: 'applications.id',
-                                             css: {asc: dataProvider.sort.field() === 'id' ? dataProvider.sort.asc() : false,
-                                                   desc: dataProvider.sort.field() === 'id' ? !dataProvider.sort.asc() : false}"></th>
-
-              <th class="sorting third"  data-bind="click: _.partial(sortBy, 'type'),
-                                             ltext: 'applications.type',
-                                             css: {asc: dataProvider.sort.field() === 'type' ? dataProvider.sort.asc() : false,
-                                                   desc: dataProvider.sort.field() === 'type' ? !dataProvider.sort.asc() : false}"></th>
-
-              <th class="sorting fourth" data-bind="click: _.partial(sortBy, 'location'),
-                                             ltext: 'applications.location',
-                                             css: {asc: dataProvider.sort.field() === 'location' ? dataProvider.sort.asc() : false,
-                                                   desc: dataProvider.sort.field() === 'location' ? !dataProvider.sort.asc() : false}"></th>
-
-              <th class="sorting fifth" data-bind="click: _.partial(sortBy, 'foreman'),
-                                             ltext: 'applications.foreman-name',
-                                             css: {asc: dataProvider.sort.field() === 'foreman' ? dataProvider.sort.asc() : false,
-                                                   desc: dataProvider.sort.field() === 'foreman' ? !dataProvider.sort.asc() : false}"></th>
-
-              <th class="sorting sixth" data-bind="click: _.partial(sortBy, 'foremanRole'),
-                                             ltext: 'applications.foreman-role',
-                                             css: {asc: dataProvider.sort.field() === 'foremanRole' ? dataProvider.sort.asc() : false,
-                                                   desc: dataProvider.sort.field() === 'foremanRole' ? !dataProvider.sort.asc() : false}"></th>
-
-              <th class="sorting seventh" data-bind="click: _.partial(sortBy, 'submitted'),
-                                             ltext: 'applications.sent',
-                                             css: {asc: dataProvider.sort.field() === 'submitted' ? dataProvider.sort.asc() : false,
-                                                   desc: dataProvider.sort.field() === 'submitted' ? !dataProvider.sort.asc() : false}"></th>
-
-              <th class="sorting eight" data-bind="click: _.partial(sortBy, 'state'),
-                                             ltext: 'applications.status',
-                                             css: {asc: dataProvider.sort.field() === 'state' ? dataProvider.sort.asc() : false,
-                                                   desc: dataProvider.sort.field() === 'state' ? !dataProvider.sort.asc() : false}"></th>
+            <tr data-bind="foreach: columns">
+              <th data-bind="click: $data.click, css: $data.css, attr: $data.attr">
+                <span data-bind="ltext: $data.ltext"></span>
+                <i class="lupicon-chevron-small-up" data-bind="visible: $data.isAscending"></i>
+                <i class="lupicon-chevron-small-down" data-bind="visible: $data.isDescending"></i>
+              </th>
             </tr>
           </thead>
           <tbody data-bind="foreach: data">

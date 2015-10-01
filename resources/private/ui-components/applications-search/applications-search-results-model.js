@@ -36,4 +36,39 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
 
   self.dispose = _.partial(hub.unsubscribe, self.onPageLoad);
 
+  self.createColumn = function(index, text, opts) {
+    index = index || "";
+    text = text || "";
+    var colspan = util.getIn(opts, ["colspan"], 1);
+    var sortable = util.getIn(opts, ["sortable"], true);
+    var sortField = util.getIn(opts, ["sortField"], "");
+
+    var css = [index];
+    if (sortable) {
+      css.push("sorting");
+    }
+
+    return { click: sortable ? _.partial(self.sortBy, sortField) : _.noop,
+             css: css.join(" "),
+             ltext: text,
+             attr: {colspan: colspan},
+             isDescending: ko.pureComputed(function() {
+               return self.dataProvider.sort.field() === sortField && !self.dataProvider.sort.asc();
+             }),
+             isAscending: ko.pureComputed(function() {
+               return self.dataProvider.sort.field() === sortField && self.dataProvider.sort.asc();
+             }) };
+  };
+
+  self.columns = [
+    self.createColumn("first", "applications.indicators", {colspan: lupapisteApp.models.currentUser.isAuthority() ? "4" : "3", sortable: false}),
+    self.createColumn("second", "applications.type", {sortField: "type"}),
+    self.createColumn("third", "applications.location", {sortField: "location"}),
+    self.createColumn("fourth", "applications.operation", {sortable: false}),
+    self.createColumn("fifth", "applications.applicant", {sortField: "applicant"}),
+    self.createColumn("sixth", "applications.sent", {sortField: "submitted"}),
+    self.createColumn("seventh", "applications.updated", {sortField: "modified"}),
+    self.createColumn("eight", "applications.status", {sortField: "state"}),
+    self.createColumn("ninth", "applications.authority", {sortField: "handler"})
+  ];
 };
