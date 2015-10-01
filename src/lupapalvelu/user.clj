@@ -49,9 +49,7 @@
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}
            (sc/optional-key :orgAuthz)            {sc/Keyword (sc/pred vector? "OrgAuthz must be vector")}
-           (sc/optional-key :personId)            (sc/either
-                                                    (sc/pred nil?)
-                                                    (sc/pred util/valid-hetu? "Not valid hetu"))
+           (sc/optional-key :personId)            (sc/maybe (sc/pred util/valid-hetu? "Not valid hetu"))
            (sc/optional-key :street)              (sc/maybe (util/max-length-string 255))
            (sc/optional-key :city)                (sc/maybe (util/max-length-string 255))
            (sc/optional-key :zip)                 (sc/either
@@ -73,16 +71,22 @@
                                                     (sc/pred util/finnish-y? "Not valid Y code")
                                                     (sc/pred ss/blank?))
            (sc/optional-key :allowDirectMarketing) sc/Bool
-           (sc/optional-key :attachments)         (sc/pred vector? "Attachments are in a vector")
+           (sc/optional-key :attachments)         [{:attachment-type  {:type-group sc/Str, :type-id sc/Str}
+                                                    :attachment-id sc/Str
+                                                    :file-name  sc/Str
+                                                    :content-type  sc/Str
+                                                    :size  sc/Num
+                                                    :created sc/Num}]
            (sc/optional-key :company)             {:id sc/Str :role sc/Str}
-           (sc/optional-key :partnerApplications) {:rakentajafi {:id sc/Str
-                                                                 :created sc/Int
-                                                                 :origin sc/Bool}}
+           (sc/optional-key :partnerApplications) {(sc/optional-key :rakentajafi) {:id sc/Str
+                                                                                   :created sc/Int
+                                                                                   :origin sc/Bool}}
            (sc/optional-key :notification)        {(sc/optional-key :messageI18nkey) sc/Str
                                                    (sc/optional-key :titleI18nkey)   sc/Str
                                                    (sc/optional-key :message)        sc/Str
                                                    (sc/optional-key :title)          sc/Str}
-           (sc/optional-key :defaultFilter)       {:id sc/Str}
+           (sc/optional-key :defaultFilter)       {(sc/optional-key :id) (sc/maybe sc/Str)
+                                                   (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)}
            (sc/optional-key :applicationFilters)  [{:id        sc/Str
                                                     :title     sc/Str
                                                     :sort     {:field (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler")
