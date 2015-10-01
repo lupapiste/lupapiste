@@ -6,8 +6,8 @@ LUPAPISTE.ApplicationsForemanSearchTabsModel = function(params) {
 
   // TODO check query for notice and verdict
   self.tabs = ko.observableArray(["all",
-                                  "application",
-                                  "notice",
+                                  "foremanApplication",
+                                  "foremanNotice",
                                   "inforequest",
                                   "verdict",
                                   "canceled"]);
