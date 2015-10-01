@@ -677,7 +677,7 @@
                                    :asianhallinta false}
      :kiinteistonmuodostus         {:schema "kiinteistonmuodostus"
                                     :permit-type permit/KT
-                                    ;;:optional #{"secondary-kiinteistot"}
+                                    :optional #{"secondary-kiinteistot"}
                                     :required common-maanmittaus-schemas
                                     :attachments []
                                     :add-operation-allowed true

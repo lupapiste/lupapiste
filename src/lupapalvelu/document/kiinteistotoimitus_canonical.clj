@@ -1,9 +1,10 @@
 (ns lupapalvelu.document.kiinteistotoimitus-canonical
-  (:require [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
+  (:require [clojure.walk :as walk]
+            [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
             [lupapalvelu.document.tools :as tools ]
             [lupapalvelu.permit :as permit]
-            [sade.util :as util]
-            [sade.strings :as str]))
+            [sade.strings :as str]
+            [sade.util :as util]))
 
 (defn- operation-name
   "Operation name to schema element name.
@@ -49,13 +50,44 @@
     :details {:selvitettavaAsia (:rajankayntiTyyppi data)
               :kuvaus (:kuvaus data)}}])
 
+(defn property-details
+  "List of maps with either :property-id or :mat (kiinteisto- and maaraalatunnus)"
+  [docs & [app]]
+  (for [{{property :kiinteisto} :data} docs]
+    (if-let [mat (canonical-common/maaraalatunnus property app)]
+      {:mat mat}
+      (if app
+        {:property-id (:propertyId app)}
+        {:property-id (:kiinteistoTunnus property)}))))
+
+(defn kiinteisto-vs-maaraala
+  ":kiinteistotieto and :maaraAlatieto sequences for given properties.
+  Properties are property-details results."
+  [properties]
+  (defn safe-conj [coll pred x]
+    (if pred
+      (let [coll (or coll [])]
+        (conj coll x))
+      coll))
+  (reduce (fn [acc p]
+            (let [{:keys [kiinteistotieto maaraAlatieto]} acc
+                  {:keys [property-id mat]} p
+                  kt (safe-conj kiinteistotieto
+                                property-id
+                                {:Kiinteisto {:kiinteistotunnus property-id}})
+                  m (safe-conj maaraAlatieto
+                               mat
+                               {:MaaraAla {:maaraAlatunnus mat}})]
+              (merge acc {:kiinteistotieto kt :maaraAlatieto m})))
+          {}
+          properties))
+
 (defn rt-details
   "All the rasitetoimitus operations are combined into one Rasitetoimitus,
   with kayttooikeustieto sequence."
-  [docs from-property]
+  [docs from-property-id to-properties]
   (let [rt-docs (canonical-common/schema-info-filter docs :name #{"rasitetoimitus"})
-        to-properties (map #(-> % :data :kiinteisto :kiinteistoTunnus)
-                           (canonical-common/schema-info-filter docs :name #{"secondary-kiinteistot"}))]
+        to-prop-ids (walk/walk :property-id #(remove nil? %) to-properties)]
     {:name :Rasitetoimitus
      :details {:kayttooikeustieto
                (flatten (for [doc rt-docs
@@ -64,33 +96,36 @@
                           (map (fn [p] {:KayttoOikeus
                                         (merge {:kayttooikeuslaji (:kayttooikeuslaji group)
                                                 :kayttaja p
-                                                :antaja from-property}
+                                                :antaja from-property-id}
                                                (when date
                                                  {:paattymispvm date})
                                                {:valiaikainenKytkin (not (str/blank? date))})})
-                               to-properties)))}}))
-
+                               to-prop-ids)))}}))
 
 (defn kiinteistotoimitus-canonical [application lang]
   (let [app (tools/unwrapped application)
         docs  (canonical-common/documents-without-blanks app)
         property-id (:propertyId application)
+        main-property (property-details (canonical-common/schema-info-filter docs :name "kiinteisto") app)
+        main-property-canon (kiinteisto-vs-maaraala main-property)
+        secondaries (property-details (canonical-common/schema-info-filter docs :name "secondary-kiinteistot"))
+        all-properties (concat main-property secondaries)
+        all-properties-canon (kiinteisto-vs-maaraala all-properties)
         op-docs (canonical-common/schema-info-filter docs :name #{"kiinteistonmuodostus" "rajankaynti"})
-        op-details (concat (map operation-details op-docs) [(rt-details docs property-id)])
+        op-details (concat (map operation-details op-docs) [(rt-details docs property-id secondaries)])
         parties (canonical-common/process-parties docs lang)
-        [{{property :kiinteisto} :data}] (canonical-common/schema-info-filter docs :name "kiinteisto")
         toimitus-fn (fn [{:keys [:name :details]}]
                       (merge {:toimituksenTiedottieto
                               {:ToimituksenTiedot (canonical-common/toimituksen-tiedot application lang)}
                               :toimitushakemustieto
                               {:Toimitushakemus
-                               {:osapuolitieto parties
-                                :sijaintitieto (canonical-common/get-sijaintitieto application)
-                                :kiinteistotieto {:Kiinteisto {:kiinteistotunnus property-id}}
-                                :maaraAlatieto  (when-let [mat (canonical-common/maaraalatunnus app property)]
-                                                  {:MaaraAla {:maaraAlatunnus mat}})
-                                :tilatieto (canonical-common/application-state app)}}
+                               (merge all-properties-canon
+                                      {:osapuolitieto parties
+                                       :sijaintitieto (canonical-common/get-sijaintitieto application)
+                                       :tilatieto (canonical-common/application-state app)}
+                                      )}
                               :toimituksenTila "Hakemus"}
+                             main-property-canon
                              details))]
     {:Kiinteistotoimitus
      {:featureMembers

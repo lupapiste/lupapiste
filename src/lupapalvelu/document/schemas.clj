@@ -888,6 +888,7 @@
 
 (def rajankaynti-tyyppi {:name "rajankayntiTyyppi"
                          :type :select
+                         :layout :full-width
                          :required true
                          :body [{:name "Rajan paikkaa ja rajamerkki\u00e4 koskeva ep\u00e4selvyys (rajank\u00e4ynti)"}
                                 {:name "Ep\u00e4selvyys siit\u00e4, mihin rekisteriyksikk\u00f6\u00f6n jokin alue kuuluu"}

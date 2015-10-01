@@ -171,11 +171,13 @@
     (assoc application :submittable (foreman-submittable? application))
     application))
 
-(def- operation-meta-fields-to-enrich #{:optional})
+;; Meta fields with default values.
+(def- operation-meta-fields-to-enrich {:optional []})
 (defn- enrich-primary-operation-with-metadata [app]
   (let [enrichable-fields (-> (operations/get-primary-operation-metadata app)
-                              (select-keys operation-meta-fields-to-enrich))]
-    (update app :primaryOperation merge enrichable-fields)))
+                              (select-keys (keys operation-meta-fields-to-enrich)))
+        fields-with-defaults (merge operation-meta-fields-to-enrich enrichable-fields)]
+    (update app :primaryOperation merge fields-with-defaults)))
 
 (defn post-process-app [app user]
   (->> app

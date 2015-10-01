@@ -3393,7 +3393,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 
 /* line 192, ../sass/partials/_forms.scss */
 .form-full-width > select {
-  width: 50% !important;
+  width: 80% !important;
 }
 
 /* line 196, ../sass/partials/_forms.scss */
