@@ -61,7 +61,7 @@
    :org-authz-roles #{:authority}
    :states states/all-states}
   [{application :application}]
-  (:comments application))
+  (ok (select-keys application [:id :comments])))
 
 (defcommand add-comment
   {:parameters [id text target roles]
