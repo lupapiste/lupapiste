@@ -5,7 +5,7 @@
             [sade.core :refer :all]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [clj-time.format :as timeformat]
-            [clj-time.core :refer [days weeks months years ago]]
+            [clj-time.core :refer [days weeks months years ago from-now]]
             [clj-time.coerce :as tc]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [debugf]]
@@ -264,16 +264,25 @@
                 4 "%02d:%02d:%02d.%d")]
       (apply format fmt (map ->int matches)))))
 
-(defn get-timestamp-from-now
-  "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
-  [time-key amount]
-  {:pre [(#{:day :week :month :years} time-key)]}
+(defn- get-timestamp-ago-or-from-now
+  [ago-from-now-fn time-key amount]
+  {:pre [(#{:day :week :month :year} time-key)]}
   (let [time-fn (case time-key
                   :day days
                   :week weeks
                   :month months
-                  :years years)]
-    (tc/to-long (-> amount time-fn ago))))
+                  :year years)]
+    (tc/to-long (-> amount time-fn ago-from-now-fn))))
+
+(defn get-timestamp-ago
+  [time-key amount]
+  "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
+  (get-timestamp-ago-or-from-now ago time-key amount))
+
+(defn get-timestamp-from-now
+  "Returns a timestamp in future. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
+  [time-key amount]
+  (get-timestamp-ago-or-from-now from-now time-key amount))
 
 (defn to-long
   "Parses string to long. If string is not numeric returns nil."
