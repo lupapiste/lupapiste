@@ -70,8 +70,7 @@
   (fact "ya-jatkoaika requires" (is-link-permit-required {:secondaryOperations [{:name "ya-jatkoaika"}]}) => truthy))
 
 (facts "Add operation allowed"
-  (let [not-allowed-for #{:raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :tilan-rekisteroiminen-tontiksi :yhdistaminen :rajankaynnin-hakeminen
-                          :tonttijaon-hakeminen :tontin-lohkominen :rasitetoimitus :tonttijaon-muutoksen-hakeminen :rajannayton-hakeminen :halkominen :aiemmalla-luvalla-hakeminen}
+       (let [not-allowed-for #{:raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen :rajankaynti}
         error {:ok false :text "error.add-operation-not-allowed"}]
 
     (doseq [operation lupapalvelu.operations/operations]
@@ -79,7 +78,7 @@
             application {:primaryOperation {:name (name op)} :permitSubtype nil}
             operation-allowed (add-operation-allowed? nil application)]
         (fact {:midje/description (name op)}
-          (if (or (not= permit-type "R") (not-allowed-for op))
+              (if (or (not (contains? #{"R" "KT"} permit-type)) (not-allowed-for op))
             (fact "Add operation not allowed" operation-allowed => error)
             (fact "Add operation allowed" operation-allowed => nil?)))))
 

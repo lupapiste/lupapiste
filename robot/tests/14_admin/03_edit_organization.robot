@@ -1,13 +1,22 @@
 *** Settings ***
 
 Documentation  Admin edits organization
-Suite setup     SolitaAdmin logs in
 Suite teardown  Apply minimal fixture now
 Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
+Mikko creates an inforequest and an application in Sipoo
+  Mikko logs in
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname}  admin${secs}
+  Create inforequest the fast way  ${appname}ir  360603.153  6734222.95  753-416-25-30  kerrostalo-rivitalo  The winter is coming
+  Create application the fast way  ${appname}app  753-416-25-31  kerrostalo-rivitalo
+  Open to authorities  Hello admin!
+  [Teardown]  Logout
+
 Solita admin sees the list of organizations
+  SolitaAdmin logs in
   Click link  Organisaatiot
   Wait until  Element Should be Visible  xpath=//table[@data-test-id="organizations-table"]
 
@@ -49,13 +58,6 @@ Organization 753-R has now inforequest enabled and application disabled
   Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="open-inforequest-email-753-R"]  root@localhost
   [Teardown]  Logout
 
-Mikko creates an inforequest in Sipoo
-  Mikko logs in
-  ${secs} =  Get Time  epoch
-  Set Suite Variable  ${appname}  admin${secs}
-  Create inforequest the fast way  ${appname}  360603.153  6734222.95  753-416-25-30  kerrostalo-rivitalo  The winter is coming
-  [Teardown]  Logout
-
 Admin impersonated Sipoo authority
   SolitaAdmin logs in
   Click link  Organisaatiot
@@ -66,5 +68,9 @@ Admin impersonated Sipoo authority
   Click enabled by test id  submit-login-as
 
 Admin sees Mikko's inforequest
-  Request should be visible  ${appname}
+  Request should be visible  ${appname}ir
+
+Admin sees comment on Mikko's application
+  Open application  ${appname}app  753-416-25-31
+  Comment count is  1
   [Teardown]  Logout

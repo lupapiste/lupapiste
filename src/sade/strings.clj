@@ -104,6 +104,8 @@
 
 (defn upper-case ^String [^CharSequence x] (when x (s/upper-case x)))
 
+(defn capitalize ^String [^CharSequence x] (when x (s/capitalize x)))
+
 (defn trim ^String [^CharSequence x] (when x (s/trim x)))
 
 (defn split ^String [^CharSequence s ^java.util.regex.Pattern re] (when s (s/split s re)))

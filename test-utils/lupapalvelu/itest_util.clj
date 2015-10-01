@@ -382,6 +382,7 @@
   {:post [(or (nil? %)
             (and (:to %) (:subject %) (not (.contains (:subject %) "???")) (-> % :body :html) (-> % :body :plain))
             (println %))]}
+  (Thread/sleep 20) ; A little wait to allow mails to be delivered
   (let [{:keys [ok message]} (query pena :last-email :reset true)] ; query with any user will do
     (assert ok)
     message))
@@ -389,6 +390,7 @@
 (defn sent-emails
   "Returns a list of emails and clears the inbox"
   []
+  (Thread/sleep 20) ; A little wait to allow mails to be delivered
   (let [{:keys [ok messages]} (query pena :sent-emails :reset true)] ; query with any user will do
     (assert ok)
     messages))

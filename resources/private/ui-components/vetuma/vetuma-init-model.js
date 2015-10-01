@@ -12,9 +12,9 @@ LUPAPISTE.VetumaInitModel = function(params) {
   self.id = _.isUndefined(params.id) ?  "vetuma-init" : params.id;
   self.visible = _.isUndefined(params.visible) ?  true : params.visible;
   self.href = ko.pureComputed(function() {
-    var params = _.map(VETUMA_PARAMS, function(param) {
+    var getParams = _.map(VETUMA_PARAMS, function(param) {
       return param + "=" + encodeURIComponent(ko.unwrap(params[param]));
     }).join("&");
-    return VETUMA_BASE + params;
+    return VETUMA_BASE + getParams;
   });
 };

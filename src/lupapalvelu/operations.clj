@@ -670,19 +670,19 @@
      :kiinteistonmuodostus         {:schema "kiinteistonmuodostus"
                                     :permit-type permit/KT
                                     :optional #{"secondary-kiinteistot"}
-                                    :required (conj common-maanmittaus-schemas "rasitetoimitus")
+                                    :required common-maanmittaus-schemas
                                     :attachments []
-                                    :add-operation-allowed false
+                                    :add-operation-allowed true
                                     :min-outgoing-link-permits 0
-                                    :asianhallinta false}
+                                    :asianhallinta true}
      :rasitetoimitus                {:schema "rasitetoimitus"
                                      :permit-type permit/KT
                                      :optional #{"secondary-kiinteistot"}
-                                     :required (conj common-maanmittaus-schemas "kiinteistonmuodostus")
+                                     :required common-maanmittaus-schemas
                                      :attachments []
-                                     :add-operation-allowed false
+                                     :add-operation-allowed true
                                      :min-outgoing-link-permits 0
-                                     :asianhallinta false}
+                                     :asianhallinta true}
      :rajankaynti                  {:schema "rajankaynti"
                                     :permit-type permit/KT
                                     :optional #{"secondary-kiinteistot"}
@@ -690,7 +690,7 @@
                                     :attachments []
                                     :add-operation-allowed false
                                     :min-outgoing-link-permits 0
-                                    :asianhallinta false}
+                                    :asianhallinta true}
      :poikkeamis                  {:schema "rakennushanke"
                                    :permit-type permit/P
                                    :required  (conj common-poikkeamis-schemas "suunnittelutarveratkaisun-lisaosa")
@@ -698,126 +698,126 @@
                                    :add-operation-allowed false
                                    :min-outgoing-link-permits 0
                                    :asianhallinta true}
-     :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
-                                   :permit-type permit/MAL
-                                   :required ["ymp-maksaja" "rakennuspaikka"]
-                                   :attachments []
-                                   :add-operation-allowed false
-                                   :min-outgoing-link-permits 0
-                                   :asianhallinta true}
-     :vvvl-vesijohdosta           {:schema "talousvedet"
-                                   :permit-type permit/VVVL
-                                   :required common-vvvl-schemas
-                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
-                                   :add-operation-allowed false
-                                   :min-outgoing-link-permits 0
-                                   :asianhallinta true}
-     :vvvl-viemarista             {:schema "jatevedet"
-                                   :permit-type permit/VVVL
-                                   :required common-vvvl-schemas
-                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
-                                   :add-operation-allowed false
-                                   :min-outgoing-link-permits 0
-                                   :asianhallinta true}
-     :vvvl-vesijohdosta-ja-viemarista {:schema "talousvedet"
-                                       :permit-type permit/VVVL
-                                       :required (conj common-vvvl-schemas "jatevedet")
-                                       :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
-                                       :add-operation-allowed false
-                                       :min-outgoing-link-permits 0
-                                       :asianhallinta true}
-     :vvvl-hulevesiviemarista    {:schema "hulevedet"
+    :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
+                                  :permit-type permit/MAL
+                                  :required ["ymp-maksaja" "rakennuspaikka"]
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :min-outgoing-link-permits 0
+                                  :asianhallinta true}
+    :vvvl-vesijohdosta           {:schema "talousvedet"
                                   :permit-type permit/VVVL
                                   :required common-vvvl-schemas
                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0
                                   :asianhallinta true}
+    :vvvl-viemarista             {:schema "jatevedet"
+                                  :permit-type permit/VVVL
+                                  :required common-vvvl-schemas
+                                  :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                  :add-operation-allowed false
+                                  :min-outgoing-link-permits 0
+                                  :asianhallinta true}
+    :vvvl-vesijohdosta-ja-viemarista {:schema "talousvedet"
+                                      :permit-type permit/VVVL
+                                      :required (conj common-vvvl-schemas "jatevedet")
+                                      :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                      :add-operation-allowed false
+                                      :min-outgoing-link-permits 0
+                                      :asianhallinta true}
+    :vvvl-hulevesiviemarista    {:schema "hulevedet"
+                                 :permit-type permit/VVVL
+                                 :required common-vvvl-schemas
+                                 :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                 :add-operation-allowed false
+                                 :min-outgoing-link-permits 0
+                                 :asianhallinta true}
 
-     :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
-                                   :permit-type permit/R
-                                   :required ["tyonjohtaja" "maksaja"]
-                                   :attachments []
-                                   :add-operation-allowed false
-                                   :min-outgoing-link-permits 1
-                                   :max-outgoing-link-permits 1
-                                   :max-incoming-link-permits 0
-                                   :allowed-link-permit-types #{permit/R permit/P}
-                                   :asianhallinta false}
+    :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
+                                  :permit-type permit/R
+                                  :required ["tyonjohtaja" "maksaja"]
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :min-outgoing-link-permits 1
+                                  :max-outgoing-link-permits 1
+                                  :max-incoming-link-permits 0
+                                  :allowed-link-permit-types #{permit/R permit/P}
+                                  :asianhallinta false}
 
-     :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
-                                   :permit-type permit/R
-                                   :subtypes [:tyonjohtaja-hakemus :tyonjohtaja-ilmoitus]
-                                   :state-graph-resolver tyonjohtaja-state-machine-resolver
-                                   :required ["hankkeen-kuvaus-minimum"]
-                                   :attachments []
-                                   :add-operation-allowed false
-                                   :min-outgoing-link-permits 1
-                                   :max-outgoing-link-permits 1
-                                   :max-incoming-link-permits 0
-                                   :allowed-link-permit-types #{permit/R permit/P}
-                                   :asianhallinta false}
+    :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
+                                  :permit-type permit/R
+                                  :subtypes [:tyonjohtaja-hakemus :tyonjohtaja-ilmoitus]
+                                  :state-graph-resolver tyonjohtaja-state-machine-resolver
+                                  :required ["hankkeen-kuvaus-minimum"]
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :min-outgoing-link-permits 1
+                                  :max-outgoing-link-permits 1
+                                  :max-incoming-link-permits 0
+                                  :allowed-link-permit-types #{permit/R permit/P}
+                                  :asianhallinta false}
 
-     :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"
-                                   :permit-type permit/R
-                                   :required ["suunnittelija" "maksaja"]
-                                   :attachments []
-                                   :add-operation-allowed false
-                                   :min-outgoing-link-permits 1
-                                   :asianhallinta false}
+    :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"
+                                  :permit-type permit/R
+                                  :required ["suunnittelija" "maksaja"]
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :min-outgoing-link-permits 1
+                                  :asianhallinta false}
 
-     :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
-                                   :permit-type permit/R
-                                   :required ["maksaja"]
-                                   :attachments []
-                                   :add-operation-allowed false
-                                   :min-outgoing-link-permits 1
-                                   :asianhallinta false}
-
-     :aiemmalla-luvalla-hakeminen {:schema "hankkeen-kuvaus"
-                                   :permit-type permit/R
-                                   :required []
-                                   :attachments []
-                                   :add-operation-allowed false
-                                   :min-outgoing-link-permits 0
-                                   :asianhallinta false}
-
-     :rak-valm-tyo                {:schema "maisematyo"
-                                   :permit-type permit/R
-                                   :required common-rakval-schemas
-                                   :attachments [:paapiirustus [:asemapiirros]]
-                                   :add-operation-allowed true
-                                   :min-outgoing-link-permits 0
-                                   :asianhallinta false}
-
-     :aloitusoikeus               {:schema "aloitusoikeus"
-                                   :permit-type permit/R
-                                   :required ["maksaja"]
-                                   :attachments []
-                                   :add-operation-allowed false
-                                   :min-outgoing-link-permits 1
-                                   :asianhallinta false}
-     :raktyo-aloit-loppuunsaat   {:schema "hankkeen-kuvaus-minimum"
+    :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
                                   :permit-type permit/R
                                   :required ["maksaja"]
                                   :attachments []
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 1
                                   :asianhallinta false}
-     :tonttijako                 {:schema "maankayton-muutos"
-                                  :permit-type permit/MM
-                                  :required common-maanmittaus-schemas
+
+    :aiemmalla-luvalla-hakeminen {:schema "hankkeen-kuvaus"
+                                  :permit-type permit/R
+                                  :required []
                                   :attachments []
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0
                                   :asianhallinta false}
-     :asemakaava                 {:schema "maankayton-muutos"
-                                  :permit-type permit/MM
-                                  :required common-maanmittaus-schemas
+
+    :rak-valm-tyo                {:schema "maisematyo"
+                                  :permit-type permit/R
+                                  :required common-rakval-schemas
+                                  :attachments [:paapiirustus [:asemapiirros]]
+                                  :add-operation-allowed true
+                                  :min-outgoing-link-permits 0
+                                  :asianhallinta false}
+
+    :aloitusoikeus               {:schema "aloitusoikeus"
+                                  :permit-type permit/R
+                                  :required ["maksaja"]
                                   :attachments []
                                   :add-operation-allowed false
-                                  :min-outgoing-link-permits 0
-                                  :asianhallinta true}
+                                  :min-outgoing-link-permits 1
+                                  :asianhallinta false}
+    :raktyo-aloit-loppuunsaat   {:schema "hankkeen-kuvaus-minimum"
+                                 :permit-type permit/R
+                                 :required ["maksaja"]
+                                 :attachments []
+                                 :add-operation-allowed false
+                                 :min-outgoing-link-permits 1
+                                 :asianhallinta false}
+    :tonttijako                 {:schema "maankayton-muutos"
+                                 :permit-type permit/MM
+                                 :required common-maanmittaus-schemas
+                                 :attachments []
+                                 :add-operation-allowed false
+                                 :min-outgoing-link-permits 0
+                                 :asianhallinta true}
+    :asemakaava                 {:schema "maankayton-muutos"
+                                 :permit-type permit/MM
+                                 :required common-maanmittaus-schemas
+                                 :attachments []
+                                 :add-operation-allowed false
+                                 :min-outgoing-link-permits 0
+                                 :asianhallinta true}
      :ranta-asemakaava          {:schema "maankayton-muutos"
                                  :permit-type permit/MM
                                  :required common-maanmittaus-schemas
