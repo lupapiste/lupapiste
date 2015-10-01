@@ -156,7 +156,8 @@
                           "submitted" :submitted
                           "foreman" :foreman
                           "foremanRole" :foremanRole
-                          "state" :state})
+                          "state" :state
+                          "id" :_id})
 
 (defn- dir [asc] (if asc 1 -1))
 
