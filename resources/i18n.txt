@@ -4,3 +4,5 @@ applications.filter.verdict:  Päätökset
 applications.id:  Tunnus
 applications.foreman-name:  Työnjohtaja
 applications.foreman-role:  Rooli
+applications.filter.foremanApplication:  Hakemukset
+applications.filter.foremanNotice:  Ilmoitukset
