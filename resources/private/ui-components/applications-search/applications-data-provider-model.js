@@ -110,7 +110,6 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   };
 
   self.setDefaultForemanSort = function() {
-    console.log("setDefaultForemanSort");
     self.sort.field(defaultForemanSort.field);
     self.sort.asc(defaultForemanSort.asc);
   };
