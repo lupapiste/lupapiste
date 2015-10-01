@@ -790,6 +790,10 @@
                                {:municipality "564" :permitType "VVVL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}]
                        :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
                                 :url "http://www.ouka.fi"}]
+                       :statementGivers [{:id "516560d6c2e6f603beccc144"
+                                          :text "Paloviranomainen",
+                                          :email "olli.uleaborg@ouka.fi",
+                                          :name "Olli Ule\u00E5borg"}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YI" "YL" "YM" "MAL" "VVVL"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
