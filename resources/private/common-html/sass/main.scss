@@ -17,10 +17,11 @@
   white-space:nowrap;
 }
 
-@mixin clearfix {
+@mixin clearfix() {
   *zoom: 1;
-  &:before, &:after {
-    content: "";
+  &:before,
+  &:after {
+    content: " ";
     display: table;
   }
   &:after {

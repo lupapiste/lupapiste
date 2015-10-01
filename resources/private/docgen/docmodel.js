@@ -1743,6 +1743,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var section = $("<section>").addClass( "accordion").attr( "data-doc-type", self.schemaName );
 
     var contents = $("<div>").addClass( "accordion_content");
+    // id is used to remove validation indicators in showValidationResults
+    contents.attr("id", "document-" + self.docId);
     function toggleContents( isOpen ) {
       contents.toggleClass( "expandend");
       contents.attr( "data-accordion-state",

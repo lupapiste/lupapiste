@@ -36,10 +36,13 @@
 (defquery get-application-operations
   {:user-roles #{:authority}}
   [{user :user}]
-
   (let [orgIds             (map name (-> user :orgAuthz keys))
         organizations      (map lupapalvelu.organization/get-organization orgIds)
         selected-ops       (mapcat :selected-operations organizations)
+        is-R?              (some #(= (:permitType %) "R") (mapcat :scope organizations))
+        selected-ops       (if is-R?
+                             (distinct (conj selected-ops "tyonjohtajan-nimeaminen-v2"))
+                             selected-ops)
         ops-by-permit-type (selected-ops-by-permit-type selected-ops)]
     (ok :operationsByPermitType ops-by-permit-type)))
 

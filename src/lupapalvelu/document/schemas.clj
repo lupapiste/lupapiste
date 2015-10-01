@@ -1100,13 +1100,13 @@
     :body (approvable-top-level-groups maisematyo)}
    {:info {:name "rajankaynti" :approvable true}
     :body (approvable-top-level-groups (body rajankaynti-tyyppi kuvaus))}
-   
+
    {:info {:name "maankayton-muutos" :approvable true}
     :body (approvable-top-level-groups (body uusi-tai-muutos kuvaus))}
-   
+
    {:info {:name "rasitetoimitus" :approvable true}
     :body [kt-rasitetoimitus]}
-   
+
    {:info {:name "kiinteistonmuodostus" :approvable true}
     :body [kt-kiinteistonmuodostus]}
 
@@ -1177,7 +1177,8 @@
            :removable true
            :repeating true
            :approvable true
-           :type :party}
+           :type :party
+           :after-update 'lupapalvelu.application-meta-fields/foreman-index-update}
     :body tyonjohtaja}
 
    {:info {:name "tyonjohtaja-v2"
@@ -1186,7 +1187,8 @@
            :removable false
            :repeating false
            :approvable true
-           :type :party}
+           :type :party
+           :after-update 'lupapalvelu.application-meta-fields/foreman-index-update}
     :body tyonjohtaja-v2}
 
    {:info {:name "maksaja"

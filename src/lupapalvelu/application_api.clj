@@ -467,60 +467,54 @@
                              (fail :error.link-permit-not-required)))]})
 
 (defquery app-matches-for-link-permits
-          {:parameters [id]
-           :user-roles #{:applicant :authority}
-           :states     (states/all-application-states-but (conj states/terminal-states :sent))}
-          [{{:keys [propertyId] :as application} :application user :user :as command}]
-          (let [application (meta-fields/enrich-with-link-permit-data application)
-                ;; exclude from results the current application itself, and the applications that have a link-permit relation to it
-                ignore-ids (-> application
-                               (#(concat (:linkPermitData %) (:appsLinkingToUs %)))
-                               (#(map :id %))
-                               (conj id))
-                results (mongo/select :applications
-                                      (merge (domain/application-query-for user) {:_id             {$nin ignore-ids}
-                                                                                  :infoRequest     false
-                                                                                  :permitType      (:permitType application)
-                                                                                  :secondaryOperations.name {$nin ["ya-jatkoaika"]}
-                                                                                  :primaryOperation.name {$nin ["ya-jatkoaika"]}})
-
-                                      [:permitType :address :propertyId])
-                ;; add the text to show in the dropdown for selections
-                enriched-results (map
-                                   (fn [r] (assoc r :text (str (:address r) ", " (:id r))))
-                                   results)
-                ;; sort the results
-                same-property-id-fn #(= propertyId (:propertyId %))
-                with-same-property-id (vec (filter same-property-id-fn enriched-results))
-                without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
-                organized-results (flatten (conj with-same-property-id without-same-property-id))
-                final-results (map #(select-keys % [:id :text]) organized-results)]
-            (ok :app-links final-results)))
-
-
-(defn- validate-jatkolupa-zero-link-permits [_ application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)]
-    (when (and (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
-               (pos? (-> application :linkPermitData count)))
-      (fail :error.jatkolupa-can-only-be-added-one-link-permit))))
-
-(defn- validate-link-permit-id [{:keys [data]} application]
+  {:parameters [id]
+   :user-roles #{:applicant :authority}
+   :states     (states/all-application-states-but (conj states/terminal-states :sent))}
+  [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
+        ;; exclude from results the current application itself, and the applications that have a link-permit relation to it
         ignore-ids (-> application
                        (#(concat (:linkPermitData %) (:appsLinkingToUs %)))
                        (#(map :id %))
-                       (conj (:id application)))]
-    (when (some
-            #(= (:id %) (:linkPermitId data))
-            (:appsLinkingToUs application))
-      (fail :error.link-permit-already-having-us-as-link-permit))))
+                       (conj id))
+        results (mongo/select :applications
+                              (merge (domain/application-query-for user) {:_id             {$nin ignore-ids}
+                                                                          :infoRequest     false
+                                                                          :permitType      (:permitType application)
+                                                                          :secondaryOperations.name {$nin ["ya-jatkoaika"]}
+                                                                          :primaryOperation.name {$nin ["ya-jatkoaika"]}})
+
+                              [:permitType :address :propertyId])
+        ;; add the text to show in the dropdown for selections
+        enriched-results (map
+                           (fn [r] (assoc r :text (str (:address r) ", " (:id r))))
+                           results)
+        ;; sort the results
+        same-property-id-fn #(= propertyId (:propertyId %))
+        with-same-property-id (vec (filter same-property-id-fn enriched-results))
+        without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
+        organized-results (flatten (conj with-same-property-id without-same-property-id))
+        final-results (map #(select-keys % [:id :text]) organized-results)]
+    (ok :app-links final-results)))
+
+(defn- validate-linking [command app]
+  (let [link-permit-id (ss/trim (get-in command [:data :linkPermitId]))
+        {:keys [appsLinkingToUs linkPermitData]} (meta-fields/enrich-with-link-permit-data app)
+        max-outgoing-link-permits (operations/get-primary-operation-metadata app :max-outgoing-link-permits)
+        links    (concat appsLinkingToUs linkPermitData)
+        illegal-apps (conj links app)]
+    (cond
+      (and link-permit-id (util/find-by-id link-permit-id illegal-apps))
+      (fail :error.link-permit-already-having-us-as-link-permit)
+
+      (and max-outgoing-link-permits (= max-outgoing-link-permits (count linkPermitData)))
+      (fail :error.max-outgoing-link-permits))))
 
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
    :user-roles       #{:applicant :authority}
    :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
-   :pre-checks       [validate-jatkolupa-zero-link-permits
-                      validate-link-permit-id
+   :pre-checks       [validate-linking
                       a/validate-authority-in-drafts]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
                       (fn [{data :data}] (when (= (:id data) (ss/trim (:linkPermitId data))) (fail :error.link-permit-self-reference)))

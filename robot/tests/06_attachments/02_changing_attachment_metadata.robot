@@ -16,9 +16,6 @@ Mikko creates application
 Mikko edits operation description
   Open accordions  info
   Edit operation description  uusiRakennus  Talo A
-  # Wait and click  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//button[@data-test-id='edit-op-description']
-  # Input text by test id  op-description-editor  Talo A
-  # Wait until  Page should contain  Tallennettu
 
 Mikko adds an operation
   Set animations off

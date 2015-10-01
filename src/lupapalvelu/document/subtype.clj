@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.subtype
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [sade.util :refer [->int ->double] :as util]
+            [sade.validators :refer [valid-email?]]
             [clojure.string :refer [blank?]]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
@@ -8,7 +9,7 @@
 (defmethod subtype-validation :email [_ v]
   (cond
     (blank? v) nil
-    (util/valid-email? v) nil
+    (valid-email? v) nil
     :else [:warn "illegal-email"]))
 
 (defmethod subtype-validation :tel [_ v]

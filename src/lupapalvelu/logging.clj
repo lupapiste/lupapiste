@@ -18,7 +18,7 @@
 
 (defn- output-fn
   "Logging output function"
-  ([data] (output-fn nil data))
+  ([data] (output-fn {:stacktrace-fonts {}} data))
   ([opts data]
     (let [{:keys [session-id applicationId userId]} context
           {:keys [level ?err_ msg_ ?ns-str timestamp_]} data]
@@ -31,7 +31,7 @@
         (or ?ns-str "unknown namespace") " - "
         (force msg_)
         (when-let [err (force ?err_)]
-          (str "\n" (timbre/stacktrace err)))))))
+          (str "\n" (timbre/stacktrace err opts)))))))
 
 (def time-format "yyyy-MM-dd HH:mm:ss.SSS")
 

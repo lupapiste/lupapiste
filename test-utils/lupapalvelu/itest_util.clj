@@ -382,6 +382,7 @@
   {:post [(or (nil? %)
             (and (:to %) (:subject %) (not (.contains (:subject %) "???")) (-> % :body :html) (-> % :body :plain))
             (println %))]}
+  (Thread/sleep 20) ; A little wait to allow mails to be delivered
   (let [{:keys [ok message]} (query pena :last-email :reset true)] ; query with any user will do
     (assert ok)
     message))
@@ -389,6 +390,7 @@
 (defn sent-emails
   "Returns a list of emails and clears the inbox"
   []
+  (Thread/sleep 20) ; A little wait to allow mails to be delivered
   (let [{:keys [ok messages]} (query pena :sent-emails :reset true)] ; query with any user will do
     (assert ok)
     messages))
@@ -434,7 +436,7 @@
   (apply give-verdict-with-fn local-command apikey application-id args))
 
 (defn create-foreman-application [project-app-id apikey userId role difficulty]
-  (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role)
+  (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role :foremanEmail "")
         foreman-app          (query-application apikey foreman-app-id)
         foreman-doc          (domain/get-document-by-name foreman-app "tyonjohtaja-v2")]
     (command apikey :set-user-to-document :id foreman-app-id :documentId (:id foreman-doc) :userId userId :path "" :collection "documents")
