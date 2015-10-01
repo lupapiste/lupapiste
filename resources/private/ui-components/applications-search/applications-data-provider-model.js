@@ -7,6 +7,14 @@ LUPAPISTE.ApplicationsDataProvider = function() {
                      totalCount: -1,
                      userTotalCount: -1};
 
+  var defaultSort = {field: "modified", asc: false};
+
+  var defaultForemanSort = {field: "submitted", asc: false};
+
+  // Observables
+  self.sort = util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]) ||
+              {field: ko.observable(defaultSort.field), asc: ko.observable(defaultSort.asc)};
+
   self.data = ko.observable(defaultData);
 
   self.applications = ko.observableArray([]);
@@ -19,18 +27,11 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.limit = ko.observable(25);
 
-  self.sort = util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]) ||
-              {field: ko.observable("modified"), asc: ko.observable(false)};
-
-  lupapisteApp.services.applicationFiltersService.selected.subscribe(function(selected) {
-    if (selected) {
-      self.sort.field(selected.sort.field());
-      self.sort.asc(selected.sort.asc());
-    }
-  });
-
   self.skip = ko.observable(0);
 
+  self.pending = ko.observable(false);
+
+  // Computed
   var searchFields = ko.pureComputed(function() {
     return { searchText: self.searchFieldDelayed(),
              tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
@@ -53,16 +54,22 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     self.applicationType();
     lupapisteApp.services.areaFilterService.selected();
     self.limit();
-
     self.skip(0); // when above filters change, set table view to first page
   });
-
-  self.pending = ko.observable(false);
 
   ko.computed(function() {
     return self.pending() ? pageutil.showAjaxWait(loc("applications.loading")) : pageutil.hideAjaxWait();
   });
 
+  // Subscribtions
+  lupapisteApp.services.applicationFiltersService.selected.subscribe(function(selected) {
+    if (selected) {
+      self.sort.field(selected.sort.field());
+      self.sort.asc(selected.sort.asc());
+    }
+  });
+
+  // Methods
   function wrapData(data) {
     data.applications = _.map(data.applications, function(item) {
       switch(item.urgency) {
@@ -97,12 +104,16 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     self.searchField("");
   };
 
-  ko.computed(function() {
-    ajax.datatables("applications-search", searchFields())
-      .success(self.onSuccess)
-      .pending(self.pending)
-    .call();
-  }).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
+  self.setDefaultSort = function() {
+    self.sort.field(defaultSort.field);
+    self.sort.asc(defaultSort.asc);
+  };
+
+  self.setDefaultForemanSort = function() {
+    console.log("setDefaultForemanSort");
+    self.sort.field(defaultForemanSort.field);
+    self.sort.asc(defaultForemanSort.asc);
+  };
 
   hub.onPageLoad("applications", function() {
     ajax.datatables("applications-search", searchFields())
@@ -110,4 +121,10 @@ LUPAPISTE.ApplicationsDataProvider = function() {
     .call();
   });
 
+  ko.computed(function() {
+    ajax.datatables("applications-search", searchFields())
+      .success(self.onSuccess)
+      .pending(self.pending)
+    .call();
+  }).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
 };
