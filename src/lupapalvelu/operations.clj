@@ -130,6 +130,10 @@
         ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
         ["toiminnan-muutos" :yl-toiminnan-muutos]]]
 
+      ; permit/YM
+      ["muut-ymparistoluvat"
+       [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]]]
+
       ; permit/VVVL
       ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
        [["vesijohdosta" :vvvl-vesijohdosta]
@@ -301,13 +305,13 @@
 ;                                   :add-operation-allowed true
 ;                                   :min-outgoing-link-permits 0
 ;                                   :asianhallinta false}
-   :muistomerkin-rauhoittaminen   {:schema "muistomerkki-perustelut-rauhoitukselle"
-                                   :permit-type permit/YL
-                                   :required ["muistomerkki-kaytto-ja-hoito"]
+   :muistomerkin-rauhoittaminen   {:schema "luonnonmuistomerkin-rauhoittaminen"
+                                   :permit-type permit/YM
+                                   :required []
                                    :attachments [] #_[:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                    :add-operation-allowed false
                                    :min-outgoing-link-permits 0
-                                   :asianhallinta false}
+                                   :asianhallinta true}
    })
 
 (def- yi-operations
