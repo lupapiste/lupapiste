@@ -83,7 +83,8 @@
      :body [{:name "kunnanJate" :type :checkbox}
             {:name "tuottajanJate" :type :checkbox}
             {:name "muuJate" :type :checkbox}
-            {:name "muuJateValue" :type :string}]}))
+            {:name "muuJateValue" :type :string}]}
+    {:name "vastaanottopaikat-liitteena" :type :checkbox}))
 
 
 
