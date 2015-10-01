@@ -103,7 +103,6 @@
 (defn all-next-states
   "Returns a set of states that are after the start state in graph, including start state itself."
   [graph start & [results]]
-  ;{:post [(do (println start results "returns" %) %)]}
   (let [results (set results)
         transitions (get graph start)]
     (cond
