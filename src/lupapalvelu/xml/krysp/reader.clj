@@ -25,10 +25,12 @@
 
 (defn wfs-is-alive?
   "checks if the given system is Web Feature Service -enabled. kindof."
-  [url]
+  [url username password]
   (when-not (s/blank? url)
     (try
-     (let [resp (http/get url {:query-params {:request "GetCapabilities"} :throw-exceptions false})]
+      (let [credentials (when-not (s/blank? username) {:basic-auth [username password]})
+            options     (merge {:query-params {:request "GetCapabilities"} :throw-exceptions false} credentials)
+            resp        (http/get url options)]
        (or
          (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
          (warn "Response not OK or did not contain XML. Response was: " resp)))
