@@ -293,7 +293,13 @@
 (def yl-operations
   {:yl-uusi-toiminta ymparistolupa-operation
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
-   :yl-toiminnan-muutos ymparistolupa-operation})
+   :yl-toiminnan-muutos ymparistolupa-operation
+   :jatteen-keraystoiminta {:schema "jatteen-kerays"
+                            :permit-type permit/YL
+                            :required ["ymp-maksaja"]
+                            :attachments ymparistolupa-attachments
+                            :add-operation-allowed false
+                            :asianhallinta true}})
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
   (if (= :tyonjohtaja-ilmoitus (keyword subtype))
