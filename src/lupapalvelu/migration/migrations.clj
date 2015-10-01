@@ -1116,7 +1116,7 @@
 (defn extract-credentials-from-krysp-address
   [[permit-type {url :url :as krysp-config}]]
   (when url
-    (let [[_ protocol username password url] (re-matches #"(.*://)?(.*:)?(.*@)?(.*$)" url)
+    (let [[_ protocol username password url] (re-matches #"(https?://)([^:]*:)?([^@]*@)?(.*$)" url)
           username (apply str (butlast username))
           password (apply str (butlast password))]
       (when (and url (not (empty? username)) (not (empty? password)))
