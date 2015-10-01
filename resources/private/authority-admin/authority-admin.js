@@ -374,7 +374,7 @@
       ajax.command("set-krysp-endpoint", {
         url: self.editUrl(), 
         username: self.editUsername(), 
-        password: seld.editPassword(), 
+        password: self.editPassword(), 
         version: self.editVersion(), 
         permitType: self.editContext.permitType
       })
