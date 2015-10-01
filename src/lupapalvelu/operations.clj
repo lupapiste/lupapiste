@@ -299,6 +299,7 @@
                             :required ["ymp-maksaja"]
                             :attachments ymparistolupa-attachments
                             :add-operation-allowed false
+                            :min-outgoing-link-permits 0
                             :asianhallinta true}})
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
