@@ -28,17 +28,30 @@
   (when (seq org)
     (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))))
 
+(defn- remove-sensitive-data
+  [org]
+  (->> (:krysp org)
+       (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]))
+       (into {})
+       (assoc org :krysp)))
+
 (defn get-organizations
   ([]
     (get-organizations {}))
   ([query]
-    (map with-scope-defaults (mongo/select :organizations query)))
+   (->> (mongo/select :organizations query)
+        (map remove-sensitive-data)
+        (map with-scope-defaults)))
   ([query projection]
-    (map with-scope-defaults (mongo/select :organizations query projection))))
+   (->> (mongo/select :organizations query projection)
+        (map remove-sensitive-data)
+        (map with-scope-defaults ))))
 
 (defn get-organization [id]
   {:pre [(not (s/blank? id))]}
-  (with-scope-defaults (mongo/by-id :organizations id)))
+  (->> (mongo/by-id :organizations id)
+       remove-sensitive-data
+       with-scope-defaults)) 
 
 (defn update-organization [id changes]
   {:pre [(not (s/blank? id))]}
@@ -52,7 +65,7 @@
   ([{:keys [organization permitType] :as application}]
     (get-krysp-wfs organization permitType))
   ([organization-id permit-type]
-  (let [organization (get-organization organization-id)
+  (let [organization (mongo/by-id :organizations organization-id)
         krysp-config (get-in organization [:krysp (keyword permit-type)])
         crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
         crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
