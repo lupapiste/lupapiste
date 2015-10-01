@@ -17,6 +17,7 @@
                           :validate-doc
                           :fetch-validation-errors
                           :add-comment
+                          :comments
                           :attachment-types
                           :attachment-operations
                           :should-see-unsubmitted-statements
