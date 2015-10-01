@@ -645,17 +645,17 @@
      :kiinteistonmuodostus         {:schema "kiinteistonmuodostus"
                                     :permit-type permit/KT
                                     :optional #{"secondary-kiinteistot"}
-                                    :required (conj common-maanmittaus-schemas "rasitetoimitus")
+                                    :required common-maanmittaus-schemas
                                     :attachments []
-                                    :add-operation-allowed false
+                                    :add-operation-allowed true
                                     :min-outgoing-link-permits 0
                                     :asianhallinta false}
      :rasitetoimitus                {:schema "rasitetoimitus"
                                      :permit-type permit/KT
                                      :optional #{"secondary-kiinteistot"}
-                                     :required (conj common-maanmittaus-schemas "kiinteistonmuodostus")
+                                     :required common-maanmittaus-schemas
                                      :attachments []
-                                     :add-operation-allowed false
+                                     :add-operation-allowed true
                                      :min-outgoing-link-permits 0
                                      :asianhallinta false}
      :rajankaynti                  {:schema "rajankaynti"

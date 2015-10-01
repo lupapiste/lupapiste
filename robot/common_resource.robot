@@ -395,7 +395,8 @@ Primary operation is
 Edit operation description
   [Arguments]  ${doc}  ${text}
   Wait until element is visible  jquery=div#application-info-tab button[data-test-id=edit-op-description-${doc}] :first
-  Mouse Down  jquery=div#application-info-tab [data-test-id=edit-op-description-${doc}] :first
+  #Mouse Down  jquery=div#application-info-tab [data-test-id=edit-op-description-${doc}] :first
+  Execute Javascript  $('div#application-info-tab [data-test-id=edit-op-description-${doc}] :first').mousedown();
   Wait until element is visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
   Input text by test id  op-description-editor-${doc}  ${text}
   # Close the input bubble. Press key fails if the bubble has already been closed.
