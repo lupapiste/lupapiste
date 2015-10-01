@@ -84,7 +84,7 @@
                                   :lainhuutotodistus
                                   :kauppakirja
                                   :kartta
-                                  :valokuva
+                                  :valokuva-kohteesta
                                   :kohdekuvaus
                                   :selvitys-omistusoikeudesta]
 ;    :laitoksen_tiedot [:voimassa_olevat_ymparistolupa_vesilupa
@@ -201,6 +201,7 @@
       :P  attachment-types-R
       :YI attachment-types-YI
       :YL attachment-types-YL
+      :YM attachment-types-YM
       :VVVL attachment-types-YI ;TODO Put correct attachment list here
       :MM attachment-types-KT ;TODO Put correct attachment list here
       :MAL attachment-types-MAL
