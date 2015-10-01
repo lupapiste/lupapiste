@@ -1,0 +1,5 @@
+YM: Muut ympäristöluvat
+operations.tree.muut-ymparistoluvat: Muut ympäristöluvat
+operations.tree.muistomerkin-rauhoittaminen: Muistomerkin rauhoittaminen
+operations.muistomerkin-rauhoittaminen: Muistomerkin rauhoittaminen
+operations.muistomerkin-rauhoittaminen.desc: Hakemus muistomerkin rauhoittamiseksi.
