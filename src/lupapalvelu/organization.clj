@@ -57,35 +57,29 @@
         crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
         crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
                        (-> iv (crypt/str->bytes) (crypt/base64-decode)))
-        credentials  (when-let [creds (and crypto-iv (:credentials krysp-config))]
-                       (->> creds
+        password     (when-let [password (and crypto-iv (:password krysp-config))]
+                       (->> password
                             (crypt/str->bytes)
                             (crypt/base64-decode)
                             (crypt/decrypt crypto-key crypto-iv :aes)
-                            (crypt/bytes->str)
-                            (json/decode)
-                            (walk/keywordize-keys)))]
+                            (crypt/bytes->str)))
+        username     (:username krysp-config)]
     (when-not (s/blank? (:url krysp-config))
-      (->> credentials
-           ((juxt :username :password))
-           (when-not (s/blank? (:username credentials)))
-           (hash-map :credentials)
+      (->> (when username {:credentials [username password]})
            (merge (select-keys krysp-config [:url :version])))))))
 
 (defn- encode-credentials
   [username password]
   (when-not (s/blank? username)
-    (let [crypto-key  (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
-          crypto-iv   (crypt/make-iv-128)
-          credentials (->> {:username username
-                            :password password}
-                           (json/encode)
-                           (crypt/str->bytes)
-                           (crypt/encrypt crypto-key crypto-iv :aes)
-                           (crypt/base64-encode)
-                           (crypt/bytes->str))
-          crypto-iv   (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))]
-      {:credentials credentials :crypto-iv crypto-iv})))
+    (let [crypto-key       (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
+          crypto-iv        (crypt/make-iv-128)
+          crypted-password (->> password
+                                (crypt/str->bytes)
+                                (crypt/encrypt crypto-key crypto-iv :aes)
+                                (crypt/base64-encode)
+                                (crypt/bytes->str))
+          crypto-iv        (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))]
+      {:username username :password crypted-password :crypto-iv crypto-iv})))
 
 (defn set-krysp-endpoint
   [id url username password permitType version]
