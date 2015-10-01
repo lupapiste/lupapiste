@@ -66,6 +66,14 @@
    :wfs-krysp-ns-name "ymparisto/ymparistoluvat"
    :wfs-krysp-url-asia-prefix "ymy:luvanTunnistetiedot/"})
 
+(defpermit YM  "Muut ymparistoluvat"
+  {:subtypes       []
+   :sftp-directory "/ymparisto"
+   :applicant-doc-schema "hakija"
+   :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
+   :multiple-parties-allowed true
+   :extra-statement-selection-values false})
+
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
   {:subtypes       []
    :sftp-directory "/ymparisto"
