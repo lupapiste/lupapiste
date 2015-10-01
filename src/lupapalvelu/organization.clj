@@ -30,10 +30,11 @@
 
 (defn- remove-sensitive-data
   [org]
-  (->> (:krysp org)
-       (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]))
-       (into {})
-       (assoc org :krysp)))
+  (when (seq org)
+    (->> (:krysp org)
+         (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]))
+         (into {})
+         (assoc org :krysp))))
 
 (defn get-organizations
   ([]
