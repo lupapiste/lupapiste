@@ -1,0 +1,1 @@
+authorityrole.archivist: Arkistonhoitaja
