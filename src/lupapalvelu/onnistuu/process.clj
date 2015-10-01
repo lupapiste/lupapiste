@@ -102,7 +102,7 @@
                        :requirements    [{:type :person, :identifier hetu}]}
                       (json/encode)
                       (crypt/str->bytes)
-                      (crypt/encrypt (-> crypto-key (crypt/str->bytes) (crypt/base64-decode)) crypto-iv)
+                      (crypt/encrypt (-> crypto-key (crypt/str->bytes) (crypt/base64-decode)) crypto-iv :rijndael)
                       (crypt/base64-encode)
                       (crypt/bytes->str))
      :iv         (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))}))
@@ -161,7 +161,7 @@
         resp       (->> data
                         (crypt/str->bytes)
                         (crypt/base64-decode)
-                        (crypt/decrypt crypto-key crypto-iv)
+                        (crypt/decrypt crypto-key crypto-iv :rijndael)
                         (crypt/bytes->str)
                         (json/decode)
                         walk/keywordize-keys)

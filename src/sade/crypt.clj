@@ -16,19 +16,19 @@
   (cr/bytes 16))
 
 (def ^:private ciphers
-  {:default (fn [encrypt? crypto-key crypto-iv]
-              (doto (-> (RijndaelEngine. 256)
+  {:rijndael (fn [encrypt? crypto-key crypto-iv]
+               (doto (-> (RijndaelEngine. 256)
                         (CBCBlockCipher.)
                         (PaddedBufferedBlockCipher. (ZeroBytePadding.)))
-                (.init encrypt? (ParametersWithIV. (KeyParameter. (into-array Byte/TYPE crypto-key))
-                                                   (into-array Byte/TYPE crypto-iv)))))
+                 (.init encrypt? (ParametersWithIV. (KeyParameter. (into-array Byte/TYPE crypto-key))
+                                                    (into-array Byte/TYPE crypto-iv)))))
 
-   :aes     (fn [encrypt? crypto-key crypto-iv]
-              (doto (-> (AESEngine.)
-                        (CBCBlockCipher.)
-                        (PaddedBufferedBlockCipher. (PKCS7Padding.)))
-                (.init encrypt? (ParametersWithIV. (KeyParameter. (into-array Byte/TYPE crypto-key))
-                                                   (into-array Byte/TYPE crypto-iv)))))})
+   :aes      (fn [encrypt? crypto-key crypto-iv]
+               (doto (-> (AESEngine.)
+                         (CBCBlockCipher.)
+                         (PaddedBufferedBlockCipher. (PKCS7Padding.)))
+                 (.init encrypt? (ParametersWithIV. (KeyParameter. (into-array Byte/TYPE crypto-key))
+                                                    (into-array Byte/TYPE crypto-iv)))))})
 
 (defn- crypt ^bytes [^BufferedBlockCipher cipher ^bytes data]
   (let [in-size  (alength data)
@@ -41,18 +41,14 @@
       out)))
 
 (defn encrypt 
-  ([crypto-key crypto-iv data]
-   (encrypt crypto-key crypto-iv :default data))
-  ([crypto-key crypto-iv cipher data]
-   {:pre (keyword? cipher)}
-   (crypt ((cipher ciphers) true crypto-key crypto-iv) data)))
+  [crypto-key crypto-iv cipher data]
+  {:pre [(contains? ciphers cipher)]}
+  (crypt ((cipher ciphers) true crypto-key crypto-iv) data))
 
 (defn decrypt 
-  ([crypto-key crypto-iv data]
-   (decrypt crypto-key crypto-iv :default data))
-  ([crypto-key crypto-iv cipher data]
-   {:pre (keyword? cipher)}
-   (crypt ((cipher ciphers) false crypto-key crypto-iv) data)))
+  [crypto-key crypto-iv cipher data]
+  {:pre [(contains? ciphers cipher)]}
+  (crypt ((cipher ciphers) false crypto-key crypto-iv) data))
 
 (defn str->bytes ^bytes [^String s] (.getBytes s "UTF-8"))
 (defn bytes->str ^String [^bytes b] (String. b "UTF-8"))
