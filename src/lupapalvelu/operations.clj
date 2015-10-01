@@ -297,7 +297,7 @@
    :jatteen-keraystoiminta {:schema "jatteen-kerays"
                             :permit-type permit/YL
                             :required ["ymp-maksaja"]
-                            :attachments ymparistolupa-attachments
+                            :attachments [] ; [:jatteen_kerays [:vastaanottopaikan_tiedot]] sync with commons
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
                             :asianhallinta true}})
