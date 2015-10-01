@@ -9,12 +9,12 @@ LUPAPISTE.VetumaInitModel = function(params) {
     params.language = loc.currentLanguage;
   }
 
-  function appendParam(url, param) {
-    return url + param + "=" + encodeURIComponent(ko.unwrap(params[param])) +  "&";
-  }
-
   self.id = _.isUndefined(params.id) ?  "vetuma-init" : params.id;
   self.visible = _.isUndefined(params.visible) ?  true : params.visible;
-  self.href = ko.pureComputed(function() {return _.reduce(VETUMA_PARAMS, appendParam, VETUMA_BASE);});
-
+  self.href = ko.pureComputed(function() {
+    var getParams = _.map(VETUMA_PARAMS, function(param) {
+      return param + "=" + encodeURIComponent(ko.unwrap(params[param]));
+    }).join("&");
+    return VETUMA_BASE + getParams;
+  });
 };

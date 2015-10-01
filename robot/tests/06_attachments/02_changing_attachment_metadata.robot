@@ -15,9 +15,7 @@ Mikko creates application
 
 Mikko edits operation description
   Open accordions  info
-  Wait and click  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//button[@data-test-id='edit-op-description']
-  Input text by test id  op-description-editor  Talo A
-  Wait until  Page should contain  Tallennettu
+  Edit operation description  uusiRakennus  Talo A
 
 Mikko adds an operation
   Set animations off
@@ -32,10 +30,10 @@ Mikko adds an operation
 
 Mikko edits operation B description
   Open accordions  info
-  ${button} =  Set Variable  $("#application-info-tab button[data-test-id='edit-op-description']:last")
-  Execute Javascript  ${button}.click();
+  ${button} =  Set Variable  $("#application-info-tab button[data-test-id='edit-op-description-uusiRakennus']:last")
+  Execute Javascript  ${button}.mousedown();
 
-  ${selector} =   Set Variable  $("input[data-test-id='op-description-editor']:visible")
+  ${selector} =   Set Variable  $("input[data-test-id='op-description-editor-uusiRakennus']:visible")
   Wait For Condition  return ${selector}.length===1;  10
 
   Execute Javascript  ${selector}.val("Talo B").change().blur();

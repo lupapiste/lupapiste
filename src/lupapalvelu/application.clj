@@ -60,7 +60,7 @@
       (fail :error.permit-must-have-link-permit))))
 
 (defn validate-authority-in-drafts
-  "Validator: Restric authority access in draft application.
+  "Validator: Restrict authority access in draft application.
    To be used in commands' :pre-checks vector."
   [{user :user} {state :state}]
   (when (and (= :draft (keyword state)) (user/authority? user))
@@ -326,13 +326,23 @@
     (str app-id "|" link-permit-id)
     (str link-permit-id "|" app-id)))
 
-(defn do-add-link-permit [{:keys [id propertyId primaryOperation]} link-permit-id]
+(defn do-add-link-permit [{:keys [id propertyId primaryOperation] :as application} link-permit-id]
   {:pre [(mongo/valid-key? link-permit-id)
          (not= id link-permit-id)]}
   (let [db-id (make-mongo-id-for-link-permit id link-permit-id)
-        is-lupapiste-app (mongo/any? :applications {:_id link-permit-id})
-        linked-app (when is-lupapiste-app
-                     (domain/get-application-no-access-checking link-permit-id))]
+        link-application (some-> link-permit-id
+                     domain/get-application-no-access-checking
+                     meta-fields/enrich-with-link-permit-data)
+        max-incoming-link-permits (operations/get-primary-operation-metadata link-application :max-incoming-link-permits)
+        allowed-link-permit-types (operations/get-primary-operation-metadata application :allowed-link-permit-types)]
+
+    (when link-application
+      (if (and max-incoming-link-permits (>= (count (:appsLinkingToUs link-application)) max-incoming-link-permits))
+        (fail! :error.max-incoming-link-permits))
+
+      (if (and allowed-link-permit-types (not (allowed-link-permit-types (permit/permit-type link-application))))
+        (fail! :error.link-permit-wrong-type)))
+
     (mongo/update-by-id :app-links db-id
                         {:_id           db-id
                          :link          [id link-permit-id]
@@ -340,11 +350,9 @@
                                          :apptype    (:name primaryOperation)
                                          :propertyId propertyId}
                          link-permit-id {:type           "linkpermit"
-                                         :linkpermittype (if is-lupapiste-app
+                                         :linkpermittype (if link-application
                                                            "lupapistetunnus"
                                                            "kuntalupatunnus")
-                                         :apptype        (->> linked-app
-                                                              (:primaryOperation)
-                                                              (:name))}}
+                                         :apptype (get-in link-application [:primaryOperation :name])}}
                         :upsert true)))
 

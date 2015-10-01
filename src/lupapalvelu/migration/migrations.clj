@@ -564,12 +564,6 @@
                             doc)) (:documents application))]
         (mongo/update-by-id collection id {$set {:documents documents}})))))
 
-#_(defmigration applicant-index-regeneration
-   (reduce + 0
-    (for [collection [:applications :submitted-applications]]
-      (let [applications (mongo/select collection)]
-        (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-update %)) applications))))))
-
 (def- operation-mappings
   {:asuinrakennus         [:kerrostalo-rivitalo :pientalo]
    :muu-uusi-rakentaminen [:muu-uusi-rakentaminen :teollisuusrakennus]
@@ -1142,6 +1136,11 @@
   (doseq [organization (mongo/select :organizations)]
     (move-credentials-out-from-organization-krysp-addresses organization)))
 
+(defmigration foreman-index-v2
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {} [:documents])]
+        (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/foreman-index-update %)) applications))))))
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

@@ -26,10 +26,20 @@ LUPAPISTE.OperationFilterService = function(applicationFiltersService) {
     ko.utils.arrayPushAll(self.selected, savedFilter() ? wrapInObject(savedFilter()) : []);
   });
 
-  ajax
-    .query("get-application-operations")
-    .success(function(res) {
-      _data(res.operationsByPermitType);
-    })
-    .call();
+  function load() {
+    if (lupapisteApp.models.globalAuthModel.ok("get-application-operations")) {
+      ajax.query("get-application-operations")
+        .success(function(res) {
+        _data(res.operationsByPermitType);
+        })
+        .call();
+      return true;
+    }
+    return false;
+  }
+
+  if (!load()) {
+    hub.subscribe("global-auth-model-loaded", load, true);
+  }
+
 };

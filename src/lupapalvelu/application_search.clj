@@ -103,10 +103,31 @@
       (when-not (empty? areas)
         (make-area-query areas user))])})
 
+;;
+;; Fields
+;;
 
-;;
-;; Public API
-;;
+(def- db-fields ; projection
+  [:_comments-seen-by :_statements-seen-by :_verdicts-seen-by
+   :_attachment_indicator_reset :address :applicant :attachments
+   :auth :authority :authorityNotice :comments :created :documents
+   :foreman :foremanRole :infoRequest :modified :municipality
+   :neighbors :permitSubtype :primaryOperation :state :statements
+   :submitted :tasks :urgency :verdicts])
+
+(def- indicator-fields
+  (map :field meta-fields/indicator-meta-fields))
+
+(def- frontend-fields
+  [:id :address :applicant :authority :authorityNotice
+   :infoRequest :kind :modified :municipality
+   :primaryOperation :state :submitted :urgency :verdicts])
+
+(defn- select-fields [application]
+  (select-keys
+    application
+    (concat frontend-fields indicator-fields)))
+
 
 (defn- enrich-row [{:keys [permitSubtype infoRequest] :as app}]
   (assoc app :kind (cond
@@ -119,6 +140,8 @@
                           "location" :address
                           "modified" :modified
                           "submitted" :submitted
+                          "foreman" :foreman
+                          "foremanRole" :foremanRole
                           "state" :state})
 
 (defn- dir [asc] (if asc 1 -1))
@@ -140,11 +163,13 @@
         limit       (or (:limit params) 10)
         apps        (mongo/with-collection "applications"
                       (query/find query)
+                      (query/fields db-fields)
                       (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
         rows        (map
                       (comp
+                        select-fields
                         enrich-row
                         (partial meta-fields/with-indicators user)
                         #(domain/filter-application-content-for % user)
@@ -153,6 +178,10 @@
     {:userTotalCount user-total
      :totalCount query-total
      :applications rows}))
+
+;;
+;; Public API
+;;
 
 (defn public-fields [{:keys [municipality submitted primaryOperation]}]
   (let [op-name (:name primaryOperation)]

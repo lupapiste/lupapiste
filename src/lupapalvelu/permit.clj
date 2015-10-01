@@ -184,7 +184,7 @@
 (defn permit-type
   "gets the permit-type of application"
   [application]
-  {:post [(not= % nil)]}
+  {:post [(string? %)]}
   (:permitType application))
 
 ;;

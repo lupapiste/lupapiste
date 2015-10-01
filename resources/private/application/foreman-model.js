@@ -177,144 +177,19 @@ LUPAPISTE.ForemanModel = function() {
 
   self.submit = function() {
     self.error(undefined);
-
-    function inviteToApplication(params, cb) {
-      var defaults = {
-        id: "",
-        documentName: "",
-        documentId: "",
-        path: "",
-        email: "",
-        title: "",
-        text: "",
-        role: "",
-        appAuth: []
-      };
-      params = _.merge(defaults, params);
-
-      // check if invitee is already authenticated (or invited)
-      if (!_.find(params.appAuth, {username: params.email})) {
-        ajax.command("invite-with-role", params)
-          .processing(self.processing)
-          .pending(self.pending)
-          .success(function(data) {
-            cb(data);
-          })
-          .error(function(err) {
-            // recipient might have already been invited
-            cb(err);
-          })
-          .call();
-      } else {
-        cb();
-      }
-    }
-
-    function inviteCompanyToApplication(params, cb) {
-      ajax
-        .command("company-invite", params)
-        .processing(self.processing)
-        .pending(self.pending)
-        .success(cb)
-        .error(cb)
-        .call();
-    }
-
-    function getHakijat() {
-      var hakijaDocs = _.where(self.application().documents, {"schema-info": {"name": "hakija"}});
-      hakijaDocs = hakijaDocs.concat(_.where(self.application().documents, {"schema-info": {"name": "hakija-r"}}));
-      return _(hakijaDocs).map(function(doc) {
-        var userId = util.getIn(doc, ["data", "henkilo", "userId", "value"]);
-        var companyId = util.getIn(doc, ["data", "yritys", "companyId", "value"]);
-        // check if hakija is company or person
-        var type = util.getIn(doc, ["data", "_selected", "value"]);
-
-        if (type === "henkilo") {
-          var auth = _.find(self.application().auth, function(a) {
-            return a.id === userId;
-          });
-          return {
-            userId: userId,
-            docId: doc.id,
-            docName: util.getIn(doc, ["schema-info", "name"]),
-            path: "henkilo",
-            email: util.getIn(auth, ["username"])
-          };
-        }
-        else if (type === "yritys") {
-          return {
-            companyId: companyId
-          };
-        }
-      }).filter(_.identity).value();
-    }
-
-    function inviteHakijat(id, auth) {
-      var hakijat = getHakijat();
-
-      var deferreds = [];
-      _.forEach(hakijat, function(hakija) {
-        if (hakija.userId && hakija.email) {
-          deferreds.push(inviteToApplication({
-            id: id,
-            documentId: hakija.docId,
-            documentName: hakija.docName,
-            path: hakija.path,
-            email: hakija.email,
-            role: "writer",
-            appAuth: auth
-          }, _.noop));
-        }
-        else if (hakija.companyId) {
-          deferreds.push(inviteCompanyToApplication({id: id, "company-id": hakija.companyId }, _.noop));
-        }
-      });
-
-      $.when.apply($, deferreds)
-      .then(function() {
-        self.finished(id);
-      });
-    }
-
-    function createApplication() {
-      // 2. create "tyonjohtajan ilmoitus" application
-      ajax.command("create-foreman-application", { "id": self.application().id,
-                                                   "taskId": self.taskId() ? self.taskId() : "",
-                                                   "foremanRole": self.selectedRole() ? self.selectedRole() : "" })
-        .processing(self.processing)
-        .pending(self.pending)
-        .success(function(data) {
-          // 3. invite foreman to new application
-          if (self.email()) {
-            inviteToApplication({
-                id: data.id,
-                email: self.email(),
-                role: "foreman",
-                appAuth: data.auth
-              }, function() {
-                inviteHakijat(data.id, data.auth);
-            });
-          } else {
-            inviteHakijat(data.id, data.auth);
-          }
-        })
-        .error(function(err) {
-          self.error(err.text);
-        })
-        .call();
-    }
-
-    // 1. invite foreman to current application
-    if (self.email()) {
-      inviteToApplication({
-                id: self.application().id,
-                email: self.email(),
-                role: "foreman",
-                appAuth: self.application().auth
-              }, createApplication);
-    } else {
-      createApplication();
-    }
+    ajax.command("create-foreman-application", { "id": self.application().id,
+                                                 "taskId": self.taskId() ? self.taskId() : "",
+                                                 "foremanRole": self.selectedRole() ? self.selectedRole() : "",
+                                                 "foremanEmail": self.email() ? self.email() : "" })
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function(data) {
+        self.finished(data.id);
+      })
+      .error(function(err) {
+        self.error(err.text);
+      })
+      .call();
 
     return false;
   };

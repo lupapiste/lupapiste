@@ -13,7 +13,7 @@
             <i class="search-icon lupicon-remove toggle" data-bind="click: _.partial(dataProvider.searchField, ''), attr: {title: loc('applications.filter.search.clear')}"></i>
           </div>
         </div>
-        <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.isAuthority() -->
+        <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
         <div class="col-2">
           <label data-bind="ltext: 'application.filter.search.select.saved.filter'"></label>
           <div data-test-id="select-advanced-filter" data-bind="component: {name: 'autocomplete-saved-filters', params: {lPlaceholder: 'application.filter.search.placeholder.saved-filter'}}"></div>
@@ -29,7 +29,7 @@
         <!-- /ko -->
       </div>
 
-      <!-- ko if: features.enabled('alueellisetOrganisaatiot-search') && lupapisteApp.models.currentUser.isAuthority() -->
+      <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
       <div class="row" data-test-id="advanced-filters" data-bind="slider: showAdvancedFilters">
         <div class="form-grid form-grid--no-border">
           <div class="row row--no-margin">
