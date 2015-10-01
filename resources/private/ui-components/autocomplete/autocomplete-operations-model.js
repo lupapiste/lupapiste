@@ -28,7 +28,9 @@ LUPAPISTE.AutocompleteOperationsModel = function(params) {
     _.forEach(data, function(item) {
       var header = {label: item.permitType, groupHeader: true};
 
-      var filteredData = util.filterDataByQuery(item.operations, self.query() || "", self.selected());
+      var filteredData = util.filterDataByQuery({data: item.operations,
+                                                 query: self.query(),
+                                                 selected: self.selected()});
 
       // append group header and group items to result data
       if (filteredData.length > 0) {
