@@ -203,7 +203,7 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     self.showArchiveMenuOptions = ko.observable(false);
-    if (window.lupapisteApp && lupapisteApp.models && lupapisteApp.models.globalAuthModel) {
+    if (util.getIn(window, ["lupapisteApp", "models", "globalAuthModel"])) {
       self.showArchiveMenuOptions(lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled"));
     }
     hub.subscribe("global-auth-model-loaded", function() {
