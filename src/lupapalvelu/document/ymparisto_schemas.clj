@@ -71,8 +71,8 @@
            kuvaus
            {:name "muita-tietoja" :type :text :max-len 4000 :required false :layout :full-width}]}
 
-   {:name "muistomerkki-kaytto-ja-hoito" :type :group :required true
-    :body [{:name "nahtavyyskohde" :type :checkbox
+   {:name "muistomerkki-kaytto-ja-hoito" :type :group
+    :body [{:name "nahtavyyskohde" :type :checkbox :required true
             :group-help "muistomerkki-kaytto-ja-hoito.help"
 ;            :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :docgen-checkbox :whitelist {:roles [:none] :otherwise :disabled}
 ;            :i18nkey "nahtavyyskohde"
