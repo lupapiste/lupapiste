@@ -161,11 +161,13 @@
 
 (def- mkmu-validators
   {"2.1.6" common-validator-2_1_6
-   "1.0.1" (create-validator mkmu-1_0_1)})
+   "1.0.1" (create-validator mkmu-1_0_1)
+   "ah-1.1" asianhallinta-validator})
 
 (def- kiito-validators
   {"2.1.6" common-validator-2_1_6
-   "1.0.2" (create-validator kiito-1_0_2)})
+   "1.0.2" (create-validator kiito-1_0_2)
+   "ah-1.1" asianhallinta-validator})
 
 (def- schema-validators
   {:R   rakval-validators
