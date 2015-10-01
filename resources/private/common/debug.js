@@ -80,8 +80,8 @@ jQuery(function($) {
                                           .click(function() { createApplication("sisatila-muutos", "R"); }))
                                   .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("YA/katulupa").
                                           click(function() { createApplication("ya-katulupa-vesi-ja-viemarityot", "YA"); }))
-                                  .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("KT/tonttijaon-haku")
-                                          .click(function() { createApplication("tonttijaon-hakeminen", "R"); }))))
+                                  .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("KT/kiinteistonmuodostus")
+                                          .click(function() { createApplication("kiinteistonmuodostus", "R"); }))))
                   .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
                   .append($("<span>").text("Throttle web: "))
                   .append($("<b>").addClass("dev-throttle-web").text("0"))

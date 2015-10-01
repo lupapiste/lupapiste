@@ -189,6 +189,10 @@ input[readonly], textarea[readonly] {
   }
 }
 
+.form-full-width > select {
+  width: 80% !important;
+}
+
 .form-single-line {
   display: block;
 }
@@ -584,9 +588,6 @@ input.form-input.inline {
     }
     background-color: $gray246;
     border-bottom: 1px solid $gray221;
-    /* .btn, button { */
-    /*   margin-right: 10px */
-    /* } */
   }
 }
 
@@ -601,12 +602,6 @@ input.form-input.inline {
   }
 }
 
-
-
-
-.accordion-fields button.margins-s {
-  margin-bottom: 0;
-}
 
 .accordion_content > .group-help-text {
   display: block;
