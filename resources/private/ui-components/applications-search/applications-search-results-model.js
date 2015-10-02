@@ -8,7 +8,9 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
   self.data = ko.pureComputed(function() {
     return _.map(self.dataProvider.applications(), function(item) {
       item.kuntalupatunnus = util.getIn(item, ["verdicts", 0, "kuntalupatunnus"]);
-      item.foremanRoleI18nKey = "osapuoli.tyonjohtaja.kuntaRoolikoodi." + item.foremanRole;
+      if (item.foremanRole) {
+        item.foremanRoleI18nkey = "osapuoli.tyonjohtaja.kuntaRoolikoodi." + item.foremanRole;
+      }
       return item;
     });
   });
