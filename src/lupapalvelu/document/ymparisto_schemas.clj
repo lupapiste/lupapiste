@@ -1,8 +1,9 @@
 (ns lupapalvelu.document.ymparisto-schemas
-  (:require [lupapalvelu.document.schemas :refer :all]))
+  (:require [lupapalvelu.document.schemas :refer :all]
+            [lupapalvelu.document.tools :refer :all]))
 
-(def sijainti (body simple-osoite
-                {:name "karttapiirto" :type :text :max-len 4000}))
+#_(def sijainti (body simple-osoite
+                 {:name "karttapiirto" :type :text :max-len 4000}))
 
 (def kesto (body {:name "kesto" :type :group
                   :body [{:name "alku" :type :date}
@@ -12,9 +13,8 @@
                          {:name "sunnuntai", :type :group, :body [{:name "sunnuntaiAlkuAika" :type :time} {:name "sunnuntaiLoppuAika" :type :time}]}]}))
 
 
-(def kesto-mini (body {:name "kesto" :type :group
-                       :body [{:name "alku" :type :date}
-                              {:name "loppu" :type :date}]}))
+(def kesto-mini
+  (schema-body-without-element-by-name kesto "arki" "lauantai" "sunnuntai"))
 
 (def meluilmoitus (body
                     {:name "rakentaminen" :type :group
@@ -86,6 +86,16 @@
             {:name "muuJateValue" :type :string}]}
     {:name "vastaanottopaikat-liitteena" :type :checkbox}))
 
+(def luonnonmuistomerkin-rauhoittaminen
+  (body
+    {:name "muistomerkki-perustelut-rauhoitukselle" :type :group
+     :body [{:name "kohteen-nimi" :type :string :size "l" :required true :group-help "muistomerkki-perustelut-rauhoitukselle.help"}
+            kuvaus
+            {:name "muita-tietoja" :type :text :max-len 4000 :required false :layout :full-width}]}
+
+   {:name "muistomerkki-kaytto-ja-hoito" :type :group
+    :body [{:name "nahtavyyskohde" :type :checkbox :required true :layout :full-width
+            :group-help "muistomerkki-kaytto-ja-hoito.help"}]}))
 
 
 (defschemas
@@ -134,6 +144,9 @@
    {:info {:name "maa-aineslupa-kuvaus"
            :order 1}
     :body [kuvaus]}
+   {:info {:name "luonnonmuistomerkin-rauhoittaminen"
+           :order 1}
+    :body luonnonmuistomerkin-rauhoittaminen}
    {:info {:name "paatoksen-toimitus"
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname

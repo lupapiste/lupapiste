@@ -630,10 +630,16 @@ LUPAPISTE.ApplicationModel = function() {
     }
   };
 
-  self.showAddPropertyButton = ko.pureComputed(function () {
+  self.showAddPropertyButton = ko.pureComputed( function () {
     var primaryOp = lupapisteApp.models.application.primaryOperation();
 
     return lupapisteApp.models.applicationAuthModel.ok("create-doc") &&
       _.includes(util.getIn(primaryOp, ["optional"]), "secondary-kiinteistot");
   });
+
+  self.addProperty = function() {
+    hub.send("show-dialog", {ltitle: "application.dialog.add-property.title",
+                             size: "medium",
+                             component: "add-property-dialog"});
+  };
 };

@@ -54,10 +54,9 @@
     display: none;
     padding: {
       top: $marginS;
-      bottom: $marginS;
+      //bottom: $marginS;
     }
     position: relative;
-    //background: darken($lp-light-grey, 5%);
     border: 1px solid $gray221;
     border-top: none;
     .accordion-content-part {
@@ -89,6 +88,9 @@
   }
 }
 
+.accordion-fields > .button-group:last-child {
+  border-bottom: none;
+}
 
 .accordion-indicator {
   z-index: 12000;

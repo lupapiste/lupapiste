@@ -771,9 +771,15 @@
       :kasittelija (format "%s %s" a-first a-last)
       :hakemuksenTila (state enums)}}))
 
+(defn- mat-helper [property prop-id]
+  (when-let [mat (:maaraalaTunnus property)]
+    (format "%sM%s" prop-id mat)))
+
 (defn maaraalatunnus
   "Returns maaraalatunnus in the correct format if the id is available
-  in the property, otherwise nil."
-  [app property]
-  (when-let [mat (:maaraalaTunnus property)]
-    (format "%sM%s" (:propertyId app) mat)))
+  in the property, otherwise nil. For the primary application the
+  application must be provided."
+  [property & [app]]
+  (if app
+    (mat-helper property (:propertyId app))
+    (mat-helper property (:kiinteistoTunnus property))))

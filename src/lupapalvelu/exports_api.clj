@@ -123,6 +123,7 @@
    :muu-rakennus-laaj                                                 "D"
    :tontin-jarjestelymuutos                                           "D"
    :jatteen-keraystoiminta                                            "D"
+   :muistomerkin-rauhoittaminen                                       "D"
    })
 
 (defn- export [collection query fields]

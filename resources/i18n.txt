@@ -18,3 +18,53 @@ jatteen-kerays.keraystoiminnan-jarjestaja: Keräystoiminnan järjestäjä
 jatteen-kerays.keraystoiminnan-jarjestaja.muuKeraysValue: Muu, mikä?
 jatteen-kerays.jatteen-vastuullinen.muuJateValue: Muu, mikä?
 jatteen-kerays.vastaanottopaikat-liitteena: Tiedot vastaanottopaikoista ilmoituksen liitteenä.
+YM: Muut ympäristöluvat
+operations.tree.muut-ymparistoluvat: Muut ympäristöluvat
+operations.tree.muistomerkin-rauhoittaminen: Luonnonmuistomerkin rauhoittaminen
+operations.muistomerkin-rauhoittaminen: Luonnonmuistomerkin rauhoittaminen
+operations.muistomerkin-rauhoittaminen.desc: Hakemus muistomerkin rauhoittamiseksi.
+
+
+attachmentType.muistomerkin-rauhoittaminen._group_label: Luonnonmuistomerkin rauhoittaminen
+attachmentType.muistomerkin-rauhoittaminen.lainhuutotodistus: Kiinteistön lainhuutotodistus
+attachmentType.muistomerkin-rauhoittaminen.kauppakirja: Kauppakirja
+attachmentType.muistomerkin-rauhoittaminen.kartta: Kartta
+attachmentType.muistomerkin-rauhoittaminen.valokuva-kohteesta: Valokuva kohteesta
+attachmentType.muistomerkin-rauhoittaminen.kohdekuvaus: Kohdejuvaus
+attachmentType.muistomerkin-rauhoittaminen.kirjallinen-aineisto: Kirjallinen aineisto
+attachmentType.muistomerkin-rauhoittaminen.selvitys-omistusoikeudesta: Selvitys omistusoikeudesta
+
+attachmentType.muistomerkin-rauhoittaminen.lainhuutotodistus.info: TODO
+attachmentType.muistomerkin-rauhoittaminen.kauppakirja.info: TODO
+attachmentType.muistomerkin-rauhoittaminen.kartta.info: TODO
+attachmentType.muistomerkin-rauhoittaminen.valokuva-kohteesta.info: TODO
+attachmentType.muistomerkin-rauhoittaminen.kohdekuvaus.info: TODO
+attachmentType.muistomerkin-rauhoittaminen.kirjallinen-aineisto.info: TODO
+attachmentType.muistomerkin-rauhoittaminen.selvitys-omistusoikeudesta.info: TODO
+
+luonnonmuistomerkin-rauhoittaminen.muistomerkki-perustelut-rauhoitukselle._group_label: Perustelut rauhoitukselle
+luonnonmuistomerkin-rauhoittaminen.muistomerkki-perustelut-rauhoitukselle.kohteen-nimi: Kohteen nimi
+luonnonmuistomerkin-rauhoittaminen.muistomerkki-perustelut-rauhoitukselle.kuvaus: Kohteen kuvaus (mittasuhteet ja ulkomuoto)
+luonnonmuistomerkin-rauhoittaminen.muistomerkki-perustelut-rauhoitukselle.muita-tietoja: Muita tietoja kohteesta
+luonnonmuistomerkin-rauhoittaminen.muistomerkki-kaytto-ja-hoito.nahtavyyskohde: Kohdetta voi käyttää nähtävyyskohteena
+luonnonmuistomerkin-rauhoittaminen.muistomerkki-kaytto-ja-hoito._group_label: Käyttö ja hoito
+luonnonmuistomerkin-rauhoittaminen.muistomerkki-kaytto-ja-hoito: Käyttö ja hoito
+
+luonnonmuistomerkin-rauhoittaminen._group_label: Luonnonmuistomerkin rauhoittaminen
+muistomerkin-rauhoittaminen._group_label: Luonnonmuistomerkin rauhoittaminen
+
+muistomerkki-perustelut-rauhoitukselle.help: Kohteen ulkonäön lisäksi arvioidaan kohteen merkitystä maisemakuvassa, selostetaan kohteen sijainti kulkuväyliin nähden ja mainitaan kohteeseen mahdollisesti liittyvät kansantarinat ja muut perinnetiedot.
+muistomerkki-kaytto-ja-hoito.help: Luonnonmuistomerkki merkitään selvästi maastoon rauhoituslaatalla. Mikäli kohde on helposti saavutettavissa, voidaan siihen tutustumista helpottaa omistajan suostumuksesta esimerkiksi varustamalla kohde opasteella.
+
+help.YM.applicationInfoDesc: Tällä välilehdellä näet valitsemaasi toimenpiteeseen liittyvät lomaketiedot. Osioon tallennettavat tiedot välittyvät kunnan kautta eri viranomaisten järjestelmiin.
+help.YM.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
+help.YM.attachmentsDesc: Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt ja korjauksia vaativat liitteet merkitään taulukossa punaisella ikonilla. Viranomainen voi myös merkitä liitteen <b>alustavasti hyväksytyksi tai korjattavaksi. Tämä ei ole vielä virallinen hyväksyntä, sillä sitä varten hakemus pitää käsitellä kunnan päätöksentekoprosessin mukaisesti</b>. 
+help.YM.conversationDesc: Täällä voit keskustella hakemuksesta viranomaisten ja valtuutettujen kanssa. "Kysy viranomaiselta" - toiminnolla kutsut viranomaisen vastaamaan kysymykseesi. Tällöin viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.
+help.YM.helpText: Lupapisteessä voit valmistella hakemusta rauhassa suunnittelijasi ja viranomaisten kanssa. Voit kutsua suunnittelijan ja mahdolliset muut hakijat mukaan "Osapuolet"-välilehdellä. Oranssin keskustelupainikkeen takaa voit kirjoittaa kommentin ja lähetä viesti- painikkeella lähettää sen tiedoksi hakemukselle kutsutuille osapuolille tai vaihtoehtoisesti kysyä neuvoa viranomaiselta käyttämällä kysy viranomainen – painiketta. Hakemuksen jättäminen tapahtuu hakemuksen jättäminen –välilehdellä olevan jätä hakemus- painikkeen kautta.  Välilehdellä ilmoitetaan punaisella ikonilla puuttuvat pakolliset tiedot. Tällöin hakemuksesi katsotaan tulleen virallisesti vireille. Tämän jälkeen viranomainen tarkistaa hakemuksen ja pyytää tarvittaessa täydennyksiä. Kun hakemus on viranomaisen kannalta valmis, hän ottaa hakemuksen käsittelyyn kunnan päätöksenteko järjestelmään. Hakemuksen tila on tällöin "Käsittelyssä", etkä voi enää muokata hakemusta. Viranomaisen tehtyä päätöksen näet päätös otteen "Päätös"-välilehdellä ja saat siitä myös tiedon sähköpostiisi.
+help.YM.neighborsDesc: Mikäli hanke edellyttää naapurien tiedottamista, tekee viranomainen tarvittavat toimenpiteet, jonka jälkeen näet listan tiedotettavista naapureista tällä välilehdellä.
+Voit hoitaa tiedottamisen joko sähköpostitse Lupapisteen kautta tai paperilomakkeella, joka liitetään skannattuna suunnitelmat ja liitteet – välilehdelle.
+help.YM.PartiesDesc: Osapuolet–välilehdellä täytät hankkeeseesi liittyvien henkilöiden ja/tai yritysten tiedot. Valtuutetut – kohdan alta näet henkilöt, joilla on oikeus nähdä tai muokata hankettasi. Voit halutessasi kutsua hankkeelle muita henkilöitä, kuten kanssahakijoita tai suunnittelijoita valtuuta henkilö – painikkeen kautta.  Rekisteröidyttyään ja hyväksyttyään sähköpostiin lähetetyn valtuutuksen saavat kutsutut yhtäläiset valtuudet käsitellä hankettasi. Valtuutus voidaan hoitaa myös perinteisesti valtakirjalla, joka voidaan lisätä hankkeen liitteeksi suunnitelmat ja liitteet – välilehdellä. Valtuutus toimii myös hakijan allekirjoituksena hakemuksella. Jos hakija on hyväksynyt valtuutuksen, viranomainen ei vaadi erillistä allekirjoitusta hakemusta jätettäessä. 
+help.YM.statementsDesc: Viranomainen voi tarvittaessa pyytää hakemuksesta <b> lausuntoja muilta viranomaisilta</b>. Viranomaisten antamia lausuntoja voit lukea tällä välilehdellä.
+help.YM.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
+help.YM.verdictDesc: Täällä näet viranomaisen tekemät hakemukseesi liittyvät päätökset. Saat sähköpostiviestin, kun viranomainen lisää päätöksen.
+application.YM.neighbors: Naapurien tiedotus

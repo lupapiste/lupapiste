@@ -62,7 +62,7 @@
 
 ;; "Lausuntopyynto: Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn statement-request-reminder []
-  (let [timestamp-1-week-ago (util/get-timestamp-from-now :week 1)
+  (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
                                                                    :given nil
@@ -85,7 +85,7 @@
 
 ;; "Neuvontapyynto: Neuvontapyyntoon ei ole vastattu viikon kuluessa eli neuvontapyynnon tila on avoin. Lahetetaan viikoittain uudelleen."
 (defn open-inforequest-reminder []
-  (let [timestamp-1-week-ago (util/get-timestamp-from-now :week 1)
+  (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         oirs (mongo/select :open-inforequest-token {:created (older-than timestamp-1-week-ago)
                                                     :last-used nil
                                                     $or [{:reminder-sent {$exists false}}
@@ -104,7 +104,7 @@
 
 ;; "Naapurin kuuleminen: Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Muistutus lahetetaan kerran."
 (defn neighbor-reminder []
-  (let [timestamp-1-week-ago (util/get-timestamp-from-now :week 1)
+  (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :neighbors.status {$elemMatch {$and [{:state {$in ["email-sent"]}}
                                                                                {:created (older-than timestamp-1-week-ago)}
@@ -154,7 +154,7 @@
 
 ;; "YA hakemus: Hakemukselle merkitty tyoaika umpeutuu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn ya-work-time-is-expiring-reminder []
-  (let [timestamp-1-week-ago (util/get-timestamp-from-now :week 1)
+  (let [timestamp-1-week-in-future (util/get-timestamp-from-now :week 1)
         apps (mongo/select :applications {:permitType "YA"
                                           :state {$in ["verdictGiven" "constructionStarted"]}
                                           ;; Cannot compare timestamp directly against date string here (e.g against "08.10.2015"). Must do it in function body.
@@ -169,8 +169,8 @@
                   work-time-expires-timestamp (util/to-millis-from-local-date-string work-time-expires-str)]
             :when (and
                     work-time-expires-timestamp
-                    (> work-time-expires-timestamp timestamp-1-week-ago)
-                    (< work-time-expires-timestamp (now)))]
+                    (> work-time-expires-timestamp (now))
+                    (< work-time-expires-timestamp timestamp-1-week-in-future))]
       (notifications/notify! :reminder-ya-work-time-is-expiring {:application app
                                                                  :user (get-app-owner app)
                                                                  :data {:work-time-expires-date work-time-expires-str}})
@@ -181,7 +181,7 @@
 
 ;; "Hakemus: Hakemuksen tila on valmisteilla tai vireilla, mutta edellisesta paivityksesta on aikaa yli kuukausi. Lahetetaan kuukausittain uudelleen."
 (defn application-state-reminder []
-  (let [timestamp-1-month-ago (util/get-timestamp-from-now :month 1)
+  (let [timestamp-1-month-ago (util/get-timestamp-ago :month 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :modified (older-than timestamp-1-month-ago)
                                           $or [{:reminder-sent {$exists false}}

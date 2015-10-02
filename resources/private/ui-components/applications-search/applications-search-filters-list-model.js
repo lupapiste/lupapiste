@@ -30,7 +30,6 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
       areas:         _.map(ko.unwrap(lupapisteApp.services.areaFilterService.selected), "id")
     };
 
-    // TODO foreman
     ajax
     .command("save-application-filter", {filterType: "application", title: title, filter: filter, sort: ko.toJS(dataProvider.sort)})
     .error(util.showSavedIndicator)
@@ -44,14 +43,7 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
   };
 
   self.clearFilters = function() {
-    lupapisteApp.services.handlerFilterService.selected([]);
-    lupapisteApp.services.tagFilterService.selected([]);
-    lupapisteApp.services.operationFilterService.selected([]);
-    lupapisteApp.services.organizationFilterService.selected([]);
-    lupapisteApp.services.areaFilterService.selected([]);
-    lupapisteApp.services.applicationFiltersService.selected(undefined);
-    dataProvider.searchField("");
+    dataProvider.clearFilters();
     self.newFilterName("");
   };
-
 };

@@ -204,8 +204,8 @@
    "foreman" :foremanFilters})
 
 (def default-filter-storage-key
-  {"application" :id
-   "foreman" :foremanFilterId})
+  {"application" "id"
+   "foreman" "foremanFilterId"})
 
 (defn- validate-filter-type [{{filter-type :filterType} :data}]
   (when-not (contains? filter-storage-key filter-type)
@@ -223,7 +223,8 @@
    :description      "Adds/Updates users default filter for the application search"}
   [{{user-id :id} :user}]
 
-  (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filterId}}}))
+  (let [id-key           (default-filter-storage-key filterType)]
+    (mongo/update-by-id :users user-id {$set {(str "defaultFilter." id-key) filterId}})))
 
 (defcommand save-application-filter
   {:parameters       [title :filter sort filterType]
@@ -254,7 +255,7 @@
                                 (assoc-in filters [$] search-filter)))
         update {$set (merge {storage-key updated-filters}
                        (when (empty? filters)
-                         {:defaultFilter {id-key filter-id}}))}]
+                         {(str "defaultFilter." id-key) filter-id}))}]
 
     (when title-collision?
       (fail! :error.filter-title-collision))
@@ -279,7 +280,7 @@
         id-key (default-filter-storage-key filterType)
         update (merge {$pull {storage-key {:id filterId}}}
                       (when (= (get-in user [:defaultFilter id-key]) filterId)
-                        {$set {:defaultFilter {id-key nil}}}))]
+                        {$set {(str "defaultFilter." id-key) ""}}))]
     (mongo/update-by-id :users user-id update)))
 
 ;;
@@ -653,3 +654,15 @@
   {:user-roles #{:applicant :authority}}
   [{{id :id} :user}]
   (mongo/update-by-id :users id {$unset {:notification 1}}))
+
+(defquery enable-foreman-search
+  {:user-roles #{:authority}
+   :org-authz-roles (disj action/all-org-authz-roles :tos-editor :tos-publisher)
+   :pre-checks [(fn [command application]
+                  (let [org-ids (user/organization-ids (:user command))]
+                    (if-not application
+                      (when-not (pos? (mongo/count :organizations {:_id {$in org-ids} :scope.permitType permit/R }))
+                        unauthorized)
+                      unauthorized))
+                  )]}
+  [_])
