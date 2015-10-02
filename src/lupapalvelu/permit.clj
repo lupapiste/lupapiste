@@ -51,7 +51,7 @@
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
-   :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/ilmoitukset"})
@@ -60,7 +60,7 @@
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
-   :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/ymparistoluvat"
@@ -70,7 +70,7 @@
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
-   :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false})
 
@@ -78,7 +78,7 @@
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
-   :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/vesihuoltolaki"
@@ -98,7 +98,7 @@
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
-   :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/maa_ainesluvat"
@@ -108,7 +108,7 @@
   {:subtypes       []
    :sftp-directory "/kiinteistotoimitus"
    :applicant-doc-schema "hakija"
-   :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "kiinteistotoimitus"})
@@ -117,7 +117,7 @@
   {:subtypes       []
    :sftp-directory "/maankaytonmuutos"
    :applicant-doc-schema "hakija"
-   :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "maankaytonmuutos"})
