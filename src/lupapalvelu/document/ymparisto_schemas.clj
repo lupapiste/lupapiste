@@ -120,14 +120,9 @@
    {:info {:name "maa-aineslupa-kuvaus"
            :order 1}
     :body [kuvaus]}
-
    {:info {:name "luonnonmuistomerkin-rauhoittaminen"
-;           :i18name "osapuoli"
-;           :removable false
-;           :approvable false
            :order 1}
     :body luonnonmuistomerkin-rauhoittaminen}
-
    {:info {:name "paatoksen-toimitus"
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
