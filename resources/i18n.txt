@@ -1,11 +1,11 @@
 YM: Muut ympäristöluvat
 operations.tree.muut-ymparistoluvat: Muut ympäristöluvat
-operations.tree.muistomerkin-rauhoittaminen: Muistomerkin rauhoittaminen
-operations.muistomerkin-rauhoittaminen: Muistomerkin rauhoittaminen
+operations.tree.muistomerkin-rauhoittaminen: Luonnonmuistomerkin rauhoittaminen
+operations.muistomerkin-rauhoittaminen: Luonnonmuistomerkin rauhoittaminen
 operations.muistomerkin-rauhoittaminen.desc: Hakemus muistomerkin rauhoittamiseksi.
 
 
-attachmentType.muistomerkin-rauhoittaminen._group_label: Muistomerkin rauhoittaminen
+attachmentType.muistomerkin-rauhoittaminen._group_label: Luonnonmuistomerkin rauhoittaminen
 attachmentType.muistomerkin-rauhoittaminen.lainhuutotodistus: Kiinteistön lainhuutotodistus
 attachmentType.muistomerkin-rauhoittaminen.kauppakirja: Kauppakirja
 attachmentType.muistomerkin-rauhoittaminen.kartta: Kartta
@@ -30,8 +30,11 @@ luonnonmuistomerkin-rauhoittaminen.muistomerkki-kaytto-ja-hoito.nahtavyyskohde: 
 luonnonmuistomerkin-rauhoittaminen.muistomerkki-kaytto-ja-hoito._group_label: Käyttö ja hoito
 luonnonmuistomerkin-rauhoittaminen.muistomerkki-kaytto-ja-hoito: Käyttö ja hoito
 
-luonnonmuistomerkin-rauhoittaminen._group_label: Muistomerkin rauhoittaminen
-muistomerkin-rauhoittaminen._group_label: Muistomerkin rauhoittaminen
+luonnonmuistomerkin-rauhoittaminen._group_label: Luonnonmuistomerkin rauhoittaminen
+muistomerkin-rauhoittaminen._group_label: Luonnonmuistomerkin rauhoittaminen
+
+muistomerkki-perustelut-rauhoitukselle.help: Kohteen ulkonäön lisäksi arvioidaan kohteen merkitystä maisemakuvassa, selostetaan kohteen sijainti kulkuväyliin nähden ja mainitaan kohteeseen mahdollisesti liittyvät kansantarinat ja muut perinnetiedot.
+muistomerkki-kaytto-ja-hoito.help: Luonnonmuistomerkki merkitään selvästi maastoon rauhoituslaatalla. Mikäli kohde on helposti saavutettavissa, voidaan siihen tutustumista helpottaa omistajan suostumuksesta esimerkiksi varustamalla kohde opasteella.
 
 help.YM.applicationInfoDesc: Tällä välilehdellä näet valitsemaasi toimenpiteeseen liittyvät lomaketiedot. Osioon tallennettavat tiedot välittyvät kunnan kautta eri viranomaisten järjestelmiin.
 help.YM.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
