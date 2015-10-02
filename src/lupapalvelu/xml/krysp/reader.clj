@@ -25,10 +25,12 @@
 
 (defn wfs-is-alive?
   "checks if the given system is Web Feature Service -enabled. kindof."
-  [url]
+  [url username password]
   (when-not (s/blank? url)
     (try
-     (let [resp (http/get url {:query-params {:request "GetCapabilities"} :throw-exceptions false})]
+      (let [credentials (when-not (s/blank? username) {:basic-auth [username password]})
+            options     (merge {:query-params {:request "GetCapabilities"} :throw-exceptions false} credentials)
+            resp        (http/get url options)]
        (or
          (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
          (warn "Response not OK or did not contain XML. Response was: " resp)))
@@ -102,26 +104,35 @@
 
 (defn building-xml
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
-  [server property-id]
+  [server credentials property-id]
   (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
     (trace "Get building: " url)
-    (or (cr/get-xml url) {})))
+    (or (cr/get-xml url credentials) {})))
 
-(defn- application-xml [type-name id-path server id raw?]
-  (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))
-        credentials nil]
+(defn- application-xml [type-name id-path server credentials id raw?]
+  (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))]
     (trace "Get application: " url)
     (cr/get-xml url credentials raw?)))
 
-(defn rakval-application-xml [server id search-type raw?] (application-xml rakval-case-type (get-tunnus-path permit/R search-type) server id raw?))
-(defn poik-application-xml   [server id search-type raw?] (application-xml poik-case-type   (get-tunnus-path permit/P search-type) server id raw?))
-(defn yl-application-xml     [server id search-type raw?] (application-xml yl-case-type     (get-tunnus-path permit/YL search-type) server id raw?))
-(defn mal-application-xml    [server id search-type raw?] (application-xml mal-case-type    (get-tunnus-path permit/MAL search-type) server id raw?))
-(defn vvvl-application-xml   [server id search-type raw?] (application-xml vvvl-case-type   (get-tunnus-path permit/VVVL search-type) server id raw?))
-(defn ya-application-xml     [server id search-type raw?] (let [options (post-body-for-ya-application id (get-tunnus-path permit/YA search-type))
-                                                                credentials nil]
-                                                            (trace "Get application: " server " with post body: " options )
-                                                            (cr/get-xml-with-post server options credentials raw?)))
+(defn rakval-application-xml [server credentials id search-type raw?]
+  (application-xml rakval-case-type (get-tunnus-path permit/R search-type)    server credentials id raw?))
+
+(defn poik-application-xml   [server credentials id search-type raw?]
+  (application-xml poik-case-type   (get-tunnus-path permit/P search-type)    server credentials id raw?))
+
+(defn yl-application-xml     [server credentials id search-type raw?]
+  (application-xml yl-case-type     (get-tunnus-path permit/YL search-type)   server credentials id raw?))
+
+(defn mal-application-xml    [server credentials id search-type raw?]
+  (application-xml mal-case-type    (get-tunnus-path permit/MAL search-type)  server credentials id raw?))
+
+(defn vvvl-application-xml   [server credentials id search-type raw?]
+  (application-xml vvvl-case-type   (get-tunnus-path permit/VVVL search-type) server credentials id raw?))
+
+(defn ya-application-xml     [server credentials id search-type raw?] 
+  (let [options (post-body-for-ya-application id (get-tunnus-path permit/YA search-type))]
+    (trace "Get application: " server " with post body: " options )
+    (cr/get-xml-with-post server options credentials raw?)))
 
 (permit/register-function permit/R    :xml-from-krysp rakval-application-xml)
 (permit/register-function permit/P    :xml-from-krysp poik-application-xml)
@@ -413,12 +424,17 @@
 
 (defn- ->standard-verdicts [xml-without-ns]
   (map (fn [paatos-xml-without-ns]
-         (let [poytakirjat (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
-               poytakirja (poytakirja-with-paatos-data poytakirjat) ]
-           (when (and poytakirja (> (now) (:paatospvm poytakirja)))
+         (let [poytakirjat      (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
+               poytakirja       (poytakirja-with-paatos-data poytakirjat)
+               paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
+               valid-paatospvm? (> (now) (:paatospvm poytakirja))
+               valid-antopvm?   (or (not (:anto paivamaarat))
+                                    (> (now) (:anto paivamaarat)))]
+           (when (and poytakirja
+                      valid-paatospvm?
+                      valid-antopvm?)
              {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
-              :paivamaarat    (get-pvm-dates paatos-xml-without-ns
-                                [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
+              :paivamaarat    paivamaarat
               :poytakirjat    (seq poytakirjat)})))
     (select xml-without-ns [:paatostieto :Paatos])))
 

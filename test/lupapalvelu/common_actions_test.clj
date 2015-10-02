@@ -71,7 +71,7 @@
         allowed-actions #{; queries
                           :application :validate-doc :fetch-validation-errors
                           :get-organization-tags :get-organization-areas
-                          :reduced-foreman-history :foreman-history :foreman-applications
+                          :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
                           ; raw
                           :preview-attachment :view-attachment :download-attachment :download-all-attachments}]
     (doseq [command (ca/foreach-action user {} application)

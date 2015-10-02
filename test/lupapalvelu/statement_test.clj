@@ -8,7 +8,8 @@
 
 (let [test-app-R  {:municipality 753 :permitType "R"}
       test-app-P  {:municipality 753 :permitType "P"}
-      test-app-YA {:municipality 753 :permitType "YA"}]
+      test-app-YA {:municipality 753 :permitType "YA"}
+      test-app-YM {:municipality 753 :permitType "YM"}]
 
   ;; permit type R
 
@@ -50,4 +51,11 @@
   (fact "get-possible-statement-statuses, permit type R, krysp yhteiset version 2.1.5"
     (possible-statement-statuses test-app-YA) => (just ["puoltaa" "ei-puolla" "ehdoilla"] :in-any-order)
     (provided
-      (organization/resolve-organization anything anything) => {:krysp {:YA {:version "2.2.0"}}})))
+      (organization/resolve-organization anything anything) => {:krysp {:YA {:version "2.2.0"}}}))
+
+  ;; permit type YM
+
+  (fact "get-possible-statement-statuses, permit type YM, no krysp versions defined"
+    (possible-statement-statuses test-app-YM) => (just ["puoltaa" "ei-puolla" "ehdoilla"] :in-any-order)
+    (provided
+      (organization/resolve-organization anything anything) => {})))

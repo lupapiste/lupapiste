@@ -1,8 +1,9 @@
 (ns lupapalvelu.document.ymparisto-schemas
-  (:require [lupapalvelu.document.schemas :refer :all]))
+  (:require [lupapalvelu.document.schemas :refer :all]
+            [lupapalvelu.document.tools :refer :all]))
 
-(def sijainti (body simple-osoite
-                {:name "karttapiirto" :type :text :max-len 4000}))
+#_(def sijainti (body simple-osoite
+                 {:name "karttapiirto" :type :text :max-len 4000}))
 
 (def kesto (body {:name "kesto" :type :group
                   :body [{:name "alku" :type :date}
@@ -12,9 +13,8 @@
                          {:name "sunnuntai", :type :group, :body [{:name "sunnuntaiAlkuAika" :type :time} {:name "sunnuntaiLoppuAika" :type :time}]}]}))
 
 
-(def kesto-mini (body {:name "kesto" :type :group
-                       :body [{:name "alku" :type :date}
-                              {:name "loppu" :type :date}]}))
+(def kesto-mini
+  (schema-body-without-element-by-name kesto "arki" "lauantai" "sunnuntai"))
 
 (def meluilmoitus (body
                     {:name "rakentaminen" :type :group
@@ -62,6 +62,41 @@
                                    {:name "Rahaa"}
                                    {:name "Pankkitakaus"}]}))
 
+(def jatteen-keraystoiminta-ilmoitus
+  (body
+    {:name "toiminnan-muoto"
+     :type :select
+     :required true
+     :body [{:name "uusiToiminta"}
+            {:name "muutosToimintaan"}
+            {:name "olemassaOlevaToiminta"}]}
+    {:name "keraystoiminnan-jarjestaja"
+     :type :group
+     :required true
+     :body [{:name "kunnanKerays" :type :checkbox}
+            {:name "tuottajanKerays" :type :checkbox}
+            {:name "muuKerays" :type :checkbox}
+            {:name "muuKeraysValue" :type :string}]}
+    {:name "jatteen-vastuullinen"
+     :type :group
+     :required true
+     :body [{:name "kunnanJate" :type :checkbox}
+            {:name "tuottajanJate" :type :checkbox}
+            {:name "muuJate" :type :checkbox}
+            {:name "muuJateValue" :type :string}]}
+    {:name "vastaanottopaikat-liitteena" :type :checkbox}))
+
+(def luonnonmuistomerkin-rauhoittaminen
+  (body
+    {:name "muistomerkki-perustelut-rauhoitukselle" :type :group
+     :group-help "muistomerkki-perustelut-rauhoitukselle.help"
+     :body [{:name "kohteen-nimi" :type :string :size "l" :required true}
+            kuvaus
+            {:name "muita-tietoja" :type :text :max-len 4000 :required false :layout :full-width}]}
+
+   {:name "muistomerkki-kaytto-ja-hoito" :type :group
+    :group-help "muistomerkki-kaytto-ja-hoito.help"
+    :body [{:name "nahtavyyskohde" :type :checkbox :required true :layout :full-width}]}))
 
 
 (defschemas
@@ -110,8 +145,14 @@
    {:info {:name "maa-aineslupa-kuvaus"
            :order 1}
     :body [kuvaus]}
+   {:info {:name "luonnonmuistomerkin-rauhoittaminen"
+           :order 1}
+    :body luonnonmuistomerkin-rauhoittaminen}
    {:info {:name "paatoksen-toimitus"
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
             :body [{:name "Noudetaan"}
-                   {:name "Postitetaan"}]}]}])
+                   {:name "Postitetaan"}]}]}
+
+   {:info {:name "jatteen-kerays"}
+    :body jatteen-keraystoiminta-ilmoitus}])

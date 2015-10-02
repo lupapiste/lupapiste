@@ -3402,7 +3402,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 }
 
 /* line 192, ../sass/partials/_forms.scss */
-.form-full-width > select {
+.form-full-width > select, .form-full-width > label {
   width: 80% !important;
 }
 
@@ -3489,9 +3489,9 @@ input.form-input.inline {
   width: auto;
   display: inline-block;
   vertical-align: bottom;
-  margin: 0 6px 2px 6px;
+  margin: 0 6px 0 6px;
   width: 14px;
-  height: 14px;
+  height: 24px;
   padding: 0;
 }
 /* line 273, ../sass/partials/_forms.scss */
@@ -3553,7 +3553,7 @@ input.form-input.inline {
 }
 /* line 325, ../sass/partials/_forms.scss */
 .form-group .form-input.checkbox, .form-group .form-input.radio, .form-choice .form-input.checkbox, .form-choice .form-input.radio, .form-table .form-input.checkbox, .form-table .form-input.radio {
-  margin: 0 6px 2px 0;
+  margin: 0 6px 0 0;
   display: inline-block;
 }
 /* line 329, ../sass/partials/_forms.scss */

@@ -13,7 +13,7 @@
 (def local-krysp  (str (server-address) "/dev/krysp"))
 
 (fact "two buildings can be extracted"
-  (let [xml (building-xml local-krysp id)]
+  (let [xml (building-xml local-krysp nil id)]
     xml => truthy
 
     (let [buildings (->buildings-summary xml)]
@@ -46,7 +46,7 @@
                                :created     "1998"}))))
 
 (fact "converting building krysp to lupapiste domain model"
-  (let [xml (building-xml local-krysp id)]
+  (let [xml (building-xml local-krysp nil id)]
     xml => truthy
 
     (fact "invalid buildingid returns nil"
@@ -149,23 +149,23 @@
                                               :yhteystiedot {:email "", :puhelin ""}}}})))))
 
 (fact "converting rakval verdict krysp to lupapiste domain model, using lupapistetunnus"
-  (let [xml (rakval-application-xml local-krysp id :application-id false)]
+  (let [xml (rakval-application-xml local-krysp nil id :application-id false)]
     xml => truthy
     (count (->verdicts xml ->standard-verdicts)) => 2))
 
 (fact "converting rakval verdict krysp to lupapiste domain model, using kuntalupatunnus"
-  (let [xml (rakval-application-xml local-krysp kuntalupatunnus :kuntalupatunnus false)]
+  (let [xml (rakval-application-xml local-krysp nil kuntalupatunnus :kuntalupatunnus false)]
     xml => truthy
     (count (->verdicts xml ->standard-verdicts)) => 1))
 
 (fact "converting poikkeamis verdict krysp to lupapiste domain model"
-  (let [xml (poik-application-xml local-krysp id :application-id false)]
+  (let [xml (poik-application-xml local-krysp nil id :application-id false)]
     xml => truthy
     (count (->verdicts xml ->standard-verdicts)) => 1))
 
 
 (fact "converting ya-verdict krysp to lupapiste domain model"
-  (let [xml (ya-application-xml local-krysp id :application-id false)]
+  (let [xml (ya-application-xml local-krysp nil id :application-id false)]
     xml => truthy
     (count (->verdicts xml ->simple-verdicts)) => 1))
 
@@ -177,7 +177,7 @@
       (fact "Application XML getter is set up" getter => fn?)
       (fact "Verdict reader is set ip" reader => fn?)
 
-      (let [xml (getter local-krysp id :application-id false)
+      (let [xml (getter local-krysp nil id :application-id false)
             cases (->verdicts xml reader)]
         (fact "xml is parsed" cases => truthy)
         (fact "xml has 1 cases" (count cases) => 1)

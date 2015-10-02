@@ -654,3 +654,15 @@
   {:user-roles #{:applicant :authority}}
   [{{id :id} :user}]
   (mongo/update-by-id :users id {$unset {:notification 1}}))
+
+(defquery enable-foreman-search
+  {:user-roles #{:authority}
+   :org-authz-roles (disj action/all-org-authz-roles :tos-editor :tos-publisher)
+   :pre-checks [(fn [command application]
+                  (let [org-ids (user/organization-ids (:user command))]
+                    (if-not application
+                      (when-not (pos? (mongo/count :organizations {:_id {$in org-ids} :scope.permitType permit/R }))
+                        unauthorized)
+                      unauthorized))
+                  )]}
+  [_])

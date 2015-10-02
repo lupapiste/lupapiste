@@ -154,8 +154,8 @@
 (defn add-value-metadata [m meta-data]
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
-(defn- load-building-data [url property-id building-id overwrite-all?]
-  (let [all-data (krysp-reader/->rakennuksen-tiedot (krysp-reader/building-xml url property-id) building-id)]
+(defn- load-building-data [url credentials property-id building-id overwrite-all?]
+  (let [all-data (krysp-reader/->rakennuksen-tiedot (krysp-reader/building-xml url credentials property-id) building-id)]
     (if overwrite-all?
       all-data
       (select-keys all-data (keys krysp-reader/empty-building-ids)))))
@@ -169,7 +169,7 @@
    :states     krysp-enrichment-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
-  (let [{url :url} (organization/get-krysp-wfs application)
+  (let [{url :url credentials :credentials} (organization/get-krysp-wfs application)
         clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
     (if (or clear-ids? url)
       (let [document     (doc-persistence/by-id application collection documentId)
@@ -198,7 +198,7 @@
                             (tools/path-vals
                               (if clear-ids?
                                 krysp-reader/empty-building-ids
-                                (load-building-data url propertyId buildingId overwrite))))
+                                (load-building-data url credentials propertyId buildingId overwrite))))
             krysp-update-map (doc-persistence/validated-model-updates application collection document krysp-updates created :source "krysp")
 
             {:keys [mongo-query mongo-updates]} (util/deep-merge
@@ -219,10 +219,10 @@
    :states     krysp-enrichment-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
-  (if-let [{url :url} (organization/get-krysp-wfs application)]
+  (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
     (try
-      (let [kryspxml  (krysp-reader/building-xml url propertyId)
-            buildings (krysp-reader/->buildings-summary kryspxml)]
+      (let [kryspxml    (krysp-reader/building-xml url credentials propertyId)
+            buildings   (krysp-reader/->buildings-summary kryspxml)]
         (ok :data buildings))
       (catch java.io.IOException e
         (errorf "Unable to get building info from %s backend: %s" (i18n/loc "municipality" municipality) (.getMessage e))
