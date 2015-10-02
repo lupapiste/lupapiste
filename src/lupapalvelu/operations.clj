@@ -305,13 +305,6 @@
 ;                                   :add-operation-allowed true
 ;                                   :min-outgoing-link-permits 0
 ;                                   :asianhallinta false}
-   :muistomerkin-rauhoittaminen   {:schema "luonnonmuistomerkin-rauhoittaminen"
-                                   :permit-type permit/YM
-                                   :required []
-                                   :attachments []
-                                   :add-operation-allowed false
-                                   :min-outgoing-link-permits 0
-                                   :asianhallinta true}
    })
 
 (def- yi-operations
@@ -323,6 +316,15 @@
                                   :min-outgoing-link-permits 0
                                   :asianhallinta true}
    })
+
+(def- ym-operations
+  {:muistomerkin-rauhoittaminen  {:schema "luonnonmuistomerkin-rauhoittaminen"
+                                  :permit-type permit/YM
+                                  :required []
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :min-outgoing-link-permits 0
+                                  :asianhallinta true}})
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
   (if (= :tyonjohtaja-ilmoitus (keyword subtype))
@@ -839,7 +841,8 @@
      }
     ya-operations
     yl-operations
-    yi-operations))
+    yi-operations
+    ym-operations))
 
 ;; Validate operations
 (doseq [[k op] operations]
