@@ -298,7 +298,7 @@
 (def- yl-operations
   {:yl-uusi-toiminta ymparistolupa-operation
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
-   :yl-toiminnan-muutos ymparistolupa-operation)
+   :yl-toiminnan-muutos ymparistolupa-operation
 ;   :pima                          {:schema "pima"
 ;                                   :permit-type permit/YL
 ;                                   :required ["ymp-ilm-kesto-mini"]
