@@ -189,7 +189,7 @@ input[readonly], textarea[readonly] {
   }
 }
 
-.form-full-width > select {
+.form-full-width > select, .form-full-width > label {
   width: 80% !important;
 }
 
