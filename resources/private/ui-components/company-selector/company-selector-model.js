@@ -11,7 +11,6 @@ LUPAPISTE.CompanySelectorModel = function(params) {
     company.displayName = ko.pureComputed(function() {
       return ko.unwrap(company.name) + " (" + ko.unwrap(company.y) + ")";
     });
-    company.disable = ko.observable(_.has(company, "invite"));
     return company;
   }
 
