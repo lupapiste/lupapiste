@@ -72,7 +72,7 @@
 
    {:name "muistomerkki-kaytto-ja-hoito" :type :group
     :group-help "muistomerkki-kaytto-ja-hoito.help"
-    :body [{:name "nahtavyyskohde" :type :checkbox :required true :layout :full-width}]}))
+    :body [{:name "ei-nahtavyyskohde" :type :checkbox :required true :layout :full-width}]}))
 
 
 (defschemas
