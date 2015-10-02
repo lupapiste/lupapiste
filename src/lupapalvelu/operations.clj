@@ -132,7 +132,8 @@
 
       ; permit/YM
       ["muut-ymparistoluvat"
-       [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]]]
+       [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]
+        ["jatteen-keraystoiminta" :jatteen-keraystoiminta]]]
 
       ; permit/VVVL
       ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
