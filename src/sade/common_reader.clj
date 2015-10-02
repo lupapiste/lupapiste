@@ -117,6 +117,8 @@
 (defn get-xml
   ([url]
     (get-xml url nil false))
+  ([url credentials]
+    (get-xml url credentials false))
   ([url credentials raw?]
     {:pre [url
            (or (nil? credentials) (= (count credentials) 2))
