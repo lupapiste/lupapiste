@@ -65,13 +65,14 @@
 (def luonnonmuistomerkin-rauhoittaminen
   (body
     {:name "muistomerkki-perustelut-rauhoitukselle" :type :group
-     :body [{:name "kohteen-nimi" :type :string :size "l" :required true :group-help "muistomerkki-perustelut-rauhoitukselle.help"}
+     :group-help "muistomerkki-perustelut-rauhoitukselle.help"
+     :body [{:name "kohteen-nimi" :type :string :size "l" :required true}
             kuvaus
             {:name "muita-tietoja" :type :text :max-len 4000 :required false :layout :full-width}]}
 
    {:name "muistomerkki-kaytto-ja-hoito" :type :group
-    :body [{:name "nahtavyyskohde" :type :checkbox :required true :layout :full-width
-            :group-help "muistomerkki-kaytto-ja-hoito.help"}]}))
+    :group-help "muistomerkki-kaytto-ja-hoito.help"
+    :body [{:name "ei-nahtavyyskohde" :type :checkbox :required true :layout :full-width}]}))
 
 
 (defschemas
