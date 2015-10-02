@@ -8,12 +8,14 @@
         <div class="container">
           <h1>
             <div class="application-search-link">
-                <a class="link active" href="#" data-bind="ltext: 'navigation', click: _.partial(searchType, 'applications'), visible: !showApplicationsSearch()"></a>
+                <a class="link active" href="#" data-test-id="applications-search-link"
+                   data-bind="ltext: 'navigation', click: _.partial(searchType, 'applications'), visible: !showApplicationsSearch()"></a>
                 <span href="#" data-bind="ltext: 'navigation', visible: showApplicationsSearch"></span>
             </div>
-            <!-- ko if: lupapisteApp.models.currentUser.isAuthority() && lupapisteApp.models.currentUser.hasRPermitType() -->
+            <!-- ko if: lupapisteApp.models.globalAuthModel.ok("enable-foreman-search") -->
             <div class="application-search-link">
-                <a class="link" href="#" data-bind="ltext: 'applications.search.foremen', click: _.partial(searchType, 'foreman'), visible: !showForemanSearch()"></a>
+                <a class="link" href="#" data-test-id="applications-foreman-search-link"
+                   data-bind="ltext: 'applications.search.foremen', click: _.partial(searchType, 'foreman'), visible: !showForemanSearch()"></a>
                 <span data-bind="ltext: 'applications.search.foremen', visible: showForemanSearch"></span>
             </div>
             <!-- /ko -->
