@@ -14,7 +14,9 @@ LUPAPISTE.AutocompleteTagsModel = function(params) {
     for (var key in lupapisteApp.services.tagFilterService.data()) {
       var header = {label: lupapisteApp.services.tagFilterService.data()[key].name[loc.currentLanguage], groupHeader: true};
 
-      var filteredData = util.filterDataByQuery(lupapisteApp.services.tagFilterService.data()[key].tags, self.query() || "", self.selected());
+      var filteredData = util.filterDataByQuery({data: lupapisteApp.services.tagFilterService.data()[key].tags,
+                                                 query: self.query(),
+                                                 selected: self.selected()});
       // append group header and group items to result data
       if (filteredData.length > 0) {
         if (_.keys(lupapisteApp.services.tagFilterService.data()).length > 1) {

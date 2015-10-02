@@ -131,7 +131,7 @@
                                  :uuid       uuid}]}
                   (json/encode)
                   (crypt/str->bytes)
-                  (crypt/encrypt crypto-key crypto-iv)
+                  (crypt/encrypt crypto-key crypto-iv :rijndael)
                   (crypt/base64-encode)
                   (crypt/bytes->str)
                   (crypt/url-encode))

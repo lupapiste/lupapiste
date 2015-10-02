@@ -179,9 +179,10 @@
 (defn get-application-xml-getter
   "Returns a function that fetches KRYSP XML from municipality backend.
    Function parameters: 1) url,
-                        2) id,
-                        3) keyword parameter: search-type (e.g. :application-id or :kuntalupatunnus)
-                        4) optional boolean parameter: raw form."
+                        2) credentials [username password],
+                        3) id,
+                        4) keyword parameter: search-type (e.g. :application-id or :kuntalupatunnus)
+                        5) optional boolean parameter: raw form."
   [permit-type]
   (get-metadata permit-type :xml-from-krysp))
 

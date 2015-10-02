@@ -348,6 +348,8 @@
 
     self.data = ko.observable();
     self.editUrl = ko.observable();
+    self.editUsername = ko.observable();
+    self.editPassword = ko.observable();
     self.versions = ko.observable([]);
     self.editVersion = ko.observable();
     self.editContext = null;
@@ -369,7 +371,13 @@
     };
 
     self.save = function() {
-      ajax.command("set-krysp-endpoint", {url: self.editUrl(), version: self.editVersion(), permitType: self.editContext.permitType})
+      ajax.command("set-krysp-endpoint", {
+        url: self.editUrl(), 
+        username: self.editUsername(), 
+        password: self.editPassword(), 
+        version: self.editVersion(), 
+        permitType: self.editContext.permitType
+      })
         .success(function() {
           self.load();
           self.error(false);
@@ -384,11 +392,15 @@
 
     self.openDialog = function(model) {
       var url = model.url || "";
+      var username = model.username || "";
+      var password = model.password || "";
       var version = model.version || "";
       var versionsAvailable = LUPAPISTE.config.kryspVersions[model.permitType];
       if (!versionsAvailable) {error("No supported KRYSP versions for permit type", model.permitType);}
       self.versions(versionsAvailable);
       self.editUrl(url);
+      self.editUsername(username);
+      self.editPassword(password);
       self.editVersion(version);
       self.editContext = model;
       self.error(false);
