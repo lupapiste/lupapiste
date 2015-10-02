@@ -16,6 +16,15 @@
                        :body [{:name "alku" :type :date}
                               {:name "loppu" :type :date}]}))
 
+(def tila (body {:name "omistaja"     :body henkilotiedot-minimal}
+                {:name "tilatiedot"   :type :string}
+                {:name "osoite"       :body simple-osoite}
+                {:name "yhteystiedot" :body yhteystiedot}))
+
+(def ymparistolupa (body {:name "lupaviranomainen" :type :string}
+                         {:name "lupapaatostiedot" :type :string}
+                         {:name "kesto" :body kesto}))
+
 (def meluilmoitus (body
                     {:name "rakentaminen" :type :group
                      :body [{:name "melua-aihettava-toiminta" :type :select :sortBy :displayname
@@ -62,7 +71,72 @@
                                    {:name "Rahaa"}
                                    {:name "Pankkitakaus"}]}))
 
+(def elainmaarat (body (map (partial assoc {:type :string :unit "kpl" :size "s"} :name) 
+                            ["lyspylehmat" "emolehmat" "hiehotLihanaudatSiistossonnit" "nuorkarja"
+                             "emakotPorsaineen" "sateliittiemakotPorsaineen" "lihasiatSiitossiat" "joutilaatEmakot" "vieroitetutPorsaat"
+                             "hevoset" "ponit" "lampaatUuhetKaritsoineen" "vuohetKututKileineen" 
+                             "lattiakanatBroileremot" "hakkikanat" "kalkkunat" "broileritKananuorikot" "ankatHanhet" "sorsat"])))
 
+(def lantajarjestelma (body [{:name "jarjestelma"
+                              :body [{:name "lietelanta" :type :checkbox}
+                                     {:name "kuivalantaJaVirtsa" :type :checkbox}
+                                     {:name "kuivikelanta" :type :checkbox}
+                                     {:name "kuivikepohja" :type :checkbox}
+                                     {:name "tyhjennysvali" :type :string :unit "kk" :size "s"}
+                                     {:name "kaytettyKuivike" :type :string}]}
+                             {:name "varastot"
+                              :body (body (map (partial assoc {:type :string :unit "m3" :size "m"} :name)
+                                               ["kuivalantalanTilavuus" "virtsasailioidenTilavuus" "muuSailiotilavuus"
+                                                "lietesailioidenJaKuilujenTilavuus" "kuivikepoihjan"])
+                                          ({:name "suppeaJaloittelualue" :type :string :unit "m2"}))}
+                             {:name "yhteinenVarasto"
+                              :body (body {:name "tyyppi" :type :string}
+                                          {:name "tilavuus" :type :string :unit "m3" :size "s"}
+                                          {:name "kayttajat" :repaeting true :body tila})}]))
+
+(def lannan-varastointi-ilmoitus (body
+                                  {:name "kuvaus"
+                                   :type :select
+                                   :required true
+                                   :body [{:name "poikkeaminenVarastointitilavuudesta"}
+                                          {:name "muuLannanKaukovarastointi"}]}
+                                  {:name "ilmoittajan-tilatiedot"
+                                   :type :group
+                                   :required true
+                                   :body [{:name "tila" :body tila}
+                                          {:name "elainmaarat" :body elainmaarat}
+                                          {:name "lantajarjestelma" :body lantajarjestelma}
+                                          {:name "selostusElaimienOleskelusta" :type :text :max-len 1000}
+                                          {:name "poikkeamissuunnitelma" :type :text :max-len 4000}]}
+                                  {:name "poikkamistapa"
+                                   :type :group
+                                   :body [{:name      "tapaA"
+                                           :type      :group
+                                           :repeating true
+                                           :body [{:name "tila" :type :group :body tila}
+                                                  {:name "ymparistolupa" :type :group :body ymparistolupa}
+                                                  {:name "lantamaara" :type :string :unit "m3"}]}
+                                          {:name      "tapaB" 
+                                           :type      :group
+                                           :repeating true
+                                           :body [{:name "tila" :type :group :body tila}
+                                                  {:name "varastointitapa" :type :text :max-len 1000}
+                                                  {:name "lantamaara" :type :string :unit "m3"}]}
+                                          {:name      "tapaC" 
+                                           :type      :group
+                                           :repeating true
+                                           :body [{:name "tila" :type :group :body tila}
+                                                  {:name "hyodyntamispaikka" :type :text :max-len 1000}
+                                                  {:name "lantamaara" :type :string :unit "m3"}]}
+                                          {:name      "tapaD"
+                                           :type      :group
+                                           :repeating true
+                                           :body [{:name "patterin"}]}]}
+                                  {:name "liitteet"
+                                   :type :checkbox
+                                   :body [{:name "kartta" :required true}
+                                          {:name "muu"}]}
+                                  {:name "lisatiedot" :type :text :max-len 4000}))
 
 (defschemas
   1
@@ -114,4 +188,7 @@
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
             :body [{:name "Noudetaan"}
-                   {:name "Postitetaan"}]}]}])
+                   {:name "Postitetaan"}]}]}
+
+   {:info {:name "lannan-varastointi"}
+    :body lannan-varastointi-ilmoitus}])
