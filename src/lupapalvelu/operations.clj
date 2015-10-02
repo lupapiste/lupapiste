@@ -329,7 +329,7 @@
 
    :jatteen-keraystoiminta {:schema "jatteen-kerays"
                             :permit-type permit/YM
-                            :required ["ymp-maksaja"]
+                            :required []
                             :attachments [] ; [:jatteen_kerays [:vastaanottopaikan_tiedot]] sync with commons
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
