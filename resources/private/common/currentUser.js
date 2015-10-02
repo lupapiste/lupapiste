@@ -57,6 +57,14 @@ LUPAPISTE.CurrentUser = function() {
       username = self.firstName() + " " + self.lastName();
     }
     return username;
+
+  });
+  self.showNotification = ko.pureComputed(function() {
+    return !_.isEmpty(getNotificationFields(self.notification));
+  });
+
+  self.hasRPermitType = ko.pureComputed(function() {
+    return !_(self.orgAuthz()).keys().filter(function(o) {return _.contains(o, "-R");}).isEmpty();
   });
 
   function getNotificationFields(notification) {
@@ -74,10 +82,6 @@ LUPAPISTE.CurrentUser = function() {
       return undefined;
     }
   }
-
-  self.showNotification = ko.pureComputed(function() {
-    return !_.isEmpty(getNotificationFields(self.notification));
-  });
 
   ko.computed(function() {
     if (self.showNotification()) {
