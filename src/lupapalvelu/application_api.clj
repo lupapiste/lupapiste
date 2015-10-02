@@ -89,13 +89,6 @@
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
     (when-let [rakennuspaikka (domain/get-document-by-type application :location)]
       (when-let [ktj-tiedot (wfs/rekisteritiedot-xml (:propertyId application))]
-
-;        (>debug-repl)
-
-        (println "\n autofill-rakennuspaikka, ktj-tiedot:")
-        (>pprint ktj-tiedot)
-        (println "\n")
-
         (let [updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
                        [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
                        [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]

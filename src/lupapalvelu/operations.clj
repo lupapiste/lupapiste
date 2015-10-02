@@ -308,7 +308,7 @@
    :muistomerkin-rauhoittaminen   {:schema "luonnonmuistomerkin-rauhoittaminen"
                                    :permit-type permit/YM
                                    :required []
-                                   :attachments [] #_[:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                   :attachments []
                                    :add-operation-allowed false
                                    :min-outgoing-link-permits 0
                                    :asianhallinta true}
