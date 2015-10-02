@@ -62,6 +62,30 @@
                                    {:name "Rahaa"}
                                    {:name "Pankkitakaus"}]}))
 
+(def jatteen-keraystoiminta-ilmoitus
+  (body
+    {:name "toiminnan-muoto"
+     :type :select
+     :required true
+     :body [{:name "uusiToiminta"}
+            {:name "muutosToimintaan"}
+            {:name "olemassaOlevaToiminta"}]}
+    {:name "keraystoiminnan-jarjestaja"
+     :type :group
+     :required true
+     :body [{:name "kunnanKerays" :type :checkbox}
+            {:name "tuottajanKerays" :type :checkbox}
+            {:name "muuKerays" :type :checkbox}
+            {:name "muuKeraysValue" :type :string}]}
+    {:name "jatteen-vastuullinen"
+     :type :group
+     :required true
+     :body [{:name "kunnanJate" :type :checkbox}
+            {:name "tuottajanJate" :type :checkbox}
+            {:name "muuJate" :type :checkbox}
+            {:name "muuJateValue" :type :string}]}
+    {:name "vastaanottopaikat-liitteena" :type :checkbox}))
+
 (def luonnonmuistomerkin-rauhoittaminen
   (body
     {:name "muistomerkki-perustelut-rauhoitukselle" :type :group
@@ -128,4 +152,7 @@
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
             :body [{:name "Noudetaan"}
-                   {:name "Postitetaan"}]}]}])
+                   {:name "Postitetaan"}]}]}
+
+   {:info {:name "jatteen-kerays"}
+    :body jatteen-keraystoiminta-ilmoitus}])

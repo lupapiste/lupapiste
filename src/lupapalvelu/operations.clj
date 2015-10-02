@@ -132,7 +132,8 @@
 
       ; permit/YM
       ["muut-ymparistoluvat"
-       [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]]]
+       [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]
+        ["jatteen-keraystoiminta" :jatteen-keraystoiminta]]]
 
       ; permit/VVVL
       ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
@@ -324,7 +325,15 @@
                                   :attachments []
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0
-                                  :asianhallinta true}})
+                                  :asianhallinta true}
+
+   :jatteen-keraystoiminta {:schema "jatteen-kerays"
+                            :permit-type permit/YM
+                            :required []
+                            :attachments [] ; [:jatteen_kerays [:vastaanottopaikan_tiedot]] sync with commons
+                            :add-operation-allowed false
+                            :min-outgoing-link-permits 0
+                            :asianhallinta true}})
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
   (if (= :tyonjohtaja-ilmoitus (keyword subtype))
