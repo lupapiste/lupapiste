@@ -77,7 +77,7 @@
 
 (def- attachment-types-YL attachment-types/Ymparistolupa)
 
-(def- attachment-types-YM attachment-types/MuutYmparistoluvat)
+(def- attachment-types-YM []  #_attachment-types/MuutYmparistoluvat)   ;; *** TODO: Enable this when YM attachments in the Commons project is updated ***
 
 (def- attachment-types-MAL attachment-types/Maa-ainesluvat)
 
