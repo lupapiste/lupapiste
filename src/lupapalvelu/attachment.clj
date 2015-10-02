@@ -77,6 +77,8 @@
 
 (def- attachment-types-YL attachment-types/Ymparistolupa)
 
+(def- attachment-types-YM []  #_attachment-types/MuutYmparistoluvat)   ;; *** TODO: Enable this when YM attachments in the Commons project is updated ***
+
 (def- attachment-types-MAL attachment-types/Maa-ainesluvat)
 
 (def- attachment-types-KT attachment-types/Kiinteistotoimitus)
@@ -92,6 +94,7 @@
       attachment-types-YA
       attachment-types-YI
       attachment-types-YL
+      attachment-types-YM
       attachment-types-MAL
       attachment-types-KT)))
 
@@ -128,6 +131,7 @@
       :P  attachment-types-R
       :YI attachment-types-YI
       :YL attachment-types-YL
+      :YM attachment-types-YM
       :VVVL attachment-types-YI ;TODO Put correct attachment list here
       :MM attachment-types-KT ;TODO Put correct attachment list here
       :MAL attachment-types-MAL
