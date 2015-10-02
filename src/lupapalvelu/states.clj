@@ -1,43 +1,8 @@
 (ns lupapalvelu.states
-  (:require [clojure.set :refer [difference union]]))
+  (:require [clojure.set :refer [difference union ]]
+            [sade.strings :as ss]))
 
-
-(def all-application-states #{:draft :open :submitted :sent :complement-needed
-                              :verdictGiven :constructionStarted :closed :canceled
-                              :extinct
-                              :hearing :proposal :proposalApproved
-                              :survey :sessionProposal :sessionHeld :registered
-                              :appealed :final
-                              })
-(def all-inforequest-states #{:info :answered})
-(def all-states             (union all-application-states all-inforequest-states))
-
-(def pre-verdict-states #{:draft :info :answered :open :submitted :complement-needed :sent})
-(def post-verdict-states (difference all-application-states pre-verdict-states #{:canceled}))
-
-(def pre-sent-application-states #{:draft :open :submitted :complement-needed})
-
-(def post-submitted-states #{:sent :complement-needed :verdictGiven :constructionStarted :closed})
-
-(def terminal-states #{:canceled :closed :final :extinct :registered})
-
-(def all-but-draft-or-terminal (difference all-states #{:draft} terminal-states))
-(def all-application-states-but-draft-or-terminal (difference all-application-states #{:draft} terminal-states))
-
-(defn- drop-state-set [drop-states]
-  (cond
-    (and (= 1 (count drop-states)) (coll? (first drop-states))) (drop-state-set (first drop-states))
-    (every? keyword? drop-states) (set drop-states)
-    :else (throw (IllegalArgumentException. "Only keyword varargs or a single collection of keywords is supported"))))
-
-(defn all-states-but [& drop-states]
-  (difference all-states (drop-state-set drop-states)))
-
-(defn all-application-states-but [& drop-states]
-  (difference all-application-states (drop-state-set drop-states)))
-
-(defn all-inforequest-states-but [& drop-states]
-  (difference all-inforequest-states (drop-state-set drop-states)))
+(def initial-state :draft)
 
 (def
   ^{:doc "Possible state transitions for inforequests.
@@ -119,6 +84,74 @@
      :sessionHeld [:registered :canceled] ; Kokous pidetty
      :registered [] ; Kiinteistorekisterissa
      }))
+
+
+(def pre-verdict-states #{:draft :info :answered :open :submitted :complement-needed :sent})
+
+(def pre-sent-application-states #{:draft :open :submitted :complement-needed})
+
+;;
+;; Calculated state sets
+;;
+
+(def all-graphs
+  (->>
+    (ns-publics 'lupapalvelu.states)
+    (filter #(ss/ends-with (name (first %)) "-graph"))
+    (map (fn [v] @(second v)))))
+
+(defn all-next-states
+  "Returns a set of states that are after the start state in graph, including start state itself."
+  [graph start & [results]]
+  (let [results (set results)
+        transitions (get graph start)]
+    (cond
+      (empty? transitions) #{start} ; terminal state
+      (results start) results ; loop!
+      :else (into (conj results start)
+              (apply union (map #(all-next-states graph % (conj results start)) transitions))))))
+
+(def post-verdict-states
+ (let [graphs (filter :verdictGiven all-graphs)]
+   (difference
+     (apply union (map #(all-next-states % :verdictGiven) graphs))
+     #{:canceled}
+     ; ymp-application-state-graph loops back to pre verdict states
+     pre-verdict-states)))
+
+(def post-submitted-states
+ (let [graphs (filter :submitted all-graphs)]
+   (disj (apply union (map #(all-next-states % :verdictGiven) graphs)) :canceled :submitted)))
+
+(def all-states (->> all-graphs (map keys) (apply concat) set))
+(def all-inforequest-states (-> default-inforequest-state-graph keys set (disj :canceled)))
+(def all-application-states (difference all-states all-inforequest-states))
+
+(def terminal-states
+  (->>
+    all-graphs
+    (map (fn [g] (->> g (filter #(empty? (second %))) (map first))))
+    (apply concat)
+    set))
+
+(def all-but-draft-or-terminal (difference all-states #{:draft} terminal-states))
+(def all-application-states-but-draft-or-terminal (difference all-application-states #{:draft} terminal-states))
+
+(defn- drop-state-set [drop-states]
+  (cond
+    (and (= 1 (count drop-states)) (coll? (first drop-states))) (drop-state-set (first drop-states))
+    (every? keyword? drop-states) (set drop-states)
+    :else (throw (IllegalArgumentException. "Only keyword varargs or a single collection of keywords is supported"))))
+
+(defn all-states-but [& drop-states]
+  (difference all-states (drop-state-set drop-states)))
+
+(defn all-application-states-but [& drop-states]
+  (difference all-application-states (drop-state-set drop-states)))
+
+(defn all-inforequest-states-but [& drop-states]
+  (difference all-inforequest-states (drop-state-set drop-states)))
+
 
 (comment
   (require ['rhizome.viz :as 'viz])

@@ -21,7 +21,7 @@
   (fixture/apply-fixture "minimal"))
 
 (def- timestamp-the-beginning-of-time 0)
-(def- timestamp-1-day-ago (util/get-timestamp-from-now :day 1))
+(def- timestamp-1-day-ago (util/get-timestamp-ago :day 1))
 
 (def- neighbor-non-matching
   {:id "534bf825299508fb3618489v"
@@ -231,8 +231,8 @@
                                  :removable false,
                                  :type "group",
                                  :name "tyoaika"},
-                   :data {:tyoaika-paattyy-pvm {:value "25.09.2015", :modified 1443177751909},
-                          :tyoaika-alkaa-pvm {:value "30.09.2015", :modified 1443177749608}}}]}))
+                   :data {:tyoaika-alkaa-pvm {:value (util/to-local-date (util/get-timestamp-from-now :day 1)), :modified 1443177749608},
+                          :tyoaika-paattyy-pvm {:value (util/to-local-date (util/get-timestamp-from-now :day 6)), :modified 1443177751909}}}]}))
 
 
 (defn- check-sent-reminder-email [to subject bodyparts & [application-id link-role]]
@@ -468,6 +468,34 @@
 
        (batchrun/ya-work-time-is-expiring-reminder)
        (dummy-email-server/messages) => empty?
-       )))
+       ))
+
+   (fact "applications with :tyoaika-paattyy-pvm date too far in the future are not reacted to"
+     (mongo/with-db db-name
+       (let [date-str-8-days-in-future (util/to-local-date (util/get-timestamp-from-now :day 8))]
+
+         (update-application
+           (application->command ya-reminder-application)
+           {:documents {$elemMatch {:schema-info (:name "tyoaika")}}}
+           {$set {:documents.$.data.tyoaika-paattyy-pvm.value date-str-8-days-in-future}})  ;; 8 days -> will not trigger reminder
+
+         (batchrun/ya-work-time-is-expiring-reminder)
+         (dummy-email-server/messages) => empty?
+         )))
+
+   (fact "applications with :tyoaika-paattyy-pvm date in the past are not reacted to"
+     (mongo/with-db db-name
+       (let [date-str-1-day-ago (util/to-local-date (util/get-timestamp-ago :day 1))]
+
+         (update-application
+           (application->command ya-reminder-application)
+           {:documents {$elemMatch {:schema-info (:name "tyoaika")}}}
+           {$set {:documents.$.data.tyoaika-paattyy-pvm.value date-str-1-day-ago}})  ;; 1 day in the past -> will not trigger reminder
+
+         (batchrun/ya-work-time-is-expiring-reminder)
+         (dummy-email-server/messages) => empty?
+         )))
+
+   )
  )
 

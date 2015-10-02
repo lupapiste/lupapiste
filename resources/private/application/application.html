@@ -284,7 +284,13 @@
                                 <span data-bind="ltext: 'applications.declineInvite'"></span>
                             </button>
                             <!-- /ko -->
-                        </div>
+                            <button class="function"
+                                    data-bind="click: addProperty, visible: showAddPropertyButton"
+                                    data-test-id="add-property">
+                              <i class="lupicon-circle-plus"></i>
+                              <span data-bind="ltext: 'secondary-kiinteistot._append_label'"></span>
+                            </button>
+                            </div>
                         </div>
                     </div>
 
@@ -405,8 +411,6 @@
                                 <!-- This is where generated document will be placed. -->
                             </div>
                         </div>
-
-                        <div data-bind="component: 'add-property', visible: showAddPropertyButton"></div>
 
                         <div class="process-nav">
                             <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="parties">

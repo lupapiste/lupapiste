@@ -645,19 +645,19 @@
      :kiinteistonmuodostus         {:schema "kiinteistonmuodostus"
                                     :permit-type permit/KT
                                     :optional #{"secondary-kiinteistot"}
-                                    :required (conj common-maanmittaus-schemas "rasitetoimitus")
+                                    :required common-maanmittaus-schemas
                                     :attachments []
-                                    :add-operation-allowed false
+                                    :add-operation-allowed true
                                     :min-outgoing-link-permits 0
-                                    :asianhallinta false}
+                                    :asianhallinta true}
      :rasitetoimitus                {:schema "rasitetoimitus"
                                      :permit-type permit/KT
                                      :optional #{"secondary-kiinteistot"}
-                                     :required (conj common-maanmittaus-schemas "kiinteistonmuodostus")
+                                     :required common-maanmittaus-schemas
                                      :attachments []
-                                     :add-operation-allowed false
+                                     :add-operation-allowed true
                                      :min-outgoing-link-permits 0
-                                     :asianhallinta false}
+                                     :asianhallinta true}
      :rajankaynti                  {:schema "rajankaynti"
                                     :permit-type permit/KT
                                     :optional #{"secondary-kiinteistot"}
@@ -665,7 +665,7 @@
                                     :attachments []
                                     :add-operation-allowed false
                                     :min-outgoing-link-permits 0
-                                    :asianhallinta false}
+                                    :asianhallinta true}
      :poikkeamis                  {:schema "rakennushanke"
                                    :permit-type permit/P
                                    :required  (conj common-poikkeamis-schemas "suunnittelutarveratkaisun-lisaosa")
@@ -798,7 +798,7 @@
                                  :attachments []
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta true}
     :asemakaava                 {:schema "maankayton-muutos"
                                  :permit-type permit/MM
                                  :required common-maanmittaus-schemas

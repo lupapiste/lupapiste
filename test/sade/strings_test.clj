@@ -124,3 +124,10 @@
   (trim " a")   => "a"
   (trim "a ")   => "a"
   (trim " a ")  => "a")
+
+(fact "capitalize"
+      (capitalize nil) => nil
+      (capitalize "")  => ""
+      (capitalize "h") => "H"
+      (capitalize "H") => "H"
+      (capitalize "hello") => "Hello")

@@ -13,6 +13,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.user :refer [applicant?] :as user]
+            [lupapalvelu.states :as states]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.geojson :as geo]))
 
@@ -71,6 +72,12 @@
     (when (seq coordinates)
       {$or (map (fn [c] {:location {$geoWithin {"$polygon" c}}}) coordinates)})))
 
+(def applicant-application-states
+  {:state {$in ["open" "submitted" "sent" "complement-needed" "draft"]}})
+
+(def authority-application-states
+  {:state {$in ["submitted" "sent" "complement-needed"]}})
+
 (defn make-query [query {:keys [searchText kind applicationType handlers tags organizations operations areas]} user]
   {$and
    (filter seq
@@ -78,16 +85,22 @@
       (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
       (if (applicant? user)
         (case applicationType
-          "inforequest"       {:state {$in ["answered" "info"]}}
-          "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "draft"]}}
-          "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
-          "canceled"          {:state "canceled"}
+          "inforequest"        {:state {$in ["answered" "info"]}}
+          "application"        applicant-application-states
+          "construction"       {:state {$in ["verdictGiven" "constructionStarted"]}}
+          "canceled"           {:state "canceled"}
+          "verdict"            {:state {$in states/post-verdict-states}}
+          "foremanApplication" (assoc applicant-application-states :permitSubtype "tyonjohtaja-hakemus")
+          "foremanNotice"      (assoc applicant-application-states :permitSubtype "tyonjohtaja-ilmoitus")
           {:state {$ne "canceled"}})
         (case applicationType
-          "inforequest"       {:state {$in ["open" "answered" "info"]}}
-          "application"       {:state {$in ["submitted" "sent" "complement-needed"]}}
-          "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
-          "canceled"          {:state "canceled"}
+          "inforequest"        {:state {$in ["open" "answered" "info"]}}
+          "application"        authority-application-states
+          "construction"       {:state {$in ["verdictGiven" "constructionStarted"]}}
+          "verdict"            {:state {$in states/post-verdict-states}}
+          "canceled"           {:state "canceled"}
+          "foremanApplication" (assoc authority-application-states :permitSubtype "tyonjohtaja-hakemus")
+          "foremanNotice"      (assoc authority-application-states :permitSubtype "tyonjohtaja-ilmoitus")
           {:state {$nin ["draft" "canceled"]}}))
       (when-not (empty? handlers)
         (if ((set handlers) "no-authority")
@@ -121,7 +134,8 @@
 (def- frontend-fields
   [:id :address :applicant :authority :authorityNotice
    :infoRequest :kind :modified :municipality
-   :primaryOperation :state :submitted :urgency :verdicts])
+   :primaryOperation :state :submitted :urgency :verdicts
+   :foreman :foremanRole])
 
 (defn- select-fields [application]
   (select-keys
@@ -142,7 +156,8 @@
                           "submitted" :submitted
                           "foreman" :foreman
                           "foremanRole" :foremanRole
-                          "state" :state})
+                          "state" :state
+                          "id" :_id})
 
 (defn- dir [asc] (if asc 1 -1))
 

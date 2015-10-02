@@ -416,11 +416,11 @@
   (let [poytakirjat (map ->paatospoytakirja (select (cr/strip-xml-namespaces xml) [:paatostieto :Paatos :poytakirja]))
         poytakirja (poytakirja-with-paatos-data poytakirjat)
         paatospvm  (:paatospvm poytakirja)
-        timestamp-1-day-from-now (util/get-timestamp-from-now :day 1)]
+        timestamp-1-day-ago (util/get-timestamp-ago :day 1)]
     (cond
       (not (seq poytakirjat))                (fail :info.no-verdicts-found-from-backend)
       (not (seq poytakirja))                 (fail :info.paatos-details-missing)
-      (< timestamp-1-day-from-now paatospvm) (fail :info.paatos-future-date))))
+      (< timestamp-1-day-ago paatospvm)      (fail :info.paatos-future-date))))
 
 (defn- ->standard-verdicts [xml-without-ns]
   (map (fn [paatos-xml-without-ns]
@@ -501,11 +501,11 @@
         osapuolet (get-tj-suunnittelija-osapuolet xml-without-ns osapuoli-path osapuoli-key kuntaRoolikoodi-key kuntaRoolikoodi yhteystiedot)
         osapuoli (party-with-paatos-data osapuolet sijaistus)
         paatospvm  (:paatosPvm osapuoli)
-        timestamp-1-day-from-now (util/get-timestamp-from-now :day 1)]
+        timestamp-1-day-ago (util/get-timestamp-ago :day 1)]
     (cond
       (not (seq osapuolet))                  (fail :info.no-verdicts-found-from-backend)
       (not (seq osapuoli))                   (fail :info.tj-suunnittelija-paatos-details-missing)
-      (< timestamp-1-day-from-now paatospvm) (fail :info.paatos-future-date))))
+      (< timestamp-1-day-ago paatospvm)      (fail :info.paatos-future-date))))
 
 (defn ->tj-suunnittelija-verdicts [{{:keys [yhteystiedot sijaistus]} :data} osapuoli-type kuntaRoolikoodi xml-without-ns]
   (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
