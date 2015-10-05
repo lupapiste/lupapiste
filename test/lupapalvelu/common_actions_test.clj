@@ -44,6 +44,8 @@
             :let [action (keyword (:action command))
                   result (user-is-not-allowed-to-access? command application)]]
       (fact {:midje/description (name action)}
+        (fact "has user" (:user command) => user)
+        (fact "has upplication" (:application command) => application)
         (if (allowed-actions action)
           result => nil?
           result => unauthorized?)))))
