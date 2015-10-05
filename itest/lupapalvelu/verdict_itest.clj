@@ -82,14 +82,14 @@
           (upload-attachment pena (:id application) first-attachment false))))))
 
 (fact "Fetch verdict when all antoPvms are in the future"
-  (let [application      (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
+  (let [application      (create-and-submit-local-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
         app-id           (:id application)
         future-timestamp (sade.util/get-timestamp-from-now :week 1)
         pvm-keys         [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano]
         pvm-dates-mock   (zipmap pvm-keys (repeat future-timestamp))]
-    (command sonja :check-for-verdict :id app-id) => ok?
-      (provided (#'lupapalvelu.xml.krysp.reader/get-pvm-dates anything pvm-keys) => pvm-dates-mock)
-    (let [app-with-no-verdicts (query-application mikko app-id)]
+    (local-command sonja :check-for-verdict :id app-id) => ok?
+    (provided (#'lupapalvelu.xml.krysp.reader/get-pvm-dates anything pvm-keys) => pvm-dates-mock)
+    (let [app-with-no-verdicts (query-application local-query mikko app-id)]
       (fact "No verdicts"
         (-> app-with-no-verdicts :verdicts count) => 0))))
 

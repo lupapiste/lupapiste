@@ -427,7 +427,7 @@
          (let [poytakirjat      (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
                poytakirja       (poytakirja-with-paatos-data poytakirjat)
                paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
-               valid-paatospvm? (> (now) (:paatospvm poytakirja))
+               valid-paatospvm? (> (util/get-timestamp-ago :day 1) (:paatospvm poytakirja))
                valid-antopvm?   (or (not (:anto paivamaarat))
                                     (> (now) (:anto paivamaarat)))]
            (when (and poytakirja
