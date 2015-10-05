@@ -74,6 +74,10 @@
     :group-help "muistomerkki-kaytto-ja-hoito.help"
     :body [{:name "ei-nahtavyyskohde" :type :checkbox :required true :layout :full-width}]}))
 
+(def kaytostapoistetun-oljy-tai-kemikaalisailion-jattamiseksi-maaperaan
+  ;; TODO
+  )
+
 
 (defschemas
   1
@@ -124,6 +128,9 @@
    {:info {:name "luonnonmuistomerkin-rauhoittaminen"
            :order 1}
     :body luonnonmuistomerkin-rauhoittaminen}
+   {:info {:name "kaytostapoistetun-oljy-tai-kemikaalisailion-jattamiseksi-maaperaan"
+           :order 1}
+    :body kaytostapoistetun-oljy-tai-kemikaalisailion-jattamiseksi-maaperaan}
    {:info {:name "paatoksen-toimitus"
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
