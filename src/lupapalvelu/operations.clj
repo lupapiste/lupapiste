@@ -133,7 +133,8 @@
       ; permit/YM
       ["muut-ymparistoluvat"
        [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]
-        ["jatteen-keraystoiminta" :jatteen-keraystoiminta]]]
+        ["jatteen-keraystoiminta" :jatteen-keraystoiminta]
+        ["lannan-varastointi" :lannan-varastointi]]]
 
       ; permit/VVVL
       ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
@@ -331,6 +332,14 @@
                             :permit-type permit/YM
                             :required []
                             :attachments [] ; [:jatteen_kerays [:vastaanottopaikan_tiedot]] sync with commons
+                            :add-operation-allowed false
+                            :min-outgoing-link-permits 0
+                            :asianhallinta true}
+
+   :lannan-varastointi     {:schema "lannan-varastointi"
+                            :permit-type permit/YM
+                            :required []
+                            :attachments []
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
                             :asianhallinta true}})
