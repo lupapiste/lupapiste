@@ -124,6 +124,7 @@
    :tontin-jarjestelymuutos                                           "D"
    :jatteen-keraystoiminta                                            "D"
    :muistomerkin-rauhoittaminen                                       "D"
+   :lannan-varastointi                                                "D"
    })
 
 (defn- export [collection query fields]
