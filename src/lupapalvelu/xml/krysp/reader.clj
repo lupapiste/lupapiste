@@ -424,12 +424,17 @@
 
 (defn- ->standard-verdicts [xml-without-ns]
   (map (fn [paatos-xml-without-ns]
-         (let [poytakirjat (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
-               poytakirja (poytakirja-with-paatos-data poytakirjat) ]
-           (when (and poytakirja (> (now) (:paatospvm poytakirja)))
+         (let [poytakirjat      (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
+               poytakirja       (poytakirja-with-paatos-data poytakirjat)
+               paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
+               valid-paatospvm? (> (now) (:paatospvm poytakirja))
+               valid-antopvm?   (or (not (:anto paivamaarat))
+                                    (> (now) (:anto paivamaarat)))]
+           (when (and poytakirja
+                      valid-paatospvm?
+                      valid-antopvm?)
              {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
-              :paivamaarat    (get-pvm-dates paatos-xml-without-ns
-                                [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
+              :paivamaarat    paivamaarat
               :poytakirjat    (seq poytakirjat)})))
     (select xml-without-ns [:paatostieto :Paatos])))
 

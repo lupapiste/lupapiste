@@ -472,12 +472,13 @@
                              .getFeatureSource
                              .getFeatures
                              transform-crs-to-wgs84)
-            areas (cheshire/parse-string (.toString (FeatureJSON.) new-collection))]
-        (when (geo/validate-features (:features (keywordize-keys areas)))
+            areas (keywordize-keys (cheshire/parse-string (.toString (FeatureJSON.) new-collection)))
+            ensured-areas (geo/ensure-features areas)]
+        (when (geo/validate-features (:features ensured-areas))
           (fail! :error.coordinates-not-epsg3067))
-        (o/update-organization org-id {$set {:areas areas}})
+        (o/update-organization org-id {$set {:areas ensured-areas}})
         (.dispose data-store)
-        (->> (assoc file-info :areas areas :ok true)
+        (->> (assoc file-info :areas ensured-areas :ok true)
           (resp/json)
           (resp/content-type "application/json")
           (resp/status 200)))

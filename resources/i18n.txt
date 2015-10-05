@@ -1,0 +1,22 @@
+operations.jatteen-keraystoiminta: Ilmoitus jätteen ammattimaisesta keräystoiminnasta
+jatteen-kerays.toiminnan-muoto.uusiToiminta: Uusi toiminta
+jatteen-kerays.toiminnan-muoto.muutosToimintaan: Muutos toimintaan
+jatteen-kerays.toiminnan-muoto.olemassaOlevaToiminta: Olemassa oleva toiminta
+jatteen-kerays.toiminnan-muoto._group_label: Keräystoiminnan muoto
+jatteen-kerays.keraystoiminnan-jarjestaja.kunnanKerays: Kunta
+jatteen-kerays.keraystoiminnan-jarjestaja.tuottajanKerays: Tuottaja/tuottajayhteisö
+jatteen-kerays.keraystoiminnan-jarjestaja.muuKerays: Muu toimija
+jatteen-kerays.keraystoiminnan-jarjestaja._group_label: Keräystoiminnan järjestäjä
+jatteen-kerays.jatteen-vastuullinen.kunnanJate: Kunta
+jatteen-kerays.jatteen-vastuullinen.tuottajanJate: Tuottaja/tuottajayhteisö
+jatteen-kerays.jatteen-vastuullinen.muuJate: Muu taho
+jatteen-kerays.jatteen-vastuullinen._group_label: Kerättävän jätteen vastuullinen taho
+jatteen-keraystoiminta._group_label: Jätteen ammattimainen keräystoiminta
+jatteen-kerays._group_label: Jätteen ammattimainen keräystoiminta
+jatteen-kerays.jatteen-vastuullinen: Kerättävän jätteen vastuullinen taho
+jatteen-kerays.keraystoiminnan-jarjestaja: Keräystoiminnan järjestäjä
+jatteen-kerays.keraystoiminnan-jarjestaja.muuKeraysValue: Muu, mikä?
+jatteen-kerays.jatteen-vastuullinen.muuJateValue: Muu, mikä?
+jatteen-kerays.vastaanottopaikat-liitteena: Tiedot vastaanottopaikoista ilmoituksen liitteenä.
+operations.tree.jatteen-keraystoiminta: Ilmoitus jätteen ammattimaisesta keräystoiminnasta
+operations.jatteen-keraystoiminta.desc:
