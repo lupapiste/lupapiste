@@ -87,7 +87,7 @@
         future-timestamp (sade.util/get-timestamp-from-now :week 1)
         pvm-keys         [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano]
         pvm-dates-mock   (zipmap pvm-keys (repeat future-timestamp))]
-    (local-command sonja :check-for-verdict :id app-id) => ok?
+    (local-command sonja :check-for-verdict :id app-id) => (partial expected-failure? "info.paatos-future-date")
     (provided (#'lupapalvelu.xml.krysp.reader/get-pvm-dates anything pvm-keys) => pvm-dates-mock)
     (let [app-with-no-verdicts (query-application local-query mikko app-id)]
       (fact "No verdicts"
