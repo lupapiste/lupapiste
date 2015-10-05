@@ -16,14 +16,28 @@
 (def kesto-mini
   (schema-body-without-element-by-name kesto "arki" "lauantai" "sunnuntai"))
 
-(def tila (body {:name "omistaja"     :body henkilotiedot-minimal}
-                {:name "tilatiedot"   :type :string}
-                {:name "osoite"       :body simple-osoite}
-                {:name "yhteystiedot" :body yhteystiedot}))
+(def maatila (body {:name "omistaja" 
+                    :type :group
+                    :body [{:name "etunimi" :type :string}
+                           {:name "sukunimi" :type :string}]}
+                   {:name "tilatiedot" 
+                    :type :group 
+                    :body [{:name "tilatunnus" :type :string}]}
+                   simple-osoite
+                   yhteystiedot))
 
-(def ymparistolupa (body {:name "lupaviranomainen" :type :string}
-                         {:name "lupapaatostiedot" :type :string}
-                         {:name "kesto" :body kesto}))
+(def maatila-suppea (body {:name "omistaja" 
+                           :type :group
+                           :body [{:name "etunimi" :type :string}
+                                  {:name "sukunimi" :type :string}]}
+                          {:name "tilatiedot" 
+                           :type :group 
+                           :body [{:name "tilatunnus" :type :string}]}))
+
+(def ymparistolupa (body {:name "lupaviranomainen" :type :string :size "l"}
+                         {:name "lupapaatostiedot" :type :string :size "l"}
+                         {:name "alku" :type :date}
+                         {:name "loppu" :type :date}))
 
 (def meluilmoitus (body
                     {:name "rakentaminen" :type :group
@@ -71,12 +85,6 @@
                                    {:name "Rahaa"}
                                    {:name "Pankkitakaus"}]}))
 
-(def elainmaarat (body (map (partial assoc {:type :string :unit "kpl" :size "s"} :name) 
-                            ["lyspylehmat" "emolehmat" "hiehotLihanaudatSiistossonnit" "nuorkarja"
-                             "emakotPorsaineen" "sateliittiemakotPorsaineen" "lihasiatSiitossiat" "joutilaatEmakot" "vieroitetutPorsaat"
-                             "hevoset" "ponit" "lampaatUuhetKaritsoineen" "vuohetKututKileineen" 
-                             "lattiakanatBroileremot" "hakkikanat" "kalkkunat" "broileritKananuorikot" "ankatHanhet" "sorsat"])))
-
 (def jatteen-keraystoiminta-ilmoitus
   (body
     {:name "toiminnan-muoto"
@@ -113,66 +121,96 @@
     :group-help "muistomerkki-kaytto-ja-hoito.help"
     :body [{:name "nahtavyyskohde" :type :checkbox :required true :layout :full-width}]}))
 
-(def lantajarjestelma (body [{:name "jarjestelma"
-                              :body [{:name "lietelanta" :type :checkbox}
-                                     {:name "kuivalantaJaVirtsa" :type :checkbox}
-                                     {:name "kuivikelanta" :type :checkbox}
-                                     {:name "kuivikepohja" :type :checkbox}
-                                     {:name "tyhjennysvali" :type :string :unit "kk" :size "s"}
-                                     {:name "kaytettyKuivike" :type :string}]}
-                             {:name "varastot"
-                              :body (body (map (partial assoc {:type :string :unit "m3" :size "m"} :name)
-                                               ["kuivalantalanTilavuus" "virtsasailioidenTilavuus" "muuSailiotilavuus"
-                                                "lietesailioidenJaKuilujenTilavuus" "kuivikepoihjan"])
-                                          ({:name "suppeaJaloittelualue" :type :string :unit "m2"}))}
-                             {:name "yhteinenVarasto"
-                              :body (body {:name "tyyppi" :type :string}
-                                          {:name "tilavuus" :type :string :unit "m3" :size "s"}
-                                          {:name "kayttajat" :repaeting true :body tila})}]))
+(def elainmaarat (let [elainryhmat ["lyspylehmat" "emolehmat" "hiehotLihanaudatSiitossonnit" "nuorkarja"
+                                    "emakotPorsaineen" "sateliittiemakotPorsaineen" "lihasiatSiitossiat"
+                                    "joutilaatEmakot" "vieroitetutPorsaat"
+                                    "hevoset" "ponit" "lampaatUuhetKaritsoineen" "vuohetKututKileineen" 
+                                    "lattiakanatBroileremot" "hakkikanat" "kalkkunat" "broileritKananuorikot"
+                                    "ankatHanhet" "sorsat"]]
+                   (body {:name "maara"
+                          :type :table 
+                          :repeating true
+                          :body [{:name "ryhma" 
+                                  :type :select 
+                                  :label false
+                                  :size "l"
+                                  :body (map (partial hash-map :name) elainryhmat)}
+                                 {:name "nykyinen" :i18nkey "nykyinen-elainmaara" :label false :type :string :unit "kpl" :size "s"}
+                                 {:name "maksimi" :i18nkey "maksimi-elainmaara" :label false :type :string :unit "kpl" :size "s"}]})))
 
-(def lannan-varastointi-ilmoitus (body
-                                  {:name "kuvaus"
-                                   :type :select
-                                   :required true
-                                   :body [{:name "poikkeaminenVarastointitilavuudesta"}
-                                          {:name "muuLannanKaukovarastointi"}]}
-                                  {:name "ilmoittajan-tilatiedot"
-                                   :type :group
-                                   :required true
-                                   :body [{:name "tila" :body tila}
-                                          {:name "elainmaarat" :body elainmaarat}
-                                          {:name "lantajarjestelma" :body lantajarjestelma}
-                                          {:name "selostusElaimienOleskelusta" :type :text :max-len 1000}
-                                          {:name "poikkeamissuunnitelma" :type :text :max-len 4000}]}
-                                  {:name "poikkamistapa"
-                                   :type :group
-                                   :body [{:name      "tapaA"
-                                           :type      :group
-                                           :repeating true
-                                           :body [{:name "tila" :type :group :body tila}
-                                                  {:name "ymparistolupa" :type :group :body ymparistolupa}
-                                                  {:name "lantamaara" :type :string :unit "m3"}]}
-                                          {:name      "tapaB" 
-                                           :type      :group
-                                           :repeating true
-                                           :body [{:name "tila" :type :group :body tila}
-                                                  {:name "varastointitapa" :type :text :max-len 1000}
-                                                  {:name "lantamaara" :type :string :unit "m3"}]}
-                                          {:name      "tapaC" 
-                                           :type      :group
-                                           :repeating true
-                                           :body [{:name "tila" :type :group :body tila}
-                                                  {:name "hyodyntamispaikka" :type :text :max-len 1000}
-                                                  {:name "lantamaara" :type :string :unit "m3"}]}
-                                          {:name      "tapaD"
-                                           :type      :group
-                                           :repeating true
-                                           :body [{:name "patterin"}]}]}
-                                  {:name "liitteet"
-                                   :type :checkbox
-                                   :body [{:name "kartta" :required true}
-                                          {:name "muu"}]}
-                                  {:name "lisatiedot" :type :text :max-len 4000}))
+(def lannan-varastointi-ilmoitus (body {:name "kuvaus"
+                                        :type :select
+                                        :required true
+                                        :body [{:name "poikkeaminenVarastointitilavuudesta"}
+                                               {:name "muuLannanKaukovarastointi"}]}
+
+                                       {:name "ilmoittajan-tilatiedot"
+                                        :type :group
+                                        :required true
+                                        :body [{:name "tila" :type :group :body maatila}
+                                               {:name "elainmaarat" :type :group :body elainmaarat}
+                                               {:name "lantajarjestelma"
+                                                :type :group
+                                                :body [{:name "lietelanta" :type :checkbox}
+                                                       {:name "kuivalantaJaVirtsa" :type :checkbox}
+                                                       {:name "kuivikelanta" :type :checkbox}
+                                                       {:name "kuivikepohja" :type :checkbox}
+                                                       {:name "tyhjennysvali" :type :string :unit "kuukautta" :size "s"}
+                                                       {:name "kaytettyKuivike" :type :string}]}
+                                               {:name "varastot"
+                                                :type :group
+                                                :body (body (map (partial assoc {:type :string :unit "m3" :size "s"} :name)
+                                                                 ["kuivalantalanTilavuus" "virtsasailioidenTilavuus" "muuSailiotilavuus"
+                                                                  "lietesailioidenJaKuilujenTilavuus" "kuivikepohjienKokonaistilavuus"
+                                                                  "kompostialustanVarstointitilavuus"])
+                                                            {:name "suppeaJaloittelualue"
+                                                             :type :group
+                                                             :body [{:name "jaloittelualue" :type :string :unit "m2" :size "s"}
+                                                                    {:name "varastointitilavuus" :type :string :unit "m3" :size "s"}]}
+                                                            {:name "muuVarasto" 
+                                                             :type :table
+                                                             :repeating true
+                                                             :body [{:name "varasto" :label false :type :string}
+                                                                    {:name "tilavuus" :label false :type :string :unit "m3" :size "s"}]})}
+                                               {:name "yhteinenVarasto"
+                                                :type :group
+                                                :body [{:name "tyyppi" :type :string}
+                                                       {:name "tilavuus" :type :string :unit "m3" :size "s"}
+                                                       {:name "kayttajat" :type :group :repeating true :body maatila-suppea}]}
+                                               {:name "selostusElaimienOleskelusta" :type :text :max-len 1000}
+                                               {:name "poikkeamissuunnitelma" :type :text :max-len 4000}]}
+
+                                       {:name "poikkeamistapa"
+                                        :type :group
+                                        :body [{:name      "tapaA"
+                                                :type      :group
+                                                :repeating true
+                                                :body [{:name "hyodyntava-maatila" :type :group :body maatila}
+                                                       {:name "ymparistolupa" :type :group :body ymparistolupa}
+                                                       {:name "lantamaara" :type :string :unit "m3" :size "m"}]}
+                                               {:name      "tapaB" 
+                                                :type      :group
+                                                :repeating true
+                                                :body [{:name "varastoiva-maatila" :type :group :body maatila}
+                                                       {:name "varastointitapa" :type :text :max-len 1000}
+                                                       {:name "lantamaara" :type :string :unit "m3" :size "s"}]}
+                                               {:name      "tapaC" 
+                                                :type      :group
+                                                :repeating true
+                                                :body [{:name "hyodyntava-maatila" :type :group :body maatila}
+                                                       {:name "hyodyntamispaikka" :type :text :max-len 1000}
+                                                       {:name "lantamaara" :type :string :unit "m3"}]}
+                                               {:name      "tapaD"
+                                                :type      :group
+                                                :repeating true
+                                                :body [{:name "patterin"}]}]}
+
+                                       {:name "liitteet"
+                                        :type :group
+                                        :body [{:name "kartta" :type :checkbox :required true}
+                                               {:name "muu" :type :string}]}
+
+                                       {:name "lisatiedot" :type :text :max-len 4000}))
 
 (defschemas
   1
