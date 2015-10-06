@@ -322,6 +322,14 @@
   {:muistomerkin-rauhoittaminen  {:schema "luonnonmuistomerkin-rauhoittaminen"
                                   :permit-type permit/YM
                                   :required []
+                                  ;; TODO: sync with attachments in Commons.
+;                                  :attachments [:muistomerkin-rauhoittaminen [:kirjallinen-aineisto
+;                                                                              :lainhuutotodistus
+;                                                                              :kauppakirja
+;                                                                              :kartta
+;                                                                              :valokuva-kohteesta
+;                                                                              :kohdekuvaus
+;                                                                              :selvitys-omistusoikeudesta]]
                                   :attachments []
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0
@@ -333,7 +341,21 @@
                             :attachments [] ; [:jatteen_kerays [:vastaanottopaikan_tiedot]] sync with commons
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
-                            :asianhallinta true}})
+                            :asianhallinta true}
+
+   :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan {:schema "kaytostapoistetun-sailion-jattaminen-maaperaan"
+                                                                      :permit-type permit/YM
+                                                                      :required []
+                                                                      ;; TODO: sync with attachments in Commons.
+;                                                                      :attachments [:kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan [:karttapiirros
+;                                                                                                                                                       :sailion-tarkastuspoytakirja
+;                                                                                                                                                       :kiinteiston-omistajien-suostumus]]
+                                                                      :attachments []
+                                                                      :add-operation-allowed false
+                                                                      :min-outgoing-link-permits 0
+                                                                      :asianhallinta true}
+
+   })
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
   (if (= :tyonjohtaja-ilmoitus (keyword subtype))
