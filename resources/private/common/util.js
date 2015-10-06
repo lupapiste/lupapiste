@@ -110,7 +110,7 @@ var util = (function($) {
 
   function getIn(m, ks, defaultValue) {
     var value = ko.unwrap(m);
-    if (_.isUndefined(value)) {
+    if (_.isUndefined(value) || _.isNull(value)) {
       return defaultValue;
     }
     return _.isEmpty(ks) ? value : getIn(value[_.first(ks)], _.rest(ks), defaultValue);

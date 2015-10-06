@@ -1,9 +1,9 @@
 (ns sade.crypt
   (:require [crypto.random :as cr])
   (:import [org.bouncycastle.crypto BufferedBlockCipher]
-           [org.bouncycastle.crypto.engines RijndaelEngine]
+           [org.bouncycastle.crypto.engines RijndaelEngine AESEngine]
            [org.bouncycastle.crypto.modes CBCBlockCipher]
-           [org.bouncycastle.crypto.paddings PaddedBufferedBlockCipher ZeroBytePadding]
+           [org.bouncycastle.crypto.paddings PaddedBufferedBlockCipher ZeroBytePadding PKCS7Padding]
            [org.bouncycastle.crypto.params KeyParameter ParametersWithIV]
            [org.apache.commons.codec.binary Base64]))
 
@@ -12,12 +12,23 @@
 (defn make-iv []
   (cr/bytes 32))
 
-(defn- cipher [encrypt? crypto-key crypto-iv]
-  (doto (-> (RijndaelEngine. 256)
-            (CBCBlockCipher.)
-            (PaddedBufferedBlockCipher. (ZeroBytePadding.)))
-    (.init encrypt? (ParametersWithIV. (KeyParameter. (into-array Byte/TYPE crypto-key))
-                                       (into-array Byte/TYPE crypto-iv)))))
+(defn make-iv-128 []
+  (cr/bytes 16))
+
+(def ^:private ciphers
+  {:rijndael (fn [encrypt? crypto-key crypto-iv]
+               (doto (-> (RijndaelEngine. 256)
+                        (CBCBlockCipher.)
+                        (PaddedBufferedBlockCipher. (ZeroBytePadding.)))
+                 (.init encrypt? (ParametersWithIV. (KeyParameter. (into-array Byte/TYPE crypto-key))
+                                                    (into-array Byte/TYPE crypto-iv)))))
+
+   :aes      (fn [encrypt? crypto-key crypto-iv]
+               (doto (-> (AESEngine.)
+                         (CBCBlockCipher.)
+                         (PaddedBufferedBlockCipher. (PKCS7Padding.)))
+                 (.init encrypt? (ParametersWithIV. (KeyParameter. (into-array Byte/TYPE crypto-key))
+                                                    (into-array Byte/TYPE crypto-iv)))))})
 
 (defn- crypt ^bytes [^BufferedBlockCipher cipher ^bytes data]
   (let [in-size  (alength data)
@@ -29,11 +40,15 @@
       (byte-array out-len out)
       out)))
 
-(defn encrypt [crypto-key crypto-iv data]
-  (crypt (cipher true crypto-key crypto-iv) data))
+(defn encrypt 
+  [crypto-key crypto-iv cipher data]
+  {:pre [(contains? ciphers cipher)]}
+  (crypt ((cipher ciphers) true crypto-key crypto-iv) data))
 
-(defn decrypt [crypto-key crypto-iv data]
-  (crypt (cipher false crypto-key crypto-iv) data))
+(defn decrypt 
+  [crypto-key crypto-iv cipher data]
+  {:pre [(contains? ciphers cipher)]}
+  (crypt ((cipher ciphers) false crypto-key crypto-iv) data))
 
 (defn str->bytes ^bytes [^String s] (.getBytes s "UTF-8"))
 (defn bytes->str ^String [^bytes b] (String. b "UTF-8"))

@@ -62,7 +62,7 @@
         process     (->> data
                          (c/str->bytes)
                          (c/base64-decode)
-                         (c/decrypt crypto-key crypto-iv)
+                         (c/decrypt crypto-key crypto-iv :rijndael)
                          (c/bytes->str)
                          (json/decode))
         process     (assoc process
@@ -94,7 +94,7 @@
                                           :uuid        uuid}]}
                         (json/encode)
                         (c/str->bytes)
-                        (c/encrypt crypto-key crypto-iv)
+                        (c/encrypt crypto-key crypto-iv :rijndael)
                         (c/base64-encode)
                         (c/bytes->str)
                         (c/url-encode))

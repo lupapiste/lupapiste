@@ -45,6 +45,8 @@
             :let [action (keyword (:action command))
                   result (user-is-not-allowed-to-access? command application)]]
       (fact {:midje/description (name action)}
+        (fact "has user" (:user command) => user)
+        (fact "has upplication" (:application command) => application)
         (if (allowed-actions action)
           result => nil?
           result => unauthorized?)))))
@@ -71,7 +73,7 @@
         allowed-actions #{; queries
                           :application :validate-doc :fetch-validation-errors
                           :get-organization-tags :get-organization-areas
-                          :reduced-foreman-history :foreman-history :foreman-applications
+                          :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
                           ; raw
                           :preview-attachment :view-attachment :download-attachment :download-all-attachments}]
     (doseq [command (ca/foreach-action user {} application)

@@ -43,8 +43,8 @@
   (let [{permit-type :permitType municipality :municipality} application
         extra-statement-statuses-allowed? (permit/get-metadata permit-type :extra-statement-selection-values)
         organization (organization/resolve-organization municipality permit-type)
-        version (get-in organization [:krysp (keyword permit-type) :version] "0.0.0")
-        yht-version (mapping-common/get-yht-version permit-type version)]
+        version (get-in organization [:krysp (keyword permit-type) :version])
+        yht-version (if version (mapping-common/get-yht-version permit-type version) "0.0.0")]
     (if (and extra-statement-statuses-allowed? (util/version-is-greater-or-equal yht-version {:major 2 :minor 1 :micro 5}))
       statement-statuses-more-options
       statement-statuses)))

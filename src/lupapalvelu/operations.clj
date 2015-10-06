@@ -130,6 +130,11 @@
         ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
         ["toiminnan-muutos" :yl-toiminnan-muutos]]]
 
+      ; permit/YM
+      ["muut-ymparistoluvat"
+       [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]
+        ["jatteen-keraystoiminta" :jatteen-keraystoiminta]]]
+
       ; permit/VVVL
       ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
        [["vesijohdosta" :vvvl-vesijohdosta]
@@ -290,10 +295,45 @@
    :min-outgoing-link-permits 0
    :asianhallinta true})
 
-(def yl-operations
+(def- yl-operations
   {:yl-uusi-toiminta ymparistolupa-operation
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
-   :yl-toiminnan-muutos ymparistolupa-operation})
+   :yl-toiminnan-muutos ymparistolupa-operation
+;   :pima                          {:schema "pima"
+;                                   :permit-type permit/YL
+;                                   :required ["ymp-ilm-kesto-mini"]
+;                                   :attachments []
+;                                   :add-operation-allowed true
+;                                   :min-outgoing-link-permits 0
+;                                   :asianhallinta false}
+   })
+
+(def- yi-operations
+  {:meluilmoitus                 {:schema "meluilmoitus"
+                                  :permit-type permit/YI
+                                  :required ["ymp-ilm-kesto"]
+                                  :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                  :add-operation-allowed false
+                                  :min-outgoing-link-permits 0
+                                  :asianhallinta true}
+   })
+
+(def- ym-operations
+  {:muistomerkin-rauhoittaminen  {:schema "luonnonmuistomerkin-rauhoittaminen"
+                                  :permit-type permit/YM
+                                  :required []
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :min-outgoing-link-permits 0
+                                  :asianhallinta true}
+
+   :jatteen-keraystoiminta {:schema "jatteen-kerays"
+                            :permit-type permit/YM
+                            :required []
+                            :attachments [] ; [:jatteen_kerays [:vastaanottopaikan_tiedot]] sync with commons
+                            :add-operation-allowed false
+                            :min-outgoing-link-permits 0
+                            :asianhallinta true}})
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
   (if (= :tyonjohtaja-ilmoitus (keyword subtype))
@@ -673,19 +713,6 @@
                                    :add-operation-allowed false
                                    :min-outgoing-link-permits 0
                                    :asianhallinta true}
-     :meluilmoitus                {:schema "meluilmoitus"
-                                   :permit-type permit/YI
-                                   :required ["ymp-ilm-kesto"]
-                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
-                                   :add-operation-allowed false
-                                   :min-outgoing-link-permits 0
-                                   :asianhallinta true}
-     ;     :pima                        {:schema "pima"
-     ;                                   :permit-type permit/YL
-     ;                                   :required ["ymp-ilm-kesto-mini"]
-     ;                                   :attachments []
-     ;                                   :add-operation-allowed true
-     ;                                   :min-outgoing-link-permits 0
     :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
                                   :permit-type permit/MAL
                                   :required ["ymp-maksaja" "rakennuspaikka"]
@@ -822,7 +849,9 @@
                                  :asianhallinta true}
      }
     ya-operations
-    yl-operations))
+    yl-operations
+    yi-operations
+    ym-operations))
 
 ;; Validate operations
 (doseq [[k op] operations]

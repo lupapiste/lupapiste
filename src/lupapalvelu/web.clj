@@ -655,4 +655,11 @@
                "true" true
                "on"   true
                false)]
-      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))}))))
+      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
+
+  (defpage [:get "/dev/private-krysp"] []
+    (let [request (request/ring-request)
+          user    (basic-authentication request)]
+      (if user
+        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/capabilities.xml")))
+        basic-401))))
