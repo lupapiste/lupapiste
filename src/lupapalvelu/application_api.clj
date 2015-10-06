@@ -408,10 +408,11 @@
         new-secondary-ops (if old-primary-op ; production data contains applications with nil in primaryOperation
                             (conj secondary-ops-without-old-primary-op old-primary-op)
                             secondary-ops-without-old-primary-op)]
-    (when-not new-primary-op
-      (fail! :error.unknown-operation))
-    (update-application command {$set {:primaryOperation new-primary-op
-                                       :secondaryOperations new-secondary-ops}})
+    (when-not (= (:id old-primary-op) secondaryOperationId)
+      (when-not new-primary-op
+        (fail! :error.unknown-operation))
+      (update-application command {$set {:primaryOperation    new-primary-op
+                                         :secondaryOperations new-secondary-ops}}))
     (ok)))
 
 (defcommand change-permit-sub-type
