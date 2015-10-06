@@ -2,40 +2,39 @@
    (:require [lupapalvelu.document.schemas :refer :all]
              [lupapalvelu.document.tools :refer :all]))
 
+(def vesihuolto-rakennuspaikka [{:name "kiinteisto"
+                                 :type :group
+                                 :body [
+                                        {:name "tilanNimi" :type :string :readonly true}
+                                        {:name "rekisterointipvm" :type :string :readonly true}
+                                        {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
+                                        {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}])
+
 (def vesihuolto-kiinteisto {:info {:name "vesihuolto-kiinteisto"
                                    :approvable true
                                    :removable false
                                    :repeating false
                                    :order 2
                                    :type :location}
-                            :body (conj (schema-body-without-element-by-name rakennuspaikka
-                                                                             "maaraalaTunnus"
-                                                                             "rantaKytkin"
-                                                                              "hallintaperuste"
-                                                                              "kaavanaste"
-                                                                              "kaavatilanne")
-                                                {:name "kiinteistoonKuuluu" :type :group :repeating true
-                                                 :body [{:name "rakennuksenTyypi" :type :select :sortBy :displayname
-                                                         :body [{:name "El\u00e4insuoja"}
-                                                                {:name "Saunarakennus"}
-                                                                {:name "Lomarakennus"}
-                                                                {:name "Asuinrakennus"}
-                                                                {:name "ei tiedossa"}]}
-                                                        {:name "rakennusvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}
-                                                        {:name "vapautus" :type :checkbox}
-                                                        {:name "kohteenVarustelutaso" :type :group
-                                                         :body [{:name "Suihku" :type :checkbox}
-                                                                {:name "Tiskiallas" :type :checkbox}
-                                                                {:name "Astianpesukone" :type :checkbox}
-                                                                {:name "Pyykinpesukone" :type :checkbox}
-                                                                {:name "Lamminvesivaraaja" :type :checkbox}
-                                                                {:name "Kuivakaymala" :type :checkbox}
-                                                                {:name "WC" :type :checkbox}
-                                                                ]}]}
-                                                )})
-
-
-
+                            :body (conj vesihuolto-rakennuspaikka
+                                        {:name "kiinteistoonKuuluu" :type :group :repeating true
+                                         :body [{:name "rakennuksenTyypi" :type :select :sortBy :displayname
+                                                 :body [{:name "El\u00e4insuoja"}
+                                                        {:name "Saunarakennus"}
+                                                        {:name "Lomarakennus"}
+                                                        {:name "Asuinrakennus"}
+                                                        {:name "ei tiedossa"}]}
+                                                {:name "rakennusvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}
+                                                {:name "vapautus" :type :checkbox}
+                                                {:name "kohteenVarustelutaso" :type :group
+                                                 :body [{:name "Suihku" :type :checkbox}
+                                                        {:name "Tiskiallas" :type :checkbox}
+                                                        {:name "Astianpesukone" :type :checkbox}
+                                                        {:name "Pyykinpesukone" :type :checkbox}
+                                                        {:name "Lamminvesivaraaja" :type :checkbox}
+                                                        {:name "Kuivakaymala" :type :checkbox}
+                                                        {:name "WC" :type :checkbox}
+                                                        ]}]})})
 
 (defschemas
   1

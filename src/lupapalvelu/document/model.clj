@@ -381,7 +381,8 @@
    If predicate matches, value is outputted using emitter function.
    Both predicate and emitter take two parameters: element schema definition and the value map."
   [pred emitter {data :data :as document} initial-path]
-  (when data
+  (if-not data
+    document
     (letfn [(doc-walk [schema-body path]
               (into {}
                 (map
