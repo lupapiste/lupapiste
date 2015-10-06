@@ -385,24 +385,23 @@
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
-(defn get-attachment-as
-  "Returns the attachment if user has access to application, otherwise nil."
+(defn get-attachment-file-as
+  "Returns the attachment file if user has access to application, otherwise nil."
   [user file-id]
-  (when-let [attachment (mongo/download file-id)]
-    (when-let [application (get-application-as (:application attachment) user :include-canceled-apps? true)]
-      (when (seq application) attachment))))
+  (when-let [attachment-file (mongo/download file-id)]
+    (when-let [application (get-application-as (:application attachment-file) user :include-canceled-apps? true)]
+      (when (seq application) attachment-file))))
 
-(defn get-attachment
-  "Returns the attachment without access checking, otherwise nil."
+(defn get-attachment-file
+  "Returns the attachment file without access checking, otherwise nil."
   [file-id]
-  (when-let [attachment (mongo/download file-id)]
-    (when-let [application (get-application-no-access-checking (:application attachment))]
-      (when (seq application) attachment))))
+  (when-let [attachment-file (mongo/download file-id)]
+    (when-let [application (get-application-no-access-checking (:application attachment-file))]
+      (when (seq application) attachment-file))))
 
 (defn output-attachment
-  [attachment-id download? attachment-fn]
-  (debugf "file download: attachment-id=%s" attachment-id)
-  (if-let [attachment (attachment-fn attachment-id)]
+  [file-id download? attachment-fn]
+  (if-let [attachment (attachment-fn file-id)]
     (let [response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:content-type attachment)
@@ -429,15 +428,15 @@
 
 (defn output-attachment-preview
   "Outputs attachment preview creating it if is it does not already exist"
-  [attachment-id attachment-fn]
-  (let [preview-id (str attachment-id "-preview")]
+  [file-id attachment-fn]
+  (let [preview-id (str file-id "-preview")]
     (when (= 0 (mongo/count :fs.files {:_id preview-id}))
-      (let [attachment (get-attachment attachment-id)
+      (let [attachment (get-attachment-file file-id)
             file-name (:file-name attachment)
             content-type (:content-type attachment)
             content ((:content attachment))
             application-id (:application attachment)]
-        (create-preview attachment-id file-name content-type content application-id)))
+        (create-preview file-id file-name content-type content application-id)))
     (output-attachment preview-id false attachment-fn)))
 
 (defn attach-file!
