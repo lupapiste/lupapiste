@@ -20,16 +20,19 @@ var locationSearch = (function() {
   };
 
   var searchPropertyId = function(requestContext, x, y, onSuccess, onFail) {
-    ajax
-      .get("/proxy/property-id-by-point")
-      .param("x", x)
-      .param("y", y)
-      .success(requestContext.onResponse(onSuccess))
-      .fail(requestContext.onResponse(onFail))
-      .call();
+    if( x > 0 && y > 0 ) {
+      ajax
+      .get ("/proxy/property-id-by-point")
+      .param ("x", x)
+      .param ("y", y)
+      .success (requestContext.onResponse(onSuccess))
+      .fail (requestContext.onResponse(onFail))
+      .call ();
+    }
   };
 
   var searchAddress = function(requestContext, x, y, onSuccess, onFail) {
+    if( x > 0 && y > 0 ) {
     ajax
       .get("/proxy/address-by-point")
       .param("x", x)
@@ -37,6 +40,7 @@ var locationSearch = (function() {
       .success(requestContext.onResponse(onSuccess))
       .fail(requestContext.onResponse(onFail))
       .call();
+    }
   };
 
   var searchOwnersByPropertyId = function(requestContext, propertyId, onSuccess, onFail) {
