@@ -492,6 +492,7 @@
 (facts "blacklists"
   (fact "no blacklist, no changes"
     (strip-blacklisted-data nil nil) => nil
+    (strip-blacklisted-data {:schema-info {}} nil) => {:schema-info {}}
     (strip-blacklisted-data hakija nil) => hakija
     (strip-blacklisted-data hakija :x) => hakija
     (strip-blacklisted-data uusiRakennus :x) => uusiRakennus)
