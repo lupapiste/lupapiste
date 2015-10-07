@@ -86,7 +86,7 @@
         type (re-find #"^POINT|^LINESTRING|^POLYGON" wkt)
         coords (s/replace wkt #"^POINT|^LINESTRING|^POLYGON" "")
         features (case type
-                   "POINT" (let [[x y] (s/split (re-find #"\d+ \d+" coords) #" ")]
+                   "POINT" (let [[x y] (s/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
                              (wfs/property-info-by-point x y))
                    "LINESTRING" (wfs/property-info-by-line (s/split (s/replace coords #"[\(\)]" "") #","))
                    "POLYGON" (let [outterring (first (s/split coords #"\)" 1))] ;;; pudotetaan reiat pois
