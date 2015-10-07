@@ -115,7 +115,11 @@
     {:name "ymparistonsuojeluselvitys"
      :type :text
      :max-len 4000
-     :placeholder "cancel"}))
+     :placeholder "cancel"}
+    {:name "toiminnan-kesto"
+     :type :group
+     :body [{:name "aloituspvm" :type :date}
+            {:name "loppupvm" :type :date}]}))
 
 
 (defschemas
