@@ -5658,30 +5658,30 @@ table.attachments-template-table td.attachment-version-info {
 }
 
 /*Tab styles*/
-/* line 49, ../sass/partials/_tabs.scss */
+/* line 42, ../sass/partials/_tabs.scss */
 .tab-wrapper {
   padding: 30px;
 }
 
-/* line 53, ../sass/partials/_tabs.scss */
+/* line 46, ../sass/partials/_tabs.scss */
 .tabs-container {
   width: 100%;
   display: block;
   clear: both;
   box-sizing: border-box;
-  margin-top: 40px;
+  padding-top: 40px;
 }
 
-/* line 63, ../sass/partials/_tabs.scss */
+/* line 56, ../sass/partials/_tabs.scss */
 .tabs {
   list-style: none;
   margin: 0;
 }
-/* line 66, ../sass/partials/_tabs.scss */
+/* line 59, ../sass/partials/_tabs.scss */
 .tabs li {
   display: inline;
 }
-/* line 68, ../sass/partials/_tabs.scss */
+/* line 61, ../sass/partials/_tabs.scss */
 .tabs li a {
   display: inline-block;
   text-decoration: none;
@@ -5689,8 +5689,6 @@ table.attachments-template-table td.attachment-version-info {
   color: #333333;
   padding-left: 12px;
   padding-right: 12px;
-  /* top: $marginS; */
-  /* bottom: $marginS; */
   min-height: 40px;
   max-height: 40px;
   line-height: 40px;
@@ -5698,18 +5696,18 @@ table.attachments-template-table td.attachment-version-info {
   border-width: 1px;
   border-color: #dddddd;
   border-bottom: none;
-  /* Note: IE filters and border-radius don't mix */
   position: relative;
   outline: 0;
 }
-/* line 74, ../sass/partials/_tabs.scss */
+/* line 67, ../sass/partials/_tabs.scss */
 .tabs li.active a {
+  box-sizing: content-box;
   border-style: solid;
   border-width: 2px;
   border-color: #bbbbbb;
   border-bottom: none;
 }
-/* line 39, ../sass/partials/_tabs.scss */
+/* line 32, ../sass/partials/_tabs.scss */
 .tabs li.active a:before {
   content: " ";
   border-bottom: 2px solid white;
@@ -5719,12 +5717,12 @@ table.attachments-template-table td.attachment-version-info {
   width: 100%;
 }
 
-/* line 80, ../sass/partials/_tabs.scss */
+/* line 73, ../sass/partials/_tabs.scss */
 ul.tabs {
   font-size: 0;
 }
 
-/* line 84, ../sass/partials/_tabs.scss */
+/* line 77, ../sass/partials/_tabs.scss */
 .tabs span.indicator {
   display: table-cell;
   float: right;
@@ -5741,19 +5739,19 @@ ul.tabs {
   padding-right: 2px;
 }
 
-/* line 104, ../sass/partials/_tabs.scss */
+/* line 97, ../sass/partials/_tabs.scss */
 .tabs a.link-btn :first-child {
   padding-right: 2px !important;
 }
 
-/* line 109, ../sass/partials/_tabs.scss */
+/* line 102, ../sass/partials/_tabs.scss */
 .tabs li.active > a.link-btn {
   cursor: default;
   color: #333333;
   pointer-events: none;
 }
 
-/* line 115, ../sass/partials/_tabs.scss */
+/* line 108, ../sass/partials/_tabs.scss */
 .tabs-content-container {
   border: 1px solid #ccc;
   border-top: none;
@@ -5761,21 +5759,21 @@ ul.tabs {
   width: 400px;
 }
 
-/* line 122, ../sass/partials/_tabs.scss */
+/* line 115, ../sass/partials/_tabs.scss */
 .tab-content {
   padding: 0;
 }
-/* line 124, ../sass/partials/_tabs.scss */
+/* line 117, ../sass/partials/_tabs.scss */
 .tab-content h1 {
   line-height: normal;
   float: left;
 }
 
-/* line 130, ../sass/partials/_tabs.scss */
+/* line 123, ../sass/partials/_tabs.scss */
 .radio-tabs {
   display: inline;
 }
-/* line 133, ../sass/partials/_tabs.scss */
+/* line 126, ../sass/partials/_tabs.scss */
 .radio-tabs input[type=radio] {
   display: none;
   width: 0px;
@@ -5786,7 +5784,7 @@ ul.tabs {
   position: absolute;
   z-index: -1;
 }
-/* line 143, ../sass/partials/_tabs.scss */
+/* line 136, ../sass/partials/_tabs.scss */
 .radio-tabs input[type="radio"] + label {
   display: inline-block;
   padding: 8px 10px;
@@ -5797,42 +5795,42 @@ ul.tabs {
   /* Note: IE filters and border-radius don't mix */
   filter: none;
 }
-/* line 152, ../sass/partials/_tabs.scss */
+/* line 145, ../sass/partials/_tabs.scss */
 .radio-tabs input[type="radio"] + label:hover {
   cursor: pointer;
 }
-/* line 156, ../sass/partials/_tabs.scss */
+/* line 149, ../sass/partials/_tabs.scss */
 .radio-tabs input[type="radio"]:checked + label {
   background: #dddddd;
 }
-/* line 160, ../sass/partials/_tabs.scss */
+/* line 153, ../sass/partials/_tabs.scss */
 .radio-tabs [type="radio"] + label.checked {
   background: #dddddd;
 }
-/* line 163, ../sass/partials/_tabs.scss */
+/* line 156, ../sass/partials/_tabs.scss */
 .radio-tabs .form-input {
   margin-bottom: 7px;
 }
-/* line 166, ../sass/partials/_tabs.scss */
+/* line 159, ../sass/partials/_tabs.scss */
 .radio-tabs button.application-create, .radio-tabs button.application-from-previous {
   display: inline;
   margin-bottom: 0;
   width: 330px;
 }
 @media all and (max-width: 1000px) {
-  /* line 166, ../sass/partials/_tabs.scss */
+  /* line 159, ../sass/partials/_tabs.scss */
   .radio-tabs button.application-create, .radio-tabs button.application-from-previous {
     position: absolute;
     left: 8px;
     top: 54px;
   }
 }
-/* line 176, ../sass/partials/_tabs.scss */
+/* line 169, ../sass/partials/_tabs.scss */
 .radio-tabs button.application-from-previous {
   margin: 0 5px;
 }
 
-/* line 182, ../sass/partials/_tabs.scss */
+/* line 175, ../sass/partials/_tabs.scss */
 .missing-info-title {
   margin-bottom: 6px;
   margin-top: 24px;

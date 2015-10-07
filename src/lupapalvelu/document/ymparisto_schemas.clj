@@ -156,6 +156,29 @@
            {:name "sailion-kunto" :type :text :max-len 4000 :required true}]}
    tiedot-sailiosta))
 
+(def koeluontoinen-toiminta
+  (body
+    {:name "kuvaus-toiminnosta"
+     :type :text
+     :max-len 4000
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
+    {:name "raaka-aineet"
+     :type :text
+     :max-len 4000
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
+    {:name "paastot"
+     :type :text
+     :max-len 4000
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
+    {:name "ymparistonsuojeluselvitys"
+     :type :text
+     :max-len 4000
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
+    {:name "toiminnan-kesto"
+     :type :group
+     :body [{:name "aloituspvm" :type :date}
+            {:name "loppupvm" :type :date}]}))
+
 
 (defschemas
   1
@@ -216,4 +239,6 @@
                    {:name "Postitetaan"}]}]}
 
    {:info {:name "jatteen-kerays"}
-    :body jatteen-keraystoiminta-ilmoitus}])
+    :body jatteen-keraystoiminta-ilmoitus}
+   {:info {:name "koeluontoinen-toiminta"}
+    :body koeluontoinen-toiminta}])
