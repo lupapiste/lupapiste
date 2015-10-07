@@ -1,6 +1,8 @@
 (ns lupapalvelu.permit-test
   (:require [lupapalvelu.permit :refer :all]
-            [midje.sweet :refer :all]))
+            [lupapalvelu.attachment :as attachment]
+            [midje.sweet :refer :all]]))
+
 
 (fact "validators"
   (fact "is-not"
@@ -26,3 +28,8 @@
 (facts "get-sftp-directory"
   (fact "R" (get-sftp-directory "R") => "/rakennus")
   (fact ":R" (get-sftp-directory :R) => "/rakennus"))
+
+(fact "All permits have attachments defined"
+  (doseq [permit (keys (permit-types))]
+    (fact {:midje/description permit}
+      (get attachment/attachment-types-by-permit-type (keyword permit)) =not=> empty?)))
