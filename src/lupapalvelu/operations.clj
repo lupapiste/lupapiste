@@ -792,6 +792,7 @@
     :aiemmalla-luvalla-hakeminen {:schema "hankkeen-kuvaus"
                                   :permit-type permit/R
                                   :required []
+                                  :optional #{"maksaja" "paasuunnittelija" "suunnittelija"}
                                   :attachments []
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0
