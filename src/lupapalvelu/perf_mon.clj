@@ -63,6 +63,8 @@
 (defn- get-total-db-call-duration [perf-context]
   (->> perf-context (map second) (reduce +)))
 
+(defn ns->ms [ns] (quot ns 1000000))
+
 (defn log-perf-context [handler request]
   (if (bypass? request)
     (handler request)
@@ -73,9 +75,9 @@
           (finally
             (let [end (System/nanoTime)]
               (debug (get request :uri) ":"
-                (quot (- end start) 1000000) "ms,"
+                (ns->ms (- end start)) "ms,"
                 (count @*perf-context*) "db calls took totally"
-                (quot (get-total-db-call-duration @*perf-context*) 1000000) "ms"))))))))
+                (ns->ms (get-total-db-call-duration @*perf-context*)) "ms"))))))))
 
 (defn perf-mon-middleware [handler] (fn [request] (log-perf-context handler request)))
 
