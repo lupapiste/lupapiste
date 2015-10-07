@@ -11,8 +11,6 @@ $tab-size: 2px;
   padding: {
     left: $marginM;
     right: $marginM;
-    /* top: $marginS; */
-    /* bottom: $marginS; */
   }
   @include btn-height;
   border: {
@@ -21,26 +19,21 @@ $tab-size: 2px;
     color: $gray221;
     bottom: none;
   }
-  //border-bottom: $tab-size solid $gray187
-  //outline: none;
-  /* Note: IE filters and border-radius don't mix */
-  //filter: none;
 }
 
 @mixin active-tab-style {
+  box-sizing: content-box;
   border: {
     style: solid;
     width: $tab-size;
     color: $gray187;
     bottom: none;
 }
-  //margin-bottom: -2 * $tab-size;
-  //  margin-bottom: 0;
   &:before {
     content: " ";
     border-bottom: $tab-size solid white;
     position: absolute;
-    bottom: -2px;
+    bottom: -$tab-size;
     left: 0%;
     width: 100%;
   }
