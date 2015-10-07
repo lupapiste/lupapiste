@@ -17,7 +17,11 @@
 
 (defn instrument-ns [f & namespaces]
   (doseq [n namespaces
-          v (filter (comp fn? deref) (vals (ns-publics n)))]
+          v (->>
+              (ns-publics n)
+              vals
+              (remove (comp :perfmon-exclude meta))
+              (filter (comp fn? deref)))]
     (instrument f v)))
 
 ;;
