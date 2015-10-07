@@ -100,59 +100,44 @@
 
 (def tiedot-sailiosta
   {:name "tiedot-sailiosta" :type :group
-    :body [{:name "kaytosta-poistamisen-syy" :type :select :sortBy :displayname
-;            :required true
+    :body [{:name "kaytosta-poistamisen-syy" :type :select :sortBy :displayname :required true
             :other-key "muu-syy"
             :body [{:name "lammistysmuodon-vaihtaminen"}
                    {:name "oljylammistyslaitteiston-uusiminen"}]}
            {:name "muu-syy" :type :string}
-           {:name "kaytosta-poistamisen-ajankohta" :type :date}
-           {:name "kaytosta-poiston-jalkeen" :type :group :layout :horizontal
+           {:name "kaytosta-poistamisen-ajankohta" :type :date :required true}
+           {:name "kaytosta-poiston-jalkeen" :type :group :layout :horizontal :required true
             :body [{:name "tyhjennetty" :type :checkbox}
                    {:name "puhdistettu" :type :checkbox}
                    {:name "tarkastettu" :type :checkbox}]}
-           {:name "sailion-pienin-etaisyys-rakennuksesta" :type :string :subtype :number :size "s" :unit "m"}
-           {:name "sailion-pienin-etaisyys-rakennuksesta-mista-mitattu" :type :string :size "l"}
-           {:name "koko" :type :string :subtype :number :size "s" :unit "m3"
-;            :required false
-;            :min-len 4 :max-len 4
-            }
-           {:name "materiaali" :type :select :sortBy :displayname
-;            :required true
+           {:name "sailion-pienin-etaisyys-rakennuksesta" :type :string :subtype :number :size "s" :unit "m" :required true}
+           {:name "sailion-pienin-etaisyys-rakennuksesta-mista-mitattu" :type :string :size "l" :required true}
+           {:name "koko" :type :string :subtype :number :size "s" :unit "m3" :required true}
+           {:name "materiaali" :type :select :sortBy :displayname :required true
             :other-key "muu-materiaali"
             :body [{:name "metalli"}
                    {:name "muovi-tai-lasikuitu"}]}
            {:name "muu-materiaali" :type :string}
-
            {:name "onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet" :type :group :layout :horizontal
             :body [{:name "onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet-kylla" :type :checkbox}
                    {:name "onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet-paljonko" :type :string :subtype :number :size "s" :unit "m"}]}
-
-           {:name "sailio-sijaitsee-bunkkerissa" :type :select
-;            :required true
+           {:name "sailio-sijaitsee-bunkkerissa" :type :select :required true
             :body [{:name "kylla"}
                    {:name "ei"}]}
-           {:name "sailio-sijaitsee-tarkealla-pohjavesialueella" :type :select
-;            :required true
+           {:name "sailio-sijaitsee-tarkealla-pohjavesialueella" :type :select :required true
             :body [{:name "kylla"}
                    {:name "ei"}
                    {:name "ei-tietoa"}]}
-;           {:name "sailion-kunto" :type :string :size "l"}
-           {:name "sailion-kunto" :type :text :max-len 4000
-;            :required false
-            :layout :full-width}
-
+           {:name "sailion-kunto" :type :text :max-len 4000 :layout :full-width :required true}
            {:name "onko-tapahtunut-vuotoja" :type :group :layout :horizontal
             :body [{:name "on-tapahtunut-vuotoja" :type :checkbox}
                    {:name "vuotoja-tapahtunut-vuonna" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}]}
-
            {:name "onko-tapahtunut-ylitayttoja" :type :group :layout :horizontal
             :body [{:name "on-tapahtunut-ylitayttoja" :type :checkbox}
                    {:name "ylitayttoja-tapahtunut-vuonna" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}]}
-
            {:name "oljysailion-putkijarjestelma" :type :group
             :group-help "oljysailion-putkijarjestelma.help"
-            :body [{:name "oljysailion-putkijarjestelma" :type :select :sortBy :displayname
+            :body [{:name "oljysailion-putkijarjestelma" :type :select :sortBy :displayname :required true
                     :body [{:name "1-putkijarjestelma"}
                            {:name "2-putkijarjestelma"}]}]}
            ]})
@@ -161,14 +146,14 @@
   (body
     {:name "tiedot-kiinteistosta" :type :group
      :body (body
-             {:name "kiinteistotunnus" :type :string :subtype :kiinteistotunnus}
+             {:name "kiinteistotunnus" :type :string :subtype :kiinteistotunnus :required true}
              {:name "kiint-omistaja-jos-ei-hakija" :type :string :size "l"}
              simple-osoite)}
    {:name "maahan-jattamisen-perustelut" :type :group :layout :vertical
     :body [{:name "sailion-poistaminen-vahingoittaa-rakenteita" :type :checkbox}
            {:name "sailion-poistaminen-teknisesti-vaikeata" :type :checkbox}
            {:name "sailion-poistaminen-muut-perustelut" :type :checkbox}
-           {:name "sailion-kunto" :type :text :max-len 4000 :layout :full-width}]}
+           {:name "sailion-kunto" :type :text :max-len 4000 :required true}]}
    tiedot-sailiosta))
 
 
