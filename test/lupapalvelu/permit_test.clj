@@ -1,8 +1,8 @@
 (ns lupapalvelu.permit-test
-  (:require [lupapalvelu.permit :refer :all]
-            [lupapalvelu.attachment :as attachment]
-            [midje.sweet :refer :all]]))
-
+  (:require [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.i18n :refer [has-term?]]
+            [lupapalvelu.permit :refer :all]
+            [midje.sweet :refer :all]))
 
 (fact "validators"
   (fact "is-not"
@@ -28,6 +28,11 @@
 (facts "get-sftp-directory"
   (fact "R" (get-sftp-directory "R") => "/rakennus")
   (fact ":R" (get-sftp-directory :R) => "/rakennus"))
+
+(facts "Every permit type has AddOperations localization"
+       (doseq [p (keys (permit-types))
+               :let [s (str "help." p ".AddOperations")]]
+         (fact {:midje/description s} (has-term? "fi" s) => true)))
 
 (fact "All permits have attachments defined"
   (doseq [permit (keys (permit-types))]
