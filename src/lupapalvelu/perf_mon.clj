@@ -75,9 +75,9 @@
           (finally
             (let [end (System/nanoTime)]
               (debug (get request :uri) ":"
-                (- end start) "ns,"
-                (count @*perf-context*) "db calls,"
-                (get-total-db-call-duration @*perf-context*) "ns"))))))))
+                (quot (- end start) 1000000) "ms,"
+                (count @*perf-context*) "db calls took totally"
+                (quot (get-total-db-call-duration @*perf-context*) 1000000) "ms"))))))))
 
 (defn perf-mon-middleware [handler] (fn [request] (log-perf-context handler request)))
 
