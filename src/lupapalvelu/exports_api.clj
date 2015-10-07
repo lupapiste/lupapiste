@@ -124,6 +124,7 @@
    :tontin-jarjestelymuutos                                           "D"
    :jatteen-keraystoiminta                                            "D"
    :muistomerkin-rauhoittaminen                                       "D"
+   :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan  "D"
    })
 
 (defn- export [collection query fields]
