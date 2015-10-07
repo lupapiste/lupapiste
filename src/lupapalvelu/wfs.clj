@@ -412,7 +412,7 @@
 (defn gfi-to-features-sito [gfi municipality]
   (when gfi
     (xml-> (->features gfi startparse-sax-non-validating "UTF-8") :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi")))))
-    
+
 (defn feature-to-feature-info-sito  [feature]
   (when feature
     {:id (first (xml-> feature :lupapiste:TUNNUS text))
@@ -518,4 +518,3 @@
                          {:query-params (:params request)
                           :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
                           :as :stream})))))
-
