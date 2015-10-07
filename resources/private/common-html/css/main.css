@@ -5658,7 +5658,7 @@ table.attachments-template-table td.attachment-version-info {
   display: block;
   clear: both;
   box-sizing: border-box;
-  margin-top: 40px;
+  padding-top: 40px;
 }
 
 /* line 56, ../sass/partials/_tabs.scss */
