@@ -38,8 +38,8 @@ kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.materiaali.muovi
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.materiaali._group_label: Materiaali
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.muu-materiaali: Muu materiaali
 
-kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet._group_label: Onko säiliön pohja alempana kuin rakennuksen perusteet?
-kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet.onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet-kylla: Kyllä
+kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet._group_label: Tiedot säiliön pohjasta
+kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet.onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet-kylla: Säiliön pohja alempana kuin rakennuksen perusteet
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet.onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet-paljonko: Kuinka paljon?
 
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.sailio-sijaitsee-bunkkerissa.kylla: Kyllä
@@ -52,10 +52,10 @@ kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.sailio-sijaitsee
 
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.sailion-kunto: Säiliön kunto
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-tapahtunut-vuotoja.ei: Ei
-kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-tapahtunut-vuotoja._group_label: Onko tapahtunut vuotoja?
+kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-tapahtunut-vuotoja._group_label: Tiedot tapahtuneista vuodoista
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.vuotoja-tapahtunut-vuonna: Vuotoja tapahtunut vuonna
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-tapahtunut-ylitayttoja.ei: Ei
-kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-tapahtunut-ylitayttoja._group_label: Onko tapahtunut ylitäyttöjä?
+kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-tapahtunut-ylitayttoja._group_label: Tiedot tapahtuneista ylitäytöistä
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.ylitayttoja-tapahtunut-vuonna: Ylitäyttöjä tapahtunut vuonna
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta._group_label: Tiedot käytöstä poistetusta säiliöstä
 
@@ -65,9 +65,9 @@ kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-kiinteistosta.osoite.posti
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-kiinteistosta.osoite._group_label: Kiinteistön osoitetiedot, jos eri kuin hakijan
 
 
-kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-tapahtunut-vuotoja.on-tapahtunut-vuotoja: Kyllä
+kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-tapahtunut-vuotoja.on-tapahtunut-vuotoja: On tapahtunut vuotoja
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-tapahtunut-vuotoja.vuotoja-tapahtunut-vuonna: Minä vuonna?
-kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-tapahtunut-ylitayttoja.on-tapahtunut-ylitayttoja: Kyllä
+kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-tapahtunut-ylitayttoja.on-tapahtunut-ylitayttoja: On tapahtunut ylitäyttöjä
 kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.onko-tapahtunut-ylitayttoja.ylitayttoja-tapahtunut-vuonna: Minä vuonna?
 
 oljysailion-putkijarjestelma.help: 2-putkijärjestelmässä öljy tulee säiliöstä tuloputkea pitkin polttimeen ja ylijäämäöljy siirtyy polttimelta paluuputkea pitkin säiliöön takaisin.
