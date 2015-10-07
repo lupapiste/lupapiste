@@ -65,20 +65,21 @@
        (map (comp first rest))
        (reduce +)))
 
-(defn perf-mon-middleware [handler]
-  (fn [request]
-    (if (bypass? request)
-      (handler request)
-      (binding [*perf-context* (atom [])]
-        (let [start (System/nanoTime)]
-          (try
-            (handler request)
-            (finally
-              (let [end (System/nanoTime)]
-                (debug (get request :uri) ":"
-                       (- end start) "ns,"
-                       (count @*perf-context*) "db calls,"
-                       (get-total-db-call-duration @*perf-context*) "ns")))))))))
+(defn log-perf-context [handler request]
+  (if (bypass? request)
+    (handler request)
+    (binding [*perf-context* (atom [])]
+      (let [start (System/nanoTime)]
+        (try
+          (handler request)
+          (finally
+            (let [end (System/nanoTime)]
+              (debug (get request :uri) ":"
+                (- end start) "ns,"
+                (count @*perf-context*) "db calls,"
+                (get-total-db-call-duration @*perf-context*) "ns"))))))))
+
+(defn perf-mon-middleware [handler] (fn [request] (log-perf-context handler request)))
 
 ;;
 ;; Throttling:
