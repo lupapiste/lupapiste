@@ -183,6 +183,28 @@
      :body [{:name "aloituspvm" :type :date}
             {:name "loppupvm" :type :date}]}))
 
+(def ilmoitus-poikkeuksellisesta-tilanteesta
+  (body
+    kuvaus
+    {:name "tilanne" :type :select :required true
+     :other-key "muu-kertaluonteinen-tapaus"
+     :body [{:name "onnettomuus"}
+            {:name "tuotantohairio"}
+            {:name "purkutyo"}]}
+    {:name "muu-kertaluonteinen-tapaus" :type :string}
+    {:name "paastot-ja-jatteet" :type :group
+;            :group-help "paastot-ja-jatteet.help"
+            :body [{:name "oljysailion-putkijarjestelma" :type :select :required true
+                    :body [{:name "paaston-aiheuttama-vaara" :type :text :max-len 4000 :required true}
+                           {:name "jatteen-nimi-olomuoto-ominaisuudet" :type :text :max-len 4000 :required true}
+                           {:name "jatteen-maarat" :type :string}
+                           {:name "muut-paastot-olomuoto-ominaisuudet" :type :text :max-len 4000 :required true}
+                           ]}]}
+    {:name "jatehuollon-jarjestaminen" :type :group
+;            :group-help "jatehuollon-jarjestaminen.help"
+            :body [{:name "oljysailion-putkijarjestelma" :type :select :required true
+                    :body [{:name "keraily-varastointi-kuljetus-kasittely" :type :text :max-len 4000 :required true}]}]}))
+
 
 (defschemas
   1
@@ -236,6 +258,9 @@
    {:info {:name "kaytostapoistetun-sailion-jattaminen-maaperaan"
            :order 1}
     :body kaytostapoistetun-sailion-jattaminen-maaperaan}
+   {:info {:name "ilmoitus-poikkeuksellisesta-tilanteesta"
+           :order 1}
+    :body ilmoitus-poikkeuksellisesta-tilanteesta}
    {:info {:name "paatoksen-toimitus"
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
