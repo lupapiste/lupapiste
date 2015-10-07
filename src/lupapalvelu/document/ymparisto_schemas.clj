@@ -103,19 +103,19 @@
     {:name "kuvaus-toiminnosta"
      :type :text
      :max-len 4000
-     :placeholder "cancel"}
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
     {:name "raaka-aineet"
      :type :text
      :max-len 4000
-     :placeholder "cancel"}
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
     {:name "paastot"
      :type :text
      :max-len 4000
-     :placeholder "cancel"}
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
     {:name "ymparistonsuojeluselvitys"
      :type :text
      :max-len 4000
-     :placeholder "cancel"}
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
     {:name "toiminnan-kesto"
      :type :group
      :body [{:name "aloituspvm" :type :date}
