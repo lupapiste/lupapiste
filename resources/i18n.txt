@@ -1,0 +1,27 @@
+operations.tree.koeluontoinen-toiminta: Ilmoitus koeluontoisesta toiminnasta
+operations.koeluontoinen-toiminta: Ilmoitus koeluontoisesta toiminnasta
+operations.koeluontoinen-toiminta.desc:
+koeluontoinen-toiminta.kuvaus-toiminnosta: Kuvaus koeluonteisesta toiminnasta / tuotannosta
+koeluontoinen-toiminta.raaka-aineet: Raaka-aineet
+koeluontoinen-toiminta.paastot: Toiminnasta aiheutuvat päästöt ja arvio niiden vaikutuksista
+koeluontoinen-toiminta.ymparistonsuojeluselvitys: Selvitys suunnittelluista ympäristönsuojelutoimista
+koeluontoinen-toiminta._group_label: Koeluontoinen toiminta
+
+koeluontoinen-toiminta.toiminnan-kesto.aloituspvm: Aloituspäivämäärä
+koeluontoinen-toiminta.toiminnan-kesto.loppupvm: Loppupäivämäärä
+koeluontoinen-toiminta.toiminnan-kesto._group_label: Koeluonteisen toiminnan kesto
+
+koeluontoinen-toiminta.kuvaus.placeholder: Kirjoita kuvaus. Jos kuvaus on liitteenä, niin lisää maininta tähän.
+
+attachmentType.jatteen_kerays._group_label: Jätteen keräystoiminta
+attachmentType.jatteen_kerays.vastaanottopaikan_tiedot: Vastaanottopaikan tiedot
+attachmentType.jatteen_kerays.vastaanottopaikan_tiedot.info:
+attachmentType.koeluontoinen_toiminta._group_label: Koeluontoinen toiminta
+attachmentType.koeluontoinen_toiminta.kuvaus_toiminnasta: Kuvaus toiminnasta
+attachmentType.koeluontoinen_toiminta.kuvaus_toiminnasta.info:
+attachmentType.koeluontoinen_toiminta.raaka-aineet: Raaka-aineet
+attachmentType.koeluontoinen_toiminta.raaka-aineet.info:
+attachmentType.koeluontoinen_toiminta.paasto_arviot: Päästöt ja arvio niiden vaikutusksista
+attachmentType.koeluontoinen_toiminta.paasto_arviot.info:
+attachmentType.koeluontoinen_toiminta.selvitys_ymparistonsuojelutoimista: Selvitys ympäristönsuojelutoimista
+attachmentType.koeluontoinen_toiminta.selvitys_ymparistonsuojelutoimista.info:
