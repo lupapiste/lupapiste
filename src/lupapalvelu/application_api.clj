@@ -107,15 +107,15 @@
             time))))))
 
 (defquery party-document-names
-          {:parameters [:id]
-           :user-roles #{:applicant :authority}
-           :states     states/all-application-states}
-          [{application :application}]
-          (let [documents (:documents application)
-                initialOp (:name (:primaryOperation application))
-                original-schema-names (-> initialOp keyword operations/operations :required)
-                original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
-            (ok :partyDocumentNames (conj original-party-documents (permit/get-applicant-doc-schema (permit/permit-type application))))))
+  {:parameters [:id]
+   :user-roles #{:applicant :authority}
+   :states     states/all-application-states}
+  [{application :application}]
+  (let [documents (:documents application)
+        op-meta (operations/get-primary-operation-metadata application)
+        original-schema-names (->> (select-keys op-meta [:required :optional]) vals (apply concat))
+        original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
+    (ok :partyDocumentNames (conj original-party-documents (permit/get-applicant-doc-schema (permit/permit-type application))))))
 
 (defcommand mark-seen
   {:parameters       [:id type]

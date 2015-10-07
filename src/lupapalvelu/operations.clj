@@ -133,7 +133,9 @@
       ; permit/YM
       ["muut-ymparistoluvat"
        [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]
-        ["jatteen-keraystoiminta" :jatteen-keraystoiminta]]]
+        ["jatteen-keraystoiminta" :jatteen-keraystoiminta]
+        ["koeluontoinen-toiminta" :koeluontoinen-toiminta]
+        ]]
 
       ; permit/VVVL
       ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
@@ -330,10 +332,18 @@
    :jatteen-keraystoiminta {:schema "jatteen-kerays"
                             :permit-type permit/YM
                             :required []
-                            :attachments [] ; [:jatteen_kerays [:vastaanottopaikan_tiedot]] sync with commons
+                            :attachments [:jatteen_kerays [:vastaanottopaikan_tiedot]]
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
-                            :asianhallinta true}})
+                            :asianhallinta true}
+   :koeluontoinen-toiminta {:schema "koeluontoinen-toiminta"
+                            :permit-type permit/YM
+                            :required []
+                            :attachments [] ; TODO
+                            :add-operation-allowed false
+                            :min-outgoing-link-permits 0
+                            :asianhallinta true}
+   })
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
   (if (= :tyonjohtaja-ilmoitus (keyword subtype))
@@ -792,6 +802,7 @@
     :aiemmalla-luvalla-hakeminen {:schema "hankkeen-kuvaus"
                                   :permit-type permit/R
                                   :required []
+                                  :optional #{"maksaja" "paasuunnittelija" "suunnittelija"}
                                   :attachments []
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0

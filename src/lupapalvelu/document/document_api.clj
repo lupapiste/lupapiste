@@ -50,7 +50,6 @@
                                                           (tf/unparse (tf/formatter "dd.MM.yyyy") (tf/parse (tf/formatter "yyyyMMdd") (:rekisterointipvm ktj-tiedot)))
                                                           (catch Exception e (:rekisterointipvm ktj-tiedot)))
                                                         "")]]]
-        (println updates)
         (doc-persistence/persist-model-updates (:application command) "documents" document updates (sade.core/now))))
     (ok :doc (:id document))))
 
