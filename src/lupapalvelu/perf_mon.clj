@@ -61,9 +61,7 @@
       (apply f args))))
 
 (defn- get-total-db-call-duration [perf-context]
-  (->> perf-context
-       (map (comp first rest))
-       (reduce +)))
+  (->> perf-context (map second) (reduce +)))
 
 (defn log-perf-context [handler request]
   (if (bypass? request)
