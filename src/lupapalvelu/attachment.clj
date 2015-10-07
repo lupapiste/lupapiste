@@ -69,19 +69,17 @@
    :B5
    :muu])
 
-(def- attachment-types-R attachment-types/Rakennusluvat)
-
-(def- attachment-types-YA attachment-types/YleistenAlueidenLuvat)
-
-(def- attachment-types-YI attachment-types/Ymparistoilmoitukset)
-
-(def- attachment-types-YL attachment-types/Ymparistolupa)
-
-(def- attachment-types-YM []  #_attachment-types/MuutYmparistoluvat)   ;; *** TODO: Enable this when YM attachments in the Commons project is updated ***
-
-(def- attachment-types-MAL attachment-types/Maa-ainesluvat)
-
-(def- attachment-types-KT attachment-types/Kiinteistotoimitus)
+(def- attachment-types-by-permit-type
+  {:R attachment-types/Rakennusluvat
+   :P attachment-types/Rakennusluvat
+   :YA attachment-types/YleistenAlueidenLuvat
+   :YI attachment-types/Ymparistoilmoitukset
+   :YL attachment-types/Ymparistolupa
+   :YM attachment-types/MuutYmparistoluvat
+   :VVVL attachment-types/Ymparistoilmoitukset
+   :MAL attachment-types/Maa-ainesluvat
+   :MM attachment-types/Kiinteistotoimitus
+   :KT attachment-types/Kiinteistotoimitus})
 
 (defn attachment-ids-from-tree [tree]
   {:pre [(sequential? tree)]}
@@ -89,14 +87,7 @@
 
 (def all-attachment-type-ids
   (attachment-ids-from-tree
-    (concat
-      attachment-types-R
-      attachment-types-YA
-      attachment-types-YI
-      attachment-types-YL
-      attachment-types-YM
-      attachment-types-MAL
-      attachment-types-KT)))
+    (apply concat (set (vals attachment-types-by-permit-type)))))
 
 ;;
 ;; Api
@@ -124,19 +115,9 @@
   "Returns partitioned list of allowed attachment types or throws exception"
   [permit-type]
   {:pre [permit-type]}
-  (partition 2
-    (case (keyword permit-type)
-      :R  attachment-types-R
-      :YA attachment-types-YA
-      :P  attachment-types-R
-      :YI attachment-types-YI
-      :YL attachment-types-YL
-      :YM attachment-types-YM
-      :VVVL attachment-types-YI ;TODO Put correct attachment list here
-      :MM attachment-types-KT ;TODO Put correct attachment list here
-      :MAL attachment-types-MAL
-      :KT attachment-types-KT
-      (fail! (str "unsupported permit-type: " (name permit-type))))))
+  (if-let [types (get attachment-types-by-permit-type (keyword permit-type))]
+    (partition 2 types)
+    (fail! (str "unsupported permit-type: " (name permit-type)))))
 
 (defn get-attachment-types-for-application
   [application]
