@@ -377,6 +377,10 @@ input.form-input.inline {
   margin: $marginM;
 }
 
+.docgen-content .form-choice .form-entry.form-full-width {
+  display: block !important;
+}
+
 .form-error {
   display: inline;
   color: red;
