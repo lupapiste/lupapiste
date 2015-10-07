@@ -332,7 +332,7 @@
    :jatteen-keraystoiminta {:schema "jatteen-kerays"
                             :permit-type permit/YM
                             :required []
-                            :attachments [] ; [:jatteen_kerays [:vastaanottopaikan_tiedot]] sync with commons
+                            :attachments [:jatteen_kerays [:vastaanottopaikan_tiedot]]
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
                             :asianhallinta true}
