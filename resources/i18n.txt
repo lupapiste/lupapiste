@@ -4,9 +4,11 @@ operations.kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan: Kä
 
 kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan._group_label: Käytöstäpoistetun öljy- tai kemikaalisäiliön jättäminen maaperään
 
+attachmentType.kaytostapoistetun-oljy-tai-kemikaal…aminen-maaperaan.sailion-tarkastuspoytakirja.info: 
+attachmentType.kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan._group_label: Käytöstäpoistetun öljy- tai kemikaalisäiliön jättäminen maaperään
 attachmentType.kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan.karttapiirros: Karttapiirros
 attachmentType.kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan.karttapiirros.info: Karttapiirros, josta selviää säiliön sijainti ja niiden rakenteiden sijainti, jotka estävät/vaikeuttavat säiliön poistoa.
-attachmentType.kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan.sailion-tarkastuspoytakirja: Säiliön tarkastuspoytakirja
+attachmentType.kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan.sailion-tarkastuspoytakirja: Säiliön tarkastuspöytäkirja
 attachmentType.kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan.kiinteiston-omistajien-suostumus: Kiinteiston omistajien suostumus
 attachmentType.kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan.kiinteiston-omistajien-suostumus.info: Kirjallinen suostumus säiliön maahan jättämiselle muilta kiinteistön omistajilta. Ei tarvita, jos hakijalla on pitkäaikainen vuokrasopimus kaupungin kanssa.
 
