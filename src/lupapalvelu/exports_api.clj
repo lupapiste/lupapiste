@@ -128,6 +128,7 @@
    :jatteen-keraystoiminta                                            "D"
    :muistomerkin-rauhoittaminen                                       "D"
    :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan  "D"
+   :ilmoitus-poikkeuksellisesta-tilanteesta                           "D"
    })
 
 (defn- export [collection query fields]
