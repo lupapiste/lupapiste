@@ -81,20 +81,16 @@
           (upload-attachment sonja (:id application) first-attachment true)
           (upload-attachment pena (:id application) first-attachment false))))))
 
-;;
-;; TODO: 'Local' versions of the commands do not work, because on CI environment does not provide the example xml message from the dummy-krysp url.
-;;
-#_(fact "Fetch verdict when all antoPvms are in the future"
-   (let [application      (create-and-submit-local-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
-         app-id           (:id application)
-         future-timestamp (sade.util/get-timestamp-from-now :week 1)
-         pvm-keys         [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano]
-         pvm-dates-mock   (zipmap pvm-keys (repeat future-timestamp))]
-     (local-command sonja :check-for-verdict :id app-id) => (partial expected-failure? "info.paatos-future-date")
-     (provided (#'lupapalvelu.xml.krysp.reader/get-pvm-dates anything pvm-keys) => pvm-dates-mock)
-     (let [app-with-no-verdicts (query-application local-query mikko app-id)]
-       (fact "No verdicts"
-         (-> app-with-no-verdicts :verdicts count) => 0))))
+(fact "Fetch verdict when all antoPvms are in the future"
+  (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
+        app-id (:id application)
+        future-timestamp (util/get-timestamp-from-now :week 1)]
+    (override-krysp-xml sipoo "753-R" :R [{:selector [:yht:antoPvm] :value (util/to-xml-date future-timestamp)}])
+    (command sonja :check-for-verdict :id app-id) => (partial expected-failure? "info.paatos-future-date")
+    (let [app-with-no-verdicts (query-application mikko app-id)]
+      (fact "No verdicts"
+        (-> app-with-no-verdicts :verdicts count) => 0)))
+  (against-background (after :facts (remove-krysp-xml-overrides sipoo "753-R" :R))))
 
 (facts* "Fetch verdict from KRYSP backend"
   (last-email) ; Inbox zero
