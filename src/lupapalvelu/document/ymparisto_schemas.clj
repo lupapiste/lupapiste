@@ -98,6 +98,25 @@
     :group-help "muistomerkki-kaytto-ja-hoito.help"
     :body [{:name "ei-nahtavyyskohde" :type :checkbox :required true :layout :full-width}]}))
 
+(def koeluontoinen-toiminta
+  (body
+    {:name "kuvaus-toiminnosta"
+     :type :text
+     :max-len 4000
+     :placeholder "cancel"}
+    {:name "raaka-aineet"
+     :type :text
+     :max-len 4000
+     :placeholder "cancel"}
+    {:name "paastot"
+     :type :text
+     :max-len 4000
+     :placeholder "cancel"}
+    {:name "ymparistonsuojeluselvitys"
+     :type :text
+     :max-len 4000
+     :placeholder "cancel"}))
+
 
 (defschemas
   1
@@ -155,4 +174,6 @@
                    {:name "Postitetaan"}]}]}
 
    {:info {:name "jatteen-kerays"}
-    :body jatteen-keraystoiminta-ilmoitus}])
+    :body jatteen-keraystoiminta-ilmoitus}
+   {:info {:name "koeluontoinen-toiminta"}
+    :body koeluontoinen-toiminta}])
