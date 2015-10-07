@@ -245,7 +245,7 @@
        :metadata metadata
        :application (:application metadata)})))
 
-(defn download [file-id]
+(defn ^{:perfmon-exclude true} download [file-id]
   (download-find {:_id file-id}))
 
 (defn delete-file [query]
@@ -253,7 +253,7 @@
     (info "removing file" query)
     (gfs/remove (get-gfs) query)))
 
-(defn delete-file-by-id [file-id]
+(defn ^{:perfmon-exclude true} delete-file-by-id [file-id]
   (delete-file {:id file-id}))
 
 (defn count
@@ -263,7 +263,7 @@
   ([collection query]
     (mc/count (get-db) collection (remove-null-chars query))))
 
-(defn get-next-sequence-value [sequence-name]
+(defn ^{:perfmon-exclude true} get-next-sequence-value [sequence-name]
   (:count (update-one-and-return :sequences {:_id (name sequence-name)} {$inc {:count 1}} :upsert true)))
 
 (defn ^{:perfmon-exclude true} db-mode
