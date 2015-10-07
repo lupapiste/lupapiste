@@ -98,34 +98,12 @@
     :group-help "muistomerkki-kaytto-ja-hoito.help"
     :body [{:name "ei-nahtavyyskohde" :type :checkbox :required true :layout :full-width}]}))
 
-(def kaytostapoistetun-sailion-jattaminen-maaperaan
-  (body
-;    kuvaus
-    {:name "tiedot-kiinteistosta" :type :group
-     :group-help "tiedot-kiinteistosta.help"
-     :body [;{:name "kohteen-nimi" :type :string :size "l" :required true}
-            {:name "kiinteistotunnus" :type :string :subtype :kiinteistotunnus
-;             :size "m"
-;             :hidden true
-             }
-            {:name "kiint-omistaja-jos-ei-hakija" :type :string
-;             :size "l"
-;             :hidden true
-             }
-            simple-osoite]}
-
-   {:name "maahan-jattamisen-perustelut" :type :group :layout :vertical
-    :group-help "maahan-jattamisen-perustelut.help"
-    :body [{:name "sailion-poistaminen-vahingoittaa-rakenteita" :type :checkbox}
-           {:name "sailion-poistaminen-teknisesti-vaikeata" :type :checkbox}
-           {:name "sailion-poistaminen-muut-perustelut" :type :checkbox}]}
-
-   {:name "tiedot-kaytosta-poistetusta-sailiosta" :type :group
-    :group-help "tiedot-kaytosta-poistetusta-sailiosta.help"
+(def tiedot-sailiosta
+  {:name "tiedot-sailiosta" :type :group
     :body [{:name "kaytosta-poistamisen-syy" :type :select :sortBy :displayname
 ;            :required true
             :other-key "muu-syy"
-            :body [{:name "lammistysmuodon-vaihtuminen"}
+            :body [{:name "lammistysmuodon-vaihtaminen"}
                    {:name "oljylammistyslaitteiston-uusiminen"}]}
            {:name "muu-syy" :type :string}
            {:name "kaytosta-poistamisen-ajankohta" :type :date}
@@ -133,6 +111,8 @@
             :body [{:name "tyhjennetty" :type :checkbox}
                    {:name "puhdistettu" :type :checkbox}
                    {:name "tarkastettu" :type :checkbox}]}
+           {:name "sailion-pienin-etaisyys-rakennuksesta" :type :string :subtype :number :size "s" :unit "m"}
+           {:name "sailion-pienin-etaisyys-rakennuksesta-mista-mitattu" :type :string :size "l"}
            {:name "koko" :type :string :subtype :number :size "s" :unit "m3"
 ;            :required false
 ;            :min-len 4 :max-len 4
@@ -140,50 +120,56 @@
            {:name "materiaali" :type :select :sortBy :displayname
 ;            :required true
             :other-key "muu-materiaali"
-            :body [{:name "lammistysmuodon-vaihtuminen"}
-                   {:name "oljylammistyslaitteiston-uusiminen"}]}
+            :body [{:name "metalli"}
+                   {:name "muovi-tai-lasikuitu"}]}
            {:name "muu-materiaali" :type :string}
 
-           {:name "sailion-pohja-alempana-kuin-rakennuksen-perusteet" :type :select :sortBy :displayname
+           {:name "onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet" :type :group :layout :horizontal
+            :body [{:name "onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet-kylla" :type :checkbox}
+                   {:name "onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet-paljonko" :type :string :subtype :number :size "s" :unit "m"}]}
+
+           {:name "sailio-sijaitsee-bunkkerissa" :type :select
 ;            :required true
-            :other-key "sailion-pohja-kuinka-paljon-alempana"
-            :body [#_{:name "kylla"}  ;; TODO: miten saa taman Muu-kahdaksi?
+            :body [{:name "kylla"}
                    {:name "ei"}]}
-           {:name "sailion-pohja-kuinka-paljon-alempana" :type :string :subtype :number :size "s" :unit "m"}
-           {:name "sailio-sijaitsee-bunkkerissa" :type :group :layout :horizontal
-            :body [{:name "kylla" :type :checkbox}
-                   {:name "ei" :type :checkbox}]}
-           {:name "sailio-sijaitsee-tarkealla-pohjavesialueella" :type :group :layout :horizontal
-            :body [{:name "kylla" :type :checkbox}
-                   {:name "ei" :type :checkbox}
-                   {:name "ei-tietoa" :type :checkbox}]}
+           {:name "sailio-sijaitsee-tarkealla-pohjavesialueella" :type :select
+;            :required true
+            :body [{:name "kylla"}
+                   {:name "ei"}
+                   {:name "ei-tietoa"}]}
 ;           {:name "sailion-kunto" :type :string :size "l"}
            {:name "sailion-kunto" :type :text :max-len 4000
 ;            :required false
             :layout :full-width}
 
-           {:name "onko-tapahtunut-ylivuotoja" :type :select :sortBy :displayname
-;            :required true
-            :other-key "vuotoja-tapahtunut-vuonna"
-            :body [#_{:name "kylla-vuonna"}  ;; TODO: miten saa taman Muu-kahdaksi?
-                   {:name "ei"}]}
-           {:name "vuotoja-tapahtunut-vuonna" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}
+           {:name "onko-tapahtunut-vuotoja" :type :group :layout :horizontal
+            :body [{:name "on-tapahtunut-vuotoja" :type :checkbox}
+                   {:name "vuotoja-tapahtunut-vuonna" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}]}
 
-           {:name "onko-tapahtunut-ylitayttoja" :type :select :sortBy :displayname
-;            :required true
-            :other-key "ylitayttoja-tapahtunut-vuonna"
-            :body [#_{:name "kylla-vuonna"}  ;; TODO: miten saa taman Muu-kahdaksi?
-                   {:name "ei"}]}
-           {:name "ylitayttoja-tapahtunut-vuonna" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}
+           {:name "onko-tapahtunut-ylitayttoja" :type :group :layout :horizontal
+            :body [{:name "on-tapahtunut-ylitayttoja" :type :checkbox}
+                   {:name "ylitayttoja-tapahtunut-vuonna" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}]}
 
-           {:name "oljysailion-putkijarjestelma" :type :select :sortBy :displayname
-;            :required true
-            :group-help "oljysailion-2-putkijarjestelma-desc"   ;; TODO: miten taman saa naytettya?
-            :body [{:name "1-putkijarjestelma"}
-                   {:name "2-putkijarjestelma"}]}
-           ]}
+           {:name "oljysailion-putkijarjestelma" :type :group
+            :group-help "oljysailion-putkijarjestelma.help"
+            :body [{:name "oljysailion-putkijarjestelma" :type :select :sortBy :displayname
+                    :body [{:name "1-putkijarjestelma"}
+                           {:name "2-putkijarjestelma"}]}]}
+           ]})
 
-   ))
+(def kaytostapoistetun-sailion-jattaminen-maaperaan
+  (body
+    {:name "tiedot-kiinteistosta" :type :group
+     :body (body
+             {:name "kiinteistotunnus" :type :string :subtype :kiinteistotunnus}
+             {:name "kiint-omistaja-jos-ei-hakija" :type :string :size "l"}
+             simple-osoite)}
+   {:name "maahan-jattamisen-perustelut" :type :group :layout :vertical
+    :body [{:name "sailion-poistaminen-vahingoittaa-rakenteita" :type :checkbox}
+           {:name "sailion-poistaminen-teknisesti-vaikeata" :type :checkbox}
+           {:name "sailion-poistaminen-muut-perustelut" :type :checkbox}
+           {:name "sailion-kunto" :type :text :max-len 4000 :layout :full-width}]}
+   tiedot-sailiosta))
 
 
 (defschemas
