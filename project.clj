@@ -37,7 +37,7 @@
                  [org.apache.poi/poi-ooxml "3.11"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js org.mozilla/rhino]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
-                 [fi.sito/oskari "0.9.44"]
+                 [fi.sito/oskari "0.9.47"]
                  [slingshot "0.12.2"]
                  [com.google.zxing/javase "2.2"]
                  [prismatic/schema "0.4.3"]
