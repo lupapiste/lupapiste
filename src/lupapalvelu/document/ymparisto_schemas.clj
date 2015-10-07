@@ -146,7 +146,6 @@
   (body
     {:name "tiedot-kiinteistosta" :type :group
      :body (body
-             {:name "kiinteistotunnus" :type :string :subtype :kiinteistotunnus :required true}
              {:name "kiint-omistaja-jos-ei-hakija" :type :string :size "l"}
              simple-osoite)}
    {:name "maahan-jattamisen-perustelut" :type :group :layout :vertical
