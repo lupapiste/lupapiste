@@ -367,7 +367,7 @@
                             :min-outgoing-link-permits 0
                             :asianhallinta true}
 
-   :ilmoitus-poikkeuksellisesta-tilanteesta {:schema "ilmoitus-poikkeuksellisesta-tilanteesta"
+   :ilmoitus-poikkeuksellisesta-tilanteesta {:schema "ilmoitus-poik-tilanteesta"
                                              :permit-type permit/YM
                                              :required []
                                              ;; TODO: sync with attachments in Commons.
