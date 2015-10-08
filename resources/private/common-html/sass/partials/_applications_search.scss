@@ -11,6 +11,21 @@
     }
     margin-bottom: $grid-margin;
   }
+  h1 {
+    display: inline-block;
+    .application-search-link{
+      display: inline-block;
+      &:not(:last-of-type):after {
+        content: "\00a0\007c\00a0";
+      }
+    }
+    a {
+      @include link;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
 }
 
 #invitations {
@@ -20,7 +35,6 @@
     margin-bottom: 0;
   }
 }
-
 
 .applications-search-component {
   clear: both;
@@ -129,9 +143,6 @@ div.search {
   }
 }
 
-.application-row {
-  height: 45px;
-}
 .applications-search-results__indicator {
   color: $primary;
   padding: 3px 0 0 0 !important;
@@ -161,31 +172,77 @@ div.search {
   }
 }
 
-table.applications-table {
-  th.first {
-
-  }
-  th.second {
-
-  }
-  th.third {
-
-  }
-  th.fourth {
-
-  }
-  th.fifth {
-    width: 10%;
-  }
-  th.sixth {
-    width: 5%;
-  }
-  th.seventh {
-    width: 5%;
-  }
-  th.eight {
-  }
-  th.ninth {
-    width: 10%;
+.application-search-result__table, .application-foreman-search-result__table {
+  th {
+    @include disable-select;
+    white-space: nowrap;
+    padding-right: 16px;
+    span, i {
+      vertical-align: middle;
+    }
+    i {
+      position: absolute;
+    }
   }
 }
+
+.application-search-result__table {
+  th {
+    &.first {
+
+    }
+    &.second {
+
+    }
+    &.third {
+
+    }
+    &.fourth {
+
+    }
+    &.fifth {
+      width: 10%;
+    }
+    &.sixth {
+      width: 5%;
+    }
+    &.seventh {
+      width: 5%;
+    }
+    &.eight {
+      width: 10%;
+    }
+    &.ninth {
+      width: 10%;
+    }
+  }
+}
+
+.application-foreman-search-result__table {
+  th {
+    &.first {
+    }
+    &.second {
+      width: 15%;
+    }
+    &.third {
+      width: 5%;
+    }
+    &.fourth {
+      width: 20%;
+    }
+    &.fifth {
+      width: 15%;
+    }
+    &.sixth {
+      width: 15%;
+    }
+    &.seventh {
+      width: 5%;
+    }
+    &.eight {
+      width: 15%;
+    }
+  }
+}
+

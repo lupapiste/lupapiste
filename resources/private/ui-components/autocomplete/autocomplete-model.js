@@ -127,6 +127,11 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.selectItem = function(item) {
+    if  (_.isEmpty(item)) {
+      error("Autocomplete: selected item was unexpectedly empty",
+        {options: self.options, optionsText: self.optionsText, optionsCaption: self.optionsCaption, functionArgs: arguments});
+      return;
+    }
     if (item.behaviour === "clearSelected") {
       self.selectedOptions([]);
     } else if (item.behaviour === "singleSelection") {
@@ -148,22 +153,13 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.navigate = function(data, event) {
     function scrollToActiveItem(index) {
-      var $container = $(event.target).siblings("ul");
-      var $activeItem = $container.find("li:nth-child(" + index + ")");
-
-      if ($activeItem.length === 0) {
+      var container = $(event.target).closest(".autocomplete-dropdown").find(".autocomplete-result");
+      var activeItem = container.find("li:nth-child(" + index + ")");
+      if (activeItem.length === 0) {
         return;
       }
-
-      var containerTop = $container.scrollTop() + $activeItem.height();
-      var containerBottom = $container.scrollTop() + $container.height() - $activeItem.height();
-
-      var itemTop = $activeItem.position().top;
-      var itemBottom = $activeItem.position().top + $activeItem.height();
-
-      if ((itemBottom > containerBottom) || (itemTop < containerTop)) {
-        $container.scrollTop($container.scrollTop() + $activeItem.position().top);
-      }
+      container.scrollTop(0);
+      container.scrollTop(activeItem.offset().top - container.height() - activeItem.height());
     }
 
     if (event.keyCode === 13) {
@@ -178,7 +174,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
         self.index(self.index() + 1);
       }
       // skip group header
-      else if (getCurrentItem() /* is not nullable */ && getCurrentItem().groupHeader && !firstItem) {
+      else if (getCurrentItem() && getCurrentItem().groupHeader && !firstItem) {
         self.index(self.index() - 1);
       }
       scrollToActiveItem(self.index());

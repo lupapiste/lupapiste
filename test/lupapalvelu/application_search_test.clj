@@ -18,7 +18,7 @@
 (facts "sorting parameter parsing"
   (make-sort {:sort {:field "unknown" :asc false}})  => {}
   (make-sort {:sort {:field "unknown" :asc true}})  => {}
-  (make-sort {:sort {:field "id" :asc false}}) => {}
+  (make-sort {:sort {:field "id" :asc false}}) => {:_id -1}
   (make-sort {:sort {:field "_id" :asc false}}) => {}
   (make-sort {:sort {:field "type" :asc true }})  => {:infoRequest -1, :permitSubtype 1}
   (make-sort {:sort {:field "type" :asc false }}) => {:infoRequest 1, :permitSubtype -1}

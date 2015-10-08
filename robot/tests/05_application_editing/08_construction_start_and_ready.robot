@@ -43,6 +43,7 @@ Sonja goes to the Rakentaminen tab and sets construction started via a dialog
   Element should be visible  //*[@data-test-id='application-open-tasks-tab']
   Tab should be visible  tasks
 
+# Datepicker can fail if Firefox is not the active application.
 Sonja goes to the Rakentaminen tab and sets construction ready via a dialog
   Sets construction started/ready via modal datepicker dialog  application-inform-construction-ready-btn  02.07.2018
   Wait until  Application state should be  closed

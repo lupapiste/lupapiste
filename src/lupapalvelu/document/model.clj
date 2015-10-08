@@ -115,11 +115,8 @@
       [:err "application-does-not-have-given-auth"])))
 
 (defmethod validate-field :companySelector [application elem v]
-  (when-not (ss/blank? v)
-    (when-not (and
-                (domain/has-auth? application v)
-                (domain/no-pending-invites? application v))
-      [:err "application-does-not-have-given-auth"])))
+  (when-not (or (string? v) (nil? v))
+    [:err "unknown-type"]))
 
 (defmethod validate-field :fillMyInfoButton [_ _ _] nil)
 (defmethod validate-field :foremanHistory [_ _ _] nil)
@@ -384,7 +381,8 @@
    If predicate matches, value is outputted using emitter function.
    Both predicate and emitter take two parameters: element schema definition and the value map."
   [pred emitter {data :data :as document} initial-path]
-  (when data
+  (if-not data
+    document
     (letfn [(doc-walk [schema-body path]
               (into {}
                 (map

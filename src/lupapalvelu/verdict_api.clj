@@ -28,7 +28,8 @@
       (let [validator-fn (permit/get-verdict-validator (permit/permit-type application))]
         (validator-fn app-xml))
       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
-        (update-application command updates)
+        (when updates
+          (update-application command updates))
         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
     (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} (:name op))
       (verdict/fetch-tj-suunnittelija-verdict command))))

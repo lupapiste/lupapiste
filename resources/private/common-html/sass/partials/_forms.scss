@@ -189,7 +189,7 @@ input[readonly], textarea[readonly] {
   }
 }
 
-.form-full-width > select {
+.form-full-width > select, .form-full-width > label {
   width: 80% !important;
 }
 
@@ -266,9 +266,9 @@ input.form-input.inline {
   width: auto;
   display: inline-block;
   vertical-align: bottom;
-  margin: 0 $marginS 2px $marginS;
+  margin: 0 $marginS 0 $marginS;
   width: 14px;
-  height: 14px;
+  height: 24px;
   padding: 0;
   &.error {
     outline: 3px solid red;
@@ -323,7 +323,7 @@ input.form-input.inline {
     display: block;
   }
   .form-input.checkbox, .form-input.radio {
-    margin: 0 $marginS 2px 0;
+    margin: 0 $marginS 0 0;
     display: inline-block;
   }
   .form-label-checkbox{
@@ -375,6 +375,10 @@ input.form-input.inline {
   display: inline;
   color: red;
   margin: $marginM;
+}
+
+.docgen-content .form-choice .form-entry.form-full-width {
+  display: block !important;
 }
 
 .form-error {
@@ -979,7 +983,6 @@ div.alleYli-radioGroup {
   display: inline-block;
   margin-top: $marginL;
 }
-
 
 // Grid styles
 

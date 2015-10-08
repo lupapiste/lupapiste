@@ -1113,13 +1113,34 @@
     {:permitType "YA"
      :tasks {$elemMatch {:schema-info.name "task-katselmus"}}}))
 
+(defn extract-credentials-from-krysp-address
+  [[permit-type {url :url :as krysp-config}]]
+  (when url
+    (let [[_ protocol username password url] (re-matches #"(https?://)([^:]*:)?([^@]*@)?(.*$)" url)
+          username (apply str (butlast username))
+          password (apply str (butlast password))]
+      (when (and url (not (empty? username)) (not (empty? password)))
+        [permit-type (merge krysp-config {:url (str protocol url) :username username :password password})]))))
+
+(defn update-krysp-config
+  [{organization-id :id} permit-type {url :url username :username password :password version :version}]
+  (when username
+    (organization/set-krysp-endpoint organization-id url username password (name permit-type) version)))
+
+(defn move-credentials-out-from-organization-krysp-addresses
+  [{krysp-configs :krysp :as organization}]
+  (doseq [[permit-type config] (map extract-credentials-from-krysp-address krysp-configs)]
+    (update-krysp-config organization permit-type config)))
+
+(defmigration move-credentials-out-from-krysp-addresses
+  (doseq [organization (mongo/select :organizations)]
+    (move-credentials-out-from-organization-krysp-addresses organization)))
 
 (defmigration foreman-index-v2
   (reduce + 0
     (for [collection [:applications :submitted-applications]]
       (let [applications (mongo/select collection {} [:documents])]
         (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/foreman-index-update %)) applications))))))
-
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

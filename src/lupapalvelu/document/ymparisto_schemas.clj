@@ -1,8 +1,9 @@
 (ns lupapalvelu.document.ymparisto-schemas
-  (:require [lupapalvelu.document.schemas :refer :all]))
+  (:require [lupapalvelu.document.schemas :refer :all]
+            [lupapalvelu.document.tools :refer :all]))
 
-(def sijainti (body simple-osoite
-                {:name "karttapiirto" :type :text :max-len 4000}))
+#_(def sijainti (body simple-osoite
+                 {:name "karttapiirto" :type :text :max-len 4000}))
 
 (def kesto (body {:name "kesto" :type :group
                   :body [{:name "alku" :type :date}
@@ -12,9 +13,8 @@
                          {:name "sunnuntai", :type :group, :body [{:name "sunnuntaiAlkuAika" :type :time} {:name "sunnuntaiLoppuAika" :type :time}]}]}))
 
 
-(def kesto-mini (body {:name "kesto" :type :group
-                       :body [{:name "alku" :type :date}
-                              {:name "loppu" :type :date}]}))
+(def kesto-mini
+  (schema-body-without-element-by-name kesto "arki" "lauantai" "sunnuntai"))
 
 (def meluilmoitus (body
                     {:name "rakentaminen" :type :group
@@ -62,6 +62,157 @@
                                    {:name "Rahaa"}
                                    {:name "Pankkitakaus"}]}))
 
+(def jatteen-keraystoiminta-ilmoitus
+  (body
+    {:name "toiminnan-muoto"
+     :type :select
+     :required true
+     :body [{:name "uusiToiminta"}
+            {:name "muutosToimintaan"}
+            {:name "olemassaOlevaToiminta"}]}
+    {:name "keraystoiminnan-jarjestaja"
+     :type :group
+     :required true
+     :body [{:name "kunnanKerays" :type :checkbox}
+            {:name "tuottajanKerays" :type :checkbox}
+            {:name "muuKerays" :type :checkbox}
+            {:name "muuKeraysValue" :type :string}]}
+    {:name "jatteen-vastuullinen"
+     :type :group
+     :required true
+     :body [{:name "kunnanJate" :type :checkbox}
+            {:name "tuottajanJate" :type :checkbox}
+            {:name "muuJate" :type :checkbox}
+            {:name "muuJateValue" :type :string}]}
+    {:name "vastaanottopaikat-liitteena" :type :checkbox}))
+
+(def luonnonmuistomerkin-rauhoittaminen
+  (body
+    {:name "muistomerkki-perustelut-rauhoitukselle" :type :group
+     :group-help "muistomerkki-perustelut-rauhoitukselle.help"
+     :body [{:name "kohteen-nimi" :type :string :size "l" :required true}
+            kuvaus
+            {:name "muita-tietoja" :type :text :max-len 4000 :required false :layout :full-width}]}
+
+   {:name "muistomerkki-kaytto-ja-hoito" :type :group
+    :group-help "muistomerkki-kaytto-ja-hoito.help"
+    :body [{:name "ei-nahtavyyskohde" :type :checkbox :required true :layout :full-width}]}))
+
+(def tiedot-sailiosta
+  {:name "tiedot-sailiosta" :type :group
+    :body [{:name "kaytosta-poistamisen-syy" :type :select :sortBy :displayname :required true
+            :other-key "muu-syy"
+            :body [{:name "lammistysmuodon-vaihtaminen"}
+                   {:name "oljylammistyslaitteiston-uusiminen"}]}
+           {:name "muu-syy" :type :string}
+           {:name "kaytosta-poistamisen-ajankohta" :type :date :required true}
+           {:name "kaytosta-poiston-jalkeen" :type :group :layout :horizontal :required true
+            :body [{:name "tyhjennetty" :type :checkbox}
+                   {:name "puhdistettu" :type :checkbox}
+                   {:name "tarkastettu" :type :checkbox}]}
+           {:name "sailion-pienin-etaisyys-rakennuksesta" :type :string :subtype :number :size "s" :unit "m" :required true}
+           {:name "sailion-pienin-etaisyys-rakennuksesta-mista-mitattu" :type :string :size "l" :required true}
+           {:name "koko" :type :string :subtype :number :size "s" :unit "m3" :required true}
+           {:name "materiaali" :type :select :sortBy :displayname :required true
+            :other-key "muu-materiaali"
+            :body [{:name "metalli"}
+                   {:name "muovi-tai-lasikuitu"}]}
+           {:name "muu-materiaali" :type :string}
+           {:name "onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet" :type :group :layout :horizontal
+            :body [{:name "onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet-kylla" :type :checkbox}
+                   {:name "onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet-paljonko" :type :string :subtype :number :size "s" :unit "m"}]}
+           {:name "sailio-sijaitsee-bunkkerissa" :type :select :required true
+            :body [{:name "kylla"}
+                   {:name "ei"}]}
+           {:name "sailio-sijaitsee-tarkealla-pohjavesialueella" :type :select :required true
+            :body [{:name "kylla"}
+                   {:name "ei"}
+                   {:name "ei-tietoa"}]}
+           {:name "sailion-kunto" :type :text :max-len 4000 :layout :full-width :required true}
+           {:name "onko-tapahtunut-vuotoja" :type :group :layout :horizontal
+            :body [{:name "on-tapahtunut-vuotoja" :type :checkbox}
+                   {:name "vuotoja-tapahtunut-vuonna" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}]}
+           {:name "onko-tapahtunut-ylitayttoja" :type :group :layout :horizontal
+            :body [{:name "on-tapahtunut-ylitayttoja" :type :checkbox}
+                   {:name "ylitayttoja-tapahtunut-vuonna" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}]}
+           {:name "oljysailion-putkijarjestelma" :type :group
+            :group-help "oljysailion-putkijarjestelma.help"
+            :body [{:name "oljysailion-putkijarjestelma" :type :select :sortBy :displayname :required true
+                    :body [{:name "1-putkijarjestelma"}
+                           {:name "2-putkijarjestelma"}]}]}
+           ]})
+
+(def kaytostapoistetun-sailion-jattaminen-maaperaan
+  (body
+    {:name "tiedot-kiinteistosta" :type :group
+     :body (body
+             {:name "kiint-omistaja-jos-ei-hakija" :type :string :size "l"}
+             {:name "osoite"
+                     :type :group
+                     :blacklist [turvakielto]
+                     :body [{:name "katu" :type :string :subtype :vrk-address}
+                            {:name "postinumero" :type :string :subtype :zip :size "s"}
+                            {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m"}]})}
+   {:name "maahan-jattamisen-perustelut" :type :group :layout :vertical
+    :body [{:name "sailion-poistaminen-vahingoittaa-rakenteita" :type :checkbox}
+           {:name "sailion-poistaminen-teknisesti-vaikeata" :type :checkbox}
+           {:name "sailion-poistaminen-muut-perustelut" :type :checkbox}
+           {:name "sailion-kunto" :type :text :max-len 4000 :required true}]}
+   tiedot-sailiosta))
+
+(def koeluontoinen-toiminta
+  (body
+    {:name "kuvaus-toiminnosta"
+     :type :text
+     :required true
+     :max-len 4000
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
+    {:name "raaka-aineet"
+     :type :text
+     :max-len 4000
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
+    {:name "paastot"
+     :type :text
+     :max-len 4000
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
+    {:name "ymparistonsuojeluselvitys"
+     :type :text
+     :max-len 4000
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}))
+
+(def maa-ainesten-kotitarveotto
+  (body
+    {:name "kotitarveoton-kesto"
+     :type :group
+     :body [{:name "alkanut" :type :string :subtype :number :required true}
+            {:name "jatkuu-vuoteen" :type :string :subtype :number :required true}]}
+    {:name "kotitarveoton-maarat"
+     :type :group
+     :body [{:name "kokonaismaara" :type :string :size "m" :subtype :decimal :unit :k-m3 :required true}
+            {:name "maaran-jakautuminen"
+             :type :group
+             :body [{:name "kalliokivi" :type :string :size "s" :subtype :decimal :unit :k-m3}
+                    {:name "sora-ja-hiekka" :type :string :size "s" :subtype :decimal :unit :k-m3}
+                    {:name "siltti-ja-savi" :type :string :size "s" :subtype :decimal :unit :k-m3}
+                    {:name "moreeni" :type :string :size "s" :subtype :decimal :unit :k-m3}
+                    {:name "eloperainen-maalaji" :type :string :size "s" :subtype :decimal :unit :k-m3}
+                    {:name "muu" :type :string :size "m" :unit :k-m3}]}]}))
+
+(def ilmoitus-poikkeuksellisesta-tilanteesta
+  (body
+    {:name "tilanne" :type :select :required true
+             :other-key "muu-kertaluonteinen-tapaus"
+             :body [{:name "onnettomuus"}
+                    {:name "tuotantohairio"}
+                    {:name "purkutyo"}]}
+    {:name "muu-kertaluonteinen-tapaus" :type :string}
+    {:name "paastot-ja-jatteet" :type :group
+     :body [{:name "paaston-aiheuttama-vaara" :type :text :max-len 4000 :required true}
+            {:name "jatteen-nimi-olomuoto-ominaisuudet" :type :text :max-len 4000 :required true}
+            {:name "jatteen-maarat" :type :text :max-len 4000 :required true}
+            {:name "muut-paastot-olomuoto-ominaisuudet" :type :text :max-len 4000 :required true}]}
+    {:name "jatehuollon-jarjestaminen" :type :group
+     :body [{:name "keraily-varastointi-kuljetus-kasittely" :type :text :max-len 4000 :required true}]}))
 
 
 (defschemas
@@ -110,8 +261,28 @@
    {:info {:name "maa-aineslupa-kuvaus"
            :order 1}
     :body [kuvaus]}
+   {:info {:name "luonnonmuistomerkin-rauhoittaminen"
+           :order 1}
+    :body luonnonmuistomerkin-rauhoittaminen}
+   {:info {:name "kaytostapoistetun-sailion-jattaminen-maaperaan"
+           :order 1}
+    :body kaytostapoistetun-sailion-jattaminen-maaperaan}
+   {:info {:name "ilmoitus-poik-tilanteesta"
+           :order 1}
+    :body ilmoitus-poikkeuksellisesta-tilanteesta}
    {:info {:name "paatoksen-toimitus"
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
             :body [{:name "Noudetaan"}
-                   {:name "Postitetaan"}]}]}])
+                   {:name "Postitetaan"}]}]}
+
+   {:info {:name "jatteen-kerays"}
+    :body jatteen-keraystoiminta-ilmoitus}
+   {:info {:name "koeluontoinen-toiminta"}
+    :body (body
+            koeluontoinen-toiminta
+            kesto-mini)}
+   {:info {:name "maa-ainesten-kotitarveotto"
+           :approvable true}
+    :body maa-ainesten-kotitarveotto}
+   ])

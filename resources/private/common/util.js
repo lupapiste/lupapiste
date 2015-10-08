@@ -110,7 +110,7 @@ var util = (function($) {
 
   function getIn(m, ks, defaultValue) {
     var value = ko.unwrap(m);
-    if (!value) {
+    if (_.isUndefined(value) || _.isNull(value)) {
       return defaultValue;
     }
     return _.isEmpty(ks) ? value : getIn(value[_.first(ks)], _.rest(ks), defaultValue);
@@ -225,11 +225,18 @@ var util = (function($) {
     return [strOrArr + suffix];
   }
 
-  function filterDataByQuery(data, q, selected, label) {
-    label = label || "label";
-    return _.filter(data, function(item) {
-      return _.reduce(q.split(" "), function(result, word) {
-        return !_.some(selected, item) && _.contains(ko.unwrap(item[label]).toUpperCase(), word.toUpperCase()) && result;
+  var defaultOptions = {
+    data: [],
+    query: "",
+    selected: undefined,
+    label: "label"
+  };
+
+  function filterDataByQuery(options) {
+    options = _.defaults(options, defaultOptions);
+    return _.filter(options.data, function(item) {
+      return _.reduce(options.query.split(" "), function(result, word) {
+        return !_.some(options.selected, item) && _.contains(ko.unwrap(item[options.label]).toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
   }
