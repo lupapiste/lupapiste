@@ -338,8 +338,8 @@
 
    :lannan-varastointi     {:schema "lannan-varastointi"
                             :permit-type permit/YM
-                            :required []
-                            :attachments []
+                            :required ["yl-maatalous-hankkeen-kuvaus"]
+                            :attachments [] ; [:kartat [:patterin-sijainti]] TODO: sync with commons
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
                             :asianhallinta true}})
