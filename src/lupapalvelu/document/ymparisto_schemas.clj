@@ -215,8 +215,13 @@
      :body [{:name "keraily-varastointi-kuljetus-kasittely" :type :text :max-len 4000 :required true}]}))
 
 (def maastoliikennelaki-kilpailut-ja-harjoitukset
-  ;; TODO
-  )
+  (body
+    {:name "toiminnan-laatu" :type :group
+     :group-help "maastoliikennelaki-kilpailut-ja-harjoitukset.toiminnan-laatu.help"
+     :body [kuvaus]}
+    {:name "toiminnan-vaikutukset" :type :group
+     :group-help "maastoliikennelaki-kilpailut-ja-harjoitukset.toiminnan-vaikutukset.help"
+     :body [{:name "tiedot-vaikutuksista-luonnolle" :type :text :max-len 4000 :required true}]}))
 
 
 (defschemas
