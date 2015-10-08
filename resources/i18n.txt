@@ -1,0 +1,20 @@
+operations.tree.ilmoitus-poikkeuksellisesta-tilanteesta: Ympäristönsuojelulain 120 §:n mukainen ilmoitus poikkeuksellisesta tilanteesta
+operations.ilmoitus-poikkeuksellisesta-tilanteesta: Ympäristönsuojelulain 120 §:n mukainen ilmoitus poikkeuksellisesta tilanteesta
+ilmoitus-poikkeuksellisesta-tilanteesta._group_label: Ympäristönsuojelulain 120 §:n mukainen ilmoitus poikkeuksellisesta tilanteesta
+
+ilmoitus-poik-tilanteesta.kuvaus: Poikkeksellisen tilanteen kuvaus
+
+ilmoitus-poik-tilanteesta.tilanne.onnettomuus: Onnettomuus
+ilmoitus-poik-tilanteesta.tilanne.tuotantohairio: Tuotantohäiriö
+ilmoitus-poik-tilanteesta.tilanne.purkutyo: Purkutyö
+ilmoitus-poik-tilanteesta.muu-kertaluonteinen-tapaus: Muu kertaluonteinen tapaus
+ilmoitus-poik-tilanteesta.tilanne._group_label: Tilanne, jota ilmoitus koskee
+
+ilmoitus-poik-tilanteesta.paastot-ja-jatteet._group_label: Päästöt ja jätteet
+ilmoitus-poik-tilanteesta.paastot-ja-jatteet.paaston-aiheuttama-vaara: Päästön tai jätteen aiheuttama ympäristö- ja terveysvaara
+ilmoitus-poik-tilanteesta.paastot-ja-jatteet.jatteen-nimi-olomuoto-ominaisuudet: Jätteen nimi, olomuoto ja vaaralliset ominaisuudet
+ilmoitus-poik-tilanteesta.paastot-ja-jatteet.jatteen-maarat: Määrä/määrät
+ilmoitus-poik-tilanteesta.paastot-ja-jatteet.muut-paastot-olomuoto-ominaisuudet: Muut päästöt, olomuoto ja vaaralliset ominaisuudet
+
+ilmoitus-poik-tilanteesta.jatehuollon-jarjestaminen._group_label: Jätehuollon järjestäminen
+ilmoitus-poik-tilanteesta.jatehuollon-jarjestaminen.keraily-varastointi-kuljetus-kasittely: Jätteiden keräily ja varastointi kiinteistöllä, kuljetus, käsittelytapa ja -paikka
