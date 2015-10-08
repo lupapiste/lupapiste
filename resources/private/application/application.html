@@ -191,10 +191,10 @@
                                 <button data-bind="click: approveApplication,
                                                visible: $root.authorization.ok('approve-application'),
                                                enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
-                                    data-test-id="approve-application"
-                                    class="positive caps">
-                                <i class="lupicon-circle-arrow-right"></i>
-                                <span data-bind="ltext: 'application.approveApplication'"></span>
+                                        data-test-id="approve-application"
+                                        class="positive caps">
+                                    <i class="lupicon-circle-arrow-right"></i>
+                                    <span data-bind="ltext: 'application.approveApplication'"></span>
                                 </button>
                                 <div data-bind="component: {name: 'export-attachments'}"></div>
                                 <button class="positive caps"
