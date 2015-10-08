@@ -32,6 +32,18 @@
                         <span class="narrow-hide" data-bind="ltext: 'help'"></span>
                     </a>
                 </div>
+                <div class="header-box" data-bind="visible: features.enabled('arkistointi') && $root.showArchiveMenuOptions">
+                    <a href="/document-search">
+                        <span class="lupicon-archives"></span>
+                        <span class="narrow-hide" data-bind="ltext: 'Dokumentit'"></span>
+                    </a>
+                </div>
+                <div class="header-box" data-bind="visible: $root.showArchiveMenuOptions">
+                    <a href="/tiedonohjaus">
+                        <span class="lupicon-tree-path"></span>
+                        <span class="narrow-hide" data-bind="ltext: 'Tiedonohjaus'"></span>
+                    </a>
+                </div>
                 <div class="header-box">
                     <a href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
                         <span class="lupicon-user"></span>

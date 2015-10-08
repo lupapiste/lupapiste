@@ -160,3 +160,6 @@
        %
        (assoc % :id (mongo/create-id)))
     tags))
+
+(defn some-organization-has-archive-enabled? [organization-ids]
+  (pos? (mongo/count :organizations {:_id {$in organization-ids} :permanent-archive-enabled true})))
