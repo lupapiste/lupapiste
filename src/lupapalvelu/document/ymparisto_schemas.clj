@@ -192,7 +192,7 @@
     {:name "paastot-ja-jatteet" :type :group
      :body [{:name "paaston-aiheuttama-vaara" :type :text :max-len 4000 :required true}
             {:name "jatteen-nimi-olomuoto-ominaisuudet" :type :text :max-len 4000 :required true}
-            {:name "jatteen-maarat" :type :string :required true}
+            {:name "jatteen-maarat" :type :text :max-len 4000 :required true}
             {:name "muut-paastot-olomuoto-ominaisuudet" :type :text :max-len 4000 :required true}]}
     {:name "jatehuollon-jarjestaminen" :type :group
      :body [{:name "keraily-varastointi-kuljetus-kasittely" :type :text :max-len 4000 :required true}]}))
