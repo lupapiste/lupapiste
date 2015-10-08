@@ -383,7 +383,7 @@
                                              ;; TODO: sync with attachments in Commons.
 ;                                             :attachments [:ilmoitus-poikkeuksellisesta-tilanteesta [:kayttoturvallisuustiedote]
 ;                                                           :kartat [:jatteen-sijainti]]
-                                             :attachments [] ; TODO
+                                             :attachments []
                                              :add-operation-allowed false
                                              :min-outgoing-link-permits 0
                                              :asianhallinta true}
@@ -393,7 +393,7 @@
                                                   :required []
                                                   ;; TODO: sync with attachments in Commons.
 ;                                                  :attachments [:maastoliikennelaki-kilpailut-ja-harjoitukset [:asemapiirros-kilpailu-tai-harjoitusalueesta]]
-                                                  :attachments [] ; TODO
+                                                  :attachments []
                                                   :add-operation-allowed false
                                                   :min-outgoing-link-permits 0
                                                   :asianhallinta true}
