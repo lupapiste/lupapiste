@@ -106,7 +106,10 @@
           </h2>
         </div>
 
-        <p data-bind="lhtml: 'inforequest.desc'" class="tab-info"></p>
+        <div data-bind="lhtml: 'inforequest.desc'" class="operation-info"></div>
+        <div class="organizationLinks"
+             data-bind="template: {name: 'organization-links-template', data: application}">
+        </div>
         <h2 data-bind="ltext: 'inforequest.attachments'"></h2>
         <div data-bind="if: application.hasAttachment">
           <table class="table" data-test-id="inforequest-attachments-table">
