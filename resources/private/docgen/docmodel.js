@@ -1412,7 +1412,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       }
 
       var appendButton = makeButton(myPath.join("_") + "_append",
-                                    loc([self.schemaI18name, myPath.join("."), "_append_label"]),
+                                    loc( util.locKeyFromDocPath(_.flatten([self.schemaI18name, myPath, "_append_label"]).join(".")) ),
                                     {icon: "lupicon-circle-plus", className: "secondary"});
       appendButton.disabled = isSubSchemaWhitelisted(subSchema);
 
