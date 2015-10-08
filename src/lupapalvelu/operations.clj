@@ -136,6 +136,7 @@
         ["jatteen-keraystoiminta" :jatteen-keraystoiminta]
         ["kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan" :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan]
         ["koeluontoinen-toiminta" :koeluontoinen-toiminta]
+        ["maa-ainesten-kotitarveotto" :maa-ainesten-kotitarveotto]
         ]]
 
       ; permit/VVVL
@@ -365,6 +366,14 @@
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
                             :asianhallinta true}
+
+   :maa-ainesten-kotitarveotto {:schema "maa-ainesten-kotitarveotto"
+                                :permit-type permit/YM
+                                :required ["kiinteisto"]
+                                :attachments [] ; [:kartat [:ottamispaikan-sijainti]
+                                :add-operation-allowed false
+                                :min-outgoing-link-permits 0
+                                :asianhallinta true}
    })
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
