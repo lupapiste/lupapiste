@@ -103,7 +103,7 @@
    :yl-uusi-toiminta                                                  "B"
    :yl-olemassa-oleva-toiminta                                        "D"
    :yl-toiminnan-muutos                                               "D"
-   :koeluontoinen-toiminta                                            "D" ; FIXME kysytty Terolta?
+   :koeluontoinen-toiminta                                            "D"
    :tonttijako                                                        "D"
    :rasitetoimitus                                                    "D"
    :rajankaynti                                                       "D"
