@@ -247,12 +247,18 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.openOskariMap = function() {
-    var coords = "&coord=" + self.location().x() + "_" + self.location().y();
-    var zoom = "&zoomLevel=12";
-    var features = "&addPoint=1&addArea=1";
-    var lang = "&lang=" + loc.getCurrentLanguage();
-    var municipality = "&municipality=" + self.municipality();
-    var url = "/oskari/fullmap.html?build=" + LUPAPISTE.config.build + "&id=" + self.id() + coords + zoom + features + lang + municipality;
+    var featureParams = ["addPoint", "addArea", "addLine", "addCircle", "addEllipse"];
+    var featuresEnabled = lupapisteApp.models.applicationAuthModel.ok("save-application-drawings") ? 1 : 0;
+    var features = _.map(featureParams, function (f) {return f + "=" + featuresEnabled;}).join("&");
+    var params = ["build=" + LUPAPISTE.config.build,
+                  "id=" + self.id(),
+                  "coord=" + self.location().x() + "_" + self.location().y(),
+                  "zoomLevel=12",
+                  "lang=" + loc.getCurrentLanguage(),
+                  "municipality=" + self.municipality(),
+                  features];
+
+    var url = "/oskari/fullmap.html?" + params.join("&");
     window.open(url);
     hub.send("track-click", {category:"Application", label:"map", event:"openOskariMap"});
   };
