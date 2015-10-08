@@ -180,6 +180,24 @@
      :max-len 4000
      :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}))
 
+(def maa-ainesten-kotitarveotto
+  (body
+    {:name "kotitarveoton-kesto"
+     :type :group
+     :body [{:name "alkanut" :type :string :subtype :number :required true}
+            {:name "jatkuu-vuoteen" :type :string :subtype :number :required true}]}
+    {:name "kotitarveoton-maarat"
+     :type :group
+     :body [{:name "kokonaismaara" :type :string :size "m" :subtype :decimal :unit :k-m3 :required true}
+            {:name "maaran-jakautuminen"
+             :type :group
+             :body [{:name "kalliokivi" :type :string :size "s" :subtype :decimal :unit :k-m3}
+                    {:name "sora-ja-hiekka" :type :string :size "s" :subtype :decimal :unit :k-m3}
+                    {:name "siltti-ja-savi" :type :string :size "s" :subtype :decimal :unit :k-m3}
+                    {:name "moreeni" :type :string :size "s" :subtype :decimal :unit :k-m3}
+                    {:name "eloperainen-maalaji" :type :string :size "s" :subtype :decimal :unit :k-m3}
+                    {:name "muu" :type :string :size "m" :unit :k-m3}]}]}))
+
 (def ilmoitus-poikkeuksellisesta-tilanteesta
   (body
     {:name "tilanne" :type :select :required true
@@ -270,3 +288,7 @@
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
             :body [{:name "Noudetaan"}
                    {:name "Postitetaan"}]}]}])
+   {:info {:name "maa-ainesten-kotitarveotto"
+           :approvable true}
+    :body maa-ainesten-kotitarveotto}
+   ])
