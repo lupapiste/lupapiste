@@ -1,0 +1,1 @@
+application.publishBulletin: Julkaise Julkipano.fi:ssä

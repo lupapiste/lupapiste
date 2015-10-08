@@ -188,6 +188,16 @@
                         <div class="application_actions">
                             <div class="stacked" data-bind="with: application">
                                 <!-- ko if: !hasInvites() -->
+                                <!-- ko if: features.enabled('publish-bulletin') -->
+                                <div class="feature">
+                                    <button data-test-id="publish-bulletin"
+                                            class="positive caps">
+                                        <i class="lupicon-circle-arrow-right"></i>
+                                        <span data-bind="ltext: 'application.publishBulletin'"></span>
+                                    </button>
+                                    <hr/>
+                                </div>
+                                <!-- /ko -->
                                 <button data-bind="click: approveApplication,
                                                visible: $root.authorization.ok('approve-application'),
                                                enable: !processing() && $root.authorization.ok('approve-application'),
