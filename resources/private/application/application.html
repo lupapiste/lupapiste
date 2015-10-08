@@ -190,7 +190,8 @@
                                 <!-- ko if: !hasInvites() -->
                                 <button data-bind="click: approveApplication,
                                                visible: $root.authorization.ok('approve-application'),
-                                               enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
+                                               enable: !processing() && $root.authorization.ok('approve-application'),
+                                               attr: {'title': loc('tooltip.approveApplication')}"
                                         data-test-id="approve-application"
                                         class="positive caps">
                                     <i class="lupicon-circle-arrow-right"></i>
