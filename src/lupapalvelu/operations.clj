@@ -371,7 +371,8 @@
                                              :permit-type permit/YM
                                              :required []
                                              ;; TODO: sync with attachments in Commons.
-;                                             :attachments [:ilmoitus-poikkeuksellisesta-tilanteesta [:kayttoturvallisuustiedote]]
+;                                             :attachments [:ilmoitus-poikkeuksellisesta-tilanteesta [:kayttoturvallisuustiedote]
+;                                                           :kartat [:jatteen-sijainti]]
                                              :attachments [] ; TODO
                                              :add-operation-allowed false
                                              :min-outgoing-link-permits 0
