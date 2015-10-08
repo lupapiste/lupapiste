@@ -2,7 +2,7 @@ operations.tree.ilmoitus-poikkeuksellisesta-tilanteesta: Ympäristönsuojelulain
 operations.ilmoitus-poikkeuksellisesta-tilanteesta: Ympäristönsuojelulain 120 §:n mukainen ilmoitus poikkeuksellisesta tilanteesta
 ilmoitus-poikkeuksellisesta-tilanteesta._group_label: Ympäristönsuojelulain 120 §:n mukainen ilmoitus poikkeuksellisesta tilanteesta
 
-ilmoitus-poik-tilanteesta.kuvaus: Poikkeksellisen tilanteen kuvaus
+ilmoitus-poik-tilanteesta.kuvaus: Poikkeuksellisen tilanteen kuvaus
 
 ilmoitus-poik-tilanteesta.tilanne.onnettomuus: Onnettomuus
 ilmoitus-poik-tilanteesta.tilanne.tuotantohairio: Tuotantohäiriö
