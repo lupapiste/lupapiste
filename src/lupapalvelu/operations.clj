@@ -136,6 +136,7 @@
         ["jatteen-keraystoiminta" :jatteen-keraystoiminta]
         ["kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan" :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan]
         ["koeluontoinen-toiminta" :koeluontoinen-toiminta]
+        ["maa-ainesten-kotitarveotto" :maa-ainesten-kotitarveotto]
         ["ilmoitus-poikkeuksellisesta-tilanteesta" :ilmoitus-poikkeuksellisesta-tilanteesta]
         ]]
 
@@ -367,6 +368,13 @@
                             :min-outgoing-link-permits 0
                             :asianhallinta true}
 
+   :maa-ainesten-kotitarveotto {:schema "maa-ainesten-kotitarveotto"
+                                :permit-type permit/YM
+                                :required ["kiinteisto"]
+                                :attachments [] ; [:kartat [:ottamispaikan-sijainti]
+                                :add-operation-allowed false
+                                :min-outgoing-link-permits 0
+                                :asianhallinta true}
    :ilmoitus-poikkeuksellisesta-tilanteesta {:schema "ilmoitus-poik-tilanteesta"
                                              :permit-type permit/YM
                                              :required []

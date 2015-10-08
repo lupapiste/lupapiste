@@ -1,0 +1,30 @@
+unit.k-m3: tuhatta m³
+operations.maa-ainesten-kotitarveotto.desc:
+operations.tree.maa-ainesten-kotitarveotto: Ilmoitus maa-ainesten kotitarveotosta
+operations.maa-ainesten-kotitarveotto: Ilmoitus maa-ainesten kotitarveotosta
+maa-ainesten-kotitarveotto.kotitarveoton-kesto.alkanut: Kotitarveotto alkanut alueella vuonna
+maa-ainesten-kotitarveotto.kotitarveoton-kesto.jatkuu-vuoteen: Kotitarveotto jatkuu arviolta vuoteen
+maa-ainesten-kotitarveotto.kotitarveoton-kesto._group_label: Kotitarveoton kesto
+maa-ainesten-kotitarveotto.kotitarveoton-maarat.kokonaismaara: Arvio kotitarveoton kokonaismäärästä
+maa-ainesten-kotitarveotto.kotitarveoton-maarat.maaran-jakautuminen.kalliokivi: Kalliokiviainesta
+maa-ainesten-kotitarveotto.kotitarveoton-maarat.maaran-jakautuminen.sora-ja-hiekka: Soraa ja hiekkaa
+maa-ainesten-kotitarveotto.kotitarveoton-maarat.maaran-jakautuminen.siltti-ja-savi: Silttiä ja savea
+maa-ainesten-kotitarveotto.kotitarveoton-maarat.maaran-jakautuminen.moreeni: Moreenia
+maa-ainesten-kotitarveotto.kotitarveoton-maarat.maaran-jakautuminen.eloperainen-maalaji: Eloperäisiä maalajeja (multaa ja liejua)
+maa-ainesten-kotitarveotto.kotitarveoton-maarat.maaran-jakautuminen.muu: Muu, mitä?
+maa-ainesten-kotitarveotto.kotitarveoton-maarat.maaran-jakautuminen._group_label: Arvio kokonaismäärän jakautumisesta (jos mahdollista)
+maa-ainesten-kotitarveotto.kotitarveoton-maarat._group_label: Maa-aineksen arvioitu ottomäärä ja laatu
+maa-ainesten-kotitarveotto._group_label: Maa-ainesten kotitarveotto
+
+attachmentType.kartat.ottamispaikan-sijainti: Peruskarttaote ottamispaikan sijainnista
+attachmentType.kartat.lantapatterin-sijainti: Lantapatterin sijainti
+attachmentType.kartat.jatteen-sijainti: Jätteen sijainti
+attachmentType.ilmoitus-poikkeuksellisesta-tilanteesta.kayttoturvallisuustiedote: Käyttöturvallisuustiedote
+attachmentType.ilmoitus-poikkeuksellisesta-tilanteesta._group_label: Poikkeuksellinen tilanne
+attachmentType.kartat.luonnonmuistomerkin-sijainti-kartalla: Luonnonmuistomerkin sijainti
+attachmentType.kartat.sailion-ja-rakenteiden-sijainti-kartalla: Säiliön ja rakenteiden sijainti
+attachmentType.ilmoitus-poikkeuksellisesta-tilanteesta.kayttoturvallisuustiedote: Käyttöturvallisuustiedote
+attachmentType.ilmoitus-poikkeuksellisesta-tilanteesta._group_label: Poikkeuksellinen tilanne
+attachmentType.kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan.sailion-tarkastuspoytakirja: Säiliön tarkastuspöytäkirja
+attachmentType.kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan.kiinteiston-omistajien-suostumus: Kiinteistön omistajiensuostumus
+attachmentType.kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan._group_label: Käytöstpoistetun öljy- tai emikaalisäiliönjättäminen maaperään

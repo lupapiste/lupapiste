@@ -129,6 +129,7 @@
    :muistomerkin-rauhoittaminen                                       "D"
    :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan  "D"
    :ilmoitus-poikkeuksellisesta-tilanteesta                           "D"
+   :maa-ainesten-kotitarveotto                                        "D"
    })
 
 (defn- export [collection query fields]
