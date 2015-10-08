@@ -13,7 +13,7 @@ ilmoitus-poik-tilanteesta.tilanne._group_label: Tilanne, jota ilmoitus koskee
 ilmoitus-poik-tilanteesta.paastot-ja-jatteet._group_label: Päästöt ja jätteet
 ilmoitus-poik-tilanteesta.paastot-ja-jatteet.paaston-aiheuttama-vaara: Päästön tai jätteen aiheuttama ympäristö- ja terveysvaara
 ilmoitus-poik-tilanteesta.paastot-ja-jatteet.jatteen-nimi-olomuoto-ominaisuudet: Jätteen nimi, olomuoto ja vaaralliset ominaisuudet
-ilmoitus-poik-tilanteesta.paastot-ja-jatteet.jatteen-maarat: Määrä/määrät
+ilmoitus-poik-tilanteesta.paastot-ja-jatteet.jatteen-maarat: Jätteiden määrä/määrät
 ilmoitus-poik-tilanteesta.paastot-ja-jatteet.muut-paastot-olomuoto-ominaisuudet: Muut päästöt, olomuoto ja vaaralliset ominaisuudet
 
 ilmoitus-poik-tilanteesta.jatehuollon-jarjestaminen._group_label: Jätehuollon järjestäminen
