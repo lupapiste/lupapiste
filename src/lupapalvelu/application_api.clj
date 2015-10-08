@@ -711,3 +711,10 @@
         redirect-url               (apply str url-parts)]
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
+
+(defcommand publish-bulletin
+  {:parameters [:id]
+   :user-roles #{:authority}
+   :states     states/all-application-states}
+  [_]
+  (ok))
