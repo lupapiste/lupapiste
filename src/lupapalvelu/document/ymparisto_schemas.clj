@@ -180,6 +180,23 @@
      :max-len 4000
      :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}))
 
+(def ilmoitus-poikkeuksellisesta-tilanteesta
+  (body
+    kuvaus
+    {:name "tilanne" :type :select :required true
+             :other-key "muu-kertaluonteinen-tapaus"
+             :body [{:name "onnettomuus"}
+                    {:name "tuotantohairio"}
+                    {:name "purkutyo"}]}
+    {:name "muu-kertaluonteinen-tapaus" :type :string}
+    {:name "paastot-ja-jatteet" :type :group
+     :body [{:name "paaston-aiheuttama-vaara" :type :text :max-len 4000 :required true}
+            {:name "jatteen-nimi-olomuoto-ominaisuudet" :type :text :max-len 4000 :required true}
+            {:name "jatteen-maarat" :type :text :max-len 4000 :required true}
+            {:name "muut-paastot-olomuoto-ominaisuudet" :type :text :max-len 4000 :required true}]}
+    {:name "jatehuollon-jarjestaminen" :type :group
+     :body [{:name "keraily-varastointi-kuljetus-kasittely" :type :text :max-len 4000 :required true}]}))
+
 
 (defschemas
   1
@@ -233,6 +250,9 @@
    {:info {:name "kaytostapoistetun-sailion-jattaminen-maaperaan"
            :order 1}
     :body kaytostapoistetun-sailion-jattaminen-maaperaan}
+   {:info {:name "ilmoitus-poik-tilanteesta"
+           :order 1}
+    :body ilmoitus-poikkeuksellisesta-tilanteesta}
    {:info {:name "paatoksen-toimitus"
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
