@@ -191,7 +191,9 @@
 
                                 <!-- ko if: features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin')-->
                                 <div class="feature">
-                                    <button data-bind="visible: $root.authorization.ok('publish-bulletin')"
+                                    <button data-bind="visible: $root.authorization.ok('publish-bulletin'),
+                                                       enable: !processing(),
+                                                       attr: {'title': loc('tooltip.publishBulletin')}"
                                             data-test-id="publish-bulletin"
                                             class="positive caps">
                                         <i class="lupicon-circle-arrow-right"></i>
