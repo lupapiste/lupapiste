@@ -137,6 +137,7 @@
         ["kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan" :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan]
         ["koeluontoinen-toiminta" :koeluontoinen-toiminta]
         ["ilmoitus-poikkeuksellisesta-tilanteesta" :ilmoitus-poikkeuksellisesta-tilanteesta]
+        ["maastoliikennelaki-kilpailut-ja-harjoitukset" :maastoliikennelaki-kilpailut-ja-harjoitukset]
         ]]
 
       ; permit/VVVL
@@ -377,6 +378,16 @@
                                              :add-operation-allowed false
                                              :min-outgoing-link-permits 0
                                              :asianhallinta true}
+   :maastoliikennelaki-kilpailut-ja-harjoitukset {:schema "maastoliikennelaki-kilpailut-ja-harjoitukset"
+                                                  :permit-type permit/YM
+                                                  :required []
+                                                  ;; TODO: sync with attachments in Commons.
+;                                                  :attachments [:ilmoitus-poikkeuksellisesta-tilanteesta [:kayttoturvallisuustiedote]
+;                                                                :kartat [:jatteen-sijainti]]
+                                                  :attachments [] ; TODO
+                                                  :add-operation-allowed false
+                                                  :min-outgoing-link-permits 0
+                                                  :asianhallinta true}
    })
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]

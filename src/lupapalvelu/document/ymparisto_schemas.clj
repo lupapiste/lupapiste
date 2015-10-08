@@ -196,6 +196,10 @@
     {:name "jatehuollon-jarjestaminen" :type :group
      :body [{:name "keraily-varastointi-kuljetus-kasittely" :type :text :max-len 4000 :required true}]}))
 
+(def maastoliikennelaki-kilpailut-ja-harjoitukset
+  ;; TODO
+  )
+
 
 (defschemas
   1
@@ -252,15 +256,17 @@
    {:info {:name "ilmoitus-poik-tilanteesta"
            :order 1}
     :body ilmoitus-poikkeuksellisesta-tilanteesta}
-   {:info {:name "paatoksen-toimitus"
-           :order 9999}
-    :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
-            :body [{:name "Noudetaan"}
-                   {:name "Postitetaan"}]}]}
-
    {:info {:name "jatteen-kerays"}
     :body jatteen-keraystoiminta-ilmoitus}
    {:info {:name "koeluontoinen-toiminta"}
     :body (body
             koeluontoinen-toiminta
-            kesto-mini)}])
+            kesto-mini)}
+   {:info {:name "maastoliikennelaki-kilpailut-ja-harjoitukset"
+           :order 1}
+    :body maastoliikennelaki-kilpailut-ja-harjoitukset}
+   {:info {:name "paatoksen-toimitus"
+           :order 9999}
+    :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
+            :body [{:name "Noudetaan"}
+                   {:name "Postitetaan"}]}]}])
