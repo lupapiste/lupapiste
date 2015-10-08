@@ -69,7 +69,7 @@
     :states     #{:draft :answered :open :submitted :complement-needed}
     :pre-checks [application/validate-authority-in-drafts
                  (fn [{data :data} application]
-                   (if-let [document (domain/get-document-by-id application (:docId data))]
+                   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
                      (cond
                        (deny-remove-of-last-document document application) (fail :error.removal-of-last-document-denied)
                        (deny-remove-of-primary-operation document application) (fail! :error.removal-of-primary-document-denied))))]}
