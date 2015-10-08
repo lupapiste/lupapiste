@@ -182,7 +182,6 @@
 
 (def ilmoitus-poikkeuksellisesta-tilanteesta
   (body
-    kuvaus
     {:name "tilanne" :type :select :required true
              :other-key "muu-kertaluonteinen-tapaus"
              :body [{:name "onnettomuus"}
