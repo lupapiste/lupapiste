@@ -579,18 +579,19 @@
                                {:name "sahkoKytkin" :type :checkbox}
                                {:name "maakaasuKytkin" :type :checkbox}
                                {:name "kaapeliKytkin" :type :checkbox}]})
+
 (def varusteet {:name "varusteet" :type :group :layout :vertical
-                                                     :body [{:name "sahkoKytkin" :type :checkbox}
-                                                            {:name "kaasuKytkin" :type :checkbox}
-                                                            {:name "viemariKytkin" :type :checkbox}
-                                                            {:name "vesijohtoKytkin" :type :checkbox}
-                                                            {:name "hissiKytkin" :type :checkbox}
-                                                            {:name "koneellinenilmastointiKytkin" :type :checkbox}
-                                                            {:name "lamminvesiKytkin" :type :checkbox}
-                                                            {:name "aurinkopaneeliKytkin" :type :checkbox}
-                                                            {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
-                                                            {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
-                                                            {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
+                :body [{:name "sahkoKytkin" :type :checkbox}
+                       {:name "kaasuKytkin" :type :checkbox}
+                       {:name "viemariKytkin" :type :checkbox}
+                       {:name "vesijohtoKytkin" :type :checkbox}
+                       {:name "hissiKytkin" :type :checkbox}
+                       {:name "koneellinenilmastointiKytkin" :type :checkbox}
+                       {:name "lamminvesiKytkin" :type :checkbox}
+                       {:name "aurinkopaneeliKytkin" :type :checkbox}
+                       {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
+                       {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
+                       {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
 
 (def luokitus {:name "luokitus"
                :type :group

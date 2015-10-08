@@ -134,6 +134,7 @@
       ["muut-ymparistoluvat"
        [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]
         ["jatteen-keraystoiminta" :jatteen-keraystoiminta]
+        ["kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan" :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan]
         ["koeluontoinen-toiminta" :koeluontoinen-toiminta]
         ]]
 
@@ -324,6 +325,14 @@
   {:muistomerkin-rauhoittaminen  {:schema "luonnonmuistomerkin-rauhoittaminen"
                                   :permit-type permit/YM
                                   :required []
+                                  ;; TODO: sync with attachments in Commons.
+;                                  :attachments [:muistomerkin-rauhoittaminen [:kirjallinen-aineisto
+;                                                                              :lainhuutotodistus
+;                                                                              :kauppakirja
+;                                                                              :kartta
+;                                                                              :valokuva-kohteesta
+;                                                                              :kohdekuvaus
+;                                                                              :selvitys-omistusoikeudesta]]
                                   :attachments []
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0
@@ -336,6 +345,19 @@
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
                             :asianhallinta true}
+
+   :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan {:schema "kaytostapoistetun-sailion-jattaminen-maaperaan"
+                                                                      :permit-type permit/YM
+                                                                      :required []
+                                                                      ;; TODO: sync with attachments in Commons.
+;                                                                      :attachments [:kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan [:karttapiirros
+;                                                                                                                                                       :sailion-tarkastuspoytakirja
+;                                                                                                                                                       :kiinteiston-omistajien-suostumus]]
+                                                                      :attachments []
+                                                                      :add-operation-allowed false
+                                                                      :min-outgoing-link-permits 0
+                                                                      :asianhallinta true}
+
    :koeluontoinen-toiminta {:schema "koeluontoinen-toiminta"
                             :permit-type permit/YM
                             :required []
