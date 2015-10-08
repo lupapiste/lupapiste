@@ -137,6 +137,7 @@
         ["kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan" :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan]
         ["koeluontoinen-toiminta" :koeluontoinen-toiminta]
         ["maa-ainesten-kotitarveotto" :maa-ainesten-kotitarveotto]
+        ["ilmoitus-poikkeuksellisesta-tilanteesta" :ilmoitus-poikkeuksellisesta-tilanteesta]
         ]]
 
       ; permit/VVVL
@@ -374,6 +375,16 @@
                                 :add-operation-allowed false
                                 :min-outgoing-link-permits 0
                                 :asianhallinta true}
+   :ilmoitus-poikkeuksellisesta-tilanteesta {:schema "ilmoitus-poik-tilanteesta"
+                                             :permit-type permit/YM
+                                             :required []
+                                             ;; TODO: sync with attachments in Commons.
+;                                             :attachments [:ilmoitus-poikkeuksellisesta-tilanteesta [:kayttoturvallisuustiedote]
+;                                                           :kartat [:jatteen-sijainti]]
+                                             :attachments [] ; TODO
+                                             :add-operation-allowed false
+                                             :min-outgoing-link-permits 0
+                                             :asianhallinta true}
    })
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
