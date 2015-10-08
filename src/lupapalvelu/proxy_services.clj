@@ -7,6 +7,7 @@
             [noir.response :as resp]
             [sade.coordinate :as coord]
             [sade.env :as env]
+            [sade.strings :as ss]
             [sade.util :refer [dissoc-in select ->double]]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]))
 
@@ -47,7 +48,8 @@
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn find-addresses-proxy [request]
-  (let [term (get (:params request) :term)]
+  (let [term (get (:params request) :term)
+        term (ss/replace term #"\p{Punct}" " ")]
     (if (string? term)
       (resp/json (or (find-address/search term) []))
       (resp/status 400 "Missing query param 'term'"))))
