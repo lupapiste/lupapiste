@@ -271,9 +271,11 @@
            :order 1}
     :body [kuvaus]}
    {:info {:name "luonnonmuistomerkin-rauhoittaminen"
+           :approvable true
            :order 1}
     :body luonnonmuistomerkin-rauhoittaminen}
    {:info {:name "kaytostapoistetun-sailion-jattaminen-maaperaan"
+           :approvable true
            :order 1}
     :body kaytostapoistetun-sailion-jattaminen-maaperaan}
    {:info {:name "ilmoitus-poik-tilanteesta"
@@ -286,6 +288,7 @@
             koeluontoinen-toiminta
             kesto-mini)}
    {:info {:name "maastoliikennelaki-kilpailut-ja-harjoitukset"
+           :approvable true
            :order 1}
     :body maastoliikennelaki-kilpailut-ja-harjoitukset}
    {:info {:name "maa-ainesten-kotitarveotto"
