@@ -164,6 +164,7 @@
   (body
     {:name "kuvaus-toiminnosta"
      :type :text
+     :required true
      :max-len 4000
      :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
     {:name "raaka-aineet"
@@ -177,11 +178,7 @@
     {:name "ymparistonsuojeluselvitys"
      :type :text
      :max-len 4000
-     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}
-    {:name "toiminnan-kesto"
-     :type :group
-     :body [{:name "aloituspvm" :type :date}
-            {:name "loppupvm" :type :date}]}))
+     :placeholder "koeluontoinen-toiminta.kuvaus.placeholder"}))
 
 
 (defschemas
@@ -245,4 +242,6 @@
    {:info {:name "jatteen-kerays"}
     :body jatteen-keraystoiminta-ilmoitus}
    {:info {:name "koeluontoinen-toiminta"}
-    :body koeluontoinen-toiminta}])
+    :body (body
+            koeluontoinen-toiminta
+            kesto-mini)}])
