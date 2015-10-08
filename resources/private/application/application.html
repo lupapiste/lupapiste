@@ -394,15 +394,8 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="organizationLinks">
-                            <div class="organization-links" data-bind="visible: organizationLinks() && organizationLinks().length">
-                                <h3 data-bind="ltext: 'organization.links'"></h3>
-                                <ul data-bind="foreach: organizationLinks">
-                                    <li>
-                                        <a data-bind="text: name[loc.getCurrentLanguage()], attr: {href: url}" href="#" target="_blank"></a>
-                                    </li>
-                                </ul>
-                            </div>
+                        <div class="organizationLinks"
+                             data-bind="template: 'organization-links-template'">
                         </div>
                         <p data-bind="lhtml: 'required.field.desc'"></p>
                         <!-- docgen generated content: -->
