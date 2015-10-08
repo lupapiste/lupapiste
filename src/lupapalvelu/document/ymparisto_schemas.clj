@@ -183,13 +183,12 @@
 (def ilmoitus-poikkeuksellisesta-tilanteesta
   (body
     kuvaus
-    {:name "tilanne-jota-ilmoitus-koskee" :type :group
-     :body [{:name "tilanne" :type :select :required true
+    {:name "tilanne" :type :select :required true
              :other-key "muu-kertaluonteinen-tapaus"
              :body [{:name "onnettomuus"}
                     {:name "tuotantohairio"}
                     {:name "purkutyo"}]}
-            {:name "muu-kertaluonteinen-tapaus" :type :string}]}
+    {:name "muu-kertaluonteinen-tapaus" :type :string}
     {:name "paastot-ja-jatteet" :type :group
 ;            :group-help "paastot-ja-jatteet.help"
             :body [{:name "oljysailion-putkijarjestelma" :type :select :required true
