@@ -147,13 +147,14 @@ $app-gray-darkest: $gray187;
       //width: 30%;
       display: table-cell;
       margin-bottom: 0;
-      padding: 6px;
+      padding: {
+        top: 6px;
+        bottom: 6px;
+        left: 6px;
+      }
     }
     select {
       vertical-align: top;
-    }
-    .application_summary_text, ul {
-      //width: 69%;
     }
     ul {
       li {
@@ -342,13 +343,18 @@ $app-gray-darkest: $gray187;
 .application-summary-table > div {
   border-bottom: 1px solid $app-gray-dark;
   display: table-row;
-  :first-child {
-    padding-right: 2em;
-  }
 }
 
 .application-summary-table > div > span {
   width: 100%;
+}
+
+.application-summary-table > div > p {
+  padding-right: 2em;
+  @media (max-width: $narrow-breakpoint) {
+    white-space: nowrap;
+  }
+
 }
 
 .application_summary_info > div.state-indication,
