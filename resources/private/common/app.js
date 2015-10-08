@@ -202,6 +202,14 @@ var LUPAPISTE = LUPAPISTE || {};
       });
     };
 
+    self.showArchiveMenuOptions = ko.observable(false);
+    if (util.getIn(window, ["lupapisteApp", "models", "globalAuthModel"])) {
+      self.showArchiveMenuOptions(lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled"));
+    }
+    hub.subscribe("global-auth-model-loaded", function() {
+      self.showArchiveMenuOptions(lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled"));
+    });
+
     /**
      * Complete the App initialization after DOM is loaded.
      */
@@ -242,7 +250,8 @@ var LUPAPISTE = LUPAPISTE || {};
       var model = {
         currentLanguage: loc.getCurrentLanguage(),
         openStartPage: openStartPage,
-        showUserMenu: self.showUserMenu
+        showUserMenu: self.showUserMenu,
+        showArchiveMenuOptions: self.showArchiveMenuOptions
       };
 
       $("#app").applyBindings(lupapisteApp.models.rootVMO);
