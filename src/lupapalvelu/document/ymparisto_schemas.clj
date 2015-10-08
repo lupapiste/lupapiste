@@ -283,12 +283,13 @@
    {:info {:name "maastoliikennelaki-kilpailut-ja-harjoitukset"
            :order 1}
     :body maastoliikennelaki-kilpailut-ja-harjoitukset}
+   {:info {:name "maa-ainesten-kotitarveotto"
+           :approvable true}
+    :body maa-ainesten-kotitarveotto}
+
    {:info {:name "paatoksen-toimitus"
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
             :body [{:name "Noudetaan"}
-                   {:name "Postitetaan"}]}]}])
-   {:info {:name "maa-ainesten-kotitarveotto"
-           :approvable true}
-    :body maa-ainesten-kotitarveotto}
+                   {:name "Postitetaan"}]}]}
    ])
