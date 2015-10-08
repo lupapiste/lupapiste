@@ -234,7 +234,8 @@
                    :wordpress anyone
                    :welcome anyone
                    :oskari anyone
-                   :neighbor anyone})
+                   :neighbor anyone
+                   :bulletin anyone})
 
 (defn cache-headers [resource-type]
   (if (env/feature? :no-cache)
