@@ -31,8 +31,6 @@ $app-gray-darkest: $gray187;
   // Preamble is not used in neighbors' view (no actions).
   .preamble {
     position: relative;
-    /* float: left; */
-    //width: 100%;
     padding: {
       left: $map-width;
       right: 24%;
@@ -51,8 +49,9 @@ $app-gray-darkest: $gray187;
       margin-bottom: $marginM;
     }
     .application_actions {
+      // Note: no width, because want the stacked buttons
+      // determine their size autonomously.
       right: 0;
-      width: 24%;
     }
     @media (max-width: $narrow-breakpoint) {
       padding: 0;
@@ -65,7 +64,6 @@ $app-gray-darkest: $gray187;
         float: left;
         margin: {
           left: $marginL; // Align with summary info.
-          //bottom: $marginM; // Especially needed when no tabs.
         }
       }
       .application_actions {
@@ -83,11 +81,6 @@ $app-gray-darkest: $gray187;
     line-height: 24px;
     margin-bottom: $marginS;
   }
-  /* button { */
-  /*   margin: 0; */
-  /*   margin-bottom: $marginS; */
-  /* } */
-
   .application-map-container {
     position: relative;
     .map{
@@ -113,14 +106,9 @@ $app-gray-darkest: $gray187;
   .application_summary_info {
     margin: 0 $marginL $marginL $marginL;
     color: $gray51;
-    //float: left;
-    //width: 50%;
     h1 {
       width: 100%;
       color: $gray51;
-      .address {
-        //white-space: nowrap;
-      }
       a {
         padding-left: 32px;
         background-position: 8px -4200px;
@@ -130,11 +118,10 @@ $app-gray-darkest: $gray187;
       color: $gray51;
     }
     a {
-        //color: white;
-        font-size: $font-size-body;
-        text-transform: none;
-        height: auto;
-        width: auto;
+      font-size: $font-size-body;
+      text-transform: none;
+      height: auto;
+      width: auto;
     }
     .summary-help {
       width: 100%;
@@ -150,25 +137,16 @@ $app-gray-darkest: $gray187;
       display: block;
     }
 
-    .remove-link-permit {
-      //color: rgb(242,242,242);
-    }
-
     .link-permit-item {
-      //color: rgb(242,242,242);
       text-decoration: none;
     }
 
-    /* div:nth-child(even) { */
-    /*   background:rgb(127,127,127); */
-    /* } */
     p, .application_summary_text, ul {
       vertical-align: top;
       display: inline-block;
       width: 30%;
       margin-bottom: 0;
       padding: 6px;
-      //color: rgb(242,242,242);
     }
     select {
       vertical-align: top;
@@ -203,11 +181,9 @@ $app-gray-darkest: $gray187;
         &:after {
             border-left: 11px solid $green-dark;
           }
-
       }
 
       div {
-        //background-color: $lp-dark-grey;
         height: 24px;
         span {
           //color: darken($lp-light-grey, 10%);
@@ -326,11 +302,9 @@ $app-gray-darkest: $gray187;
   }
 
   .application_actions {
-    //background-color: $lp-dark-grey;
     position: absolute;
     right: 0;
     top: $marginM;
-    //width: $cols3;
     .muncipality-info {
       background: darken($lp-light-grey, 15%);
       width: 100%;
@@ -355,9 +329,6 @@ $app-gray-darkest: $gray187;
        color: rgb(242,242,242);
       }
     }
-    /* button { */
-    /*   width: 100%; */
-    /* } */
   }
 }
 
@@ -427,11 +398,6 @@ $app-gray-darkest: $gray187;
   margin-top: $baseline;
   .process-next {
     float: right;
-    /* span { */
-    /*   margin-right: -$marginS; */
-    /* } */
-  }
-  .process-previous {
   }
 }
 
@@ -718,21 +684,12 @@ $app-gray-darkest: $gray187;
 }
 
 .requiredField-line {
-  /* margin-bottom: $marginS; */
-  /* vertical-align: top; */
   display: table-row;
-  /* padding: $marginS; */
-  /* height: 24px; */
   span, a {
-  /*   vertical-align: top; */
-  /*   line-height: 14px; */
-  /*   max-height: 16px; */
     display: table-cell;
   }
   a {
     padding-left: $marginM;
-//    font-size: 14px;
-
   }
   .required-field-error-element-name {
     padding-left: $marginS;
@@ -837,13 +794,6 @@ $app-gray-darkest: $gray187;
     display: block;
   }
 }
-
-
-// Can be removed when the buttons are removed
-// from H2 bar.
-/* h2.sticky { */
-/*   margin-bottom: $marginM; */
-/* } */
 
 h2 > i.is-right {
   float: right;
