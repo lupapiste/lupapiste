@@ -2,12 +2,12 @@
   (:require [sade.util :as util]
             [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.operations :as operations]))
 
 (defn maa-aines-canonical [application lang]
   (let [documents (tools/unwrapped (canonical-common/documents-by-type-without-blanks application))
         kuvaus    (-> documents :maa-aineslupa-kuvaus first :data :kuvaus)
-        hakija-key (keyword (permit/get-applicant-doc-schema (permit/permit-type application)))]
+        hakija-key (keyword (operations/resolve-applicant-doc-schema application))]
     {:MaaAinesluvat
      {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
       :maaAineslupaAsiatieto

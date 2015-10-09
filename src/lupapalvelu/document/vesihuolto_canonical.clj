@@ -2,8 +2,8 @@
   (:require [lupapalvelu.document.vesihuolto-schemas :as vh-schemas]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.permit :as permit]
             [sade.strings :refer [lower-case]]))
 
 
@@ -55,7 +55,7 @@
         kuvaus (-> (:hankkeen-kuvaus-vesihuolto documents) first :data :kuvaus)
         operation-name (->> (:primaryOperation application) :name (i18n/localize lang "operations"))
         asian-kuvaus (str operation-name " / " kuvaus)
-        hakija-key (keyword (permit/get-applicant-doc-schema (permit/permit-type application)))]
+        hakija-key (keyword (operations/resolve-applicant-doc-schema application))]
     {:Vesihuoltolaki
      {:toimituksenTiedot (toimituksen-tiedot application lang)
       :vapautukset

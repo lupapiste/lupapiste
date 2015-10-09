@@ -115,7 +115,7 @@
         op-meta (operations/get-primary-operation-metadata application)
         original-schema-names (->> (select-keys op-meta [:required :optional]) vals (apply concat))
         original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
-    (ok :partyDocumentNames (conj original-party-documents (permit/get-applicant-doc-schema (permit/permit-type application))))))
+    (ok :partyDocumentNames (conj original-party-documents (operations/resolve-applicant-doc-schema application)))))
 
 (defcommand mark-seen
   {:parameters       [:id type]
