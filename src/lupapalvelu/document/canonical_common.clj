@@ -351,7 +351,6 @@
 
 (defn get-parties [documents]
   (let [hakija-key (let [hakija-docs (filter #(= "hakija" (-> % :schema-info :subtype)) documents)]
-                     (assert (= 1 (count hakija-docs)))
                      (-> hakija-docs first :schema-info :name))]
     (filter #(seq (:Osapuoli %))
             (into
