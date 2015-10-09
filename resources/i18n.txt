@@ -1,26 +1,3 @@
-operations.jatteen-keraystoiminta: Ilmoitus jätteen ammattimaisesta keräystoiminnasta
-jatteen-kerays.toiminnan-muoto.uusiToiminta: Uusi toiminta
-jatteen-kerays.toiminnan-muoto.muutosToimintaan: Muutos toimintaan
-jatteen-kerays.toiminnan-muoto.olemassaOlevaToiminta: Olemassa oleva toiminta
-jatteen-kerays.toiminnan-muoto._group_label: Keräystoiminnan muoto
-jatteen-kerays.keraystoiminnan-jarjestaja.kunnanKerays: Kunta
-jatteen-kerays.keraystoiminnan-jarjestaja.tuottajanKerays: Tuottaja/tuottajayhteisö
-jatteen-kerays.keraystoiminnan-jarjestaja.muuKerays: Muu toimija
-jatteen-kerays.keraystoiminnan-jarjestaja._group_label: Keräystoiminnan järjestäjä
-jatteen-kerays.jatteen-vastuullinen.kunnanJate: Kunta
-jatteen-kerays.jatteen-vastuullinen.tuottajanJate: Tuottaja/tuottajayhteisö
-jatteen-kerays.jatteen-vastuullinen.muuJate: Muu taho
-jatteen-kerays.jatteen-vastuullinen._group_label: Kerättävän jätteen vastuullinen taho
-jatteen-keraystoiminta._group_label: Jätteen ammattimainen keräystoiminta
-jatteen-kerays._group_label: Jätteen ammattimainen keräystoiminta
-jatteen-kerays.jatteen-vastuullinen: Kerättävän jätteen vastuullinen taho
-jatteen-kerays.keraystoiminnan-jarjestaja: Keräystoiminnan järjestäjä
-jatteen-kerays.keraystoiminnan-jarjestaja.muuKeraysValue: Muu, mikä?
-jatteen-kerays.jatteen-vastuullinen.muuJateValue: Muu, mikä?
-jatteen-kerays.vastaanottopaikat-liitteena: Tiedot vastaanottopaikoista ilmoituksen liitteenä.
-operations.tree.jatteen-keraystoiminta: Ilmoitus jätteen ammattimaisesta keräystoiminnasta
-operations.jatteen-keraystoiminta.desc:
-
 operations.tree.lannan-varastointi: Ilmoitus lannan varastoinnista
 operations.lannan-varastointi: Ilmoitus lannan varastoinnista
 operations.lannan-varastointi.desc: Tällä lomakkeella ilmoitetaan kunnan ympäristönsuojeluviranomaiselle <p><ul><li> 1) Maataloudesta peräisin olevien nitraattien vesiin pääsyn rajoittamisesta annetun valtioneuvoston asetuksen (931/2000) (nitraattiasetus) 4 §:n 3 momentissa tarkoitetusta poikkeamisesta karjanlannan varastointitilalle 4 §:n 1 momentissa edellytetystä varastointitilavuudesta (Lomakkeesta täytetään ilmoittajaa koskevat tiedot sekä tiedot tilan eläinmäärästä ja lannan varastointiin vaikuttavista seikoista. Poikkeamistavan osalta täytetään joku/jotkut tarvittavista kohdista A, B, C tai D. Mikäli kohtien A-C mukaisia vastaanottajia on useita, annetaan jokaisesta vastaavat tiedot liitteellä.)</li><li> 2) Muusta kuin kohdassa 1 tarkoitetusta lannan kaukovarastoinnista patterissanitraattiasetuksen 3 §:ssä ja liitteessä 1 annettujen määräysten mukaisesti (Lomakkeesta täytetään ilmoittajaa koskevat tiedot sekä tiedot tilan eläinmäärästä ja lannan kaukovarastointiin patterissa vaikuttavista seikoista. Patteroinnin osalta täytetään kohta D.)</li></ul></p><p>Ilmoitus tulee antaa vähintään kuukautta ennen, kuin on tarkoitus ryhtyä kohdassa 1 tarkoitettuun poikkeamiseen tähtääviin toimenpiteisiin tai kohdassa 2 tarkoitettuun muuhun lannan varastoimiseen patterissa.</p><p>Ilmoitus tulee uusia aina silloin, kun suunnitellut toimenpiteet poikkeaisivat aiemmin tehdyssä ilmoituksessa esitetyistä toimenpiteistä.</p><p>Ilmoituksen tekee se maataloustoiminnan harjoittaja, jonka on tarkoitus poiketa nitraattiasetuksessa edellytetystä lannan varastointitilavuudesta (kohta 1) tai jonka on tarkoitus ryhtyä muuhun lannan varastoimiseen patterissa (kohta 2).</p>

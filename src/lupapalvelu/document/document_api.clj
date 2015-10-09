@@ -11,6 +11,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.wfs :as wfs]
             [clj-time.format :as tf]))
 
@@ -50,34 +51,34 @@
                                                           (tf/unparse (tf/formatter "dd.MM.yyyy") (tf/parse (tf/formatter "yyyyMMdd") (:rekisterointipvm ktj-tiedot)))
                                                           (catch Exception e (:rekisterointipvm ktj-tiedot)))
                                                         "")]]]
-        (println updates)
         (doc-persistence/persist-model-updates (:application command) "documents" document updates (sade.core/now))))
     (ok :doc (:id document))))
 
 (defn- deny-remove-of-primary-operation [document application]
   (= (get-in document [:schema-info :op :id]) (get-in application [:primaryOperation :id])))
 
-(defn- deny-remove-of-last-document [document documents]
-  (let [schema (:schema-info document)
-        schema_count (count ( (keyword (:name schema)) (group-by (comp keyword :name :schema-info) documents)))]
-    (and (:deny-removing-last-document schema) (= schema_count 1))))
+(defn- deny-remove-of-last-document [{schema-info :schema-info} {documents :documents}]
+  (when schema-info
+    (let [info (:info (schemas/get-schema schema-info))
+          doc-count (count (domain/get-documents-by-name documents (:name info)))]
+      (and (:deny-removing-last-document info) (<= doc-count 1)))))
 
 (defcommand remove-doc
   {:parameters  [id docId]
     :user-roles #{:applicant :authority}
     :states     #{:draft :answered :open :submitted :complement-needed}
-    :pre-checks [application/validate-authority-in-drafts]}
+    :pre-checks [application/validate-authority-in-drafts
+                 (fn [{data :data} application]
+                   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
+                     (cond
+                       (deny-remove-of-last-document document application) (fail :error.removal-of-last-document-denied)
+                       (deny-remove-of-primary-operation document application) (fail! :error.removal-of-primary-document-denied))))]}
   [{:keys [application created] :as command}]
-  (let [document (domain/get-document-by-id application docId)]
-    (when (deny-remove-of-primary-operation document application)
-      (fail! :error.removal-of-primary-document-denied))
-    (when (deny-remove-of-last-document document (:documents application))
-      (fail! :error.removal-of-last-document-denied))
-    (when-not document
-      (fail! :error.document-not-found))
-
-    (doc-persistence/remove! command docId "documents")
-    (ok)))
+  (if-let [document (domain/get-document-by-id application docId)]
+    (do
+      (doc-persistence/remove! command docId "documents")
+      (ok))
+    (fail :error.document-not-found)))
 
 (defcommand update-doc
   {:parameters [id doc updates]

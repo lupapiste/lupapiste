@@ -39,13 +39,14 @@
   `(binding [*db-name* ~db-name]
      ~@body))
 
-(defn db-selection-middleware [handler]
+(defn ^{:perfmon-exclude true} db-selection-middleware
+  [handler]
   (fn [request]
     (let [db-name (get-in request [:cookies "test_db_name" :value] default-db-name)]
       (with-db db-name
         (handler request)))))
 
-(defn get-db []
+(defn ^{:perfmon-exclude true} get-db []
   {:pre [@connection]}
   (locking dbs
     (or (get @dbs *db-name*)
@@ -53,30 +54,30 @@
           (swap! dbs assoc *db-name* db)
           db))))
 
-(defn get-gfs []
+(defn ^{:perfmon-exclude true} get-gfs []
   (m/get-gridfs @connection (.getName (get-db))))
 
-(defn with-_id [m]
+(defn ^{:perfmon-exclude true} with-_id [m]
   (if-let [id (:id m)]
     (-> m
       (assoc :_id id)
       (dissoc :id))
     m))
 
-(defn with-id [m]
+(defn ^{:perfmon-exclude true} with-id [m]
   (if-let [id (:_id m)]
     (-> m
       (assoc :id id)
       (dissoc :_id))
     m))
 
-(defn create-id []
+(defn ^{:perfmon-exclude true} create-id []
   (str (ObjectId.)))
 
 ; http://docs.mongodb.org/manual/reference/limits/#Restrictions-on-Field-Names
 (def key-pattern #"^[^\.\$\u0000]+$")
 
-(defn valid-key? [k]
+(defn ^{:perfmon-exclude true} valid-key? [k]
   (if k
     (if (instance? ObjectId k)
       true
@@ -84,17 +85,17 @@
         (boolean (and (re-matches key-pattern key) (< (clojure.core/count key) 800)))))
     false))
 
-(defn operator? [s]
+(defn ^{:perfmon-exclude true} operator? [s]
   (contains? operators s))
 
-(defn generate-array-updates
+(defn ^{:perfmon-exclude true} generate-array-updates
   "Returns a map of mongodb array update paths to be used as a value for $set or $unset operation.
    E.g., (generate-array-updates :attachments [true nil nil true nil] true? \"k\" \"v\")
          => {\"attachments.0.k\" \"v\", \"attachments.3.k\" \"v\"}"
   [array-name array pred k v]
   (reduce (fn [m i] (assoc m (str (name array-name) \. i \. (name k)) v)) {} (util/positions pred array)))
 
-(defn remove-null-chars
+(defn ^{:perfmon-exclude true} remove-null-chars
   "Removes illegal null characters from input.
    Nulls cause 'BSON cstring' exceptions."
   [m]
@@ -216,7 +217,7 @@
   [collection query]
   (.wasAcknowledged (mc/remove (get-db) collection (remove-null-chars query))))
 
-(defn set-file-id [^GridFSInputFile input ^String id]
+(defn ^{:perfmon-exclude true} set-file-id [^GridFSInputFile input ^String id]
   (.setId input (remove-null-chars id))
   input)
 
@@ -244,7 +245,7 @@
        :metadata metadata
        :application (:application metadata)})))
 
-(defn download [file-id]
+(defn ^{:perfmon-exclude true} download [file-id]
   (download-find {:_id file-id}))
 
 (defn delete-file [query]
@@ -252,7 +253,7 @@
     (info "removing file" query)
     (gfs/remove (get-gfs) query)))
 
-(defn delete-file-by-id [file-id]
+(defn ^{:perfmon-exclude true} delete-file-by-id [file-id]
   (delete-file {:id file-id}))
 
 (defn count
@@ -262,10 +263,10 @@
   ([collection query]
     (mc/count (get-db) collection (remove-null-chars query))))
 
-(defn get-next-sequence-value [sequence-name]
+(defn ^{:perfmon-exclude true} get-next-sequence-value [sequence-name]
   (:count (update-one-and-return :sequences {:_id (name sequence-name)} {$inc {:count 1}} :upsert true)))
 
-(defn db-mode
+(defn ^{:perfmon-exclude true} db-mode
   "Database mode is read from env document in systemstatus collection"
   []
   (:mode (by-id :systemstatus "env")))
@@ -320,10 +321,6 @@
       (reset! connection nil))
     (debug "Not connected")))
 
-(defn ensure-index-old
-  [coll keys & args]
-  (apply mc/ensure-index (get-db) coll keys args))
-
 (defn ensure-index
   ([coll keys]
    (mc/ensure-index (get-db) coll keys))
@@ -334,7 +331,7 @@
   [coll idx]
   (mc/drop-index (get-db) coll idx))
 
-(defn ensure-indexes []
+(defn ^{:perfmon-exclude true} ensure-indexes []
   (debug "ensure-indexes")
   (ensure-index :users {:username 1} {:unique true})
   (ensure-index :users {:email 1} {:unique true})

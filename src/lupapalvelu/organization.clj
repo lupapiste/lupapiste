@@ -66,21 +66,21 @@
   ([{:keys [organization permitType] :as application}]
     (get-krysp-wfs organization permitType))
   ([organization-id permit-type]
-  (let [organization (mongo/by-id :organizations organization-id)
-        krysp-config (get-in organization [:krysp (keyword permit-type)])
-        crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
-        crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
-                       (-> iv (crypt/str->bytes) (crypt/base64-decode)))
-        password     (when-let [password (and crypto-iv (:password krysp-config))]
-                       (->> password
-                            (crypt/str->bytes)
+   (let [organization (mongo/by-id :organizations organization-id)
+         krysp-config (get-in organization [:krysp (keyword permit-type)])
+         crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
+         crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
+                        (-> iv (crypt/str->bytes) (crypt/base64-decode)))
+         password     (when-let [password (and crypto-iv (:password krysp-config))]
+                        (->> password
+                             (crypt/str->bytes)
                             (crypt/base64-decode)
-                            (crypt/decrypt crypto-key crypto-iv :aes)
-                            (crypt/bytes->str)))
-        username     (:username krysp-config)]
-    (when-not (s/blank? (:url krysp-config))
-      (->> (when username {:credentials [username password]})
-           (merge (select-keys krysp-config [:url :version])))))))
+                             (crypt/decrypt crypto-key crypto-iv :aes)
+                             (crypt/bytes->str)))
+         username     (:username krysp-config)]
+     (when-not (s/blank? (:url krysp-config))
+       (->> (when username {:credentials [username password]})
+            (merge (select-keys krysp-config [:url :version])))))))
 
 (defn- encode-credentials
   [username password]
@@ -160,3 +160,6 @@
        %
        (assoc % :id (mongo/create-id)))
     tags))
+
+(defn some-organization-has-archive-enabled? [organization-ids]
+  (pos? (mongo/count :organizations {:_id {$in organization-ids} :permanent-archive-enabled true})))

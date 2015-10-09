@@ -63,6 +63,9 @@ $lupicon-size: 22px;
   cursor: default;
 }
 
+.lupicon-external-link:before {
+  content: "\e651";
+}
 .lupicon-document-list:before {
   content: "\e64f";
 }

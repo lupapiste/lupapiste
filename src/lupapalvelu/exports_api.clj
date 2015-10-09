@@ -23,6 +23,8 @@
       {:priceClass (get @kayttotarkoitus-hinnasto kayttotarkoitus) :kayttotarkoitus kayttotarkoitus})))
 
 (def price-classes-for-operation
+  ; See lupapiste-chef/cookbooks/lupapiste-dw/files/default/etl/setupdata/price_class_csv.csv
+
   {:asuinrakennus               uuden-rakentaminen ; old operation tree
    :vapaa-ajan-asuinrakennus    uuden-rakentaminen
    :varasto-tms                 uuden-rakentaminen
@@ -101,6 +103,7 @@
    :yl-uusi-toiminta                                                  "B"
    :yl-olemassa-oleva-toiminta                                        "D"
    :yl-toiminnan-muutos                                               "D"
+   :koeluontoinen-toiminta                                            "D"
    :tonttijako                                                        "D"
    :rasitetoimitus                                                    "D"
    :rajankaynti                                                       "D"
@@ -125,6 +128,9 @@
    :jatteen-keraystoiminta                                            "D"
    :muistomerkin-rauhoittaminen                                       "D"
    :lannan-varastointi                                                "D"
+   :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan  "D"
+   :ilmoitus-poikkeuksellisesta-tilanteesta                           "D"
+   :maa-ainesten-kotitarveotto                                        "D"
    })
 
 (defn- export [collection query fields]

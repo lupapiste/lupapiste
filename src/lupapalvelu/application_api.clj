@@ -107,15 +107,15 @@
             time))))))
 
 (defquery party-document-names
-          {:parameters [:id]
-           :user-roles #{:applicant :authority}
-           :states     states/all-application-states}
-          [{application :application}]
-          (let [documents (:documents application)
-                initialOp (:name (:primaryOperation application))
-                original-schema-names (-> initialOp keyword operations/operations :required)
-                original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
-            (ok :partyDocumentNames (conj original-party-documents (permit/get-applicant-doc-schema (permit/permit-type application))))))
+  {:parameters [:id]
+   :user-roles #{:applicant :authority}
+   :states     states/all-application-states}
+  [{application :application}]
+  (let [documents (:documents application)
+        op-meta (operations/get-primary-operation-metadata application)
+        original-schema-names (->> (select-keys op-meta [:required :optional]) vals (apply concat))
+        original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
+    (ok :partyDocumentNames (conj original-party-documents (permit/get-applicant-doc-schema (permit/permit-type application))))))
 
 (defcommand mark-seen
   {:parameters       [:id type]
@@ -408,10 +408,11 @@
         new-secondary-ops (if old-primary-op ; production data contains applications with nil in primaryOperation
                             (conj secondary-ops-without-old-primary-op old-primary-op)
                             secondary-ops-without-old-primary-op)]
-    (when-not new-primary-op
-      (fail! :error.unknown-operation))
-    (update-application command {$set {:primaryOperation new-primary-op
-                                       :secondaryOperations new-secondary-ops}})
+    (when-not (= (:id old-primary-op) secondaryOperationId)
+      (when-not new-primary-op
+        (fail! :error.unknown-operation))
+      (update-application command {$set {:primaryOperation    new-primary-op
+                                         :secondaryOperations new-secondary-ops}}))
     (ok)))
 
 (defcommand change-permit-sub-type

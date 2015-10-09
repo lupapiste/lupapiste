@@ -69,19 +69,17 @@
    :B5
    :muu])
 
-(def- attachment-types-R attachment-types/Rakennusluvat)
-
-(def- attachment-types-YA attachment-types/YleistenAlueidenLuvat)
-
-(def- attachment-types-YI attachment-types/Ymparistoilmoitukset)
-
-(def- attachment-types-YL attachment-types/Ymparistolupa)
-
-(def- attachment-types-YM []  #_attachment-types/MuutYmparistoluvat)   ;; *** TODO: Enable this when YM attachments in the Commons project is updated ***
-
-(def- attachment-types-MAL attachment-types/Maa-ainesluvat)
-
-(def- attachment-types-KT attachment-types/Kiinteistotoimitus)
+(def- attachment-types-by-permit-type
+  {:R attachment-types/Rakennusluvat
+   :P attachment-types/Rakennusluvat
+   :YA attachment-types/YleistenAlueidenLuvat
+   :YI attachment-types/Ymparistoilmoitukset
+   :YL attachment-types/Ymparistolupa
+   :YM attachment-types/MuutYmparistoluvat
+   :VVVL attachment-types/Ymparistoilmoitukset
+   :MAL attachment-types/Maa-ainesluvat
+   :MM attachment-types/Kiinteistotoimitus
+   :KT attachment-types/Kiinteistotoimitus})
 
 (defn attachment-ids-from-tree [tree]
   {:pre [(sequential? tree)]}
@@ -89,14 +87,7 @@
 
 (def all-attachment-type-ids
   (attachment-ids-from-tree
-    (concat
-      attachment-types-R
-      attachment-types-YA
-      attachment-types-YI
-      attachment-types-YL
-      attachment-types-YM
-      attachment-types-MAL
-      attachment-types-KT)))
+    (apply concat (set (vals attachment-types-by-permit-type)))))
 
 ;;
 ;; Api
@@ -124,19 +115,9 @@
   "Returns partitioned list of allowed attachment types or throws exception"
   [permit-type]
   {:pre [permit-type]}
-  (partition 2
-    (case (keyword permit-type)
-      :R  attachment-types-R
-      :YA attachment-types-YA
-      :P  attachment-types-R
-      :YI attachment-types-YI
-      :YL attachment-types-YL
-      :YM attachment-types-YM
-      :VVVL attachment-types-YI ;TODO Put correct attachment list here
-      :MM attachment-types-KT ;TODO Put correct attachment list here
-      :MAL attachment-types-MAL
-      :KT attachment-types-KT
-      (fail! (str "unsupported permit-type: " (name permit-type))))))
+  (if-let [types (get attachment-types-by-permit-type (keyword permit-type))]
+    (partition 2 types)
+    (fail! (str "unsupported permit-type: " (name permit-type)))))
 
 (defn get-attachment-types-for-application
   [application]
@@ -385,24 +366,23 @@
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
-(defn get-attachment-as
-  "Returns the attachment if user has access to application, otherwise nil."
+(defn get-attachment-file-as
+  "Returns the attachment file if user has access to application, otherwise nil."
   [user file-id]
-  (when-let [attachment (mongo/download file-id)]
-    (when-let [application (get-application-as (:application attachment) user :include-canceled-apps? true)]
-      (when (seq application) attachment))))
+  (when-let [attachment-file (mongo/download file-id)]
+    (when-let [application (get-application-as (:application attachment-file) user :include-canceled-apps? true)]
+      (when (seq application) attachment-file))))
 
-(defn get-attachment
-  "Returns the attachment without access checking, otherwise nil."
+(defn get-attachment-file
+  "Returns the attachment file without access checking, otherwise nil."
   [file-id]
-  (when-let [attachment (mongo/download file-id)]
-    (when-let [application (get-application-no-access-checking (:application attachment))]
-      (when (seq application) attachment))))
+  (when-let [attachment-file (mongo/download file-id)]
+    (when-let [application (get-application-no-access-checking (:application attachment-file))]
+      (when (seq application) attachment-file))))
 
 (defn output-attachment
-  [attachment-id download? attachment-fn]
-  (debugf "file download: attachment-id=%s" attachment-id)
-  (if-let [attachment (attachment-fn attachment-id)]
+  [file-id download? attachment-fn]
+  (if-let [attachment (attachment-fn file-id)]
     (let [response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:content-type attachment)
@@ -429,15 +409,16 @@
 
 (defn output-attachment-preview
   "Outputs attachment preview creating it if is it does not already exist"
-  [attachment-id attachment-fn]
-  (let [preview-id (str attachment-id "-preview")]
-    (when (= 0 (mongo/count :fs.files {:_id preview-id}))
-      (let [attachment (get-attachment attachment-id)
+  [file-id attachment-fn]
+  (let [preview-id (str file-id "-preview")]
+    (when (zero? (mongo/count :fs.files {:_id preview-id}))
+      (let [attachment (get-attachment-file file-id)
             file-name (:file-name attachment)
             content-type (:content-type attachment)
-            content ((:content attachment))
+            content-fn (:content attachment)
             application-id (:application attachment)]
-        (create-preview attachment-id file-name content-type content application-id)))
+        (assert content-fn (str "content for file " file-id))
+        (create-preview file-id file-name content-type (content-fn) application-id)))
     (output-attachment preview-id false attachment-fn)))
 
 (defn attach-file!

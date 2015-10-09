@@ -129,7 +129,7 @@
 (defn vvvl-application-xml   [server credentials id search-type raw?]
   (application-xml vvvl-case-type   (get-tunnus-path permit/VVVL search-type) server credentials id raw?))
 
-(defn ya-application-xml     [server credentials id search-type raw?] 
+(defn ya-application-xml     [server credentials id search-type raw?]
   (let [options (post-body-for-ya-application id (get-tunnus-path permit/YA search-type))]
     (trace "Get application: " server " with post body: " options )
     (cr/get-xml-with-post server options credentials raw?)))
@@ -412,27 +412,33 @@
 (defn- poytakirja-with-paatos-data [poytakirjat]
   (some #(when (and (:paatoskoodi %) (:paatoksentekija %) (:paatospvm %)) %) poytakirjat))
 
+(defn- valid-paatospvm? [paatos-pvm]
+  (> (util/get-timestamp-ago :day 1) paatos-pvm))
+
+(defn- valid-antopvm? [anto-pvm]
+  (or (not anto-pvm) (> (now) anto-pvm)))
+
 (defn- standard-verdicts-validator [xml]
-  (let [poytakirjat (map ->paatospoytakirja (select (cr/strip-xml-namespaces xml) [:paatostieto :Paatos :poytakirja]))
-        poytakirja (poytakirja-with-paatos-data poytakirjat)
-        paatospvm  (:paatospvm poytakirja)
-        timestamp-1-day-ago (util/get-timestamp-ago :day 1)]
+  (let [paatos-xml-without-ns (select (cr/strip-xml-namespaces xml) [:paatostieto :Paatos])
+        poytakirjat (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
+        poytakirja  (poytakirja-with-paatos-data poytakirjat)
+        paivamaarat (map #(get-pvm-dates % [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano]) paatos-xml-without-ns)]
     (cond
-      (not (seq poytakirjat))                (fail :info.no-verdicts-found-from-backend)
-      (not (seq poytakirja))                 (fail :info.paatos-details-missing)
-      (< timestamp-1-day-ago paatospvm)      (fail :info.paatos-future-date))))
+      (not (seq poytakirjat))                               (fail :info.no-verdicts-found-from-backend)
+      (not (seq poytakirja))                                (fail :info.paatos-details-missing)
+      (or
+        (not (valid-paatospvm? (:paatospvm poytakirja)))
+        (not-any? #(valid-antopvm? (:anto %)) paivamaarat)) (fail :info.paatos-future-date))))
 
 (defn- ->standard-verdicts [xml-without-ns]
   (map (fn [paatos-xml-without-ns]
          (let [poytakirjat      (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
                poytakirja       (poytakirja-with-paatos-data poytakirjat)
-               paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
-               valid-paatospvm? (> (now) (:paatospvm poytakirja))
-               valid-antopvm?   (or (not (:anto paivamaarat))
-                                    (> (now) (:anto paivamaarat)))]
-           (when (and poytakirja
-                      valid-paatospvm?
-                      valid-antopvm?)
+               paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])]
+           (when (and
+                   poytakirja
+                   (valid-paatospvm? (:paatospvm poytakirja))
+                   (valid-antopvm? (:anto paivamaarat)))
              {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
               :paivamaarat    paivamaarat
               :poytakirjat    (seq poytakirjat)})))

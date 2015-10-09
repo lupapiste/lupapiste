@@ -74,6 +74,9 @@
     :repeating true
     :body      (body childs)}])
 
+(defn approvable-top-level-groups [v]
+  (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
+
 ;;
 ;; schema sniplets
 ;;
@@ -518,11 +521,11 @@
 
 (def mitat {:name "mitat"
             :type :group
-            :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
-                   {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                   {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+            :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 0 :max 9999999}
+                   {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 0 :max 9999999}
+                   {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 0 :max 9999999}
                    {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
-                   {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
+                   {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 0 :max 9999999}]})
 
 (def mitat-muutos (merge mitat
                     {:group-help "mitat-muutos.help"
@@ -579,18 +582,19 @@
                                {:name "sahkoKytkin" :type :checkbox}
                                {:name "maakaasuKytkin" :type :checkbox}
                                {:name "kaapeliKytkin" :type :checkbox}]})
+
 (def varusteet {:name "varusteet" :type :group :layout :vertical
-                                                     :body [{:name "sahkoKytkin" :type :checkbox}
-                                                            {:name "kaasuKytkin" :type :checkbox}
-                                                            {:name "viemariKytkin" :type :checkbox}
-                                                            {:name "vesijohtoKytkin" :type :checkbox}
-                                                            {:name "hissiKytkin" :type :checkbox}
-                                                            {:name "koneellinenilmastointiKytkin" :type :checkbox}
-                                                            {:name "lamminvesiKytkin" :type :checkbox}
-                                                            {:name "aurinkopaneeliKytkin" :type :checkbox}
-                                                            {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
-                                                            {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
-                                                            {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
+                :body [{:name "sahkoKytkin" :type :checkbox}
+                       {:name "kaasuKytkin" :type :checkbox}
+                       {:name "viemariKytkin" :type :checkbox}
+                       {:name "vesijohtoKytkin" :type :checkbox}
+                       {:name "hissiKytkin" :type :checkbox}
+                       {:name "koneellinenilmastointiKytkin" :type :checkbox}
+                       {:name "lamminvesiKytkin" :type :checkbox}
+                       {:name "aurinkopaneeliKytkin" :type :checkbox}
+                       {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
+                       {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
+                       {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
 
 (def luokitus {:name "luokitus"
                :type :group
@@ -1045,9 +1049,6 @@
                                {:name "paattymispvm"
                                 :type :date}]})
 
-
-(defn- approvable-top-level-groups [v]
-  (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
 
 ;;
 ;; schemas
