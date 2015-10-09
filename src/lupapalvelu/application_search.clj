@@ -215,7 +215,7 @@
    :modified 1})
 
 (defn application-bulletins [{:keys [limit] :or {limit 10}}]
-  (let [query {}]
+  (let [query {:versions {$slice -1}}]
     (mongo/with-collection "application-snapshots"
       (query/find query)
       (query/fields bulletins-fields)
