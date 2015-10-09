@@ -6,6 +6,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.mongo :as mongo]
@@ -39,7 +40,7 @@
     (some #(= op %) supported-ops)))
 
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
-              :y                             (sc/pred util/finnish-y? "Not valid Y code")
+              :y                             (sc/pred v/finnish-y? "Not valid Y code")
               :accountType                   (apply sc/enum (conj (map (comp name :name) account-types) "custom"))
               :customAccountLimit            (sc/maybe sc/Int)
               (sc/optional-key :reference)   max-64-or-nil
@@ -48,7 +49,7 @@
               :zip                           (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
                                                          (sc/pred ss/blank?))
               (sc/optional-key :country)     max-64-or-nil
-              (sc/optional-key :ovt)         (sc/either (sc/pred util/finnish-ovt? "Not a valid OVT code")
+              (sc/optional-key :ovt)         (sc/either (sc/pred v/finnish-ovt? "Not a valid OVT code")
                                                         (sc/pred ss/blank?))
               (sc/optional-key :pop)         (sc/either (sc/pred supported-invoice-operator? "Not a supported invoice operator")
                                                         (sc/pred ss/blank?))
