@@ -34,154 +34,155 @@
                             <div data-bind="if: hasInvites" class="summary-help">
                                 <p data-bind="lhtml: 'application.invite.help'"></p>
                             </div>
-
-                            <!-- Property ID: -->
-                            <div>
+                            <div class="application-summary-table">
+                              <!-- Property ID: -->
+                              <div>
                                 <p data-bind="ltext: 'application.property'"></p>
                                 <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
-                            </div>
+                              </div>
 
-                            <!-- Municipality: -->
-                            <div>
+                              <!-- Municipality: -->
+                              <div>
                                 <p data-bind="ltext: 'application.municipality'"></p>
                                 <span class="application_summary_text" data-bind="text: loc(['municipality', municipality()])"></span>
-                            </div>
+                              </div>
 
-                            <!-- Submitted: -->
-                            <div>
+                              <!-- Submitted: -->
+                              <div>
                                 <p data-bind="ltext: 'application.submissionDate'"></p>
                                 <span data-bind="if: $data.submitted">
-                                    <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
+                                  <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
                                 </span>
-                            </div>
+                              </div>
 
-                            <!-- ID: -->
-                            <div>
+                              <!-- ID: -->
+                              <div>
                                 <p data-bind="ltext: 'application.id'"></p>
                                 <span data-bind="text: id, attr: {'data-test-value': id}"
                                       data-test-id="application-id"
                                       class="application_summary_text">
                                 </span>
-                            </div>
+                              </div>
 
-                            <!-- Authorities: -->
-                            <!-- ko if: $root.authorization.ok('assign-application') -->
-                            <div data-bind="component: {name: 'authority-select', params: {kind: 'application'}}"></div>
-                            <!-- /ko -->
+                              <!-- Authorities: -->
+                              <!-- ko if: $root.authorization.ok('assign-application') -->
+                              <div data-bind="component: {name: 'authority-select', params: {kind: 'application'}}"></div>
+                              <!-- /ko -->
 
-                            <!-- Operations: -->
-                            <!-- ko if: $root.permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
-                            <div>
+                              <!-- Operations: -->
+                              <!-- ko if: $root.permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
+                              <div>
                                 <p data-bind="ltext: 'application.operations.secondary'"></p>
                                 <!-- ko if: operationsCount() && operationsCount().length > 0 -->
                                 <ul data-test-id="application-secondary-operations" data-bind="foreach: operationsCount">
-                                    <li>
-                                        <span data-bind="visible: count > 1">
-                                            <span data-bind="text: count"></span>
-                                            <span>&#x00D7;</span>
-                                        </span>
-                                        <span data-bind="ltext: 'operations.' + name, attr: {'data-test-secondary-operation-id': name}" data-test-id="test-application-operation"></span>
-                                    </li>
+                                  <li>
+                                    <span data-bind="visible: count > 1">
+                                      <span data-bind="text: count"></span>
+                                      <span>&#x00D7;</span>
+                                    </span>
+                                    <span data-bind="ltext: 'operations.' + name, attr: {'data-test-secondary-operation-id': name}" data-test-id="test-application-operation"></span>
+                                  </li>
                                 </ul>
                                 <!-- /ko -->
                                 <!-- ko if: operationsCount() && operationsCount().length === 0 -->
                                 <p data-bind="ltext: 'application.operations.secondary.none'"></p>
                                 <!-- /ko -->
-                            </div>
-                            <!-- /ko -->
+                              </div>
+                              <!-- /ko -->
 
-                            <!-- Subtypes: -->
-                            <!-- ko if: $root.permitSubtypes().length > 0 -->
-                            <div>
+                              <!-- Subtypes: -->
+                              <!-- ko if: $root.permitSubtypes().length > 0 -->
+                              <div>
                                 <p data-bind="ltext: 'application.permitSubtypes'"></p>
                                 <span class="application_summary_text">
-                                    <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
-                                                       enable: $root.authorization.ok('change-permit-sub-type'),
-                                                       optionsText: function(item) {return item ? loc('permitSubtype.' + item) : loc('choose'); }"
-                                            id="permitSubtypeSelect">
-                                    </select>
-                                    <!-- ko if: permitSubtypeHelp() -->
-                                    <span data-bind="component: { name: 'help-toggle', params: { lhtml: [permitSubtypeHelp()]}}"></span>
-                                    <!-- /ko -->
+                                  <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
+                                                     enable: $root.authorization.ok('change-permit-sub-type'),
+                                                     optionsText: function(item) {return item ? loc('permitSubtype.' + item) : loc('choose'); }"
+                                          id="permitSubtypeSelect">
+                                  </select>
+                                  <!-- ko if: permitSubtypeHelp() -->
+                                  <span data-bind="component: { name: 'help-toggle', params: { lhtml: [permitSubtypeHelp()]}}"></span>
+                                  <!-- /ko -->
                                 </span>
-                            </div>
-                            <!-- /ko -->
+                              </div>
+                              <!-- /ko -->
 
-                            <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("set-tos-function-for-application") -->
-                            <div>
+                              <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("set-tos-function-for-application") -->
+                              <div>
                                 <p data-bind="ltext: 'tos.function'"></p>
                                 <span class="application_summary_text">
-                                    <select data-bind="options: $root.tosFunctions,
-                                                       optionsText: 'name',
-                                                       optionsValue: 'code',
-                                                       value: $root.application.tosFunction,
-                                                       valueAllowUnset: true" ></select>
+                                  <select data-bind="options: $root.tosFunctions,
+                                                     optionsText: 'name',
+                                                     optionsValue: 'code',
+                                                     value: $root.application.tosFunction,
+                                                     valueAllowUnset: true" ></select>
                                 </span>
-                            </div>
-                            <!-- /ko -->
+                              </div>
+                              <!-- /ko -->
 
-                            <!-- Link-permits: -->
-                            <!-- ko if: linkPermitData -->
-                            <div data-bind="with: linkPermitData" class="link-permits">
+                              <!-- Link-permits: -->
+                              <!-- ko if: linkPermitData -->
+                              <div data-bind="with: linkPermitData" class="link-permits">
                                 <p data-bind="ltext: 'application.linkPermits'" class="link-permit-title"></p>
                                 <span class="application_summary_text" data-bind="foreach: $data">
-                                    <span data-bind="visible: $data.type() === 'lupapistetunnus'" class="link-permit">
-                                        <a data-bind="attr: {'data-test-app-link-permit': $data.id, href: '#!/application/' + $data.id()}"
-                                           data-test-id="test-application-link-permit-lupapistetunnus"
-                                           class="link-permit-item">
-                                            <span data-bind="text: $data.id"></span>
-                                            -
-                                            <span data-bind="ltext: 'operations.' + $data.operation()"></span>
-                                        </a>
-                                        <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
-                                                      click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
-                                           data-test-id="test-remove-link-permit"
-                                           href="#" class="remove-link-permit link-btn">
-                                            <i class="lupicon-remove"></i>
-                                        </a>
+                                  <span data-bind="visible: $data.type() === 'lupapistetunnus'" class="link-permit">
+                                    <a data-bind="attr: {'data-test-app-link-permit': $data.id, href: '#!/application/' + $data.id()}"
+                                       data-test-id="test-application-link-permit-lupapistetunnus"
+                                       class="link-permit-item">
+                                      <span data-bind="text: $data.id"></span>
+                                      -
+                                      <span data-bind="ltext: 'operations.' + $data.operation()"></span>
+                                    </a>
+                                    <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
+                                                  click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                                       data-test-id="test-remove-link-permit"
+                                       href="#" class="remove-link-permit link-btn">
+                                      <i class="lupicon-remove"></i>
+                                    </a>
+                                  </span>
+                                  <span data-bind="visible: $data.type() === 'kuntalupatunnus'" class="link-permit">
+                                    <span data-bind="text: $data.id,
+                                                     attr: {'data-test-app-link-permit': $data.id}"
+                                          data-test-id="test-application-link-permit-kuntalupatunnus"
+                                          class="link-permit-item">
                                     </span>
-                                    <span data-bind="visible: $data.type() === 'kuntalupatunnus'" class="link-permit">
-                                        <span data-bind="text: $data.id,
-                                                         attr: {'data-test-app-link-permit': $data.id}"
-                                              data-test-id="test-application-link-permit-kuntalupatunnus"
-                                              class="link-permit-item">
-                                        </span>
-                                        <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
-                                                      click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
-                                           data-test-id="test-remove-link-permit"
-                                           href="#" class="remove-link-permit link-btn">
-                                            <i class="lupicon-remove"></i>
-                                        </a>
-                                    </span>
+                                    <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
+                                                  click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                                       data-test-id="test-remove-link-permit"
+                                       href="#" class="remove-link-permit link-btn">
+                                      <i class="lupicon-remove"></i>
+                                    </a>
+                                  </span>
                                 </span>
-                            </div>
-                            <!-- /ko -->
+                              </div>
+                              <!-- /ko -->
 
-                            <!-- Applications linking to us: -->
-                            <!-- ko if: appsLinkingToUs -->
-                            <div data-bind="with: appsLinkingToUs" class="link-permits">
+                              <!-- Applications linking to us: -->
+                              <!-- ko if: appsLinkingToUs -->
+                              <div data-bind="with: appsLinkingToUs" class="link-permits">
                                 <p data-bind="ltext: 'application.appsLinkingToUs'" class="link-permit-title"></p>
                                 <span class="application_summary_text" data-bind="foreach: $data">
-                                    <span class="link-permit">
-                                        <a data-bind="attr: {'data-test-app-linking-to-us': $data.id, href: '#!/application/' + $data.id()}"
-                                           data-test-id="test-application-app-linking-to-us"
-                                           class="link-permit-item">
-                                            <span data-bind="text: $data.id"></span>
-                                            -
-                                            <span data-bind="ltext: 'operations.' + $data.operation()"></span>
-                                        </a>
-                                    </span>
+                                  <span class="link-permit">
+                                    <a data-bind="attr: {'data-test-app-linking-to-us': $data.id, href: '#!/application/' + $data.id()}"
+                                       data-test-id="test-application-app-linking-to-us"
+                                       class="link-permit-item">
+                                      <span data-bind="text: $data.id"></span>
+                                      -
+                                      <span data-bind="ltext: 'operations.' + $data.operation()"></span>
+                                    </a>
+                                  </span>
                                 </span>
+                              </div>
+                              <!-- /ko -->
                             </div>
-                            <!-- /ko -->
                         </div>
                         <div class="application-map-container">
-                            <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
-                            <div class="application-map-actions" data-bind="with: application">
-                                <!-- ko if: location() -->
-                                <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
-                                <!-- /ko -->
-                            </div>
+                          <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+                          <div class="application-map-actions" data-bind="with: application">
+                            <!-- ko if: location() -->
+                            <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
+                            <!-- /ko -->
+                          </div>
                         </div>
 
                         <!-- Actions: -->
@@ -394,15 +395,8 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="organizationLinks">
-                            <div class="organization-links" data-bind="visible: organizationLinks() && organizationLinks().length">
-                                <h3 data-bind="ltext: 'organization.links'"></h3>
-                                <ul data-bind="foreach: organizationLinks">
-                                    <li>
-                                        <a data-bind="text: name[loc.getCurrentLanguage()], attr: {href: url}" href="#" target="_blank"></a>
-                                    </li>
-                                </ul>
-                            </div>
+                        <div class="organizationLinks"
+                             data-bind="template: 'organization-links-template'">
                         </div>
                         <p data-bind="lhtml: 'required.field.desc'"></p>
                         <!-- docgen generated content: -->

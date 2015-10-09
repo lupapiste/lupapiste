@@ -103,7 +103,7 @@
    :yl-uusi-toiminta                                                  "B"
    :yl-olemassa-oleva-toiminta                                        "D"
    :yl-toiminnan-muutos                                               "D"
-   :koeluontoinen-toiminta                                            "D" ; FIXME kysytty Terolta?
+   :koeluontoinen-toiminta                                            "D"
    :tonttijako                                                        "D"
    :rasitetoimitus                                                    "D"
    :rajankaynti                                                       "D"
@@ -127,7 +127,11 @@
    :tontin-jarjestelymuutos                                           "D"
    :jatteen-keraystoiminta                                            "D"
    :muistomerkin-rauhoittaminen                                       "D"
+   :lannan-varastointi                                                "D"
    :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan  "D"
+   :ilmoitus-poikkeuksellisesta-tilanteesta                           "D"
+   :maa-ainesten-kotitarveotto                                        "D"
+   :maastoliikennelaki-kilpailut-ja-harjoitukset                      "D"
    })
 
 (defn- export [collection query fields]

@@ -1384,10 +1384,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           models = subSchema.initiallyEmpty ? [] : [{}];
       }
 
-      var elements;
+      var elements = subSchema["repeating-init-empty"] ? [] : buildElements(models);
 
       if (subSchema.type === "table") {
-        elements = buildElements(models);
         var div = document.createElement("div");
         div.className = "form-table";
         var table = document.createElement("table");
@@ -1416,12 +1415,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         div.appendChild(table);
 
         elements = [div];
-      } else {
-        elements = buildElements(models);
       }
 
       var appendButton = makeButton(myPath.join("_") + "_append",
-                                    loc([self.schemaI18name, myPath.join("."), "_append_label"]),
+                                    loc( util.locKeyFromDocPath(_.flatten([self.schemaI18name, myPath, "_append_label"]).join(".")) ),
                                     {icon: "lupicon-circle-plus", className: "secondary"});
       appendButton.disabled = isSubSchemaWhitelisted(subSchema);
 
