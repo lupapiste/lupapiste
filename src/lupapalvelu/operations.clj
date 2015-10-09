@@ -353,7 +353,7 @@
    :lannan-varastointi     {:schema "lannan-varastointi"
                             :permit-type permit/YM
                             :required ["yl-maatalous-hankkeen-kuvaus"]
-                            :attachments [] ; [:kartat [:patterin-sijainti]] TODO: sync with commons
+                            :attachments [:kartat [:lantapatterin-sijainti]]
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
                             :asianhallinta true}
@@ -373,7 +373,7 @@
    :koeluontoinen-toiminta {:schema "koeluontoinen-toiminta"
                             :permit-type permit/YM
                             :required []
-                            :attachments [] ; TODO
+                            :attachments []
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
                             :asianhallinta true}
@@ -381,7 +381,7 @@
    :maa-ainesten-kotitarveotto {:schema "maa-ainesten-kotitarveotto"
                                 :permit-type permit/YM
                                 :required ["kiinteisto"]
-                                :attachments [] ; [:kartat [:ottamispaikan-sijainti]
+                                :attachments [:kartat [:ottamispaikan-sijainti]]
                                 :add-operation-allowed false
                                 :min-outgoing-link-permits 0
                                 :asianhallinta true}
