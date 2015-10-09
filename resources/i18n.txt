@@ -1,2 +1,10 @@
 application.publishBulletin: Julkaise Julkipano.fi:ssä
 tooltip.publishBulletin: Julkaisee hakemuksen Julkipano.fi-palvelussa
+
+bulletin.state: Ilmoituksen tila
+bulletin.municipality: Kunta
+bulletin.location: Sijainti
+bulletin.type: Hakemustyyppi
+bulletin.applicant: Hakija
+bulletin.date: Päiväys
+bulletin.feedback-period: Palauteaika päättyy
