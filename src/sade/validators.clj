@@ -41,3 +41,6 @@
   (if bic
     (re-matches #"^[a-zA-Z]{6}[a-zA-Z\d]{2,5}$" bic)
     false))
+
+(defn rakennusnumero? [^String s]
+  (and (not (nil? s)) (re-matches #"^\d{3}$" s)))

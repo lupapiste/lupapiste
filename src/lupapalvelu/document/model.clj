@@ -101,7 +101,7 @@
   (cond
     (ss/blank? v) nil
     (= "other" v) nil
-    (util/rakennusnumero? v) nil
+    (v/rakennusnumero? v) nil
     (util/rakennustunnus? v) nil
     :else [:warn "illegal-rakennusnumero"]))
 
