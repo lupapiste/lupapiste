@@ -128,7 +128,8 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.selectItem = function(item) {
     if  (_.isEmpty(item)) {
-      error("Autocomplete: selected item was unexpectedly empty");
+      error("Autocomplete: selected item was unexpectedly empty",
+        {options: self.options, optionsText: self.optionsText, optionsCaption: self.optionsCaption, functionArgs: arguments});
       return;
     }
     if (item.behaviour === "clearSelected") {

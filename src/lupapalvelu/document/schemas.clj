@@ -74,6 +74,9 @@
     :repeating true
     :body      (body childs)}])
 
+(defn approvable-top-level-groups [v]
+  (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
+
 ;;
 ;; schema sniplets
 ;;
@@ -1046,9 +1049,6 @@
                                {:name "paattymispvm"
                                 :type :date}]})
 
-
-(defn- approvable-top-level-groups [v]
-  (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
 
 ;;
 ;; schemas
