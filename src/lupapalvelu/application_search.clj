@@ -207,3 +207,18 @@
                      :sv (i18n/localize :sv "operations" op-name)}}))
 
 
+(def bulletins-fields
+  {:state 1 :municipality 1
+   :address 1 :location 1
+   :primaryOperation 1
+   :applicant 1 :modified 1})
+
+(defn application-bulletins [{:keys [limit] :or {limit 10}}]
+  (let [query {}]
+    (mongo/with-collection "application-snapshots"
+      (query/find query)
+      (query/fields bulletins-fields)
+      (query/sort {:modified 1})
+      (query/limit limit))))
+
+
