@@ -117,7 +117,7 @@
 
    {:name "muistomerkki-kaytto-ja-hoito" :type :group
     :group-help "muistomerkki-kaytto-ja-hoito.help"
-    :body [{:name "ei-nahtavyyskohde" :type :checkbox :required true :layout :full-width}]}))
+    :body [{:name "ei-nahtavyyskohde" :type :checkbox :layout :full-width}]}))
 
 (def tiedot-sailiosta
   {:name "tiedot-sailiosta" :type :group
@@ -142,9 +142,7 @@
            {:name "onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet" :type :group :layout :horizontal
             :body [{:name "onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet-kylla" :type :checkbox}
                    {:name "onko-sailion-pohja-alempana-kuin-rakennuksen-perusteet-paljonko" :type :string :subtype :number :size "s" :unit "m"}]}
-           {:name "sailio-sijaitsee-bunkkerissa" :type :select :required true
-            :body [{:name "kylla"}
-                   {:name "ei"}]}
+           {:name "sailio-sijaitsee-bunkkerissa" :type :checkbox}
            {:name "sailio-sijaitsee-tarkealla-pohjavesialueella" :type :select :required true
             :body [{:name "kylla"}
                    {:name "ei"}
@@ -158,7 +156,7 @@
                    {:name "ylitayttoja-tapahtunut-vuonna" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}]}
            {:name "oljysailion-putkijarjestelma" :type :group
             :group-help "oljysailion-putkijarjestelma.help"
-            :body [{:name "oljysailion-putkijarjestelma" :type :select :sortBy :displayname :required true
+            :body [{:name "oljysailion-putkijarjestelma" :type :select :sortBy :displayname
                     :body [{:name "1-putkijarjestelma"}
                            {:name "2-putkijarjestelma"}]}]}
            ]})
@@ -169,10 +167,11 @@
      :body (body
              {:name "kiint-omistaja-jos-ei-hakija" :type :string :size "l"})}
    {:name "maahan-jattamisen-perustelut" :type :group :layout :vertical
-    :body [{:name "sailion-poistaminen-vahingoittaa-rakenteita" :type :checkbox}
+    :body [{:name "perustelut-liitteena" :type :checkbox}
+           {:name "sailion-poistaminen-vahingoittaa-rakenteita" :type :checkbox}
            {:name "sailion-poistaminen-teknisesti-vaikeata" :type :checkbox}
            {:name "sailion-poistaminen-muut-perustelut" :type :checkbox}
-           {:name "sailion-kunto" :type :text :max-len 4000 :required true}]}
+           {:name "sailion-kunto" :type :text :max-len 4000}]}
    tiedot-sailiosta))
 
 (def koeluontoinen-toiminta
@@ -403,7 +402,7 @@
     :body luonnonmuistomerkin-rauhoittaminen}
    {:info {:name "kaytostapoistetun-sailion-jattaminen-maaperaan"
            :approvable true
-           :order 1}
+           :order 100}
     :body kaytostapoistetun-sailion-jattaminen-maaperaan}
    {:info {:name "ilmoitus-poik-tilanteesta"
            :order 1}
