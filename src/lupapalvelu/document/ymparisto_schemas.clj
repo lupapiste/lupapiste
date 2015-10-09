@@ -320,6 +320,7 @@
                                                 :type :group
                                                 :group-help "lannan-varastointi.poikkeamistapa.tapa.help"
                                                 :repeating true
+                                                :repeating-init-empty true
                                                 :body [{:name "hyodyntava-maatila" :type :group :body maatila}
                                                        {:name "ymparistolupa" :type :group :body ymparistolupa}
                                                        {:name "lantamaara" :type :string :unit "m3" :size "m"}]}
@@ -328,6 +329,7 @@
                                                 :type :group
                                                 :group-help "lannan-varastointi.poikkeamistapa.tapa.help"
                                                 :repeating true
+                                                :repeating-init-empty true
                                                 :body [{:name "varastoiva-maatila" :type :group :body maatila}
                                                        {:name "varastointitapa" :type :text :max-len 1000}
                                                        {:name "lantamaara" :type :string :unit "m3" :size "m"}]}
@@ -336,6 +338,7 @@
                                                 :type :group
                                                 :group-help "lannan-varastointi.poikkeamistapa.tapa.help"
                                                 :repeating true
+                                                :repeating-init-empty true
                                                 :body [{:name "hyodyntava-maatila" :type :group :body maatila}
                                                        {:name "hyodyntamispaikka" :type :text :max-len 1000}
                                                        {:name "lantamaara" :type :string :unit "m3" :size "m"}]}
@@ -344,6 +347,7 @@
                                                 :type :group
                                                 :group-help "lannan-varastointi.poikkeamistapa.tapaD.help"
                                                 :repeating true
+                                                :repeating-init-empty true
                                                 :body [{:name "patterinSijaintipaikka" :type :group :body maatila}
                                                        {:name "peruslohko"
                                                         :type :table
