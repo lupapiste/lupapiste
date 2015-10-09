@@ -3239,6 +3239,15 @@ button:focus {
   margin-right: -3px;
 }
 
+/* line 510, ../sass/partials/_buttons.scss */
+.application_actions button.positive {
+  border: 1px solid #dddddd;
+}
+/* line 512, ../sass/partials/_buttons.scss */
+.application_actions button.positive:hover, .application_actions button.positive:active {
+  border-color: #bbbbbb;
+}
+
 /* line 1, ../sass/partials/_forms.scss */
 legend {
   font-size: 21.6px;
