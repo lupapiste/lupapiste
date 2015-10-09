@@ -1,17 +1,2 @@
 application.publishBulletin: Julkaise Julkipano.fi:ssä
 tooltip.publishBulletin: Julkaisee hakemuksen Julkipano.fi-palvelussa
-operations.maastoliikennelaki-kilpailut-ja-harjoitukset: Maastoliikennelain mukainen lupa kilpailuihin ja harjoituksiin
-
-operations.maastoliikennelaki-kilpailut-ja-harjoitukset.desc: Maastoliikennelain (1710/95) mukaan on moottorikäyttöisillä ajoneuvoilla tapahtuvaan kilpailujen ja harjoitusten toistuvaan tai pysyvään järjestämiseen samassa maastossa haettava kunnan ympäristönsuojeluviranomaisen lupa. Myös yksittäisen tapahtuman järjestämiseen on haettava lupa, jos tapahtumasta on odotettavissa huomattavia haittoja luonnolle, muulle ympäristölle, asutukselle, yleiselle virkistyskäytölle, kalastukselle tai muulle yleiselle tai yksityiselle edulle. Toiminnalle on oltava myös alueen omistajan kirjallinen lupa.
-
-operations.tree.maastoliikennelaki-kilpailut-ja-harjoitukset: Maastoliikennelain mukainen lupa kilpailuihin ja harjoituksiin
-
-maastoliikennelaki-kilpailut-ja-harjoitukset._group_label: Maastoliikennelain mukainen lupa kilpailuihin ja harjoituksiin
-
-maastoliikennelaki-kilpailut-ja-harjoitukset.toiminnan-laatu._group_label: Tiedot toiminnan laadusta
-maastoliikennelaki-kilpailut-ja-harjoitukset.toiminnan-laatu.kuvaus: Toiminnan kuvaus
-maastoliikennelaki-kilpailut-ja-harjoitukset.toiminnan-vaikutukset._group_label: Tiedot vaikutuksista luonnolle
-maastoliikennelaki-kilpailut-ja-harjoitukset.toiminnan-vaikutukset.tiedot-vaikutuksista-luonnolle: Vaikutusten kuvaus
-
-maastoliikennelaki-kilpailut-ja-harjoitukset.toiminnan-laatu.help: Selvitys toiminnan laadusta (enduro/trial/auto jne.), osanottaja-/harjoittelijamääristä, tapahtuman ajankohdasta ja päivittäisistä toiminta-ajoista.
-maastoliikennelaki-kilpailut-ja-harjoitukset.toiminnan-vaikutukset.help: Selvitys toiminnan vaikutuksista luonnolle, muulle ympäristölle, kalastukselle, asutukselle, yleiselle virkistyskäytölle tai muulle yleiselle edulle.
