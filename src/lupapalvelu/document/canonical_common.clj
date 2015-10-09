@@ -246,6 +246,7 @@
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
+   "Ilmoituksen tekij\u00e4"        "hakija"
    "Rakennusvalvonta-asian laskun maksaja"  "maksaja"
    "p\u00e4\u00e4suunnittelija"     "p\u00e4\u00e4suunnittelija"
    "GEO-suunnittelija"              "erityissuunnittelija"
