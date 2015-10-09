@@ -167,13 +167,7 @@
   (body
     {:name "tiedot-kiinteistosta" :type :group
      :body (body
-             {:name "kiint-omistaja-jos-ei-hakija" :type :string :size "l"}
-             {:name "osoite"
-                     :type :group
-                     :blacklist [turvakielto]
-                     :body [{:name "katu" :type :string :subtype :vrk-address}
-                            {:name "postinumero" :type :string :subtype :zip :size "s"}
-                            {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m"}]})}
+             {:name "kiint-omistaja-jos-ei-hakija" :type :string :size "l"})}
    {:name "maahan-jattamisen-perustelut" :type :group :layout :vertical
     :body [{:name "sailion-poistaminen-vahingoittaa-rakenteita" :type :checkbox}
            {:name "sailion-poistaminen-teknisesti-vaikeata" :type :checkbox}

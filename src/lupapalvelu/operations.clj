@@ -360,7 +360,7 @@
 
    :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan {:schema "kaytostapoistetun-sailion-jattaminen-maaperaan"
                                                                       :permit-type permit/YM
-                                                                      :required []
+                                                                      :required ["kiinteisto"]
                                                                       ;; TODO: sync with attachments in Commons.
 ;                                                                      :attachments [:kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan [:sailion-tarkastuspoytakirja
 ;                                                                                                                                                       :kiinteiston-omistajien-suostumus]
