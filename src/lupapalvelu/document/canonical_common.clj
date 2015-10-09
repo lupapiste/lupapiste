@@ -270,6 +270,7 @@
   {:paasuunnittelija       "p\u00e4\u00e4suunnittelija"
    :hakija-r               "Rakennusvalvonta-asian hakija"
    :hakija                 "Rakennusvalvonta-asian hakija"
+   :ilmoittaja             "Ilmoituksen tekij\u00e4"
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
