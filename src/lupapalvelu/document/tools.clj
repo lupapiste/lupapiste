@@ -75,9 +75,11 @@
 
 (defn- ^{:testable true} group [x t]
   (if (:repeating x)
-    {:name :0
-     :type t
-     :body (:body x)}
+    (if-not (:repeating-init-empty %)
+      {:name :0
+       :type t
+       :body (:body x)}
+      {})
     (:body x)))
 
 (defn create-unwrapped-data [{body :body} f]
