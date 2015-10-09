@@ -35,9 +35,9 @@
 
 
 (def app-snapshot-fields
-  [:address :primaryOperation :created :modified
-   :state :permitType :organization :verdicts :documents
-   :propertyId :location])
+  [:address :created :location :modified
+   :municipality :organization :permitType
+   :primaryOperation :propertyId :state :verdicts])
 
 (defcommand publish-bulletin
   {:parameters [id]
