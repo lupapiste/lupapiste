@@ -147,7 +147,8 @@
                    "organization-filter-service.js"
                    "organization-tags-service.js"
                    "handler-filter-service.js"
-                   "application-filters-service.js"]}
+                   "application-filters-service.js"
+                   "application-bulletins-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -367,7 +368,7 @@
 
    :bulletins-app {:depends [:ui-components]
                   :js ["bulletins-app.js"]}
-   :bulletins {:depends [:bulletins-app :header]
+   :bulletins {:depends [:bulletins-app :header :services]
                :html ["application-bulletins.html"]}
    })
 
