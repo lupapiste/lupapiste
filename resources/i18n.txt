@@ -1,0 +1,188 @@
+operations.tree.lannan-varastointi: Ilmoitus lannan varastoinnista
+operations.lannan-varastointi: Ilmoitus lannan varastoinnista
+operations.lannan-varastointi.desc: Tällä lomakkeella ilmoitetaan kunnan ympäristönsuojeluviranomaiselle <p><ul><li> 1) Maataloudesta peräisin olevien nitraattien vesiin pääsyn rajoittamisesta annetun valtioneuvoston asetuksen (931/2000) (nitraattiasetus) 4 §:n 3 momentissa tarkoitetusta poikkeamisesta karjanlannan varastointitilalle 4 §:n 1 momentissa edellytetystä varastointitilavuudesta (Lomakkeesta täytetään ilmoittajaa koskevat tiedot sekä tiedot tilan eläinmäärästä ja lannan varastointiin vaikuttavista seikoista. Poikkeamistavan osalta täytetään joku/jotkut tarvittavista kohdista A, B, C tai D. Mikäli kohtien A-C mukaisia vastaanottajia on useita, annetaan jokaisesta vastaavat tiedot liitteellä.)</li><li> 2) Muusta kuin kohdassa 1 tarkoitetusta lannan kaukovarastoinnista patterissanitraattiasetuksen 3 §:ssä ja liitteessä 1 annettujen määräysten mukaisesti (Lomakkeesta täytetään ilmoittajaa koskevat tiedot sekä tiedot tilan eläinmäärästä ja lannan kaukovarastointiin patterissa vaikuttavista seikoista. Patteroinnin osalta täytetään kohta D.)</li></ul></p><p>Ilmoitus tulee antaa vähintään kuukautta ennen, kuin on tarkoitus ryhtyä kohdassa 1 tarkoitettuun poikkeamiseen tähtääviin toimenpiteisiin tai kohdassa 2 tarkoitettuun muuhun lannan varastoimiseen patterissa.</p><p>Ilmoitus tulee uusia aina silloin, kun suunnitellut toimenpiteet poikkeaisivat aiemmin tehdyssä ilmoituksessa esitetyistä toimenpiteistä.</p><p>Ilmoituksen tekee se maataloustoiminnan harjoittaja, jonka on tarkoitus poiketa nitraattiasetuksessa edellytetystä lannan varastointitilavuudesta (kohta 1) tai jonka on tarkoitus ryhtyä muuhun lannan varastoimiseen patterissa (kohta 2).</p>
+
+lannan-varastointi-kuvaus.help: Tällä lomakkeella ilmoitetaan kunnan ympäristönsuojeluviranomaiselle <p><ol><li> Maataloudesta peräisin olevien nitraattien vesiin pääsyn rajoittamisesta annetun valtioneuvoston asetuksen (931/2000) (nitraattiasetus) 4 §:n 3 momentissa tarkoitetusta poikkeamisesta karjanlannan varastointitilalle 4 §:n 1 momentissa edellytetystä varastointitilavuudesta (Lomakkeesta täytetään ilmoittajaa koskevat tiedot sekä tiedot tilan eläinmäärästä ja lannan varastointiin vaikuttavista seikoista. Poikkeamistavan osalta täytetään joku/jotkut tarvittavista kohdista A, B, C tai D. Mikäli kohtien A-C mukaisia vastaanottajia on useita, annetaan jokaisesta vastaavat tiedot liitteellä.)</li><li> Muusta kuin kohdassa 1 tarkoitetusta lannan kaukovarastoinnista patterissanitraattiasetuksen 3 §:ssä ja liitteessä 1 annettujen määräysten mukaisesti (Lomakkeesta täytetään ilmoittajaa koskevat tiedot sekä tiedot tilan eläinmäärästä ja lannan kaukovarastointiin patterissa vaikuttavista seikoista. Patteroinnin osalta täytetään kohta D.)</li></ol></p><p>Ilmoitus tulee antaa vähintään kuukautta ennen, kuin on tarkoitus ryhtyä kohdassa 1 tarkoitettuun poikkeamiseen tähtääviin toimenpiteisiin tai kohdassa 2 tarkoitettuun muuhun lannan varastoimiseen patterissa.</p><p>Ilmoitus tulee uusia aina silloin, kun suunnitellut toimenpiteet poikkeaisivat aiemmin tehdyssä ilmoituksessa esitetyistä toimenpiteistä.</p><p>Ilmoituksen tekee se maataloustoiminnan harjoittaja, jonka on tarkoitus poiketa nitraattiasetuksessa edellytetystä lannan varastointitilavuudesta (kohta 1) tai jonka on tarkoitus ryhtyä muuhun lannan varastoimiseen patterissa (kohta 2).</p><h5>TIETOJEN ANTAMISEN PERUSTE</h5><p>Valtioneuvoston asetus maataloudesta peräisin olevien nitraattien vesiin pääsyn rajoittamisesta (931/2000), ns. nitraattiasetus. Asetus koskee koko maata (2 §).</p><h5>Ympäristönsuojelulaki (86/2000) 83 §</h5><p>Kunnan ympäristönsuojeluviranomaisella tai sen määräämällä viranhaltijalla on oikeus saada viranomaisten toiminnan julkisuudesta annetussa laissa säädetyn salassapitovelvollisuuden estämättä valvontaa varten tarpeellisia tietoja viranomaisilta ja toiminnanharjoittajilta.</p>
+
+lannan-varastointi.toimenpide._group_label: Lannan varastointitoiminta
+lannan-varastointi.toimenpide.tapa._group_label: Toimenpide
+lannan-varastointi.toimenpide.tapa.poikkeaminenVarastointitilavuudesta: 1. Poikkeaminen karjanlannan varastoinnille edellytetystä varastointitilavuudesta (Nitraattiasetuksen (931/2000) 4 §:n 2 mom. mukainen ilmoitus)
+lannan-varastointi.toimenpide.tapa.muuLannanKaukovarastointi: 2. Muu lannan kaukovarastointi patterissa, viranomaisen pyytäessä ilmoitusta (Nitraattiasetuksen 3 §:n ja liitteen 1 mukainen lannan varastointi patterissa)
+
+yl-maatalous-hankkeen-kuvaus._group_label: Hankkeen kuvaus
+yl-maatalous-hankkeen-kuvaus.kuvaus: Kuvaus
+yl-maatalous-hankkeen-kuvaus.tilatunnus: Hakijan tilatunnus
+
+lannan-varastointi._group_label: Lannan varastointi
+
+lannan-varastointi.lantajarjestelma.lietelanta: Lietelanta
+lannan-varastointi.lantajarjestelma.kuivalantaJaVirtsa: Kuivalanta ja virtsa
+lannan-varastointi.lantajarjestelma.kuivikelanta: Kuivikelanta
+lannan-varastointi.lantajarjestelma.kuivikepohja: Kuivikepohja
+lannan-varastointi.lantajarjestelma.tyhjennysvali: Kuivikepohjan tyhjennysväli
+lannan-varastointi.lantajarjestelma.kaytettyKuivike: Käytetty kuivike 
+
+lannan-varastointi.omatVarastot._group_label: Olemassa olevat lantavarastot
+lannan-varastointi.omatVarastot.kuivalantala: Kuivalantalan tilavuus
+lannan-varastointi.omatVarastot.virtsasailio: Virtsasäiliöiden tilavuus
+lannan-varastointi.omatVarastot.lietesailioTaiKuilu: Lietesäiliöiden ja -kuilujen yhteistilavuus
+lannan-varastointi.omatVarastot.muuSailio: Muu säliötilavuus
+lannan-varastointi.omatVarastot.kuivikepohja: Kuivikepohjien kokonaistilavuus
+lannan-varastointi.omatVarastot.kompostialusta: Kompostointialustan varastointitilavuus
+lannan-varastointi.omatVarastot.muutVarastot._group_label: Muut varastot
+lannan-varastointi.omatVarastot.muutVarastot.tyyppi: Muu varasto
+lannan-varastointi.omatVarastot.muutVarastot.tilavuus: Tilavuus
+lannan-varastointi.omatVarastot.muutVarastot._append_label: Lisää muu varasto
+lannan-varastointi.omatVarastot.suppeaJaloittelualue._group_label: Asianmukainen suppea jaloittelualue
+lannan-varastointi.omatVarastot.suppeaJaloittelualue.jaloittelualue: Jaloittelualueen pinta-ala
+lannan-varastointi.omatVarastot.suppeaJaloittelualue.varastointitilavuus: Varastointitilavuus
+
+lannan-varastointi.yhteinenVarasto._group_label: Viljelijöiden yhteinen varasto
+lannan-varastointi.yhteinenVarasto.tyyppi: Varaston tyyppi
+lannan-varastointi.yhteinenVarasto.tilavuus: Tilavuus
+lannan-varastointi.yhteinenVarasto.kayttajat._group_label: Käyttäjät
+lannan-varastointi.yhteinenVarasto.kayttajat._append_label: Lisää käyttäjä
+lannan-varastointi.yhteinenVarasto.kayttajat.omistaja._group_label: Omistaja
+lannan-varastointi.yhteinenVarasto.kayttajat.omistaja.etunimi: Etunimi
+lannan-varastointi.yhteinenVarasto.kayttajat.omistaja.sukunimi: Sukunimi
+lannan-varastointi.yhteinenVarasto.kayttajat.tilatiedot._group_label: Tilatiedot
+lannan-varastointi.yhteinenVarasto.kayttajat.tilatiedot.tilatunnus: Tilatunnus
+
+lannan-varastointi.elainmaarat._group_label: Tiedot tilan eläinmäärästä
+lannan-varastointi.elainmaarat._append_label: Lisää eläinmäärätietue
+lannan-varastointi.elainmaarat.ryhma: Eläinryhmä
+lannan-varastointi.elainmaarat.ryhma._group_label: Eläinryhmä
+lannan-varastointi.elainmaarat.ryhma.lyspylehmat: Lypsylehmät
+lannan-varastointi.elainmaarat.ryhma.emolehmat: Emolehmät
+lannan-varastointi.elainmaarat.ryhma.hiehotLihanaudatSiitossonnit: Hiehot, lihanaudat, siitossonnit
+lannan-varastointi.elainmaarat.ryhma.nuorkarja: Nuorkarja alle 6 kk
+lannan-varastointi.elainmaarat.ryhma.emakotPorsaineen: Emakot porsaineen
+lannan-varastointi.elainmaarat.ryhma.sateliittiemakotPorsaineen: Sateliittiemakot porsaineen 
+lannan-varastointi.elainmaarat.ryhma.lihasiatSiitossiat: Lihasiat, siitossiat
+lannan-varastointi.elainmaarat.ryhma.joutilaatEmakot: Joutilaat emakot
+lannan-varastointi.elainmaarat.ryhma.vieroitetutPorsaat: Vieroitetut porsaat
+lannan-varastointi.elainmaarat.ryhma.hevoset: Hevoset
+lannan-varastointi.elainmaarat.ryhma.ponit: Ponit
+lannan-varastointi.elainmaarat.ryhma.lampaatUuhetKaritsoineen: Lampaat, uuhet karitsoineen
+lannan-varastointi.elainmaarat.ryhma.vuohetKututKileineen: Vuohet, kutut karitsoineen
+lannan-varastointi.elainmaarat.ryhma.lattiakanatBroileremot: Lattiakanat, broileremot
+lannan-varastointi.elainmaarat.ryhma.hakkikanat: Häkkikanat
+lannan-varastointi.elainmaarat.ryhma.kalkkunat: Kalkkunat
+lannan-varastointi.elainmaarat.ryhma.broileritKananuorikot: Broilerit, kananuorikot
+lannan-varastointi.elainmaarat.ryhma.ankatHanhet: Ankat, hanhet
+lannan-varastointi.elainmaarat.ryhma.sorsat: Sorsat
+lannan-varastointi.muutElaimet._group_label:
+lannan-varastointi.muutElaimet.kuvaus: Muu eläin
+lannan-varastointi.muutElaimet._append_label: Lisää muu eläinmäärätietue
+nykyinen-elainmaara: Nykyinen eläinmäärä
+maksimi-elainmaara: Maksimi eläinmäärä
+
+lannan-varastointi.vastaanotettuLanta._group_label: Tila vastaanottaa karjanlantaa tai vastaavaa, luovuttajan tiedot
+lannan-varastointi.vastaanotettuLanta.kuvaus: Vastaanotettu lanta
+lannan-varastointi.vastaanotettuLanta.maara: Määrä, vuodessa
+lannan-varastointi.vastaanotettuLanta.etunimi: Etunimi
+lannan-varastointi.vastaanotettuLanta.sukunimi: Sukunimi
+lannan-varastointi.vastaanotettuLanta.tilatunnus: Tilatunnus
+lannan-varastointi.vastaanotettuLanta._append_label: Lisää luovuttaja
+lannan-varastointi.lantajarjestelma._group_label: Lantajärjestelmä
+lannan-varastointi.yhteinenVarasto._group_label: Viljelijöiden yhteinen varasto
+lannan-varastointi.yhteinenVarasto.kayttajat.etunimi: Etunimi
+lannan-varastointi.yhteinenVarasto.kayttajat.sukunimi: Sukunimi
+lannan-varastointi.yhteinenVarasto.kayttajat.tilatunnus: Tilatunnus
+lannan-varastointi.selostusElaimienOleskelusta: Selostus, minkä verran eri eläinryhmät ovat olleet sisällä ja ulkona laidunkauden aikana
+lannan-varastointi.poikkeamissuunnitelma: Perustelut poikkeamiselle ja mahdollinen suunnitelma siitä, milloin lantavarastot on tarkoitus rakentaa vastaamaan nitraattiasetuksen mukaista varastointitilavuutta
+
+lannan-varastointi.poikkeamistapa._group_label: Poikkeamistapa
+lannan-varastointi.poikkeamistapa.tapaA._group_label: Tapa A - Lanta luovutetaan sellaiselle hyödyntäjälle/hyödyntäjille, joka voi vastaanottaa sitä ympäristönsuojelulain 28 §:n mukaan myönnetyn luvan perusteella
+lannan-varastointi.poikkeamistapa.tapaB._group_label: Tapa B - Lantaa luovutetaan yhdelle tai useammalle viljelijälle valtioneuvoston asetuksen (931/2000) mukaisella tavalla varastoitavaksi
+lannan-varastointi.poikkeamistapa.tapaC._group_label: Tapa C - Lanta luovutetaan välittömästi hyötykäyttöön
+lannan-varastointi.poikkeamistapa.tapaD._group_label: Tapa D - Lanta varastoidaan valtioneuvoston asetuksen (931/2000) mukaisesti asianmukaisesti tehdyssä ja peitetyssä lantapatterissa
+
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila._group_label: Hyödyntäjän tiedot
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila._group_label: Varastoijan tiedot
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila._group_label: Hyödyntäjän tiedot
+
+lannan-varastointi.poikkeamistapa.tapaA._append_label: Lisää poikkeamistapa A
+lannan-varastointi.poikkeamistapa.tapaB._append_label: Lisää poikkeamistapa B
+lannan-varastointi.poikkeamistapa.tapaC._append_label: Lisää poikkeamistapa C
+lannan-varastointi.poikkeamistapa.tapaD._append_label: Lisää poikkeamistapa D
+
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila.omistaja._group_label: Omistaja
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila.omistaja.etunimi: Etunimi
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila.omistaja.sukunimi: Sukunimi
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila.tilatiedot._group_label: Tilatiedot
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila.tilatiedot.tilatunnus: Tilatunnus
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila.osoite._group_label: Osoite
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila.osoite.katu: Katuosoite
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila.osoite.postinumero: Postinumero
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila.osoite.postitoimipaikannimi: Postitoimipaikka
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila.yhteystiedot._group_label: Yhteystiedot
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila.yhteystiedot.puhelin: Puhelinnumero
+lannan-varastointi.poikkeamistapa.tapaA.hyodyntava-maatila.yhteystiedot.email: Sähköpostiosoite
+lannan-varastointi.poikkeamistapa.tapaA.ymparistolupa._group_label: Ympäristönsuojelulain 28 §:n mukaisen luvan myöntänyt viranomainen
+lannan-varastointi.poikkeamistapa.tapaA.ymparistolupa.lupaviranomainen: Lupaviranomainen
+lannan-varastointi.poikkeamistapa.tapaA.ymparistolupa.lupapaatostiedot: Lupapäätöstiedot
+lannan-varastointi.poikkeamistapa.tapaA.ymparistolupa.voimassaoloaika._group_label: Luvan voimassaoloaika
+lannan-varastointi.poikkeamistapa.tapaA.ymparistolupa.voimassaoloaika.alku: Alkuaika
+lannan-varastointi.poikkeamistapa.tapaA.ymparistolupa.voimassaoloaika.loppu: Loppuaika
+lannan-varastointi.poikkeamistapa.tapaA.lantamaara: Hyödynnettäväksi vietävän lannan määrä
+
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila.omistaja._group_label: Omistaja
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila.omistaja.etunimi: Etunimi
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila.omistaja.sukunimi: Sukunimi
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila.tilatiedot._group_label: Tilatiedot
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila.tilatiedot.tilatunnus: Tilatunnus
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila.osoite._group_label: Osoite
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila.osoite.katu: Katuosoite
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila.osoite.postinumero: Postinumero
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila.osoite.postitoimipaikannimi: Postitoimipaikka
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila.yhteystiedot._group_label: Yhteystiedot
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila.yhteystiedot.puhelin: Puhelinnumero
+lannan-varastointi.poikkeamistapa.tapaB.varastoiva-maatila.yhteystiedot.email: Sähköpostiosoite
+lannan-varastointi.poikkeamistapa.tapaB.varastointitapa: Selvitys varastointitavasta
+lannan-varastointi.poikkeamistapa.tapaB.lantamaara: Varastoitavan lannan määrä
+
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila.omistaja._group_label: Omistaja
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila.omistaja.etunimi: Etunimi
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila.omistaja.sukunimi: Sukunimi
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila.tilatiedot._group_label: Tilatiedot
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila.tilatiedot.tilatunnus: Tilatunnus
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila.osoite._group_label: Osoite
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila.osoite.katu: Katuosoite
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila.osoite.postinumero: Postinumero
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila.osoite.postitoimipaikannimi: Postitoimipaikka
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila.yhteystiedot._group_label: Yhteystiedot
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila.yhteystiedot.puhelin: Puhelinnumero
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntava-maatila.yhteystiedot.email: Sähköpostiosoite
+lannan-varastointi.poikkeamistapa.tapaC.hyodyntamispaikka: Selvitys hyödyntämispaikasta
+lannan-varastointi.poikkeamistapa.tapaC.lantamaara: Hyödynnettäväksi vietävän lannan määrä
+
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka._group_label: Patterin sijainti
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka.omistaja._group_label: Tilan omistaja
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka.omistaja.etunimi: Etunimi
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka.omistaja.sukunimi: Sukunimi
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka.tilatiedot._group_label: Tilatiedot
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka.tilatiedot.tilatunnus: Tilatunnus
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka.osoite._group_label: Osoite
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka.osoite.katu: Katuosoite
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka.osoite.postinumero: Postinumero
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka.osoite.postitoimipaikannimi: Postitoimipaikka
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka.yhteystiedot._group_label: Yhteystiedot
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka.yhteystiedot.puhelin: Puhelinnumero
+lannan-varastointi.poikkeamistapa.tapaD.patterinSijaintipaikka.yhteystiedot.email: Sähköpostiosoite
+
+lannan-varastointi.poikkeamistapa.tapaD.peruslohko._group_label: Peruslohkot
+lannan-varastointi.poikkeamistapa.tapaD.peruslohko.nimi: Nimi
+lannan-varastointi.poikkeamistapa.tapaD.peruslohko.tunnus: Tunnus
+lannan-varastointi.poikkeamistapa.tapaD.peruslohko.pintaala: Pinta-ala
+lannan-varastointi.poikkeamistapa.tapaD.peruslohko._append_label: Lisää peruslohko
+lannan-varastointi.poikkeamistapa.tapaD.perustamistapaJaPeittaminen: Patterin perustamistapa ja peittäminen
+lannan-varastointi.poikkeamistapa.tapaD.lannanMaara: Arvio patteroitavan lannan määrästä
+lannan-varastointi.poikkeamistapa.tapaD.patterienLukumaara: Patterien lukumäärä
+lannan-varastointi.poikkeamistapa.tapaD.etaisyydet._group_label: Etäisyydet
+lannan-varastointi.poikkeamistapa.tapaD.etaisyydet.etaisyysTalouskaivoon: Etäisyys lähimpään talousvesikaivoon
+lannan-varastointi.poikkeamistapa.tapaD.etaisyydet.etaisyysValtaojaan: Etäisyys lähimpään valtaojaan
+lannan-varastointi.poikkeamistapa.tapaD.etaisyydet.etaisyysVesistoon: Etäisyys lähimpään vesistöön
+lannan-varastointi.poikkeamistapa.tapaD.patterinLevitysaika._group_label: Patterin suunniteltu levitysaika
+lannan-varastointi.poikkeamistapa.tapaD.patterinLevitysaika.alku: Alkuaika
+lannan-varastointi.poikkeamistapa.tapaD.patterinLevitysaika.loppu: Loppuaika

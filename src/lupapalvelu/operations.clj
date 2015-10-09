@@ -134,6 +134,7 @@
       ["muut-ymparistoluvat"
        [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]
         ["jatteen-keraystoiminta" :jatteen-keraystoiminta]
+        ["lannan-varastointi" :lannan-varastointi]
         ["kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan" :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan]
         ["koeluontoinen-toiminta" :koeluontoinen-toiminta]
         ["maa-ainesten-kotitarveotto" :maa-ainesten-kotitarveotto]
@@ -344,6 +345,14 @@
                             :permit-type permit/YM
                             :required []
                             :attachments [:jatteen_kerays [:vastaanottopaikan_tiedot]]
+                            :add-operation-allowed false
+                            :min-outgoing-link-permits 0
+                            :asianhallinta true}
+
+   :lannan-varastointi     {:schema "lannan-varastointi"
+                            :permit-type permit/YM
+                            :required ["yl-maatalous-hankkeen-kuvaus"]
+                            :attachments [] ; [:kartat [:patterin-sijainti]] TODO: sync with commons
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
                             :asianhallinta true}

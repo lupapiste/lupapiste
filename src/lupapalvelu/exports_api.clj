@@ -127,6 +127,7 @@
    :tontin-jarjestelymuutos                                           "D"
    :jatteen-keraystoiminta                                            "D"
    :muistomerkin-rauhoittaminen                                       "D"
+   :lannan-varastointi                                                "D"
    :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan  "D"
    :ilmoitus-poikkeuksellisesta-tilanteesta                           "D"
    :maa-ainesten-kotitarveotto                                        "D"
