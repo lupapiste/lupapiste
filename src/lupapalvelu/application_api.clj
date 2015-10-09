@@ -728,5 +728,5 @@
         app-snapshot (assoc app-snapshot :attachments attachments)
         changes      {$push {:versions app-snapshot}
                       $set  {:modified created}}]
-    (mongo/update-by-id :application-snapshots id changes :upsert true)
+    (mongo/update-by-id :application-bulletins id changes :upsert true)
     (ok)))
