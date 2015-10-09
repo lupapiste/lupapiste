@@ -1,7 +1,7 @@
 (function() {
   "use strict";
 
-  var constructEditableMetadata = function(actualMetadata, schema, roles) {
+  var constructEditableMetadata = function(actualMetadata, schema) {
     var newMap = {};
     _.forEach(schema, function (v) {
       if (v.dependencies) {
@@ -84,6 +84,16 @@
     return errors;
   };
 
+  var getForbiddenFields = function(schema, roles) {
+    var naughtyFields = [];
+    _.forEach(schema, function (attribute) {
+      if (attribute['require-role'] && !_.contains(roles, attribute['require-role'])) {
+        naughtyFields.push(attribute.type);
+      }
+    });
+    return naughtyFields;
+  };
+
   var model = function(params) {
     var self = this;
     self.attachmentId = params.attachmentId ? params.attachmentId : ko.observable(null);
@@ -95,6 +105,7 @@
     self.editedMetadata = ko.observable();
     self.schema = ko.observableArray();
     self.inputTypeMap = {};
+    self.disabledFields = ko.observableArray();
     
     var orgAuthz = ko.unwrap(lupapisteApp.models.currentUser.orgAuthz);
     var organization = ko.unwrap(params.application.organization);
@@ -117,6 +128,7 @@
         self.editedMetadata(constructEditableMetadata(ko.mapping.toJS(self.metadata), data.schema, roles));
         self.inputTypeMap = constructSchemaInputTypeMap(data.schema);
         self.schema(data.schema);
+        self.disabledFields(getForbiddenFields(data.schema, roles));
       })
       .call();
 
