@@ -349,14 +349,6 @@
                                   :permit-type permit/YM
                                   :applicant-doc-schema applicant-doc-schema-YM
                                   :required []
-                                  ;; TODO: sync with attachments in Commons.
-;                                  :attachments [:muistomerkin-rauhoittaminen [:kirjallinen-aineisto
-;                                                                              :lainhuutotodistus
-;                                                                              :kauppakirja
-;                                                                              :valokuva-kohteesta
-;                                                                              :kohdekuvaus
-;                                                                              :selvitys-omistusoikeudesta]
-;                                                :kartat [:luonnonmuistomerkin-sijainti-kartalla]]
                                   :attachments []
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0
@@ -366,7 +358,7 @@
                             :permit-type permit/YM
                             :applicant-doc-schema applicant-doc-schema-YM
                             :required []
-                            :attachments [:jatteen_kerays [:vastaanottopaikan_tiedot]]
+                            :attachments []
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
                             :asianhallinta true}
@@ -375,7 +367,7 @@
                             :permit-type permit/YM
                             :applicant-doc-schema applicant-doc-schema-YM
                             :required ["yl-maatalous-hankkeen-kuvaus"]
-                            :attachments [:kartat [:lantapatterin-sijainti]]
+                            :attachments []
                             :add-operation-allowed false
                             :min-outgoing-link-permits 0
                             :asianhallinta true}
@@ -406,7 +398,7 @@
                                 :permit-type permit/YM
                                 :applicant-doc-schema applicant-doc-schema-YM
                                 :required ["kiinteisto"]
-                                :attachments [:kartat [:ottamispaikan-sijainti]]
+                                :attachments []
                                 :add-operation-allowed false
                                 :min-outgoing-link-permits 0
                                 :asianhallinta true}
