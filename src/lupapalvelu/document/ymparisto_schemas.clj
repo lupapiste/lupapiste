@@ -412,7 +412,7 @@
    {:info {:name "koeluontoinen-toiminta"}
     :body (body
             koeluontoinen-toiminta
-            kesto-mini)}
+            (map #(assoc % :required true) kesto-mini))}
    {:info {:name "maastoliikennelaki-kilpailut-ja-harjoitukset"
            :approvable true
            :order 1}
