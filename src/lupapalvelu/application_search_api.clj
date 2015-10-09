@@ -93,10 +93,3 @@
     (ok :applications (->> apps
                            (filter :primaryOperation)
                            (map search/public-fields)))))
-
-(defquery application-bulletins
-  {:description "Query for Julkipano"
-   :parameters []
-   :user-roles #{:anonymous}}
-  [{data :data}]
-  (ok :data (search/application-bulletins data)))
