@@ -16,12 +16,15 @@
    :modified 1})
 
 (defn application-bulletins [{:keys [limit] :or {limit 10}}]
-  (let [query {}]
-    (mongo/with-collection "application-bulletins"
-      (query/find query)
-      (query/fields bulletins-fields)
-      (query/sort {:modified 1})
-      (query/limit limit))))
+  (let [query {}
+        apps (mongo/with-collection "application-bulletins"
+               (query/find query)
+               (query/fields bulletins-fields)
+               (query/sort {:modified 1})
+               (query/limit limit))]
+    (map
+      #(assoc (first (:versions %)) :id (:_id %))
+      apps)))
 
 (defquery application-bulletins
   {:description "Query for Julkipano"
