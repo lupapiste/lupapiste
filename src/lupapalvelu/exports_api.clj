@@ -131,6 +131,7 @@
    :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan  "D"
    :ilmoitus-poikkeuksellisesta-tilanteesta                           "D"
    :maa-ainesten-kotitarveotto                                        "D"
+   :maastoliikennelaki-kilpailut-ja-harjoitukset                      "D"
    })
 
 (defn- export [collection query fields]

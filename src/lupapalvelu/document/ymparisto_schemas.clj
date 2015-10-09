@@ -235,6 +235,15 @@
     {:name "jatehuollon-jarjestaminen" :type :group
      :body [{:name "keraily-varastointi-kuljetus-kasittely" :type :text :max-len 4000 :required true}]}))
 
+(def maastoliikennelaki-kilpailut-ja-harjoitukset
+  (body
+    {:name "toiminnan-laatu" :type :group
+     :group-help "maastoliikennelaki-kilpailut-ja-harjoitukset.toiminnan-laatu.help"
+     :body [kuvaus]}
+    {:name "toiminnan-vaikutukset" :type :group
+     :group-help "maastoliikennelaki-kilpailut-ja-harjoitukset.toiminnan-vaikutukset.help"
+     :body [{:name "tiedot-vaikutuksista-luonnolle" :type :text :max-len 4000 :required true}]}))
+
 (def elainmaarat [{:name "ryhma" 
                    :type :select 
                    :label false
@@ -395,19 +404,29 @@
            :order 1}
     :body [kuvaus]}
    {:info {:name "luonnonmuistomerkin-rauhoittaminen"
+           :approvable true
            :order 1}
     :body luonnonmuistomerkin-rauhoittaminen}
    {:info {:name "kaytostapoistetun-sailion-jattaminen-maaperaan"
+           :approvable true
            :order 1}
     :body kaytostapoistetun-sailion-jattaminen-maaperaan}
    {:info {:name "ilmoitus-poik-tilanteesta"
            :order 1}
     :body ilmoitus-poikkeuksellisesta-tilanteesta}
-   {:info {:name "paatoksen-toimitus"
-           :order 9999}
-    :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
-            :body [{:name "Noudetaan"}
-                   {:name "Postitetaan"}]}]}
+   {:info {:name "jatteen-kerays"}
+    :body jatteen-keraystoiminta-ilmoitus}
+   {:info {:name "koeluontoinen-toiminta"}
+    :body (body
+            koeluontoinen-toiminta
+            kesto-mini)}
+   {:info {:name "maastoliikennelaki-kilpailut-ja-harjoitukset"
+           :approvable true
+           :order 1}
+    :body maastoliikennelaki-kilpailut-ja-harjoitukset}
+   {:info {:name "maa-ainesten-kotitarveotto"
+           :approvable true}
+    :body maa-ainesten-kotitarveotto}
    {:info {:name "yl-maatalous-hankkeen-kuvaus"
            :order 1}
     :body [kuvaus
@@ -415,14 +434,11 @@
    {:info {:name "lannan-varastointi"
            :section-help "lannan-varastointi-kuvaus.help"}
     :body lannan-varastointi-ilmoitus}
-   {:info {:name "jatteen-kerays"}
-    :body jatteen-keraystoiminta-ilmoitus}
-   {:info {:name "koeluontoinen-toiminta"}
-    :body (body
-            koeluontoinen-toiminta
-            kesto-mini)}
-   {:info {:name "maa-ainesten-kotitarveotto"
-           :approvable true}
-    :body maa-ainesten-kotitarveotto}
+
+   {:info {:name "paatoksen-toimitus"
+           :order 9999}
+    :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
+            :body [{:name "Noudetaan"}
+                   {:name "Postitetaan"}]}]}
    ])
 
