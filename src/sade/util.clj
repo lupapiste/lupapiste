@@ -315,35 +315,6 @@
   [m & kvs]
   (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
 
-(def vrk-checksum-chars ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"])
-
-(def finnish-hetu-regex #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$")
-
-(defn vrk-checksum [^Long l]
-  (nth vrk-checksum-chars (mod l 31)))
-
-(defn hetu-checksum [^String hetu]
-  (vrk-checksum (Long/parseLong (str (subs hetu 0 6) (subs hetu 7 10)))))
-
-(defn- validate-hetu-date [hetu]
-  (let [dateparts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
-        yy (last (butlast dateparts))
-        yyyy (str (case (last dateparts) "+" "18" "-" "19" "20") yy)
-        basic-date (str yyyy (second dateparts) (first dateparts))]
-    (try
-      (timeformat/parse (timeformat/formatters :basic-date) basic-date)
-      true
-      (catch Exception e
-        false))))
-
-(defn- validate-hetu-checksum [hetu]
-  (= (subs hetu 10 11) (hetu-checksum hetu)))
-
-(defn valid-hetu? [^String hetu]
-  (if hetu
-    (and (validate-hetu-date hetu) (validate-hetu-checksum hetu))
-    false))
-
 (defn- rakennustunnus-checksum [^String prt]
   (vrk-checksum (Long/parseLong (subs prt 0 9))))
 
