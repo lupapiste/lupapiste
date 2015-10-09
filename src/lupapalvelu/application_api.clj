@@ -720,9 +720,9 @@
   {:parameters [id]
    :user-roles #{:authority}
    :states     states/all-application-states}
-  [{:keys [application created] :as command}]
+  [{:keys [{:keys [attachments] :as application} created] :as command}]
   (let [app-snapshot (select-keys application app-snapshot-fields)
-        attachments  (->> (:attachments application)
+        attachments  (->> attachments
                           (filter :latestVersion)
                           (map #(dissoc % :versions)))
         app-snapshot (assoc app-snapshot :attachments attachments)
