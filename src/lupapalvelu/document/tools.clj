@@ -75,7 +75,7 @@
 
 (defn- ^{:testable true} group [x t]
   (if (:repeating x)
-    (if-not (:repeating-init-empty %)
+    (if-not (:repeating-init-empty x)
       {:name :0
        :type t
        :body (:body x)}
