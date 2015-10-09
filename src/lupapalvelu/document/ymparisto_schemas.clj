@@ -266,7 +266,7 @@
                                                 :body [{:name "poikkeaminenVarastointitilavuudesta"}
                                                        {:name "muuLannanKaukovarastointi"}]}]}
 
-                                       {:name "elainmaarat" :type :table :repeating true :body elainmaarat}
+                                       {:name "elainmaarat" :group-help "lannan-varastointi.elainmaarat.group-help" :type :table :repeating true :body elainmaarat}
                                        {:name "muutElaimet"
                                         :repeating true
                                         :type :table
@@ -315,8 +315,10 @@
                                        
                                        {:name "poikkeamistapa"
                                         :type :group
+                                        :group-help "lannan-varastointi.poikkeamistapa.help"
                                         :body [{:name "tapaA"
                                                 :type :group
+                                                :group-help "lannan-varastointi.poikkeamistapa.tapa.help"
                                                 :repeating true
                                                 :body [{:name "hyodyntava-maatila" :type :group :body maatila}
                                                        {:name "ymparistolupa" :type :group :body ymparistolupa}
@@ -324,6 +326,7 @@
 
                                                {:name "tapaB" 
                                                 :type :group
+                                                :group-help "lannan-varastointi.poikkeamistapa.tapa.help"
                                                 :repeating true
                                                 :body [{:name "varastoiva-maatila" :type :group :body maatila}
                                                        {:name "varastointitapa" :type :text :max-len 1000}
@@ -331,6 +334,7 @@
 
                                                {:name "tapaC" 
                                                 :type :group
+                                                :group-help "lannan-varastointi.poikkeamistapa.tapa.help"
                                                 :repeating true
                                                 :body [{:name "hyodyntava-maatila" :type :group :body maatila}
                                                        {:name "hyodyntamispaikka" :type :text :max-len 1000}
@@ -338,6 +342,7 @@
 
                                                {:name "tapaD"
                                                 :type :group
+                                                :group-help "lannan-varastointi.poikkeamistapa.tapaD.help"
                                                 :repeating true
                                                 :body [{:name "patterinSijaintipaikka" :type :group :body maatila}
                                                        {:name "peruslohko"
