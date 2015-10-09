@@ -65,7 +65,7 @@
 (defmethod subtype-validation :zip [_ v]
   (cond
     (blank? v) nil
-    (util/finnish-zip? v) nil
+    (v/finnish-zip? v) nil
     :else [:warn "illegal-zip"]))
 
 (defmethod subtype-validation :rakennusnumero [_ v]

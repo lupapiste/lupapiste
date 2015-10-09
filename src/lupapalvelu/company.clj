@@ -46,7 +46,7 @@
               (sc/optional-key :reference)   max-64-or-nil
               :address1                      max-64-or-nil
               :po                            max-64-or-nil
-              :zip                           (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
+              :zip                           (sc/either (sc/pred v/finnish-zip? "Not a valid zip code")
                                                          (sc/pred ss/blank?))
               (sc/optional-key :country)     max-64-or-nil
               (sc/optional-key :ovt)         (sc/either (sc/pred v/finnish-ovt? "Not a valid OVT code")

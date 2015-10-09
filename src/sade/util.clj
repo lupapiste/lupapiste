@@ -315,9 +315,6 @@
   [m & kvs]
   (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
 
-(defn finnish-zip? [^String zip-code]
-  (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
-
 (defn relative-local-url? [^String url]
   (not (or (not (string? url)) (ss/starts-with url "//") (re-matches #"^\w+://.*" url))))
 

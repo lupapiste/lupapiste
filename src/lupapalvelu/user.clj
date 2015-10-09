@@ -64,7 +64,7 @@
            (sc/optional-key :street)              (sc/maybe (util/max-length-string 255))
            (sc/optional-key :city)                (sc/maybe (util/max-length-string 255))
            (sc/optional-key :zip)                 (sc/either
-                                                    (sc/pred util/finnish-zip? "Not a valid zip code")
+                                                    (sc/pred v/finnish-zip? "Not a valid zip code")
                                                     (sc/pred ss/blank?))
            (sc/optional-key :phone)               (sc/maybe (util/max-length-string 255))
            (sc/optional-key :architect)           sc/Bool
@@ -107,7 +107,7 @@
                    :street    (sc/maybe (util/max-length-string 255))
                    :city      (sc/maybe (util/max-length-string 255))
                    :zip       (sc/either
-                                (sc/pred util/finnish-zip? "Not a valid zip code")
+                                (sc/pred v/finnish-zip? "Not a valid zip code")
                                 (sc/pred ss/blank?))
                    :phone (sc/maybe (util/max-length-string 255))
                    (sc/optional-key :architect) sc/Bool
