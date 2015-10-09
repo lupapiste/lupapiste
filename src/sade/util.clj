@@ -315,11 +315,6 @@
   [m & kvs]
   (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
 
-(defn bic? [bic]
-  (if bic
-    (re-matches #"^[a-zA-Z]{6}[a-zA-Z\d]{2,5}$" bic)
-    false))
-
 (defn rakennusnumero? [^String s]
   (and (not (nil? s)) (re-matches #"^\d{3}$" s)))
 

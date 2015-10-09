@@ -36,3 +36,8 @@
     (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\w{0,5}" ovt)]
       (finnish-y? (str y \- c)))
     false))
+
+(defn bic? [bic]
+  (if bic
+    (re-matches #"^[a-zA-Z]{6}[a-zA-Z\d]{2,5}$" bic)
+    false))
