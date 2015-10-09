@@ -208,10 +208,11 @@
 
 
 (def bulletins-fields
-  {:state 1 :municipality 1
-   :address 1 :location 1
-   :primaryOperation 1
-   :applicant 1 :modified 1})
+  {:versions.state 1 :versions.municipality 1
+   :versions.address 1 :versions.location 1
+   :versions.primaryOperation 1
+   :versions.applicant 1 :versions.modified 1
+   :modified 1})
 
 (defn application-bulletins [{:keys [limit] :or {limit 10}}]
   (let [query {}]
