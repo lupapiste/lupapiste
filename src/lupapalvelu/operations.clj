@@ -138,6 +138,7 @@
         ["koeluontoinen-toiminta" :koeluontoinen-toiminta]
         ["maa-ainesten-kotitarveotto" :maa-ainesten-kotitarveotto]
         ["ilmoitus-poikkeuksellisesta-tilanteesta" :ilmoitus-poikkeuksellisesta-tilanteesta]
+        ["maastoliikennelaki-kilpailut-ja-harjoitukset" :maastoliikennelaki-kilpailut-ja-harjoitukset]
         ]]
 
       ; permit/VVVL
@@ -331,10 +332,10 @@
 ;                                  :attachments [:muistomerkin-rauhoittaminen [:kirjallinen-aineisto
 ;                                                                              :lainhuutotodistus
 ;                                                                              :kauppakirja
-;                                                                              :kartta
 ;                                                                              :valokuva-kohteesta
 ;                                                                              :kohdekuvaus
-;                                                                              :selvitys-omistusoikeudesta]]
+;                                                                              :selvitys-omistusoikeudesta]
+;                                                :kartat [:luonnonmuistomerkin-sijainti-kartalla]]
                                   :attachments []
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0
@@ -352,9 +353,9 @@
                                                                       :permit-type permit/YM
                                                                       :required []
                                                                       ;; TODO: sync with attachments in Commons.
-;                                                                      :attachments [:kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan [:karttapiirros
-;                                                                                                                                                       :sailion-tarkastuspoytakirja
-;                                                                                                                                                       :kiinteiston-omistajien-suostumus]]
+;                                                                      :attachments [:kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan [:sailion-tarkastuspoytakirja
+;                                                                                                                                                       :kiinteiston-omistajien-suostumus]
+;                                                                                    :kartat [:sailion-ja-rakenteiden-sijainti-kartalla]]
                                                                       :attachments []
                                                                       :add-operation-allowed false
                                                                       :min-outgoing-link-permits 0
@@ -375,16 +376,27 @@
                                 :add-operation-allowed false
                                 :min-outgoing-link-permits 0
                                 :asianhallinta true}
+
    :ilmoitus-poikkeuksellisesta-tilanteesta {:schema "ilmoitus-poik-tilanteesta"
                                              :permit-type permit/YM
                                              :required []
                                              ;; TODO: sync with attachments in Commons.
 ;                                             :attachments [:ilmoitus-poikkeuksellisesta-tilanteesta [:kayttoturvallisuustiedote]
 ;                                                           :kartat [:jatteen-sijainti]]
-                                             :attachments [] ; TODO
+                                             :attachments []
                                              :add-operation-allowed false
                                              :min-outgoing-link-permits 0
                                              :asianhallinta true}
+
+   :maastoliikennelaki-kilpailut-ja-harjoitukset {:schema "maastoliikennelaki-kilpailut-ja-harjoitukset"
+                                                  :permit-type permit/YM
+                                                  :required []
+                                                  ;; TODO: sync with attachments in Commons.
+;                                                  :attachments [:maastoliikennelaki-kilpailut-ja-harjoitukset [:asemapiirros-kilpailu-tai-harjoitusalueesta]]
+                                                  :attachments []
+                                                  :add-operation-allowed false
+                                                  :min-outgoing-link-permits 0
+                                                  :asianhallinta true}
    })
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
