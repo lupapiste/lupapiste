@@ -32,3 +32,24 @@
    :user-roles #{:anonymous}}
   [{data :data}]
   (ok :data (application-bulletins data)))
+
+
+(def app-snapshot-fields
+  [:address :primaryOperation :created :modified
+   :state :permitType :organization :verdicts :documents
+   :propertyId :location])
+
+(defcommand publish-bulletin
+  {:parameters [id]
+   :user-roles #{:authority}
+   :states     states/all-application-states}
+  [{:keys [application created] :as command}]
+  (let [app-snapshot (select-keys application app-snapshot-fields)
+        attachments  (->> (:attachments application)
+                          (filter :latestVersion)
+                          (map #(dissoc % :versions)))
+        app-snapshot (assoc app-snapshot :attachments attachments)
+        changes      {$push {:versions app-snapshot}
+                      $set  {:modified created}}]
+    (mongo/update-by-id :application-bulletins id changes :upsert true)
+    (ok)))
