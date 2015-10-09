@@ -722,6 +722,10 @@
    :states     states/all-application-states}
   [{:keys [application created] :as command}]
   (let [app-snapshot (select-keys application app-snapshot-fields)
+        attachments  (->> (:attachments application)
+                          (filter :latestVersion)
+                          (map #(dissoc % :versions)))
+        app-snapshot (assoc app-snapshot :attachments attachments)
         changes      {$push {:versions app-snapshot}
                       $set  {:modified created}}]
     (mongo/update-by-id :application-snapshots id changes :upsert true)
