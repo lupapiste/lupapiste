@@ -103,7 +103,7 @@
     (ss/blank? v) nil
     (= "other" v) nil
     (v/rakennusnumero? v) nil
-    (util/rakennustunnus? v) nil
+    (v/rakennustunnus? v) nil
     :else [:warn "illegal-rakennusnumero"]))
 
 (defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))

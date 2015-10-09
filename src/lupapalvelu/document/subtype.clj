@@ -77,7 +77,7 @@
 (defmethod subtype-validation :rakennustunnus [_ v]
   (cond
    (blank? v) nil
-   (util/rakennustunnus? v) nil
+   (v/rakennustunnus? v) nil
    :else [:warn "illegal-rakennustunnus"])
  )
 

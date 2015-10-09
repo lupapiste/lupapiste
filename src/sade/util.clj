@@ -315,15 +315,6 @@
   [m & kvs]
   (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
 
-(defn- rakennustunnus-checksum [^String prt]
-  (vrk-checksum (Long/parseLong (subs prt 0 9))))
-
-(defn- rakennustunnus-checksum-matches? [^String prt]
-  (= (subs prt 9 10) (rakennustunnus-checksum prt)))
-
-(defn rakennustunnus? [^String prt]
-  (and (not (nil? prt)) (re-matches #"^\d{9}[0-9A-FHJ-NPR-Y]$" prt) (rakennustunnus-checksum-matches? prt)))
-
 (defn finnish-zip? [^String zip-code]
   (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
 

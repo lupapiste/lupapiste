@@ -29,3 +29,13 @@
     (finnish-ovt? "003723415294")  => falsey)
   (facts "Alphabetic suffix"
     (fact (finnish-ovt? "003718523029101CZ") => truthy)))
+
+(facts "rakennustunnus?"
+  (fact (rakennustunnus? nil) => falsey)
+  (fact (rakennustunnus? "") => falsey)
+  (fact (rakennustunnus? "foo") => falsey)
+  (fact (rakennustunnus? "1a") => falsey)
+  (fact (rakennustunnus? "1A") => falsey)
+  (fact (rakennustunnus? "903048741J") => truthy)
+  (fact "SYKE sample with a fixed checksum" (rakennustunnus? "100012345N") => truthy)
+  (fact "VRK sample with a fixed checksum" (rakennustunnus? "1234567892") => truthy))

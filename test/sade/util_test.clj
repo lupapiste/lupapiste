@@ -213,16 +213,6 @@
   (assoc-when {:a nil :b :b} :a :a, :b nil, :c :c)
   => {:a :a, :b :b, :c :c})
 
-(facts "rakennustunnus?"
-  (fact (rakennustunnus? nil) => falsey)
-  (fact (rakennustunnus? "") => falsey)
-  (fact (rakennustunnus? "foo") => falsey)
-  (fact (rakennustunnus? "1a") => falsey)
-  (fact (rakennustunnus? "1A") => falsey)
-  (fact (rakennustunnus? "903048741J") => truthy)
-  (fact "SYKE sample with a fixed checksum" (rakennustunnus? "100012345N") => truthy)
-  (fact "VRK sample with a fixed checksum" (rakennustunnus? "1234567892") => truthy))
-
 (facts max-length
   (fact (sc/check (max-length 1) []) => nil)
   (fact (sc/check (max-length 1) [1]) => nil)
