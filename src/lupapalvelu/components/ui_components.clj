@@ -365,9 +365,10 @@
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}
 
-   :bulletin-app {:depends [:ui-components]
-                  :js ["bulletin-app.js"]}
-   :bulletin {:depends [:bulletin-app :header]}
+   :bulletins-app {:depends [:ui-components]
+                  :js ["bulletins-app.js"]}
+   :bulletins {:depends [:bulletins-app :header]
+               :html ["application-bulletins.html"]}
    })
 
 ; Make sure all dependencies are resolvable:
