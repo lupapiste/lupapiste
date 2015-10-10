@@ -3,7 +3,7 @@
 <body>
   <section class="page" id="inforequest">
     <div class="application_summary">
-        <div class="container">
+        <div class="container" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'inforequest'">
             <div class="preamble">
                 <div data-bind="with: application" class="application_summary_info">
                     <h1 data-bind="component: {name: 'address',
@@ -97,7 +97,7 @@
         <div id="inforequest-marker-map-contents"></div>
       </div>
 
-      <div class="content-narrow">
+      <div class="content-narrow" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'inforequest'">
 
         <div data-bind="visible: lupapisteApp.models.currentUser.oir">
           <h2 data-test-id="wanna-join">
