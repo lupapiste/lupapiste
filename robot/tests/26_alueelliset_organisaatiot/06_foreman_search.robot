@@ -1,9 +1,9 @@
 *** Settings ***
 
 Documentation  Applicant and authority uses application tabs
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource       ../../common_resource.robot
-Suite setup  Apply minimal fixture now
+Suite Setup  Apply minimal fixture now
 
 *** Test Cases ***
 

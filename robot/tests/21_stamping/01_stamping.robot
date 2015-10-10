@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Stamping functionality for authority
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
 
