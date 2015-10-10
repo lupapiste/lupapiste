@@ -68,7 +68,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
       "orderVerdictAttachments": {
         loc: loc("verdict.orderAttachmentPrints.button"),
         clickCommand: function() {
-          self.verdictAttachmentPrintsOrderModel.openDialog({application: self.appModel});
+          self.verdictAttachmentPrintsOrderModel.openDialog();
         },
         visibleFn: function (rawAttachments) {
           return self.authorizationModel.ok("order-verdict-attachment-prints") && self.verdictAttachmentPrintsOrderModel.attachments().length;

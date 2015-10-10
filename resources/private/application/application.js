@@ -148,8 +148,8 @@
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.secondaryOperations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      verdictAttachmentPrintsOrderModel.refresh(applicationModel);
-      verdictAttachmentPrintsOrderHistoryModel.refresh(applicationModel);
+      verdictAttachmentPrintsOrderModel.refresh();
+      verdictAttachmentPrintsOrderHistoryModel.refresh();
 
       attachmentsTab.refresh(applicationModel);
 
