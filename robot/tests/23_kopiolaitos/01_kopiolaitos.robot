@@ -116,7 +116,7 @@ Sonja checks that email was sent
   Page Should Contain  Sipoon rakennusvalvonta, Sonja Sibbo
   Page Should Contain  tilaaja@example.com
   Page Should Contain  ${TXT_TESTFILE_NAME}
-  Go Back
+  [Teardown]  Go Back
 
 Sonja opens the kopiolaitos order history dialog
   Wait until  Element should be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
