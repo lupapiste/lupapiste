@@ -1384,10 +1384,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           models = subSchema.initiallyEmpty ? [] : [{}];
       }
 
-      var elements;
+      var elements = subSchema["repeating-init-empty"] ? [] : buildElements(models);
 
       if (subSchema.type === "table") {
-        elements = buildElements(models);
         var div = document.createElement("div");
         div.className = "form-table";
         var table = document.createElement("table");
@@ -1416,8 +1415,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         div.appendChild(table);
 
         elements = [div];
-      } else {
-        elements = buildElements(models);
       }
 
       var appendButton = makeButton(myPath.join("_") + "_append",

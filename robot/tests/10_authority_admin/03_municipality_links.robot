@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Authority admin edits municipality links
-Test teardown  Logout
+Test Teardown  Logout
 Resource       ../../common_resource.robot
 
 *** Test Cases ***

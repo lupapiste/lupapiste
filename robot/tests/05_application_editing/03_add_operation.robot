@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Mikko ads an other operation
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***

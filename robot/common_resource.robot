@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-...            More about robot http://code.google.com/p/robotframework/.
 Library        Selenium2Library   timeout=10  run_on_failure=Nothing
 Library        String
 

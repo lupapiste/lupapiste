@@ -9,6 +9,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.vrk :refer :all]
             [lupapalvelu.document.document-field-validators :refer :all]
@@ -66,7 +67,7 @@
 (defmethod validate-field :hetu [_ _ v]
   (cond
     (ss/blank? v) nil
-    (re-matches util/finnish-hetu-regex v) (when-not (util/valid-hetu? v) [:err "illegal-hetu"])
+    (re-matches v/finnish-hetu-regex v) (when-not (v/valid-hetu? v) [:err "illegal-hetu"])
     :else [:err "illegal-hetu"]))
 
 (defmethod validate-field :checkbox [_ _ v]
@@ -101,8 +102,8 @@
   (cond
     (ss/blank? v) nil
     (= "other" v) nil
-    (util/rakennusnumero? v) nil
-    (util/rakennustunnus? v) nil
+    (v/rakennusnumero? v) nil
+    (v/rakennustunnus? v) nil
     :else [:warn "illegal-rakennusnumero"]))
 
 (defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))
