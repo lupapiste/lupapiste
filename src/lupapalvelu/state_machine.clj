@@ -52,5 +52,4 @@
     unauthorized))
 
 (defn verdict-given-state [application]
-  (let [states [:verdictGiven :foremanVerdictGiven]]
-    (util/find-first (partial valid-state? application) states)))
+  (util/find-first (partial valid-state? application) states/verdict-given-states))

@@ -113,10 +113,12 @@
       :else (into (conj results start)
               (apply union (map #(all-next-states graph % (conj results start)) transitions))))))
 
+(def verdict-given-states #{:verdictGiven :foremanVerdictGiven})
+
 (def post-verdict-states
- (let [graphs (filter :verdictGiven all-graphs)]
+ (let [graphs (filter (comp (partial some verdict-given-states) keys) all-graphs)]
    (difference
-     (apply union (map #(all-next-states % :verdictGiven) graphs))
+     (apply union (map (fn [g] (apply union (map #(all-next-states g %) verdict-given-states))) graphs))
      #{:canceled}
      ; ymp-application-state-graph loops back to pre verdict states
      pre-verdict-states)))
