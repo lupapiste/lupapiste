@@ -26,7 +26,7 @@
                  [org.apache.commons/commons-lang3 "3.3.2"] ; Already a dependency but required explicitly
                  [commons-io/commons-io "2.4"]
                  [commons-codec/commons-codec "1.10"]
-                 [com.lowagie/itext "4.2.1" :exclusions [org.bouncycastle/bctsp-jdk14 xml-apis]]
+                 [itext "4.2.1" :exclusions [org.bouncycastle/bctsp-jdk14 xml-apis]]
                  [net.java.dev.jai-imageio/jai-imageio-core-standalone "1.2-pre-dr-b04-2014-09-13"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [endophile "0.1.2" :exclusions [hiccup]]

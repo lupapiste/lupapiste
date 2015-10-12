@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   On R type of application, applying a change permit
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
