@@ -35,18 +35,20 @@
   tj-ilmoitus-state-graph
   (merge
     (select-keys default-application-state-graph [:draft :open :canceled])
-    {:submitted         [:closed  :canceled]
-     :complement-needed [:closed]
-     :closed            [:complement-needed]}))
+    {:submitted  [:sent :canceled]
+     :sent       [:foremanAcknowledged :complement-needed :canceled]
+     :complement-needed   [:sent :acknowledged :canceled]
+     :acknowledged []}))
 
 (def
   ^{:doc "See default-application-state-graph"}
   tj-hakemus-state-graph
   (merge
-    (select-keys default-application-state-graph [:draft :open :canceled :closed])
+    (select-keys default-application-state-graph [:draft :open :canceled])
     {:submitted    [:sent :canceled]
-     :sent         [:closed :complement-needed :canceled]
-     :complement-needed [:sent :canceled]}))
+     :sent         [:foremanVerdictGiven :complement-needed :canceled]
+     :complement-needed [:sent :canceled]
+     :foremanVerdictGiven []}))
 
 ; TODO draft versions this forward
 

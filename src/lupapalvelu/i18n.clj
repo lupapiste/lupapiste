@@ -6,6 +6,7 @@
             [cheshire.core :as json]
             [sade.env :as env]
             [sade.core :refer :all]
+            [sade.util :as util]
             [lupapiste-commons.i18n.core :as commons]))
 
 (def default-lang :fi)
@@ -36,6 +37,8 @@
   (merge-with conj
               (-> (commons/read-translations (io/resource "shared_translations.txt"))
                   commons/keys-by-language)
+              (-> (commons/read-translations (io/resource "i18n_states.txt"))
+                  commons/keys-by-language)
               (with-open [in (io/input-stream (io/resource "i18n.xlsx"))]
                 (let [wb      (xls/load-workbook in)
                       langs   (-> wb seq first first xls/read-row rest)
@@ -45,7 +48,7 @@
                   (reduce (partial process-row langs-but-default) {} data)))))
 
 (def- localizations (atom nil))
-(def- excel-data (future (load-translations)))
+(def- excel-data (util/future* (load-translations)))
 
 (defn reload! []
   (if (seq @localizations)
