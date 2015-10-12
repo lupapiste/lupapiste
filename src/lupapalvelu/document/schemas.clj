@@ -12,6 +12,15 @@
 (defn get-all-schemas [] @registered-schemas)
 (defn get-schemas [version] (get @registered-schemas version))
 
+(defn get-hakija-schema-names [schema-version]
+  (let [schemas (get-schemas schema-version)]
+    (assert schemas)
+    (->> schemas
+      (map #(when (= "hakija" (-> % val :info :subtype))
+              (-> % val :info :name)))
+      (filter identity)
+      set)))
+
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
                  :approvable :removable :deny-removing-last-document
