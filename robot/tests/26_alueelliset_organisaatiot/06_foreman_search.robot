@@ -25,7 +25,7 @@ Sonja logs in and sees some only foreman applications on foreman search tab
   Sonja logs in
   Go to page  applications
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  4
-  Click by test id  applications-foreman-search-link
+  Click Element  //label[@for="searchTypeForeman"]
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  3
 
 Sonja can see foreman application on verdict tab
@@ -38,7 +38,7 @@ Sonja sees different saved filters on foreman search tab
   Wait Until  Element should not be visible  //div[@data-test-id="saved-filter-row-Barfoo"]
   Wait Until  Element should not be visible  //div[@data-test-id="saved-filter-row-Foobar"]
 
-  Click by test id  applications-search-link
+  Click Element  //label[@for="searchTypeApplications"]
   Click by test id  toggle-advanced-filters
   Click by test id  toggle-saved-filters
   Wait Until  Element should be visible  //div[@data-test-id="saved-filter-row-Barfoo"]
