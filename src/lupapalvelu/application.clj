@@ -19,6 +19,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as user]
+            [lupapalvelu.states :as states]
             [sade.core :refer :all]
             [sade.property :as p]
             [sade.util :as util]
@@ -74,6 +75,25 @@
   (when-let [subtype (:permitSubtype data)]
     (when-not (util/contains-value? (resolve-valid-subtypes application) (keyword subtype))
       (fail :error.permit-has-no-such-subtype))))
+
+(defn submitted? [{:keys [submitted state primaryOperation]}]
+  (or
+    (not (nil? submitted))
+    (and
+      (= "aiemmalla-luvalla-hakeminen" (:name primaryOperation))
+      (states/post-submitted-states state))))
+
+(defn- link-permit-submitted? [link-id]
+  (submitted? (domain/get-application-no-access-checking link-id)))
+
+; Foreman
+(defn- foreman-submittable? [application]
+  (let [result (when (-> application :state keyword #{:draft :open :submitted :complement-needed})
+                 (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
+                   (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
+    (if (nil? result)
+      true
+      result)))
 
 ;;
 ;; Helpers
@@ -152,19 +172,6 @@
 ;;
 ;; Application query post process
 ;;
-
-(defn- link-permit-submitted? [link-id]
-  (-> (mongo/by-id "applications" link-id [:state])
-    :state keyword #{:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed :canceled} nil? not))
-
-; Foreman
-(defn- foreman-submittable? [application]
-  (let [result (when (-> application :state keyword #{:draft :open :submitted :complement-needed})
-                 (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
-                   (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
-    (if (nil? result)
-      true
-      result)))
 
 (defn- process-foreman-v2 [application]
   (if (= (-> application :primaryOperation :name) "tyonjohtajan-nimeaminen-v2")
