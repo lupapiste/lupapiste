@@ -278,7 +278,7 @@
           (errorf "Failed to rename %s to %s" zip-path target))))))
 
 (defn check-for-asianhallinta-verdicts [& args]
-  (when (env/feature? :automatic-verdicts-checking)
+  (do
     (mongo/connect!)
     (fetch-asianhallinta-verdicts)
     (mongo/disconnect!)))
