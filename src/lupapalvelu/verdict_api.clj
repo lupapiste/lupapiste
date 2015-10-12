@@ -15,6 +15,7 @@
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :as user]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]))
 
 ;;
@@ -106,13 +107,13 @@
              "verdicts.$.sopimus" (:sopimus verdict)
              "verdicts.$.paatokset" (:paatokset verdict)}})))
 
-(defn- publish-verdict [{timestamp :created :as command} {:keys [id kuntalupatunnus]}]
+(defn- publish-verdict [{timestamp :created application :application :as command} {:keys [id kuntalupatunnus]}]
   (if-not (ss/blank? kuntalupatunnus)
-    (do
+    (let [next-state (sm/verdict-given-state application)]
       (update-application command
         {:verdicts {$elemMatch {:id id}}}
         {$set {:modified timestamp
-               :state    :verdictGiven
+               :state    next-state
                :verdicts.$.draft false}})
       (ok))
     (fail :error.no-verdict-municipality-id)))

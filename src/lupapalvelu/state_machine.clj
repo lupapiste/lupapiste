@@ -50,3 +50,8 @@
     (when-not (can-proceed? application next-state)
       (fail :error.command-illegal-state :state (:state application) :next-state next-state))
     unauthorized))
+
+
+(defn verdict-given-state [application]
+  :verdictGiven
+  )
