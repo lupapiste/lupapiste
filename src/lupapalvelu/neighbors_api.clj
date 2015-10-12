@@ -170,7 +170,7 @@
                           strip-document
                           (remove (fn-> :schema-info :name #{"paatoksen-toimitus-rakval"})
                             (concat
-                             (filter (fn-> :schema-info :subtype (= "hakija")) documents)
+                             (filter (fn-> :schema-info :subtype (schemas/hakija-subtypes)) documents)
                              (filter (fn-> :schema-info :type (not= "party")) documents)))))))
 
 (defquery neighbor-application
