@@ -351,8 +351,10 @@
     {tag-name (doc-transformer osapuoli party-type)}))
 
 (defn get-parties [documents]
-  (let [hakija-key (let [hakija-docs (filter #(schemas/hakija-subtypes (-> % :schema-info :subtype)) documents)]
-                     (-> hakija-docs first :schema-info :name))]
+  (let [hakija-key (some
+                     #(when (= "hakija" (-> % val :info :subtype))
+                        (-> % val :info :name))
+                     documents)]
     (filter #(seq (:Osapuoli %))
             (into
               (get-parties-by-type documents :Osapuoli hakija-key get-osapuoli-data)

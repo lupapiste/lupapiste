@@ -1050,8 +1050,6 @@
                                 :type :date}]})
 
 
-(def hakija-subtypes #{"hakija" "ilmoittaja"})
-
 ;;
 ;; schemas
 ;;
@@ -1164,7 +1162,7 @@
            :repeating true
            :approvable true
            :type :party
-           :subtype "ilmoittaja"
+           :subtype "hakija"
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
