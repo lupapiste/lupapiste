@@ -36,7 +36,7 @@
   (merge
     (select-keys default-application-state-graph [:draft :open :canceled])
     {:submitted  [:sent :canceled]
-     :sent       [:foremanAcknowledged :complement-needed :canceled]
+     :sent       [:acknowledged :complement-needed :canceled]
      :complement-needed   [:sent :acknowledged :canceled]
      :acknowledged []}))
 
