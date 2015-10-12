@@ -30,7 +30,6 @@
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
    :sftp-directory   "/rakennus"
-   :applicant-doc-schema "hakija-r"
    :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values true
@@ -40,7 +39,6 @@
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes             []
    :sftp-directory       "/yleiset_alueet"
-   :applicant-doc-schema "hakija-ya"
    :allowed-task-schemas #{"task-katselmus-ya" "task-lupamaarays"}
    :multiple-parties-allowed false
    :extra-statement-selection-values false
@@ -50,7 +48,6 @@
 (defpermit YI  "Ymparistoilmoitukset"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
@@ -59,7 +56,6 @@
 (defpermit YL  "Ymparistolupa"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
@@ -69,7 +65,6 @@
 (defpermit YM  "Muut ymparistoluvat"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false})
@@ -77,7 +72,6 @@
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
@@ -87,7 +81,6 @@
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
    :sftp-directory   "/poikkeusasiat"
-   :applicant-doc-schema "hakija"
    :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values true
@@ -97,7 +90,6 @@
 (defpermit MAL "Maa-ainesluvat"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
@@ -107,7 +99,6 @@
 (defpermit KT "Kiinteistotoimitus"
   {:subtypes       []
    :sftp-directory "/kiinteistotoimitus"
-   :applicant-doc-schema "hakija"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
@@ -116,7 +107,6 @@
 (defpermit MM "Maankayton muutos"
   {:subtypes       []
    :sftp-directory "/maankaytonmuutos"
-   :applicant-doc-schema "hakija"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
@@ -135,9 +125,6 @@
 
 (defn get-sftp-directory [permit-type]
   (get-metadata permit-type :sftp-directory))
-
-(defn get-applicant-doc-schema [permit-type]
-  (get-metadata permit-type :applicant-doc-schema))
 
 (defn get-application-mapper
   "Returns a function that maps application into KRYSP XML and saves the XML to disk."

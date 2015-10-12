@@ -1,0 +1,3 @@
+ilmoittaja._group_label: Ilmoittaja
+ilmoittaja._append_label: Lisää ilmoittaja
+schemas.ilmoittaja: Ilmoittaja
