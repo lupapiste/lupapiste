@@ -47,7 +47,6 @@
           (and (.contains to2 ronja-email) (.contains to1 pena-email))) => true))
 
     (fact "kosti can comment application with commenter role"
-      (comment-application sonja id false kosti-id) => ok?
       (command kosti :can-target-comment-to-authority :id id) => ok?
       (comment-application kosti id false luukas-id) => ok?)
 
