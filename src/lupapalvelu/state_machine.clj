@@ -51,7 +51,6 @@
       (fail :error.command-illegal-state :state (:state application) :next-state next-state))
     unauthorized))
 
-
 (defn verdict-given-state [application]
-  :verdictGiven
-  )
+  (let [states [:verdictGiven :foremanVerdictGiven]]
+    (util/find-first (partial valid-state? application) states)))
