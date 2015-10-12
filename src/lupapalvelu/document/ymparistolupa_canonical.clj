@@ -9,7 +9,7 @@
         kuvaus    (-> documents :yl-hankkeen-kuvaus first :data)
         generic-id {:yksilointitieto (:id application)
                     :alkuHetki (util/to-xml-datetime (:created application))}
-        hakija-key (keyword (operations/resolve-applicant-doc-schema application))]
+        hakija-key (keyword (operations/get-applicant-doc-schema-name application))]
     {:Ymparistoluvat
      {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
       :ymparistolupatieto

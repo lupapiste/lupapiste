@@ -1032,8 +1032,8 @@
   ([{op :primaryOperation}] (get-operation-metadata (:name op)))
   ([{op :primaryOperation} metadata-key] (get-operation-metadata (:name op) metadata-key)))
 
-(defn resolve-applicant-doc-schema [application]
-  (:applicant-doc-schema (get-primary-operation-metadata application)))
+(defn get-applicant-doc-schema-name [application]
+  (get-primary-operation-metadata application :applicant-doc-schema))
 
 (defn permit-type-of-operation [operation]
   (get-operation-metadata operation :permit-type))

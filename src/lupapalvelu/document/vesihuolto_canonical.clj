@@ -55,7 +55,7 @@
         kuvaus (-> (:hankkeen-kuvaus-vesihuolto documents) first :data :kuvaus)
         operation-name (->> (:primaryOperation application) :name (i18n/localize lang "operations"))
         asian-kuvaus (str operation-name " / " kuvaus)
-        hakija-key (keyword (operations/resolve-applicant-doc-schema application))]
+        hakija-key (keyword (operations/get-applicant-doc-schema-name application))]
     {:Vesihuoltolaki
      {:toimituksenTiedot (toimituksen-tiedot application lang)
       :vapautukset

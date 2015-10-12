@@ -7,7 +7,7 @@
 (defn maa-aines-canonical [application lang]
   (let [documents (tools/unwrapped (canonical-common/documents-by-type-without-blanks application))
         kuvaus    (-> documents :maa-aineslupa-kuvaus first :data :kuvaus)
-        hakija-key (keyword (operations/resolve-applicant-doc-schema application))]
+        hakija-key (keyword (operations/get-applicant-doc-schema-name application))]
     {:MaaAinesluvat
      {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
       :maaAineslupaAsiatieto

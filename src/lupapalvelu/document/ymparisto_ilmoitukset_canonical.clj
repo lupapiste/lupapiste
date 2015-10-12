@@ -16,7 +16,7 @@
         kesto (-> (:ymp-ilm-kesto documents) first :data :kesto)
         kello (apply merge (filter map? (vals kesto)))
         melu (-> meluilmo :data :melu)
-        hakija-key (keyword (operations/resolve-applicant-doc-schema application))]
+        hakija-key (keyword (operations/get-applicant-doc-schema-name application))]
     {:Ilmoitukset {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
                    :melutarina {:Melutarina {:yksilointitieto (:id application)
                                              :alkuHetki (util/to-xml-datetime (:submitted application))

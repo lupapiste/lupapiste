@@ -240,7 +240,7 @@
                       (cons op-doc))]                      ;; new docs
     (if-not user
       new-docs
-      (conj new-docs (make (operations/resolve-applicant-doc-schema application))))))
+      (conj new-docs (make (operations/get-applicant-doc-schema-name application))))))
 
 
 (defn make-op [op-name created]
