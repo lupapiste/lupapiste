@@ -24,6 +24,7 @@
    :sent "vireill\u00e4"
    :complement-needed "odottaa asiakkaan toimenpiteit\u00e4"
    :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
+   :foremanVerdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
    :constructionStarted "rakennusty\u00f6t aloitettu"
    :closed "valmis"})
 
@@ -40,6 +41,7 @@
    :sent :submitted ; Enables XML to be formed from sent applications
    :complement-needed :complementNeeded
    :verdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
+   :foremanVerdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
    :constructionStarted :started
    :closed :closed})
 
