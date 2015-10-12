@@ -46,6 +46,15 @@
           (and (.contains to1 ronja-email) (.contains to2 pena-email))
           (and (.contains to2 ronja-email) (.contains to1 pena-email))) => true))
 
+    (fact "kosti can comment application with commenter role"
+      (comment-application sonja id false kosti-id) => ok?
+      (command kosti :can-target-comment-to-authority :id id) => ok?
+      (comment-application kosti id false luukas-id) => ok?)
+
+    (fact "luukas cannot comment application without commenter role"
+      (command luukas :can-target-comment-to-authority :id id) => fail?
+      (comment-application luukas id false) => unauthorized?)
+
     (fact "can't refer to non-existent user id"
       (comment-application sonja id false 0) => (partial expected-failure? "to-is-not-id-of-any-user-in-system"))
 
