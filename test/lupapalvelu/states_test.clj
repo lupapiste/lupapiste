@@ -19,9 +19,10 @@
   all-application-states => #{:draft :open :submitted :sent :complement-needed
                               :verdictGiven :constructionStarted :closed :canceled
                               :extinct
+                              :acknowledged :foremanVerdictGiven
                               :hearing :proposal :proposalApproved
                               :survey :sessionProposal :sessionHeld :registered
                               :appealed :final})
 
 (fact "terminal states"
-  terminal-states => #{:canceled :closed :final :extinct :registered})
+  terminal-states => #{:canceled :closed :final :extinct :registered :acknowledged :foremanVerdictGiven})
