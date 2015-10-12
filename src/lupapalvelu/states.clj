@@ -68,7 +68,7 @@
   (merge
     (select-keys default-application-state-graph [:draft :open :canceled])
     {:submitted [:hearing :canceled]
-     :hearing [:proposal :canceledl]
+     :hearing [:proposal :canceled]
      :proposal [:proposalApproved :canceled]
      :proposalApproved [:final :appealed :canceled]
      :appealed [:final :canceled] ; Oikaisuvaatimus
