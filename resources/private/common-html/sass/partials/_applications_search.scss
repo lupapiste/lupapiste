@@ -13,18 +13,6 @@
   }
   h1 {
     display: inline-block;
-    .application-search-link{
-      display: inline-block;
-      &:not(:last-of-type):after {
-        content: "\00a0\007c\00a0";
-      }
-    }
-    a {
-      @include link;
-      &:hover {
-        text-decoration: none;
-      }
-    }
   }
 }
 
