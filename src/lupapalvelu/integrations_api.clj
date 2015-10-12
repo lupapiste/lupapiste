@@ -124,7 +124,7 @@
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)
                 (application-already-exported :exported-to-backing-system)]
-   :states     #{:sent :verdictGiven :constructionStarted}
+   :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 
@@ -292,7 +292,7 @@
   {:parameters [id lang attachmentIds]
    :user-roles #{:authority}
    :pre-checks [has-asianhallinta-operation (application-already-exported :exported-to-asianhallinta)]
-   :states     #{:verdictGiven :sent}
+   :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 
