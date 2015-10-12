@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Authority add neighbors to be heard
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***

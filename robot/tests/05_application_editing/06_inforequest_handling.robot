@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Inforequest state handling
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***

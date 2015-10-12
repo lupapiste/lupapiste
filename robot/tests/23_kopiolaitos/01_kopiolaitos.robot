@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Kopiolaitos interaction
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Variables      ../06_attachments/variables.py
 
