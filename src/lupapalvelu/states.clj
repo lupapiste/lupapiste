@@ -123,7 +123,7 @@
 
 (def post-submitted-states
  (let [graphs (filter :submitted all-graphs)]
-   (disj (apply union (map #(all-next-states % :verdictGiven) graphs)) :canceled :submitted)))
+   (disj (apply union (map #(all-next-states % :submitted) graphs)) :canceled :submitted)))
 
 (def all-states (->> all-graphs (map keys) (apply concat) set))
 (def all-inforequest-states (-> default-inforequest-state-graph keys set (disj :canceled)))
