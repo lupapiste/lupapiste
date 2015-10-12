@@ -12,6 +12,15 @@
 (defn get-all-schemas [] @registered-schemas)
 (defn get-schemas [version] (get @registered-schemas version))
 
+(defn get-hakija-schema-names [schema-version]
+  (let [schemas (get-schemas schema-version)]
+    (assert schemas)
+    (->> schemas
+      (map #(when (= "hakija" (-> % val :info :subtype))
+              (-> % val :info :name)))
+      (filter identity)
+      set)))
+
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
                  :approvable :removable :deny-removing-last-document
@@ -1154,6 +1163,20 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
     :body (schema-body-without-element-by-name ya-party turvakielto)}
+
+   {:info {:name "ilmoittaja"
+           :i18name "osapuoli"
+           :order 3
+           :removable true
+           :repeating true
+           :approvable true
+           :type :party
+           :subtype "hakija"
+           :group-help nil
+           :section-help nil
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           }
+    :body party}
 
    {:info {:name "paasuunnittelija"
            :i18name "osapuoli"

@@ -248,6 +248,7 @@
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
+   "Ilmoituksen tekij\u00e4"        "hakija"
    "Rakennusvalvonta-asian laskun maksaja"  "maksaja"
    "p\u00e4\u00e4suunnittelija"     "p\u00e4\u00e4suunnittelija"
    "GEO-suunnittelija"              "erityissuunnittelija"
@@ -272,6 +273,7 @@
   {:paasuunnittelija       "p\u00e4\u00e4suunnittelija"
    :hakija-r               "Rakennusvalvonta-asian hakija"
    :hakija                 "Rakennusvalvonta-asian hakija"
+   :ilmoittaja             "Ilmoituksen tekij\u00e4"
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
@@ -350,14 +352,13 @@
         :when (seq osapuoli)]
     {tag-name (doc-transformer osapuoli party-type)}))
 
-(defn get-parties [documents]
-  (let [hakija-key (if (:hakija-r documents)
-                     :hakija-r
-                     :hakija)]
+(defn get-parties [{:keys [schema-version]} documents]
+  (let [hakija-schema-names (schemas/get-hakija-schema-names schema-version)
+        hakija-key (some #(when (hakija-schema-names (name %)) %) (keys documents))]
     (filter #(seq (:Osapuoli %))
-            (into
-              (get-parties-by-type documents :Osapuoli hakija-key get-osapuoli-data)
-              (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))))
+      (into
+        (get-parties-by-type documents :Osapuoli hakija-key get-osapuoli-data)
+        (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))))
 
 (defn get-suunnittelija-data [suunnittelija party-type]
   (when (-> suunnittelija :henkilotiedot :sukunimi)
@@ -518,7 +519,7 @@
 (defn osapuolet [{neighbors :neighbors :as application} documents-by-type lang]
   {:pre [(map? documents-by-type) (string? lang)]}
   {:Osapuolet
-   {:osapuolitieto (get-parties documents-by-type)
+   {:osapuolitieto (get-parties application documents-by-type)
     :suunnittelijatieto (get-designers documents-by-type)
     :tyonjohtajatieto (get-foremen application documents-by-type lang)
     ;:naapuritieto (get-neighbors neighbors)LPK-215
