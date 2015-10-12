@@ -459,7 +459,7 @@
   {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId kuntalupatunnus section]
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])]
    :user-roles #{:authority}
-   :states     #{:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed}
+   :states     (cons :submitted states/post-submitted-states)
    :description "Stamps all attachments of given application"}
   [{application :application {transparency :transparency} :data :as command}]
   (let [parsed-timestamp (cond
