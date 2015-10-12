@@ -423,13 +423,15 @@
 
 ; Patched from me.raynes.fs.compression
 (defn unzip
-  "Takes the path to a zipfile source and unzips it to target-dir."
+  "Takes the path to a zipfile source and unzips all files to root of target-dir."
   ([source]
     (unzip source (name source)))
   ([source target-dir]
     (with-open [zip (java.util.zip.ZipFile. (fs/file source))]
       (let [entries (enumeration-seq (.entries zip))
-            target-file #(fs/file target-dir (str %))]
+            target-file #(->> (.getName %)
+                           fs/base-name
+                           (fs/file target-dir))]
         (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
                 :let [f (target-file entry)]]
           (fs/mkdirs (fs/parent f))
