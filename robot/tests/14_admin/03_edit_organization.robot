@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Admin edits organization
-Suite teardown  Apply minimal fixture now
+Suite Teardown  Apply minimal fixture now
 Resource       ../../common_resource.robot
 
 *** Test Cases ***

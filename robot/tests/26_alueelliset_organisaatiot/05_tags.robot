@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Authority admin edits municipality tags and authority tests them
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource       ../../common_resource.robot
 
 *** Test Cases ***

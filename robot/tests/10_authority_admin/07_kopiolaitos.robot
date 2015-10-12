@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Authority admin edits organization specific Kopiolaitos fields
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 

@@ -1,6 +1,6 @@
 *** Settings ***
 
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        keywords.robot
 Suite Setup     Initialize
