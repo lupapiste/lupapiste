@@ -22,50 +22,54 @@
 
 (def- operation-tree-for-R
   ["Rakentaminen ja purkaminen"
-   [["Uuden rakennuksen rakentaminen"
-     [["kerrostalo-rivitalo" :kerrostalo-rivitalo]
-      ["pientalo" :pientalo]
-      ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
-      ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
-      ["teollisuusrakennus" :teollisuusrakennus]
-      ["Muun rakennuksen rakentaminen" :muu-uusi-rakentaminen]]]
-    ["Rakennuksen-laajentaminen"
-     [["kerrostalo-rt-laaj" :kerrostalo-rt-laaj]
-      ["pientalo-laaj" :pientalo-laaj]
-      ["vapaa-ajan-rakennus-laaj" :vapaa-ajan-rakennus-laaj]
-      ["talousrakennus-laaj" :talousrakennus-laaj]
-      ["teollisuusrakennus-laaj" :teollisuusrakennus-laaj]
-      ["muu-rakennus-laaj" :muu-rakennus-laaj]]]
-    ["Rakennuksen korjaaminen tai muuttaminen"
-     [["kayttotark-muutos" :kayttotark-muutos]
-      ["sisatila-muutos" :sisatila-muutos]
-      ["Rakennuksen julkisivun tai katon muuttaminen" :julkisivu-muutos]
-      ["Markatilan laajentaminen" :markatilan-laajentaminen]
-      ["linjasaneeraus" :linjasaneeraus]
-      ["Parvekkeen tai terassin lasittaminen" :parveke-tai-terassi]
-      ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
-      ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
-      ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]]]
-    ["Rakennelman rakentaminen"
-     [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
-      ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
-      ["Mainoslaite" :mainoslaite]
-      ["Aita" :aita]
-      ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
-      ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]]]
-    ["Rakennuksen purkaminen" :purkaminen]
-    ["Maisemaa muutava toimenpide"
-     [["Puun kaataminen" :puun-kaataminen]
-      ["tontin-jarjestelymuutos" :tontin-jarjestelymuutos]
-      ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]
-      ["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
-      ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
-    ["rakennustyo-muutostoimenpiteet"
-     [["Suunnittelija" :suunnittelijan-nimeaminen]
-      ["Tyonjohtaja" :tyonjohtajan-nimeaminen-v2]
-      ["rak-valm-tyo" :rak-valm-tyo]
-      ["Aloitusoikeus" :aloitusoikeus]
-      ["raktyo-aloit-loppuunsaat" :raktyo-aloit-loppuunsaat]]]]])
+   (filter identity
+     [["Uuden rakennuksen rakentaminen"
+       [["kerrostalo-rivitalo" :kerrostalo-rivitalo]
+        ["pientalo" :pientalo]
+        ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
+        ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
+        ["teollisuusrakennus" :teollisuusrakennus]
+        ["Muun rakennuksen rakentaminen" :muu-uusi-rakentaminen]]]
+      ["Rakennuksen-laajentaminen"
+       [["kerrostalo-rt-laaj" :kerrostalo-rt-laaj]
+        ["pientalo-laaj" :pientalo-laaj]
+        ["vapaa-ajan-rakennus-laaj" :vapaa-ajan-rakennus-laaj]
+        ["talousrakennus-laaj" :talousrakennus-laaj]
+        ["teollisuusrakennus-laaj" :teollisuusrakennus-laaj]
+        ["muu-rakennus-laaj" :muu-rakennus-laaj]]]
+      ["Rakennuksen korjaaminen tai muuttaminen"
+       [["kayttotark-muutos" :kayttotark-muutos]
+        ["sisatila-muutos" :sisatila-muutos]
+        ["Rakennuksen julkisivun tai katon muuttaminen" :julkisivu-muutos]
+        ["Markatilan laajentaminen" :markatilan-laajentaminen]
+        ["linjasaneeraus" :linjasaneeraus]
+        ["Parvekkeen tai terassin lasittaminen" :parveke-tai-terassi]
+        ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
+        ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
+        ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]]]
+      ["Rakennelman rakentaminen"
+       [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
+        ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
+        ["Mainoslaite" :mainoslaite]
+        ["Aita" :aita]
+        ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
+        ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]]]
+      ["Rakennuksen purkaminen" :purkaminen]
+      ["Maisemaa muutava toimenpide"
+       [["Puun kaataminen" :puun-kaataminen]
+        ["tontin-jarjestelymuutos" :tontin-jarjestelymuutos]
+        ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]
+        ["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
+        ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
+      ["rakennustyo-muutostoimenpiteet"
+       [["Suunnittelija" :suunnittelijan-nimeaminen]
+        ["Tyonjohtaja" :tyonjohtajan-nimeaminen-v2]
+        ["rak-valm-tyo" :rak-valm-tyo]
+        ["Aloitusoikeus" :aloitusoikeus]
+        ["raktyo-aloit-loppuunsaat" :raktyo-aloit-loppuunsaat]]]
+      (when (env/feature? :rakennusjateilmoitus)
+        ["Rakennusjateilmoitus" :rakennusjateilmoitus])
+      ])])
 
 (def- operation-tree-for-YA
   ["yleisten-alueiden-luvat"
@@ -855,6 +859,14 @@
                                 :add-operation-allowed false
                                 :min-outgoing-link-permits 1
                                 :asianhallinta false}
+   :rakennusjateilmoitus        {:schema "rakennusjateilmoitus"
+                                 :permit-type permit/R
+                                 :required ["hankkeen-kuvaus-minimum"]
+                                 :attachments []
+                                 :add-operation-allowed true
+                                 :applicant-doc-schema applicant-doc-schema-name-R
+                                 :min-outgoing-link-permits 1
+                                 :asianhallinta false}
    })
 
 (def- vvvl-operations
