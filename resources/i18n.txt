@@ -19,7 +19,7 @@ rakennusjateilmoitus.rakennusjateIlmoitus.jatteenToimituspaikka: Toimituspaikka
 rakennusjateilmoitus.rakennusjateIlmoitus.painoT: Paino tonnia
 rakennusjateilmoitus.rakennusjateIlmoitus.suunniteltuMaara: Arvioitu määrä
 rakennusjateilmoitus.rakennusjateIlmoitus.toteutunutMaara: Toteutunut määrä
-rakennusjateilmoitus.rakennusjateIlmoitus.yksikko: Yksikko 
+rakennusjateilmoitus.rakennusjateIlmoitus.yksikko: Yksikkö
 rakennusjateilmoitus.rakennusjateIlmoitus.yksikko.kg: Kilo
 rakennusjateilmoitus.rakennusjateIlmoitus.yksikko.m2: Neliötä
 rakennusjateilmoitus.rakennusjateIlmoitus.yksikko.m3: Kuutiota
