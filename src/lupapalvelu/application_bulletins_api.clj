@@ -36,7 +36,7 @@
 
 
 (def app-snapshot-fields
-  [:address :created :location :modified
+  [:address :created :location :modified :applicant
    :municipality :organization :permitType
    :primaryOperation :propertyId :state :verdicts])
 
