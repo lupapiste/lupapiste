@@ -1,2 +1,2 @@
-application.publishBulletin: Julkaise Julkipano.fi:ssä
-tooltip.publishBulletin: Julkaisee hakemuksen Julkipano.fi-palvelussa
+
+
