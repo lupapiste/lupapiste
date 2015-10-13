@@ -31,7 +31,7 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
     };
 
     ajax
-    .command("save-application-filter", {title: title, filter: filter, sort: ko.toJS(dataProvider.sort)})
+    .command("save-application-filter", {filterType: "application", title: title, filter: filter, sort: ko.toJS(dataProvider.sort)})
     .error(util.showSavedIndicator)
     .success(function(res) {
       util.showSavedIndicator(res);
@@ -43,14 +43,7 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
   };
 
   self.clearFilters = function() {
-    lupapisteApp.services.handlerFilterService.selected([]);
-    lupapisteApp.services.tagFilterService.selected([]);
-    lupapisteApp.services.operationFilterService.selected([]);
-    lupapisteApp.services.organizationFilterService.selected([]);
-    lupapisteApp.services.areaFilterService.selected([]);
-    lupapisteApp.services.applicationFiltersService.selected(undefined);
-    dataProvider.searchField("");
+    dataProvider.clearFilters();
     self.newFilterName("");
   };
-
 };

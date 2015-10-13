@@ -74,6 +74,9 @@
     :repeating true
     :body      (body childs)}])
 
+(defn approvable-top-level-groups [v]
+  (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
+
 ;;
 ;; schema sniplets
 ;;
@@ -579,18 +582,19 @@
                                {:name "sahkoKytkin" :type :checkbox}
                                {:name "maakaasuKytkin" :type :checkbox}
                                {:name "kaapeliKytkin" :type :checkbox}]})
+
 (def varusteet {:name "varusteet" :type :group :layout :vertical
-                                                     :body [{:name "sahkoKytkin" :type :checkbox}
-                                                            {:name "kaasuKytkin" :type :checkbox}
-                                                            {:name "viemariKytkin" :type :checkbox}
-                                                            {:name "vesijohtoKytkin" :type :checkbox}
-                                                            {:name "hissiKytkin" :type :checkbox}
-                                                            {:name "koneellinenilmastointiKytkin" :type :checkbox}
-                                                            {:name "lamminvesiKytkin" :type :checkbox}
-                                                            {:name "aurinkopaneeliKytkin" :type :checkbox}
-                                                            {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
-                                                            {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
-                                                            {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
+                :body [{:name "sahkoKytkin" :type :checkbox}
+                       {:name "kaasuKytkin" :type :checkbox}
+                       {:name "viemariKytkin" :type :checkbox}
+                       {:name "vesijohtoKytkin" :type :checkbox}
+                       {:name "hissiKytkin" :type :checkbox}
+                       {:name "koneellinenilmastointiKytkin" :type :checkbox}
+                       {:name "lamminvesiKytkin" :type :checkbox}
+                       {:name "aurinkopaneeliKytkin" :type :checkbox}
+                       {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
+                       {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
+                       {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
 
 (def luokitus {:name "luokitus"
                :type :group
@@ -888,6 +892,7 @@
 
 (def rajankaynti-tyyppi {:name "rajankayntiTyyppi"
                          :type :select
+                         :layout :full-width
                          :required true
                          :body [{:name "Rajan paikkaa ja rajamerkki\u00e4 koskeva ep\u00e4selvyys (rajank\u00e4ynti)"}
                                 {:name "Ep\u00e4selvyys siit\u00e4, mihin rekisteriyksikk\u00f6\u00f6n jokin alue kuuluu"}
@@ -910,7 +915,6 @@
 
 (def kt-kiinteistonmuodostus {:name "kiinteistonmuodostus"
                               :type :group
-                              :repeating true
                               :approvable true
                               :removable true
                               :body [{:name "kiinteistonmuodostusTyyppi"
@@ -927,16 +931,8 @@
                                              {:name "yleisen-alueen-lohkominen" }]}
                                      kuvaus]})
 
-;; (def kt-lohkominen [{:name "lohkomisenTyypi"
-;;                      :type :select
-;;                      :required true
-;;                      :body [{:name "Tonttijaon mukainen tontti"}
-;;                             {:name "Ohjeellisen tonttijaon mukainen rakennuspaikka"}]}
-;;                     kuvaus])
-
 (def kt-rasitetoimitus {:name "rasitetoimitus"
                         :type :group
-                        :repeating true
                         :approvable true
                         :removable true
                         :body [{:name "kayttooikeuslaji"
@@ -1050,20 +1046,9 @@
                                         {:name "Yhteisrasite"}
                                         {:name "Yksityinen hauta"}
                                         {:name "Talousveden ottaminen"}]}
-                               {:name "kayttaja"
-                                :required true
-                                :type :string :subtype :kiinteistotunnus
-                                }
-                               {:name "antaja"
-                                :required true
-                                :type :string :subtype :kiinteistotunnus
-                                }
                                {:name "paattymispvm"
                                 :type :date}]})
 
-
-(defn- approvable-top-level-groups [v]
-  (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
 
 ;;
 ;; schemas
@@ -1116,13 +1101,13 @@
     :body (approvable-top-level-groups maisematyo)}
    {:info {:name "rajankaynti" :approvable true}
     :body (approvable-top-level-groups (body rajankaynti-tyyppi kuvaus))}
-   
+
    {:info {:name "maankayton-muutos" :approvable true}
     :body (approvable-top-level-groups (body uusi-tai-muutos kuvaus))}
-   
+
    {:info {:name "rasitetoimitus" :approvable true}
     :body [kt-rasitetoimitus]}
-   
+
    {:info {:name "kiinteistonmuodostus" :approvable true}
     :body [kt-kiinteistonmuodostus]}
 
@@ -1193,7 +1178,8 @@
            :removable true
            :repeating true
            :approvable true
-           :type :party}
+           :type :party
+           :after-update 'lupapalvelu.application-meta-fields/foreman-index-update}
     :body tyonjohtaja}
 
    {:info {:name "tyonjohtaja-v2"
@@ -1202,7 +1188,8 @@
            :removable false
            :repeating false
            :approvable true
-           :type :party}
+           :type :party
+           :after-update 'lupapalvelu.application-meta-fields/foreman-index-update}
     :body tyonjohtaja-v2}
 
    {:info {:name "maksaja"

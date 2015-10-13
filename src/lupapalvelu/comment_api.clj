@@ -54,6 +54,15 @@
    :user-roles #{:authority :oirAuthority}
    :states      #{:info}})
 
+(defquery comments
+  {:parameters [id]
+   :user-roles #{:applicant :authority :oirAuthority}
+   :user-authz-roles action/all-authz-writer-roles
+   :org-authz-roles #{:authority}
+   :states states/all-states}
+  [{application :application}]
+  (ok (select-keys application [:id :comments])))
+
 (defcommand add-comment
   {:parameters [id text target roles]
    :user-roles #{:applicant :authority :oirAuthority}

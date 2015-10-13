@@ -44,7 +44,7 @@
     (ok :user user)
     (if-let [full-user (user/get-user-by-id (:id user))]
       (ok :user (dissoc full-user :private :personId))
-     (fail))))
+      (fail))))
 
 (defquery users
   {:user-roles #{:admin}}
@@ -135,12 +135,6 @@
           :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
           :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))))
 
-(defn get-or-create-user-by-email [email current-user]
-  (let [email (user/canonize-email email)]
-    (or
-      (user/get-user-by-email email)
-      (user/create-new-user current-user {:email email :role "dummy"}))))
-
 ;;
 ;; ==============================================================================
 ;; Updating user data:
@@ -201,56 +195,92 @@
       (mongo/update :users {:email email} {$set {:role "authority"}})
       (fail :error.user-not-found))))
 
+;;
+;; Saved search filters
+;;
+
+(def filter-storage-key
+  {"application" :applicationFilters
+   "foreman" :foremanFilters})
+
+(def default-filter-storage-key
+  {"application" "id"
+   "foreman" "foremanFilterId"})
+
+(defn- validate-filter-type [{{filter-type :filterType} :data}]
+  (when-not (contains? filter-storage-key filter-type)
+    (fail :error.invalid-type)))
+
 (defcommand update-default-application-filter
-  {:parameters       [filter-id]
+  {:parameters       [filterId filterType]
    :user-roles       #{:authority}
-   :input-validators [(fn [{{filter-id :filter-id} :data {user-id :id} :user}]
-                        (let [app-filter (user/get-application-filters user-id)]
-                          (when-not (or (nil? filter-id) (util/find-by-id filter-id app-filter))
+   :input-validators [validate-filter-type
+                      (fn [{{filter-id :filterId filter-type :filterType} :data {user-id :id} :user}]
+                        (let [user (user/get-user-by-id user-id)
+                              filters (get user (filter-storage-key filter-type))]
+                          (when-not (or (nil? filter-id) (util/find-by-id filter-id filters))
                             (fail :error.filter-not-found))))]
    :description      "Adds/Updates users default filter for the application search"}
   [{{user-id :id} :user}]
 
-  (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filter-id}}}))
+  (let [id-key           (default-filter-storage-key filterType)]
+    (mongo/update-by-id :users user-id {$set {(str "defaultFilter." id-key) filterId}})))
 
 (defcommand save-application-filter
-  {:parameters       [title :filter sort]
+  {:parameters       [title :filter sort filterType]
    :user-roles       #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:title :filter :sort])
-                      (fn [{{filter-id :filter-id} :data}]
+   :input-validators [validate-filter-type
+                      (partial action/non-blank-parameters [:title :filter :sort])
+                      (fn [{{filter-id :filterId} :data}]
                         (when (and filter-id (not (mongo/valid-key? filter-id)))
                           (fail :error.illegal-key)))]
    :description      "Adds/updates application filter for the user"}
-  [{{user-id :id} :user {filter-data :filter filter-id :filter-id} :data}]
+  [{{user-id :id} :user {filter-data :filter filter-id :filterId} :data}]
   (let [filter-id        (or filter-id (mongo/create-id))
-        app-filters      (user/get-application-filters user-id)
-        title-collision? (->> app-filters
+        storage-key      (filter-storage-key filterType)
+        id-key           (default-filter-storage-key filterType)
+        user             (user/get-user-by-id user-id)
+        filters          (get user storage-key)
+        title-collision? (->> filters
                               (filter #(= (:title %) title))
                               (map :id)
                               (some (partial not= filter-id)))
         search-filter    {:id filter-id :title title :filter filter-data :sort sort}
         ; enable editing existing filter
-        updated-filters  (as-> app-filters $
-                               (zipmap (map :id $) (range))
-                               (get $ filter-id (count $))
-                               (assoc-in app-filters [$] search-filter))]
+        updated-filters  (if (empty? filters)
+                           [search-filter]
+                           (as-> filters $
+                                (zipmap (map :id $) (range))
+                                (get $ filter-id (count $))
+                                (assoc-in filters [$] search-filter)))
+        update {$set (merge {storage-key updated-filters}
+                       (when (empty? filters)
+                         {(str "defaultFilter." id-key) filter-id}))}]
+
     (when title-collision?
       (fail! :error.filter-title-collision))
-    (mongo/update-by-id :users user-id {$set {:applicationFilters updated-filters}})
-    (when (empty? app-filters)
-      (mongo/update-by-id :users user-id {$set {:defaultFilter {:id filter-id}}}))
+
+    (doseq [filter updated-filters]
+      ; Should always  pass, but if not, throws exception which will be caught
+      ; by our action framework. User gets an unexpected error.
+      (sc/validate user/SearchFilter filter))
+
+    (mongo/update-by-id :users user-id update)
     (ok :filter search-filter)))
 
 (defcommand remove-application-filter
-  {:parameters [filter-id]
+  {:parameters [filterId filterType]
    :user-roles #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:filter-id])]
+   :input-validators [validate-filter-type
+                      (partial action/non-blank-parameters [:filterId])]
    :description "Removes users application filter"}
   [{{user-id :id} :user}]
   (let [user (user/get-user-by-id user-id)
-        update (merge {$pull {:applicationFilters {:id filter-id}}}
-                      (when (= (get-in user [:defaultFilter :id]) filter-id)
-                        {$set {:defaultFilter {:id nil}}}))]
+        storage-key (filter-storage-key filterType)
+        id-key (default-filter-storage-key filterType)
+        update (merge {$pull {storage-key {:id filterId}}}
+                      (when (= (get-in user [:defaultFilter id-key]) filterId)
+                        {$set {(str "defaultFilter." id-key) ""}}))]
     (mongo/update-by-id :users user-id update)))
 
 ;;
@@ -624,3 +654,25 @@
   {:user-roles #{:applicant :authority}}
   [{{id :id} :user}]
   (mongo/update-by-id :users id {$unset {:notification 1}}))
+
+(defquery enable-foreman-search
+  {:user-roles #{:authority}
+   :org-authz-roles (disj action/all-org-authz-roles :tos-editor :tos-publisher)
+   :pre-checks [(fn [command application]
+                  (let [org-ids (user/organization-ids (:user command))]
+                    (if-not application
+                      (when-not (pos? (mongo/count :organizations {:_id {$in org-ids} :scope.permitType permit/R }))
+                        unauthorized)
+                      unauthorized))
+                  )]}
+  [_])
+
+(defquery permanent-archive-enabled
+  {:user-roles #{:authority}
+   :pre-checks [(fn [command application]
+                  (let [org-set (user/organization-ids-by-roles (:user command) #{:authority :tos-editor :tos-publisher})]
+                    (if-not application
+                      (when-not (organization/some-organization-has-archive-enabled? org-set)
+                        unauthorized)
+                      unauthorized)))]}
+  [_])

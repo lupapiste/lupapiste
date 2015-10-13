@@ -10,9 +10,10 @@
             [slingshot.slingshot :refer [throw+]]
             [noir.response :as resp]
             [sade.env :as env]
-            [sade.util :refer [max-length-string valid-email? valid-hetu?]]
+            [sade.util :refer [max-length-string]]
             [sade.core :refer [ok]]
             [sade.crypt :as crypt]
+            [sade.validators :refer [valid-email? valid-hetu?]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.i18n :as i18n]
@@ -101,7 +102,7 @@
                        :requirements    [{:type :person, :identifier hetu}]}
                       (json/encode)
                       (crypt/str->bytes)
-                      (crypt/encrypt (-> crypto-key (crypt/str->bytes) (crypt/base64-decode)) crypto-iv)
+                      (crypt/encrypt (-> crypto-key (crypt/str->bytes) (crypt/base64-decode)) crypto-iv :rijndael)
                       (crypt/base64-encode)
                       (crypt/bytes->str))
      :iv         (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))}))
@@ -160,7 +161,7 @@
         resp       (->> data
                         (crypt/str->bytes)
                         (crypt/base64-decode)
-                        (crypt/decrypt crypto-key crypto-iv)
+                        (crypt/decrypt crypto-key crypto-iv :rijndael)
                         (crypt/bytes->str)
                         (json/decode)
                         walk/keywordize-keys)

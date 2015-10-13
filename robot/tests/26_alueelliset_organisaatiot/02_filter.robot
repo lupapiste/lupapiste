@@ -1,9 +1,9 @@
 *** Settings ***
 
 Documentation  Authority uses default filter
-Suite teardown  Run Keywords  Logout  Apply minimal fixture now
+Suite Teardown  Run Keywords  Logout  Apply minimal fixture now
 Resource        ../../common_resource.robot
-Suite setup     Apply minimal fixture now
+Suite Setup     Apply minimal fixture now
 
 *** Test Cases ***
 
@@ -27,14 +27,14 @@ Sonja opens search page
   Filter item should contain X number of tags  tags  0
   Filter item should contain X number of tags  operations  0
   Filter item should contain X number of tags  organization  0
-  Sorting Should Be Set As  Päivitetty  desc
+  Sorting Should Be Set As Descending  Päivitetty
   Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
 
 Sonja selects application sorting
   Click sorting field  Tyyppi
-  Sorting Should Be Set As  Tyyppi  desc
+  Sorting Should Be Set As Descending  Tyyppi
   Click sorting field  Tyyppi
-  Sorting Should Be Set As  Tyyppi  asc
+  Sorting Should Be Set As Ascending  Tyyppi
 
 ...selects handler
   Select From Autocomplete  div[@data-test-id="handlers-filter-component"]  ${sonja name}
@@ -85,7 +85,7 @@ Sonja removes all but operations filter
   Filter item should contain X number of tags  tags  0
   Filter item should contain X number of tags  operations  1
   Filter item should contain X number of tags  organization  0
-  Sorting Should Be Set As  Tyyppi  asc
+  Sorting Should Be Set As Ascending  Tyyppi
 
 Sonja closes and opens advanced filters
   Click by test id  toggle-advanced-filters
@@ -96,7 +96,7 @@ Sonja closes and opens advanced filters
   Filter item should contain X number of tags  tags  0
   Filter item should contain X number of tags  operations  1
   Filter item should contain X number of tags  organization  0
-  Sorting Should Be Set As  Tyyppi  asc
+  Sorting Should Be Set As Ascending  Tyyppi
 
 Sonja opens an application and returns to applications page
   Wait Until  Click Element  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
@@ -110,7 +110,7 @@ Filter should be set as before visiting application
   Filter item should contain X number of tags  tags  0
   Filter item should contain X number of tags  operations  1
   Filter item should contain X number of tags  organization  0
-  Sorting Should Be Set As  Tyyppi  asc
+  Sorting Should Be Set As Ascending  Tyyppi
 
 Sonja removes the operations filter
   Wait until  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//ul[@class="tags"]//li[@class="tag"]//i
@@ -118,9 +118,9 @@ Sonja removes the operations filter
 
 Sonja sets sorting by location
   Click sorting field  Sijainti
-  Sorting Should Be Set As  Sijainti  desc
+  Sorting Should Be Set As Descending  Sijainti
   Click sorting field  Sijainti
-  Sorting Should Be Set As  Sijainti  asc
+  Sorting Should Be Set As Ascending  Sijainti
 
 Sonja saves sort-by-location filter
   Save advanced filter  sort-by-location
@@ -152,7 +152,7 @@ Default filter should be sort-by-location filter
   Filter item should contain X number of tags  tags  0
   Filter item should contain X number of tags  operations  0
   Filter item should contain X number of tags  organization  0
-  Sorting Should Be Set As  Sijainti  asc
+  Sorting Should Be Set As Ascending  Sijainti
 
 Sonja selects MEGA filter
   Select From Autocomplete  div[@data-test-id="select-advanced-filter"]  MEGA
@@ -194,13 +194,18 @@ Filter should contain tag
   [Arguments]  ${filter name}  ${text}
   Wait Until  Element Should Contain  xpath=//div[@data-test-id="${filter name}-filter-component"]//ul[@class="tags"]//li[@class="tag"]//span  ${text}
 
-Sorting Should Be Set As
-  [Arguments]  ${field name}  ${order}
-  Wait until  Element should be visible  //table[@id="applications-list"]//th[contains(text(), "${field name}") and contains(@class, "${order}")]
+Sorting Should Be Set As Ascending
+  [Arguments]  ${field name}
+  Wait until  Element should be visible  //table[@id="applications-list"]//th[@data-test-id="search-column-${field name}"]//i[contains(@class, "lupicon-chevron-small-up")]
+
+Sorting Should Be Set As Descending
+  [Arguments]  ${field name}
+  Wait until  Element should be visible  //table[@id="applications-list"]//th[@data-test-id="search-column-${field name}"]//i[contains(@class, "lupicon-chevron-small-down")]
 
 Click sorting field
   [Arguments]  ${field name}
-  Wait Until  Click Element  xpath=//table[@id="applications-list"]//th[contains(text(), "${field name}")]
+  Wait Until  Element should be visible  xpath=//table[@id="applications-list"]//th[@data-test-id="search-column-${field name}"]
+  Wait Until  Click Element  xpath=//table[@id="applications-list"]//th[@data-test-id="search-column-${field name}"]
 
 Save advanced filter
   [Arguments]  ${filter-name}

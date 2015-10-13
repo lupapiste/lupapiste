@@ -2,7 +2,8 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.domain :as domain]
+            [sade.strings :as ss]))
 
 (apply-remote-minimal)
 
@@ -11,7 +12,7 @@
         {application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
         application                  (query-application apikey application-id)
         _                            (generate-documents application apikey)
-        {foreman-application-id :id} (command apikey :create-foreman-application :id application-id :taskId "" :foremanRole "ei tiedossa") => truthy
+        {foreman-application-id :id} (command apikey :create-foreman-application :id application-id :taskId "" :foremanRole "ei tiedossa" :foremanEmail "") => truthy
 
         foreman-application          (query-application apikey foreman-application-id)
         foreman-link-permit-data     (first (foreman-application :linkPermitData))
@@ -56,6 +57,16 @@
 
           (dissoc hakija-doc-data :userId) => (dissoc foreman-hakija-doc-data :userId))))
 
+    (fact "Foreman name index is updated"
+      (command apikey :update-doc :id (:id foreman-application) :doc (:id foreman-doc) :collection "documents"
+        :updates [["henkilotiedot.etunimi" "foo"] ["henkilotiedot.sukunimi" "bar"] ["kuntaRoolikoodi" "erityisalojen ty\u00F6njohtaja"]]) => ok?
+
+      (let [application-after-update (query-application apikey (:id foreman-application))]
+        (:foreman foreman-application) => ss/blank?
+        (:foremanRole foreman-application) => ss/blank?
+        (:foreman application-after-update) => "bar foo"
+        (:foremanRole application-after-update) => "erityisalojen ty\u00F6njohtaja"))
+
     (fact "Can't submit foreman app before original link-permit-app is submitted"
       (:submittable (query-application apikey foreman-application-id)) => false)
 
@@ -77,7 +88,7 @@
             application (create-and-submit-application apikey)
             _ (command sonja :check-for-verdict :id (:id application))
             application (query-application apikey (:id application))
-            {foreman-application-id :id} (command apikey :create-foreman-application :id (:id application) :taskId "" :foremanRole "")
+            {foreman-application-id :id} (command apikey :create-foreman-application :id (:id application) :taskId "" :foremanRole "" :foremanEmail "")
             tasks (:tasks application)
             foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") tasks))]
         (command apikey :link-foreman-task :id (:id application) :taskId (:id foreman-task) :foremanAppId foreman-application-id) => ok?
@@ -107,10 +118,10 @@
 
     (facts "updating other foreman projects to current foreman application"
       (let [{application1-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
-            {foreman-application1-id :id} (command apikey :create-foreman-application :id application1-id :taskId "" :foremanRole "") => truthy
+            {foreman-application1-id :id} (command apikey :create-foreman-application :id application1-id :taskId "" :foremanRole "" :foremanEmail "") => truthy
 
             {application2-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
-            {foreman-application2-id :id} (command apikey :create-foreman-application :id application2-id :taskId "" :foremanRole "") => truthy
+            {foreman-application2-id :id} (command apikey :create-foreman-application :id application2-id :taskId "" :foremanRole "" :foremanEmail "") => truthy
 
             foreman-application1          (query-application apikey foreman-application1-id)
             foreman-application2          (query-application apikey foreman-application2-id)
@@ -198,6 +209,77 @@
       (fact "1st succeeds"
         (command mikko :add-link-permit :id foreman-app-id5 :linkPermitId "other ID 1") => ok?)
       (fact "2nd fails"
-        (command mikko :add-link-permit :id foreman-app-id5 :linkPermitId "other ID 2") => fail?))
+        (command mikko :add-link-permit :id foreman-app-id5 :linkPermitId "other ID 2") => fail?))))
 
-    ))
+(facts* "Auths and invites"
+  (let [apikey pena
+        {application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
+        {hakija1 :doc}               (command pena :create-doc :id application-id :schemaName "hakija-r")
+        {hakija-no-auth :doc}        (command pena :create-doc :id application-id :schemaName "hakija-r")
+        {hakija-contact-person :doc} (command pena :create-doc :id application-id :schemaName "hakija-r")
+        {hakija-company :doc}        (command pena :create-doc :id application-id :schemaName "hakija-r")
+
+        _ (command apikey :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
+                   :documentId "" :path "" :role "writer") => ok?
+        _ (command apikey :update-doc :id application-id :doc hakija1  :collection "documents"
+            :updates [["henkilo.yhteystiedot.email" "foo@example.com"]]) => ok?
+
+        _ (command apikey :update-doc :id application-id :doc hakija-no-auth  :collection "documents"
+            :updates [["henkilo.yhteystiedot.email" "unknown@example.com"]]) => ok?
+
+        _ (command apikey :update-doc :id application-id :doc hakija-contact-person  :collection "documents"
+            :updates [["_selected" "yritys"] ["yritys.yhteyshenkilo.yhteystiedot.email" "contact@example.com"]]) => ok?
+
+        _ (invite-company-and-accept-invitation pena application-id "solita") => truthy
+        _ (command apikey :update-doc :id application-id :doc hakija-company  :collection "documents"
+            :updates [["_selected" "yritys"] ["yritys.companyId" "solita"]]) => ok?
+
+        application            (query-application apikey application-id)
+
+        has-auth? (fn [email auth]
+                        (or (some (partial = email) (map :username auth)) false))]
+    (sent-emails) ; clear email box
+
+    (fact "Create foreman application with correct auths"
+      (let [{foreman-app-id :id} (command apikey :create-foreman-application :id application-id
+                                   :taskId "" :foremanRole "ei tiedossa" :foremanEmail "heppu@example.com") => truthy
+            {auth-array :auth} (query-application pena foreman-app-id) => truthy
+            {orig-auth :auth}  (query-application pena application-id)]
+        (fact "applicant 'foo@example.com' is authed to foreman application"
+          (has-auth? "foo@example.com" auth-array) => true)
+        (fact "applicant 'unknown@example.com' is not authed to foreman app"
+          (has-auth? "unknown@example.com" auth-array) => false)
+        (fact "company contact person does not have auth, as it is not authed to original app"
+          (has-auth? "contact@example.com" auth-array) => false)
+        (fact "company 'solita' is authed" ; id is from minimal 1060155-5
+          (has-auth? "1060155-5" auth-array) => true)
+        (fact "foreman is authed, also to original application"
+          (has-auth? "heppu@example.com" auth-array)
+          (has-auth? "heppu@exampe.com" orig-auth))
+
+        (fact "Emails are sent correctly to recipients"
+          (let [recipients (map :to (sent-emails))]
+            recipients => (just ["heppu@example.com" ; foreman is invited to original application also
+                                 "heppu@example.com"
+                                 "foo@example.com"
+                                 "Kaino Solita <kaino@solita.fi>"])))))
+
+    (fact "Contact person is added to new foreman app, when its auth is added to original application"
+      (let [_ (command apikey :invite-with-role :id application-id :email "contact@example.com" :text "" :documentName ""
+                     :documentId "" :path "" :role "writer") => ok?
+            _ (command apikey :remove-doc :id application-id :docId hakija1) => ok? ; remove one applicant
+            _ (sent-emails) ; reset email box
+            {foreman-app-id :id} (command apikey :create-foreman-application :id application-id
+                                   :taskId "" :foremanRole "ei tiedossa" :foremanEmail "heppu@example.com") => truthy
+            {auth-array :auth} (query-application pena foreman-app-id) => truthy]
+        (has-auth? "contact@example.com" auth-array) => true
+        (has-auth? "foo@example.com" auth-array) => false
+
+        (fact "Emails are correctly sent"
+          (let [recipients (map :to (sent-emails))]
+            (fact "only one email is sent to foreman, as he is already authed to original"
+              (count (filter (partial = "heppu@example.com") recipients)) => 1)
+            recipients => (just ["heppu@example.com"
+                                 "contact@example.com"
+                                 "Kaino Solita <kaino@solita.fi>"])))))))
+

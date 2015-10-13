@@ -1,10 +1,14 @@
 (ns lupapalvelu.organization
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.string :as s]
+            [clojure.walk :as walk]
             [monger.operators :refer :all]
+            [cheshire.core :as json]
             [sade.core :refer [fail]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.crypt :as crypt]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]))
@@ -24,17 +28,31 @@
   (when (seq org)
     (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))))
 
+(defn- remove-sensitive-data
+  [org]
+  (when (seq org)
+    (->> (:krysp org)
+         (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]))
+         (into {})
+         (assoc org :krysp))))
+
 (defn get-organizations
   ([]
     (get-organizations {}))
   ([query]
-    (map with-scope-defaults (mongo/select :organizations query)))
+   (->> (mongo/select :organizations query)
+        (map remove-sensitive-data)
+        (map with-scope-defaults)))
   ([query projection]
-    (map with-scope-defaults (mongo/select :organizations query projection))))
+   (->> (mongo/select :organizations query projection)
+        (map remove-sensitive-data)
+        (map with-scope-defaults ))))
 
 (defn get-organization [id]
   {:pre [(not (s/blank? id))]}
-  (with-scope-defaults (mongo/by-id :organizations id)))
+  (->> (mongo/by-id :organizations id)
+       remove-sensitive-data
+       with-scope-defaults)) 
 
 (defn update-organization [id changes]
   {:pre [(not (s/blank? id))]}
@@ -48,10 +66,43 @@
   ([{:keys [organization permitType] :as application}]
     (get-krysp-wfs organization permitType))
   ([organization-id permit-type]
-  (let [organization (get-organization organization-id)
-        krysp-config (get-in organization [:krysp (keyword permit-type)])]
-    (when-not (s/blank? (:url krysp-config))
-      (select-keys krysp-config [:url :version])))))
+   (let [organization (mongo/by-id :organizations organization-id)
+         krysp-config (get-in organization [:krysp (keyword permit-type)])
+         crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
+         crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
+                        (-> iv (crypt/str->bytes) (crypt/base64-decode)))
+         password     (when-let [password (and crypto-iv (:password krysp-config))]
+                        (->> password
+                             (crypt/str->bytes)
+                            (crypt/base64-decode)
+                             (crypt/decrypt crypto-key crypto-iv :aes)
+                             (crypt/bytes->str)))
+         username     (:username krysp-config)]
+     (when-not (s/blank? (:url krysp-config))
+       (->> (when username {:credentials [username password]})
+            (merge (select-keys krysp-config [:url :version])))))))
+
+(defn- encode-credentials
+  [username password]
+  (when-not (s/blank? username)
+    (let [crypto-key       (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
+          crypto-iv        (crypt/make-iv-128)
+          crypted-password (->> password
+                                (crypt/str->bytes)
+                                (crypt/encrypt crypto-key crypto-iv :aes)
+                                (crypt/base64-encode)
+                                (crypt/bytes->str))
+          crypto-iv        (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))]
+      {:username username :password crypted-password :crypto-iv crypto-iv})))
+
+(defn set-krysp-endpoint
+  [id url username password permitType version]
+  (->> (encode-credentials username password)
+       (merge {:url url :version version})
+       (map (fn [[k v]] [(str "krysp." permitType "." (name k)) v]))
+       (into {})
+       (hash-map $set)
+       (update-organization id)))
 
 (defn get-organization-name [organization]
   (let [default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
@@ -109,3 +160,6 @@
        %
        (assoc % :id (mongo/create-id)))
     tags))
+
+(defn some-organization-has-archive-enabled? [organization-ids]
+  (pos? (mongo/count :organizations {:_id {$in organization-ids} :permanent-archive-enabled true})))

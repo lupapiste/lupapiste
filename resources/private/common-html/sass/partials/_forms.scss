@@ -189,6 +189,10 @@ input[readonly], textarea[readonly] {
   }
 }
 
+.form-full-width > select, .form-full-width > label {
+  width: 80% !important;
+}
+
 .form-single-line {
   display: block;
 }
@@ -262,9 +266,9 @@ input.form-input.inline {
   width: auto;
   display: inline-block;
   vertical-align: bottom;
-  margin: 0 $marginS 2px $marginS;
+  margin: 0 $marginS 0 $marginS;
   width: 14px;
-  height: 14px;
+  height: 24px;
   padding: 0;
   &.error {
     outline: 3px solid red;
@@ -319,7 +323,7 @@ input.form-input.inline {
     display: block;
   }
   .form-input.checkbox, .form-input.radio {
-    margin: 0 $marginS 2px 0;
+    margin: 0 $marginS 0 0;
     display: inline-block;
   }
   .form-label-checkbox{
@@ -371,6 +375,10 @@ input.form-input.inline {
   display: inline;
   color: red;
   margin: $marginM;
+}
+
+.docgen-content .form-choice .form-entry.form-full-width {
+  display: block !important;
 }
 
 .form-error {
@@ -584,9 +592,6 @@ input.form-input.inline {
     }
     background-color: $gray246;
     border-bottom: 1px solid $gray221;
-    /* .btn, button { */
-    /*   margin-right: 10px */
-    /* } */
   }
 }
 
@@ -601,12 +606,6 @@ input.form-input.inline {
   }
 }
 
-
-
-
-.accordion-fields button.margins-s {
-  margin-bottom: 0;
-}
 
 .accordion_content > .group-help-text {
   display: block;
@@ -985,7 +984,6 @@ div.alleYli-radioGroup {
   margin-top: $marginL;
 }
 
-
 // Grid styles
 
 $col: 25%;
@@ -1040,6 +1038,15 @@ $col: 25%;
     border: 1px solid $checkbox-border-color;
     padding: 7px;
   }
+  .radio-wrapper {
+    border: 1px solid $radio-border-color;
+    padding: $marginS $marginL $marginS $marginS;
+  }
+  .checkbox-wrapper, .radio-wrapper {
+    label {
+      cursor: pointer;
+    }
+  }
 
   select::-ms-expand {
       display: none;
@@ -1068,11 +1075,14 @@ $col: 25%;
     }
   }
 
-  input[type=checkbox] {
+  input[type=checkbox], input[type=radio] {
     opacity: 0;
     width: 0;
     height: 0;
     margin: 0;
+    font-size: 0;
+    display: inline;
+    //-moz-transform: scale(0.1);
   }
 
   .checkbox-label:before {
@@ -1087,6 +1097,21 @@ $col: 25%;
   input[type=checkbox]:checked + .checkbox-label:before {
     @include lupicon-font;
     content: "\e604";
+    color: $checkbox-selected-color;
+  }
+
+  .radio-label:before {
+    @include lupicon-font;
+    content: "\e634";
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: top;
+    color: $checkbox-color;
+  }
+
+  input[type=radio]:checked + .radio-label:before {
+    @include lupicon-font;
+    content: "\e635";
     color: $checkbox-selected-color;
   }
 

@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-...            More about robot http://code.google.com/p/robotframework/.
 Library        Selenium2Library   timeout=10  run_on_failure=Nothing
 Library        String
 
@@ -394,8 +393,9 @@ Primary operation is
 # This only works if there is only one applicable document.
 Edit operation description
   [Arguments]  ${doc}  ${text}
-  Wait until element is visible  jquery=div#application-info-tab button[data-test-id=edit-op-description-${doc}]
-  Mouse Down  jquery=div#application-info-tab [data-test-id=edit-op-description-${doc}] :visible
+  Wait until element is visible  jquery=div#application-info-tab button[data-test-id=edit-op-description-${doc}] :first
+  #Mouse Down  jquery=div#application-info-tab [data-test-id=edit-op-description-${doc}] :first
+  Execute Javascript  $('div#application-info-tab [data-test-id=edit-op-description-${doc}] :first').mousedown();
   Wait until element is visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
   Input text by test id  op-description-editor-${doc}  ${text}
   # Close the input bubble. Press key fails if the bubble has already been closed.

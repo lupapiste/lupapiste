@@ -6,6 +6,8 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   self.savedFilters = lupapisteApp.services.applicationFiltersService.savedFilters;
 
+  self.savedForemanFilters = lupapisteApp.services.applicationFiltersService.savedForemanFilters;
+
   self.searchFieldSelected = ko.observable(false);
 
   self.showAdvancedFilters = ko.observable(false);

@@ -16,10 +16,10 @@
 ;;
 (apply-remote-minimal)
 
-(facts "Getting user"
-       (fact (let [response (query pena :user)]
-               response => ok?
-               (get-in response [:user :email]) => "pena@example.com")))
+(fact "user query"
+  (let [response (query pena :user)]
+    response => ok?
+    (get-in response [:user :email]) => "pena@example.com"))
 
 (facts "Getting users"
 
@@ -79,15 +79,28 @@
   (fact (command veikko :update-user :firstName "f" :lastName "l") => ok?)
   (fact (-> (query veikko :user) :user) => (contains {:firstName "f" :lastName "l"})))
 
+(facts "save-application-filter"
+  (apply-remote-minimal)
+
+  (fact "fails with invalid filter type"
+    (command ronja :save-application-filter :title "titteli" :filter {} :sort {:field "applicant" :asc true} :filterId "beefcace" :filterType "a") => fail?)
+
+  (fact (command ronja :save-application-filter :title "titteli" :filter {} :sort {:field "applicant" :asc true} :filterId "beefcace" :filterType "application") => ok?)
+  (fact "Filter is saved"
+    (let [{user :user} (query admin :user-by-email :email "ronja.sibbo@sipoo.fi")]
+      (get-in user [:applicationFilters 0 :title]) => "titteli"
+      (fact "as default"
+        (->> user :defaultFilter :id) => "beefcace"))))
+
 (facts update-default-application-filter
   (apply-remote-minimal)
 
-  (fact (->> (command sonja :update-default-application-filter :filter-id "foobar")) => ok?)
+  (fact (command sonja :update-default-application-filter :filterId "foobar" :filterType "application") => ok?)
 
   (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "foobar")
 
   (fact "Overwrite default filter"
-      (->> (command sonja :update-default-application-filter :filter-id "barfoo")) => ok?)
+    (command sonja :update-default-application-filter :filterId "barfoo" :filterType "application") => ok?)
 
   (fact "Filter overwritten"
       (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "barfoo"))

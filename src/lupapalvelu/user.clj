@@ -11,6 +11,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.validators :as v]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
@@ -29,6 +30,16 @@
    :username  "dummy@example.com"
    :enabled   false})
 
+(def SearchFilter
+  {:id        sc/Str
+   :title     sc/Str
+   :sort     {:field (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole" "id")
+              :asc    sc/Bool}
+   :filter   {(sc/optional-key :handlers) (sc/pred vector? "Handler filter should have ids in a vector")
+              (sc/optional-key :tags) (sc/pred vector? "Tag filter should have ids in a vector")
+              (sc/optional-key :operations) (sc/pred vector? "Op filter should have ids in a vector")
+              (sc/optional-key :organizations) (sc/pred vector? "Org filter should have ids in a vector")
+              (sc/optional-key :areas) (sc/pred vector? "Area filter should have ids in a vector")}})
 
 (def User {:id                                    sc/Str
            :firstName                             (util/max-length-string 255)
@@ -42,18 +53,18 @@
                                                            "rest-api"
                                                            "trusted-etl")
            :email                                 (sc/both
-                                                    (sc/pred util/valid-email? "Not valid email")
+                                                    (sc/pred v/valid-email? "Not valid email")
                                                     (util/max-length-string 255))
            :username                              (util/max-length-string 255)
            :enabled                               sc/Bool
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}
            (sc/optional-key :orgAuthz)            {sc/Keyword (sc/pred vector? "OrgAuthz must be vector")}
-           (sc/optional-key :personId)            (sc/maybe (sc/pred util/valid-hetu? "Not valid hetu"))
+           (sc/optional-key :personId)            (sc/maybe (sc/pred v/valid-hetu? "Not valid hetu"))
            (sc/optional-key :street)              (sc/maybe (util/max-length-string 255))
            (sc/optional-key :city)                (sc/maybe (util/max-length-string 255))
            (sc/optional-key :zip)                 (sc/either
-                                                    (sc/pred util/finnish-zip? "Not a valid zip code")
+                                                    (sc/pred v/finnish-zip? "Not a valid zip code")
                                                     (sc/pred ss/blank?))
            (sc/optional-key :phone)               (sc/maybe (util/max-length-string 255))
            (sc/optional-key :architect)           sc/Bool
@@ -68,7 +79,7 @@
            (sc/optional-key :fise)                (util/max-length-string 255)
            (sc/optional-key :companyName)         (util/max-length-string 255)
            (sc/optional-key :companyId)           (sc/either
-                                                    (sc/pred util/finnish-y? "Not valid Y code")
+                                                    (sc/pred v/finnish-y? "Not valid Y code")
                                                     (sc/pred ss/blank?))
            (sc/optional-key :allowDirectMarketing) sc/Bool
            (sc/optional-key :attachments)         [{:attachment-type  {:type-group sc/Str, :type-id sc/Str}
@@ -87,23 +98,16 @@
                                                    (sc/optional-key :title)          sc/Str}
            (sc/optional-key :defaultFilter)       {(sc/optional-key :id) (sc/maybe sc/Str)
                                                    (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)}
-           (sc/optional-key :applicationFilters)  [{:id        sc/Str
-                                                    :title     sc/Str
-                                                    :sort     {:field (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler")
-                                                               :asc    sc/Bool}
-                                                    :filter   {(sc/optional-key :handlers) (sc/pred vector? "Handler filter should have ids in a vector")
-                                                               (sc/optional-key :tags) (sc/pred vector? "Tag filter should have ids in a vector")
-                                                               (sc/optional-key :operations) (sc/pred vector? "Op filter should have ids in a vector")
-                                                               (sc/optional-key :organizations) (sc/pred vector? "Org filter should have ids in a vector")
-                                                               (sc/optional-key :areas) (sc/pred vector? "Area filter should have ids in a vector")}}]})
+           (sc/optional-key :applicationFilters)  [SearchFilter]
+           (sc/optional-key :foremanFilters)      [SearchFilter]})
 
 (def RegisterUser {:email     (sc/both
-                                (sc/pred util/valid-email? "Not valid email")
+                                (sc/pred v/valid-email? "Not valid email")
                                 (util/max-length-string 255))
                    :street    (sc/maybe (util/max-length-string 255))
                    :city      (sc/maybe (util/max-length-string 255))
                    :zip       (sc/either
-                                (sc/pred util/finnish-zip? "Not a valid zip code")
+                                (sc/pred v/finnish-zip? "Not a valid zip code")
                                 (sc/pred ss/blank?))
                    :phone (sc/maybe (util/max-length-string 255))
                    (sc/optional-key :architect) sc/Bool
@@ -369,9 +373,6 @@
        (fail! :error.user-not-found :email ~email))
      ~@body))
 
-(defn get-application-filters [id]
-  (or (:applicationFilters (get-user-by-id id)) []))
-
 ;;
 ;; ==============================================================================
 ;; Create user:
@@ -483,6 +484,12 @@
           (do
             (warn e "Inserting new user failed")
             (fail! :cant-insert)))))))
+
+(defn get-or-create-user-by-email [email current-user]
+  (let [email (canonize-email email)]
+    (or
+      (get-user-by-email email)
+      (create-new-user current-user {:email email :role "dummy"}))))
 
 ;;
 ;; ==============================================================================

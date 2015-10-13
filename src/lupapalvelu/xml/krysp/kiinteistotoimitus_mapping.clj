@@ -37,7 +37,9 @@
                       {:kiinteistotieto {:Kiinteisto :kiinteistotunnus}}
                       {:maaraAlatieto {:MaaraAla :maaraAlatunnus}}
                       {:tilatieto {:Tila [:pvm :kasittelija :hakemuksenTila]}}]}]}
-                  :toimituksenTila]
+                  :toimituksenTila
+                  {:kiinteistotieto {:Kiinteisto :kiinteistotunnus}}
+                  {:maaraAlatieto {:MaaraAla :maaraAlatunnus}}]
         basic (conj toimitus :kuvaus)
         toimitus-types {:featureMembers/kiito [{:Lohkominen (concat toimitus [:lohkomisenTyyppi :kuvaus])}
                          {:YhtAlueenOsuuksienSiirto basic}

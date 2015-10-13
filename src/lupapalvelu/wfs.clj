@@ -411,7 +411,7 @@
 
 (defn gfi-to-features-sito [gfi municipality]
   (when gfi
-    (xml-> (->features gfi startparse-sax-non-validating) :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi")))))
+    (xml-> (->features gfi startparse-sax-non-validating "UTF-8") :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi")))))
 
 (defn feature-to-feature-info-sito  [feature]
   (when feature
@@ -421,6 +421,15 @@
      :vahvistett_pvm (first (xml-> feature :lupapiste:VAHVISTETT text))
      :linkki (first (xml-> feature :lupapiste:LINKKI text))
      :type "sito"}))
+
+(defn feature-to-feature-info-liiteri-ak  [feature]
+  (when feature
+    {:id (first (xml-> feature :lupapiste:tunnus text))
+     :kuntanro (first (xml-> feature :lupapiste:kuntaid text))
+     :kunta (first (xml-> feature :lupapiste:kunta text))
+     :kaavanro (first (xml-> feature :lupapiste:tunnus text))
+     :linkki (first (xml-> feature :lupapiste:merkinnat text))
+     :type "liiteri-ak"}))
 
 (defn general-plan-info-by-point [x y]
   (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]
@@ -509,4 +518,3 @@
                          {:query-params (:params request)
                           :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
                           :as :stream})))))
-

@@ -423,6 +423,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else {
       input.value = value || "";
       sourceValueChanged(input, value, sourceValue, source);
+
+      if (subSchema.placeholder && _.includes(["text", "email", "search", "url", "tel", "password"], type)) {
+        input.setAttribute("placeholder", loc(subSchema.placeholder));
+      }
     }
     return input;
   }
@@ -602,6 +606,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.className = "form-input textarea";
     var value = getModelValue(model, subSchema.name);
     input.value = value;
+
+    if (subSchema.placeholder) {
+      input.setAttribute("placeholder", loc(subSchema.placeholder));
+    }
+
     var sourceValue = _.isObject(model) ? getModelSourceValue(model, subSchema.name) : undefined;
     var source = _.isObject(model) ? getModelSource(model, subSchema.name) : undefined;
 
@@ -1375,10 +1384,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           models = subSchema.initiallyEmpty ? [] : [{}];
       }
 
-      var elements;
+      var elements = subSchema["repeating-init-empty"] ? [] : buildElements(models);
 
       if (subSchema.type === "table") {
-        elements = buildElements(models);
         var div = document.createElement("div");
         div.className = "form-table";
         var table = document.createElement("table");
@@ -1407,12 +1415,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         div.appendChild(table);
 
         elements = [div];
-      } else {
-        elements = buildElements(models);
       }
 
       var appendButton = makeButton(myPath.join("_") + "_append",
-                                    loc([self.schemaI18name, myPath.join("."), "_append_label"]),
+                                    loc( util.locKeyFromDocPath(_.flatten([self.schemaI18name, myPath, "_append_label"]).join(".")) ),
                                     {icon: "lupicon-circle-plus", className: "secondary"});
       appendButton.disabled = isSubSchemaWhitelisted(subSchema);
 

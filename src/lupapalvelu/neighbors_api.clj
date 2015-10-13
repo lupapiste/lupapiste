@@ -216,7 +216,7 @@
   {:parameters [neighborId token fileId]
    :user-roles #{:anonymous}}
   [{created :created}]
-  (let [att-info    (attachment/get-attachment fileId)
+  (let [att-info    (attachment/get-attachment-file fileId)
         application (domain/get-application-no-access-checking (:application att-info))
         neighbor    (util/find-by-id neighborId (:neighbors application))
         attachment  (attachment/get-attachment-info-by-file-id application fileId)
@@ -224,7 +224,7 @@
     (if (and
           (valid-token? token (:status neighbor) created)
           (= att-type "paapiirustus"))
-      (attachment/output-attachment fileId true attachment/get-attachment)
+      (attachment/output-attachment fileId true attachment/get-attachment-file)
       {:status 401
        :headers {"Content-Type" "text/plain"}
        :body "401 Unauthorized"})))

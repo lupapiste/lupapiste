@@ -39,11 +39,11 @@
           <!-- ko if: data().length > 0 -->
           <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}, css: {'autocomplete-result-grouped': groupedResults}">
             <!-- ko foreach: data -->
-              <!-- ko if: $data && $data.groupHeader -->
+              <!-- ko if: $data.groupHeader -->
               <li class="autocomplete-group-header" data-bind="text: $component.optionsText ? $data[$component.optionsText] : $data,
                                                                titleWhenOverflow: $component.optionsText ? $data[$component.optionsText] : $data"></li>
               <!-- /ko -->
-              <!-- ko ifnot: $data && $data.groupHeader -->
+              <!-- ko ifnot: $data.groupHeader -->
               <li class="autocomplete-result-item"
                   data-bind="event: {mouseover: $component.changeIndex.bind($data, $index()),
                                      mousedown: $component.selectItem.bind($data)},

@@ -6,6 +6,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.mongo :as mongo]
@@ -39,16 +40,16 @@
     (some #(= op %) supported-ops)))
 
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
-              :y                             (sc/pred util/finnish-y? "Not valid Y code")
+              :y                             (sc/pred v/finnish-y? "Not valid Y code")
               :accountType                   (apply sc/enum (conj (map (comp name :name) account-types) "custom"))
               :customAccountLimit            (sc/maybe sc/Int)
               (sc/optional-key :reference)   max-64-or-nil
               :address1                      max-64-or-nil
               :po                            max-64-or-nil
-              :zip                           (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
+              :zip                           (sc/either (sc/pred v/finnish-zip? "Not a valid zip code")
                                                          (sc/pred ss/blank?))
               (sc/optional-key :country)     max-64-or-nil
-              (sc/optional-key :ovt)         (sc/either (sc/pred util/finnish-ovt? "Not a valid OVT code")
+              (sc/optional-key :ovt)         (sc/either (sc/pred v/finnish-ovt? "Not a valid OVT code")
                                                         (sc/pred ss/blank?))
               (sc/optional-key :pop)         (sc/either (sc/pred supported-invoice-operator? "Not a supported invoice operator")
                                                         (sc/pred ss/blank?))
@@ -293,6 +294,14 @@
                  :firstName (:name company)
                  :lastName  "")))
 
+(defn company-invitation-token [caller company-id application-id]
+  (token/make-token
+    :accept-company-invitation
+    nil
+    {:caller caller, :company-id company-id, :application-id application-id}
+    :auto-consume false
+    :ttl ttl/company-invite-ttl))
+
 (defn company-invite [caller application company-id]
   {:pre [(map? caller) (map? application) (string? company-id)]}
   (let [company   (find-company! {:id company-id})
@@ -302,7 +311,7 @@
                     :invite {:user {:id company-id}})
         admins    (find-company-admins company-id)
         application-id (:id application)
-        token-id  (token/make-token :accept-company-invitation nil {:caller caller, :company-id company-id, :application-id application-id} :auto-consume false :ttl ttl/company-invite-ttl)
+        token-id  (company-invitation-token caller company-id application-id)
         update-count (update-application
                        (application->command application)
                        {:auth {$not {$elemMatch {:invite.user.id company-id}}}}

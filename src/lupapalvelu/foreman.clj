@@ -3,10 +3,13 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
+            [lupapalvelu.application :as application]
+            [lupapalvelu.company :as company]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]
             [monger.operators :refer :all]))
 
 (defn other-project-document [application timestamp]
@@ -136,3 +139,82 @@
     (or
       (validate-notice-or-application application)
       (validate-notice-submittable application))))
+
+(defn new-foreman-application [{:keys [created user application] :as command}]
+  (-> (application/do-create-application
+        (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
+                              :x (-> application :location first)
+                              :y (-> application :location second)
+                              :address (:address application)
+                              :propertyId (:propertyId application)
+                              :municipality (:municipality application)
+                              :infoRequest false
+                              :messages []}))
+    (assoc :opened (if (util/pos? (:opened application)) created nil))))
+
+
+(defn cleanup-hakija-doc [doc]
+  (-> doc
+      (assoc :id (mongo/create-id))
+      (assoc-in [:data :henkilo :userId] {:value nil})))
+
+(defn create-foreman-docs [application foreman-app role]
+  (let [hankkeen-kuvaus      (get-in (domain/get-document-by-name application "hankkeen-kuvaus") [:data :kuvaus :value])
+        hankkeen-kuvaus-doc  (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum")
+        hankkeen-kuvaus-doc  (if hankkeen-kuvaus
+                               (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
+                               hankkeen-kuvaus-doc)
+
+        tyonjohtaja-doc      (domain/get-document-by-name foreman-app "tyonjohtaja-v2")
+        tyonjohtaja-doc      (if-not (ss/blank? role)
+                               (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] role)
+                               tyonjohtaja-doc)
+
+        hakija-docs          (domain/get-applicant-documents (:documents application))
+        hakija-docs          (map cleanup-hakija-doc hakija-docs)]
+    (->> (:documents foreman-app)
+      (remove #(#{"hankkeen-kuvaus-minimum" "hakija-r" "tyonjohtaja-v2"} (-> % :schema-info :name)))
+      (concat (remove nil? [hakija-docs hankkeen-kuvaus-doc tyonjohtaja-doc]))
+      flatten)))
+
+(defn- henkilo-invite [applicant auth]
+  {:pre [(= "henkilo" (get-in applicant [:data :_selected]))
+         (sequential? auth)]}
+  (when-let [email (user/canonize-email (get-in applicant [:data :henkilo :yhteystiedot :email]))]
+    (when (some #(= email (:username %)) auth)
+      {:email email
+       :role "writer"})))
+
+(defn- yritys-invite [applicant auth]
+  {:pre [(= "yritys" (get-in applicant [:data :_selected]))
+         (sequential? auth)]}
+  (if-let [company-id (get-in applicant [:data :yritys :companyId])]
+    (some
+      #(when (= company-id (or (:id %) (get-in % [:invite :user :id])))
+         {:company-id company-id})
+      auth)
+    (when-let [contact-email (user/canonize-email
+                               (get-in applicant [:data :yritys :yhteyshenkilo :yhteystiedot :email]))]
+      (some
+        #(when (= contact-email (:username %))
+           {:email contact-email
+            :role "writer"})
+        auth))))
+
+(defn applicant-invites [documents auth]
+  (let [unwrapped-applicants (tools/unwrapped
+                               (domain/get-applicant-documents documents))]
+    (->> unwrapped-applicants
+        (map
+          #(case (-> % :data :_selected)
+             "henkilo" (henkilo-invite % auth)
+             "yritys" (yritys-invite % auth)))
+        (remove nil?))))
+
+(defn create-company-auth [company-id]
+  (when-let [company (company/find-company-by-id company-id)]
+    (assoc
+      (company/company->auth company)
+      :id "" ; prevents access to application before accepting invite
+      :role ""
+      :invite {:user {:id company-id}})))

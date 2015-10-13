@@ -6,6 +6,7 @@ LUPAPISTE.InputFieldModel = function(params) {
   var self = this;
 
   self.id = params.id || util.randomElementId();
+  self.name = params.name;
   self.label = params.lLabel ? loc(params.lLabel) : params.label;
   self.value = params.value;
   self.placeholder = params.lPlaceholder ? loc(params.lPlaceholder) : params.placeholder;
@@ -25,4 +26,5 @@ LUPAPISTE.InputFieldModel = function(params) {
   self.optionsValue = params.optionsValue || "";
   self.optionsText  = params.optionsText || "";
   self.optionsCaption = params.lOptionsCaption ? loc(params.lOptionsCaption) : params.optionsCaption;
+
 };

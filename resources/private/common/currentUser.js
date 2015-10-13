@@ -24,8 +24,9 @@ LUPAPISTE.CurrentUser = function() {
       message:        undefined,
       messageI18nkey: undefined
     },
-    defaultFilter: {id: ""},
-    applicationFilters: []
+    defaultFilter: {id: "", foremanFilterId: ""},
+    applicationFilters: [],
+    foremanFilters: []
   };
 
   function constructor(user) {
@@ -38,13 +39,13 @@ LUPAPISTE.CurrentUser = function() {
     return self.id();
   });
 
-  self.isAuthority = function() {
+  self.isAuthority = ko.pureComputed(function() {
     return self.role() === "authority";
-  };
+  });
 
-  self.isApplicant = function() {
+  self.isApplicant = ko.pureComputed(function() {
     return self.role() === "applicant";
-  };
+  });
 
   self.isCompanyUser = ko.pureComputed(function() {
     return !_.isEmpty(ko.unwrap(self.company.id()));
@@ -56,6 +57,11 @@ LUPAPISTE.CurrentUser = function() {
       username = self.firstName() + " " + self.lastName();
     }
     return username;
+
+  });
+
+  self.showNotification = ko.pureComputed(function() {
+    return !_.isEmpty(getNotificationFields(self.notification));
   });
 
   function getNotificationFields(notification) {
@@ -73,10 +79,6 @@ LUPAPISTE.CurrentUser = function() {
       return undefined;
     }
   }
-
-  self.showNotification = ko.pureComputed(function() {
-    return !_.isEmpty(getNotificationFields(self.notification));
-  });
 
   ko.computed(function() {
     if (self.showNotification()) {

@@ -4,11 +4,11 @@
             [clojure.string :as s]
             [slingshot.slingshot :refer [try+]]
             [schema.core :as sc]
-            [sade.dns :as dns]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
@@ -46,10 +46,7 @@
   ([command] (email-validator :email command))
   ([email-param-name command]
     (let [email (get-in command [:data email-param-name])]
-      (when-not (or (ss/blank? email)
-                  (and
-                    (util/valid-email? email)
-                    (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email))))
+      (when-not (v/email-and-domain-valid? email)
         (fail :error.email)))))
 
 
@@ -63,8 +60,8 @@
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
 (def all-authz-roles (conj all-authz-writer-roles :reader))
 
-(def default-org-authz-roles #{:authority})
-(def reader-org-authz-roles #{:authority :reader})
+(def default-org-authz-roles #{:authority :approver})
+(def reader-org-authz-roles #{:authority :reader :approver})
 (def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin :reader :tos-editor :tos-publisher :approver))
 
 ;; Notificator

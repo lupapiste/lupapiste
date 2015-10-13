@@ -130,6 +130,18 @@
         ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
         ["toiminnan-muutos" :yl-toiminnan-muutos]]]
 
+      ; permit/YM
+      ["muut-ymparistoluvat"
+       [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]
+        ["jatteen-keraystoiminta" :jatteen-keraystoiminta]
+        ["lannan-varastointi" :lannan-varastointi]
+        ["kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan" :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan]
+        ["koeluontoinen-toiminta" :koeluontoinen-toiminta]
+        ["maa-ainesten-kotitarveotto" :maa-ainesten-kotitarveotto]
+        ["ilmoitus-poikkeuksellisesta-tilanteesta" :ilmoitus-poikkeuksellisesta-tilanteesta]
+        ["maastoliikennelaki-kilpailut-ja-harjoitukset" :maastoliikennelaki-kilpailut-ja-harjoitukset]
+        ]]
+
       ; permit/VVVL
       ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
        [["vesijohdosta" :vvvl-vesijohdosta]
@@ -290,10 +302,111 @@
    :min-outgoing-link-permits 0
    :asianhallinta true})
 
-(def yl-operations
+(def- yl-operations
   {:yl-uusi-toiminta ymparistolupa-operation
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
-   :yl-toiminnan-muutos ymparistolupa-operation})
+   :yl-toiminnan-muutos ymparistolupa-operation
+;   :pima                          {:schema "pima"
+;                                   :permit-type permit/YL
+;                                   :required ["ymp-ilm-kesto-mini"]
+;                                   :attachments []
+;                                   :add-operation-allowed true
+;                                   :min-outgoing-link-permits 0
+;                                   :asianhallinta false}
+   })
+
+(def- yi-operations
+  {:meluilmoitus                 {:schema "meluilmoitus"
+                                  :permit-type permit/YI
+                                  :required ["ymp-ilm-kesto"]
+                                  :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                  :add-operation-allowed false
+                                  :min-outgoing-link-permits 0
+                                  :asianhallinta true}
+   })
+
+(def- ym-operations
+  {:muistomerkin-rauhoittaminen  {:schema "luonnonmuistomerkin-rauhoittaminen"
+                                  :permit-type permit/YM
+                                  :required []
+                                  ;; TODO: sync with attachments in Commons.
+;                                  :attachments [:muistomerkin-rauhoittaminen [:kirjallinen-aineisto
+;                                                                              :lainhuutotodistus
+;                                                                              :kauppakirja
+;                                                                              :valokuva-kohteesta
+;                                                                              :kohdekuvaus
+;                                                                              :selvitys-omistusoikeudesta]
+;                                                :kartat [:luonnonmuistomerkin-sijainti-kartalla]]
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :min-outgoing-link-permits 0
+                                  :asianhallinta true}
+
+   :jatteen-keraystoiminta {:schema "jatteen-kerays"
+                            :permit-type permit/YM
+                            :required []
+                            :attachments [:jatteen_kerays [:vastaanottopaikan_tiedot]]
+                            :add-operation-allowed false
+                            :min-outgoing-link-permits 0
+                            :asianhallinta true}
+
+   :lannan-varastointi     {:schema "lannan-varastointi"
+                            :permit-type permit/YM
+                            :required ["yl-maatalous-hankkeen-kuvaus"]
+                            :attachments [:kartat [:lantapatterin-sijainti]]
+                            :add-operation-allowed false
+                            :min-outgoing-link-permits 0
+                            :asianhallinta true}
+
+   :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan {:schema "kaytostapoistetun-sailion-jattaminen-maaperaan"
+                                                                      :permit-type permit/YM
+                                                                      :required ["kiinteisto"]
+                                                                      ;; TODO: sync with attachments in Commons.
+;                                                                      :attachments [:kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan [:sailion-tarkastuspoytakirja
+;                                                                                                                                                       :kiinteiston-omistajien-suostumus]
+;                                                                                    :kartat [:sailion-ja-rakenteiden-sijainti-kartalla]]
+                                                                      :attachments []
+                                                                      :add-operation-allowed false
+                                                                      :min-outgoing-link-permits 0
+                                                                      :asianhallinta true}
+
+   :koeluontoinen-toiminta {:schema "koeluontoinen-toiminta"
+                            :permit-type permit/YM
+                            :required []
+                            :attachments []
+                            :add-operation-allowed false
+                            :min-outgoing-link-permits 0
+                            :asianhallinta true}
+
+   :maa-ainesten-kotitarveotto {:schema "maa-ainesten-kotitarveotto"
+                                :permit-type permit/YM
+                                :required ["kiinteisto"]
+                                :attachments [:kartat [:ottamispaikan-sijainti]]
+                                :add-operation-allowed false
+                                :min-outgoing-link-permits 0
+                                :asianhallinta true}
+
+   :ilmoitus-poikkeuksellisesta-tilanteesta {:schema "ilmoitus-poik-tilanteesta"
+                                             :permit-type permit/YM
+                                             :required []
+                                             ;; TODO: sync with attachments in Commons.
+;                                             :attachments [:ilmoitus-poikkeuksellisesta-tilanteesta [:kayttoturvallisuustiedote]
+;                                                           :kartat [:jatteen-sijainti]]
+                                             :attachments []
+                                             :add-operation-allowed false
+                                             :min-outgoing-link-permits 0
+                                             :asianhallinta true}
+
+   :maastoliikennelaki-kilpailut-ja-harjoitukset {:schema "maastoliikennelaki-kilpailut-ja-harjoitukset"
+                                                  :permit-type permit/YM
+                                                  :required []
+                                                  ;; TODO: sync with attachments in Commons.
+;                                                  :attachments [:maastoliikennelaki-kilpailut-ja-harjoitukset [:asemapiirros-kilpailu-tai-harjoitusalueesta]]
+                                                  :attachments []
+                                                  :add-operation-allowed false
+                                                  :min-outgoing-link-permits 0
+                                                  :asianhallinta true}
+   })
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
   (if (= :tyonjohtaja-ilmoitus (keyword subtype))
@@ -645,19 +758,19 @@
      :kiinteistonmuodostus         {:schema "kiinteistonmuodostus"
                                     :permit-type permit/KT
                                     :optional #{"secondary-kiinteistot"}
-                                    :required (conj common-maanmittaus-schemas "rasitetoimitus")
+                                    :required common-maanmittaus-schemas
                                     :attachments []
-                                    :add-operation-allowed false
+                                    :add-operation-allowed true
                                     :min-outgoing-link-permits 0
-                                    :asianhallinta false}
+                                    :asianhallinta true}
      :rasitetoimitus                {:schema "rasitetoimitus"
                                      :permit-type permit/KT
                                      :optional #{"secondary-kiinteistot"}
-                                     :required (conj common-maanmittaus-schemas "kiinteistonmuodostus")
+                                     :required common-maanmittaus-schemas
                                      :attachments []
-                                     :add-operation-allowed false
+                                     :add-operation-allowed true
                                      :min-outgoing-link-permits 0
-                                     :asianhallinta false}
+                                     :asianhallinta true}
      :rajankaynti                  {:schema "rajankaynti"
                                     :permit-type permit/KT
                                     :optional #{"secondary-kiinteistot"}
@@ -665,7 +778,7 @@
                                     :attachments []
                                     :add-operation-allowed false
                                     :min-outgoing-link-permits 0
-                                    :asianhallinta false}
+                                    :asianhallinta true}
      :poikkeamis                  {:schema "rakennushanke"
                                    :permit-type permit/P
                                    :required  (conj common-poikkeamis-schemas "suunnittelutarveratkaisun-lisaosa")
@@ -673,19 +786,6 @@
                                    :add-operation-allowed false
                                    :min-outgoing-link-permits 0
                                    :asianhallinta true}
-     :meluilmoitus                {:schema "meluilmoitus"
-                                   :permit-type permit/YI
-                                   :required ["ymp-ilm-kesto"]
-                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
-                                   :add-operation-allowed false
-                                   :min-outgoing-link-permits 0
-                                   :asianhallinta true}
-     ;     :pima                        {:schema "pima"
-     ;                                   :permit-type permit/YL
-     ;                                   :required ["ymp-ilm-kesto-mini"]
-     ;                                   :attachments []
-     ;                                   :add-operation-allowed true
-     ;                                   :min-outgoing-link-permits 0
     :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
                                   :permit-type permit/MAL
                                   :required ["ymp-maksaja" "rakennuspaikka"]
@@ -799,7 +899,7 @@
                                  :attachments []
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta true}
     :asemakaava                 {:schema "maankayton-muutos"
                                  :permit-type permit/MM
                                  :required common-maanmittaus-schemas
@@ -823,7 +923,9 @@
                                  :asianhallinta true}
      }
     ya-operations
-    yl-operations))
+    yl-operations
+    yi-operations
+    ym-operations))
 
 ;; Validate operations
 (doseq [[k op] operations]

@@ -12,13 +12,13 @@
   (operation-names "bil") => ["auto-katos"]
   (operation-names "grilli") => ["auto-katos"]
   (operation-names "Ty\u00f6njohtaja") => ["tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen"]
-  (operation-names "ANNAN") => (just ["muu-uusi-rakentaminen" "muu-tontti-tai-kort-muutos" "ya-kayttolupa-muu-kayttolupa" "muu-laajentaminen" "muu-rakennus-laaj" "talousrakennus-laaj" "masto-tms" "muu-maisema-toimenpide" "varasto-tms" "sisatila-muutos"] :in-any-order)
+  (operation-names "ANNAN") => (just ["lannan-varastointi" "muu-uusi-rakentaminen" "muu-tontti-tai-kort-muutos" "ya-kayttolupa-muu-kayttolupa" "muu-laajentaminen" "muu-rakennus-laaj" "talousrakennus-laaj" "masto-tms" "muu-maisema-toimenpide" "varasto-tms" "sisatila-muutos"] :in-any-order)
   (operation-names "S\u00e4hk\u00f6-, data ja muiden kaapelien sijoittaminen") => ["ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen"])
 
 (facts "sorting parameter parsing"
   (make-sort {:sort {:field "unknown" :asc false}})  => {}
   (make-sort {:sort {:field "unknown" :asc true}})  => {}
-  (make-sort {:sort {:field "id" :asc false}}) => {}
+  (make-sort {:sort {:field "id" :asc false}}) => {:_id -1}
   (make-sort {:sort {:field "_id" :asc false}}) => {}
   (make-sort {:sort {:field "type" :asc true }})  => {:infoRequest -1, :permitSubtype 1}
   (make-sort {:sort {:field "type" :asc false }}) => {:infoRequest 1, :permitSubtype -1}

@@ -11,7 +11,6 @@ th {
   background: $gray221;
   padding-left: $marginM;
   padding-right: $marginM;
-  height: $grid-min-height;
   vertical-align: middle;
   // font-family: $font-heading;
   // font-size: 0.85em;
@@ -21,7 +20,7 @@ th {
 
 tr {
   background: white;
-  border-bottom: 1px $gray221;
+  border: 1px solid $gray221;
   &:nth-child(even) {
     background: $gray246;
   }
@@ -59,6 +58,8 @@ tr {
 th, td {
   padding:$marginS $marginM;
   text-align:left;
+  height: $grid-min-height;
+  min-height: $grid-min-height;
   &.btn{
     margin-bottom: 0px;
   }
