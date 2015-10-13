@@ -58,6 +58,6 @@
   (let [graph (state-graph application)
         initial-state (states/initial-state graph)]
     (loop [state initial-state, path []]
-      (if (states/terminal-state? graph state)
+      (if (or (states/terminal-state? graph state) (util/contains-value? path state) )
         (conj path state)
         (recur (first (graph state)) (conj path state))))))

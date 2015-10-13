@@ -36,6 +36,10 @@
   (merge
     (select-keys default-application-state-graph [:draft :open :canceled])
     {:submitted  [:acknowledged :canceled]
+     ; must be for tj-hakemus-state-graph compatibility:
+     ; if foreman application is in complement-needed state it can be converted
+     ; to use this state graph
+     :complement-needed [:acknowledged]
      :acknowledged [:submitted]}))
 
 (def
