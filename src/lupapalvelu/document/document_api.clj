@@ -91,7 +91,7 @@
 (defcommand update-task
   {:parameters [id doc updates]
    :user-roles #{:applicant :authority}
-   :states     (states/all-states-but (conj states/terminal-states :sent))
+   :states     (states/all-application-states-but (conj states/terminal-states :sent))
    :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (doc-persistence/update! command doc updates "tasks"))

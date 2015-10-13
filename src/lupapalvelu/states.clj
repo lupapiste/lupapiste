@@ -129,12 +129,7 @@
       (and
         (= 1 (count transitions))
         (= 1 (count loopback-transitions))
-        (= (first loopback-transitions) state)
-
-
-        )
-
-     )))
+        (= (first loopback-transitions) state)))))
 
 (def terminal-states
   (->>

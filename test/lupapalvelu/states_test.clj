@@ -25,4 +25,4 @@
                               :appealed :final})
 
 (fact "terminal states"
-  terminal-states => #{:canceled :closed :final :extinct :registered :acknowledged :foremanVerdictGiven})
+  terminal-states => #{:answered :canceled :closed :final :extinct :registered :acknowledged :foremanVerdictGiven})
