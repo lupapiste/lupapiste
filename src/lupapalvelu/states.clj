@@ -129,10 +129,26 @@
 (def all-inforequest-states (-> default-inforequest-state-graph keys set (disj :canceled)))
 (def all-application-states (difference all-states all-inforequest-states))
 
+(defn terminal-state? [graph state]
+  {:pre [(map? graph) (keyword? state)]}
+  (let [transitions (graph state)
+        loopback-transitions (-> (first transitions) graph set (disj :canceled))]
+    (or
+      (empty? transitions)
+      (and
+        (= 1 (count transitions))
+        (= 1 (count loopback-transitions))
+        (= (first loopback-transitions) state)
+
+
+        )
+
+     )))
+
 (def terminal-states
   (->>
     all-graphs
-    (map (fn [g] (->> g (filter #(empty? (second %))) (map first))))
+    (map (fn [g] (->> g (filter #(terminal-state? g (first %))) (map first))))
     (apply concat)
     set))
 
