@@ -8,6 +8,10 @@ Resource        ../../common_resource.robot
 
 Sonja publishes an application as a bulletin
   Sonja logs in
-  Create application with state  create-app  753-416-25-22  kerrostalo-rivitalo  sent
+  Create application with state  Latokuja 3  753-416-25-22  kerrostalo-rivitalo  sent
   Click by test id  publish-bulletin
-  Go to page  bulletins
+  Logout
+
+Unlogged user sees Sonja's bulletin
+  Go to bulletins page
+  Wait until  Element should be visible  //table[@id="application-bulletins-list"]/tbody/*/td[contains(text(), "Latokuja 3")]

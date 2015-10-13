@@ -16,6 +16,7 @@ ${SLOWEST_SPEED}                0.5
 
 ${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
 ${LOGOUT URL}                   ${SERVER}/app/fi/logout
+${BULLETINS URL}                ${SERVER}/app/fi/bulletins
 ${APPLICATIONS PATH}            /app/fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
@@ -52,6 +53,11 @@ Go to login page
   Go to  ${LOGIN URL}
   Wait Until  Title should be  Lupapiste
   Wait Until  Page should contain  Haluan kirjautua palveluun
+
+Go to bulletins page
+  Go to  ${BULLETINS URL}
+  Wait Until  Title should be  Lupapiste
+  Wait Until  Page should contain  Kuntien julkipanoilmoitukset
 
 Open last email
   Go to  ${LAST EMAIL URL}
