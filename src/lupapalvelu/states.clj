@@ -1,6 +1,7 @@
 (ns lupapalvelu.states
   (:require [clojure.set :refer [difference union ]]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [lupapiste-commons.states :as common-states]))
 
 (def initial-state :draft)
 
@@ -18,17 +19,7 @@
           Key is the starting state, first in the value vector is the default next state and
           the rest are other possible next states."}
   default-application-state-graph
-  {:draft      [:open :submitted :canceled]
-   :open       [:submitted :canceled]
-   :submitted  [:sent :verdictGiven :canceled]
-   :sent       [:verdictGiven :complement-needed :canceled]
-   :complement-needed   [:sent :verdictGiven :canceled]
-   :verdictGiven        [:constructionStarted :canceled]
-   :constructionStarted [:closed :canceled]
-   :closed   []
-   :canceled []
-   :extinct  [] ; Rauennut
-   })
+  common-states/default-application-state-graph)
 
 (def
   ^{:doc "See default-application-state-graph"}
