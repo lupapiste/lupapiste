@@ -19,7 +19,7 @@ ${LOGOUT URL}                   ${SERVER}/app/fi/logout
 ${APPLICATIONS PATH}            /app/fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
-${CREATE URL}                   ${SERVER}/dev/create
+${CREATE URL}                   ${SERVER}/dev/create?redirect=true
 ${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
 ${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
 ${SELENIUM}                     ${EMPTY}
@@ -416,19 +416,19 @@ Operation description is
 
 Create application the fast way
   [Arguments]  ${address}  ${propertyId}  ${operation}
-  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
+  Go to  ${CREATE URL}&address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
 Create application with state
   [Arguments]  ${address}  ${propertyId}  ${operation}  ${state}
-  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
+  Go to  ${CREATE URL}&address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${x}  ${y}   ${propertyId}  ${operation}  ${message}
-  Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&operation=${operation}&x=${x}&y=${y}&message=${message}
+  Go to  ${CREATE URL}&infoRequest=true&address=${address}&propertyId=${propertyId}&operation=${operation}&x=${x}&y=${y}&message=${message}
   Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
   Kill dev-box
 
