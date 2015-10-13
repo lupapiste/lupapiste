@@ -219,7 +219,7 @@ body {
   height: 100%;
 }
 /* line 50, ../sass/partials/_base.scss */
-body.applicant, body.authority, body.authority-admin, body.welcome, body.admin, body.oir, body.neighbor, body.hashbang {
+body.applicant, body.authority, body.authority-admin, body.welcome, body.admin, body.oir, body.neighbor, body.hashbang, body.bulletins {
   min-height: 100vh;
   padding-bottom: 320px;
   position: relative;
