@@ -719,7 +719,8 @@
 (defcommand publish-bulletin
   {:parameters [id]
    :user-roles #{:authority}
-   :states     states/all-application-states}
+   :states     states/all-application-states
+   :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
   (let [app-snapshot (select-keys application app-snapshot-fields)
         attachments  (->> (:attachments application)
