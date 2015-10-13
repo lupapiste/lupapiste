@@ -260,6 +260,14 @@ i.btn-small {
   @include styled-input( $bg: $turqo-link, $hover-bg: $turqo-hover, $active-bg: $turqo-active );
 }
 
+@include button-div-a-i-span ( bulletin ) {
+  @include styled-input( $bg: $blue-link, $hover-bg: $blue-hover, $active-bg: $blue-active );
+}
+
+@include button-div-a-i-span ( bulletin-inverse ) {
+  @include styled-input( $bg: $blue-active, $hover-bg: $blue-hover, $active-bg: $blue-link );
+}
+
 @mixin function ($text, $hover-text, $active-text ) {
   @include styled-input($bg: white, $hover-bg: white, $active-bg: white,
                         $text: $text, $hover-text: $hover-text, $active-text: $active-text,
