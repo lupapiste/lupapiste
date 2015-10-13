@@ -618,7 +618,7 @@
         (resp/status 200 (str response))
         (resp/json response))))
 
-  (defpage "/dev/create" {:keys [infoRequest propertyId message] :as query-params}
+  (defpage "/dev/create" {:keys [infoRequest propertyId message redirect] :as query-params}
     (let [request (request/ring-request)
           property (p/to-property-id propertyId)
           params (assoc (from-query request) :propertyId property :messages (if message [message] []))
@@ -628,9 +628,9 @@
           (when-let [opt-data (not-empty (select-keys query-params [:state]))]
             (do
               (mongo/update-by-id :applications (:id response) {$set opt-data})))
-          (if (:redirect query-params)
-            (redirect "fi" (str (user/applicationpage-for (:role (user/current-user request)))
-                              "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
+          (if redirect
+            (resp/redirect (str "/app/fi/" (str (user/applicationpage-for (:role (user/current-user request)))
+                                                "#!/" (if infoRequest "inforequest" "application") "/" (:id response))))
             (resp/status 200 (:id response))))
         (resp/status 400 (str response)))))
 
