@@ -1,6 +1,3 @@
-application.publishBulletin: Julkaise Julkipano.fi:ssä
-tooltip.publishBulletin: Julkaisee hakemuksen Julkipano.fi-palvelussa
-
 bulletin.state: Ilmoituksen tila
 bulletin.municipality: Kunta
 bulletin.location: Sijainti

@@ -112,6 +112,10 @@ $checkbox-color:          $gray187;
 $checkbox-selected-color: $orange-light;
 $checkbox-border-color:   $gray221;
 
+$radio-color:          $checkbox-color;
+$radio-selected-color: $checkbox-selected-color;
+$radio-border-color:   $checkbox-border-color;
+
 $input-color:       $gray51;
 $input-focus-color: $gray51;
 

@@ -72,7 +72,7 @@
                (let [document (if (zero? i)
                                 (domain/get-applicant-document (:documents application))
                                 (doc-persistence/do-create-doc
-                                  (assoc-in command [:data :schemaName] (permit/get-applicant-doc-schema (permit/permit-type application)))))
+                                  (assoc-in command [:data :schemaName] (operations/get-applicant-doc-schema-name application))))
                      applicant-type (get-applicant-type applicant)
                      user-info (case applicant-type
                                  ;; Not including here the id of the invited user into "user-info",

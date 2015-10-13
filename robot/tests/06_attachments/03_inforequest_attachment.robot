@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Mikko adds an attachment to inforequest
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
 

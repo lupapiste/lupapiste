@@ -72,7 +72,7 @@
                                :_comments-seen-by {},
                                :propertyId "63844900010004",
                                :verdicts [],
-                               :documents [ctc/henkilohakija
+                               :documents [ctc/henkiloilmoittaja
                                            meluilmo
                                            kesto],
                                :_statements-seen-by {},
@@ -124,7 +124,7 @@
                                       :_comments-seen-by {},
                                       :propertyId "63844900010004",
                                       :verdicts [],
-                                      :documents [ctc/yrityshakija
+                                      :documents [ctc/yritysilmoittaja
                                                   meluilmo
                                                   kesto],
                                       :_statements-seen-by {},
@@ -230,7 +230,7 @@
       (:sunnuntaiLoppuAika toiminnanKesto) => "18:00:00")
     ))
 
-(fl/facts* "Meluilmoitus yrityshakija to canonical"
+(fl/facts* "Meluilmoitus yritysilmoittaja to canonical"
   (let [canonical (yic/meluilmoitus-canonical meluilmoitus-yritys-application "fi") => truthy
         Ilmoitukset (:Ilmoitukset canonical) => truthy
         toimutuksenTiedot (:toimituksenTiedot Ilmoitukset) => truthy

@@ -60,11 +60,11 @@
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}
            (sc/optional-key :orgAuthz)            {sc/Keyword (sc/pred vector? "OrgAuthz must be vector")}
-           (sc/optional-key :personId)            (sc/maybe (sc/pred util/valid-hetu? "Not valid hetu"))
+           (sc/optional-key :personId)            (sc/maybe (sc/pred v/valid-hetu? "Not valid hetu"))
            (sc/optional-key :street)              (sc/maybe (util/max-length-string 255))
            (sc/optional-key :city)                (sc/maybe (util/max-length-string 255))
            (sc/optional-key :zip)                 (sc/either
-                                                    (sc/pred util/finnish-zip? "Not a valid zip code")
+                                                    (sc/pred v/finnish-zip? "Not a valid zip code")
                                                     (sc/pred ss/blank?))
            (sc/optional-key :phone)               (sc/maybe (util/max-length-string 255))
            (sc/optional-key :architect)           sc/Bool
@@ -79,7 +79,7 @@
            (sc/optional-key :fise)                (util/max-length-string 255)
            (sc/optional-key :companyName)         (util/max-length-string 255)
            (sc/optional-key :companyId)           (sc/either
-                                                    (sc/pred util/finnish-y? "Not valid Y code")
+                                                    (sc/pred v/finnish-y? "Not valid Y code")
                                                     (sc/pred ss/blank?))
            (sc/optional-key :allowDirectMarketing) sc/Bool
            (sc/optional-key :attachments)         [{:attachment-type  {:type-group sc/Str, :type-id sc/Str}
@@ -107,7 +107,7 @@
                    :street    (sc/maybe (util/max-length-string 255))
                    :city      (sc/maybe (util/max-length-string 255))
                    :zip       (sc/either
-                                (sc/pred util/finnish-zip? "Not a valid zip code")
+                                (sc/pred v/finnish-zip? "Not a valid zip code")
                                 (sc/pred ss/blank?))
                    :phone (sc/maybe (util/max-length-string 255))
                    (sc/optional-key :architect) sc/Bool

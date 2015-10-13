@@ -236,6 +236,23 @@
     :city "Sipoo"
     :private {:password "$2a$10$YM2XkcJVjM5JiqqR2qg7U.iUuY10LPYexYTfV/21RHOayn1xIf2sS"
               :apikey "5056e6d3aa24a1c901e6b9de"}}
+
+   ;; Kosti Kommentoija - Sipoon kommentoija: kosti / kosti
+   {:id "777777777777777777000026"
+    :username "kosti"
+    :role "authority"
+    :enabled true
+    :email "kosti.kommentoija@sipoo.fi"
+    :orgAuthz {:753-R #{:commenter}}
+    :firstName "Kosti"
+    :lastName "Kommentoija"
+    :phone "03121992"
+    :street "Katuosoite 1 a 3"
+    :zip "04130"
+    :city "Sipoo"
+    :private {:password "$2a$10$d2Ut/qSvKylOGhYm/7jXB..1ZC7/x39q5e/PFdtjHLqV1XW9wr3oO"
+              :apikey "XDnPTeDDpPqU5yoYQEERgZ0p4H6dff1RIdYgyDCk"}}
+
    ;; Porvoo
 
    ;; Pekka Borga - Porvoon lupa-arkkitehti:  pekka / pekka

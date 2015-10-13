@@ -14,6 +14,7 @@
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
             [sade.property :as p]
+            [sade.validators :as v]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
@@ -146,7 +147,7 @@
   "Returns national building id or nil if the input was not valid"
   [^String s]
   (let [building-id (ss/trim (str s))]
-    (when (util/rakennustunnus? building-id)
+    (when (v/rakennustunnus? building-id)
       building-id)))
 
 (defn- ->building-ids [id-container xml-no-ns]
