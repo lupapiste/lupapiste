@@ -3,16 +3,25 @@
             [sade.strings :as ss]
             [lupapiste-commons.states :as common-states]))
 
-(def initial-state :draft)
+(defn initial-state [graph]
+  {:pre [(map? graph)], :post [%]}
+  (if (instance? clojure.lang.PersistentArrayMap graph)
+    (first (keys graph))
+    (let [states  (into #{} (for [[k v] graph :when (seq v)] k)) ; can't be initial state without transitions
+          targets (->> graph vals (apply concat) set)
+          initial-states (difference states targets)]
+      (assert (= 1 (count initial-states)))
+      (first initial-states))))
 
 (def
   ^{:doc "Possible state transitions for inforequests.
           Key is the starting state, first in the value vector is the default next state and
           the rest are other possible next states."}
   default-inforequest-state-graph
-  {:info     [:answered :canceled]
-   :answered [:info]
-   :canceled []})
+  (array-map
+    :info     [:answered :canceled]
+    :answered [:info]
+    :canceled []))
 
 (def
   ^{:doc "Possible state transitions for applications.

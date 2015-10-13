@@ -2,6 +2,12 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.states :refer :all]))
 
+(fact "initial-state"
+  (initial-state default-application-state-graph) => :draft
+  (initial-state tj-hakemus-state-graph) => :draft
+  (initial-state tj-ilmoitus-state-graph) => :draft
+  (initial-state default-inforequest-state-graph) => :info)
+
 (fact "all-next-states"
   (all-next-states default-application-state-graph :verdictGiven) => #{:verdictGiven :constructionStarted :closed :canceled})
 
