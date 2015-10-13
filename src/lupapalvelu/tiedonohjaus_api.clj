@@ -3,7 +3,6 @@
             [sade.core :refer [ok fail]]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.organization-api :as oa]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [monger.operators :refer :all]
@@ -91,7 +90,7 @@
   (->> (remove #(= tms/Tila %) tms/asiakirja-metadata-fields)
        (concat tms/common-metadata-fields)))
 
-(defn metadata-schema-for-ui [field]
+(defn- metadata-schema-for-ui [field]
   (cond-> field
           (:dependencies field) (->> (:dependencies)
                                      (map (fn [[k v]] {k (map metadata-schema-for-ui v)}))
@@ -123,13 +122,13 @@
                       (tms/sanitize-metadata))]
     (assoc document :metadata metadata)))
 
-(defn update-application-child-metadata [{:keys [application created user] :as command} type id metadata]
+(defn- update-application-child-metadata! [{:keys [application created user] :as command} type id metadata]
   (when (env/feature? :tiedonohjaus)
     (try
       (if-let [child (first (filter #(= (:id %) id) (type application)))]
         (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
               updated-child (update-document-metadata child metadata user-roles)
-              updated-children (-> (remove #(= % updated-child) (type application)) (conj updated-child))]
+              updated-children (-> (remove #(= % child) (type application)) (conj updated-child))]
           (action/update-application command {$set {:modified created type updated-children}}))
         (fail "error.child.id"))
       (catch RuntimeException e
@@ -141,21 +140,21 @@
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal}
   [command]
-  (update-application-child-metadata command :verdicts verdictId metadata))
+  (update-application-child-metadata! command :verdicts verdictId metadata))
 
 (defcommand store-tos-metadata-for-statement
   {:parameters [:id statementId metadata]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal}
   [command]
-  (update-application-child-metadata command :statements statementId metadata))
+  (update-application-child-metadata! command :statements statementId metadata))
 
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal}
   [command]
-  (update-application-child-metadata command :attachments attachmentId metadata))
+  (update-application-child-metadata! command :attachments attachmentId metadata))
 
 (defcommand store-tos-metadata-for-application
   {:parameters [:id metadata]
