@@ -8406,31 +8406,35 @@ div.search i {
   font-size: 1.375rem;
   margin-top: 20px;
 }
-/* line 21, ../sass/partials/_bulletins.scss */
+/* line 15, ../sass/partials/_bulletins.scss */
+#application-bulletins p button {
+  margin-left: 20px;
+}
+/* line 24, ../sass/partials/_bulletins.scss */
 #application-bulletins .blue-bg {
   background-color: #0fa8f7;
 }
-/* line 23, ../sass/partials/_bulletins.scss */
+/* line 26, ../sass/partials/_bulletins.scss */
 #application-bulletins .blue-bg h1, #application-bulletins .blue-bg p {
   color: #fff;
 }
-/* line 28, ../sass/partials/_bulletins.scss */
+/* line 31, ../sass/partials/_bulletins.scss */
 #application-bulletins .content-center {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   position: relative;
-  padding: 60px 0;
+  padding: 40px 0;
 }
-/* line 35, ../sass/partials/_bulletins.scss */
+/* line 38, ../sass/partials/_bulletins.scss */
 #application-bulletins .full {
   width: 100%;
   min-width: 320px;
 }
-/* line 40, ../sass/partials/_bulletins.scss */
+/* line 43, ../sass/partials/_bulletins.scss */
 #application-bulletins .slogan, #application-bulletins .ingress {
   text-align: center;
   width: 80%;
-  margin: 0 auto 30px;
+  margin: 0 auto 20px;
 }
 
 /* VIEWS
