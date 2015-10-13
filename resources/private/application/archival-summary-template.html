@@ -98,7 +98,7 @@
             </div>
             <div data-bind="if: !_.isEmpty($data.metadata)">
               <div data-bind="component: {name: 'metadata-editor',
-                                            params: {attachmentId: id, metadata: metadata, applicationId: $root.application.id,
+                                            params: {attachmentId: id, metadata: metadata, application: $root.application,
                                             saveCallback: function(){$data.showAdditionalControls(false);}}}"></div>
             </div>
           </div>
@@ -156,7 +156,7 @@
           <div class="left">
             <div data-bind="if: !_.isEmpty($data.metadata)">
               <div data-bind="component: {name: 'metadata-editor',
-                                          params: {metadata: metadata, applicationId: $root.application.id,
+                                          params: {metadata: metadata, application: $root.application,
                                           saveCallback: function(){$data.showAdditionalControls(false);}}}"></div>
             </div>
           </div>
