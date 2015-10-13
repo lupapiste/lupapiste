@@ -1,0 +1,27 @@
+operations.rakennusjateilmoitus: Rakennus- ja purkujäteilmoitus
+operations.tree.rakennusjateilmoitus: Rakennus- ja purkujäteilmoitus
+rakennusjateilmoitus._group_label: Rakennus- ja purkujäteilmoitus
+rakennusjateilmoitus.rakennusjateIlmoitus._append_label: Lisää
+rakennusjateilmoitus.rakennusjateIlmoitus._group_label: Rakennus- ja purkujäteilmoitus
+rakennusjateilmoitus.rakennusjateIlmoitus.copyLabel: Kopio
+
+rakennusjateilmoitus.rakennusjateIlmoitus.jateTyyppi: Aines
+rakennusjateilmoitus.rakennusjateIlmoitus.jateTyyppi.betoni: betoni-, tiili-, kivennäislaatta- ja keramiikkajätteet 
+rakennusjateilmoitus.rakennusjateIlmoitus.jateTyyppi.kipsi: kipsipohjaiset jätteet
+rakennusjateilmoitus.rakennusjateIlmoitus.jateTyyppi.lasi: lasijätteet
+rakennusjateilmoitus.rakennusjateIlmoitus.jateTyyppi.maa: maa- ja kiviainesjätteet
+rakennusjateilmoitus.rakennusjateIlmoitus.jateTyyppi.metalli: metallijätteet 
+rakennusjateilmoitus.rakennusjateIlmoitus.jateTyyppi.muovi: muovijätteet
+rakennusjateilmoitus.rakennusjateIlmoitus.jateTyyppi.paperi: paperi- ja kartonkijätteet
+rakennusjateilmoitus.rakennusjateIlmoitus.jateTyyppi.puu: kyllästämättömät puujätteet
+
+rakennusjateilmoitus.rakennusjateIlmoitus.jatteenToimituspaikka: Toimituspaikka
+rakennusjateilmoitus.rakennusjateIlmoitus.painoT: Paino tonnia
+rakennusjateilmoitus.rakennusjateIlmoitus.suunniteltuMaara: Arvioitu määrä
+rakennusjateilmoitus.rakennusjateIlmoitus.toteutunutMaara: Toteutunut määrä
+rakennusjateilmoitus.rakennusjateIlmoitus.yksikko: Yksikko 
+rakennusjateilmoitus.rakennusjateIlmoitus.yksikko.kg: Kilo
+rakennusjateilmoitus.rakennusjateIlmoitus.yksikko.m2: Neliötä
+rakennusjateilmoitus.rakennusjateIlmoitus.yksikko.m3: Kuutiota
+rakennusjateilmoitus.rakennusjateIlmoitus.yksikko.tonni: Tonnia
+rakennusjateilmoitus.rakennusjateIlmoitus.yksikko.undefined: Valitse
