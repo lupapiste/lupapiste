@@ -368,8 +368,9 @@
 
    :bulletins-app {:depends [:ui-components]
                   :js ["bulletins-app.js"]}
-   :bulletins {:depends [:bulletins-app :header :services]
-               :html ["application-bulletins.html"]}
+
+   :bulletins {:depends [:bulletins-app :services]
+               :html ["application-bulletins.html" "header.html"] :js ["header.js"]}
    })
 
 ; Make sure all dependencies are resolvable:
