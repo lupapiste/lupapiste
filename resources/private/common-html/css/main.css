@@ -1565,7 +1565,7 @@ nav .julkipano-brand .header-box a span {
   vertical-align: middle;
 }
 /* line 171, ../sass/partials/_header.scss */
-nav .julkipano-brand .header-box .julkipano-user {
+nav .julkipano-brand .header-box, nav .julkipano-brand .julkipano-user {
   font-size: 16px;
   vertical-align: middle;
   white-space: nowrap;
@@ -1577,7 +1577,7 @@ nav .julkipano-brand .header-box .julkipano-user {
   color: #fff;
 }
 /* line 181, ../sass/partials/_header.scss */
-nav .julkipano-brand .header-box .julkipano-user span {
+nav .julkipano-brand .header-box span, nav .julkipano-brand .julkipano-user span {
   vertical-align: middle;
 }
 /* line 185, ../sass/partials/_header.scss */
