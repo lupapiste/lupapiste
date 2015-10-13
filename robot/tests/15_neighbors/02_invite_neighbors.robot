@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Authority adds couple of neighbors, then we invite them and see how they respond
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***

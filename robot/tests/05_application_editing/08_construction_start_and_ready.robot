@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   On application, construction is set started and ready
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***

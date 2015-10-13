@@ -2,7 +2,7 @@
 
 Documentation   Users are added to company
 Resource        ../../common_resource.robot
-Suite teardown  Logout
+Suite Teardown  Logout
 
 *** Test Cases ***
 

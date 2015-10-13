@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   User's own attachments
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Variables      ../06_attachments/variables.py
 

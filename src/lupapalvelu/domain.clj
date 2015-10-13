@@ -15,7 +15,7 @@
 ;;
 
 (defn basic-application-query-for [user]
-  (let [organizations (user/organization-ids-by-roles user #{:authority :reader})]
+  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter})]
     (case (keyword (:role user))
       :applicant    (if-let [company-id (get-in user [:company :id])]
                       {$or [{:auth.id (:id user)} {:auth.id company-id}]}

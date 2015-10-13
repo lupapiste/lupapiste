@@ -28,20 +28,20 @@
 
   ; It's not nice to test the number of users, but... well, this is relly easy:
   (fact (-> (query admin :users :role "admin") :users count) => 1)
-  (fact (-> (query admin :users :organization "753-R") :users count) => 4)
-  (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 3))
+  (fact (-> (query admin :users :organization "753-R") :users count) => 5)
+  (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 4))
 
 (facts users-for-datatables
  (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
    => (contains {:ok true
-                 :data (contains {:rows (comp (partial = 4) count)
-                                  :total 4
-                                  :display 4
+                 :data (contains {:rows (comp (partial = 5) count)
+                                  :total 5
+                                  :display 5
                                   :echo "123"})}))
  (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 1) count)
-                                  :total 4
+                                  :total 5
                                   :display 1
                                   :echo "123"})})))
 ;;

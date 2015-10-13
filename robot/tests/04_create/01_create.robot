@@ -2,7 +2,7 @@
 
 Documentation   Mikko creates a new application
 Resource        ../../common_resource.robot
-Suite setup     Apply minimal fixture now
+Suite Setup     Apply minimal fixture now
 
 *** Test Cases ***
 

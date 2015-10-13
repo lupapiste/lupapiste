@@ -47,6 +47,7 @@
 (defcommand can-target-comment-to-authority
   {:description "Dummy command for UI logic"
    :user-roles #{:authority}
+   :org-authz-roles action/commenter-org-authz-roles
    :states      (states/all-states-but [:draft :canceled])})
 
 (defcommand can-mark-answered
@@ -58,7 +59,7 @@
   {:parameters [id]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :org-authz-roles #{:authority}
+   :org-authz-roles action/commenter-org-authz-roles
    :states states/all-states}
   [{application :application}]
   (ok (select-keys application [:id :comments])))
@@ -68,6 +69,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states     (states/all-states-but [:canceled])
    :user-authz-roles action/all-authz-writer-roles
+   :org-authz-roles action/commenter-org-authz-roles
    :pre-checks [applicant-cant-set-to
                 application/validate-authority-in-drafts]
    :input-validators [validate-comment-target

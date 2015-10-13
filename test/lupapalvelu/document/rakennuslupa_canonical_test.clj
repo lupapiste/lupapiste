@@ -397,6 +397,7 @@
 (def application-rakennuslupa
   {:id "LP-753-2013-00001"
    :permitType "R"
+   :schema-version 1
    :municipality municipality
    :auth [{:id "777777777777777777000020"
            :firstName "Pena"

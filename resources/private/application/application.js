@@ -54,7 +54,7 @@
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
-  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(applicationModel, signingModel, verdictAttachmentPrintsOrderModel);
+  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(signingModel, verdictAttachmentPrintsOrderModel);
   var foremanModel = new LUPAPISTE.ForemanModel();
 
   var authorities = ko.observableArray([]);
@@ -148,10 +148,10 @@
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.secondaryOperations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      verdictAttachmentPrintsOrderModel.refresh(applicationModel);
-      verdictAttachmentPrintsOrderHistoryModel.refresh(applicationModel);
+      verdictAttachmentPrintsOrderModel.refresh();
+      verdictAttachmentPrintsOrderHistoryModel.refresh();
 
-      attachmentsTab.refresh(applicationModel);
+      attachmentsTab.refresh();
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);

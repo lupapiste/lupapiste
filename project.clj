@@ -26,7 +26,7 @@
                  [org.apache.commons/commons-lang3 "3.3.2"] ; Already a dependency but required explicitly
                  [commons-io/commons-io "2.4"]
                  [commons-codec/commons-codec "1.10"]
-                 [com.lowagie/itext "4.2.1" :exclusions [org.bouncycastle/bctsp-jdk14 xml-apis]]
+                 [itext "4.2.1" :exclusions [org.bouncycastle/bctsp-jdk14 xml-apis]]
                  [net.java.dev.jai-imageio/jai-imageio-core-standalone "1.2-pre-dr-b04-2014-09-13"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [endophile "0.1.2" :exclusions [hiccup]]
@@ -60,7 +60,7 @@
                  [org.geotools/gt-referencing "12.4"]
                  [org.geotools/gt-epsg-wkt "12.4"]
                  [org.clojure/data.json "0.2.6"]
-                 [lupapiste/commons "0.5.15"]]
+                 [lupapiste/commons "0.5.16"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]

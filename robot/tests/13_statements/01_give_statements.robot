@@ -1,8 +1,8 @@
 *** Settings ***
 
 Documentation   Application statements are managed
-Suite setup     Apply minimal fixture now
-Suite teardown  Logout
+Suite Setup     Apply minimal fixture now
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
