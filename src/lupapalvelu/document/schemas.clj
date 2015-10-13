@@ -517,6 +517,37 @@
                       :copybutton true
                       :body huoneistoRow})
 
+
+
+(def jatettyyppi {:name "jateTyyppi" :type :select :size "l" :label false
+                  :body [{:name "betoni"}
+                         {:name "kipsi"}
+                         {:name "puu"}
+                         {:name "metalli"}
+                         {:name "lasi"}
+                         {:name "muovi"}
+                         {:name "paperi"}
+                         {:name "maa"}]})
+
+(def rakennusjateilmoitusRow [jatettyyppi
+                              {:name "suunniteltuMaara" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m" :label false}
+                              {:name "toteutunutMaara" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m" :label false}
+                              {:name "yksikko" :type :select :label false
+                               :body [{:name "kg"}
+                                      {:name "tonni"}
+                                      {:name "m2"}
+                                      {:name "m3"}]}
+                              {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m" :label false}
+                              {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "l" :label false}])
+
+(def rakennusjateilmoitus {:name "rakennusjateIlmoitus"
+                           :type :table
+                           :repeating true
+                           :approvable false
+                           :body rakennusjateilmoitusRow})
+
+
+
 ;; Usage type definitions have moved to lupapiste-commons.usage-types
 
 (def kaytto {:name "kaytto"
@@ -1247,7 +1278,6 @@
            :type :location}
     :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
-
    {:info {:name "paatoksen-toimitus-rakval"
            :removable false
            :approvable true
@@ -1266,4 +1296,9 @@
            :order 100}
     :body [{:name "suoramarkkinointikielto" ;THIS IS DEPRECATED!
             :type :checkbox
-            :layout :full-width}]}])
+            :layout :full-width}]}
+
+   {:info {:name "rakennusjateilmoitus"
+           :order 200}
+    :body (body rakennusjateilmoitus)}
+   ])
