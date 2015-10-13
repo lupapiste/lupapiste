@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="docgen-localized-string-template">
+      <span class="form-entry">
+        <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
+        <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
+        <label data-bind="visible: params.schema.label, ltext: params.schema.label"></label>
+        <span class="form-string"
+                 type="text"
+                 data-bind="ltext: value() && params.schema.locPrefix + '.' + value(),
+                            css: classes,
+                            event: events,
+                            attr: { 'data-test-id': path.join('.') }">
+        </span>
+        <span data-bind="saveIndicator: indicator, label: false"></span>
+      </span>
+    </script>
+  </section>
+</body>
+</html>
