@@ -279,7 +279,7 @@
 (defcommand refresh-ktj
   {:parameters [:id]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft])}
+   :states     (states/all-application-states-but (conj states/terminal-states :draft))}
   [{:keys [application created]}]
   (autofill-rakennuspaikka application created)
   (ok))
