@@ -85,6 +85,7 @@
         next-state   (if jatkoaika-app?
                        :closed ; FIXME create a state machine for :ya-jatkoaika
                        (sm/next-state application))
+        _           (assert next-state)
 
         timestamps  (zipmap (conj #{:modified :sent} next-state) (repeat created))
         _           (assert (every? (partial contains? domain/application-skeleton) (keys timestamps)))
