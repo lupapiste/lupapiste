@@ -35,10 +35,8 @@
   tj-ilmoitus-state-graph
   (merge
     (select-keys default-application-state-graph [:draft :open :canceled])
-    {:submitted  [:sent :canceled]
-     :sent       [:acknowledged :complement-needed :canceled]
-     :complement-needed   [:sent :acknowledged :canceled]
-     :acknowledged []}))
+    {:submitted  [:acknowledged :canceled]
+     :acknowledged [:submitted]}))
 
 (def
   ^{:doc "See default-application-state-graph"}
