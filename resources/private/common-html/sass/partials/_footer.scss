@@ -53,6 +53,10 @@ footer {
     .footer-box {
       @include nav-link($link: $blue, $hover: white);
       color: $blue;
+      i {
+        vertical-align: middle;
+        padding-left: $marginS;
+      }
     }
     .footer-align-right {
       float: right;
