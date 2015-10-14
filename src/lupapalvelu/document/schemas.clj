@@ -542,6 +542,7 @@
 
 (def rakennusjateilmoitus {:name "rakennusjateIlmoitus"
                            :type :table
+                           :group-help "rakennusjateIlmoitus.help"
                            :repeating true
                            :approvable false
                            :body rakennusjateilmoitusRow})
