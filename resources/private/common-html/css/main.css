@@ -8681,6 +8681,23 @@ div.search i {
   margin: 0 auto 20px;
 }
 
+/* line 50, ../sass/partials/_bulletins.scss */
+.search-button-wrapper {
+  text-align: center;
+}
+/* line 53, ../sass/partials/_bulletins.scss */
+.search-button-wrapper button span:last-child {
+  padding-left: 6px;
+}
+/* line 54, ../sass/partials/_bulletins.scss */
+.search-button-wrapper button span:last-child:before {
+  content: "(";
+}
+/* line 57, ../sass/partials/_bulletins.scss */
+.search-button-wrapper button span:last-child:after {
+  content: ")";
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

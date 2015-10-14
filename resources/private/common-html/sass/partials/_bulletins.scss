@@ -46,3 +46,18 @@
     margin: 0 auto $grid-margin;
   }
 }
+
+.search-button-wrapper {
+  text-align: center;
+  button {
+    span:last-child {
+      &:before {
+        content: "(";
+      }
+      &:after {
+        content: ")";
+      }
+      padding-left: $marginS;
+    }
+  }
+}
