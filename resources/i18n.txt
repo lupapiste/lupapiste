@@ -54,4 +54,5 @@ vaarallisetAineet.yksikko.kg: Kilo
 vaarallisetAineet.yksikko.m2: Neliötä
 vaarallisetAineet.yksikko.m3: Kuutiota
 vaarallisetAineet.yksikko.tonni: Tonnia
-vaarallisetAineet.yksikko.undefined: Valitse
+
+rakennusjateIlmoitus.help: Lisätietoa kierrätyksestä löydät osoitteesta http://www.kierratys.info/.

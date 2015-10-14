@@ -363,7 +363,12 @@
                   :js ["neighbor-app.js"]}
    :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics]
               :html ["neighbor-show.html"]
-              :js ["neighbor-show.js"]}})
+              :js ["neighbor-show.js"]}
+
+   :bulletin-app {:depends [:ui-components]
+                  :js ["bulletin-app.js"]}
+   :bulletin {:depends [:bulletin-app :header]}
+   })
 
 ; Make sure all dependencies are resolvable:
 (doseq [[component {dependencies :depends}] ui-components

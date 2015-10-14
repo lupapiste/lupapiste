@@ -25,7 +25,6 @@
     self.application = ko.observable();
     self.metadata = ko.observable();
     self.statementId  = ko.observable();
-    self.applicationId  = ko.observable();
     self.showTosMetadata = ko.observable(false);
 
     self.statuses = ko.observableArray([]);
@@ -57,7 +56,6 @@
       self.data(null);
       self.metadata(null);
       self.statementId(null);
-      self.applicationId(null);
       self.showTosMetadata(false);
       self.application(null);
       self.statuses([]);
@@ -74,7 +72,6 @@
         self.data(ko.mapping.fromJS(statement));
         self.metadata(statement.metadata);
         self.statementId(statement.id);
-        self.applicationId(application.id);
 
         if (!self.dirty()) {
           if (statement.status) {

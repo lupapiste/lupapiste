@@ -3,8 +3,7 @@ LUPAPISTE.RadioFieldModel = function(params) {
   params = params || {};
 
   // Construct super
-  LUPAPISTE.InputFieldModel.call(this, params);
+  ko.utils.extend(this, new LUPAPISTE.InputFieldModel(params));
 
   this.selectedValue = params.selectedValue;
 };
-LUPAPISTE.RadioFieldModel.prototype = _.create(LUPAPISTE.InputFieldModel.prototype, {"constructor":LUPAPISTE.RadioFieldModel});

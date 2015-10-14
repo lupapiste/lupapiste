@@ -84,17 +84,32 @@
     return errors;
   };
 
+  var getForbiddenFields = function(schema, roles) {
+    var naughtyFields = [];
+    _.forEach(schema, function (attribute) {
+      if (attribute['require-role'] && !_.contains(roles, attribute['require-role'])) {
+        naughtyFields.push(attribute.type);
+      }
+    });
+    return naughtyFields;
+  };
+
   var model = function(params) {
     var self = this;
     self.attachmentId = params.attachmentId ? params.attachmentId : ko.observable(null);
     self.statementId = params.statementId ? params.statementId : ko.observable(null);
     self.verdictId = params.verdictId ? params.verdictId : ko.observable(null);
-    self.applicationId = params.applicationId;
+    self.applicationId = params.application.id;
     self.metadata = params.metadata;
     self.editable = ko.observable(false);
     self.editedMetadata = ko.observable();
     self.schema = ko.observableArray();
     self.inputTypeMap = {};
+    self.disabledFields = ko.observableArray();
+    
+    var orgAuthz = ko.unwrap(lupapisteApp.models.currentUser.orgAuthz);
+    var organization = ko.unwrap(params.application.organization);
+    var roles = orgAuthz && organization ? ko.unwrap(orgAuthz[organization]) : [];
 
     self.invalidFields = ko.pureComputed(function () {
       return validateMetadata(ko.mapping.toJS(self.editedMetadata), self.schema());
@@ -102,18 +117,18 @@
 
     self.metadata.subscribe(function(newValue) {
       // If metadata changes outside this component, we update the new values to the local copy
-      // TODO: this was randomly called with null argument, causing ko. mappping to NPE. Why ?
       if (!_.isEmpty(self.schema()) && !_.isEmpty(newValue)) {
-        var newData = constructEditableMetadata(ko.mapping.toJS(newValue), self.schema());
+        var newData = constructEditableMetadata(ko.mapping.toJS(newValue), self.schema(), roles);
         self.editedMetadata(newData);
       }
     });
 
     ajax.query("tos-metadata-schema")
       .success(function(data) {
-        self.editedMetadata(constructEditableMetadata(ko.mapping.toJS(self.metadata), data.schema));
+        self.editedMetadata(constructEditableMetadata(ko.mapping.toJS(self.metadata), data.schema, roles));
         self.inputTypeMap = constructSchemaInputTypeMap(data.schema);
         self.schema(data.schema);
+        self.disabledFields(getForbiddenFields(data.schema, roles));
       })
       .call();
 
@@ -122,7 +137,7 @@
     };
 
     self.cancelEdit = function() {
-      self.editedMetadata(constructEditableMetadata(ko.mapping.toJS(self.metadata), self.schema()));
+      self.editedMetadata(constructEditableMetadata(ko.mapping.toJS(self.metadata), self.schema(), roles));
       self.editable(false);
     };
 
