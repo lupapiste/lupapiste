@@ -519,7 +519,7 @@
 
 
 
-(def jatettyyppi {:name "jateTyyppi" :type :select :size "l" :label false
+(def jatetyyppi {:name "jateTyyppi" :type :select :label false
                   :body [{:name "betoni"}
                          {:name "kipsi"}
                          {:name "puu"}
@@ -529,9 +529,20 @@
                          {:name "paperi"}
                          {:name "maa"}]})
 
-(def rakennusjateilmoitusRow [jatettyyppi
-                              {:name "suunniteltuMaara" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m" :label false}
-                              {:name "toteutunutMaara" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m" :label false}
+(def vaarallinenainetyyppi {:name "vaarallinenaineTyyppi" :type :select :label false
+                            :body [{:name "maalit-lakat-liimat-ja-liuottimet"}
+                                   {:name "aerosolipullot"}
+                                   {:name "painekyllastetty-puu"}
+                                   {:name "elohopealamput-ja-paristot"}
+                                   {:name "jateoljyt-ja-muut-oljyiset-jatteet"}
+                                   {:name "asbesti"}
+                                   {:name "kivihiilipiki-eli-kreosootti"}
+                                   {:name "raskasmetallipitoiset-maalijatteet"}
+                                   {:name "eristeiden-ja-tiivistemassojen-haitalliset-jatteet"}
+                                   {:name "sahko-ja-elektroniikkaromu"}]})
+
+(def rakennusjateilmoitusRow [{:name "suunniteltuMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m" :label false}
+                              {:name "toteutunutMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m" :label false}
                               {:name "yksikko" :type :select :label false
                                :body [{:name "kg"}
                                       {:name "tonni"}
@@ -540,11 +551,22 @@
                               {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m" :label false}
                               {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "l" :label false}])
 
-(def rakennusjateilmoitus {:name "rakennusjateIlmoitus"
-                           :type :table
-                           :repeating true
-                           :approvable false
-                           :body rakennusjateilmoitusRow})
+(def rakennusJaPurkujateRow (body jatetyyppi rakennusjateilmoitusRow))
+
+(def vaarallisetAineetRow (body vaarallinenainetyyppi rakennusjateilmoitusRow))
+
+(def rakennusjateilmoitus [{:name "rakennusJaPurkujate"
+                            :type :table
+                            :uicomponent :docgenTable
+                            :repeating true
+                            :approvable false
+                            :body rakennusJaPurkujateRow}
+                           {:name "vaarallisetAineet"
+                            :type :table
+                            :uicomponent :docgenTable
+                            :repeating true
+                            :approvable false
+                            :body vaarallisetAineetRow}])
 
 
 
