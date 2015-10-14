@@ -264,16 +264,17 @@
       (a/validate-link-permits application)
       (do-submit command application created))))
 
-(defcommand acknowledge-application
+(defcommand return-application-to-submitted
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:authority}
-   :org-authz-roles  #{:approver}
+   :org-authz-roles  #{:approver :authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(partial sm/validate-state-transition :acknowledged)]}
-  [{timestamp :created :as command}]
-  (update-application command {$set {:state :acknowledged, :acknowledged timestamp}})
+   :states           #{:acknowledged}
+   :pre-checks       [(partial sm/validate-state-transition :submitted)]}
+  [command]
+  (update-application command {$set {:state :submitted}})
   (ok))
 
 (defcommand refresh-ktj
