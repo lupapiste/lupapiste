@@ -427,14 +427,26 @@
   ([source]
     (unzip source (name source)))
   ([source target-dir]
-    (with-open [zip (java.util.zip.ZipFile. (fs/file source))]
-      (let [entries (enumeration-seq (.entries zip))
-            target-file #(->> (.getName %)
-                           fs/base-name
-                           (fs/file target-dir))]
-        (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
-                :let [f (target-file entry)]]
-          (fs/mkdirs (fs/parent f))
-          (io/copy (.getInputStream zip entry) f))))
+    (unzip source target-dir "UTF-8"))
+  ([source target-dir encoding]
+    (let [fallback-encoding "IBM437"]
+      (try
+
+       (with-open [zip (java.util.zip.ZipFile. (fs/file source) (java.nio.charset.Charset/forName encoding))]
+        (let [entries (enumeration-seq (.entries zip))
+              target-file #(->> (.getName %)
+                             fs/base-name
+                             (fs/file target-dir))]
+          (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
+                  :let [f (target-file entry)]]
+            (fs/mkdirs (fs/parent f))
+            (io/copy (.getInputStream zip entry) f))))
+
+       (catch IllegalArgumentException e
+         (if-not (= encoding fallback-encoding)
+           (do
+             (debugf "Malformed zipfile contents in (%s) with encoding: %s. Fallbacking to CP437 encoding" source encoding)
+             (unzip source target-dir fallback-encoding))
+           (fail! :error.unzipping-error)))))
     target-dir))
 

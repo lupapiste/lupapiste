@@ -14,7 +14,8 @@ Bulletins page is empty at first
 Sonja publishes an application as a bulletin
   Go to login page
   Sonja logs in
-  Create application with state  Latokuja 3  753-416-25-22  kerrostalo-rivitalo  sent
+  Create application with state  create-app  753-416-25-22  kerrostalo-rivitalo  sent
+  Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
   Logout
 
