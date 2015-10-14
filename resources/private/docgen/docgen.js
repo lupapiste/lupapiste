@@ -40,7 +40,9 @@ var docgen = (function () {
                   meta: {},
                   validationErrors: doc.validationErrors
                 };
-                var newElem = new DocModel(schema, newDoc, application, authorizationModel).element;
+                var newDocSchema = _.cloneDeep(schema);
+                newDocSchema.info.op = null;
+                var newElem = new DocModel(newDocSchema, newDoc, application, authorizationModel).element;
                 $(self).before(newElem);
                 $(".sticky", newElem).Stickyfill();
               })
@@ -53,6 +55,7 @@ var docgen = (function () {
 
     $("select[data-select-other-id]", docgenDiv).each(initSelectWithOther).change(selectWithOtherChanged);
     $(".sticky", docgenDiv).Stickyfill();
+    window.Stickyfill.rebuild();
   }
 
   return {

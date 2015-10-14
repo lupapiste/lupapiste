@@ -240,7 +240,7 @@
                       (cons op-doc))]                      ;; new docs
     (if-not user
       new-docs
-      (conj new-docs (make (permit/get-applicant-doc-schema (permit/permit-type application)))))))
+      (conj new-docs (make (operations/get-applicant-doc-schema-name application))))))
 
 
 (defn make-op [op-name created]

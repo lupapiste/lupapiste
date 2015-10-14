@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.subtype
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [sade.util :refer [->int ->double] :as util]
-            [sade.validators :refer [valid-email?]]
+            [sade.validators :refer [valid-email?] :as v]
             [clojure.string :refer [blank?]]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
@@ -59,25 +59,25 @@
 (defmethod subtype-validation :y-tunnus [_ v]
   (cond
     (blank? v) nil
-    (util/finnish-y? v) nil
+    (v/finnish-y? v) nil
     :else [:warn "illegal-y-tunnus"]))
 
 (defmethod subtype-validation :zip [_ v]
   (cond
     (blank? v) nil
-    (util/finnish-zip? v) nil
+    (v/finnish-zip? v) nil
     :else [:warn "illegal-zip"]))
 
 (defmethod subtype-validation :rakennusnumero [_ v]
   (cond
     (blank? v) nil
-    (util/rakennusnumero? v) nil
+    (v/rakennusnumero? v) nil
     :else [:warn "illegal-rakennusnumero"]))
 
 (defmethod subtype-validation :rakennustunnus [_ v]
   (cond
    (blank? v) nil
-   (util/rakennustunnus? v) nil
+   (v/rakennustunnus? v) nil
    :else [:warn "illegal-rakennustunnus"])
  )
 
@@ -102,7 +102,7 @@
 (defmethod subtype-validation :ovt [_ v]
   (cond
     (blank? v) nil
-    util/finnish-ovt? nil
+    v/finnish-ovt? nil
     :else [:warn "illegal-ovt-tunnus"]))
 
 (defmethod subtype-validation nil [_ _]

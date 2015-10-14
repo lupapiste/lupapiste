@@ -6,20 +6,8 @@
       <!-- ko ifnot: noApplications() -->
       <div class="applications-search-top">
         <div class="container">
-          <h1>
-            <div class="application-search-link">
-                <a class="link active" href="#" data-test-id="applications-search-link"
-                   data-bind="ltext: 'navigation', click: _.partial(searchType, 'applications'), visible: !showApplicationsSearch()"></a>
-                <span href="#" data-bind="ltext: 'navigation', visible: showApplicationsSearch"></span>
-            </div>
-            <!-- ko if: lupapisteApp.models.globalAuthModel.ok("enable-foreman-search") -->
-            <div class="application-search-link">
-                <a class="link" href="#" data-test-id="applications-foreman-search-link"
-                   data-bind="ltext: 'applications.search.foremen', click: _.partial(searchType, 'foreman'), visible: !showForemanSearch()"></a>
-                <span data-bind="ltext: 'applications.search.foremen', visible: showForemanSearch"></span>
-            </div>
-            <!-- /ko -->
-          </h1>
+          <h1 data-bind="ltext: 'navigation'"></h1>
+
           <div class="button-group">
             <button data-bind="click: create"
                     data-test-id="applications-create-new-inforequest"
@@ -44,6 +32,25 @@
             </button>
             <!-- /ko -->
           </div>
+
+          <!-- ko if: lupapisteApp.models.globalAuthModel.ok('enable-foreman-search') -->
+          <div class="form-grid form-grid--no-border">
+            <span
+                 data-bind="component: {name: 'radio-field',
+                                        params: {value: 'applications',
+                                                 selectedValue: searchType,
+                                                 id: 'searchTypeApplications',
+                                                 name: 'searchType',
+                                                 lLabel: 'navigation'}}"></span>
+            <span
+                 data-bind="component: {name: 'radio-field',
+                                        params: {value: 'foreman',
+                                                 selectedValue: searchType,
+                                                 id: 'searchTypeForeman',
+                                                 name: 'searchType',
+                                                 lLabel: 'applications.search.foremen'}}"></span>
+          </div>
+          <!-- /ko -->
 
           <!-- ko if: showApplicationsSearch -->
           <div data-bind="component: {name: 'applications-search-filter', params: {dataProvider: dataProvider}}" class="applications-search-component"></div>

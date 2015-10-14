@@ -1,10 +1,10 @@
-LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachmentPrintsOrderModel) {
+LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOrderModel) {
   "use strict";
 
   var self = this;
 
   self.authorizationModel = lupapisteApp.models.applicationAuthModel;
-  self.appModel = appModel;
+  self.appModel = lupapisteApp.models.application;
   self.signingModel = signingModel;
   self.verdictAttachmentPrintsOrderModel = verdictAttachmentPrintsOrderModel;
 
@@ -15,8 +15,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
   self.attachmentsOperations = ko.observable([]);
 
   self.showPostAtachmentsActions = ko.pureComputed(function() {
-    return (!appModel.inPostVerdictState() && self.preAttachmentsByOperation().length > 0) ||
-           (appModel.inPostVerdictState()  && self.postAttachmentsByOperation().length > 0);
+    return (!self.appModel.inPostVerdictState() && self.preAttachmentsByOperation().length > 0) ||
+           (self.appModel.inPostVerdictState()  && self.postAttachmentsByOperation().length > 0);
   });
 
   var attachmentsOperationsMapping = {
@@ -25,7 +25,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         clickCommand: function() {
           return self.newAttachment();
         },
-        visibleFn: function (rawAttachments) {
+        visibleFn: function () {
           return self.authorizationModel.ok("upload-attachment");
         }
       },
@@ -34,7 +34,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         clickCommand: function() {
           return self.copyOwnAttachments();
         },
-        visibleFn: function (rawAttachments) {
+        visibleFn: function () {
           return self.authorizationModel.ok("copy-user-attachments-to-application");
         }
       },
@@ -43,7 +43,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         clickCommand: function() {
           return self.attachmentTemplatesModel.show();
         },
-        visibleFn: function (rawAttachments) {
+        visibleFn: function () {
           return self.authorizationModel.ok("create-attachments");
         }
       },
@@ -52,7 +52,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         clickCommand: function() {
           return self.startStamping();
         },
-        visibleFn: function (rawAttachments) {
+        visibleFn: function () {
           return self.authorizationModel.ok("stamp-attachments") && self.appModel.hasAttachment();
         }
       },
@@ -61,16 +61,16 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         clickCommand: function() {
           return self.startMarkingVerdictAttachments();
         },
-        visibleFn: function (rawAttachments) {
+        visibleFn: function () {
           return self.authorizationModel.ok("set-attachments-as-verdict-attachment") && self.appModel.hasAttachment();
         }
       },
       "orderVerdictAttachments": {
         loc: loc("verdict.orderAttachmentPrints.button"),
         clickCommand: function() {
-          self.verdictAttachmentPrintsOrderModel.openDialog({application: self.appModel});
+          self.verdictAttachmentPrintsOrderModel.openDialog();
         },
-        visibleFn: function (rawAttachments) {
+        visibleFn: function () {
           return self.authorizationModel.ok("order-verdict-attachment-prints") && self.verdictAttachmentPrintsOrderModel.attachments().length;
         }
       },
@@ -79,7 +79,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         clickCommand: function() {
           return self.signingModel.init(self.appModel);
         },
-        visibleFn: function (rawAttachments) {
+        visibleFn: function () {
           return self.authorizationModel.ok("sign-attachments") && self.appModel.hasAttachment();
         }
       },
@@ -88,7 +88,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         clickCommand: function() {
           window.location = "/api/raw/download-all-attachments?id=" + self.appModel.id() + "&lang=" + loc.getCurrentLanguage();
         },
-        visibleFn: function (rawAttachments) {
+        visibleFn: function () {
           return self.appModel.hasAttachment();
         }
       }
@@ -120,15 +120,13 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     self.showHelp(!self.showHelp());
   };
 
-  self.refresh = function(appModel) {
-    self.appModel = appModel;
-
-    var rawAttachments = ko.mapping.toJS(appModel.attachments);
+  self.refresh = function() {
+    var rawAttachments = lupapisteApp.models.application._js.attachments;
     var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
     var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);
 
     // pre verdict attachments are not editable after verdict has been given
-    var preGroupEditable = lupapisteApp.models.currentUser.isAuthority() || !_.contains(LUPAPISTE.config.postVerdictStates, appModel.state());
+    var preGroupEditable = lupapisteApp.models.currentUser.isAuthority() || !_.contains(LUPAPISTE.config.postVerdictStates, self.appModel.state());
     var preGrouped = attachmentUtils.getGroupByOperation(preAttachments, preGroupEditable, self.appModel.allowedAttachmentTypes());
 
     var postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, self.appModel.allowedAttachmentTypes());
@@ -253,7 +251,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     var desc = e["op-desc"];
 
     _.each(self.appModel.attachments(), function(attachment) {
-      if (ko.unwrap(attachment.op) && attachment.op.id() === opid && typeof attachment.op.description === "function") {
+      if (util.getIn(attachment, ["op", "id"]) === opid && ko.isObservable(attachment.op.description)) {
         attachment.op.description(desc);
       }
     });

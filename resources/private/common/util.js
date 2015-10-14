@@ -110,7 +110,7 @@ var util = (function($) {
 
   function getIn(m, ks, defaultValue) {
     var value = ko.unwrap(m);
-    if (_.isUndefined(value)) {
+    if (_.isUndefined(value) || _.isNull(value)) {
       return defaultValue;
     }
     return _.isEmpty(ks) ? value : getIn(value[_.first(ks)], _.rest(ks), defaultValue);
@@ -236,7 +236,8 @@ var util = (function($) {
     options = _.defaults(options, defaultOptions);
     return _.filter(options.data, function(item) {
       return _.reduce(options.query.split(" "), function(result, word) {
-        return !_.some(options.selected, item) && _.contains(ko.unwrap(item[options.label]).toUpperCase(), word.toUpperCase()) && result;
+        var dataForLabel = ko.unwrap(item[options.label]);
+        return !_.some(options.selected, item) && dataForLabel !== undefined && _.contains(dataForLabel.toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
   }

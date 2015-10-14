@@ -12,6 +12,15 @@
 (defn get-all-schemas [] @registered-schemas)
 (defn get-schemas [version] (get @registered-schemas version))
 
+(defn get-hakija-schema-names [schema-version]
+  (let [schemas (get-schemas schema-version)]
+    (assert schemas)
+    (->> schemas
+      (map #(when (= "hakija" (-> % val :info :subtype))
+              (-> % val :info :name)))
+      (filter identity)
+      set)))
+
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
                  :approvable :removable :deny-removing-last-document
@@ -73,6 +82,9 @@
     :type      :group
     :repeating true
     :body      (body childs)}])
+
+(defn approvable-top-level-groups [v]
+  (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
 
 ;;
 ;; schema sniplets
@@ -579,18 +591,19 @@
                                {:name "sahkoKytkin" :type :checkbox}
                                {:name "maakaasuKytkin" :type :checkbox}
                                {:name "kaapeliKytkin" :type :checkbox}]})
+
 (def varusteet {:name "varusteet" :type :group :layout :vertical
-                                                     :body [{:name "sahkoKytkin" :type :checkbox}
-                                                            {:name "kaasuKytkin" :type :checkbox}
-                                                            {:name "viemariKytkin" :type :checkbox}
-                                                            {:name "vesijohtoKytkin" :type :checkbox}
-                                                            {:name "hissiKytkin" :type :checkbox}
-                                                            {:name "koneellinenilmastointiKytkin" :type :checkbox}
-                                                            {:name "lamminvesiKytkin" :type :checkbox}
-                                                            {:name "aurinkopaneeliKytkin" :type :checkbox}
-                                                            {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
-                                                            {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
-                                                            {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
+                :body [{:name "sahkoKytkin" :type :checkbox}
+                       {:name "kaasuKytkin" :type :checkbox}
+                       {:name "viemariKytkin" :type :checkbox}
+                       {:name "vesijohtoKytkin" :type :checkbox}
+                       {:name "hissiKytkin" :type :checkbox}
+                       {:name "koneellinenilmastointiKytkin" :type :checkbox}
+                       {:name "lamminvesiKytkin" :type :checkbox}
+                       {:name "aurinkopaneeliKytkin" :type :checkbox}
+                       {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
+                       {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
+                       {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
 
 (def luokitus {:name "luokitus"
                :type :group
@@ -1046,9 +1059,6 @@
                                 :type :date}]})
 
 
-(defn- approvable-top-level-groups [v]
-  (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
-
 ;;
 ;; schemas
 ;;
@@ -1153,6 +1163,20 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
     :body (schema-body-without-element-by-name ya-party turvakielto)}
+
+   {:info {:name "ilmoittaja"
+           :i18name "osapuoli"
+           :order 3
+           :removable true
+           :repeating true
+           :approvable true
+           :type :party
+           :subtype "hakija"
+           :group-help nil
+           :section-help nil
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           }
+    :body party}
 
    {:info {:name "paasuunnittelija"
            :i18name "osapuoli"

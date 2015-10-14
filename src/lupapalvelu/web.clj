@@ -41,7 +41,8 @@
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.neighbors-api]
-            [lupapalvelu.idf.idf-api :as idf-api]))
+            [lupapalvelu.idf.idf-api :as idf-api]
+            [net.cgrand.enlive-html :as enlive]))
 
 ;;
 ;; Helpers
@@ -233,7 +234,8 @@
                    :wordpress anyone
                    :welcome anyone
                    :oskari anyone
-                   :neighbor anyone})
+                   :neighbor anyone
+                   :bulletin anyone})
 
 (defn cache-headers [resource-type]
   (if (env/feature? :no-cache)
@@ -568,7 +570,17 @@
 (defpage [:get ["/dev/:status"  :status #"[45]0\d"]] {status :status} (resp/status (util/->int status) status))
 
 (when (env/feature? :dummy-krysp)
-  (defpage "/dev/krysp" {typeName :typeName r :request filter :filter}
+  (defn override-xml [xml-file overrides]
+    (let [xml            (enlive/xml-resource xml-file)
+          overridden-xml (reduce (fn [nodes override]
+                                   (enlive/transform nodes
+                                                     (->> (:selector override)
+                                                          (map keyword))
+                                                     (enlive/content (:value override))))
+                                 xml overrides)]
+      (apply str (enlive/emit* overridden-xml))))
+
+  (defpage "/dev/krysp" {typeName :typeName r :request filter :filter overrides :overrides}
     (if-not (s/blank? typeName)
       (let [filter-type-name (-> filter sade.xml/parse (sade.common-reader/all-of [:PropertyIsEqualTo :PropertyName]))
             xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
@@ -576,13 +588,15 @@
                   "ymy:Ymparistolupa"           "krysp/sample/verdict-yl.xml"
                   "ymm:MaaAineslupaAsia"        "krysp/sample/verdict-mal.xml"
                   "ymv:Vapautus"                "krysp/sample/verdict-vvvl.xml"
-                  "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/sample/poikkari-verdict-cgi.xml"}]
+                  "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/sample/poikkari-verdict-cgi.xml"}
+            overrides (-> (json/decode overrides)
+                          (clojure.walk/keywordize-keys))]
         ;; Use different sample xml for rakval query with kuntalupatunnus type of filter.
-        (if (and
-              (= "rakval:RakennusvalvontaAsia" typeName)
-              (= "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:kuntalupatunnus" filter-type-name))
-          (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml")))
-          (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (xmls typeName))))))
+        (cond
+          (and (= "rakval:RakennusvalvontaAsia" typeName)
+               (= "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:kuntalupatunnus" filter-type-name)) (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml")))
+          (not-empty overrides) (resp/content-type "application/xml; charset=utf-8" (override-xml (io/resource (xmls typeName)) overrides))
+          :else (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (xmls typeName))))))
       (when (= r "GetCapabilities")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/capabilities.xml"))))))
 

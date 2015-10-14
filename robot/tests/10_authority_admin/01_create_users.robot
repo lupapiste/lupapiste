@@ -1,8 +1,8 @@
 *** Settings ***
 
 Documentation   Authority admin creates users
-Suite setup     Apply minimal fixture now
-Suite teardown  Logout
+Suite Setup     Apply minimal fixture now
+Suite Teardown  Logout
 Resource       ../../common_resource.robot
 
 *** Test Cases ***

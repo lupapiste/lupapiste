@@ -24,7 +24,8 @@
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as u])
+            [lupapalvelu.user :as u]
+            [lupapalvelu.organization :as organization])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
 
@@ -60,6 +61,8 @@
 (def ronja-id    (id-for "ronja"))
 (def luukas      (apikey-for "luukas"))
 (def luukas-id   (id-for "luukas"))
+(def kosti       (apikey-for "kosti"))
+(def kosti-id    (id-for "kosti"))
 (def sipoo       (apikey-for "sipoo"))
 (def tampere-ya  (apikey-for "tampere-ya"))
 (def naantali    (apikey-for "admin@naantali.fi"))
@@ -152,11 +155,14 @@
   (decode-response
     (http-post
       (str (server-address) "/api/" (name action-type) "/" (name command-name))
-      {:headers {"authorization" (str "apikey=" apikey)
-                 "content-type" "application/json;charset=utf-8"}
-       :body (json/encode (apply hash-map args))
-       :follow-redirects false
-       :throw-exceptions false})))
+      (let [args (if (map? (first args))
+                   (first args)
+                   (apply hash-map args))]
+        {:headers {"authorization" (str "apikey=" apikey)
+                   "content-type" "application/json;charset=utf-8"}
+         :body (json/encode args)
+         :follow-redirects false
+       :throw-exceptions false}))))
 
 (defn raw-command [apikey command-name & args]
   (apply decode-post :command apikey command-name args))
@@ -270,6 +276,20 @@
 ;;
 ;; DSLs
 ;;
+
+(defn remove-krysp-xml-overrides [apikey org-id permit-type]
+  (let [org  (organization-from-minimal-by-id org-id)
+        args (select-keys (get-in org [:krysp permit-type]) [:url :version])
+        args (assoc args :permitType permit-type :username "" :password "")]
+    (command apikey :set-krysp-endpoint args)))
+
+(defn override-krysp-xml [apikey org-id permit-type overrides]
+  (let [org         (organization-from-minimal-by-id org-id)
+        current-url (get-in org [:krysp permit-type :url])
+        new-url     (str current-url "?overrides=" (json/generate-string overrides))
+        args        (select-keys (get-in org [:krysp permit-type]) [:version])
+        args        (assoc args :permitType permit-type :url new-url :username "" :password "")]
+    (command apikey :set-krysp-endpoint args)))
 
 (defn set-anti-csrf! [value] (query pena :set-feature :feature "disable-anti-csrf" :value (not value)))
 (defn feature? [& feature]

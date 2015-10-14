@@ -15,6 +15,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
+            [sade.validators :as v]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.vtj :as vtj]))
@@ -242,7 +243,7 @@
 
 (defn- handle-failure [{:keys [extradata subjectdata] :as params} vetuma-data]
   (let [cause (cond
-                (util/finnish-y? extradata) :y
+                (v/finnish-y? extradata) :y
                 (ss/contains? extradata "Cannot use VTJ") :vtj
                 :else :error)]
     (case cause

@@ -22,7 +22,8 @@
    :open-inforequest-email ""
    :opening nil})
 
-(def authority-roles [:authority :approver :reader :tos-editor :tos-publisher])
+(def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
+(def authority-roles (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))
 
 (defn- with-scope-defaults [org]
   (when (seq org)
@@ -66,21 +67,21 @@
   ([{:keys [organization permitType] :as application}]
     (get-krysp-wfs organization permitType))
   ([organization-id permit-type]
-  (let [organization (mongo/by-id :organizations organization-id)
-        krysp-config (get-in organization [:krysp (keyword permit-type)])
-        crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
-        crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
-                       (-> iv (crypt/str->bytes) (crypt/base64-decode)))
-        password     (when-let [password (and crypto-iv (:password krysp-config))]
-                       (->> password
-                            (crypt/str->bytes)
+   (let [organization (mongo/by-id :organizations organization-id)
+         krysp-config (get-in organization [:krysp (keyword permit-type)])
+         crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
+         crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
+                        (-> iv (crypt/str->bytes) (crypt/base64-decode)))
+         password     (when-let [password (and crypto-iv (:password krysp-config))]
+                        (->> password
+                             (crypt/str->bytes)
                             (crypt/base64-decode)
-                            (crypt/decrypt crypto-key crypto-iv :aes)
-                            (crypt/bytes->str)))
-        username     (:username krysp-config)]
-    (when-not (s/blank? (:url krysp-config))
-      (->> (when username {:credentials [username password]})
-           (merge (select-keys krysp-config [:url :version])))))))
+                             (crypt/decrypt crypto-key crypto-iv :aes)
+                             (crypt/bytes->str)))
+         username     (:username krysp-config)]
+     (when-not (s/blank? (:url krysp-config))
+       (->> (when username {:credentials [username password]})
+            (merge (select-keys krysp-config [:url :version])))))))
 
 (defn- encode-credentials
   [username password]
@@ -130,7 +131,6 @@
     {:pre  [municipality organization (permit/valid-permit-type? permit-type)]}
    (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization)))))
 
-
 (defn with-organization [id function]
   (if-let [organization (get-organization id)]
     (function organization)
@@ -144,8 +144,8 @@
 (defn allowed-roles-in-organization [organization]
   {:pre [(map? organization)]}
   (if-not (:permanent-archive-enabled organization)
-    (remove #(ss/starts-with (name %) "tos-") authority-roles)
-    authority-roles)  )
+    (remove #(% (set permanent-archive-authority-roles)) authority-roles)
+    authority-roles))
 
 (defn filter-valid-user-roles-in-organization [organization roles]
   (let [organization  (if (map? organization) organization (get-organization organization))
@@ -160,3 +160,6 @@
        %
        (assoc % :id (mongo/create-id)))
     tags))
+
+(defn some-organization-has-archive-enabled? [organization-ids]
+  (pos? (mongo/count :organizations {:_id {$in organization-ids} :permanent-archive-enabled true})))

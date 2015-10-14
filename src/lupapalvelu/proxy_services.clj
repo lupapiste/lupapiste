@@ -1,13 +1,15 @@
 (ns lupapalvelu.proxy-services
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [noir.response :as resp]
-            [clojure.xml :as xml]
+  (:require [clojure.data.zip.xml :refer :all]
             [clojure.string :as s]
-            [lupapalvelu.wfs :as wfs]
+            [clojure.xml :as xml]
             [lupapalvelu.find-address :as find-address]
-            [clojure.data.zip.xml :refer :all]
+            [lupapalvelu.wfs :as wfs]
+            [noir.response :as resp]
+            [sade.coordinate :as coord]
             [sade.env :as env]
-            [sade.util :refer [dissoc-in select]]))
+            [sade.strings :as ss]
+            [sade.util :refer [dissoc-in select ->double]]
+            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]))
 
 ;;
 ;; NLS:
@@ -46,7 +48,8 @@
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn find-addresses-proxy [request]
-  (let [term (get (:params request) :term)]
+  (let [term (get (:params request) :term)
+        term (ss/replace term #"\p{Punct}" " ")]
     (if (string? term)
       (resp/json (or (find-address/search term) []))
       (resp/status 400 "Missing query param 'term'"))))
@@ -72,19 +75,20 @@
       (resp/json (:kiinttunnus (wfs/feature-to-property-id (first features))))
       (resp/status 503 "Service temporarily unavailable"))))
 
-(defn address-by-point-proxy [request]
-  (let [{x :x y :y} (:params request)
-        features (wfs/address-by-point x y)]
-    (if features
+(defn address-by-point-proxy [{{x :x y :y} :params}]
+  (if (and (coord/valid-x? (->double x))
+           (coord/valid-y? (->double y)))
+    (if-let [features (wfs/address-by-point x y)]
       (resp/json (wfs/feature-to-address-details (first features)))
-      (resp/status 503 "Service temporarily unavailable"))))
+      (resp/status 503 "Service temporarily unavailable"))
+    (resp/status 400 "Bad Request")))
 
 (defn property-info-by-wkt-proxy [request] ;example: wkt=POINT(404271+6693892)&radius=100
   (let [{wkt :wkt radius :radius} (:params request)
         type (re-find #"^POINT|^LINESTRING|^POLYGON" wkt)
         coords (s/replace wkt #"^POINT|^LINESTRING|^POLYGON" "")
         features (case type
-                   "POINT" (let [[x y] (s/split (re-find #"\d+ \d+" coords) #" ")]
+                   "POINT" (let [[x y] (s/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
                              (if (nil? radius) 
                                (wfs/property-info-by-point x y) 
                                (wfs/property-info-by-radius x y radius)))

@@ -26,7 +26,7 @@
                  [org.apache.commons/commons-lang3 "3.3.2"] ; Already a dependency but required explicitly
                  [commons-io/commons-io "2.4"]
                  [commons-codec/commons-codec "1.10"]
-                 [com.lowagie/itext "4.2.1" :exclusions [org.bouncycastle/bctsp-jdk14 xml-apis]]
+                 [itext "4.2.1" :exclusions [org.bouncycastle/bctsp-jdk14 xml-apis]]
                  [net.java.dev.jai-imageio/jai-imageio-core-standalone "1.2-pre-dr-b04-2014-09-13"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [endophile "0.1.2" :exclusions [hiccup]]
@@ -37,7 +37,7 @@
                  [org.apache.poi/poi-ooxml "3.11"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js org.mozilla/rhino]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
-                 [fi.sito/oskari "0.9.44"]
+                 [fi.sito/oskari "0.9.47"]
                  [slingshot "0.12.2"]
                  [com.google.zxing/javase "2.2"]
                  [prismatic/schema "0.4.3"]
@@ -60,7 +60,7 @@
                  [org.geotools/gt-referencing "12.4"]
                  [org.geotools/gt-epsg-wkt "12.4"]
                  [org.clojure/data.json "0.2.6"]
-                 [lupapiste/commons "0.5.14"]]
+                 [lupapiste/commons "0.5.17"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]

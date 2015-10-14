@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Application gets tasks based on verdict
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Variables      ../06_attachments/variables.py
 

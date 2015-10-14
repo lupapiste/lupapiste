@@ -377,6 +377,10 @@ input.form-input.inline {
   margin: $marginM;
 }
 
+.docgen-content .form-choice .form-entry.form-full-width {
+  display: block !important;
+}
+
 .form-error {
   display: inline;
   color: red;
@@ -1034,6 +1038,15 @@ $col: 25%;
     border: 1px solid $checkbox-border-color;
     padding: 7px;
   }
+  .radio-wrapper {
+    border: 1px solid $radio-border-color;
+    padding: $marginS $marginL $marginS $marginS;
+  }
+  .checkbox-wrapper, .radio-wrapper {
+    label {
+      cursor: pointer;
+    }
+  }
 
   select::-ms-expand {
       display: none;
@@ -1062,11 +1075,12 @@ $col: 25%;
     }
   }
 
-  input[type=checkbox] {
+  input[type=checkbox], input[type=radio] {
     opacity: 0;
     width: 0;
     height: 0;
     margin: 0;
+    font-size: 0;
   }
 
   .checkbox-label:before {
@@ -1081,6 +1095,21 @@ $col: 25%;
   input[type=checkbox]:checked + .checkbox-label:before {
     @include lupicon-font;
     content: "\e604";
+    color: $checkbox-selected-color;
+  }
+
+  .radio-label:before {
+    @include lupicon-font;
+    content: "\e634";
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: top;
+    color: $checkbox-color;
+  }
+
+  input[type=radio]:checked + .radio-label:before {
+    @include lupicon-font;
+    content: "\e635";
     color: $checkbox-selected-color;
   }
 

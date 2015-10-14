@@ -1,8 +1,8 @@
 *** Settings ***
 
 Documentation  Authority admin edits organization WSF
-Suite setup     Sipoo logs in
-Suite teardown  Logout
+Suite Setup     Sipoo logs in
+Suite Teardown  Logout
 Resource       ../../common_resource.robot
 
 *** Test Cases ***

@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   User changes account details
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource       ../../common_resource.robot
 
 *** Test Cases ***
