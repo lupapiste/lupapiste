@@ -1,4 +1,5 @@
 operations.rakennusjateilmoitus: Rakennus- ja purkujäteilmoitus
+operations.rakennusjateilmoitus.desc: 
 operations.tree.Rakennusjateilmoitus:  Rakennus- ja purkujäteilmoitus
 rakennusjateilmoitus._group_label: Rakennus- ja purkujäteilmoitus
 rakennusjateilmoitus.rakennusjateIlmoitus._append_label: Lisää
