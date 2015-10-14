@@ -112,6 +112,12 @@
 (defn intersects [& e]
   (str "<ogc:Intersects>" (apply str e) "</ogc:Intersects>"))
 
+(defn within [& e]
+  (str "<DWithin>" (apply str e) "</DWithin>"))
+
+(defn distance [distance]
+  (format "<Distance units='m'>%s</Distance>" distance))
+
 (defn point [x y]
   (format "<gml:Point><gml:pos>%s %s</gml:pos></gml:Point>" x y))
 
@@ -321,6 +327,18 @@
       (property-name "ktjkiiwfs:sijainti")
       (filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
+
+(defn property-info-by-radius [x y radius]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (property-name "ktjkiiwfs:kiinteistotunnus")
+      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (ogc-filter
+        (within
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (point x y)
+          (distance radius))))))
 
 (defn property-info-by-point [x y]
   (post ktjkii
