@@ -29,6 +29,7 @@
 
 (defquery application-bulletins
   {:description "Query for Julkipano"
+   :feature :publish-bulletin
    :parameters []
    :user-roles #{:anonymous}}
   [{data :data}]
