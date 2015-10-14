@@ -1142,6 +1142,50 @@
     (for [collection [:applications :submitted-applications]]
       (let [applications (mongo/select collection {} [:documents])]
         (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/foreman-index-update %)) applications))))))
+
+; 2015-10-14:
+;> db.applications.distinct("state", {"permitSubtype": "tyonjohtaja-hakemus"})
+;[
+;        "canceled",
+;        "verdictGiven",
+;        "draft",
+;        "open",
+;        "submitted",
+;        "answered",
+;        "sent",
+;        "complement-needed"
+;]
+
+(defmigration tyonjohtaja-hakemus-verdict-given-mapping
+  {:apply-when (pos? (mongo/count :applications {:permitSubtype "tyonjohtaja-hakemus", :state "verdictGiven"}))}
+  (mongo/update-n :applications {:permitSubtype "tyonjohtaja-hakemus", :state "verdictGiven"} {$set {:state :foremanVerdictGiven}}))
+
+
+; 2015-10-14:
+;> db.applications.distinct("state", {"permitSubtype": "tyonjohtaja-ilmoitus"})
+;[
+;        "closed",
+;        "verdictGiven",
+;        "canceled",
+;        "draft",
+;        "open",
+;        "submitted",
+;        "complement-needed"
+;]
+
+(defmigration tyonjohtaja-ilmoitus-closed-mapping
+  {:apply-when (pos? (mongo/count :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "closed"}))}
+  (reduce + 0
+    (for [{:keys [id closed]} (mongo/select :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "closed"} [:closed])]
+      (mongo/update-n :applications {:_id id} {$set {:state :acknowledged, :acknowledged closed}, {$unset {:closed 1}}}))))
+
+(defmigration tyonjohtaja-ilmoitus-verdict-given-mapping
+  {:apply-when (pos? (mongo/count :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "verdictGiven"}))}
+  (reduce + 0
+    (for [{:keys [id verdicts]} (mongo/select :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "verdictGiven"} [:verdicts])
+          :let [timestamp (->> (map :timestamp verdicts) (filter number?) (apply min))]]
+      (mongo/update-n :applications {:_id id} {$set {:state :acknowledged, :acknowledged timestamp}}))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
