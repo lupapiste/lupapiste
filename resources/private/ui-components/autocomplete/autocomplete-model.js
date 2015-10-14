@@ -163,7 +163,11 @@ LUPAPISTE.AutocompleteModel = function(params) {
     }
 
     if (event.keyCode === 13) {
-      self.selectItem(getCurrentItem());
+      var currentItem = getCurrentItem();
+      // Don't select group header or empty result
+      if (currentItem && !currentItem.groupHeader) {
+        self.selectItem(currentItem);
+      }
     }
 
     else if (event.keyCode === 38) {
