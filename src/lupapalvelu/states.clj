@@ -5,9 +5,16 @@
 
 (defn initial-state [graph]
   {:pre [(map? graph)], :post [%]}
-  (if (instance? clojure.lang.PersistentArrayMap graph)
-    (first (keys graph))
-    (let [states  (into #{} (for [[k v] graph :when (seq v)] k)) ; can't be initial state without transitions
+  (cond
+    ; Check the most common case first
+    (contains? graph :draft) :draft
+
+    ; First key of an ordered map
+    (instance? clojure.lang.PersistentArrayMap graph) (first (keys graph))
+
+    ; Fallback calculation. (A state can't be the initial state without transitions.)
+    :else
+    (let [states  (into #{} (for [[k v] graph :when (seq v)] k))
           targets (->> graph vals (apply concat) set)
           initial-states (difference states targets)]
       (assert (= 1 (count initial-states)))
