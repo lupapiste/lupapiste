@@ -87,24 +87,28 @@
 
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
-    (when-let [rakennuspaikka (domain/get-document-by-type application :location)]
-      (when-let [ktj-tiedot (wfs/rekisteritiedot-xml (:propertyId application))]
-        (let [updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
-                       [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
-                       [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
-                       [[:kiinteisto :rekisterointipvm] (or
-                                                          (try
-                                                            (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                            (catch Exception e (:rekisterointipvm ktj-tiedot)))
-                                                          "")]]
-              schema (schemas/get-schema (:schema-info rakennuspaikka))
-              updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
-          (doc-persistence/persist-model-updates
-            application
-            "documents"
-            rakennuspaikka
-            updates
-            time))))))
+    (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]
+      (doseq [rakennuspaikka rakennuspaikka-docs
+             :when (seq rakennuspaikka)]
+       (when-let [ktj-tiedot (wfs/rekisteritiedot-xml (or
+                                                        (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
+                                                        (:propertyId application)))]
+         (let [updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
+                        [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
+                        [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
+                        [[:kiinteisto :rekisterointipvm] (or
+                                                           (try
+                                                             (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                             (catch Exception e (:rekisterointipvm ktj-tiedot)))
+                                                           "")]]
+               schema (schemas/get-schema (:schema-info rakennuspaikka))
+               updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
+           (doc-persistence/persist-model-updates
+             application
+             "documents"
+             rakennuspaikka
+             updates
+             time)))))))
 
 (defquery party-document-names
   {:parameters [:id]
