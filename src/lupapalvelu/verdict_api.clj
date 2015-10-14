@@ -144,11 +144,11 @@
           attachments (filter is-verdict-attachment? (:attachments application))
           {:keys [sent state verdicts]} application
           ; Deleting the only given verdict? Return sent or submitted state.
-          step-back? (and (= 1 (count verdicts)) (= "verdictGiven" state))
+          step-back? (and (= 1 (count verdicts)) (states/verdict-given-states (keyword state)))
           updates (merge {$pull {:verdicts {:id verdictId}
-                                :comments {:target target}
-                                :tasks {:source target}}}
-                    (when step-back? {$set {:state (if sent :sent :submitted)}}))]
+                                 :comments {:target target}
+                                 :tasks {:source target}}}
+                    (when step-back? {$set {:state (if (and sent (sm/valid-state? application :sent)) :sent :submitted)}}))]
       (update-application command updates)
       (doseq [{attachment-id :id} attachments]
         (attachment/delete-attachment application attachment-id))
