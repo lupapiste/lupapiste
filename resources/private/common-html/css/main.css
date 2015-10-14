@@ -1833,37 +1833,81 @@ footer .informations .footer-box a:link:hover, footer .informations .footer-box 
 footer .informations .footer-box.sade-box a {
   display: inline;
 }
+/* line 53, ../sass/partials/_footer.scss */
+footer .lupapiste-brand .footer-box {
+  color: #0fbbf7;
+}
+/* line 15, ../sass/partials/_header.scss */
+footer .lupapiste-brand .footer-box a {
+  font-size: 16px;
+  vertical-align: middle;
+  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* line 24, ../sass/partials/_header.scss */
+footer .lupapiste-brand .footer-box a:link, footer .lupapiste-brand .footer-box a:visited {
+  color: #0fbbf7;
+  text-decoration: none;
+}
+/* line 27, ../sass/partials/_header.scss */
+footer .lupapiste-brand .footer-box a:link span, footer .lupapiste-brand .footer-box a:visited span {
+  color: #0fbbf7;
+}
+/* line 31, ../sass/partials/_header.scss */
+footer .lupapiste-brand .footer-box a:hover, footer .lupapiste-brand .footer-box a:active {
+  color: white;
+  background-color: inherit;
+}
+/* line 34, ../sass/partials/_header.scss */
+footer .lupapiste-brand .footer-box a:hover span, footer .lupapiste-brand .footer-box a:active span {
+  color: white;
+}
+/* line 38, ../sass/partials/_header.scss */
+footer .lupapiste-brand .footer-box a span {
+  vertical-align: middle;
+}
+/* line 57, ../sass/partials/_footer.scss */
+footer .lupapiste-brand .footer-align-right {
+  float: right;
+}
+/* line 59, ../sass/partials/_footer.scss */
+footer .lupapiste-brand .footer-align-right ul {
+  float: right;
+}
 @media (max-width: 991px) {
-  /* line 52, ../sass/partials/_footer.scss */
+  /* line 66, ../sass/partials/_footer.scss */
   footer .footer-box:nth-child(2n+1) {
     clear: left;
   }
-  /* line 55, ../sass/partials/_footer.scss */
+  /* line 69, ../sass/partials/_footer.scss */
   footer .footer-box {
     min-width: 49%;
   }
 }
 
 @media (max-width: 991px) {
-  /* line 62, ../sass/partials/_footer.scss */
+  /* line 76, ../sass/partials/_footer.scss */
   body {
     padding-bottom: 420px !important;
   }
 }
-/* line 67, ../sass/partials/_footer.scss */
+/* line 81, ../sass/partials/_footer.scss */
 footer ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
 }
 
-/* line 73, ../sass/partials/_footer.scss */
+/* line 87, ../sass/partials/_footer.scss */
 footer ul li {
   margin-bottom: .5em;
   margin-top: 0;
 }
 
-/* line 80, ../sass/partials/_footer.scss */
+/* line 94, ../sass/partials/_footer.scss */
 #buildinfo {
   clear: both;
   display: block;

@@ -135,7 +135,7 @@
 
    :common-html  {:depends [:selectm-html]
                   :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
-                  :html ["404.html" "footer.html"]}
+                  :html ["404.html"]}
 
    ;; Components to be included in a SPA
 
@@ -164,6 +164,8 @@
                   :html ["mypage.html"]}
 
    :header     {:html ["header.html"], :js ["header.js"]}
+
+   :footer     {:html ["footer.html"]}
 
    :modal-datepicker {:depends [:common-html]
                       :html ["modal-datepicker.html"]
@@ -307,7 +309,7 @@
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
-   :hashbang     {:depends [:common-html :ui-components :header]
+   :hashbang     {:depends [:common-html :ui-components :header :footer]
                   :js ["hashbang.js"]
                   :html ["index.html"]}
 
@@ -321,27 +323,27 @@
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :header :debug
-                             :company :analytics :register-company]}
+                             :company :analytics :register-company :footer]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
    :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
-                             :company :stamp :integration-error :analytics :metadata-editor]}
+                             :company :stamp :integration-error :analytics :metadata-editor :footer]}
 
    :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :notice :analytics :header]
+                       :docgen :debug :notice :analytics :header :footer]
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin-app.js" "register-authority-admin-models.js"]}
-   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol]
+   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer]
                          :js [schema-versions-by-permit-type "organization-user.js" "edit-roles-dialog-model.js" "authority-admin.js"]
                          :html ["authority-admin.html"]}
 
    :admin-app {:depends [:ui-components]
                :js ["admin.js" "register-admin-models.js"]}
-   :admin     {:depends [:admin-app :common-html :authenticated :admins :accordion :map :mypage :header :debug]
+   :admin     {:depends [:admin-app :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js" "notifications.js"]
                :html ["index.html" "admin.html" "organization.html"
@@ -353,7 +355,7 @@
    :welcome-app {:depends [:ui-components]
                  :js ["welcome.js"]}
 
-   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics]
+   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics :footer]
              :js ["company-user.js"]
 
              :html ["index.html" "login.html" "company-user.html"]}
@@ -362,7 +364,7 @@
 
    :neighbor-app {:depends [:ui-components]
                   :js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics]
+   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}
 
@@ -370,7 +372,7 @@
                   :js ["bulletins-app.js"]}
 
    :bulletins {:depends [:bulletins-app :services]
-               :html ["application-bulletins.html" "header.html"] :js ["header.js"]}
+               :html ["application-bulletins.html" "header.html" "footer.html"] :js ["header.js"]}
    })
 
 ; Make sure all dependencies are resolvable:

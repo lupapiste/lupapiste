@@ -9,3 +9,6 @@ bulletin.feedback-period: Palauteaika päättyy
 bulletin.page.info:  Julkipano-palvelussa voit tutustua kuntien lupa-asioiden ilmoituksiin ja päätöksiin.
 bulletin.page.header:  Kuntien julkipanoilmoitukset
 bulletin.page.service-info:  Palveluinfo
+
+footer.service.instructions:  Palvelun käytön ohjeet
+footer.reload:  Takaisin ylös

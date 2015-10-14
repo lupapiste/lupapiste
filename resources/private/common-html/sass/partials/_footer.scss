@@ -16,7 +16,7 @@ footer {
   height: auto;
   bottom: 0;
   width: 100%;
-  
+
   .informations {
     padding: $marginM;
     width: 100%;
@@ -48,6 +48,20 @@ footer {
       }
     }
   }
+
+  .lupapiste-brand {
+    .footer-box {
+      @include nav-link($link: $blue, $hover: white);
+      color: $blue;
+    }
+    .footer-align-right {
+      float: right;
+      ul {
+        float: right;
+      }
+    }
+  }
+
   @media (max-width:991px) {
       .footer-box:nth-child(2n+1) {
           clear: left;
