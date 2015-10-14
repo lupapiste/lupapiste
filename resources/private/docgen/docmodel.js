@@ -872,6 +872,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return createComponent("property-group", params);
   }
 
+  function buildDocgenTable (subSchema, model, path) {
+    var name = subSchema.name;
+
+    var params = {
+      path: path,
+      subSchema: subSchema,
+      documentId: self.docId,
+      model: model[name]
+    };
+    return createComponent("docgen-table", params);
+  }
+
   function buildRadioGroup(subSchema, model, path) {
     var myPath = path.join(".");
     var myModel;
@@ -1294,6 +1306,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   var builders = {
     group: buildGroup,
     docgenGroup: buildDocgenGroup,
+    docgenTable: buildDocgenTable,
     propertyGroup: buildPropertyGroup,
     string: buildString,
     hetu: buildString,

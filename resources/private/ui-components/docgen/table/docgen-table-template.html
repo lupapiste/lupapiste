@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="docgen-table-template">
+      <div class="form-table" data-bind="attr: {id: self.groupId}">
+
+        <label class="form-label form-label-table" data-bind="ltext: groupLabel"></label>
+        <table>
+          <thead>
+            <tr data-bind="foreach: columnHeaders"><td><span data-bind="ltext: $data"></span></td></tr>
+          </thead>
+          <tbody>
+            <tr data-bind="foreach: subSchemas">
+              <td>
+                <span class="form-entry"
+                  data-bind="component: { name: uicomponent,
+                                          params: { schema: $data,
+                                                    path: path,
+                                                    model: model }}">
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

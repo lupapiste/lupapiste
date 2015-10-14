@@ -8,6 +8,7 @@ jQuery(document).ready(function() {
     {name: "foreman-history"},
     {name: "foreman-other-applications"},
     {name: "docgen-group"},
+    {name: "docgen-table"},
     {name: "docgen-checkbox", model: "docgen-input-model"},
     {name: "docgen-select", model: "docgen-input-model"},
     {name: "docgen-string", model: "docgen-input-model"},
