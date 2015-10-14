@@ -278,7 +278,7 @@
    :_comments-seen-by        {}
    :_statements-seen-by      {}
    :_verdicts-seen-by        {}
-   :acknowledged             nil ; keyword
+   :acknowledged             nil ; timestamp
    :address                  ""
    :applicant                ""
    :attachments              []
