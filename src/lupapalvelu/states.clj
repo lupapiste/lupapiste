@@ -180,13 +180,10 @@
 (comment
   (require ['rhizome.viz :as 'viz])
   (require ['lupapalvelu.i18n :as 'i18n])
-  (doseq [sym ['default-inforequest-state-graph
-               'default-application-state-graph
-               'tj-hakemus-state-graph
-               'tj-ilmoitus-state-graph
-               'ymp-application-state-graph
-               'tonttijako-application-state-graph
-               'kt-application-state-graph]
+  (doseq [sym (->>
+                (ns-publics 'lupapalvelu.states)
+                (filter #(ss/ends-with (name (first %)) "-graph"))
+                (map first))
           :let [g (var-get (resolve sym))
                 filename (str "target/" (name sym) ".png")]]
     (viz/save-graph (keys g) g :node->descriptor (fn [n] {:label (str (i18n/localize "fi" (name n)) "\n(" (name n) ")")}) :filename filename))
