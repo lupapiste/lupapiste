@@ -46,8 +46,8 @@
      ; must be for tj-hakemus-state-graph compatibility:
      ; if foreman application is in complement-needed state it can be converted
      ; to use this state graph
-     :complement-needed [:acknowledged]
-     :acknowledged [:submitted]}))
+     :complement-needed [:acknowledged :canceled]
+     :acknowledged [:complement-needed]}))
 
 (def
   ^{:doc "See default-application-state-graph"}

@@ -183,7 +183,7 @@
                         </div>
 
                         <!-- Actions: -->
-                        <div class="application_actions">
+                        <div class="application_actions" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'application'">
                             <div class="stacked" data-bind="with: application">
                                 <!-- ko if: !hasInvites() -->
 
