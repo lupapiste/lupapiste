@@ -10,7 +10,7 @@ jQuery(document).ready(function() {
     {name: "docgen-group"},
     {name: "docgen-table"},
     {name: "docgen-checkbox", model: "docgen-input-model"},
-    {name: "docgen-select", model: "docgen-input-model"},
+    {name: "docgen-select"},
     {name: "docgen-string", model: "docgen-input-model"},
     {name: "docgen-inline-string", model: "docgen-input-model"},
     {name: "attachments-multiselect"},
