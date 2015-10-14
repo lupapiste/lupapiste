@@ -1,0 +1,3 @@
+KT: Kiinteistötoimitukset ja tonttijaot
+operations.tree.maankayton-muutos: Kaavoitushakemukset
+operations.tree.maanmittaustoimitukset: Kiinteistötoimitukset ja tonttijaot
