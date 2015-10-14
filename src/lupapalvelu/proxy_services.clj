@@ -89,8 +89,8 @@
         coords (s/replace wkt #"^POINT|^LINESTRING|^POLYGON" "")
         features (case type
                    "POINT" (let [[x y] (s/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
-                             (if (nil? radius) 
-                               (wfs/property-info-by-point x y) 
+                             (if-not (ss/numeric? radius)
+                               (wfs/property-info-by-point x y)
                                (wfs/property-info-by-radius x y radius)))
                    "LINESTRING" (wfs/property-info-by-line (s/split (s/replace coords #"[\(\)]" "") #","))
                    "POLYGON" (let [outterring (first (s/split coords #"\)" 1))] ;;; pudotetaan reiat pois
