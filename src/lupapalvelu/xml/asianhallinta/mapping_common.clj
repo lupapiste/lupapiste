@@ -56,6 +56,15 @@
    {:tag :Luotu}
    {:tag :Metatiedot :child [{:tag :Metatieto :child metatieto-type}]}])
 
+(def liite-type-1_2
+  [{:tag :Kuvaus}
+   {:tag :KuvausFi}
+   {:tag :KuvausSv}
+   {:tag :Tyyppi}
+   {:tag :LinkkiLiitteeseen}
+   {:tag :Luotu}
+   {:tag :Metatiedot :child [{:tag :Metatieto :child metatieto-type}]}])
+
 (def muu-tunnus-type
   [{:tag :Tunnus}
    {:tag :Sovellus}])
