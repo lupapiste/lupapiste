@@ -32,7 +32,6 @@ Foreman sees his other foreman jobs
 
 Foreman submits the second application
   Foreman applies personal information to the foreman application  1
-  Submit application
   Foreman can see the first related construction info on the second foreman application
 
 Foreman gets error message when trying to submit foreman notice before link permit has verdict
@@ -44,6 +43,11 @@ Foreman gets error message when trying to submit foreman notice before link perm
   Element should contain  xpath=//div[@id='modal-dialog-content']/div[@class='header']/span[@class="title"]  Työnjohtajan ilmoitus
   Confirm notification dialog
   Wait Until  Application state should be  draft
+
+Foreman application can be submitted
+  Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
+  Positive indicator should be visible
+  Submit application
 
 Can not link base app to foreman application
   Open project application
