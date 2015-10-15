@@ -2,13 +2,14 @@
   (:require [sade.core :refer [ok fail]]
             [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
+            [lupapalvelu.states :as states]
             [lupapalvelu.kopiolaitos :as kopiolaitos]))
 
 (defcommand order-verdict-attachment-prints
   {:description "Orders prints of marked verdict attachments from copy institute.
                  If the command is run more than once, the already ordered attachment copies are ordered again."
    :parameters [:id :lang :attachmentsWithAmounts :orderInfo]
-   :states     #{:verdictGiven :constructionStarted}
+   :states     states/post-verdict-states
    :user-roles #{:authority}
    :input-validators [(partial action/non-blank-parameters [:lang])
                       (partial action/map-parameters-with-required-keys [:orderInfo]

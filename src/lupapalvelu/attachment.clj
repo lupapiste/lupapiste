@@ -436,6 +436,7 @@
         options (merge options {:file-id file-id
                                 :filename sanitazed-filename
                                 :content-type content-type})]
+    (debug "         uploading to mongo: "  content)
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
     (.submit preview-threadpool #(create-preview file-id sanitazed-filename content-type content application-id db-name))
     (update-or-create-attachment options)))
@@ -488,9 +489,9 @@
 
 (defn ensure-pdf-a
   "Ensures PDF file PDF/A compatibility status based on original attachment status"
-  [temp-file valid-pdfa]
-  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
-  (if (not valid-pdfa)
+  [temp-file must-be-pdfa?]
+  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? must-be-pdfa?))
+  (if (not must-be-pdfa?)
     (do (debugf "    no PDF/A required, no conversion") {:file temp-file :pdfa false})
     (let [a-temp-file (File/createTempFile "lupapiste.stamp.a." ".tmp")
           conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath temp-file) (.getAbsolutePath a-temp-file))]

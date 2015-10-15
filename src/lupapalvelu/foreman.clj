@@ -14,13 +14,12 @@
 
 (defn other-project-document [application timestamp]
   (let [building-doc (domain/get-document-by-name application "uusiRakennus")
-        kokonaisala (get-in building-doc [:data :mitat :kokonaisala :value])
-        operation (get-in building-doc [:schema-info :op :name])]
+        kokonaisala (get-in building-doc [:data :mitat :kokonaisala :value])]
     {:luvanNumero {:value (:id application)
                    :modified timestamp}
      :katuosoite {:value (:address application)
                   :modified timestamp}
-     :rakennustoimenpide {:value operation
+     :rakennustoimenpide {:value (get-in application [:primaryOperation :name])
                           :modified timestamp}
      :kokonaisala {:value kokonaisala
                    :modified timestamp}

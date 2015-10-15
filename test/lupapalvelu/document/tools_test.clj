@@ -94,3 +94,11 @@
       (deep-find deep-find-test-data [:b :e]) => '()
       )
 
+(def updates [["a" 1] ["b" 2] ["c" 3]])
+
+(fact "get-update-item-value"
+  (get-update-item-value updates "a") => 1
+  (get-update-item-value updates "non-existing") => nil
+  )
+
+

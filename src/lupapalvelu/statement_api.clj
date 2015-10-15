@@ -15,7 +15,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
-            [lupapalvelu.user-api :as user-api]))
+            [lupapalvelu.user-api :as user-api]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]))
 
 ;;
 ;; Authority Admin operations
@@ -156,7 +157,7 @@
    :notified    true
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
    :description "authrority-roled statement owners can give statements - notifies via comment."}
-  [{:keys [application user created] :as command}]
+  [{:keys [application user created lang] :as command}]
   (when-not ((set (possible-statement-statuses application)) status)
     (fail! :error.unknown-statement-status))
   (let [comment-text   (if (statement-given? application statementId)
@@ -164,10 +165,14 @@
                          (i18n/loc "statement.given"))
         comment-target {:type :statement :id statementId}
         comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created)]
-    (update-application command
-      {:statements {$elemMatch {:id statementId}}}
-      (util/deep-merge
-        comment-model
-        {$set {:statements.$.status status
-               :statements.$.given created
-               :statements.$.text text}}))))
+
+    (let [response (update-application command
+                                       {:statements {$elemMatch {:id statementId}}}
+                                       (util/deep-merge
+                                         comment-model
+                                         {$set {:statements.$.status status
+                                                :statements.$.given created
+                                                :statements.$.text text}}))
+          updated-app (assoc application :statements (map  #(if (= statementId (:id %)) (assoc % :status status :given created :text text) % ) (:statements application) ) )]
+                       (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
+                       response)))
