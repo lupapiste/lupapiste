@@ -11,7 +11,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   var model = params.model || {};
 
   function buildLocKey(subSchema, path) {
-    return subSchema.i18nkey || path.concat(subSchema.name).join(".");
+    return subSchema.i18nkey || path.join(".");
   }
 
   self.subSchemas = _.map(params.subSchema.body, function(schema) {
