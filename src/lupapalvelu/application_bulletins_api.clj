@@ -17,11 +17,8 @@
    :modified 1})
 
 (def default-bulletin-page-size 10)
-
 (defn- do-get-application-bulletins [{:keys [limit] :or {limit default-bulletin-page-size}}]
-  (let [query {}
-        apps (mongo/with-collection "application-bulletins"
-               (query/find query)
+  (let [apps (mongo/with-collection "application-bulletins"
                (query/fields bulletins-fields)
                (query/sort {:modified 1})
                (query/limit limit))]
