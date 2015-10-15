@@ -1177,7 +1177,7 @@
   {:apply-when (pos? (mongo/count :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "closed"}))}
   (reduce + 0
     (for [{:keys [id closed]} (mongo/select :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "closed"} [:closed])]
-      (mongo/update-n :applications {:_id id} {$set {:state :acknowledged, :acknowledged closed}, {$unset {:closed 1}}}))))
+      (mongo/update-n :applications {:_id id} {$set {:state :acknowledged, :acknowledged closed}, $unset {:closed 1}}))))
 
 (defmigration tyonjohtaja-ilmoitus-verdict-given-mapping
   {:apply-when (pos? (mongo/count :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "verdictGiven"}))}
