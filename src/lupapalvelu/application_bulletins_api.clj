@@ -18,7 +18,7 @@
 
 (def default-bulletin-page-size 10)
 
-(defn application-bulletins [{:keys [limit] :or {limit default-bulletin-page-size}}]
+(defn- do-get-application-bulletins [{:keys [limit] :or {limit default-bulletin-page-size}}]
   (let [query {}
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
@@ -32,13 +32,11 @@
 (defquery application-bulletins
   {:description "Query for Julkipano"
    :feature :publish-bulletin
-   :parameters []
-   :optional-parameters [page]
+   :parameters [page]
    :user-roles #{:anonymous}}
   [{data :data}]
-  (let [page  (or page 1)
-        limit (* page default-bulletin-page-size)]
-    (ok :data (application-bulletins (assoc data :limit limit)))))
+  (let [limit (* page default-bulletin-page-size)]
+    (ok :data (do-get-application-bulletins (assoc data :limit limit)))))
 
 
 (def app-snapshot-fields
