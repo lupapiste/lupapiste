@@ -169,7 +169,8 @@
 (def- mkmu-validators
   {"2.1.6" common-validator-2_1_6
    "1.0.1" (create-validator mkmu-1_0_1)
-   "ah-1.1" asianhallinta-validator})
+   "ah-1.1" asianhallinta-validator-1_1
+   "ah-1.2" asianhallinta-validator-1_2})
 
 (def- kiito-validators
   {"2.1.6" common-validator-2_1_6
@@ -184,7 +185,8 @@
    :YI  ymp-validators
    :MAL ymp-validators
    :VVVL {"2.1.3" common-validator-2_1_3
-          "ah-1.1" asianhallinta-validator-1_1}
+          "ah-1.1" asianhallinta-validator-1_1
+          "ah-1.2" asianhallinta-validator-1_2}
    :YL  ymp-validators
    :MM  mkmu-validators ; maankayton muutos aka kaavat
    :KT  kiito-validators})
