@@ -1158,7 +1158,7 @@
 
 (defmigration tyonjohtaja-hakemus-verdict-given-mapping
   {:apply-when (pos? (mongo/count :applications {:permitSubtype "tyonjohtaja-hakemus", :state "verdictGiven"}))}
-  (mongo/update-n :applications {:permitSubtype "tyonjohtaja-hakemus", :state "verdictGiven"} {$set {:state :foremanVerdictGiven}}))
+  (mongo/update-by-query :applications {:permitSubtype "tyonjohtaja-hakemus", :state "verdictGiven"} {$set {:state :foremanVerdictGiven}}))
 
 
 ; 2015-10-14:
@@ -1177,14 +1177,14 @@
   {:apply-when (pos? (mongo/count :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "closed"}))}
   (reduce + 0
     (for [{:keys [id closed]} (mongo/select :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "closed"} [:closed])]
-      (mongo/update-n :applications {:_id id} {$set {:state :acknowledged, :acknowledged closed}, $unset {:closed 1}}))))
+      (mongo/update-by-query :applications {:_id id} {$set {:state :acknowledged, :acknowledged closed}, $unset {:closed 1}}))))
 
 (defmigration tyonjohtaja-ilmoitus-verdict-given-mapping
   {:apply-when (pos? (mongo/count :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "verdictGiven"}))}
   (reduce + 0
     (for [{:keys [id verdicts]} (mongo/select :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "verdictGiven"} [:verdicts])
           :let [timestamp (->> (map :timestamp verdicts) (filter number?) (apply min))]]
-      (mongo/update-n :applications {:_id id} {$set {:state :acknowledged, :acknowledged timestamp}}))))
+      (mongo/update-by-query :applications {:_id id} {$set {:state :acknowledged, :acknowledged timestamp}}))))
 
 ;;
 ;; ****** NOTE! ******
