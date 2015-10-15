@@ -90,16 +90,15 @@
    :pre-checks [application/validate-authority-in-drafts]}
   [{application :application user :user :as command}]
   (when-let [foreman-applications (seq (foreman/get-foreman-project-applications application foremanHetu))]
-    (let [other-applications (map (fn [app] (foreman/other-project-document app (:created command))) foreman-applications)
-          tyonjohtaja-doc (domain/get-document-by-name application "tyonjohtaja-v2")
-          muut-hankkeet (get-in tyonjohtaja-doc [:data :muutHankkeet])
-          muut-hankkeet (select-keys muut-hankkeet (for [[k v] muut-hankkeet :when (not (get-in v [:autoupdated :value]))] k))
-          muut-hankkeet (into [] (map (fn [[_ v]] v) muut-hankkeet))
-          all-hankkeet (concat other-applications muut-hankkeet)
-          all-hankkeet (into {} (map-indexed (fn [idx hanke] {(keyword (str idx)) hanke}) all-hankkeet))
-          tyonjohtaja-doc (assoc-in tyonjohtaja-doc [:data :muutHankkeet] all-hankkeet)
-          documents (:documents application)
-          documents (map (fn [doc] (if (= (:id tyonjohtaja-doc) (:id doc)) tyonjohtaja-doc doc)) documents)]
+    (let [other-applications (map #(foreman/other-project-document % (:created command)) foreman-applications)
+          tyonjohtaja-doc (update-in (domain/get-document-by-name application "tyonjohtaja-v2") [:data :muutHankkeet] 
+                                     (fn [muut-hankkeet]                      
+                                       (->> (vals muut-hankkeet)
+                                            (remove #(get-in % [:autoupdated :value]))
+                                            (concat other-applications)
+                                            (map vector (map (comp keyword str) (range)))
+                                            (into {}))))
+          documents (map (fn [doc] (if (= (:id doc) (:id tyonjohtaja-doc)) tyonjohtaja-doc doc)) (:documents application))]
       (update-application command {$set {:documents documents}}))
     (ok)))
 

@@ -68,4 +68,4 @@
         scope         (organization/resolve-organization-scope (:municipality application) permit-type)
         ah-version    (resolve-ah-version scope)
         output-dir    (resolve-output-directory scope)]
-       (ah-mapping/taydennys-asiaan-from-application application attachments lang ah-version begin-of-link output-dir)))
+    (ah-mapping/taydennys-asiaan-from-application application attachments lang ah-version begin-of-link output-dir)))

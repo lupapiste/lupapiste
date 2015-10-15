@@ -1125,7 +1125,7 @@
 
 (defn update-krysp-config
   [{organization-id :id} permit-type {url :url username :username password :password version :version}]
-  (when username
+  (when (and username password)
     (organization/set-krysp-endpoint organization-id url username password (name permit-type) version)))
 
 (defn move-credentials-out-from-organization-krysp-addresses
