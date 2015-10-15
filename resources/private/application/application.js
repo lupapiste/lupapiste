@@ -78,8 +78,8 @@
 
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
       .success(function() {
-        authorizationModel.refresh(currentId);
         hub.send("indicator", {style: "positive"});
+        applicationModel.reload();
       })
       .call();
   }

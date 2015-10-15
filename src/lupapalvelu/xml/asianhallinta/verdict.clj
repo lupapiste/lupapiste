@@ -11,6 +11,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.state-machine :as sm]
             [clojure.string :as s]
             [clojure.java.io :as io]
             [sade.common-reader :as cr]
@@ -95,6 +96,8 @@
         ; Create verdict
         ; -> fetch application
         (let [application (domain/get-application-no-access-checking application-id)
+              current-state (keyword (:state application))
+              verdict-given-state (sm/verdict-given-state application)
               org-scope (org/resolve-organization-scope (:municipality application) (:permitType application))]
 
           ; -> check ftp-user has right to modify app
@@ -102,9 +105,9 @@
             (error-and-fail! (str "FTP user " ftp-user " is not allowed to make changes to application " application-id) :error.integration.asianhallinta.unauthorized))
 
           ; -> check that application is in correct state
-          (when-not (#{:constructionStarted :sent :verdictGiven} (keyword (:state application)))
+          (when-not (#{:constructionStarted :sent verdict-given-state} current-state)
             (error-and-fail!
-              (str "Application " application-id " in wrong state (" (:state application) ") for asianhallinta verdict") :error.integration.asianhallinta.wrong-state))
+              (str "Application " application-id " in wrong state (" current-state ") for asianhallinta verdict") :error.integration.asianhallinta.wrong-state))
 
           ; -> build update clause
           ; -> update-application
@@ -115,7 +118,7 @@
                                $set  (merge
                                        {:modified (core/now)}
                                        (when (#{:sent} (keyword (:state application)))
-                                         {:state :verdictGiven}))}]
+                                         {:state verdict-given-state}))}]
 
             (action/update-application command update-clause)
             (doseq [attachment attachments]

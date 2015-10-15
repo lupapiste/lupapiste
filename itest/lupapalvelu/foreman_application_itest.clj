@@ -113,8 +113,8 @@
         (command sonja :approve-application :id application-id :lang "fi") => ok?
         (command sonja :approve-application :id foreman-application-id :lang "fi") => ok?)
 
-      (fact "when foreman application is of type 'ilmoitus', after approval its state is closed"
-        (:state (query-application apikey foreman-application-id)) => "closed"))
+      (fact "when foreman application is of type 'ilmoitus', after approval its state is acknowledged"
+        (:state (query-application apikey foreman-application-id)) => "acknowledged"))
 
     (facts "updating other foreman projects to current foreman application"
       (let [{application1-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
@@ -258,7 +258,8 @@
           (has-auth? "heppu@exampe.com" orig-auth))
 
         (fact "Emails are sent correctly to recipients"
-          (let [recipients (map :to (sent-emails))]
+          (let [emails (sent-emails)
+                recipients (map :to emails)]
             recipients => (just ["heppu@example.com" ; foreman is invited to original application also
                                  "heppu@example.com"
                                  "foo@example.com"
