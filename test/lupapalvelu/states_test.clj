@@ -16,8 +16,8 @@
   post-submitted-states =not=> (contains #{:open :submitted}))
 
 (fact "post-verdict-states"
-  post-verdict-states => (contains #{:verdictGiven :constructionStarted :closed})
-  post-verdict-states =not=> (contains #{:sent :complement-needed}))
+  post-verdict-states => (contains #{:verdictGiven :foremanVerdictGiven :constructionStarted :closed})
+  post-verdict-states =not=> (contains #{:sent :complement-needed :canceled :submitted}))
 
 (fact "all states"
   all-inforequest-states => #{:info :answered}
