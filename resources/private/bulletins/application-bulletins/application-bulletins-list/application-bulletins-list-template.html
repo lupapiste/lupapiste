@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="application-bulletins-list-template">
+      <table id="application-bulletins-list">
+        <thead>
+          <tr data-bind="foreach: columns">
+            <th><span data-bind="ltext: $data.ltext"></span></th>
+          </tr>
+        </thead>
+        <tbody data-bind="foreach: bulletins">
+          <tr data-bind="click: $component.params.clickHandler">
+            <td data-bind="ltext: $data.state"></td>
+            <td data-bind="ltext: $data.municipality"></td>
+            <td data-bind="text: $data.address"></td>
+            <td data-bind="ltext: $data.type"></td>
+            <td data-bind="text: $data.applicant"></td>
+            <td data-bind="dateTimeString: $data.date"></td>
+            <td data-bind="text: $data.feedbackPeriod"></td>
+          </tr>
+        </tbody>
+      </table>
+    </script>
+  </section>
+</body>
+</html>

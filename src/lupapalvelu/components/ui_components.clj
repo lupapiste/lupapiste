@@ -147,8 +147,7 @@
                    "organization-filter-service.js"
                    "organization-tags-service.js"
                    "handler-filter-service.js"
-                   "application-filters-service.js"
-                   "application-bulletins-service.js"]}
+                   "application-filters-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -368,12 +367,20 @@
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}
 
-   :bulletins-app {:depends [:ui-components]
-                  :js ["bulletins-app.js"]}
-
-   :bulletins {:depends [:bulletins-app :services]
-               :html ["application-bulletins.html" "bulletin.html" "header.html" "footer.html"]
-               :js ["bulletin.js" "header.js"]}
+   :bulletins {:depends [:ui-components]
+               :html ["header.html" "footer.html"
+                      "bulletins.html" "bulletins-template.html"
+                      "application-bulletin/application-bulletin-template.html"
+                      "application-bulletins/application-bulletins-template.html"
+                      "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
+                      "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-template.html"]
+               :js ["header.js"
+                    "bulletins.js" "bulletins-model.js"
+                    "application-bulletins-service.js"
+                    "application-bulletin/application-bulletin-model.js"
+                    "application-bulletins/application-bulletins-model.js"
+                    "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
+                    "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"]}
    })
 
 ; Make sure all dependencies are resolvable:

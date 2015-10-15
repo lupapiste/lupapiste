@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="load-more-application-bulletins-template">
+      <div class="search-button-wrapper">
+        <button class="bulletin"
+                data-bind="click: requestedPages.increment.bind(requestedPages),
+                           visible: showButton">
+          <i class="lupicon-circle-plus"></i>
+          <span data-bind="ltext: 'bulletin.search.button'"></span>
+          <span data-bind="text: localizedBulletinsLeft">kpl</span>
+        </button>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

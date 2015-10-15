@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="application-bulletin-template">
+
+      <div class="application_summary">
+        <div class="container">
+          <div class="preamble">
+            <div class="application_summary_info" data-bind="with: bulletin">
+              <h1 data-bind="text: address"></h1> <!-- TODO implement LPK-724 and change: edit: 'edit.address' -->
+              <h2 data-bind="if: primaryOperation">
+                    <span data-test-id="bulletin-primary-operation"
+                          data-bind="ltext: 'operations.' + primaryOperation.name, attr: {'data-test-primary-operation-id': primaryOperation.name}"></span>
+              </h2>
+
+              <!-- State: -->
+              <!-- Property ID: -->
+              <div>
+                <p data-bind="ltext: 'application.property'"></p>
+                <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="bulletin-property-id"></span>
+              </div>
+
+              <!-- Municipality: -->
+              <div>
+                <p data-bind="ltext: 'application.municipality'"></p>
+                <span class="application_summary_text" data-bind="text: loc(['municipality', municipality])"></span>
+              </div>
+            </div>
+            <div class="application-map-container">
+              <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+            </div>
+
+              <!-- Actions: -->
+              <div class="application_actions">
+                <!-- click: exportPdf, visible: $root.authorization.ok('pdf-export'), enable: !processing() && $root.authorization.ok('pdf-export') -->
+                <button class="function"
+                        data-bind=""
+                        data-test-id="application-pdf-btn">
+                    <i class="lupicon-print"></i>
+                    <span data-bind="ltext: 'application.pdf'"></span>
+                </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </script>
+  </section>
+</body>
+</html>

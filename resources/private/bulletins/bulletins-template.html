@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="bulletins-template">
+    <!-- ko if: bulletinId() -->
+    <div data-bind="component: {name: 'application-bulletin',
+                                params: {bulletinId: bulletinId()}}"></div>
+    <!-- /ko -->
+    <!-- ko ifnot: bulletinId() -->
+    <div data-bind="component: {name: 'application-bulletins'}"></div>
+    <!-- /ko -->
+    </script>
+  </section>
+</body>
+</html>
