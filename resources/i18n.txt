@@ -1,2 +1,0 @@
-foremanVerdictGiven.title:
-acknowledged.title:
