@@ -16,12 +16,17 @@
    :versions.applicant 1 :versions.modified 1
    :modified 1})
 
-(def default-bulletin-page-size 10)
-(defn- do-get-application-bulletins [page]
+(def bulletin-page-size 10)
+
+(defn- get-application-bulletins-left [page]
+  (- (mongo/count :application-bulletins)
+     (* page bulletin-page-size)))
+
+(defn- get-application-bulletins [page]
   (let [apps (mongo/with-collection "application-bulletins"
                (query/fields bulletins-fields)
                (query/sort {:modified 1})
-               (query/paginate :page page :per-page default-bulletin-page-size))]
+               (query/paginate :page page :per-page bulletin-page-size))]
     (map
       #(assoc (first (:versions %)) :id (:_id %))
       apps)))
@@ -32,7 +37,8 @@
    :parameters [page]
    :user-roles #{:anonymous}}
   [_]
-  (ok :data (do-get-application-bulletins page)))
+  (ok :data (get-application-bulletins page)
+      :left (get-application-bulletins-left page)))
 
 
 (def app-snapshot-fields
