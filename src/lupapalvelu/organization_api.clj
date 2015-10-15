@@ -307,14 +307,16 @@
       (fail :error.unknown-organization))))
 
 (defcommand set-krysp-endpoint
-  {:parameters [url permitType version]
+  {:parameters [url username password permitType version]
    :user-roles #{:authorityAdmin}
    :input-validators [permit/permit-type-validator]}
   [{user :user}]
-  (if (or (s/blank? url) (krysp/wfs-is-alive? url))
-    (mongo/update-by-id :organizations (user/authority-admins-organization-id user) {$set {(str "krysp." permitType ".url") url
-                                                                                           (str "krysp." permitType ".version") version}})
-    (fail :auth-admin.legacyNotResponding)))
+  (let [organization-id (user/authority-admins-organization-id user)
+        krysp-config    (o/get-krysp-wfs organization-id permitType)
+        password        (if (s/blank? password) (second (:credentials krysp-config)) password)]
+    (if (or (s/blank? url) (krysp/wfs-is-alive? url username password))
+      (o/set-krysp-endpoint organization-id url username password permitType version)
+      (fail :auth-admin.legacyNotResponding))))
 
 (defcommand set-kopiolaitos-info
   {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
@@ -408,7 +410,7 @@
                                   [:tags :name])
           result (map (juxt :id #(select-keys % [:tags :name])) organization-tags)]
       (ok :tags (into {} result)))
-    (fail :error.organization-not-found)))
+    (ok :tags {})))
 
 (defquery get-organization-areas
   {:user-authz-roles #{:statementGiver}
@@ -422,7 +424,7 @@
                                [:areas :name])
           result (map (juxt :id #(select-keys % [:areas :name])) organization-areas)]
       (ok :areas (into {} result)))
-    (fail :error.organization-not-found)))
+    (ok :areas {})))
 
 (defn-
   ^org.geotools.data.simple.SimpleFeatureCollection
@@ -470,12 +472,13 @@
                              .getFeatureSource
                              .getFeatures
                              transform-crs-to-wgs84)
-            areas (cheshire/parse-string (.toString (FeatureJSON.) new-collection))]
-        (when (geo/validate-features (:features (keywordize-keys areas)))
+            areas (keywordize-keys (cheshire/parse-string (.toString (FeatureJSON.) new-collection)))
+            ensured-areas (geo/ensure-features areas)]
+        (when (geo/validate-features (:features ensured-areas))
           (fail! :error.coordinates-not-epsg3067))
-        (o/update-organization org-id {$set {:areas areas}})
+        (o/update-organization org-id {$set {:areas ensured-areas}})
         (.dispose data-store)
-        (->> (assoc file-info :areas areas :ok true)
+        (->> (assoc file-info :areas ensured-areas :ok true)
           (resp/json)
           (resp/content-type "application/json")
           (resp/status 200)))

@@ -17,7 +17,11 @@
 
 (defn instrument-ns [f & namespaces]
   (doseq [n namespaces
-          v (filter (comp fn? deref) (vals (ns-publics n)))]
+          v (->>
+              (ns-publics n)
+              vals
+              (remove (comp :perfmon-exclude meta))
+              (filter (comp fn? deref)))]
     (instrument f v)))
 
 ;;
@@ -57,24 +61,25 @@
       (apply f args))))
 
 (defn- get-total-db-call-duration [perf-context]
-  (->> perf-context
-       (map (comp first rest))
-       (reduce +)))
+  (->> perf-context (map second) (reduce +)))
 
-(defn perf-mon-middleware [handler]
-  (fn [request]
-    (if (bypass? request)
-      (handler request)
-      (binding [*perf-context* (atom [])]
-        (let [start (System/nanoTime)]
-          (try
-            (handler request)
-            (finally
-              (let [end (System/nanoTime)]
-                (debug (get request :uri) ":"
-                       (- end start) "ns,"
-                       (count @*perf-context*) "db calls,"
-                       (get-total-db-call-duration @*perf-context*) "ns")))))))))
+(defn ns->ms [ns] (quot ns 1000000))
+
+(defn log-perf-context [handler request]
+  (if (bypass? request)
+    (handler request)
+    (binding [*perf-context* (atom [])]
+      (let [start (System/nanoTime)]
+        (try
+          (handler request)
+          (finally
+            (let [end (System/nanoTime)]
+              (debug (get request :uri) ":"
+                (ns->ms (- end start)) "ms,"
+                (count @*perf-context*) "db calls took totally"
+                (ns->ms (get-total-db-call-duration @*perf-context*)) "ms"))))))))
+
+(defn perf-mon-middleware [handler] (fn [request] (log-perf-context handler request)))
 
 ;;
 ;; Throttling:

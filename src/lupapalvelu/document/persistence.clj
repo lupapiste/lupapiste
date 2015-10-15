@@ -28,7 +28,10 @@
 
 (defn ->model-updates
   "Creates model-updates from ui-format."
-  [updates] (for [[k v] updates] [(-> k (s/split #"\.") (->> (map keyword)) vec) v]))
+  [updates]
+  (for [[k v] updates]
+    (let [keys (mapv keyword (s/split k #"\."))]
+      [keys v])))
 
 (defn ->mongo-updates
   "Creates full paths to document update values to be $set.
@@ -132,16 +135,18 @@
                      :attachments
                      (:attachments application)
                      #(= (:id (:op %)) op-id)
-                     :op nil)))})))
-  )
+                     :op nil)))}))))
 
-(defn do-create-doc [{{:keys [id schemaName]} :data created :created application :application :as command}]
+(defn do-create-doc [{{:keys [schemaName]} :data created :created application :application :as command} & updates]
   (let [schema (schemas/get-schema (:schema-version application) schemaName)]
     (when-not (:repeating (:info schema)) (fail! :illegal-schema))
     (let [document (model/new-document schema created)]
       (update-application command
-        {$push {:documents document}
-         $set {:modified created}})
+                          {$push {:documents document}
+                           $set {:modified created}})
+      (when updates
+        (let [model-updates (->model-updates (first updates))]
+          (persist-model-updates application "documents" document model-updates created)))
       document)))
 
 (defn- update-key-in-schema? [schema [update-key _]]
@@ -190,8 +195,6 @@
                        (filter (partial update-key-in-schema? (:body schema))))]
       (when-not schema (fail! :error.schema-not-found))
       (when-not company (fail! :error.company-not-found))
-      (when-not (and (domain/has-auth? application company-id) (domain/no-pending-invites? application company-id))
-        (fail! :error.application-does-not-have-given-auth))
       (debugf "merging company %s into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
       (persist-model-updates application "documents" document updates timestamp))))
 

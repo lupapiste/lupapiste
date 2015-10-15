@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Behaving of the inforequest marker map
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***

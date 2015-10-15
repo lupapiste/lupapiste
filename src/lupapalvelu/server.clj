@@ -49,7 +49,8 @@
             [lupapalvelu.asianhallinta-config-api]
             [lupapalvelu.perf-mon-api]
             [lupapalvelu.user-notification-api]
-            [lupapalvelu.tiedonohjaus-api]))
+            [lupapalvelu.tiedonohjaus-api]
+            [lupapalvelu.application-tabs-api]))
 
 (defonce jetty (atom nil))
 
@@ -61,7 +62,7 @@
     (let [msg (format "%s build %s (%s)\nFailing migration(s): %s"
                 env/target-env
                 (:build-number env/buildinfo)
-                (:branch env/buildinfo)
+                (:hg-branch env/buildinfo)
                 (s/join failures))]
       (email/send-email-message "lupapalvelu@solita.fi" "Critical: Migration failure!" [msg msg])))
 

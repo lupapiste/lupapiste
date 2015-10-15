@@ -9,16 +9,16 @@
 (testable-privates lupapalvelu.application-search make-sort operation-names make-area-query)
 
 (facts "operation-names"
-  (operation-names "bil") => ["auto-katos"]
+  (operation-names "bil") => ["auto-katos" "kiinteistonmuodostus"]
   (operation-names "grilli") => ["auto-katos"]
   (operation-names "Ty\u00f6njohtaja") => ["tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen"]
-  (operation-names "ANNAN") => (just ["muu-uusi-rakentaminen" "muu-tontti-tai-kort-muutos" "ya-kayttolupa-muu-kayttolupa" "muu-laajentaminen" "muu-rakennus-laaj" "talousrakennus-laaj" "masto-tms" "muu-maisema-toimenpide" "varasto-tms" "sisatila-muutos"] :in-any-order)
+  (operation-names "ANNAN") => (just ["lannan-varastointi" "muu-uusi-rakentaminen" "muu-tontti-tai-kort-muutos" "ya-kayttolupa-muu-kayttolupa" "muu-laajentaminen" "muu-rakennus-laaj" "talousrakennus-laaj" "masto-tms" "muu-maisema-toimenpide" "varasto-tms" "sisatila-muutos"] :in-any-order)
   (operation-names "S\u00e4hk\u00f6-, data ja muiden kaapelien sijoittaminen") => ["ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen"])
 
 (facts "sorting parameter parsing"
   (make-sort {:sort {:field "unknown" :asc false}})  => {}
   (make-sort {:sort {:field "unknown" :asc true}})  => {}
-  (make-sort {:sort {:field "id" :asc false}}) => {}
+  (make-sort {:sort {:field "id" :asc false}}) => {:_id -1}
   (make-sort {:sort {:field "_id" :asc false}}) => {}
   (make-sort {:sort {:field "type" :asc true }})  => {:infoRequest -1, :permitSubtype 1}
   (make-sort {:sort {:field "type" :asc false }}) => {:infoRequest 1, :permitSubtype -1}
@@ -35,9 +35,9 @@
 
 (fact "make-query (LUPA-519) with filter-user checks both authority and auth.id"
   (-> (make-query {} {:kind  "both"
-                     :applicationType "all"
-                     :handler  "123"}
-                 {:role "authority"}) (get "$and") last) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
+                      :applicationType "all"
+                      :handlers  ["123"]}
+                  {:role "authority"}) (get "$and") last) => (contains {"$or" [{:auth.id {"$in" ["123"]}} {:authority.id  {"$in" ["123"]}}]}))
 
 (fact "query contais user query"
   (-> (make-query {:auth.id "123"} {} {}) (get "$and") first) => {:auth.id "123"})
@@ -50,11 +50,11 @@
     {:auth.id "123"}
     {:kind  "applications"
      :applicationType "all"
-     :handler  "321"
+     :handlers  ["321"]
      :tags ["test1" "test2"]}
     {:role "authority"}) => (just {"$and" (just [{:auth.id "123"}
                                                  {:state {"$nin" ["draft" "canceled"]}}
-                                                 {"$or" [{"auth.id" "321"} {"authority.id" "321"}]}
+                                                 {"$or" [{:auth.id {"$in" ["321"]}} {:authority.id  {"$in" ["321"]}}]}
                                                  {:tags {"$in" ["test1" "test2"]}}])}))
 
 (fact "Organization are present in query"

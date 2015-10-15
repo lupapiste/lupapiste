@@ -28,7 +28,8 @@
       (let [validator-fn (permit/get-verdict-validator (permit/permit-type application))]
         (validator-fn app-xml))
       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
-        (update-application command updates)
+        (when updates
+          (update-application command updates))
         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
     (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} (:name op))
       (verdict/fetch-tj-suunnittelija-verdict command))))
@@ -72,8 +73,6 @@
         blank-verdict (cond-> (domain/->paatos {:draft true})
                               (seq metadata) (assoc :metadata metadata))]
     (update-application command {$push {:verdicts blank-verdict}})
-    (debugf (str "DEBUG: blank-verdict= " blank-verdict ))
-
     (ok :verdictId (:id blank-verdict))))
 
 (defn- find-verdict [{verdicts :verdicts} id]
@@ -99,7 +98,6 @@
                   (merge
                     (select-keys data [:verdictId :backendId :status :name :section :agreement :text :given :official])
                     {:timestamp created, :draft true}))]
-    (debugf (str "  save-verdict mongo : " verdict))
     (update-application command
       {:verdicts {$elemMatch {:id verdictId}}}
       {$set {"verdicts.$.kuntalupatunnus" (:kuntalupatunnus verdict)

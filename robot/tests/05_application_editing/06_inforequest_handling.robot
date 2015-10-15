@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Inforequest state handling
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
@@ -19,7 +19,7 @@ Mikko creates two new inforequests
 
 Sonja sees comment indicator on applications list
   Sonja logs in
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${inforequest-handling}']//div[@class='unseen-comments']  1
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${inforequest-handling}']//div[@data-test-id='unseen-comments']  1
 
 Authority assigns an inforequest to herself
   Inforequest is not assigned  ${inforequest-handling}
@@ -33,8 +33,8 @@ Authority assigns an inforequest to herself
 
 Comment indicator is no longer visible (LPK-454)
   Go to page  applications
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${inforequest-cancelling}']//div[@class='unseen-comments']  1
-  Page should not contain element  xpath=//table[@id='applications-list']//tr[@data-test-address='${inforequest-handling}']//div[@class='unseen-comments']
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${inforequest-cancelling}']//div[@data-test-id='unseen-comments']  1
+  Page should not contain element  xpath=//table[@id='applications-list']//tr[@data-test-address='${inforequest-handling}']//div[@data-test-id='unseen-comments']
 
 Sonja is marked as authority
   Inforequest is assigned to  ${inforequest-handling}  Sibbo Sonja

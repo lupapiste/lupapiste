@@ -107,15 +107,15 @@
             time))))))
 
 (defquery party-document-names
-          {:parameters [:id]
-           :user-roles #{:applicant :authority}
-           :states     states/all-application-states}
-          [{application :application}]
-          (let [documents (:documents application)
-                initialOp (:name (:primaryOperation application))
-                original-schema-names (-> initialOp keyword operations/operations :required)
-                original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
-            (ok :partyDocumentNames (conj original-party-documents (permit/get-applicant-doc-schema (permit/permit-type application))))))
+  {:parameters [:id]
+   :user-roles #{:applicant :authority}
+   :states     states/all-application-states}
+  [{application :application}]
+  (let [documents (:documents application)
+        op-meta (operations/get-primary-operation-metadata application)
+        original-schema-names (->> (select-keys op-meta [:required :optional]) vals (apply concat))
+        original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
+    (ok :partyDocumentNames (conj original-party-documents (operations/get-applicant-doc-schema-name application)))))
 
 (defcommand mark-seen
   {:parameters       [:id type]
@@ -408,10 +408,11 @@
         new-secondary-ops (if old-primary-op ; production data contains applications with nil in primaryOperation
                             (conj secondary-ops-without-old-primary-op old-primary-op)
                             secondary-ops-without-old-primary-op)]
-    (when-not new-primary-op
-      (fail! :error.unknown-operation))
-    (update-application command {$set {:primaryOperation new-primary-op
-                                       :secondaryOperations new-secondary-ops}})
+    (when-not (= (:id old-primary-op) secondaryOperationId)
+      (when-not new-primary-op
+        (fail! :error.unknown-operation))
+      (update-application command {$set {:primaryOperation    new-primary-op
+                                         :secondaryOperations new-secondary-ops}}))
     (ok)))
 
 (defcommand change-permit-sub-type
@@ -467,60 +468,54 @@
                              (fail :error.link-permit-not-required)))]})
 
 (defquery app-matches-for-link-permits
-          {:parameters [id]
-           :user-roles #{:applicant :authority}
-           :states     (states/all-application-states-but (conj states/terminal-states :sent))}
-          [{{:keys [propertyId] :as application} :application user :user :as command}]
-          (let [application (meta-fields/enrich-with-link-permit-data application)
-                ;; exclude from results the current application itself, and the applications that have a link-permit relation to it
-                ignore-ids (-> application
-                               (#(concat (:linkPermitData %) (:appsLinkingToUs %)))
-                               (#(map :id %))
-                               (conj id))
-                results (mongo/select :applications
-                                      (merge (domain/application-query-for user) {:_id             {$nin ignore-ids}
-                                                                                  :infoRequest     false
-                                                                                  :permitType      (:permitType application)
-                                                                                  :secondaryOperations.name {$nin ["ya-jatkoaika"]}
-                                                                                  :primaryOperation.name {$nin ["ya-jatkoaika"]}})
-
-                                      [:permitType :address :propertyId])
-                ;; add the text to show in the dropdown for selections
-                enriched-results (map
-                                   (fn [r] (assoc r :text (str (:address r) ", " (:id r))))
-                                   results)
-                ;; sort the results
-                same-property-id-fn #(= propertyId (:propertyId %))
-                with-same-property-id (vec (filter same-property-id-fn enriched-results))
-                without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
-                organized-results (flatten (conj with-same-property-id without-same-property-id))
-                final-results (map #(select-keys % [:id :text]) organized-results)]
-            (ok :app-links final-results)))
-
-
-(defn- validate-jatkolupa-zero-link-permits [_ application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)]
-    (when (and (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
-               (pos? (-> application :linkPermitData count)))
-      (fail :error.jatkolupa-can-only-be-added-one-link-permit))))
-
-(defn- validate-link-permit-id [{:keys [data]} application]
+  {:parameters [id]
+   :user-roles #{:applicant :authority}
+   :states     (states/all-application-states-but (conj states/terminal-states :sent))}
+  [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
+        ;; exclude from results the current application itself, and the applications that have a link-permit relation to it
         ignore-ids (-> application
                        (#(concat (:linkPermitData %) (:appsLinkingToUs %)))
                        (#(map :id %))
-                       (conj (:id application)))]
-    (when (some
-            #(= (:id %) (:linkPermitId data))
-            (:appsLinkingToUs application))
-      (fail :error.link-permit-already-having-us-as-link-permit))))
+                       (conj id))
+        results (mongo/select :applications
+                              (merge (domain/application-query-for user) {:_id             {$nin ignore-ids}
+                                                                          :infoRequest     false
+                                                                          :permitType      (:permitType application)
+                                                                          :secondaryOperations.name {$nin ["ya-jatkoaika"]}
+                                                                          :primaryOperation.name {$nin ["ya-jatkoaika"]}})
+
+                              [:permitType :address :propertyId])
+        ;; add the text to show in the dropdown for selections
+        enriched-results (map
+                           (fn [r] (assoc r :text (str (:address r) ", " (:id r))))
+                           results)
+        ;; sort the results
+        same-property-id-fn #(= propertyId (:propertyId %))
+        with-same-property-id (vec (filter same-property-id-fn enriched-results))
+        without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
+        organized-results (flatten (conj with-same-property-id without-same-property-id))
+        final-results (map #(select-keys % [:id :text]) organized-results)]
+    (ok :app-links final-results)))
+
+(defn- validate-linking [command app]
+  (let [link-permit-id (ss/trim (get-in command [:data :linkPermitId]))
+        {:keys [appsLinkingToUs linkPermitData]} (meta-fields/enrich-with-link-permit-data app)
+        max-outgoing-link-permits (operations/get-primary-operation-metadata app :max-outgoing-link-permits)
+        links    (concat appsLinkingToUs linkPermitData)
+        illegal-apps (conj links app)]
+    (cond
+      (and link-permit-id (util/find-by-id link-permit-id illegal-apps))
+      (fail :error.link-permit-already-having-us-as-link-permit)
+
+      (and max-outgoing-link-permits (= max-outgoing-link-permits (count linkPermitData)))
+      (fail :error.max-outgoing-link-permits))))
 
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
    :user-roles       #{:applicant :authority}
    :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
-   :pre-checks       [validate-jatkolupa-zero-link-permits
-                      validate-link-permit-id
+   :pre-checks       [validate-linking
                       a/validate-authority-in-drafts]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
                       (fn [{data :data}] (when (= (:id data) (ss/trim (:linkPermitId data))) (fail :error.link-permit-self-reference)))
@@ -716,3 +711,23 @@
         redirect-url               (apply str url-parts)]
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
+
+(def app-snapshot-fields [:address :primaryOperation :created :modified
+                          :state :permitType :organization :verdicts :documents
+                          :propertyId :location])
+
+(defcommand publish-bulletin
+  {:parameters [id]
+   :user-roles #{:authority}
+   :states     states/all-application-states
+   :pre-checks [a/validate-authority-in-drafts]}
+  [{:keys [application created] :as command}]
+  (let [app-snapshot (select-keys application app-snapshot-fields)
+        attachments  (->> (:attachments application)
+                          (filter :latestVersion)
+                          (map #(dissoc % :versions)))
+        app-snapshot (assoc app-snapshot :attachments attachments)
+        changes      {$push {:versions app-snapshot}
+                      $set  {:modified created}}]
+    (mongo/update-by-id :application-bulletins id changes :upsert true)
+    (ok)))

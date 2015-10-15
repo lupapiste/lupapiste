@@ -24,7 +24,8 @@
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as u])
+            [lupapalvelu.user :as u]
+            [lupapalvelu.organization :as organization])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
 
@@ -58,6 +59,10 @@
 (def sonja-muni  "753")
 (def ronja       (apikey-for "ronja"))
 (def ronja-id    (id-for "ronja"))
+(def luukas      (apikey-for "luukas"))
+(def luukas-id   (id-for "luukas"))
+(def kosti       (apikey-for "kosti"))
+(def kosti-id    (id-for "kosti"))
 (def sipoo       (apikey-for "sipoo"))
 (def tampere-ya  (apikey-for "tampere-ya"))
 (def naantali    (apikey-for "admin@naantali.fi"))
@@ -150,11 +155,14 @@
   (decode-response
     (http-post
       (str (server-address) "/api/" (name action-type) "/" (name command-name))
-      {:headers {"authorization" (str "apikey=" apikey)
-                 "content-type" "application/json;charset=utf-8"}
-       :body (json/encode (apply hash-map args))
-       :follow-redirects false
-       :throw-exceptions false})))
+      (let [args (if (map? (first args))
+                   (first args)
+                   (apply hash-map args))]
+        {:headers {"authorization" (str "apikey=" apikey)
+                   "content-type" "application/json;charset=utf-8"}
+         :body (json/encode args)
+         :follow-redirects false
+       :throw-exceptions false}))))
 
 (defn raw-command [apikey command-name & args]
   (apply decode-post :command apikey command-name args))
@@ -269,6 +277,20 @@
 ;; DSLs
 ;;
 
+(defn remove-krysp-xml-overrides [apikey org-id permit-type]
+  (let [org  (organization-from-minimal-by-id org-id)
+        args (select-keys (get-in org [:krysp permit-type]) [:url :version])
+        args (assoc args :permitType permit-type :username "" :password "")]
+    (command apikey :set-krysp-endpoint args)))
+
+(defn override-krysp-xml [apikey org-id permit-type overrides]
+  (let [org         (organization-from-minimal-by-id org-id)
+        current-url (get-in org [:krysp permit-type :url])
+        new-url     (str current-url "?overrides=" (json/generate-string overrides))
+        args        (select-keys (get-in org [:krysp permit-type]) [:version])
+        args        (assoc args :permitType permit-type :url new-url :username "" :password "")]
+    (command apikey :set-krysp-endpoint args)))
+
 (defn set-anti-csrf! [value] (query pena :set-feature :feature "disable-anti-csrf" :value (not value)))
 (defn feature? [& feature]
   (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name feature)))))
@@ -380,6 +402,7 @@
   {:post [(or (nil? %)
             (and (:to %) (:subject %) (not (.contains (:subject %) "???")) (-> % :body :html) (-> % :body :plain))
             (println %))]}
+  (Thread/sleep 20) ; A little wait to allow mails to be delivered
   (let [{:keys [ok message]} (query pena :last-email :reset true)] ; query with any user will do
     (assert ok)
     message))
@@ -387,6 +410,7 @@
 (defn sent-emails
   "Returns a list of emails and clears the inbox"
   []
+  (Thread/sleep 20) ; A little wait to allow mails to be delivered
   (let [{:keys [ok messages]} (query pena :sent-emails :reset true)] ; query with any user will do
     (assert ok)
     messages))
@@ -432,7 +456,7 @@
   (apply give-verdict-with-fn local-command apikey application-id args))
 
 (defn create-foreman-application [project-app-id apikey userId role difficulty]
-  (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role)
+  (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role :foremanEmail "")
         foreman-app          (query-application apikey foreman-app-id)
         foreman-doc          (domain/get-document-by-name foreman-app "tyonjohtaja-v2")]
     (command apikey :set-user-to-document :id foreman-app-id :documentId (:id foreman-doc) :userId userId :path "" :collection "documents")

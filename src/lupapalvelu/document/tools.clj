@@ -37,6 +37,7 @@
     :hetu             "210281-9988"
     :fillMyInfoButton nil
     :foremanHistory   nil
+    :maaraalaTunnus   nil
     :string           (condp = (keyword subtype)
                         :maaraala-tunnus   "0003"
                         :email            "example@example.com"
@@ -74,15 +75,17 @@
 
 (defn- ^{:testable true} group [x t]
   (if (:repeating x)
-    {:name :0
-     :type t
-     :body (:body x)}
+    (if-not (:repeating-init-empty x)
+      {:name :0
+       :type t
+       :body (:body x)}
+      {})
     (:body x)))
 
 (defn create-unwrapped-data [{body :body} f]
   (flattened
     (walk/prewalk
-      #(if (map? %)
+      #(if (and (map? %) (not-empty %))
          (let [t (keyword (:type %))
                v (if (#{:group :table :foremanOtherApplications} t) (group % t) (f %))]
            {(keyword (:name %)) v})

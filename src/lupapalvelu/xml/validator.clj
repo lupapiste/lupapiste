@@ -168,7 +168,8 @@
 
 (def- mkmu-validators
   {"2.1.6" common-validator-2_1_6
-   "1.0.1" (create-validator mkmu-1_0_1)})
+   "1.0.1" (create-validator mkmu-1_0_1)
+   "ah-1.1" asianhallinta-validator})
 
 (def- kiito-validators
   {"2.1.6" common-validator-2_1_6

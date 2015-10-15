@@ -46,7 +46,7 @@
 
 (facts "standard-verdicts-validator"
   (against-background
-    (sade.util/get-timestamp-from-now :day 1) => (+ (to-timestamp "1970-01-01") 100))
+    (sade.util/get-timestamp-ago :day 1) => (+ (to-timestamp "1970-01-01") 100))
   (fact "Missing details"
     (standard-verdicts-validator (verdict-skeleton [])) => {:ok false, :text "info.paatos-details-missing"})
   (fact "Future date"

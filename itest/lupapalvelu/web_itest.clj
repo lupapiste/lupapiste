@@ -1,23 +1,26 @@
 (ns lupapalvelu.web-itest
-  (:require [lupapalvelu.itest-util :refer :all]
-            [clojure.walk :refer [keywordize-keys]]
-            [sade.env :as env]
-            [midje.sweet :refer :all]
-            [cheshire.core :as json]))
+  (:require [midje.sweet :refer :all]
+            [ring.util.codec :as codec]
+            [lupapalvelu.itest-util :refer :all]
+            [sade.env :as env]))
 
-(facts "redirect-after-login functionality"
+(facts "redirect-after-login"
   (let [store (atom {})
         initial-params {:cookie-store (->cookie-store store)
                         :follow-redirects false
                         :throw-exceptions false}
         resp (http-get (str (server-address) "/app/fi/applicant" "?redirect-after-login=/foo/bar") initial-params)
-        anti-csrf-token (ring.util.codec/url-decode (.getValue (@store "anti-csrf-token")))
+        anti-csrf-token (codec/url-decode (.getValue (@store "anti-csrf-token")))
         params (assoc-in initial-params [:headers "x-anti-forgery-token"] anti-csrf-token)]
     (:status resp) => 302
     (:headers resp) => (contains {"Location" (str (server-address) (env/value :frontpage :fi))})
 
-    (http-post (str (server-address) "/api/login") (assoc params :form-params {:username "pena" :password "pena"})) => http200?
+    (fact "Login succeeds"
+      (let [{body :body :as login} (http-post (str (server-address) "/api/login") (assoc params :form-params {:username "pena" :password "pena"} :as :json))]
+       body => ok?
+       login => http200?))
 
-    (let [resp (http-get (str (server-address) "/api/query/redirect-after-login") params)]
-      resp => http200?
-      (get-in (decode-response resp) [:body :url]) => "foo/bar")))
+    (fact "url is returned"
+      (let [{body :body :as resp} (http-get (str (server-address) "/api/query/redirect-after-login") (assoc params :as :json))]
+        resp => http200?
+        (:url body) => "foo/bar"))))

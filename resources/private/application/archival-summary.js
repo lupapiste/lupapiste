@@ -22,7 +22,7 @@
 
   var getPreAttachments = function(attachments) {
     return _.filter(attachments, function(attachment) {
-      return !_.contains(LUPAPISTE.config.postVerdictStates, attachment.applicationState());
+      return !_.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState));
     });
   };
 
@@ -49,7 +49,7 @@
         return new GroupModel(group, null, attachments);
       } else {
         var att = _.first(attachments);
-        return new GroupModel(att.op.name(), att.op.description(), attachments);
+        return new GroupModel(ko.unwrap(att.op.name), ko.unwrap(att.op.description), attachments);
       }
     });
     return _.sortBy(mapped, function(group) { // attachments.general on top, else sort by op.created

@@ -112,6 +112,12 @@
 (defn intersects [& e]
   (str "<ogc:Intersects>" (apply str e) "</ogc:Intersects>"))
 
+(defn within [& e]
+  (str "<DWithin>" (apply str e) "</DWithin>"))
+
+(defn distance [distance]
+  (format "<Distance units='m'>%s</Distance>" distance))
+
 (defn point [x y]
   (format "<gml:Point><gml:pos>%s %s</gml:pos></gml:Point>" x y))
 
@@ -189,7 +195,7 @@
   (s/replace (first (xml-> ring :gml:LinearRing :gml:posList text)) #"(\d+\.*\d*)\s+(\d+\.*\d*)\s+" "$1 $2, "))
 
 (defn feature-to-area [feature]
-  (when feature 
+  (when feature
     (let [polygonpatch (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:sijainti :gml:Surface :gml:patches :gml:PolygonPatch))
           exterior (extract-coordinates (first (xml-> polygonpatch :gml:exterior)))
           interiors (map extract-coordinates (xml-> polygonpatch :gml:interior))]
@@ -242,7 +248,7 @@
     (let [{status :status body :body} (http-fn url request)]
       (if (= status 200)
         [:ok body]
-        [:error status]))
+        [:error status body]))
     (catch Exception e
       [:failure e])))
 
@@ -253,10 +259,15 @@
                  :basic-auth (auth url)
                  param-key q}
         task (future* (exec-http http-fn url request))
-        [status data] (deref task timeout [:timeout])]
+        [status data error-body] (deref task timeout [:timeout])
+        error-text (-> error-body  (ss/replace #"[\r\n]+" " ") (ss/limit 400 "..."))]
     (condp = status
       :timeout (do (errorf "wfs timeout: url=%s" url) nil)
-      :error   (do (errorf "wfs status %s: url=%s" data url) nil)
+      :error   (do
+                 (case data
+                   400 (errorf "wfs status 400 Bad Request '%s', url=%s, response body=%s" (ss/limit (str q) 220 "...") url error-text)
+                   (errorf "wfs status %s: url=%s, response body=%s" data url error-text))
+                 nil)
       :failure (do (errorf data "wfs failure: url=%s" url) nil)
       :ok      (let [features (-> data
                                 (s/replace "UTF-8" "ISO-8859-1")
@@ -316,6 +327,18 @@
       (property-name "ktjkiiwfs:sijainti")
       (filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
+
+(defn property-info-by-radius [x y radius]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (property-name "ktjkiiwfs:kiinteistotunnus")
+      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (ogc-filter
+        (within
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (point x y)
+          (distance radius))))))
 
 (defn property-info-by-point [x y]
   (post ktjkii
@@ -406,7 +429,7 @@
 
 (defn gfi-to-features-sito [gfi municipality]
   (when gfi
-    (xml-> (->features gfi startparse-sax-non-validating) :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi")))))
+    (xml-> (->features gfi startparse-sax-non-validating "UTF-8") :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi")))))
 
 (defn feature-to-feature-info-sito  [feature]
   (when feature
@@ -416,6 +439,15 @@
      :vahvistett_pvm (first (xml-> feature :lupapiste:VAHVISTETT text))
      :linkki (first (xml-> feature :lupapiste:LINKKI text))
      :type "sito"}))
+
+(defn feature-to-feature-info-liiteri-ak  [feature]
+  (when feature
+    {:id (first (xml-> feature :lupapiste:tunnus text))
+     :kuntanro (first (xml-> feature :lupapiste:kuntaid text))
+     :kunta (first (xml-> feature :lupapiste:kunta text))
+     :kaavanro (first (xml-> feature :lupapiste:tunnus text))
+     :linkki (first (xml-> feature :lupapiste:merkinnat text))
+     :type "liiteri-ak"}))
 
 (defn general-plan-info-by-point [x y]
   (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]
@@ -504,4 +536,3 @@
                          {:query-params (:params request)
                           :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
                           :as :stream})))))
-

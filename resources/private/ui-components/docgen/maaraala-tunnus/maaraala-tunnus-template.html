@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="maaraala-tunnus-template">
+      <span class="form-entry">
+
+        <label style="display: block;" class="form-label" data-bind="text: propertyIdLabel"></label> <!-- TODO: style -->
+        <span class="kiintun-and-maaraalatunnus">
+          <span class="form-maaraala" data-bind="propertyId: propertyId"></span>
+          <span data-bind="visible: isMaaraala">-M</span>
+          <span data-bind="component: {name: 'docgen-inline-string',
+                                       params: { schema: schema,
+                                                 applicationId: applicationId,
+                                                 documentId: documentId,
+                                                 path: path,
+                                                 model: model }},
+                           style: {visibility: visibilityState}"></div>
+        </span>
+      </span>
+    </script>
+  </section>
+</body>
+</html>

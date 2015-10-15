@@ -326,8 +326,8 @@
 
           <select name="attachmentType" data-bind="options: availableAttachmentTypes, value: attachmentType, optionsText: 'name', optionsValue: 'id', optionsCaption: loc('userinfo.architect.qualification.choose')"></select>
           <div class="clear"></div>
-          <input type="file" name="files[]" class="file-upload"></input>
-          <input data-bind="attr: {value: csrf}" type="hidden" name="__anti-forgery-token"></input>
+          <input type="file" name="files[]" class="file-upload"/>
+          <input data-bind="attr: {value: csrf}" type="hidden" name="__anti-forgery-token"/>
         </form>
 
         <div>

@@ -1,8 +1,6 @@
 var util = (function($) {
   "use strict";
 
-  function nop() {}
-
   function zeropad(len, val) {
     return _.sprintf("%0" + len + "d", _.isString(val) ? parseInt(val, 10) : val);
   }
@@ -103,21 +101,19 @@ var util = (function($) {
   }
 
   function isNum(s) {
+    return s && s.match(/^\s*-??\d+\s*$/) !== null;
+  }
+
+  function isNonNegative(s) {
     return s && s.match(/^\s*\d+\s*$/) !== null;
   }
 
-  function getIn(m, keyArray, defaultValue) {
-    if (m && keyArray && keyArray.length > 0) {
-      var key = keyArray[0];
-      if (m.hasOwnProperty(key)) {
-        var val = ko.unwrap(m[key]);
-        if (keyArray.length === 1) {
-          return val;
-        }
-        return getIn(val, keyArray.splice(1, keyArray.length - 1), defaultValue);
-      }
+  function getIn(m, ks, defaultValue) {
+    var value = ko.unwrap(m);
+    if (_.isUndefined(value) || _.isNull(value)) {
+      return defaultValue;
     }
-    return defaultValue;
+    return _.isEmpty(ks) ? value : getIn(value[_.first(ks)], _.rest(ks), defaultValue);
   }
 
   function getFeatureName(feature) {
@@ -194,7 +190,7 @@ var util = (function($) {
       return errArray.length > 0;
     });
     return errs;
-  }
+  };
 
   var extractRequiredErrors = _.partial(extractErrors, function(errResult) {
     return _.includes(errResult, "illegal-value:required");
@@ -229,10 +225,19 @@ var util = (function($) {
     return [strOrArr + suffix];
   }
 
-  function filterDataByQuery(data, q, selected) {
-    return _.filter(data, function(item) {
-      return _.reduce(q.split(" "), function(result, word) {
-        return !_.some(selected, item) && _.contains(item.label.toUpperCase(), word.toUpperCase()) && result;
+  var defaultOptions = {
+    data: [],
+    query: "",
+    selected: undefined,
+    label: "label"
+  };
+
+  function filterDataByQuery(options) {
+    options = _.defaults(options, defaultOptions);
+    return _.filter(options.data, function(item) {
+      return _.reduce(options.query.split(" "), function(result, word) {
+        var dataForLabel = ko.unwrap(item[options.label]);
+        return !_.some(options.selected, item) && dataForLabel !== undefined && _.contains(dataForLabel.toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
   }
@@ -263,7 +268,6 @@ var util = (function($) {
       toDbFormat:             propertyIdToDbFormat
     },
     buildingName: buildingName,
-    nop:          nop,
     constantly:   function(value) { return function() { return value; }; },
     autofocus:    autofocus,
     isNum:        isNum,
@@ -279,7 +283,8 @@ var util = (function($) {
     randomElementId: randomElementId,
     withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery,
-    showSavedIndicator: showSavedIndicator
+    showSavedIndicator: showSavedIndicator,
+    isNonNegative: isNonNegative
   };
 
 })(jQuery);

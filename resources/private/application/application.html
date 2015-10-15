@@ -34,259 +34,280 @@
                             <div data-bind="if: hasInvites" class="summary-help">
                                 <p data-bind="lhtml: 'application.invite.help'"></p>
                             </div>
-
-                            <!-- Property ID: -->
-                            <div>
+                            <div class="application-summary-table">
+                              <!-- Property ID: -->
+                              <div>
                                 <p data-bind="ltext: 'application.property'"></p>
                                 <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
-                            </div>
+                              </div>
 
-                            <!-- Municipality: -->
-                            <div>
+                              <!-- Municipality: -->
+                              <div>
                                 <p data-bind="ltext: 'application.municipality'"></p>
                                 <span class="application_summary_text" data-bind="text: loc(['municipality', municipality()])"></span>
-                            </div>
+                              </div>
 
-                            <!-- Submitted: -->
-                            <div>
+                              <!-- Submitted: -->
+                              <div>
                                 <p data-bind="ltext: 'application.submissionDate'"></p>
                                 <span data-bind="if: $data.submitted">
-                                    <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
+                                  <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
                                 </span>
-                            </div>
+                              </div>
 
-                            <!-- ID: -->
-                            <div>
+                              <!-- ID: -->
+                              <div>
                                 <p data-bind="ltext: 'application.id'"></p>
                                 <span data-bind="text: id, attr: {'data-test-value': id}"
                                       data-test-id="application-id"
                                       class="application_summary_text">
                                 </span>
-                            </div>
+                              </div>
 
-                            <!-- Authorities: -->
-                            <!-- ko if: $root.authorization.ok('assign-application') -->
-                            <div data-bind="component: {name: 'authority-select', params: {kind: 'application'}}"></div>
-                            <!-- /ko -->
+                              <!-- Authorities: -->
+                              <!-- ko if: $root.authorization.ok('assign-application') -->
+                              <div data-bind="component: {name: 'authority-select', params: {kind: 'application'}}"></div>
+                              <!-- /ko -->
 
-                            <!-- Operations: -->
-                            <!-- ko if: $root.permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
-                            <div>
+                              <!-- Operations: -->
+                              <!-- ko if: $root.permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
+                              <div>
                                 <p data-bind="ltext: 'application.operations.secondary'"></p>
                                 <!-- ko if: operationsCount() && operationsCount().length > 0 -->
                                 <ul data-test-id="application-secondary-operations" data-bind="foreach: operationsCount">
-                                    <li>
-                                        <span data-bind="visible: count > 1">
-                                            <span data-bind="text: count"></span>
-                                            <span>&#x00D7;</span>
-                                        </span>
-                                        <span data-bind="ltext: 'operations.' + name, attr: {'data-test-secondary-operation-id': name}" data-test-id="test-application-operation"></span>
-                                    </li>
+                                  <li>
+                                    <span data-bind="visible: count > 1">
+                                      <span data-bind="text: count"></span>
+                                      <span>&#x00D7;</span>
+                                    </span>
+                                    <span data-bind="ltext: 'operations.' + name, attr: {'data-test-secondary-operation-id': name}" data-test-id="test-application-operation"></span>
+                                  </li>
                                 </ul>
                                 <!-- /ko -->
                                 <!-- ko if: operationsCount() && operationsCount().length === 0 -->
                                 <p data-bind="ltext: 'application.operations.secondary.none'"></p>
                                 <!-- /ko -->
-                            </div>
-                            <!-- /ko -->
+                              </div>
+                              <!-- /ko -->
 
-                            <!-- Subtypes: -->
-                            <!-- ko if: $root.permitSubtypes().length > 0 -->
-                            <div>
+                              <!-- Subtypes: -->
+                              <!-- ko if: $root.permitSubtypes().length > 0 -->
+                              <div>
                                 <p data-bind="ltext: 'application.permitSubtypes'"></p>
                                 <span class="application_summary_text">
-                                    <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
-                                                       enable: $root.authorization.ok('change-permit-sub-type'),
-                                                       optionsText: function(item) {return item ? loc('permitSubtype.' + item) : loc('choose'); }"
-                                            id="permitSubtypeSelect">
-                                    </select>
-                                    <!-- ko if: permitSubtypeHelp() -->
-                                    <span data-bind="component: { name: 'help-toggle', params: { lhtml: [permitSubtypeHelp()]}}"></span>
-                                    <!-- /ko -->
+                                  <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
+                                                     enable: $root.authorization.ok('change-permit-sub-type'),
+                                                     optionsText: function(item) {return item ? loc('permitSubtype.' + item) : loc('choose'); }"
+                                          id="permitSubtypeSelect">
+                                  </select>
+                                  <!-- ko if: permitSubtypeHelp() -->
+                                  <span data-bind="component: { name: 'help-toggle', params: { lhtml: [permitSubtypeHelp()]}}"></span>
+                                  <!-- /ko -->
                                 </span>
-                            </div>
-                            <!-- /ko -->
+                              </div>
+                              <!-- /ko -->
 
-                            <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("set-tos-function-for-application") -->
-                            <div>
+                              <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("set-tos-function-for-application") -->
+                              <div>
                                 <p data-bind="ltext: 'tos.function'"></p>
                                 <span class="application_summary_text">
-                                    <select data-bind="options: $root.tosFunctions,
-                                                       optionsText: 'name',
-                                                       optionsValue: 'code',
-                                                       value: $root.application.tosFunction,
-                                                       valueAllowUnset: true" ></select>
+                                  <select data-bind="options: $root.tosFunctions,
+                                                     optionsText: 'name',
+                                                     optionsValue: 'code',
+                                                     value: $root.application.tosFunction,
+                                                     valueAllowUnset: true" ></select>
                                 </span>
-                            </div>
-                            <!-- /ko -->
+                              </div>
+                              <!-- /ko -->
 
-                            <!-- Link-permits: -->
-                            <!-- ko if: linkPermitData -->
-                            <div data-bind="with: linkPermitData" class="link-permits">
+                              <!-- Link-permits: -->
+                              <!-- ko if: linkPermitData -->
+                              <div data-bind="with: linkPermitData" class="link-permits">
                                 <p data-bind="ltext: 'application.linkPermits'" class="link-permit-title"></p>
                                 <span class="application_summary_text" data-bind="foreach: $data">
-                                    <span data-bind="visible: $data.type() === 'lupapistetunnus'" class="link-permit">
-                                        <a data-bind="click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
-                                                      attr: {'data-test-app-link-permit': $data.id}"
-                                           data-test-id="test-application-link-permit-lupapistetunnus"
-                                           class="link-permit-item">
-                                            <span data-bind="text: $data.id"></span>
-                                            -
-                                            <span data-bind="ltext: 'operations.' + $data.operation()"></span>
-                                        </a>
-                                        <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
-                                                      click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
-                                           data-test-id="test-remove-link-permit"
-                                           href="#" class="remove-link-permit link-btn">
-                                            <i class="lupicon-remove"></i>
-                                        </a>
+                                  <span data-bind="visible: $data.type() === 'lupapistetunnus'" class="link-permit">
+                                    <a data-bind="attr: {'data-test-app-link-permit': $data.id, href: '#!/application/' + $data.id()}"
+                                       data-test-id="test-application-link-permit-lupapistetunnus"
+                                       class="link-permit-item">
+                                      <span data-bind="text: $data.id"></span>
+                                      -
+                                      <span data-bind="ltext: 'operations.' + $data.operation()"></span>
+                                    </a>
+                                    <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
+                                                  click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                                       data-test-id="test-remove-link-permit"
+                                       href="#" class="remove-link-permit link-btn">
+                                      <i class="lupicon-remove"></i>
+                                    </a>
+                                  </span>
+                                  <span data-bind="visible: $data.type() === 'kuntalupatunnus'" class="link-permit">
+                                    <span data-bind="text: $data.id,
+                                                     attr: {'data-test-app-link-permit': $data.id}"
+                                          data-test-id="test-application-link-permit-kuntalupatunnus"
+                                          class="link-permit-item">
                                     </span>
-                                    <span data-bind="visible: $data.type() === 'kuntalupatunnus'" class="link-permit">
-                                        <span data-bind="text: $data.id,
-                                                         attr: {'data-test-app-link-permit': $data.id}"
-                                              data-test-id="test-application-link-permit-kuntalupatunnus"
-                                              class="link-permit-item">
-                                        </span>
-                                        <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
-                                                      click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
-                                           data-test-id="test-remove-link-permit"
-                                           href="#" class="remove-link-permit link-btn">
-                                            <i class="lupicon-remove"></i>
-                                        </a>
-                                    </span>
+                                    <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
+                                                  click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                                       data-test-id="test-remove-link-permit"
+                                       href="#" class="remove-link-permit link-btn">
+                                      <i class="lupicon-remove"></i>
+                                    </a>
+                                  </span>
                                 </span>
-                            </div>
-                            <!-- /ko -->
+                              </div>
+                              <!-- /ko -->
 
-                            <!-- Applications linking to us: -->
-                            <!-- ko if: appsLinkingToUs -->
-                            <div data-bind="with: appsLinkingToUs" class="link-permits">
+                              <!-- Applications linking to us: -->
+                              <!-- ko if: appsLinkingToUs -->
+                              <div data-bind="with: appsLinkingToUs" class="link-permits">
                                 <p data-bind="ltext: 'application.appsLinkingToUs'" class="link-permit-title"></p>
                                 <span class="application_summary_text" data-bind="foreach: $data">
-                                    <span class="link-permit">
-                                        <a data-bind="click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
-                                                      attr: {'data-test-app-linking-to-us': $data.id}"
-                                           data-test-id="test-application-app-linking-to-us"
-                                           href="#" class="link-permit-item">
-                                            <span data-bind="text: $data.id"></span>
-                                            -
-                                            <span data-bind="ltext: 'operations.' + $data.operation()"></span>
-                                        </a>
-                                    </span>
+                                  <span class="link-permit">
+                                    <a data-bind="attr: {'data-test-app-linking-to-us': $data.id, href: '#!/application/' + $data.id()}"
+                                       data-test-id="test-application-app-linking-to-us"
+                                       class="link-permit-item">
+                                      <span data-bind="text: $data.id"></span>
+                                      -
+                                      <span data-bind="ltext: 'operations.' + $data.operation()"></span>
+                                    </a>
+                                  </span>
                                 </span>
+                              </div>
+                              <!-- /ko -->
                             </div>
-                            <!-- /ko -->
                         </div>
                         <div class="application-map-container">
-                            <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
-                            <div class="application-map-actions" data-bind="with: application">
-                                <!-- ko if: location() -->
-                                <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
-                                <!-- /ko -->
-                            </div>
+                          <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+                          <div class="application-map-actions" data-bind="with: application">
+                            <!-- ko if: location() -->
+                            <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
+                            <!-- /ko -->
+                          </div>
                         </div>
 
                         <!-- Actions: -->
                         <div class="application_actions">
                             <div class="stacked" data-bind="with: application">
                                 <!-- ko if: !hasInvites() -->
+
+                                <!-- ko if: features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin')-->
+                                <div class="feature">
+                                    <button data-bind="click: publishApplicationBulletin,
+                                                       visible: $root.authorization.ok('publish-bulletin'),
+                                                       enable: !processing(),
+                                                       attr: {'title': loc('tooltip.publishBulletin')}"
+                                            data-test-id="publish-bulletin"
+                                            class="positive caps">
+                                        <i class="lupicon-circle-arrow-right"></i>
+                                        <span data-bind="ltext: 'application.publishBulletin'"></span>
+                                    </button>
+                                </div>
+                                <!-- /ko -->
+
                                 <button data-bind="click: approveApplication,
                                                visible: $root.authorization.ok('approve-application'),
-                                               enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
-                                    data-test-id="approve-application"
-                                    class="positive caps">
-                                <i class="lupicon-circle-arrow-right"></i>
-                                <span data-bind="ltext: 'application.approveApplication'"></span>
-                            </button>
-                            <div data-bind="component: {name: 'export-attachments'}"></div>
-                            <button class="positive caps"
-                                    data-bind="click: toAsianhallinta,
-                                               visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
-                                               enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
-                                               attr: {'title': loc('tooltip.toAsianhallinta')}"
-                                    data-test-id="to-asianhallinta">
-                                <i class="lupicon-circle-arrow-right"></i>
-                                <span data-bind="ltext: 'application.toAsianhallinta'"></span>
-                            </button>
-                            <button class="function"
-                                    data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: !processing() && $root.authorization.ok('request-for-complement')"
-                                    data-test-id="request-for-complement">
-                                <i class="lupicon-circle-plus"></i>
-                                <span data-bind="ltext: 'application.requestForComplement'"></span>
-                            </button>
-                            <button class="function"
-                                    data-bind="click: addOperation, visible: $root.authorization.ok('add-operation'), enable: !processing() && $root.authorization.ok('add-operation')"
-                                    data-test-id="add-operation">
-                                <i class="lupicon-circle-plus"></i>
-                                <span data-bind="ltext: 'application.addOperation'"></span>
-                            </button>
-                            <button class="function"
-                                    data-bind="click: exportPdf, visible: $root.authorization.ok('pdf-export'), enable: !processing() && $root.authorization.ok('pdf-export')"
-                                    data-test-id="application-pdf-btn">
-                                <i class="lupicon-print"></i>
-                                <span data-bind="ltext: 'application.pdf'"></span>
-                            </button>
-                            <button class="function"
-                                    data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog, visible: $root.authorization.ok('add-link-permit'), enable: !processing() && $root.authorization.ok('add-link-permit')" data-test-id="application-add-link-permit-btn">
-                                <i class="lupicon-circle-plus"></i>
-                                <span data-bind="ltext: 'application.addLinkPermit'"></span>
-                            </button>
-                            <button class="function"
-                                    data-bind="click: createChangePermit, visible: $root.authorization.ok('create-change-permit'), enable: !processing() && $root.authorization.ok('create-change-permit')"
-                                    data-test-id="change-permit-create-btn">
-                                <i class="lupicon-circle-plus"></i>
-                                <span data-bind="ltext: 'application.createChangePermit'"></span>
-                            </button>
-                            <button class="function"
-                                    data-bind="click: createContinuationPeriodPermit, visible: $root.authorization.ok('create-continuation-period-permit'), enable: !processing() && $root.authorization.ok('create-continuation-period-permit')"
-                                    data-test-id="continuation-period-create-btn">
-                                <i class="lupicon-circle-plus"></i>
-                                <span data-bind="ltext: 'application.createContinuationPeriodPermit'"></span>
-                            </button>
-                            <button class="function"
-                                    data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application'), enable: !processing() && $root.authorization.ok('cancel-application')"
-                                    data-test-id="application-cancel-btn">
-                                <i class="lupicon-circle-remove"></i>
-                                <span data-bind="ltext: 'application.cancelApplication'"></span>
-                            </button>
-                            <button class="function"
-                                    data-bind="click: cancelApplicationAuthority, visible: $root.authorization.ok('cancel-application-authority'), enable: !processing() && $root.authorization.ok('cancel-application-authority')"
-                                    data-test-id="application-cancel-authority-btn">
-                                <i class="lupicon-circle-remove"></i>
-                                <span data-bind="ltext: 'application.cancelApplication'"></span>
-                            </button>
-                            <button class="function"
-                                    data-bind="click: refreshKTJ, visible: $root.authorization.ok('refresh-ktj'), enable: !processing() && $root.authorization.ok('refresh-ktj')"
-                                    data-test-id="application-refresh-ktj-btn">
-                                <i class="lupicon-refresh"></i>
-                                <span data-bind="ltext: 'application.refreshKTJ'"></span>
-                            </button>
-                            <button class="function"
-                                    data-bind="click: resetIndicators, visible: $root.authorization.ok('mark-everything-seen'), enable: !processing() && $root.authorization.ok('mark-everything-seen')"
-                                    data-test-id="application-mark-everything-seen-btn">
-                                <i class="lupicon-eye"></i>
-                                <span data-bind="ltext: 'application.reset-indicators'"></span>
-                            </button>
-                            <!-- Link to organization's backing system URL if given and valid -->
-                            <button class="function"
-                                    data-bind="click: toBackingSystem, visible: $root.authorization.ok('redirect-to-vendor-backend')">
-                                <i class="lupicon-circle-arrow-right"></i>
-                                <span data-bind="ltext: 'application.showInBackingSystem'"></span>
-                            </button>
-                            <!-- /ko  -->
-                            <!-- ko if: hasInvites -->
-                            <button class="positive"
-                                    data-bind="click: approveInvite, enable: $root.authorization.ok('approve-invite')"
-                                    data-test-id="accept-invite-button">
-                                <span data-bind="ltext: 'applications.approveInvite'"></span>
-                            </button>
-                            <button class="function"
-                                    data-bind="click: declineInvite, enable: $root.authorization.ok('decline-invitation')"
-                                    data-test-id="decline-invite-button">
-                                <span data-bind="ltext: 'applications.declineInvite'"></span>
-                            </button>
-                            <!-- /ko -->
-                        </div>
+                                               enable: !processing() && $root.authorization.ok('approve-application'),
+                                               attr: {'title': loc('tooltip.approveApplication')}"
+                                        data-test-id="approve-application"
+                                        class="positive caps">
+                                    <i class="lupicon-circle-arrow-right"></i>
+                                    <span data-bind="ltext: 'application.approveApplication'"></span>
+                                </button>
+                                <div data-bind="component: {name: 'export-attachments'}"></div>
+                                <button class="positive caps"
+                                        data-bind="click: toAsianhallinta,
+                                                   visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                                                   enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                                                   attr: {'title': loc('tooltip.toAsianhallinta')}"
+                                        data-test-id="to-asianhallinta">
+                                    <i class="lupicon-circle-arrow-right"></i>
+                                    <span data-bind="ltext: 'application.toAsianhallinta'"></span>
+                                </button>
+                                <button class="function"
+                                        data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: !processing() && $root.authorization.ok('request-for-complement')"
+                                        data-test-id="request-for-complement">
+                                    <i class="lupicon-circle-plus"></i>
+                                    <span data-bind="ltext: 'application.requestForComplement'"></span>
+                                </button>
+                                <button class="function"
+                                        data-bind="click: addOperation, visible: $root.authorization.ok('add-operation'), enable: !processing() && $root.authorization.ok('add-operation')"
+                                        data-test-id="add-operation">
+                                    <i class="lupicon-circle-plus"></i>
+                                    <span data-bind="ltext: 'application.addOperation'"></span>
+                                </button>
+                                <button class="function"
+                                        data-bind="click: exportPdf, visible: $root.authorization.ok('pdf-export'), enable: !processing() && $root.authorization.ok('pdf-export')"
+                                        data-test-id="application-pdf-btn">
+                                    <i class="lupicon-print"></i>
+                                    <span data-bind="ltext: 'application.pdf'"></span>
+                                </button>
+                                <button class="function"
+                                        data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog, visible: $root.authorization.ok('add-link-permit'), enable: !processing() && $root.authorization.ok('add-link-permit')" data-test-id="application-add-link-permit-btn">
+                                    <i class="lupicon-circle-plus"></i>
+                                    <span data-bind="ltext: 'application.addLinkPermit'"></span>
+                                </button>
+                                <button class="function"
+                                        data-bind="click: createChangePermit, visible: $root.authorization.ok('create-change-permit'), enable: !processing() && $root.authorization.ok('create-change-permit')"
+                                        data-test-id="change-permit-create-btn">
+                                    <i class="lupicon-circle-plus"></i>
+                                    <span data-bind="ltext: 'application.createChangePermit'"></span>
+                                </button>
+                                <button class="function"
+                                        data-bind="click: createContinuationPeriodPermit, visible: $root.authorization.ok('create-continuation-period-permit'), enable: !processing() && $root.authorization.ok('create-continuation-period-permit')"
+                                        data-test-id="continuation-period-create-btn">
+                                    <i class="lupicon-circle-plus"></i>
+                                    <span data-bind="ltext: 'application.createContinuationPeriodPermit'"></span>
+                                </button>
+                                <button class="function"
+                                        data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application'), enable: !processing() && $root.authorization.ok('cancel-application')"
+                                        data-test-id="application-cancel-btn">
+                                    <i class="lupicon-circle-remove"></i>
+                                    <span data-bind="ltext: 'application.cancelApplication'"></span>
+                                </button>
+                                <button class="function"
+                                        data-bind="click: cancelApplicationAuthority, visible: $root.authorization.ok('cancel-application-authority'), enable: !processing() && $root.authorization.ok('cancel-application-authority')"
+                                        data-test-id="application-cancel-authority-btn">
+                                    <i class="lupicon-circle-remove"></i>
+                                    <span data-bind="ltext: 'application.cancelApplication'"></span>
+                                </button>
+                                <button class="function"
+                                        data-bind="click: refreshKTJ, visible: $root.authorization.ok('refresh-ktj'), enable: !processing() && $root.authorization.ok('refresh-ktj')"
+                                        data-test-id="application-refresh-ktj-btn">
+                                    <i class="lupicon-refresh"></i>
+                                    <span data-bind="ltext: 'application.refreshKTJ'"></span>
+                                </button>
+                                <button class="function"
+                                        data-bind="click: resetIndicators, visible: $root.authorization.ok('mark-everything-seen'), enable: !processing() && $root.authorization.ok('mark-everything-seen')"
+                                        data-test-id="application-mark-everything-seen-btn">
+                                    <i class="lupicon-eye"></i>
+                                    <span data-bind="ltext: 'application.reset-indicators'"></span>
+                                </button>
+                                <!-- Link to organization's backing system URL if given and valid -->
+                                <button class="function"
+                                        data-bind="click: toBackingSystem, visible: $root.authorization.ok('redirect-to-vendor-backend')">
+                                    <i class="lupicon-circle-arrow-right"></i>
+                                    <span data-bind="ltext: 'application.showInBackingSystem'"></span>
+                                </button>
+                                <!-- /ko  -->
+                                <!-- ko if: hasInvites -->
+                                <button class="positive"
+                                        data-bind="click: approveInvite, enable: $root.authorization.ok('approve-invite')"
+                                        data-test-id="accept-invite-button">
+                                    <span data-bind="ltext: 'applications.approveInvite'"></span>
+                                </button>
+                                <button class="function"
+                                        data-bind="click: declineInvite, enable: $root.authorization.ok('decline-invitation')"
+                                        data-test-id="decline-invite-button">
+                                    <span data-bind="ltext: 'applications.declineInvite'"></span>
+                                </button>
+                                <!-- /ko -->
+                                <button class="function"
+                                        data-bind="click: addProperty, visible: showAddPropertyButton"
+                                        data-test-id="add-property">
+                                  <i class="lupicon-circle-plus"></i>
+                                  <span data-bind="ltext: 'secondary-kiinteistot._append_label'"></span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -304,7 +325,7 @@
                                     <span data-bind="ltext: 'application.tabParties'"></span>
                                     <span data-bind="if: partyDocumentIndicator">
                                         <span data-bind="text: partyDocumentIndicator" id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
-                            <li data-bind="if: inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'tasks'}">
+                            <li data-bind="if: $root.authorization.ok('tasks-tab-visible'), css: {'active': $parent.selectedTabName() === 'tasks'}">
                                 <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab" class="link-btn">
                                     <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                                     <span data-bind="if: $data.tasksRequiringAction">
@@ -390,15 +411,8 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="organizationLinks">
-                            <div class="organization-links" data-bind="visible: organizationLinks() && organizationLinks().length">
-                                <h3 data-bind="ltext: 'organization.links'"></h3>
-                                <ul data-bind="foreach: organizationLinks">
-                                    <li>
-                                        <a data-bind="text: name[loc.getCurrentLanguage()], attr: {href: url}" href="#" target="_blank"></a>
-                                    </li>
-                                </ul>
-                            </div>
+                        <div class="organizationLinks"
+                             data-bind="template: 'organization-links-template'">
                         </div>
                         <p data-bind="lhtml: 'required.field.desc'"></p>
                         <!-- docgen generated content: -->
@@ -407,6 +421,7 @@
                                 <!-- This is where generated document will be placed. -->
                             </div>
                         </div>
+
                         <div class="process-nav">
                             <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="parties">
                                 <span data-bind="ltext: 'application.next-tab'"></span>
@@ -822,6 +837,20 @@
                                     </i>
                                 </h2>
 
+                                <!-- metadata -->
+                                <!-- ko if: features.enabled('tiedonohjaus') && !_.isEmpty($data.metadata) && $root.authorization.ok('store-tos-metadata-for-attachment') -->
+                                <div class="feature" style="margin-top: 15px;">
+                                    <button id="show-tos-metadata" class="btn" data-bind="click: $data.toggleTosMetadata, visible: !_.isEmpty(metadata) && $root.authorization.ok('store-tos-metadata-for-application')">
+                                        <i data-bind="css: {'lupicon-chevron-small-right': !showTosMetadata(), 'lupicon-chevron-small-down': showTosMetadata}"></i>
+                                        <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
+                                    </button>
+
+                                    <div class="tos-metadata-content" data-bind="slider: $data.showTosMetadata, visible: !_.isEmpty($data.metadata)">
+                                        <div data-bind="component: {name: 'metadata-editor', params: {verdictId: ko.observable($data.id), metadata: ko.observable($data.metadata), application: $root.application}}"></div>
+                                    </div>
+                                </div>
+                                <!-- /ko -->
+
                                 <!--  ko if:  $data.paatokset -->
                                 <div data-bind="foreach: paatokset, attr: {'data-test-id' : 'given-verdict-id-' + $index() + '-content'}">
                                     <div class="accordion">
@@ -1022,11 +1051,6 @@
                                                         <div data-bind="ltext: 'verdict.poytakirjat.missing'"></div>
                                                         <!-- /ko -->
                                                     </div>
-
-                                                    <!-- metadata -->
-
-
-
                                                 </div>
                                             </div>
                                         </div>
@@ -1222,7 +1246,7 @@
 
                     <!-- Tasks tab -->
 
-                    <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
+                    <div id="application-tasks-tab" data-bind="visible: $root.authorization.ok('tasks-tab-visible'), with: $root.application" class="tab-content" >
 
                         <h1 data-bind="ltext: 'application.tabConstructionTimeTasks'"></h1>
                         <span data-bind="component: {

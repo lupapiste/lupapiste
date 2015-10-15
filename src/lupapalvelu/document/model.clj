@@ -9,6 +9,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.vrk :refer :all]
             [lupapalvelu.document.document-field-validators :refer :all]
@@ -66,7 +67,7 @@
 (defmethod validate-field :hetu [_ _ v]
   (cond
     (ss/blank? v) nil
-    (re-matches util/finnish-hetu-regex v) (when-not (util/valid-hetu? v) [:err "illegal-hetu"])
+    (re-matches v/finnish-hetu-regex v) (when-not (v/valid-hetu? v) [:err "illegal-hetu"])
     :else [:err "illegal-hetu"]))
 
 (defmethod validate-field :checkbox [_ _ v]
@@ -101,8 +102,8 @@
   (cond
     (ss/blank? v) nil
     (= "other" v) nil
-    (util/rakennusnumero? v) nil
-    (util/rakennustunnus? v) nil
+    (v/rakennusnumero? v) nil
+    (v/rakennustunnus? v) nil
     :else [:warn "illegal-rakennusnumero"]))
 
 (defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))
@@ -115,15 +116,14 @@
       [:err "application-does-not-have-given-auth"])))
 
 (defmethod validate-field :companySelector [application elem v]
-  (when-not (ss/blank? v)
-    (when-not (and
-                (domain/has-auth? application v)
-                (domain/no-pending-invites? application v))
-      [:err "application-does-not-have-given-auth"])))
+  (when-not (or (string? v) (nil? v))
+    [:err "unknown-type"]))
 
 (defmethod validate-field :fillMyInfoButton [_ _ _] nil)
 (defmethod validate-field :foremanHistory [_ _ _] nil)
 (defmethod validate-field :foremanOtherApplications [_ _ _] nil)
+
+(defmethod validate-field :maaraalaTunnus [_ _ _] nil)
 
 (defmethod validate-field nil [_ _ _]
   [:err "illegal-key"])
@@ -382,7 +382,8 @@
    If predicate matches, value is outputted using emitter function.
    Both predicate and emitter take two parameters: element schema definition and the value map."
   [pred emitter {data :data :as document} initial-path]
-  (when data
+  (if-not data
+    document
     (letfn [(doc-walk [schema-body path]
               (into {}
                 (map

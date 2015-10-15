@@ -5,8 +5,11 @@
     <!-- ko if: showSidePanel -->
     <div id="side-panel" data-bind="transition: sidePanelVisible, class: 'show-side-panel'">
         <div class="buttons">
-            <button class="primary vertical caps btn-conversation"
-                    data-bind="click: toggleConversationPanel, css: {active: showConversationPanel}" id="open-conversation-side-panel">
+            <button id="open-conversation-side-panel"
+                    class="primary vertical caps btn-conversation"
+                    data-bind="click: toggleConversationPanel,
+                               visible: authorization.ok('comments') || authorization.ok('can-target-comment-to-authority') || authorization.ok('can-mark-answered'),
+                               css: {active: showConversationPanel}">
                 <i class="lupicon-conversation"></i>
                 <span data-bind="if: unseenComments,
                                  visible: unseenComments">
@@ -14,8 +17,12 @@
                 </span>
                 <span class="btn-title" data-bind="lspaced: 'conversation.title'"></span>
             </button>
-            <button class="primary vertical caps btn-notice" data-bind="click: toggleNoticePanel, visible: authorization.ok('add-authority-notice'), css: {active: showNoticePanel}" id="open-notice-side-panel">
-                <i class="lupicon-list"></i>
+            <button id="open-notice-side-panel"
+                    class="primary vertical caps btn-notice"
+                    data-bind="click: toggleNoticePanel,
+                               visible: authorization.ok('add-authority-notice'),
+                               css: {active: showNoticePanel}">
+                <i class="lupicon-document-list"></i>
                 <span class="btn-title" data-bind="lspaced: 'notice.title'"></span>
             </button>
         </div>

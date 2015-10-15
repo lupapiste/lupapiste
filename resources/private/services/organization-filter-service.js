@@ -1,15 +1,11 @@
-LUPAPISTE.OrganizationFilterService = function() {
+LUPAPISTE.OrganizationFilterService = function(applicationFiltersService) {
   "use strict";
   var self = this;
 
   self.selected = ko.observableArray([]);
 
-  var defaultFilter = ko.pureComputed(function() {
-    var applicationFilters = _.first(lupapisteApp.models.currentUser.applicationFilters());
-    return applicationFilters &&
-           applicationFilters.filter.organizations &&
-           applicationFilters.filter.organizations() ||
-           [];
+  var savedFilter = ko.pureComputed(function() {
+    return util.getIn(applicationFiltersService.selected(), ["filter", "organizations"]);
   });
 
   var organizationNames = ko.observable();
@@ -19,7 +15,7 @@ LUPAPISTE.OrganizationFilterService = function() {
     var usersOwnOrganizations = _.keys(lupapisteApp.models.currentUser.orgAuthz());
     var ownOrgsWithNames = _.map(usersOwnOrganizations, function(org) {
       var name = util.getIn(organizationNames(), ["names", org, loc.currentLanguage]);
-      var fallback = util.getIn(organizationNames(), ["names", org, "fi"]); // fallback to "fi" language
+      var fallback = util.getIn(organizationNames(), ["names", org, "fi"]) || org; // fallback to "fi" language
       return {id: org, label: name ? name : fallback};
     });
 
@@ -28,19 +24,31 @@ LUPAPISTE.OrganizationFilterService = function() {
 
   // add default filter items when data or filter updates
   ko.computed(function() {
+    self.selected([]);
     ko.utils.arrayPushAll(self.selected,
       _.filter(self.data(), function(org) {
-        return _.contains(defaultFilter(), org.id);
+        if (savedFilter()) {
+          return  _.contains(savedFilter(), org.id);
+        }
       }));
   });
 
   // TODO maybe get organizations with names with a single query, now we depend on two separate
   // async updates (get-organization-names command and currentUser.orgAuthz)
-  ajax
-    .query("get-organization-names")
-    .error(_.noop)
-    .success(function(res) {
-      organizationNames(res);
-    })
-    .call();
+  function load() {
+    if (lupapisteApp.models.globalAuthModel.ok("get-organization-names")) {
+      ajax
+        .query("get-organization-names")
+        .success(function(res) {
+          organizationNames(res);
+        })
+        .call();
+      return true;
+    }
+    return false;
+  }
+
+  if (!load()) {
+    hub.subscribe("global-auth-model-loaded", load, true);
+  }
 };

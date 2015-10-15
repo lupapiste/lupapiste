@@ -1,3 +1,32 @@
+.applications-search-top {
+  background-color: $gray238;
+  border-bottom: 2px solid $gray221;
+  .container {
+    margin-bottom: 0;
+  }
+  .button-group {
+    float: right;
+    button {
+      margin-left: $grid-margin;
+    }
+    margin-bottom: $grid-margin;
+  }
+  h1 {
+    display: inline-block;
+  }
+}
+
+#invitations {
+  background-color: $gray238;
+  margin-bottom: -$marginL;
+  .container {
+    margin-bottom: 0;
+  }
+}
+
+.applications-search-component {
+  clear: both;
+}
 
 .search-tabs {
   ul {
@@ -37,69 +66,171 @@
 }
 
 .paging {
-  button:first-child {
-    margin-right: $marginS;
-  }
-  select {
-    width: $cols1*1.5;
-    margin-left: $marginM;
-    margin-right: $marginS;
-  }
-}
-
-div.filter-row {
-  margin-bottom: $marginM;
-  > div {
+  color: $gray51;
+  label {
+    color: $gray51;
+    margin-bottom: $marginS;
     display: inline-block;
   }
-  label {
-    display: block
-  }
-  input.search {
-    ~ span.icon {
-      position: relative;
-      left: -22px;
-      top: 4px;
-    }
-    line-height: $baseline;
-    padding: $marginS/2 $marginL $marginS/2 $marginS;
-    border: 1px solid #dddddd;
-    box-shadow: none;
-  }
-  .autocomplete-component > .autocomplete-selection-wrapper > span.autocomplete-selection {
-    border-radius: 0;
-  }
-  .filter-item {
-    margin-right: $marginM;
+  button {
+    margin-right: $grid-margin;
   }
 }
 
-div.filter-row.advanced {
-  .autocomplete-component {
-    width: 600px;
+div.search {
+  position: relative;
+  input {
+    padding-right: 40px !important;
+  }
+
+  &.active {
+    i {
+      color: $orange-light;
+    }
+  }
+  i {
+    color: $primary;
+    position: absolute;
+    top: 8px;
+    right: 8px;
   }
 }
 
-@media (max-width:1260px) {
-  div.filter-row.advanced {
-    .autocomplete-component {
-      width: 460px;
+.applications-search-filters-list {
+
+  .applications-search-filters-list__filters {
+    display: table;
+  }
+
+  .applications-search-filters-list__filter-row {
+    display: table-row;
+  }
+
+  .applications-search-filters-list__filter-item {
+    background-color: #fff;
+    display: table-cell;
+    vertical-align: top;
+    height: $grid-input-height;
+    &:first-child {
+      width: 100%;
+    }
+    button {
+      width: 100%;
+    }
+  }
+  .applications-search-filters-list__filter-item--default-filter {
+    min-width: 250px;
+    max-width: 250px;
+    width: 250px;
+    overflow: hidden;
+  }
+  .applications-search-filters-list__filter-item--remove {
+    min-width: 105px;
+    max-width: 105px;
+    width: 105px;
+  }
+}
+
+.applications-search-results__indicator {
+  color: $primary;
+  padding: 3px 0 0 0 !important;
+  word-wrap: break-word;
+  div {
+    text-align: center;
+    height: auto !important;
+    padding: 0 $marginS !important;
+    white-space: nowrap;
+    i {
+      display: table-cell;
+    }
+    span {
+      padding-left: 2px;
+      display: table-cell;
+      vertical-align: middle;
+      color: $grey-text;
+    }
+  }
+  .application-search-results__urgency {
+    &.urgent {
+      color: $red-dark;
+    }
+    &.pending {
+      color: $orange-dark;
     }
   }
 }
 
-@media (max-width:990px) {
-  div.filter-row.advanced {
-    .autocomplete-component {
-      width:390px;
+.application-search-result__table, .application-foreman-search-result__table {
+  th {
+    @include disable-select;
+    white-space: nowrap;
+    padding-right: 16px;
+    span, i {
+      vertical-align: middle;
+    }
+    i {
+      position: absolute;
     }
   }
 }
 
-@media (max-width:990px) {
-  div.filter-row.advanced {
-    .autocomplete-component {
-      width:790px;
+.application-search-result__table {
+  th {
+    &.first {
+
+    }
+    &.second {
+
+    }
+    &.third {
+
+    }
+    &.fourth {
+
+    }
+    &.fifth {
+      width: 10%;
+    }
+    &.sixth {
+      width: 5%;
+    }
+    &.seventh {
+      width: 5%;
+    }
+    &.eight {
+      width: 10%;
+    }
+    &.ninth {
+      width: 10%;
     }
   }
 }
+
+.application-foreman-search-result__table {
+  th {
+    &.first {
+    }
+    &.second {
+      width: 15%;
+    }
+    &.third {
+      width: 5%;
+    }
+    &.fourth {
+      width: 20%;
+    }
+    &.fifth {
+      width: 15%;
+    }
+    &.sixth {
+      width: 15%;
+    }
+    &.seventh {
+      width: 5%;
+    }
+    &.eight {
+      width: 15%;
+    }
+  }
+}
+

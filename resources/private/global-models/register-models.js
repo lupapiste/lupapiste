@@ -5,15 +5,9 @@
   lupapisteApp.models.applicationAuthModel = authorization.create();
 
   lupapisteApp.models.globalAuthModel = authorization.create();
-  lupapisteApp.models.globalAuthModel.refresh();                      // no application bound
+  lupapisteApp.models.globalAuthModel.refreshWithCallback({}, _.partial(hub.send, "global-auth-model-loaded")); // no application bound
 
   lupapisteApp.models.rootVMO = new LUPAPISTE.RootViewModel();
 
   lupapisteApp.models.currentUser = new LUPAPISTE.CurrentUser();
-
-  lupapisteApp.services.areaFilterService = new LUPAPISTE.AreaFilterService();
-  lupapisteApp.services.operationFilterService = new LUPAPISTE.OperationFilterService();
-  lupapisteApp.services.organizationFilterService = new LUPAPISTE.OrganizationFilterService();
-  lupapisteApp.services.organizationTagsService = new LUPAPISTE.OrganizationTagsService();
-  lupapisteApp.services.tagFilterService = new LUPAPISTE.TagFilterService(lupapisteApp.services.organizationTagsService);
 })();

@@ -7,9 +7,9 @@
             [sade.strings :as ss]
             [sade.dns :as dns]
             [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.action :refer [defquery]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as user]
             [lupapalvelu.user :as user]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
@@ -54,7 +54,7 @@
       (bad-request "Invalid timestamp: NaN"))))
 
 (defn- invalid-email [email]
-  (when-not (and (util/valid-email? email) (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email)))
+  (when-not (and (v/valid-email? email) (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email)))
     (bad-request "Invalid email parameter")))
 
 (defn- invalid-boolean [b]

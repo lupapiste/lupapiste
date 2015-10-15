@@ -14,32 +14,34 @@
 ;; Getting user and users:
 ;; ==============================================================================
 ;;
+(apply-remote-minimal)
 
-(facts "Getting user"
-  (fact (query pena :user) => (contains {:user (contains {:email "pena@example.com"})})))
+(fact "user query"
+  (let [response (query pena :user)]
+    response => ok?
+    (get-in response [:user :email]) => "pena@example.com"))
 
 (facts "Getting users"
-  (apply-remote-minimal)
 
   (fact "applicants are not allowed to call this"
     (query pena :users) =not=> ok?)
 
   ; It's not nice to test the number of users, but... well, this is relly easy:
   (fact (-> (query admin :users :role "admin") :users count) => 1)
-  (fact (-> (query admin :users :organization "753-R") :users count) => 4)
-  (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 3))
+  (fact (-> (query admin :users :organization "753-R") :users count) => 5)
+  (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 4))
 
 (facts users-for-datatables
  (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
    => (contains {:ok true
-                 :data (contains {:rows (comp (partial = 4) count)
-                                  :total 4
-                                  :display 4
+                 :data (contains {:rows (comp (partial = 5) count)
+                                  :total 5
+                                  :display 5
                                   :echo "123"})}))
  (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 1) count)
-                                  :total 4
+                                  :total 5
                                   :display 1
                                   :echo "123"})})))
 ;;
@@ -77,18 +79,31 @@
   (fact (command veikko :update-user :firstName "f" :lastName "l") => ok?)
   (fact (-> (query veikko :user) :user) => (contains {:firstName "f" :lastName "l"})))
 
+(facts "save-application-filter"
+  (apply-remote-minimal)
+
+  (fact "fails with invalid filter type"
+    (command ronja :save-application-filter :title "titteli" :filter {} :sort {:field "applicant" :asc true} :filterId "beefcace" :filterType "a") => fail?)
+
+  (fact (command ronja :save-application-filter :title "titteli" :filter {} :sort {:field "applicant" :asc true} :filterId "beefcace" :filterType "application") => ok?)
+  (fact "Filter is saved"
+    (let [{user :user} (query admin :user-by-email :email "ronja.sibbo@sipoo.fi")]
+      (get-in user [:applicationFilters 0 :title]) => "titteli"
+      (fact "as default"
+        (->> user :defaultFilter :id) => "beefcace"))))
+
 (facts update-default-application-filter
   (apply-remote-minimal)
 
-  (fact (->> (command sonja :update-default-application-filter :filter {:handler (:id sonja)  :tags ["bar" "buzz"] :operations [] :organizations [] :areas ["1"]} :sort {:column "type" :asc false})) => ok?)
+  (fact (command sonja :update-default-application-filter :filterId "foobar" :filterType "application") => ok?)
 
-  (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter) first :tags) => ["bar" "buzz"])
+  (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "foobar")
 
   (fact "Overwrite default filter"
-      (->> (command sonja :update-default-application-filter :filter {:tags ["foo"]} :sort {:column "modified" :asc true})) => ok?)
+    (command sonja :update-default-application-filter :filterId "barfoo" :filterType "application") => ok?)
 
   (fact "Filter overwritten"
-      (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :applicationFilters (map :filter)) => [{:tags ["foo"]}]))
+      (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "barfoo"))
 
 (facts update-user-organization
   (apply-remote-minimal)

@@ -21,11 +21,12 @@ var stamping = (function() {
     },
 
     cancelStamping: function() {
+      var id = pageutil.subPage();
       model.stampingMode(false);
-      model.appModel.open("attachments");
       model.appModel = null;
       model.attachments = null;
       model.authorization = null;
+      pageutil.openPage("application/" + id, "attachments");
     },
 
     resetStamping: function() {

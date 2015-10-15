@@ -217,14 +217,14 @@ i.btn-small {
   background-color: $bg;
 
   &:link, &:visited {
-            color: $text;
-            background-color: $bg;
-          }
+    color: $text;
+    background-color: $bg;
+  }
   &:hover {
     color: $hover-text;
     background-color: $hover-bg
   }
-  &:active {
+  &:active, &.active {
     color: $active-text;
     background-color: $active-bg
   }
@@ -270,11 +270,11 @@ i.btn-small {
     color: $gray221;
   }
   &:link, &:visited {
-            border-color: $gray221;
-          }
+    border-color: $gray221;
+  }
   &:hover, &:active {
-            border-color: $gray187;
-           }
+    border-color: $gray187;
+  }
 }
 
 @include button-div-a-i-span (function) {
@@ -475,4 +475,41 @@ i.toggle {
 #login-button span {
   text-align: center;
   width: 200px;
+}
+
+button {
+  &:focus {
+    outline:0;
+  }
+}
+
+.remove-button {
+  position: relative;
+  .remove-button__row {
+    position: absolute;
+    top: 0;
+    right: 0;
+    white-space: nowrap;
+    width: 0px;
+    overflow: hidden;
+    z-index: 1;
+    &.remove-button--show {
+      width: auto;
+    }
+    button {
+      display: inline-block;
+      width: 105px !important;
+      &.primary {
+        margin-right: -3px;
+      }
+    }
+  }
+}
+
+// Could be done in @include button-div-a-i-span (positive), didn't want to add borders anywhere else
+.application_actions button.positive {
+  border: 1px solid $gray221;
+  &:hover, &:active {
+    border-color: $gray187;
+  }
 }

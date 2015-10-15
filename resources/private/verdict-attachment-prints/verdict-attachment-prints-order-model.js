@@ -2,7 +2,11 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   "use strict";
   var self = this;
   self.dialogSelector = "#dialog-verdict-attachment-prints-order";
-  self.application = null;
+
+  self.propertyId = lupapisteApp.models.application.propertyId;
+  self.applicantName = lupapisteApp.models.application.applicant;
+  self.lupapisteId = lupapisteApp.models.application.id;
+  self.address = lupapisteApp.models.application.address;
 
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
@@ -14,9 +18,8 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   self.ordererAddress = ko.observable("");
   self.ordererEmail = ko.observable("");
   self.ordererPhone = ko.observable("");
-  self.applicantName = ko.observable("");
   self.kuntalupatunnus = ko.observable("");
-  self.propertyId = ko.observable("");
+
   self.propertyIdHumanReadable = ko.pureComputed({
     read: function(){
       return self.propertyId() ? util.prop.toHumanFormat(self.propertyId()) : "";
@@ -26,14 +29,12 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     },
     owner: self
   });
-  self.lupapisteId = ko.observable("");
-  self.address = ko.observable("");
 
   self.authorizationModel = lupapisteApp.models.applicationAuthModel;
 
   self.ok = ko.computed(function() {
     var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {
-      return util.isNum(a.orderAmount());
+      return util.isNonNegative(a.orderAmount());
     });
     var dialogFieldValues = [self.ordererOrganization(),
                              self.ordererEmail(),
@@ -80,21 +81,21 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   // Open the dialog
 
-  self.refresh = function(applicationModel) {
-    self.application = ko.toJS(applicationModel);
+  self.refresh = function() {
+    var application = lupapisteApp.models.application._js;
     self.processing(false);
     self.pending(false);
     self.errorMessage(null);
 
-    var attachments = _(self.application.attachments || [])
+    var attachments = _(application.attachments || [])
                       .filter(printableAttachment)
                       .map(enrichAttachment)
                       .value();
     self.attachments(attachments);
 
-    var kopiolaitosMeta = ko.unwrap(self.application.organizationMeta).kopiolaitos;
+    var kopiolaitosMeta = application.organizationMeta.kopiolaitos;
     var currentUserName = lupapisteApp.models.currentUser.firstName() + " " + lupapisteApp.models.currentUser.lastName();
-    var ordererName = (self.application.organizationName || "") + ", " + currentUserName;
+    var ordererName = (application.organizationMeta.name || "") + ", " + currentUserName;
 
     self.kopiolaitosEmail(kopiolaitosMeta.kopiolaitosEmail || "");
     if (_.isEmpty(self.kopiolaitosEmail())) {
@@ -105,25 +106,16 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     self.ordererAddress(kopiolaitosMeta.kopiolaitosOrdererAddress || "");
     self.ordererEmail(kopiolaitosMeta.kopiolaitosOrdererEmail || "");
     self.ordererPhone(kopiolaitosMeta.kopiolaitosOrdererPhone || "");
-    self.applicantName(self.application.applicant || "");
-    self.kuntalupatunnus((self.application.verdicts && self.application.verdicts[0] && self.application.verdicts[0].kuntalupatunnus) ? self.application.verdicts[0].kuntalupatunnus : "");
-    self.propertyId(self.application.propertyId);
-    self.lupapisteId(self.application.id);
-    self.address(self.application.address);
-
+    self.kuntalupatunnus(util.getIn(application, ["verdicts", 0, "kuntalupatunnus"], ""));
   };
 
-  self.openDialog = function(bindings) {
-    self.refresh(bindings.application);
-    LUPAPISTE.ModalDialog.open(self.dialogSelector);
-  };
+  self.openDialog = _.partial(LUPAPISTE.ModalDialog.open, self.dialogSelector);
 
   // Send the prints order
 
-
   self.orderAttachmentPrints = function() {
     var data = {
-      id: self.application.id,
+      id: lupapisteApp.models.application.id(),
       lang: loc.getCurrentLanguage(),
       attachmentsWithAmounts: normalizeAttachments(self.attachments()),
       orderInfo: {
@@ -143,11 +135,10 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {
+        lupapisteApp.models.application.reload();
         LUPAPISTE.ModalDialog.close();  // close the prints ordering dialog first
         var content = loc("verdict-attachment-prints-order.order-dialog.ready", self.attachments().length);
         LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), content);
-        pageutil.showAjaxWait();
-        repository.load(self.application.id);
       })
       .error(function(d) {
         error(d);

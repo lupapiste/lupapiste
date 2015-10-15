@@ -185,7 +185,26 @@
     :zip "33456"
     :city "Sipoo"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
-              :apikey "5056e6d3aa24a1c901e6b9d1"}}
+              :apikey "5056e6d3aa24a1c901e6b9d1"}
+    :applicationFilters [{:id "foobar"
+                          :title "Foobar"
+                          :sort {:asc false
+                                 :field "modified"}
+                          :filter {:handlers []
+                                   :tags []
+                                   :operations []
+                                   :organizations []
+                                   :areas []}}
+                         {:id "barfoo"
+                          :title "Barfoo"
+                          :sort {:asc false
+                                 :field "modified"}
+                          :filter {:handlers []
+                                   :tags []
+                                   :operations []
+                                   :organizations []
+                                   :areas []}}]}
+
    ;; Ronja Sibbo - Sipoon lupa-arkkitehti:  ronja / sonja
    {:id "777777777777777777000024"
     :username "ronja"
@@ -201,6 +220,7 @@
     :city "Sipoo"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
+
    ;; Luukas Lukija - Sipoon katselija:  luukas / luukas
    {:id "777777777777777777000025"
     :username "luukas"
@@ -216,6 +236,23 @@
     :city "Sipoo"
     :private {:password "$2a$10$YM2XkcJVjM5JiqqR2qg7U.iUuY10LPYexYTfV/21RHOayn1xIf2sS"
               :apikey "5056e6d3aa24a1c901e6b9de"}}
+
+   ;; Kosti Kommentoija - Sipoon kommentoija: kosti / kosti
+   {:id "777777777777777777000026"
+    :username "kosti"
+    :role "authority"
+    :enabled true
+    :email "kosti.kommentoija@sipoo.fi"
+    :orgAuthz {:753-R #{:commenter}}
+    :firstName "Kosti"
+    :lastName "Kommentoija"
+    :phone "03121992"
+    :street "Katuosoite 1 a 3"
+    :zip "04130"
+    :city "Sipoo"
+    :private {:password "$2a$10$d2Ut/qSvKylOGhYm/7jXB..1ZC7/x39q5e/PFdtjHLqV1XW9wr3oO"
+              :apikey "XDnPTeDDpPqU5yoYQEERgZ0p4H6dff1RIdYgyDCk"}}
+
    ;; Porvoo
 
    ;; Pekka Borga - Porvoon lupa-arkkitehti:  pekka / pekka
@@ -763,13 +800,18 @@
                       {:id "564-YMP"
                        :name {:fi "Oulun ymparisto"
                               :sv "Oulun ymparisto"}
-                       :scope [{:municipality "564" :permitType "YI" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
+                       :scope [{:municipality "564" :permitType "YM" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
+                               {:municipality "564" :permitType "YI" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
                                {:municipality "564" :permitType "YL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
                                {:municipality "564" :permitType "MAL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
                                {:municipality "564" :permitType "VVVL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}]
                        :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
                                 :url "http://www.ouka.fi"}]
-                       :selected-operations (map first (filter (fn [[_ v]] (#{"YI" "YL" "MAL" "VVVL"} (name (:permit-type v)))) operations/operations))
+                       :statementGivers [{:id "516560d6c2e6f603beccc144"
+                                          :text "Paloviranomainen",
+                                          :email "olli.uleaborg@ouka.fi",
+                                          :name "Olli Ule\u00E5borg"}]
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"YI" "YL" "YM" "MAL" "VVVL"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
                       ;;
