@@ -23,6 +23,10 @@
 ;; KRYSP verdicts
 ;;
 
+(defn application-has-verdict-given-state [_ application]
+  (when-not (some (partial sm/valid-state? application) states/verdict-given-states)
+    (fail :error.command-illegal-state)))
+
 (defn do-check-for-verdict [{{op :primaryOperation :as application} :application :as command}]
   {:pre [(every? command [:application :user :created])]}
   (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
@@ -50,6 +54,7 @@
    :states     (conj give-verdict-states :constructionStarted) ; states reviewed 2015-10-12
    :user-roles #{:authority}
    :notified   true
+   :pre-checks [application-has-verdict-given-state]
    :on-success (notify :application-verdict)}
   [command]
   (let [result (do-check-for-verdict command)]
@@ -69,6 +74,7 @@
 (defcommand new-verdict-draft
   {:parameters [:id]
    :states     give-verdict-states
+   :pre-checks [application-has-verdict-given-state]
    :user-roles #{:authority}}
   [{:keys [application] :as command}]
   (let [organization (get application :organization)
@@ -93,7 +99,8 @@
                       (partial action/boolean-parameters [:agreement])]
    :states     give-verdict-states
    :user-roles #{:authority}
-   :pre-checks [(fn [{{:keys [verdictId]} :data} application]
+   :pre-checks [application-has-verdict-given-state
+                (fn [{{:keys [verdictId]} :data} application]
                   (when verdictId
                     (when-not (:draft (find-verdict application verdictId))
                       (fail :error.verdict.not-draft))))]}
@@ -112,18 +119,20 @@
 
 (defn- publish-verdict [{timestamp :created application :application :as command} {:keys [id kuntalupatunnus]}]
   (if-not (ss/blank? kuntalupatunnus)
-    (let [next-state (sm/verdict-given-state application)]
-      (update-application command
-        {:verdicts {$elemMatch {:id id}}}
-        {$set {:modified timestamp
-               :state    next-state
-               :verdicts.$.draft false}})
-      (ok))
+    (when-let [next-state (sm/verdict-given-state application)]
+      (do
+        (update-application command
+         {:verdicts {$elemMatch {:id id}}}
+         {$set {:modified timestamp
+                :state    next-state
+                :verdicts.$.draft false}})
+        (ok)))
     (fail :error.no-verdict-municipality-id)))
 
 (defcommand publish-verdict
   {:parameters [id verdictId]
    :states     give-verdict-states
+   :pre-checks [application-has-verdict-given-state]
    :notified   true
    :on-success (notify :application-verdict)
    :user-roles #{:authority}}
