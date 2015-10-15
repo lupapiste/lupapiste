@@ -9,7 +9,9 @@ jQuery(function($) {
     return false;
   }
 
-  function createApplication(operation, permitType) {
+  function doCreateApplication (operation, permitType, appIdCallback) {
+    appIdCallback = appIdCallback || _.noop;
+
     var municipality = "753";
     if (lupapisteApp.models.currentUser.isAuthority()) {
       var probableOrg = municipality + "-" + permitType;
@@ -24,8 +26,26 @@ jQuery(function($) {
               operation: operation,
               x: "404369.304000",
               y: "6693806.957000" },
-      success: function() { $("#debug-create-done").text(" DONE!").show().delay(1000).fadeOut(); }
+      success: function(id) {
+        appIdCallback(id);
+        $("#debug-create-done").text(" DONE!").show().delay(1000).fadeOut();
+      }
     });
+  }
+
+  function createApplicationAndPublishBulletin (operation, permitType) {
+    doCreateApplication(operation, permitType, function (createdAppId) {
+      $.ajax({
+        url: "/dev/publish-bulletin",
+        data: { id: createdAppId },
+        success: function() { $("#debug-create-and-publish-done").text(" DONE!").show().delay(1000).fadeOut(); }
+      });
+    });
+    return false;
+  }
+
+  function createApplication(operation, permitType) {
+    doCreateApplication(operation, permitType);
     return false;
   }
 
@@ -81,7 +101,11 @@ jQuery(function($) {
                                   .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("YA/katulupa").
                                           click(function() { createApplication("ya-katulupa-vesi-ja-viemarityot", "YA"); }))
                                   .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("KT/kiinteistonmuodostus")
-                                          .click(function() { createApplication("kiinteistonmuodostus", "R"); }))))
+                                          .click(function() { createApplication("kiinteistonmuodostus", "R"); })))
+                          .append($("<p>").text("Create and publish in julkipano.fi:")
+                                  .append($("<span>").attr("id", "debug-create-and-publish-done").css("font-weight", "bold").hide())
+                                  .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/asuinkerrostalo")
+                                          .click(function() { createApplicationAndPublishBulletin("kerrostalo-rivitalo", "R"); }))))
                   .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
                   .append($("<span>").text("Throttle web: "))
                   .append($("<b>").addClass("dev-throttle-web").text("0"))

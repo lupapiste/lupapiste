@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+  <footer>
+    <div class="informations">
+
+      <div class="footer-box">
+        <h3 data-bind="ltext: 'footer.contact'"></h3>
+        <ul>
+          <li><a data-bind="attr: { href: loc( 'footer.support.request.href' ) },
+                            text: loc( 'footer.support.request.text' )"></a></li>
+          <li><a href="mailto:tuki@lupapiste.fi">tuki@lupapiste.fi</a></li>
+        <!-- ko if: lupapisteApp.models.currentUser && (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.isCompanyUser()) -->
+          <li><span><span data-bind="ltext: 'footer.tel'"></span> 044 750 4471</span></li>
+            <!-- /ko -->
+            <li><a data-bind="attr: {href: loc( 'footer.help.href')},
+                              text: loc( 'footer.help.text' )"></a></li>
+        </ul>
+      </div>
+      <div class="footer-box">
+        <h3 data-bind="ltext: 'footer.conversation.title'"></h3>
+        <span data-bind="ltext: 'footer.conversation.desc'"></span>
+      </div>
+      <div class="footer-box">
+          <ul>
+              <li><a href="/ota-yhteytta" target="_blank" data-bind="ltext: 'footer.feedback'" ></a></li>
+              <li><a data-bind="ltext: 'footer.service.info'" href="http://www.lupapiste.fi/palveluinfo"></a></li>
+              <li><a href="/rekisteriseloste" data-bind="ltext: 'footer.register'"></a></li>
+              <li><a href="/kayttoehdot" data-bind="ltext: 'footer.terms'"></a></li>
+              <li><a href="/lisenssit" data-bind="ltext: 'footer.license'"></a></li>
+          </ul>
+      </div>
+
+      <div class="footer-box sade-box">
+          <h3 data-bind="ltext: 'footer.sade.title'"></h3>
+          <span data-bind="ltext: 'footer.sade'"> </span>
+          <a href="http://www.vm.fi/sade" target="_blank">www.vm.fi/sade</a>)
+      </div>
+    </div>
+    <span id="buildinfo"></span>
+  </footer>
+
+</body>
+</html>

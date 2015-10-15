@@ -229,7 +229,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
       $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
-        function openStartPage() {
+      function openStartPage() {
         if (self.logoPath) {
           window.location = window.location.protocol + "//" + window.location.host + self.logoPath;
         } else if (self.startPage && self.startPage.charAt(0) !== "/") {

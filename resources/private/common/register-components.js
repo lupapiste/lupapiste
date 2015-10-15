@@ -69,7 +69,10 @@ jQuery(document).ready(function() {
     {name: "accordion-toolbar"},
     {name: "group-approval"},
     {name: "submit-button"},
-    {name: "remove-button"}
+    {name: "remove-button"},
+    {name: "application-bulletins"},
+    {name: "application-bulletins-list"},
+    {name: "load-more-application-bulletins"}
   ];
 
   _.forEach(components, function(component) {

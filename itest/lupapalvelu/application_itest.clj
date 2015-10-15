@@ -466,11 +466,3 @@
           primary-op (:primaryOperation app)]
       (:name secondary-op) => "kerrostalo-rivitalo"
       (:name primary-op) => "varasto-tms")))
-
-(facts "Publishing bulletins"
-  (let [app    (create-and-submit-application pena)
-        app-id (:id app)]
-    (fact "Authority can publish bulletin"
-      (command sonja :publish-bulletin :id app-id) => ok?)
-    (fact "Regular user can't publish bulletin"
-      (command pena :publish-bulletin :id app-id) => fail?)))
