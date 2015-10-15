@@ -70,7 +70,8 @@ jQuery(document).ready(function() {
     {name: "submit-button"},
     {name: "remove-button"},
     {name: "application-bulletins"},
-    {name: "application-bulletins-list"}
+    {name: "application-bulletins-list"},
+    {name: "load-more-application-bulletins"}
   ];
 
   _.forEach(components, function(component) {
