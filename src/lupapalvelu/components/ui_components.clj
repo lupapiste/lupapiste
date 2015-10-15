@@ -372,7 +372,7 @@
                   :js ["bulletins-app.js"]}
 
    :bulletins {:depends [:bulletins-app :services]
-               :html ["application-bulletins.html" "header.html" "footer.html"] :js ["header.js"]}
+               :html ["application-bulletins.html" "bulletin.html" "header.html" "footer.html"] :js ["header.js"]}
    })
 
 ; Make sure all dependencies are resolvable:
