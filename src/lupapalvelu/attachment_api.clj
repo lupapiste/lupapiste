@@ -321,7 +321,7 @@
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
-   :states     (states/all-states-but states/terminal-states)
+   :states     (conj (states/all-states-but states/terminal-states) :answered)
    :notified   true
    :on-success [(notify :new-comment)
                 open-inforequest/notify-on-comment]
@@ -358,7 +358,7 @@
    :input-validators [(partial action/number-parameters [:rotation])
                       (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
    :pre-checks  attachment-modification-precheks
-   :states      (states/all-states-but states/terminal-states)
+   :states      (conj (states/all-states-but states/terminal-states) :answered)
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."}
   [{:keys [application user created]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
@@ -459,7 +459,7 @@
   {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId kuntalupatunnus section]
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])]
    :user-roles #{:authority}
-   :states     #{:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed}
+   :states     (conj states/post-submitted-states :submitted)
    :description "Stamps all attachments of given application"}
   [{application :application {transparency :transparency} :data :as command}]
   (let [parsed-timestamp (cond

@@ -1,9 +1,9 @@
 *** Settings ***
 
-Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        keywords.robot
 Suite Setup     Initialize
+Suite Teardown  Logout
 
 *** Keywords ***
 Mikko creates an application and invites foreman
@@ -29,6 +29,8 @@ Submit the base app
 Foreman sees his other foreman jobs
   Foreman logs in
   Foreman applies personal information to the foreman application  0
+
+Foreman submits the second application
   Foreman applies personal information to the foreman application  1
   Foreman can see the first related construction info on the second foreman application
 
@@ -41,6 +43,11 @@ Foreman gets error message when trying to submit foreman notice before link perm
   Element should contain  xpath=//div[@id='modal-dialog-content']/div[@class='header']/span[@class="title"]  Työnjohtajan ilmoitus
   Confirm notification dialog
   Wait Until  Application state should be  draft
+
+Foreman application can be submitted
+  Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
+  Positive indicator should be visible
+  Submit application
 
 Can not link base app to foreman application
   Open project application
@@ -74,3 +81,60 @@ Link the new foreman app from base app
 Foreman app is linking to base app
   # ...even though we tried to create the link the other way
   Wait until  Page Should Contain Element  xpath=//section[@id="application"]//a[@data-test-app-linking-to-us="${blankForemanAppId}"]
+  Logout
+
+Authority opens the submitted foreman application
+  Sonja logs in
+  Open foreman application  1
+  Wait until  Application state should be  submitted
+
+Authority decides that a verdict is not required
+  Select From List By Value  permitSubtypeSelect  tyonjohtaja-ilmoitus
+  Positive indicator should be visible
+
+Authority tries to send application to backend
+  Click enabled by test id  approve-application
+
+Can not be send before base app
+  Confirm  integration-error-dialog
+
+Approve base app
+  Go back to project application
+  Click enabled by test id  approve-application
+  Wait until  Application state should be  sent
+
+Approve foreman app
+  Open foreman application  1
+  Click enabled by test id  approve-application
+  Wait Until  Application state should be  acknowledged
+
+On second thought, complement is needed
+  Click enabled by test id  request-for-complement
+  Wait Until  Application state should be  complement-needed
+
+Verdict can't be given
+  Open tab  verdict
+  Element should not be visible  //div[@id="application-verdict-tab"]//button[@data-test-id="give-verdict"]
+
+Change subtype back to foreman application
+  Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
+  Positive indicator should be visible
+
+Verdict could be given
+  Wait Until  Element should be visible  //div[@id="application-verdict-tab"]//button[@data-test-id="give-verdict"]
+
+Re-send and give verdict
+  Click enabled by test id  approve-application
+  Wait until  Application state should be  sent
+  Submit empty verdict  foremanVerdictGiven
+
+Deleting the verdict sets application back to previous state
+  Application state should be  foremanVerdictGiven
+  Open tab  verdict
+
+  Wait Until  Element should be visible  //div[@id="application-verdict-tab"]//*[@data-test-id="delete-verdict-from-listing"]
+  Click element  xpath=//div[@id="application-verdict-tab"]//*[@data-test-id="delete-verdict-from-listing"]
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element should not be visible  //div[@id="application-verdict-tab"]//*[@data-test-id="delete-verdict-from-listing"]
+
+  Application state should be  sent

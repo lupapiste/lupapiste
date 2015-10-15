@@ -264,6 +264,38 @@
     (fact "Maksaja is Yritys 1743842-0 (first)"
       (sxml/get-text xml-parsed [:UusiAsia :Maksaja :Yritys :Ytunnus]) => (get-in docs [:maksaja 0 :data :yritys :liikeJaYhteisoTunnus]))))
 
+(fl/facts* "Schema version 1.2"
+  (let [application    (ua-mapping/enrich-application
+                         (assoc poikkeus-test/poikkari-hakemus :attachments attachments))
+        canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
+        canonical      (assoc-in canonical
+                         [:UusiAsia :Liitteet :Liite]
+                         (ah/get-attachments-as-canonical (:attachments application) begin-of-link))
+        schema-version "ah-1.2"
+        mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
+        xml            (element-to-xml canonical mapping) => truthy
+        xml-s          (xml/indent-str xml) => truthy
+        permit-type    (:permitType application)
+        xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
+
+    (fact "Validator for Asianhallinta exists"
+      ((keyword permit-type) validator/supported-versions-by-permit-type) => (contains schema-version))
+
+    (fact "Validate UusiAsia XML"
+      (validator/validate xml-s permit-type schema-version) => nil)
+
+    (facts "Liitteet has KuvausFi and KuvausSv added in schema 1.2"
+      (let [liitteet (sxml/select1 xml-parsed [:UusiAsia :Liitteet])
+            liit1 (first (:content liitteet))
+            liit2 (second (:content liitteet))]
+        liitteet => truthy
+        (facts "1st Liite"
+          (fact "KuvausFi" (sxml/get-text liit1 [:KuvausFi]) => "Asemapiirros")
+          (fact "KuvausSv" (sxml/get-text liit1 [:KuvausSv]) => "Situationsplan"))
+        (facts "2nd Liite"
+          (fact "KuvausFi" (sxml/get-text liit2 [:KuvausFi]) => "Valtakirja")
+          (fact "KuvausSv" (sxml/get-text liit2 [:KuvausSv]) => "Fullmakt"))))))
+
 
 (facts "Unit tests - attachments-for-write"
 
