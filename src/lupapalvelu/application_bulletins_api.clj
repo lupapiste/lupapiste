@@ -17,11 +17,11 @@
    :modified 1})
 
 (def default-bulletin-page-size 10)
-(defn- do-get-application-bulletins [{:keys [limit] :or {limit default-bulletin-page-size}}]
+(defn- do-get-application-bulletins [page]
   (let [apps (mongo/with-collection "application-bulletins"
                (query/fields bulletins-fields)
                (query/sort {:modified 1})
-               (query/limit limit))]
+               (query/paginate :page page :per-page default-bulletin-page-size))]
     (map
       #(assoc (first (:versions %)) :id (:_id %))
       apps)))
@@ -31,9 +31,8 @@
    :feature :publish-bulletin
    :parameters [page]
    :user-roles #{:anonymous}}
-  [{data :data}]
-  (let [limit (* page default-bulletin-page-size)]
-    (ok :data (do-get-application-bulletins (assoc data :limit limit)))))
+  [_]
+  (ok :data (do-get-application-bulletins page)))
 
 
 (def app-snapshot-fields
