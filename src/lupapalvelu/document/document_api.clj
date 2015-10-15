@@ -21,6 +21,28 @@
 (def approve-doc-states (states/all-application-states-but (conj states/terminal-states :draft :sent :verdictGiven :constructionStarted)))
 
 ;;
+;; KTJ-info updation
+;;
+
+(def ktj-format (tf/formatter "yyyyMMdd"))
+(def output-format (tf/formatter "dd.MM.yyyy"))
+
+(defn fetch-and-persist-ktj-tiedot [application document property-id time]
+  (when-let [ktj-tiedot (wfs/rekisteritiedot-xml property-id)]
+    (let [doc-updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
+                       [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
+                       [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
+                       [[:kiinteisto :rekisterointipvm] (or
+                                                          (try
+                                                            (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                            (catch Exception e (:rekisterointipvm ktj-tiedot)))
+                                                          "")]]
+          schema (schemas/get-schema (:schema-info document))
+          updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) doc-updates)]
+      (doc-persistence/persist-model-updates application "documents" document doc-updates time))))
+
+
+;;
 ;; CRUD
 ;;
 
@@ -41,17 +63,10 @@
   [command]
   (let [document (doc-persistence/do-create-doc command updates)]
     (when fetchRakennuspaikka
-      (let [propertyId (get-in command [:application :propertyId])
-            ktj-tiedot (wfs/rekisteritiedot-xml propertyId)
-            updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
-                     [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
-                     [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
-                     [[:kiinteisto :rekisterointipvm] (or
-                                                        (try
-                                                          (tf/unparse (tf/formatter "dd.MM.yyyy") (tf/parse (tf/formatter "yyyyMMdd") (:rekisterointipvm ktj-tiedot)))
-                                                          (catch Exception e (:rekisterointipvm ktj-tiedot)))
-                                                        "")]]]
-        (doc-persistence/persist-model-updates (:application command) "documents" document updates (sade.core/now))))
+      (let [property-id (or
+                          (-> updates first second)
+                          (get-in command [:application :propertyId]))]
+        (fetch-and-persist-ktj-tiedot (:application command) document property-id (now))))
     (ok :doc (:id document))))
 
 (defn- deny-remove-of-primary-operation [document application]
