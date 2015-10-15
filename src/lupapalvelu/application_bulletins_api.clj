@@ -31,9 +31,12 @@
   {:description "Query for Julkipano"
    :feature :publish-bulletin
    :parameters []
+   :optional-parameters [page]
    :user-roles #{:anonymous}}
   [{data :data}]
-  (ok :data (application-bulletins data)))
+  (let [page  (or page 1)
+        limit (* page 10)]
+    (ok :data (application-bulletins (assoc data :limit limit)))))
 
 
 (def app-snapshot-fields
