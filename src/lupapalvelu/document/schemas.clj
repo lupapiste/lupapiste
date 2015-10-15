@@ -1323,4 +1323,10 @@
    {:info {:name "rakennusjateilmoitus"
            :order 200}
     :body (body rakennusjateilmoitus)}
+
+   ;; TODO: "rakennusjateselvitys"-skeema: kopioi luontivaiheessa "rakennusjateilmoitus"-skeema.
+   ;; Kts. esimerkkia mm.
+   ;;   application.clj  make-documents
+   ;;   prev-permit.clj  applicant->applicant-doc
+
    ])
