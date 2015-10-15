@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.document-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
             [monger.operators :refer :all]
-            [sade.core :refer [ok fail fail! unauthorized!]]
+            [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
             [lupapalvelu.domain :as domain]
