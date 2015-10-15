@@ -1,0 +1,5 @@
+KT: Kiinteistötoimitukset ja tonttijaot
+operations.tree.maankayton-muutos: Kaavoitushakemukset
+operations.tree.maanmittaustoimitukset: Kiinteistötoimitukset ja tonttijaot
+kiinteistonmuodostus.kiinteistonmuodostus.kiinteistonmuodostusTyyppi.kiinteistolajin-muutos: Kiinteistölaadun tai -tunnuksen muutos
+kiinteistonmuodostus.kiinteistonmuodostus.kiinteistonmuodostusTyyppi.lohkominen-tonttijako: Lohkominen - sitovan tonttijaon mukainen tontti

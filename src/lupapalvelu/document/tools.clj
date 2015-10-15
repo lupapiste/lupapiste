@@ -182,6 +182,14 @@
                                           (concat result (deep-find v target (conj current-location k) result))
                                           result))))))))
 
+(defn get-update-item-value [updates item-name]
+  {:pre [(vector? updates) (string? item-name)]}
+  (some
+    (fn [update-item]
+      (when (some #(= item-name %) update-item)
+        (second update-item)))
+    updates))
+
 (defn update-in-repeating
   ([m [k & ks] f & args]
     (if (every? (comp ss/numeric? name) (keys m))
