@@ -541,15 +541,15 @@
                                    {:name "eristeiden-ja-tiivistemassojen-haitalliset-jatteet"}
                                    {:name "sahko-ja-elektroniikkaromu"}]})
 
-(def rakennusjateilmoitusRow [{:name "suunniteltuMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m" :label false}
-                              {:name "toteutunutMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m" :label false}
+(def rakennusjateilmoitusRow [{:name "suunniteltuMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "s" :label false}
+                              {:name "toteutunutMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "s" :label false}
                               {:name "yksikko" :type :select :label false
                                :body [{:name "kg"}
                                       {:name "tonni"}
                                       {:name "m2"}
                                       {:name "m3"}]}
-                              {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m" :label false}
-                              {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "l" :label false}])
+                              {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "s" :label false}
+                              {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "m" :label false}])
 
 (def rakennusJaPurkujateRow (body jatetyyppi rakennusjateilmoitusRow))
 
