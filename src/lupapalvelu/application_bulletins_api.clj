@@ -16,7 +16,9 @@
    :versions.applicant 1 :versions.modified 1
    :modified 1})
 
-(defn application-bulletins [{:keys [limit] :or {limit 10}}]
+(def default-bulletin-page-size 10)
+
+(defn application-bulletins [{:keys [limit] :or {limit default-bulletin-page-size}}]
   (let [query {}
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
@@ -35,7 +37,7 @@
    :user-roles #{:anonymous}}
   [{data :data}]
   (let [page  (or page 1)
-        limit (* page 10)]
+        limit (* page default-bulletin-page-size)]
     (ok :data (application-bulletins (assoc data :limit limit)))))
 
 
