@@ -827,6 +827,7 @@
                                     <span data-bind="visible: $data.draft" style="text-transform: lowercase;">(<span data-bind="ltext: 'draft'"></span>)</span>
 
                                     <i class="primary lupicon-remove is-right"
+                                        data-test-id="delete-verdict-from-listing"
                                         data-bind="click: $root.verdictModel.deleteVerdict,
                                         visible: $root.authorization.ok('delete-verdict'),
                                         enable: $root.authorization.ok('delete-verdict'),
