@@ -1,11 +1,11 @@
-LUPAPISTE.ApplicationBulletinsModel = function() {
+LUPAPISTE.ApplicationBulletinsModel = function(params) {
   "use strict";
   var self = this;
   self.bulletinService = new LUPAPISTE.ApplicationBulletinsService();
   self.requestedPages = ko.observable(1);
 
   self.openBulletin = function(item) {
-  	console.log(item);
+  	params.bulletinId(item.id);
   };
 
   ko.computed(function () {

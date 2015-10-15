@@ -8,7 +8,7 @@
                                 params: {bulletinId: bulletinId()}}"></div>
     <!-- /ko -->
     <!-- ko ifnot: bulletinId() -->
-    <div data-bind="component: {name: 'application-bulletins'}"></div>
+    <div data-bind="component: {name: 'application-bulletins', params: {bulletinId: bulletinId}}"></div>
     <!-- /ko -->
     </script>
   </section>
