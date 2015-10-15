@@ -5,8 +5,6 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.path = _.isArray(params.path) ? params.path : [params.path];
   self.groupId = "group-" + params.documentId + "-" + self.path.join("-");
   self.groupLabel = self.path.join(".") + "._group_label";
-  self.applicationId = params.applicationId || lupapisteApp.models.application.id();
-  self.documentId = params.documentId;
 
   var model = params.model || {};
 
@@ -20,6 +18,8 @@ LUPAPISTE.DocgenGroupModel = function(params) {
       path: self.path,
       label: schema.label === false ? null : [buildLocKey(params.subSchema, self.path), schema.name].join("."),
       model: model[schema.name],
+      applicationId: params.applicationId || lupapisteApp.models.application.id(),
+      documentId: params.documentId,
       valueAllowUnset: schema.uicomponent === "docgen-select" || schema.type === "select" ? true : undefined
     });
   });
