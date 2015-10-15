@@ -37,8 +37,6 @@
   (merge-with conj
               (-> (commons/read-translations (io/resource "shared_translations.txt"))
                   commons/keys-by-language)
-              (-> (commons/read-translations (io/resource "i18n_states.txt"))
-                  commons/keys-by-language)
               (with-open [in (io/input-stream (io/resource "i18n.xlsx"))]
                 (let [wb      (xls/load-workbook in)
                       langs   (-> wb seq first first xls/read-row rest)
