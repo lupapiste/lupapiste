@@ -27,13 +27,15 @@
                                   :sent (* 3 day)
                                   :constructionStarted (* 5 day)
                                   :closed (* 6 day)
-                                  :verdictGiven (* 7 day)}
+                                  :verdictGiven (* 7 day)
+                                  :foremanVerdictGiven (* 7 day)}
 
    (all-state-timestamps (dissoc app :closed :verdicts :started :complementNeeded)) => {:complement-needed nil
                                                                                         :submitted (* 3 day)
                                                                                         :sent (* 3 day)
                                                                                         :constructionStarted nil
                                                                                         :closed nil
-                                                                                        :verdictGiven nil}
+                                                                                        :verdictGiven nil
+                                                                                        :foremanVerdictGiven nil}
 
    ))

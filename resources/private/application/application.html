@@ -17,15 +17,12 @@
                             <!-- State: -->
                             <div class="state-indication" data-bind="attr: {'data-test-state': state}" data-test-id="application-state" >
                                 <div data-bind="attr: {'class': state}">
-                                    <span data-bind="ltext: 'draft', attr: {'title' : loc('draft.title')}" class="draft-box"></span>
-                                    <span data-bind="ltext: 'open', attr: {'title' : loc('open.title')}" class="open-box"></span>
-                                    <span data-bind="ltext: 'submitted', attr: {'title' : loc('submitted.title')}" class="submitted-box"></span>
-                                    <span data-bind="ltext: 'complement-needed', attr: {'title' : loc('complement-needed.title')}" id="complement-needed-box" class="complement-needed-box"></span>
-                                    <span data-bind="ltext: 'sent', attr: {'title' : loc('sent.title')}" class="sent-box"></span>
-                                    <span data-bind="ltext: 'verdictGiven', attr: {'title' : loc('verdictGiven.title')}" class="verdictGiven-box"></span>
-                                    <span data-bind="ltext: 'constructionStarted', attr: {'title' : loc('constructionStarted.title')}" class="constructionStarted-box"></span>
-                                    <span data-bind="ltext: 'closed', attr: {'title' : loc('closed.title')}" class="closed-box"></span>
-                                    <span data-bind="ltext: 'canceled', attr: {'title' : loc('canceled.title')}" class="canceled-box"></span>
+                                  <!-- ko ifnot: currentStateInSeq() -->
+                                  <span data-bind="ltext: state, attr: {'title' : loc([state(), 'title']), 'class': state() + '-box'}"></span>
+                                  <!-- /ko -->
+                                  <!-- ko  foreach: stateSeq -->
+                                  <span data-bind="ltext: $data, attr: {'title' : loc([$data, 'title']), 'class': $data + '-box'}"></span>
+                                  <!-- /ko -->
                                 </div>
                             </div>
                             <div data-bind="if: $root.application.state() == 'draft'" class="summary-help">
@@ -186,7 +183,7 @@
                         </div>
 
                         <!-- Actions: -->
-                        <div class="application_actions">
+                        <div class="application_actions" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'application'">
                             <div class="stacked" data-bind="with: application">
                                 <!-- ko if: !hasInvites() -->
 
@@ -830,6 +827,7 @@
                                     <span data-bind="visible: $data.draft" style="text-transform: lowercase;">(<span data-bind="ltext: 'draft'"></span>)</span>
 
                                     <i class="primary lupicon-remove is-right"
+                                        data-test-id="delete-verdict-from-listing"
                                         data-bind="click: $root.verdictModel.deleteVerdict,
                                         visible: $root.authorization.ok('delete-verdict'),
                                         enable: $root.authorization.ok('delete-verdict'),

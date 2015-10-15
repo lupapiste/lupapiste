@@ -49,3 +49,11 @@
   (validate-state-transition :canceled ..anything.. {:infoRequest true :state "answered"}) => (contains {:ok false})
   (validate-state-transition :canceled ..anything.. {:infoRequest true :state "canceled"}) => (contains {:ok false})
   (validate-state-transition :canceled ..anything.. {:infoRequest true :state "info"}) => nil)
+
+(facts "state-seq"
+  (state-seq {}) => [:draft :open :submitted :sent :verdictGiven :constructionStarted :closed]
+  (state-seq {:infoRequest true}) => [:info :answered]
+
+  (state-seq {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => [:draft :open :submitted :sent :foremanVerdictGiven]
+  (state-seq {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
+              :permitSubtype "tyonjohtaja-ilmoitus"}) => [:draft :open :submitted :acknowledged])

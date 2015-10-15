@@ -16,13 +16,17 @@
    :versions.applicant 1 :versions.modified 1
    :modified 1})
 
-(defn application-bulletins [{:keys [limit] :or {limit 10}}]
-  (let [query {}
-        apps (mongo/with-collection "application-bulletins"
-               (query/find query)
+(def bulletin-page-size 10)
+
+(defn- get-application-bulletins-left [page]
+  (- (mongo/count :application-bulletins)
+     (* page bulletin-page-size)))
+
+(defn- get-application-bulletins [page]
+  (let [apps (mongo/with-collection "application-bulletins"
                (query/fields bulletins-fields)
                (query/sort {:modified 1})
-               (query/limit limit))]
+               (query/paginate :page page :per-page bulletin-page-size))]
     (map
       #(assoc (first (:versions %)) :id (:_id %))
       apps)))
@@ -30,10 +34,11 @@
 (defquery application-bulletins
   {:description "Query for Julkipano"
    :feature :publish-bulletin
-   :parameters []
+   :parameters [page]
    :user-roles #{:anonymous}}
-  [{data :data}]
-  (ok :data (application-bulletins data)))
+  [_]
+  (ok :data (get-application-bulletins page)
+      :left (get-application-bulletins-left page)))
 
 
 (def app-snapshot-fields

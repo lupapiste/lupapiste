@@ -908,11 +908,12 @@ Input verdict
   Execute JavaScript  $("#verdict-name").change();
 
 Submit empty verdict
+  [Arguments]  ${targetState}=verdictGiven
   Go to give new verdict
   Input verdict  -  6  01.05.2018  01.06.2018  -
   Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Application state should be  verdictGiven
+  Wait until  Application state should be  ${targetState}
 
 Do fetch verdict
   [Arguments]  ${fetchConfirmationText}
