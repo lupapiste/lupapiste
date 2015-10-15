@@ -6,5 +6,5 @@ LUPAPISTE.DocgenSelectModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.DocgenInputModel(params));
 
   self.valueAllowUnset = params.schema.valueAllowUnset;
-  self.optionsCaption = self.valueAllowUnset ? loc([self.path, "select"]) : null;
+  self.optionsCaption = self.valueAllowUnset ? loc([self.path.join("."), "select"]) : null;
 };
