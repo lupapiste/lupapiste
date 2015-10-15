@@ -183,11 +183,10 @@
                                           result))))))))
 
 (defn get-update-item-value [updates item-name]
-  {:pre [(vector? updates) (string? item-name)]}
+  {:pre [(vector? updates) (every? vector? updates) (string? item-name)]}
   (some
-    (fn [update-item]
-      (when (some #(= item-name %) update-item)
-        (second update-item)))
+    (fn [[k v]]
+      (when (= item-name k) v))
     updates))
 
 (defn update-in-repeating
