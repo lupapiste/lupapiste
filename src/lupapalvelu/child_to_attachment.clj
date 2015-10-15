@@ -20,9 +20,9 @@
 (defn- build-attachment [user application type lang id file]
   (let [use-pdf-a? (env/feature? :arkistointi)
         content  (attachment/ensure-pdf-a file use-pdf-a?)
-        type-name (cond
-                    (= type :statements) (if (= lang :sv) "Utlåtande" "Lausunto")
-                    (= type :verdicts) "verdict")
+        type-name (case type
+                    :statements (i18n/localize lang "statement.lausunto")
+                    :verdicts "verdict")
         filename (str type-name ".pdf")
         child (get-child application type id)]
     {:application application

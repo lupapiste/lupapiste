@@ -212,7 +212,7 @@ $app-gray-darkest: $gray187;
           }
         }
 
-        .constructionStarted-box, .closed-box, .complement-needed-box, .verdictGiven-box, .canceled-box  {
+        .constructionStarted-box, .closed-box, .complement-needed-box, .verdictGiven-box, .foremanVerdictGiven-box, acknowledged-box, .canceled-box  {
           display: none;
         }
         &.draft {
@@ -243,9 +243,12 @@ $app-gray-darkest: $gray187;
           .draft-box, .open-box, .submitted-box {
             @include past-state;
           }
+          .verdictGiven-box, .foremanVerdictGiven-box, .acknowledged-box  {
+            display: inline-block;
+          }
         }
         &.complement-needed {
-          #complement-needed-box {
+          .complement-needed-box {
             @include active-state;
           }
           .draft-box, .open-box, .submitted-box {
@@ -260,6 +263,17 @@ $app-gray-darkest: $gray187;
             display: none;
           }
           .verdictGiven-box, .constructionStarted-box, .closed-box  {
+            display: inline-block;
+          }
+        }
+        &.foremanVerdictGiven {
+          .foremanVerdictGiven-box {
+            @include active-state;
+          }
+          .draft-box, .open-box, .submitted-box, .sent-box {
+            display: none;
+          }
+          .foremanVerdictGiven-box  {
             display: inline-block;
           }
         }
@@ -289,6 +303,14 @@ $app-gray-darkest: $gray187;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
+          }
+        }
+        &.acknowledged {
+          .acknowledged-box {
+            @include active-state;
+          }
+          .draft-box, .open-box, .submitted-box, .sent-box   {
+            @include past-state;
           }
         }
         &.canceled {
