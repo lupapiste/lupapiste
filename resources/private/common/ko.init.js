@@ -457,4 +457,8 @@
       });
     }
   };
+
+  ko.observable.fn.increment = function () {
+    this(this() + 1);
+  };
 })(jQuery);
