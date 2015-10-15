@@ -15,7 +15,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.document.document-api :as document-api]
+            [lupapalvelu.document.document :as document]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
@@ -89,7 +89,7 @@
         (let [property-id (or
                             (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
                             (:propertyId application))]
-          (document-api/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
+          (document/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
 
 (defquery party-document-names
   {:parameters [:id]
