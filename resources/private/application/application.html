@@ -325,7 +325,7 @@
                                     <span data-bind="ltext: 'application.tabParties'"></span>
                                     <span data-bind="if: partyDocumentIndicator">
                                         <span data-bind="text: partyDocumentIndicator" id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
-                            <li data-bind="if: inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'tasks'}">
+                            <li data-bind="if: $root.authorization.ok('tasks-tab-visible'), css: {'active': $parent.selectedTabName() === 'tasks'}">
                                 <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab" class="link-btn">
                                     <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                                     <span data-bind="if: $data.tasksRequiringAction">
@@ -1246,7 +1246,7 @@
 
                     <!-- Tasks tab -->
 
-                    <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
+                    <div id="application-tasks-tab" data-bind="visible: $root.authorization.ok('tasks-tab-visible'), with: $root.application" class="tab-content" >
 
                         <h1 data-bind="ltext: 'application.tabConstructionTimeTasks'"></h1>
                         <span data-bind="component: {
