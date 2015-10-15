@@ -24,7 +24,7 @@
 ;;
 
 (defn application-has-verdict-given-state [_ application]
-  (when-not (some (partial sm/valid-state? application) states/verdict-given-states)
+  (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
 (defn do-check-for-verdict [{{op :primaryOperation :as application} :application :as command}]
