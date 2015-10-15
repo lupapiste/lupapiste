@@ -851,6 +851,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildDocgenGroup (subSchema, model, path) {
     var name = subSchema.name;
 
+    path.unshift(self.schemaName);
+
     var params = {
       path: path,
       subSchema: subSchema,
@@ -862,6 +864,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildPropertyGroup (subSchema, model, path) {
     var name = subSchema.name;
+    
+    path.unshift(self.schemaName);
 
     var params = {
       path: path,
@@ -874,6 +878,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildDocgenTable (subSchema, model, path) {
     var name = subSchema.name;
+    
+    path.unshift(self.schemaName);
 
     var params = {
       path: path,
