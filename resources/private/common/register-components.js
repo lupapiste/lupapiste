@@ -12,6 +12,7 @@ jQuery(document).ready(function() {
     {name: "docgen-checkbox", model: "docgen-input-model"},
     {name: "docgen-select"},
     {name: "docgen-string", model: "docgen-input-model"},
+    {name: "docgen-localized-string", model: "docgen-input-model"},
     {name: "docgen-inline-string", model: "docgen-input-model"},
     {name: "attachments-multiselect"},
     {name: "authority-select"},

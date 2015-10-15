@@ -120,7 +120,7 @@
                                       (fn [app]
                                         (when (and
                                                 ((states/all-application-states-but [:canceled :draft :open]) (keyword (:state app)))
-                                                (when-not (some #(#{"aiemmalla-luvalla-hakeminen"} (:name %)) (resolve-operations app))
+                                                (when-not (some #(= "aiemmalla-luvalla-hakeminen" %) (map :name (resolve-operations app)))
                                                   (nil? (:submitted app))))
                                           (:id app)))
                                       @applications)))]

@@ -155,15 +155,15 @@
 
 (def operation-tree-for-KT ; aka kiinteistotoimitus aka maanmittaustoimitukset
   ["maanmittaustoimitukset"
-   [ ["kiinteistonmuodostus" :kiinteistonmuodostus]
+   [["tonttijako" :tonttijako]
+    ["kiinteistonmuodostus" :kiinteistonmuodostus]
     ["rasitetoimitus" :rasitetoimitus]
     ["rajankaynti" :rajankaynti]
     ]])
 
 (def operation-tree-for-MM
   ["maankayton-muutos"
-   [["tonttijako" :tonttijako]
-    ["asemakaava" :asemakaava]
+   [["asemakaava" :asemakaava]
     ["ranta-asemakaava" :ranta-asemakaava]
     ["yleiskaava" :yleiskaava]
     ]])
