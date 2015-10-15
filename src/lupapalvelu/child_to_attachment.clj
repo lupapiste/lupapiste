@@ -18,18 +18,17 @@
   (:metadata (get-child application type id)))
 
 (defn- build-attachment [user application type lang id file]
-  (let [use-pdf-a? (env/feature? :arkistointi)
-        content  (attachment/ensure-pdf-a file use-pdf-a?)
+  (let [is-pdf-a? (attachment/ensure-pdf-a file (env/feature? :arkistointi))
         type-name (case type
-                    :statements (i18n/localize lang "statement.lausunto")
+                    :statements (i18n/localize (name lang) "statement.lausunto")
                     :verdicts "verdict")
         filename (str type-name ".pdf")
         child (get-child application type id)]
     {:application application
      :filename filename
      :metadata (:metadata child)
-     :size (.length (:file content))
-     :content (:file content)
+     :size (.length file)
+     :content file
      :attachment-id nil
      :attachment-type {:type-group "muut" :type-id "muu"}
      :op nil
@@ -38,7 +37,7 @@
      :user user
      :created (now)
      :required false
-     :valid-pdfa (:pdfa content)
+     :valid-pdfa is-pdf-a?
      :missing-fonts []}))
 
 (defn generate-attachment-from-children [user app lang child-type id]
