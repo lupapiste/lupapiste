@@ -541,59 +541,33 @@
                                    {:name "eristeiden-ja-tiivistemassojen-haitalliset-jatteet"}
                                    {:name "sahko-ja-elektroniikkaromu"}]})
 
-(def jateyksikko {:name "yksikko" :type :select :label false
-                  :body [{:name "kg"}
-                         {:name "tonni"}
-                         {:name "m2"}
-                         {:name "m3"}]})
-
-(def rakennusjatesuunnitelmaRow [{:name "suunniteltuMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m" :label false}
-                                 jateyksikko
-                                 {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m" :label false}
-                                 {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "l" :label false}])
-
-(def rakennusjateselvitysRow [{:name "suunniteltuMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m" :label false}
+(def rakennusjateilmoitusRow [{:name "suunniteltuMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m" :label false}
                               {:name "toteutunutMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m" :label false}
-                              {:name "yksikko" :type :either :body [(assoc jateyksikko :readonly true)
-                                                                   jateyksikko]}
+                              {:name "yksikko" :type :select :label false
+                               :body [{:name "kg"}
+                                      {:name "tonni"}
+                                      {:name "m2"}
+                                      {:name "m3"}]}
                               {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m" :label false}
                               {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "l" :label false}])
 
-(def rakennusjatesuunnitelma [{:name "rakennusJaPurkujate"
-                               :type :table
-                               :uicomponent :docgenTable
-                               :repeating true
-                               :approvable false
-                               :body (body jatetyyppi rakennusjatesuunnitelmaRow)}
-                              {:name "vaarallisetAineet"
-                               :type :table
-                               :uicomponent :docgenTable
-                               :repeating true
-                               :approvable false
-                               :body (body vaarallinenainetyyppi rakennusjatesuunnitelmaRow)}])
+(def rakennusJaPurkujateRow (body jatetyyppi rakennusjateilmoitusRow))
 
-(def rakennusjateselvitys [{:name "rakennusJaPurkujate"
+(def vaarallisetAineetRow (body vaarallinenainetyyppi rakennusjateilmoitusRow))
+
+(def rakennusjateilmoitus [{:name "rakennusJaPurkujate"
                             :type :table
                             :uicomponent :docgenTable
                             :repeating true
                             :approvable false
-                            :body (body
-                                    {:name "jatetyyppi" :type :either
-                                     :body (body
-                                             (assoc jatetyyppi :readonly true)
-                                             jatetyyppi)}
-                                    rakennusjateselvitysRow)}
+                            :body rakennusJaPurkujateRow}
                            {:name "vaarallisetAineet"
                             :type :table
                             :uicomponent :docgenTable
                             :repeating true
                             :approvable false
-                            :body (body
-                                    {:name "vaarallinenainetyyppi" :type :either
-                                     :body (body
-                                             (assoc vaarallinenainetyyppi :readonly true)
-                                             vaarallinenainetyyppi)}
-                                    rakennusjateselvitysRow)}])
+                            :body vaarallisetAineetRow}])
+
 
 
 ;; Usage type definitions have moved to lupapiste-commons.usage-types
@@ -1337,13 +1311,9 @@
 
    {:info {:name "rakennusjatesuunnitelma"
            :order 200}
-    :body (body rakennusjatesuunnitelma)}
+    :body (body rakennusjateilmoitus)}
 
-   {:info {:name "rakennusjateselvitys"
-           :order 201}
-    :body (body rakennusjateselvitys)}
-
-   ;; TODO: "rakennusjateselvitys"-skeema: kopioi luontivaiheessa "rakennusjatesuunnitelma"-skeema.
+   ;; TODO: "rakennusjateselvitys"-skeema: kopioi luontivaiheessa "rakennusjateilmoitus"-skeema.
    ;; Kts. esimerkkia mm.
    ;;   application.clj  make-documents
    ;;   prev-permit.clj  applicant->applicant-doc
