@@ -278,7 +278,15 @@
       }
       currentId = newId;
       repository.load(currentId, applicationModel.pending, function(application) {
-        selectTab(tab || (application.inPostVerdictState ? "tasks" : "info"));
+        var fallbackTab = function(application) {
+          if (application.inPostVerdictState) {
+            return application.primaryOperation.name.match(/tyonjohtaja/) ? "applicationSummary" : "tasks";
+          } else {
+            return "info";
+          }
+        };
+
+        selectTab(tab || fallbackTab(application));
       });
     }
   }
