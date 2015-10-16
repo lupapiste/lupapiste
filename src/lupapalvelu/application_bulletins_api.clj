@@ -50,7 +50,7 @@
   {:parameters [id]
    :feature :publish-bulletin
    :user-roles #{:authority}
-   :states     states/all-application-states}
+   :states     (states/all-application-states-but :draft)}
   [{:keys [application created] :as command}]
   (let [app-snapshot (select-keys application app-snapshot-fields)
         attachments (->> (:attachments application)
