@@ -74,7 +74,7 @@
          (doseq [lang i18n/languages]
            (facts {:midje/description (name lang)}
                   (let [file (File/createTempFile (str "export-test-" (name lang)) ".pdf")
-                        pdf-content (pdf-export/generate-with-children application lang :statements )
+                        pdf-content (pdf-export/generate-pdf-from-child application lang :statements )
                         ]
                     (io/copy pdf-content file)
                     (debug " Exported statement to: " (.getAbsolutePath file))
