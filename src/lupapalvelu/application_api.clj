@@ -539,7 +539,7 @@
         muutoslupa-app (merge application
                               {:id            muutoslupa-app-id
                                :created       created
-                               :opened        created
+                               :opened        (when (user/authority? user) created)
                                :modified      created
                                :documents     (into [] (map
                                                          (fn [doc]
@@ -548,9 +548,7 @@
                                                                (update-in doc [:schema-info :op :id] op-id-mapping)
                                                                doc)))
                                                          (:documents application)))
-                               :state         (cond
-                                                (user/authority? user) :open
-                                                :else :draft)
+                               :state         (if (user/authority? user) :open :draft)
                                :permitSubtype :muutoslupa
                                :primaryOperation (assoc primary-op :id (op-id-mapping (:id primary-op)))
                                :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops) }
