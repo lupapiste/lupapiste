@@ -286,6 +286,7 @@
                        :openInfoRequest     open-inforequest?
                        :secondaryOperations []
                        :state               state
+                       :history             [{:state state, :ts created, :user (user/summary user)}]
                        :municipality        municipality
                        :location            (->location x y)
                        :organization        (:id organization)
