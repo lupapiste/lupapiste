@@ -487,18 +487,25 @@
 
 (defn delete-file! [^File file] (try (.delete file) (catch Exception _)))
 
-(defn ensure-pdf-a
-  "Ensures PDF file PDF/A compatibility status based on original attachment status"
-  [temp-file must-be-pdfa?]
-  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? must-be-pdfa?))
-  (if (not must-be-pdfa?)
-    (do (debugf "    no PDF/A required, no conversion") {:file temp-file :pdfa false})
-    (let [a-temp-file (File/createTempFile "lupapiste.stamp.a." ".tmp")
-          conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath temp-file) (.getAbsolutePath a-temp-file))]
+(defn- convert-file-to-pdf-inplace [src-file temp-file]
+  "Convert a DPF file to PDF/A in place using given temp file. Fail-safe, if conversion fails returns false otherwie true. Side effects: orig. file is overwritten and temp file is deleted."
+  (try
+    (let [conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath src-file) (.getAbsolutePath temp-file))]
       (cond
-        (:already-valid-pdfa? conversion-result) (do (debugf "      file valid PDF/A, no conversion") {:file temp-file :pdfa true})
-        (:pdfa? conversion-result) (do (debug "      converting to PDF/A file: " (.getAbsolutePath a-temp-file)) (delete-file! temp-file) {:file a-temp-file :pdfa true})
-        :else (do (errorf "Ensuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
+        (:already-valid-pdfa? conversion-result) (debug "      file was valid PDF/A, no conversion")
+        (:pdfa? conversion-result) (do (io/copy temp-file src-file) (debug "      file converted to PDF/A") )
+        :else (error "PDF/A conversion failed, file is not PDF/A" ))
+      (:pdfa? conversion-result))
+    (catch Exception e (do (error "    Unknown exception:" e " in PDF/A conversion, no conversion" ) false) )
+    (finally (.deleteOnExit temp-file))))
+
+(defn ensure-pdf-a
+  "Ensures PDF file PDF/A compatibility status basedon given boolean"
+  [src-file must-be-pdfa?]
+  (debug "  ensuring file: " (.getAbsolutePath src-file) " must be PDF/A: " must-be-pdfa?)
+  (if (not must-be-pdfa?)
+    (do (debugf "    no PDF/A required, no conversion") false)
+    (convert-file-to-pdf-inplace src-file (File/createTempFile "lupapiste.pdf.a." ".tmp"))))
 
 (defn application-to-pdf-a
   "Returns application data in PDF/A temp file"

@@ -410,12 +410,11 @@
 
 (defn- stamp-attachment! [stamp file-info {:keys [application user now x-margin y-margin transparency]}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp? valid-pdfa]} file-info
-        temp-file (File/createTempFile "lupapiste.stamp." ".tmp")
+        file (File/createTempFile "lupapiste.stamp." ".tmp")
         new-file-id (mongo/create-id)]
-    (with-open [out (io/output-stream temp-file)]
+    (with-open [out (io/output-stream file)]
       (stamper/stamp stamp fileId out x-margin y-margin transparency))
-    (let [ensured-file (attachment/ensure-pdf-a temp-file valid-pdfa)
-          {:keys [file pdfa]} ensured-file]
+    (let [is-pdf-a? (attachment/ensure-pdf-a file valid-pdfa)]
       (debug "uploading stamped file: " (.getAbsolutePath file))
       (mongo/upload new-file-id filename contentType file :application (:id application))
       (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
@@ -424,7 +423,7 @@
                                             :file-id new-file-id :filename filename
                                             :content-type contentType :size (.length file)
                                             :comment-text nil :now now :user user
-                                            :valid-pdfa pdfa
+                                            :valid-pdfa is-pdf-a?
                                             :stamped true :make-comment false :state :ok}))
       (attachment/delete-file! file))
     new-file-id))
