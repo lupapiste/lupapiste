@@ -100,6 +100,7 @@
 ;;
 
 (defn insert-application [application]
+  {:pre [(every? (partial contains? application)  (keys domain/application-skeleton))]}
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
 
 (defn filter-repeating-party-docs [schema-version schema-names]
