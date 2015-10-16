@@ -5,7 +5,7 @@ LUPAPISTE.ApplicationBulletinsModel = function(params) {
   self.requestedPages = ko.observable(1);
 
   self.openBulletin = function(item) {
-  	params.bulletinId(item.id);
+    pageutil.openPage("bulletin", item.id);
   };
 
   ko.computed(function () {
