@@ -112,7 +112,6 @@ var LUPAPISTE = LUPAPISTE || {};
       }
 
       var path = self.currentHash.split("/");
-      console.log("hash changed, APP PATH: ", path);
 
       if (!self.allowAnonymous && self.session === undefined) {
         ajax.query("user")
