@@ -848,45 +848,50 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return div;
   }
 
+  var rootParams = {
+    applicationId: self.appId,
+    documentId: self.docId,
+    schemaI18name: self.schemaI18name,
+    path: [],
+    i18npath: [self.schemaI18name],
+  }
+
   function buildDocgenGroup (subSchema, model, path) {
-    var name = subSchema.name;
 
-    path.unshift(self.schemaName);
-
-    var params = {
-      path: path,
+    var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : rootParams.i18npath.concat(path)
+    var params = _.extend({}, rootParams, {
+      path: rootParams.path.concat(path),
+      i18npath: i18npath,
       subSchema: subSchema,
-      documentId: self.docId,
-      model: model[name]
-    };
+      model: model[subSchema.name]
+    });
+
     return createComponent("docgen-group", params);
   }
 
   function buildPropertyGroup (subSchema, model, path) {
-    var name = subSchema.name;
-    
-    path.unshift(self.schemaName);
 
-    var params = {
-      path: path,
+    var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : rootParams.i18npath.concat(path)
+    var params = _.extend({}, rootParams, {
+      path: rootParams.path.concat(path),
+      i18npath: i18npath,
       subSchema: subSchema,
-      documentId: self.docId,
-      model: model[name]
-    };
+      model: model[subSchema.name]
+    });
+
     return createComponent("property-group", params);
   }
 
   function buildDocgenTable (subSchema, model, path) {
-    var name = subSchema.name;
-    
-    path.unshift(self.schemaName);
 
-    var params = {
-      path: path,
+    var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : rootParams.i18npath.concat(path)
+    var params = _.extend({}, rootParams, {
+      path: rootParams.path.concat(path),
+      i18npath: i18npath,
       subSchema: subSchema,
-      documentId: self.docId,
-      model: model[name]
-    };
+      model: model[subSchema.name]
+    });
+
     return createComponent("docgen-table", params);
   }
 

@@ -6,7 +6,7 @@ LUPAPISTE.DocgenTableModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.DocgenGroupModel(params));
 
   self.columnHeaders = _.map(params.subSchema.body, function(schema) {
-    return self.path.concat(schema.name);
+    return self.i18npath.concat(schema.name);
   });
   
 };

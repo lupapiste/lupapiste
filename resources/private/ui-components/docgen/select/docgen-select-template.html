@@ -8,7 +8,7 @@
         <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
         <label data-bind="visible: params.schema.label">Select</label>
         <select class="form-input combobox" data-bind="options: params.schema.body,
-                           optionsText: function(item) { return loc(item.i18nkey || [path.join('.'), item.name]) },
+                           optionsText: optionsTextFn,
                            optionsValue: 'name',
                            value: value,
                            valueAllowUnset: valueAllowUnset,

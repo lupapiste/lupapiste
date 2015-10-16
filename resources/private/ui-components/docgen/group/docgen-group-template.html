@@ -6,15 +6,17 @@
       <div class="form-group" data-bind="attr: {id: self.groupId}">
         <label class="form-label form-label-group" data-bind="ltext: groupLabel"></label>
         
-        <div data-bind="foreach: subSchemas">
-          <span class="form-entry"
-                data-bind="component: { name: uicomponent,
-                                        params: { schema: $data,
-                                                  path: path,
-                                                  model: model,
-                                                  applicationId: applicationId,
-                                                  documentId: documentId }}">
-          </span>
+        <div data-bind="foreach: rows">
+          <div data-bind="foreach: subSchemas">
+            <span class="form-entry"
+                  data-bind="component: { name: uicomponent,
+                                          params: { schema: $data,
+                                                    path: path,
+                                                    model: model,
+                                                    applicationId: applicationId,
+                                                    documentId: documentId }}">
+            </span>
+          </div>
         </div>
       </div>
     </script>
