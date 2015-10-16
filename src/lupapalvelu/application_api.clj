@@ -536,8 +536,20 @@
         op-id-mapping (into {} (map
                                  #(vector (:id %) (mongo/create-id))
                                  (conj secondary-ops primary-op)))
-        muutoslupa-app (merge application
+        muutoslupa-app (merge (select-keys application
+                                [:auth
+                                 :propertyId, :location
+                                 :schema-version
+                                 :address, :title
+                                 :foreman, :foremanRole
+                                 :applicant,  :_applicantIndex
+                                 :municipality, :organization
+                                 :drawings
+                                 :metadata])
+
                               {:id            muutoslupa-app-id
+                               :permitType    permit/R
+                               :permitSubtype :muutoslupa
                                :created       created
                                :opened        (when (user/authority? user) created)
                                :modified      created
@@ -549,13 +561,24 @@
                                                                doc)))
                                                          (:documents application)))
                                :state         (if (user/authority? user) :open :draft)
-                               :permitSubtype :muutoslupa
+
+                               :infoRequest false
+                               :openInfoRequest false
+                               :convertedToApplication nil
+
                                :primaryOperation (assoc primary-op :id (op-id-mapping (:id primary-op)))
                                :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops) }
-                              (select-keys
-                                domain/application-skeleton
-                                [:attachments :statements :verdicts :comments :submitted :sent :neighbors
-                                 :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
+
+                              ; Keys to reset
+                              (select-keys domain/application-skeleton
+                                [:attachments :statements :verdicts :tasks :buildings :neighbors
+                                 :comments :authorityNotice :urgency ; comment panel content
+                                 :submitted :sent :acknowledged :closed :closedBy :started :startedBy ; timestamps
+                                 :_statements-seen-by :_comments-seen-by :_verdicts-seen-by :_attachment_indicator_reset ; indicators
+                                 :reminder-sent :transfers :history ; logs
+                                 :authority
+                                 :tosFunction]))]
+
     (a/do-add-link-permit muutoslupa-app (:id application))
     (a/insert-application muutoslupa-app)
     (ok :id muutoslupa-app-id)))
