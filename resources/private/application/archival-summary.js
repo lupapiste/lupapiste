@@ -26,6 +26,12 @@
     });
   };
 
+  var getPostAttachments = function(attachments) {
+    return _.filter(attachments, function(attachment) {
+      return _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState));
+    });
+  };
+
   var filterByArchiveStatus = function(attachments, keepArchived) {
     return _.filter(attachments, function(attachment) {
       if (!attachment.metadata() || !attachment.metadata()["sailytysaika"] || !attachment.metadata()["sailytysaika"]["arkistointi"]()
@@ -121,20 +127,22 @@
     var self = this;
     self.attachments = params.application.attachments;
     var preAttachments = ko.pureComputed(function() {
-      var preAttachments = getPreAttachments(self.attachments());
-      return addAdditionalFieldsToAttachments(preAttachments, params.application.id());
+      return addAdditionalFieldsToAttachments(getPreAttachments(self.attachments()), params.application.id());
     });
-    var archivedAttachments = ko.pureComputed(function() {
-      return filterByArchiveStatus(preAttachments(), true);
-    });
-    var notArchivedAttachments = ko.pureComputed(function() {
-      return filterByArchiveStatus(preAttachments(), false);
+    var postAttachments = ko.pureComputed(function() {
+      return addAdditionalFieldsToAttachments(getPostAttachments(self.attachments()), params.application.id());
     });
     self.archivedGroups = ko.pureComputed(function() {
-      return getGroupList(archivedAttachments());
+      return getGroupList(filterByArchiveStatus(preAttachments(), true));
+    });
+    self.archivedPostGroups = ko.pureComputed(function() {
+      return getGroupList(filterByArchiveStatus(postAttachments(), true));
     });
     self.notArchivedGroups = ko.pureComputed(function() {
-      return getGroupList(notArchivedAttachments());
+      return getGroupList(filterByArchiveStatus(preAttachments(), false));
+    });
+    self.notArchivedPostGroups = ko.pureComputed(function() {
+      return getGroupList(filterByArchiveStatus(preAttachments(), false));
     });
     var mainDocuments = ko.pureComputed(function() {
       return addAdditionalFieldsToAttachments(collectMainDocuments(params.application));
@@ -146,10 +154,10 @@
       return filterByArchiveStatus(mainDocuments(), false);
     });
     self.showArchived = ko.pureComputed(function() {
-      return !_.isEmpty(self.archivedDocuments()) || !_.isEmpty(self.archivedGroups());
+      return !_.isEmpty(self.archivedDocuments()) || !_.isEmpty(self.archivedGroups()) || !_.isEmpty(self.archivedPostGroups());
     });
     self.showNotArchived = ko.pureComputed(function() {
-      return !_.isEmpty(self.notArchivedDocuments()) || !_.isEmpty(self.notArchivedGroups());
+      return !_.isEmpty(self.notArchivedDocuments()) || !_.isEmpty(self.notArchivedGroups()) || !_.isEmpty(self.notArchivedPostGroups());
     });
 
     var attachmentGroupLabel = function(groupName) {

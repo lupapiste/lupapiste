@@ -1,5 +1,13 @@
 .archival-summary-document-set {
   margin-bottom: $marginL;
+
+  h2 {
+    font-family: $font-heading;
+    font-weight: normal;
+    margin: $marginL 0 0 0;
+    text-transform: uppercase;
+    color: $grey-text;
+  }
 }
 
 .archival-summary-table {
