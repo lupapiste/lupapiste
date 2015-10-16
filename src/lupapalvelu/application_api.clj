@@ -536,6 +536,7 @@
         op-id-mapping (into {} (map
                                  #(vector (:id %) (mongo/create-id))
                                  (conj secondary-ops primary-op)))
+        state (if (user/authority? user) :open :draft)
         muutoslupa-app (merge (select-keys application
                                 [:auth
                                  :propertyId, :location
@@ -560,8 +561,9 @@
                                                                (update-in doc [:schema-info :op :id] op-id-mapping)
                                                                doc)))
                                                          (:documents application)))
-                               :state         (if (user/authority? user) :open :draft)
+                               :state         state
 
+                               :history [{:state state, :ts created, :user (user/summary user)}]
                                :infoRequest false
                                :openInfoRequest false
                                :convertedToApplication nil
@@ -575,7 +577,7 @@
                                  :comments :authorityNotice :urgency ; comment panel content
                                  :submitted :sent :acknowledged :closed :closedBy :started :startedBy ; timestamps
                                  :_statements-seen-by :_comments-seen-by :_verdicts-seen-by :_attachment_indicator_reset ; indicators
-                                 :reminder-sent :transfers :history ; logs
+                                 :reminder-sent :transfers ; logs
                                  :authority
                                  :tosFunction]))]
 
