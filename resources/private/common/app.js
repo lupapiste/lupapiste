@@ -58,13 +58,8 @@ var LUPAPISTE = LUPAPISTE || {};
       trace("pageId", pageId, "pagePath", pagePath);
 
       if (pageId !== self.currentPage) {
-        window.scrollTo(0, 0);
-        self.currentPage = pageId;
-        // Reset title. Pages can override title when they handle page-load event.
-        document.title = self.defaultTitle;
-
         // if pages are component controlled, skip element selection
-        if (!_.includes(self.componentPages, pageId)) {
+        if (!_.includes(self.componentPages, pageId) || !self.currentPage) {
           $(".page").removeClass("visible");
 
           var page$ = $("#" + pageId);
@@ -84,6 +79,10 @@ var LUPAPISTE = LUPAPISTE || {};
           // Set focus on the first field
           util.autofocus(page$);
         }
+        window.scrollTo(0, 0);
+        self.currentPage = pageId;
+        // Reset title. Pages can override title when they handle page-load event.
+        document.title = self.defaultTitle;
       }
 
       hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
@@ -113,7 +112,7 @@ var LUPAPISTE = LUPAPISTE || {};
       }
 
       var path = self.currentHash.split("/");
-      console.log("APP PATH: ", path);
+      console.log("hash changed, APP PATH: ", path);
 
       if (!self.allowAnonymous && self.session === undefined) {
         ajax.query("user")
@@ -219,6 +218,7 @@ var LUPAPISTE = LUPAPISTE || {};
      */
     self.domReady = function () {
       self.initSubscribtions();
+      console.log("begin domReady()");
 
       $(window)
         .hashchange(self.hashChanged)
@@ -237,6 +237,8 @@ var LUPAPISTE = LUPAPISTE || {};
         if (self.logoPath) {
           window.location = window.location.protocol + "//" + window.location.host + self.logoPath;
         } else if (self.startPage && self.startPage.charAt(0) !== "/") {
+          console.log("Opening Start page", self.startPage);
+          console.log("currentHash", self.currentHash);
           if (self.currentHash === self.startPage) {
             // trigger start page re-rendering
             self.previousHash = self.currentHash;
