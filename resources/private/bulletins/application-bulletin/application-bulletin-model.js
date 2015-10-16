@@ -5,10 +5,19 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   self.bulletin = ko.observable();
 
+  self.map = gis
+      .makeMap("bulletin-map", false)
+      .updateSize()
+      .center(404168, 6693765, 14);
+
   ajax.query("bulletin", {bulletinId: params.bulletinId})
     .success(function(res) {
       if (res.bulletin.id) {
         self.bulletin(res.bulletin);
+
+        var location = self.bulletin().location;
+        self.map.clear().updateSize().center(location[0], location[1]).add({x: location[0], y: location[1]});
+
       } else {
         pageutil.openPage("bulletins");
       }

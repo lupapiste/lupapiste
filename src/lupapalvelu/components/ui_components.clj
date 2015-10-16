@@ -367,7 +367,7 @@
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}
 
-   :bulletins {:depends [:ui-components]
+   :bulletins {:depends [:ui-components :map]
                :html ["header.html" "footer.html"
                       "bulletins.html" "bulletins-template.html"
                       "application-bulletin/application-bulletin-template.html"
