@@ -295,6 +295,7 @@
    :drawings                 []
    :foreman                  ""
    :foremanRole              ""
+   :history                  [] ; state transition audit log
    :infoRequest              false
    :location                 {}
    :modified                 nil ; timestamp
