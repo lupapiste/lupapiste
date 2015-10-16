@@ -1243,8 +1243,8 @@
                     </script>
 
                     <!-- Tasks tab -->
-
-                    <div id="application-tasks-tab" data-bind="visible: $root.authorization.ok('tasks-tab-visible'), with: $root.application" class="tab-content" >
+                    <!-- ko if: selectedTabName() === 'tasks' && $root.authorization.ok('tasks-tab-visible') -->
+                    <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
 
                         <h1 data-bind="ltext: 'application.tabConstructionTimeTasks'"></h1>
                         <span data-bind="component: {
@@ -1385,6 +1385,7 @@
                                            visible: $root.authorization.ok('create-task'),
                                            enable: $root.authorization.ok('create-task')"></button>
                     </div>
+                    <!-- /ko -->
                 </div>
             </div>
             <div id="boxes">
