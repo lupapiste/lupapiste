@@ -42,8 +42,8 @@
 
 
 (def app-snapshot-fields
-  [:address :created :location :modified :applicant
-   :municipality :organization :permitType
+  [:address :applicant :created :documents :location
+   :modified :municipality :organization :permitType
    :primaryOperation :propertyId :state :verdicts])
 
 (defcommand publish-bulletin
