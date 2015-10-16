@@ -15,6 +15,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.user :as user]
             [sade.env :as env]
             [sade.excel-reader :as er]))
 
@@ -1185,6 +1186,35 @@
     (for [{:keys [id verdicts]} (mongo/select :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "verdictGiven"} [:verdicts])
           :let [timestamp (->> (map :timestamp verdicts) (filter number?) (apply min))]]
       (mongo/update-by-query :applications {:_id id} {$set {:state :acknowledged, :acknowledged timestamp}}))))
+
+(defn pena?
+  "Pena has been deleted from prod db"
+  [user] (= "777777777777777777000020" (:id user)))
+
+(defn init-application-history [{:keys [created opened infoRequest convertedToApplication permitSubtype] :as application}]
+  (let [owner-auth (first (domain/get-auths-by-role application :owner))
+        owner-user (user/find-user (select-keys owner-auth [:id]))
+        creator (cond
+                  (= permitSubtype "muutoslupa") (:user (mongo/by-id :muutoslupa created))
+                  owner-user owner-user
+                  (pena? owner-auth) (merge owner-auth {:role "applicant" :firstName "Testaaja" :lastName "Solita"}))
+
+        ;_ (assert (:id owner) (:id application))
+
+        state (if (= permitSubtype "muutoslupa")
+                (if (user/authority? creator) "open" "draft")
+                (cond
+                  (or infoRequest convertedToApplication)  "info"
+                  (= opened created) "open"
+                  (and (ss/blank? (:personId creator)) (user/authority? creator)) "open"
+                  :else "draft"))]
+    {$set {:history [{:state state, :ts created, :user (user/summary creator)}]}}))
+
+(defmigration init-history
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {:history.0 {$exists false}} [:created :opened :auth :infoRequest :convertedToApplication :permitSubtype])]
+        (count (map #(mongo/update-by-id collection (:id %) (init-application-history %)) applications))))))
 
 ;;
 ;; ****** NOTE! ******
