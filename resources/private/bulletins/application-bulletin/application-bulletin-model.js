@@ -6,9 +6,12 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   self.bulletin = ko.observable();
 
   ajax.query("bulletin", {bulletinId: params.bulletinId})
-    .success(function(d) {
-      console.log(d.bulletin);
-      self.bulletin(d.bulletin);
+    .success(function(res) {
+      if (res.bulletin.id) {
+        self.bulletin(res.bulletin);
+      } else {
+        pageutil.openPage("bulletins");
+      }
     })
     .call();
 
