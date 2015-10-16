@@ -3,7 +3,8 @@
 
   window.lupapisteApp = new LUPAPISTE.App({startPage: "bulletins",
                                            allowAnonymous: true,
-                                           showUserMenu: false});
+                                           showUserMenu: false,
+                                           componentPages: ["bulletin"]});
   $(function() {
     lupapisteApp.domReady();
 

@@ -25,6 +25,7 @@ var LUPAPISTE = LUPAPISTE || {};
     self.session = undefined;
     self.allowAnonymous = params.allowAnonymous;
     self.showUserMenu = (params.showUserMenu !== undefined) ? params.showUserMenu : !params.allowAnonymous;
+    self.componentPages = params.componentPages || [];
     self.previousHash = "";
     self.currentHash = "";
 
@@ -57,30 +58,32 @@ var LUPAPISTE = LUPAPISTE || {};
       trace("pageId", pageId, "pagePath", pagePath);
 
       if (pageId !== self.currentPage) {
-        $(".page").removeClass("visible");
-
-        var page$ = $("#" + pageId);
-        if (page$.length === 0) {
-          pageId = self.startPage;
-          pagePath = [];
-          page$ = $("#" + pageId);
-        }
-
-        if (page$.length === 0) {
-          // Something is seriously wrong, even startPage was not found
-          error("Unknown page " + pageId + " and failed to default to " + self.startPage);
-          return;
-        }
-
-        page$.addClass("visible");
         window.scrollTo(0, 0);
         self.currentPage = pageId;
-
         // Reset title. Pages can override title when they handle page-load event.
         document.title = self.defaultTitle;
 
-        // Set focus on the first field
-        util.autofocus(page$);
+        // if pages are component controlled, skip element selection
+        if (!_.includes(self.componentPages, pageId)) {
+          $(".page").removeClass("visible");
+
+          var page$ = $("#" + pageId);
+          if (page$.length === 0) {
+            pageId = self.startPage;
+            pagePath = [];
+            page$ = $("#" + pageId);
+          }
+
+          if (page$.length === 0) {
+            // Something is seriously wrong, even startPage was not found
+            error("Unknown page " + pageId + " and failed to default to " + self.startPage);
+            return;
+          }
+
+          page$.addClass("visible");
+          // Set focus on the first field
+          util.autofocus(page$);
+        }
       }
 
       hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
@@ -110,6 +113,7 @@ var LUPAPISTE = LUPAPISTE || {};
       }
 
       var path = self.currentHash.split("/");
+      console.log("APP PATH: ", path);
 
       if (!self.allowAnonymous && self.session === undefined) {
         ajax.query("user")
