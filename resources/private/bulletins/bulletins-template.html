@@ -3,13 +3,7 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="bulletins-template">
-    <!-- ko if: page() === "bulletin" -->
-    <div data-bind="component: {name: 'application-bulletin',
-                                params: pageParams}"></div>
-    <!-- /ko -->
-    <!-- ko if: page() === "bulletins" -->
-    <div data-bind="component: {name: 'application-bulletins', params: pageParams}"></div>
-    <!-- /ko -->
+    <div id="bulletins-component" data-bind="attr: {'id': page()+'-component'},component: {name: 'application-' + page(), params: pageParams}"></div>
     </script>
   </section>
 </body>
