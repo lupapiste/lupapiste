@@ -2,7 +2,10 @@ LUPAPISTE.BulletinsModel = function() {
   "use strict";
   var self = this;
 
-  self.page = ko.observable();
+  self.supportedPages = ["bulletins", "bulletin"];
+
+  self.page = ko.observable().extend({limited: {values: self.supportedPages, defaultValue: "bulletins"}});
+
   self.pageParams = ko.observable({});
 
   hub.onPageLoad("bulletins", function() {
@@ -15,7 +18,15 @@ LUPAPISTE.BulletinsModel = function() {
     self.page("bulletin");
   });
 
+  function onLoad() {
+    var currPage = pageutil.getPage();
+    if (currPage === "bulletin") {
+      self.pageParams({bulletinId: pageutil.subPage()});
+      self.page("bulletin");
+    } else {
+      self.page(currPage);
+    }
+  }
 
-  self.page("bulletins");
-
+  onLoad();
 };
