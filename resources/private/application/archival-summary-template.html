@@ -12,9 +12,9 @@
         <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: archivedDocuments, showWillPublish: true}}"></div>
       </div>
 
-      <h2 data-bind="ltext: 'application.attachments.pre-verdict'"></h2>
+      <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(archivedGroups())"></h2>
       <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true, attachmentTypes: selectableAttachmentTypes}}"></div>
-      <h2 data-bind="ltext: 'application.attachments.post-verdict'"></h2>
+      <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(archivedPostGroups())"></h2>
       <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedPostGroups, showWillPublish: true, attachmentTypes: selectableAttachmentTypes}}"></div>
 
       <div><button class="btn-primary" data-bind="ltext: 'archivalSummary.archive'"></button></div>
@@ -27,9 +27,9 @@
         <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: notArchivedDocuments, showWillPublish: false}}"></div>
       </div>
 
-      <h2 data-bind="ltext: 'application.attachments.pre-verdict'"></h2>
+      <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(notArchivedGroups())"></h2>
       <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedGroups, showWillPublish: false, attachmentTypes: selectableAttachmentTypes}}"></div>
-      <h2 data-bind="ltext: 'application.attachments.post-verdict'"></h2>
+      <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(notArchivedPostGroups())"></h2>
       <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false, attachmentTypes: selectableAttachmentTypes}}"></div>
     </div>
 

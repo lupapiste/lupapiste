@@ -142,7 +142,7 @@
       return getGroupList(filterByArchiveStatus(preAttachments(), false));
     });
     self.notArchivedPostGroups = ko.pureComputed(function() {
-      return getGroupList(filterByArchiveStatus(preAttachments(), false));
+      return getGroupList(filterByArchiveStatus(postAttachments(), false));
     });
     var mainDocuments = ko.pureComputed(function() {
       return addAdditionalFieldsToAttachments(collectMainDocuments(params.application));
