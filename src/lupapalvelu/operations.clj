@@ -186,7 +186,7 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def- common-rakval-schemas ["hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"])
+(def- common-rakval-schemas ["hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma"])
 
 (def- common-maanmittaus-schemas ["maksaja" "kiinteisto"])
 
@@ -821,7 +821,7 @@
    :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required ["maksaja"]
+                                 :required ["maksaja"]       ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
                                  :attachments []
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 1
@@ -830,7 +830,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required []
-                                 :optional #{"maksaja" "paasuunnittelija" "suunnittelija"}
+                                 :optional #{"maksaja" "paasuunnittelija" "suunnittelija"}  ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
                                  :attachments []
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 0
@@ -854,20 +854,11 @@
    :raktyo-aloit-loppuunsaat   {:schema "hankkeen-kuvaus-minimum"
                                 :permit-type permit/R
                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                :required ["maksaja"]
+                                :required ["maksaja"]        ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
                                 :attachments []
                                 :add-operation-allowed false
                                 :min-outgoing-link-permits 1
-                                :asianhallinta false}
-   :rakennusjateilmoitus        {:schema "rakennusjateilmoitus"
-                                 :permit-type permit/R
-                                 :required ["hankkeen-kuvaus-minimum"]
-                                 :attachments []
-                                 :add-operation-allowed true
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :min-outgoing-link-permits 1
-                                 :asianhallinta false}
-   })
+                                :asianhallinta false}})
 
 (def- vvvl-operations
   {:vvvl-vesijohdosta           {:schema "talousvedet"

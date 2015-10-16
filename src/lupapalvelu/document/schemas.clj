@@ -1300,17 +1300,6 @@
            :type :location}
     :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
-   {:info {:name "paatoksen-toimitus-rakval"
-           :removable false
-           :approvable true
-           :order 10}
-    :body (body
-           [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
-           simple-osoite
-           [{:name "yritys" :type :group
-             :body [{:name "yritysnimi" :type :string}]}]
-           tayta-omat-tiedot-button)}
-
    {:info {:name "aloitusoikeus" :removable false :approvable true}
     :body (body kuvaus)}
 
@@ -1320,7 +1309,7 @@
             :type :checkbox
             :layout :full-width}]}
 
-   {:info {:name "rakennusjateilmoitus"
+   {:info {:name "rakennusjatesuunnitelma"
            :order 200}
     :body (body rakennusjateilmoitus)}
 
@@ -1329,4 +1318,14 @@
    ;;   application.clj  make-documents
    ;;   prev-permit.clj  applicant->applicant-doc
 
+   {:info {:name "paatoksen-toimitus-rakval"
+           :removable false
+           :approvable true
+           :order 300}
+    :body (body
+           [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
+           simple-osoite
+           [{:name "yritys" :type :group
+             :body [{:name "yritysnimi" :type :string}]}]
+           tayta-omat-tiedot-button)}
    ])
