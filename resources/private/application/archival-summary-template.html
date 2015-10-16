@@ -45,11 +45,16 @@
           <div class="stamped" data-bind="ltext: 'attachment.stamped'"></div>
           <div data-bind="if: $parent.showWillPublish" class="will-publish"><span data-bind="ltext: 'julkaistaan'"></span></div>
         </div>
-        <div data-bind="ltext: 'application.attachmentType'" class="attachment-type"></div>
+        <div class="archival-status-header" data-bind="visible: $parent.showWillPublish">A</div>
+        <div data-bind="ltext: 'application.attachmentType'" class="attachment-type attachment-type-header"></div>
       </div>
 
       <!-- ko foreach: attachments -->
       <div class="attachment-row">
+        <div class="archival-status" data-bind="visible: $parents[1].showWillPublish">
+           <input type="checkbox" data-bind="visible: archivable, checked: sendToArchive">
+           <span class="icon missing" data-bind="visible: !archivable, attr: {title: loc('attachment.invalid-pdfa')}"></span>
+        </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
           <div class="small-columns">
             <div class="retention-period" data-bind="text: retentionDescription"></div>
@@ -136,11 +141,15 @@
           <div class="stamped" data-bind="ltext: 'attachment.stamped'"></div>
           <div data-bind="if: showWillPublish" class="will-publish"><span data-bind="ltext: 'julkaistaan'"></span></div>
         </div>
-        <div data-bind="ltext: 'application.attachmentType'" class="attachment-type"></div>
+        <div class="archival-status-header">A</div>
+        <div data-bind="ltext: 'application.attachmentType'" class="attachment-type attachment-type-header"></div>
       </div>
 
       <!-- ko foreach: documents -->
       <div class="attachment-row">
+        <div class="archival-status">
+           <input type="checkbox" data-bind="checked: sendToArchive">
+        </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
           <div class="small-columns">
             <div class="retention-period" data-bind="text: retentionDescription"></div>

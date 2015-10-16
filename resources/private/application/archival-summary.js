@@ -115,6 +115,8 @@
             .call();
         });
       }
+      attachment.archivable = attachment.latestVersion ? attachment.latestVersion['valid-pdfa']() : false;
+      attachment.sendToArchive = ko.observable(false);
       return attachment;
     });
   };

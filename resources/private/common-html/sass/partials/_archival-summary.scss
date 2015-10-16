@@ -35,6 +35,9 @@
     letter-spacing: 0.125em;
     padding: 6px 0;
   }
+  .attachment-type-header {
+    margin-left: 30px;
+  }
   .attachment-row {
     font-size: 14px;
     border-bottom: 1px solid #e9e9e9;
@@ -52,6 +55,8 @@
       div {
         vertical-align: top;
       }
+      position: relative;
+      margin-left: 30px;
     }
     .additional-controls {
       @include clearfix;
@@ -100,6 +105,21 @@
         }
       }
     }
+  }
+  .archival-status {
+    float: left;
+    width: 28px;
+    padding: 9px 0 0 3px;
+    input {
+      position: relative;
+      top: -2px;
+      margin: 0 0 0 2px;
+    }
+  }
+  .archival-status-header {
+    float: left;
+    width: 28px;
+    padding-left: 8px;
   }
   .attachment-type {
     margin-right: 545px;
