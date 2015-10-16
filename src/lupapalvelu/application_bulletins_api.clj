@@ -62,9 +62,13 @@
     (mongo/update-by-id :application-bulletins id changes :upsert true)
     (ok)))
 
+(def bulletin-fields
+  (merge bulletins-fields
+    {:versions.documents 1}))
+
 (defquery bulletin
   {:parameters [bulletinId]
    :feature :publish-bulletin
    :user-roles #{:anonymous}}
-  (let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletins-fields))]
+  (let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
     (ok :bulletin (assoc (-> bulletin :versions first) :id (:id bulletin)))))
