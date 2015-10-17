@@ -17,7 +17,10 @@
       <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(archivedPostGroups())"></h2>
       <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedPostGroups, showWillPublish: true, attachmentTypes: selectableAttachmentTypes}}"></div>
 
-      <div><button class="btn-primary" data-bind="ltext: 'archivalSummary.archive'"></button></div>
+      <div class="buttons">
+        <button class="btn-primary" data-bind="ltext: 'archivalSummary.archiveSelected', enable: archiveButtonEnabled"></button>
+        <a href="#" data-bind="click: selectAll">Valitse kaikki</a>
+      </div>
     </div>
 
     <div data-bind="if: showNotArchived" class="archival-summary-document-set">
