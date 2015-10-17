@@ -22,13 +22,15 @@
 
   var getPreAttachments = function(attachments) {
     return _.filter(attachments, function(attachment) {
-      return !_.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState));
+      return !_.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState)) &&
+        attachment.latestVersion;
     });
   };
 
   var getPostAttachments = function(attachments) {
     return _.filter(attachments, function(attachment) {
-      return _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState));
+      return _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState)) &&
+          attachment.latestVersion;
     });
   };
 
