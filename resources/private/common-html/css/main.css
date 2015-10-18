@@ -7571,54 +7571,60 @@ ul.attachments-list li.mandatory-attachments {
   height: 30px;
 }
 /* line 37, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form input[type=checkbox] {
+  width: auto;
+  height: auto;
+  vertical-align: middle;
+}
+/* line 42, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form input[type=number] {
   width: 50px;
   text-align: right;
   display: inline-block;
 }
-/* line 42, ../sass/partials/_metadata-editor.scss */
+/* line 47, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form label {
   display: inline-block;
   margin: 5px 0 5px 0;
   font-weight: 700;
 }
-/* line 48, ../sass/partials/_metadata-editor.scss */
+/* line 53, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form .text-input-container div {
   display: inline-block;
   margin: 0;
 }
-/* line 52, ../sass/partials/_metadata-editor.scss */
+/* line 57, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form .text-input-container .form-input {
   margin: 0;
 }
-/* line 59, ../sass/partials/_metadata-editor.scss */
+/* line 64, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor button:disabled {
   cursor: not-allowed;
 }
-/* line 64, ../sass/partials/_metadata-editor.scss */
+/* line 69, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .invalid {
   border: 2px solid #ff0643;
   border-radius: 2px;
   outline: none;
 }
-/* line 70, ../sass/partials/_metadata-editor.scss */
+/* line 75, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .subtable {
   background-color: #e8e8e7;
   padding: 10px;
   border-radius: 4px;
   margin-top: 10px;
 }
-/* line 75, ../sass/partials/_metadata-editor.scss */
+/* line 80, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .subtable h4 {
   font-size: 16px;
   margin-top: 0;
 }
-/* line 79, ../sass/partials/_metadata-editor.scss */
+/* line 84, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .subtable h5 {
   font-weight: 700;
   margin-bottom: 5px;
 }
-/* line 84, ../sass/partials/_metadata-editor.scss */
+/* line 89, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-buttons {
   *zoom: 1;
   padding-top: 15px;
@@ -7632,11 +7638,11 @@ ul.attachments-list li.mandatory-attachments {
 .metadata-editor-container .editor .editor-buttons:after {
   clear: both;
 }
-/* line 87, ../sass/partials/_metadata-editor.scss */
+/* line 92, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-buttons .save {
   float: left;
 }
-/* line 90, ../sass/partials/_metadata-editor.scss */
+/* line 95, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-buttons .delete {
   float: right;
 }
