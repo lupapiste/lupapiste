@@ -44,7 +44,7 @@
   (memo/ttl get-metadata-for-document-from-toj
             :ttl/threshold 10000))
 
-(defn document-with-updated-metadata [document organization tos-function & type]
+(defn document-with-updated-metadata [document organization tos-function & [type]]
   (let [document-type (or type (:type document))]
     (->> (metadata-for-document organization tos-function document-type)
          (assoc document :metadata))))
