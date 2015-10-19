@@ -2,11 +2,13 @@
   (:require [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
+            [sade.strings :as ss]
+            [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.states :as states]))
-
-
+            [monger.operators :refer :all]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.application-search :refer [operation-names]]))
 
 (def bulletins-fields
   {:versions {$slice -1}
@@ -19,11 +21,37 @@
 (def bulletin-page-size 10)
 
 (defn- get-application-bulletins-left [page searchText]
-  (- (mongo/count :application-bulletins)
-     (* page bulletin-page-size)))
+  (let [query (make-query searchText)]
+    (- (mongo/count :application-bulletins query)
+       (* page bulletin-page-size))))
+
+(defn- make-free-text-query [filter-search]
+  (let [or-query {$or [{:versions.address {$regex filter-search $options "i"}}
+                       {:versions.verdicts.kuntalupatunnus {$regex filter-search $options "i"}}
+                       {:versions.applicant {$regex filter-search $options "i"}}]}
+        ops (operation-names filter-search)]
+    (if (seq ops)
+      (update-in or-query [$or] concat [{:versions.primaryOperation.name {$in ops}}])
+      or-query)))
+
+(defn- make-text-query [filter-search]
+  {:pre [filter-search]}
+  (cond
+    (re-matches #"^([Ll][Pp])-\d{3}-\d{4}-\d{5}$" filter-search) {:_id (ss/upper-case filter-search)}
+    (re-matches p/property-id-pattern filter-search) {:versions.propertyId (p/to-property-id filter-search)}
+    :else (make-free-text-query filter-search)))
+
+(defn- make-query [search-text]
+  (let [and-query (filter seq
+                    [(when-not (ss/blank? search-text) (make-text-query (ss/trim search-text)))])]
+    (if (empty? and-query)
+      {}
+      {$and and-query})))
 
 (defn- get-application-bulletins [page searchText]
-  (let [apps (mongo/with-collection "application-bulletins"
+  (let [query (make-query searchText)
+        apps (mongo/with-collection "application-bulletins"
+               (query/find query)
                (query/fields bulletins-fields)
                (query/sort {:modified 1})
                (query/paginate :page page :per-page bulletin-page-size))]

@@ -34,7 +34,7 @@
     []
     (keys operations/operations)))
 
-(defn- operation-names [filter-search]
+(defn operation-names [filter-search]
   (let [normalized (normalize-operation-name filter-search)]
     (map :op
       (filter
