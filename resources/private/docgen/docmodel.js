@@ -1123,6 +1123,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
     var params = {
       applicationId: self.appId,
+      authModel: self.authorizationModel,
       documentId: self.docId,
       documentName: self.schemaName,
       hetu: undefined,
