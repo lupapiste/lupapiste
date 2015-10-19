@@ -18,11 +18,11 @@
 
 (def bulletin-page-size 10)
 
-(defn- get-application-bulletins-left [page]
+(defn- get-application-bulletins-left [page searchText]
   (- (mongo/count :application-bulletins)
      (* page bulletin-page-size)))
 
-(defn- get-application-bulletins [page]
+(defn- get-application-bulletins [page searchText]
   (let [apps (mongo/with-collection "application-bulletins"
                (query/fields bulletins-fields)
                (query/sort {:modified 1})
@@ -34,11 +34,11 @@
 (defquery application-bulletins
   {:description "Query for Julkipano"
    :feature :publish-bulletin
-   :parameters [page]
+   :parameters [page searchText]
    :user-roles #{:anonymous}}
   [_]
-  (ok :data (get-application-bulletins page)
-      :left (get-application-bulletins-left page)))
+  (ok :data (get-application-bulletins page searchText)
+      :left (get-application-bulletins-left page searchText)))
 
 
 (def app-snapshot-fields

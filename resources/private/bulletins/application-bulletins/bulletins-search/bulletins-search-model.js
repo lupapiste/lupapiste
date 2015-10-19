@@ -2,5 +2,8 @@ LUPAPISTE.BulletinsSearchModel = function(params) {
   "use strict";
   var self = this;
 
-  self.searchText = ko.observable();
+  // Query object
+  var query = params.query;
+
+  self.searchText = query.searchText || ko.observable();
 }

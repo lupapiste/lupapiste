@@ -2,13 +2,23 @@ LUPAPISTE.ApplicationBulletinsModel = function(params) {
   "use strict";
   var self = this;
   self.bulletinService = new LUPAPISTE.ApplicationBulletinsService();
-  self.requestedPages = ko.observable(1);
+
+  self.query = {
+    searchText: ko.observable(),
+    page: ko.observable(1)
+  }
 
   self.openBulletin = function(item) {
     pageutil.openPage("bulletin", item.id);
   };
 
-  ko.computed(function () {
-    self.bulletinService.fetchBulletins(self.requestedPages());
+  // Reset page when search filters change
+  ko.computed(function() {
+    self.query.searchText();
+    self.query.page(1);
+  })
+
+  ko.computed(function() {
+    self.bulletinService.fetchBulletins(ko.mapping.toJS(self.query));
   });
 };

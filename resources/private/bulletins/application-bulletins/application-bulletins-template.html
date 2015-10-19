@@ -19,7 +19,8 @@
       </div>
       <div class="full content gray-bg">
         <div class="content-center">
-          <div data-bind="component: {name: 'bulletins-search'}"></div>
+          <div data-bind="component: {name: 'bulletins-search',
+                                      params: {query: query}}"></div>
         </div>
       </div>
       <div class="full content">
@@ -29,7 +30,7 @@
                                                clickHandler: openBulletin}}"></div>
 
           <div data-bind="component: {name: 'load-more-application-bulletins',
-                                      params: {requestedPages: requestedPages,
+                                      params: {requestedPages: query.page,
                                                bulletinsLeft: bulletinService.bulletinsLeft}}"></div>
         </div>
       </div>
