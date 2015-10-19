@@ -6,11 +6,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
   self.size = uiComponents.sizeClasses[self.params.schema.size];
   self.value = ko.observable(self.params.model ? self.params.model.value : undefined);
   self.path = self.params.path;
-  if (!_.isEmpty(self.params.index)) {
-    self.path = self.path.concat(self.params.index.toString());
-  }
-
-  self.path = self.path.concat(self.params.schema.name);
+  
   self.i18npath = self.params.schema.i18nkey ? [self.params.schema.i18nkey] : self.params.schema.i18npath;
   if (!self.i18npath) {
     self.i18npath = [util.locKeyFromDocPath([self.params.schemaI18name].concat(self.params.path).join("."))];

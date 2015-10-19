@@ -15,7 +15,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.groupId = "group-" + params.documentId + "-" + self.path.join("-");
   self.groupLabel = self.i18npath.concat("_group_label").join(".");
 
-  var subSchemas = _.map(params.subSchema.body, function(schema) {
+  self.subSchemas = _.map(params.subSchema.body, function(schema) {
     var uicomponent = schema.uicomponent || "docgen-" + schema.type;
     var isSelect = schema.uicomponent === "docgen-select" || schema.type === "select";
     var hasLabel = schema.label === "false";
@@ -23,7 +23,6 @@ LUPAPISTE.DocgenGroupModel = function(params) {
     var locKey = i18npath.join(".");
     return _.extend({}, schema, {
       uicomponent: uicomponent,
-      path: self.path.concat(schema.name),
       schemaI18name: self.schemaI18name,
       i18npath: i18npath,
       label: hasLabel ? null : locKey,
@@ -34,9 +33,10 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   });
 
   var createRow = function(model, index) {
-    return {subSchemas: _.map(subSchemas, function(schema) {
+    var groupPath = index ? self.path.concat(index) : self.path
+    return {subSchemas: _.map(self.subSchemas, function(schema) {
       return _.extend({}, schema, {
-        path: index ? schema.path.concat(index) : schema.path,
+        path: groupPath.concat(schema.name),
         model: model[schema.name]
       });
     })};
