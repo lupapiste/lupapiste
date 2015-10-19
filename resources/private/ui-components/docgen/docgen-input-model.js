@@ -59,7 +59,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
 
   self.readonly = ko.observable(self.params.schema.readonly || self.params.readonly);
 
-  self.disabled = ko.observable(!lupapisteApp.models.applicationAuthModel.ok("update-doc") ||
+  self.disabled = ko.observable(params.isDisabled || !lupapisteApp.models.applicationAuthModel.ok("update-doc") ||
                                 util.getIn(params, ["model", "disabled"]));
   var save = function(val) {
     uiComponents.save("update-doc",

@@ -5,6 +5,8 @@ LUPAPISTE.PropertyGroupModel = function(params) {
   // inherit from DocgenGroupModel
   ko.utils.extend(self, new LUPAPISTE.DocgenGroupModel(params));
 
+  self.appId = params.appId || null;
+
   self.isMaaraala = ko.observable(false);
   self.documentId = params.documentId;
 

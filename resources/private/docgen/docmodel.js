@@ -864,6 +864,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var name = subSchema.name;
 
     var params = {
+      appId: self.appId,
       path: path,
       subSchema: subSchema,
       documentId: self.docId,
