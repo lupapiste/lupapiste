@@ -45,7 +45,7 @@
                                                              :state "draft"})]
          (doseq [lang i18n/languages]
            (facts {:midje/description (name lang)}
-                  (let [pdf-content (child-to-attachment/generate-attachment-from-children nil application lang :statements "2")]
+                  #_(let [pdf-content (child-to-attachment/generate-attachment-from-children nil application lang :statements "2")]
                     (debug " Exported statement file: " (:content pdf-content))
                     (debug " Exported statement : " pdf-content))))))
 

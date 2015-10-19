@@ -302,8 +302,8 @@
       (when-not (attachment/attach-file! (assoc attachment-data :missing-fonts missing-fonts))
         (fail :error.unknown)))))
 
-(defn- upload! [{:keys [filename content] :as attachment-data}]
-  (if (and (env/feature? :arkistointi) (= (mime/mime-type filename) "application/pdf"))
+(defn- upload! [{:keys [filename content application] :as attachment-data}]
+  (if (and (= (mime/mime-type filename) "application/pdf") (pdf-conversion/pdf-a-required? (:organization application)))
     (let [processing-result (pdf-conversion/convert-to-pdf-a content)]
       (if (:already-valid-pdfa? processing-result)
         (when-not (attachment/attach-file! (assoc attachment-data :valid-pdfa true))
@@ -409,12 +409,12 @@
 
 
 (defn- stamp-attachment! [stamp file-info {:keys [application user now x-margin y-margin transparency]}]
-  (let [{:keys [attachment-id contentType fileId filename re-stamp? valid-pdfa]} file-info
+  (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
         file (File/createTempFile "lupapiste.stamp." ".tmp")
         new-file-id (mongo/create-id)]
     (with-open [out (io/output-stream file)]
       (stamper/stamp stamp fileId out x-margin y-margin transparency))
-    (let [is-pdf-a? (attachment/ensure-pdf-a file valid-pdfa)]
+    (let [is-pdf-a? (pdf-conversion/ensure-pdf-a file (:organization application))]
       (debug "uploading stamped file: " (.getAbsolutePath file))
       (mongo/upload new-file-id filename contentType file :application (:id application))
       (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update

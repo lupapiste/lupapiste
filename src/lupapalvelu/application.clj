@@ -100,6 +100,7 @@
 ;;
 
 (defn insert-application [application]
+  {:pre [(every? (partial contains? application)  (keys domain/application-skeleton))]}
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
 
 (defn filter-repeating-party-docs [schema-version schema-names]
@@ -286,6 +287,7 @@
                        :openInfoRequest     open-inforequest?
                        :secondaryOperations []
                        :state               state
+                       :history             [{:state state, :ts created, :user (user/summary user)}]
                        :municipality        municipality
                        :location            (->location x y)
                        :organization        (:id organization)

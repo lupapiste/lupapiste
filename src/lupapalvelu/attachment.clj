@@ -487,30 +487,10 @@
 
 (defn delete-file! [^File file] (try (.delete file) (catch Exception _)))
 
-(defn- convert-file-to-pdf-inplace [src-file temp-file]
-  "Convert a DPF file to PDF/A in place using given temp file. Fail-safe, if conversion fails returns false otherwie true. Side effects: orig. file is overwritten and temp file is deleted."
-  (try
-    (let [conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath src-file) (.getAbsolutePath temp-file))]
-      (cond
-        (:already-valid-pdfa? conversion-result) (debug "      file was valid PDF/A, no conversion")
-        (:pdfa? conversion-result) (do (io/copy temp-file src-file) (debug "      file converted to PDF/A") )
-        :else (error "PDF/A conversion failed, file is not PDF/A" ))
-      (:pdfa? conversion-result))
-    (catch Exception e (do (error "    Unknown exception:" e " in PDF/A conversion, no conversion" ) false) )
-    (finally (.deleteOnExit temp-file))))
-
-(defn ensure-pdf-a
-  "Ensures PDF file PDF/A compatibility status basedon given boolean"
-  [src-file must-be-pdfa?]
-  (debug "  ensuring file: " (.getAbsolutePath src-file) " must be PDF/A: " must-be-pdfa?)
-  (if (not must-be-pdfa?)
-    (do (debugf "    no PDF/A required, no conversion") false)
-    (convert-file-to-pdf-inplace src-file (File/createTempFile "lupapiste.pdf.a." ".tmp"))))
-
 (defn application-to-pdf-a
   "Returns application data in PDF/A temp file"
   [application lang]
   (let [file (File/createTempFile "application-pdf-a-" ".tmp")
         stream (pdf-export/generate application lang)]
     (io/copy stream file)
-  (ensure-pdf-a file true)))
+    (pdf-conversion/ensure-pdf-a file (:organization application))))

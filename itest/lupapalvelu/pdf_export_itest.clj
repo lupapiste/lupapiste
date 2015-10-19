@@ -7,7 +7,8 @@
             [sade.util :as util]
             [midje.sweet :refer :all]
             [pdfboxing.text :as pdfbox]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo])
+  (:import (java.io File)))
 
 (apply-remote-minimal)
 
@@ -54,7 +55,7 @@
                             :secondaryOperations test-secondaryoperations})
 
         lang        "fi"
-        file        (java.io.File/createTempFile "test" ".pdf")]
+        file        (File/createTempFile "pdf-export-itest-" ".pdf")]
 
 
     (with-lang lang
@@ -77,7 +78,6 @@
         pdf-content => (contains (:id application))
         pdf-content => (contains "Testihenkilo Erkki")
         pdf-content => (contains "Asuinkerrostalon tai rivitalon rakentaminen, Aidan rakentaminen")
-
         ; documents
         (doseq [doc-data documents-data]
           (clojure.walk/prewalk (partial walk-function pdf-content) doc-data)))
