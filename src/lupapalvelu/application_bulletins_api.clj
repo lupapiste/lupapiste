@@ -12,7 +12,7 @@
   {:versions {$slice -1}
    :versions.state 1 :versions.municipality 1
    :versions.address 1 :versions.location 1
-   :versions.primaryOperation 1
+   :versions.primaryOperation 1 :versions.propertyId 1
    :versions.applicant 1 :versions.modified 1
    :modified 1})
 
@@ -42,8 +42,8 @@
 
 
 (def app-snapshot-fields
-  [:address :created :location :modified :applicant
-   :municipality :organization :permitType
+  [:address :applicant :created :documents :location
+   :modified :municipality :organization :permitType
    :primaryOperation :propertyId :state :verdicts])
 
 (defcommand publish-bulletin
@@ -61,3 +61,14 @@
                  $set  {:modified created}}]
     (mongo/update-by-id :application-bulletins id changes :upsert true)
     (ok)))
+
+(def bulletin-fields
+  (merge bulletins-fields
+    {:versions.documents 1}))
+
+(defquery bulletin
+  {:parameters [bulletinId]
+   :feature :publish-bulletin
+   :user-roles #{:anonymous}}
+  (let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
+    (ok :bulletin (assoc (-> bulletin :versions first) :id (:id bulletin)))))
