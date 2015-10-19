@@ -1138,7 +1138,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildFillMyInfoButton(subSchema, model, path) {
-    if (model.fillMyInfo && model.fillMyInfo.disabled) {
+    if (self.isDisabled || (model.fillMyInfo && model.fillMyInfo.disabled)) {
       return;
     }
 
