@@ -48,3 +48,53 @@
   (let [document-type (or type (:type document))]
     (->> (metadata-for-document organization tos-function document-type)
          (assoc document :metadata))))
+
+(defn- get-tos-toimenpide-for-application-state-from-toj [organization tos-function state]
+  (if (env/feature? :tiedonohjaus)
+    (when (and organization tos-function state)
+      (try
+        (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/toimenpide-for-state/" state)
+              response (http/get url {:as :json
+                                      :throw-exceptions false})]
+          (if (= 200 (:status response))
+            (:body response)
+            {}))
+        (catch Exception _
+          {})))
+    {}))
+
+(def toimenpide-for-state
+  (memo/ttl get-tos-toimenpide-for-application-state-from-toj
+    :ttl/threshold 10000))
+
+(defn- get-documents-from-application [application]
+  [{:type :hakemus
+    :category :document
+    :ts (:created application)}])
+
+(defn- get-attachments-from-application [application]
+  (reduce (fn [acc attachment]
+            (if-let [versions (seq (:versions attachment))]
+              (->> versions
+                   (map (fn [ver]
+                          {:id (:type attachment)
+                           :category :attachment
+                           :version (:version ver)
+                           :ts (:created ver)}))
+                  (concat acc))
+              acc))
+    []
+    (:attachments application)))
+
+(defn generate-process-report-data [application]
+  (let [documents (get-documents-from-application application)
+        attachments (get-attachments-from-application application)
+        all-docs (sort-by :ts (concat documents attachments))]
+    (map (fn [[{:keys [state ts]} next]]
+           {:action (toimenpide-for-state (:organization application) (:tosFunction application) state)
+            :start ts
+            :documents (filter (fn [{doc-ts :ts}]
+                                 (and (>= doc-ts ts) (or (nil? next) (< doc-ts (:ts next)))))
+                         all-docs)
+            })
+      (partition 2 1 nil (:history application)))))
