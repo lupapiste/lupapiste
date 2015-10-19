@@ -4,6 +4,7 @@
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.states :as states]))
 
 
@@ -70,5 +71,9 @@
   {:parameters [bulletinId]
    :feature :publish-bulletin
    :user-roles #{:anonymous}}
-  (let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
-    (ok :bulletin (assoc (-> bulletin :versions first) :id (:id bulletin)))))
+  (let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))
+        bulletin-version (assoc (-> bulletin :versions first) :id (:id bulletin))
+        append-schema-fn (fn [{schema-info :schema-info :as doc}]
+                           (assoc doc :schema (schemas/get-schema schema-info)))
+        bulletin (update-in bulletin-version [:documents] (partial map append-schema-fn))]
+    (ok :bulletin bulletin)))
