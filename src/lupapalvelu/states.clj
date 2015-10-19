@@ -44,10 +44,10 @@
     (select-keys default-application-state-graph [:draft :open :canceled])
     {:submitted  [:acknowledged :canceled]
      ; must be for tj-hakemus-state-graph compatibility:
-     ; if foreman application is in complement-needed state it can be converted
+     ; if foreman application is in complementNeeded state it can be converted
      ; to use this state graph
-     :complement-needed [:acknowledged :canceled]
-     :acknowledged [:complement-needed]}))
+     :complementNeeded [:acknowledged :canceled]
+     :acknowledged [:complementNeeded]}))
 
 (def
   ^{:doc "See default-application-state-graph"}
@@ -55,8 +55,8 @@
   (merge
     (select-keys default-application-state-graph [:draft :open :canceled])
     {:submitted    [:sent :canceled]
-     :sent         [:foremanVerdictGiven :complement-needed :canceled]
-     :complement-needed [:sent :canceled]
+     :sent         [:foremanVerdictGiven :complementNeeded :canceled]
+     :complementNeeded [:sent :canceled]
      :foremanVerdictGiven []}))
 
 ; TODO draft versions this forward
@@ -65,9 +65,9 @@
   ^{:doc "See default-application-state-graph"}
   ymp-application-state-graph
   (merge
-    (select-keys default-application-state-graph [:draft :open :submitted :sent :complement-needed :canceled])
+    (select-keys default-application-state-graph [:draft :open :submitted :sent :complementNeeded :canceled])
     {:verdictGiven [:final :appealed :canceled]
-     :appealed     [:complement-needed :verdictGiven :final :canceled] ; Valitettu
+     :appealed     [:complementNeeded :verdictGiven :final :canceled] ; Valitettu
      :final        [] ; Lain voimainen
      }))
 
@@ -97,9 +97,9 @@
      }))
 
 
-(def pre-verdict-states #{:draft :info :answered :open :submitted :complement-needed :sent})
+(def pre-verdict-states #{:draft :info :answered :open :submitted :complementNeeded :sent})
 
-(def pre-sent-application-states #{:draft :open :submitted :complement-needed})
+(def pre-sent-application-states #{:draft :open :submitted :complementNeeded})
 
 ;;
 ;; Calculated state sets

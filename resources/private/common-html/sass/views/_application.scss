@@ -212,7 +212,7 @@ $app-gray-darkest: $gray187;
           }
         }
 
-        .constructionStarted-box, .closed-box, .complement-needed-box, .verdictGiven-box, .foremanVerdictGiven-box, acknowledged-box, .canceled-box  {
+        .constructionStarted-box, .closed-box, .complementNeeded-box, .verdictGiven-box, .foremanVerdictGiven-box, acknowledged-box, .canceled-box  {
           display: none;
         }
         &.draft {
@@ -247,8 +247,8 @@ $app-gray-darkest: $gray187;
             display: inline-block;
           }
         }
-        &.complement-needed {
-          .complement-needed-box {
+        &.complementNeeded {
+          .complementNeeded-box {
             @include active-state;
           }
           .draft-box, .open-box, .submitted-box {

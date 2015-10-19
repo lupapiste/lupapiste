@@ -8658,7 +8658,7 @@ span.icon_clear:before {
   z-index: 1;
 }
 /* line 215, ../sass/views/_application.scss */
-.application_summary .application_summary_info .state-indication div .constructionStarted-box, .application_summary .application_summary_info .state-indication div .closed-box, .application_summary .application_summary_info .state-indication div .complement-needed-box, .application_summary .application_summary_info .state-indication div .verdictGiven-box, .application_summary .application_summary_info .state-indication div .foremanVerdictGiven-box, .application_summary .application_summary_info .state-indication div acknowledged-box, .application_summary .application_summary_info .state-indication div .canceled-box {
+.application_summary .application_summary_info .state-indication div .constructionStarted-box, .application_summary .application_summary_info .state-indication div .closed-box, .application_summary .application_summary_info .state-indication div .complementNeeded-box, .application_summary .application_summary_info .state-indication div .verdictGiven-box, .application_summary .application_summary_info .state-indication div .foremanVerdictGiven-box, .application_summary .application_summary_info .state-indication div acknowledged-box, .application_summary .application_summary_info .state-indication div .canceled-box {
   display: none;
 }
 /* line 219, ../sass/views/_application.scss */
@@ -8718,17 +8718,17 @@ span.icon_clear:before {
   display: inline-block;
 }
 /* line 251, ../sass/views/_application.scss */
-.application_summary .application_summary_info .state-indication div.complement-needed .complement-needed-box {
+.application_summary .application_summary_info .state-indication div.complementNeeded .complementNeeded-box {
   color: white;
   background-color: #2ca92c;
   display: inline-block;
 }
 /* line 183, ../sass/views/_application.scss */
-.application_summary .application_summary_info .state-indication div.complement-needed .complement-needed-box:after {
+.application_summary .application_summary_info .state-indication div.complementNeeded .complementNeeded-box:after {
   border-left: 11px solid #2ca92c;
 }
 /* line 254, ../sass/views/_application.scss */
-.application_summary .application_summary_info .state-indication div.complement-needed .draft-box, .application_summary .application_summary_info .state-indication div.complement-needed .open-box, .application_summary .application_summary_info .state-indication div.complement-needed .submitted-box {
+.application_summary .application_summary_info .state-indication div.complementNeeded .draft-box, .application_summary .application_summary_info .state-indication div.complementNeeded .open-box, .application_summary .application_summary_info .state-indication div.complementNeeded .submitted-box {
   display: none;
 }
 /* line 259, ../sass/views/_application.scss */

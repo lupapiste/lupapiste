@@ -22,7 +22,7 @@
 (def application-state-to-krysp-state
   {:submitted "vireill\u00e4"
    :sent "vireill\u00e4"
-   :complement-needed "odottaa asiakkaan toimenpiteit\u00e4"
+   :complementNeeded "odottaa asiakkaan toimenpiteit\u00e4"
    :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
    :foremanVerdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
    :constructionStarted "rakennusty\u00f6t aloitettu"
@@ -31,7 +31,7 @@
 (def ymp-application-state-to-krysp-state
   {:sent "1 Vireill\u00e4"
    :submitted "1 Vireill\u00e4"
-   :complement-needed "1 Vireill\u00e4"
+   :complementNeeded "1 Vireill\u00e4"
    :verdictGiven "ei tiedossa"
    :constructionStarted "ei tiedossa"
    :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
@@ -39,7 +39,7 @@
 (def- state-timestamp-fn
   {:submitted :submitted
    :sent :submitted ; Enables XML to be formed from sent applications
-   :complement-needed :complementNeeded
+   :complementNeeded :complementNeeded
    :verdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
    :foremanVerdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
    :constructionStarted :started

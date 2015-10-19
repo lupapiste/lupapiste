@@ -26,7 +26,7 @@
   {:parameters [:id :schemaName]
    :optional-parameters [updates fetchRakennuspaikka]
    :user-roles #{:applicant :authority}
-   :states     #{:draft :answered :open :submitted :complement-needed}
+   :states     #{:draft :answered :open :submitted :complementNeeded}
    :pre-checks [create-doc-validator
                 application/validate-authority-in-drafts]}
   [command]
@@ -42,7 +42,7 @@
 (defcommand remove-doc
   {:parameters  [id docId]
     :user-roles #{:applicant :authority}
-    :states     #{:draft :answered :open :submitted :complement-needed}
+    :states     #{:draft :answered :open :submitted :complementNeeded}
     :pre-checks [application/validate-authority-in-drafts
                  remove-doc-validator]}
   [{:keys [application created] :as command}]
@@ -71,7 +71,7 @@
 (defcommand remove-document-data
   {:parameters       [id doc path collection]
    :user-roles       #{:applicant :authority}
-   :states           #{:draft :answered :open :submitted :complement-needed}
+   :states           #{:draft :answered :open :submitted :complementNeeded}
    :input-validators [doc-persistence/validate-collection]
    :pre-checks       [application/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]

@@ -88,7 +88,7 @@
 
 ; Foreman
 (defn- foreman-submittable? [application]
-  (let [result (when (-> application :state keyword #{:draft :open :submitted :complement-needed})
+  (let [result (when (-> application :state keyword #{:draft :open :submitted :complementNeeded})
                  (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
                    (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
     (if (nil? result)
