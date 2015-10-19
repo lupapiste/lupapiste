@@ -8,7 +8,7 @@ LUPAPISTE.PropertyGroupModel = function(params) {
   self.isMaaraala = ko.observable(false);
   self.documentId = params.documentId;
 
-  self.isEnabled = ko.computed(function() {
+  self.isEnabled = ko.pureComputed(function() {
     return !params.isDisabled && params.authModel.ok("update-doc");
   });
 
@@ -24,7 +24,7 @@ LUPAPISTE.PropertyGroupModel = function(params) {
   var partitionedSchemas = _.partition(self.subSchemas, function(schema) {
     return schema.name === "maaraalaTunnus";
   });
-  
+
   self.maaraalaSchema = _.first(_.first(partitionedSchemas));
   self.otherSchemas = _(partitionedSchemas)
     .rest()
