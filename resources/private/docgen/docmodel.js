@@ -1245,10 +1245,26 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildCompanySelector(subSchema, model, path) {
+
+    function mapCompany(company) {
+      company.displayName = ko.pureComputed(function() {
+        return ko.unwrap(company.name) + " (" + ko.unwrap(company.y) + ")";
+      });
+      return company;
+    }
     var myNs = path.slice(0, path.length - 1).join(".");
+
+    var companies = _(lupapisteApp.models.application.roles() || [])
+                    .filter(function(r) {
+                      return ko.unwrap(r.type) === "company";
+                    })
+                    .map(mapCompany)
+                    .value();
 
     var params = {
       id: self.appId,
+      companies: companies,
+      authModel: self.authorizationModel,
       documentId: self.docId,
       documentName: self.schemaName,
       path: myNs,
