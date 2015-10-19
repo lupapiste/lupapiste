@@ -18,7 +18,7 @@ LUPAPISTE.PropertyGroupModel = function(params) {
 
   self.propertyId = ko.pureComputed(function() {
     return util.getIn(params, ["model", "kiinteistoTunnus", "value"]) ||
-           lupapisteApp.models.application.propertyId();
+           params.propertyId;
   });
 
   var partitionedSchemas = _.partition(self.subSchemas, function(schema) {
