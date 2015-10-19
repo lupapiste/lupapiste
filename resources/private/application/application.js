@@ -77,8 +77,8 @@
     if (isInitializing || !authorizationModel.ok("change-permit-sub-type")) { return; }
 
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
-      .success(function() {
-        hub.send("indicator", {style: "positive"});
+      .success(function(resp) {
+        util.showSavedIndicator(resp);
         applicationModel.reload();
       })
       .call();
@@ -278,7 +278,15 @@
       }
       currentId = newId;
       repository.load(currentId, applicationModel.pending, function(application) {
-        selectTab(tab || (application.inPostVerdictState ? "tasks" : "info"));
+        var fallbackTab = function(application) {
+          if (application.inPostVerdictState) {
+            return application.primaryOperation.name.match(/tyonjohtaja/) ? "applicationSummary" : "tasks";
+          } else {
+            return "info";
+          }
+        };
+
+        selectTab(tab || fallbackTab(application));
       });
     }
   }

@@ -3,11 +3,10 @@
     [lupapalvelu.attachment :as attachment]
     [lupapalvelu.pdf-export :as pdf-export]
     [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
-    [sade.env :as env]
     [sade.core :refer [def- now]]
     [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
     [clojure.pprint :refer [pprint]]
-    [clojure.java.io :as io])
+    [lupapalvelu.pdf-conversion :as pdf-conversion])
   (:import (java.io File FileOutputStream)))
 
 (defn- get-child [application type id]
@@ -18,18 +17,17 @@
   (:metadata (get-child application type id)))
 
 (defn- build-attachment [user application type lang id file]
-  (let [use-pdf-a? (env/feature? :arkistointi)
-        content  (attachment/ensure-pdf-a file use-pdf-a?)
+  (let [is-pdf-a? (pdf-conversion/ensure-pdf-a file (:organization application))
         type-name (case type
-                    :statements (i18n/localize lang "statement.lausunto")
+                    :statements (i18n/localize (name lang) "statement.lausunto")
                     :verdicts "verdict")
         filename (str type-name ".pdf")
         child (get-child application type id)]
     {:application application
      :filename filename
      :metadata (:metadata child)
-     :size (.length (:file content))
-     :content (:file content)
+     :size (.length file)
+     :content file
      :attachment-id nil
      :attachment-type {:type-group "muut" :type-id "muu"}
      :op nil
@@ -38,7 +36,7 @@
      :user user
      :created (now)
      :required false
-     :valid-pdfa (:pdfa content)
+     :valid-pdfa is-pdf-a?
      :missing-fonts []}))
 
 (defn generate-attachment-from-children [user app lang child-type id]
@@ -49,9 +47,7 @@
     (with-lang lang (pdf-export/generate-pdf-with-child app child-type out id))
     (build-attachment user app child-type lang id pdf-file)))
 
-
 (defn create-attachment-from-children [user app child-type id lang]
   "Generates attachment from child and saves it"
   (let [child (generate-attachment-from-children user app lang child-type id)]
     (attachment/attach-file! child)))
-

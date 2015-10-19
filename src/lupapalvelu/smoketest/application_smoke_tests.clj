@@ -132,7 +132,7 @@
 ;  (timestamp-is-set :canceled #{:canceled}))
 
 (defmonster sent-timestamp
-  (timestamp-is-set :sent #{:sent :complement-needed}))
+  (timestamp-is-set :sent #{:sent :complementNeeded}))
 
 (defmonster closed-timestamp
   (timestamp-is-set :closed #{:closed}))

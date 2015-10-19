@@ -12,17 +12,17 @@
   (all-next-states default-application-state-graph :verdictGiven) => #{:verdictGiven :constructionStarted :closed :canceled})
 
 (fact "post-submitted-states"
-  post-submitted-states => (contains #{:sent :complement-needed :verdictGiven :constructionStarted :closed})
+  post-submitted-states => (contains #{:sent :complementNeeded :verdictGiven :constructionStarted :closed})
   post-submitted-states =not=> (contains #{:open :submitted}))
 
 (fact "post-verdict-states"
   post-verdict-states => (contains #{:verdictGiven :foremanVerdictGiven :constructionStarted :closed})
-  post-verdict-states =not=> (contains #{:sent :complement-needed :canceled :submitted}))
+  post-verdict-states =not=> (contains #{:sent :complementNeeded :canceled :submitted}))
 
 (fact "all states"
   all-inforequest-states => #{:info :answered}
 
-  all-application-states => #{:draft :open :submitted :sent :complement-needed
+  all-application-states => #{:draft :open :submitted :sent :complementNeeded
                               :verdictGiven :constructionStarted :closed :canceled
                               :extinct
                               :acknowledged :foremanVerdictGiven

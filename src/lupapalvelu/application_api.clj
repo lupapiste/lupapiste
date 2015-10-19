@@ -209,12 +209,12 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(partial sm/validate-state-transition :complement-needed)]}
+   :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified         created
                              :complementNeeded created
-                             :state            :complement-needed}}))
+                             :state            :complementNeeded}}))
 
 
 (defn- do-submit [command application created]
@@ -261,7 +261,7 @@
   {:parameters       [:id drawings]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :states           #{:draft :info :answered :open :submitted :complement-needed}
+   :states           #{:draft :info :answered :open :submitted :complementNeeded}
    :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
@@ -536,10 +536,23 @@
         op-id-mapping (into {} (map
                                  #(vector (:id %) (mongo/create-id))
                                  (conj secondary-ops primary-op)))
-        muutoslupa-app (merge application
+        state (if (user/authority? user) :open :draft)
+        muutoslupa-app (merge (select-keys application
+                                [:auth
+                                 :propertyId, :location
+                                 :schema-version
+                                 :address, :title
+                                 :foreman, :foremanRole
+                                 :applicant,  :_applicantIndex
+                                 :municipality, :organization
+                                 :drawings
+                                 :metadata])
+
                               {:id            muutoslupa-app-id
+                               :permitType    permit/R
+                               :permitSubtype :muutoslupa
                                :created       created
-                               :opened        created
+                               :opened        (when (user/authority? user) created)
                                :modified      created
                                :documents     (into [] (map
                                                          (fn [doc]
@@ -548,16 +561,26 @@
                                                                (update-in doc [:schema-info :op :id] op-id-mapping)
                                                                doc)))
                                                          (:documents application)))
-                               :state         (cond
-                                                (user/authority? user) :open
-                                                :else :draft)
-                               :permitSubtype :muutoslupa
+                               :state         state
+
+                               :history [{:state state, :ts created, :user (user/summary user)}]
+                               :infoRequest false
+                               :openInfoRequest false
+                               :convertedToApplication nil
+
                                :primaryOperation (assoc primary-op :id (op-id-mapping (:id primary-op)))
                                :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops) }
-                              (select-keys
-                                domain/application-skeleton
-                                [:attachments :statements :verdicts :comments :submitted :sent :neighbors
-                                 :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
+
+                              ; Keys to reset
+                              (select-keys domain/application-skeleton
+                                [:attachments :statements :verdicts :tasks :buildings :neighbors
+                                 :comments :authorityNotice :urgency ; comment panel content
+                                 :submitted :sent :acknowledged :closed :closedBy :started :startedBy ; timestamps
+                                 :_statements-seen-by :_comments-seen-by :_verdicts-seen-by :_attachment_indicator_reset ; indicators
+                                 :reminder-sent :transfers ; logs
+                                 :authority
+                                 :tosFunction]))]
+
     (a/do-add-link-permit muutoslupa-app (:id application))
     (a/insert-application muutoslupa-app)
     (ok :id muutoslupa-app-id)))
