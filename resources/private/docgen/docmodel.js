@@ -1252,31 +1252,34 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       });
       return company;
     }
-    var myNs = path.slice(0, path.length - 1).join(".");
 
-    var companies = _(lupapisteApp.models.application.roles() || [])
-                    .filter(function(r) {
-                      return ko.unwrap(r.type) === "company";
-                    })
-                    .map(mapCompany)
-                    .value();
+    if (!self.isDisabled) {
+      var myNs = path.slice(0, path.length - 1).join(".");
 
-    var params = {
-      id: self.appId,
-      companies: companies,
-      authModel: self.authorizationModel,
-      documentId: self.docId,
-      documentName: self.schemaName,
-      path: myNs,
-      collection: self.getCollection(),
-      selected: getModelValue(model, subSchema.name),
-      schema: subSchema
-    };
+      var companies = _(lupapisteApp.models.application.roles() || [])
+                      .filter(function(r) {
+                        return ko.unwrap(r.type) === "company";
+                      })
+                      .map(mapCompany)
+                      .value();
 
-    var span = makeEntrySpan(subSchema, path.join("."));
-    span.appendChild(createComponent("company-selector", params));
-    $(span).addClass("companySelector");
-    return span;
+      var params = {
+        id: self.appId,
+        companies: companies,
+        authModel: self.authorizationModel,
+        documentId: self.docId,
+        documentName: self.schemaName,
+        path: myNs,
+        collection: self.getCollection(),
+        selected: getModelValue(model, subSchema.name),
+        schema: subSchema
+      };
+
+      var span = makeEntrySpan(subSchema, path.join("."));
+      span.appendChild(createComponent("company-selector", params));
+      $(span).addClass("companySelector");
+      return span;
+    }
   }
 
   function buildTableRow(subSchema, model, path, partOfChoice) {
