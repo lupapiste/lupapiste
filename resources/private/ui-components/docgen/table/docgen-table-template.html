@@ -25,6 +25,13 @@
             </tr>
           </tbody>
         </table>
+        <!-- ko if: repeating -->
+        <button data-bind="ltext: appendLabel,
+                           click: addRow"></button>
+        <button data-bind="ltext: copyLabel,
+                           click: copyLastRow"></button>
+        <span data-bind="copyIndicator: indicator, label: false"></span>
+        <!-- /ko -->
       </div>
     </script>
   </section>

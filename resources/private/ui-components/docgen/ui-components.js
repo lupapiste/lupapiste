@@ -5,9 +5,12 @@ var uiComponents = (function() {
 
   // TODO: show warning indicator
   // TODO: refactor
-  var save = function(command, documentId, applicationId, element, path, val, indicator, result, cb) {
+  var saveMany = function(command, documentId, applicationId, element, paths, vals, indicator, result, cb) {
     cb = cb ? cb : function() {};
-    var updates = [[path.join("."), val]];
+    var updates = _(paths)
+      .map(function(p) { return p.join("."); })
+      .zip(vals)
+      .value();
     ajax
       .command(command, {
         doc: documentId,
@@ -16,7 +19,7 @@ var uiComponents = (function() {
         collection: "documents"})
       .success(function (e) {
         var res = _.find(e.results, function(result) {
-          return _.isEqual(result.path, path);
+          return _.isEqual(result.path, paths);
         });
         result(res ? res.result : undefined);
         indicator({type: "saved"});
@@ -31,9 +34,14 @@ var uiComponents = (function() {
       .call();
   };
 
+  var save = function(command, documentId, applicationId, element, path, val, indicator, result, cb) {
+    return saveMany(command, documentId, applicationId, element, [path], [val], indicator, result, cb)
+  }
+
   return {
     sizeClasses: sizeClasses,
-    save: save
+    save: save,
+    saveMany: saveMany,
   };
 
 })();

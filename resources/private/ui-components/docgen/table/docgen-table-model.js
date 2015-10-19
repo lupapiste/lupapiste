@@ -5,7 +5,7 @@ LUPAPISTE.DocgenTableModel = function(params) {
   // inherit from DocgenGroupModel
   ko.utils.extend(self, new LUPAPISTE.DocgenGroupModel(params));
 
-  self.columnHeaders = _.map(params.subSchema.body, function(schema) {
+  self.columnHeaders = _.map(params.schema.body, function(schema) {
     return self.i18npath.concat(schema.name);
   });
   
