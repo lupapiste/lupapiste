@@ -8,6 +8,10 @@ LUPAPISTE.PropertyGroupModel = function(params) {
   self.isMaaraala = ko.observable(false);
   self.documentId = params.documentId;
 
+  self.isEnabled = ko.computed(function() {
+    return !params.isDisabled && params.authModel.ok("update-doc");
+  });
+
   self.checkboxId = ko.pureComputed(function() {
     return [self.documentId, "maaraalaTunnus"].join("-");
   });

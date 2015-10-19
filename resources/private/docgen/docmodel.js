@@ -867,7 +867,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       path: path,
       subSchema: subSchema,
       documentId: self.docId,
-      model: model[name]
+      model: model[name],
+      isDisabled: self.isDisabled,
+      authModel: self.authorizationModel
     };
     return createComponent("property-group", params);
   }
