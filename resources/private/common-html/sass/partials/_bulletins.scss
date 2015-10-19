@@ -8,6 +8,14 @@
     text-transform: none;
   }
 
+  h3 {
+    font-family: $font-heading;
+    font-weight: 700;
+    font-size: 2rem;
+    text-transform: none;
+    color: $gray51;
+  }
+
   p {
     font-weight: 300;
     font-size: 1.375rem;
@@ -15,6 +23,16 @@
     button {
       margin-left: $grid-margin;
     }
+  }
+
+  input {
+    &:focus {
+      border-color: $blue-light;
+    }
+  }
+
+  input:focus + i {
+    color: red;
   }
 
   .content {
@@ -65,3 +83,20 @@
     }
   }
 }
+
+.bulletins-search {
+  h3 {
+    text-align: center;
+  }
+  .search-field {
+    i {
+      color: $blue-dark;
+    }
+    &.active {
+      i {
+        color: $blue-light;
+      }
+    }
+  }
+}
+
