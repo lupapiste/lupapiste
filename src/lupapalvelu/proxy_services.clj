@@ -98,11 +98,45 @@
       (resp/json (map wfs/feature-to-property-info features))
       (resp/status 503 "Service temporarily unavailable"))))
 
+(defn create-layer-object [layer-name]
+  (let [layer-category (cond 
+                         (re-find #"^\d+_asemakaava$" layer-name) "asemakaava"
+                         (re-find #"^\d+_kantakartta$" layer-name) "kantakartta"
+                         :else "other")
+        ]
+	  (identity {
+              :wmsName layer-name 
+              :wmsUrl "/proxy/wms"
+              :name (cond
+                      (= layer-category "asemakaava") (identity {:fi "Asemakaava" :sv "Detaljplan" :en "???"})
+                      (= layer-category "kantakartta") (identity {:fi "Kantakartta" :sv "Baskarta" :en "???"})
+                      :else (identity {:fi "" :sv "" :en ""})
+                      )
+              :id (cond
+                      (= layer-category "asemakaava") "101"
+                      (= layer-category "kantakartta") "102"
+                      :else "0"
+                      )
+              :baseLayer (if (or (= layer-category "asemakaava") (= layer-category "kantakartta"))
+                           true
+                           false)
+              }
+	  )
+  )
+)
+
 (defn wms-capabilities-proxy [request]
-  (let [capabilities (wfs/getcapabilities request)
-        layers (wfs/capabilities-to-layers capabilities)]
+  (let [{municipality :municipality} (:params request)
+        capabilities (wfs/getcapabilities request)
+        layers (wfs/capabilities-to-layers capabilities)
+        ]
     (if layers
-      (resp/json (map wfs/layer-to-name layers))
+      (resp/json 
+        (if (nil? municipality)
+          (map create-layer-object (map wfs/layer-to-name layers))
+          (filter #(= (re-find #"^\d+" (:wmsName %)) municipality) (map create-layer-object (map wfs/layer-to-name layers)))
+          )
+        )
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn plan-urls-by-point-proxy [request]
