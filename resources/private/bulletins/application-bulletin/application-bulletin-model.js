@@ -4,6 +4,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   var self = this;
 
   self.bulletin = ko.observable();
+  self.selectedTab = ko.observable("info");
 
   self.map = gis
       .makeMap("bulletin-map", false)

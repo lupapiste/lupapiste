@@ -32,16 +32,29 @@
             </div>
 
               <!-- Actions: -->
-              <div class="application_actions">
-                <!-- click: exportPdf, visible: $root.authorization.ok('pdf-export'), enable: !processing() && $root.authorization.ok('pdf-export') -->
-                <button class="function"
-                        data-bind=""
-                        data-test-id="application-pdf-btn">
-                    <i class="lupicon-print"></i>
-                    <span data-bind="ltext: 'application.pdf'"></span>
-                </button>
+            <div class="application_actions">
+              <!-- click: exportPdf, visible: $root.authorization.ok('pdf-export'), enable: !processing() && $root.authorization.ok('pdf-export') -->
+              <button class="function"
+                      data-bind=""
+                      data-test-id="application-pdf-btn">
+                  <i class="lupicon-print"></i>
+                  <span data-bind="ltext: 'application.pdf'"></span>
+              </button>
             </div>
           </div>
+
+          <!-- Tabs: -->
+          <div class="tabs-container" data-bind="with: bulletin">
+            <ul class="tabs" id="">
+              <li data-bind="css: {'active': $parent.selectedTab() === 'info'}">
+                  <a data-bind="" href="#" class="link-btn">
+                      <span data-bind="ltext: 'application.tabInfo'"></span> </a></li>
+              <li data-bind="css: {'active': $parent.selectedTab() === 'attachments'}">
+                  <a data-bind="click" href="#" data-test-id="application-open-attachments-tab" class="link-btn">
+                      <span data-bind="ltext: 'application.tabAttachments'"></span></a></li>
+            </ul>
+          </div>
+
         </div>
       </div>
 
