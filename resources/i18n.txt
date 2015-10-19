@@ -14,3 +14,5 @@ bulletin.page.service-info:  Palveluinfo
 
 footer.service.instructions:  Palvelun käytön ohjeet
 footer.reload:  Takaisin ylös
+
+bulletin.tab.info: Ilmoituksen tiedot
