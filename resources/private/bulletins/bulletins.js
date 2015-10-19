@@ -13,7 +13,8 @@
         {name: "application-bulletins"},
         {name: "application-bulletins-list"},
         {name: "load-more-application-bulletins"},
-        {name: "application-bulletin"}];
+        {name: "application-bulletin"},
+        {name: "bulletins-search"}];
 
     _.forEach(components, function(component) {
       ko.components.register(component.name, {
