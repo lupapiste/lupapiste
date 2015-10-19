@@ -8710,37 +8710,41 @@ div.search i {
   color: #fff;
 }
 /* line 31, ../sass/partials/_bulletins.scss */
+#bulletins-component .gray-bg {
+  background-color: #eeeeee;
+}
+/* line 35, ../sass/partials/_bulletins.scss */
 #bulletins-component .content-center {
   max-width: 1280px;
   margin: 0 auto;
   position: relative;
   padding: 40px 0;
 }
-/* line 38, ../sass/partials/_bulletins.scss */
+/* line 42, ../sass/partials/_bulletins.scss */
 #bulletins-component .full {
   width: 100%;
   min-width: 320px;
 }
-/* line 43, ../sass/partials/_bulletins.scss */
+/* line 47, ../sass/partials/_bulletins.scss */
 #bulletins-component .slogan, #bulletins-component .ingress {
   text-align: center;
   width: 80%;
   margin: 0 auto 20px;
 }
 
-/* line 50, ../sass/partials/_bulletins.scss */
+/* line 54, ../sass/partials/_bulletins.scss */
 .search-button-wrapper {
   text-align: center;
 }
-/* line 53, ../sass/partials/_bulletins.scss */
+/* line 57, ../sass/partials/_bulletins.scss */
 .search-button-wrapper button span:last-child {
   padding-left: 6px;
 }
-/* line 54, ../sass/partials/_bulletins.scss */
+/* line 58, ../sass/partials/_bulletins.scss */
 .search-button-wrapper button span:last-child:before {
   content: "(";
 }
-/* line 57, ../sass/partials/_bulletins.scss */
+/* line 61, ../sass/partials/_bulletins.scss */
 .search-button-wrapper button span:last-child:after {
   content: ")";
 }
