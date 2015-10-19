@@ -48,7 +48,8 @@
 (defn- make-free-text-query [filter-search]
   (let [or-query {$or [{:address {$regex filter-search $options "i"}}
                        {:verdicts.kuntalupatunnus {$regex filter-search $options "i"}}
-                       {:_applicantIndex {$regex filter-search $options "i"}}]}
+                       {:_applicantIndex {$regex filter-search $options "i"}}
+                       {:foreman {$regex filter-search $options "i"}}]}
         ops (operation-names filter-search)]
     (if (seq ops)
       (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}} {:secondaryOperations.name {$in ops}}])
