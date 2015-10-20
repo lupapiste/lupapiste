@@ -39,7 +39,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   });
 
   var createRow = function(rowModel, index) {
-    var groupPath = index ? self.path.concat(index) : self.path;
+    var groupPath = _.isNaN(parseInt(index)) ? self.path : self.path.concat(index);
     return { index: index,
              subSchemas: _.map(self.subSchemas, function(schema) {
       return _.extend({}, schema, {
@@ -49,13 +49,29 @@ LUPAPISTE.DocgenGroupModel = function(params) {
     })};
   }
 
-  self.removeRow = function(rowIndex) {
-    self.rows.splice(rowIndex, 1);
+  self.removeRow = function(row) {
+    var path = self.params.path.concat(row.index);
+
+    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
+      { title: loc("yes"), fn: function () {
+        ajax
+          .command("remove-document-data", {
+            doc: self.documentId,
+            id: self.applicationId,
+            path: path,
+            collection: "documents"
+          })
+          .success(function() {
+            self.rows.remove(row);
+          })
+          .call();
+        }
+      }, { title: loc("no") });
   }
 
   self.addRow = function() {
     var dataIndex = parseInt( _(self.rows()).map('index').max() ) + 1;
-    self.rows.push(createRow({}, dataIndex));
+    self.rows.push(createRow({}, dataIndex || 0));
   }
 
   if (self.repeating) {
@@ -63,4 +79,13 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   } else {
     self.rows([createRow(model)]);
   }
+
+  var addOneIfEmpty = function(rows) {
+    if ( _.isEmpty(rows) ) {
+      self.addRow();
+    }
+  }
+
+  self.rows.subscribe(addOneIfEmpty);
+  addOneIfEmpty(self.rows());
 };

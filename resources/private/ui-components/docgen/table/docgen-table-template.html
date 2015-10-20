@@ -11,7 +11,8 @@
             <tr data-bind="foreach: columnHeaders"><td><span data-bind="ltext: $data"></span></td></tr>
           </thead>
           <tbody data-bind="foreach: rows">
-            <tr data-bind="foreach: subSchemas">
+            <tr>
+              <!-- ko foreach: subSchemas -->
               <td>
                 <span class="form-entry"
                   data-bind="component: { name: uicomponent,
@@ -22,12 +23,25 @@
                                                     documentId: documentId }}">
                 </span>
               </td>
+              <!-- /ko -->
+
+              <!-- ko if: $component.repeating -->
+              <td class="action-column">
+                <span class="icon remove-grey inline-right" data-bind="click: $parent.removeRow,
+                                                                       visible: lupapisteApp.models.applicationAuthModel.ok('remove-document-data')"></span>
+              </td>
+              <!-- /ko -->
             </tr>
           </tbody>
         </table>
         <!-- ko if: repeating -->
-        <button data-bind="ltext: appendLabel,
-                           click: addRow"></button>
+
+        <button data-bind="attr: { class: 'secondary' },
+                           click: addRow">
+
+            <i data-bind="attr: { class: 'lupicon-circle-plus' }"></i>
+            <span data-bind="ltext: appendLabel"></span>
+        </button>
         <!-- /ko -->
       </div>
     </script>

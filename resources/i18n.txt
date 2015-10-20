@@ -56,3 +56,7 @@ rakennusjateilmoitus.vaarallisetAineet.yksikko.m3: Kuutiota
 rakennusjateilmoitus.vaarallisetAineet.yksikko.tonni: Tonnia
 
 rakennusjateIlmoitus.help: Lisätietoa kierrätyksestä löydät osoitteesta http://www.kierratys.info/.
+
+
+rakennusjateilmoitus.rakennusJaPurkujate._append_label: Lisää rivi
+rakennusjateilmoitus.vaarallisetAineet._append_label: Lisää rivi

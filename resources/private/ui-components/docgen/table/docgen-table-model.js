@@ -8,5 +8,9 @@ LUPAPISTE.DocgenTableModel = function(params) {
   self.columnHeaders = _.map(params.schema.body, function(schema) {
     return self.i18npath.concat(schema.name);
   });
+
+  if (self.repeating) {
+    self.columnHeaders.push('remove');
+  }
   
 };
