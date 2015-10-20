@@ -212,6 +212,13 @@
         doc.sendToArchive(true);
       });
     };
+
+    self.processData = ko.observable();
+    ajax.query('process-report-data', {id: params.application.id})
+      .success(function(data) {
+        self.processData(data.process);
+      })
+      .call();
   };
 
   ko.components.register("archival-summary", {

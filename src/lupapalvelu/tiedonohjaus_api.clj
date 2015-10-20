@@ -171,3 +171,10 @@
       (catch RuntimeException e
         (timbre/error e)
         (fail "error.invalid.metadata")))))
+
+(defquery process-report-data
+  {:parameters [:id]
+   :user-roles #{:authority}
+   :states states/all-application-states}
+  [{:keys [application]}]
+  (ok :process (t/generate-process-report-data application)))
