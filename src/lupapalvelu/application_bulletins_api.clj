@@ -43,7 +43,7 @@
 
 
 (def app-snapshot-fields
-  [:address :applicant :created :documents :location
+  [:_applicantIndex :address :applicant :created :documents :location
    :modified :municipality :organization :permitType
    :primaryOperation :propertyId :state :verdicts])
 
@@ -65,7 +65,7 @@
 
 (def bulletin-fields
   (merge bulletins-fields
-    {:versions.documents 1}))
+    {:_applicantIndex 1 :versions.documents 1}))
 
 (defquery bulletin
   {:parameters [bulletinId]
