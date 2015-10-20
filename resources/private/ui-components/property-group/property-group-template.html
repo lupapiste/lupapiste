@@ -23,7 +23,8 @@
                                                applicationId: appId,
                                                isMaaraala: isMaaraala,
                                                propertyId: propertyId(),
-                                               isDisabled: isDisabled }}"></div>
+                                               isDisabled: isDisabled,
+                                               authModel: authModel }}"></div>
 
         <span data-bind="foreach: otherSchemas">
           <div class="form-entry"
@@ -31,7 +32,8 @@
                                        params: { schema: $data,
                                                  path: path,
                                                  model: model,
-                                                 isDisabled: $component.isDisabled }}"></div>
+                                                 isDisabled: $component.isDisabled,
+                                                 authModel: $component.authModel }}"></div>
         </span>
       </div>
     </script>
