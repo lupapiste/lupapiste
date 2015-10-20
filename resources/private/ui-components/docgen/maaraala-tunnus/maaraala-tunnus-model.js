@@ -3,6 +3,7 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   var self = this;
 
   self.model = params.model;
+  self.isDisabled = params.isDisabled;
   self.applicationId = params.applicationId || (lupapisteApp.models.application && lupapisteApp.models.application.id()) || null;
   self.documentId = params.documentId;
   self.propertyId = ko.unwrap(params.propertyId);

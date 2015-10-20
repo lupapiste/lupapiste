@@ -7,11 +7,13 @@ LUPAPISTE.PropertyGroupModel = function(params) {
 
   self.appId = params.appId || null;
 
+  self.isDisabled = params.isDisabled;
+
   self.isMaaraala = ko.observable(false);
   self.documentId = params.documentId;
 
   self.isEnabled = ko.pureComputed(function() {
-    return !params.isDisabled && params.authModel.ok("update-doc");
+    return !self.isDisabled && params.authModel.ok("update-doc");
   });
 
   self.checkboxId = ko.pureComputed(function() {

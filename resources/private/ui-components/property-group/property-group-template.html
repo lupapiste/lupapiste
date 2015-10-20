@@ -22,14 +22,16 @@
                                                model: maaraalaSchema.model,
                                                applicationId: appId,
                                                isMaaraala: isMaaraala,
-                                               propertyId: propertyId() }}"></div>
+                                               propertyId: propertyId(),
+                                               isDisabled: isDisabled }}"></div>
 
         <span data-bind="foreach: otherSchemas">
           <div class="form-entry"
                data-bind="component: { name: uicomponent,
                                        params: { schema: $data,
                                                  path: path,
-                                                 model: model }}"></div>
+                                                 model: model,
+                                                 isDisabled: $component.isDisabled }}"></div>
         </span>
       </div>
     </script>
