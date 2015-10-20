@@ -26,6 +26,12 @@
                 <p data-bind="ltext: 'application.municipality'"></p>
                 <span class="application_summary_text" data-bind="text: loc(['municipality', municipality])"></span>
               </div>
+              <div>
+                <p data-bind="ltext: 'bulletin.applicants'"></p>
+                <ul data-bind="foreach: _applicantIndex">
+                  <li data-bind="text: $data"></li>
+                </ul>
+              </div>
             </div>
             <div class="application-map-container">
               <div id="bulletin-map" class="map map-large" style="width: 320px; height: 280px;"></div>
