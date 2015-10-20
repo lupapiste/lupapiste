@@ -100,8 +100,8 @@ Veikko can see statements as he is beeing requested a statement to the applicati
   Open application  ${appname}  753-416-25-22
 
 Statement giver sees comments
-  # 1+2 statement comments
-  Comment count is  3
+  # 1+2 statement comments, 2 auto generated attachments
+  Comment count is  5
 
 Veikko from Tampere can give verdict to own statement
   Open tab  statement

@@ -44,7 +44,7 @@
   {:subject-key    "verdict"
    :tab            "/verdict"})
 
-(def give-verdict-states (clojure.set/union #{:submitted :complement-needed :sent} states/verdict-given-states))
+(def give-verdict-states (clojure.set/union #{:submitted :complementNeeded :sent} states/verdict-given-states))
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.

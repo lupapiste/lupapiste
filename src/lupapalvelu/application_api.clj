@@ -15,9 +15,8 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.document.document :as document]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
@@ -82,29 +81,15 @@
   (let [authorities (find-authorities-in-applications-organization application)]
     (ok :authorities (map #(select-keys % [:id :firstName :lastName]) authorities))))
 
-(def ktj-format (tf/formatter "yyyyMMdd"))
-(def output-format (tf/formatter "dd.MM.yyyy"))
-
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
-    (when-let [rakennuspaikka (domain/get-document-by-type application :location)]
-      (when-let [ktj-tiedot (wfs/rekisteritiedot-xml (:propertyId application))]
-        (let [updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
-                       [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
-                       [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
-                       [[:kiinteisto :rekisterointipvm] (or
-                                                          (try
-                                                            (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                            (catch Exception e (:rekisterointipvm ktj-tiedot)))
-                                                          "")]]
-              schema (schemas/get-schema (:schema-info rakennuspaikka))
-              updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
-          (doc-persistence/persist-model-updates
-            application
-            "documents"
-            rakennuspaikka
-            updates
-            time))))))
+    (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]
+      (doseq [rakennuspaikka rakennuspaikka-docs
+              :when (seq rakennuspaikka)]
+        (let [property-id (or
+                            (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
+                            (:propertyId application))]
+          (document/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
 
 (defquery party-document-names
   {:parameters [:id]
@@ -224,12 +209,12 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(partial sm/validate-state-transition :complement-needed)]}
+   :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified         created
                              :complementNeeded created
-                             :state            :complement-needed}}))
+                             :state            :complementNeeded}}))
 
 
 (defn- do-submit [command application created]
@@ -276,7 +261,7 @@
   {:parameters       [:id drawings]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :states           #{:draft :info :answered :open :submitted :complement-needed}
+   :states           #{:draft :info :answered :open :submitted :complementNeeded}
    :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
@@ -551,10 +536,23 @@
         op-id-mapping (into {} (map
                                  #(vector (:id %) (mongo/create-id))
                                  (conj secondary-ops primary-op)))
-        muutoslupa-app (merge application
+        state (if (user/authority? user) :open :draft)
+        muutoslupa-app (merge (select-keys application
+                                [:auth
+                                 :propertyId, :location
+                                 :schema-version
+                                 :address, :title
+                                 :foreman, :foremanRole
+                                 :applicant,  :_applicantIndex
+                                 :municipality, :organization
+                                 :drawings
+                                 :metadata])
+
                               {:id            muutoslupa-app-id
+                               :permitType    permit/R
+                               :permitSubtype :muutoslupa
                                :created       created
-                               :opened        created
+                               :opened        (when (user/authority? user) created)
                                :modified      created
                                :documents     (into [] (map
                                                          (fn [doc]
@@ -563,16 +561,26 @@
                                                                (update-in doc [:schema-info :op :id] op-id-mapping)
                                                                doc)))
                                                          (:documents application)))
-                               :state         (cond
-                                                (user/authority? user) :open
-                                                :else :draft)
-                               :permitSubtype :muutoslupa
+                               :state         state
+
+                               :history [{:state state, :ts created, :user (user/summary user)}]
+                               :infoRequest false
+                               :openInfoRequest false
+                               :convertedToApplication nil
+
                                :primaryOperation (assoc primary-op :id (op-id-mapping (:id primary-op)))
                                :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops) }
-                              (select-keys
-                                domain/application-skeleton
-                                [:attachments :statements :verdicts :comments :submitted :sent :neighbors
-                                 :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
+
+                              ; Keys to reset
+                              (select-keys domain/application-skeleton
+                                [:attachments :statements :verdicts :tasks :buildings :neighbors
+                                 :comments :authorityNotice :urgency ; comment panel content
+                                 :submitted :sent :acknowledged :closed :closedBy :started :startedBy ; timestamps
+                                 :_statements-seen-by :_comments-seen-by :_verdicts-seen-by :_attachment_indicator_reset ; indicators
+                                 :reminder-sent :transfers ; logs
+                                 :authority
+                                 :tosFunction]))]
+
     (a/do-add-link-permit muutoslupa-app (:id application))
     (a/insert-application muutoslupa-app)
     (ok :id muutoslupa-app-id)))

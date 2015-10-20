@@ -334,7 +334,7 @@
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
-                            <li data-bind="if: _.contains(['draft', 'open', 'submitted', 'complement-needed'], state()),
+                            <li data-bind="if: _.contains(['draft', 'open', 'submitted', 'complementNeeded'], state()),
                                            css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
                                    class="link-btn">
@@ -1243,8 +1243,8 @@
                     </script>
 
                     <!-- Tasks tab -->
-
-                    <div id="application-tasks-tab" data-bind="visible: $root.authorization.ok('tasks-tab-visible'), with: $root.application" class="tab-content" >
+                    <!-- ko if: selectedTabName() === 'tasks' && $root.authorization.ok('tasks-tab-visible') -->
+                    <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
 
                         <h1 data-bind="ltext: 'application.tabConstructionTimeTasks'"></h1>
                         <span data-bind="component: {
@@ -1385,6 +1385,7 @@
                                            visible: $root.authorization.ok('create-task'),
                                            enable: $root.authorization.ok('create-task')"></button>
                     </div>
+                    <!-- /ko -->
                 </div>
             </div>
             <div id="boxes">

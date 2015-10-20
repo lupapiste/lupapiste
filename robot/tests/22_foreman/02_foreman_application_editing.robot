@@ -110,7 +110,7 @@ Approve foreman app
 
 On second thought, complement is needed
   Click enabled by test id  request-for-complement
-  Wait Until  Application state should be  complement-needed
+  Wait Until  Application state should be  complementNeeded
 
 Verdict can't be given
   Open tab  verdict

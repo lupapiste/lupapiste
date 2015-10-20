@@ -487,23 +487,10 @@
 
 (defn delete-file! [^File file] (try (.delete file) (catch Exception _)))
 
-(defn ensure-pdf-a
-  "Ensures PDF file PDF/A compatibility status based on original attachment status"
-  [temp-file must-be-pdfa?]
-  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? must-be-pdfa?))
-  (if (not must-be-pdfa?)
-    (do (debugf "    no PDF/A required, no conversion") {:file temp-file :pdfa false})
-    (let [a-temp-file (File/createTempFile "lupapiste.stamp.a." ".tmp")
-          conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath temp-file) (.getAbsolutePath a-temp-file))]
-      (cond
-        (:already-valid-pdfa? conversion-result) (do (debugf "      file valid PDF/A, no conversion") {:file temp-file :pdfa true})
-        (:pdfa? conversion-result) (do (debug "      converting to PDF/A file: " (.getAbsolutePath a-temp-file)) (delete-file! temp-file) {:file a-temp-file :pdfa true})
-        :else (do (errorf "Ensuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
-
 (defn application-to-pdf-a
   "Returns application data in PDF/A temp file"
   [application lang]
   (let [file (File/createTempFile "application-pdf-a-" ".tmp")
         stream (pdf-export/generate application lang)]
     (io/copy stream file)
-  (ensure-pdf-a file true)))
+    (pdf-conversion/ensure-pdf-a file (:organization application))))

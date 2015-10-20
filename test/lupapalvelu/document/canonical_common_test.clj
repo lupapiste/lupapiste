@@ -15,14 +15,14 @@
                 :closed (* 6 day))
               (update-in [:verdicts] conj {:timestamp (* 7 day)}))]
 
-   (fact "complement-needed" (state-timestamp (assoc app :state "complement-needed")) => (* 2 day))
+   (fact "complementNeeded" (state-timestamp (assoc app :state "complementNeeded")) => (* 2 day))
    (fact "submitted" (state-timestamp (assoc app :state "submitted")) => (* 3 day))
    (fact "sent" (state-timestamp (assoc app :state "sent")) => (* 3 day))
    (fact "constructionStarted" (state-timestamp (assoc app :state "constructionStarted")) => (* 5 day))
    (fact "closed" (state-timestamp (assoc app :state "closed")) => (* 6 day))
    (fact "verdictGiven" (state-timestamp (assoc app :state "verdictGiven")) => (* 7 day))
 
-   (all-state-timestamps app) => {:complement-needed (* 2 day)
+   (all-state-timestamps app) => {:complementNeeded (* 2 day)
                                   :submitted (* 3 day)
                                   :sent (* 3 day)
                                   :constructionStarted (* 5 day)
@@ -30,7 +30,7 @@
                                   :verdictGiven (* 7 day)
                                   :foremanVerdictGiven (* 7 day)}
 
-   (all-state-timestamps (dissoc app :closed :verdicts :started :complementNeeded)) => {:complement-needed nil
+   (all-state-timestamps (dissoc app :closed :verdicts :started :complementNeeded)) => {:complementNeeded nil
                                                                                         :submitted (* 3 day)
                                                                                         :sent (* 3 day)
                                                                                         :constructionStarted nil

@@ -407,8 +407,7 @@ Edit operation description
   # Close the input bubble. Press key fails if the bubble has already been closed.
   Run Keyword And Ignore Error  Press Key  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]  \\13
 
-  Wait for jQuery
-  Wait until  Page should contain  Tallennettu
+  Positive indicator should be visible
   Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
 
 # This only works if there is only one applicable document.

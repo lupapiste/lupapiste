@@ -58,7 +58,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   }));
 
   self.subscriptionIds.push(hub.subscribe("hetuChanged", function(data) {
-    ajax.command("update-foreman-other-applications", {id: self.params.applicationId, foremanHetu: data.value})
+    ajax.command("update-foreman-other-applications", {id: self.params.applicationId, foremanHetu: data.value || ""})
     .success(function() {
       repository.load(self.params.applicationId);
     })
