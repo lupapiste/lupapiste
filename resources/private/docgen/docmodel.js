@@ -858,8 +858,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildDocgenGroup (subSchema, model, path) {
 
-    var model = ko.mapping.fromJS(model);
-
     var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : rootParams.i18npath.concat(path)
     var params = _.extend({}, rootParams, {
       path: rootParams.path.concat(path),
@@ -885,8 +883,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildDocgenTable (subSchema, model, path) {
-
-    var model = ko.mapping.fromJS(model);
 
     var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : rootParams.i18npath.concat(path)
     var params = _.extend({}, rootParams, {

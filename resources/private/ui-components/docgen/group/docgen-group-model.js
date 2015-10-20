@@ -17,7 +17,6 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.groupId = "group-" + params.documentId + "-" + self.path.join("-");
   self.groupLabel = self.i18npath.concat("_group_label").join(".");
   self.appendLabel = self.i18npath.concat("_append_label").join(".");
-  self.copyLabel = self.i18npath.concat("_copy_label").join(".");
 
   self.indicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});
@@ -39,13 +38,13 @@ LUPAPISTE.DocgenGroupModel = function(params) {
     });
   });
 
-  var createRow = function(model, index) {
-    var groupPath = index ? self.path.concat(index) : self.path
+  var createRow = function(rowModel, index) {
+    var groupPath = index ? self.path.concat(index) : self.path;
     return { index: index,
              subSchemas: _.map(self.subSchemas, function(schema) {
       return _.extend({}, schema, {
         path: groupPath.concat(schema.name),
-        model: model[schema.name]
+        model: rowModel[schema.name]
       });
     })};
   }
@@ -57,28 +56,6 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.addRow = function() {
     var dataIndex = parseInt( _(self.rows()).map('index').max() ) + 1;
     self.rows.push(createRow({}, dataIndex));
-  }
-
-  self.copyLastRow = function() {
-    var dataIndex = parseInt( _(self.rows()).map('index').max() ) + 1;
-    var data = _(_.last(self.rows()).subSchemas)
-      .filter('model.value')
-      .mapKeys('name')
-      .mapValues('model')
-      .value();
-    var row = createRow(data , dataIndex);
-    var updates = _.filter(row.subSchemas, 'model');
-    uiComponents.saveMany("update-doc",
-                           self.documentId,
-                           self.applicationId,
-                           params.schema.name,
-                           _.map(updates, 'path'),
-                           _.map(updates, 'model.value'),
-                           self.indicator,
-                           self.result,
-                           function() {
-                              self.rows.push(row);
-                           });
   }
 
   if (self.repeating) {
