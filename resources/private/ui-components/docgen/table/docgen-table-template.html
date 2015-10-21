@@ -3,7 +3,7 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="docgen-table-template">
-      <div class="form-table" data-bind="attr: {id: self.groupId}">
+      <div class="form-table" data-bind="attr: {id: groupId}">
 
         <label class="form-label form-label-table" data-bind="ltext: groupLabel"></label>
         <table>
@@ -11,7 +11,7 @@
             <tr data-bind="foreach: columnHeaders"><td><span data-bind="ltext: $data"></span></td></tr>
           </thead>
           <tbody data-bind="foreach: rows">
-            <tr>
+            <tr data-bind="attr: { id: $component.groupId + '-row-' + index }">
               <!-- ko foreach: subSchemas -->
               <td>
                 <span class="form-entry"
@@ -34,15 +34,19 @@
             </tr>
           </tbody>
         </table>
-        <!-- ko if: repeating -->
+      </div>
 
-        <button data-bind="attr: { class: 'secondary' },
-                           click: addRow">
-
-            <i data-bind="attr: { class: 'lupicon-circle-plus' }"></i>
-            <span data-bind="ltext: appendLabel"></span>
-        </button>
-        <!-- /ko -->
+      <!-- ko if: repeating -->
+      <div class="button-group">
+        <div data-bind="component: { name: 'docgen-button',
+                                     params: { id: groupId + '-append-button', 
+                                               className: 'secondary', 
+                                               icon: 'lupicon-circle-plus', 
+                                               label: appendLabel, 
+                                               clickFn: addRow }}">
+        </div>
+      </div>
+      <!-- /ko -->
       </div>
     </script>
   </section>
