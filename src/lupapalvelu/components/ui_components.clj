@@ -374,7 +374,8 @@
                       "application-bulletins/application-bulletins-template.html"
                       "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
                       "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-template.html"
-                      "application-bulletins/bulletins-search/bulletins-search-template.html"]
+                      "application-bulletins/bulletins-search/bulletins-search-template.html"
+                      "application-bulletins/bulletins-search/autocomplete-municipalities-template.html"]
                :js ["header.js"
                     "bulletins.js" "bulletins-model.js"
                     "application-bulletins-service.js"
@@ -382,7 +383,8 @@
                     "application-bulletins/application-bulletins-model.js"
                     "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
                     "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"
-                    "application-bulletins/bulletins-search/bulletins-search-model.js"]}
+                    "application-bulletins/bulletins-search/bulletins-search-model.js"
+                    "application-bulletins/bulletins-search/autocomplete-municipalities-model.js"]}
    })
 
 ; Make sure all dependencies are resolvable:

@@ -11,6 +11,11 @@
               <div data-bind="component: {name: 'search-field',
                                           params: {value: searchText}}"></div>
             </div>
+            <div class="col-1">
+              <div data-bind="component: {name: 'autocomplete-municipalities',
+                                          params: {bulletinService: bulletinService,
+                                                   selected: municipality}}"></div>
+            </div>
           </div>
         </div>
       </div>
