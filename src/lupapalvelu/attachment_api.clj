@@ -414,7 +414,7 @@
         new-file-id (mongo/create-id)]
     (with-open [out (io/output-stream file)]
       (stamper/stamp stamp fileId out x-margin y-margin transparency))
-    (let [is-pdf-a? (pdf-conversion/ensure-pdf-a file (:organization application))]
+    (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))]
       (debug "uploading stamped file: " (.getAbsolutePath file))
       (mongo/upload new-file-id filename contentType file :application (:id application))
       (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update

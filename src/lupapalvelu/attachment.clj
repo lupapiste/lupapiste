@@ -493,4 +493,4 @@
   (let [file (File/createTempFile "application-pdf-a-" ".tmp")
         stream (pdf-export/generate application lang)]
     (io/copy stream file)
-    (pdf-conversion/ensure-pdf-a file (:organization application))))
+    (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))))
