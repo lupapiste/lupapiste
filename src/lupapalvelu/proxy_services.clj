@@ -103,6 +103,11 @@
                          (re-find #"^\d+_asemakaava$" layer-name) "asemakaava"
                          (re-find #"^\d+_kantakartta$" layer-name) "kantakartta"
                          :else "other")
+        layer-id (cond
+                      (= layer-category "asemakaava") "101"
+                      (= layer-category "kantakartta") "102"
+                      :else "0"
+                      )
         ]
 	  (identity {
               :wmsName layer-name 
@@ -112,14 +117,11 @@
                       (= layer-category "kantakartta") (identity {:fi "Kantakartta" :sv "Baskarta" :en "???"})
                       :else (identity {:fi "" :sv "" :en ""})
                       )
-              :id (cond
-                      (= layer-category "asemakaava") "101"
-                      (= layer-category "kantakartta") "102"
-                      :else "0"
-                      )
-              :baseLayer (if (or (= layer-category "asemakaava") (= layer-category "kantakartta"))
-                           true
-                           false)
+              :id layer-id
+              :baseLayerId layer-id
+              :isBaseLayer (if (or (= layer-category "asemakaava") (= layer-category "kantakartta"))
+                             true
+                             false)
               }
 	  )
   )
