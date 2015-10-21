@@ -67,12 +67,13 @@
    :states     (states/all-application-states-but :draft)}
   [{:keys [application created] :as command}]
   (let [app-snapshot (select-keys application app-snapshot-fields)
-        attachments (->> (:attachments application)
-                         (filter :latestVersion)
-                         (map #(dissoc % :versions)))
+        attachments  (->> (:attachments application)
+                          (filter :latestVersion)
+                          (map #(dissoc % :versions)))
         app-snapshot (assoc app-snapshot :attachments attachments)
-        changes {$push {:versions app-snapshot}
-                 $set  {:modified created}}]
+        changes      {$push {:versions app-snapshot}
+                      $set  {:modified created
+                             :municipality (:municipality app-snapshot)}}]
     (mongo/update-by-id :application-bulletins id changes :upsert true)
     (ok)))
 
