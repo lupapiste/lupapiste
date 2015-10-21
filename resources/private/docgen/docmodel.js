@@ -857,7 +857,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       path: path,
       i18npath: i18npath,
       schema: subSchema,
-      model: model[subSchema.name]
+      model: model[subSchema.name],
+      isDisabled: self.isDisabled
     };
 
     return createComponent(name, params);
