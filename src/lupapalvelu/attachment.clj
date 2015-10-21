@@ -274,7 +274,7 @@
               (when set-app-modified? {:modified now})
               (when set-attachment-modified? {:attachments.$.modified now}))})))
 
-(defn update-latest-version-content [application attachment-id file-id size now]
+(defn update-latest-version-content [user application attachment-id file-id size now]
   (let [attachment (get-attachment-info application attachment-id)
         latest-version-index (-> attachment :versions count dec)
         latest-version-path (str "attachments.$.versions." latest-version-index ".")
@@ -288,9 +288,11 @@
       {:attachments {$elemMatch {:id attachment-id}}}
       {$set {:modified now
              :attachments.$.modified now
+             (str latest-version-path "user") user
              (str latest-version-path "fileId") file-id
              (str latest-version-path "size") size
              (str latest-version-path "created") now
+             :attachments.$.latestVersion.user user
              :attachments.$.latestVersion.fileId file-id
              :attachments.$.latestVersion.size size
              :attachments.$.latestVersion.created now}})))

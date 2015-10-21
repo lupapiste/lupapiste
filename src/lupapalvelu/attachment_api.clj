@@ -418,7 +418,7 @@
       (debug "uploading stamped file: " (.getAbsolutePath file))
       (mongo/upload new-file-id filename contentType file :application (:id application))
       (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-        (attachment/update-latest-version-content application attachment-id new-file-id (.length file) now)
+        (attachment/update-latest-version-content user application attachment-id new-file-id (.length file) now)
         (attachment/set-attachment-version {:application application :attachment-id attachment-id
                                             :file-id new-file-id :filename filename
                                             :content-type contentType :size (.length file)
