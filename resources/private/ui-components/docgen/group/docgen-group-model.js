@@ -24,7 +24,6 @@ LUPAPISTE.DocgenGroupModel = function(params) {
 
   self.subSchemas = _.map(params.schema.body, function(schema) {
     var uicomponent = schema.uicomponent || "docgen-" + schema.type;
-    var isSelect = schema.uicomponent === "docgen-select" || schema.type === "select";
     var i18npath = schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(schema.name);
     return _.extend({}, schema, {
       uicomponent: uicomponent,
@@ -32,7 +31,6 @@ LUPAPISTE.DocgenGroupModel = function(params) {
       i18npath: i18npath,
       applicationId: self.applicationId,
       documentId: params.documentId,
-      valueAllowUnset: isSelect ? true : undefined,
     });
   });
 
