@@ -517,8 +517,6 @@
                       :copybutton true
                       :body huoneistoRow})
 
-
-
 (def jatetyyppi {:name "jateTyyppi" :type :select
                   :body [{:name "betoni"}
                          {:name "kipsi"}
@@ -541,33 +539,47 @@
                                    {:name "eristeiden-ja-tiivistemassojen-haitalliset-jatteet"}
                                    {:name "sahko-ja-elektroniikkaromu"}]})
 
-(def rakennusjateilmoitusRow [{:name "suunniteltuMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "s"}
-                              {:name "toteutunutMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "s"}
-                              {:name "yksikko" :type :select
-                               :body [{:name "kg"}
-                                      {:name "tonni"}
-                                      {:name "m2"}
-                                      {:name "m3"}]}
-                              {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "s"}
-                              {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "m"}])
+(def jateyksikko {:name "yksikko" :type :select
+                  :body [{:name "kg"}
+                         {:name "tonni"}
+                         {:name "m2"}
+                         {:name "m3"}]})
 
-(def rakennusJaPurkujateRow (body jatetyyppi rakennusjateilmoitusRow))
+(def rakennusjatesuunnitelmaRow [{:name "suunniteltuMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m"}
+                                 jateyksikko
+                                 {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m"}
+                                 {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "l"}])
 
-(def vaarallisetAineetRow (body vaarallinenainetyyppi rakennusjateilmoitusRow))
+(def rakennusjateselvitysRow [{:name "toteutunutMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m"}
+                              jateyksikko
+                              {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m"}
+                              {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "l"}])
 
-(def rakennusjateilmoitus [{:name "rakennusJaPurkujate"
+(def rakennusjatesuunnitelma [{:name "rakennusJaPurkujate"
+                               :type :table
+                               :uicomponent :docgenTable
+                               :repeating true
+                               :approvable false
+                               :body (body jatetyyppi rakennusjatesuunnitelmaRow)}
+                              {:name "vaarallisetAineet"
+                               :type :table
+                               :uicomponent :docgenTable
+                               :repeating true
+                               :approvable false
+                               :body (body vaarallinenainetyyppi rakennusjatesuunnitelmaRow)}])
+
+(def rakennusjateselvitys [{:name "rakennusJaPurkujate"
                             :type :table
                             :uicomponent :docgenTable
                             :repeating true
                             :approvable false
-                            :body rakennusJaPurkujateRow}
+                            :body (body jatetyyppi rakennusjateselvitysRow)}
                            {:name "vaarallisetAineet"
                             :type :table
                             :uicomponent :docgenTable
                             :repeating true
                             :approvable false
-                            :body vaarallisetAineetRow}])
-
+                            :body (body vaarallinenainetyyppi rakennusjateselvitysRow)}])
 
 
 ;; Usage type definitions have moved to lupapiste-commons.usage-types
@@ -1311,7 +1323,10 @@
 
    {:info {:name "rakennusjatesuunnitelma"
            :order 200}
-    :body (body rakennusjateilmoitus)}
+    :body (body rakennusjatesuunnitelma)}
+   {:info {:name "rakennusjateselvitys"
+           :order 201}
+    :body (body rakennusjateselvitys)}
 
    ;; TODO: "rakennusjateselvitys"-skeema: kopioi luontivaiheessa "rakennusjateilmoitus"-skeema.
    ;; Kts. esimerkkia mm.
