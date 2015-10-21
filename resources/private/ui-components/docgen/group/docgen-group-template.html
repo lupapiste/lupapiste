@@ -6,6 +6,10 @@
       <div class="form-group" data-bind="attr: {id: self.groupId}">
         <label class="form-label form-label-group" data-bind="ltext: groupLabel"></label>
         
+        <!-- ko if: groupHelp -->
+        <span class="group-help-text" data-bind="ltext: groupHelp"></span>
+        <!-- /ko -->
+        
         <div data-bind="foreach: rows">
           <div data-bind="foreach: subSchemas">
             <span class="form-entry"

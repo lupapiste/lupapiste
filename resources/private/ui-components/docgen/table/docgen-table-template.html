@@ -6,6 +6,11 @@
       <div class="form-table" data-bind="attr: {id: groupId}">
 
         <label class="form-label form-label-table" data-bind="ltext: groupLabel"></label>
+
+        <!-- ko if: groupHelp -->
+        <span class="group-help-text" data-bind="ltext: groupHelp"></span>
+        <!-- /ko -->
+
         <table>
           <thead>
             <tr data-bind="foreach: columnHeaders"><td><span data-bind="ltext: $data"></span></td></tr>
