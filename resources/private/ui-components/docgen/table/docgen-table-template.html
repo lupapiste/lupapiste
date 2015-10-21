@@ -32,8 +32,8 @@
 
               <!-- ko if: $component.repeating -->
               <td class="action-column">
-                <span class="icon remove-grey inline-right" data-bind="click: $parent.removeRow,
-                                                                       visible: lupapisteApp.models.applicationAuthModel.ok('remove-document-data')"></span>
+                <i class="lupicon-remove primary" data-bind="click: $parent.removeRow,
+                                                             visible: lupapisteApp.models.applicationAuthModel.ok('remove-document-data')"></i>
               </td>
               <!-- /ko -->
             </tr>
@@ -43,13 +43,13 @@
 
       <!-- ko if: repeating -->
       <div class="button-group">
-        <div data-bind="component: { name: 'docgen-button',
+        <span data-bind="component: { name: 'docgen-button',
                                      params: { id: groupId + '-append-button', 
-                                               className: 'secondary', 
+                                               className: 'positive', 
                                                icon: 'lupicon-circle-plus', 
                                                label: appendLabel, 
                                                clickFn: addRow }}">
-        </div>
+        </span>
       </div>
       <!-- /ko -->
       </div>
