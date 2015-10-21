@@ -89,6 +89,31 @@
   (attachment-ids-from-tree
     (apply concat (set (vals attachment-types-by-permit-type)))))
 
+;; Helper for reporting purposes
+(defn localised-attachments-by-permit-type [permit-type]
+  (let [localize-attachment-section
+        (fn [lang [title attachment-names]]
+          [(i18n/localize lang (ss/join "." ["attachmentType" (name title) "_group_label"]))
+           (reduce
+             (fn [result attachment-name]
+               (conj
+                 result
+                 (i18n/localize lang
+                   (ss/join "." ["attachmentType" (name title) (name attachment-name)]))))
+             []
+             attachment-names)])]
+    (reduce
+      (fn [accu lang]
+        (assoc accu (keyword lang)
+          (->> (get attachment-types-by-permit-type (keyword permit-type))
+            (partition 2)
+            (map (partial localize-attachment-section lang))
+            vec)))
+      {}
+     ["fi" "sv"]))
+
+  )
+
 ;;
 ;; Api
 ;;
