@@ -35,7 +35,6 @@
 
 (defn- get-application-bulletins [page searchText]
   (let [query (or (make-query searchText) {})
-        _ (prn "query", query)
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
                (query/fields bulletins-fields)
