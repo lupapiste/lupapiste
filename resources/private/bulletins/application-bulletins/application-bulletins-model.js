@@ -1,7 +1,7 @@
 LUPAPISTE.ApplicationBulletinsModel = function(params) {
   "use strict";
   var self = this;
-  self.bulletinService = new LUPAPISTE.ApplicationBulletinsService();
+  self.bulletinService = params.bulletinService;
 
   self.query = {
     searchText: ko.observable(),

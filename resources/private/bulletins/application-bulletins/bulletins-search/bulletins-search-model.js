@@ -5,5 +5,7 @@ LUPAPISTE.BulletinsSearchModel = function(params) {
   // Query object
   var query = params.query;
 
+  self.bulletinService = params.bulletinService;
+
   self.searchText = query.searchText || ko.observable();
 }
