@@ -68,10 +68,12 @@ LUPAPISTE.DocgenGroupModel = function(params) {
         .call();
     };
 
+    var message = "document.delete." + params.schema.type + ".row.message";
+
     hub.send("show-dialog", {ltitle: "document.delete.header",
                              size: "medium",
                              component: "yes-no-dialog",
-                             componentParams: {ltext: "document.delete.message",
+                             componentParams: {ltext: message,
                                                yesFn: removeFn}});
   }
 
