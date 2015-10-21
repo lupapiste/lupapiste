@@ -2,6 +2,7 @@
   (:require [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
+            [sade.util :refer [fn->]]
             [lupapalvelu.action :refer [defquery defcommand]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
@@ -54,6 +55,10 @@
    :states     states/all-application-states}
   [{:keys [application created] :as command}]
   (let [app-snapshot (select-keys application app-snapshot-fields)
+        app-snapshot (update-in
+                       app-snapshot
+                       [:documents]
+                       (partial remove (fn-> :schema-info :type keyword (= :party))))
         attachments (->> (:attachments application)
                          (filter :latestVersion)
                          (map #(dissoc % :versions)))
