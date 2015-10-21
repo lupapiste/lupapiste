@@ -4,4 +4,9 @@
 @set server=%2
 @if [%server%]==[] set server=localhost:8000
 
-pybot --exclude integration --exclude fail --RunEmptySuite --variable SERVER:http://%server% -d target common/setup %target% common/teardown
+@set startTime=%time%
+@echo Start Time: %startTime%
+call pybot --exclude integration --exclude fail --RunEmptySuite --variable SERVER:http://%server% -d target common/setup %target% common/teardown
+@echo Done
+@echo Start Time:  %startTime%
+@echo Finish Time: %time%

@@ -430,7 +430,7 @@
 
 (def hanke-row [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                 {:name "katuosoite" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
-                {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.rakennustoimenpide"}
+                {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-localized-string :i18nkey "muutHankkeet.rakennustoimenpide" :locPrefix "operations"}
                 {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
                 {:name "vaihe" :type :select :size "t" :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe"
                  :body [{:name "R" :i18nkey "muutHankkeet.R"}
@@ -1300,17 +1300,6 @@
            :type :location}
     :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
-   {:info {:name "paatoksen-toimitus-rakval"
-           :removable false
-           :approvable true
-           :order 10}
-    :body (body
-           [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
-           simple-osoite
-           [{:name "yritys" :type :group
-             :body [{:name "yritysnimi" :type :string}]}]
-           tayta-omat-tiedot-button)}
-
    {:info {:name "aloitusoikeus" :removable false :approvable true}
     :body (body kuvaus)}
 
@@ -1320,7 +1309,23 @@
             :type :checkbox
             :layout :full-width}]}
 
-   {:info {:name "rakennusjateilmoitus"
+   {:info {:name "rakennusjatesuunnitelma"
            :order 200}
     :body (body rakennusjateilmoitus)}
+
+   ;; TODO: "rakennusjateselvitys"-skeema: kopioi luontivaiheessa "rakennusjateilmoitus"-skeema.
+   ;; Kts. esimerkkia mm.
+   ;;   application.clj  make-documents
+   ;;   prev-permit.clj  applicant->applicant-doc
+
+   {:info {:name "paatoksen-toimitus-rakval"
+           :removable false
+           :approvable true
+           :order 300}
+    :body (body
+           [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
+           simple-osoite
+           [{:name "yritys" :type :group
+             :body [{:name "yritysnimi" :type :string}]}]
+           tayta-omat-tiedot-button)}
    ])

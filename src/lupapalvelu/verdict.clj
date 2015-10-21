@@ -18,6 +18,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch])
@@ -88,7 +89,7 @@
         {$set (merge {:verdicts verdicts-with-attachments
                       :modified created}
                 (when-not (states/post-verdict-states (keyword (:state application)))
-                  {:state :verdictGiven})
+                  {:state (sm/verdict-given-state application)})
                 (when-not has-old-verdict-tasks {:tasks tasks})
                 (when extras-reader (extras-reader app-xml)))}))))
 
@@ -101,7 +102,7 @@
     (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
       {$set {:verdicts verdicts-with-attachments
              :modified created
-             :state    :verdictGiven}})))
+             :state    (sm/verdict-given-state application)}})))
 
 (defn- get-tj-suunnittelija-doc-name
   "Returns name of first party document of operation"

@@ -112,8 +112,11 @@
         "krysp/yhteiset-2.1.6.xsd"
         "krysp/kiinteistotoimitus-1.0.2.xsd"))
 
-(def- asianhallinta
-   (conj xml-sources "asianhallinta/asianhallinta.xsd"))
+(def- asianhallinta_1_1
+   (conj xml-sources "asianhallinta/asianhallinta_1.1.xsd"))
+
+(def- asianhallinta_1_2
+   (conj xml-sources "asianhallinta/asianhallinta_1.2.xsd"))
 
 (defn- create-validator [schemas]
   (.newValidator (.newSchema schema-factory (into-array (map stream-source schemas)))))
@@ -125,7 +128,8 @@
 (def- common-validator-2_1_5 (create-validator yht-2_1_5))
 (def- common-validator-2_1_6 (create-validator yht-2_1_6))
 
-(def- asianhallinta-validator (create-validator asianhallinta))
+(def- asianhallinta-validator-1_1 (create-validator asianhallinta_1_1))
+(def- asianhallinta-validator-1_2 (create-validator asianhallinta_1_2))
 
 ; mapping-common contains the same information.
 ; Perhaps the permit type -- version -mapping could
@@ -144,7 +148,8 @@
    "2.1.3" common-validator-2_1_3
    "2.2.0" common-validator-2_1_5
    "2.2.1" common-validator-2_1_6
-   "ah-1.1" asianhallinta-validator})
+   "ah-1.1" asianhallinta-validator-1_1
+   "ah-1.2" asianhallinta-validator-1_2})
 
 (def- poik-validators
   {"2.1.2" common-validator-2_1_0
@@ -153,21 +158,25 @@
    "2.1.5" common-validator-2_1_3
    "2.2.0" common-validator-2_1_5
    "2.2.1" common-validator-2_1_6
-   "ah-1.1" asianhallinta-validator})
+   "ah-1.1" asianhallinta-validator-1_1
+   "ah-1.2" asianhallinta-validator-1_2})
 
 (def- ymp-validators
   {"2.1.2" common-validator-2_1_3
-   "ah-1.1" asianhallinta-validator})
+   "ah-1.1" asianhallinta-validator-1_1
+   "ah-1.2" asianhallinta-validator-1_2})
 
 (def- mkmu-validators
   {"2.1.6" common-validator-2_1_6
    "1.0.1" (create-validator mkmu-1_0_1)
-   "ah-1.1" asianhallinta-validator})
+   "ah-1.1" asianhallinta-validator-1_1
+   "ah-1.2" asianhallinta-validator-1_2})
 
 (def- kiito-validators
   {"2.1.6" common-validator-2_1_6
    "1.0.2" (create-validator kiito-1_0_2)
-   "ah-1.1" asianhallinta-validator})
+   "ah-1.1" asianhallinta-validator-1_1
+   "ah-1.2" asianhallinta-validator-1_2})
 
 (def- schema-validators
   {:R   rakval-validators
@@ -176,7 +185,8 @@
    :YI  ymp-validators
    :MAL ymp-validators
    :VVVL {"2.1.3" common-validator-2_1_3
-          "ah-1.1" asianhallinta-validator}
+          "ah-1.1" asianhallinta-validator-1_1
+          "ah-1.2" asianhallinta-validator-1_2}
    :YL  ymp-validators
    :MM  mkmu-validators ; maankayton muutos aka kaavat
    :KT  kiito-validators})

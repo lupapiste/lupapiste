@@ -15,9 +15,8 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.document.document :as document]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
@@ -29,7 +28,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
-            [lupapalvelu.state-machine :as state-machine]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as user]))
 
 ;; Notifications
@@ -82,29 +81,15 @@
   (let [authorities (find-authorities-in-applications-organization application)]
     (ok :authorities (map #(select-keys % [:id :firstName :lastName]) authorities))))
 
-(def ktj-format (tf/formatter "yyyyMMdd"))
-(def output-format (tf/formatter "dd.MM.yyyy"))
-
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
-    (when-let [rakennuspaikka (domain/get-document-by-type application :location)]
-      (when-let [ktj-tiedot (wfs/rekisteritiedot-xml (:propertyId application))]
-        (let [updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
-                       [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
-                       [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
-                       [[:kiinteisto :rekisterointipvm] (or
-                                                          (try
-                                                            (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                            (catch Exception e (:rekisterointipvm ktj-tiedot)))
-                                                          "")]]
-              schema (schemas/get-schema (:schema-info rakennuspaikka))
-              updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
-          (doc-persistence/persist-model-updates
-            application
-            "documents"
-            rakennuspaikka
-            updates
-            time))))))
+    (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]
+      (doseq [rakennuspaikka rakennuspaikka-docs
+              :when (seq rakennuspaikka)]
+        (let [property-id (or
+                            (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
+                            (:propertyId application))]
+          (document/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
 
 (defquery party-document-names
   {:parameters [:id]
@@ -162,7 +147,7 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(partial state-machine/validate-state-transition :canceled)]}
+   :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified created
@@ -178,7 +163,7 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :states           #{:draft :info :open :submitted}
-   :pre-checks       [(partial state-machine/validate-state-transition :canceled)]}
+   :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified created
@@ -194,7 +179,7 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [a/validate-authority-in-drafts
-                      (partial state-machine/validate-state-transition :canceled)]}
+                      (partial sm/validate-state-transition :canceled)]}
   [{:keys [created application] :as command}]
   (update-application command
     (util/deep-merge
@@ -224,7 +209,7 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(partial state-machine/validate-state-transition :complement-needed)]}
+   :pre-checks       [(partial sm/validate-state-transition :complement-needed)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified         created
@@ -256,7 +241,7 @@
    :on-success       (notify :application-state-change)
    :pre-checks       [domain/validate-owner-or-write-access
                       a/validate-authority-in-drafts
-                      (partial state-machine/validate-state-transition :submitted)]}
+                      (partial sm/validate-state-transition :submitted)]}
   [{:keys [application created] :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)]
     (or
@@ -267,7 +252,7 @@
 (defcommand refresh-ktj
   {:parameters [:id]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft])}
+   :states     (states/all-application-states-but (conj states/terminal-states :draft))}
   [{:keys [application created]}]
   (autofill-rakennuspaikka application created)
   (ok))

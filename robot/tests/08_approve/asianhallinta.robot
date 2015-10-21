@@ -70,8 +70,7 @@ Velho sees approve and asianhallinta buttons in requiredFieldSummary tab
 
 Velho moves application to asianhallinta, error should pop up
   Click by test id  to-asianhallinta
-  Wait until  Element should be visible  xpath=//section[@id="integration-error-page"]//div[@id="integration-error-dialog"]
-  Click by test id  integration-error-confirm
+  Confirm  integration-error-dialog
   Logout
 
 Kuopio admin sets asianhallinta disabled

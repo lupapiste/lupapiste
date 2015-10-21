@@ -6,6 +6,7 @@
             [cheshire.core :as json]
             [sade.env :as env]
             [sade.core :refer :all]
+            [sade.util :as util]
             [lupapiste-commons.i18n.core :as commons]))
 
 (def default-lang :fi)
@@ -45,7 +46,7 @@
                   (reduce (partial process-row langs-but-default) {} data)))))
 
 (def- localizations (atom nil))
-(def- excel-data (future (load-translations)))
+(def- excel-data (util/future* (load-translations)))
 
 (defn reload! []
   (if (seq @localizations)
