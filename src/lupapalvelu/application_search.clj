@@ -80,10 +80,10 @@
       {$or (map (fn [c] {:location {$geoWithin {"$polygon" c}}}) coordinates)})))
 
 (def applicant-application-states
-  {:state {$in ["open" "submitted" "sent" "complement-needed" "draft"]}})
+  {:state {$in ["open" "submitted" "sent" "complementNeeded" "draft"]}})
 
 (def authority-application-states
-  {:state {$in ["submitted" "sent" "complement-needed"]}})
+  {:state {$in ["submitted" "sent" "complementNeeded"]}})
 
 (defn make-query [query {:keys [searchText kind applicationType handlers tags organizations operations areas]} user]
   {$and

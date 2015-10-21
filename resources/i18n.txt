@@ -16,3 +16,5 @@ footer.service.instructions:  Palvelun käytön ohjeet
 footer.reload:  Takaisin ylös
 
 bulletins.search:  Ilmoitushaku
+
+bulletin.tab.info: Ilmoituksen tiedot

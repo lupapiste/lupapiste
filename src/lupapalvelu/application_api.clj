@@ -209,12 +209,12 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(partial sm/validate-state-transition :complement-needed)]}
+   :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
   [{:keys [created] :as command}]
   (update-application command
                       {$set {:modified         created
                              :complementNeeded created
-                             :state            :complement-needed}}))
+                             :state            :complementNeeded}}))
 
 
 (defn- do-submit [command application created]
@@ -261,7 +261,7 @@
   {:parameters       [:id drawings]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :states           #{:draft :info :answered :open :submitted :complement-needed}
+   :states           #{:draft :info :answered :open :submitted :complementNeeded}
    :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)

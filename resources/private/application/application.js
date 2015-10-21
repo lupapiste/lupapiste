@@ -77,8 +77,8 @@
     if (isInitializing || !authorizationModel.ok("change-permit-sub-type")) { return; }
 
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
-      .success(function() {
-        hub.send("indicator", {style: "positive"});
+      .success(function(resp) {
+        util.showSavedIndicator(resp);
         applicationModel.reload();
       })
       .call();

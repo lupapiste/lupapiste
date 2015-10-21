@@ -334,7 +334,7 @@
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
-                            <li data-bind="if: _.contains(['draft', 'open', 'submitted', 'complement-needed'], state()),
+                            <li data-bind="if: _.contains(['draft', 'open', 'submitted', 'complementNeeded'], state()),
                                            css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
                                    class="link-btn">

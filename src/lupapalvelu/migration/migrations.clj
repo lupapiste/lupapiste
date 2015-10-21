@@ -1216,6 +1216,9 @@
       (let [applications (mongo/select collection {:history.0 {$exists false}} [:created :opened :auth :infoRequest :convertedToApplication :permitSubtype])]
         (count (map #(mongo/update-by-id collection (:id %) (init-application-history %)) applications))))))
 
+(defmigration complement-needed-camelcase
+  (mongo/update-by-query :applications {:state "complement-needed"} {$set {:state "complementNeeded"}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

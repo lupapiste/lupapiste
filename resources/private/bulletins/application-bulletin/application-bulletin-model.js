@@ -4,6 +4,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   var self = this;
 
   self.bulletin = ko.observable();
+  self.selectedTab = ko.observable("info");
 
   self.map = gis
       .makeMap("bulletin-map", false)
@@ -18,6 +19,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
         var location = self.bulletin().location;
         self.map.clear().updateSize().center(location[0], location[1]).add({x: location[0], y: location[1]});
 
+        docgen.displayDocuments("#bulletinDocgen", self.bulletin(), self.bulletin().documents, {ok: function() { return false; }}, {disabled: true});
       } else {
         pageutil.openPage("bulletins");
       }

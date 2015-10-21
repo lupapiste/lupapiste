@@ -6,6 +6,7 @@
             [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.schemas :as schemas]
             [monger.operators :refer :all]
             [lupapalvelu.states :as states]
             [lupapalvelu.application-search :refer [make-text-query]]))
@@ -53,8 +54,9 @@
   (ok :data (get-application-bulletins page searchText)
       :left (get-application-bulletins-left page searchText)))
 
+
 (def app-snapshot-fields
-  [:address :applicant :created :documents :location
+  [:_applicantIndex :address :applicant :created :documents :location
    :modified :municipality :organization :permitType
    :primaryOperation :propertyId :state :verdicts])
 
@@ -76,11 +78,15 @@
 
 (def bulletin-fields
   (merge bulletins-fields
-    {:versions.documents 1}))
+    {:_applicantIndex 1 :versions.documents 1}))
 
 (defquery bulletin
   {:parameters [bulletinId]
    :feature :publish-bulletin
    :user-roles #{:anonymous}}
-  (let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
-    (ok :bulletin (assoc (-> bulletin :versions first) :id (:id bulletin)))))
+  (let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))
+        bulletin-version (assoc (-> bulletin :versions first) :id (:id bulletin))
+        append-schema-fn (fn [{schema-info :schema-info :as doc}]
+                           (assoc doc :schema (schemas/get-schema schema-info)))
+        bulletin (update-in bulletin-version [:documents] (partial map append-schema-fn))]
+    (ok :bulletin bulletin)))
