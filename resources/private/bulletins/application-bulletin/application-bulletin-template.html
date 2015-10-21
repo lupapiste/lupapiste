@@ -27,7 +27,7 @@
                 <span class="application_summary_text" data-bind="text: loc(['municipality', municipality])"></span>
               </div>
               <div>
-                <p data-bind="ltext: 'bulletin.applicants'"></p>
+                <p data-bind="text: loc('bulletin.applicants') + ':'"></p>
                 <ul data-bind="foreach: _applicantIndex">
                   <li data-bind="text: $data"></li>
                 </ul>
