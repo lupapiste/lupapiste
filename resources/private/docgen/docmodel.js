@@ -848,51 +848,31 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return div;
   }
 
-  var rootParams = {
-    applicationId: self.appId,
-    documentId: self.docId,
-    schemaI18name: self.schemaI18name,
-    path: [],
-    i18npath: [self.schemaI18name],
+  function buildGroupComponent (name, subSchema, model, path) {
+    var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(path)
+    var params = {
+      applicationId: self.appId,
+      documentId: self.docId,
+      schemaI18name: self.schemaI18name,
+      path: path,
+      i18npath: i18npath,
+      schema: subSchema,
+      model: model[subSchema.name]
+    };
+
+    return createComponent(name, params);
   }
 
   function buildDocgenGroup (subSchema, model, path) {
-
-    var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : rootParams.i18npath.concat(path)
-    var params = _.extend({}, rootParams, {
-      path: rootParams.path.concat(path),
-      i18npath: i18npath,
-      schema: subSchema,
-      model: model[subSchema.name]
-    });
-
-    return createComponent("docgen-group", params);
+    return buildGroupComponent("docgen-group", subSchema, model, path);
   }
 
   function buildPropertyGroup (subSchema, model, path) {
-
-    var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : rootParams.i18npath.concat(path)
-    var params = _.extend({}, rootParams, {
-      path: rootParams.path.concat(path),
-      i18npath: i18npath,
-      schema: subSchema,
-      model: model[subSchema.name]
-    });
-
-    return createComponent("property-group", params);
+    return buildGroupComponent("property-group", subSchema, model, path);
   }
 
   function buildDocgenTable (subSchema, model, path) {
-
-    var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : rootParams.i18npath.concat(path)
-    var params = _.extend({}, rootParams, {
-      path: rootParams.path.concat(path),
-      i18npath: i18npath,
-      schema: subSchema,
-      model: model[subSchema.name]
-    });
-
-    return createComponent("docgen-table", params);
+    return buildGroupComponent("docgen-table", subSchema, model, path);
   }
 
   function buildRadioGroup(subSchema, model, path) {
