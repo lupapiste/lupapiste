@@ -6,7 +6,7 @@
       <span class="form-entry">
         <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
         <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
-        <label data-bind="visible: params.schema.label, ltext: params.schema.label"></label>
+        <label data-bind="visible: label, ltext: label"></label>
         <input type="checkbox" data-bind="checked: value, disable: disabled" />
         <span data-bind="saveIndicator: indicator, label: false"></span>
       </span>

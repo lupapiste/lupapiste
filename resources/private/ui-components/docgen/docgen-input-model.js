@@ -12,6 +12,8 @@ LUPAPISTE.DocgenInputModel = function(params) {
     self.i18npath = [util.locKeyFromDocPath([self.params.schemaI18name].concat(self.params.path).join("."))];
   }
 
+  self.label = (params.schema.label === false || params.schema.label === "false") ? null : self.i18npath.join(".");
+
   self.indicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});
   self.errorMessage = ko.observable();
