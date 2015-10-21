@@ -77,7 +77,7 @@
             (if-let [versions (seq (:versions attachment))]
               (->> versions
                    (map (fn [ver]
-                          {:id (:type attachment)
+                          {:type (:type attachment)
                            :category :attachment
                            :version (:version ver)
                            :ts (:created ver)}))
@@ -86,15 +86,16 @@
     []
     (:attachments application)))
 
-(defn generate-process-report-data [application]
+(defn generate-case-file-data [application]
   (let [documents (get-documents-from-application application)
         attachments (get-attachments-from-application application)
         all-docs (sort-by :ts (concat documents attachments))]
     (map (fn [[{:keys [state ts]} next]]
-           {:action (toimenpide-for-state (:organization application) (:tosFunction application) state)
-            :start ts
-            :documents (filter (fn [{doc-ts :ts}]
-                                 (and (>= doc-ts ts) (or (nil? next) (< doc-ts (:ts next)))))
-                         all-docs)
-            })
+           (let [api-response (toimenpide-for-state (:organization application) (:tosFunction application) state)
+                 action-name (or (:name api-response) "Ei asetettu tiedonohjaussuunnitelmassa")]
+             {:action action-name
+              :start ts
+              :documents (filter (fn [{doc-ts :ts}]
+                                   (and (>= doc-ts ts) (or (nil? next) (< doc-ts (:ts next)))))
+                           all-docs)}))
       (partition 2 1 nil (:history application)))))

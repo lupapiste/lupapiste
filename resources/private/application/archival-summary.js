@@ -213,10 +213,10 @@
       });
     };
 
-    self.processData = ko.observable();
-    ajax.query('process-report-data', {id: params.application.id})
+    self.caseFile = ko.observableArray();
+    ajax.query('case-file-data', {id: params.application.id})
       .success(function(data) {
-        self.processData(data.process);
+        self.caseFile(data.process);
       })
       .call();
   };

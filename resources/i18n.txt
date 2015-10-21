@@ -1,0 +1,6 @@
+caseFile.heading: Käsittelyprosessin tiedot
+caseFile.action: Käsittelyvaihe
+document: Asiakirja
+attachment: Liitetiedosto
+caseFile.actionDate: Vaiheen alku
+caseFile.documentDate: Toimituspäivämäärä
