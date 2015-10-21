@@ -52,22 +52,27 @@ LUPAPISTE.DocgenGroupModel = function(params) {
 
   self.removeRow = function(row) {
     var path = self.params.path.concat(row.index);
+    var row = _.find(self.rows(), function(r) { return r.index === row.index });
 
-    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
-      { title: loc("yes"), fn: function () {
-        ajax
-          .command("remove-document-data", {
-            doc: self.documentId,
-            id: self.applicationId,
-            path: path,
-            collection: "documents"
-          })
-          .success(function() {
-            self.rows.remove(row);
-          })
-          .call();
-        }
-      }, { title: loc("no") });
+    var removeFn = function () {
+      ajax
+        .command("remove-document-data", {
+          doc: self.documentId,
+          id: self.applicationId,
+          path: path,
+          collection: "documents"
+        })
+        .success(function() {
+          self.rows.remove(row);
+        })
+        .call();
+    };
+
+    hub.send("show-dialog", {ltitle: "document.delete.header",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: "document.delete.message",
+                                               yesFn: removeFn}});
   }
 
   self.addRow = function() {
@@ -86,7 +91,6 @@ LUPAPISTE.DocgenGroupModel = function(params) {
       self.addRow();
     }
   }
-
   self.rows.subscribe(addOneIfEmpty);
   addOneIfEmpty(self.rows());
 };

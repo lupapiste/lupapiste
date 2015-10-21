@@ -1,10 +1,11 @@
 LUPAPISTE.DocgenButtonModel = function(params) {
   "use strict";
-  var self = this;
 
-  self.id = params.id;
-  self.clickFn = params.clickFn || _.noop;
-  self.label = params.label;
-  self.icon = params.icon;
-  self.className = params.className || 'primary';
+  var self = _.extend(this, params, {
+    id: params.id,
+    clickFn: params.clickFn || _.noop,
+    label: params.label,
+    icon: params.icon,
+    className: params.className || 'primary',
+  });
 };
