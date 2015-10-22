@@ -17,6 +17,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.groupId = "group-" + params.documentId + "-" + self.path.join("-");
   self.groupLabel = self.i18npath.concat("_group_label").join(".");
   self.appendLabel = self.i18npath.concat("_append_label").join(".");
+  self.copyLabel = self.i18npath.concat("_copy_label").join(".");
   self.groupHelp = params.schema['group-help'] && self.i18npath.concat(params.schema['group-help']).join(".");
 
   self.indicator = ko.observable().extend({notify: "always"});
@@ -77,6 +78,17 @@ LUPAPISTE.DocgenGroupModel = function(params) {
     self.rows.push(createRow({}, dataIndex || 0));
   }
 
+  self.duplicateLastRow = function() {
+    var sourceIndex = parseInt( _(self.rows()).map('index').max() );
+    uiComponents.copyRow(self.documentId,
+                         self.applicationId,
+                         self.path,
+                         sourceIndex,
+                         sourceIndex + 1,
+                         self.indicator,
+                         self.result);
+  };
+
   if (self.repeating) {
     self.rows(_.map(model, createRow));
   } else {
@@ -88,6 +100,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
       self.addRow();
     }
   }
+
   self.rows.subscribe(addOneIfEmpty);
   addOneIfEmpty(self.rows());
 };

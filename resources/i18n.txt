@@ -59,6 +59,8 @@ rakennusjatesuunnitelma.help: Lisätietoa kierrätyksestä löydät osoitteesta 
 
 
 rakennusjatesuunnitelma.rakennusJaPurkujate._append_label: Lisää rivi
+rakennusjatesuunnitelma.rakennusJaPurkujate._copy_label: Kopioi viimeinen rivi
 rakennusjatesuunnitelma.vaarallisetAineet._append_label: Lisää rivi
+rakennusjatesuunnitelma.vaarallisetAineet._copy_label: Kopioi viimeinen rivi
 
 document.delete.table.row.message: Oletko varma, että haluat poistaa rivin?

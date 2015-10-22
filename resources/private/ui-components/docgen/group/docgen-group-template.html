@@ -47,6 +47,12 @@
                                                icon: 'lupicon-circle-plus', 
                                                label: appendLabel, 
                                                clickFn: addRow }}">
+        <span data-bind="component: { name: 'docgen-button',
+                                     params: { id: groupId + '-copy-button', 
+                                               className: 'secondary', 
+                                               icon: 'lupicon-circle-plus', 
+                                               label: copyLabel, 
+                                               clickFn: duplicateLastRow }}">
         </span>
       </div>
       <!-- /ko -->

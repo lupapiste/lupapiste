@@ -6,7 +6,7 @@ var uiComponents = (function() {
   // TODO: show warning indicator
   // TODO: refactor
   var saveMany = function(command, documentId, applicationId, element, paths, vals, indicator, result, cb) {
-    cb = cb ? cb : function() {};
+    cb = cb || _.noop;
     var updates = _(paths)
       .map(function(p) { return p.join("."); })
       .zip(vals)
@@ -18,10 +18,11 @@ var uiComponents = (function() {
         updates: updates,
         collection: "documents"})
       .success(function (e) {
-        var res = _.find(e.results, function(result) {
-          return _.isEqual(result.path, paths);
-        });
-        result(res ? res.result : undefined);
+        _(e.result).filter(function(r) {
+          return _.contains(paths, r.path);
+        }).forEach(function(r) {
+          result(r.result)
+        }).value();
         indicator({type: "saved"});
         cb();
       })
@@ -38,10 +39,40 @@ var uiComponents = (function() {
     return saveMany(command, documentId, applicationId, element, [path], [val], indicator, result, cb)
   }
 
+
+  var copyRow = function(documentId, applicationId, path, sourceIndex, targetIndex, indicator, result, cb) {
+    cb = cb || _.noop;
+    ajax
+      .command("copy-row", {
+        doc: documentId,
+        id: applicationId,
+        path: path,
+        "source-index": sourceIndex,
+        "target-index": targetIndex,
+        collection: "documents"})
+      .success(function (e) {
+        repository.load(applicationId);
+        var res = _.find(e.results, function(result) {
+          return _.isEqual(result.path, path);
+        });
+        result(res ? res.result : undefined);
+        indicator({type: "saved"});
+        cb(e);
+      })
+      .error(function () {
+        indicator({type: "err"});
+      })
+      .fail(function () {
+        indicator({type: "err"});
+      })
+      .call();
+  };
+
   return {
     sizeClasses: sizeClasses,
     save: save,
     saveMany: saveMany,
+    copyRow: copyRow,
   };
 
 })();
