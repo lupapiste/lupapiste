@@ -19,5 +19,3 @@ Bulletins should be paginable
 
   Wait until  Element should not be visible  //button[@data-test-id='load-more-bulletins']
   Table with id should have rowcount  application-bulletins-list  11
-
-

@@ -652,7 +652,8 @@
           response (execute-command "publish-bulletin" params request)]
       (core/ok? response)))
 
-  (defpage "/dev/publish-bulletin-quickly" {:keys [count]}
+  (defpage "/dev/publish-bulletin-quickly" {:keys [count] :or {count "1"}}
+    (println count)
     (let [results (take (util/to-long count) (repeatedly create-app-and-publish-bulletin))]
       (if (every? true? results)
         (resp/status 200 "OK")

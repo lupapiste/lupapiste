@@ -33,13 +33,13 @@ jQuery(function($) {
     });
   }
 
-  function createApplicationAndPublishBulletin (operation, permitType) {
-    doCreateApplication(operation, permitType, function (createdAppId) {
-      $.ajax({
-        url: "/dev/publish-bulletin",
-        data: { id: createdAppId },
-        success: function() { $("#debug-create-and-publish-done").text(" DONE!").show().delay(1000).fadeOut(); }
-      });
+  function createApplicationAndPublishBulletin (count) {
+    $.ajax({
+      url: "/dev/publish-bulletin-quickly",
+      data: {
+        count: (count || 1)
+      },
+      success: function() { $("#debug-create-and-publish-done").text(" DONE!").show().delay(50).fadeOut(); }
     });
     return false;
   }
@@ -104,8 +104,11 @@ jQuery(function($) {
                                           .click(function() { createApplication("kiinteistonmuodostus", "R"); })))
                           .append($("<p>").text("Create and publish in julkipano.fi:")
                                   .append($("<span>").attr("id", "debug-create-and-publish-done").css("font-weight", "bold").hide())
-                                  .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/asuinkerrostalo")
-                                          .click(function() { createApplicationAndPublishBulletin("kerrostalo-rivitalo", "R"); }))))
+                                  .append($("<a>").attr("id", "debug-create-application-and-publish-bulletin").attr("href", "#").text("R/asuinkerrostalo")
+                                          .click(function() { createApplicationAndPublishBulletin(); }))
+                                  .append($("<a>").attr("id", "debug-create-application-and-publish-bulletin").attr("href", "#").text("R/asuinkerrostalo x 5")
+                                          .click(function() { createApplicationAndPublishBulletin(5); }))
+                                  ))
                   .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
                   .append($("<span>").text("Throttle web: "))
                   .append($("<b>").addClass("dev-throttle-web").text("0"))
