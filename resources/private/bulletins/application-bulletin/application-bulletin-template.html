@@ -8,13 +8,18 @@
         <div class="container">
           <div class="preamble">
             <div class="application_summary_info" data-bind="with: bulletin">
-              <h1 data-bind="text: address"></h1> <!-- TODO implement LPK-724 and change: edit: 'edit.address' -->
+              <h1 data-bind="text: address"></h1>
               <h2 data-bind="if: primaryOperation">
                     <span data-test-id="bulletin-primary-operation"
                           data-bind="ltext: 'operations.' + primaryOperation.name, attr: {'data-test-primary-operation-id': primaryOperation.name}"></span>
               </h2>
 
               <!-- State: -->
+              <div class="state-indication" data-bind="attr: {'data-test-state': bulletinState}" data-test-id="application-state" >
+                <div data-bind="attr: {'class': bulletinState}">
+                  <span data-bind="ltext: bulletinState, attr: {'title' : loc([bulletinState, 'title']), 'class': bulletinState + '-box'}"></span>
+                </div>
+              </div>
               <!-- Property ID: -->
               <div>
                 <p data-bind="ltext: 'application.property'"></p>

@@ -11,7 +11,7 @@
 
 
 (def bulletins-fields
-  {:versions {$slice -1}
+  {:versions {$slice -1} :versions.bulletinState 1
    :versions.state 1 :versions.municipality 1
    :versions.address 1 :versions.location 1
    :versions.primaryOperation 1 :versions.propertyId 1
@@ -52,7 +52,7 @@
   (condp contains? app-state
     states/pre-verdict-states :published
     states/post-verdict-states :verdict
-    :else :published))
+    :published))
 
 (defcommand publish-bulletin
   {:parameters [id]
