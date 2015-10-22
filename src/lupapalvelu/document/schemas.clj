@@ -547,8 +547,7 @@
 
 (def rakennusjatesuunnitelmaRow [{:name "suunniteltuMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m"}
                                  jateyksikko
-                                 {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m"}
-                                 {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "l"}])
+                                 {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m"}])
 
 (def rakennusjateselvitysRow [{:name "toteutunutMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m"}
                               jateyksikko
