@@ -2,9 +2,11 @@ LUPAPISTE.BulletinsModel = function() {
   "use strict";
   var self = this;
 
-  self.supportedPages = ["bulletins", "bulletin"];
+  var supportedPages = ["bulletins", "bulletin"];
 
-  self.page = ko.observable().extend({limited: {values: self.supportedPages, defaultValue: "bulletins"}});
+  self.page = ko.observable().extend({
+    limited: {values: supportedPages, defaultValue: "bulletins"}
+  });
 
   var bulletinService = new LUPAPISTE.ApplicationBulletinsService();
 
