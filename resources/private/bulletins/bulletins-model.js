@@ -10,8 +10,6 @@ LUPAPISTE.BulletinsModel = function() {
 
   var bulletinService = new LUPAPISTE.ApplicationBulletinsService();
 
-  var bulletinId = undefined;
-
   self.pageParams = ko.pureComputed(function () {
     var defaultParams = {
       bulletinService: bulletinService
@@ -20,7 +18,7 @@ LUPAPISTE.BulletinsModel = function() {
     return self.page() === "bulletin" ?
       _.extend(defaultParams, { bulletinId: bulletinId }) :
       defaultParams;
-  })
+  });
 
   hub.onPageLoad("bulletins", function(e) {
     self.page(e.pageId);
@@ -32,4 +30,5 @@ LUPAPISTE.BulletinsModel = function() {
   });
 
   self.page(pageutil.getPage());
+  var bulletinId = pageutil.subPage();
 };
