@@ -13,7 +13,8 @@
                                             :kielitieto]}}
                   {:toimitushakemustieto
                    [{:Toimitushakemus
-                     [{:osapuolitieto
+                     [{:hakemustunnustieto {:Hakemustunnus/yht [:tunnus :sovellus]}}
+                      {:osapuolitieto
                        {:Osapuoli
                         [:roolikoodi :turvakieltokytkin :asioimiskieli
                          {:henkilotieto
