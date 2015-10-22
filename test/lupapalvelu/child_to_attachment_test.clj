@@ -8,7 +8,8 @@
             [midje.sweet :refer :all]
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [pdfboxing.text :as pdfbox]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [lupapalvelu.organization :as organization])
   (:import (java.io File)))
 
 
@@ -32,20 +33,63 @@
    :person {:name name}
    :attachments [{:target {:type "statement"}} {:target {:type "something else"}}]})
 
-(facts "Generate PDF from dummy application statements"
+
+(defn- dummy-neighbour [id name status]
+  {:propertyId id
+   :owner {:type "luonnollinen"
+           :name name
+           :email nil
+           :businessID nil
+           :nameOfDeceased nil
+           :address
+           {:street "Valli & kuja I/X:s Gaatta"
+            :city "Helsinki"
+            :zip "00100"}}
+   :id id
+   :status [{:state status
+             :created 1444902294666}]}
+  )
+
+(defn filename-and-size-exists [data]
+  (and (contains? data :filename)
+       (> (:size data) 0 )))
+
+(facts " Generate PDF from dummy application statements "
        (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
              dummy-docs (map util/dummy-doc schema-names)
-             dummy-statements [(dummy-statement "2" "Matti Malli" nil "Lorelei ipsum")
-                               (dummy-statement "1" "Minna Malli" "joku status" "Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero.")]
+             dummy-statements [(dummy-statement "2" " Matti Malli " nil " Lorelei ipsum ")
+                               (dummy-statement "1" " Minna Malli " " joku status " " Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero. ")]
              application (merge domain/application-skeleton {:id "LP-1"
-                                                             :address "Korpikuusen kannon alla 1 "
+                                                             :address " Korpikuusen kannon alla 1 "
                                                              :documents dummy-docs
                                                              :statements dummy-statements
                                                              :municipality "444"
-                                                             :state "draft"})]
+                                                             :state " draft "})]
          (doseq [lang i18n/languages]
-           (facts {:midje/description (name lang)}
-                  #_(let [pdf-content (child-to-attachment/generate-attachment-from-children nil application lang :statements "2")]
-                    (debug " Exported statement file: " (:content pdf-content))
-                    (debug " Exported statement : " pdf-content))))))
+           (fact {:midje/description (name lang)}
+                 (let [pdf-content (child-to-attachment/generate-attachment-from-children nil application lang :statements "2")]
+                   (debug " Exported statement file: " (:content pdf-content))
+                   (debug " Exported statement : " pdf-content)
+                   pdf-content
+                   ) => filename-and-size-exists
+                 (provided (lupapalvelu.pdf-conversion/pdf-a-required? anything) => false)))))
 
+(facts " Generate PDF from dummy application neighbours "
+       (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
+             dummy-docs (map util/dummy-doc schema-names)
+             dummy-neighbours [(dummy-neighbour "2" " Matti Malli " nil)
+                               (dummy-neighbour "1" " Minna Malli " " joku status ")]
+             application (merge domain/application-skeleton {:id "LP-1"
+                                                             :address " Korpikuusen kannon alla 1 "
+                                                             :documents dummy-docs
+                                                             :neighbors dummy-neighbours
+                                                             :municipality "444"
+                                                             :state " draft "})]
+         (doseq [lang i18n/languages]
+           (fact {:midje/description (name lang)}
+                 (let [pdf-content (child-to-attachment/generate-attachment-from-children nil application lang :neighbors "2")]
+                   (debug " Exported neighbours file: " (:content pdf-content))
+                   (debug " Exported neighbours: " pdf-content)
+                   pdf-content
+                   ) => filename-and-size-exists
+                 (provided (lupapalvelu.pdf-conversion/pdf-a-required? anything) => false)))))
