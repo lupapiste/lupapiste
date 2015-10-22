@@ -4,6 +4,7 @@ LUPAPISTE.LoadMoreApplicationBulletinsModel = function(params) {
 
   self.requestedPages = params.requestedPages;
   self.bulletinsLeft = params.bulletinsLeft;
+  self.pending = params.pending;
 
   self.showButton = ko.pureComputed(function () {
     return self.bulletinsLeft() > 0;

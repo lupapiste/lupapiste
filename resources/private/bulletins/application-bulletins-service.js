@@ -5,7 +5,7 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   self.data = ko.observableArray([]);
   self.bulletinsLeft = ko.observable(0);
 
-  self.fetchBulletins = _.debounce(function (query) {
+  self.fetchBulletins = _.debounce(function (query, pending) {
     ajax.datatables("application-bulletins", {page:         query.page,
                                               searchText:   util.getIn(query, ["searchText"],         ""),
                                               municipality: util.getIn(query, ["municipality", "id"], "")})
@@ -17,11 +17,12 @@ LUPAPISTE.ApplicationBulletinsService = function() {
           self.data(self.data().concat(res.data));
         }
       })
+      .pending(pending || _.noop)
       .call();
   }, 250);
 
   self.fetchMunicipalities = function() {
     return [297, 753];
-  }
+  };
 };
 

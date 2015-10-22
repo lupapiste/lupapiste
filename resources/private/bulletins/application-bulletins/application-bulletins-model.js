@@ -1,4 +1,4 @@
-LUPAPISTE.ApplicationBulletinsModel = function(params) {
+LUPAPISTE.ApplicationBulletinsModel = function() {
   "use strict";
   var self = this;
   self.bulletinService = params.bulletinService;
@@ -7,7 +7,7 @@ LUPAPISTE.ApplicationBulletinsModel = function(params) {
     searchText: ko.observable(),
     municipality: ko.observable(),
     page: ko.observable(1)
-  }
+  };
 
   self.openBulletin = function(item) {
     pageutil.openPage("bulletin", item.id);
@@ -17,9 +17,12 @@ LUPAPISTE.ApplicationBulletinsModel = function(params) {
   ko.computed(function() {
     self.query.searchText();
     self.query.page(1);
-  })
+  });
+
+  self.moreBulletinsPending = ko.observable(false);
 
   ko.computed(function() {
-    self.bulletinService.fetchBulletins(ko.mapping.toJS(self.query));
+    self.bulletinService.fetchBulletins(ko.mapping.toJS(self.query),
+      self.moreBulletinsPending);
   });
 };
