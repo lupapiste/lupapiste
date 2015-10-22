@@ -9,6 +9,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.crypt :as crypt]
+            [sade.http :as http]
+            [sade.xml :as xml]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]))
@@ -163,3 +165,22 @@
 
 (defn some-organization-has-archive-enabled? [organization-ids]
   (pos? (mongo/count :organizations {:_id {$in organization-ids} :permanent-archive-enabled true})))
+
+
+;;
+;; Organization/municipality provided map support.
+
+(defn all-layers-from-map-server
+  "Fetches every map layer title from the organization/municipality map server.
+   The title is used because it is the only mandatory element.
+   The server details are stored under the organization."
+  [org-id]
+  (when-let [m (-> org-id get-organization :map-layers)]
+    (let [{:keys [url username password]} m
+          req {:request "GetCapabilities"}
+          params (if username
+                   (assoc req :basic-auth [username password])
+                   req)
+          _ (debug "Map server query" org-id url params)
+          data (-> url (http/get {:query-params params}) :body xml/parse xml/xml->edn)]
+      (map :Title (-> data :WMS_Capabilities :Capability :Layer :Layer)))))

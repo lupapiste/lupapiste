@@ -22,8 +22,6 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.property :as p]
-            [sade.http :as http]
-            [sade.xml :as xml]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.states :as states]
             [lupapalvelu.xml.krysp.reader :as krysp]
@@ -490,15 +488,24 @@
         (error "Failed to parse shapefile" t)
         (resp/status 400 :error.shapefile-parsing-failed)))))
 
-(defn all-layers-from-map-server
-  "Fetches every map layer from the organization/municipality map server."
-  [url]
-  (let [data (-> url (http/get {:query-params {:request "GetCapabilities"}}) :body xml/parse xml/xml->edn)]
-    (for [layer (-> data :WMS_Capabilities :Capability :Layer :Layer)]
-      {:name (:Name layer)
-       :title (:Title layer)})))
-
-(defquery get-map-layers
+(defquery get-all-map-layers
   {:parameters       [organizationId]
    :user-roles       #{:authorityAdmin :authority}}
-  (ok :layers ["hii" "hoo"]))
+  (ok :layers (o/all-layers-from-map-server organizationId)))
+
+(defquery get-map-layers-data
+  {:parameters [organizationId]
+   :user-roles #{:authorityAdmin}}
+  (ok (-> organizationId o/get-organization :map-layers)))
+
+(defcommand update-map-server-details
+  {:parameters [organizationId url username password]
+   :user-roles #{:authorityAdmin}}
+  (o/update-organization organizationId {$set {:map-layers {:url url
+                                                            :username username
+                                                            :password password}}})
+
+  (try+
+   (ok :layers (o/all-layers-from-map-server organizationId))
+   (catch Throwable t
+     (ok :error (.getMessage t)))))
