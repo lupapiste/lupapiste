@@ -17,9 +17,10 @@
   (:metadata (get-child application type id)))
 
 (defn- build-attachment [user application type lang id file]
-  (let [is-pdf-a? (pdf-conversion/ensure-pdf-a file (:organization application))
+  (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
         type-name (case type
                     :statements (i18n/localize (name lang) "statement.lausunto")
+                    :neighbors (i18n/localize (name lang) "application.MM.neighbors")
                     :verdicts "verdict")
         filename (str type-name ".pdf")
         child (get-child application type id)]

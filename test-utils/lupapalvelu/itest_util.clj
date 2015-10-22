@@ -304,6 +304,8 @@
          (set-anti-csrf! (not old-value#))))))
 
 (defn comment-application
+  ([apikey id]
+    (comment-application apikey id false nil))
   ([apikey id open?]
     {:pre [(instance? Boolean open?)]}
     (comment-application apikey id open? nil))
