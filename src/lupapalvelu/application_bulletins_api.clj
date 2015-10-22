@@ -48,6 +48,12 @@
    :modified :municipality :organization :permitType
    :primaryOperation :propertyId :state :verdicts])
 
+(defn bulletin-state [app-state] ; TODO state machine for bulletins
+  (condp contains? app-state
+    states/pre-verdict-states :published
+    states/post-verdict-states :verdict
+    :else :published))
+
 (defcommand publish-bulletin
   {:parameters [id]
    :feature :publish-bulletin
@@ -62,7 +68,9 @@
         attachments (->> (:attachments application)
                          (filter :latestVersion)
                          (map #(dissoc % :versions)))
-        app-snapshot (assoc app-snapshot :attachments attachments)
+        app-snapshot (assoc app-snapshot
+                       :attachments attachments
+                       :bulletinState (bulletin-state (:state app-snapshot)))
         changes {$push {:versions app-snapshot}
                  $set  {:modified created}}]
     (mongo/update-by-id :application-bulletins id changes :upsert true)
