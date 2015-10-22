@@ -22,4 +22,3 @@ Unlogged user sees Sonja's bulletin
   Go to bulletins page
   Wait until  Element should be visible  //table[@id="application-bulletins-list"]//td[contains(text(), "Latokuja 3")]
   Table with id should have rowcount  application-bulletins-list  1
-
