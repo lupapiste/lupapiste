@@ -1,0 +1,1 @@
+help.rasitetoimitus: Rasitetoimituksissa kohteena oleva kiinteistö on rasitettu (rasitteen antaja) ja kaikki lisäkohdekiinteistöt ovat oikeutettuja (rasitteen saajia).
