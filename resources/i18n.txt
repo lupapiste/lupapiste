@@ -1,66 +1,57 @@
-operations.rakennusjatesuunnitelma: Rakennus- ja purkujäteilmoitus
-operations.rakennusjatesuunnitelma.desc: 
-operations.tree.rakennusjatesuunnitelma:  Rakennus- ja purkujäteilmoitus
 rakennusjatesuunnitelma._group_label: Rakennus- ja purkujätesuunnitelma
 rakennusjatesuunnitelma.rakennusjatesuunnitelma._append_label: Lisää
-rakennusjatesuunnitelma.rakennusJaPurkujate._group_label: Rakennus- ja purkujäteilmoitus
-rakennusjatesuunnitelma.vaarallisetAineet._group_label: Vaaralliset aineet
-rakennusjatesuunnitelma.rakennusjatesuunnitelma.copyLabel: Kopio
+rakennusjateselvitys._group_label: Rakennus- ja purkujätesuunnitelma
+rakennusjateselvitys.rakennusjatesuunnitelma._append_label: Lisää
+rakennusJaPurkujate._group_label: Rakennus- ja purkujäteilmoitus
+vaarallisetAineet._group_label: Vaaralliset aineet
 
-rakennusjatesuunnitelma.rakennusJaPurkujate.jateTyyppi.select: Valitse aines
-rakennusjatesuunnitelma.rakennusJaPurkujate.yksikko.select: Valitse yksikkö
-rakennusjatesuunnitelma.vaarallisetAineet.vaarallinenaineTyyppi.select: Valitse aines
-rakennusjatesuunnitelma.vaarallisetAineet.yksikko.select: Valitse yksikkö
+jatetyyppi.select: Valitse aines
+jateyksikko.select: Valitse yksikkö
+vaarallinenainetyyppi.select: Valitse aines
+jateyksikko.select: Valitse yksikkö
 
-rakennusjatesuunnitelma.rakennusJaPurkujate.jateTyyppi: Aines
-rakennusjatesuunnitelma.rakennusJaPurkujate.jateTyyppi.betoni: betoni-, tiili-, kivennäislaatta- ja keramiikkajätteet 
-rakennusjatesuunnitelma.rakennusJaPurkujate.jateTyyppi.kipsi: kipsipohjaiset jätteet
-rakennusjatesuunnitelma.rakennusJaPurkujate.jateTyyppi.lasi: lasijätteet
-rakennusjatesuunnitelma.rakennusJaPurkujate.jateTyyppi.maa: maa- ja kiviainesjätteet
-rakennusjatesuunnitelma.rakennusJaPurkujate.jateTyyppi.metalli: metallijätteet 
-rakennusjatesuunnitelma.rakennusJaPurkujate.jateTyyppi.muovi: muovijätteet
-rakennusjatesuunnitelma.rakennusJaPurkujate.jateTyyppi.paperi: paperi- ja kartonkijätteet
-rakennusjatesuunnitelma.rakennusJaPurkujate.jateTyyppi.puu: kyllästämättömät puujätteet
+jatetyyppi.betoni: betoni-, tiili-, kivennäislaatta- ja keramiikkajätteet 
+jatetyyppi.kipsi: kipsipohjaiset jätteet
+jatetyyppi.lasi: lasijätteet
+jatetyyppi.maa: maa- ja kiviainesjätteet
+jatetyyppi.metalli: metallijätteet 
+jatetyyppi.muovi: muovijätteet
+jatetyyppi.paperi: paperi- ja kartonkijätteet
+jatetyyppi.puu: kyllästämättömät puujätteet
 
-rakennusjatesuunnitelma.rakennusJaPurkujate.jatteenToimituspaikka: Toimituspaikka
-rakennusjatesuunnitelma.rakennusJaPurkujate.painoT: Paino tonnia
-rakennusjatesuunnitelma.rakennusJaPurkujate.suunniteltuMaara: Arvioitu määrä
-rakennusjatesuunnitelma.rakennusJaPurkujate.toteutunutMaara: Toteutunut määrä
-rakennusjatesuunnitelma.rakennusJaPurkujate.yksikko: Yksikkö
-rakennusjatesuunnitelma.rakennusJaPurkujate.yksikko.kg: Kilo
-rakennusjatesuunnitelma.rakennusJaPurkujate.yksikko.m2: Neliötä
-rakennusjatesuunnitelma.rakennusJaPurkujate.yksikko.m3: Kuutiota
-rakennusjatesuunnitelma.rakennusJaPurkujate.yksikko.tonni: Tonnia
-rakennusjatesuunnitelma.rakennusJaPurkujate.yksikko.undefined: Valitse
+rakennusJaPurkujate.jatetyyppi: Aines
+rakennusJaPurkujate.painoT: Paino tonnia
+rakennusJaPurkujate.suunniteltuMaara: Arvioitu määrä
+rakennusJaPurkujate.toteutunutMaara: Toteutunut määrä
+rakennusJaPurkujate.yksikko: Yksikkö
+rakennusJaPurkujate.jatteenToimituspaikka: Toimituspaikka
+jateyksikko.kg: Kilo
+jateyksikko.m2: Neliötä
+jateyksikko.m3: Kuutiota
+jateyksikko.tonni: Tonnia
 
-rakennusjatesuunnitelma.vaarallisetAineet.vaarallinenaineTyyppi: Aines
-rakennusjatesuunnitelma.vaarallisetAineet.vaarallinenaineTyyppi.maalit-lakat-liimat-ja-liuottimet: Maalit, lakat, liimat ja liuottimet
-rakennusjatesuunnitelma.vaarallisetAineet.vaarallinenaineTyyppi.aerosolipullot: Aerosolipullot
-rakennusjatesuunnitelma.vaarallisetAineet.vaarallinenaineTyyppi.painekyllastetty-puu: Painekyllästetty puu
-rakennusjatesuunnitelma.vaarallisetAineet.vaarallinenaineTyyppi.elohopealamput-ja-paristot: Elohopealamput ja paristot
-rakennusjatesuunnitelma.vaarallisetAineet.vaarallinenaineTyyppi.jateoljyt-ja-muut-oljyiset-jatteet: Jäteöljyt ja muut öljyiset jätteet
-rakennusjatesuunnitelma.vaarallisetAineet.vaarallinenaineTyyppi.asbesti: Asbesti
-rakennusjatesuunnitelma.vaarallisetAineet.vaarallinenaineTyyppi.kivihiilipiki-eli-kreosootti: Kivihiilipiki eli kreosootti
-rakennusjatesuunnitelma.vaarallisetAineet.vaarallinenaineTyyppi.raskasmetallipitoiset-maalijatteet: Lyijymönjä ja muut raskasmetallipitoiset maalijätteet
-rakennusjatesuunnitelma.vaarallisetAineet.vaarallinenaineTyyppi.eristeiden-ja-tiivistemassojen-haitalliset-jatteet: Eristeiden ja tiivistemassojen haitalliset jätteet (mm. PCB)
-rakennusjatesuunnitelma.vaarallisetAineet.vaarallinenaineTyyppi.sahko-ja-elektroniikkaromu: Sähkö- ja elektroniikkaromu, loisteputket, elohopeakytkimet, kondensaattorit, paristot ja akut
+vaarallisetAineet.vaarallinenainetyyppi: Aines
+vaarallisetAineet.painoT: Paino tonnia
+vaarallisetAineet.suunniteltuMaara: Arvioitu määrä
+vaarallisetAineet.toteutunutMaara: Toteutunut määrä
+vaarallisetAineet.yksikko: Yksikkö
+vaarallisetAineet.jatteenToimituspaikka: Toimituspaikka
+vaarallinenainetyyppi.maalit-lakat-liimat-ja-liuottimet: Maalit, lakat, liimat ja liuottimet
+vaarallinenainetyyppi.aerosolipullot: Aerosolipullot
+vaarallinenainetyyppi.painekyllastetty-puu: Painekyllästetty puu
+vaarallinenainetyyppi.elohopealamput-ja-paristot: Elohopealamput ja paristot
+vaarallinenainetyyppi.jateoljyt-ja-muut-oljyiset-jatteet: Jäteöljyt ja muut öljyiset jätteet
+vaarallinenainetyyppi.asbesti: Asbesti
+vaarallinenainetyyppi.kivihiilipiki-eli-kreosootti: Kivihiilipiki eli kreosootti
+vaarallinenainetyyppi.raskasmetallipitoiset-maalijatteet: Lyijymönjä ja muut raskasmetallipitoiset maalijätteet
+vaarallinenainetyyppi.eristeiden-ja-tiivistemassojen-haitalliset-jatteet: Eristeiden ja tiivistemassojen haitalliset jätteet (mm. PCB)
+vaarallinenainetyyppi.sahko-ja-elektroniikkaromu: Sähkö- ja elektroniikkaromu, loisteputket, elohopeakytkimet, kondensaattorit, paristot ja akut
 
-rakennusjatesuunnitelma.vaarallisetAineet.jatteenToimituspaikka: Toimituspaikka
-rakennusjatesuunnitelma.vaarallisetAineet.painoT: Paino tonnia
-rakennusjatesuunnitelma.vaarallisetAineet.suunniteltuMaara: Arvioitu määrä
-rakennusjatesuunnitelma.vaarallisetAineet.toteutunutMaara: Toteutunut määrä
-rakennusjatesuunnitelma.vaarallisetAineet.yksikko: Yksikkö
-rakennusjatesuunnitelma.vaarallisetAineet.yksikko.kg: Kilo
-rakennusjatesuunnitelma.vaarallisetAineet.yksikko.m2: Neliötä
-rakennusjatesuunnitelma.vaarallisetAineet.yksikko.m3: Kuutiota
-rakennusjatesuunnitelma.vaarallisetAineet.yksikko.tonni: Tonnia
+rakennusjate.help: Lisätietoa kierrätyksestä löydät osoitteesta <a href="http://www.kierratys.info/">http://www.kierratys.info/</a>.
 
-rakennusjatesuunnitelma.help: Lisätietoa kierrätyksestä löydät osoitteesta http://www.kierratys.info/.
-
-
-rakennusjatesuunnitelma.rakennusJaPurkujate._append_label: Lisää rivi
-rakennusjatesuunnitelma.rakennusJaPurkujate._copy_label: Kopioi viimeinen rivi
-rakennusjatesuunnitelma.vaarallisetAineet._append_label: Lisää rivi
-rakennusjatesuunnitelma.vaarallisetAineet._copy_label: Kopioi viimeinen rivi
+rakennusJaPurkujate._append_label: Lisää rivi
+rakennusJaPurkujate._copy_label: Kopioi viimeinen rivi
+vaarallisetAineet._append_label: Lisää rivi
+vaarallisetAineet._copy_label: Kopioi viimeinen rivi
 
 document.delete.table.row.message: Oletko varma, että haluat poistaa rivin?

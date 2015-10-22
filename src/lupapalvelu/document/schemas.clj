@@ -517,7 +517,7 @@
                       :copybutton true
                       :body huoneistoRow})
 
-(def jatetyyppi {:name "jateTyyppi" :type :select
+(def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi"
                   :body [{:name "betoni"}
                          {:name "kipsi"}
                          {:name "puu"}
@@ -527,7 +527,7 @@
                          {:name "paperi"}
                          {:name "maa"}]})
 
-(def vaarallinenainetyyppi {:name "vaarallinenaineTyyppi" :type :select
+(def vaarallinenainetyyppi {:name "vaarallinenainetyyppi" :type :select :i18nkey "vaarallinenainetyyppi"
                             :body [{:name "maalit-lakat-liimat-ja-liuottimet"}
                                    {:name "aerosolipullot"}
                                    {:name "painekyllastetty-puu"}
@@ -539,7 +539,7 @@
                                    {:name "eristeiden-ja-tiivistemassojen-haitalliset-jatteet"}
                                    {:name "sahko-ja-elektroniikkaromu"}]})
 
-(def jateyksikko {:name "yksikko" :type :select
+(def jateyksikko {:name "yksikko" :i18nkey "jateyksikko" :type :select
                   :body [{:name "kg"}
                          {:name "tonni"}
                          {:name "m2"}
@@ -555,12 +555,14 @@
                               {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "l"}])
 
 (def rakennusjatesuunnitelma [{:name "rakennusJaPurkujate"
+                               :i18nkey "rakennusJaPurkujate"
                                :type :table
                                :uicomponent :docgenTable
                                :repeating true
                                :approvable false
                                :body (body jatetyyppi rakennusjatesuunnitelmaRow)}
                               {:name "vaarallisetAineet"
+                               :i18nkey "vaarallisetAineet"
                                :type :table
                                :uicomponent :docgenTable
                                :repeating true
@@ -568,12 +570,14 @@
                                :body (body vaarallinenainetyyppi rakennusjatesuunnitelmaRow)}])
 
 (def rakennusjateselvitys [{:name "rakennusJaPurkujate"
+                            :i18nkey "rakennusJaPurkujate"
                             :type :table
                             :uicomponent :docgenTable
                             :repeating true
                             :approvable false
                             :body (body jatetyyppi rakennusjateselvitysRow)}
                            {:name "vaarallisetAineet"
+                            :i18nkey "vaarallisetAineet"
                             :type :table
                             :uicomponent :docgenTable
                             :repeating true
@@ -1321,10 +1325,12 @@
             :layout :full-width}]}
 
    {:info {:name "rakennusjatesuunnitelma"
-           :order 200}
+           :order 200
+           :section-help "rakennusjate.help"}
     :body (body rakennusjatesuunnitelma)}
    {:info {:name "rakennusjateselvitys"
-           :order 201}
+           :order 201
+           :section-help "rakennusjate.help"}
     :body (body rakennusjateselvitys)}
 
    ;; TODO: "rakennusjateselvitys"-skeema: kopioi luontivaiheessa "rakennusjateilmoitus"-skeema.
