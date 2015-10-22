@@ -68,11 +68,37 @@ var uiComponents = (function() {
       .call();
   };
 
+  var removeRow = function (documentId, applicationId, path, indicator, result, cb) {
+    ajax
+      .command("remove-document-data", {
+        doc: documentId,
+        id: applicationId,
+        path: path,
+        collection: "documents"
+      })
+      .success(function(e) {
+        var res = _.find(e.results, function(result) {
+          return _.isEqual(result.path, path);
+        });
+        result(res ? res.result : undefined);
+        indicator({type: "saved"});
+        cb(e);
+      })
+      .error(function () {
+        indicator({type: "err"});
+      })
+      .fail(function () {
+        indicator({type: "err"});
+      })
+      .call();
+  };
+
   return {
     sizeClasses: sizeClasses,
     save: save,
     saveMany: saveMany,
     copyRow: copyRow,
+    removeRow: removeRow,
   };
 
 })();

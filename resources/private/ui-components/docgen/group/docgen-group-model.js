@@ -48,20 +48,16 @@ LUPAPISTE.DocgenGroupModel = function(params) {
 
   self.removeRow = function(row) {
     var path = self.params.path.concat(row.index);
-    var row = _.find(self.rows(), function(r) { return r.index === row.index });
+
+    var cb = function () {
+      var r = _.find(self.rows(), function(r) {
+        return r.index === row.index;
+      });
+      self.rows.remove(r);
+    };
 
     var removeFn = function () {
-      ajax
-        .command("remove-document-data", {
-          doc: self.documentId,
-          id: self.applicationId,
-          path: path,
-          collection: "documents"
-        })
-        .success(function() {
-          self.rows.remove(row);
-        })
-        .call();
+      uiComponents.removeRow(self.documentId, self.applicationId, path, self.indicator, self.result, cb);
     };
 
     var message = "document.delete." + params.schema.type + ".row.message";
