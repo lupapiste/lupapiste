@@ -21,6 +21,7 @@ ${APPLICATIONS PATH}            /app/fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
 ${CREATE URL}                   ${SERVER}/dev/create?redirect=true
+${CREATE BULLETIN URL}          ${SERVER}/dev/publish-bulletin-quickly
 ${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
 ${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
 ${SELENIUM}                     ${EMPTY}
@@ -108,6 +109,10 @@ Wait for jQuery
 
 Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
+
+Resurrect dev-box
+  Execute Javascript  $(".dev-debug").show();
+  Wait until  Element should be visible  //div[@class="dev-debug"]
 
 Language To
   [Arguments]  ${lang}
@@ -415,6 +420,11 @@ Operation description is
   [Arguments]  ${doc}  ${text}
   Wait until  Element text should be  xpath=//div[@id='application-info-tab']//span[@data-test-id='op-description-${doc}']  - ${text}
 
+Table with id should have rowcount
+  [Arguments]  ${id}  ${expectedRowcount}
+  ${rowcount}=  Get Matching XPath Count  //table[@id='${id}']/tbody/tr
+  Should be equal  ${rowcount}  ${expectedRowcount}
+
 #
 # Helper for inforequest and application crud operations:
 #
@@ -430,6 +440,10 @@ Create application with state
   Go to  ${CREATE URL}&address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
+
+Create bulletins the fast way
+  [Arguments]  ${count}
+  Go to  ${CREATE BULLETIN URL}?count=${count}
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${x}  ${y}   ${propertyId}  ${operation}  ${message}
