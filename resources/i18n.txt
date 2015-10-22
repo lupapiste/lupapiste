@@ -1,0 +1,8 @@
+auth-admin.municipality-maps.title: Kunnan omat kartta-aineistot
+auth-admin.municipality-maps.url: Karttapalvelimen osoite (URL)
+auth-admin.municipality-maps.username: Käyttäjätunnus (jos tarpeen)
+auth-admin.municipality-maps.password: Salasana (jos tarpeen)
+auth-admin.municipality-maps.fetch: Hae karttatasot
+auth-admin.municipality-maps.add: Lisää taso
+auth-admin.municipality-maps.kantakartta: Kantakartta
+auth-admin.municipality-maps.asemakaava: Asemakaava

@@ -32,6 +32,7 @@ jQuery(document).ready(function() {
     {name: "ok-button-group"},
     {name: "company-edit"},
     {name: "tags-editor"},
+    {name: "municipality-maps"},
     {name: "upload"},
     {name: "openlayers-map"},
     {name: "vetuma-init"},
