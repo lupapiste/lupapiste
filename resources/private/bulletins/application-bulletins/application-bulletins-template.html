@@ -32,6 +32,7 @@
 
           <div data-bind="component: {name: 'load-more-application-bulletins',
                                       params: {requestedPages: query.page,
+                                               pending: moreBulletinsPending,
                                                bulletinsLeft: bulletinService.bulletinsLeft}}"></div>
         </div>
       </div>
