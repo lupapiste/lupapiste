@@ -12,4 +12,5 @@ LUPAPISTE.BulletinsSearchModel = function(params) {
   self.state = query.state || ko.observable();
 
   self.bulletinService.fetchMunicipalities();
+  self.bulletinService.fetchStates();
 };

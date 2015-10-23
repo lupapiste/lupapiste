@@ -30,5 +30,10 @@ LUPAPISTE.ApplicationBulletinsService = function() {
       })
       .call();
   };
+
+  self.states = ko.observableArray([]);
+  self.fetchStates = function() {
+    self.states(["open", "close"]);
+  };
 };
 
