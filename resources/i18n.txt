@@ -19,8 +19,12 @@ bulletins.search:  Ilmoitushaku
 
 bulletin.tab.info: Ilmoituksen tiedot
 bulletin.applicants: Hakija(t)
-published: Kuulutettu
+
+bulletin.state.proclaimed: Kuulutettu
+bulletin.state.proclaimed.title: Julkipantu kuulutus
+bulletin.state.verdictGiven: Päätös annettu
+bulletin.state.verdictGiven.title: Päätös annettu
 
 bulletin.municipalities-search.caption:  Koko Suomi
 bulletin.states-search.caption:  Kaikki ilmoitustilat
-published.title: Julkipantu kuulutus
+

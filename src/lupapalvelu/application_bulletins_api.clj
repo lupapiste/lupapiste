@@ -74,9 +74,9 @@
 
 (defn bulletin-state [app-state] ; TODO state machine for bulletins
   (condp contains? app-state
-    states/pre-verdict-states :published
-    states/post-verdict-states :verdict
-    :published))
+    states/pre-verdict-states :proclaimed
+    states/post-verdict-states :verdictGiven
+    :proclaimed))
 
 (defcommand publish-bulletin
   {:parameters [id]
