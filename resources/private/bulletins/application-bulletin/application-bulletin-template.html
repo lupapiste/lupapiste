@@ -72,7 +72,7 @@
                   <a data-bind="" href="#" class="link-btn-julkipano">
                       <span data-bind="ltext: 'application.tabInfo'"></span> </a></li>
               <li data-bind="css: {'active': $parent.selectedTab() === 'attachments'}">
-                  <a data-bind="click" href="#" data-test-id="application-open-attachments-tab" class="link-btn-julkipano">
+                  <a data-bind="click: function() {return;}" href="#" data-test-id="application-open-attachments-tab" class="link-btn-julkipano">
                       <span data-bind="ltext: 'application.tabAttachments'"></span></a></li>
             </ul>
           </div>
