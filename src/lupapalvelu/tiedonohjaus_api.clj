@@ -171,3 +171,10 @@
       (catch RuntimeException e
         (timbre/error e)
         (fail "error.invalid.metadata")))))
+
+(defquery case-file-data
+  {:parameters [:id]
+   :user-roles #{:authority}
+   :states states/all-application-states}
+  [{:keys [application]}]
+  (ok :process (t/generate-case-file-data application)))

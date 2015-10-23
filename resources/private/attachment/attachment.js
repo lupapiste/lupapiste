@@ -478,7 +478,7 @@ var attachment = (function() {
       }
     });
 
-    var rawAttachments = ko.mapping.toJS(model.application.attachments());
+    var rawAttachments = model.application._js.attachments;
 
     var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
     var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);
