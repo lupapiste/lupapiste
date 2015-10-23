@@ -29,12 +29,12 @@
     (when-let [and-query (seq queries)]
       {$and and-query})))
 
-(defn- get-application-bulletins-left [page searchText]
+(defn- get-application-bulletins-left [page searchText municipality state]
   (let [query (make-query searchText)]
     (- (mongo/count :application-bulletins query)
        (* page bulletin-page-size))))
 
-(defn- get-application-bulletins [page searchText]
+(defn- get-application-bulletins [page searchText municipality state]
   (let [query (or (make-query searchText) {})
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
@@ -48,11 +48,12 @@
 (defquery application-bulletins
   {:description "Query for Julkipano"
    :feature :publish-bulletin
-   :parameters [page searchText]
+   :parameters [page searchText municipality state]
    :user-roles #{:anonymous}}
   [_]
-  (ok :data (get-application-bulletins page searchText)
-      :left (get-application-bulletins-left page searchText)))
+  (let [parameters [page searchText municipality state]]
+    (ok :data (apply get-application-bulletins parameters)
+        :left (apply get-application-bulletins-left parameters))))
 
 
 (def app-snapshot-fields
