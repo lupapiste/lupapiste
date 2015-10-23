@@ -31,6 +31,7 @@ $app-gray-darkest: $gray187;
   // Preamble is not used in neighbors' view (no actions).
   .preamble {
     position: relative;
+    min-height: 280px; // at least the size of the map container
     padding: {
       left: $map-width;
       right: 24%;
