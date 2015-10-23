@@ -212,6 +212,13 @@
         doc.sendToArchive(true);
       });
     };
+
+    self.caseFile = ko.observableArray();
+    ajax.query('case-file-data', {id: params.application.id})
+      .success(function(data) {
+        self.caseFile(data.process);
+      })
+      .call();
   };
 
   ko.components.register("archival-summary", {
