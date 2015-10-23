@@ -43,3 +43,8 @@ Open bulletin by index
   ${address}=  Convert to upper case  ${address}
   Click element  //table[@id='application-bulletins-list']/tbody/tr[${idx}]
   Wait until  Element text should be  //div[@id='bulletin-component']//h1[@data-test-id='bulletin-address']  ${address}
+
+Bulletin state is
+  [Arguments]  ${state}
+  ${elemStateVal}=  Get Element Attribute  //div[@id='bulletin-component']//div[@data-test-id='bulletin-state']@data-test-state
+  Should Be Equal As Strings  ${state}  ${elemStateVal}
