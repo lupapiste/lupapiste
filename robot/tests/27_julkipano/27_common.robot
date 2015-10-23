@@ -38,6 +38,8 @@ Search bulletins by text
 Open bulletin by index
   [Arguments]  ${idx}
   # Indices are > 0 in XPath
+  Wait until  Element should be visible  //table[@id="application-bulletins-list"]/tbody/tr[${idx}]
   ${address}=  Get text  //table[@id='application-bulletins-list']//tr[${idx}]/td[3]
-  Click element  //table[@id='application-bulletins-list']//tr[${idx}]
+  ${address}=  Convert to upper case  ${address}
+  Click element  //table[@id='application-bulletins-list']/tbody/tr[${idx}]
   Wait until  Element text should be  //div[@id='bulletin-component']//h1[@data-test-id='bulletin-address']  ${address}
