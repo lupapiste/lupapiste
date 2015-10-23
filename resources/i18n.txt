@@ -21,5 +21,6 @@ bulletin.tab.info: Ilmoituksen tiedot
 bulletin.applicants: Hakija(t)
 published: Kuulutettu
 
-bulletin.search.caption:  Koko Suomi
+bulletin.municipalities-search.caption:  Koko Suomi
+bulletin.states-search.caption:  Kaikki ilmoitustilat
 published.title: Julkipantu kuulutus
