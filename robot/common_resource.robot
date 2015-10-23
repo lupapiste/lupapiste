@@ -264,27 +264,27 @@ User nav menu is not visible
   Element should not be visible  //*[@data-test-id='user-nav-menu']
 
 As Mikko
-  Open browser to login page
+  Go to login page
   Mikko logs in
 
 As Teppo
-  Open browser to login page
+  Go to login page
   Teppo logs in
 
 As Veikko
-  Open browser to login page
+  Go to login page
   Veikko logs in
 
 As Sonja
-  Open browser to login page
+  Go to login page
   Sonja logs in
 
 As Sipoo
-  Open browser to login page
+  Go to login page
   Sipoo logs in
 
 As Solitaadmin
-  Open browser to login page
+  Go to login page
   Solitaadmin logs in
 
 Mikko logs in

@@ -715,7 +715,7 @@
 (defmulti mapper
   "Recursively generates a 'traditional' mapping (with :tag, :ns
   and :child properties) from the shorthand form. As the shorthand
-  uses lists, maps and keywords, each type is handled byt its
+  uses lists, maps and keywords, each type is handled by its
   corresponding method.
   Note: The root element must be defined separately. See the
   ->mapping functions in the client code for details."
