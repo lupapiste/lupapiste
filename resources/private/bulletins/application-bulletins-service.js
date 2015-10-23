@@ -22,8 +22,13 @@ LUPAPISTE.ApplicationBulletinsService = function() {
       .call();
   }, 250);
 
+  self.municipalities = ko.observableArray([]);
   self.fetchMunicipalities = function() {
-    return [297, 753];
+    ajax.query("application-bulletin-municipalities", {})
+      .success(function(res) {
+        self.municipalities(res.municipalities);
+      })
+      .call();
   };
 };
 
