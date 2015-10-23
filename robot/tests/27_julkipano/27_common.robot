@@ -7,6 +7,9 @@ Create bulletins
   As Sonja
   Create bulletins the fast way  11
 
+Bulletin list should have no rows
+  Element should not be visible  //table[@id="application-bulletins-list"]/tbody/tr
+
 Bulletin list should have rows
   [Arguments]  ${rows}
   Wait until  Element should be visible  //table[@id="application-bulletins-list"]/tbody/tr

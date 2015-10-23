@@ -3,13 +3,13 @@
 Documentation   Admin edits authority admin users
 Suite teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ./27_common.robot
 
 *** Test Cases ***
 
 Bulletins page is empty at first
   Go to bulletins page
-  ${rows}=  Get Matching XPath Count  //table[@id="application-bulletins-list"]/tr
-  Should be equal  ${rows}  0
+  Bulletin list should have no rows
 
 Sonja publishes an application as a bulletin
   As Sonja
