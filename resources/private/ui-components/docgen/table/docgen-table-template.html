@@ -42,7 +42,7 @@
       </div>
 
       <!-- ko if: repeating -->
-      <div class="button-group">
+      <div class="button-group" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok('update-doc')">
         <span data-bind="component: { name: 'docgen-button',
                                      params: { id: groupId + '-append-button', 
                                                className: 'positive', 

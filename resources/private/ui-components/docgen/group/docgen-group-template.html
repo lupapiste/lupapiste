@@ -15,7 +15,8 @@
                                                    icon: 'lupicon-remove', 
                                                    label: 'remove',
                                                    index: index,
-                                                   clickFn: $parent.removeRow }}">
+                                                   clickFn: $parent.removeRow }},
+                             visible: lupapisteApp.models.applicationAuthModel.ok('remove-document-data')">
             </span>
           </div>
           <!-- /ko -->
@@ -40,7 +41,7 @@
       </div>
         
       <!-- ko if: repeating -->
-      <div class="button-group">
+      <div class="button-group" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok('update-doc')">
         <span data-bind="component: { name: 'docgen-button',
                                      params: { id: groupId + '-append-button', 
                                                className: 'positive', 
