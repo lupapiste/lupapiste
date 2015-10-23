@@ -88,19 +88,20 @@
   [docs from-property-id to-properties]
   (let [rt-docs (canonical-common/schema-info-filter docs :name #{"rasitetoimitus"})
         to-prop-ids (walk/walk :property-id #(remove nil? %) to-properties)]
-    {:name :Rasitetoimitus
-     :details {:kayttooikeustieto
-               (flatten (for [doc rt-docs
-                              :let [group (-> doc :data :rasitetoimitus)
-                                    date  (-> group :paattymispvm util/to-xml-date-from-string)]]
-                          (map (fn [p] {:KayttoOikeus
-                                        (merge {:kayttooikeuslaji (:kayttooikeuslaji group)
-                                                :kayttaja p
-                                                :antaja from-property-id}
-                                               (when date
-                                                 {:paattymispvm date})
-                                               {:valiaikainenKytkin (not (str/blank? date))})})
-                               to-prop-ids)))}}))
+    (when (not-empty rt-docs)
+     {:name :Rasitetoimitus
+      :details {:kayttooikeustieto
+                (flatten (for [doc rt-docs
+                               :let [group (-> doc :data :rasitetoimitus)
+                                     date  (-> group :paattymispvm util/to-xml-date-from-string)]]
+                           (map (fn [p] {:KayttoOikeus
+                                         (merge {:kayttooikeuslaji (:kayttooikeuslaji group)
+                                                 :kayttaja p
+                                                 :antaja from-property-id}
+                                                (when date
+                                                  {:paattymispvm date})
+                                                {:valiaikainenKytkin (not (str/blank? date))})})
+                                to-prop-ids)))}})))
 
 (defn kiinteistotoimitus-canonical [application lang]
   (let [app (tools/unwrapped application)
@@ -112,7 +113,11 @@
         all-properties (concat main-property secondaries)
         all-properties-canon (kiinteisto-vs-maaraala all-properties)
         op-docs (canonical-common/schema-info-filter docs :name #{"kiinteistonmuodostus" "rajankaynti"})
-        op-details (concat (map operation-details op-docs) [(rt-details docs property-id secondaries)])
+        rt-dets (rt-details docs property-id secondaries)
+        op-details (map operation-details op-docs)
+        op-details (if rt-dets
+                     (conj op-details rt-dets)
+                     op-details)
         parties (canonical-common/process-parties docs lang)
         toimitus-fn (fn [{:keys [:name :details]}]
                       (merge {:toimituksenTiedottieto
