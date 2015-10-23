@@ -12,27 +12,26 @@
 (defn- get-child [application type id]
   (filter #(or (nil? id) (= id (:id %))) (type application)))
 
-;;TODO: Get metadata from tiedonohjaus system (t/metadata-for-document organization functionCode "lausunto")
-(defn- get-metadata [application type id]
-  (:metadata (get-child application type id)))
-
 (defn- build-attachment [user application type lang id file]
   (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
         type-name (case type
                     :statements (i18n/localize (name lang) "statement.lausunto")
                     :neighbors (i18n/localize (name lang) "application.MM.neighbors")
-                    :verdicts "verdict")
-        filename (str type-name ".pdf")
+                    :verdicts (i18n/localize (name lang) "application.verdict.title"))
         child (get-child application type id)]
     {:application application
-     :filename filename
-     :metadata (:metadata child)
+     :filename (case type
+                 (str type-name ".pdf"))
      :size (.length file)
      :content file
      :attachment-id nil
-     :attachment-type {:type-group "muut" :type-id "muu"}
+     :attachment-type (case type
+                        :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"}
+                        {:type-group "muut" :type-id "muu"})
      :op nil
-     :comment-text type-name
+     :comment-text (case type
+                     :neighbors (get-in child [:owner :name])
+                     type-name)
      :locked true
      :user user
      :created (now)
@@ -41,9 +40,9 @@
      :missing-fonts []}))
 
 (defn generate-attachment-from-children [user app lang child-type id]
-  "Return attachment as map"
-  (debug "   generate-attachment-from-children " (name lang) "PDF from " (name child-type) " child id: " id ", children: " (pprint (child-type app)))
-  (let [pdf-file (File/createTempFile (str "pdf-export-" (name lang) "-") ".pdf")
+  "Builds attachment and return attachment data as map"
+  (debug "   generate-attachment-from-children lang=" (name lang) ", type=" (name child-type) ", id=" id ",org: " (:organization app) ", children: " (child-type app))
+  (let [pdf-file (File/createTempFile (str "pdf-export-" (name lang) "-" (name child-type) "-") ".pdf")
         out (FileOutputStream. pdf-file)]
     (with-lang lang (pdf-export/generate-pdf-with-child app child-type out id))
     (build-attachment user app child-type lang id pdf-file)))
