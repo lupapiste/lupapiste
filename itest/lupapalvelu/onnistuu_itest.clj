@@ -7,7 +7,7 @@
             [lupapalvelu.itest-util :refer [->cookie-store server-address decode-response
                                             admin query command http-get
                                             last-email apply-remote-minimal
-                                            ok? fail? http200? http302?] :as u]))
+                                            ok? fail? http200? http302? http400? http404?] :as u]))
 
 (apply-remote-minimal)
 
@@ -78,24 +78,25 @@
 (fact "cancel unknown"
   (command u/pena :cancel-sign :processId "fooo") => fail?)
 
-(fact "Start and cancel signing (LPK-946)"
-  (let [process-id (:id (init-sign))]
-    (fetch-document process-id) => http200?
-    (command u/pena :cancel-sign :processId process-id) => ok?
-    (get-process-status process-id) => "cancelled"))
-
 (fact "Fetch document"
   (let [process-id (:id (init-sign))]
     (fetch-document process-id) => http200?
     (get-process-status process-id) => "started"))
 
 (fact "Fetch document for unknown process"
-  (fetch-document "foozaa") => (contains {:status 404}))
+  (fetch-document "foozaa") => http404?)
 
 (fact "Can't fetch document on cancelled process"
   (let [process-id (:id (init-sign))]
     (command u/pena :cancel-sign :processId process-id)
-    (fetch-document process-id) => (contains {:status 400})))
+    (fetch-document process-id) => http400?))
+
+(fact "Start and cancel signing (LPK-946)"
+  (let [process-id (:id (init-sign))]
+    (fetch-document process-id) => http200?
+    (command u/pena :cancel-sign :processId process-id) => ok?
+    (get-process-status process-id) => "cancelled"
+    (fetch-document process-id) => http404?))
 
 (fact "init-sign-for-existing-user"
   (init-sign-existing-user) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
