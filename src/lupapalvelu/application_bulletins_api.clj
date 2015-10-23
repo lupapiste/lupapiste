@@ -61,7 +61,8 @@
    :parameters []
    :user-roles #{:anonymous}}
   [_]
-  (ok :municipalities ["297" "753"]))
+  (let [municipalities (mongo/distinct :application-bulletins :versions.municipality)]
+    (ok :municipalities municipalities)))
 
 
 (def app-snapshot-fields
