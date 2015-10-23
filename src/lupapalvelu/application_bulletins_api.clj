@@ -66,6 +66,15 @@
   (let [municipalities (mongo/distinct :application-bulletins :versions.municipality)]
     (ok :municipalities municipalities)))
 
+(defquery application-bulletin-states
+  {:description "List of distinct municipalities of application bulletins"
+   :feature :publish-bulletin
+   :parameters []
+   :user-roles #{:anonymous}}
+  [_]
+  (let [states (mongo/distinct :application-bulletins :versions.bulletinState)]
+    (ok :states states)))
+
 
 (def app-snapshot-fields
   [:_applicantIndex :address :applicant :created :documents :location

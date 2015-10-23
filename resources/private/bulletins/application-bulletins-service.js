@@ -33,7 +33,11 @@ LUPAPISTE.ApplicationBulletinsService = function() {
 
   self.states = ko.observableArray([]);
   self.fetchStates = function() {
-    self.states(["open", "close"]);
+    ajax.query("application-bulletin-states", {})
+      .success(function(res) {
+        self.states(res.states);
+      })
+      .call();
   };
 };
 
