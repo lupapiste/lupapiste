@@ -638,9 +638,26 @@
     (let [request (request/ring-request)
           params (assoc (from-query request) :id id)
           response (execute-command "publish-bulletin" params request)]
-      (if (core/ok? response)
+      (core/ok? response)))
+
+  (defn- create-app-and-publish-bulletin []
+    (let [request (request/ring-request)
+          params (assoc (from-query request) :operation "kerrostalo-rivitalo"
+                                             :address "Latokuja 3"
+                                             :propertyId (p/to-property-id "753-416-25-22")
+                                             :x "360603.153"
+                                             :y "6734222.95")
+          {id :id} (execute-command "create-application" params request)
+          params  (assoc (from-query request) :id id)
+          response (execute-command "publish-bulletin" params request)]
+      (core/ok? response)))
+
+  (defpage "/dev/publish-bulletin-quickly" {:keys [count] :or {count "1"}}
+    (println count)
+    (let [results (take (util/to-long count) (repeatedly create-app-and-publish-bulletin))]
+      (if (every? true? results)
         (resp/status 200 "OK")
-        (resp/status 400 (str response)))))
+        (resp/status 400 "FAIL"))))
 
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt

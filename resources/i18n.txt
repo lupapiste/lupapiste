@@ -15,9 +15,13 @@ bulletin.page.service-info:  Palveluinfo
 footer.service.instructions:  Palvelun käytön ohjeet
 footer.reload:  Takaisin ylös
 
+bulletins.search:  Ilmoitushaku
+
 bulletin.tab.info: Ilmoituksen tiedot
 bulletin.applicants: Hakija(t)
 published: Kuulutettu
+
+bulletin.search.caption:  Koko Suomi
 published.title: Julkipantu kuulutus
 bulletin.pdf: Tulosta ilmoitus
 bulletin.comment: Kommentoi ilmoitusta

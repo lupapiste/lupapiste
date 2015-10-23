@@ -14,7 +14,7 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
     {ltext: "bulletin.feedback-period"}
   ];
 
-  self.bulletins = ko.computed(function () {
+  self.bulletins = ko.pureComputed(function () {
     return _.map(params.bulletins(), function (bulletin) {
       return {
         id: bulletin.id,

@@ -8,12 +8,26 @@
     text-transform: none;
   }
 
+  h3 {
+    font-family: $font-heading;
+    font-weight: 700;
+    font-size: 2rem;
+    text-transform: none;
+    color: $gray51;
+  }
+
   p {
     font-weight: 300;
     font-size: 1.375rem;
     margin-top: $grid-margin;
     button {
       margin-left: $grid-margin;
+    }
+  }
+
+  input {
+    &:focus {
+      border-color: $blue-light;
     }
   }
 
@@ -26,6 +40,10 @@
     h1,p {
       color: #fff;
     }
+  }
+
+  .gray-bg {
+    background-color: $gray238;
   }
 
   .content-center {
@@ -61,3 +79,59 @@
     }
   }
 }
+
+.bulletins-search {
+  h3 {
+    text-align: center;
+  }
+  .search-field {
+    i {
+      color: $blue-dark;
+    }
+    &.active {
+      i {
+        color: $blue-light;
+      }
+    }
+  }
+}
+
+.autocomplete-component {
+  .autocomplete-selection-wrapper {
+    i.tag-chevron {
+      color: $blue-dark;
+      &.toggle {
+        color: $blue-light;
+      }
+    }
+  }
+  .autocomplete-selection-wrapper.active {
+    border-color: $blue-light;
+    .tag-chevron {
+      color: $blue-light;
+    }
+  }
+  .search {
+    .search-icon {
+      color: $blue-dark;
+    }
+    &.active {
+      .search-icon {
+        color: $blue-light;
+      }
+    }
+  }
+  .autocomplete-dropdown {
+    ul.autocomplete-result {
+      border-color: $blue-light;
+      li.autocomplete-result-item.active {
+        background-color: $blue;
+        &:active {
+          background-color: $blue-light;
+        }
+      }
+
+    }
+  }
+}
+

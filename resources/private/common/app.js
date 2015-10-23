@@ -32,7 +32,7 @@ var LUPAPISTE = LUPAPISTE || {};
     // Global models
     self.models = {};
 
-    // Gobal service
+    // Global services
     self.services = {};
 
     /**

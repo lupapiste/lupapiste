@@ -1160,6 +1160,25 @@ $col: 25%;
     }
   }
 
+  .search-field {
+    position: relative;
+    input {
+      padding-right: 40px !important;
+    }
+
+    &.active {
+      i {
+        color: $orange-light;
+      }
+    }
+    i {
+      color: $primary;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+  }
+
   button.input-button {
     position: absolute;
     bottom: 0;

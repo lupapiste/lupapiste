@@ -45,22 +45,28 @@
 ;; Query construction
 ;;
 
-(defn- make-free-text-query [filter-search]
-  (let [or-query {$or [{:address {$regex filter-search $options "i"}}
-                       {:verdicts.kuntalupatunnus {$regex filter-search $options "i"}}
-                       {:_applicantIndex {$regex filter-search $options "i"}}
-                       {:foreman {$regex filter-search $options "i"}}]}
-        ops (operation-names filter-search)]
+(defn- prefix-key [prefix key]
+  (keyword (str prefix (name key))))
+
+(defn- make-free-text-query [filter-search & {:keys [prefix] :or {prefix ""} }]
+  (let [prefix        (when-not (ss/blank? prefix)
+                        (str prefix "."))
+        search-keys   [:address :verdicts.kuntalupatunnus :_applicantIndex :foreman]
+
+        prefixed-keys (map (partial prefix-key prefix) search-keys)
+        or-query      {$or (map #(hash-map % {$regex filter-search $options "i"}) prefixed-keys)}
+        ops           (operation-names filter-search)]
     (if (seq ops)
-      (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}} {:secondaryOperations.name {$in ops}}])
+      (update-in or-query [$or] concat [{(prefix-key prefix :primaryOperation.name) {$in ops}}
+                                        {(prefix-key prefix :secondaryOperations.name) {$in ops}}])
       or-query)))
 
-(defn- make-text-query [filter-search]
+(defn make-text-query [filter-search & {:keys [prefix] :or {prefix ""} }]
   {:pre [filter-search]}
   (cond
     (re-matches #"^([Ll][Pp])-\d{3}-\d{4}-\d{5}$" filter-search) {:_id (ss/upper-case filter-search)}
-    (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
-    :else (make-free-text-query filter-search)))
+    (re-matches p/property-id-pattern filter-search) {(prefix-key prefix :propertyId) (p/to-property-id filter-search)}
+    :else (make-free-text-query filter-search :prefix prefix)))
 
 (defn- make-area-query [areas user]
   {:pre [(sequential? areas)]}

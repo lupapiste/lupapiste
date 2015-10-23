@@ -3,12 +3,14 @@
             [monger.query :as query]
             [sade.core :refer :all]
             [sade.util :refer [fn->]]
+            [sade.strings :as ss]
+            [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.states :as states]))
-
-
+            [monger.operators :refer :all]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.application-search :refer [make-text-query]]))
 
 (def bulletins-fields
   {:versions {$slice -1} :versions.bulletinState 1
@@ -20,12 +22,22 @@
 
 (def bulletin-page-size 10)
 
-(defn- get-application-bulletins-left [page]
-  (- (mongo/count :application-bulletins)
-     (* page bulletin-page-size)))
+(defn- make-query [search-text]
+  (let [text-query (when-not (ss/blank? search-text)
+                     (make-text-query (ss/trim search-text) :prefix "versions"))
+        queries    (filter seq [text-query])]
+    (when-let [and-query (seq queries)]
+      {$and and-query})))
 
-(defn- get-application-bulletins [page]
-  (let [apps (mongo/with-collection "application-bulletins"
+(defn- get-application-bulletins-left [page searchText]
+  (let [query (make-query searchText)]
+    (- (mongo/count :application-bulletins query)
+       (* page bulletin-page-size))))
+
+(defn- get-application-bulletins [page searchText]
+  (let [query (or (make-query searchText) {})
+        apps (mongo/with-collection "application-bulletins"
+               (query/find query)
                (query/fields bulletins-fields)
                (query/sort {:modified 1})
                (query/paginate :page page :per-page bulletin-page-size))]
@@ -36,11 +48,11 @@
 (defquery application-bulletins
   {:description "Query for Julkipano"
    :feature :publish-bulletin
-   :parameters [page]
+   :parameters [page searchText]
    :user-roles #{:anonymous}}
   [_]
-  (ok :data (get-application-bulletins page)
-      :left (get-application-bulletins-left page)))
+  (ok :data (get-application-bulletins page searchText)
+      :left (get-application-bulletins-left page searchText)))
 
 
 (def app-snapshot-fields
@@ -58,7 +70,7 @@
   {:parameters [id]
    :feature :publish-bulletin
    :user-roles #{:authority}
-   :states     states/all-application-states}
+   :states     (states/all-application-states-but :draft)}
   [{:keys [application created] :as command}]
   (let [app-snapshot (select-keys application app-snapshot-fields)
         app-snapshot (update-in
@@ -72,7 +84,8 @@
                        :attachments attachments
                        :bulletinState (bulletin-state (:state app-snapshot)))
         changes {$push {:versions app-snapshot}
-                 $set  {:modified created}}]
+                 $set  {:modified created
+                        :municipality (:municipality app-snapshot)}}]
     (mongo/update-by-id :application-bulletins id changes :upsert true)
     (ok)))
 

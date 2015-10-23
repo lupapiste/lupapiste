@@ -5,11 +5,16 @@
     <script type="text/x-jquery-tmpl" id="load-more-application-bulletins-template">
       <div class="search-button-wrapper">
         <button class="bulletin"
+                data-test-id="load-more-bulletins"
                 data-bind="click: requestedPages.increment.bind(requestedPages),
-                           visible: showButton">
+                           visible: showButton,
+                           disable: pending,
+                           css: {waiting: pending}">
           <i class="lupicon-circle-plus"></i>
+          <i class="wait spin lupicon-refresh"></i>
           <span data-bind="ltext: 'bulletin.search.button'"></span>
-          <span data-bind="text: localizedBulletinsLeft">kpl</span>
+          <span data-test-id="bulletins-left"
+                data-bind="text: localizedBulletinsLeft"></span>
         </button>
       </div>
     </script>

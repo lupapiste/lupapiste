@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="bulletins-search-template">
+      <div class="bulletins-search">
+        <h3 data-bind="ltext: 'bulletins.search'"></h3>
+        <div class="form-grid form-grid--no-border">
+          <div class="row">
+            <div class="col-1">
+              <div data-test-id="bulletin-search-field"
+                   data-bind="component: {name: 'search-field',
+                                          params: {value: searchText}}"></div>
+            </div>
+            <div class="col-1">
+              <div data-bind="component: {name: 'autocomplete-municipalities',
+                                          params: {bulletinService: bulletinService,
+                                                   selected: municipality}}"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </script>
+  </section>
+</body>
+</html>
