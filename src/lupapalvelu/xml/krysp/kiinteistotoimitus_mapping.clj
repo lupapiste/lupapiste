@@ -42,7 +42,8 @@
                   {:kiinteistotieto {:Kiinteisto :kiinteistotunnus}}
                   {:maaraAlatieto {:MaaraAla :maaraAlatunnus}}]
         basic (conj toimitus :kuvaus)
-        toimitus-types {:featureMembers/kiito [{:Lohkominen (concat toimitus [:lohkomisenTyyppi :kuvaus])}
+        toimitus-types {:featureMembers/kiito
+                        [{:Lohkominen (concat toimitus [:lohkomisenTyyppi :kuvaus])}
                          {:YhtAlueenOsuuksienSiirto basic}
                          {:Rasitetoimitus (conj toimitus {:kayttooikeustieto
                                                           {:KayttoOikeus [:kayttooikeuslaji :kayttaja :antaja
