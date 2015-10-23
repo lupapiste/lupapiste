@@ -18,5 +18,8 @@ footer.reload:  Takaisin ylös
 bulletins.search:  Ilmoitushaku
 
 bulletin.tab.info: Ilmoituksen tiedot
+bulletin.applicants: Hakija(t)
+published: Kuulutettu
 
 bulletin.search.caption:  Koko Suomi
+published.title: Julkipantu kuulutus

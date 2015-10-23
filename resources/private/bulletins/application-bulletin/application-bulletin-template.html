@@ -8,13 +8,18 @@
         <div class="container">
           <div class="preamble">
             <div class="application_summary_info" data-bind="with: bulletin">
-              <h1 data-bind="text: address"></h1> <!-- TODO implement LPK-724 and change: edit: 'edit.address' -->
+              <h1 data-bind="text: address"></h1>
               <h2 data-bind="if: primaryOperation">
                     <span data-test-id="bulletin-primary-operation"
                           data-bind="ltext: 'operations.' + primaryOperation.name, attr: {'data-test-primary-operation-id': primaryOperation.name}"></span>
               </h2>
 
               <!-- State: -->
+              <div class="state-indication" data-bind="attr: {'data-test-state': bulletinState}" data-test-id="application-state" >
+                <div data-bind="attr: {'class': bulletinState}">
+                  <span data-bind="ltext: bulletinState, attr: {'title' : loc([bulletinState, 'title']), 'class': bulletinState + '-box'}"></span>
+                </div>
+              </div>
               <!-- Property ID: -->
               <div>
                 <p data-bind="ltext: 'application.property'"></p>
@@ -25,6 +30,12 @@
               <div>
                 <p data-bind="ltext: 'application.municipality'"></p>
                 <span class="application_summary_text" data-bind="text: loc(['municipality', municipality])"></span>
+              </div>
+              <div>
+                <p data-bind="text: loc('bulletin.applicants') + ':'"></p>
+                <ul data-bind="foreach: _applicantIndex">
+                  <li data-bind="text: $data"></li>
+                </ul>
               </div>
             </div>
             <div class="application-map-container">
@@ -58,15 +69,12 @@
         </div>
       </div>
       <div class="container">
-        <div class="bulletin-info tab-content">
+        <div class="bulletin-info">
           <h1 data-bind="ltext: 'bulletin.tab.info'"></h1>
-          <div class="application_section">
-              <div id="bulletinDocgen" class="docgen-content">
-                  <!-- This is where the generated documents will be placed. -->
-              </div>
+          <div id="bulletinDocgen" class="docgen-content">
+              <!-- This is where the generated documents will be placed. -->
           </div>
         </div>
-
       </div>
 
     </script>

@@ -2,6 +2,7 @@
   (:require [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
+            [sade.util :refer [fn->]]
             [sade.strings :as ss]
             [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand]]
@@ -12,7 +13,7 @@
             [lupapalvelu.application-search :refer [make-text-query]]))
 
 (def bulletins-fields
-  {:versions {$slice -1}
+  {:versions {$slice -1} :versions.bulletinState 1
    :versions.state 1 :versions.municipality 1
    :versions.address 1 :versions.location 1
    :versions.primaryOperation 1 :versions.propertyId 1
@@ -59,6 +60,12 @@
    :modified :municipality :organization :permitType
    :primaryOperation :propertyId :state :verdicts])
 
+(defn bulletin-state [app-state] ; TODO state machine for bulletins
+  (condp contains? app-state
+    states/pre-verdict-states :published
+    states/post-verdict-states :verdict
+    :published))
+
 (defcommand publish-bulletin
   {:parameters [id]
    :feature :publish-bulletin
@@ -66,19 +73,25 @@
    :states     (states/all-application-states-but :draft)}
   [{:keys [application created] :as command}]
   (let [app-snapshot (select-keys application app-snapshot-fields)
-        attachments  (->> (:attachments application)
-                          (filter :latestVersion)
-                          (map #(dissoc % :versions)))
-        app-snapshot (assoc app-snapshot :attachments attachments)
-        changes      {$push {:versions app-snapshot}
-                      $set  {:modified created
-                             :municipality (:municipality app-snapshot)}}]
+        app-snapshot (update-in
+                       app-snapshot
+                       [:documents]
+                       (partial remove (fn-> :schema-info :type keyword (= :party))))
+        attachments (->> (:attachments application)
+                         (filter :latestVersion)
+                         (map #(dissoc % :versions)))
+        app-snapshot (assoc app-snapshot
+                       :attachments attachments
+                       :bulletinState (bulletin-state (:state app-snapshot)))
+        changes {$push {:versions app-snapshot}
+                 $set  {:modified created
+                        :municipality (:municipality app-snapshot)}}]
     (mongo/update-by-id :application-bulletins id changes :upsert true)
     (ok)))
 
 (def bulletin-fields
   (merge bulletins-fields
-    {:_applicantIndex 1 :versions.documents 1}))
+    {:versions._applicantIndex 1 :versions.documents 1}))
 
 (defquery bulletin
   {:parameters [bulletinId]

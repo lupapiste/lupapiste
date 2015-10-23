@@ -322,6 +322,11 @@ $app-gray-darkest: $gray187;
             display: none;
           }
         }
+        &.published {
+          .published-box {
+            @include active-state;
+          }
+        }
       }
     }
   }
