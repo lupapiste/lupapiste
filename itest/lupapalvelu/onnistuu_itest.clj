@@ -1,6 +1,5 @@
 (ns lupapalvelu.onnistuu-itest
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.itest-util :as u]
             [lupapalvelu.onnistuu.process :as p]
             [sade.crypt :as crypt]
             [sade.env :as env]
@@ -8,19 +7,18 @@
             [lupapalvelu.itest-util :refer [->cookie-store server-address decode-response
                                             admin query command http-get
                                             last-email apply-remote-minimal
-                                            ok? fail? http200? http302?
-                                            ]]))
+                                            ok? fail? http200? http302?] :as u]))
 
 (apply-remote-minimal)
 
 (defn get-process [process-id]
-  (:process (u/query u/pena :find-sign-process :processId process-id)))
+  (:process (query u/pena :find-sign-process :processId process-id)))
 
 (defn get-process-status [process-id]
   (:status (get-process process-id)))
 
 (defn init-sign []
-  (-> (u/command u/pena :init-sign
+  (-> (command u/pena :init-sign
                  :company {:name  "company-name"
                            :y     "2341528-4"
                            :accountType "account5"
@@ -37,7 +35,7 @@
       get-process))
 
 (defn init-sign-existing-user []
-  (-> (u/command u/pena :init-sign
+  (-> (command u/pena :init-sign
                  :company {:name  "company-name"
                            :y     "2341528-4"
                            :accountType "account5"
@@ -52,6 +50,9 @@
                  :lang "fi")
       :process-id
       get-process))
+
+(defn fetch-document [process-id]
+  (http-get (str (server-address) "/api/sign/document/" process-id) {:throw-exceptions false}))
 
 (fact "init-sign"
   (init-sign) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
@@ -71,24 +72,30 @@
 
 (fact "cancel"
   (let [process-id (:id (init-sign))]
-    (u/command u/pena :cancel-sign :processId process-id)
+    (command u/pena :cancel-sign :processId process-id)
     (get-process-status process-id) => "cancelled"))
 
 (fact "cancel unknown"
-  (u/command u/pena :cancel-sign :processId "fooo") => {:ok false, :text "error.unknown"})
+  (command u/pena :cancel-sign :processId "fooo") => fail?)
+
+(fact "Start and cancel signing (LPK-946)"
+  (let [process-id (:id (init-sign))]
+    (fetch-document process-id) => http200?
+    (command u/pena :cancel-sign :processId process-id) => ok?
+    (get-process-status process-id) => "cancelled"))
 
 (fact "Fetch document"
-    (let [process-id (:id (init-sign))]
-      (http-get (str (u/server-address) "/api/sign/document/" process-id) {:throw-exceptions false}) => (contains {:status 200})
-      (get-process-status process-id) => "started"))
+  (let [process-id (:id (init-sign))]
+    (fetch-document process-id) => http200?
+    (get-process-status process-id) => "started"))
 
 (fact "Fetch document for unknown process"
-  (http-get (str (u/server-address) "/api/sign/document/" "foozaa") {:throw-exceptions false}) => (contains {:status 404}))
+  (fetch-document "foozaa") => (contains {:status 404}))
 
 (fact "Can't fetch document on cancelled process"
   (let [process-id (:id (init-sign))]
-    (u/command u/pena :cancel-sign :processId process-id)
-    (http-get (str (u/server-address) "/api/sign/document/" process-id) {:throw-exceptions false}) => (contains {:status 400})))
+    (command u/pena :cancel-sign :processId process-id)
+    (fetch-document process-id) => (contains {:status 400})))
 
 (fact "init-sign-for-existing-user"
   (init-sign-existing-user) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
@@ -109,12 +116,12 @@
 
 (fact "Fetch document for existing user"
   (let [process-id (:id (init-sign-existing-user))]
-    (http-get (str (u/server-address) "/api/sign/document/" process-id) {:throw-exceptions false}) => (contains {:status 200})
+    (fetch-document process-id) => http200?
     (get-process-status process-id) => "started"))
 
-(fact "Approve signin process"
+(fact "Approve signing process"
   (let [process-id (:id (init-sign))
-        _ (http-get (str (u/server-address) "/api/sign/document/" process-id) {:throw-exceptions false}) => (contains {:status 200})
+        _ (fetch-document process-id) => http200?
         process (get-process process-id)
         stamp (:stamp process)
         crypto-key (-> (env/get-config) :onnistuu :crypto-key (crypt/str->bytes) (crypt/base64-decode))
@@ -143,9 +150,9 @@
     response => http200?
     (get-process-status process-id) => "done"))
 
-(fact "Fail signin process"
+(fact "Fail signing process"
   (let [process-id (:id (init-sign))
-        _ (http-get (str (u/server-address) "/api/sign/document/" process-id) {:throw-exceptions false}) => (contains {:status 200})
+        _ (fetch-document process-id) => http200?
         store (atom {})
         params {:cookie-store (->cookie-store store)
                 :throw-exceptions false}
