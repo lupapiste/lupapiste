@@ -8,7 +8,8 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   self.fetchBulletins = _.debounce(function (query, pending) {
     ajax.datatables("application-bulletins", {page:         query.page,
                                               searchText:   util.getIn(query, ["searchText"],         ""),
-                                              municipality: util.getIn(query, ["municipality", "id"], "")})
+                                              municipality: util.getIn(query, ["municipality", "id"], ""),
+                                              state:        util.getIn(query, ["state", "id"],        "")})
       .success(function(res) {
         self.bulletinsLeft(res.left);
         if (query.page === 1) {
