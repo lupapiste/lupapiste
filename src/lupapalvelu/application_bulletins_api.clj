@@ -55,6 +55,14 @@
     (ok :data (apply get-application-bulletins parameters)
         :left (apply get-application-bulletins-left parameters))))
 
+(defquery application-bulletin-municipalities
+  {:description "List of distinct municipalities of application bulletins"
+   :feature :publish-bulletin
+   :parameters []
+   :user-roles #{:anonymous}}
+  [_]
+  (ok :municipalities ["297" "753"]))
+
 
 (def app-snapshot-fields
   [:_applicantIndex :address :applicant :created :documents :location
