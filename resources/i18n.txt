@@ -1,23 +1,27 @@
 rakennusjatesuunnitelma._group_label: Rakennus- ja purkujätesuunnitelma
-rakennusjatesuunnitelma.rakennusjatesuunnitelma._append_label: Lisää
-rakennusjateselvitys._group_label: Rakennus- ja purkujätesuunnitelma
-rakennusjateselvitys.rakennusjatesuunnitelma._append_label: Lisää
-rakennusJaPurkujate._group_label: Rakennus- ja purkujäteilmoitus
-vaarallisetAineet._group_label: Vaaralliset aineet
+rakennusjatesuunnitelma._append_label: Lisää
+rakennusjateselvitys._group_label: Rakennus- ja purkujäteselvitys
+rakennusjateselvitys._append_label: Lisää
+
+jateyksikko.select: Valitse yksikkö
+jateyksikko.kg: Kilo
+jateyksikko.m2: Neliötä
+jateyksikko.m3: Kuutiota
+jateyksikko.tonni: Tonnia
+
+rakennusJaPurkujate._group_label: Rakennus- ja purkujäte
+rakennusJaPurkujate._append_label: Lisää rivi
+rakennusJaPurkujate._copy_label: Kopioi viimeinen rivi
 
 jatetyyppi.select: Valitse aines
-jateyksikko.select: Valitse yksikkö
-vaarallinenainetyyppi.select: Valitse aines
-jateyksikko.select: Valitse yksikkö
-
-jatetyyppi.betoni: betoni-, tiili-, kivennäislaatta- ja keramiikkajätteet 
-jatetyyppi.kipsi: kipsipohjaiset jätteet
-jatetyyppi.lasi: lasijätteet
-jatetyyppi.maa: maa- ja kiviainesjätteet
-jatetyyppi.metalli: metallijätteet 
-jatetyyppi.muovi: muovijätteet
-jatetyyppi.paperi: paperi- ja kartonkijätteet
-jatetyyppi.puu: kyllästämättömät puujätteet
+jatetyyppi.betoni: Betoni-, tiili-, kivennäislaatta- ja keramiikkajätteet 
+jatetyyppi.kipsi: Kipsipohjaiset jätteet
+jatetyyppi.lasi: Lasijätteet
+jatetyyppi.maa: Maa- ja kiviainesjätteet
+jatetyyppi.metalli: Metallijätteet 
+jatetyyppi.muovi: Muovijätteet
+jatetyyppi.paperi: Paperi- ja kartonkijätteet
+jatetyyppi.puu: Kyllästämättömät puujätteet
 
 rakennusJaPurkujate.jatetyyppi: Aines
 rakennusJaPurkujate.painoT: Paino tonnia
@@ -25,10 +29,10 @@ rakennusJaPurkujate.suunniteltuMaara: Arvioitu määrä
 rakennusJaPurkujate.toteutunutMaara: Toteutunut määrä
 rakennusJaPurkujate.yksikko: Yksikkö
 rakennusJaPurkujate.jatteenToimituspaikka: Toimituspaikka
-jateyksikko.kg: Kilo
-jateyksikko.m2: Neliötä
-jateyksikko.m3: Kuutiota
-jateyksikko.tonni: Tonnia
+
+vaarallisetAineet._group_label: Vaaralliset aineet
+vaarallisetAineet._append_label: Lisää rivi
+vaarallisetAineet._copy_label: Kopioi viimeinen rivi
 
 vaarallisetAineet.vaarallinenainetyyppi: Aines
 vaarallisetAineet.painoT: Paino tonnia
@@ -36,6 +40,8 @@ vaarallisetAineet.suunniteltuMaara: Arvioitu määrä
 vaarallisetAineet.toteutunutMaara: Toteutunut määrä
 vaarallisetAineet.yksikko: Yksikkö
 vaarallisetAineet.jatteenToimituspaikka: Toimituspaikka
+
+vaarallinenainetyyppi.select: Valitse aines
 vaarallinenainetyyppi.maalit-lakat-liimat-ja-liuottimet: Maalit, lakat, liimat ja liuottimet
 vaarallinenainetyyppi.aerosolipullot: Aerosolipullot
 vaarallinenainetyyppi.painekyllastetty-puu: Painekyllästetty puu
@@ -49,9 +55,6 @@ vaarallinenainetyyppi.sahko-ja-elektroniikkaromu: Sähkö- ja elektroniikkaromu,
 
 rakennusjate.help: Lisätietoa kierrätyksestä löydät osoitteesta <a href="http://www.kierratys.info/">http://www.kierratys.info/</a>.
 
-rakennusJaPurkujate._append_label: Lisää rivi
-rakennusJaPurkujate._copy_label: Kopioi viimeinen rivi
-vaarallisetAineet._append_label: Lisää rivi
-vaarallisetAineet._copy_label: Kopioi viimeinen rivi
-
 document.delete.table.row.message: Oletko varma, että haluat poistaa rivin?
+
+
