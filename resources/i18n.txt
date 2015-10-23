@@ -19,3 +19,6 @@ bulletin.tab.info: Ilmoituksen tiedot
 bulletin.applicants: Hakija(t)
 published: Kuulutettu
 published.title: Julkipantu kuulutus
+bulletin.pdf: Tulosta ilmoitus
+bulletin.comment: Kommentoi ilmoitusta
+bulletin.attachments.download: Tulosta kaikki liitteet

@@ -43,13 +43,24 @@
             </div>
 
               <!-- Actions: -->
-            <div class="application_actions">
-              <!-- click: exportPdf, visible: $root.authorization.ok('pdf-export'), enable: !processing() && $root.authorization.ok('pdf-export') -->
+            <div class="application_actions stacked">
               <button class="function"
                       data-bind=""
-                      data-test-id="application-pdf-btn">
+                      data-test-id="">
+                  <i class="lupicon-comment"></i>
+                  <span data-bind="ltext: 'bulletin.comment'"></span>
+              </button>
+              <button class="function"
+                      data-bind=""
+                      data-test-id="">
                   <i class="lupicon-print"></i>
-                  <span data-bind="ltext: 'application.pdf'"></span>
+                  <span data-bind="ltext: 'bulletin.pdf'"></span>
+              </button>
+              <button class="function"
+                      data-bind=""
+                      data-test-id="">
+                  <i class="lupicon-print"></i>
+                  <span data-bind="ltext: 'bulletin.attachments.download'"></span>
               </button>
             </div>
           </div>
