@@ -8,7 +8,7 @@
         <div class="container">
           <div class="preamble">
             <div class="application_summary_info" data-bind="with: bulletin">
-              <h1 data-bind="text: address"></h1>
+              <h1 data-bind="text: address" data-test-id="bulletin-address"></h1>
               <h2 data-bind="if: primaryOperation">
                     <span data-test-id="bulletin-primary-operation"
                           data-bind="ltext: 'operations.' + primaryOperation.name, attr: {'data-test-primary-operation-id': primaryOperation.name}"></span>
