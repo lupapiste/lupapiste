@@ -48,7 +48,8 @@
 (defn- make-free-text-query [filter-search]
   (let [or-query {$or [{:address {$regex filter-search $options "i"}}
                        {:verdicts.kuntalupatunnus {$regex filter-search $options "i"}}
-                       {:_applicantIndex {$regex filter-search $options "i"}}]}
+                       {:_applicantIndex {$regex filter-search $options "i"}}
+                       {:foreman {$regex filter-search $options "i"}}]}
         ops (operation-names filter-search)]
     (if (seq ops)
       (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}} {:secondaryOperations.name {$in ops}}])
@@ -73,10 +74,10 @@
       {$or (map (fn [c] {:location {$geoWithin {"$polygon" c}}}) coordinates)})))
 
 (def applicant-application-states
-  {:state {$in ["open" "submitted" "sent" "complement-needed" "draft"]}})
+  {:state {$in ["open" "submitted" "sent" "complementNeeded" "draft"]}})
 
 (def authority-application-states
-  {:state {$in ["submitted" "sent" "complement-needed"]}})
+  {:state {$in ["submitted" "sent" "complementNeeded"]}})
 
 (defn make-query [query {:keys [searchText kind applicationType handlers tags organizations operations areas]} user]
   {$and

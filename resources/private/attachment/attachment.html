@@ -226,7 +226,7 @@
                   <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
                 </button>
 
-                <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: !_.isEmpty(metadata())">
+                <div class="tos-metadata-content" data-bind="slider: showTosMetadata">
                   <div data-bind="component: {name: 'metadata-editor',
                                               params: {attachmentId: id, metadata: metadata, application: application}}">
                   </div>

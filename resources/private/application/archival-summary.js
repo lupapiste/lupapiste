@@ -22,7 +22,15 @@
 
   var getPreAttachments = function(attachments) {
     return _.filter(attachments, function(attachment) {
-      return !_.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState));
+      return !_.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState)) &&
+        attachment.latestVersion;
+    });
+  };
+
+  var getPostAttachments = function(attachments) {
+    return _.filter(attachments, function(attachment) {
+      return _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState)) &&
+          attachment.latestVersion;
     });
   };
 
@@ -109,6 +117,8 @@
             .call();
         });
       }
+      attachment.archivable = attachment.latestVersion ? attachment.latestVersion['valid-pdfa']() : false;
+      attachment.sendToArchive = ko.observable(false);
       return attachment;
     });
   };
@@ -121,20 +131,28 @@
     var self = this;
     self.attachments = params.application.attachments;
     var preAttachments = ko.pureComputed(function() {
-      var preAttachments = getPreAttachments(self.attachments());
-      return addAdditionalFieldsToAttachments(preAttachments, params.application.id());
+      return addAdditionalFieldsToAttachments(getPreAttachments(self.attachments()), params.application.id());
     });
-    var archivedAttachments = ko.pureComputed(function() {
+    var postAttachments = ko.pureComputed(function() {
+      return addAdditionalFieldsToAttachments(getPostAttachments(self.attachments()), params.application.id());
+    });
+    var archivedPreAttachments = ko.pureComputed(function() {
       return filterByArchiveStatus(preAttachments(), true);
     });
-    var notArchivedAttachments = ko.pureComputed(function() {
-      return filterByArchiveStatus(preAttachments(), false);
+    var archivedPostAttachments = ko.pureComputed(function() {
+      return filterByArchiveStatus(postAttachments(), true);
     });
     self.archivedGroups = ko.pureComputed(function() {
-      return getGroupList(archivedAttachments());
+      return getGroupList(archivedPreAttachments());
+    });
+    self.archivedPostGroups = ko.pureComputed(function() {
+      return getGroupList(archivedPostAttachments());
     });
     self.notArchivedGroups = ko.pureComputed(function() {
-      return getGroupList(notArchivedAttachments());
+      return getGroupList(filterByArchiveStatus(preAttachments(), false));
+    });
+    self.notArchivedPostGroups = ko.pureComputed(function() {
+      return getGroupList(filterByArchiveStatus(postAttachments(), false));
     });
     var mainDocuments = ko.pureComputed(function() {
       return addAdditionalFieldsToAttachments(collectMainDocuments(params.application));
@@ -146,10 +164,10 @@
       return filterByArchiveStatus(mainDocuments(), false);
     });
     self.showArchived = ko.pureComputed(function() {
-      return !_.isEmpty(self.archivedDocuments()) || !_.isEmpty(self.archivedGroups());
+      return !_.isEmpty(self.archivedDocuments()) || !_.isEmpty(self.archivedGroups()) || !_.isEmpty(self.archivedPostGroups());
     });
     self.showNotArchived = ko.pureComputed(function() {
-      return !_.isEmpty(self.notArchivedDocuments()) || !_.isEmpty(self.notArchivedGroups());
+      return !_.isEmpty(self.notArchivedDocuments()) || !_.isEmpty(self.notArchivedGroups()) || !_.isEmpty(self.notArchivedPostGroups());
     });
 
     var attachmentGroupLabel = function(groupName) {
@@ -173,6 +191,27 @@
         };
       });
     });
+
+    self.archiveButtonEnabled = ko.pureComputed(function() {
+      var isSelectedForArchive = function(attachment) {
+        return ko.unwrap(attachment.sendToArchive);
+      };
+      return _.some(preAttachments(), isSelectedForArchive) || _.some(postAttachments(), isSelectedForArchive) ||
+        _.some(mainDocuments(), isSelectedForArchive);
+    });
+
+    self.selectAll = function() {
+      var selectIfArchivable = function(attachment) {
+        if (attachment.archivable) {
+          attachment.sendToArchive(true);
+        }
+      };
+      _.forEach(archivedPreAttachments(), selectIfArchivable);
+      _.forEach(archivedPostAttachments(), selectIfArchivable);
+      _.forEach(self.archivedDocuments(), function(doc) {
+        doc.sendToArchive(true);
+      });
+    };
   };
 
   ko.components.register("archival-summary", {

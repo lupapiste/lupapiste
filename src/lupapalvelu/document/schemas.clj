@@ -1010,6 +1010,7 @@
 
 (def kt-rasitetoimitus {:name "rasitetoimitus"
                         :type :group
+                        :group-help "help.rasitetoimitus"
                         :approvable true
                         :removable true
                         :body [{:name "kayttooikeuslaji"

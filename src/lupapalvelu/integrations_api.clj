@@ -78,7 +78,7 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           #{:submitted :complement-needed}
+   :states           #{:submitted :complementNeeded}
    :org-authz-roles  #{:approver}}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
@@ -100,7 +100,7 @@
                          (update-link-permit-data-with-kuntalupatunnus-from-verdict %)
                          %))
                       (merge app-updates))
-        mongo-query {:state {$in ["submitted" "complement-needed"]}}
+        mongo-query {:state {$in ["submitted" "complementNeeded"]}}
         indicator-updates (application/mark-indicators-seen-updates application user created)
         transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
         do-update (fn [attachments-updates]
@@ -252,7 +252,7 @@
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [has-asianhallinta-operation]
-   :states     #{:submitted :complement-needed}}
+   :states     #{:submitted :complementNeeded}}
   [{:keys [application created user]:as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
         application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]

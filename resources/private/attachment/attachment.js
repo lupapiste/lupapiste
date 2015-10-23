@@ -464,6 +464,7 @@ var attachment = (function() {
     approveModel.setAttachmentId(attachmentId);
 
     model.showAttachmentVersionHistory(false);
+    model.showTosMetadata(false);
 
     pageutil.hideAjaxWait();
     model.indicator(false);

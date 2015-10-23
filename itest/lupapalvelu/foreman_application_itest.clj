@@ -109,12 +109,18 @@
       (fact "Can't approve foreman application before actual application"
         (command sonja :approve-application :id foreman-application-id :lang "fi") => (partial expected-failure? "error.link-permit-app-not-in-post-sent-state"))
 
+      (fact "can still comment"
+        (comment-application apikey foreman-application-id) => ok?)
+
       (fact "After approving actual application, foreman can be approved. No need for verdict"
         (command sonja :approve-application :id application-id :lang "fi") => ok?
         (command sonja :approve-application :id foreman-application-id :lang "fi") => ok?)
 
       (fact "when foreman application is of type 'ilmoitus', after approval its state is acknowledged"
-        (:state (query-application apikey foreman-application-id)) => "acknowledged"))
+        (:state (query-application apikey foreman-application-id)) => "acknowledged")
+
+      (fact "can no longer comment"
+        (comment-application apikey foreman-application-id) => fail?))
 
     (facts "updating other foreman projects to current foreman application"
       (let [{application1-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy

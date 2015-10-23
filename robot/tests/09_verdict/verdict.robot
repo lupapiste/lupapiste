@@ -32,6 +32,13 @@ Sonja fetches verdict from municipality KRYSP service
   Page Should Contain Element  //div[@data-test-id="given-verdict-id-0-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
   Page Should Not Contain Element  //div[@data-test-id="given-verdict-id-1-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
 
+Check task counts
+  Open tab  tasks
+  # 3+3+3 tasks from backend
+  Task count is  task-katselmus  3
+  Foreman count is  3
+  Task count is  task-lupamaarays  3
+
 Sonja creates verdict with adds comment
   Go to give new verdict
   Title Should Be  ${appname} - Lupapiste
@@ -39,31 +46,29 @@ Sonja creates verdict with adds comment
   Comment verdict  Myönnetään...
 
 Add katselmus
-  # 3 tasks from backend
-  Task count is  task-katselmus  3
   Create task  task-katselmus  Lopullinen loppukatselmus
-  # One on this verdict screen and one hidden in tasks tab
-  Task count is  task-katselmus  5
+  # One on this verdict screen (and 3 hidden in tasks tab)
+  Task count is  task-katselmus  1
 
 Add foreman
-  # 3 tasks from backend
-  Foreman count is  3
   Create task  task-vaadittu-tyonjohtaja  TJ0
-  # One on this verdict screen and one hidden in tasks tab
+  # One on this verdict screen (and 3 hidden in tasks tab)
   Task count is  task-vaadittu-tyonjohtaja  1
-  Foreman count is  4
 
 Add other task
-  # 3 tasks from backend
-  Task count is  task-lupamaarays  3
   Create task  task-lupamaarays  Bajamajoja oltava riittävästi
-  # One on this verdict screen and one hidden in tasks tab
-  Task count is  task-lupamaarays  5
+  # One on this verdict screen (and 3 hidden in tasks tab)
+  Task count is  task-lupamaarays  1
 
-Return to application
+Return to application and check total task numbers
   Click by test id  return-from-verdict
+  Open tab  tasks
+  Task count is  task-katselmus  4
+  Foreman count is  4
+  Task count is  task-lupamaarays  4
 
 Verdict has tasks
+  Open tab  verdict
   Page Should Not Contain Element  xpath=//div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
   Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"]  Lopullinen loppukatselmus
   Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//ul[@data-bind="foreach: lupamaaraykset.muutMaaraykset"]/li  Bajamajoja oltava riittävästi

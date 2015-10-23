@@ -188,6 +188,8 @@
           "ah-1.1" asianhallinta-validator-1_1
           "ah-1.2" asianhallinta-validator-1_2}
    :YL  ymp-validators
+   :YM {"ah-1.1" asianhallinta-validator-1_1
+        "ah-1.2" asianhallinta-validator-1_2}
    :MM  mkmu-validators ; maankayton muutos aka kaavat
    :KT  kiito-validators})
 
