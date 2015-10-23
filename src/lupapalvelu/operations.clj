@@ -67,8 +67,6 @@
         ["rak-valm-tyo" :rak-valm-tyo]
         ["Aloitusoikeus" :aloitusoikeus]
         ["raktyo-aloit-loppuunsaat" :raktyo-aloit-loppuunsaat]]]
-      (when (env/feature? :rakennusjateilmoitus)
-        ["Rakennusjateilmoitus" :rakennusjateilmoitus])
       ])])
 
 (def- operation-tree-for-YA
@@ -186,7 +184,7 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def- common-rakval-schemas ["hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma"])
+(def- common-rakval-schemas ["hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"])
 
 (def- common-maanmittaus-schemas ["maksaja" "kiinteisto"])
 
