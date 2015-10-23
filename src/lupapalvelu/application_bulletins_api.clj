@@ -22,20 +22,22 @@
 
 (def bulletin-page-size 10)
 
-(defn- make-query [search-text]
-  (let [text-query (when-not (ss/blank? search-text)
-                     (make-text-query (ss/trim search-text) :prefix "versions"))
-        queries    (filter seq [text-query])]
+(defn- make-query [search-text municipality]
+  (let [text-query         (when-not (ss/blank? search-text)
+                             (make-text-query (ss/trim search-text) :prefix "versions"))
+        municipality-query (when-not (ss/blank? municipality)
+                             {:versions.municipality municipality})
+        queries            (filter seq [text-query municipality-query])]
     (when-let [and-query (seq queries)]
       {$and and-query})))
 
 (defn- get-application-bulletins-left [page searchText municipality state]
-  (let [query (make-query searchText)]
+  (let [query (make-query searchText municipality)]
     (- (mongo/count :application-bulletins query)
        (* page bulletin-page-size))))
 
 (defn- get-application-bulletins [page searchText municipality state]
-  (let [query (or (make-query searchText) {})
+  (let [query (or (make-query searchText municipality) {})
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
                (query/fields bulletins-fields)
