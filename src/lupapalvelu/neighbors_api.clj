@@ -6,6 +6,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn-> fn->> dissoc-in] :as util]
             [sade.core :refer [ok fail now]]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.action :refer [defcommand defquery defraw update-application] :as action]
             [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.attachment :as attachment]
@@ -46,13 +47,13 @@
   (merge
     (params->neighbor params)
     {:id (mongo/create-id)
-     :status [{:state   :open
+     :status [{:state :open
                :created (now)}]}))
 
 (defcommand neighbor-add
   {:parameters [id]
    :user-roles #{:authority}
-   :states     states/all-application-states-but-draft-or-terminal}
+   :states states/all-application-states-but-draft-or-terminal}
   [command]
   (let [new-neighbor (params->new-neighbor (:data command))]
     (update-application command {$push {:neighbors new-neighbor}})
@@ -61,7 +62,7 @@
 (defcommand neighbor-add-owners
   {:parameters [id propertyId owners]
    :user-roles #{:authority}
-   :states     states/all-application-states-but-draft-or-terminal}
+   :states states/all-application-states-but-draft-or-terminal}
   [command]
   (let [new-neighbors (mapv #(params->new-neighbor (assoc % :propertyId propertyId)) owners)]
     (update-application command {$push {:neighbors {$each new-neighbors}}})
@@ -70,25 +71,25 @@
 (defcommand neighbor-update
   {:parameters [id neighborId]
    :user-roles #{:authority}
-   :states     states/all-application-states-but-draft-or-terminal}
+   :states states/all-application-states-but-draft-or-terminal}
   [command]
   (update-application command
-    {:neighbors {$elemMatch {:id neighborId}}}
-    {$set (->
-            (params->neighbor (:data command))
-            (rename-keys {:propertyId :neighbors.$.propertyId :owner :neighbors.$.owner}))}))
+                      {:neighbors {$elemMatch {:id neighborId}}}
+                      {$set (->
+                              (params->neighbor (:data command))
+                              (rename-keys {:propertyId :neighbors.$.propertyId :owner :neighbors.$.owner}))}))
 
 (defcommand neighbor-remove
   {:parameters [id neighborId]
    :user-roles #{:authority}
-   :states     states/all-application-states-but-draft-or-terminal}
+   :states states/all-application-states-but-draft-or-terminal}
   [command]
   (update-application command
-    {$pull {:neighbors {:id neighborId}}}))
+                      {$pull {:neighbors {:id neighborId}}}))
 
 (defn- neighbor-invite-model [{{token :token neighbor-id :neighborId expires :expires} :data {:keys [id address municipality neighbors]} :application} _ recipient]
   (letfn [(link-fn [lang] (str (env/value :host) "/app/" (name lang) "/neighbor/" id "/" neighbor-id "/" token))]
-    {:name    (get-in (util/find-by-id neighbor-id neighbors) [:owner :name])
+    {:name (get-in (util/find-by-id neighbor-id neighbors) [:owner :name])
      :address address
      :expires expires
      :city-fi (i18n/localize :fi "municipality" municipality)
@@ -104,41 +105,41 @@
   {:parameters [id neighborId email]
    :input-validators [(partial action/non-blank-parameters [:email :neighborId])
                       action/email-validator]
-   :notified   true
+   :notified true
    :user-roles #{:applicant :authority}
-   :states     states/all-application-states-but-draft-or-terminal}
+   :states states/all-application-states-but-draft-or-terminal}
   [{:keys [user created] :as command}]
   (let [token (token/make-token-id)
         email (user/canonize-email email)
         expires (+ ttl/neighbor-token-ttl created)]
     (update-application command
-      {:neighbors {$elemMatch {:id neighborId}}}
-      {$push {:neighbors.$.status {:state   :email-sent
-                                   :email   email
-                                   :token   token
-                                   :user    user
-                                   :created created}}})
+                        {:neighbors {$elemMatch {:id neighborId}}}
+                        {$push {:neighbors.$.status {:state :email-sent
+                                                     :email email
+                                                     :token token
+                                                     :user user
+                                                     :created created}}})
     (notifications/notify! :neighbor (assoc command :data {:email email, :token token, :neighborId neighborId, :expires (util/to-local-datetime expires)}))))
 
 (defcommand neighbor-mark-done
   {:parameters [id neighborId]
    :user-roles #{:authority}
-   :states     states/all-application-states-but-draft-or-terminal}
-  [{:keys [user created] :as command}]
-  (update-application command
-    {:neighbors {$elemMatch {:id neighborId}}}
-    {$push {:neighbors.$.status {:state   :mark-done
-                                 :user    user
-                                 :created created}}}))
+   :states states/all-application-states-but-draft-or-terminal}
+  [{:keys [application user created lang] :as command}]
+  (let [new-state {:state :mark-done :user user :created created}
+        response (update-application command {:neighbors {$elemMatch {:id neighborId}}} {$push {:neighbors.$.status new-state}})
+        updated-app (domain/get-application-no-access-checking (:id application))]
+    (child-to-attachment/create-attachment-from-children user updated-app :neighbors neighborId lang)
+    response))
 
 (defn- append-doc-schemas [{schema-info :schema-info :as document}]
   (assoc document :schema (schemas/get-schema schema-info)))
 
 (defn- strip-document [doc]
   (-> doc
-    (model/strip-blacklisted-data :neighbor)
-    model/strip-turvakielto-data
-    append-doc-schemas))
+      (model/strip-blacklisted-data :neighbor)
+      model/strip-turvakielto-data
+      append-doc-schemas))
 
 (defn ->public [{documents :documents :as application}]
   (-> application
@@ -163,25 +164,25 @@
                     :municipality])
       (assoc :location (location->object application))
       (assoc :attachments (->> application
-                            :attachments
-                            (filter (fn-> :type :type-group (= "paapiirustus")))
-                            (filter (fn-> :versions empty? not))))
+                               :attachments
+                               (filter (fn-> :type :type-group (= "paapiirustus")))
+                               (filter (fn-> :versions empty? not))))
       (assoc :documents (map
                           strip-document
                           (remove (fn-> :schema-info :name #{"paatoksen-toimitus-rakval"})
-                            (concat
-                             (filter (fn-> :schema-info :subtype (= "hakija")) documents)
-                             (filter (fn-> :schema-info :type (not= "party")) documents)))))))
+                                  (concat
+                                    (filter (fn-> :schema-info :subtype (= "hakija")) documents)
+                                    (filter (fn-> :schema-info :type (not= "party")) documents)))))))
 
 (defquery neighbor-application
-  {:parameters [applicationId neighborId token]
-   :user-roles #{:anonymous}}
-  [{user :user created :created :as command}]
-  (let [application (domain/get-application-no-access-checking applicationId)
-        neighbor (util/find-by-id neighborId (:neighbors application))]
-    (if (valid-token? token (:status neighbor) created)
-      (ok :application (->public application))
-      (fail :error.token-not-found))))
+          {:parameters [applicationId neighborId token]
+           :user-roles #{:anonymous}}
+          [{user :user created :created :as command}]
+          (let [application (domain/get-application-no-access-checking applicationId)
+                neighbor (util/find-by-id neighborId (:neighbors application))]
+            (if (valid-token? token (:status neighbor) created)
+              (ok :application (->public application))
+              (fail :error.token-not-found))))
 
 (defcommand neighbor-response
   {:parameters [applicationId neighborId token response message stamp]
@@ -189,22 +190,24 @@
                         (when-not (#{"ok" "comments"} (get-in command [:data :response]))
                           (fail :error.invalid-response)))]
    :user-roles #{:anonymous}}
-  [{:keys [user created] :as command}]
+  [{:keys [user created lang] :as command}]
   (if-let [vetuma-user (vetuma/get-user stamp)]
     (let [application (domain/get-application-no-access-checking applicationId)
           neighbor (util/find-by-id neighborId (:neighbors application))]
       (if-not (valid-token? token (:status neighbor) created)
         (fail :error.token-not-found)
-        (do
-          (update-application (action/application->command application)
-            {:neighbors {$elemMatch {:id neighborId}}}
-            {$push {:neighbors.$.status {:state    (str "response-given-" response)
-                                         :message  message
-                                         :user     user
-                                         :vetuma   (rename-keys vetuma-user {:firstname :firstName :lastname :lastName})
-                                         :created  created}}})
-          (vetuma/consume-user stamp)
-          (ok))))
+        (let [new-state {:state (str "response-given-" response)
+                         :message message
+                         :user user
+                         :vetuma (rename-keys vetuma-user {:firstname :firstName :lastname :lastName})
+                         :created created}]
+          (do
+            (update-application (action/application->command application)
+                                {:neighbors {$elemMatch {:id neighborId}}}
+                                {$push {:neighbors.$.status new-state}})
+            (vetuma/consume-user stamp)
+            (child-to-attachment/create-attachment-from-children user (domain/get-application-no-access-checking (:id application)) :neighbors neighborId lang)
+            (ok)))))
     (fail :error.invalid-vetuma-user)))
 
 ;;
@@ -213,18 +216,18 @@
 
 ; http://localhost:8000/api/raw/neighbor/download-attachment?neighbor-id=51b1b6bfaa24d5fcab8a3239&token=G7s1enGjJrHcwHYOzpJ60wDw3JoIfqGhCW74ZLQhKUSiD7wZ&file-id=51b1b86daa24d5fcab8a32d7
 (defraw neighbor-download-attachment
-  {:parameters [neighborId token fileId]
-   :user-roles #{:anonymous}}
-  [{created :created}]
-  (let [att-info    (attachment/get-attachment-file fileId)
-        application (domain/get-application-no-access-checking (:application att-info))
-        neighbor    (util/find-by-id neighborId (:neighbors application))
-        attachment  (attachment/get-attachment-info-by-file-id application fileId)
-        att-type    (-> attachment :type :type-group)]
-    (if (and
-          (valid-token? token (:status neighbor) created)
-          (= att-type "paapiirustus"))
-      (attachment/output-attachment fileId true attachment/get-attachment-file)
-      {:status 401
-       :headers {"Content-Type" "text/plain"}
-       :body "401 Unauthorized"})))
+        {:parameters [neighborId token fileId]
+         :user-roles #{:anonymous}}
+        [{created :created}]
+        (let [att-info (attachment/get-attachment-file fileId)
+              application (domain/get-application-no-access-checking (:application att-info))
+              neighbor (util/find-by-id neighborId (:neighbors application))
+              attachment (attachment/get-attachment-info-by-file-id application fileId)
+              att-type (-> attachment :type :type-group)]
+          (if (and
+                (valid-token? token (:status neighbor) created)
+                (= att-type "paapiirustus"))
+            (attachment/output-attachment fileId true attachment/get-attachment-file)
+            {:status 401
+             :headers {"Content-Type" "text/plain"}
+             :body "401 Unauthorized"})))

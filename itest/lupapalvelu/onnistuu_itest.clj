@@ -5,20 +5,20 @@
             [sade.env :as env]
             [cheshire.core :as json]
             [lupapalvelu.itest-util :refer [->cookie-store server-address decode-response
-                                            admin query command http-get
+                                            pena admin query command http-get
                                             last-email apply-remote-minimal
                                             ok? fail? http200? http302? http400? http404?]]))
 
 (apply-remote-minimal)
 
 (defn get-process [process-id]
-  (:process (query u/pena :find-sign-process :processId process-id)))
+  (:process (query pena :find-sign-process :processId process-id)))
 
 (defn get-process-status [process-id]
   (:status (get-process process-id)))
 
 (defn init-sign []
-  (-> (command u/pena :init-sign
+  (-> (command pena :init-sign
                  :company {:name  "company-name"
                            :y     "2341528-4"
                            :accountType "account5"
@@ -35,7 +35,7 @@
       get-process))
 
 (defn init-sign-existing-user []
-  (-> (command u/pena :init-sign
+  (-> (command pena :init-sign
                  :company {:name  "company-name"
                            :y     "2341528-4"
                            :accountType "account5"
@@ -72,11 +72,11 @@
 
 (fact "cancel"
   (let [process-id (:id (init-sign))]
-    (command u/pena :cancel-sign :processId process-id)
+    (command pena :cancel-sign :processId process-id)
     (get-process-status process-id) => "cancelled"))
 
 (fact "cancel unknown"
-  (command u/pena :cancel-sign :processId "fooo") => fail?)
+  (command pena :cancel-sign :processId "fooo") => fail?)
 
 (fact "Fetch document"
   (let [process-id (:id (init-sign))]
@@ -88,13 +88,13 @@
 
 (fact "Can't fetch document on cancelled process"
   (let [process-id (:id (init-sign))]
-    (command u/pena :cancel-sign :processId process-id)
+    (command pena :cancel-sign :processId process-id)
     (fetch-document process-id) => http400?))
 
 (fact "Start and cancel signing (LPK-946)"
   (let [process-id (:id (init-sign))]
     (fetch-document process-id) => http200?
-    (command u/pena :cancel-sign :processId process-id) => ok?
+    (command pena :cancel-sign :processId process-id) => ok?
     (get-process-status process-id) => "cancelled"
     (fetch-document process-id) => http400?))
 
