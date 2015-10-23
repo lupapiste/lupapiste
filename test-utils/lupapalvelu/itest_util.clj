@@ -77,13 +77,16 @@
 (def velho-muni "297")
 (def velho-id   (id-for "velho"))
 (def jarvenpaa  (apikey-for "admin@jarvenpaa.fi"))
+(def olli       (apikey-for "olli"))
+(def olli-id    (id-for "olli"))
 
 (def sipoo-property-id "75300000000000")
 (def jarvenpaa-property-id "18600000000000")
 (def tampere-property-id "83700000000000")
 (def kuopio-property-id "29700000000000")
 (def oir-property-id "43300000000000")
-(def no-backend-property-id "56400000000000") ; Oulu
+(def oulu-property-id "56400000000000")
+(def no-backend-property-id oulu-property-id)
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
@@ -379,7 +382,7 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (apply create-app-id apikey args)
-        resp  (command apikey :submit-application :id id)] ; confirm parameter used only with foreman notice
+        resp  (command apikey :submit-application :id id)]
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
