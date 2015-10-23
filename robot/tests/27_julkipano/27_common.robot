@@ -34,3 +34,10 @@ Create application and publish bulletin
 Search bulletins by text
   [Arguments]  ${text}
   Input text  //div[@data-test-id='bulletin-search-field']//input[@type='text']  ${text}
+
+Open bulletin by index
+  [Arguments]  ${idx}
+  # Indices are > 0 in XPath
+  ${address}=  Get text  //table[@id='application-bulletins-list']//tr[${idx}]/td[3]
+  Click element  //table[@id='application-bulletins-list']//tr[${idx}]
+  Wait until  Element text should be  //div[@id='bulletin-component']//h1[@data-test-id='bulletin-address']  ${address}
