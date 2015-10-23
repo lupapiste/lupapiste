@@ -17,7 +17,7 @@
               <!-- State: -->
               <div class="state-indication" data-bind="attr: {'data-test-state': bulletinState}" data-test-id="application-state" >
                 <div data-bind="attr: {'class': bulletinState}">
-                  <span data-bind="ltext: bulletinState, attr: {'title' : loc([bulletinState, 'title']), 'class': bulletinState + '-box'}"></span>
+                  <span data-bind="ltext: $parent.bulletinStateLoc, attr: {'title' : loc([$parent.bulletinStateLoc, 'title']), 'class': bulletinState + '-box'}"></span>
                 </div>
               </div>
               <!-- Property ID: -->
