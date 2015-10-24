@@ -1,0 +1,1 @@
+EMAIL-TEMPLATE-valtuutuskutsu-loppulause: Mikäli olet rekisteröitynyt eri osoitteella Lupapisteeseen, pyydä kutsun lähettäjältä matti.meikalainen@example.com uusi kutsu.
