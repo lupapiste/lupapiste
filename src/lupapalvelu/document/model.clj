@@ -126,7 +126,7 @@
 (defmethod validate-field :maaraalaTunnus [_ _ v]
   (cond
     (ss/blank? v) nil
-    (re-matches #"^[0-9]{4}$" v) nil
+    (re-matches v/maara-alatunnus-pattern v) nil
     :else [:warn "illegal-maaraala-tunnus"]))
 
 (defmethod validate-field nil [_ _ _]
