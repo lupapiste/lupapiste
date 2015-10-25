@@ -831,16 +831,7 @@
              {:name "poistumanAjankohta" :type :date}
              olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
 
-(def rakennuspaikka [#_{:name "kiinteisto"
-                      :type :group
-                      :body [{:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
-                             {:name "tilanNimi" :type :string :readonly true}
-                             {:name "rekisterointipvm" :type :string :readonly true}
-                             {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
-                             {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}
-                             {:name "rantaKytkin" :type :checkbox}]}
-
-                     {:name "kiinteisto"
+(def rakennuspaikka [{:name "kiinteisto"
                       :type :group
                       :uicomponent :propertyGroup
                       :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size "s"}
