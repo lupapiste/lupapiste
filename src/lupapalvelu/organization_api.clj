@@ -504,8 +504,4 @@
   (o/update-organization organizationId {$set {:map-layers {:url url
                                                             :username username
                                                             :password password}}})
-
-  (try+
-   (ok :layers (o/all-layers-from-map-server organizationId))
-   (catch Throwable t
-     (ok :error (.getMessage t)))))
+  (ok :layers (o/all-layers-from-map-server organizationId)))

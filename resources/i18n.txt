@@ -1,8 +1,14 @@
 auth-admin.municipality-maps.title: Kunnan omat kartta-aineistot
+auth-admin.municipality-maps.server-details: Karttpalvelimen tiedot
 auth-admin.municipality-maps.url: Karttapalvelimen osoite (URL)
 auth-admin.municipality-maps.username: Käyttäjätunnus (jos tarpeen)
 auth-admin.municipality-maps.password: Salasana (jos tarpeen)
-auth-admin.municipality-maps.fetch: Hae karttatasot
+auth-admin.municipality-maps.fetch: Tallenna asetukset ja hae karttatasot
 auth-admin.municipality-maps.add: Lisää taso
 auth-admin.municipality-maps.kantakartta: Kantakartta
 auth-admin.municipality-maps.asemakaava: Asemakaava
+auth-admin.municipality-maps.error: Karttatasojen haku epäonnistui
+auth-admin.municipality-maps.layers: Tasot
+auth-admin.municipality-maps.layer: Taso
+auth-admin.municipality-maps.layername: Tason nimi
+auth-admin.municipality-maps.preview: Esikatselu

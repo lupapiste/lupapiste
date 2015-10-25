@@ -170,6 +170,24 @@
 ;;
 ;; Organization/municipality provided map support.
 
+(defmulti layer-info (fn [a]
+                       (cond
+                         (map? a) :map
+                         (sequential? a) :sequential)))
+
+(defmethod layer-info :map
+  [a]
+  (let [m {:title (:Title a)
+           :name (:Name a)}
+        layer (:Layer a)]
+    (if layer
+      (assoc m :layer (layer-info layer))
+      m)))
+
+(defmethod layer-info :sequential
+  [a]
+  (map layer-info a))
+
 (defn all-layers-from-map-server
   "Fetches every map layer title from the organization/municipality map server.
    The title is used because it is the only mandatory element.
@@ -177,10 +195,10 @@
   [org-id]
   (when-let [m (-> org-id get-organization :map-layers)]
     (let [{:keys [url username password]} m
-          req {:request "GetCapabilities"}
+          req {:query-params {:request "GetCapabilities"}}
           params (if username
                    (assoc req :basic-auth [username password])
                    req)
           _ (debug "Map server query" org-id url params)
-          data (-> url (http/get {:query-params params}) :body xml/parse xml/xml->edn)]
-      (map :Title (-> data :WMS_Capabilities :Capability :Layer :Layer)))))
+          data (-> url (http/get params) :body xml/parse xml/xml->edn)]
+      (-> data :WMS_Capabilities :Capability :Layer layer-info))))
