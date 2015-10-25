@@ -536,6 +536,10 @@
    "ranta-asemakaava" "ranta"
    "ei kaavaa" "ei kaavaa"})
 
+(defn format-maara-alatunnus [tunnus]
+  (when-let [digits (and (string? tunnus) (second (re-find v/maara-alatunnus-pattern (ss/trim tunnus))))]
+    (str \M (ss/zero-pad 4 digits))))
+
 (defn get-bulding-places [docs application]
   (for [doc docs
         :let [rakennuspaikka (:data doc)
@@ -554,9 +558,9 @@
                                      {:Kiinteisto
                                       (merge {:tilannimi (:tilanNimi kiinteisto)
                                               :kiinteistotunnus (:propertyId application)
-                                              :rantaKytkin (true? (-> kiinteisto :rantaKytkin))}
-                                        (when (-> kiinteisto :maaraalaTunnus)
-                                          {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus))}))}}}}}
+                                              :rantaKytkin (true? (:rantaKytkin kiinteisto))}
+                                        (when-let [maara-ala (format-maara-alatunnus (:maaraalaTunnus kiinteisto))]
+                                          {:maaraAlaTunnus maara-ala}))}}}}}
               kaavatieto (merge
                            (when kaavanaste {:kaavanaste kaavanaste})
                            (when kaavatilanne
@@ -774,9 +778,9 @@
       :kasittelija (format "%s %s" a-first a-last)
       :hakemuksenTila (state enums)}}))
 
-(defn- mat-helper [property prop-id]
+(defn- mat-helper [property property-id]
   (when-let [mat (:maaraalaTunnus property)]
-    (format "%sM%s" prop-id mat)))
+    (format "%sM%s" property-id mat)))
 
 (defn maaraalatunnus
   "Returns maaraalatunnus in the correct format if the id is available

@@ -39,3 +39,20 @@
                                                                                         :foremanVerdictGiven nil}
 
    ))
+
+(facts "Maara-alatunnus"
+  (fact "nil" (format-maara-alatunnus nil) => nil)
+  (fact "blank" (format-maara-alatunnus "") => nil)
+  (fact "space" (format-maara-alatunnus " ") => nil)
+  (fact "1 num" (format-maara-alatunnus "1") => "M0001")
+  (fact "2 num" (format-maara-alatunnus "12") => "M0012")
+  (fact "3 num" (format-maara-alatunnus "123") => "M0123")
+  (fact "4 num" (format-maara-alatunnus "1234") => "M1234")
+  (fact "5 num" (format-maara-alatunnus "12345") => nil)
+  (fact "M+1 num" (format-maara-alatunnus "M1") => "M0001")
+  (fact "M+4 num" (format-maara-alatunnus "M1234") => "M1234")
+  (fact "M+5 num" (format-maara-alatunnus "M12345") => nil)
+  (fact "some odd data from prod"
+    (format-maara-alatunnus "K286-T4") => nil
+    (format-maara-alatunnus " 1:64") => nil
+    (format-maara-alatunnus "696-415-7-11") => nil))
