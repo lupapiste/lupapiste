@@ -1,15 +1,15 @@
 (ns lupapalvelu.document.canonical-common
-  (:require [clojure.string :as s]
-            [clojure.walk :as walk]
+  (:require [clojure.walk :as walk]
+            [cljts.io :as jts]
             [swiss.arrows :refer [-<>]]
+            [sade.core :refer :all]
+            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas]
-            [cljts.io :as jts]
-            [sade.env :as env]))
+            [lupapalvelu.document.schemas :as schemas]))
 
 
 ; Empty String will be rendered as empty XML element
@@ -58,7 +58,7 @@
   (group-by (comp keyword :name :schema-info) documents))
 
 (defn empty-strings-to-nil [v]
-  (when-not (and (string? v) (s/blank? v)) v))
+  (when-not (and (string? v) (ss/blank? v)) v))
 
 (defn documents-by-type-without-blanks
   "Converts blank strings to nils and groups documents by schema name"
@@ -109,7 +109,7 @@
   (let [muu (= "other" sel-val)
         k   (if muu muu-key sel-key)
         v   (if muu muu-val sel-val)]
-    (when-not (s/blank? v)
+    (when-not (ss/blank? v)
       {k v})))
 
 (def ya-operation-type-to-usage-description
@@ -319,7 +319,7 @@
                    ; Old applications have kuntaRoolikoodi under patevyys group (LUPA-771)
                    (get-in party [:patevyys :kuntaRoolikoodi])
                    default-role)]
-      (if (s/blank? code) default-role code))))
+      (if (ss/blank? code) default-role code))))
 
 (defn get-osapuoli-data [osapuoli party-type]
   (let [selected-value (or (-> osapuoli :_selected) (-> osapuoli first key))
@@ -410,14 +410,14 @@
 (defn- get-sijaistustieto [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm] :as sijaistus} sijaistettavaRooli]
   (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
     {:Sijaistus (util/assoc-when {}
-                  :sijaistettavaHlo (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
+                  :sijaistettavaHlo (ss/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
                   :sijaistettavaRooli sijaistettavaRooli
-                  :alkamisPvm (when-not (s/blank? alkamisPvm) (util/to-xml-date-from-string alkamisPvm))
-                  :paattymisPvm (when-not (s/blank? paattymisPvm) (util/to-xml-date-from-string paattymisPvm)))}))
+                  :alkamisPvm (when-not (ss/blank? alkamisPvm) (util/to-xml-date-from-string alkamisPvm))
+                  :paattymisPvm (when-not (ss/blank? paattymisPvm) (util/to-xml-date-from-string paattymisPvm)))}))
 
 (defn- get-sijaistettava-hlo-214 [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi] :as sijaistus}]
   (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
-    (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))))
+    (ss/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))))
 
 (defn- get-vastattava-tyotieto [{tyotehtavat :vastattavatTyotehtavat} lang]
   (util/strip-nils
@@ -460,8 +460,8 @@
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
        :tyonjohtajaHakemusKytkin (= "hakemus" (:tyonjohtajaHakemusKytkin patevyys))
        :sijaistustieto (get-sijaistustieto sijaistus rooli)}
-      (when-not (s/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
-      (when-not (s/blank? paattymisPvm) {:paattymisPvm (util/to-xml-date-from-string paattymisPvm)})
+      (when-not (ss/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
+      (when-not (ss/blank? paattymisPvm) {:paattymisPvm (util/to-xml-date-from-string paattymisPvm)})
       (get-vastattava-tyotieto tyonjohtaja lang)
       (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
         (when-not (ss/blank? sijaistettava-hlo)
@@ -490,8 +490,8 @@
        :tyonjohtajaHakemusKytkin (= "tyonjohtaja-hakemus" (:permitSubtype application))
        :sijaistustieto (get-sijaistustieto sijaistus rooli)
        :vainTamaHankeKytkin (:tyonjohtajanHyvaksynta (:tyonjohtajanHyvaksynta tyonjohtaja))}
-      (when-not (s/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
-      (when-not (s/blank? paattymisPvm) {:paattymisPvm (util/to-xml-date-from-string paattymisPvm)})
+      (when-not (ss/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
+      (when-not (ss/blank? paattymisPvm) {:paattymisPvm (util/to-xml-date-from-string paattymisPvm)})
       (get-vastattava-tyotieto tyonjohtaja lang)
       (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
         (when-not (ss/blank? sijaistettava-hlo)
@@ -548,11 +548,11 @@
                                    :alkuHetki (util/to-xml-datetime (now))
                                    :rakennuspaikanKiinteistotieto
                                    {:RakennuspaikanKiinteisto
-                                    {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus))
-                                     :hallintaperuste (-> rakennuspaikka :hallintaperuste)
+                                    {:kokotilaKytkin (ss/blank? (ss/trim (:maaraalaTunnus kiinteisto)))
+                                     :hallintaperuste (:hallintaperuste rakennuspaikka )
                                      :kiinteistotieto
                                      {:Kiinteisto
-                                      (merge {:tilannimi (-> kiinteisto :tilanNimi)
+                                      (merge {:tilannimi (:tilanNimi kiinteisto)
                                               :kiinteistotunnus (:propertyId application)
                                               :rantaKytkin (true? (-> kiinteisto :rantaKytkin))}
                                         (when (-> kiinteisto :maaraalaTunnus)
@@ -617,7 +617,7 @@
           {:keys [yhteyshenkilo osoite]} yritys
           {:keys [etunimi sukunimi]} (:henkilotiedot yhteyshenkilo)
           {:keys [puhelin email]} (:yhteystiedot yhteyshenkilo)
-          yhteyshenkilon-nimi (s/trim (str etunimi " " sukunimi))
+          yhteyshenkilon-nimi (ss/trim (str etunimi " " sukunimi))
           osoite (get-simple-osoite (:osoite yritys))]
       (not-empty
         (util/assoc-when {}
@@ -755,7 +755,7 @@
                                          billing-information)}})))
 
 (defn- process-party [lang {{role :subtype} :schema-info data :data}]
-  {:Osapuoli (merge {:roolikoodi (s/capitalize role)
+  {:Osapuoli (merge {:roolikoodi (ss/capitalize role)
                      :asioimiskieli lang
                      :vainsahkoinenAsiointiKytkin false} (osapuolitieto data))})
 
