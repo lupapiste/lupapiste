@@ -191,22 +191,23 @@
                           (fail :error.invalid-response)))]
    :user-roles #{:anonymous}}
   [{:keys [user created lang] :as command}]
-  (if-let [vetuma-user (vetuma/get-user stamp)]
+  (if-let [vetuma-user (rename-keys (vetuma/get-user stamp) {:firstname :firstName :lastname :lastName})]
     (let [application (domain/get-application-no-access-checking applicationId)
-          neighbor (util/find-by-id neighborId (:neighbors application))]
+          neighbor (util/find-by-id neighborId (:neighbors application))
+          ]
       (if-not (valid-token? token (:status neighbor) created)
         (fail :error.token-not-found)
         (let [new-state {:state (str "response-given-" response)
                          :message message
-                         :user user
-                         :vetuma (rename-keys vetuma-user {:firstname :firstName :lastname :lastName})
+                         :user (user/summary user) ; Most likely nil
+                         :vetuma vetuma-user
                          :created created}]
           (do
             (update-application (action/application->command application)
                                 {:neighbors {$elemMatch {:id neighborId}}}
                                 {$push {:neighbors.$.status new-state}})
             (vetuma/consume-user stamp)
-            (child-to-attachment/create-attachment-from-children user (domain/get-application-no-access-checking (:id application)) :neighbors neighborId lang)
+            (child-to-attachment/create-attachment-from-children vetuma-user (domain/get-application-no-access-checking (:id application)) :neighbors neighborId lang)
             (ok)))))
     (fail :error.invalid-vetuma-user)))
 
