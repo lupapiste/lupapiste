@@ -40,7 +40,7 @@
 
    ))
 
-(facts "Maara-alatunnus"
+(facts "Format maara-alatunnus"
   (fact "nil" (format-maara-alatunnus nil) => nil)
   (fact "blank" (format-maara-alatunnus "") => nil)
   (fact "space" (format-maara-alatunnus " ") => nil)
@@ -56,3 +56,14 @@
     (format-maara-alatunnus "K286-T4") => nil
     (format-maara-alatunnus " 1:64") => nil
     (format-maara-alatunnus "696-415-7-11") => nil))
+
+(facts "maaraalatunnus"
+  (fact "nil" (maaraalatunnus nil) => nil)
+  (fact "empty" (maaraalatunnus {}) => nil)
+  (fact "1 num" (maaraalatunnus {:kiinteistoTunnus "kt", :maaraalaTunnus "1"}) => "ktM0001")
+  (fact "2 num" (maaraalatunnus {:kiinteistoTunnus "kt", :maaraalaTunnus "12"}) => "ktM0012")
+  (fact "M+3 num" (maaraalatunnus {:kiinteistoTunnus "kt", :maaraalaTunnus "M123"}) => "ktM0123")
+  (fact "4 num" (maaraalatunnus {:kiinteistoTunnus "kt", :maaraalaTunnus "1234"}) => "ktM1234")
+  (fact "5 num" (maaraalatunnus {:kiinteistoTunnus "kt", :maaraalaTunnus "12345"}) => nil)
+  (fact "M+1 num with app" (maaraalatunnus {:kiinteistoTunnus "kt", :maaraalaTunnus "1"}, {:propertyId "kiinteisto"}) => "kiinteistoM0001")
+  )

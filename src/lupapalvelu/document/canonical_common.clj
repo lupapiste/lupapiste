@@ -381,7 +381,7 @@
          :kokemusvuodet (:kokemus patevyys)}
         (when (-> henkilo :nimi :sukunimi)
           {:henkilo henkilo})
-        (when (-> suunnittelija :yritys :yritysnimi s/blank? not)
+        (when (-> suunnittelija :yritys :yritysnimi ss/blank? not)
           {:yritys (merge
                      (get-simple-yritys (:yritys suunnittelija))
                      {:postiosoite osoite ; - 2.1.4
@@ -403,7 +403,7 @@
                        r))
                    []
                    (dissoc selections :muuMika)))]
-    (if (-> selections :muuMika s/blank? not)
+    (if (-> selections :muuMika ss/blank? not)
       (str joined "," (-> selections :muuMika))
       joined)))
 
@@ -536,7 +536,9 @@
    "ranta-asemakaava" "ranta"
    "ei kaavaa" "ei kaavaa"})
 
-(defn format-maara-alatunnus [tunnus]
+(defn format-maara-alatunnus
+  "Given a valid parameter, returns M + zero padded id"
+  [tunnus]
   (when-let [digits (and (string? tunnus) (second (re-find v/maara-alatunnus-pattern (ss/trim tunnus))))]
     (str \M (ss/zero-pad 4 digits))))
 
@@ -779,8 +781,8 @@
       :hakemuksenTila (state enums)}}))
 
 (defn- mat-helper [property property-id]
-  (when-let [mat (:maaraalaTunnus property)]
-    (format "%sM%s" property-id mat)))
+  (when-let [mat (format-maara-alatunnus (:maaraalaTunnus property))]
+    (str property-id mat)))
 
 (defn maaraalatunnus
   "Returns maaraalatunnus in the correct format if the id is available
