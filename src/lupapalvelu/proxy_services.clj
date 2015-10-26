@@ -5,10 +5,11 @@
             [lupapalvelu.find-address :as find-address]
             [lupapalvelu.wfs :as wfs]
             [noir.response :as resp]
-            [sade.coordinate :as coord]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :refer [dissoc-in select ->double]]
+            [sade.coordinate :as coord]
+            [sade.property :as p]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]))
 
 ;;
@@ -61,12 +62,13 @@
       (resp/json {:data (map wfs/feature-to-position features)})
       (resp/status 503 "Service temporarily unavailable"))))
 
-(defn area-by-property-id-proxy [request]
-  (let [property-id (get (:params request) :property-id)
-        features (wfs/area-by-property-id property-id)]
-    (if features
-      (resp/json {:data (map wfs/feature-to-area features)})
-      (resp/status 503 "Service temporarily unavailable"))))
+(defn area-by-property-id-proxy [{{property-id :property-id} :params :as request}]
+  (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id) )
+    (let [features (wfs/area-by-property-id property-id)]
+      (if features
+        (resp/json {:data (map wfs/feature-to-area features)})
+        (resp/status 503 "Service temporarily unavailable")))
+    (resp/status 400 "Bad Request")))
 
 (defn property-id-by-point-proxy [request]
   (let [{x :x y :y} (:params request)
