@@ -112,10 +112,10 @@
   (str "<ogc:Intersects>" (apply str e) "</ogc:Intersects>"))
 
 (defn within [& e]
-  (str "<DWithin>" (apply str e) "</DWithin>"))
+  (str "<ogc:DWithin>" (apply str e) "</ogc:DWithin>"))
 
 (defn distance [distance]
-  (format "<Distance units=\"m\">%s</Distance>" distance))
+  (str "<ogc:Distance units=\"m\">" distance "</ogc:Distance>"))
 
 (defn point [x y]
   (format "<gml:Point><gml:pos>%s %s</gml:pos></gml:Point>" x y))
