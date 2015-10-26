@@ -78,6 +78,7 @@
    :parameters [:id]
    :user-roles #{:authority :applicant}
    :user-authz-roles action/all-authz-roles
+   :org-authz-roles action/reader-org-authz-roles
    :states states/all-application-states}
   [{application :application}]
   (ok :data (possible-statement-statuses application)))

@@ -123,7 +123,11 @@
 (defmethod validate-field :foremanHistory [_ _ _] nil)
 (defmethod validate-field :foremanOtherApplications [_ _ _] nil)
 
-(defmethod validate-field :maaraalaTunnus [_ _ _] nil)
+(defmethod validate-field :maaraalaTunnus [_ _ v]
+  (cond
+    (ss/blank? v) nil
+    (re-matches v/maara-alatunnus-pattern v) nil
+    :else [:warn "illegal-maaraala-tunnus"]))
 
 (defmethod validate-field nil [_ _ _]
   [:err "illegal-key"])
