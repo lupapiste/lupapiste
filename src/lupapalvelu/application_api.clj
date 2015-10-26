@@ -659,14 +659,14 @@
   (let [op (:primaryOperation application)
         organization (organization/get-organization (:organization application))]
     (update-application command
+                        (util/deep-merge
+                          (a/state-transition-update :open created user)
                         {$set  {:infoRequest            false
                                 :openInfoRequest        false
-                                :state                  :open
-                                :opened                 created
                                 :convertedToApplication created
                                 :documents              (a/make-documents user created op application)
                                 :modified               created}
-                         $push {:attachments {$each (a/make-attachments created op organization (:state application) (:tosFunction application))}}})
+                           $push {:attachments {$each (a/make-attachments created op organization (:state application) (:tosFunction application))}}}))
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
 
