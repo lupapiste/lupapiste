@@ -125,35 +125,35 @@
 (defn polygon [c]
   (format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension=\"2\">%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
 
-(defn property-name [n]
-  (str "<ogc:PropertyName>" n "</ogc:PropertyName>"))
+(defn property-name [prop-name]
+  (str "<ogc:PropertyName>" prop-name "</ogc:PropertyName>"))
 
-(defn property-filter [filter-name property-name property-value]
+(defn property-filter [filter-name prop-name value]
   (str
-    "<ogc:" filter-name " wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-       <ogc:PropertyName>" property-name "</ogc:PropertyName>
-       <ogc:Literal>" property-value "</ogc:Literal>
-     </ogc:" filter-name ">"))
+    "<ogc:" filter-name " wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">"
+    (property-name prop-name)
+    "<ogc:Literal>" value "</ogc:Literal>"
+    "</ogc:" filter-name ">"))
 
-(defn property-is-like [property-name property-value]
-  (property-filter "PropertyIsLike" property-name property-value))
+(defn property-is-like [prop-name value]
+  (property-filter "PropertyIsLike" prop-name value))
 
-(defn property-is-equal [property-name property-value]
-  (property-filter "PropertyIsEqualTo" property-name property-value))
+(defn property-is-equal [prop-name value]
+  (property-filter "PropertyIsEqualTo" prop-name value))
 
-(defn property-is-less [property-name property-value]
-  (property-filter "PropertyIsLessThan" property-name property-value))
+(defn property-is-less [prop-name value]
+  (property-filter "PropertyIsLessThan" prop-name value))
 
-(defn property-is-greater [property-name property-value]
-  (property-filter "PropertyIsGreaterThan" property-name property-value))
+(defn property-is-greater [prop-name value]
+  (property-filter "PropertyIsGreaterThan" prop-name value))
 
-(defn property-is-between [property-name property-lower-value property-upper-value]
+(defn property-is-between [name lower-value upper-value]
   (str
-    "<ogc:PropertyIsBetween wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-       <ogc:PropertyName>" property-name "</ogc:PropertyName>
-       <ogc:LowerBoundary>" property-lower-value "</ogc:LowerBoundary>"
-    "  <ogc:UpperBoundary>" property-upper-value "</ogc:UpperBoundary>
-     </ogc:PropertyIsBetween>"))
+    "<ogc:PropertyIsBetween wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">"
+    (property-name name)
+    "<ogc:LowerBoundary>" lower-value "</ogc:LowerBoundary>"
+    "<ogc:UpperBoundary>" upper-value "</ogc:UpperBoundary>"
+    "</ogc:PropertyIsBetween>"))
 
 ;;
 ;; Helpers for result parsing:
