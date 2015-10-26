@@ -27,6 +27,7 @@
      :attachment-id nil
      :attachment-type (case type
                         :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"}
+                        :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
                         {:type-group "muut" :type-id "muu"})
      :op nil
      :comment-text (case type
