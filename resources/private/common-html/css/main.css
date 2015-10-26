@@ -9805,6 +9805,16 @@ div.search i {
   background-color: #0fcff7;
 }
 
+/* line 155, ../sass/partials/_bulletins.scss */
+#application-bulletins-list th.sixth {
+  width: 5%;
+}
+/* line 161, ../sass/partials/_bulletins.scss */
+#application-bulletins-list th > i {
+  color: #0fa8f7;
+  position: absolute;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

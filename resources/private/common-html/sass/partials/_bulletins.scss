@@ -135,3 +135,31 @@
   }
 }
 
+#application-bulletins-list {
+  th {
+    &.first {
+
+    }
+    &.second {
+
+    }
+    &.third {
+
+    }
+    &.fourth {
+
+    }
+    &.fifth {
+
+    }
+    &.sixth {
+      width: 5%;
+    }
+    &.seventh {
+    }
+  }
+  th > i {
+    color: $blue-dark;
+    position: absolute;
+  }
+}

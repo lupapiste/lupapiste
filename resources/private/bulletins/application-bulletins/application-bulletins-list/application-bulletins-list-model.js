@@ -4,14 +4,16 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
 
   self.params = params;
 
+  var sort = {field: ko.observable(""), asc: ko.observable(false)};
+
   self.columns = [
-    {ltext: "bulletin.state"},
-    {ltext: "bulletin.municipality"},
-    {ltext: "bulletin.location"},
-    {ltext: "bulletin.type"},
-    {ltext: "bulletin.applicant"},
-    {ltext: "bulletin.date"},
-    {ltext: "bulletin.feedback-period"}
+    util.createSortableColumn("first", "bulletin.state", {sortField: "bulletinState", currentSort: sort}),
+    util.createSortableColumn("second", "bulletin.municipality", {sortField: "municipality", currentSort: sort}),
+    util.createSortableColumn("third", "bulletin.location", {sortField: "location", currentSort: sort}),
+    util.createSortableColumn("fourth", "bulletin.type", {sortField: "type", currentSort: sort}),
+    util.createSortableColumn("fifth", "bulletin.applicant", {sortField: "applicant", currentSort: sort}),
+    util.createSortableColumn("sixth", "bulletin.date", {sortField: "modified", currentSort: sort}),
+    util.createSortableColumn("seventh", "bulletin.feedback-period", {sortField: "feedbackPeriod", currentSort: sort})
   ];
 
   self.bulletins = ko.pureComputed(function () {
