@@ -848,28 +848,33 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return div;
   }
 
-  function buildDocgenGroup (subSchema, model, path) {
-    var name = subSchema.name;
-
+  function buildGroupComponent (name, subSchema, model, path) {
+    var name = (name === 'docgen-group' && subSchema.repeating) ? 'docgen-repeating-group' : name;
+    var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(_.reject(path, _.isNumber));
     var params = {
-      path: path,
-      subSchema: subSchema,
+      applicationId: self.appId,
       documentId: self.docId,
-      model: model[name]
+      schemaI18name: self.schemaI18name,
+      path: path,
+      i18npath: i18npath,
+      schema: subSchema,
+      model: model[subSchema.name],
+      isDisabled: self.isDisabled
     };
-    return createComponent("docgen-group", params);
+
+    return createComponent(name, params);
+  }
+
+  function buildDocgenGroup (subSchema, model, path) {
+    return buildGroupComponent("docgen-group", subSchema, model, path);
   }
 
   function buildPropertyGroup (subSchema, model, path) {
-    var name = subSchema.name;
+    return buildGroupComponent("property-group", subSchema, model, path);
+  }
 
-    var params = {
-      path: path,
-      subSchema: subSchema,
-      documentId: self.docId,
-      model: model[name]
-    };
-    return createComponent("property-group", params);
+  function buildDocgenTable (subSchema, model, path) {
+    return buildGroupComponent("docgen-table", subSchema, model, path);
   }
 
   function buildRadioGroup(subSchema, model, path) {
@@ -1294,6 +1299,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   var builders = {
     group: buildGroup,
     docgenGroup: buildDocgenGroup,
+    docgenTable: buildDocgenTable,
     propertyGroup: buildPropertyGroup,
     string: buildString,
     hetu: buildString,

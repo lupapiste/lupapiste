@@ -17,7 +17,8 @@
         <div class="form-entry"
              data-bind="component: { name: 'maaraala-tunnus',
                                      params: { schema: maaraalaSchema,
-                                               path: path,
+                                               path: maaraalaSchema.path,
+                                               applicationId: applicationId,
                                                documentId: documentId,
                                                model: maaraalaSchema.model,
                                                isMaaraala: isMaaraala,
