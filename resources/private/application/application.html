@@ -1027,8 +1027,14 @@
                                                             </thead>
                                                             <tbody data-bind="foreach: $data.poytakirjat">
                                                                 <tr class="statement-row">
-                                                                    <td data-bind="if: $data.status">
-                                                                        <span data-bind="ltext: 'verdict.status.'+$data.status"></span></td>
+                                                                    <td>
+                                                                      <!-- ko if: $data.status -->
+                                                                      <span data-bind="ltext: 'verdict.status.'+$data.status"></span>
+                                                                      <!-- /ko -->
+                                                                      <!-- ko if: !$data.status && $data.paatoskoodi -->
+                                                                      <span data-bind="text: $data.paatoskoodi"></span>
+                                                                      <!-- /ko -->
+                                                                    </td>
                                                                     <td data-bind="text: $data.paatos" class="verdict-text"></td>
                                                                     <td data-bind="text: $data.pykala"></td>
                                                                     <td data-bind="text: $data.paatoksentekija"></td>
