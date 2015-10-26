@@ -83,10 +83,12 @@
       (resp/status 503 "Service temporarily unavailable"))
     (resp/status 400 "Bad Request")))
 
+(def wdk-type-pattern #"^POINT|^LINESTRING|^POLYGON")
+
 (defn property-info-by-wkt-proxy [request] ;example: wkt=POINT(404271+6693892)&radius=100
   (let [{wkt :wkt radius :radius} (:params request)
-        type (re-find #"^POINT|^LINESTRING|^POLYGON" wkt)
-        coords (s/replace wkt #"^POINT|^LINESTRING|^POLYGON" "")
+        type (re-find wdk-type-pattern wkt)
+        coords (s/replace wkt wdk-type-pattern "")
         features (case type
                    "POINT" (let [[x y] (s/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
                              (if-not (ss/numeric? radius)
