@@ -361,6 +361,30 @@
       (assert ok)
       application)))
 
+(defn query-bulletin
+  "Fetch application bulletin from server.
+   Asserts that bulletin is found and that the bulletin data looks sane.
+   Takes an optional query function (query or local-query)"
+  ([apikey id] (query-bulletin query apikey id))
+  ([f apikey id]
+    {:pre  [id]
+     :post [(:id %)
+            (not (s/blank? (:applicant %)))
+            (:modified %) (pos? (:modified %))
+            (:primaryOperation %)
+            (:state %)
+            (:bulletinState %)
+            (:municipality %)
+            (:location %)
+            (:address %)
+            (:propertyId %)
+            (:documents %)
+            (:attachments %)
+            (every? (fn [a] (or (empty? (:versions a)) (= (:latestVersion a) (last (:versions a))))) (:attachments %))]}
+    (let [{:keys [bulletin ok]} (f apikey :bulletin :bulletinId id)]
+      (assert ok)
+      bulletin)))
+
 (defn- test-application-create-successful [resp app-id]
   (fact "Application created"
     resp => ok?
