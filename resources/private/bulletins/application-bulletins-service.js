@@ -9,7 +9,8 @@ LUPAPISTE.ApplicationBulletinsService = function() {
     ajax.datatables("application-bulletins", {page:         query.page,
                                               searchText:   util.getIn(query, ["searchText"],         ""),
                                               municipality: util.getIn(query, ["municipality", "id"], ""),
-                                              state:        util.getIn(query, ["state", "id"],        "")})
+                                              state:        util.getIn(query, ["state", "id"],        ""),
+                                              sort:         query.sort || {field: "", asc: false}})
       .success(function(res) {
         self.bulletinsLeft(res.left);
         if (query.page === 1) {

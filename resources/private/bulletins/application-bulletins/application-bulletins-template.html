@@ -28,7 +28,8 @@
         <div class="content-center">
           <div data-bind="component: {name: 'application-bulletins-list',
                                       params: {bulletins: bulletinService.data,
-                                               clickHandler: openBulletin}}"></div>
+                                               clickHandler: openBulletin,
+                                               query: query}}"></div>
 
           <div data-bind="component: {name: 'load-more-application-bulletins',
                                       params: {requestedPages: query.page,

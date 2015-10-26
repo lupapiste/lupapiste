@@ -7,7 +7,8 @@ LUPAPISTE.ApplicationBulletinsModel = function(params) {
     searchText: ko.observable(),
     municipality: ko.observable(),
     state: ko.observable(),
-    page: ko.observable(1)
+    page: ko.observable(1),
+    sort: {field: ko.observable("modified"), asc: ko.observable(false)}
   };
 
   self.openBulletin = function(item) {
@@ -17,6 +18,7 @@ LUPAPISTE.ApplicationBulletinsModel = function(params) {
   // Reset page when search filters change
   ko.computed(function() {
     self.query.searchText();
+    ko.mapping.toJS(self.query.sort);
     self.query.page(1);
   });
 
