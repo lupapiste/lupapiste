@@ -23,4 +23,8 @@
     (facts "Bulletin query"
       (let [bulletin (query-bulletin pena app-id)]
         (fact "bulletin state is 'proclaimed'"
-          (:bulletinState bulletin) => "proclaimed")))))
+          (:bulletinState bulletin) => "proclaimed")
+        (fact "each documents has schema definition"
+          (:documents bulletin) => (partial every? :schema))
+        (fact "no party documents"
+          (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))))))
