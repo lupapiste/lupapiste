@@ -563,7 +563,7 @@
                                                          (:documents application)))
                                :state         state
 
-                               :history [{:state state, :ts created, :user (user/summary user)}]
+                               :history [(a/history-entry state created user)]
                                :infoRequest false
                                :openInfoRequest false
                                :convertedToApplication nil

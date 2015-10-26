@@ -37,6 +37,9 @@
         permit-subtypes (permit/permit-subtypes permit-type)]
     (concat op-subtypes permit-subtypes)))
 
+(defn history-entry [to-state timestamp user]
+  {:state to-state, :ts timestamp, :user (user/summary user)})
+
 ;;
 ;; Validators
 ;;
@@ -288,7 +291,7 @@
                        :openInfoRequest     open-inforequest?
                        :secondaryOperations []
                        :state               state
-                       :history             [{:state state, :ts created, :user (user/summary user)}]
+                       :history             [(history-entry state created user)]
                        :municipality        municipality
                        :location            (->location x y)
                        :organization        (:id organization)
@@ -406,4 +409,4 @@
   "Returns a MongoDB update map for state transition"
   [to-state timestamp user]
   {$set (merge {:state to-state} (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
-   $push {:history {:state to-state, :ts timestamp, :user (user/summary user)}}})
+   $push {:history (history-entry to-state timestamp user)}})
