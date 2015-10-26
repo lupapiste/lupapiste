@@ -32,7 +32,8 @@
 ;; config:
 ;;
 
-(def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
+(def ktjkii "https://ws.nls.fi/ktjkii/wfs-2015/wfs")
+
 (def maasto "https://ws.nls.fi/maasto/wfs")
 (def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
 
@@ -85,9 +86,9 @@
             xmlns:ogc=\"http://www.opengis.net/ogc\"
             xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
             xsi:schemaLocation=\"http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
-          <wfs:Query" (apply str (map (fn [[k v]] (format " %s=\"%s\"" k v)) attrs)) ">"
-            (apply str e)
-       "</wfs:Query></wfs:GetFeature>"))
+      <wfs:Query" (apply str (map (fn [[k v]] (format " %s=\"%s\"" k v)) attrs)) ">"
+    (apply str e)
+    "</wfs:Query></wfs:GetFeature>"))
 
 (defn ogc-sort-by
   ([property-names]
