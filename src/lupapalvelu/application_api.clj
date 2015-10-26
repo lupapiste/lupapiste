@@ -208,12 +208,10 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified         created
-                             :complementNeeded created
-                             :state            :complementNeeded}}))
-
+  [{:keys [created user] :as command}]
+  (update-application command (util/deep-merge
+                                (a/state-transition :complementNeeded created user)
+                                {$set {:modified created}})))
 
 (defn- do-submit [command application created]
   (let [history-entries (remove nil?
