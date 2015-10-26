@@ -324,7 +324,7 @@
     (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
       (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (property-name "ktjkiiwfs:sijainti")
-      (filter
+      (ogc-filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
 (defn property-info-by-radius [x y radius]
