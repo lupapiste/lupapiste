@@ -114,7 +114,8 @@
 
 (def bulletin-fields
   (merge bulletins-fields
-    {:versions._applicantIndex 1 :versions.documents 1}))
+    {:versions._applicantIndex 1 :versions.documents 1
+     :versions.attachments 1}))
 
 (defquery bulletin
   {:parameters [bulletinId]
