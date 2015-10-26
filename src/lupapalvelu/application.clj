@@ -385,7 +385,7 @@
      :complementNeeded nil
      :verdictGiven nil
      :constructionStarted :started
-     :acknowledged nil
+     :acknowledged :acknowledged
      :foremanVerdictGiven nil
      :closed :closed
      :canceled :canceled}
