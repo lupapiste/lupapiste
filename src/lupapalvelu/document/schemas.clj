@@ -430,9 +430,9 @@
 
 (def hanke-row [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                 {:name "katuosoite" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
-                {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-localized-string :i18nkey "muutHankkeet.rakennustoimenpide" :locPrefix "operations"}
+                {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.rakennustoimenpide" :locPrefix "operations"}
                 {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
-                {:name "vaihe" :type :select :size "t" :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe"
+                {:name "vaihe" :type :select :size "t" :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe" :valueAllowUnset false
                  :body [{:name "R" :i18nkey "muutHankkeet.R"}
                         {:name "A" :i18nkey "muutHankkeet.A"}
                         {:name "K" :i18nkey "muutHankkeet.K"}]}
@@ -516,6 +516,74 @@
                       :approvable true
                       :copybutton true
                       :body huoneistoRow})
+
+(def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi"
+                  :body [{:name "betoni"}
+                         {:name "kipsi"}
+                         {:name "puu"}
+                         {:name "metalli"}
+                         {:name "lasi"}
+                         {:name "muovi"}
+                         {:name "paperi"}
+                         {:name "maa"}]})
+
+(def vaarallinenainetyyppi {:name "vaarallinenainetyyppi" :type :select :i18nkey "vaarallinenainetyyppi"
+                            :body [{:name "maalit-lakat-liimat-ja-liuottimet"}
+                                   {:name "aerosolipullot"}
+                                   {:name "painekyllastetty-puu"}
+                                   {:name "elohopealamput-ja-paristot"}
+                                   {:name "jateoljyt-ja-muut-oljyiset-jatteet"}
+                                   {:name "asbesti"}
+                                   {:name "kivihiilipiki-eli-kreosootti"}
+                                   {:name "raskasmetallipitoiset-maalijatteet"}
+                                   {:name "eristeiden-ja-tiivistemassojen-haitalliset-jatteet"}
+                                   {:name "sahko-ja-elektroniikkaromu"}]})
+
+(def jateyksikko {:name "yksikko" :i18nkey "jateyksikko" :type :select
+                  :body [{:name "kg"}
+                         {:name "tonni"}
+                         {:name "m2"}
+                         {:name "m3"}]})
+
+(def rakennusjatesuunnitelmaRow [{:name "suunniteltuMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m"}
+                                 jateyksikko
+                                 {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m"}])
+
+(def rakennusjateselvitysRow [{:name "toteutunutMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m"}
+                              jateyksikko
+                              {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m"}
+                              {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "l"}])
+
+(def rakennusjatesuunnitelma [{:name "rakennusJaPurkujate"
+                               :i18nkey "rakennusJaPurkujate"
+                               :type :table
+                               :uicomponent :docgenTable
+                               :repeating true
+                               :approvable false
+                               :body (body jatetyyppi rakennusjatesuunnitelmaRow)}
+                              {:name "vaarallisetAineet"
+                               :i18nkey "vaarallisetAineet"
+                               :type :table
+                               :uicomponent :docgenTable
+                               :repeating true
+                               :approvable false
+                               :body (body vaarallinenainetyyppi rakennusjatesuunnitelmaRow)}])
+
+(def rakennusjateselvitys [{:name "rakennusJaPurkujate"
+                            :i18nkey "rakennusJaPurkujate"
+                            :type :table
+                            :uicomponent :docgenTable
+                            :repeating true
+                            :approvable false
+                            :body (body jatetyyppi rakennusjateselvitysRow)}
+                           {:name "vaarallisetAineet"
+                            :i18nkey "vaarallisetAineet"
+                            :type :table
+                            :uicomponent :docgenTable
+                            :repeating true
+                            :approvable false
+                            :body (body vaarallinenainetyyppi rakennusjateselvitysRow)}])
+
 
 ;; Usage type definitions have moved to lupapiste-commons.usage-types
 
@@ -831,16 +899,7 @@
              {:name "poistumanAjankohta" :type :date}
              olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
 
-(def rakennuspaikka [#_{:name "kiinteisto"
-                      :type :group
-                      :body [{:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
-                             {:name "tilanNimi" :type :string :readonly true}
-                             {:name "rekisterointipvm" :type :string :readonly true}
-                             {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
-                             {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}
-                             {:name "rantaKytkin" :type :checkbox}]}
-
-                     {:name "kiinteisto"
+(def rakennuspaikka [{:name "kiinteisto"
                       :type :group
                       :uicomponent :propertyGroup
                       :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size "s"}
@@ -1248,18 +1307,6 @@
            :type :location}
     :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
-
-   {:info {:name "paatoksen-toimitus-rakval"
-           :removable false
-           :approvable true
-           :order 10}
-    :body (body
-           [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
-           simple-osoite
-           [{:name "yritys" :type :group
-             :body [{:name "yritysnimi" :type :string}]}]
-           tayta-omat-tiedot-button)}
-
    {:info {:name "aloitusoikeus" :removable false :approvable true}
     :body (body kuvaus)}
 
@@ -1267,4 +1314,30 @@
            :order 100}
     :body [{:name "suoramarkkinointikielto" ;THIS IS DEPRECATED!
             :type :checkbox
-            :layout :full-width}]}])
+            :layout :full-width}]}
+
+   {:info {:name "rakennusjatesuunnitelma"
+           :order 200
+           :section-help "rakennusjate.help"}
+    :body (body rakennusjatesuunnitelma)}
+   {:info {:name "rakennusjateselvitys"
+           :order 201
+           :section-help "rakennusjate.help"}
+    :body (body rakennusjateselvitys)}
+
+   ;; TODO: "rakennusjateselvitys"-skeema: kopioi luontivaiheessa "rakennusjateilmoitus"-skeema.
+   ;; Kts. esimerkkia mm.
+   ;;   application.clj  make-documents
+   ;;   prev-permit.clj  applicant->applicant-doc
+
+   {:info {:name "paatoksen-toimitus-rakval"
+           :removable false
+           :approvable true
+           :order 300}
+    :body (body
+           [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
+           simple-osoite
+           [{:name "yritys" :type :group
+             :body [{:name "yritysnimi" :type :string}]}]
+           tayta-omat-tiedot-button)}
+   ])

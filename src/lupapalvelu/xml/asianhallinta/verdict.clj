@@ -47,7 +47,7 @@
                 :poytakirjat  [{:paatoksentekija (:PaatoksenTekija AsianPaatos)
                                 :paatospvm       (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
                                 :pykala          (:Pykala AsianPaatos)
-                                :paatoskoodi     (:PaatosKoodi AsianPaatos)
+                                :paatoskoodi     (or (:PaatosKoodi AsianPaatos) (:PaatoksenTunnus AsianPaatos)) ; PaatosKoodi is not required
                                 :id              (mongo/create-id)}]}]})
 
 (defn- insert-attachment! [application attachment unzipped-path verdict-id poytakirja-id]

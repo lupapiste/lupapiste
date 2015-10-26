@@ -12,8 +12,7 @@
               <th>Yritys</th>
               <th>Y-tunnus</th>
               <th>Osoite</th>
-              <th>Postinumero</th>
-              <th>Postitoimipaikka</th>
+              <th>P&auml;&auml;k&auml;ytt&auml;j&auml;t</th>
               <th>Tilityyppi</th>
               <th>K&auml;ytt&auml;j&auml;m&auml;r&auml;</th>
               <th>Toiminnot</th>
@@ -23,9 +22,15 @@
             <tr data-bind="attr: {'data-test-id': 'company-row-' + company.id}">
               <td data-bind="text: company.name"></td>
               <td data-bind="text: company.y"></td>
-              <td><span data-bind="text: company.address1"></span></td>
-              <td data-bind="text: company.zip"></td>
-              <td data-bind="text: company.po"></td>
+              <td>
+              <span data-bind="text: company.address1"></span><br/>
+              <span data-bind="text: company.zip"></span> <span data-bind="text: company.po"></span>
+              </td>
+              <td data-bind="foreach: company.admins">
+                <div>
+                  <span data-bind="fullName: $data"></span> / <span data-bind="text: $data.username"></span>
+                </div>
+              </td>
               <td data-bind="text: loc('register.company.' + company.accountType + '.title')"></td>
               <td data-bind="text: company.userLimit"></td>
               <td><a data-bind="click: company.openDialog" data-test-id="company-edit">Muokkaa</a></td>

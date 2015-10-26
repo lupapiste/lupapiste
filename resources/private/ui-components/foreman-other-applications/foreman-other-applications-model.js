@@ -14,16 +14,21 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
     _.forEach(self.params.subSchema.body, function(subSchema) {
       var rowModel = model ? model[subSchema.name] : undefined;
       var readonly = false;
-      if (_.contains(LUPAPISTE.config.foremanReadonlyFields, subSchema.name)) {
+      var schema = _.extend({}, subSchema);
+      if (_.contains(LUPAPISTE.config.foremanReadonlyFields, schema.name)) {
         readonly = util.getIn(model, ["autoupdated", "value"]) || false;
+      }
+      if (schema.uicomponent === "docgen-string" && schema.locPrefix && readonly) {
+        schema.uicomponent = "docgen-localized-string";
       }
       var item = {
         applicationId: self.params.applicationId,
         documentId: self.params.documentId,
-        path: self.params.path,
+        path: self.params.path.concat([index, schema.name]),
+        i18npath: self.params.schemaI18name.concat(self.params.path).concat(schema.name),
         schemaI18name: self.params.schemaI18name,
         index: index,
-        schema: subSchema,
+        schema: schema,
         model: rowModel,
         validationErrors: res,
         readonly: readonly
@@ -35,7 +40,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
 
   var rows = [];
   var autoupdatedRows = [];
-  for (var key in self.params.model) {
+  for (var key in _(self.params.model).keys().filter(_.flow(_.parseInt, _.isFinite)).value()) {
     var model = self.params.model[key];
     if (util.getIn(model, ["autoupdated", "value"])) {
       autoupdatedRows.push(createRow(model, key));

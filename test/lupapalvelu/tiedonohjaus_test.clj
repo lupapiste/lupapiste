@@ -30,7 +30,7 @@
                                                               :category :attachment
                                                               :version 1
                                                               :ts 200}]}
-                                                {:action "Käsittelyssä"
+                                                {:action "K\u00e4sittelyss\u00e4"
                                                  :start 250
                                                  :documents [{:type {:foo :qaz}
                                                               :category :attachment
@@ -42,4 +42,4 @@
                                                               :ts 500}]}]
       (provided
         (toimenpide-for-state "753-R" "10 03 00 01" "draft") => {:name "Valmisteilla"}
-        (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "Käsittelyssä"}))))
+        (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"}))))

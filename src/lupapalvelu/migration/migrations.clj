@@ -1199,7 +1199,7 @@
                   owner-user owner-user
                   (pena? owner-auth) (merge owner-auth {:role "applicant" :firstName "Testaaja" :lastName "Solita"}))
 
-        ;_ (assert (:id owner) (:id application))
+        _ (assert (:id creator) (:id application))
 
         state (if (= permitSubtype "muutoslupa")
                 (if (user/authority? creator) "open" "draft")
