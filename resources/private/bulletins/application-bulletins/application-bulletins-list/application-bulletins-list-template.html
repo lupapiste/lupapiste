@@ -11,7 +11,7 @@
         </thead>
         <tbody data-bind="foreach: bulletins">
           <tr data-bind="click: $component.params.clickHandler">
-            <td data-bind="ltext: $data.state"></td>
+            <td data-bind="ltext: $data.bulletinStateLoc"></td>
             <td data-bind="ltext: $data.municipality"></td>
             <td data-bind="text: $data.address"></td>
             <td data-bind="ltext: $data.type"></td>

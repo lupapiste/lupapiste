@@ -18,7 +18,8 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
     return _.map(params.bulletins(), function (bulletin) {
       return {
         id: bulletin.id,
-        state: bulletin.state,
+        bulletinState: bulletin.bulletinState,
+        bulletinStateLoc: ["bulletin", "state", bulletin.bulletinState],
         municipality: "municipality." + bulletin.municipality,
         address: bulletin.address,
         type: "operations." + bulletin.primaryOperation.name,
