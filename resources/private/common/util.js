@@ -256,7 +256,7 @@ var util = (function($) {
     var colspan = util.getIn(opts, ["colspan"], 1);
     var sortable = util.getIn(opts, ["sortable"], true);
     var sortField = util.getIn(opts, ["sortField"], "");
-    var currentSort = util.getIn(opts, ["currentSort"], {field: ko.observable(""), asc: ko.observable(false)});
+    var currentSort = util.getIn(opts, ["currentSort"], {field: ko.observable(), asc: ko.observable(false)});
 
     function sortBy(target) {
       if ( target === currentSort.field() ) {
