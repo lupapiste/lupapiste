@@ -382,7 +382,7 @@
      :open :opened
      :submitted :submitted
      :sent :sent
-     :complementNeeded nil
+     :complementNeeded :complementNeeded
      :verdictGiven nil
      :constructionStarted :started
      :acknowledged :acknowledged
