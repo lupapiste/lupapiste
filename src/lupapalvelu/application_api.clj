@@ -141,6 +141,15 @@
 (defn- remove-app-links [id]
   (mongo/remove-many :app-links {:link {$in [id]}}))
 
+(defn- do-cancel [{:keys [created user data] :as command}]
+  {:pre [(seq (:application command))]}
+  (update-application command
+                      (util/deep-merge
+                        (a/state-transition-update :canceled created user)
+                        {$set {:modified created}}))
+  (remove-app-links (:id data))
+  (ok))
+
 (defcommand cancel-inforequest
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
@@ -148,13 +157,8 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified created
-                             :canceled created
-                             :state    :canceled}})
-  (remove-app-links id)
-  (ok))
+  [command]
+  (do-cancel command))
 
 (defcommand cancel-application
   {:parameters       [id]
@@ -164,13 +168,8 @@
    :on-success       (notify :application-state-change)
    :states           #{:draft :info :open :submitted}
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified created
-                             :canceled created
-                             :state    :canceled}})
-  (remove-app-links id)
-  (ok))
+  [command]
+  (do-cancel command))
 
 (defcommand cancel-application-authority
   {:parameters       [id text lang]
@@ -180,9 +179,10 @@
    :on-success       (notify :application-state-change)
    :pre-checks       [a/validate-authority-in-drafts
                       (partial sm/validate-state-transition :canceled)]}
-  [{:keys [created application] :as command}]
+  [{:keys [created application user] :as command}]
   (update-application command
     (util/deep-merge
+      (a/state-transition-update :canceled created user)
       (when (seq text)
         (comment/comment-mongo-update
           (:state application)
@@ -196,9 +196,7 @@
           (:user command)
           nil
           created))
-      {$set {:modified created
-             :canceled created
-             :state    :canceled}}))
+      {$set {:modified created}}))
   (remove-app-links id)
   (ok))
 

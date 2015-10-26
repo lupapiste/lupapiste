@@ -141,7 +141,10 @@
     (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
     (fact "Sonja can cancel Mikko's application"
       (command sonja :cancel-application-authority :id application-id :text nil :lang "fi") => ok?)
-    (fact "Sonja sees the canceled application" (query sonja :application :id application-id) => ok?)
+    (fact "Sonja sees the canceled application"
+      (let [application (query-application sonja application-id)]
+        (-> application :history last :state) => "canceled"))
+
     (let [email (last-email)]
       (:to email) => (contains (email-for-key mikko))
       (:subject email) => "Lupapiste.fi: Peruutustie 23 - hakemuksen tila muuttunut"
