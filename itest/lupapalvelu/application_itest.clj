@@ -200,6 +200,8 @@
 
     (command sonja :approve-application :id application-id :lang "fi")
 
+    (-> (query-application sonja application-id) :history last :state) => "sent"
+
     (facts "no vendor backend id (kuntalupatunnus)"
       (fact* "redirects to LP backend url if configured"
         (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForLpId :val redirect-url) => ok?

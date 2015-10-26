@@ -219,7 +219,7 @@
 
 (defn- do-submit [command application created]
   (let [history-entries (remove nil?
-                          [(when-not (:opened application) (a/history-entry :open created (:user command)) )
+                          [(when-not (:opened application) (a/history-entry :open created (:user command)))
                            (a/history-entry :submitted created (:user command))])]
     (update-application command
       {$set {:state     :submitted
