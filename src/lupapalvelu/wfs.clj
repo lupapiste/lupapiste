@@ -126,7 +126,7 @@
   (format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension=\"2\">%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
 
 (defn property-name [n]
-  (str "<wfs:PropertyName>" n "</wfs:PropertyName>"))
+  (str "<ogc:PropertyName>" n "</ogc:PropertyName>"))
 
 (defn property-filter [filter-name property-name property-value]
   (str
