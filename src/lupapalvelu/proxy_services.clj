@@ -86,7 +86,7 @@
 (def wdk-type-pattern #"^POINT|^LINESTRING|^POLYGON")
 
 (defn property-info-by-wkt-proxy [request] ;example: wkt=POINT(404271+6693892)&radius=100
-  (let [{wkt :wkt radius :radius} (:params request)
+  (let [{wkt :wkt radius :radius :or {wkt ""}} (:params request)
         type (re-find wdk-type-pattern wkt)
         coords (s/replace wkt wdk-type-pattern "")
         features (case type
