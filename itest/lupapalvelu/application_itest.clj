@@ -120,7 +120,9 @@
       (let [resp        (command sonja :submit-application :id application-id)
             application (query-application sonja application-id)]
         resp => ok?
-        (:state application) => "submitted"))))
+        (:state application) => "submitted"
+        (-> application :history last :state) => "submitted"
+        (-> application :history butlast last :state) => "open"))))
 
 (facts* "Application has opened when submitted from draft"
   (let [{id :id :as app1} (create-application pena) => truthy

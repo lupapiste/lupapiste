@@ -218,11 +218,16 @@
 
 
 (defn- do-submit [command application created]
-  (update-application command
-                      {$set {:state     :submitted
-                             :modified  created
-                             :opened    (or (:opened application) created)
-                             :submitted (or (:submitted application) created)}})
+  (let [history-entries (remove nil?
+                          [(when-not (:opened application) (a/history-entry :open created (:user command)) )
+                           (when-not (:submitted application) (a/history-entry :submitted created (:user command)))])]
+    (update-application command
+                       (merge
+                         {$set {:state     :submitted
+                                :modified  created
+                                :opened    (or (:opened application) created)
+                                :submitted (or (:submitted application) created)}}
+                         (when (seq history-entries) {$push {:history {$each history-entries}}}))))
   (try
     (mongo/insert :submitted-applications (-> application
                                             meta-fields/enrich-with-link-permit-data
@@ -661,11 +666,11 @@
     (update-application command
                         (util/deep-merge
                           (a/state-transition-update :open created user)
-                        {$set  {:infoRequest            false
-                                :openInfoRequest        false
-                                :convertedToApplication created
-                                :documents              (a/make-documents user created op application)
-                                :modified               created}
+                          {$set  {:infoRequest            false
+                                  :openInfoRequest        false
+                                  :convertedToApplication created
+                                  :documents              (a/make-documents user created op application)
+                                  :modified               created}
                            $push {:attachments {$each (a/make-attachments created op organization (:state application) (:tosFunction application))}}}))
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
