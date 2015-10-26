@@ -7,9 +7,9 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   self.selectedTab = ko.observable("info");
 
   self.bulletinStateLoc = ko.pureComputed(function() {
-    return ["bulletin", "state", self.bulletin().bulletinState];
+    return ["bulletin", "state", self.bulletin().bulletinState].join(".");
   });
- 
+
   self.map = gis
       .makeMap("bulletin-map", false)
       .updateSize()
