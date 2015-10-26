@@ -9,11 +9,11 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
   self.columns = [
     util.createSortableColumn("first", "bulletin.state", {sortField: "bulletinState", currentSort: self.query.sort}),
     util.createSortableColumn("second", "bulletin.municipality", {sortField: "municipality", currentSort: self.query.sort}),
-    util.createSortableColumn("third", "bulletin.location", {sortField: "location", currentSort: self.query.sort}),
-    util.createSortableColumn("fourth", "bulletin.type", {sortField: "type", currentSort: self.query.sort}),
+    util.createSortableColumn("third", "bulletin.location", {sortField: "address", currentSort: self.query.sort}),
+    util.createSortableColumn("fourth", "bulletin.type", {sortable: false}),
     util.createSortableColumn("fifth", "bulletin.applicant", {sortField: "applicant", currentSort: self.query.sort}),
     util.createSortableColumn("sixth", "bulletin.date", {sortField: "modified", currentSort: self.query.sort}),
-    util.createSortableColumn("seventh", "bulletin.feedback-period", {sortField: "feedbackPeriod", currentSort: self.query.sort})
+    util.createSortableColumn("seventh", "bulletin.feedback-period", {sortable: false})
   ];
 
   self.bulletins = ko.pureComputed(function () {
