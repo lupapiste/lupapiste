@@ -33,7 +33,7 @@ Klicka h&auml;r f&ouml;r att godk&auml;nna din roll och se uppgifterna om ans&ou
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt. Kontrollera ocks&aring; att den inbjudna e-postadressen [{{recipient-email}}]({{recipient-email}}) motsvarar den e-postadress du anv&auml;nt f&ouml;r att registrera dig i tj&auml;nsten.
 
-Vid problem &auml;r du v&auml;lkommen att kontakta [tuki@lupapiste.fi](tuki@lupapiste.fi).
+Om du registrerat dig i Lupapiste med en annan adress, be [{{inviter-email}}]({{inviter-email}}) som skickat inbjudan om en ny inbjudan.
 
 ---
 
