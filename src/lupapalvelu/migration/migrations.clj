@@ -1227,7 +1227,7 @@
                      (when canceled {:state :canceled, :ts canceled, :user nil})
                      (when started {:state :constructionStarted, :ts started, :user (user/summary startedBy)})
                      (when closed {:state :constructionStarted, :ts closed, :user (user/summary closedBy)})]]
-    {$push {$each (remove nil? all-entries)}}))
+    {$push {:history {$each (remove nil? all-entries)}}}))
 
 (defmigration populate-history
   (reduce + 0
