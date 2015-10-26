@@ -55,6 +55,5 @@ vaarallinenainetyyppi.sahko-ja-elektroniikkaromu: Sähkö- ja elektroniikkaromu,
 
 rakennusjate.help: Lisätietoa kierrätyksestä löydät osoitteesta <a href="http://www.kierratys.info/">http://www.kierratys.info/</a>.
 
-document.delete.table.row.message: Oletko varma, että haluat poistaa rivin?
-
+document.delete.table.subGroup.message: Oletko varma, että haluat poistaa rivin?
 

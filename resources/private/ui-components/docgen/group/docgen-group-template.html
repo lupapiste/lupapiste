@@ -3,60 +3,26 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="docgen-group-template">
-      <div data-bind="foreach: rows">
 
-        <div class="form-group" data-bind="attr: {id: $component.groupId + '-row-' + index}">
+      <div class="form-group" data-bind="attr: {id: groupId}">
 
-          <!-- ko if: $component.repeating -->
-          <div class="group-buttons">
-            <span data-bind="component: { name: 'docgen-button',
-                                         params: { id: $component.groupId + '-row-' + index + '-remove-button', 
-                                                   className: 'secondary is-right', 
-                                                   icon: 'lupicon-remove', 
-                                                   label: 'remove',
-                                                   index: index,
-                                                   clickFn: $parent.removeRow }},
-                             visible: lupapisteApp.models.applicationAuthModel.ok('remove-document-data')">
-            </span>
-          </div>
-          <!-- /ko -->
+        <label class="form-label form-label-group" data-bind="ltext: groupLabel"></label>
+        
+        <!-- ko if: groupHelp -->
+        <span class="group-help-text" data-bind="ltext: groupHelp"></span>
+        <!-- /ko -->
 
-          <label class="form-label form-label-group" data-bind="ltext: $component.groupLabel"></label>
-          
-          <!-- ko if: $component.groupHelp -->
-          <span class="group-help-text" data-bind="ltext: $component.groupHelp"></span>
-          <!-- /ko -->
-
-          <div data-bind="foreach: subSchemas">
-            <span class="form-entry"
-                  data-bind="component: { name: uicomponent,
-                                          params: { schema: $data,
-                                                    path: path,
-                                                    model: model,
-                                                    applicationId: applicationId,
-                                                    documentId: documentId }}">
-            </span>
-          </div>
+        <div data-bind="foreach: subSchemas">
+          <span class="form-entry"
+                data-bind="component: { name: uicomponent,
+                                        params: { schema: $data,
+                                                  path: path,
+                                                  model: model,
+                                                  applicationId: applicationId,
+                                                  documentId: documentId }}">
+          </span>
         </div>
       </div>
-        
-      <!-- ko if: repeating -->
-      <div class="button-group" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok('update-doc')">
-        <span data-bind="component: { name: 'docgen-button',
-                                     params: { id: groupId + '-append-button', 
-                                               className: 'positive', 
-                                               icon: 'lupicon-circle-plus', 
-                                               label: appendLabel, 
-                                               clickFn: addRow }}">
-        <span data-bind="component: { name: 'docgen-button',
-                                     params: { id: groupId + '-copy-button', 
-                                               className: 'secondary', 
-                                               icon: 'lupicon-circle-plus', 
-                                               label: copyLabel, 
-                                               clickFn: duplicateLastRow }}">
-        </span>
-      </div>
-      <!-- /ko -->
 
     </script>
   </section>

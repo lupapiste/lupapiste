@@ -30,35 +30,32 @@
               </td>
               <!-- /ko -->
 
-              <!-- ko if: $component.repeating -->
               <td class="action-column">
-                <i class="lupicon-remove primary" data-bind="click: $parent.removeRow,
+                <i class="lupicon-remove primary" data-bind="click: $parent.removeGroup,
                                                              visible: lupapisteApp.models.applicationAuthModel.ok('remove-document-data')"></i>
               </td>
-              <!-- /ko -->
+
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- ko if: repeating -->
       <div class="button-group" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok('update-doc')">
         <span data-bind="component: { name: 'docgen-button',
                                      params: { id: groupId + '-append-button', 
                                                className: 'positive', 
                                                icon: 'lupicon-circle-plus', 
                                                label: appendLabel, 
-                                               clickFn: addRow }}">
+                                               clickFn: addGroup }}">
         </span>
         <span data-bind="component: { name: 'docgen-button',
                                      params: { id: groupId + '-copy-button', 
                                                className: 'secondary', 
                                                icon: 'lupicon-circle-plus', 
                                                label: copyLabel, 
-                                               clickFn: duplicateLastRow }}">
+                                               clickFn: duplicateLastGroup }}">
         </span>
       </div>
-      <!-- /ko -->
       </div>
     </script>
   </section>

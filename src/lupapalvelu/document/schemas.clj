@@ -563,8 +563,8 @@
                                :body (body jatetyyppi rakennusjatesuunnitelmaRow)}
                               {:name "vaarallisetAineet"
                                :i18nkey "vaarallisetAineet"
-                               :type :table
-                               :uicomponent :docgenTable
+                               :type :group
+                               :uicomponent :docgenGroup
                                :repeating true
                                :approvable false
                                :body (body vaarallinenainetyyppi rakennusjatesuunnitelmaRow)}])
