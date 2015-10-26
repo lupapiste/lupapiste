@@ -76,19 +76,17 @@
 ;;
 
 (defn query [attrs & e]
-  (str "<?xml version='1.0' encoding='UTF-8'?>
-        <wfs:GetFeature version='1.1.0'
-            xmlns:oso='http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02'
-            xmlns:ktjkiiwfs='http://xml.nls.fi/ktjkiiwfs/2010/02'
-            xmlns:wfs='http://www.opengis.net/wfs'
-            xmlns:gml='http://www.opengis.net/gml'
-            xmlns:ogc='http://www.opengis.net/ogc'
-            xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-            xsi:schemaLocation='http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd'>
-          <wfs:Query" (apply str (map (fn [[k v]] (format " %s='%s'" k v)) attrs)) ">"
+  (str "<wfs:GetFeature version=\"1.1.0\"
+            xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
+            xmlns:ktjkiiwfs=\"http://xml.nls.fi/ktjkiiwfs/2010/02\"
+            xmlns:wfs=\"http://www.opengis.net/wfs\"
+            xmlns:gml=\"http://www.opengis.net/gml\"
+            xmlns:ogc=\"http://www.opengis.net/ogc\"
+            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+            xsi:schemaLocation=\"http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
+          <wfs:Query" (apply str (map (fn [[k v]] (format " %s=\"%s\"" k v)) attrs)) ">"
             (apply str e)
-       "  </wfs:Query>
-        </wfs:GetFeature>"))
+       "</wfs:Query></wfs:GetFeature>"))
 
 (defn ogc-sort-by
   ([property-names]
@@ -116,23 +114,23 @@
   (str "<DWithin>" (apply str e) "</DWithin>"))
 
 (defn distance [distance]
-  (format "<Distance units='m'>%s</Distance>" distance))
+  (format "<Distance units=\"m\">%s</Distance>" distance))
 
 (defn point [x y]
   (format "<gml:Point><gml:pos>%s %s</gml:pos></gml:Point>" x y))
 
 (defn line [c]
-  (format "<gml:LineString><gml:posList srsDimension='2'>%s</gml:posList></gml:LineString>" (s/join " " c)))
+  (format "<gml:LineString><gml:posList srsDimension=\"2\">%s</gml:posList></gml:LineString>" (s/join " " c)))
 
 (defn polygon [c]
-  (format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension='2'>%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
+  (format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension=\"2\">%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
 
 (defn property-name [n]
   (str "<wfs:PropertyName>" n "</wfs:PropertyName>"))
 
 (defn property-filter [filter-name property-name property-value]
   (str
-    "<ogc:" filter-name " wildCard='*' singleChar='?' escape='!' matchCase='false'>
+    "<ogc:" filter-name " wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
        <ogc:PropertyName>" property-name "</ogc:PropertyName>
        <ogc:Literal>" property-value "</ogc:Literal>
      </ogc:" filter-name ">"))
@@ -151,7 +149,7 @@
 
 (defn property-is-between [property-name property-lower-value property-upper-value]
   (str
-    "<ogc:PropertyIsBetween wildCard='*' singleChar='?' escape='!' matchCase='false'>
+    "<ogc:PropertyIsBetween wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
        <ogc:PropertyName>" property-name "</ogc:PropertyName>
        <ogc:LowerBoundary>" property-lower-value "</ogc:LowerBoundary>"
     "  <ogc:UpperBoundary>" property-upper-value "</ogc:UpperBoundary>
