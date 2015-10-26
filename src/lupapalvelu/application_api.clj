@@ -220,14 +220,13 @@
 (defn- do-submit [command application created]
   (let [history-entries (remove nil?
                           [(when-not (:opened application) (a/history-entry :open created (:user command)) )
-                           (when-not (:submitted application) (a/history-entry :submitted created (:user command)))])]
+                           (a/history-entry :submitted created (:user command))])]
     (update-application command
-                       (merge
-                         {$set {:state     :submitted
-                                :modified  created
-                                :opened    (or (:opened application) created)
-                                :submitted (or (:submitted application) created)}}
-                         (when (seq history-entries) {$push {:history {$each history-entries}}}))))
+      {$set {:state     :submitted
+             :modified  created
+             :opened    (or (:opened application) created)
+             :submitted (or (:submitted application) created)}
+       $push {:history {$each history-entries}}}))
   (try
     (mongo/insert :submitted-applications (-> application
                                             meta-fields/enrich-with-link-permit-data
