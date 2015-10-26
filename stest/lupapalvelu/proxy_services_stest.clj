@@ -6,6 +6,7 @@
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [now]]
             [sade.env :as env]
+            [sade.coordinate :as coord]
             [cheshire.core :as json]))
 
 ; make sure proxies are enabled:
@@ -64,10 +65,15 @@
         response (point-by-property-id-proxy request)]
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)
-          data (:data body)]
-      (fact data => vector?)
-      (fact (count data) => 1)
-      (fact (keys (first data)) => (just #{:x :y})))))
+          data (:data body)
+          {:keys [x y]} (first data)]
+      (fact "collection format"
+        (count data) => 1
+        (keys (first data)) => (just #{:x :y})
+        x => string?
+        y => string?)
+      (fact "valid x" x => coord/valid-x?)
+      (fact "valid y" y => coord/valid-y?))))
 
 (facts "property-id-by-point"
   (let [x 385648
