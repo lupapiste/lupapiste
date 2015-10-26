@@ -84,6 +84,28 @@
     (let [body (json/decode (:body response) true)]
       (fact body => "09100200990013"))))
 
+(facts "property-info-by-point"
+  (let [request {:params {:wkt "POINT(404271 6693892)"}}
+        response (property-info-by-wkt-proxy request)]
+    (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
+    (let [body (json/decode (:body response) true)
+          {:keys [x y rekisteriyksikkolaji kiinttunnus]} (first body)
+          {:keys [id selite]} rekisteriyksikkolaji]
+
+      (fact "collection format"
+        (count body) => 1
+        (keys (first body)) => (just #{:x :y :rekisteriyksikkolaji :kiinttunnus}))
+      (fact "valid x" x => coord/valid-x?)
+      (fact "valid y" y => coord/valid-y?)
+      (fact "kiinttunnus" kiinttunnus => "75341600380021")
+      (fact "rekisteriyksikkolaji"
+        id => "1"
+        selite => {:fi "Tila", :sv "L\u00e4genhet"}))))
+
+(facts "property-info-by-line")
+
+(facts "property-info-by-polygon")
+
 (facts "address-by-point - street number not null"
   (let [x 333168
         y 6822000
