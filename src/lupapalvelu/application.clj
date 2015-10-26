@@ -4,6 +4,7 @@
             [clj-time.local :refer [local-now]]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
+            [monger.operators :refer [$set $push]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
@@ -367,3 +368,42 @@
                                          :apptype (get-in link-application [:primaryOperation :name])}}
                         :upsert true)))
 
+;;
+;; Updates
+;;
+
+(def timestamp-key
+  (merge
+    ; Currently used states
+    {:draft :created
+     :open :opened
+     :submitted :submitted
+     :sent :sent
+     :complementNeeded nil
+     :verdictGiven nil
+     :constructionStarted :started
+     :acknowledged nil
+     :foremanVerdictGiven nil
+     :closed :closed
+     :canceled :canceled}
+    ; New states, timestamps to be determined
+    (zipmap
+      [:appealed
+       :extinct
+       :hearing
+       :final
+       :survey
+       :sessionHeld
+       :proposal
+       :registered
+       :proposalApproved
+       :sessionProposal ]
+      (repeat nil))))
+
+(assert (= states/all-application-states (set (keys timestamp-key))))
+
+(defn state-transition
+  "Returns a MongoDB update map for state transition"
+  [to-state timestamp user]
+  {$set (merge {:state to-state} (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
+   $push {:history {:state to-state, :ts timestamp, :user (user/summary user)}}})
