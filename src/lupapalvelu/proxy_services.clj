@@ -70,16 +70,16 @@
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
-(defn property-id-by-point-proxy [request]
-  (let [{x :x y :y} (:params request)
-        features (wfs/property-id-by-point x y)]
-    (if features
-      (resp/json (:kiinttunnus (wfs/feature-to-property-id (first features))))
-      (resp/status 503 "Service temporarily unavailable"))))
+(defn property-id-by-point-proxy [{{x :x y :y} :params}]
+  (if (and (coord/valid-x? x) (coord/valid-y? y))
+    (let [features (wfs/property-id-by-point x y)]
+      (if features
+        (resp/json (:kiinttunnus (wfs/feature-to-property-id (first features))))
+        (resp/status 503 "Service temporarily unavailable")))
+    (resp/status 400 "Bad Request")))
 
 (defn address-by-point-proxy [{{x :x y :y} :params}]
-  (if (and (coord/valid-x? (->double x))
-           (coord/valid-y? (->double y)))
+  (if (and (coord/valid-x? x) (coord/valid-y? y))
     (if-let [features (wfs/address-by-point x y)]
       (resp/json (wfs/feature-to-address-details (first features)))
       (resp/status 503 "Service temporarily unavailable"))
