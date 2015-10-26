@@ -1293,7 +1293,7 @@ $max-columns: 12;
 .form-grid--no-border {
   border: none;
   @for $i from 1 through $max-columns {
-    .item-#{$i} {
+    .col-#{$i} {
       &:first-child {
         padding-left: 0;
       }
