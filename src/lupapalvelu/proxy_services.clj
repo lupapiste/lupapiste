@@ -111,26 +111,27 @@
       (resp/json (map wfs/layer-to-name layers))
       (resp/status 503 "Service temporarily unavailable"))))
 
-(defn plan-urls-by-point-proxy [request]
-  (let [{x :x y :y municipality :municipality} (:params request)
-        response (wfs/plan-info-by-point x y municipality)
-        k (keyword municipality)
-        gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
-                     (resolve (symbol f-name))
-                     wfs/gfi-to-features-sito)
-        feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
-                         (resolve (symbol f-name))
-                         wfs/feature-to-feature-info-sito)]
-    (if response
-      (resp/json (map feature-mapper (gfi-mapper response municipality)))
-      (resp/status 503 "Service temporarily unavailable"))))
+(defn plan-urls-by-point-proxy [{{:keys [x y municipality]} :params}]
+  (if (and (coord/valid-x? x) (coord/valid-y? y) (ss/numeric? municipality))
+    (let [response (wfs/plan-info-by-point x y municipality)
+          k (keyword municipality)
+          gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
+                       (resolve (symbol f-name))
+                       wfs/gfi-to-features-sito)
+          feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
+                           (resolve (symbol f-name))
+                           wfs/feature-to-feature-info-sito)]
+      (if response
+        (resp/json (map feature-mapper (gfi-mapper response municipality)))
+        (resp/status 503 "Service temporarily unavailable")))
+    (resp/status 400 "Bad Request")))
 
-(defn general-plan-urls-by-point-proxy [request]
-  (let [{x :x y :y} (:params request)
-        response (wfs/general-plan-info-by-point x y)]
-    (if response
+(defn general-plan-urls-by-point-proxy [{{x :x y :y} :params}]
+  (if (and (coord/valid-x? x) (coord/valid-y? y))
+    (if-let [response (wfs/general-plan-info-by-point x y)]
       (resp/json (map wfs/general-plan-feature-to-feature-info (wfs/gfi-to-general-plan-features response)))
-      (resp/status 503 "Service temporarily unavailable"))))
+      (resp/status 503 "Service temporarily unavailable"))
+    (resp/status 400 "Bad Request")))
 
 ;
 ; Utils:
