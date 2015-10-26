@@ -402,7 +402,7 @@
 
 (assert (= states/all-application-states (set (keys timestamp-key))))
 
-(defn state-transition
+(defn state-transition-update
   "Returns a MongoDB update map for state transition"
   [to-state timestamp user]
   {$set (merge {:state to-state} (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))

@@ -94,6 +94,6 @@
 
 (fact "State transitions"
   (let [pena {:username "pena", :firstName "Pena" :lastName "Panaani"}]
-    (state-transition :open 1 pena) => {$set {:state :open, :opened 1}, $push {:history {:state :open, :ts 1, :user pena}}}
-    (state-transition :submitted 2 pena) => {$set {:state :submitted, :submitted 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
-    (state-transition :verdictGiven 3 pena) => {$set {:state :verdictGiven}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}}))
+    (state-transition-update :open 1 pena) => {$set {:state :open, :opened 1}, $push {:history {:state :open, :ts 1, :user pena}}}
+    (state-transition-update :submitted 2 pena) => {$set {:state :submitted, :submitted 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
+    (state-transition-update :verdictGiven 3 pena) => {$set {:state :verdictGiven}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}}))
