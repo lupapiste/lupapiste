@@ -103,27 +103,29 @@
                          (re-find #"^\d+_asemakaava$" layer-name) "asemakaava"
                          (re-find #"^\d+_kantakartta$" layer-name) "kantakartta"
                          :else "other")
-        layer-id (cond
-                      (= layer-category "asemakaava") "101"
-                      (= layer-category "kantakartta") "102"
-                      :else "0"
+        layer-id (case layer-category
+                      "asemakaava" "101"
+                      "kantakartta" "102"
+                      "0"
                       )
         ]
-	  (identity {
-              :wmsName layer-name 
-              :wmsUrl "/proxy/wms"
-              :name (cond
-                      (= layer-category "asemakaava") (identity {:fi "Asemakaava" :sv "Detaljplan" :en "???"})
-                      (= layer-category "kantakartta") (identity {:fi "Kantakartta" :sv "Baskarta" :en "???"})
-                      :else (identity {:fi "" :sv "" :en ""})
-                      )
-              :id layer-id
-              :baseLayerId layer-id
-              :isBaseLayer (if (or (= layer-category "asemakaava") (= layer-category "kantakartta"))
-                             true
-                             false)
-              }
-	  )
+	  {
+    :wmsName layer-name 
+    :wmsUrl "/proxy/wms"
+    :name (case layer-category
+            "asemakaava" {:fi "Asemakaava (kunta)" :sv "Detaljplan (kommun)" :en "???"}
+            "kantakartta" {:fi "Kantakartta" :sv "Baskarta" :en "???"}
+            {:fi "" :sv "" :en ""}
+            )
+    :subtitle (case layer-category
+                "asemakaava" {:fi "Kunnan palveluun toimittama ajantasa-asemakaava" :sv "Detaljplan (kommun)" :en "???"}
+                "kantakartta" {:fi "" :sv "" :en ""}
+                {:fi "" :sv "" :en ""}
+                )
+    :id layer-id
+    :baseLayerId layer-id
+    :isBaseLayer (or (= layer-category "asemakaava") (= layer-category "kantakartta"))
+    }
   )
 )
 
