@@ -6,10 +6,13 @@ LUPAPISTE.DocgenInputModel = function(params) {
   self.size = uiComponents.sizeClasses[self.params.schema.size];
   self.value = ko.observable(self.params.model ? self.params.model.value : undefined);
   self.path = self.params.path;
-  if (!_.isEmpty(self.params.index)) {
-    self.path = self.path.concat(self.params.index.toString());
+  
+  self.i18npath = self.params.schema.i18nkey ? [self.params.schema.i18nkey] : self.params.schema.i18npath;
+  if (!self.i18npath) {
+    self.i18npath = [util.locKeyFromDocPath([self.params.schemaI18name].concat(self.params.path).join("."))];
   }
-  self.path = self.path.concat(self.params.schema.name);
+
+  self.label = (params.schema.label === false || params.schema.label === "false") ? null : self.i18npath.join(".");
 
   self.indicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});
@@ -28,11 +31,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
 
   self.helpMessage = ko.observable();
 
-  var helpLocKey = util.locKeyFromDocPath(self.params.schemaI18name + "." + self.path.join(".") + ".help");
-
-  if (self.params.schema.i18nkey) {
-    helpLocKey = self.params.schema.i18nkey + ".help";
-  }
+  var helpLocKey = self.i18npath.concat("help").join(".");
 
   if (loc.hasTerm(helpLocKey)) {
     self.helpMessage(loc(helpLocKey));
