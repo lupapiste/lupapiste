@@ -122,7 +122,7 @@
         app-snapshot (assoc app-snapshot
                        :attachments attachments
                        :bulletinState (bulletin-state (:state app-snapshot)))
-        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :location :applicant]
+        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
         changes {$push {:versions app-snapshot}
                  $set  (merge {:modified created} (get-search-fields search-fields app-snapshot))}]
     (clojure.pprint/pprint changes)
