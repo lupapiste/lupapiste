@@ -14,8 +14,13 @@
             </div>
             <div class="col-1">
               <div data-bind="component: {name: 'autocomplete-municipalities',
-                                          params: {bulletinService: bulletinService,
-                                                   selected: municipality}}"></div>
+                                          params: {selected: municipality,
+                                                   municipalities: bulletinService.municipalities}}"></div>
+            </div>
+            <div class="col-1">
+              <div data-bind="component: {name: 'autocomplete-states',
+                                          params: {selected: state,
+                                                   states: bulletinService.states}}"></div>
             </div>
           </div>
         </div>

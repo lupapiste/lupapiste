@@ -72,7 +72,7 @@
         application {:organization "999-R" :auth [] :id "123" :permitType "YA"}
         allowed-actions #{; queries
                           :application :validate-doc :fetch-validation-errors
-                          :get-organization-tags :get-organization-areas
+                          :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                           :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
                           ; raw
                           :preview-attachment :view-attachment :download-attachment :download-all-attachments}]

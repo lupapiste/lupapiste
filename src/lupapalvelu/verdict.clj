@@ -39,11 +39,14 @@
             attachment-id   urlhash
             attachment-type {:type-group "muut" :type-id "muu"}
             target          {:type "verdict" :id verdict-id :urlHash urlhash}
-            attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+            attachment-time (get-in pk [:liite :muokkausHetki] timestamp)
+            ; Reload application from DB, attachments have changed
+            ; if verdict has several attachments.
+            current-application (domain/get-application-as (:id application) user)]
         ; If the attachment-id, i.e., hash of the URL matches
         ; any old attachment, a new version will be added
         (if (= 200 (:status resp))
-          (attachment/attach-file! {:application application
+          (attachment/attach-file! {:application current-application
                                     :filename (or header-filename filename)
                                     :size content-length
                                     :content (:body resp)

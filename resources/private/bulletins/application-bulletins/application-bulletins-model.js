@@ -6,6 +6,7 @@ LUPAPISTE.ApplicationBulletinsModel = function(params) {
   self.query = {
     searchText: ko.observable(),
     municipality: ko.observable(),
+    state: ko.observable(),
     page: ko.observable(1)
   };
 

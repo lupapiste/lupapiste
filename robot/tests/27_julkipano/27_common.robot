@@ -7,6 +7,9 @@ Create bulletins
   As Sonja
   Create bulletins the fast way  11
 
+Bulletin list should have no rows
+  Element should not be visible  //table[@id="application-bulletins-list"]/tbody/tr
+
 Bulletin list should have rows
   [Arguments]  ${rows}
   Wait until  Element should be visible  //table[@id="application-bulletins-list"]/tbody/tr
@@ -16,6 +19,10 @@ Bulletin list should have rows and text
   [Arguments]  ${rows}  ${text}
   Wait until  Element should be visible  //table[@id='application-bulletins-list']//td[contains(text(), "${text}")]
   Bulletin list should have rows  ${rows}
+
+Bulletin list should not have text
+  [Arguments]  ${text}
+  Element should not be visible  //table[@id='application-bulletins-list']//td[contains(text(), "${text}")]
 
 Bulletin button should have bulletins left to fetch
   [Arguments]  ${elements}
@@ -27,7 +34,8 @@ Load more bulletins
   Wait until  Element should not be visible  //span[@data-test-id='bulletins-left'][contains(text(), '${initallyBulletinsLeft}')]
 
 Create application and publish bulletin
-  Create application with state  Mixintie 15  753-416-25-22  vapaa-ajan-asuinrakennus  sent
+  [Arguments]  ${address}
+  Create application with state  ${address}  753-416-25-22  vapaa-ajan-asuinrakennus  sent
   Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
 

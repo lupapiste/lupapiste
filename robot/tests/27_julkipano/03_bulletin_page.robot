@@ -19,7 +19,7 @@ Bulletin page should have docgen data
   Should Be True  ${sectionCount} > 0
 
 State is visible
-  Bulletin state is  published
+  Bulletin state is  proclaimed
 
 Map is visible
   Element should be visible  //div[@id='bulletin-component']//div[@id='bulletin-map']/div

@@ -22,20 +22,24 @@
 
 (def bulletin-page-size 10)
 
-(defn- make-query [search-text]
-  (let [text-query (when-not (ss/blank? search-text)
-                     (make-text-query (ss/trim search-text) :prefix "versions"))
-        queries    (filter seq [text-query])]
+(defn- make-query [search-text municipality state]
+  (let [text-query         (when-not (ss/blank? search-text)
+                             (make-text-query (ss/trim search-text) :prefix "versions"))
+        municipality-query (when-not (ss/blank? municipality)
+                             {:versions.municipality municipality})
+        state-query        (when-not (ss/blank? state)
+                             {:versions.bulletinState state})
+        queries            (filter seq [text-query municipality-query state-query])]
     (when-let [and-query (seq queries)]
       {$and and-query})))
 
-(defn- get-application-bulletins-left [page searchText]
-  (let [query (make-query searchText)]
+(defn- get-application-bulletins-left [page searchText municipality state]
+  (let [query (make-query searchText municipality state)]
     (- (mongo/count :application-bulletins query)
        (* page bulletin-page-size))))
 
-(defn- get-application-bulletins [page searchText]
-  (let [query (or (make-query searchText) {})
+(defn- get-application-bulletins [page searchText municipality state]
+  (let [query (or (make-query searchText municipality state) {})
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
                (query/fields bulletins-fields)
@@ -48,11 +52,30 @@
 (defquery application-bulletins
   {:description "Query for Julkipano"
    :feature :publish-bulletin
-   :parameters [page searchText]
+   :parameters [page searchText municipality state]
    :user-roles #{:anonymous}}
   [_]
-  (ok :data (get-application-bulletins page searchText)
-      :left (get-application-bulletins-left page searchText)))
+  (let [parameters [page searchText municipality state]]
+    (ok :data (apply get-application-bulletins parameters)
+        :left (apply get-application-bulletins-left parameters))))
+
+(defquery application-bulletin-municipalities
+  {:description "List of distinct municipalities of application bulletins"
+   :feature :publish-bulletin
+   :parameters []
+   :user-roles #{:anonymous}}
+  [_]
+  (let [municipalities (mongo/distinct :application-bulletins :versions.municipality)]
+    (ok :municipalities municipalities)))
+
+(defquery application-bulletin-states
+  {:description "List of distinct municipalities of application bulletins"
+   :feature :publish-bulletin
+   :parameters []
+   :user-roles #{:anonymous}}
+  [_]
+  (let [states (mongo/distinct :application-bulletins :versions.bulletinState)]
+    (ok :states states)))
 
 
 (def app-snapshot-fields
@@ -62,9 +85,9 @@
 
 (defn bulletin-state [app-state] ; TODO state machine for bulletins
   (condp contains? app-state
-    states/pre-verdict-states :published
-    states/post-verdict-states :verdict
-    :published))
+    states/pre-verdict-states :proclaimed
+    states/post-verdict-states :verdictGiven
+    :proclaimed))
 
 (defcommand publish-bulletin
   {:parameters [id]

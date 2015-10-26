@@ -19,10 +19,15 @@ bulletins.search:  Ilmoitushaku
 
 bulletin.tab.info: Ilmoituksen tiedot
 bulletin.applicants: Hakija(t)
-published: Kuulutettu
 
 bulletin.search.caption:  Koko Suomi
-published.title: Julkipantu kuulutus
 bulletin.pdf: Tulosta ilmoitus
+bulletin.state.proclaimed: Kuulutettu
+bulletin.state.proclaimed.title: Julkipantu kuulutus
+bulletin.state.verdictGiven: Päätös annettu
+bulletin.state.verdictGiven.title: Päätös annettu
+
 bulletin.comment: Kommentoi ilmoitusta
 bulletin.attachments.download: Tulosta kaikki liitteet
+bulletin.municipalities-search.caption:  Koko Suomi
+bulletin.states-search.caption:  Kaikki ilmoitustilat

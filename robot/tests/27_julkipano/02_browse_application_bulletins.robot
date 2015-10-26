@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Admin edits authority admin users
+Suite Setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ./27_common.robot
@@ -19,9 +20,9 @@ Bulletins should be paginable
   Bulletin list should have rows  11
 
 Bulletins should be searchable
-  Create bulletins  15
-  Create application and publish bulletin
+  Create application and publish bulletin  Mixintie 15
   Go to bulletins page
 
+  Bulletin list should not have text  Mixintie 15
   Search bulletins by text  Mixintie 15
   Bulletin list should have rows and text  1  Mixintie 15

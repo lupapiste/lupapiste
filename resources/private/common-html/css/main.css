@@ -9722,13 +9722,13 @@ span.icon_clear:before {
   display: none;
 }
 /* line 326, ../sass/views/_application.scss */
-.application_summary .application_summary_info .state-indication div.published .published-box {
+.application_summary .application_summary_info .state-indication div.proclaimed .proclaimed-box {
   color: white;
   background-color: #2ca92c;
   display: inline-block;
 }
 /* line 184, ../sass/views/_application.scss */
-.application_summary .application_summary_info .state-indication div.published .published-box:after {
+.application_summary .application_summary_info .state-indication div.proclaimed .proclaimed-box:after {
   border-left: 11px solid #2ca92c;
 }
 /* line 334, ../sass/views/_application.scss */
