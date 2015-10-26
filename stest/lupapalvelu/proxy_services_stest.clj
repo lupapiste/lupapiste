@@ -142,6 +142,20 @@
       (fact (:number body) => #"\d")
       (fact (:fi (:name body)) => "Sipoo"))))
 
+(facts "area-by-property-id"
+  (let [response (area-by-property-id-proxy {:params {:property-id "75341600380021"}})]
+    (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
+    (let [body (json/decode (:body response) true)
+          data (:data body)
+          {:keys [kiinttunnus wkt]} (first data)]
+
+      (fact "collection format"
+        (count data) => 1
+        (keys (first data)) => (just #{:kiinttunnus :wkt}))
+
+      (fact "property id is echoed" kiinttunnus => "75341600380021")
+      (fact "wkt" wkt => #"^POLYGON"))))
+
 (facts "plan-urls-by-point-proxy"
 
   (fact "Helsinki"
