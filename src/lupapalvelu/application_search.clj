@@ -166,7 +166,7 @@
                           "state" :state
                           "id" :_id})
 
-(defn- dir [asc] (if asc 1 -1))
+(defn dir [asc] (if asc 1 -1))
 
 (defn- make-sort [{{:keys [field asc]} :sort}]
   (let [sort-field (sort-field-mapping field)]
