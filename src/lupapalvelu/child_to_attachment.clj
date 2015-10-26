@@ -19,25 +19,26 @@
                     :neighbors (i18n/localize (name lang) "application.MM.neighbors")
                     :verdicts (i18n/localize (name lang) "application.verdict.title"))
         child (get-child application type id)]
-    {:application application
-     :filename (case type
-                 (str type-name ".pdf"))
-     :size (.length file)
-     :content file
-     :attachment-id nil
-     :attachment-type (case type
-                        :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"}
-                        {:type-group "muut" :type-id "muu"})
-     :op nil
-     :comment-text (case type
-                     :neighbors (get-in child [:owner :name])
-                     type-name)
-     :locked true
-     :user user
-     :created (now)
-     :required false
-     :valid-pdfa is-pdf-a?
-     :missing-fonts []}))
+    {:application        application
+     :filename           (case type
+                           (str type-name ".pdf"))
+     :size               (.length file)
+     :content            file
+     :attachment-id      nil
+     :attachment-type    (case type
+                           :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"}
+                           {:type-group "muut" :type-id "muu"})
+     :op                 nil
+     :comment-text       (case type
+                           :neighbors (get-in child [:owner :name])
+                           type-name)
+     :locked             true
+     :user               user
+     :created            (now)
+     :required           false
+     :archivable         is-pdf-a?
+     :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
+     :missing-fonts      []}))
 
 (defn generate-attachment-from-children [user app lang child-type id]
   "Builds attachment and return attachment data as map"

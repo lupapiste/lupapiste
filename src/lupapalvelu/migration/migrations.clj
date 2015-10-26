@@ -1222,7 +1222,7 @@
 (defn change-valid-pdfa-to-archivable [version]
   (let [valid-pdfa? (:valid-pdfa version)]
     (when-not (nil? valid-pdfa?)
-      (-> (assoc version :archivable valid-pdfa? :archivabilityError (if valid-pdfa? nil "invalid-pdfa"))
+      (-> (assoc version :archivable valid-pdfa? :archivabilityError (when-not valid-pdfa? :invalid-pdfa))
           (dissoc :valid-pdfa)))))
 
 (defmigration set-general-archivability-boolean

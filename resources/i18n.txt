@@ -1,0 +1,3 @@
+invalid-tiff: TIFF-tiedosto on virheellinen tai sisältää tuntemattomia metatietokenttiä.
+invalid-mime-type: Tiedostotyyppi ei sovellu pysyvään säilytykseen.
+invalid-pdfa: Tiedosto ei ole validia PDF/A-muotoa.
