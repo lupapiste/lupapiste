@@ -1,7 +1,8 @@
 (ns lupapalvelu.application-bulletins-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]))
+            [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.mongo :as mongo]))
 
 (apply-remote-minimal)
 
@@ -27,4 +28,11 @@
         (fact "each documents has schema definition"
           (:documents bulletin) => (partial every? :schema))
         (fact "no party documents"
-          (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))))))
+          (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))))
+
+    (fact "Publishing again creates new version snapshot"
+      (command olli :publish-bulletin :id app-id) => ok?
+      (-> (mongo/with-db test-db-name
+            (mongo/by-id :application-bulletins app-id [:versions]))
+        :versions
+        count) => 2)))
