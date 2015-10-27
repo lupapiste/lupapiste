@@ -575,7 +575,7 @@
                               (select-keys domain/application-skeleton
                                 [:attachments :statements :verdicts :tasks :buildings :neighbors
                                  :comments :authorityNotice :urgency ; comment panel content
-                                 :submitted :sent :acknowledged :closed :closedBy :started :startedBy ; timestamps
+                                 :submitted :sent :complementNeeded :acknowledged :closed :closedBy :started :startedBy ; timestamps
                                  :_statements-seen-by :_comments-seen-by :_verdicts-seen-by :_attachment_indicator_reset ; indicators
                                  :reminder-sent :transfers ; logs
                                  :authority
