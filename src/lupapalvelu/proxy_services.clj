@@ -5,10 +5,11 @@
             [lupapalvelu.find-address :as find-address]
             [lupapalvelu.wfs :as wfs]
             [noir.response :as resp]
-            [sade.coordinate :as coord]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :refer [dissoc-in select ->double]]
+            [sade.coordinate :as coord]
+            [sade.property :as p]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]))
 
 ;;
@@ -61,32 +62,35 @@
       (resp/json {:data (map wfs/feature-to-position features)})
       (resp/status 503 "Service temporarily unavailable"))))
 
-(defn area-by-property-id-proxy [request]
-  (let [property-id (get (:params request) :property-id)
-        features (wfs/area-by-property-id property-id)]
-    (if features
-      (resp/json {:data (map wfs/feature-to-area features)})
-      (resp/status 503 "Service temporarily unavailable"))))
+(defn area-by-property-id-proxy [{{property-id :property-id} :params :as request}]
+  (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id) )
+    (let [features (wfs/area-by-property-id property-id)]
+      (if features
+        (resp/json {:data (map wfs/feature-to-area features)})
+        (resp/status 503 "Service temporarily unavailable")))
+    (resp/status 400 "Bad Request")))
 
-(defn property-id-by-point-proxy [request]
-  (let [{x :x y :y} (:params request)
-        features (wfs/property-id-by-point x y)]
-    (if features
-      (resp/json (:kiinttunnus (wfs/feature-to-property-id (first features))))
-      (resp/status 503 "Service temporarily unavailable"))))
+(defn property-id-by-point-proxy [{{x :x y :y} :params}]
+  (if (and (coord/valid-x? x) (coord/valid-y? y))
+    (let [features (wfs/property-id-by-point x y)]
+      (if features
+        (resp/json (:kiinttunnus (wfs/feature-to-property-id (first features))))
+        (resp/status 503 "Service temporarily unavailable")))
+    (resp/status 400 "Bad Request")))
 
 (defn address-by-point-proxy [{{x :x y :y} :params}]
-  (if (and (coord/valid-x? (->double x))
-           (coord/valid-y? (->double y)))
+  (if (and (coord/valid-x? x) (coord/valid-y? y))
     (if-let [features (wfs/address-by-point x y)]
       (resp/json (wfs/feature-to-address-details (first features)))
       (resp/status 503 "Service temporarily unavailable"))
     (resp/status 400 "Bad Request")))
 
+(def wdk-type-pattern #"^POINT|^LINESTRING|^POLYGON")
+
 (defn property-info-by-wkt-proxy [request] ;example: wkt=POINT(404271+6693892)&radius=100
-  (let [{wkt :wkt radius :radius} (:params request)
-        type (re-find #"^POINT|^LINESTRING|^POLYGON" wkt)
-        coords (s/replace wkt #"^POINT|^LINESTRING|^POLYGON" "")
+  (let [{wkt :wkt radius :radius :or {wkt ""}} (:params request)
+        type (re-find wdk-type-pattern wkt)
+        coords (s/replace wkt wdk-type-pattern "")
         features (case type
                    "POINT" (let [[x y] (s/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
                              (if-not (ss/numeric? radius)
@@ -145,26 +149,27 @@
         )
       (resp/status 503 "Service temporarily unavailable"))))
 
-(defn plan-urls-by-point-proxy [request]
-  (let [{x :x y :y municipality :municipality} (:params request)
-        response (wfs/plan-info-by-point x y municipality)
-        k (keyword municipality)
-        gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
-                     (resolve (symbol f-name))
-                     wfs/gfi-to-features-sito)
-        feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
-                         (resolve (symbol f-name))
-                         wfs/feature-to-feature-info-sito)]
-    (if response
-      (resp/json (map feature-mapper (gfi-mapper response municipality)))
-      (resp/status 503 "Service temporarily unavailable"))))
+(defn plan-urls-by-point-proxy [{{:keys [x y municipality]} :params}]
+  (if (and (coord/valid-x? x) (coord/valid-y? y) (ss/numeric? municipality))
+    (let [response (wfs/plan-info-by-point x y municipality)
+          k (keyword municipality)
+          gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
+                       (resolve (symbol f-name))
+                       wfs/gfi-to-features-sito)
+          feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
+                           (resolve (symbol f-name))
+                           wfs/feature-to-feature-info-sito)]
+      (if response
+        (resp/json (map feature-mapper (gfi-mapper response municipality)))
+        (resp/status 503 "Service temporarily unavailable")))
+    (resp/status 400 "Bad Request")))
 
-(defn general-plan-urls-by-point-proxy [request]
-  (let [{x :x y :y} (:params request)
-        response (wfs/general-plan-info-by-point x y)]
-    (if response
+(defn general-plan-urls-by-point-proxy [{{x :x y :y} :params}]
+  (if (and (coord/valid-x? x) (coord/valid-y? y))
+    (if-let [response (wfs/general-plan-info-by-point x y)]
       (resp/json (map wfs/general-plan-feature-to-feature-info (wfs/gfi-to-general-plan-features response)))
-      (resp/status 503 "Service temporarily unavailable"))))
+      (resp/status 503 "Service temporarily unavailable"))
+    (resp/status 400 "Bad Request")))
 
 ;
 ; Utils:
