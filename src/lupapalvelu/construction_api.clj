@@ -43,7 +43,7 @@
        (let [timestamp     (util/to-millis-from-local-date-string startedDate)
              app-updates   (merge
                              {:modified created}
-                             (when (= "verdictGiven" (:state application))
+                             (when (states/verdict-given-states (keyword (:state application)))
                                {:started created
                                 :state  :constructionStarted}))
              application   (merge application app-updates)
@@ -58,7 +58,7 @@
            {:buildings {$elemMatch {:index (:index building)}}}
            {$set (merge app-updates {:buildings.$.constructionStarted timestamp
                                      :buildings.$.startedBy (select-keys user [:id :firstName :lastName])})})
-         (when (= "verdictGiven" (:state application))
+         (when (states/verdict-given-states (keyword (:state application)))
            (notifications/notify! :application-state-change command))
          (ok :integrationAvailable ftp-user?))))
 

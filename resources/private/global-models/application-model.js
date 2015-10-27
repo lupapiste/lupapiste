@@ -59,6 +59,8 @@ LUPAPISTE.ApplicationModel = function() {
 
   // Application metadata fields
   self.inPostVerdictState = ko.observable(false);
+  self.stateSeq = ko.observable([]);
+  self.currentStateInSeq = ko.pureComputed(function() {return _.contains(self.stateSeq(), self.state());});
   self.inPostSubmittedState = ko.observable(false); // TODO: remove
   self.vendorBackendId = ko.observable(); // TODO: remove
   self.applicantPhone = ko.observable();
@@ -321,6 +323,14 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
     hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
     return false;
+  };
+
+  self.publishApplicationBulletin = function() {
+    ajax.command("publish-bulletin", {id: self.id()})
+      .success(_.noop)
+      .error(_.noop)
+      .processing(self.processing)
+      .call();
   };
 
   self.refreshKTJ = function() {

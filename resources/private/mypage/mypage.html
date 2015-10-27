@@ -2,8 +2,11 @@
 <html>
 <body>
   <section class="page container" id="mypage">
-    <!-- TODO opening first accordion causes form to submit, don't know why -->
     <div id="own-info-form">
+      <button class="secondary" data-bind="click: function() { history.go(-1); }">
+        <i class="lupicon-chevron-start"></i>
+        <span data-bind="ltext: 'back'"></span>
+      </button>
       <h1 data-bind="ltext: 'mypage.title'"></h1>
       <div data-bind="lhtml:'mypage.desc'" class="page-info"></div>
 

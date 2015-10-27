@@ -18,6 +18,7 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
@@ -77,27 +78,29 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           #{:submitted :complement-needed}
+   :states           #{:submitted :complementNeeded}
    :org-authz-roles  #{:approver}}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
-        foreman-notice? (foreman/notice? application)
+        next-state   (if jatkoaika-app?
+                       :closed ; FIXME create a state machine for :ya-jatkoaika
+                       (sm/next-state application))
+        _           (assert next-state)
+
+        timestamps  (zipmap (conj #{:modified :sent} next-state) (repeat created))
+        _           (assert (every? (partial contains? domain/application-skeleton) (keys timestamps)))
+
         app-updates (merge
-                      {:modified created
-                       :sent created
+                      {:state next-state
                        :authority (if (domain/assigned? application) (:authority application) (user/summary user))} ; LUPA-1450
-                      (if (or jatkoaika-app? foreman-notice?)
-                        {:state :closed :closed created}
-                        {:state :sent}))
+                      timestamps)
         application (-> application
                       meta-fields/enrich-with-link-permit-data
                       (#(if (= "lupapistetunnus" (-> % :linkPermitData first :type))
                          (update-link-permit-data-with-kuntalupatunnus-from-verdict %)
                          %))
                       (merge app-updates))
-        mongo-query (if (or jatkoaika-app? foreman-notice?)
-                      {:state {$in ["submitted" "complement-needed"]}}
-                      {})
+        mongo-query {:state {$in ["submitted" "complementNeeded"]}}
         indicator-updates (application/mark-indicators-seen-updates application user created)
         transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
         do-update (fn [attachments-updates]
@@ -122,7 +125,7 @@
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)
                 (application-already-exported :exported-to-backing-system)]
-   :states     #{:sent :verdictGiven :constructionStarted}
+   :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 
@@ -249,7 +252,7 @@
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [has-asianhallinta-operation]
-   :states     #{:submitted :complement-needed}}
+   :states     #{:submitted :complementNeeded}}
   [{:keys [application created user]:as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
         application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
@@ -290,7 +293,7 @@
   {:parameters [id lang attachmentIds]
    :user-roles #{:authority}
    :pre-checks [has-asianhallinta-operation (application-already-exported :exported-to-asianhallinta)]
-   :states     #{:verdictGiven :sent}
+   :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 

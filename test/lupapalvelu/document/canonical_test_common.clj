@@ -82,6 +82,12 @@
                                      :yhteystiedot {:email {:modified 1391415662591, :value "pekka.borga@porvoo.fi"},
                                                     :puhelin {:modified 1391415662591, :value "121212"}}}}})
 
+(def yritysilmoittaja
+  (assoc-in yrityshakija [:schema-info :name] "ilmoittaja"))
+
+(def henkiloilmoittaja
+  (assoc-in henkilohakija [:schema-info :name] "ilmoittaja"))
+
 (def henkilomaksaja
   {:id "532c400eef4eb00000000000"
    :schema-info { :name "ymp-maksaja" :version 1 :approvable true :type "party" }

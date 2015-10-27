@@ -18,6 +18,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch])
@@ -38,11 +39,14 @@
             attachment-id   urlhash
             attachment-type {:type-group "muut" :type-id "muu"}
             target          {:type "verdict" :id verdict-id :urlHash urlhash}
-            attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+            attachment-time (get-in pk [:liite :muokkausHetki] timestamp)
+            ; Reload application from DB, attachments have changed
+            ; if verdict has several attachments.
+            current-application (domain/get-application-as (:id application) user)]
         ; If the attachment-id, i.e., hash of the URL matches
         ; any old attachment, a new version will be added
         (if (= 200 (:status resp))
-          (attachment/attach-file! {:application application
+          (attachment/attach-file! {:application current-application
                                     :filename (or header-filename filename)
                                     :size content-length
                                     :content (:body resp)
@@ -88,7 +92,7 @@
         {$set (merge {:verdicts verdicts-with-attachments
                       :modified created}
                 (when-not (states/post-verdict-states (keyword (:state application)))
-                  {:state :verdictGiven})
+                  {:state (sm/verdict-given-state application)})
                 (when-not has-old-verdict-tasks {:tasks tasks})
                 (when extras-reader (extras-reader app-xml)))}))))
 
@@ -101,7 +105,7 @@
     (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
       {$set {:verdicts verdicts-with-attachments
              :modified created
-             :state    :verdictGiven}})))
+             :state    (sm/verdict-given-state application)}})))
 
 (defn- get-tj-suunnittelija-doc-name
   "Returns name of first party document of operation"

@@ -253,27 +253,27 @@ User nav menu is not visible
   Element should not be visible  //*[@data-test-id='user-nav-menu']
 
 As Mikko
-  Open browser to login page
+  Go to login page
   Mikko logs in
 
 As Teppo
-  Open browser to login page
+  Go to login page
   Teppo logs in
 
 As Veikko
-  Open browser to login page
+  Go to login page
   Veikko logs in
 
 As Sonja
-  Open browser to login page
+  Go to login page
   Sonja logs in
 
 As Sipoo
-  Open browser to login page
+  Go to login page
   Sipoo logs in
 
 As Solitaadmin
-  Open browser to login page
+  Go to login page
   Solitaadmin logs in
 
 Mikko logs in
@@ -401,8 +401,7 @@ Edit operation description
   # Close the input bubble. Press key fails if the bubble has already been closed.
   Run Keyword And Ignore Error  Press Key  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]  \\13
 
-  Wait for jQuery
-  Wait until  Page should contain  Tallennettu
+  Positive indicator should be visible
   Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
 
 # This only works if there is only one applicable document.
@@ -902,11 +901,12 @@ Input verdict
   Execute JavaScript  $("#verdict-name").change();
 
 Submit empty verdict
+  [Arguments]  ${targetState}=verdictGiven
   Go to give new verdict
   Input verdict  -  6  01.05.2018  01.06.2018  -
   Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Application state should be  verdictGiven
+  Wait until  Application state should be  ${targetState}
 
 Do fetch verdict
   [Arguments]  ${fetchConfirmationText}

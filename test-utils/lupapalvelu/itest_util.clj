@@ -61,6 +61,8 @@
 (def ronja-id    (id-for "ronja"))
 (def luukas      (apikey-for "luukas"))
 (def luukas-id   (id-for "luukas"))
+(def kosti       (apikey-for "kosti"))
+(def kosti-id    (id-for "kosti"))
 (def sipoo       (apikey-for "sipoo"))
 (def tampere-ya  (apikey-for "tampere-ya"))
 (def naantali    (apikey-for "admin@naantali.fi"))
@@ -262,6 +264,9 @@
 (defn http303? [{:keys [status]}]
   (= status 303))
 
+(defn http400? [{:keys [status]}]
+  (= status 400))
+
 (defn http401? [{:keys [status]}]
   (= status 401))
 
@@ -302,6 +307,8 @@
          (set-anti-csrf! (not old-value#))))))
 
 (defn comment-application
+  ([apikey id]
+    (comment-application apikey id false nil))
   ([apikey id open?]
     {:pre [(instance? Boolean open?)]}
     (comment-application apikey id open? nil))

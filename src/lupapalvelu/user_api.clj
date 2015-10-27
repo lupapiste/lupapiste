@@ -616,7 +616,7 @@
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
    :user-roles #{:applicant}
-   :states     #{:draft :open :submitted :complement-needed}
+   :states     #{:draft :open :submitted :complementNeeded}
    :pre-checks [(fn [command _]
                   (when-not (-> command :user :architect)
                     unauthorized))]}

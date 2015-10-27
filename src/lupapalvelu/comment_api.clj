@@ -13,6 +13,10 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 
+;;
+;; Emails
+;;
+
 (defn- application-link [lang role full-path]
   (str (env/value :host) "/app/" lang "/" (user/applicationpage-for role) "#!" full-path))
 
@@ -36,6 +40,10 @@
    :subject-key    "new-comment"
    :model-fn create-model})
 
+;;
+;; Validation
+;;
+
 (defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
   (when (and to (not (user/authority? user)))
     (fail :error.to-settable-only-by-authority)))
@@ -44,10 +52,17 @@
   (when-not (#{"application", "attachment", "statement", "verdict"} (:type target))
     (fail :error.unknown-type)))
 
+;;
+;; API
+;;
+
+(def commenting-states (union states/all-inforequest-states (states/all-application-states-but states/terminal-states)))
+
 (defcommand can-target-comment-to-authority
   {:description "Dummy command for UI logic"
    :user-roles #{:authority}
-   :states      (states/all-states-but [:draft :canceled])})
+   :org-authz-roles action/commenter-org-authz-roles
+   :states      (disj commenting-states :draft)})
 
 (defcommand can-mark-answered
   {:description "Dummy command for UI logic"
@@ -58,7 +73,7 @@
   {:parameters [id]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :org-authz-roles #{:authority}
+   :org-authz-roles action/commenter-org-authz-roles
    :states states/all-states}
   [{application :application}]
   (ok (select-keys application [:id :comments])))
@@ -66,8 +81,9 @@
 (defcommand add-comment
   {:parameters [id text target roles]
    :user-roles #{:applicant :authority :oirAuthority}
-   :states     (states/all-states-but [:canceled])
+   :states     commenting-states
    :user-authz-roles action/all-authz-writer-roles
+   :org-authz-roles action/commenter-org-authz-roles
    :pre-checks [applicant-cant-set-to
                 application/validate-authority-in-drafts]
    :input-validators [validate-comment-target

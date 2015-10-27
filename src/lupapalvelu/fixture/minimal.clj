@@ -236,6 +236,23 @@
     :city "Sipoo"
     :private {:password "$2a$10$YM2XkcJVjM5JiqqR2qg7U.iUuY10LPYexYTfV/21RHOayn1xIf2sS"
               :apikey "5056e6d3aa24a1c901e6b9de"}}
+
+   ;; Kosti Kommentoija - Sipoon kommentoija: kosti / kosti
+   {:id "777777777777777777000026"
+    :username "kosti"
+    :role "authority"
+    :enabled true
+    :email "kosti.kommentoija@sipoo.fi"
+    :orgAuthz {:753-R #{:commenter}}
+    :firstName "Kosti"
+    :lastName "Kommentoija"
+    :phone "03121992"
+    :street "Katuosoite 1 a 3"
+    :zip "04130"
+    :city "Sipoo"
+    :private {:password "$2a$10$d2Ut/qSvKylOGhYm/7jXB..1ZC7/x39q5e/PFdtjHLqV1XW9wr3oO"
+              :apikey "XDnPTeDDpPqU5yoYQEERgZ0p4H6dff1RIdYgyDCk"}}
+
    ;; Porvoo
 
    ;; Pekka Borga - Porvoon lupa-arkkitehti:  pekka / pekka
@@ -253,21 +270,34 @@
 
    ;; Oulu
 
+   ;; Oulu Ymp Admin - Oulun YMP paakayttaja:  ymp-admin@oulu.fi / oulu
+   ;; Viranomaisena myos Naantalissa
+   {:id "777777777777734777000034"
+    :email "ymp-admin@oulu.fi"
+    :enabled true
+    :role "authorityAdmin"
+    :orgAuthz {:564-YMP #{:authorityAdmin}}
+    :firstName "Oulu Ymp"
+    :lastName "Admin"
+    :phone "121212"
+    :username "ymp-admin@oulu.fi"
+    :private {:password "$2a$10$JA1Ec/bEUBrKLzeZX3aKNeyXcfCtjDdWyUQPTlL0rldhFhjq5Drje"}}
+
    ;; Olli Ule\u00E5borg - Oulun lupa-arkkitehti:  olli / olli
    ;; Viranomaisena myos Naantalissa
    {:id "777777777777777777000034"
-     :email "olli.uleaborg@ouka.fi"
-     :enabled true
-     :role "authority"
-     :orgAuthz {:564-R #{:authority}
-                :529-R #{:authority}
-                :564-YMP #{:authority}}
-     :firstName "Olli"
-     :lastName "Ule\u00E5borg"
-     :phone "121212"
-     :username "olli"
-     :private {:password "$2a$10$JXFA55BPpNDpI/jDuPv76uW9TTgGHcDI2l5daelFcJbWvefB6THmi"
-               :apikey "7634919923210010829057754770828315568705"}}
+    :email "olli.uleaborg@ouka.fi"
+    :enabled true
+    :role "authority"
+    :orgAuthz {:564-R #{:authority}
+               :529-R #{:authority}
+               :564-YMP #{:authority}}
+    :firstName "Olli"
+    :lastName "Ule\u00E5borg"
+    :phone "121212"
+    :username "olli"
+    :private {:password "$2a$10$JXFA55BPpNDpI/jDuPv76uW9TTgGHcDI2l5daelFcJbWvefB6THmi"
+              :apikey "7634919923210010829057754770828315568705"}}
 
    ;; Naantali
 

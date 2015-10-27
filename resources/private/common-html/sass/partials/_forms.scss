@@ -516,7 +516,10 @@ input.form-input.inline {
       }
     }
   }
-
+  .form-string {
+    background: none;
+    border:none;
+  }
   .form-table th:first-child {
     border-left: none;
   }
@@ -1081,8 +1084,6 @@ $col: 25%;
     height: 0;
     margin: 0;
     font-size: 0;
-    display: inline;
-    //-moz-transform: scale(0.1);
   }
 
   .checkbox-label:before {

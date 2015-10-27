@@ -10,7 +10,7 @@ Hyv&auml;ksy&auml;ksesi roolin ja n&auml;hd&auml;ksesi hakemuksen tiedot klikkaa
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Tarkista my&ouml;s, ett&auml; kutsuttu s&auml;hk&ouml;postiosoite [{{recipient-email}}]({{recipient-email}}) vastaa s&auml;hk&ouml;postiosoitetta, jolla olet palveluun rekister&ouml;itynyt.
 
-Ongelmatilanteissa ota yhteytt&auml; [tuki@lupapiste.fi](tuki@lupapiste.fi).
+Mik&auml;li olet rekister&ouml;itynyt eri osoitteella Lupapisteeseen, pyyd&auml; kutsun l&auml;hett&auml;j&auml;lt&auml; [{{inviter-email}}]({{inviter-email}}) uusi kutsu.
 
 
 ---

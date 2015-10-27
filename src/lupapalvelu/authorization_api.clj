@@ -41,7 +41,8 @@
 (defn- create-invite-email-model [command conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
     :message (get-in command [:data :text])
-    :recipient-email (:email recipient)))
+    :recipient-email (:email recipient)
+    :inviter-email (-> command :user :email)))
 
 (notifications/defemail :invite  {:recipients-fn :recipients
                                   :model-fn create-invite-email-model})
@@ -69,14 +70,15 @@
     (if (or (domain/invite application email) (domain/has-auth? application (:id existing-user)))
       (fail :invite.already-has-auth)
       (let [invited (user/get-or-create-user-by-email email inviter)
-            auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)]
+            auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)
+            email-template (if (= notification "invite-to-prev-permit")
+                             :invite-to-prev-permit
+                             :invite)]
         (update-application command
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
           {$push {:auth     auth}
            $set  {:modified timestamp}})
-        (if (= notification "invite-to-prev-permit")
-          (notifications/notify! :invite-to-prev-permit (assoc command :recipients [invited]))
-          (notifications/notify! :invite (assoc command :recipients [invited])))
+        (notifications/notify! email-template (assoc command :recipients [invited]))
         (ok)))))
 
 (defn- role-validator [{{role :role} :data}]

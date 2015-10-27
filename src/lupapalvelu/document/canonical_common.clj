@@ -1,15 +1,15 @@
 (ns lupapalvelu.document.canonical-common
-  (:require [clojure.string :as s]
-            [clojure.walk :as walk]
+  (:require [clojure.walk :as walk]
+            [cljts.io :as jts]
             [swiss.arrows :refer [-<>]]
+            [sade.core :refer :all]
+            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas]
-            [cljts.io :as jts]
-            [sade.env :as env]))
+            [lupapalvelu.document.schemas :as schemas]))
 
 
 ; Empty String will be rendered as empty XML element
@@ -22,15 +22,16 @@
 (def application-state-to-krysp-state
   {:submitted "vireill\u00e4"
    :sent "vireill\u00e4"
-   :complement-needed "odottaa asiakkaan toimenpiteit\u00e4"
+   :complementNeeded "odottaa asiakkaan toimenpiteit\u00e4"
    :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
+   :foremanVerdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
    :constructionStarted "rakennusty\u00f6t aloitettu"
    :closed "valmis"})
 
 (def ymp-application-state-to-krysp-state
   {:sent "1 Vireill\u00e4"
    :submitted "1 Vireill\u00e4"
-   :complement-needed "1 Vireill\u00e4"
+   :complementNeeded "1 Vireill\u00e4"
    :verdictGiven "ei tiedossa"
    :constructionStarted "ei tiedossa"
    :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
@@ -38,8 +39,9 @@
 (def- state-timestamp-fn
   {:submitted :submitted
    :sent :submitted ; Enables XML to be formed from sent applications
-   :complement-needed :complementNeeded
+   :complementNeeded :complementNeeded
    :verdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
+   :foremanVerdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
    :constructionStarted :started
    :closed :closed})
 
@@ -56,7 +58,7 @@
   (group-by (comp keyword :name :schema-info) documents))
 
 (defn empty-strings-to-nil [v]
-  (when-not (and (string? v) (s/blank? v)) v))
+  (when-not (and (string? v) (ss/blank? v)) v))
 
 (defn documents-by-type-without-blanks
   "Converts blank strings to nils and groups documents by schema name"
@@ -107,7 +109,7 @@
   (let [muu (= "other" sel-val)
         k   (if muu muu-key sel-key)
         v   (if muu muu-val sel-val)]
-    (when-not (s/blank? v)
+    (when-not (ss/blank? v)
       {k v})))
 
 (def ya-operation-type-to-usage-description
@@ -246,6 +248,7 @@
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
+   "Ilmoituksen tekij\u00e4"        "hakija"
    "Rakennusvalvonta-asian laskun maksaja"  "maksaja"
    "p\u00e4\u00e4suunnittelija"     "p\u00e4\u00e4suunnittelija"
    "GEO-suunnittelija"              "erityissuunnittelija"
@@ -270,6 +273,7 @@
   {:paasuunnittelija       "p\u00e4\u00e4suunnittelija"
    :hakija-r               "Rakennusvalvonta-asian hakija"
    :hakija                 "Rakennusvalvonta-asian hakija"
+   :ilmoittaja             "Ilmoituksen tekij\u00e4"
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
@@ -315,7 +319,7 @@
                    ; Old applications have kuntaRoolikoodi under patevyys group (LUPA-771)
                    (get-in party [:patevyys :kuntaRoolikoodi])
                    default-role)]
-      (if (s/blank? code) default-role code))))
+      (if (ss/blank? code) default-role code))))
 
 (defn get-osapuoli-data [osapuoli party-type]
   (let [selected-value (or (-> osapuoli :_selected) (-> osapuoli first key))
@@ -348,14 +352,13 @@
         :when (seq osapuoli)]
     {tag-name (doc-transformer osapuoli party-type)}))
 
-(defn get-parties [documents]
-  (let [hakija-key (if (:hakija-r documents)
-                     :hakija-r
-                     :hakija)]
+(defn get-parties [{:keys [schema-version]} documents]
+  (let [hakija-schema-names (schemas/get-hakija-schema-names schema-version)
+        hakija-key (some #(when (hakija-schema-names (name %)) %) (keys documents))]
     (filter #(seq (:Osapuoli %))
-            (into
-              (get-parties-by-type documents :Osapuoli hakija-key get-osapuoli-data)
-              (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))))
+      (into
+        (get-parties-by-type documents :Osapuoli hakija-key get-osapuoli-data)
+        (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))))
 
 (defn get-suunnittelija-data [suunnittelija party-type]
   (when (-> suunnittelija :henkilotiedot :sukunimi)
@@ -378,7 +381,7 @@
          :kokemusvuodet (:kokemus patevyys)}
         (when (-> henkilo :nimi :sukunimi)
           {:henkilo henkilo})
-        (when (-> suunnittelija :yritys :yritysnimi s/blank? not)
+        (when (-> suunnittelija :yritys :yritysnimi ss/blank? not)
           {:yritys (merge
                      (get-simple-yritys (:yritys suunnittelija))
                      {:postiosoite osoite ; - 2.1.4
@@ -400,21 +403,21 @@
                        r))
                    []
                    (dissoc selections :muuMika)))]
-    (if (-> selections :muuMika s/blank? not)
+    (if (-> selections :muuMika ss/blank? not)
       (str joined "," (-> selections :muuMika))
       joined)))
 
 (defn- get-sijaistustieto [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm] :as sijaistus} sijaistettavaRooli]
   (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
     {:Sijaistus (util/assoc-when {}
-                  :sijaistettavaHlo (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
+                  :sijaistettavaHlo (ss/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
                   :sijaistettavaRooli sijaistettavaRooli
-                  :alkamisPvm (when-not (s/blank? alkamisPvm) (util/to-xml-date-from-string alkamisPvm))
-                  :paattymisPvm (when-not (s/blank? paattymisPvm) (util/to-xml-date-from-string paattymisPvm)))}))
+                  :alkamisPvm (when-not (ss/blank? alkamisPvm) (util/to-xml-date-from-string alkamisPvm))
+                  :paattymisPvm (when-not (ss/blank? paattymisPvm) (util/to-xml-date-from-string paattymisPvm)))}))
 
 (defn- get-sijaistettava-hlo-214 [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi] :as sijaistus}]
   (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
-    (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))))
+    (ss/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))))
 
 (defn- get-vastattava-tyotieto [{tyotehtavat :vastattavatTyotehtavat} lang]
   (util/strip-nils
@@ -457,8 +460,8 @@
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
        :tyonjohtajaHakemusKytkin (= "hakemus" (:tyonjohtajaHakemusKytkin patevyys))
        :sijaistustieto (get-sijaistustieto sijaistus rooli)}
-      (when-not (s/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
-      (when-not (s/blank? paattymisPvm) {:paattymisPvm (util/to-xml-date-from-string paattymisPvm)})
+      (when-not (ss/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
+      (when-not (ss/blank? paattymisPvm) {:paattymisPvm (util/to-xml-date-from-string paattymisPvm)})
       (get-vastattava-tyotieto tyonjohtaja lang)
       (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
         (when-not (ss/blank? sijaistettava-hlo)
@@ -487,8 +490,8 @@
        :tyonjohtajaHakemusKytkin (= "tyonjohtaja-hakemus" (:permitSubtype application))
        :sijaistustieto (get-sijaistustieto sijaistus rooli)
        :vainTamaHankeKytkin (:tyonjohtajanHyvaksynta (:tyonjohtajanHyvaksynta tyonjohtaja))}
-      (when-not (s/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
-      (when-not (s/blank? paattymisPvm) {:paattymisPvm (util/to-xml-date-from-string paattymisPvm)})
+      (when-not (ss/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
+      (when-not (ss/blank? paattymisPvm) {:paattymisPvm (util/to-xml-date-from-string paattymisPvm)})
       (get-vastattava-tyotieto tyonjohtaja lang)
       (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
         (when-not (ss/blank? sijaistettava-hlo)
@@ -516,7 +519,7 @@
 (defn osapuolet [{neighbors :neighbors :as application} documents-by-type lang]
   {:pre [(map? documents-by-type) (string? lang)]}
   {:Osapuolet
-   {:osapuolitieto (get-parties documents-by-type)
+   {:osapuolitieto (get-parties application documents-by-type)
     :suunnittelijatieto (get-designers documents-by-type)
     :tyonjohtajatieto (get-foremen application documents-by-type lang)
     ;:naapuritieto (get-neighbors neighbors)LPK-215
@@ -533,6 +536,12 @@
    "ranta-asemakaava" "ranta"
    "ei kaavaa" "ei kaavaa"})
 
+(defn format-maara-alatunnus
+  "Given a valid parameter, returns M + zero padded id"
+  [tunnus]
+  (when-let [digits (and (string? tunnus) (second (re-find v/maara-alatunnus-pattern (ss/trim tunnus))))]
+    (str \M (ss/zero-pad 4 digits))))
+
 (defn get-bulding-places [docs application]
   (for [doc docs
         :let [rakennuspaikka (:data doc)
@@ -545,15 +554,15 @@
                                    :alkuHetki (util/to-xml-datetime (now))
                                    :rakennuspaikanKiinteistotieto
                                    {:RakennuspaikanKiinteisto
-                                    {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus))
-                                     :hallintaperuste (-> rakennuspaikka :hallintaperuste)
+                                    {:kokotilaKytkin (ss/blank? (ss/trim (:maaraalaTunnus kiinteisto)))
+                                     :hallintaperuste (:hallintaperuste rakennuspaikka )
                                      :kiinteistotieto
                                      {:Kiinteisto
-                                      (merge {:tilannimi (-> kiinteisto :tilanNimi)
+                                      (merge {:tilannimi (:tilanNimi kiinteisto)
                                               :kiinteistotunnus (:propertyId application)
-                                              :rantaKytkin (true? (-> kiinteisto :rantaKytkin))}
-                                        (when (-> kiinteisto :maaraalaTunnus)
-                                          {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus))}))}}}}}
+                                              :rantaKytkin (true? (:rantaKytkin kiinteisto))}
+                                        (when-let [maara-ala (format-maara-alatunnus (:maaraalaTunnus kiinteisto))]
+                                          {:maaraAlaTunnus maara-ala}))}}}}}
               kaavatieto (merge
                            (when kaavanaste {:kaavanaste kaavanaste})
                            (when kaavatilanne
@@ -614,7 +623,7 @@
           {:keys [yhteyshenkilo osoite]} yritys
           {:keys [etunimi sukunimi]} (:henkilotiedot yhteyshenkilo)
           {:keys [puhelin email]} (:yhteystiedot yhteyshenkilo)
-          yhteyshenkilon-nimi (s/trim (str etunimi " " sukunimi))
+          yhteyshenkilon-nimi (ss/trim (str etunimi " " sukunimi))
           osoite (get-simple-osoite (:osoite yritys))]
       (not-empty
         (util/assoc-when {}
@@ -752,7 +761,7 @@
                                          billing-information)}})))
 
 (defn- process-party [lang {{role :subtype} :schema-info data :data}]
-  {:Osapuoli (merge {:roolikoodi (s/capitalize role)
+  {:Osapuoli (merge {:roolikoodi (ss/capitalize role)
                      :asioimiskieli lang
                      :vainsahkoinenAsiointiKytkin false} (osapuolitieto data))})
 
@@ -771,9 +780,9 @@
       :kasittelija (format "%s %s" a-first a-last)
       :hakemuksenTila (state enums)}}))
 
-(defn- mat-helper [property prop-id]
-  (when-let [mat (:maaraalaTunnus property)]
-    (format "%sM%s" prop-id mat)))
+(defn- mat-helper [property property-id]
+  (when-let [mat (format-maara-alatunnus (:maaraalaTunnus property))]
+    (str property-id mat)))
 
 (defn maaraalatunnus
   "Returns maaraalatunnus in the correct format if the id is available

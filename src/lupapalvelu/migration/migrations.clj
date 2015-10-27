@@ -15,6 +15,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.user :as user]
             [sade.env :as env]
             [sade.excel-reader :as er]))
 
@@ -1142,6 +1143,82 @@
     (for [collection [:applications :submitted-applications]]
       (let [applications (mongo/select collection {} [:documents])]
         (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/foreman-index-update %)) applications))))))
+
+; 2015-10-14:
+;> db.applications.distinct("state", {"permitSubtype": "tyonjohtaja-hakemus"})
+;[
+;        "canceled",
+;        "verdictGiven",
+;        "draft",
+;        "open",
+;        "submitted",
+;        "answered",
+;        "sent",
+;        "complement-needed"
+;]
+
+(defmigration tyonjohtaja-hakemus-verdict-given-mapping
+  {:apply-when (pos? (mongo/count :applications {:permitSubtype "tyonjohtaja-hakemus", :state "verdictGiven"}))}
+  (mongo/update-by-query :applications {:permitSubtype "tyonjohtaja-hakemus", :state "verdictGiven"} {$set {:state :foremanVerdictGiven}}))
+
+
+; 2015-10-14:
+;> db.applications.distinct("state", {"permitSubtype": "tyonjohtaja-ilmoitus"})
+;[
+;        "closed",
+;        "verdictGiven",
+;        "canceled",
+;        "draft",
+;        "open",
+;        "submitted",
+;        "complement-needed"
+;]
+
+(defmigration tyonjohtaja-ilmoitus-closed-mapping
+  {:apply-when (pos? (mongo/count :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "closed"}))}
+  (reduce + 0
+    (for [{:keys [id closed]} (mongo/select :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "closed"} [:closed])]
+      (mongo/update-by-query :applications {:_id id} {$set {:state :acknowledged, :acknowledged closed}, $unset {:closed 1}}))))
+
+(defmigration tyonjohtaja-ilmoitus-verdict-given-mapping
+  {:apply-when (pos? (mongo/count :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "verdictGiven"}))}
+  (reduce + 0
+    (for [{:keys [id verdicts]} (mongo/select :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "verdictGiven"} [:verdicts])
+          :let [timestamp (->> (map :timestamp verdicts) (filter number?) (apply min))]]
+      (mongo/update-by-query :applications {:_id id} {$set {:state :acknowledged, :acknowledged timestamp}}))))
+
+(defn pena?
+  "Pena has been deleted from prod db"
+  [user] (= "777777777777777777000020" (:id user)))
+
+(defn init-application-history [{:keys [created opened infoRequest convertedToApplication permitSubtype] :as application}]
+  (let [owner-auth (first (domain/get-auths-by-role application :owner))
+        owner-user (user/find-user (select-keys owner-auth [:id]))
+        creator (cond
+                  (= permitSubtype "muutoslupa") (:user (mongo/by-id :muutoslupa created))
+                  owner-user owner-user
+                  (pena? owner-auth) (merge owner-auth {:role "applicant" :firstName "Testaaja" :lastName "Solita"}))
+
+        _ (assert (:id creator) (:id application))
+
+        state (if (= permitSubtype "muutoslupa")
+                (if (user/authority? creator) "open" "draft")
+                (cond
+                  (or infoRequest convertedToApplication)  "info"
+                  (= opened created) "open"
+                  (and (ss/blank? (:personId creator)) (user/authority? creator)) "open"
+                  :else "draft"))]
+    {$set {:history [{:state state, :ts created, :user (user/summary creator)}]}}))
+
+(defmigration init-history
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {:history.0 {$exists false}} [:created :opened :auth :infoRequest :convertedToApplication :permitSubtype])]
+        (count (map #(mongo/update-by-id collection (:id %) (init-application-history %)) applications))))))
+
+(defmigration complement-needed-camelcase
+  (mongo/update-by-query :applications {:state "complement-needed"} {$set {:state "complementNeeded"}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

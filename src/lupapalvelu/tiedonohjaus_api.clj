@@ -3,7 +3,6 @@
             [sade.core :refer [ok fail]]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.organization-api :as oa]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [monger.operators :refer :all]
@@ -53,13 +52,6 @@
                           [new-k new-v])))
        (into {})))
 
-;;TODO keywordize&sanitize not needed when called from set-tos-function-for-application
-(defn- update-child-metadata [child metadata]
-  (let [metadata (->> (keywordize-keys-and-some-values metadata [])
-                      (#(assoc % :tila (or (get-in child [:metadata :tila]) "Valmis")))
-                      (tms/sanitize-metadata))]
-    (assoc child :metadata metadata)))
-
 (defcommand set-tos-function-for-operation
   {:parameters [operation functionCode]
    :user-roles #{:authorityAdmin}
@@ -71,15 +63,13 @@
   {:parameters [:id functionCode]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal}
-  [{:keys [application created] :as command}]
+  [{:keys [application created user] :as command}]
   (let [orgId (:organization application)
         code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]
     (if code-valid?
       (let [updated-attachments (map #(t/document-with-updated-metadata % orgId functionCode) (:attachments application))
-            verdict-metadata (t/metadata-for-document orgId functionCode "p\u00e4\u00e4t\u00f6s")
-            statement-metadata (t/metadata-for-document orgId functionCode "lausunto")
-            updated-verdicts (map #(update-child-metadata % verdict-metadata) (:verdicts application))
-            updated-statements (map #(update-child-metadata % statement-metadata) (:statements application))
+            updated-verdicts (map #(t/document-with-updated-metadata % orgId functionCode "p\u00e4\u00e4t\u00f6s") (:verdicts application))
+            updated-statements (map #(t/document-with-updated-metadata % orgId functionCode "lausunto") (:statements application))
             updated-metadata (t/metadata-for-document orgId functionCode "hakemus")]
         (action/update-application command
                                    {$set {:modified created
@@ -96,7 +86,11 @@
    tms/Vuodet "number"
    s/Bool "checkbox"})
 
-(defn metadata-schema-for-ui [field]
+(def editable-metadata-fields
+  (->> (remove #(= tms/Tila %) tms/asiakirja-metadata-fields)
+       (concat tms/common-metadata-fields)))
+
+(defn- metadata-schema-for-ui [field]
   (cond-> field
           (:dependencies field) (->> (:dependencies)
                                      (map (fn [[k v]] {k (map metadata-schema-for-ui v)}))
@@ -108,20 +102,33 @@
           (:schema field) (-> (assoc :inputType (get schema-to-input-type-map (:schema field)))
                               (dissoc :schema))))
 
-(def editable-metadata-fields
-  (->> (remove #(= tms/Tila %) tms/asiakirja-metadata-fields)
-       (concat tms/common-metadata-fields)))
-
 (defquery tos-metadata-schema
           {:user-roles #{:anonymous}}
           (ok :schema (map metadata-schema-for-ui editable-metadata-fields)))
 
-(defn update-application-child-metadata [{:keys [application created] :as command} type id metadata]
+(defn- revert-unauthorized-modifications [roles old-metadata new-metadata]
+  (let [disallowed-metadata (filter (fn [field] (when-let [role (:require-role field)]
+                                                  (not (contains? roles role))))
+                              editable-metadata-fields)
+        disallowed-keys (map :type disallowed-metadata)
+        replacement-metadata (select-keys old-metadata disallowed-keys)]
+    (merge new-metadata replacement-metadata)))
+
+(defn- update-document-metadata [document metadata user-roles]
+  (let [old-metadata (keywordize-keys-and-some-values (:metadata document) [])
+        metadata (->> (keywordize-keys-and-some-values metadata [])
+                      (revert-unauthorized-modifications user-roles old-metadata)
+                      (#(assoc % :tila (or (:tila old-metadata) "Valmis")))
+                      (tms/sanitize-metadata))]
+    (assoc document :metadata metadata)))
+
+(defn- update-application-child-metadata! [{:keys [application created user] :as command} type id metadata]
   (when (env/feature? :tiedonohjaus)
     (try
       (if-let [child (first (filter #(= (:id %) id) (type application)))]
-        (let [updated-child (update-child-metadata child metadata)
-              updated-children (-> (remove #(= % updated-child) (type application)) (conj updated-child))]
+        (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
+              updated-child (update-document-metadata child metadata user-roles)
+              updated-children (-> (remove #(= % child) (type application)) (conj updated-child))]
           (action/update-application command {$set {:modified created type updated-children}}))
         (fail "error.child.id"))
       (catch RuntimeException e
@@ -133,34 +140,41 @@
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal}
   [command]
-  (update-application-child-metadata command :verdicts verdictId metadata))
+  (update-application-child-metadata! command :verdicts verdictId metadata))
 
 (defcommand store-tos-metadata-for-statement
   {:parameters [:id statementId metadata]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal}
   [command]
-  (update-application-child-metadata command :statements statementId metadata))
+  (update-application-child-metadata! command :statements statementId metadata))
 
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal}
   [command]
-  (update-application-child-metadata command :attachments attachmentId metadata))
+  (update-application-child-metadata! command :attachments attachmentId metadata))
 
 (defcommand store-tos-metadata-for-application
   {:parameters [:id metadata]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal}
-  [{:keys [application created] :as command}]
+  [{:keys [application created user] :as command}]
   (when (env/feature? :tiedonohjaus)
     (try
-      (let [metadata (->> (keywordize-keys-and-some-values metadata [])
-                          (#(assoc % :tila (or (get-in application [:metadata :tila]) "Valmis")))
-                          (tms/sanitize-metadata))]
+      (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
+            processed-metadata (->> (update-document-metadata application metadata user-roles)
+                                    (:metadata))]
         (action/update-application command {$set {:modified created
-                                                  :metadata metadata}}))
+                                                  :metadata processed-metadata}}))
       (catch RuntimeException e
         (timbre/error e)
         (fail "error.invalid.metadata")))))
+
+(defquery case-file-data
+  {:parameters [:id]
+   :user-roles #{:authority}
+   :states states/all-application-states}
+  [{:keys [application]}]
+  (ok :process (t/generate-case-file-data application)))

@@ -87,3 +87,5 @@
 
 (defn finnish-zip? [^String zip-code]
   (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
+
+(def maara-alatunnus-pattern #"^M?([0-9]{1,4})$")

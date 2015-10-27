@@ -120,7 +120,7 @@
                                       (fn [app]
                                         (when (and
                                                 ((states/all-application-states-but [:canceled :draft :open]) (keyword (:state app)))
-                                                (when-not (some #(#{"aiemmalla-luvalla-hakeminen"} (:name %)) (resolve-operations app))
+                                                (when-not (some #(= "aiemmalla-luvalla-hakeminen" %) (map :name (resolve-operations app)))
                                                   (nil? (:submitted app))))
                                           (:id app)))
                                       @applications)))]
@@ -132,7 +132,7 @@
 ;  (timestamp-is-set :canceled #{:canceled}))
 
 (defmonster sent-timestamp
-  (timestamp-is-set :sent #{:sent :complement-needed}))
+  (timestamp-is-set :sent #{:sent :complementNeeded}))
 
 (defmonster closed-timestamp
   (timestamp-is-set :closed #{:closed}))

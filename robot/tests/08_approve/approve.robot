@@ -113,7 +113,7 @@ Sonja sees that attachment has transferred indicator icon
 
 Sonja sees that some completion is needed
   Click enabled by test id  request-for-complement
-  Wait Until  Application state should be  complement-needed
+  Wait Until  Application state should be  complementNeeded
   Kill session
 
 Mikko comes back, fills in missing parts and no submit button enabled

@@ -22,7 +22,8 @@
    :open-inforequest-email ""
    :opening nil})
 
-(def authority-roles [:authority :approver :reader :tos-editor :tos-publisher])
+(def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
+(def authority-roles (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))
 
 (defn- with-scope-defaults [org]
   (when (seq org)
@@ -130,7 +131,6 @@
     {:pre  [municipality organization (permit/valid-permit-type? permit-type)]}
    (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization)))))
 
-
 (defn with-organization [id function]
   (if-let [organization (get-organization id)]
     (function organization)
@@ -144,8 +144,8 @@
 (defn allowed-roles-in-organization [organization]
   {:pre [(map? organization)]}
   (if-not (:permanent-archive-enabled organization)
-    (remove #(ss/starts-with (name %) "tos-") authority-roles)
-    authority-roles)  )
+    (remove #(% (set permanent-archive-authority-roles)) authority-roles)
+    authority-roles))
 
 (defn filter-valid-user-roles-in-organization [organization roles]
   (let [organization  (if (map? organization) organization (get-organization organization))

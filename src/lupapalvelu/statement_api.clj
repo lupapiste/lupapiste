@@ -15,7 +15,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
-            [lupapalvelu.user-api :as user-api]))
+            [lupapalvelu.user-api :as user-api]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]))
 
 ;;
 ;; Authority Admin operations
@@ -77,6 +78,7 @@
    :parameters [:id]
    :user-roles #{:authority :applicant}
    :user-authz-roles action/all-authz-roles
+   :org-authz-roles action/reader-org-authz-roles
    :states states/all-application-states}
   [{application :application}]
   (ok :data (possible-statement-statuses application)))
@@ -123,7 +125,7 @@
 (defcommand request-for-statement
   {:parameters [functionCode id personIds]
    :user-roles #{:authority}
-   :states #{:open :submitted :complement-needed}
+   :states #{:open :submitted :complementNeeded}
    :notified true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
@@ -142,7 +144,7 @@
 
 (defcommand delete-statement
   {:parameters [id statementId]
-   :states     #{:open :submitted :complement-needed}
+   :states     #{:open :submitted :complementNeeded}
    :user-roles #{:authority}}
   [command]
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
@@ -150,13 +152,13 @@
 (defcommand give-statement
   {:parameters  [:id statementId status text :lang]
    :pre-checks  [statement-exists statement-owner #_statement-not-given]
-   :states      #{:open :submitted :complement-needed}
+   :states      #{:open :submitted :complementNeeded}
    :user-roles #{:authority}
    :user-authz-roles #{:statementGiver}
    :notified    true
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
    :description "authrority-roled statement owners can give statements - notifies via comment."}
-  [{:keys [application user created] :as command}]
+  [{:keys [application user created lang] :as command}]
   (when-not ((set (possible-statement-statuses application)) status)
     (fail! :error.unknown-statement-status))
   (let [comment-text   (if (statement-given? application statementId)
@@ -164,10 +166,14 @@
                          (i18n/loc "statement.given"))
         comment-target {:type :statement :id statementId}
         comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created)]
-    (update-application command
-      {:statements {$elemMatch {:id statementId}}}
-      (util/deep-merge
-        comment-model
-        {$set {:statements.$.status status
-               :statements.$.given created
-               :statements.$.text text}}))))
+
+    (let [response (update-application command
+                                       {:statements {$elemMatch {:id statementId}}}
+                                       (util/deep-merge
+                                         comment-model
+                                         {$set {:statements.$.status status
+                                                :statements.$.given created
+                                                :statements.$.text text}}))
+          updated-app (assoc application :statements (map  #(if (= statementId (:id %)) (assoc % :status status :given created :text text) % ) (:statements application) ) )]
+                       (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
+                       response)))

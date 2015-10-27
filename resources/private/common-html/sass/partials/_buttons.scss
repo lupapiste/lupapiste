@@ -217,9 +217,9 @@ i.btn-small {
   background-color: $bg;
 
   &:link, &:visited {
-            color: $text;
-            background-color: $bg;
-          }
+    color: $text;
+    background-color: $bg;
+  }
   &:hover {
     color: $hover-text;
     background-color: $hover-bg
@@ -270,11 +270,11 @@ i.btn-small {
     color: $gray221;
   }
   &:link, &:visited {
-            border-color: $gray221;
-          }
+    border-color: $gray221;
+  }
   &:hover, &:active {
-            border-color: $gray187;
-           }
+    border-color: $gray187;
+  }
 }
 
 @include button-div-a-i-span (function) {
@@ -506,4 +506,10 @@ button {
   }
 }
 
-
+// Could be done in @include button-div-a-i-span (positive), didn't want to add borders anywhere else
+.application_actions button.positive {
+  border: 1px solid $gray221;
+  &:hover, &:active {
+    border-color: $gray187;
+  }
+}

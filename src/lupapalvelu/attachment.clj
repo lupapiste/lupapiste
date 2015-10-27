@@ -89,6 +89,31 @@
   (attachment-ids-from-tree
     (apply concat (set (vals attachment-types-by-permit-type)))))
 
+;; Helper for reporting purposes
+(defn localised-attachments-by-permit-type [permit-type]
+  (let [localize-attachment-section
+        (fn [lang [title attachment-names]]
+          [(i18n/localize lang (ss/join "." ["attachmentType" (name title) "_group_label"]))
+           (reduce
+             (fn [result attachment-name]
+               (conj
+                 result
+                 (i18n/localize lang
+                   (ss/join "." ["attachmentType" (name title) (name attachment-name)]))))
+             []
+             attachment-names)])]
+    (reduce
+      (fn [accu lang]
+        (assoc accu (keyword lang)
+          (->> (get attachment-types-by-permit-type (keyword permit-type))
+            (partition 2)
+            (map (partial localize-attachment-section lang))
+            vec)))
+      {}
+     ["fi" "sv"]))
+
+  )
+
 ;;
 ;; Api
 ;;
@@ -274,7 +299,7 @@
               (when set-app-modified? {:modified now})
               (when set-attachment-modified? {:attachments.$.modified now}))})))
 
-(defn update-latest-version-content [application attachment-id file-id size now]
+(defn update-latest-version-content [user application attachment-id file-id size now]
   (let [attachment (get-attachment-info application attachment-id)
         latest-version-index (-> attachment :versions count dec)
         latest-version-path (str "attachments.$.versions." latest-version-index ".")
@@ -288,9 +313,11 @@
       {:attachments {$elemMatch {:id attachment-id}}}
       {$set {:modified now
              :attachments.$.modified now
+             (str latest-version-path "user") user
              (str latest-version-path "fileId") file-id
              (str latest-version-path "size") size
              (str latest-version-path "created") now
+             :attachments.$.latestVersion.user user
              :attachments.$.latestVersion.fileId file-id
              :attachments.$.latestVersion.size size
              :attachments.$.latestVersion.created now}})))
@@ -436,6 +463,7 @@
         options (merge options {:file-id file-id
                                 :filename sanitazed-filename
                                 :content-type content-type})]
+    (debug "         uploading to mongo: "  content)
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
     (.submit preview-threadpool #(create-preview file-id sanitazed-filename content-type content application-id db-name))
     (update-or-create-attachment options)))
@@ -486,23 +514,10 @@
 
 (defn delete-file! [^File file] (try (.delete file) (catch Exception _)))
 
-(defn ensure-pdf-a
-  "Ensures PDF file PDF/A compatibility status based on original attachment status"
-  [temp-file valid-pdfa]
-  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
-  (if (not valid-pdfa)
-    (do (debugf "    no PDF/A required, no conversion") {:file temp-file :pdfa false})
-    (let [a-temp-file (File/createTempFile "lupapiste.stamp.a." ".tmp")
-          conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath temp-file) (.getAbsolutePath a-temp-file))]
-      (cond
-        (:already-valid-pdfa? conversion-result) (do (debugf "      file valid PDF/A, no conversion") {:file temp-file :pdfa true})
-        (:pdfa? conversion-result) (do (debug "      converting to PDF/A file: " (.getAbsolutePath a-temp-file)) (delete-file! temp-file) {:file a-temp-file :pdfa true})
-        :else (do (errorf "Ensuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
-
 (defn application-to-pdf-a
   "Returns application data in PDF/A temp file"
   [application lang]
   (let [file (File/createTempFile "application-pdf-a-" ".tmp")
         stream (pdf-export/generate application lang)]
     (io/copy stream file)
-  (ensure-pdf-a file true)))
+    (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))))

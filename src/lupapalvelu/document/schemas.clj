@@ -12,6 +12,15 @@
 (defn get-all-schemas [] @registered-schemas)
 (defn get-schemas [version] (get @registered-schemas version))
 
+(defn get-hakija-schema-names [schema-version]
+  (let [schemas (get-schemas schema-version)]
+    (assert schemas)
+    (->> schemas
+      (map #(when (= "hakija" (-> % val :info :subtype))
+              (-> % val :info :name)))
+      (filter identity)
+      set)))
+
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
                  :approvable :removable :deny-removing-last-document
@@ -421,7 +430,7 @@
 
 (def hanke-row [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                 {:name "katuosoite" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
-                {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.rakennustoimenpide"}
+                {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-localized-string :i18nkey "muutHankkeet.rakennustoimenpide" :locPrefix "operations"}
                 {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
                 {:name "vaihe" :type :select :size "t" :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe"
                  :body [{:name "R" :i18nkey "muutHankkeet.R"}
@@ -822,16 +831,7 @@
              {:name "poistumanAjankohta" :type :date}
              olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
 
-(def rakennuspaikka [#_{:name "kiinteisto"
-                      :type :group
-                      :body [{:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
-                             {:name "tilanNimi" :type :string :readonly true}
-                             {:name "rekisterointipvm" :type :string :readonly true}
-                             {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
-                             {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}
-                             {:name "rantaKytkin" :type :checkbox}]}
-
-                     {:name "kiinteisto"
+(def rakennuspaikka [{:name "kiinteisto"
                       :type :group
                       :uicomponent :propertyGroup
                       :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size "s"}
@@ -933,6 +933,7 @@
 
 (def kt-rasitetoimitus {:name "rasitetoimitus"
                         :type :group
+                        :group-help "help.rasitetoimitus"
                         :approvable true
                         :removable true
                         :body [{:name "kayttooikeuslaji"
@@ -1154,6 +1155,20 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
     :body (schema-body-without-element-by-name ya-party turvakielto)}
+
+   {:info {:name "ilmoittaja"
+           :i18name "osapuoli"
+           :order 3
+           :removable true
+           :repeating true
+           :approvable true
+           :type :party
+           :subtype "hakija"
+           :group-help nil
+           :section-help nil
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           }
+    :body party}
 
    {:info {:name "paasuunnittelija"
            :i18name "osapuoli"
