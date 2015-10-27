@@ -265,7 +265,7 @@ var util = (function($) {
         currentSort.field(target);
         currentSort.asc(false);
       }
-    };
+    }
 
     var css = [index];
     if (sortable) {
@@ -282,7 +282,7 @@ var util = (function($) {
              isAscending: ko.pureComputed(function() {
                return currentSort.field() === sortField && currentSort.asc();
              }) };
-  };
+  }
 
 
   return {
