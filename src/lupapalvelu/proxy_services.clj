@@ -100,11 +100,49 @@
       (resp/json (map wfs/feature-to-property-info features))
       (resp/status 503 "Service temporarily unavailable"))))
 
+(defn create-layer-object [layer-name]
+  (let [layer-category (cond 
+                         (re-find #"^\d+_asemakaava$" layer-name) "asemakaava"
+                         (re-find #"^\d+_kantakartta$" layer-name) "kantakartta"
+                         :else "other")
+        layer-id (case layer-category
+                      "asemakaava" "101"
+                      "kantakartta" "102"
+                      "0"
+                      )
+        ]
+	  {
+    :wmsName layer-name 
+    :wmsUrl "/proxy/wms"
+    :name (case layer-category
+            "asemakaava" {:fi "Asemakaava (kunta)" :sv "Detaljplan (kommun)" :en "???"}
+            "kantakartta" {:fi "Kantakartta" :sv "Baskarta" :en "???"}
+            {:fi "" :sv "" :en ""}
+            )
+    :subtitle (case layer-category
+                "asemakaava" {:fi "Kunnan palveluun toimittama ajantasa-asemakaava" :sv "Detaljplan (kommun)" :en "???"}
+                "kantakartta" {:fi "" :sv "" :en ""}
+                {:fi "" :sv "" :en ""}
+                )
+    :id layer-id
+    :baseLayerId layer-id
+    :isBaseLayer (or (= layer-category "asemakaava") (= layer-category "kantakartta"))
+    }
+  )
+)
+
 (defn wms-capabilities-proxy [request]
-  (let [capabilities (wfs/getcapabilities request)
-        layers (wfs/capabilities-to-layers capabilities)]
+  (let [{municipality :municipality} (:params request)
+        capabilities (wfs/getcapabilities request)
+        layers (wfs/capabilities-to-layers capabilities)
+        ]
     (if layers
-      (resp/json (map wfs/layer-to-name layers))
+      (resp/json 
+        (if (nil? municipality)
+          (map create-layer-object (map wfs/layer-to-name layers))
+          (filter #(= (re-find #"^\d+" (:wmsName %)) municipality) (map create-layer-object (map wfs/layer-to-name layers)))
+          )
+        )
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn plan-urls-by-point-proxy [request]
