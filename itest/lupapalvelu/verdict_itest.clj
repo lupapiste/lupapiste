@@ -72,8 +72,8 @@
             first-attachment (get-in application [:attachments 0])]
 
         (fact "verdict is given"
-          (:state application) => "verdictGivent"
-          (-> application :history last :state) => "verdictGivent")
+          (:state application) => "verdictGiven"
+          (-> application :history last :state) => "verdictGiven")
 
         (fact "Authority is still able to add an attachment"
 
