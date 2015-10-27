@@ -36,3 +36,25 @@
             (mongo/by-id :application-bulletins app-id [:versions]))
         :versions
         count) => 2)))
+
+(mongo/with-db test-db-name ; clear bulletins
+  (mongo/remove-many :application-bulletins {}))
+
+(facts* "Querying bulletins"
+  (let [oulu-app (create-and-submit-application pena :operation "jatteen-keraystoiminta"
+                                                :propertyId oulu-property-id
+                                                :x 430109.3125 :y 7210461.375
+                                                :address "Oulu 10")
+        sipoo-app (create-and-submit-application pena :operation "meluilmoitus"
+                                                :propertyId sipoo-property-id
+                                                :x 406898.625 :y 6684125.375
+                                                :address "Hitantine 108")
+        _ (command olli :publish-bulletin :id (:id oulu-app)) => ok?
+        _ (command sonja :publish-bulletin :id (:id sipoo-app)) => ok?
+        _ (datatables pena :application-bulletins :page "1"
+                                                  :searchText ""
+                                                  :municipality nil
+                                                  :state nil) => (partial expected-failure? :error.illegal-number)
+        resp (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state nil) => ok?]
+    (fact "Two bulletins is returned"
+      (count (:data resp)) => 2)))
