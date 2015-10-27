@@ -37,7 +37,8 @@
      :user user
      :created (now)
      :required false
-     :valid-pdfa is-pdf-a?
+     :archivable         is-pdf-a?
+     :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
      :missing-fonts []}))
 
 (defn generate-attachment-from-children [user app lang child-type id]
