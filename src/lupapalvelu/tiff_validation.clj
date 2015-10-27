@@ -5,13 +5,18 @@
            (javax.imageio.stream FileImageInputStream)
            (com.sun.media.imageio.plugins.tiff BaselineTIFFTagSet)))
 
+(def allowed-tag-numbers
+  (-> (->> (BaselineTIFFTagSet/getInstance)
+           (.getTagNumbers)
+           (into #{}))
+      (conj 700)))
+
 (defn- find-tiff-errors [file]
   (let [readers (ImageIO/getImageReadersByFormatName "tiff")
         reader (.next readers)
         _ (.setInput reader (FileImageInputStream. (io/as-file file)))
         metadata (.getImageMetadata reader 0)
         tiff-fields (.getTIFFFields (.getRootIFD metadata))
-        allowed-tag-numbers (.getTagNumbers (BaselineTIFFTagSet/getInstance))
         allowed-compression-values #{1 2 3 4}
         allowed-photometric-values #{0 1 2 3 4}]
     (reduce (fn [errors field]
@@ -28,7 +33,7 @@
 
 (defn valid-tiff?
   "Checks that TIFF file metadata is readable, TIFF contains only baseline tags as defined by
-  com.sun.media.imageio.plugins.tiff.BaselineTIFFTagSet (effectively meaning that the image is TIFF 6.0),
+  com.sun.media.imageio.plugins.tiff.BaselineTIFFTagSet or XMP tag (700), effectively meaning that the image is TIFF 6.0,
   PhotometricInterpretation is a baseline value (0-4) and Compression is uncompressed, CCITT 3 modified huffman RLE,
   CCITT 3 or CCITT 4 (values 1-4), as recommended by Arkistolaitos."
   [file]
