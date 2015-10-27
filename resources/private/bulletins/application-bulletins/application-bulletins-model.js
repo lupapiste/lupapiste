@@ -2,30 +2,4 @@ LUPAPISTE.ApplicationBulletinsModel = function(params) {
   "use strict";
   var self = this;
   self.bulletinService = params.bulletinService;
-
-  self.query = {
-    searchText: ko.observable(),
-    municipality: ko.observable(),
-    state: ko.observable(),
-    page: ko.observable(1),
-    sort: {field: ko.observable("modified"), asc: ko.observable(false)}
-  };
-
-  self.openBulletin = function(item) {
-    pageutil.openPage("bulletin", item.id);
-  };
-
-  // Reset page when search filters change
-  ko.computed(function() {
-    self.query.searchText();
-    ko.mapping.toJS(self.query.sort);
-    self.query.page(1);
-  });
-
-  self.moreBulletinsPending = ko.observable(false);
-
-  ko.computed(function() {
-    self.bulletinService.fetchBulletins(ko.mapping.toJS(self.query),
-      self.moreBulletinsPending);
-  });
 };

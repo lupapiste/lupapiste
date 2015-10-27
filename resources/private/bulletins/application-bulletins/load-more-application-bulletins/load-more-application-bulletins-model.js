@@ -3,14 +3,22 @@ LUPAPISTE.LoadMoreApplicationBulletinsModel = function(params) {
   var self = this;
 
   self.requestedPages = params.requestedPages;
+
   self.bulletinsLeft = params.bulletinsLeft;
-  self.pending = params.pending;
+  self.pending = ko.observable();
 
   self.showButton = ko.pureComputed(function () {
     return self.bulletinsLeft() > 0;
   });
-  
+
   self.localizedBulletinsLeft = ko.pureComputed(function () {
     return self.bulletinsLeft() + loc("unit.kpl");
+  });
+
+  ko.computed(function() {
+    hub.send("bulletinService::fetchBulletins", {
+      page: self.requestedPages(),
+      pending: self.pending
+    });
   });
 };

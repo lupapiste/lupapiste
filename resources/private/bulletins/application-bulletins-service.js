@@ -5,12 +5,13 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   self.data = ko.observableArray([]);
   self.bulletinsLeft = ko.observable(0);
 
-  self.fetchBulletins = _.debounce(function (query, pending) {
-    ajax.datatables("application-bulletins", {page:         query.page,
-                                              searchText:   util.getIn(query, ["searchText"],         ""),
-                                              municipality: util.getIn(query, ["municipality", "id"], ""),
-                                              state:        util.getIn(query, ["state", "id"],        ""),
-                                              sort:         query.sort || {field: "", asc: false}})
+  self.fetchBulletins = _.debounce(function (query) {
+    // TODO setting these in service kind of defeats the purpose of sending events through hub
+    self.currentSort.field(query.sort.field);
+    self.currentSort.asc(query.sort.asc);
+    self.currentPage(query.page);
+
+    ajax.datatables("application-bulletins", query)
       .success(function(res) {
         self.bulletinsLeft(res.left);
         if (query.page === 1) {
@@ -19,7 +20,7 @@ LUPAPISTE.ApplicationBulletinsService = function() {
           self.data(self.data().concat(res.data));
         }
       })
-      .pending(pending || _.noop)
+      .pending(query.pending || _.noop)
       .call();
   }, 250);
 
@@ -40,5 +41,40 @@ LUPAPISTE.ApplicationBulletinsService = function() {
       })
       .call();
   };
+
+  self.currentSort = {
+    field: ko.observable("modified"),
+    asc: ko.observable(false)
+  };
+
+  self.currentPage = ko.observable(1);
+
+  var lastQuery = {
+    page: 1,
+    searchText: "",
+    municipality: "",
+    state: "",
+    sort: {field: "modified", asc: false}
+  };
+
+  hub.subscribe("bulletinService::fetchBulletins", function(event) {
+    // Merge new partial query with last whole query
+    _.merge(lastQuery, event, function(a,b) {
+      if (_.isUndefined(b) || _.isNull(b)) {
+        return "";
+      }
+      return b;
+    });
+
+    self.fetchBulletins(lastQuery);
+  });
+
+  hub.subscribe("bulletinService::fetchMunicipalities", function() {
+    self.fetchMunicipalities();
+  });
+
+  hub.subscribe("bulletinService::fetchStates", function() {
+    self.fetchStates();
+  });
 };
 

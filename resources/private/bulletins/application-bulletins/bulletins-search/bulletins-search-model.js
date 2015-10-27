@@ -2,15 +2,23 @@ LUPAPISTE.BulletinsSearchModel = function(params) {
   "use strict";
   var self = this;
 
-  // Query object
-  var query = params.query;
+  self.municipalities = params.municipalities;
+  self.states = params.states;
 
-  self.bulletinService = params.bulletinService;
+  self.searchText = ko.observable();
+  self.municipality = ko.observable();
+  self.state = ko.observable();
 
-  self.searchText = query.searchText || ko.observable();
-  self.municipality = query.municipality || ko.observable();
-  self.state = query.state || ko.observable();
+  hub.send("bulletinService::fetchMunicipalities");
 
-  self.bulletinService.fetchMunicipalities();
-  self.bulletinService.fetchStates();
+  hub.send("bulletinService::fetchStates");
+
+  ko.computed(function() {
+    hub.send("bulletinService::fetchBulletins", {
+      searchText: util.getIn(self, ["searchText"], ""),
+      municipality: util.getIn(self, ["municipality", "id"], ""),
+      state: util.getIn(self, ["state", "id"], ""),
+      page: 1
+    });
+  });
 };

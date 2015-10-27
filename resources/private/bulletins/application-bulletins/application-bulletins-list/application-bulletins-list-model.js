@@ -4,17 +4,28 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
 
   self.params = params;
 
-  self.query = params.query;
+  var currentSort = params.sort;
+
+  self.openBulletin = function(item) {
+    pageutil.openPage("bulletin", item.id);
+  };
 
   self.columns = [
-    util.createSortableColumn("first", "bulletin.state", {sortField: "bulletinState", currentSort: self.query.sort}),
-    util.createSortableColumn("second", "bulletin.municipality", {sortField: "municipality", currentSort: self.query.sort}),
-    util.createSortableColumn("third", "bulletin.location", {sortField: "address", currentSort: self.query.sort}),
+    util.createSortableColumn("first", "bulletin.state", {sortField: "bulletinState", currentSort: currentSort}),
+    util.createSortableColumn("second", "bulletin.municipality", {sortField: "municipality", currentSort: currentSort}),
+    util.createSortableColumn("third", "bulletin.location", {sortField: "address", currentSort: currentSort}),
     util.createSortableColumn("fourth", "bulletin.type", {sortable: false}),
-    util.createSortableColumn("fifth", "bulletin.applicant", {sortField: "applicant", currentSort: self.query.sort}),
-    util.createSortableColumn("sixth", "bulletin.date", {sortField: "modified", currentSort: self.query.sort}),
+    util.createSortableColumn("fifth", "bulletin.applicant", {sortField: "applicant", currentSort: currentSort}),
+    util.createSortableColumn("sixth", "bulletin.date", {sortField: "modified", currentSort: currentSort}),
     util.createSortableColumn("seventh", "bulletin.feedback-period", {sortable: false})
   ];
+
+  ko.computed(function() {
+    hub.send("bulletinService::fetchBulletins", {
+      page: 1,
+      sort: ko.mapping.toJS(currentSort)
+    });
+  });
 
   self.bulletins = ko.pureComputed(function () {
     return _.map(params.bulletins(), function (bulletin) {
