@@ -138,6 +138,9 @@
   ([command mongo-query changes]
     (update-application command mongo-query changes false))
   ([command mongo-query changes return-count?]
+    (when (get-in changes ["$set" :state])
+      (assert (seq (get-in changes ["$push" :history])) "event must be pushed to history array when state is set"))
+
     (with-application command
       (fn [{:keys [id]}]
         (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
