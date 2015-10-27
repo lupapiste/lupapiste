@@ -15,6 +15,7 @@
             [clojure.string :as s]
             [clojure.java.io :as io]
             [sade.common-reader :as cr]
+            [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.attachment :as attachment]))
 
@@ -34,7 +35,7 @@
                               (map :LinkkiLiitteeseen)
                               (map fs/base-name))]
     (doseq [filename attachment-paths]
-      (when (empty? (fs/find-files unzipped-path (re-pattern filename)))
+      (when (empty? (fs/find-files unzipped-path (ss/escaped-re-pattern filename)))
         (error-and-fail! (str "Attachment referenced in XML was not present in zip: " filename) :error.integration.asianhallinta-missing-attachment)))))
 
 (defn- build-verdict [{:keys [AsianPaatos]}]

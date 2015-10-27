@@ -1219,6 +1219,24 @@
 (defmigration complement-needed-camelcase
   (mongo/update-by-query :applications {:state "complement-needed"} {$set {:state "complementNeeded"}}))
 
+(defn change-valid-pdfa-to-archivable [version]
+  (let [valid-pdfa? (:valid-pdfa version)]
+    (when-not (nil? valid-pdfa?)
+      (-> (assoc version :archivable valid-pdfa? :archivabilityError (when-not valid-pdfa? :invalid-pdfa))
+          (dissoc :valid-pdfa)))))
+
+(defmigration set-general-archivability-boolean
+  {:apply-when (pos? (mongo/count :applications {"attachments.latestVersion.valid-pdfa" {$exists true}}))}
+  (update-applications-array
+    :attachments
+    (fn [attachment]
+      (if (:latestVersion attachment)
+        (-> (assoc attachment :versions (map change-valid-pdfa-to-archivable (:versions attachment)))
+            (assoc :latestVersion (change-valid-pdfa-to-archivable (:latestVersion attachment))))
+        attachment))
+    {"attachments.latestVersion.valid-pdfa" {$exists true}}))
+
+
 (defn populate-application-history [application]
   (let [{:keys [opened submitted sent canceled started closed startedBy closedBy history]} application
         all-entries [(when (not= "open" (-> history first :state)) {:state :open, :ts opened, :user nil})
