@@ -68,16 +68,20 @@
 
       (fact "Publish verdict" (command sonja :publish-verdict :id application-id :verdictId verdict-id) => ok?)
 
-      (fact "Authority is still able to add an attachment"
-        (let [application (query-application sonja application-id)
-              first-attachment (get-in application [:attachments 0])]
+      (let [application (query-application sonja application-id)
+            first-attachment (get-in application [:attachments 0])]
+
+        (fact "verdict is given"
+          (:state application) => "verdictGivent"
+          (-> application :history last :state) => "verdictGivent")
+
+        (fact "Authority is still able to add an attachment"
 
           (let [email (last-email)]
             (:to email) => (contains (email-for-key pena))
             (:subject email) => "Lupapiste.fi: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
             email => (partial contains-application-link-with-tab? application-id "verdict" "applicant"))
 
-          (:state application) => "verdictGiven"
           (upload-attachment sonja (:id application) first-attachment true)
           (upload-attachment pena (:id application) first-attachment false))))))
 

@@ -122,10 +122,10 @@
     (when-let [next-state (sm/verdict-given-state application)]
       (do
         (update-application command
-         {:verdicts {$elemMatch {:id id}}}
-         {$set {:modified timestamp
-                :state    next-state
-                :verdicts.$.draft false}})
+          {:verdicts {$elemMatch {:id id}}}
+          (util/deep-merge
+            (application/state-transition next-state timestamp (:user command))
+            {$set {:modified timestamp, :verdicts.$.draft false}}))
         (ok)))
     (fail :error.no-verdict-municipality-id)))
 
