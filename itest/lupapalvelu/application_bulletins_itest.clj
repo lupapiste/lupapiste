@@ -6,6 +6,8 @@
 
 (apply-remote-minimal)
 
+;; TODO FEATURE FLAG
+
 (facts "Publishing bulletins"
   (let [app (create-and-submit-application pena :operation "jatteen-keraystoiminta"
                                                 :propertyId oulu-property-id
@@ -60,35 +62,51 @@
         (fact "no party documents"
           (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))))
 
-    (facts "Paging"
-      (dotimes [i 20]
-        (let [{id :id} (create-and-submit-application pena :operation "jatteen-keraystoiminta"
-                                                  :propertyId oulu-property-id
-                                                  :x 430109.3125 :y 7210461.375
-                                                  :address "Oulu 10")]
-          (command olli :publish-bulletin :id id)))
+    (facts "Filters"
+     (fact "Municipality"
+       (:municipalities (query pena :application-bulletin-municipalities)) => (just ["564" "753"])
+       (let [{data :data} (datatables pena :application-bulletins :page 1 :searchText "" :municipality "753" :state nil :sort nil)]
+         (count data) => 1
+         (:id (first data)) => (:id sipoo-app)))
 
-      (let [{p1-data :data p1-left :left :as data} (datatables pena :application-bulletins :page 1
-                                                                                           :searchText ""
-                                                                                           :municipality nil
-                                                                                           :state nil
-                                                                                           :sort nil)
-            {p2-data :data p2-left :left} (datatables pena :application-bulletins :page 2
-                                                                                  :searchText ""
-                                                                                  :municipality nil
-                                                                                  :state nil
-                                                                                  :sort nil)
-            {p3-data :data p3-left :left} (datatables pena :application-bulletins :page 3
-                                                                                  :searchText ""
-                                                                                  :municipality nil
-                                                                                  :state nil
-                                                                                  :sort nil)]
-        (fact "page 1"
-          (count p1-data) => 10
-          p1-left => 12)
-        (fact "page 2"
-          (count p2-data) => 10
-          p2-left => 2)
-        (fact "page 3"
-          (count p3-data) => 2
-          p3-left => -8)))))
+     (fact "State"
+       (:states (query pena :application-bulletin-states)) => (just ["proclaimed"])
+       (let [{data :data} (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state "proclaimed" :sort nil)]
+         (count data) => 2))
+
+     (fact "Free text"
+       (let [{data :data} (datatables pena :application-bulletins :page 1 :searchText "hitan" :municipality nil :state nil :sort nil)]
+         (count data) => 1
+         (:id (first data)) => (:id sipoo-app))))
+
+    (facts "Paging"
+     (dotimes [_ 20]
+       (let [{id :id} (create-and-submit-application pena :operation "jatteen-keraystoiminta"
+                                                          :propertyId oulu-property-id
+                                                          :x 430109.3125 :y 7210461.375
+                                                          :address "Oulu 10")]
+         (command olli :publish-bulletin :id id)))
+     (let [{p1-data :data p1-left :left} (datatables pena :application-bulletins :page 1
+                                                                                 :searchText ""
+                                                                                 :municipality nil
+                                                                                 :state nil
+                                                                                 :sort nil)
+           {p2-data :data p2-left :left} (datatables pena :application-bulletins :page 2
+                                                                                 :searchText ""
+                                                                                 :municipality nil
+                                                                                 :state nil
+                                                                                 :sort nil)
+           {p3-data :data p3-left :left} (datatables pena :application-bulletins :page 3
+                                                                                 :searchText ""
+                                                                                 :municipality nil
+                                                                                 :state nil
+                                                                                 :sort nil)]
+       (fact "page 1"
+         (count p1-data) => 10
+         p1-left => 12)
+       (fact "page 2"
+         (count p2-data) => 10
+         p2-left => 2)
+       (fact "page 3"
+         (count p3-data) => 2
+         p3-left => -8)))))
