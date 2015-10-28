@@ -290,6 +290,7 @@
    :closedBy                 {}
    :convertedToApplication   nil ; timestamp
    :comments                 []
+   :complementNeeded         nil ; timestamp
    :created                  nil ; timestamp
    :documents                []
    :drawings                 []

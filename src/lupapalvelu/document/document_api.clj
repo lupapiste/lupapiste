@@ -162,3 +162,24 @@
   (if-let [document (domain/get-document-by-id application documentId)]
     (doc-persistence/do-set-company-to-document application document companyId path (user/get-user-by-id (:id user)) created)
     (fail :error.document-not-found)))
+
+
+;;
+;; Repeating
+;;
+
+(defcommand copy-row
+  {:parameters [id doc path source-index target-index]
+   :user-roles #{:applicant :authority}
+   :states     update-doc-states
+   :pre-checks [application/validate-authority-in-drafts]}
+  [{application :application :as command}]
+  (let [document (-> application
+                     (domain/get-document-by-id doc)
+                     (get-in (cons :data (map keyword path))))
+        updates (->> (get document ((comp keyword str) source-index))
+                     (map (fn [[key {value :value}]] 
+                            [(->> key (name) (conj path (str target-index)))
+                             value]))
+                     (filter second))]
+    (doc-persistence/update! command doc updates "documents")))

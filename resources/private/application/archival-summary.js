@@ -117,7 +117,8 @@
             .call();
         });
       }
-      attachment.archivable = attachment.latestVersion ? attachment.latestVersion['valid-pdfa']() : false;
+      attachment.archivable = util.getIn(attachment, ["latestVersion", "archivable"]) ? attachment.latestVersion['archivable']() : false;
+      attachment.archivabilityError = util.getIn(attachment, ["latestVersion", "archivabilityError"]) ? attachment.latestVersion['archivabilityError']() : null;
       attachment.sendToArchive = ko.observable(false);
       return attachment;
     });

@@ -5,11 +5,18 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   self.data = ko.observableArray([]);
   self.bulletinsLeft = ko.observable(0);
 
-  self.fetchBulletins = _.debounce(function (query, pending) {
-    ajax.datatables("application-bulletins", {page:         query.page,
-                                              searchText:   util.getIn(query, ["searchText"],         ""),
-                                              municipality: util.getIn(query, ["municipality", "id"], ""),
-                                              state:        util.getIn(query, ["state", "id"],        "")})
+  self.query = {
+    page: ko.observable(1),
+    searchText: ko.observable(""),
+    municipality: ko.observable(""),
+    state: ko.observable(""),
+    sort: {field: ko.observable("modified"), asc: ko.observable(false)}
+  };
+
+  self.fetchBulletinsPending = ko.observable(false);
+
+  self.fetchBulletins = _.debounce(function (query) {
+    ajax.datatables("application-bulletins", query)
       .success(function(res) {
         self.bulletinsLeft(res.left);
         if (query.page === 1) {
@@ -18,26 +25,55 @@ LUPAPISTE.ApplicationBulletinsService = function() {
           self.data(self.data().concat(res.data));
         }
       })
-      .pending(pending || _.noop)
+      .pending(self.fetchBulletinsPending)
       .call();
   }, 250);
 
+  ko.computed(function() {
+    self.fetchBulletins(ko.mapping.toJS(self.query),
+      self.fetchBulletinsPending);
+  });
+
   self.municipalities = ko.observableArray([]);
-  self.fetchMunicipalities = function() {
+
+  self.states = ko.observableArray([]);
+
+  function fetchMunicipalities() {
     ajax.query("application-bulletin-municipalities", {})
       .success(function(res) {
         self.municipalities(res.municipalities);
       })
       .call();
-  };
+  }
 
-  self.states = ko.observableArray([]);
-  self.fetchStates = function() {
+  function fetchStates() {
     ajax.query("application-bulletin-states", {})
       .success(function(res) {
         self.states(res.states);
       })
       .call();
-  };
+  }
+
+  // TODO hub subscriptions are not disposed if service is deleted
+  hub.subscribe("bulletinService::searchTermsChanged", function(event) {
+    self.query.searchText(event.searchText || "");
+    self.query.municipality(event.municipality || "");
+    self.query.state(event.state || "");
+    self.query.page(1);
+  });
+
+  hub.subscribe("bulletinService::pageChanged", function() {
+    self.query.page(self.query.page() + 1);
+  });
+
+  hub.subscribe("bulletinService::sortChanged", function(event) {
+    self.query.sort.field(event.sort.field);
+    self.query.sort.asc(event.sort.asc);
+    self.query.page(1);
+  });
+
+  hub.subscribe("bulletinService::fetchStates", fetchStates);
+
+  hub.subscribe("bulletinService::fetchMunicipalities", fetchMunicipalities);
 };
 

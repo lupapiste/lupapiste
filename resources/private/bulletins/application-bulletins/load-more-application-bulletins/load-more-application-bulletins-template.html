@@ -6,8 +6,8 @@
       <div class="search-button-wrapper">
         <button class="bulletin"
                 data-test-id="load-more-bulletins"
-                data-bind="click: requestedPages.increment.bind(requestedPages),
-                           visible: showButton,
+                data-bind="click: pageChanged,
+                           visible: visible,
                            disable: pending,
                            css: {waiting: pending}">
           <i class="lupicon-circle-plus"></i>

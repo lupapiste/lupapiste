@@ -30,7 +30,7 @@
   "Creates model-updates from ui-format."
   [updates]
   (for [[k v] updates]
-    (let [keys (mapv keyword (s/split k #"\."))]
+    (let [keys (mapv keyword (if (coll? k) k (s/split k #"\.")))]
       [keys v])))
 
 (defn ->mongo-updates

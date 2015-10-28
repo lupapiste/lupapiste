@@ -6,6 +6,7 @@
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [now]]
             [sade.env :as env]
+            [sade.coordinate :as coord]
             [cheshire.core :as json]))
 
 ; make sure proxies are enabled:
@@ -64,10 +65,15 @@
         response (point-by-property-id-proxy request)]
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)
-          data (:data body)]
-      (fact data => vector?)
-      (fact (count data) => 1)
-      (fact (keys (first data)) => (just #{:x :y})))))
+          data (:data body)
+          {:keys [x y]} (first data)]
+      (fact "collection format"
+        (count data) => 1
+        (keys (first data)) => (just #{:x :y})
+        x => string?
+        y => string?)
+      (fact "valid x" x => coord/valid-x?)
+      (fact "valid y" y => coord/valid-y?))))
 
 (facts "property-id-by-point"
   (let [x 385648
@@ -77,6 +83,42 @@
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)]
       (fact body => "09100200990013"))))
+
+(defn property-info-for-75341600380021 [params]
+  (let [response (property-info-by-wkt-proxy {:params params})]
+    (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
+    (let [body (json/decode (:body response) true)
+          {:keys [x y rekisteriyksikkolaji kiinttunnus]} (first body)
+          {:keys [id selite]} rekisteriyksikkolaji]
+
+      (fact "collection format"
+        (count body) => 1
+        (keys (first body)) => (just #{:x :y :rekisteriyksikkolaji :kiinttunnus}))
+      (fact "valid x" x => coord/valid-x?)
+      (fact "valid y" y => coord/valid-y?)
+      (fact "kiinttunnus" kiinttunnus => "75341600380021")
+      (fact "rekisteriyksikkolaji"
+        id => "1"
+        selite => {:fi "Tila", :sv "L\u00e4genhet"})))
+  )
+
+(facts "property-info-by-point"
+  (fact "missing params"
+    (let [response (property-info-by-wkt-proxy {:params {}})]
+      response => map?
+      (:status response) => 503))
+
+  (fact "404271,6693892"
+    (property-info-for-75341600380021 {:wkt "POINT(404271 6693892)"})))
+
+(facts "property-info-by-point with radius"
+  (property-info-for-75341600380021 {:wkt "POINT(404271 6693892)", :radius "30"}))
+
+(facts "property-info-by-line"
+  (property-info-for-75341600380021 {:wkt "LINESTRING(404271 6693892,404273 6693895)"}))
+
+(facts "property-info-by-polygon"
+  (property-info-for-75341600380021 {:wkt "POLYGON((404270 6693890,404270 6693895,404275 6693890,404270 6693890))"}))
 
 (facts "address-by-point - street number not null"
   (let [x 333168
@@ -99,6 +141,20 @@
       (fact (:street body) => "Kirkkomaanpolku")
       (fact (:number body) => #"\d")
       (fact (:fi (:name body)) => "Sipoo"))))
+
+(facts "area-by-property-id"
+  (let [response (area-by-property-id-proxy {:params {:property-id "75341600380021"}})]
+    (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
+    (let [body (json/decode (:body response) true)
+          data (:data body)
+          {:keys [kiinttunnus wkt]} (first data)]
+
+      (fact "collection format"
+        (count data) => 1
+        (keys (first data)) => (just #{:kiinttunnus :wkt}))
+
+      (fact "property id is echoed" kiinttunnus => "75341600380021")
+      (fact "wkt" wkt => #"^POLYGON"))))
 
 (facts "plan-urls-by-point-proxy"
 

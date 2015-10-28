@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="docgen-table-template">
+      <div class="form-table" data-bind="attr: {id: groupId}">
+
+        <label class="form-label form-label-table" data-bind="ltext: groupLabel"></label>
+
+        <!-- ko if: groupHelp -->
+        <span class="group-help-text" data-bind="ltext: groupHelp"></span>
+        <!-- /ko -->
+
+        <table>
+          <thead>
+            <tr data-bind="foreach: columnHeaders"><td><span data-bind="ltext: $data"></span></td></tr>
+          </thead>
+          <tbody data-bind="foreach: rows">
+            <tr data-bind="attr: { id: $component.groupId + '-row-' + index }">
+              <!-- ko foreach: subSchemas -->
+              <td>
+                <span class="form-entry"
+                  data-bind="component: { name: uicomponent,
+                                          params: { schema: $data,
+                                                    path: path,
+                                                    model: model,
+                                                    applicationId: applicationId,
+                                                    documentId: documentId }}">
+                </span>
+              </td>
+              <!-- /ko -->
+
+              <td class="action-column">
+                <i class="lupicon-remove primary" data-bind="click: $parent.removeGroup,
+                                                             visible: lupapisteApp.models.applicationAuthModel.ok('remove-document-data')"></i>
+              </td>
+
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="button-group" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok('update-doc')">
+        <span data-bind="component: { name: 'docgen-button',
+                                     params: { id: groupId + '-append-button', 
+                                               className: 'positive', 
+                                               icon: 'lupicon-circle-plus', 
+                                               label: appendLabel, 
+                                               clickFn: addGroup }}">
+        </span>
+        <span data-bind="component: { name: 'docgen-button',
+                                     params: { id: groupId + '-copy-button', 
+                                               className: 'secondary', 
+                                               icon: 'lupicon-circle-plus', 
+                                               label: copyLabel, 
+                                               clickFn: duplicateLastGroup }}">
+        </span>
+      </div>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

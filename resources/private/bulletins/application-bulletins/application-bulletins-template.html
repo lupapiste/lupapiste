@@ -20,20 +20,20 @@
       <div class="full content gray-bg">
         <div class="content-center">
           <div data-bind="component: {name: 'bulletins-search',
-                                      params: {query: query,
-                                               bulletinService: bulletinService}}"></div>
+                                      params: {municipalities: bulletinService.municipalities,
+                                               states: bulletinService.states}}"></div>
         </div>
       </div>
       <div class="full content">
         <div class="content-center">
           <div data-bind="component: {name: 'application-bulletins-list',
                                       params: {bulletins: bulletinService.data,
-                                               clickHandler: openBulletin}}"></div>
+                                               sort: bulletinService.query.sort}}"></div>
 
           <div data-bind="component: {name: 'load-more-application-bulletins',
-                                      params: {requestedPages: query.page,
-                                               pending: moreBulletinsPending,
-                                               bulletinsLeft: bulletinService.bulletinsLeft}}"></div>
+                                      params: {dataRemaining: bulletinService.bulletinsLeft,
+                                               pending: isLoadButtonPending,
+                                               visible: isLoadButtonVisible}}"></div>
         </div>
       </div>
     </script>

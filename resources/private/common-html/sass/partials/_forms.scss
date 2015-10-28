@@ -988,16 +988,21 @@ div.alleYli-radioGroup {
 }
 
 // Grid styles
-
 $col: 25%;
+// default columns 4
+$max-columns: 12;
+
+@mixin column-width ($width) {
+  width: $width;
+  min-width: $width;
+  max-width: $width;
+}
 
 @mixin column ($size) {
   position: relative;
   float: left;
+  @include column-width($size * $col);
   // display: inline-block;;
-  width: $size * $col;
-  min-width: $size * $col;
-  max-width: $size * $col;
   padding-left: $grid-margin;
 
   label.required:after {
@@ -1185,9 +1190,12 @@ $col: 25%;
     right: 0;
   }
 
-  @for $i from 1 through 4 {
+  @for $i from 1 through $max-columns {
     .col-#{$i} {
       @include column($i);
+    }
+    .col-#{$i}.col--full > * {
+      width: 100%;
     }
   }
 
@@ -1272,12 +1280,23 @@ $col: 25%;
   }
 }
 
+@for $i from 1 through $max-columns {
+  .form-grid.form-grid--columns-#{$i} > .row {
+    @for $j from 1 through $i {
+      .col-#{$j} {
+        @include column-width(100% / $i * $j);
+      }
+    }
+  }
+}
+
 .form-grid--no-border {
   border: none;
-
-  .col-1, .col-2, .col-3, .col-4 {
-    &:first-child {
-      padding-left: 0;
+  @for $i from 1 through $max-columns {
+    .col-#{$i} {
+      &:first-child {
+        padding-left: 0;
+      }
     }
   }
 }

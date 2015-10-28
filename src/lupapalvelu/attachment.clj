@@ -236,7 +236,7 @@
   ([options]
     {:pre [(map? options)]}
     (set-attachment-version options 5))
-  ([{:keys [application attachment-id file-id filename content-type size comment-text now user stamped make-comment state target valid-pdfa missing-fonts]
+  ([{:keys [application attachment-id file-id filename content-type size comment-text now user stamped make-comment state target archivable archivabilityError missing-fonts]
      :or {make-comment true state :requires_authority_action} :as options}
     retry-limit]
     {:pre [(map? options) (map? application) (string? attachment-id) (string? file-id) (string? filename) (string? content-type) (number? size) (number? now) (map? user) (not (nil? stamped))]}
@@ -255,7 +255,8 @@
                            :contentType content-type
                            :size size
                            :stamped stamped
-                           :valid-pdfa valid-pdfa
+                           :archivable archivable
+                           :archivabilityError archivabilityError
                            :missing-fonts missing-fonts}
 
             comment-target {:type :attachment

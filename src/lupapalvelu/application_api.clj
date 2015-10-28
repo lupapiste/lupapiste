@@ -141,6 +141,12 @@
 (defn- remove-app-links [id]
   (mongo/remove-many :app-links {:link {$in [id]}}))
 
+(defn- do-cancel [{:keys [created user data] :as command}]
+  {:pre [(seq (:application command))]}
+  (update-application command (a/state-transition-update :canceled created user))
+  (remove-app-links (:id data))
+  (ok))
+
 (defcommand cancel-inforequest
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
@@ -148,13 +154,8 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified created
-                             :canceled created
-                             :state    :canceled}})
-  (remove-app-links id)
-  (ok))
+  [command]
+  (do-cancel command))
 
 (defcommand cancel-application
   {:parameters       [id]
@@ -164,13 +165,8 @@
    :on-success       (notify :application-state-change)
    :states           #{:draft :info :open :submitted}
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified created
-                             :canceled created
-                             :state    :canceled}})
-  (remove-app-links id)
-  (ok))
+  [command]
+  (do-cancel command))
 
 (defcommand cancel-application-authority
   {:parameters       [id text lang]
@@ -180,9 +176,10 @@
    :on-success       (notify :application-state-change)
    :pre-checks       [a/validate-authority-in-drafts
                       (partial sm/validate-state-transition :canceled)]}
-  [{:keys [created application] :as command}]
+  [{:keys [created application user] :as command}]
   (update-application command
     (util/deep-merge
+      (a/state-transition-update :canceled created user)
       (when (seq text)
         (comment/comment-mongo-update
           (:state application)
@@ -195,10 +192,7 @@
           false
           (:user command)
           nil
-          created))
-      {$set {:modified created
-             :canceled created
-             :state    :canceled}}))
+          created))))
   (remove-app-links id)
   (ok))
 
@@ -210,19 +204,19 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified         created
-                             :complementNeeded created
-                             :state            :complementNeeded}}))
-
+  [{:keys [created user] :as command}]
+  (update-application command (util/deep-merge (a/state-transition-update :complementNeeded created user))))
 
 (defn- do-submit [command application created]
-  (update-application command
-                      {$set {:state     :submitted
-                             :modified  created
-                             :opened    (or (:opened application) created)
-                             :submitted (or (:submitted application) created)}})
+  (let [history-entries (remove nil?
+                          [(when-not (:opened application) (a/history-entry :open created (:user command)))
+                           (a/history-entry :submitted created (:user command))])]
+    (update-application command
+      {$set {:state     :submitted
+             :modified  created
+             :opened    (or (:opened application) created)
+             :submitted (or (:submitted application) created)}
+       $push {:history {$each history-entries}}}))
   (try
     (mongo/insert :submitted-applications (-> application
                                             meta-fields/enrich-with-link-permit-data
@@ -563,7 +557,7 @@
                                                          (:documents application)))
                                :state         state
 
-                               :history [{:state state, :ts created, :user (user/summary user)}]
+                               :history [(a/history-entry state created user)]
                                :infoRequest false
                                :openInfoRequest false
                                :convertedToApplication nil
@@ -575,7 +569,7 @@
                               (select-keys domain/application-skeleton
                                 [:attachments :statements :verdicts :tasks :buildings :neighbors
                                  :comments :authorityNotice :urgency ; comment panel content
-                                 :submitted :sent :acknowledged :closed :closedBy :started :startedBy ; timestamps
+                                 :submitted :sent :complementNeeded :acknowledged :closed :closedBy :started :startedBy ; timestamps
                                  :_statements-seen-by :_comments-seen-by :_verdicts-seen-by :_attachment_indicator_reset ; indicators
                                  :reminder-sent :transfers ; logs
                                  :authority
@@ -659,14 +653,14 @@
   (let [op (:primaryOperation application)
         organization (organization/get-organization (:organization application))]
     (update-application command
-                        {$set  {:infoRequest            false
-                                :openInfoRequest        false
-                                :state                  :open
-                                :opened                 created
-                                :convertedToApplication created
-                                :documents              (a/make-documents user created op application)
-                                :modified               created}
-                         $push {:attachments {$each (a/make-attachments created op organization (:state application) (:tosFunction application))}}})
+                        (util/deep-merge
+                          (a/state-transition-update :open created user)
+                          {$set  {:infoRequest            false
+                                  :openInfoRequest        false
+                                  :convertedToApplication created
+                                  :documents              (a/make-documents user created op application)
+                                  :modified               created}
+                           $push {:attachments {$each (a/make-attachments created op organization (:state application) (:tosFunction application))}}}))
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
 

@@ -6,7 +6,7 @@
       <span class="form-entry">
         <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
         <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
-        <label data-bind="visible: params.schema.label, ltext: params.schema.label"></label>
+        <label data-bind="visible: label, ltext: label"></label>
         <span class="form-string"
                  type="text"
                  data-bind="ltext: value() && params.schema.locPrefix + '.' + value(),

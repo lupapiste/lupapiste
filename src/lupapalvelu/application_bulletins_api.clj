@@ -10,7 +10,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [monger.operators :refer :all]
             [lupapalvelu.states :as states]
-            [lupapalvelu.application-search :refer [make-text-query]]))
+            [lupapalvelu.application-search :refer [make-text-query dir]]))
 
 (def bulletins-fields
   {:versions {$slice -1} :versions.bulletinState 1
@@ -24,7 +24,7 @@
 
 (defn- make-query [search-text municipality state]
   (let [text-query         (when-not (ss/blank? search-text)
-                             (make-text-query (ss/trim search-text) :prefix "versions"))
+                             (make-text-query (ss/trim search-text)))
         municipality-query (when-not (ss/blank? municipality)
                              {:versions.municipality municipality})
         state-query        (when-not (ss/blank? state)
@@ -33,17 +33,30 @@
     (when-let [and-query (seq queries)]
       {$and and-query})))
 
-(defn- get-application-bulletins-left [page searchText municipality state]
+(defn- get-application-bulletins-left [page searchText municipality state _]
   (let [query (make-query searchText municipality state)]
     (- (mongo/count :application-bulletins query)
        (* page bulletin-page-size))))
 
-(defn- get-application-bulletins [page searchText municipality state]
+(def- sort-field-mapping {"bulletinState" :bulletinState
+                          "municipality" :municipality
+                          "address" :address
+                          "applicant" :applicant
+                          "modified" :modified})
+
+(defn- make-sort [{:keys [field asc]}]
+  (let [sort-field (sort-field-mapping field)]
+    (cond
+      (nil? sort-field) {}
+      (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
+      :else (array-map sort-field (dir asc)))))
+
+(defn- get-application-bulletins [page searchText municipality state sort]
   (let [query (or (make-query searchText municipality state) {})
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
                (query/fields bulletins-fields)
-               (query/sort {:modified 1})
+               (query/sort (make-sort sort))
                (query/paginate :page page :per-page bulletin-page-size))]
     (map
       #(assoc (first (:versions %)) :id (:_id %))
@@ -52,11 +65,11 @@
 (defquery application-bulletins
   {:description "Query for Julkipano"
    :feature :publish-bulletin
-   :parameters [page searchText municipality state]
+   :parameters [page searchText municipality state sort]
    :input-validators [(partial action/number-parameters [:page])]
    :user-roles #{:anonymous}}
   [_]
-  (let [parameters [page searchText municipality state]]
+  (let [parameters [page searchText municipality state sort]]
     (ok :data (apply get-application-bulletins parameters)
         :left (apply get-application-bulletins-left parameters))))
 
@@ -90,6 +103,9 @@
     states/post-verdict-states :verdictGiven
     :proclaimed))
 
+(defn- get-search-fields [fields app]
+  (into {} (map #(hash-map % (% app)) fields)))
+
 (defcommand publish-bulletin
   {:parameters [id]
    :feature :publish-bulletin
@@ -107,9 +123,9 @@
         app-snapshot (assoc app-snapshot
                        :attachments attachments
                        :bulletinState (bulletin-state (:state app-snapshot)))
+        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
         changes {$push {:versions app-snapshot}
-                 $set  {:modified created
-                        :municipality (:municipality app-snapshot)}}]
+                 $set  (merge {:modified created} (get-search-fields search-fields app-snapshot))}]
     (mongo/update-by-id :application-bulletins id changes :upsert true)
     (ok)))
 

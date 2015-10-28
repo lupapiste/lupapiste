@@ -59,6 +59,7 @@
 
 
           (fact "Application is sent and timestamp is there"
+            (-> updated-application :history last :state) => "sent"
             (:state updated-application) => "sent"
             (:sent updated-application) => util/pos?)
 
