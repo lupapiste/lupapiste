@@ -1,0 +1,2 @@
+attachmentType.muut.paatos.info: Viranomaisen päätös
+attachmentType.muut.paatosote.info: Ote viranomaisen päätöksestä
