@@ -13,11 +13,7 @@ LUPAPISTE.ApplicationBulletinsService = function() {
     sort: {field: ko.observable("modified"), asc: ko.observable(false)}
   };
 
-  self.pending = ko.observable(false);
-
-  ko.computed(function() {
-    hub.send("bulletinService::pendingChanged", {pending: self.pending()});
-  });
+  self.fetchBulletinsPending = ko.observable(false);
 
   self.fetchBulletins = _.debounce(function (query) {
     ajax.datatables("application-bulletins", query)
@@ -29,13 +25,13 @@ LUPAPISTE.ApplicationBulletinsService = function() {
           self.data(self.data().concat(res.data));
         }
       })
-      .pending(self.pending)
+      .pending(self.fetchBulletinsPending)
       .call();
   }, 250);
 
   ko.computed(function() {
     self.fetchBulletins(ko.mapping.toJS(self.query),
-      self.pending);
+      self.fetchBulletinsPending);
   });
 
   self.municipalities = ko.observableArray([]);
@@ -76,12 +72,8 @@ LUPAPISTE.ApplicationBulletinsService = function() {
     self.query.page(1);
   });
 
-  hub.subscribe("bulletinService::fetchStates", function() {
-    fetchStates();
-  });
+  hub.subscribe("bulletinService::fetchStates", fetchStates);
 
-  hub.subscribe("bulletinService::fetchMunicipalities", function() {
-    fetchMunicipalities();
-  });
+  hub.subscribe("bulletinService::fetchMunicipalities", fetchMunicipalities);
 };
 

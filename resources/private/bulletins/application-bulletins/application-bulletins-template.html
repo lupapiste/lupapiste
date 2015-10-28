@@ -31,7 +31,9 @@
                                                sort: bulletinService.query.sort}}"></div>
 
           <div data-bind="component: {name: 'load-more-application-bulletins',
-                                      params: {bulletinsLeft: bulletinService.bulletinsLeft}}"></div>
+                                      params: {dataRemaining: bulletinService.bulletinsLeft,
+                                               pending: isLoadButtonPending,
+                                               visible: isLoadButtonVisible}}"></div>
         </div>
       </div>
     </script>

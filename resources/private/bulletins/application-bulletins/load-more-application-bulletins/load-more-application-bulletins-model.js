@@ -2,26 +2,15 @@ LUPAPISTE.LoadMoreApplicationBulletinsModel = function(params) {
   "use strict";
   var self = this;
 
-  self.bulletinsLeft = params.bulletinsLeft;
-  self.pending = ko.observable();
-
-  self.showButton = ko.pureComputed(function () {
-    return self.bulletinsLeft() > 0;
-  });
+  self.dataRemaining = params.dataRemaining;
+  self.pending = params.pending;
+  self.visible = params.visible;
 
   self.localizedBulletinsLeft = ko.pureComputed(function () {
-    return self.bulletinsLeft() + loc("unit.kpl");
+    return self.dataRemaining() + loc("unit.kpl");
   });
 
   self.pageChanged = function() {
     hub.send("bulletinService::pageChanged");
-  };
-
-  var id = hub.subscribe("bulletinService::pendingChanged", function(event) {
-    self.pending(event.pending);
-  });
-
-  self.dispose = function () {
-    hub.unsubscribe(id);
   };
 };
