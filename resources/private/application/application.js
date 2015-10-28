@@ -280,7 +280,12 @@
       repository.load(currentId, applicationModel.pending, function(application) {
         var fallbackTab = function(application) {
           if (application.inPostVerdictState) {
-            return application.primaryOperation.name.match(/tyonjohtaja/) ? "applicationSummary" : "tasks";
+            var name = application.primaryOperation.name;
+            if (name) {
+              return name.match(/tyonjohtaja/) ? "applicationSummary" : "tasks";
+            } else {
+              return "tasks";
+            }
           } else {
             return "info";
           }
