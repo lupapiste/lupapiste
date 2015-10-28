@@ -489,19 +489,34 @@
         (resp/status 400 :error.shapefile-parsing-failed)))))
 
 (defquery get-all-map-layers
-  {:parameters       [organizationId]
+  {:description "Every map layer from the organization map server."
+   :parameters       [organizationId]
    :user-roles       #{:authorityAdmin :authority}}
   (ok :layers (o/all-layers-from-map-server organizationId)))
 
 (defquery get-map-layers-data
-  {:parameters [organizationId]
+  {:description "Organization server and layer details."
+   :parameters [organizationId]
    :user-roles #{:authorityAdmin}}
   (ok (-> organizationId o/get-organization :map-layers)))
 
 (defcommand update-map-server-details
   {:parameters [organizationId url username password]
    :user-roles #{:authorityAdmin}}
-  (o/update-organization organizationId {$set {:map-layers {:url url
-                                                            :username username
-                                                            :password password}}})
-  (ok :layers (o/all-layers-from-map-server organizationId)))
+  (o/update-organization organizationId {$set {:map-layers.server {:url url
+                                                                   :username username
+                                                                   :password password}}})
+  (ok))
+
+(defcommand update-user-layers
+  {:parameters [organizationId layers]
+   :user-roles #{:authorityAdmin}}
+  (o/update-organization organizationId {$set {:map-layers.layers layers}})
+  (ok))
+
+(defquery organization-map-server-proxy
+  {:user-roles #{:authorityAdmin}}
+  [{data :data}]
+  (let [org-id (:organizationId data)
+        params (dissoc data :organizationId)]
+    (o/query-organization-map-server org-id params)))

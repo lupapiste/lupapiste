@@ -170,6 +170,15 @@
 ;;
 ;; Organization/municipality provided map support.
 
+(defn query-organization-map-server
+  [org-id params]
+  (when-let [m (-> org-id get-organization :map-layers :server)]
+    (let [{:keys [url username password]} m]
+      (http/get url
+                (merge {:query-params params}
+                       (when-not (ss/blank? username)
+                         {:basic-auth [username password]}))))))
+
 (defmulti layer-info (fn [a]
                        (cond
                          (map? a) :map
@@ -188,12 +197,13 @@
   [a]
   (map layer-info a))
 
-(defn all-layers-from-map-server
-  "Fetches every map layer title from the organization/municipality map server.
-   The title is used because it is the only mandatory element.
-   The server details are stored under the organization."
+
+
+#_(defn all-layers-from-map-server
+  "Fetches every map layer (title, name) from the organization/municipality map server.
+  The result is a layer tree (composite), where layer can have children under :layer key."
   [org-id]
-  (when-let [m (-> org-id get-organization :map-layers)]
+    (when-let [m (-> org-id get-organization :map-layers :server)]
     (let [{:keys [url username password]} m
           req {:query-params {:request "GetCapabilities"}}
           params (if username
@@ -202,3 +212,11 @@
           _ (debug "Map server query" org-id url params)
           data (-> url (http/get params) :body xml/parse xml/xml->edn)]
       (-> data :WMS_Capabilities :Capability :Layer layer-info))))
+
+(defn all-layers-from-map-server
+  "Fetches every map layer (title, name) from the organization/municipality map server.
+  The result is a layer tree (composite), where layer can have children under :layer key."
+  [org-id]
+  (when-let [response (query-organization-map-server org-id {:request "GetCapabilities"})]
+    (let [data (-> response :body xml/parse xml/xml->edn)]
+    (-> data :WMS_Capabilities :Capability :Layer layer-info))))
