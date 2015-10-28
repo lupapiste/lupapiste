@@ -258,18 +258,19 @@
   (let [ah-organizations (mongo/select :organizations
                                        {"scope.caseManagement.ftpUser" {$exists true}}
                                        {"scope.caseManagement.ftpUser" 1})
-        ftp-users (get-asianhallinta-ftp-users ah-organizations)]
-    (doseq [user ftp-users
+        ftp-users (get-asianhallinta-ftp-users ah-organizations)
+        eraajo-user (user/batchrun-user (map :id ah-organizations))]
+    (doseq [ftp-user ftp-users
             :let [path (str
                          (env/value :outgoing-directory) "/"
-                         user "/"
+                         ftp-user "/"
                          "asianhallinta/to_lupapiste/")]
             zip (util/get-files-by-regex path #".+\.zip$")]
       (fs/mkdirs (str path "archive"))
       (fs/mkdirs (str path "error"))
       (let [zip-path (.getPath zip)
             result (try
-                     (ah-verdict/process-ah-verdict zip-path user)
+                     (ah-verdict/process-ah-verdict zip-path ftp-user eraajo-user)
                      (catch Throwable e
                        (error e "Error processing zip-file in asianhallinta verdict batchrun")
                        (fail :error.unknown)))

@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [monger.operators :refer [$set $push]]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :refer :all]
@@ -90,3 +91,9 @@
   (validate-has-subtypes nil {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => nil
   (validate-has-subtypes nil {:permitType "R"}) => {:ok false :text "error.permit-has-no-subtypes"}
   (validate-has-subtypes nil nil) => {:ok false :text "error.permit-has-no-subtypes"})
+
+(fact "State transitions"
+  (let [pena {:username "pena", :firstName "Pena" :lastName "Panaani"}]
+    (state-transition-update :open 1 pena) => {$set {:state :open, :opened 1}, $push {:history {:state :open, :ts 1, :user pena}}}
+    (state-transition-update :submitted 2 pena) => {$set {:state :submitted, :submitted 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
+    (state-transition-update :verdictGiven 3 pena) => {$set {:state :verdictGiven}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}}))

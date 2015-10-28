@@ -306,6 +306,7 @@
                    (let [application (query-application pena application-id)
                          email (last-email)]
                         (:state application) => "complementNeeded"
+                        (-> application :history last :state) => "complementNeeded"
                         (:to email) => (contains (email-for-key pena))
                         (:subject email) => "Lupapiste.fi: Ryspitie 289 - hakemuksen tila muuttunut"
                         (get-in email [:body :plain]) => (contains "T\u00e4ydennett\u00e4v\u00e4n\u00e4")

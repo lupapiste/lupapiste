@@ -1236,6 +1236,23 @@
         attachment))
     {"attachments.latestVersion.valid-pdfa" {$exists true}}))
 
+
+(defn populate-application-history [application]
+  (let [{:keys [opened submitted sent canceled started closed startedBy closedBy history]} application
+        all-entries [(when (not= "open" (-> history first :state)) {:state :open, :ts opened, :user nil})
+                     (when submitted {:state :submitted, :ts submitted, :user nil})
+                     (when sent {:state :sent, :ts sent, :user nil})
+                     (when canceled {:state :canceled, :ts canceled, :user nil})
+                     (when started {:state :constructionStarted, :ts started, :user (user/summary startedBy)})
+                     (when closed {:state :constructionStarted, :ts closed, :user (user/summary closedBy)})]]
+    {$push {:history {$each (remove nil? all-entries)}}}))
+
+(defmigration populate-history
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {:state {$ne "draft"}, :infoRequest false} [:opened :sent :submitted :canceled :started :closed :startedBy :closedBy :history])]
+        (count (map #(mongo/update-by-id collection (:id %) (populate-application-history %)) applications))))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
