@@ -90,11 +90,12 @@
       (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
             tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)]
         (util/deep-merge
-          (when-not (states/post-verdict-states (keyword (:state application)))
-            (application/state-transition-update (sm/verdict-given-state application) created user))
           {$set (merge {:verdicts verdicts-with-attachments, :modified created}
                   (when-not has-old-verdict-tasks {:tasks tasks})
-                  (when extras-reader (extras-reader app-xml)))})))))
+                  (when extras-reader (extras-reader app-xml)))}
+          (when-not (states/post-verdict-states (keyword (:state application)))
+            (application/state-transition-update (sm/verdict-given-state application) created user))
+          )))))
 
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]

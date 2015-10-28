@@ -1,6 +1,7 @@
 (ns lupapalvelu.construction-api
   (:require [monger.operators :refer [$set $elemMatch]]
             [lupapalvelu.action :refer [defcommand update-application notify] :as action]
+            [lupapalvelu.application :as application]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
@@ -24,10 +25,9 @@
    :input-validators [(partial action/non-blank-parameters [:startedTimestampStr])]}
   [{:keys [user created] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
-    (update-application command {$set {:modified created
-                                       :started timestamp
-                                       :startedBy (select-keys user [:id :firstName :lastName])
-                                       :state  :constructionStarted}}))
+    (update-application command (util/deep-merge
+                                  (application/state-transition-update :constructionStarted created user)
+                                  {$set {:modified created, :startedBy (select-keys user [:id :firstName :lastName])}})))
   (ok))
 
 (comment
@@ -43,7 +43,7 @@
        (let [timestamp     (util/to-millis-from-local-date-string startedDate)
              app-updates   (merge
                              {:modified created}
-                             (when (states/verdict-given-states (keyword (:state application)))
+                             (when
                                {:started created
                                 :state  :constructionStarted}))
              application   (merge application app-updates)
@@ -56,8 +56,13 @@
            (mapping-to-krysp/save-aloitusilmoitus-as-krysp application lang organization timestamp building user))
          (update-application command
            {:buildings {$elemMatch {:index (:index building)}}}
-           {$set (merge app-updates {:buildings.$.constructionStarted timestamp
-                                     :buildings.$.startedBy (select-keys user [:id :firstName :lastName])})})
+           (util/deep-merge
+             {$set {:modified created
+                    :buildings.$.constructionStarted timestamp
+                    :buildings.$.startedBy (select-keys user [:id :firstName :lastName])}}
+             (when (states/verdict-given-states (keyword (:state application)))
+               (application/state-transition-update :constructionStarted created user))
+             ))
          (when (states/verdict-given-states (keyword (:state application)))
            (notifications/notify! :application-state-change command))
          (ok :integrationAvailable ftp-user?))))
@@ -81,5 +86,7 @@
         ftp-user?     (organization/has-ftp-user? organization (permit/permit-type application))]
     (when ftp-user?
       (mapping-to-krysp/save-application-as-krysp application lang application organization))
-    (update-application command {$set app-updates})
+    (update-application command (util/deep-merge
+                                  {$set app-updates}
+                                  (application/state-transition-update :closed created user)))
     (ok :integrationAvailable ftp-user?)))
