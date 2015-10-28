@@ -13,6 +13,8 @@
                                                   :x 430109.3125 :y 7210461.375
                                                   :address "Oulu 10")
           app-id (:id app)]
+      (fact "publishing with wrong id results in error"
+        (command olli :publish-bulletin :id "123") => (partial expected-failure? :error.application-not-accessible))
 
       (fact "Bulletin not found before publishing"
         (query pena :bulletin :bulletinId app-id) => (partial expected-failure? :error.bulletin.not-found))
