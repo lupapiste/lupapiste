@@ -21,15 +21,6 @@
     (fact "Regular user can't publish bulletin"
       (command pena :publish-bulletin :id app-id) => fail?)
 
-    (facts "Bulletin query"
-      (let [bulletin (query-bulletin pena app-id)]
-        (fact "bulletin state is 'proclaimed'"
-          (:bulletinState bulletin) => "proclaimed")
-        (fact "each documents has schema definition"
-          (:documents bulletin) => (partial every? :schema))
-        (fact "no party documents"
-          (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))))
-
     (fact "Publishing again creates new version snapshot"
       (command olli :publish-bulletin :id app-id) => ok?
       (-> (mongo/with-db test-db-name
@@ -58,4 +49,13 @@
                                                   :sort nil) => (partial expected-failure? :error.illegal-number)
         resp (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state nil :sort nil) => ok?]
     (fact "Two bulletins is returned"
-      (count (:data resp)) => 2)))
+      (count (:data resp)) => 2)
+
+    (facts "Response data"
+      (let [bulletin (query-bulletin pena (:id oulu-app))]
+        (fact "bulletin state is 'proclaimed'"
+          (:bulletinState bulletin) => "proclaimed")
+        (fact "each documents has schema definition"
+          (:documents bulletin) => (partial every? :schema))
+        (fact "no party documents"
+          (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))))))
