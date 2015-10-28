@@ -3,6 +3,7 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [slingshot.slingshot :refer [try+]]
+            [monger.operators :refer [$set $push $pull]]
             [schema.core :as sc]
             [sade.env :as env]
             [sade.util :as util]
@@ -138,8 +139,17 @@
   ([command mongo-query changes]
     (update-application command mongo-query changes false))
   ([command mongo-query changes return-count?]
-    (when (get-in changes ["$set" :state])
-      (assert (seq (get-in changes ["$push" :history])) "event must be pushed to history array when state is set"))
+
+    (when-let [new-state (get-in changes [$set :state])]
+      (assert
+        (or
+          ; Require history entry
+          (seq (get-in changes [$push :history]))
+          ; Inforequest state chenges don't require logging
+          (states/all-inforequest-states new-state)
+          ; delete-verdict commands sets state back, but no logging is required (LPK-917)
+          (seq (get-in changes [$pull :verdicts])))
+        "event must be pushed to history array when state is set"))
 
     (with-application command
       (fn [{:keys [id]}]
