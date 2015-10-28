@@ -14,11 +14,10 @@ LUPAPISTE.BulletinsSearchModel = function(params) {
   hub.send("bulletinService::fetchStates");
 
   ko.computed(function() {
-    hub.send("bulletinService::fetchBulletins", {
+    hub.send("bulletinService::searchTermsChanged", {
       searchText: util.getIn(self, ["searchText"], ""),
       municipality: util.getIn(self, ["municipality", "id"], ""),
-      state: util.getIn(self, ["state", "id"], ""),
-      page: 1
+      state: util.getIn(self, ["state", "id"], "")
     });
   });
 };

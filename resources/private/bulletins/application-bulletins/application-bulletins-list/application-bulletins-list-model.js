@@ -4,7 +4,7 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
 
   self.params = params;
 
-  var currentSort = params.sort;
+  var currentSort = {field: ko.observable(params.sort.field()), asc: ko.observable(params.sort.asc())};
 
   self.openBulletin = function(item) {
     pageutil.openPage("bulletin", item.id);
@@ -21,8 +21,7 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
   ];
 
   ko.computed(function() {
-    hub.send("bulletinService::fetchBulletins", {
-      page: 1,
+    hub.send("bulletinService::sortChanged", {
       sort: ko.mapping.toJS(currentSort)
     });
   });

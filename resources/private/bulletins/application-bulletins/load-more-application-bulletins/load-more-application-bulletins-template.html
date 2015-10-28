@@ -6,7 +6,7 @@
       <div class="search-button-wrapper">
         <button class="bulletin"
                 data-test-id="load-more-bulletins"
-                data-bind="click: requestedPages.increment.bind(requestedPages),
+                data-bind="click: pageChanged,
                            visible: showButton,
                            disable: pending,
                            css: {waiting: pending}">

@@ -2,8 +2,6 @@ LUPAPISTE.LoadMoreApplicationBulletinsModel = function(params) {
   "use strict";
   var self = this;
 
-  self.requestedPages = params.requestedPages;
-
   self.bulletinsLeft = params.bulletinsLeft;
   self.pending = ko.observable();
 
@@ -15,10 +13,15 @@ LUPAPISTE.LoadMoreApplicationBulletinsModel = function(params) {
     return self.bulletinsLeft() + loc("unit.kpl");
   });
 
-  ko.computed(function() {
-    hub.send("bulletinService::fetchBulletins", {
-      page: self.requestedPages(),
-      pending: self.pending
-    });
+  self.pageChanged = function() {
+    hub.send("bulletinService::pageChanged");
+  };
+
+  var id = hub.subscribe("bulletinService::pendingChanged", function(event) {
+    self.pending(event.pending);
   });
+
+  self.dispose = function () {
+    hub.unsubscribe(id);
+  };
 };

@@ -5,12 +5,21 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   self.data = ko.observableArray([]);
   self.bulletinsLeft = ko.observable(0);
 
-  self.fetchBulletins = _.debounce(function (query) {
-    // TODO setting these in service kind of defeats the purpose of sending events through hub
-    self.currentSort.field(query.sort.field);
-    self.currentSort.asc(query.sort.asc);
-    self.currentPage(query.page);
+  self.query = {
+    page: ko.observable(1),
+    searchText: ko.observable(""),
+    municipality: ko.observable(""),
+    state: ko.observable(""),
+    sort: {field: ko.observable("modified"), asc: ko.observable(false)}
+  };
 
+  self.pending = ko.observable(false);
+
+  ko.computed(function() {
+    hub.send("bulletinService::pendingChanged", {pending: self.pending()});
+  });
+
+  self.fetchBulletins = _.debounce(function (query) {
     ajax.datatables("application-bulletins", query)
       .success(function(res) {
         self.bulletinsLeft(res.left);
@@ -20,61 +29,59 @@ LUPAPISTE.ApplicationBulletinsService = function() {
           self.data(self.data().concat(res.data));
         }
       })
-      .pending(query.pending || _.noop)
+      .pending(self.pending)
       .call();
   }, 250);
 
+  ko.computed(function() {
+    self.fetchBulletins(ko.mapping.toJS(self.query),
+      self.pending);
+  });
+
   self.municipalities = ko.observableArray([]);
-  self.fetchMunicipalities = function() {
+
+  self.states = ko.observableArray([]);
+
+  function fetchMunicipalities() {
     ajax.query("application-bulletin-municipalities", {})
       .success(function(res) {
         self.municipalities(res.municipalities);
       })
       .call();
-  };
+  }
 
-  self.states = ko.observableArray([]);
-  self.fetchStates = function() {
+  function fetchStates() {
     ajax.query("application-bulletin-states", {})
       .success(function(res) {
         self.states(res.states);
       })
       .call();
-  };
+  }
 
-  self.currentSort = {
-    field: ko.observable("modified"),
-    asc: ko.observable(false)
-  };
-
-  self.currentPage = ko.observable(1);
-
-  var lastQuery = {
-    page: 1,
-    searchText: "",
-    municipality: "",
-    state: "",
-    sort: {field: "modified", asc: false}
-  };
-
-  hub.subscribe("bulletinService::fetchBulletins", function(event) {
-    // Merge new partial query with last whole query
-    _.merge(lastQuery, event, function(a,b) {
-      if (_.isUndefined(b) || _.isNull(b)) {
-        return "";
-      }
-      return b;
-    });
-
-    self.fetchBulletins(lastQuery);
+  // TODO hub subscriptions are not disposed if service is deleted
+  hub.subscribe("bulletinService::searchTermsChanged", function(event) {
+    self.query.searchText(event.searchText || "");
+    self.query.municipality(event.municipality || "");
+    self.query.state(event.state || "");
+    self.query.page(1);
   });
 
-  hub.subscribe("bulletinService::fetchMunicipalities", function() {
-    self.fetchMunicipalities();
+  hub.subscribe("bulletinService::pageChanged", function() {
+    self.query.page(self.query.page() + 1);
+  });
+
+  hub.subscribe("bulletinService::sortChanged", function(event) {
+    self.query.sort.field(event.sort.field);
+    self.query.sort.asc(event.sort.asc);
+    self.query.page(1);
   });
 
   hub.subscribe("bulletinService::fetchStates", function() {
-    self.fetchStates();
+    fetchStates();
+  });
+
+  hub.subscribe("bulletinService::fetchMunicipalities", function() {
+    fetchMunicipalities();
   });
 };
 

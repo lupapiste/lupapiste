@@ -28,11 +28,10 @@
         <div class="content-center">
           <div data-bind="component: {name: 'application-bulletins-list',
                                       params: {bulletins: bulletinService.data,
-                                               sort: bulletinService.currentSort}}"></div>
+                                               sort: bulletinService.query.sort}}"></div>
 
           <div data-bind="component: {name: 'load-more-application-bulletins',
-                                      params: {bulletinsLeft: bulletinService.bulletinsLeft,
-                                      requestedPages: bulletinService.currentPage}}"></div>
+                                      params: {bulletinsLeft: bulletinService.bulletinsLeft}}"></div>
         </div>
       </div>
     </script>
