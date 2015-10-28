@@ -5,7 +5,7 @@
             [sade.util :refer [fn->]]
             [sade.strings :as ss]
             [sade.property :as p]
-            [lupapalvelu.action :refer [defquery defcommand]]
+            [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
             [monger.operators :refer :all]
@@ -66,6 +66,7 @@
   {:description "Query for Julkipano"
    :feature :publish-bulletin
    :parameters [page searchText municipality state sort]
+   :input-validators [(partial action/number-parameters [:page])]
    :user-roles #{:anonymous}}
   [_]
   (let [parameters [page searchText municipality state sort]]
