@@ -54,12 +54,17 @@
 
       (facts "Response data"
         (let [bulletin (query-bulletin pena (:id oulu-app))]
+          (keys bulletin) => (just [:id :_applicantIndex :address :applicant :attachments
+                                    :bulletinState :documents :location :modified :municipality
+                                    :primaryOperation :propertyId :state] :in-any-order)
           (fact "bulletin state is 'proclaimed'"
             (:bulletinState bulletin) => "proclaimed")
           (fact "each documents has schema definition"
             (:documents bulletin) => (partial every? :schema))
           (fact "no party documents"
-            (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))))
+            (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))
+          (fact "_applicantIndex"
+            (:_applicantIndex bulletin) => (just ["Panaani Pena"]))))
 
       (facts "Filters"
        (fact "Municipality"
