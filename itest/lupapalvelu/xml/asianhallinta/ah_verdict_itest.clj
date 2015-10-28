@@ -23,6 +23,13 @@
 
 (def db-name (str "test_xml_asianhallinta_verdict-itest_" (now)))
 
+(def system-user {:id "-"
+                  :enabled true
+                  :lastName "Er\u00e4ajo"
+                  :firstName "Lupapiste"
+                  :role "authority"
+                  :orgAuthz []})
+
 (mongo/connect!)
 (mongo/with-db db-name
   (fixture/apply-fixture "minimal")
@@ -147,7 +154,7 @@
           AsianPaatos (:AsianPaatos parsed-example-ah-xml)]
 
       (fact "If application in wrong state, return error"
-        (ahk/process-ah-verdict zip-file "dev_ah_kuopio") => (partial expected-failure? "error.integration.asianhallinta.wrong-state"))
+        (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta.wrong-state"))
 
                                         ; generate docs, set application to 'sent' state by moving it to asianhallinta
       (generate-documents application pena true)
@@ -159,7 +166,7 @@
 
         (fact* "Creates verdict based on xml"
           (:verdicts application) => empty?
-          (ahk/process-ah-verdict zip-file "dev_ah_kuopio") => ok?
+          (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => ok?
           (let [application (query-application local-query pena (:id application))
                 verdicts (:verdicts application) =not=> empty?
                 new-verdict (last verdicts)
@@ -195,7 +202,7 @@
               (generate-documents application pena true)
               (local-command velho :application-to-asianhallinta :id app-id :lang "fi")
 
-              (ahk/process-ah-verdict zip-file "dev_ah_kuopio")
+              (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user)
 
               (let [application (query-application local-query velho app-id)
                     new-verdict (last (:verdicts application))]
@@ -221,52 +228,52 @@
              (count (fs/find-files unzip-path pattern)) => 2)))
 
   (fact "Creates correct verdict model from xml"
-    (build-verdict parsed-example-ah-xml) => {:id "deadbeef" ; mongo/create-id
-                                              :source "ah"
-                                              :kuntalupatunnus "2015-1234"
-                                              :timestamp       "123456" ; core/now
-                                              :paatokset       [{:paatostunnus "12345678"
-                                                                 :paivamaarat  {:anto 1420070400000} ;2015-01-01
-                                                                 :poytakirjat  [{:paatoksentekija "Pena Panaani"
-                                                                                 :paatospvm       1420070400000
-                                                                                 :pykala          "\u00a7987"
-                                                                                 :paatoskoodi     "my\u00F6nnetty"
-                                                                                 :id              "deadbeef"}]}]}
-                                              (provided (mongo/create-id) => "deadbeef")
-                                              (provided (core/now) => "123456"))
+    (build-verdict parsed-example-ah-xml 123456) =>
+    {:id "deadbeef" ; mongo/create-id
+     :source "ah"
+     :kuntalupatunnus "2015-1234"
+     :timestamp       123456
+     :paatokset       [{:paatostunnus "12345678"
+                        :paivamaarat  {:anto 1420070400000} ;2015-01-01
+                        :poytakirjat  [{:paatoksentekija "Pena Panaani"
+                                        :paatospvm       1420070400000
+                                        :pykala          "\u00a7987"
+                                        :paatoskoodi     "my\u00F6nnetty"
+                                        :id              "deadbeef"}]}]}
+    (provided (mongo/create-id) => "deadbeef"))
 
   (fact "Paatostunnus is used if paatoskoodi not available"
-    (build-verdict parsed-example-ah-xml-no-paatoskoodi) => {:id "deadbeef" ; mongo/create-id
-                                                             :source "ah"
-                                                             :kuntalupatunnus "2015-1234"
-                                                             :timestamp       "123456" ; core/now
-                                                             :paatokset       [{:paatostunnus "12345678"
-                                                                                :paivamaarat  {:anto 1420070400000} ;2015-01-01
-                                                                                :poytakirjat  [{:paatoksentekija "Pena Panaani"
-                                                                                                :paatospvm       1420070400000
-                                                                                                :pykala          "\u00a7987"
-                                                                                                :paatoskoodi     "12345678"
-                                                                                                :id              "deadbeef"}]}]}
-                                                             (provided (mongo/create-id) => "deadbeef")
-                                                             (provided (core/now) => "123456")))
+    (build-verdict parsed-example-ah-xml-no-paatoskoodi 123456) =>
+    {:id "deadbeef" ; mongo/create-id
+     :source "ah"
+     :kuntalupatunnus "2015-1234"
+     :timestamp       123456
+     :paatokset       [{:paatostunnus "12345678"
+                        :paivamaarat  {:anto 1420070400000} ;2015-01-01
+                        :poytakirjat  [{:paatoksentekija "Pena Panaani"
+                                        :paatospvm       1420070400000
+                                        :pykala          "\u00a7987"
+                                        :paatoskoodi     "12345678"
+                                        :id              "deadbeef"}]}]}
+    (provided (mongo/create-id) => "deadbeef")))
 
 (facts "Errorenous, return error"
   (fact "If passed zip file is missing"
     (mongo/with-db db-name
-      (ahk/process-ah-verdict "/foo/bar" "dev_ah_kuopio") => (partial expected-failure? "error.integration.asianhallinta-file-not-found")))
+      (ahk/process-ah-verdict "/foo/bar" "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-file-not-found")))
 
   (fact "If xml message missing from zip"
     (mongo/with-db db-name
       (let [zip-file (.getPath (build-zip! [example-ah-attachment-path]))] ; xml is missing
-        (ahk/process-ah-verdict zip-file "dev_ah_kuopio") => (partial expected-failure? "error.integration.asianhallinta-wrong-number-of-xmls"))))
+        (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-wrong-number-of-xmls"))))
 
   (fact "If attachment files missing from zip"
     (mongo/with-db db-name
       (let [zip-file (.getPath (build-zip! [example-ah-xml-path]))] ;attachment is missing
-        (ahk/process-ah-verdict zip-file "dev_ah_kuopio") => (partial expected-failure? "error.integration.asianhallinta-missing-attachment"))))
+        (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-missing-attachment"))))
 
   (fact "If xml message references an application that the ftp user cannot access"
     (mongo/with-db db-name
       (let [zip-file (.getPath (build-zip! [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]))]
-        (ahk/process-ah-verdict zip-file "sipoo") => (partial expected-failure? "error.integration.asianhallinta.unauthorized")))))
+        (ahk/process-ah-verdict zip-file "sipoo" system-user) => (partial expected-failure? "error.integration.asianhallinta.unauthorized")))))
 
