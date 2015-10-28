@@ -11,10 +11,6 @@ if [ -z $server ] ; then
 	server="https://www-dev.lupapiste.fi"
 fi
 
-hubert='hubert.solita.fi'
-bianca='192.168.7.253'
-
-#remote=$bianca
-remote=$hubert
+source remote-config.sh
 
 pybot -d target --exclude integration --exclude fail --variable BROWSER:internetexplorer --variable SELENIUM:http://$remote:4444/wd/hub --variable SERVER:$server $target
