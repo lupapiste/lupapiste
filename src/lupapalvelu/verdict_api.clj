@@ -126,7 +126,7 @@
           {:verdicts {$elemMatch {:id id}}}
           (util/deep-merge
             (application/state-transition-update next-state timestamp (:user command))
-            {$set {:modified timestamp, :verdicts.$.draft false}}))
+            {$set {:verdicts.$.draft false}}))
         (ok)))
     (fail :error.no-verdict-municipality-id)))
 

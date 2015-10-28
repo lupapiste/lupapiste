@@ -143,10 +143,7 @@
 
 (defn- do-cancel [{:keys [created user data] :as command}]
   {:pre [(seq (:application command))]}
-  (update-application command
-                      (util/deep-merge
-                        (a/state-transition-update :canceled created user)
-                        {$set {:modified created}}))
+  (update-application command (a/state-transition-update :canceled created user))
   (remove-app-links (:id data))
   (ok))
 
@@ -195,8 +192,7 @@
           false
           (:user command)
           nil
-          created))
-      {$set {:modified created}}))
+          created))))
   (remove-app-links id)
   (ok))
 
@@ -209,9 +205,7 @@
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
   [{:keys [created user] :as command}]
-  (update-application command (util/deep-merge
-                                (a/state-transition-update :complementNeeded created user)
-                                {$set {:modified created}})))
+  (update-application command (util/deep-merge (a/state-transition-update :complementNeeded created user))))
 
 (defn- do-submit [command application created]
   (let [history-entries (remove nil?

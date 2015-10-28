@@ -106,7 +106,7 @@
     (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
       (util/deep-merge
         (application/state-transition-update (sm/verdict-given-state application) created user)
-        {$set {:verdicts verdicts-with-attachments, :modified created}}))))
+        {$set {:verdicts verdicts-with-attachments}}))))
 
 (defn- get-tj-suunnittelija-doc-name
   "Returns name of first party document of operation"

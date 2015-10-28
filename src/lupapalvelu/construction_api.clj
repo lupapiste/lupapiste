@@ -27,7 +27,7 @@
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
     (update-application command (util/deep-merge
                                   (application/state-transition-update :constructionStarted created user)
-                                  {$set {:modified created, :startedBy (select-keys user [:id :firstName :lastName])}})))
+                                  {$set {:startedBy (select-keys user [:id :firstName :lastName])}})))
   (ok))
 
 (comment
