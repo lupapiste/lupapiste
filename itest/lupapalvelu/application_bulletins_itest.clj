@@ -82,7 +82,7 @@
 
       (facts "Filters"
        (fact "Municipality"
-         (:municipalities (query pena :application-bulletin-municipalities)) => (just ["564" "753"])
+         (:municipalities (query pena :application-bulletin-municipalities)) => (just ["564" "753"] :in-any-order)
          (let [{data :data} (datatables pena :application-bulletins :page 1 :searchText "" :municipality "753" :state nil :sort nil)]
            (count data) => 1
            (:id (first data)) => (:id sipoo-app)))
