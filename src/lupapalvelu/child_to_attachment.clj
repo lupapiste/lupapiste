@@ -27,6 +27,7 @@
      :attachment-id nil
      :attachment-type (case type
                         :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"}
+                        :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
                         {:type-group "muut" :type-id "muu"})
      :op nil
      :comment-text (case type
@@ -36,7 +37,8 @@
      :user user
      :created (now)
      :required false
-     :valid-pdfa is-pdf-a?
+     :archivable         is-pdf-a?
+     :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
      :missing-fonts []}))
 
 (defn generate-attachment-from-children [user app lang child-type id]

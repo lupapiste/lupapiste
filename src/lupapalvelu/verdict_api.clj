@@ -6,6 +6,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [ok fail fail! ok?]]
+            [lupapalvelu.application :as application]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
@@ -122,10 +123,10 @@
     (when-let [next-state (sm/verdict-given-state application)]
       (do
         (update-application command
-         {:verdicts {$elemMatch {:id id}}}
-         {$set {:modified timestamp
-                :state    next-state
-                :verdicts.$.draft false}})
+          {:verdicts {$elemMatch {:id id}}}
+          (util/deep-merge
+            (application/state-transition-update next-state timestamp (:user command))
+            {$set {:verdicts.$.draft false}}))
         (ok)))
     (fail :error.no-verdict-municipality-id)))
 

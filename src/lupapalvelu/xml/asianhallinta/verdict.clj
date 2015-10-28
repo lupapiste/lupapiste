@@ -8,6 +8,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as org]
             [lupapalvelu.action :as action]
+            [lupapalvelu.application :as application]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.notifications :as notifications]
@@ -15,6 +16,7 @@
             [clojure.string :as s]
             [clojure.java.io :as io]
             [sade.common-reader :as cr]
+            [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.attachment :as attachment]))
 
@@ -34,13 +36,13 @@
                               (map :LinkkiLiitteeseen)
                               (map fs/base-name))]
     (doseq [filename attachment-paths]
-      (when (empty? (fs/find-files unzipped-path (re-pattern filename)))
+      (when (empty? (fs/find-files unzipped-path (ss/escaped-re-pattern filename)))
         (error-and-fail! (str "Attachment referenced in XML was not present in zip: " filename) :error.integration.asianhallinta-missing-attachment)))))
 
-(defn- build-verdict [{:keys [AsianPaatos]}]
+(defn- build-verdict [{:keys [AsianPaatos]} timestamp]
   {:id              (mongo/create-id)
    :kuntalupatunnus (:AsianTunnus AsianPaatos)
-   :timestamp (core/now)
+   :timestamp timestamp
    :source    "ah"
    :paatokset [{:paatostunnus (:PaatoksenTunnus AsianPaatos)
                 :paivamaarat  {:anto (cr/to-timestamp (:PaatoksenPvm AsianPaatos))}
@@ -50,7 +52,7 @@
                                 :paatoskoodi     (or (:PaatosKoodi AsianPaatos) (:PaatoksenTunnus AsianPaatos)) ; PaatosKoodi is not required
                                 :id              (mongo/create-id)}]}]})
 
-(defn- insert-attachment! [application attachment unzipped-path verdict-id poytakirja-id]
+(defn- insert-attachment! [application attachment unzipped-path verdict-id poytakirja-id timestamp]
   (let [filename      (fs/base-name (:LinkkiLiitteeseen attachment))
         file          (fs/file (s/join "/" [unzipped-path filename]))
         file-size     (.length file)
@@ -70,13 +72,14 @@
                               :required false
                               :locked true
                               :user batchrun-user
-                              :created (core/now)
+                              :created timestamp
                               :state :ok})))
 
-(defn process-ah-verdict [path-to-zip ftp-user]
+(defn process-ah-verdict [path-to-zip ftp-user system-user]
   (try
     (let [unzipped-path (unzip-file path-to-zip)
-          xmls (fs/find-files unzipped-path #".*xml$")]
+          xmls (fs/find-files unzipped-path #".*xml$")
+          timestamp (core/now)]
       ; path must contain exactly one xml
       (when-not (= (count xmls) 1)
         (error-and-fail! (str "Expected to find one xml, found " (count xmls)) :error.integration.asianhallinta-wrong-number-of-xmls))
@@ -111,14 +114,13 @@
 
           ; -> build update clause
           ; -> update-application
-          (let [new-verdict   (build-verdict parsed-xml)
+          (let [new-verdict   (build-verdict parsed-xml timestamp)
                 command       (action/application->command application)
                 poytakirja-id (get-in new-verdict [:paatokset 0 :poytakirjat 0 :id])
-                update-clause {$push {:verdicts new-verdict}
-                               $set  (merge
-                                       {:modified (core/now)}
-                                       (when (#{:sent} (keyword (:state application)))
-                                         {:state verdict-given-state}))}]
+                update-clause (util/deep-merge
+                                {$push {:verdicts new-verdict}, $set  {:modified timestamp}}
+                                (when (= :sent (keyword (:state application)))
+                                  (application/state-transition-update verdict-given-state timestamp system-user)))]
 
             (action/update-application command update-clause)
             (doseq [attachment attachments]
@@ -127,7 +129,8 @@
                 attachment
                 unzipped-path
                 (:id new-verdict)
-                poytakirja-id))
+                poytakirja-id
+                timestamp))
             (notifications/notify! :application-verdict command)
             (ok)))))
     (catch Throwable e
