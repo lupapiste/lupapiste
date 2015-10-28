@@ -126,7 +126,6 @@
         search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
         changes {$push {:versions app-snapshot}
                  $set  (merge {:modified created} (get-search-fields search-fields app-snapshot))}]
-    (clojure.pprint/pprint changes)
     (mongo/update-by-id :application-bulletins id changes :upsert true)
     (ok)))
 
