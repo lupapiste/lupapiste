@@ -120,7 +120,9 @@
       (let [resp        (command sonja :submit-application :id application-id)
             application (query-application sonja application-id)]
         resp => ok?
-        (:state application) => "submitted"))))
+        (:state application) => "submitted"
+        (-> application :history last :state) => "submitted"
+        (-> application :history butlast last :state) => "open"))))
 
 (facts* "Application has opened when submitted from draft"
   (let [{id :id :as app1} (create-application pena) => truthy
@@ -139,7 +141,10 @@
     (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
     (fact "Sonja can cancel Mikko's application"
       (command sonja :cancel-application-authority :id application-id :text nil :lang "fi") => ok?)
-    (fact "Sonja sees the canceled application" (query sonja :application :id application-id) => ok?)
+    (fact "Sonja sees the canceled application"
+      (let [application (query-application sonja application-id)]
+        (-> application :history last :state) => "canceled"))
+
     (let [email (last-email)]
       (:to email) => (contains (email-for-key mikko))
       (:subject email) => "Lupapiste.fi: Peruutustie 23 - hakemuksen tila muuttunut"
@@ -197,6 +202,8 @@
         redirect-url   "http://www.taustajarjestelma.fi/servlet/kohde?kohde=rakennuslupatunnus&lupatunnus="]
 
     (command sonja :approve-application :id application-id :lang "fi")
+
+    (-> (query-application sonja application-id) :history last :state) => "sent"
 
     (facts "no vendor backend id (kuntalupatunnus)"
       (fact* "redirects to LP backend url if configured"

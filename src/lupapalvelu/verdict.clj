@@ -89,12 +89,13 @@
     (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
       (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
             tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)]
-        {$set (merge {:verdicts verdicts-with-attachments
-                      :modified created}
-                (when-not (states/post-verdict-states (keyword (:state application)))
-                  {:state (sm/verdict-given-state application)})
-                (when-not has-old-verdict-tasks {:tasks tasks})
-                (when extras-reader (extras-reader app-xml)))}))))
+        (util/deep-merge
+          {$set (merge {:verdicts verdicts-with-attachments, :modified created}
+                  (when-not has-old-verdict-tasks {:tasks tasks})
+                  (when extras-reader (extras-reader app-xml)))}
+          (when-not (states/post-verdict-states (keyword (:state application)))
+            (application/state-transition-update (sm/verdict-given-state application) created user))
+          )))))
 
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]
@@ -103,9 +104,9 @@
                          (permit/get-tj-suunnittelija-verdict-reader (:permitType application))
                          doc osapuoli-type target-kuntaRoolikoodi)]
     (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
-      {$set {:verdicts verdicts-with-attachments
-             :modified created
-             :state    (sm/verdict-given-state application)}})))
+      (util/deep-merge
+        (application/state-transition-update (sm/verdict-given-state application) created user)
+        {$set {:verdicts verdicts-with-attachments, :modified created}}))))
 
 (defn- get-tj-suunnittelija-doc-name
   "Returns name of first party document of operation"
