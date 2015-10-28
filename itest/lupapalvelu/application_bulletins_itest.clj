@@ -54,7 +54,8 @@
         _ (datatables pena :application-bulletins :page "1"
                                                   :searchText ""
                                                   :municipality nil
-                                                  :state nil) => (partial expected-failure? :error.illegal-number)
-        resp (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state nil) => ok?]
+                                                  :state nil
+                                                  :sort nil) => (partial expected-failure? :error.illegal-number)
+        resp (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state nil :sort nil) => ok?]
     (fact "Two bulletins is returned"
       (count (:data resp)) => 2)))
