@@ -58,4 +58,37 @@
         (fact "each documents has schema definition"
           (:documents bulletin) => (partial every? :schema))
         (fact "no party documents"
-          (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))))))
+          (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))))
+
+    (facts "Paging"
+      (dotimes [i 20]
+        (let [{id :id} (create-and-submit-application pena :operation "jatteen-keraystoiminta"
+                                                  :propertyId oulu-property-id
+                                                  :x 430109.3125 :y 7210461.375
+                                                  :address "Oulu 10")]
+          (command olli :publish-bulletin :id id)))
+
+      (let [{p1-data :data p1-left :left :as data} (datatables pena :application-bulletins :page 1
+                                                                                           :searchText ""
+                                                                                           :municipality nil
+                                                                                           :state nil
+                                                                                           :sort nil)
+            {p2-data :data p2-left :left} (datatables pena :application-bulletins :page 2
+                                                                                  :searchText ""
+                                                                                  :municipality nil
+                                                                                  :state nil
+                                                                                  :sort nil)
+            {p3-data :data p3-left :left} (datatables pena :application-bulletins :page 3
+                                                                                  :searchText ""
+                                                                                  :municipality nil
+                                                                                  :state nil
+                                                                                  :sort nil)]
+        (fact "page 1"
+          (count p1-data) => 10
+          p1-left => 12)
+        (fact "page 2"
+          (count p2-data) => 10
+          p2-left => 2)
+        (fact "page 3"
+          (count p3-data) => 2
+          p3-left => -8)))))
