@@ -430,9 +430,9 @@
 
 (def hanke-row [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                 {:name "katuosoite" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
-                {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-localized-string :i18nkey "muutHankkeet.rakennustoimenpide" :locPrefix "operations"}
+                {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.rakennustoimenpide" :locPrefix "operations"}
                 {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
-                {:name "vaihe" :type :select :size "t" :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe"
+                {:name "vaihe" :type :select :size "t" :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe" :valueAllowUnset false
                  :body [{:name "R" :i18nkey "muutHankkeet.R"}
                         {:name "A" :i18nkey "muutHankkeet.A"}
                         {:name "K" :i18nkey "muutHankkeet.K"}]}

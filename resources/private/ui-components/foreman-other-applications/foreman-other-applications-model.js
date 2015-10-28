@@ -14,8 +14,12 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
     _.forEach(self.params.subSchema.body, function(subSchema) {
       var rowModel = model ? model[subSchema.name] : undefined;
       var readonly = false;
-      if (_.contains(LUPAPISTE.config.foremanReadonlyFields, subSchema.name)) {
+      var schema = _.extend({}, subSchema);
+      if (_.contains(LUPAPISTE.config.foremanReadonlyFields, schema.name)) {
         readonly = util.getIn(model, ["autoupdated", "value"]) || false;
+      }
+      if (schema.uicomponent === "docgen-string" && schema.locPrefix && readonly) {
+        schema.uicomponent = "docgen-localized-string";
       }
       var item = {
         applicationId: self.params.applicationId,
@@ -23,7 +27,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
         path: self.params.path,
         schemaI18name: self.params.schemaI18name,
         index: index,
-        schema: subSchema,
+        schema: schema,
         model: rowModel,
         validationErrors: res,
         readonly: readonly
