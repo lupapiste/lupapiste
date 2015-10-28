@@ -43,7 +43,7 @@ var stamping = (function() {
     var verdict = util.getIn(model.appModel._js, ["verdicts", 0]);
 
     if (!model.stampFields.organization) {
-      model.stampFields.organization = ko.observable(model.appModel._js.organizationName);
+      model.stampFields.organization = ko.observable(model.appModel.organizationName());
     }
 
     if (verdict) {
