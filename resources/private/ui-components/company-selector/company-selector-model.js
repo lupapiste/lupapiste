@@ -5,25 +5,9 @@ LUPAPISTE.CompanySelectorModel = function(params) {
 
   self.indicator = ko.observable();
   self.result = ko.observable();
-  self.authorization = lupapisteApp.models.applicationAuthModel;
+  self.authorization = params.authModel;
 
-  function mapCompany(company) {
-    company.displayName = ko.pureComputed(function() {
-      return ko.unwrap(company.name) + " (" + ko.unwrap(company.y) + ")";
-    });
-    return company;
-  }
-
-  function getCompanies() {
-    return _(lupapisteApp.models.application.roles())
-      .filter(function(r) {
-        return ko.unwrap(r.type) === "company";
-      })
-      .map(mapCompany)
-      .value();
-  }
-
-  self.companies = ko.observableArray(getCompanies());
+  self.companies = ko.observableArray(params.companies);
   self.selected = ko.observable(_.isEmpty(params.selected) ? undefined : params.selected);
 
   self.setOptionDisable = function(option, item) {
@@ -35,7 +19,7 @@ LUPAPISTE.CompanySelectorModel = function(params) {
 
   self.selected.subscribe(function(id) {
     var p = {
-      id: lupapisteApp.models.application.id(),
+      id: params.id,
       documentId: params.documentId,
       companyId: id ? id : "",
       path: params.path
@@ -43,12 +27,12 @@ LUPAPISTE.CompanySelectorModel = function(params) {
     ajax.command("set-company-to-document", p)
     .success(function() {
       function cb() {
-        repository.load(lupapisteApp.models.application.id());
+        repository.load(params.id);
       }
 
       uiComponents.save("update-doc",
                          params.documentId,
-                         lupapisteApp.models.application.id(),
+                         params.id,
                          params.schema.name,
                          params.path.split(".").concat([params.schema.name]),
                          id,

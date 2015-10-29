@@ -1,0 +1,35 @@
+(ns lupapalvelu.application-bulletins-test
+  (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [monger.operators :refer :all]
+            [lupapalvelu.application-bulletins :refer :all]))
+
+(def example-app {:documents [{:schema-info {:type :party} :data {:name "party 1"}}
+                              {:schema-info {:type "party"} :data {:name "party 2"}}
+                              {:schema-info {:type :location} :data {:name "location" :x 1 :y 2}}
+                              {:schema-info {} :data {:name "untyped"}}]
+                  :attachments [{:type "test1" :versions [{:id 1} {:id 2}] :latestVersion {:id 2}}
+                                {:type "testi2"}
+                                nil]
+                  :state :submitted})
+
+(facts "Remove party docs"
+  (let [docs (:documents example-app)
+        expected-docs [{:schema-info {:type :location} :data {:name "location" :x 1 :y 2}}
+                       {:schema-info {} :data {:name "untyped"}}]]
+    (remove-party-docs-fn docs) => expected-docs))
+
+(fact "Snapshot"
+  (let [snapshot (create-bulletin-snapshot example-app)
+        updates (snapshot-updates snapshot {} 123)]
+    (fact "attachments with latest versions"
+      (:attachments snapshot) => [{:type "test1" :latestVersion {:id 2}}])
+
+    (fact "state"
+      (:state snapshot) => :submitted
+      (:bulletinState snapshot) => :proclaimed)
+
+    (fact "mongo update clause, versions are pushed"
+      updates => {$push {:versions snapshot}
+                  $set  {:modified 123}})))
+

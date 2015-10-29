@@ -1128,6 +1128,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
     var params = {
       applicationId: self.appId,
+      authModel: self.authorizationModel,
       documentId: self.docId,
       documentName: self.schemaName,
       hetu: undefined,
@@ -1143,7 +1144,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildFillMyInfoButton(subSchema, model, path) {
-    if (model.fillMyInfo && model.fillMyInfo.disabled) {
+    if (self.isDisabled || (model.fillMyInfo && model.fillMyInfo.disabled)) {
       return;
     }
 
@@ -1250,22 +1251,41 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildCompanySelector(subSchema, model, path) {
-    var myNs = path.slice(0, path.length - 1).join(".");
 
-    var params = {
-      id: self.appId,
-      documentId: self.docId,
-      documentName: self.schemaName,
-      path: myNs,
-      collection: self.getCollection(),
-      selected: getModelValue(model, subSchema.name),
-      schema: subSchema
-    };
+    function mapCompany(company) {
+      company.displayName = ko.pureComputed(function() {
+        return ko.unwrap(company.name) + " (" + ko.unwrap(company.y) + ")";
+      });
+      return company;
+    }
 
-    var span = makeEntrySpan(subSchema, path.join("."));
-    span.appendChild(createComponent("company-selector", params));
-    $(span).addClass("companySelector");
-    return span;
+    if (!self.isDisabled) {
+      var myNs = path.slice(0, path.length - 1).join(".");
+
+      var companies = _(lupapisteApp.models.application.roles() || [])
+                      .filter(function(r) {
+                        return ko.unwrap(r.type) === "company";
+                      })
+                      .map(mapCompany)
+                      .value();
+
+      var params = {
+        id: self.appId,
+        companies: companies,
+        authModel: self.authorizationModel,
+        documentId: self.docId,
+        documentName: self.schemaName,
+        path: myNs,
+        collection: self.getCollection(),
+        selected: getModelValue(model, subSchema.name),
+        schema: subSchema
+      };
+
+      var span = makeEntrySpan(subSchema, path.join("."));
+      span.appendChild(createComponent("company-selector", params));
+      $(span).addClass("companySelector");
+      return span;
+    }
   }
 
   function buildTableRow(subSchema, model, path, partOfChoice) {
