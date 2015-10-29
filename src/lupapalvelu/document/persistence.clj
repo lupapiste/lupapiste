@@ -33,6 +33,14 @@
     (let [keys (mapv keyword (if (coll? k) k (s/split k #"\.")))]
       [keys v])))
 
+(defn data-model->model-updates
+  "Creates model updates from data returned by mongo query"
+  [path data-model]
+  (if (contains? data-model :value)
+    [[path (:value data-model)]]
+    (->> (filter (comp map? val) data-model)
+         (mapcat (fn [[k m]] (data-model->model-updates (conj path k) m))))))
+
 (defn ->mongo-updates
   "Creates full paths to document update values to be $set.
    To be used within model/with-timestamp."
