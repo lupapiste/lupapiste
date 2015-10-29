@@ -367,6 +367,13 @@
                                    class="link-btn">
                                     <span data-bind="ltext: 'attachment.tosMetadata'"></span>
                                 </a></li>
+
+                            <li data-bind="if: features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin'),
+                                           css: {'active': $parent.selectedTabName() === 'bulletin'}">
+                                <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab"
+                                   class="link-btn">
+                                    <span data-bind="text: 'JPano'"></span>
+                                </a></li>
                         </ul>
                     </div>
                 </div>
@@ -1145,14 +1152,18 @@
                             </div>
                         </div>
                     </div>
+                    <!-- /ko -->
 
                     <!-- Bulletin tab -->
-                    <!-- ko if: features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin') && -->
+                    <!-- ko if: selectedTabName() === 'bulletin' && features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin') -->
+                    <div id="application-bulletin-tab" class="tab-content">
+                      <div data-bind="attr: {'class': features.enabled('publish-bulletin') ? 'feature' : ''}">
+                        <h1>JPano komponentti</h1>
+                      </div>
+                    </div>
 
                     <!-- /ko -->
                     <!-- / Bulletin tab -->
-
-                    <!-- /ko -->
 
                     <script type="text/x-jquery-tmpl" id="statements-template">
                         <div data-bind="ifnot: $data.statements && statements().length > 0">
