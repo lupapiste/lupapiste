@@ -9737,72 +9737,71 @@ div.search i {
   width: 80%;
   margin: 0 auto 20px;
 }
+/* line 69, ../sass/partials/_bulletins.scss */
+#bulletins-component .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {
+  color: #0fa8f7;
+}
+/* line 71, ../sass/partials/_bulletins.scss */
+#bulletins-component .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle {
+  color: #0fcff7;
+}
+/* line 76, ../sass/partials/_bulletins.scss */
+#bulletins-component .autocomplete-component .autocomplete-selection-wrapper.active {
+  border-color: #0fcff7;
+}
+/* line 78, ../sass/partials/_bulletins.scss */
+#bulletins-component .autocomplete-component .autocomplete-selection-wrapper.active .tag-chevron {
+  color: #0fcff7;
+}
+/* line 83, ../sass/partials/_bulletins.scss */
+#bulletins-component .autocomplete-component .search .search-icon {
+  color: #0fa8f7;
+}
+/* line 87, ../sass/partials/_bulletins.scss */
+#bulletins-component .autocomplete-component .search.active .search-icon {
+  color: #0fcff7;
+}
+/* line 93, ../sass/partials/_bulletins.scss */
+#bulletins-component .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
+  border-color: #0fcff7;
+}
+/* line 95, ../sass/partials/_bulletins.scss */
+#bulletins-component .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
+  background-color: #0fbbf7;
+}
+/* line 97, ../sass/partials/_bulletins.scss */
+#bulletins-component .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
+  background-color: #0fcff7;
+}
 
-/* line 68, ../sass/partials/_bulletins.scss */
+/* line 107, ../sass/partials/_bulletins.scss */
 .search-button-wrapper {
   text-align: center;
 }
-/* line 71, ../sass/partials/_bulletins.scss */
+/* line 110, ../sass/partials/_bulletins.scss */
 .search-button-wrapper button span:last-child {
   padding-left: 6px;
 }
-/* line 72, ../sass/partials/_bulletins.scss */
+/* line 111, ../sass/partials/_bulletins.scss */
 .search-button-wrapper button span:last-child:before {
   content: "(";
 }
-/* line 75, ../sass/partials/_bulletins.scss */
+/* line 114, ../sass/partials/_bulletins.scss */
 .search-button-wrapper button span:last-child:after {
   content: ")";
 }
 
-/* line 84, ../sass/partials/_bulletins.scss */
+/* line 123, ../sass/partials/_bulletins.scss */
 .bulletins-search h3 {
   text-align: center;
 }
-/* line 88, ../sass/partials/_bulletins.scss */
+/* line 127, ../sass/partials/_bulletins.scss */
 .bulletins-search .search-field i {
   color: #0fa8f7;
 }
-/* line 92, ../sass/partials/_bulletins.scss */
+/* line 131, ../sass/partials/_bulletins.scss */
 .bulletins-search .search-field.active i {
   color: #0fcff7;
-}
-
-/* line 101, ../sass/partials/_bulletins.scss */
-.autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {
-  color: #0fa8f7;
-}
-/* line 103, ../sass/partials/_bulletins.scss */
-.autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle {
-  color: #0fcff7;
-}
-/* line 108, ../sass/partials/_bulletins.scss */
-.autocomplete-component .autocomplete-selection-wrapper.active {
-  border-color: #0fcff7;
-}
-/* line 110, ../sass/partials/_bulletins.scss */
-.autocomplete-component .autocomplete-selection-wrapper.active .tag-chevron {
-  color: #0fcff7;
-}
-/* line 115, ../sass/partials/_bulletins.scss */
-.autocomplete-component .search .search-icon {
-  color: #0fa8f7;
-}
-/* line 119, ../sass/partials/_bulletins.scss */
-.autocomplete-component .search.active .search-icon {
-  color: #0fcff7;
-}
-/* line 125, ../sass/partials/_bulletins.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
-  border-color: #0fcff7;
-}
-/* line 127, ../sass/partials/_bulletins.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
-  background-color: #0fbbf7;
-}
-/* line 129, ../sass/partials/_bulletins.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
-  background-color: #0fcff7;
 }
 
 /* line 155, ../sass/partials/_bulletins.scss */
