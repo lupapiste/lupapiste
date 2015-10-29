@@ -96,9 +96,8 @@
                                        (->> (vals muut-hankkeet)
                                             (remove #(get-in % [:autoupdated :value]))
                                             (concat other-applications)
-                                            (map vector (map (comp keyword str) (range)))
-                                            (into {}))))
-          documents (map (fn [doc] (if (= (:id doc) (:id tyonjohtaja-doc)) tyonjohtaja-doc doc)) (:documents application))]
+                                            (zipmap (map (comp keyword str) (range))))))
+          documents (util/update-by-id tyonjohtaja-doc (:documents application))]
       (update-application command {$set {:documents documents}}))
     (ok)))
 
