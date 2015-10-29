@@ -685,6 +685,9 @@
       (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors-api/->public r)}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
+  (defpage "/dev/clear/:collection" {:keys [collection]}
+    (resp/status 200 (resp/json {:ok true :status (mongo/remove-many collection {})})))
+
   (defpage [:get "/api/proxy-ctrl"] []
     (resp/json {:ok true :data (not @env/proxy-off)}))
 
