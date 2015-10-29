@@ -139,13 +139,17 @@
                      #(= (:id (:op %)) op-id)
                      :op nil)))}))))
 
+(defn create-empty-doc [{created :created {schema-version :schema-version} :application :as command} schema-name]
+  (let [document (-> (schemas/get-schema schema-version schema-name)
+                     (model/new-document created))]
+    (update-application command {$push {:documents document}
+                                 $set {:modified created}})
+    document))
+
 (defn do-create-doc [{created :created application :application :as command} schema-name & updates]
   (let [schema (schemas/get-schema (:schema-version application) schema-name)]
     (when-not (:repeating (:info schema)) (fail! :illegal-schema))
-    (let [document (model/new-document schema created)]
-      (update-application command
-                          {$push {:documents document}
-                           $set {:modified created}})
+    (let [document (create-empty-doc command schema-name)]
       (when updates
         (let [model-updates (->model-updates (first updates))]
           (persist-model-updates application "documents" document model-updates created)))
