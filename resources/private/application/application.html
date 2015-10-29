@@ -186,21 +186,6 @@
                         <div class="application_actions" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'application'">
                             <div class="stacked" data-bind="with: application">
                                 <!-- ko if: !hasInvites() -->
-
-                                <!-- ko if: features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin')-->
-                                <div class="feature">
-                                    <button data-bind="click: publishApplicationBulletin,
-                                                       visible: $root.authorization.ok('publish-bulletin'),
-                                                       enable: !processing(),
-                                                       attr: {'title': loc('tooltip.publishBulletin')}"
-                                            data-test-id="publish-bulletin"
-                                            class="positive caps">
-                                        <i class="lupicon-circle-arrow-right"></i>
-                                        <span data-bind="ltext: 'application.publishBulletin'"></span>
-                                    </button>
-                                </div>
-                                <!-- /ko -->
-
                                 <button data-bind="click: approveApplication,
                                                visible: $root.authorization.ok('approve-application'),
                                                enable: !processing() && $root.authorization.ok('approve-application'),
@@ -1156,9 +1141,18 @@
 
                     <!-- Bulletin tab -->
                     <!-- ko if: selectedTabName() === 'bulletin' && features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin') -->
-                    <div id="application-bulletin-tab" class="tab-content">
+                    <div id="application-bulletin-tab" data-bind="with: application" class="tab-content">
                       <div data-bind="attr: {'class': features.enabled('publish-bulletin') ? 'feature' : ''}">
                         <h1>JPano komponentti</h1>
+                          <button data-bind="click: publishApplicationBulletin,
+                                             visible: $root.authorization.ok('publish-bulletin'),
+                                             enable: !processing(),
+                                             attr: {'title': loc('tooltip.publishBulletin')}"
+                                  data-test-id="publish-bulletin"
+                                  class="positive caps">
+                              <i class="lupicon-circle-arrow-right"></i>
+                              <span data-bind="ltext: 'application.publishBulletin'"></span>
+                          </button>
                       </div>
                     </div>
 
