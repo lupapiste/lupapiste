@@ -73,8 +73,8 @@
            (debug " org ok : " (not-empty (:organization application)))
            (fact {:midje/description (name lang)}
                  (let [pdf-content (child-to-attachment/generate-attachment-from-children nil application lang :statements "2")]
-                   (debug " Exported statement file: " (:content pdf-content))
-                   (debug " Exported statement : " pdf-content)
+;                   (debug " Exported statement file: " (:content pdf-content))
+;                   (debug " Exported statement : " pdf-content)
                    pdf-content
                    ) => filename-and-size-exists
                  (provided (lupapalvelu.pdf-conversion/pdf-a-required? anything) => false)))))
@@ -86,8 +86,8 @@
          (doseq [lang i18n/languages]
            (fact {:midje/description (name lang)}
                  (let [pdf-content (child-to-attachment/generate-attachment-from-children nil application lang :neighbors "2")]
-                   (debug " Exported neighbours file: " (:content pdf-content))
-                   (debug " Exported neighbours: " pdf-content)
+;                   (debug " Exported neighbours file: " (:content pdf-content))
+;                   (debug " Exported neighbours: " pdf-content)
                    pdf-content
                    ) => filename-and-size-exists
                  (provided (lupapalvelu.pdf-conversion/pdf-a-required? anything) => false)))))

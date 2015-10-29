@@ -77,6 +77,7 @@
                                                                                :target nil
                                                                                :type :a
                                                                                :applicationState :draft
+                                                                               :contents nil
                                                                                :signatures []
                                                                                :versions []
                                                                                :notNeeded false
@@ -91,6 +92,7 @@
                                                                                :target nil
                                                                                :type :b
                                                                                :applicationState :draft
+                                                                               :contents nil
                                                                                :signatures []
                                                                                :versions []
                                                                                :notNeeded false
@@ -183,6 +185,7 @@
                                                                                :target nil
                                                                                :type :a
                                                                                :applicationState :draft
+                                                                               :contents nil
                                                                                :signatures []
                                                                                :versions []
                                                                                :notNeeded false
@@ -198,6 +201,7 @@
                                                                                :target nil
                                                                                :type :b
                                                                                :applicationState :draft
+                                                                               :contents nil
                                                                                :signatures []
                                                                                :versions []
                                                                                :notNeeded false

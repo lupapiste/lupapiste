@@ -122,7 +122,7 @@
   (let [old-metadata (keywordize-keys-and-some-values (:metadata document) [])
         metadata (->> (keywordize-keys-and-some-values metadata [])
                       (revert-unauthorized-modifications user-roles old-metadata)
-                      (#(assoc % :tila (or (:tila old-metadata) "Valmis")))
+                      (#(assoc % :tila (or (:tila old-metadata) :luonnos)))
                       (tms/sanitize-metadata))]
     (assoc document :metadata metadata)))
 
