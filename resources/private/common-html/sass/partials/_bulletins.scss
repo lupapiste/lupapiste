@@ -1,4 +1,9 @@
 #bulletins-component {
+  font-family: $font-body;
+  font-weight: 400;
+  font-size: 1rem;
+  color: $gray51;
+
   h1 {
     font-family: $font-heading;
     font-weight: 900;
@@ -16,7 +21,7 @@
     color: $gray51;
   }
 
-  p {
+  .intro {
     font-weight: 300;
     font-size: 1.375rem;
     margin-top: $grid-margin;
