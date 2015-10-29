@@ -3,6 +3,7 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="application-bulletins-list-template">
+      <!-- ko if: gotResults -->
       <table id="application-bulletins-list">
         <thead>
         <tr data-bind="foreach: columns">
@@ -25,6 +26,10 @@
           </tr>
         </tbody>
       </table>
+      <!-- /ko -->
+      <!-- ko ifnot: gotResults -->
+      <p data-bind="ltext: 'bulletin.search.no-results'"></p>
+      <!-- /ko -->
     </script>
   </section>
 </body>

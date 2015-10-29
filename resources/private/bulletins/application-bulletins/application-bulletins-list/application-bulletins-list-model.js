@@ -6,10 +6,6 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
 
   var currentSort = {field: ko.observable(params.sort.field()), asc: ko.observable(params.sort.asc())};
 
-  self.openBulletin = function(item) {
-    pageutil.openPage("bulletin", item.id);
-  };
-
   self.columns = [
     util.createSortableColumn("first", "bulletin.state", {sortField: "bulletinState", currentSort: currentSort}),
     util.createSortableColumn("second", "bulletin.municipality", {sortField: "municipality", currentSort: currentSort}),
@@ -19,12 +15,6 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
     util.createSortableColumn("sixth", "bulletin.date", {sortField: "modified", currentSort: currentSort}),
     util.createSortableColumn("seventh", "bulletin.feedback-period", {sortable: false})
   ];
-
-  ko.computed(function() {
-    hub.send("bulletinService::sortChanged", {
-      sort: ko.mapping.toJS(currentSort)
-    });
-  });
 
   self.bulletins = ko.pureComputed(function () {
     return _.map(params.bulletins(), function (bulletin) {
@@ -41,4 +31,18 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
       };
     });
   });
+
+  self.gotResults = ko.pureComputed(function() {
+    return self.bulletins().length !== 0;
+  });
+
+  ko.computed(function() {
+    hub.send("bulletinService::sortChanged", {
+      sort: ko.mapping.toJS(currentSort)
+    });
+  });
+
+  self.openBulletin = function(item) {
+    pageutil.openPage("bulletin", item.id);
+  };
 };
