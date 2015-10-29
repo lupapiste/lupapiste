@@ -180,9 +180,9 @@
                   <div data-bind="if: features.enabled('arkistointi') && latestVersion">
                     <div class="feature archive-valid" data-bind="with: latestVersion">
                       <div>
-                        <span data-bind="ltext: 'archive.valid-format'"></span>
-                        <span class="icon ok" data-bind="visible: $data['valid-pdfa'], attr: {title: loc('attachment.valid-pdfa')}"></span>
-                        <span class="icon missing" data-bind="visible: !$data['valid-pdfa'], attr: {title: loc('attachment.invalid-pdfa')"></span>
+                        <span data-bind="ltext: 'archive.valid-format'"></span>:
+                        <span class="icon ok" data-bind="visible: $data.archivable"></span>
+                        <span class="icon missing" data-bind="visible: !$data.archivable, attr: {title: loc($data.archivabilityError)}"></span>
                       </div>
                       <div data-bind="if: $data['missing-fonts'] && $data['missing-fonts'].length > 0">
                         <h4><span data-bind="ltext: 'attachment.missing-fonts'"></span>:</h4>

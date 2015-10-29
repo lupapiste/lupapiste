@@ -32,7 +32,8 @@
 ;; config:
 ;;
 
-(def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
+(def ktjkii "https://ws.nls.fi/ktjkii/wfs-2015/wfs")
+
 (def maasto "https://ws.nls.fi/maasto/wfs")
 (def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
 
@@ -76,7 +77,8 @@
 ;;
 
 (defn query [attrs & e]
-  (str "<wfs:GetFeature version=\"1.1.0\"
+  (str
+    "<wfs:GetFeature version=\"1.1.0\"
             xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
             xmlns:ktjkiiwfs=\"http://xml.nls.fi/ktjkiiwfs/2010/02\"
             xmlns:wfs=\"http://www.opengis.net/wfs\"
@@ -84,9 +86,9 @@
             xmlns:ogc=\"http://www.opengis.net/ogc\"
             xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
             xsi:schemaLocation=\"http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
-          <wfs:Query" (apply str (map (fn [[k v]] (format " %s=\"%s\"" k v)) attrs)) ">"
-            (apply str e)
-       "</wfs:Query></wfs:GetFeature>"))
+      <wfs:Query" (apply str (map (fn [[k v]] (format " %s=\"%s\"" k v)) attrs)) ">"
+    (apply str e)
+    "</wfs:Query></wfs:GetFeature>"))
 
 (defn ogc-sort-by
   ([property-names]
@@ -111,10 +113,10 @@
   (str "<ogc:Intersects>" (apply str e) "</ogc:Intersects>"))
 
 (defn within [& e]
-  (str "<DWithin>" (apply str e) "</DWithin>"))
+  (str "<ogc:DWithin>" (apply str e) "</ogc:DWithin>"))
 
 (defn distance [distance]
-  (format "<Distance units=\"m\">%s</Distance>" distance))
+  (str "<ogc:Distance units=\"m\">" distance "</ogc:Distance>"))
 
 (defn point [x y]
   (format "<gml:Point><gml:pos>%s %s</gml:pos></gml:Point>" x y))
@@ -323,7 +325,7 @@
     (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
       (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (property-name "ktjkiiwfs:sijainti")
-      (filter
+      (ogc-filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
 (defn property-info-by-radius [x y radius]
@@ -334,7 +336,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
       (ogc-filter
         (within
-          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (point x y)
           (distance radius))))))
 
@@ -346,7 +348,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
       (ogc-filter
         (intersects
-          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (point x y))))))
 
 (defn property-info-by-line [l]
@@ -357,7 +359,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
       (ogc-filter
         (intersects
-          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (line l))))))
 
 (defn property-info-by-polygon [p]
@@ -368,7 +370,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
       (ogc-filter
         (intersects
-          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (polygon p))))))
 
 (defn getcapabilities [request]
