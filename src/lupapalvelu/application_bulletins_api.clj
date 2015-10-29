@@ -106,12 +106,7 @@
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
 
-(defcommand publish-bulletin
-  {:parameters [id]
-   :feature :publish-bulletin
-   :user-roles #{:authority}
-   :states     (states/all-application-states-but :draft)}
-  [{:keys [application created] :as command}]
+(defn- create-bulletin-snapshot [application]
   (let [app-snapshot (select-keys application app-snapshot-fields)
         app-snapshot (update-in
                        app-snapshot
@@ -122,11 +117,24 @@
                          (map #(dissoc % :versions)))
         app-snapshot (assoc app-snapshot
                        :attachments attachments
-                       :bulletinState (bulletin-state (:state app-snapshot)))
+                       :bulletinState (bulletin-state (:state app-snapshot)))]
+    app-snapshot))
+
+(defn- snapshot-updates [snapshot search-fields ts]
+  {$push {:versions snapshot}
+   $set  (merge {:modified ts} search-fields)})
+
+(defcommand publish-bulletin
+  {:parameters [id]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     (states/all-application-states-but :draft)}
+  [{:keys [application created] :as command}]
+  (let [app-snapshot (create-bulletin-snapshot application)
         search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
-        changes {$push {:versions app-snapshot}
-                 $set  (merge {:modified created} (get-search-fields search-fields app-snapshot))}]
-    (mongo/update-by-id :application-bulletins id changes :upsert true)
+        search-updates (get-search-fields search-fields app-snapshot)
+        updates (snapshot-updates app-snapshot search-updates created)]
+    (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
 (def bulletin-fields
