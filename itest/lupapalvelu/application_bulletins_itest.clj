@@ -22,17 +22,9 @@
       (fact "Authority can publish bulletin"
         (command olli :publish-bulletin :id app-id) => ok?)
       (fact "Regular user can't publish bulletin"
-        (command pena :publish-bulletin :id app-id) => fail?)
+        (command pena :publish-bulletin :id app-id) => fail?)))
 
-      (fact "Publishing again creates new version snapshot"
-        (command olli :publish-bulletin :id app-id) => ok?
-        (-> (mongo/with-db test-db-name
-              (mongo/by-id :application-bulletins app-id [:versions]))
-          :versions
-          count) => 2)))
-
-  (mongo/with-db test-db-name ; clear bulletins
-    (mongo/remove-many :application-bulletins {}))
+  (clear-collection "application-bulletins")
 
   (facts* "Querying bulletins"
     (let [oulu-app (create-and-submit-application pena :operation "jatteen-keraystoiminta"
