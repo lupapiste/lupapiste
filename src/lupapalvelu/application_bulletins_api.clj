@@ -2,10 +2,10 @@
   (:require [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
-            [sade.util :refer [fn->]]
             [sade.strings :as ss]
             [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
             [monger.operators :refer :all]
@@ -92,17 +92,6 @@
     (ok :states states)))
 
 
-(def app-snapshot-fields
-  [:_applicantIndex :address :applicant :created :documents :location
-   :modified :municipality :organization :permitType
-   :primaryOperation :propertyId :state :verdicts])
-
-(defn bulletin-state [app-state] ; TODO state machine for bulletins
-  (condp contains? app-state
-    states/pre-verdict-states :proclaimed
-    states/post-verdict-states :verdictGiven
-    :proclaimed))
-
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
 
@@ -112,21 +101,11 @@
    :user-roles #{:authority}
    :states     (states/all-application-states-but :draft)}
   [{:keys [application created] :as command}]
-  (let [app-snapshot (select-keys application app-snapshot-fields)
-        app-snapshot (update-in
-                       app-snapshot
-                       [:documents]
-                       (partial remove (fn-> :schema-info :type keyword (= :party))))
-        attachments (->> (:attachments application)
-                         (filter :latestVersion)
-                         (map #(dissoc % :versions)))
-        app-snapshot (assoc app-snapshot
-                       :attachments attachments
-                       :bulletinState (bulletin-state (:state app-snapshot)))
+  (let [app-snapshot (bulletins/create-bulletin-snapshot application)
         search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
-        changes {$push {:versions app-snapshot}
-                 $set  (merge {:modified created} (get-search-fields search-fields app-snapshot))}]
-    (mongo/update-by-id :application-bulletins id changes :upsert true)
+        search-updates (get-search-fields search-fields app-snapshot)
+        updates (bulletins/snapshot-updates app-snapshot search-updates created)]
+    (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
 (def bulletin-fields
