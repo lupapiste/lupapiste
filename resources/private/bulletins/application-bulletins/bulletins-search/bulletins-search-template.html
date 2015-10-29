@@ -13,12 +13,14 @@
                                           params: {value: searchText}}"></div>
             </div>
             <div class="col-1">
-              <div data-bind="component: {name: 'autocomplete-municipalities',
+              <div data-test-id="municipalities-filter-component"
+                   data-bind="component: {name: 'autocomplete-municipalities',
                                           params: {selected: municipality,
                                                    municipalities: municipalities}}"></div>
             </div>
             <div class="col-1">
-              <div data-bind="component: {name: 'autocomplete-states',
+              <div data-test-id="states-filter-component"
+                   data-bind="component: {name: 'autocomplete-states',
                                           params: {selected: state,
                                                    states: states}}"></div>
             </div>

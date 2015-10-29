@@ -287,6 +287,10 @@ As Solitaadmin
   Go to login page
   Solitaadmin logs in
 
+As Velho
+  Go to login page
+  Velho logs in
+
 Mikko logs in
   Applicant logs in  mikko@example.com  mikko123  Mikko Intonen
 
@@ -368,9 +372,9 @@ Autocomplete selectable values should not contain
   Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
 
 Autocomplete option list should contain
-  [Arguments]  @{options}
+  [Arguments]  ${data-test-id}  @{options}
   :FOR  ${element}  IN  @{options}
-  \  Element should contain  xpath=//div[@data-test-id="operations-filter-component"]//ul[@class="autocomplete-result autocomplete-result-grouped"]  ${element}
+  \  Element should contain  xpath=//div[@data-test-id="${data-test-id}"]//ul[contains(@class, "autocomplete-result")]  ${element}
 
 Click by id
   [Arguments]  ${id}

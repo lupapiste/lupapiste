@@ -14,7 +14,7 @@ Bulletins page is empty at first
 
 Sonja publishes an application as a bulletin
   As Sonja
-  Create application and publish bulletin  Mixintie 15
+  Create application and publish bulletin  Mixintie 15  753-416-25-22
   Logout
 
 Unlogged user sees Sonja's bulletin

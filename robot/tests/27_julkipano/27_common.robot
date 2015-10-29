@@ -34,8 +34,8 @@ Load more bulletins
   Wait until  Element should not be visible  //span[@data-test-id='bulletins-left'][contains(text(), '${initallyBulletinsLeft}')]
 
 Create application and publish bulletin
-  [Arguments]  ${address}
-  Create application with state  ${address}  753-416-25-22  vapaa-ajan-asuinrakennus  sent
+  [Arguments]  ${address}  ${propertyId}
+  Create application with state  ${address}  ${propertyId}  vapaa-ajan-asuinrakennus  sent
   Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
 

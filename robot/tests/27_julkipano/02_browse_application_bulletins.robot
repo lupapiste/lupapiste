@@ -20,9 +20,19 @@ Bulletins should be paginable
   Bulletin list should have rows  11
 
 Bulletins should be searchable
-  Create application and publish bulletin  Mixintie 15
+  As Sonja
+  Create application and publish bulletin  Mixintie 15  753-416-25-22
   Go to bulletins page
 
-  Bulletin list should not have text  Mixintie 15
   Search bulletins by text  Mixintie 15
   Bulletin list should have rows and text  1  Mixintie 15
+
+Bulletins should be filterable
+  As Velho
+  Create application and publish bulletin  Tiaisenpolku 26  297-14-3-16
+  Go to bulletins page
+
+  Click Element  xpath=//div[@data-test-id="municipalities-filter-component"]//span[contains(@class, "autocomplete-selection")]
+  Wait until  Element should be visible  xpath=//div[@data-test-id="municipalities-filter-component"]//div[@class="autocomplete-dropdown"]
+  Autocomplete option list should contain  municipalities-filter-component  Koko Suomi  Kuopio  Sipoo
+
