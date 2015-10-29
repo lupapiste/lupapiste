@@ -187,6 +187,10 @@
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
 
+(defn clear-collection [collection]
+  (let [resp (decode-response (http-get (str (server-address) "/dev/clear/" collection) {}))]
+    (assert (-> resp :body :ok) (str "Response not ok: clearing collection: \"" collection "\": response: " (pr-str resp)))))
+
 (defn create-app-with-fn [f apikey & args]
   (let [args (apply hash-map args)
         municipality (:municipality args)
