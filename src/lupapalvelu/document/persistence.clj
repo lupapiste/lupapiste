@@ -139,8 +139,8 @@
                      #(= (:id (:op %)) op-id)
                      :op nil)))}))))
 
-(defn do-create-doc [{{:keys [schemaName]} :data created :created application :application :as command} & updates]
-  (let [schema (schemas/get-schema (:schema-version application) schemaName)]
+(defn do-create-doc [{created :created application :application :as command} schema-name & updates]
+  (let [schema (schemas/get-schema (:schema-version application) schema-name)]
     (when-not (:repeating (:info schema)) (fail! :illegal-schema))
     (let [document (model/new-document schema created)]
       (update-application command

@@ -29,8 +29,8 @@
    :states     #{:draft :answered :open :submitted :complementNeeded}
    :pre-checks [create-doc-validator
                 application/validate-authority-in-drafts]}
-  [command]
-  (let [document (doc-persistence/do-create-doc command updates)]
+  [{{schema-name :schemaName} :data :as command}]
+  (let [document (doc-persistence/do-create-doc command schema-name updates)]
     (when fetchRakennuspaikka
       (let [
             property-id (or
