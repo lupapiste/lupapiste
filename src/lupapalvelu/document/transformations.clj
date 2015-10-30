@@ -20,9 +20,8 @@
       (persistence/validated-model-updates application :documents selvitys-doc updates created))))
 
 (defn create-rakennusjateselvitys-from-rakennusjatesuunnitelma [{application :application :as command}]
-  (->>  (or (domain/get-document-by-name application "rakennusjateselvitys")
-            (persistence/create-empty-doc command "rakennusjateselvitys"))
-        (rakennusjateselvitys-updates command)))
+  (when-not (domain/get-document-by-name application "rakennusjateselvitys")
+    (rakennusjateselvitys-updates command (persistence/create-empty-doc command "rakennusjateselvitys"))))
 
 (defn get-state-transition-updates [command next-state]
   (case next-state
