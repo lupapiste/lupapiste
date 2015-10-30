@@ -92,14 +92,16 @@ on-fail | Function or vector of functions. Functions are called only if the acti
 feature | Keyword: feature flag name. Action is run only if the feature flag is true. If you have feature.some-feature properties file, use :feature :some-feature in action meta data.
 
 Example query:
-    (defquery comments
-      {:parameters [id]
-       :user-roles #{:applicant :authority :oirAuthority}
-       :user-authz-roles action/all-authz-writer-roles
-       :org-authz-roles action/commenter-org-authz-roles
-       :states states/all-states}
-      [{application :application}]
-      (ok (select-keys application [:id :comments])))
+```clojure
+(defquery comments
+  {:parameters [id]
+   :user-roles #{:applicant :authority :oirAuthority}
+   :user-authz-roles action/all-authz-writer-roles
+   :org-authz-roles action/commenter-org-authz-roles
+   :states states/all-states}
+  [{application :application}]
+  (ok (select-keys application [:id :comments])))
+```
 Returns JSON to frontend: `{:ok true :data [{:id "123" :comments []}]}`
 
 
