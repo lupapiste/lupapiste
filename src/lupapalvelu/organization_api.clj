@@ -488,35 +488,45 @@
         (error "Failed to parse shapefile" t)
         (resp/status 400 :error.shapefile-parsing-failed)))))
 
-(defquery get-all-map-layers
-  {:description "Every map layer from the organization map server."
-   :parameters       [organizationId]
-   :user-roles       #{:authorityAdmin :authority}}
-  (ok :layers (o/all-layers-from-map-server organizationId)))
+;; (defquery get-all-map-layers
+;;   {:description "Every map layer from the organization map server."
+;;    :user-roles       #{:authorityAdmin :authority}}
+;;   [{user :user}]
+;;   (ok :layers (o/all-layers-from-map-server (user/authority-admins-organization-id user))))
 
 (defquery get-map-layers-data
   {:description "Organization server and layer details."
-   :parameters [organizationId]
    :user-roles #{:authorityAdmin}}
-  (ok (-> organizationId o/get-organization :map-layers)))
+  [{user :user}]
+  (ok (-> (user/authority-admins-organization-id user)
+          o/get-organization
+          :map-layers)))
 
 (defcommand update-map-server-details
-  {:parameters [organizationId url username password]
+  {:parameters [url username password]
    :user-roles #{:authorityAdmin}}
-  (o/update-organization organizationId {$set {:map-layers.server {:url url
-                                                                   :username username
-                                                                   :password password}}})
+  [{user :user}]
+  (o/update-organization (user/authority-admins-organization-id user)
+                         {$set {:map-layers.server {:url url
+                                                    :username username
+                                                    :password password}}})
   (ok))
 
 (defcommand update-user-layers
-  {:parameters [organizationId layers]
+  {:parameters [layers]
    :user-roles #{:authorityAdmin}}
-  (o/update-organization organizationId {$set {:map-layers.layers layers}})
+  [{user :user}]
+  (o/update-organization (user/authority-admins-organization-id user)
+                         {$set {:map-layers.layers layers}})
   (ok))
 
-(defquery organization-map-server-proxy
-  {:user-roles #{:authorityAdmin}}
-  [{data :data}]
-  (let [org-id (:organizationId data)
-        params (dissoc data :organizationId)]
-    (o/query-organization-map-server org-id params)))
+;; (defraw organization-map-server-proxy
+;;   {:description "hiihoo"
+;;    :user-roles #{:authorityAdmin}}
+;;   [{params :data user :user headers :headers}]
+;;   (let [response (o/query-organization-map-server (user/authority-admins-organization-id user)
+;;                                                   params
+;;                                                   headers)
+;;         te (-> response :headers :transfer-encoding)]
+;;     (println "--------------------------- " te " --------------------------- " )
+;;     response))

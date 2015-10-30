@@ -88,11 +88,9 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
 
     var parser = new ol.format.WMTSCapabilities();
     var capabilities = parser.read(xhr.responseXML);
-
     var options = ol.source.WMTS.optionsFromCapabilities(capabilities, {
                     layer: "taustakartta"
                   });
-
     // use proxy urls
     options.urls = urls;
 

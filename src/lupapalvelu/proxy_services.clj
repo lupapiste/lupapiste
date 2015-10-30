@@ -3,10 +3,13 @@
             [clojure.string :as s]
             [clojure.xml :as xml]
             [lupapalvelu.find-address :as find-address]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as user]
             [lupapalvelu.wfs :as wfs]
             [noir.response :as resp]
             [sade.coordinate :as coord]
             [sade.env :as env]
+            [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :refer [dissoc-in select ->double]]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]))
@@ -128,6 +131,23 @@
       (resp/json (map wfs/general-plan-feature-to-feature-info (wfs/gfi-to-general-plan-features response)))
       (resp/status 503 "Service temporarily unavailable"))))
 
+(defn organization-map-server
+  [request]
+  (if-let [org-id (user/authority-admins-organization-id (user/current-user request))]
+    (if-let [m (-> org-id org/get-organization :map-layers :server)]
+      (let [{:keys [url username password]} m
+            encoding (get-in request [:headers "accept-encoding"])
+            response (http/get url
+                               {:query-params (:params request)
+                                :headers {"accept-encoding" encoding}
+                                :basic-auth [username password]
+                                :as :stream})]
+        ;; The same precautions as in secure
+        (if response
+          (update-in response [:headers] dissoc "set-cookie" "server")
+          (resp/status 503 "Service temporarily unavailable")))
+      (resp/status 400 "Bad Request"))
+    (resp/status 401 "Unauthorized")))
 ;
 ; Utils:
 ;
@@ -165,5 +185,5 @@
                "wmscap" wms-capabilities-proxy
                "plan-urls-by-point" plan-urls-by-point-proxy
                "general-plan-urls-by-point" general-plan-urls-by-point-proxy
-               "plandocument" (cache (* 3 60 60 24) (secure wfs/raster-images "plandocument"))})
-
+               "plandocument" (cache (* 3 60 60 24) (secure wfs/raster-images "plandocument"))
+               "organization-map-server" organization-map-server})

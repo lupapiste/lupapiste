@@ -171,13 +171,17 @@
 ;; Organization/municipality provided map support.
 
 (defn query-organization-map-server
-  [org-id params]
+  [org-id params headers]
   (when-let [m (-> org-id get-organization :map-layers :server)]
     (let [{:keys [url username password]} m]
       (http/get url
                 (merge {:query-params params}
                        (when-not (ss/blank? username)
-                         {:basic-auth [username password]}))))))
+                         {:basic-auth [username password]
+                          :headers {"accept-encoding" (get headers "accept-encoding")}
+                          :as :stream}))))))
+
+
 
 (defmulti layer-info (fn [a]
                        (cond
@@ -198,25 +202,10 @@
   (map layer-info a))
 
 
-
-#_(defn all-layers-from-map-server
-  "Fetches every map layer (title, name) from the organization/municipality map server.
-  The result is a layer tree (composite), where layer can have children under :layer key."
-  [org-id]
-    (when-let [m (-> org-id get-organization :map-layers :server)]
-    (let [{:keys [url username password]} m
-          req {:query-params {:request "GetCapabilities"}}
-          params (if username
-                   (assoc req :basic-auth [username password])
-                   req)
-          _ (debug "Map server query" org-id url params)
-          data (-> url (http/get params) :body xml/parse xml/xml->edn)]
-      (-> data :WMS_Capabilities :Capability :Layer layer-info))))
-
-(defn all-layers-from-map-server
-  "Fetches every map layer (title, name) from the organization/municipality map server.
-  The result is a layer tree (composite), where layer can have children under :layer key."
-  [org-id]
-  (when-let [response (query-organization-map-server org-id {:request "GetCapabilities"})]
-    (let [data (-> response :body xml/parse xml/xml->edn)]
-    (-> data :WMS_Capabilities :Capability :Layer layer-info))))
+;; (defn all-layers-from-map-server
+;;   "Fetches every map layer (title, name) from the organization/municipality map server.
+;;   The result is a layer tree (composite), where layer can have children under :layer key."
+;;   [org-id]
+;;   (when-let [response (query-organization-map-server org-id {:request "GetCapabilities"})]
+;;     (let [data (-> response :body xml/parse xml/xml->edn)]
+;;       (-> data :WMS_Capabilities :Capability :Layer layer-info))))
