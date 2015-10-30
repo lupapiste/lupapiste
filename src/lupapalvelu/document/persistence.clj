@@ -39,7 +39,7 @@
   (if (contains? data-model :value)
     [[path (:value data-model)]]
     (->> (filter (comp map? val) data-model)
-         (mapcat (fn [[k m]] (data-model->model-updates (conj path k) m))))))
+         (mapcat (fn [[k m]] (data-model->model-updates (conj path (keyword k)) m))))))
 
 (defn ->mongo-updates
   "Creates full paths to document update values to be $set.
