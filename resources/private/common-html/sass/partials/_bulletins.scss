@@ -124,6 +124,14 @@
       }
     }
   }
+  .form-grid {
+    textarea {
+      &:focus {
+        color: $input-focus-color;
+        border-color: $blue-light;
+      }
+    }
+  }
   .search-button-wrapper {
     text-align: center;
     button {

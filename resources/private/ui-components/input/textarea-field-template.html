@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="textarea-field-template">
+      <div class="col--vertical">
+        <label data-bind="text: label, attr: {'for': id}, css: {'required': required}, visible: label"></label>
+        <textarea data-bind="textInput: value, attr: {placeholder: placeholder, id: id},
+                             hasFocus: isSelected,
+                             css: {required: required && !value()},
+                             disable: disable"
+                  maxlength="5000"/>
+      </div>
+    </script>
+  </section>
+</body>
+</html>
