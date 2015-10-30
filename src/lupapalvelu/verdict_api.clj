@@ -7,6 +7,7 @@
             [sade.util :as util]
             [sade.core :refer [ok fail fail! ok?]]
             [lupapalvelu.application :as application]
+            [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
@@ -34,9 +35,10 @@
     (or
       (let [validator-fn (permit/get-verdict-validator (permit/permit-type application))]
         (validator-fn app-xml))
-      (let [updates (verdict/find-verdicts-from-xml command app-xml)]
+      (let [updates (verdict/find-verdicts-from-xml command app-xml)]                    
         (when updates
-          (update-application command updates))
+          (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
+            (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))))
         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
     (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} (:name op))
       (verdict/fetch-tj-suunnittelija-verdict command))))
@@ -121,12 +123,15 @@
 (defn- publish-verdict [{timestamp :created application :application :as command} {:keys [id kuntalupatunnus]}]
   (if-not (ss/blank? kuntalupatunnus)
     (when-let [next-state (sm/verdict-given-state application)]
-      (do
+      (let [doc-updates (doc-transformations/get-state-transition-updates command next-state)]
         (update-application command
-          {:verdicts {$elemMatch {:id id}}}
-          (util/deep-merge
-            (application/state-transition-update next-state timestamp (:user command))
-            {$set {:verdicts.$.draft false}}))
+                            (util/deep-merge
+                             (:mongo-query doc-updates)
+                             {:verdicts {$elemMatch {:id id}}})
+                            (util/deep-merge
+                             (:mongo-updates doc-updates)
+                             (application/state-transition-update next-state timestamp (:user command))
+                             {$set {:verdicts.$.draft false}}))
         (ok)))
     (fail :error.no-verdict-municipality-id)))
 
