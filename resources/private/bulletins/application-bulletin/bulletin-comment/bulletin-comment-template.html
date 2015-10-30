@@ -3,8 +3,16 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="bulletin-comment-template">
-      <div>
-        Comment component
+      <div class="form-grid form-grid--no-border">
+        <div class="row">
+          <div class="col-4"
+               data-bind="component: {name: 'textarea-field',
+                                      params: {value: comment,
+                                               id: 'bulletin-comment-field',
+                                               lLabel: 'bulletin.comment',
+                                               required: true,
+                                               lPlaceholder: 'bulletin.comment.placeholder'}}"></div>
+        </div>
       </div>
     </script>
   </section>
