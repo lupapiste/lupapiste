@@ -1,0 +1,3 @@
+bulletin.comment.title:  Ilmoituksen kommentointi
+help.bulletin.comment:  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+bulletin.comment.endDate:  Ilmoituksen kommentointi päättyy
