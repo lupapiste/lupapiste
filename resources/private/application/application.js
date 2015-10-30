@@ -268,6 +268,7 @@
     if (newId === currentId && tab) {
       selectTab(tab);
     } else {
+      hub.send("track-click", {category:"Applications", label: kind, event:"openApplication"});
       pageutil.showAjaxWait();
       if (newId !== currentId) { // close sidepanel if it's open
         var sidePanel = $("#side-panel div.content-wrapper > div").filter(":visible");
@@ -280,7 +281,12 @@
       repository.load(currentId, applicationModel.pending, function(application) {
         var fallbackTab = function(application) {
           if (application.inPostVerdictState) {
-            return application.primaryOperation.name.match(/tyonjohtaja/) ? "applicationSummary" : "tasks";
+            var name = application.primaryOperation.name;
+            if (name) {
+              return name.match(/tyonjohtaja/) ? "applicationSummary" : "tasks";
+            } else {
+              return "tasks";
+            }
           } else {
             return "info";
           }

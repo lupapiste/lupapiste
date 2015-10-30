@@ -1,0 +1,170 @@
+#bulletins-component {
+  font-family: $font-body;
+  font-weight: 400;
+  font-size: 1rem;
+  color: $gray51;
+
+  h1 {
+    font-family: $font-heading;
+    font-weight: 900;
+    font-size: 3.75rem;
+    line-height: $baseline *2;
+    margin-bottom: $marginS;
+    text-transform: none;
+  }
+
+  h3 {
+    font-family: $font-heading;
+    font-weight: 700;
+    font-size: 2rem;
+    text-transform: none;
+    color: $gray51;
+  }
+
+  .intro {
+    font-weight: 300;
+    font-size: 1.375rem;
+    margin-top: $grid-margin;
+    button {
+      margin-left: $grid-margin;
+    }
+  }
+
+  input {
+    &:focus {
+      border-color: $blue-light;
+    }
+  }
+
+  .content {
+    //
+  }
+
+  .blue-bg {
+    background-color: $blue-dark;
+    h1,p {
+      color: #fff;
+    }
+  }
+
+  .gray-bg {
+    background-color: $gray238;
+  }
+
+  .content-center {
+    max-width: $application-max-width;
+    margin: 0 auto;
+    position: relative;
+    padding: $grid-margin-large 0;
+  }
+
+  .full {
+    width: 100%;
+    min-width: 320px;
+  }
+
+  .slogan, .ingress {
+    text-align: center;
+    width: 80%;
+    margin: 0 auto $grid-margin;
+  }
+
+  .autocomplete-component {
+    .autocomplete-selection-wrapper {
+      i.tag-chevron {
+        color: $blue-dark;
+        &.toggle {
+          color: $blue-light;
+        }
+      }
+    }
+    .autocomplete-selection-wrapper.active {
+      border-color: $blue-light;
+      .tag-chevron {
+        color: $blue-light;
+      }
+    }
+    .search {
+      .search-icon {
+        color: $blue-dark;
+      }
+      &.active {
+        .search-icon {
+          color: $blue-light;
+        }
+      }
+    }
+    .autocomplete-dropdown {
+      ul.autocomplete-result {
+        border-color: $blue-light;
+        li.autocomplete-result-item.active {
+          background-color: $blue;
+          &:active {
+            background-color: $blue-light;
+          }
+        }
+
+      }
+    }
+  }
+}
+
+.search-button-wrapper {
+  text-align: center;
+  button {
+    span:last-child {
+      &:before {
+        content: "(";
+      }
+      &:after {
+        content: ")";
+      }
+      padding-left: $marginS;
+    }
+  }
+}
+
+.bulletins-search {
+  h3 {
+    text-align: center;
+  }
+  .search-field {
+    i {
+      color: $blue-dark;
+    }
+    &.active {
+      i {
+        color: $blue-light;
+      }
+    }
+  }
+}
+
+#application-bulletins-list {
+  th {
+    &.first {
+
+    }
+    &.second {
+
+    }
+    &.third {
+
+    }
+    &.fourth {
+
+    }
+    &.fifth {
+
+    }
+    &.sixth {
+      width: 5%;
+    }
+    &.seventh {
+    }
+  }
+  th > i {
+    color: $blue-dark;
+    position: absolute;
+  }
+}

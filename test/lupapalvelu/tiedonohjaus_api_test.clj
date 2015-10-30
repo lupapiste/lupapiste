@@ -57,7 +57,7 @@
                                                                                                                               :perustelu "foo"}
                                                                                                                :myyntipalvelu false
                                                                                                                (keyword  "n\u00e4kyvyys") :julkinen
-                                                                                                               :tila "Valmis"}}]}}) => nil)))
+                                                                                                               :tila :luonnos}}]}}) => nil)))
 
     (fact "user with insufficient rights cannot update retention metadata"
       (let [command {:application {:organization "753-R"
@@ -86,6 +86,6 @@
                                                                                                                               :perustelu "foo"}
                                                                                                                :myyntipalvelu false
                                                                                                                (keyword  "n\u00e4kyvyys") :julkinen
-                                                                                                               :tila "Valmis"}}]}}) => nil))))
+                                                                                                               :tila :luonnos}}]}}) => nil))))
 
   )  ;; /env/feature? :tiedonohjaus

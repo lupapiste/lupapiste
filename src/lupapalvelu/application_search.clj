@@ -46,16 +46,15 @@
 ;;
 
 (defn- make-free-text-query [filter-search]
-  (let [or-query {$or [{:address {$regex filter-search $options "i"}}
-                       {:verdicts.kuntalupatunnus {$regex filter-search $options "i"}}
-                       {:_applicantIndex {$regex filter-search $options "i"}}
-                       {:foreman {$regex filter-search $options "i"}}]}
-        ops (operation-names filter-search)]
+  (let [search-keys   [:address :verdicts.kuntalupatunnus :_applicantIndex :foreman]
+        or-query      {$or (map #(hash-map % {$regex filter-search $options "i"}) search-keys)}
+        ops           (operation-names filter-search)]
     (if (seq ops)
-      (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}} {:secondaryOperations.name {$in ops}}])
+      (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}}
+                                        {:secondaryOperations.name {$in ops}}])
       or-query)))
 
-(defn- make-text-query [filter-search]
+(defn make-text-query [filter-search]
   {:pre [filter-search]}
   (cond
     (re-matches #"^([Ll][Pp])-\d{3}-\d{4}-\d{5}$" filter-search) {:_id (ss/upper-case filter-search)}
@@ -160,7 +159,7 @@
                           "state" :state
                           "id" :_id})
 
-(defn- dir [asc] (if asc 1 -1))
+(defn dir [asc] (if asc 1 -1))
 
 (defn- make-sort [{{:keys [field asc]} :sort}]
   (let [sort-field (sort-field-mapping field)]
@@ -206,5 +205,6 @@
      :operation (i18n/localize :fi "operations" op-name)
      :operationName {:fi (i18n/localize :fi "operations" op-name)
                      :sv (i18n/localize :sv "operations" op-name)}}))
+
 
 
