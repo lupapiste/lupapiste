@@ -141,7 +141,9 @@
    "2.1.4" common-validator-2_1_2
    "2.1.5" common-validator-2_1_3
    "2.1.6" (create-validator rakval-2_1_6)
-   "2.1.8" (create-validator rakval-2_1_8)})
+   "2.1.8" (create-validator rakval-2_1_8)
+;   "2.2.0" common-validator-2_1_6
+   })
 
 (def- ya-validators
   {"2.1.2" common-validator-2_1_0
