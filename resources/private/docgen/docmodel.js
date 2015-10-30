@@ -849,7 +849,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildGroupComponent (name, subSchema, model, path) {
-    var name = (name === 'docgen-group' && subSchema.repeating) ? 'docgen-repeating-group' : name;
+    var name = (name === "docgen-group" && subSchema.repeating) ? "docgen-repeating-group" : name;
     var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(_.reject(path, _.isNumber));
     var params = {
       applicationId: self.appId,
@@ -859,7 +859,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       i18npath: i18npath,
       schema: subSchema,
       model: model[subSchema.name],
-      isDisabled: self.isDisabled
+      isDisabled: self.isDisabled,
+      authModel: self.authorizationModel,
+      propertyId: self.propertyId
     };
 
     return createComponent(name, params);
