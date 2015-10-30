@@ -38,6 +38,8 @@ LUPAPISTE.ApplicationBulletinsService = function() {
 
   self.states = ko.observableArray([]);
 
+  self.bulletin = ko.observable();
+
   function fetchMunicipalities() {
     ajax.query("application-bulletin-municipalities", {})
       .success(function(res) {
@@ -50,6 +52,16 @@ LUPAPISTE.ApplicationBulletinsService = function() {
     ajax.query("application-bulletin-states", {})
       .success(function(res) {
         self.states(res.states);
+      })
+      .call();
+  }
+
+  function fetchBulletin(bulletinId) {
+    ajax.query("bulletin", {bulletinId: bulletinId})
+      .success(function(res) {
+        if (res.bulletin.id) {
+          self.bulletin(res.bulletin);
+        }
       })
       .call();
   }
@@ -75,5 +87,9 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   hub.subscribe("bulletinService::fetchStates", fetchStates);
 
   hub.subscribe("bulletinService::fetchMunicipalities", fetchMunicipalities);
+
+  hub.subscribe("bulletinService::fetchBulletin", function(event) {
+    fetchBulletin(event.id);
+  });
 };
 
