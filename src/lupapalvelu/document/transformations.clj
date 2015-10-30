@@ -1,20 +1,17 @@
 (ns lupapalvelu.document.transformations
-  (:require [lupapalvelu.domain :as domain]
+  (:require [sade.util :as util]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.persistence :as persistence]))
 
 ;;
 ;; Application state change updates
 ;;
 
-(defn rename-keys-deep [mappings m]
-  (->> (map (fn [[k v]] [(get mappings k k) (if (map? v) (rename-keys-deep mappings v) v)]) m)
-       (into {})))
-
 (defn rakennusjateselvitys-updates [{application :application created :created :as command} selvitys-doc]
   (when-let [suunnitelma-doc (domain/get-document-by-name application "rakennusjatesuunnitelma")]
     (let [field-mappings {:suunniteltuMaara :toteutunutMaara}
           updates (->> (:data suunnitelma-doc)
-                       (rename-keys-deep field-mappings)
+                       (util/postwalk-map #(clojure.set/rename-keys % field-mappings))
                        (persistence/data-model->model-updates [])
                        (filter (comp not-empty second)))]
       (persistence/validated-model-updates application :documents selvitys-doc updates created))))
