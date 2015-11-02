@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.pdf-export :as pdf-export]
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :refer [with-lang loc]]
             [sade.util :as util]
             [midje.sweet :refer :all]

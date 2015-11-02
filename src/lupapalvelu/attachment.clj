@@ -13,12 +13,12 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.pdf-export :as pdf-export]
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.preview :as preview]
-            [lupapalvelu.pdf-conversion :as pdf-conversion])
+            [lupapalvelu.pdf.pdf-conversion :as pdf-conversion])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
            [org.apache.commons.io FilenameUtils]
@@ -69,17 +69,19 @@
    :B5
    :muu])
 
-(def- attachment-types-by-permit-type
-  {:R attachment-types/Rakennusluvat
-   :P attachment-types/Rakennusluvat
-   :YA attachment-types/YleistenAlueidenLuvat
-   :YI attachment-types/Ymparistoilmoitukset
-   :YL attachment-types/Ymparistolupa
-   :YM attachment-types/MuutYmparistoluvat
-   :VVVL attachment-types/Ymparistoilmoitukset
-   :MAL attachment-types/Maa-ainesluvat
-   :MM attachment-types/Kiinteistotoimitus
-   :KT attachment-types/Kiinteistotoimitus})
+(def- attachment-types-by-permit-type-unevaluated
+  {:R 'attachment-types/Rakennusluvat
+   :P 'attachment-types/Rakennusluvat
+   :YA 'attachment-types/YleistenAlueidenLuvat
+   :YI 'attachment-types/Ymparistoilmoitukset
+   :YL 'attachment-types/Ymparistolupa
+   :YM 'attachment-types/MuutYmparistoluvat
+   :VVVL 'attachment-types/Ymparistoilmoitukset
+   :MAL 'attachment-types/Maa-ainesluvat
+   :MM 'attachment-types/Kiinteistotoimitus
+   :KT 'attachment-types/Kiinteistotoimitus})
+
+(def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
 
 (defn attachment-ids-from-tree [tree]
   {:pre [(sequential? tree)]}
@@ -96,10 +98,11 @@
           [(i18n/localize lang (ss/join "." ["attachmentType" (name title) "_group_label"]))
            (reduce
              (fn [result attachment-name]
-               (conj
-                 result
-                 (i18n/localize lang
-                   (ss/join "." ["attachmentType" (name title) (name attachment-name)]))))
+               (let [lockey                    (ss/join "." ["attachmentType" (name title) (name attachment-name)])
+                     localized-attachment-name (i18n/localize lang lockey)]
+                 (conj
+                   result
+                   (ss/join "; " [(name attachment-name) localized-attachment-name]))))
              []
              attachment-names)])]
     (reduce
@@ -113,6 +116,17 @@
      ["fi" "sv"]))
 
   )
+
+(defn print-attachment-types-by-permit-type []
+  (let [permit-types-with-names (into {}
+                                      (for [[k v] attachment-types-by-permit-type-unevaluated]
+                                        [k (name v)]))]
+    (doseq [[permit-type permit-type-name] permit-types-with-names]
+    (println permit-type-name)
+    (doseq [[group-name types] (:fi (localised-attachments-by-permit-type permit-type))]
+      (println "\t" group-name)
+      (doseq [type types]
+        (println "\t\t" type))))))
 
 ;;
 ;; Api
