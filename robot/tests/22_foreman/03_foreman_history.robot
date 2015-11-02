@@ -39,8 +39,31 @@ Escalate to authorities
   Open to authorities  Apuva
   [Teardown]  logout
 
-Authority sees foreman history
+Switch to authority
   Sonja logs in
+
+Authority sees base application on foreman search
+  ${appId} =  Get From List  ${applicationIds}  0
+  Wait until element is visible  xpath=//table[@id='applications-list']//tr[@data-id='${appId}']
+
+Authority does not see foreman applications on default search
+  ${foremanAppId0} =  Get From List  ${foremanApps}  0
+  ${foremanAppId1} =  Get From List  ${foremanApps}  1
+  ${foremanAppId4} =  Get From List  ${foremanApps}  4
+  Page Should Not Contain  xpath=//table[@id='applications-list']//tr[@data-id='${foremanAppId0}']
+  Page Should Not Contain  xpath=//table[@id='applications-list']//tr[@data-id='${foremanAppId1}']
+  Page Should Not Contain  xpath=//table[@id='applications-list']//tr[@data-id='${foremanAppId4}']
+
+Authority not see base application on foreman search
+  Click element  xpath=//label[@for='searchTypeForeman']
+  ${appId} =  Get From List  ${applicationIds}  0
+  Wait until  Page Should Not Contain  xpath=//table[@id='applications-list']//tr[@data-id='${appId}']
+
+Authority sees foreman applications on foreman search
+  ${foremanAppId4} =  Get From List  ${foremanApps}  4
+  Wait until element is visible  xpath=//table[@id='applications-list']//tr[@data-id='${foremanAppId4}']
+
+Authority sees foreman history
   Open foreman application  4
   Open tab  parties
   Open accordions  parties
