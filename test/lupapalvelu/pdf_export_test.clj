@@ -55,6 +55,7 @@
             {:state status
              :message message
              :user {:firstName "Sonja" :lastName "Sibbo"}
+             :vetuma {:firstName "TESTAA" :lastName "PORTAALIA"}
              :created 1444902294666}]})
 
 
@@ -112,7 +113,7 @@
                       (fact "Pdf data rows " (nth rows 30) => "Lorelei ipsum"))
                     (.delete file))))))
 
-(facts "Generate PDF from application neigbors"
+(facts "Generate PDF from application neigbors - signed"
        (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
              dummy-docs (map util/dummy-doc schema-names)
              dummy-neighbours [(dummy-neighbour "2" "Matti Malli" "response-given" "SigloXX")
@@ -134,9 +135,9 @@
                           expected-state (if (= lang :fi) "Vastattu" "Besvarad")
                           rows (remove str/blank? (str/split pdf-content #"\n"))]
                       (fact "PDF data rows " (count rows) => 32)
-                      (fact "Pdf data rows " (nth rows 22) => "2")
-                      (fact "Pdf data rows " (nth rows 24) => "Matti Malli")
-                      (fact "Pdf data rows " (nth rows 26) => expected-state)
-                      (fact "Pdf data rows " (nth rows 28) => "SigloXX")
-                      (fact "Pdf data rows " (nth rows 30) => "Sonja Sibbo, 15.10.2015"))
+                      (fact "Pdf data id" (nth rows 22) => "2")
+                      (fact "Pdf data owner" (nth rows 24) => "Matti Malli")
+                      (fact "Pdf data state" (nth rows 26) => expected-state)
+                      (fact "Pdf data message" (nth rows 28) => "SigloXX")
+                      (fact "Pdf data signature" (nth rows 30) => "TESTAA PORTAALIA, 15.10.2015"))
                     (.delete file))))))

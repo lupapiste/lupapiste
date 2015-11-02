@@ -214,6 +214,8 @@
     (fn [{:keys [propertyId status] {owner-name :name} :owner}]
       (let [final-status (last status)
             user (:user final-status)
+            vetuma (:vetuma final-status)
+            signature (if (empty? vetuma) user vetuma)
             state (:state final-status)
             message (:message final-status)]
         (array-map
@@ -222,9 +224,9 @@
           (loc "neighbors.status") (loc (str "neighbor.state." state))
           (loc "neighbor.show.message") (if (ss/blank? message) (loc "application.export.empty") (str message))
           (loc "export.signed.electronically") (str
-                                                 (:firstName user)
+                                                 (:firstName signature)
                                                  " "
-                                                 (:lastName user)
+                                                 (:lastName signature)
                                                  ", "
                                                  (or (util/to-local-date (:created final-status)) "-")))))
     neighbours))
