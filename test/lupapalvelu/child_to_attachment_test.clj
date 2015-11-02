@@ -41,7 +41,7 @@
    :given nil
    :status status
    :text text
-   :person {:name name}
+   :person {:name name :text "Paloviranomainen"}
    :attachments [{:target {:type "statement"}} {:target {:type "something else"}}]})
 
 
@@ -61,9 +61,14 @@
              :user {:firstName "Sonja" :lastName "Sibbo"}
              :created 1444902294666}]})
 
-(defn filename-and-size-exists [data]
-  (and (.exists (:content data))
-       (> (:size data) 0)))
+(defn- file-exists [data]
+  (.exists (:content data)))
+
+(defn- filesize-exists [data]
+  (> (:size data) 0))
+
+
+
 
 (facts " Generate PDF from dummy application statements "
        (let [dummy-statements [(dummy-statement "2" " Matti Malli " nil " Lorelei ipsum ")
@@ -73,11 +78,10 @@
            (debug " org ok : " (not-empty (:organization application)))
            (fact {:midje/description (name lang)}
                  (let [pdf-content (child-to-attachment/generate-attachment-from-children nil application lang :statements "2")]
-;                   (debug " Exported statement file: " (:content pdf-content))
-;                   (debug " Exported statement : " pdf-content)
+;                   (debug " Exported statement : " (with-out-str (clojure.pprint/pprint pdf-content)))
                    pdf-content
-                   ) => filename-and-size-exists
-                 (provided (lupapalvelu.pdf-conversion/pdf-a-required? anything) => false)))))
+                   ) => (every-checker file-exists filesize-exists)
+             (provided (lupapalvelu.pdf.pdf-conversion/pdf-a-required? anything) => false)))))
 
 (facts " Generate PDF from dummy application neighbours "
        (let [dummy-neighbours [(dummy-neighbour "2" " Matti Malli " "mark-done")
@@ -86,8 +90,8 @@
          (doseq [lang i18n/languages]
            (fact {:midje/description (name lang)}
                  (let [pdf-content (child-to-attachment/generate-attachment-from-children nil application lang :neighbors "2")]
-;                   (debug " Exported neighbours file: " (:content pdf-content))
-;                   (debug " Exported neighbours: " pdf-content)
+                   ;                   (debug " Exported neighbours file: " (:content pdf-content))
+                   ;                   (debug " Exported neighbours: " pdf-content)
                    pdf-content
-                   ) => filename-and-size-exists
-                 (provided (lupapalvelu.pdf-conversion/pdf-a-required? anything) => false)))))
+                   ) => (every-checker file-exists filesize-exists)
+                 (provided (lupapalvelu.pdf.pdf-conversion/pdf-a-required? anything) => false)))))
