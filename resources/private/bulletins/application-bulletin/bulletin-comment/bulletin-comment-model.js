@@ -8,7 +8,7 @@ LUPAPISTE.BulletinCommentModel = function() {
     // TODO add attachment to comment before it is send
   };
 
-  self.sendComment = function() {
-    hub.send("bulletinService::commentAdded", {comment: "I am a teapot"});
+  self.sendComment = function(form) {
+    hub.send("bulletinService::sendComment", {commentForm: form});
   };
 };

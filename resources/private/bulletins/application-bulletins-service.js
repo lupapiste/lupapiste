@@ -91,5 +91,15 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   hub.subscribe("bulletinService::fetchBulletin", function(event) {
     fetchBulletin(event.id);
   });
+
+  hub.subscribe("bulletinService::sendComment", function(event) {
+    var form = event.commentForm;
+    var formData = new FormData(form);
+    ajax.form("add-bulletin-comment", formData)
+    .success(function() {
+      form.reset();
+    })
+    .call();
+  });
 };
 

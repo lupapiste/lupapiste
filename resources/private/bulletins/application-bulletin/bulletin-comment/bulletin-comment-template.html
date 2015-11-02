@@ -3,7 +3,7 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="bulletin-comment-template">
-      <div class="form-grid form-grid--no-border">
+      <form data-bind="submit: sendComment" class="form-grid form-grid--no-border">
         <div class="row">
           <div class="col-4"
                data-bind="component: {name: 'textarea-field',
@@ -19,12 +19,12 @@
           </button>
         </div>
         <div class="row">
-          <button class="positive" data-bind="click: sendComment, enable: comment">
+          <button type="submit" class="positive" data-bind="enable: comment">
             <i class="lupicon-comment"></i>
             <span data-bind="ltext: 'bulletin.comment.send'"></span>
           </button>
         </div>
-      </div>
+      </form>
     </script>
   </section>
 </body>
