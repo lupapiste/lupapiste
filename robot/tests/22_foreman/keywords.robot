@@ -76,10 +76,8 @@ Foreman sets role and difficulty to foreman application
 
 Open application by id
   [Arguments]  ${appId}
-  Go to page  applications
-  Wait until element is visible  xpath=//table[@id='applications-list']//tr[@data-id='${appId}']
-  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-id='${appId}']
-  Wait for jQuery
+  ${user-role} =  Execute JavaScript  return window.lupapisteApp.models.currentUser.role();
+  Go to  ${SERVER}/app/fi/${user-role}#!/application/${appId}
 
   Wait until  Element Should Be Visible  application
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${appId}
