@@ -18,7 +18,7 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.preview :as preview]
-            [lupapalvelu.pdf.pdf-conversion :as pdf-conversion])
+            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
            [org.apache.commons.io FilenameUtils]

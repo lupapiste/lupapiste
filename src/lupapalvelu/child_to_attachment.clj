@@ -6,7 +6,7 @@
     [sade.core :refer [def- now]]
     [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
     [clojure.pprint :refer [pprint]]
-    [lupapalvelu.pdf.pdf-conversion :as pdf-conversion])
+    [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
   (:import (java.io File FileOutputStream)))
 
 (defn- get-child [application type id]

@@ -68,7 +68,7 @@
              :created 1444902294666}]})
 
 
-(background (lupapalvelu.pdf.pdf-conversion/pdf-a-required? anything) => false)
+(background (lupapalvelu.pdf.pdfa-conversion/pdf-a-required? anything) => false)
 
 (facts " Generate attachment from dummy application statements "
        (let [dummy-statements [(dummy-statement "2" "Matti Malli" nil "Lorelei ipsum")
