@@ -12,14 +12,14 @@
 (defn- get-child [application type id]
   (first (filter #(or (nil? id) (= id (:id %))) (type application))))
 
-(defn- build-attachment [user application type lang id file]
+(defn- build-attachment [user application type id lang file]
   (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
         type-name (case type
                     :statements (i18n/localize (name lang) "statement.lausunto")
                     :neighbors (i18n/localize (name lang) "application.MM.neighbors")
                     :verdicts (i18n/localize (name lang) "application.verdict.title"))
         child (get-child application type id)]
-    (debug "building attachemtn form child: " child )
+    (debug "building attachemnt form child: " child )
     {:application application
      :filename (str type-name ".pdf")
      :size (.length file)
@@ -42,15 +42,15 @@
      :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
      :missing-fonts []}))
 
-(defn generate-attachment-from-children [user app lang child-type id]
+(defn generate-attachment-from-children [user app child-type id lang]
   "Builds attachment and return attachment data as map"
   (trace "   generate-attachment-from-children lang=" (name lang) ", type=" (name child-type) ", id=" id ",org: " (:organization app) ", child: " (get-child app child-type id))
   (let [pdf-file (File/createTempFile (str "pdf-export-" (name lang) "-" (name child-type) "-") ".pdf")
         fis (FileOutputStream. pdf-file)]
     (pdf-export/generate-pdf-with-child app child-type id lang fis)
-    (build-attachment user app child-type lang id pdf-file)))
+    (build-attachment user app child-type id lang pdf-file)))
 
 (defn create-attachment-from-children [user app child-type id lang]
   "Generates attachment from child and saves it"
-  (let [child (generate-attachment-from-children user app lang child-type id)]
+  (let [child (generate-attachment-from-children user app child-type id lang)]
     (attachment/attach-file! child)))
