@@ -3,3 +3,6 @@ help.bulletin.comment:  Lorem ipsum dolor sit amet, consectetur adipisicing elit
 bulletin.comment.endDate:  Ilmoituksen kommentointi päättyy
 bulletin.comment:  Kommentti
 bulletin.comment.placeholder:  Kirjoita tähän vapaamuotoinen kommentti.
+
+bulletin.comment.addAttachment:  Lisää kommenttiin liitetiedosto
+bulletin.comment.send:  Lähetä kommentti

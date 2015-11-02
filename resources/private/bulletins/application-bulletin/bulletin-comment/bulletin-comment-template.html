@@ -10,8 +10,19 @@
                                       params: {value: comment,
                                                id: 'bulletin-comment-field',
                                                lLabel: 'bulletin.comment',
-                                               required: true,
                                                lPlaceholder: 'bulletin.comment.placeholder'}}"></div>
+        </div>
+        <div class="row">
+          <button class="bulletin" data-bind="click: addAttachment">
+            <i class="lupicon-paperclip"></i>
+            <span data-bind="ltext: 'bulletin.comment.addAttachment'"></span>
+          </button>
+        </div>
+        <div class="row">
+          <button class="positive" data-bind="click: sendComment, enable: comment">
+            <i class="lupicon-comment"></i>
+            <span data-bind="ltext: 'bulletin.comment.send'"></span>
+          </button>
         </div>
       </div>
     </script>
