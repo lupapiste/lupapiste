@@ -9721,133 +9721,161 @@ div.search i {
   font-weight: 700;
   font-size: 1.125rem;
 }
-/* line 41, ../sass/partials/_bulletins.scss */
+/* line 40, ../sass/partials/_bulletins.scss */
+#bulletins p {
+  margin-bottom: 20px;
+}
+/* line 44, ../sass/partials/_bulletins.scss */
 #bulletins .intro {
   font-weight: 300;
   font-size: 1.375rem;
   margin-top: 20px;
 }
-/* line 45, ../sass/partials/_bulletins.scss */
+/* line 48, ../sass/partials/_bulletins.scss */
 #bulletins .intro button {
   margin-left: 20px;
 }
-/* line 51, ../sass/partials/_bulletins.scss */
+/* line 53, ../sass/partials/_bulletins.scss */
+#bulletins .help-toggle {
+  color: #0fbbf7;
+}
+/* line 56, ../sass/partials/_bulletins.scss */
+#bulletins .help-toggle .lupicon-circle-question {
+  color: #0fbbf7;
+}
+/* line 58, ../sass/partials/_bulletins.scss */
+#bulletins .help-toggle .lupicon-circle-question.expanded {
+  color: #0fbbf7;
+}
+/* line 64, ../sass/partials/_bulletins.scss */
+#bulletins .help-text {
+  border-color: #0fbbf7;
+}
+/* line 69, ../sass/partials/_bulletins.scss */
+#bulletins .help-arrow:before {
+  border-bottom-color: #0fbbf7;
+}
+/* line 75, ../sass/partials/_bulletins.scss */
 #bulletins input:focus {
   border-color: #0fcff7;
 }
-/* line 60, ../sass/partials/_bulletins.scss */
+/* line 84, ../sass/partials/_bulletins.scss */
 #bulletins .blue-bg {
   background-color: #0fa8f7;
 }
-/* line 62, ../sass/partials/_bulletins.scss */
+/* line 86, ../sass/partials/_bulletins.scss */
 #bulletins .blue-bg h1, #bulletins .blue-bg p {
   color: #fff;
 }
-/* line 67, ../sass/partials/_bulletins.scss */
+/* line 91, ../sass/partials/_bulletins.scss */
 #bulletins .gray-bg {
   background-color: #eeeeee;
 }
-/* line 71, ../sass/partials/_bulletins.scss */
+/* line 95, ../sass/partials/_bulletins.scss */
 #bulletins .content-center {
   max-width: 1280px;
   margin: 0 auto;
   position: relative;
   padding: 40px 0;
 }
-/* line 78, ../sass/partials/_bulletins.scss */
+/* line 102, ../sass/partials/_bulletins.scss */
 #bulletins .full {
   width: 100%;
   min-width: 320px;
 }
-/* line 83, ../sass/partials/_bulletins.scss */
+/* line 107, ../sass/partials/_bulletins.scss */
 #bulletins .slogan, #bulletins .ingress {
   text-align: center;
   width: 80%;
   margin: 0 auto 20px;
 }
-/* line 91, ../sass/partials/_bulletins.scss */
+/* line 115, ../sass/partials/_bulletins.scss */
 #bulletins .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {
   color: #0fa8f7;
 }
-/* line 93, ../sass/partials/_bulletins.scss */
+/* line 117, ../sass/partials/_bulletins.scss */
 #bulletins .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle {
   color: #0fcff7;
 }
-/* line 98, ../sass/partials/_bulletins.scss */
+/* line 122, ../sass/partials/_bulletins.scss */
 #bulletins .autocomplete-component .autocomplete-selection-wrapper.active {
   border-color: #0fcff7;
 }
-/* line 100, ../sass/partials/_bulletins.scss */
+/* line 124, ../sass/partials/_bulletins.scss */
 #bulletins .autocomplete-component .autocomplete-selection-wrapper.active .tag-chevron {
   color: #0fcff7;
 }
-/* line 105, ../sass/partials/_bulletins.scss */
+/* line 129, ../sass/partials/_bulletins.scss */
 #bulletins .autocomplete-component .search .search-icon {
   color: #0fa8f7;
 }
-/* line 109, ../sass/partials/_bulletins.scss */
+/* line 133, ../sass/partials/_bulletins.scss */
 #bulletins .autocomplete-component .search.active .search-icon {
   color: #0fcff7;
 }
-/* line 115, ../sass/partials/_bulletins.scss */
+/* line 139, ../sass/partials/_bulletins.scss */
 #bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
   border-color: #0fcff7;
 }
-/* line 117, ../sass/partials/_bulletins.scss */
+/* line 141, ../sass/partials/_bulletins.scss */
 #bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #0fbbf7;
 }
-/* line 119, ../sass/partials/_bulletins.scss */
+/* line 143, ../sass/partials/_bulletins.scss */
 #bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #0fcff7;
 }
-/* line 129, ../sass/partials/_bulletins.scss */
+/* line 152, ../sass/partials/_bulletins.scss */
+#bulletins .form-grid textarea {
+  display: block;
+}
+/* line 154, ../sass/partials/_bulletins.scss */
 #bulletins .form-grid textarea:focus {
   color: #333333;
   border-color: #0fcff7;
 }
-/* line 135, ../sass/partials/_bulletins.scss */
+/* line 160, ../sass/partials/_bulletins.scss */
 #bulletins .search-button-wrapper {
   text-align: center;
 }
-/* line 138, ../sass/partials/_bulletins.scss */
+/* line 163, ../sass/partials/_bulletins.scss */
 #bulletins .search-button-wrapper button span:last-child {
   padding-left: 6px;
 }
-/* line 139, ../sass/partials/_bulletins.scss */
+/* line 164, ../sass/partials/_bulletins.scss */
 #bulletins .search-button-wrapper button span:last-child:before {
   content: "(";
 }
-/* line 142, ../sass/partials/_bulletins.scss */
+/* line 167, ../sass/partials/_bulletins.scss */
 #bulletins .search-button-wrapper button span:last-child:after {
   content: ")";
 }
-/* line 151, ../sass/partials/_bulletins.scss */
+/* line 176, ../sass/partials/_bulletins.scss */
 #bulletins .bulletins-search h3 {
   text-align: center;
 }
-/* line 155, ../sass/partials/_bulletins.scss */
+/* line 180, ../sass/partials/_bulletins.scss */
 #bulletins .bulletins-search .search-field i {
   color: #0fa8f7;
 }
-/* line 159, ../sass/partials/_bulletins.scss */
+/* line 184, ../sass/partials/_bulletins.scss */
 #bulletins .bulletins-search .search-field.active i {
   color: #0fcff7;
 }
-/* line 183, ../sass/partials/_bulletins.scss */
+/* line 208, ../sass/partials/_bulletins.scss */
 #bulletins #application-bulletins-list th.sixth {
   width: 5%;
 }
-/* line 189, ../sass/partials/_bulletins.scss */
+/* line 214, ../sass/partials/_bulletins.scss */
 #bulletins #application-bulletins-list th > i {
   color: #0fa8f7;
   position: absolute;
 }
-/* line 196, ../sass/partials/_bulletins.scss */
+/* line 221, ../sass/partials/_bulletins.scss */
 #bulletins #bulletin-comment h5 {
   display: inline-block;
 }
-/* line 199, ../sass/partials/_bulletins.scss */
+/* line 224, ../sass/partials/_bulletins.scss */
 #bulletins #bulletin-comment .help-toggle {
   vertical-align: top;
 }

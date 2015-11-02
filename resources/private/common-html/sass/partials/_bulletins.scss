@@ -37,6 +37,9 @@
     font-size: 1.125rem;
   }
 
+  p {
+    margin-bottom: $grid-margin;
+  }
 
   .intro {
     font-weight: 300;
@@ -44,6 +47,27 @@
     margin-top: $grid-margin;
     button {
       margin-left: $grid-margin;
+    }
+  }
+
+  .help-toggle {
+    color: $blue;
+
+    .lupicon-circle-question {
+      color: $blue;
+      &.expanded {
+        color: $blue;
+      }
+    }
+  }
+
+  .help-text {
+    border-color: $blue;
+  }
+
+  .help-arrow {
+    &:before {
+      border-bottom-color: $blue;
     }
   }
 
@@ -126,6 +150,7 @@
   }
   .form-grid {
     textarea {
+      display: block;
       &:focus {
         color: $input-focus-color;
         border-color: $blue-light;
