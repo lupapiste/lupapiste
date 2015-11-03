@@ -9888,11 +9888,12 @@ div.search i {
 /* line 232, ../sass/partials/_bulletins.scss */
 #bulletins ul.bulletin-comment__attachment-list li {
   display: table-row;
+  padding: 0;
 }
-/* line 234, ../sass/partials/_bulletins.scss */
+/* line 235, ../sass/partials/_bulletins.scss */
 #bulletins ul.bulletin-comment__attachment-list li span {
   display: table-cell;
-  padding: 0 12px;
+  padding-right: 24px;
 }
 
 /* VIEWS
