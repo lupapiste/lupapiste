@@ -96,6 +96,13 @@
 
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
+(def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil
+                         :body [{:name "AA"}
+                                {:name "A"}
+                                {:name "B"}
+                                {:name "C"}
+                                {:name "ei tiedossa"}]})
+
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
 (def yritys-valitsin [{:name "companyId" :type :companySelector :blacklist [:neighbor]}])
@@ -1135,6 +1142,14 @@
            :order 1}
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]} ; Longest value in Helsinki production data
+
+   {:info {:name "hankkeen-kuvaus-rakennuslupa"
+           :i18name "hankkeen-kuvaus"
+           :approvable true
+           :order 1}
+    :body [kuvaus
+           hankkeen-vaativuus
+           {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
 
    {:info {:name "uusiRakennus" :approvable true}
     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
