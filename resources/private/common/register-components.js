@@ -33,6 +33,8 @@ jQuery(document).ready(function() {
     {name: "company-edit"},
     {name: "tags-editor"},
     {name: "municipality-maps"},
+    {name: "municipality-maps-server"},
+    {name: "municipality-maps-layers"},
     {name: "upload"},
     {name: "openlayers-map"},
     {name: "vetuma-init"},

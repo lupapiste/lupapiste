@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container">
+      <script type="text/x-jquery-tmpl" id="municipality-maps-server-template">
+        <h3 data-bind="ltext: 'auth-admin.municipality-maps.server-details'"></h3>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'auth-admin.parameter'"></th>
+              <th data-bind="ltext: 'auth-admin.value'"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-bind="ltext: 'auth-admin.municipality-maps.url'"></td>
+              <td><input data-bind="value: url"></td>
+            </tr>
+            <tr>
+              <td data-bind="ltext: 'auth-admin.municipality-maps.username'"></td>
+              <td><input data-bind="value: username"></td>
+            </tr>
+            <tr>
+              <td data-bind="ltext: 'auth-admin.municipality-maps.password'"></td>
+              <td><input data-bind="value: password" type="password"></td>
+            </tr>
+          </tbody>
+        </table>
+        <p data-bind="visible: error" class="munimaps--error">
+          <span data-bind="text: loc( 'auth-admin.municipality-maps.error')"></span>
+        </p>
+        <button class="positive"
+                data-bind="click: updateServerDetails,
+                           css: {waiting: waiting}">
+          <i class="wait spin lupicon-refresh"></i>
+          <span data-bind="ltext: 'auth-admin.municipality-maps.fetch'"></span>
+        </button>
+
+      </script>
+    </section>
+  </body>
+</html>

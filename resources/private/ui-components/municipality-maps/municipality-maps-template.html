@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container">
+      <script type="text/x-jquery-tmpl" id="municipality-maps-template">
+        <h2 data-bind="ltext: 'auth-admin.municipality-maps.title'"></h2>
+        <div data-bind="component: {name: 'municipality-maps-server',
+                        params: serverParams}"></div>
+        <div data-bind="component: {name: 'municipality-maps-layers',
+                                    params: layersParams}"></div>
+
+        <!-- ko if: false -->
+        <div id="municipality-maps-preview" class="map-component"></div>
+        <!-- /ko -->
+      </script>
+    </section>
+  </body>
+</html>

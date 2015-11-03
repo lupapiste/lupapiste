@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container">
+      <script type="text/x-jquery-tmpl" id="municipality-maps-layers-template">
+        <h3 data-bind="ltext: 'auth-admin.municipality-maps.layers'"></h3>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'auth-admin.municipality-maps.layername'"></th>
+              <th data-bind="ltext: 'auth-admin.municipality-maps.layer'"></th>
+              <th data-bind="ltext: 'auth-admin.municipality-maps.preview'"></th>
+              <th data-bind="ltext: 'auth-admin.actions'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: userLayers">
+            <tr>
+              <!-- ko if: fixed -->
+              <td data-bind="text: $parent.shortLoc(name())"></td>
+              <!-- /ko -->
+              <!-- ko ifnot: fixed -->
+              <td><input type="text" data-bind="value: name"></td>
+              <!-- /ko -->
+              <td>
+                <select data-bind="value: id,
+                                   options: $parent.serverLayers,
+                                   optionsText: 'title',
+                                   optionsValue: 'name',
+                                   optionsCaption: loc( 'choose'),
+                                   valueAllowUnset: true">
+                </select>
+              </td>
+              <td><input type="checkbox" data-bind="checked: preview "></td>
+              <td>
+                <a href="#" data-bind="ifnot: fixed">
+                  <span data-bind="text: '[' + loc( 'remove' ) + ']',
+                                   click: $parent.removeLayer"></span>
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="positive"
+                data-bind="click: addLayer">
+          <i class="lupicon-circle-plus"></i>
+          <span data-bind="ltext: 'auth-admin.municipality-maps.add'"></span>
+        </button>
+      </script>
+    </section>
+  </body>
+</html>
