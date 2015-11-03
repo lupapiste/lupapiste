@@ -47,8 +47,8 @@
                 <div class="header-box">
                     <a href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
                         <span class="lupicon-user"></span>
-                        <span class="narrow-hide" id="user-name" data-test-role="applicant"
-                              data-bind="text: lupapisteApp.models.currentUser.displayName"></span>
+                        <span class="narrow-hide" id="user-name"
+                              data-bind="text: lupapisteApp.models.currentUser.displayName, attr: {'data-test-role' : lupapisteApp.models.currentUser.role}"></span>
                     </a>
                 </div>
                 <div class="header-box">
