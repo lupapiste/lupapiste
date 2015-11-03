@@ -28,7 +28,7 @@ Open foreman application
   [Arguments]  ${index}
   ${foremanAppId} =  Get From List  ${foremanApps}  ${index}
   Open application by id  ${foremanAppId}
-  Page should contain  Työnjohtajan nimeäminen
+  Wait Until  Page should contain  Työnjohtajan nimeäminen
 
 Open foreman accordions
   Open accordions  parties
@@ -78,9 +78,7 @@ Open application by id
   [Arguments]  ${appId}
   ${user-role} =  Execute JavaScript  return window.lupapisteApp.models.currentUser.role();
   Go to  ${SERVER}/app/fi/${user-role}#!/application/${appId}
-
-  Wait until  Element Should Be Visible  application
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${appId}
+  Wait until  Element Should Be Visible  xpath=//section[@id='application']//span[@data-test-id='application-id']
 
 Open project application
   ${appId} =   Get From List  ${applicationIds}  0
