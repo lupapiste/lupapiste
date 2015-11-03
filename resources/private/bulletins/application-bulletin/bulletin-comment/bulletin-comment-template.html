@@ -5,7 +5,7 @@
     <script type="text/x-jquery-tmpl" id="bulletin-comment-template">
       <form data-bind="submit: sendComment" class="form-grid form-grid--no-border">
         <div class="row">
-          <div class="col-4"
+           <div class="col-4"
                data-bind="component: {name: 'textarea-field',
                                       params: {value: comment,
                                                id: 'bulletin-comment-field',
@@ -14,7 +14,8 @@
         </div>
         <div class="row">
           <label data-bind="ltext: 'bulletin.comment.selectedAttachments'"></label>
-          <input class="hidden" type="file" data-bind="event: {change: fileChanged}"></div>
+          <input class="hidden" type="file" data-bind="event: {change: fileChanged}"/>
+          <input class="hidden" type="text" name="bulletin-id" data-bind="value: bulletinId"/>
           <!-- ko if: attachments().length > 0 -->
           <ul class="bulletin-comment__attachment-list" data-bind="foreach: attachments">
             <li>
