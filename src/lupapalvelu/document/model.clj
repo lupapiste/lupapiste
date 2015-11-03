@@ -456,7 +456,7 @@
       (boolean (find-by-name schema-body full-path)))))
 
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId turvakieltokytkin
-                         companyName companyId
+                         companyName companyId allowDirectMarketing
                          fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults?]}]
   {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
@@ -468,6 +468,7 @@
                        :turvakieltoKytkin       (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
        :yhteystiedot {:email                    (wrap email)
                       :puhelin                  (wrap phone)}
+       :kytkimet {:suoramarkkinointilupa        (wrap allowDirectMarketing)}
        :osoite {:katu                           (wrap street)
                 :postinumero                    (wrap zip)
                 :postitoimipaikannimi           (wrap city)}
@@ -485,7 +486,7 @@
       util/strip-empty-maps
       tools/wrapped)))
 
-(defn ->yritys [{:keys [firstName lastName email phone address1 zip po turvakieltokytkin name y ovt pop]}
+(defn ->yritys [{:keys [firstName lastName email phone address1 zip po turvakieltokytkin name y ovt pop allowDirectMarketing]}
                 & {:keys [with-empty-defaults?]}]
   {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
@@ -499,7 +500,8 @@
                                        :sukunimi      (wrap lastName)
                                        :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
                        :yhteystiedot {:email          (wrap email)
-                                      :puhelin        (wrap phone)}}
+                                      :puhelin        (wrap phone)}
+                       :kytkimet {:suoramarkkinointilupa (wrap allowDirectMarketing)}}
        :verkkolaskutustieto {:ovtTunnus               (wrap ovt)
                              :verkkolaskuTunnus       ""
                              :valittajaTunnus         (wrap pop)}}

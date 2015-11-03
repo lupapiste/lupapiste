@@ -12,7 +12,8 @@
                   "2.1.4" "2.1.2"
                   "2.1.5" "2.1.3"
                   "2.1.6" "2.1.5"
-                  "2.1.8" "2.1.5"})
+                  "2.1.8" "2.1.5"
+                  "2.2.0" "2.1.6"})
 
 (def- ya-yht {"2.1.2" "2.1.0"
               "2.1.3" "2.1.3"
@@ -317,6 +318,9 @@
     (update-in [:child] update-child-element [:henkilo] henkilo_215)
     (update-in [:child] update-child-element [:yritys] yritys_215)))
 
+(def osapuoli-body_216
+  (update-in osapuoli-body_215 [:child] conj {:tag :suoramarkkinointikieltoKytkin}))
+
 (def- naapuri {:tag :naapuritieto
                :child [{:tag :Naapuri
                         :child [{:tag :henkilo}
@@ -476,8 +480,11 @@
            naapuri]})
 
 (def osapuolet_216
-  (update-in osapuolet_215 [:child] update-child-element [:naapuritieto] naapuri-216))
-
+  {:tag :Osapuolet :ns "yht"
+   :child [{:tag :osapuolitieto :child [osapuoli-body_216]}
+           suunnittelijatieto_215
+           tyonjohtajatieto_215
+           naapuri-216]})
 
 (def tilamuutos
   {:tag :Tilamuutos :ns "yht"
