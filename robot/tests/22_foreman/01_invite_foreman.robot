@@ -60,7 +60,7 @@ Pena sets Solita as hakija
   Wait until  Select From List  xpath=//section[@data-doc-type="hakija-r"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="yritys.yritysnimi"]  Solita Oy
 
-Pena invites foreman to application
+Pena invites foreman Teppo to application
   Click by test id  invite-foreman-button
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
@@ -79,6 +79,7 @@ Pena sees sent invitation on the original application
 
 Pena sees sent invitations on the foreman application
   Open application by id  ${foremanAppId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${foremanAppId}
   Open tab  parties
   Open foreman accordions
   Wait until  Xpath Should Match X Times  //ul/li[@class="party"]  3
