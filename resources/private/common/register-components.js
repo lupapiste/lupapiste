@@ -66,6 +66,7 @@ jQuery(document).ready(function() {
     {name: "checkbox-field", model: "input-field-model"},
     {name: "select-field", model: "input-field-model"},
     {name: "radio-field"},
+    {name: "search-field"},
     {name: "maaraala-tunnus"},
     {name: "property-group"},
     {name: "password-field"},
