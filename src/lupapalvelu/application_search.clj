@@ -12,7 +12,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.user :refer [applicant?] :as user]
+            [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.geojson :as geo]))
@@ -83,7 +83,7 @@
    (filter seq
      [query
       (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
-      (if (applicant? user)
+      (if (user/applicant? user)
         (case applicationType
           "inforequest"        {:state {$in ["answered" "info"]}}
           "application"        applicant-application-states
@@ -111,8 +111,11 @@
         {:tags {$in tags}})
       (when-not (empty? organizations)
         {:organization {$in organizations}})
-      (when-not (empty? operations)
-        {:primaryOperation.name {$in operations}})
+      (if-not (empty? operations)
+        {:primaryOperation.name {$in operations}}
+        (when (user/authority? user)
+          ; Hide foreman applications in default search, see LPK-923
+          {:permitSubtype {$nin ["tyonjohtaja-hakemus", "tyonjohtaja-ilmoitus"]}}))
       (when-not (empty? areas)
         (make-area-query areas user))])})
 
