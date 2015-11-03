@@ -76,9 +76,9 @@ Foreman sets role and difficulty to foreman application
 
 Open application by id
   [Arguments]  ${appId}
-  ${user-role} =  Execute JavaScript  return window.lupapisteApp.models.currentUser.role();
+  ${user-role} =  Get role
   Go to  ${SERVER}/app/fi/${user-role}#!/application/${appId}
-  Wait until  Element Should Be Visible  xpath=//section[@id='application']//span[@data-test-id='application-id']
+  Wait until  Element Should Be Visible  xpath=//section[@id='application']
 
 Open project application
   ${appId} =   Get From List  ${applicationIds}  0
