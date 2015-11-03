@@ -6,3 +6,5 @@ bulletin.comment.placeholder:  Kirjoita tähän vapaamuotoinen kommentti.
 
 bulletin.comment.addAttachment:  Lisää kommenttiin liitetiedosto
 bulletin.comment.send:  Lähetä kommentti
+bulletin.comment.noAttachments:  Ei valittuja liitetiedostoja
+bulletin.comment.selectedAttachments:  Kommentin mukana lähtevät liitetiedostot

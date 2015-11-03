@@ -13,6 +13,26 @@
                                                lPlaceholder: 'bulletin.comment.placeholder'}}"></div>
         </div>
         <div class="row">
+          <label data-bind="ltext: 'bulletin.comment.selectedAttachments'"></label>
+          <input class="hidden" type="file" data-bind="event: {change: fileChanged}"></div>
+          <!-- ko if: attachments().length > 0 -->
+          <ul class="bulletin-comment__attachment-list" data-bind="foreach: attachments">
+            <li>
+              <span data-bind="text: $data.name"></span>
+              <span data-bind="size: $data.size"></span>
+              <span>
+                <a href="#" data-bind="click: $component.removeAttachment">
+                  <span data-bind="ltext: 'remove'"></span>
+                </a>
+              </span>
+            </li>
+          </ul>
+          <!-- /ko -->
+          <!-- ko if: attachments().length === 0 -->
+          <p data-bind="ltext: 'bulletin.comment.noAttachments'"></p>
+          <!-- /ko -->
+        </div>
+        <div class="row">
           <button class="bulletin" data-bind="click: addAttachment">
             <i class="lupicon-paperclip"></i>
             <span data-bind="ltext: 'bulletin.comment.addAttachment'"></span>

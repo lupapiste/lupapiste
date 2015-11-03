@@ -217,12 +217,24 @@
     }
   }
 
-  #bulletin-comment {
+  .bulletin-comment {
     h5 {
       display: inline-block;
     }
     .help-toggle {
       vertical-align: top;
+    }
+  }
+  ul.bulletin-comment__attachment-list {
+    display: table;
+    list-style: none;
+    padding: 0;
+    li {
+      display: table-row;
+      span {
+        display: table-cell;
+        padding: 0 $marginM;
+      }
     }
   }
 }
