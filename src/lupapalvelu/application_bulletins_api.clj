@@ -92,13 +92,13 @@
   (let [states (mongo/distinct :application-bulletins :versions.bulletinState)]
     (ok :states states)))
 
-;; TODO user-roles Vetuma authentincated person
+;; TODO user-roles Vetuma autheticated person
 (defraw add-bulletin-comment
   {:description "Add comment to bulletin"
    :feature :publish-bulletin
    :user-roles #{:anonymous}}
-  [{{[{:keys [tempfile filename size]}] :files created :created} :data :as action}]
-  (clojure.pprint/pprint action)
+  [{{files :files bulletin-id :bulletin-id bulletin-comment :bulletin-comment-field} :data created :created :as action}]
+  (prn created files bulletin-id bulletin-comment)
   (->> {:ok true}
     (resp/json)
     (resp/content-type "application/json")
