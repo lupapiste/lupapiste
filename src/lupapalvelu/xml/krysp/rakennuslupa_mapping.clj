@@ -114,6 +114,21 @@
                                :child [{:tag :muu}
                                        {:tag :omistajalaji}]}]}))
 
+(def rakennus_220
+  (update-in rakennus [:child] mapping-common/update-child-element
+      [:omistajatieto :Omistaja]
+      {:tag :Omistaja :child [{:tag :kuntaRooliKoodi :ns "yht"}
+                              {:tag :VRKrooliKoodi :ns "yht"}
+                              mapping-common/henkilo
+                              mapping-common/yritys_213
+                              {:tag :turvakieltoKytkin :ns "yht"}
+                              {:tag :suoramarkkinointikieltoKytkin :ns "yht"}
+                              {:tag :omistajalaji :ns "rakval"
+                               :child [{:tag :muu}
+                                       {:tag :omistajalaji}]}]}))
+
+
+
 (def- katselmustieto
   {:tag :katselmustieto
    :child [{:tag :Katselmus
@@ -290,7 +305,10 @@
              (mapping-common/schemalocation :R "2.2.0"))
    (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
-                 {:tag :osapuolettieto :child [mapping-common/osapuolet_216]})))
+                 {:tag :osapuolettieto :child [mapping-common/osapuolet_216]})
+   (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto]
+      {:tag :rakennustieto :child [rakennus_220]})))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}

@@ -319,7 +319,7 @@
     (update-in [:child] update-child-element [:yritys] yritys_215)))
 
 (def osapuoli-body_216
-  (update-in osapuoli-body_215 [:child] conj {:tag :suoramarkkinointikieltoKytkin}))
+  (update-in osapuoli-body_215 [:child] concat [{:tag :suoramarkkinointikieltoKytkin}]))
 
 (def- naapuri {:tag :naapuritieto
                :child [{:tag :Naapuri
