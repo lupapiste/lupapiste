@@ -455,10 +455,13 @@
     (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
       (boolean (find-by-name schema-body full-path)))))
 
+(defn good-flag? [flag]
+  (or (nil? flag) (util/boolean? flag)))
+
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId turvakieltokytkin
                          companyName companyId allowDirectMarketing
                          fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults?]}]
-  {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
+  {:pre [(good-flag? turvakieltokytkin) (good-flag? allowDirectMarketing)]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
       {:userId                                  (wrap id)
@@ -468,7 +471,7 @@
                        :turvakieltoKytkin       (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
        :yhteystiedot {:email                    (wrap email)
                       :puhelin                  (wrap phone)}
-       :kytkimet {:suoramarkkinointilupa        (wrap allowDirectMarketing)}
+       :kytkimet {:suoramarkkinointilupa        (when (or allowDirectMarketing with-empty-defaults?) (boolean allowDirectMarketing))}
        :osoite {:katu                           (wrap street)
                 :postinumero                    (wrap zip)
                 :postitoimipaikannimi           (wrap city)}
@@ -488,7 +491,7 @@
 
 (defn ->yritys [{:keys [firstName lastName email phone address1 zip po turvakieltokytkin name y ovt pop allowDirectMarketing]}
                 & {:keys [with-empty-defaults?]}]
-  {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
+  {:pre [(good-flag? turvakieltokytkin) (good-flag? allowDirectMarketing)]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
       {:yritysnimi                                    (wrap name)
@@ -501,7 +504,7 @@
                                        :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
                        :yhteystiedot {:email          (wrap email)
                                       :puhelin        (wrap phone)}
-                       :kytkimet {:suoramarkkinointilupa (wrap allowDirectMarketing)}}
+                       :kytkimet {:suoramarkkinointilupa (when (or allowDirectMarketing with-empty-defaults?) (boolean allowDirectMarketing))}}
        :verkkolaskutustieto {:ovtTunnus               (wrap ovt)
                              :verkkolaskuTunnus       ""
                              :valittajaTunnus         (wrap pop)}}
