@@ -26,7 +26,7 @@
       (let [result (prev-permit/fetch-prev-application! command)]
         (if (ok? result)
           (resp/json (assoc result :text :created-new-application))
-          (resp/status 404 (resp/json result)))))))
+          (resp/status 404 (resp/json (select-keys result [:ok :text]))))))))
 
 (defcommand create-application-from-previous-permit
   {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus]
