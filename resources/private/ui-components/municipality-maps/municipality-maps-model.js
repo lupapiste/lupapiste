@@ -6,10 +6,13 @@ LUPAPISTE.MunicipalityMapsModel = function() {
   // var serviceParams = lupapisteApp.services.municipalityMapsService.parameters;
   // self.serverParams = serviceParams.server;
 
-  self.serverParams = service.parameters.server;
-  self.layersParams = service.parameters.layers;
+  var params = service.getParameters();
+  self.serverParams = params.server;
+  self.layersParams = params.layers;
+  self.mapParams    = params.map;
 
 
+  // http://gtkdata.gtk.fi/arcgis/services/Rajapinnat/GTK_Kalliopera_WMS/MapServer/WMSServer
 
 
   // function Layer( opts) {

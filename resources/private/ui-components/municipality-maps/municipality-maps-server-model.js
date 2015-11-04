@@ -11,27 +11,30 @@ LUPAPISTE.MunicipalityMapsServerModel = function( params ) {
 
   self.error = params.error;
 
-  console.log( "Server params:", params)
+  console.log( "Server params:", params);
 
   ko.computed( function() {
     console.log( "Server computed");
-    if( params.settings()) {
-      var server = params.settings().server;
-      if( server ) {
-        self.url( server.url());
-        self.username( server.username());
-        self.password( server.password());
-      }
+    var server = params.server();
+    if(server) {
+      self.url( server.url);
+      self.username( server.username);
+      self.password( server.password);
     }
   });
 
   self.updateServerDetails = function() {
-    params.channel.send( {
-      server: {
+    params.server( {
         url: self.url(),
         username: self.username(),
         password: self.password()
-      }
     });
+    // params.channel.send( {
+    //   server: {
+    //     url: self.url(),
+    //     username: self.username(),
+    //     password: self.password()
+    //   }
+    // });
   };
 };

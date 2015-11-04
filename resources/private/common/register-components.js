@@ -35,6 +35,7 @@ jQuery(document).ready(function() {
     {name: "municipality-maps"},
     {name: "municipality-maps-server"},
     {name: "municipality-maps-layers"},
+    {name: "municipality-maps-map"},
     {name: "upload"},
     {name: "openlayers-map"},
     {name: "vetuma-init"},

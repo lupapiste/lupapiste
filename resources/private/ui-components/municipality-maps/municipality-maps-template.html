@@ -8,10 +8,8 @@
                         params: serverParams}"></div>
         <div data-bind="component: {name: 'municipality-maps-layers',
                                     params: layersParams}"></div>
-
-        <!-- ko if: false -->
-        <div id="municipality-maps-preview" class="map-component"></div>
-        <!-- /ko -->
+        <div data-bind="component: {name: 'municipality-maps-map',
+                                    params: mapParams}"></div>
       </script>
     </section>
   </body>

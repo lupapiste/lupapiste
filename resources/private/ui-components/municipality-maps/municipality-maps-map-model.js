@@ -4,9 +4,14 @@ LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
   var self = this;
 
   var PROJECTION = "EPSG:3067";
+  var PROXY        = params.PROXY;
+  var capabilities = params.capabilities;
+  var serverLayers = params.serverLayers;
+  var mapFitted    = params.mapFitted;
+  var userLayers   = params.userLayers;
 
   function findLayerCapabilities( layerId ) {
-    var layer = _.find( self.serverLayers(), {name: layerId});
+    var layer = _.find( serverLayers(), {name: layerId});
     return layer ? layer.capabilities : null;
   }
 
@@ -30,14 +35,16 @@ LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
     })
   });
 
-  var updateMap = ko.computed( function() {
-    console.log( "updateMap");
-    var caps = self.capabilities();
-    if( caps ) {
+  ko.computed( function() {
+    console.log( "updateMap", userLayers);
+    var caps = capabilities();
+    if( caps && serverLayers()) {
       var extent = null;
       map.getLayers().clear();
-      _.each( self.userLayers(), function( layer ) {
+      _.each( userLayers(), function( layer ) {
+        console.log( "Layer:", layer);
         if( layer.id()) {
+          console.log( "Add layer");
           map.addLayer( new ol.layer.Tile( {
             id: layer.id(),
             visible: layer.preview(),
@@ -50,7 +57,7 @@ LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
               }
             })
           }));
-          if( !mapFitted ) {
+          if( !mapFitted() ) {
             var ext = findLayerExtent( layer.id());
             if(ext) {
               extent = _.clone( ext );
@@ -58,8 +65,9 @@ LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
           }
         }
       });
-      if( !mapFitted && extent ) {
-        mapFitted = true;
+      if( !mapFitted() && extent ) {
+        mapFitted(true);
+        console.log( "Fit view:", extent);
         map.getView().fit( extent, map.getSize());
         // map.getView().setCenter(extent[0] + ((extent[2] - extent[0]) / 2),
         //                         extent[1] + ((extent[3] - extent[1]) / 2));
