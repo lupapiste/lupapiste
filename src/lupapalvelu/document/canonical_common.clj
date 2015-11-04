@@ -277,11 +277,19 @@
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
-(defn get-simple-osoite [{:keys [katu postinumero postitoimipaikannimi] :as osoite}]
+(defn get-simple-osoite
+  [{:keys [katu postinumero postitoimipaikannimi maa] :as osoite}]
   (when katu  ;; required field in krysp (i.e. "osoitenimi")
-    {:osoitenimi {:teksti katu}
-     :postitoimipaikannimi postitoimipaikannimi
-     :postinumero postinumero}))
+    (let [maa    (or maa "FIN")
+          addr   {:osoitenimi           {:teksti katu}
+                  :postitoimipaikannimi postitoimipaikannimi
+                  :postinumero          postinumero
+                  :valtioSuomeksi       (i18n/localize :fi (str "country." maa))
+                  :valtioKansainvalinen maa}
+          abroad (when (not= maa "FIN")
+                   {:ulkomainenLahiosoite       katu
+                    :ulkomainenPostitoimipaikka postitoimipaikannimi})]
+      (merge addr abroad))))
 
 (defn- get-name [henkilotiedot]
   {:nimi (select-keys henkilotiedot [:etunimi :sukunimi])})

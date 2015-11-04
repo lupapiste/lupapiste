@@ -1,0 +1,250 @@
+country.country: Maa
+country.AFG: Afganistan
+country.ALB: Albania
+country.ATA: Antarktis
+country.DZA: Algeria
+country.ASM: Amerikan Samoa
+country.AND: Andorra
+country.AGO: Angola
+country.ATG: Antigua ja Barbuda
+country.AZE: Azerbaidzan
+country.ARG: Argentiina
+country.AUS: Australia
+country.AUT: Itävalta
+country.BHS: Bahama
+country.BHR: Bahrain
+country.BGD: Bangladesh
+country.ARM: Armenia
+country.BRB: Barbados
+country.BEL: Belgia
+country.BMU: Bermuda
+country.BTN: Bhutan
+country.BOL: Bolivia
+country.BIH: Bosnia ja Hertsegovina
+country.BWA: Botswana
+country.BVT: Bouvet’nsaari
+country.BRA: Brasilia
+country.BLZ: Belize
+country.IOT: Brittiläinen Intian valtameren alue
+country.SLB: Salomonsaaret
+country.VGB: Brittiläiset Neitsytsaaret
+country.BRN: Brunei
+country.BGR: Bulgaria
+country.MMR: Myanmar
+country.BDI: Burundi
+country.BLR: Valko-Venäjä
+country.KHM: Kambodza
+country.CMR: Kamerun
+country.CAN: Kanada
+country.CPV: Kap Verde
+country.CYM: Caymansaaret
+country.CAF: Keski-Afrikan tasavalta
+country.LKA: Sri Lanka
+country.TCD: Tsad
+country.CHL: Chile
+country.CHN: Kiina
+country.TWN: Taiwan
+country.CXR: Joulusaari
+country.CCK: Kookossaaret
+country.COL: Kolumbia
+country.COM: Komorit
+country.MYT: Mayotte
+country.COG: Kongo (Kongo-Brazzaville)
+country.COD: Kongo (Kongo-Kinshasa)
+country.COK: Cookinsaaret
+country.CRI: Costa Rica
+country.HRV: Kroatia
+country.CUB: Kuuba
+country.CYP: Kypros
+country.CZE: Tsekki
+country.BEN: Benin
+country.DNK: Tanska
+country.DMA: Dominica
+country.DOM: Dominikaaninen tasavalta
+country.ECU: Ecuador
+country.SLV: El Salvador
+country.GNQ: Päiväntasaajan Guinea
+country.ETH: Etiopia
+country.ERI: Eritrea
+country.EST: Viro
+country.FRO: Färsaaret
+country.FLK: Falklandinsaaret
+country.SGS: Etelä-Georgia ja Eteläiset Sandwichsaaret
+country.FJI: Fidzi
+country.FIN: Suomi
+country.ALA: Ahvenanmaa
+country.FRA: Ranska
+country.GUF: Ranskan Guayana
+country.PYF: Ranskan Polynesia
+country.ATF: Ranskan eteläiset alueet
+country.DJI: Djibouti
+country.GAB: Gabon
+country.GEO: Georgia
+country.GMB: Gambia
+country.PSE: Palestiina
+country.DEU: Saksa
+country.GHA: Ghana
+country.GIB: Gibraltar
+country.KIR: Kiribati
+country.GRC: Kreikka
+country.GRL: Grönlanti
+country.GRD: Grenada
+country.GLP: Guadeloupe
+country.GUM: Guam
+country.GTM: Guatemala
+country.GIN: Guinea
+country.GUY: Guyana
+country.HTI: Haiti
+country.HMD: Heard ja McDonaldinsaaret
+country.VAT: Vatikaani
+country.HND: Honduras
+country.HKG: Hongkong
+country.HUN: Unkari
+country.ISL: Islanti
+country.IND: Intia
+country.IDN: Indonesia
+country.IRN: Iran
+country.IRQ: Irak
+country.IRL: Irlanti
+country.ISR: Israel
+country.ITA: Italia
+country.CIV: Norsunluurannikko
+country.JAM: Jamaika
+country.JPN: Japani
+country.KAZ: Kazakstan
+country.JOR: Jordania
+country.KEN: Kenia
+country.PRK: Korean demokraattinen kansantasavalta (Pohjois-Korea)
+country.KOR: Korean tasavalta (Etelä-Korea)
+country.KWT: Kuwait
+country.KGZ: Kirgisia
+country.LAO: Laos
+country.LBN: Libanon
+country.LSO: Lesotho
+country.LVA: Latvia
+country.LBR: Liberia
+country.LBY: Libya
+country.LIE: Liechtenstein
+country.LTU: Liettua
+country.LUX: Luxemburg
+country.MAC: Macao
+country.MDG: Madagaskar
+country.MWI: Malawi
+country.MYS: Malesia
+country.MDV: Malediivit
+country.MLI: Mali
+country.MLT: Malta
+country.MTQ: Martinique
+country.MRT: Mauritania
+country.MUS: Mauritius
+country.MEX: Meksiko
+country.MCO: Monaco
+country.MNG: Mongolia
+country.MDA: Moldova
+country.MNE: Montenegro
+country.MSR: Montserrat
+country.MAR: Marokko
+country.MOZ: Mosambik
+country.OMN: Oman
+country.NAM: Namibia
+country.NRU: Nauru
+country.NPL: Nepal
+country.NLD: Alankomaat
+country.CUW: Curaçao
+country.ABW: Aruba
+country.SMX: Sint Maarten (Alankomaiden osa)
+country.BES: Bonaire
+country.NCL: Uusi-Kaledonia
+country.VUT: Vanuatu
+country.NZL: Uusi-Seelanti
+country.NIC: Nicaragua
+country.NER: Niger
+country.NGA: Nigeria
+country.NIU: Niue
+country.NFK: Norfolkinsaari
+country.NOR: Norja
+country.MNP: Pohjois-Mariaanit
+country.UMI: Yhdysvaltain pienet erillissaaret
+country.FSM: Mikronesia
+country.MHL: Marshallinsaaret
+country.PLW: Palau
+country.PAK: Pakistan
+country.PAN: Panama
+country.PNG: Papua-Uusi-Guinea
+country.PRY: Paraguay
+country.PER: Peru
+country.PHL: Filippiinit
+country.PCN: Pitcairn
+country.POL: Puola
+country.PRT: Portugali
+country.GNB: Guinea-Bissau
+country.TLS: Itä-Timor
+country.PRI: Puerto Rico
+country.QAT: Qatar
+country.REU: Réunion
+country.ROU: Romania
+country.RUS: Venäjä
+country.RWA: Ruanda
+country.BLM: Saint Barthélemy
+country.SHN: Saint Helena
+country.KNA: Saint Kitts ja Nevis
+country.AIA: Anguilla
+country.LCA: Saint Lucia
+country.MAF: Saint Martin
+country.SPM: Saint-Pierre ja Miquelon
+country.VCT: Saint Vincent ja Grenadiinit
+country.SMR: San Marino
+country.STP: São Tomé ja Príncipe
+country.SAU: Saudi-Arabia
+country.SEN: Senegal
+country.SRB: Serbia
+country.SYC: Seychellit
+country.SLE: Sierra Leone
+country.SGP: Singapore
+country.SVK: Slovakia
+country.VNM: Vietnam
+country.SVN: Slovenia
+country.SOM: Somalia
+country.ZAF: Etelä-Afrikka
+country.ZWE: Zimbabwe
+country.ESP: Espanja
+country.SSD: Etelä-Sudan
+country.SDN: Sudan
+country.ESH: Länsi-Sahara
+country.SUR: Suriname
+country.SJM: Svalbard ja Jan Mayen
+country.SWZ: Swazimaa
+country.SWE: Ruotsi
+country.CHE: Sveitsi
+country.SYR: Syyria
+country.TJK: Tadzikistan
+country.THA: Thaimaa
+country.TGO: Togo
+country.TKL: Tokelau
+country.TON: Tonga
+country.TTO: Trinidad ja Tobago
+country.ARE: Arabiemiirikunnat
+country.TUN: Tunisia
+country.TUR: Turkki
+country.TKM: Turkmenistan
+country.TCA: Turks- ja Caicossaaret
+country.TUV: Tuvalu
+country.UGA: Uganda
+country.UKR: Ukraina
+country.MKD: Makedonia
+country.EGY: Egypti
+country.GBR: Britannia
+country.GGY: Guernsey
+country.JEY: Jersey
+country.IMN: Mansaari
+country.TZA: Tansania
+country.USA: Yhdysvallat (USA)
+country.VIR: Yhdysvaltain Neitsytsaaret
+country.BFA: Burkina Faso
+country.URY: Uruguay
+country.UZB: Uzbekistan
+country.VEN: Venezuela
+country.WLF: Wallis ja Futuna
+country.WSM: Samoa
+country.YEM: Jemen
+country.ZMB: Sambia
