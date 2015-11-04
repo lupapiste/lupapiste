@@ -1,7 +1,0 @@
-hankkeen-kuvaus.hankkeenVaativuus.AA: Poikkeuksellisen vaativa
-hankkeen-kuvaus.hankkeenVaativuus.A: Vaativa
-hankkeen-kuvaus.hankkeenVaativuus.B: Tavanomainen
-hankkeen-kuvaus.hankkeenVaativuus.C: Vähäinen
-hankkeen-kuvaus.hankkeenVaativuus.ei tiedossa: Ei tiedossa
-hankkeen-kuvaus.hankkeenVaativuus._group_label: Hankkeen vaativuus
-hankkeen-kuvaus-rakennuslupa._group_label: Hankkeen kuvaus
