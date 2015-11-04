@@ -104,7 +104,7 @@
                     (debug " Exported statement to: " (.getAbsolutePath file) ", size: " (.length file))
                     (fact "File exists " (.exists file))
                     (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
-                          rows (remove str/blank? (str/split pdf-content #"\n"))]
+                          rows (remove str/blank? (str/split pdf-content #"\r?\n"))]
                       (fact "PDF data rows " (count rows) => 32)
                       (fact "Pdf data rows " (nth rows 22) => "14.10.2015")
                       (fact "Pdf data rows " (nth rows 24) => "Matti Malli")
@@ -133,7 +133,7 @@
                     (fact "File exists " (.exists file))
                     (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
                           expected-state (if (= lang :fi) "Vastattu" "Besvarad")
-                          rows (remove str/blank? (str/split pdf-content #"\n"))]
+                          rows (remove str/blank? (str/split pdf-content #"\r?\n"))]
                       (fact "PDF data rows " (count rows) => 32)
                       (fact "Pdf data id" (nth rows 22) => "2")
                       (fact "Pdf data owner" (nth rows 24) => "Matti Malli")
