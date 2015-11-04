@@ -100,7 +100,7 @@
 
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
-(def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil
+(def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil 
                          :body [{:name "AA"}
                                 {:name "A"}
                                 {:name "B"}
@@ -1142,17 +1142,20 @@
 (defschemas
   1
   [{:info {:name "hankkeen-kuvaus-minimum"
+           :subtype "hankkeen-kuvaus"
            :approvable true
            :order 1}
     :body [kuvaus]}
 
    {:info {:name "hankkeen-kuvaus"
+           :subtype "hankkeen-kuvaus"
            :approvable true
            :order 1}
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]} ; Longest value in Helsinki production data
 
    {:info {:name "hankkeen-kuvaus-rakennuslupa"
+           :subtype "hankkeen-kuvaus"
            :i18name "hankkeen-kuvaus"
            :approvable true
            :order 1}
