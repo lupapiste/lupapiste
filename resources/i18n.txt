@@ -1,2 +1,0 @@
-osapuoli.suoramarkkinointilupa: Tietoja saa luovuttaa suoramarkkinointia sekä mielipide- ja markkinatutkimusta varten.
-empty:
