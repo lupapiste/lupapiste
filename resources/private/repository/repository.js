@@ -25,16 +25,16 @@ var repository = (function() {
 
     attachment.signed = false;
     var lastSignature = _.last(attachment.signatures || []);
-    if (lastSignature && attachment.versions.length > 0) {
-
-      var signedVersion = _.find(attachment.versions, function(v) {
+    var versions = _.filter(attachment.versions);
+    if (lastSignature && versions.length > 0) {
+      var signedVersion = _.find(versions, function(v) {
         // Check that signed version was created before the signature
         return v.created < lastSignature.created &&
            v.version.major === lastSignature.version.major &&
            v.version.minor === lastSignature.version.minor;
       });
 
-      var unsignedVersions = _(attachment.versions)
+      var unsignedVersions = _(versions)
         // Drop previous, signed versions
         .dropWhile(function(v) {
           return v.version.major !== lastSignature.version.major || v.version.minor !== lastSignature.version.minor;
