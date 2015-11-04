@@ -301,14 +301,17 @@
 
 (def rakennuslupa_to_krysp_220
   (-> rakennuslupa_to_krysp_218
-   (assoc-in [:attr :xsi:schemaLocation]
-             (mapping-common/schemalocation :R "2.2.0"))
-   (update-in [:child] mapping-common/update-child-element
+      (assoc-in [:attr :xsi:schemaLocation]
+                (mapping-common/schemalocation :R "2.2.0"))
+      (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
                  {:tag :osapuolettieto :child [mapping-common/osapuolet_216]})
-   (update-in [:child] mapping-common/update-child-element
-      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto]
-      {:tag :rakennustieto :child [rakennus_220]})))
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto]
+                 {:tag :rakennustieto :child [rakennus_220]})
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :hankkeenVaativuus]
+                 {:tag :hankkeenVaativuus})))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
