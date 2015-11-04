@@ -94,6 +94,10 @@
 
 (def turvakielto "turvakieltoKytkin")
 
+(def suoramarkkinointilupa {:name "suoramarkkinointilupa" :type :checkbox :layout :full-width :i18nkey "osapuoli.suoramarkkinointilupa"})
+
+(def kytkimet {:name "kytkimet" :type :group :i18nkey "empty" :body [suoramarkkinointilupa] })
+
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
@@ -163,13 +167,15 @@
                henkilo-valitsin
                [henkilotiedot]
                simple-osoite
-               yhteystiedot))
+               yhteystiedot
+               kytkimet))
 
 (def henkilo-maksaja (body
                        henkilo-valitsin
                        [henkilotiedot]
                        simple-osoite-maksaja
-                       yhteystiedot))
+                       yhteystiedot
+                       kytkimet))
 
 (def henkilo-with-required-hetu (body
                                   henkilo-valitsin
@@ -178,7 +184,8 @@
                                      (map (fn [ht] (if (= (:name ht) "hetu") (merge ht {:required true}) ht))
                                        (:body henkilotiedot)))]
                                   simple-osoite
-                                  yhteystiedot))
+                                  yhteystiedot
+                                  kytkimet))
 
 (def yritys-minimal [{:name "yritysnimi" :type :string :required true :size "l"}
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
@@ -191,7 +198,8 @@
                :type :group
                :body (body
                        [henkilotiedot-minimal]
-                       yhteystiedot)}))
+                       yhteystiedot
+                       kytkimet)}))
 
 (def yritys-maksaja (body
                       yritys-valitsin
@@ -201,7 +209,8 @@
                        :type :group
                        :body (body
                                [henkilotiedot-minimal]
-                               yhteystiedot)}))
+                               yhteystiedot
+                               kytkimet)}))
 
 (def e-invoice-operators [{:name "BAWCFI22"} ; Basware Oyj
                           {:name "003714377140"} ; Enfo Zender Oy
