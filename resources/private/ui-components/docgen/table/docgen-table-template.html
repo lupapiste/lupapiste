@@ -15,17 +15,18 @@
           <thead>
             <tr data-bind="foreach: columnHeaders"><td><span data-bind="ltext: $data"></span></td></tr>
           </thead>
-          <tbody data-bind="foreach: rows">
+          <tbody data-bind="foreach: groups">
             <tr data-bind="attr: { id: $component.groupId + '-row-' + index }">
-              <!-- ko foreach: subSchemas -->
+              <!-- ko foreach: $component.subSchemas -->
               <td>
                 <span class="form-entry"
                   data-bind="component: { name: uicomponent,
                                           params: { schema: $data,
-                                                    path: path,
-                                                    model: model,
+                                                    path: $component.path.concat([$parent.index, name]),
+                                                    i18npath: i18npath,
                                                     applicationId: applicationId,
-                                                    documentId: documentId }}">
+                                                    documentId: documentId,
+                                                    model: $parent.model[name].model }}">
                 </span>
               </td>
               <!-- /ko -->

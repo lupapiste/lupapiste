@@ -2,7 +2,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   "use strict";
   var self = this;
 
-  self.groups = ko.observableArray();
+  // self.groups = ko.observableArray();
 
   self.params = params;
 
@@ -11,10 +11,12 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.appendLabel = params.i18npath.concat("_append_label").join(".");
   self.copyLabel = params.i18npath.concat("_copy_label").join(".");
 
+  self.groups = lupapisteApp.services.documentDataService.getInDocument(params.documentId, self.path);
+
   self.indicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});
 
-  var createGroup = function(groupModel, index) {
+  var createGroup = function(groupModel) {
     return _.extend({}, self.params, {
       index: index,
       path: self.path.concat(index),
@@ -61,7 +63,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
                          self.result);
   };
 
-  self.groups(_.map(params.model, createGroup));
+  //self.groups(_.map(params.model, createGroup));
 
   var addOneIfEmpty = function(groups) {
     if ( _.isEmpty(groups) ) {

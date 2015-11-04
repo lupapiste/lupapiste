@@ -851,6 +851,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildGroupComponent (name, subSchema, model, path) {
     var name = (name === "docgen-group" && subSchema.repeating) ? "docgen-repeating-group" : name;
     var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(_.reject(path, _.isNumber));
+
+    lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
+
     var params = {
       applicationId: self.appId,
       documentId: self.docId,

@@ -15,31 +15,34 @@ LUPAPISTE.DocumentDataService = function() {
 
   // Document
 
-  self.addDocument = function(document, options) {
-    if (findDocumentById(document.id)) {
-      return -1;
-    } else {
-      return self.model.push({
-        id: document.id,
-        name: document.schema.info.name,
-        isDisabled: options && options.disabled,
-        model: createDataModel(_.extend({}, document.schema.info, document.schema), document.data)
-      });
-    }
-  }
-
   self.findDocumentById = function(id) {
     return _.find(self.model(), function(doc) {
       return doc.id === id;
     });    
   }
 
+  self.addDocument = function(doc, options) {
+    var docData = {
+      id: doc.id,
+      name: doc.schema.info.name,
+      isDisabled: options && options.disabled
+    };
+    if (self.findDocumentById(doc.id)) {
+      return -1;
+    } else {
+      return self.model.push( _.extend( docData,
+        createDataModel(_.extend({type: 'document'}, doc.schema.info, doc.schema), doc.data, [doc.schema.info.name])
+      ));
+    }
+  }
+
   self.getInDocument = function(documentId, path) {
-    return getIn(findDocumentById(documentId), path);
+    var doc = self.findDocumentById(documentId);
+    return doc && getIn(doc, path);
   }
 
   self.removeDocument = function(id) {
-    return self.model.remove(findDocumentById(id));
+    return self.model.remove(self.findDocumentById(id));
   }
 
   //
@@ -53,16 +56,9 @@ LUPAPISTE.DocumentDataService = function() {
   // Repeating utilities
   //
 
-  function createRepeatingUnitDataModel(schema, rawModel, index) {
-    return {
-      index: index, 
-      model: createGroupDataModel(schema, rawModel)
-    };
-  }
-
-  function createRepeatingDataModel(schema, rawModel) {
+  function createRepeatingDataModel(schema, rawModel, path) {
     return ko.observableArray(_.map(rawModel, function(subModel, index) {
-      return createRepeatingUnitDataModel(schema, subModel, index);
+      return _.extend({index: index}, createGroupDataModel(schema, subModel, path.concat(index)));
     }));
   }
 
@@ -78,25 +74,30 @@ LUPAPISTE.DocumentDataService = function() {
 
   function pushToRepeating(schema, repeatingModel, rawModel) {
     var ind = _(repeatingModel()).map('index').max() + 1;
-    return repeatingModel.push(createRepeatingUnitDataModel(schema, rawModel, _.max([0, ind])));
+    var path = repeatingModel() && repeatingModel().path;
+    return repeatingModel.push(createRepeatingUnitDataModel(schema, rawModel, path, _.max([0, ind])));
   }
 
   //
   // Group utilities
   //
 
-  function createGroupDataModel(schema, rawModel) {
-    return _(schema.body).map(function(subSchema) {
-      return [subSchema.name, createDataModel(subSchema, rawModel[subSchema.name])];
-    }).zipObject().value();
+  function createGroupDataModel(schema, rawModel, path) {
+    return {
+      path: path,
+      model: _(schema.body).map(function(subSchema) {
+        return [subSchema.name, createDataModel(subSchema, rawModel[subSchema.name], path.concat(subSchema.name))]
+      }).zipObject().value()
+    };
   }
 
   //
   // Input utilities
   //
 
-  function createInputDataModel(schema, rawModel) {
-    return ko.observable(rawModel && rawModel.value || rawModel);
+  function createInputDataModel(schema, rawModel, path) {
+    return {path: path,
+            model: ko.observable(rawModel && rawModel.value)};
   }
 
   //
@@ -108,25 +109,27 @@ LUPAPISTE.DocumentDataService = function() {
   }
 
   function isGroupType(schema) {
-    return _.contains(['group', 'table'], schema.type);
+    return _.contains(['group', 'table', 'location', 'document'], schema.type);
   }
 
-  function createDataModel(schema, rawModel) {
+  function createDataModel(schema, rawModel, path) {
     if (isRepeating(schema)) {
-      return createRepeatingDataModel(schema, rawModel);
+      return createRepeatingDataModel(schema, rawModel, path);
     } else if (isGroupType(schema)) {
-      return createGroupDataModel(schema, rawModel);
+      return createGroupDataModel(schema, rawModel, path);
     } else {
-      return createInputDataModel(schema, rawModel);
+      return createInputDataModel(schema, rawModel, path);
     }
   }
 
   function get(model, key) {
-    if (ko.isObservableArray(model)) {
-      return findByIndex(model(), key);
+    if (_.has(model, 'model')) {
+      return get(model.model, key);
+    } else if (ko.isObservable(model) && _.isArray(model())) {
+      return findByIndex(model, key);
     } else if (ko.isObservable(model)) {
-      return model()[key];
-    } else {
+      return model() && model()[key];
+    } else if (_.isObject(model)) {
       return model[key];
     }
   }
@@ -136,16 +139,23 @@ LUPAPISTE.DocumentDataService = function() {
   }
 
   function getAsRaw(model) {
+
     if (ko.isObservable(model)) {
-      return getTree(model());
+      return getAsRaw(model());
+
+    } else if (_.has(model, 'model')) {
+      return getAsRaw(model.model);
+
     } else if (_.has(_.first(model), 'index')) {
       return _(model)
         .map(function(rep) { return [rep.index, rep.model]; })
         .zipObject()
-        .mapValues(getTree)
+        .mapValues(getAsRaw)
         .value();
+
     } else if (_.isObject(model)) {
-      return _.mapValues(model, getTree);
+      return _.mapValues(model, getAsRaw);
+
     } else {
       return {value: model};
     }
