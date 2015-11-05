@@ -614,11 +614,33 @@
    :filename filename})
 
 (defn- create-metatieto [k v]
-  {:metatieto {:metatietoNimi k :metatietoArvo v}
-   :Metatieto {:metatietoNimi k :metatietoArvo v}})
+  (when v
+    {:metatieto {:metatietoNimi k :metatietoArvo v}
+     :Metatieto {:metatietoNimi k :metatietoArvo v}}))
 
-(defn- get-attachment-meta [attachment]
-  (let [signatures (:signatures attachment)
+(defn- all-operation-ids [application]
+  (let [primary (-> application :primaryOperation :id)
+        secondaries (map :id (:secondaryOperations application))]
+    (remove nil? (conj secondaries primary))))
+
+(defn- operation-attachment-meta
+  "Operation id and VRK-PRK from either the attachment's 'own'
+  operation or every operation if the attachment is not bound to any
+  specific op."
+  [attachment application]
+  (let [ops (or (-> attachment :op :id) (all-operation-ids application))
+        ops (-> ops list flatten)
+        metas (for [op-id ops
+                    :let [docs  (filter #(= op-id (-> % :schema-info :op :id))
+                                        (:documents application))]]
+                [(create-metatieto "toimenpideId" op-id)
+                (map #(create-metatieto "VRK-PRT" (-> % :data :valtakunnallinenNumero :value))
+                     docs)])]
+    (->> metas flatten (remove nil?) )))
+
+(defn- get-attachment-meta [attachment application]
+  (let [op-metas (operation-attachment-meta attachment application)
+        signatures (:signatures attachment)
         latestVersion (:latestVersion attachment)
         liitepohja [(create-metatieto "liiteId" (:id attachment))]
         signatures (->> signatures
@@ -633,7 +655,8 @@
                                    (create-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
                            (flatten)
                            (vec))]
-    (if (empty? signatures)
+    (remove empty? (concat liitepohja op-metas signatures))
+    #_(if (empty? signatures)
       liitepohja
       (into liitepohja signatures))))
 
@@ -643,7 +666,7 @@
         file-id (get-in attachment [:latestVersion :fileId])
         attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
         link (str begin-of-link attachment-file-name)
-        meta (get-attachment-meta attachment)]
+        meta (get-attachment-meta attachment application)]
     {:Liite (get-Liite title link attachment type file-id attachment-file-name meta)}))
 
 (defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
@@ -657,7 +680,7 @@
                                                 (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
 
-(defn get-attachments-as-canonical [{:keys [attachments title]} begin-of-link & [target]]
+(defn get-attachments-as-canonical [{:keys [attachments title] :as application} begin-of-link & [target]]
   (not-empty (for [attachment attachments
                    :when (and (:latestVersion attachment)
                            (not= "statement" (-> attachment :target :type))
@@ -672,7 +695,7 @@
                          file-id (get-in attachment [:latestVersion :fileId])
                          attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                          link (str begin-of-link attachment-file-name)
-                         meta (get-attachment-meta attachment)]]
+                         meta (get-attachment-meta attachment application)]]
                {:Liite (get-Liite attachment-title link attachment type-id file-id attachment-file-name meta)})))
 
 (defn add-statement-attachments [canonical statement-attachments lausunto-path]
