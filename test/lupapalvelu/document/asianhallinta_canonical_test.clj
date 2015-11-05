@@ -1,20 +1,20 @@
-(ns lupapalvelu.document.asianhallinta_canonical_test
-  (:require [lupapalvelu.factlet :as fl]
-            [lupapalvelu.document.asianhallinta_canonical :as ah]
-            [lupapalvelu.document.canonical-test-common :as ctc]
-            [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.xml.asianhallinta.asianhallinta_mapping :as ahm]
-            [lupapalvelu.i18n :as i18n]
-            [midje.sweet :refer :all]
+(ns lupapalvelu.document.asianhallinta-canonical-test
+  (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
-            [lupapalvelu.document.rakennuslupa_canonical-test :as rakennus-test]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.property :as p]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.factlet :as fl]
+            [lupapalvelu.document.asianhallinta-canonical :as ah]
+            [lupapalvelu.document.canonical-test-common :as ctc]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.xml.asianhallinta.asianhallinta-mapping :as ahm]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
+            [lupapalvelu.document.rakennuslupa-canonical-test :as rakennus-test]))
 
-(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta_mapping enrich-attachments-with-operation-data)
+(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-mapping enrich-attachments-with-operation-data)
 
 (def test-attachments [{:id :attachment1
                           :type {:type-group "paapiirustus"

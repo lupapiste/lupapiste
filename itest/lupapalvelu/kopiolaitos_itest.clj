@@ -1,4 +1,4 @@
-(ns lupapalvelu.kopiolaitos_itest
+(ns lupapalvelu.kopiolaitos-itest
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer :all]

@@ -1,4 +1,4 @@
-(ns lupapalvelu.document.asianhallinta_canonical
+(ns lupapalvelu.document.asianhallinta-canonical
   (:require [clojure.string :as s]
             [sade.core :refer :all]
             [sade.util :as util]

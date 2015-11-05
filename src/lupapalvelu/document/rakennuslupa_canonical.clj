@@ -1,4 +1,4 @@
-(ns lupapalvelu.document.rakennuslupa_canonical
+(ns lupapalvelu.document.rakennuslupa-canonical
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.string :as s]

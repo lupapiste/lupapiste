@@ -7,7 +7,7 @@
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]
-            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical
+            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical
                                                                  katselmus-canonical
                                                                  unsent-attachments-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]

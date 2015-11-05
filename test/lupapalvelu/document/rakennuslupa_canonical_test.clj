@@ -1,7 +1,7 @@
-(ns lupapalvelu.document.rakennuslupa_canonical-test
+(ns lupapalvelu.document.rakennuslupa-canonical-test
   (:require [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.canonical-common :refer :all]
-            [lupapalvelu.document.rakennuslupa_canonical :refer :all]
+            [lupapalvelu.document.rakennuslupa-canonical :refer :all]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.xml.emit :refer :all]
@@ -720,14 +720,14 @@
     (fact "etunimi" (:etunimi name) => "Sonja")
     (fact "sukunimi" (:sukunimi name) => "Sibbo")))
 
-(testable-privates lupapalvelu.document.rakennuslupa_canonical get-operations)
+(testable-privates lupapalvelu.document.rakennuslupa-canonical get-operations)
 
 (facts "Toimenpiteet"
   (let [documents (by-type (:documents (tools/unwrapped application-rakennuslupa)))
         actions (get-operations documents (tools/unwrapped application-rakennuslupa))]
     (fact "actions" (seq actions) => truthy)))
 
-(testable-privates lupapalvelu.document.rakennuslupa_canonical get-huoneisto-data)
+(testable-privates lupapalvelu.document.rakennuslupa-canonical get-huoneisto-data)
 
 (facts "Huoneisto is correct"
   (let [huoneistot (-> uusi-rakennus
@@ -766,7 +766,7 @@
     (fact "h2 huoneistotunnus: huoneistonumero" (-> h1 :huoneistotunnus :huoneistonumero) => "001")
     (fact "h2 huoneistotunnus: jakokirjain" (-> h1 :huoneistotunnus :jakokirjain) => "a")))
 
-(testable-privates lupapalvelu.document.rakennuslupa_canonical get-rakennus)
+(testable-privates lupapalvelu.document.rakennuslupa-canonical get-rakennus)
 
 (facts "When muu-lammonlahde is empty, lammonlahde is used"
   (let [toimenpide (tools/unwrapped {:lammitys {:lammitystapa {:value nil}
