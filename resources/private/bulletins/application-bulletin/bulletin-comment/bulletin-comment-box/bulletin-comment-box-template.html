@@ -40,8 +40,7 @@
           </button>
         </div>
         <div class="row">
-          <button type="submit" class="positive" data-bind="enable: comment,
-                                                            disable: pending,
+          <button type="submit" class="positive" data-bind="disable: pending && !comment(),
                                                             css: {waiting: pending}">
             <i class="lupicon-comment"></i>
             <i class="wait spin lupicon-refresh"></i>
