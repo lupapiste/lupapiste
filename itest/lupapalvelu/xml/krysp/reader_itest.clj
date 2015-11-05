@@ -24,11 +24,11 @@
 
       (fact "first building has correct data"
         (first buildings) => {:propertyId  "75300301050006"
-                              :buildingId  "481123123R"
+                              :buildingId  "122334455R"
                               :localShortId "001"
-                              :nationalId  "481123123R"
+                              :nationalId  "122334455R"
                               ;; TODO: test localId  (i.e. kunnanSisainenPysyvaRakennusnumero). Add it to building.xml or create similar xml file.
-                              :localId     nil #_"481123124R"
+                              :localId     nil #_"122334455R"
                               :usage       "039 muut asuinkerrostalot"
                               :area        "2682"
                               :index       nil
@@ -36,10 +36,10 @@
 
       (fact "second building has correct data"
         (second buildings) => {:propertyId   "75300301050006"
-                               :buildingId   "478123123J"
+                               :buildingId   "199887766E"
                                :localShortId "002"
-                               :localId      nil #_"481123124R"        ;; TODO: test localId  (i.e. kunnanSisainenPysyvaRakennusnumero)
-                               :nationalId   "478123123J"
+                               :localId      nil #_"199887766E"        ;; TODO: test localId  (i.e. kunnanSisainenPysyvaRakennusnumero)
+                               :nationalId   "199887766E"
                                :usage        "021 rivitalot"
                                :area         "281"
                                :index        nil
@@ -65,7 +65,7 @@
           (dissoc rakennus :huoneistot :rakennuksenOmistajat :kiinttun :kunnanSisainenPysyvaRakennusnumero)      ;; TODO: test also "kunnanSisainenPysyvaRakennusnumero" (and remove it from here)
             => (just
                  {:rakennusnro "001"
-                  :valtakunnallinenNumero "481123123R"
+                  :valtakunnallinenNumero "122334455R"
 ;                  :kunnanSisainenPysyvaRakennusnumero "481123124R"
                   :manuaalinen_rakennusnro ""
                   :verkostoliittymat {:viemariKytkin true
