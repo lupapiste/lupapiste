@@ -100,7 +100,7 @@
 
 (def
   ^{:doc "States for bulletin version snapshot"}
-  bulletin-version-state
+  bulletin-version-states
   {:proclaimed [:consideration]
    :consideration [:verdict]
    :verdict [:final]
