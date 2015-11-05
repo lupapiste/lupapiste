@@ -1,7 +1,0 @@
-consideration: Lupaharkinnassa
-bulletin.state.consideration: Lupaharkinnassa
-bulletin.state.consideration.title: Ilmoitus on viranomaisen lupaharkinnassa
-bulletin.state.verdictGiven: Päätös annettu
-bulletin.state.verdictGiven.title: Ilmoitukseen on annettu päätös
-bulletin.state.final: Lainvoimainen
-bulletin.state.final.title: Ilmoitus on lainvoimainen
