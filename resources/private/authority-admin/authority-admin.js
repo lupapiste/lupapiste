@@ -17,6 +17,7 @@
 
   function OrganizationModel() {
     var self = this;
+    self.initialized = false;
 
     self.organizationId = ko.observable();
     self.links = ko.observableArray();
@@ -25,6 +26,7 @@
     self.selectedOperations = ko.observableArray();
     self.allOperations = [];
     self.appRequiredFieldsFillingObligatory = ko.observable(false);
+    self.validateVerdictGivenDate = ko.observable(true);
     self.tosFunctions = ko.observableArray();
     self.tosFunctionVisible = ko.observable(false);
     self.permanentArchiveEnabled = ko.observable(true);
@@ -33,11 +35,14 @@
 
     self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };
 
-    self.appRequiredFieldsFillingObligatory.subscribe( function() {
-      ajax
-        .command("set-organization-app-required-fields-filling-obligatory", {isObligatory: self.appRequiredFieldsFillingObligatory()})
-        .success(self.load)
-        .call();
+    ko.computed(function() {
+      var isObligatory = self.appRequiredFieldsFillingObligatory();
+      if (self.initialized) {
+        ajax.command("set-organization-app-required-fields-filling-obligatory", {isObligatory: isObligatory})
+          .success(util.showSavedIndicator)
+          .error(util.showSavedIndicator)
+          .call();
+      }
     });
 
     function toAttachments(attachments) {
@@ -135,6 +140,8 @@
       self.features(util.getIn(organization, ["areas"]));
 
       self.allowedRoles(organization.allowedRoles);
+
+      self.initialized = true;
     };
 
     self.editLink = function(indexFn) {
@@ -372,10 +379,10 @@
 
     self.save = function() {
       ajax.command("set-krysp-endpoint", {
-        url: self.editUrl(), 
-        username: self.editUsername(), 
-        password: self.editPassword(), 
-        version: self.editVersion(), 
+        url: self.editUrl(),
+        username: self.editUsername(),
+        password: self.editPassword(),
+        version: self.editVersion(),
         permitType: self.editContext.permitType
       })
         .success(function() {
