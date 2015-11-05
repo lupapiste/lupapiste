@@ -106,7 +106,9 @@
     (v/rakennustunnus? v) nil
     :else [:warn "illegal-rakennusnumero"]))
 
-(defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))
+(defmethod validate-field :newBuildingSelector [_ elem v]
+  (when (not= v "ei tiedossa")
+    (subtype/subtype-validation {:subtype :number} v)))
 
 (defmethod validate-field :personSelector [application elem v]
   (when-not (ss/blank? v)

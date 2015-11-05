@@ -310,11 +310,11 @@
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto]
                  {:tag :rakennustieto :child [rakennus_220]})
       (update-in [:child] mapping-common/update-child-element
-                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :hankkeenVaativuus]
-                 {:tag :hankkeenVaativuus})))
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
+                 #(update-in % [:child] concat [{:tag :hankkeenVaativuus}]))
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma]
-                 #(update-in % [:child] conj {:tag :kayttotarkoitus}))))
+                 #(update-in % [:child] concat [{:tag :kayttotarkoitus}]))))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
@@ -385,12 +385,17 @@
         {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
         huomautukset (-> data :katselmus :huomautukset)
-        buildings    (map
-                       (fn [{rakennus :rakennus :as b}]
-                         (if (ss/blank? (:valtakunnallinenNumero rakennus))
-                           (assoc-in b [:rakennus :valtakunnallinenNumero] (find-national-id rakennus))
-                           b))
-                       (vals rakennus))]
+        buildings    (->> (vals rakennus)
+                       (map
+                         (fn [{rakennus :rakennus :as b}]
+                           (when rakennus
+                             (if (ss/blank? (:valtakunnallinenNumero rakennus))
+                              (assoc-in b [:rakennus :valtakunnallinenNumero] (find-national-id rakennus))
+                              b))))
+                       (remove
+                         #(or
+                            (nil? %)
+                            (= "ei tiedossa" (get-in % [:rakennus :jarjestysnumero])))))]
     (save-katselmus-xml
       application
       lang
