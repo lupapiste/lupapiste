@@ -102,8 +102,8 @@
   ^{:doc "States for bulletin version snapshot"}
   bulletin-version-states
   {:proclaimed [:consideration]
-   :consideration [:verdict]
-   :verdict [:final]
+   :consideration [:verdictGiven]
+   :verdictGiven [:final]
    :final []})
 
 
