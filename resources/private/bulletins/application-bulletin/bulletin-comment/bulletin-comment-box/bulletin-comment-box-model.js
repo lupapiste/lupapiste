@@ -1,4 +1,4 @@
-LUPAPISTE.BulletinCommentModel = function(params) {
+LUPAPISTE.BulletinCommentBoxModel = function(params) {
   "use strict";
   var self = this;
 
