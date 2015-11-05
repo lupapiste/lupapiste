@@ -310,8 +310,8 @@
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto]
                  {:tag :rakennustieto :child [rakennus_220]})
       (update-in [:child] mapping-common/update-child-element
-                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :hankkeenVaativuus]
-                 {:tag :hankkeenVaativuus})))
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
+                 #(update-in % [:child] concat [{:tag :hankkeenVaativuus}]))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
