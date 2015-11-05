@@ -419,7 +419,7 @@
 (defn- valid-antopvm? [anto-pvm]
   (or (not anto-pvm) (> (now) anto-pvm)))
 
-(defn- standard-verdicts-validator [xml organization]
+(defn- standard-verdicts-validator [xml {validate-verdict-given-date :validate-verdict-given-date}]
   (let [paatos-xml-without-ns (select (cr/strip-xml-namespaces xml) [:paatostieto :Paatos])
         poytakirjat (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
         poytakirja  (poytakirja-with-paatos-data poytakirjat)

@@ -1275,6 +1275,13 @@
                             (merge {:metadata (:metadata (update-document-tila-metadata application))}))]
       (mongo/update-n :applications {:_id (:id application)} {$set data-for-$set}))))
 
+(defmigration validate-verdict-given-date
+  {:apply-when (pos? (mongo/count :organizations {:validate-verdict-given-date {$exists false}}))}
+  (mongo/update-n :organizations {} {$set {:validate-verdict-given-date true}}))
+
+(defmigration validate-verdict-given-date-in-helsinki
+  (mongo/update-n :organizations {:_id "091-R"} {$set {:validate-verdict-given-date false}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
