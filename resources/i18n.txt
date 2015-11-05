@@ -1,0 +1,2 @@
+verdict.rakennusoikeudellinenKerrosala: Rakennusoikeudellinen kerrosala
+osapuoli.vainsahkoinenAsiointiKytkin: Haluan asioida vain sähköisesti. Hyväksyn myös tiedoksiannot pelkästään sähköisessä muodossa.
