@@ -96,6 +96,14 @@
      :registered [] ; Kiinteistorekisterissa
      }))
 
+(def
+  ^{:doc "States for bulletin version snapshot"}
+  bulletin-version-state
+  {:proclaimed [:consideration]
+   :consideration [:verdict]
+   :verdict [:final]
+   :final []})
+
 
 (def pre-verdict-states #{:draft :info :answered :open :submitted :complementNeeded :sent})
 
