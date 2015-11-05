@@ -1,3 +1,3 @@
 auth-admin.validate-verdict.title: Päätösten haku
-auth-admin.validate-verdict.rp.info: Päätös luetaan Lupapisteeseen, jos päätöskoodi ja päätöksen tekijä on annettu ja päätöspäivämäärä on eilispäivä tai vanhempi.
+auth-admin.validate-verdict.rp.info: Päätös luetaan Lupapisteeseen, jos päätöspäivämäärä on eilispäivä tai vanhempi ja päätöskoodi ja päätöksen tekijä on annettu.
 auth-admin.validate-verdict-given-date.enabled: Lisätarkastus myös päätöksen antopäivään: oltava tämä päivä tai aikaisempi
