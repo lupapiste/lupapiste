@@ -740,17 +740,16 @@
 (defmulti osapuolitieto :_selected)
 
 (defmethod osapuolitieto "henkilo"
-  [{{contact :yhteystiedot personal :henkilotiedot address :osoite} :henkilo}]
-  (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
+  [{{:keys [yhteystiedot henkilotiedot osoite]} :henkilo :as data}]
+  (merge (entry :turvakieltoKytkin henkilotiedot :turvakieltokytkin)
          {:henkilotieto {:Henkilo
-                         (merge {:nimi (merge (entry :etunimi personal)
-                                              (entry :sukunimi personal))}
-                                {:osoite (->postiosoite-type address)}
-                                (entry :email contact :sahkopostiosoite)
-                                (entry :puhelin contact)
-                                (entry :hetu personal :henkilotunnus))}}))
-
-
+                         (merge {:nimi (merge (entry :etunimi henkilotiedot)
+                                         (entry :sukunimi henkilotiedot))}
+                           {:osoite (->postiosoite-type osoite)}
+                           (entry :email yhteystiedot :sahkopostiosoite)
+                           (entry :puhelin yhteystiedot)
+                           (entry :hetu henkilotiedot :henkilotunnus))}}
+         (entry :vainsahkoinenAsiointiKytkin data)))
 
 (defmethod osapuolitieto "yritys"
   [data]
@@ -765,12 +764,15 @@
                                          {:postiosoitetieto {:postiosoite (->postiosoite-type (:osoite company))}}
                                          (entry :puhelin contact)
                                          (entry :email contact :sahkopostiosoite)
-                                         billing-information)}})))
+                                         billing-information)}}
+           (entry :vainsahkoinenAsiointiKytkin company))))
 
 (defn- process-party [lang {{role :subtype} :schema-info data :data}]
-  {:Osapuoli (merge {:roolikoodi (ss/capitalize role)
-                     :asioimiskieli lang
-                     :vainsahkoinenAsiointiKytkin false} (osapuolitieto data))})
+  {:Osapuoli (merge
+               {:roolikoodi (ss/capitalize role)
+                :asioimiskieli lang
+                :vainsahkoinenAsiointiKytkin false}
+               (osapuolitieto data))})
 
 (defn process-parties [docs lang]
   (map (partial process-party lang) (schema-info-filter docs :type "party")))
