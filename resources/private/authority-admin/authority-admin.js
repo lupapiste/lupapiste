@@ -38,7 +38,7 @@
     ko.computed(function() {
       var isObligatory = self.appRequiredFieldsFillingObligatory();
       if (self.initialized) {
-        ajax.command("set-organization-app-required-fields-filling-obligatory", {isObligatory: isObligatory})
+        ajax.command("set-organization-app-required-fields-filling-obligatory", {enabled: isObligatory})
           .success(util.showSavedIndicator)
           .error(util.showSavedIndicator)
           .call();
