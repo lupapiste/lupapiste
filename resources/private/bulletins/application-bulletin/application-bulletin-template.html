@@ -79,6 +79,7 @@
 
         </div>
       </div>
+      
       <div class="container">
         <div class="bulletin-info">
           <h3 data-bind="ltext: 'bulletin.tab.info'"></h3>
@@ -87,15 +88,9 @@
           </div>
         </div>
       </div>
-      <div class="container bulletin-comment">
-        <h5 data-bind="ltext: 'bulletin.comment.title'"></h5>
-        <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'help.bulletin.comment' } }"></span>
-        <p>
-          <span data-bind="ltext: 'bulletin.comment.endDate'"></span>
-          <span data-bind="dateTimeString: $data.proclamationEndsAt"></span>
-        </p>
-        <div data-bind="component: { name: 'bulletin-comment-box', params: { bulletinId: bulletinId } }"></div>
-      </div>
+
+      <div data-bind="component: { name: 'bulletin-comment',
+                                   params: { bulletin: $data } }"></div>
     </script>
   </section>
 </body>

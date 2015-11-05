@@ -3,7 +3,15 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="bulletin-comment-template">
-      
+      <div class="container bulletin-comment">
+        <h5 data-bind="ltext: 'bulletin.comment.title'"></h5>
+        <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'help.bulletin.comment' } }"></span>
+        <p>
+          <span data-bind="ltext: 'bulletin.comment.endDate'"></span>
+          <span data-bind="dateTimeString: bulletin.proclamationEndsAt"></span>
+        </p>
+        <div data-bind="component: { name: 'bulletin-comment-box', params: { bulletinId: bulletin.id } }"></div>
+      </div>
     </script>
   </section>
 </body>

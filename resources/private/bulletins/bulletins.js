@@ -17,6 +17,7 @@
         {name: "bulletins-search"},
         {name: "autocomplete-municipalities"},
         {name: "autocomplete-states"},
+        {name: "bulletin-comment"},
         {name: "bulletin-comment-box"}];
 
     _.forEach(components, function(component) {
