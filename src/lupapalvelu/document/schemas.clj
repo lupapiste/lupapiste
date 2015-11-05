@@ -90,6 +90,38 @@
 ;; schema sniplets
 ;;
 
+(def country-list ["AFG" "ALB" "ATA" "DZA" "ASM" "AND" "AGO" "ATG" "AZE" "ARG"
+                   "AUS" "AUT" "BHS" "BHR" "BGD" "ARM" "BRB" "BEL" "BMU" "BTN"
+                   "BOL" "BIH" "BWA" "BVT" "BRA" "BLZ" "IOT" "SLB" "VGB" "BRN"
+                   "BGR" "MMR" "BDI" "BLR" "KHM" "CMR" "CAN" "CPV" "CYM" "CAF"
+                   "LKA" "TCD" "CHL" "CHN" "TWN" "CXR" "CCK" "COL" "COM" "MYT"
+                   "COG" "COD" "COK" "CRI" "HRV" "CUB" "CYP" "CZE" "BEN" "DNK"
+                   "DMA" "DOM" "ECU" "SLV" "GNQ" "ETH" "ERI" "EST" "FRO" "FLK"
+                   "SGS" "FJI" "FIN" "ALA" "FRA" "GUF" "PYF" "ATF" "DJI" "GAB"
+                   "GEO" "GMB" "PSE" "DEU" "GHA" "GIB" "KIR" "GRC" "GRL" "GRD"
+                   "GLP" "GUM" "GTM" "GIN" "GUY" "HTI" "HMD" "VAT" "HND" "HKG"
+                   "HUN" "ISL" "IND" "IDN" "IRN" "IRQ" "IRL" "ISR" "ITA" "CIV"
+                   "JAM" "JPN" "KAZ" "JOR" "KEN" "PRK" "KOR" "KWT" "KGZ" "LAO"
+                   "LBN" "LSO" "LVA" "LBR" "LBY" "LIE" "LTU" "LUX" "MAC" "MDG"
+                   "MWI" "MYS" "MDV" "MLI" "MLT" "MTQ" "MRT" "MUS" "MEX" "MCO"
+                   "MNG" "MDA" "MNE" "MSR" "MAR" "MOZ" "OMN" "NAM" "NRU" "NPL"
+                   "NLD" "CUW" "ABW" "SMX" "BES" "NCL" "VUT" "NZL" "NIC" "NER"
+                   "NGA" "NIU" "NFK" "NOR" "MNP" "UMI" "FSM" "MHL" "PLW" "PAK"
+                   "PAN" "PNG" "PRY" "PER" "PHL" "PCN" "POL" "PRT" "GNB" "TLS"
+                   "PRI" "QAT" "REU" "ROU" "RUS" "RWA" "BLM" "SHN" "KNA" "AIA"
+                   "LCA" "MAF" "SPM" "VCT" "SMR" "STP" "SAU" "SEN" "SRB" "SYC"
+                   "SLE" "SGP" "SVK" "VNM" "SVN" "SOM" "ZAF" "ZWE" "ESP" "SSD"
+                   "SDN" "ESH" "SUR" "SJM" "SWZ" "SWE" "CHE" "SYR" "TJK" "THA"
+                   "TGO" "TKL" "TON" "TTO" "ARE" "TUN" "TUR" "TKM" "TCA" "TUV"
+                   "UGA" "UKR" "MKD" "EGY" "GBR" "GGY" "JEY" "IMN" "TZA" "USA"
+                   "VIR" "BFA" "URY" "UZB" "VEN" "WLF" "WSM" "YEM" "ZMB"])
+(def country {:name "maa"
+              :type :select
+              :default "FIN"
+              :i18nkey "country.country"
+              :sortBy :displayname
+              :body (map (fn [n]{:name n :i18nkey (str "country." n)}) country-list)})
+
 (def select-one-of-key "_selected")
 
 (def turvakielto "turvakieltoKytkin")
@@ -128,7 +160,8 @@
                      :blacklist [turvakielto]
                      :body [{:name "katu" :type :string :subtype :vrk-address :required true}
                             {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
-                            {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}]}])
+                            {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}
+                            country]}])
 
 (def simple-osoite-maksaja [{:name "osoite"
                              :i18nkey "osoite-maksaja"
@@ -136,7 +169,8 @@
                              :blacklist [turvakielto]
                              :body [{:name "katu" :type :string :subtype :vrk-address :required true}
                                     {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
-                                    {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}]}])
+                                    {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}
+                                    country]}])
 
 (def rakennuksen-osoite [{:name "osoite"
                           :type :group
@@ -149,7 +183,8 @@
                                  {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s" :hidden true :readonly true}
                                  {:name "huoneisto" :type :string :size "s" :hidden true :readonly true}
                                  {:name "postinumero" :type :string :subtype :zip :size "s"}
-                                 {:name "postitoimipaikannimi" :type :string :size "m"}]}])
+                                 {:name "postitoimipaikannimi" :type :string :size "m"}
+                                 country]}])
 
 (def yhteystiedot [{:name "yhteystiedot"
                     :type :group
@@ -447,7 +482,7 @@
 (def hanke-row [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                 {:name "katuosoite" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
                 {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.rakennustoimenpide" :locPrefix "operations"}
-                {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
+                {:name "kokonaisala" :type :string :subtype :decimal :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
                 {:name "vaihe" :type :select :size "t" :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe" :valueAllowUnset false
                  :body [{:name "R" :i18nkey "muutHankkeet.R"}
                         {:name "A" :i18nkey "muutHankkeet.A"}
@@ -778,9 +813,15 @@
                                 kuvaus
                                 maalampokaivon-etaisyydet))
 
-(def rakennelma (body
-                  [{:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}]
-                  kuvaus))
+(def rakennelman-kayttotarkoitukset ["Aallonmurtaja" "Aita" "Antenni" "Asuntovaunu" "Autosuoja" "Autotalli" "Ei tiedossa" "Hyppyrim\u00e4ki" "Ikkuna" "Infotaulu (jalankulkuopastaulu)" "Jakokaappi" "Jalasm\u00f6kki" "J\u00e4tekatos tai -aitaus" "J\u00e4tevesij\u00e4rjestelm\u00e4" "Kasvihuone" "Katos/pergola" "Katsomo" "Katumainostaulu" "Kelluva rakennelma" "Kierr\u00e4tyspiste" "Kioski" "Kolmiopilari" "Laituri" "Lastauslaituri" "Liikuteltava grillikioski" "Lipputankoryhm\u00e4" "Maakellari" "Maal\u00e4mp\u00f6pumppuj\u00e4rjestelm\u00e4" "Mainoslaite" "Markiisi" "Masto" "Muu k\u00e4ytt\u00f6" "Muu rakennelma" "Muu toimenpide" "Muu vesirajalaite" "Muuntamo" "Muuri" "N\u00e4k\u00f6torni" "Odotuskatos" "Opaste" "Ovi" "Parvekelasitus" "Pihaj\u00e4rjestely" "Piippu" "Portti" "Puhelinkioski" "Pylv\u00e4sbanderolli" "Pylv\u00e4staulu" "Pys\u00e4kkikatos" "Pys\u00e4k\u00f6intialue" "Py\u00f6re\u00e4 mainospilari" "Rantamuuri" "Savupiippu" "Siirtopuutarham\u00f6kki" "Suurtaulu, sis\u00e4lt\u00e4 valaistu" "Suurtaulu, ulkoa valaistu" "Taideteos" "Taksikatos" "Tuulivoimala" "Ulkomainoslaite" "Ulkotarjoilualue" "Vaja" "Valaisinpylv\u00e4s" "Varasto" "Varastointialue" "Viestint\u00e4torni" "Yleis\u00f6teltta" "Yleis\u00f6-WC"])
+
+(def rakennelman-kayttotarkoitus {:name "kayttotarkoitus"
+                                  :type :select
+                                  :body (mapv (partial hash-map :name) rakennelman-kayttotarkoitukset)})
+
+(def rakennelma (body {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
+                      rakennelman-kayttotarkoitus
+                      kuvaus))
 (def maisematyo (body kuvaus))
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
