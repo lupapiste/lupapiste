@@ -345,6 +345,7 @@
                                :poistumanSyy {:value "tuhoutunut"}})})
 
 (def- aidan-rakentaminen {:data {:kokonaisala {:value "0"}
+                                 :kayttotarkoitus {:value "Aita"}
                                           :kuvaus { :value "Aidan rakentaminen rajalle"}}
                                    :id "aidan-rakentaminen"
                                    :created 5

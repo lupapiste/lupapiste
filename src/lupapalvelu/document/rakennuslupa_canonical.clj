@@ -171,7 +171,7 @@
                                                  :alkuHetki (util/to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
                                                  :sijaintitieto {:Sijainti {:tyhja empty-tag}}
                                                  :kokonaisala (-> toimenpide :kokonaisala)
-                                                 :kayttotarkoitus (-> toimenpide :rakennelman-kayttotarkoitus)
+                                                 :kayttotarkoitus (-> toimenpide :kayttotarkoitus)
                                                  :kuvaus {:kuvaus (-> toimenpide :kuvaus)}
                                                  :tunnus {:jarjestysnumero nil}
                                                  :kiinttun (:propertyId application)}}}

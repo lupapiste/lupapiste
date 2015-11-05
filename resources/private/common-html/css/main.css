@@ -10503,13 +10503,33 @@ span.icon_clear:before {
 .application_summary .application_summary_info .state-indication div.proclaimed .proclaimed-box:after {
   border-left: 11px solid #2ca92c;
 }
-/* line 334, ../sass/views/_application.scss */
+/* line 331, ../sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.consideration .consideration-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+/* line 184, ../sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.consideration .consideration-box:after {
+  border-left: 11px solid #2ca92c;
+}
+/* line 336, ../sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.final .final-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+/* line 184, ../sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.final .final-box:after {
+  border-left: 11px solid #2ca92c;
+}
+/* line 344, ../sass/views/_application.scss */
 .application_summary .application_actions {
   position: absolute;
   right: 0;
   top: 12px;
 }
-/* line 338, ../sass/views/_application.scss */
+/* line 348, ../sass/views/_application.scss */
 .application_summary .application_actions .muncipality-info {
   background: #d0d0d0;
   width: 100%;
@@ -10520,13 +10540,13 @@ span.icon_clear:before {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
-/* line 345, ../sass/views/_application.scss */
+/* line 355, ../sass/views/_application.scss */
 .application_summary .application_actions .muncipality-info .h2 {
   text-transform: uppercase;
   font-size: 1em;
   text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.3), 0px -1px 0px rgba(0, 0, 0, 0.7);
 }
-/* line 350, ../sass/views/_application.scss */
+/* line 360, ../sass/views/_application.scss */
 .application_summary .application_actions .muncipality-info p {
   margin-bottom: 0;
   text-transform: uppercase;
@@ -10534,48 +10554,48 @@ span.icon_clear:before {
   font-weight: 700;
   text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.3), 0px -1px 0px rgba(0, 0, 0, 0.7);
 }
-/* line 357, ../sass/views/_application.scss */
+/* line 367, ../sass/views/_application.scss */
 .application_summary .application_actions .muncipality-info a {
   text-decoration: none;
   color: #f2f2f2;
 }
 
-/* line 365, ../sass/views/_application.scss */
+/* line 375, ../sass/views/_application.scss */
 .application-summary-table {
   display: table;
   border-collapse: collapse;
   width: 100%;
 }
 
-/* line 371, ../sass/views/_application.scss */
+/* line 381, ../sass/views/_application.scss */
 .application-summary-table > div {
   border-bottom: 1px solid #dddddd;
   display: table-row;
 }
 
-/* line 376, ../sass/views/_application.scss */
+/* line 386, ../sass/views/_application.scss */
 .application-summary-table > div > span {
   width: 100%;
 }
 
-/* line 380, ../sass/views/_application.scss */
+/* line 390, ../sass/views/_application.scss */
 .application-summary-table > div > p {
   padding-right: 2em;
 }
 @media (max-width: 991px) {
-  /* line 380, ../sass/views/_application.scss */
+  /* line 390, ../sass/views/_application.scss */
   .application-summary-table > div > p {
     white-space: nowrap;
   }
 }
 
-/* line 388, ../sass/views/_application.scss */
+/* line 398, ../sass/views/_application.scss */
 .application_summary_info > div.state-indication,
 .application_summary_info > div.summary-help {
   border-bottom: none;
 }
 
-/* line 395, ../sass/views/_application.scss */
+/* line 405, ../sass/views/_application.scss */
 #application-attachments-tab i.lupicon-circle-check,
 #application-attachments-tab i.lupicon-circle-pen,
 #application-attachments-tab i.lupicon-circle-arrow-up,
@@ -10583,16 +10603,16 @@ span.icon_clear:before {
 #application-attachments-tab i.lupicon-circle-section-sign {
   color: #2ca92c;
 }
-/* line 402, ../sass/views/_application.scss */
+/* line 412, ../sass/views/_application.scss */
 #application-attachments-tab i.lupicon-circle-star {
   color: #f39129;
 }
-/* line 405, ../sass/views/_application.scss */
+/* line 415, ../sass/views/_application.scss */
 #application-attachments-tab i.lupicon-circle-attention {
   color: #df3215;
 }
 
-/* line 395, ../sass/views/_application.scss */
+/* line 405, ../sass/views/_application.scss */
 #application-tasks-tab i.lupicon-circle-check,
 #application-tasks-tab i.lupicon-circle-pen,
 #application-tasks-tab i.lupicon-circle-arrow-up,
@@ -10600,26 +10620,26 @@ span.icon_clear:before {
 #application-tasks-tab i.lupicon-circle-section-sign {
   color: #2ca92c;
 }
-/* line 402, ../sass/views/_application.scss */
+/* line 412, ../sass/views/_application.scss */
 #application-tasks-tab i.lupicon-circle-star {
   color: #f39129;
 }
-/* line 405, ../sass/views/_application.scss */
+/* line 415, ../sass/views/_application.scss */
 #application-tasks-tab i.lupicon-circle-attention {
   color: #df3215;
 }
 
-/* line 415, ../sass/views/_application.scss */
+/* line 425, ../sass/views/_application.scss */
 #application-tasks-tab .stacked.legends {
   margin-bottom: 12px;
   margin-left: 12px;
 }
-/* line 419, ../sass/views/_application.scss */
+/* line 429, ../sass/views/_application.scss */
 #application-tasks-tab table {
   margin-bottom: 6px;
 }
 
-/* line 424, ../sass/views/_application.scss */
+/* line 434, ../sass/views/_application.scss */
 .ajax-loading-mask {
   display: none;
   position: absolute;
@@ -10630,263 +10650,263 @@ span.icon_clear:before {
   height: 100%;
   background: #fff;
 }
-/* line 433, ../sass/views/_application.scss */
+/* line 443, ../sass/views/_application.scss */
 .ajax-loading-mask .content {
   display: table;
   margin: 0 auto;
 }
-/* line 436, ../sass/views/_application.scss */
+/* line 446, ../sass/views/_application.scss */
 .ajax-loading-mask .content img {
   display: table;
   margin: 0 auto;
 }
-/* line 440, ../sass/views/_application.scss */
+/* line 450, ../sass/views/_application.scss */
 .ajax-loading-mask .content div {
   margin-top: 25px;
 }
 
-/* line 446, ../sass/views/_application.scss */
+/* line 456, ../sass/views/_application.scss */
 .process-nav {
   margin-top: 24px;
 }
-/* line 448, ../sass/views/_application.scss */
+/* line 458, ../sass/views/_application.scss */
 .process-nav .process-next {
   float: right;
 }
 
-/* line 453, ../sass/views/_application.scss */
+/* line 463, ../sass/views/_application.scss */
 #create .tree-last {
   font-size: 15px;
 }
-/* line 455, ../sass/views/_application.scss */
+/* line 465, ../sass/views/_application.scss */
 #create .tree-last li {
   font-size: 15px;
 }
-/* line 458, ../sass/views/_application.scss */
+/* line 468, ../sass/views/_application.scss */
 #create .tree-last .attachments-list {
   padding-left: 25px;
 }
 
-/* line 464, ../sass/views/_application.scss */
+/* line 474, ../sass/views/_application.scss */
 #dialog-request-for-statement button {
   margin-top: 24px;
 }
 
-/* line 469, ../sass/views/_application.scss */
+/* line 479, ../sass/views/_application.scss */
 .form-input.textarea.high {
   height: 144px;
   width: 80%;
 }
 
-/* line 475, ../sass/views/_application.scss */
+/* line 485, ../sass/views/_application.scss */
 #neighbors .map {
   width: 100%;
   height: 280px;
 }
 
-/* line 481, ../sass/views/_application.scss */
+/* line 491, ../sass/views/_application.scss */
 .application-neighbors {
   padding-top: 20px;
 }
-/* line 483, ../sass/views/_application.scss */
+/* line 493, ../sass/views/_application.scss */
 .application-neighbors td {
   vertical-align: top;
 }
-/* line 485, ../sass/views/_application.scss */
+/* line 495, ../sass/views/_application.scss */
 .application-neighbors td a.command {
   display: block;
 }
-/* line 488, ../sass/views/_application.scss */
+/* line 498, ../sass/views/_application.scss */
 .application-neighbors td .owner-name {
   font-weight: bold;
 }
-/* line 491, ../sass/views/_application.scss */
+/* line 501, ../sass/views/_application.scss */
 .application-neighbors td .owner-street {
   display: block;
   padding-left: 8px;
 }
-/* line 495, ../sass/views/_application.scss */
+/* line 505, ../sass/views/_application.scss */
 .application-neighbors td .owner-zip {
   padding-left: 8px;
 }
-/* line 498, ../sass/views/_application.scss */
+/* line 508, ../sass/views/_application.scss */
 .application-neighbors td .owner-email {
   display: block;
   font-style: italic;
 }
-/* line 502, ../sass/views/_application.scss */
+/* line 512, ../sass/views/_application.scss */
 .application-neighbors td .status-state {
   font-weight: bold;
 }
-/* line 505, ../sass/views/_application.scss */
+/* line 515, ../sass/views/_application.scss */
 .application-neighbors td .status-time {
   display: block;
   font-style: italic;
 }
 
-/* line 513, ../sass/views/_application.scss */
+/* line 523, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .dialog-content, #dialog-verdict-attachment-prints-order-history .dialog-content {
   padding-left: 15px;
 }
-/* line 516, ../sass/views/_application.scss */
+/* line 526, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .order-amount, #dialog-verdict-attachment-prints-order-history .order-amount {
   width: 18px;
 }
-/* line 519, ../sass/views/_application.scss */
+/* line 529, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .btn-prints-dialog-ok, #dialog-verdict-attachment-prints-order-history .btn-prints-dialog-ok {
   margin-left: 15px;
 }
-/* line 523, ../sass/views/_application.scss */
+/* line 533, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .context-error, #dialog-verdict-attachment-prints-order-history .context-error {
   max-width: 820px;
   word-wrap: break-word;
 }
-/* line 537, ../sass/views/_application.scss */
+/* line 547, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers, #dialog-verdict-attachment-prints-order-history .fixed-headers {
   width: 820px;
   table-layout: fixed;
   margin-right: 20px;
 }
-/* line 542, ../sass/views/_application.scss */
+/* line 552, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers .center, #dialog-verdict-attachment-prints-order-history .fixed-headers .center {
   text-align: center;
 }
-/* line 546, ../sass/views/_application.scss */
+/* line 556, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td, #dialog-verdict-attachment-prints-order-history .fixed-headers td {
   word-wrap: break-word;
 }
-/* line 550, ../sass/views/_application.scss */
+/* line 560, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(1), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(1), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(1), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(1) {
   width: 200px;
   max-width: 200px;
 }
-/* line 554, ../sass/views/_application.scss */
+/* line 564, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(2), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(2), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(2), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(2) {
   width: 200px;
   max-width: 200px;
 }
-/* line 558, ../sass/views/_application.scss */
+/* line 568, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(3), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(3), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(3), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(3) {
   width: 300px;
   max-width: 300px;
 }
-/* line 562, ../sass/views/_application.scss */
+/* line 572, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(4), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(4), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(4), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(4) {
   width: 120px;
   max-width: 120px;
 }
-/* line 568, ../sass/views/_application.scss */
+/* line 578, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers thead tr, #dialog-verdict-attachment-prints-order-history .fixed-headers thead tr {
   display: block;
   position: relative;
 }
-/* line 573, ../sass/views/_application.scss */
+/* line 583, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers tbody, #dialog-verdict-attachment-prints-order-history .fixed-headers tbody {
   display: block;
   overflow: auto;
   width: 100%;
   max-height: 200px;
 }
-/* line 581, ../sass/views/_application.scss */
+/* line 591, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .old_ie_wrapper, #dialog-verdict-attachment-prints-order-history .old_ie_wrapper {
   max-height: 200px;
   width: 820px;
   overflow-x: hidden;
   overflow-y: auto;
 }
-/* line 586, ../sass/views/_application.scss */
+/* line 596, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .old_ie_wrapper tbody, #dialog-verdict-attachment-prints-order-history .old_ie_wrapper tbody {
   height: auto;
 }
 
-/* line 591, ../sass/views/_application.scss */
+/* line 601, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-dialog-description {
   margin-bottom: 12px;
 }
-/* line 595, ../sass/views/_application.scss */
+/* line 605, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-items {
   margin-top: 6px;
   overflow-y: auto;
   max-height: 500px;
 }
-/* line 600, ../sass/views/_application.scss */
+/* line 610, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-items .history-item {
   margin: 6px 0;
 }
 
-/* line 607, ../sass/views/_application.scss */
+/* line 617, ../sass/views/_application.scss */
 .key-value-pair label {
   vertical-align: top;
   display: inline-block;
   width: 25%;
 }
-/* line 612, ../sass/views/_application.scss */
+/* line 622, ../sass/views/_application.scss */
 .key-value-pair .value {
   vertical-align: top;
   display: inline-block;
 }
 
-/* line 618, ../sass/views/_application.scss */
+/* line 628, ../sass/views/_application.scss */
 .inforequest-conversation {
   margin-top: 42px;
 }
-/* line 620, ../sass/views/_application.scss */
+/* line 630, ../sass/views/_application.scss */
 .inforequest-conversation h2 {
   border-bottom: 1px solid #c3c3c3;
 }
 
-/* line 625, ../sass/views/_application.scss */
+/* line 635, ../sass/views/_application.scss */
 .attachments-actions {
   margin-bottom: 24px;
 }
-/* line 627, ../sass/views/_application.scss */
+/* line 637, ../sass/views/_application.scss */
 .attachments-actions h3 {
   margin-top: 12px;
   font-weight: bold;
 }
 
-/* line 633, ../sass/views/_application.scss */
+/* line 643, ../sass/views/_application.scss */
 .parties-list {
   width: 100%;
   margin-bottom: 6px;
 }
-/* line 636, ../sass/views/_application.scss */
+/* line 646, ../sass/views/_application.scss */
 .parties-list button {
   margin: 12px 0;
 }
-/* line 639, ../sass/views/_application.scss */
+/* line 649, ../sass/views/_application.scss */
 .parties-list .party {
   display: table-row;
 }
-/* line 641, ../sass/views/_application.scss */
+/* line 651, ../sass/views/_application.scss */
 .parties-list .party .person {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 645, ../sass/views/_application.scss */
+/* line 655, ../sass/views/_application.scss */
 .parties-list .party .invite-state {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 649, ../sass/views/_application.scss */
+/* line 659, ../sass/views/_application.scss */
 .parties-list .party .invite-action {
   display: table-cell;
   padding-right: 12px;
 }
 
-/* line 657, ../sass/views/_application.scss */
+/* line 667, ../sass/views/_application.scss */
 #inforequest-marker-map {
   width: 30%;
   height: 520px;
   float: right;
   z-index: 2;
 }
-/* line 662, ../sass/views/_application.scss */
+/* line 672, ../sass/views/_application.scss */
 #inforequest-marker-map image {
   cursor: pointer;
 }
 
-/* line 667, ../sass/views/_application.scss */
+/* line 677, ../sass/views/_application.scss */
 #inforequest-marker-map-contents {
   z-index: 2;
   right: 30%;
@@ -10902,188 +10922,188 @@ span.icon_clear:before {
   border: 1px solid #b5b5b5;
   box-shadow: 1px 1px 2px #828282;
 }
-/* line 682, ../sass/views/_application.scss */
+/* line 692, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card {
   padding: 12px;
   z-index: 10000;
   border-top: 1px solid #b5b5b5;
   width: 100%;
 }
-/* line 688, ../sass/views/_application.scss */
+/* line 698, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3 {
   font-size: 20px;
 }
-/* line 690, ../sass/views/_application.scss */
+/* line 700, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3.operation-type {
   margin-bottom: 12px;
 }
-/* line 695, ../sass/views/_application.scss */
+/* line 705, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card .timestamp {
   float: right;
   font-size: 14px;
 }
-/* line 699, ../sass/views/_application.scss */
+/* line 709, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card a {
   color: #333;
 }
-/* line 702, ../sass/views/_application.scss */
+/* line 712, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card:first-child {
   border-top: none;
 }
-/* line 706, ../sass/views/_application.scss */
+/* line 716, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div {
   padding-bottom: 4px;
   margin-bottom: 8px;
   border-bottom: 1px solid #e8e8e8;
 }
-/* line 710, ../sass/views/_application.scss */
+/* line 720, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div:last-child {
   border-bottom: none;
   padding-bottom: 0px;
 }
-/* line 714, ../sass/views/_application.scss */
+/* line 724, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div blockquote {
   font-size: 16px;
 }
-/* line 717, ../sass/views/_application.scss */
+/* line 727, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div .comment-type {
   font-weight: 700;
 }
 
-/* line 726, ../sass/views/_application.scss */
+/* line 736, ../sass/views/_application.scss */
 .verdict-text {
   white-space: pre-line;
   width: 28.75em;
 }
 
-/* line 731, ../sass/views/_application.scss */
+/* line 741, ../sass/views/_application.scss */
 .required-field-error-doc {
   margin: 24px 0 6px;
 }
 
-/* line 735, ../sass/views/_application.scss */
+/* line 745, ../sass/views/_application.scss */
 .requiredField-line {
   display: table-row;
 }
-/* line 737, ../sass/views/_application.scss */
+/* line 747, ../sass/views/_application.scss */
 .requiredField-line span, .requiredField-line a {
   display: table-cell;
 }
-/* line 740, ../sass/views/_application.scss */
+/* line 750, ../sass/views/_application.scss */
 .requiredField-line a {
   padding-left: 12px;
 }
-/* line 743, ../sass/views/_application.scss */
+/* line 753, ../sass/views/_application.scss */
 .requiredField-line .required-field-error-element-name {
   padding-left: 6px;
 }
-/* line 746, ../sass/views/_application.scss */
+/* line 756, ../sass/views/_application.scss */
 .requiredField-line .lupicon-circle-attention {
   color: #e34319;
 }
 
-/* line 751, ../sass/views/_application.scss */
+/* line 761, ../sass/views/_application.scss */
 .invited-foremans {
   margin-bottom: 24px;
 }
-/* line 753, ../sass/views/_application.scss */
+/* line 763, ../sass/views/_application.scss */
 .invited-foremans .foreman {
   display: table-row;
 }
-/* line 755, ../sass/views/_application.scss */
+/* line 765, ../sass/views/_application.scss */
 .invited-foremans .foreman span {
   display: table-cell;
   padding-right: 6px;
 }
-/* line 763, ../sass/views/_application.scss */
+/* line 773, ../sass/views/_application.scss */
 .invited-foremans .foreman-state:before {
   content: "(";
 }
-/* line 766, ../sass/views/_application.scss */
+/* line 776, ../sass/views/_application.scss */
 .invited-foremans .foreman-state:after {
   content: ")";
 }
 
-/* line 772, ../sass/views/_application.scss */
+/* line 782, ../sass/views/_application.scss */
 .tasks-foreman {
   position: relative;
 }
-/* line 775, ../sass/views/_application.scss */
+/* line 785, ../sass/views/_application.scss */
 .tasks-foreman .form-input {
   display: inline-block;
   margin: 0 6px 0 0;
 }
-/* line 781, ../sass/views/_application.scss */
+/* line 791, ../sass/views/_application.scss */
 .tasks-foreman .form-input.combobox.long, .tasks-foreman select.long {
   width: 41.25em;
 }
-/* line 786, ../sass/views/_application.scss */
+/* line 796, ../sass/views/_application.scss */
 .tasks-foreman thead tr:first-child td {
   padding-left: 0;
 }
-/* line 791, ../sass/views/_application.scss */
+/* line 801, ../sass/views/_application.scss */
 .tasks-foreman .foreman-state:before {
   content: "(";
 }
-/* line 794, ../sass/views/_application.scss */
+/* line 804, ../sass/views/_application.scss */
 .tasks-foreman .foreman-state:after {
   content: ")";
 }
-/* line 799, ../sass/views/_application.scss */
+/* line 809, ../sass/views/_application.scss */
 .tasks-foreman .add-foreman:before {
   content: "[";
 }
-/* line 802, ../sass/views/_application.scss */
+/* line 812, ../sass/views/_application.scss */
 .tasks-foreman .add-foreman:after {
   content: "]";
 }
 
-/* line 808, ../sass/views/_application.scss */
+/* line 818, ../sass/views/_application.scss */
 .operation-info {
   width: 55%;
   display: inline-block;
   vertical-align: top;
 }
 
-/* line 813, ../sass/views/_application.scss */
+/* line 823, ../sass/views/_application.scss */
 .organizationLinks {
   vertical-align: top;
   width: 39%;
   padding-left: 48px;
   display: inline-block;
 }
-/* line 818, ../sass/views/_application.scss */
+/* line 828, ../sass/views/_application.scss */
 .organizationLinks .organization-links {
   margin-bottom: 12px;
 }
-/* line 820, ../sass/views/_application.scss */
+/* line 830, ../sass/views/_application.scss */
 .organizationLinks .organization-links a {
   color: #333;
 }
-/* line 822, ../sass/views/_application.scss */
+/* line 832, ../sass/views/_application.scss */
 .organizationLinks .organization-links a:active, .organizationLinks .organization-links a:visited, .organizationLinks .organization-links a:hover {
   color: #333;
 }
 
-/* line 830, ../sass/views/_application.scss */
+/* line 840, ../sass/views/_application.scss */
 #application-metadata-tab h1 {
   float: none;
 }
-/* line 833, ../sass/views/_application.scss */
+/* line 843, ../sass/views/_application.scss */
 #application-metadata-tab .table-metadata {
   max-width: 875px;
 }
-/* line 835, ../sass/views/_application.scss */
+/* line 845, ../sass/views/_application.scss */
 #application-metadata-tab .table-metadata .metadata-key {
   width: 175px;
 }
 
-/* line 842, ../sass/views/_application.scss */
+/* line 852, ../sass/views/_application.scss */
 #application-requiredFieldSummary-tab .auth-actions button {
   display: block;
 }
 
-/* line 847, ../sass/views/_application.scss */
+/* line 857, ../sass/views/_application.scss */
 h2 > i.is-right {
   float: right;
 }
