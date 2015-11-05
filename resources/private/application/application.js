@@ -268,6 +268,7 @@
     if (newId === currentId && tab) {
       selectTab(tab);
     } else {
+      hub.send("track-click", {category:"Applications", label: kind, event:"openApplication"});
       pageutil.showAjaxWait();
       if (newId !== currentId) { // close sidepanel if it's open
         var sidePanel = $("#side-panel div.content-wrapper > div").filter(":visible");

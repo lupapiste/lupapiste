@@ -94,7 +94,18 @@
 
 (def turvakielto "turvakieltoKytkin")
 
+(def suoramarkkinointilupa {:name "suoramarkkinointilupa" :type :checkbox :layout :full-width :i18nkey "osapuoli.suoramarkkinointilupa"})
+
+(def kytkimet {:name "kytkimet" :type :group :i18nkey "empty" :body [suoramarkkinointilupa] })
+
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
+
+(def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil 
+                         :body [{:name "AA"}
+                                {:name "A"}
+                                {:name "B"}
+                                {:name "C"}
+                                {:name "ei tiedossa"}]})
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
@@ -163,13 +174,15 @@
                henkilo-valitsin
                [henkilotiedot]
                simple-osoite
-               yhteystiedot))
+               yhteystiedot
+               kytkimet))
 
 (def henkilo-maksaja (body
                        henkilo-valitsin
                        [henkilotiedot]
                        simple-osoite-maksaja
-                       yhteystiedot))
+                       yhteystiedot
+                       kytkimet))
 
 (def henkilo-with-required-hetu (body
                                   henkilo-valitsin
@@ -178,7 +191,8 @@
                                      (map (fn [ht] (if (= (:name ht) "hetu") (merge ht {:required true}) ht))
                                        (:body henkilotiedot)))]
                                   simple-osoite
-                                  yhteystiedot))
+                                  yhteystiedot
+                                  kytkimet))
 
 (def yritys-minimal [{:name "yritysnimi" :type :string :required true :size "l"}
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
@@ -191,7 +205,8 @@
                :type :group
                :body (body
                        [henkilotiedot-minimal]
-                       yhteystiedot)}))
+                       yhteystiedot
+                       kytkimet)}))
 
 (def yritys-maksaja (body
                       yritys-valitsin
@@ -201,7 +216,8 @@
                        :type :group
                        :body (body
                                [henkilotiedot-minimal]
-                               yhteystiedot)}))
+                               yhteystiedot
+                               kytkimet)}))
 
 (def e-invoice-operators [{:name "BAWCFI22"} ; Basware Oyj
                           {:name "003714377140"} ; Enfo Zender Oy
@@ -1126,15 +1142,26 @@
 (defschemas
   1
   [{:info {:name "hankkeen-kuvaus-minimum"
+           :subtype "hankkeen-kuvaus"
            :approvable true
            :order 1}
     :body [kuvaus]}
 
    {:info {:name "hankkeen-kuvaus"
+           :subtype "hankkeen-kuvaus"
            :approvable true
            :order 1}
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]} ; Longest value in Helsinki production data
+
+   {:info {:name "hankkeen-kuvaus-rakennuslupa"
+           :subtype "hankkeen-kuvaus"
+           :i18name "hankkeen-kuvaus"
+           :approvable true
+           :order 1}
+    :body [kuvaus
+           hankkeen-vaativuus
+           {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
 
    {:info {:name "uusiRakennus" :approvable true}
     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}

@@ -25,6 +25,6 @@
       });
     });
 
-    $("#bulletins").applyBindings({});
+    $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService()});
   });
 })();

@@ -228,15 +228,15 @@ User logs in
 Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  User role should be  applicant
   User nav menu is visible
+  User role should be  applicant
   Applications page should be open
 
 Authority logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  User role should be  authority
   User nav menu is visible
+  User role should be  authority
   Authority applications page should be open
 
 Authority-admin logs in
@@ -248,13 +248,16 @@ Authority-admin logs in
 Admin logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  User role should be  admin
   User nav menu is visible
+  User role should be  admin
   Admin front page should be open
+
+Get role
+  Run Keyword And Return  Get Element Attribute  user-name@data-test-role
 
 User role should be
   [Arguments]  ${expected-role}
-  ${user-role}=  Execute JavaScript  return window.lupapisteApp.models.currentUser.role();
+  ${user-role} =  Get role
   Should Be Equal  ${expected-role}  ${user-role}
 
 User nav menu is visible

@@ -3,7 +3,13 @@ LUPAPISTE.ApplicationsSearchModel = function() {
 
   var self = this;
 
-  self.dataProvider = new LUPAPISTE.ApplicationsDataProvider();
+  self.searchType = ko.observable("applications");
+
+  self.defaultOperations = function() {
+    return self.searchType() === "foreman" ? [{id: "tyonjohtajan-nimeaminen-v2", label: ""}, {id: "tyonjohtajan-nimeaminen", label: ""}] : [];
+  };
+
+  self.dataProvider = new LUPAPISTE.ApplicationsDataProvider({defaultOperations: self.defaultOperations});
 
   self.noApplications = ko.pureComputed(function(){
     return self.dataProvider.data().userTotalCount <= 0;
@@ -33,14 +39,11 @@ LUPAPISTE.ApplicationsSearchModel = function() {
 
   self.limits = ko.observableArray([10, 25, 50, 100]);
 
-  self.searchType = ko.observable("applications");
-
   // clear filters when search type is changed
   self.searchType.subscribe(function(val) {
     self.dataProvider.clearFilters();
     if (val === "foreman") {
       self.dataProvider.setDefaultForemanSort();
-      lupapisteApp.services.operationFilterService.selected([{id: "tyonjohtajan-nimeaminen-v2", label: ""}, {id: "tyonjohtajan-nimeaminen", label: ""}]);
       lupapisteApp.services.applicationFiltersService.reloadDefaultForemanFilter();
     } else {
       self.dataProvider.setDefaultSort();

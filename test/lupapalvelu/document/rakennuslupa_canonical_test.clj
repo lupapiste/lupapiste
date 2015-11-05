@@ -371,7 +371,8 @@
 (def- hankkeen-kuvaus
   (-> hankkeen-kuvaus-minimum
     (assoc-in [:data :poikkeamat] {:value "Ei poikkeamisia"})
-    (assoc-in [:schema-info :name] "hankkeen-kuvaus")))
+    (assoc-in [:data :hankkeenVaativuus] {:value "A"})
+    (assoc-in [:schema-info :name] "hankkeen-kuvaus-rakennuslupa")))
 
 (def- link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
 (def- link-permit-data-lupapistetunnus {:id "LP-753-2013-00099" :type "lupapistetunnus"})
@@ -1335,6 +1336,36 @@
              (:maaraAika huomautus) => "2014-05-05"
              (:toteamisHetki huomautus) => "2014-04-04"
              (:toteaja huomautus) => "Jussi"))
+
+(fl/facts* "Katselmus with empty buildings is OK (no buildings in canonical)"
+  (let [canonical (katselmus-canonical
+                                           application-rakennuslupa-verdict-given
+                                           "fi"
+                                           "123"
+                                           "Pohjakatselmus 1"
+                                           1354532324658
+                                           []
+                                           authority-user-jussi
+                                           "pohjakatselmus"
+                                           :katselmus
+                                           "pidetty"
+                                           "Sonja Silja"
+                                           true
+                                           {:kuvaus "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
+                                            :maaraAika "05.5.2014"
+                                            :toteaja "Jussi"
+                                            :toteamisHetki "4.04.2014"}
+                                           "Tiivi Taavi, Hipsu ja Lala"
+                                           "Ei poikkeamisia") => truthy
+        Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+        toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
+        kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+        rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
+        RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
+        katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
+        Katselmus (:Katselmus katselmustieto) => truthy]
+    (:rakennustunnus Katselmus) => nil
+    (:katselmuksenRakennustieto Katselmus) => nil))
 
 
 ;Aloitusoikeus (Takuu) (tyonaloitus ennen kuin valitusaika loppunut luvan myontamisesta)

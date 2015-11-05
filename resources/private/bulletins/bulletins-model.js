@@ -1,4 +1,4 @@
-LUPAPISTE.BulletinsModel = function() {
+LUPAPISTE.BulletinsModel = function(params) {
   "use strict";
   var self = this;
 
@@ -8,7 +8,7 @@ LUPAPISTE.BulletinsModel = function() {
     limited: {values: supportedPages, defaultValue: "bulletins"}
   });
 
-  var bulletinService = new LUPAPISTE.ApplicationBulletinsService();
+  var bulletinService = params.bulletinService;
 
   self.pageParams = ko.pureComputed(function () {
     var defaultParams = {
@@ -16,7 +16,8 @@ LUPAPISTE.BulletinsModel = function() {
     };
 
     return self.page() === "bulletin" ?
-      _.extend(defaultParams, { bulletinId: bulletinId }) :
+      _.extend(defaultParams, { bulletinId: bulletinId,
+                                bulletinService: params.bulletinService }) :
       defaultParams;
   });
 

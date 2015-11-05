@@ -5,7 +5,7 @@ LUPAPISTE.PropertyGroupModel = function(params) {
   // inherit from DocgenGroupModel
   ko.utils.extend(self, new LUPAPISTE.DocgenGroupModel(params));
 
-  self.appId = params.appId || null;
+  self.applicationId = params.applicationId || null;
 
   self.authModel = params.authModel;
   self.isDisabled = params.isDisabled;

@@ -137,7 +137,8 @@
                      :henkilo {:henkilotiedot {:etunimi "", :hetu nil, :sukunimi "", :turvakieltoKytkin false}
                                :osoite {:katu "", :postinumero "", :postitoimipaikannimi ""}
                                :userId nil
-                               :yhteystiedot {:email "", :puhelin ""}}
+                               :yhteystiedot {:email "", :puhelin ""}
+                               :kytkimet {:suoramarkkinointilupa false}}
                      :muu-omistajalaji "", :omistajalaji nil
                      :yritys {:companyId nil
                               :liikeJaYhteisoTunnus "1234567-1"
@@ -145,8 +146,10 @@
                                        :postinumero "00380"
                                        :postitoimipaikannimi "HELSINKI"}
                               :yritysnimi "Testiyritys 11477"
-                              :yhteyshenkilo {:henkilotiedot {:etunimi "", :sukunimi "", :turvakieltoKytkin false}
-                                              :yhteystiedot {:email "", :puhelin ""}}}})))))
+                              :yhteyshenkilo {:henkilotiedot {:etunimi "", :sukunimi "",
+                                                              :turvakieltoKytkin false}
+                                              :yhteystiedot {:email "", :puhelin ""}
+                                              :kytkimet {:suoramarkkinointilupa false}}}})))))
 
 (fact "converting rakval verdict krysp to lupapiste domain model, using lupapistetunnus"
   (let [xml (rakval-application-xml local-krysp nil id :application-id false)]

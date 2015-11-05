@@ -1,4 +1,4 @@
-LUPAPISTE.ApplicationsDataProvider = function() {
+LUPAPISTE.ApplicationsDataProvider = function(params) {
   "use strict";
 
   var self = this;
@@ -10,6 +10,8 @@ LUPAPISTE.ApplicationsDataProvider = function() {
   var defaultSort = {field: "modified", asc: false};
 
   var defaultForemanSort = {field: "submitted", asc: false};
+
+  var defaultOperations = params.defaultOperations;
 
   // Observables
   self.sort = util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]) ||
@@ -33,10 +35,15 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   // Computed
   var searchFields = ko.pureComputed(function() {
+    var operations = lupapisteApp.services.operationFilterService.selected();
+    if (_.isEmpty(operations)) {
+      operations = defaultOperations();
+    }
+
     return { searchText: self.searchFieldDelayed(),
              tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
              organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
-             operations: _.pluck(lupapisteApp.services.operationFilterService.selected(), "id"),
+             operations: _.pluck(operations, "id"),
              handlers: _.pluck(lupapisteApp.services.handlerFilterService.selected(), "id"),
              applicationType: self.applicationType(),
              areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),

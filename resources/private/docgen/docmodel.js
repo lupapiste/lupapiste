@@ -849,7 +849,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildGroupComponent (name, subSchema, model, path) {
-    var name = (name === 'docgen-group' && subSchema.repeating) ? 'docgen-repeating-group' : name;
+    var name = (name === "docgen-group" && subSchema.repeating) ? "docgen-repeating-group" : name;
     var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(_.reject(path, _.isNumber));
     var params = {
       applicationId: self.appId,
@@ -859,7 +859,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       i18npath: i18npath,
       schema: subSchema,
       model: model[subSchema.name],
-      isDisabled: self.isDisabled
+      isDisabled: self.isDisabled,
+      authModel: self.authorizationModel,
+      propertyId: self.propertyId
     };
 
     return createComponent(name, params);
@@ -1030,8 +1032,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var myPath = path.join(".");
     var select = document.createElement("select");
     var selectedOption = getModelValue(model, subSchema.name);
-    var option = document.createElement("option");
+    var emptyOption = document.createElement("option");
     var span = makeEntrySpan(subSchema, myPath);
+    var unknownOption = document.createElement("option");
     span.className = "form-entry really-long";
 
     select.id = pathStrToID(myPath);
@@ -1073,12 +1076,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       };
     }
 
-    option.value = "";
-    option.appendChild(document.createTextNode(loc("selectone")));
+    emptyOption.value = "";
+    emptyOption.appendChild(document.createTextNode(loc("selectone")));
     if (selectedOption === "") {
-      option.selected = "selected";
+      emptyOption.selected = "selected";
     }
-    select.appendChild(option);
+    select.appendChild(emptyOption);
 
     $.each(self.application.buildings, function (i, building) {
           var name = building.index;
@@ -1095,6 +1098,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           }
           select.appendChild(option);
         });
+    // not known option
+    unknownOption.value = "ei tiedossa";
+    unknownOption.appendChild(document.createTextNode(loc("not-known")));
+    if (selectedOption === "ei tiedossa") {
+      unknownOption.selected = "selected";
+    }
+    select.appendChild(unknownOption);
 
     span.appendChild(makeLabel(subSchema, "select", myPath));
     span.appendChild(select);

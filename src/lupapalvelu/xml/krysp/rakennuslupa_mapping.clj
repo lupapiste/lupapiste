@@ -11,7 +11,7 @@
                                                                  katselmus-canonical
                                                                  unsent-attachments-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.pdf-export :as pdf-export]
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.xml.disk-writer :as writer]))
 
 ;RakVal
@@ -113,6 +113,21 @@
                               {:tag :omistajalaji :ns "rakval"
                                :child [{:tag :muu}
                                        {:tag :omistajalaji}]}]}))
+
+(def rakennus_220
+  (update-in rakennus [:child] mapping-common/update-child-element
+      [:omistajatieto :Omistaja]
+      {:tag :Omistaja :child [{:tag :kuntaRooliKoodi :ns "yht"}
+                              {:tag :VRKrooliKoodi :ns "yht"}
+                              mapping-common/henkilo
+                              mapping-common/yritys_213
+                              {:tag :turvakieltoKytkin :ns "yht"}
+                              {:tag :suoramarkkinointikieltoKytkin :ns "yht"}
+                              {:tag :omistajalaji :ns "rakval"
+                               :child [{:tag :muu}
+                                       {:tag :omistajalaji}]}]}))
+
+
 
 (def- katselmustieto
   {:tag :katselmustieto
@@ -284,6 +299,20 @@
    (assoc-in [:attr :xsi:schemaLocation]
      (mapping-common/schemalocation :R "2.1.8"))))
 
+(def rakennuslupa_to_krysp_220
+  (-> rakennuslupa_to_krysp_218
+      (assoc-in [:attr :xsi:schemaLocation]
+                (mapping-common/schemalocation :R "2.2.0"))
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
+                 {:tag :osapuolettieto :child [mapping-common/osapuolet_216]})
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto]
+                 {:tag :rakennustieto :child [rakennus_220]})
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :hankkeenVaativuus]
+                 {:tag :hankkeenVaativuus})))
+
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
@@ -293,6 +322,7 @@
     "2.1.5" rakennuslupa_to_krysp_215
     "2.1.6" rakennuslupa_to_krysp_216
     "2.1.8" rakennuslupa_to_krysp_218
+    "2.2.0" rakennuslupa_to_krysp_220
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- save-katselmus-xml [application
@@ -352,12 +382,17 @@
         {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
         huomautukset (-> data :katselmus :huomautukset)
-        buildings    (map
-                       (fn [{rakennus :rakennus :as b}]
-                         (if (ss/blank? (:valtakunnallinenNumero rakennus))
-                           (assoc-in b [:rakennus :valtakunnallinenNumero] (find-national-id rakennus))
-                           b))
-                       (vals rakennus))]
+        buildings    (->> (vals rakennus)
+                       (map
+                         (fn [{rakennus :rakennus :as b}]
+                           (when rakennus
+                             (if (ss/blank? (:valtakunnallinenNumero rakennus))
+                              (assoc-in b [:rakennus :valtakunnallinenNumero] (find-national-id rakennus))
+                              b))))
+                       (remove
+                         #(or
+                            (nil? %)
+                            (= "ei tiedossa" (get-in % [:rakennus :jarjestysnumero])))))]
     (save-katselmus-xml
       application
       lang
