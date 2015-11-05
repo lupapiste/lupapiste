@@ -214,6 +214,22 @@
          vaaditut-erityissuunnitelmat => sequential?
          vaaditut-erityissuunnitelmat => (just ["Rakennesuunnitelmat" "Vesi- ja viem\u00e4risuunnitelmat" "Ilmanvaihtosuunnitelmat"] :in-any-order)))))
 
+
+(facts "KRYSP verdict 2.2.0"
+  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.2.0"))
+        cases (->verdicts xml ->standard-verdicts)]
+
+    (fact "xml is parsed" cases => truthy)
+    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+
+    (let [lupamaaraykset (:lupamaaraykset verdict)]
+
+      (facts "lupamaaraukset data is correct"
+        lupamaaraykset => truthy
+        (:rakennusoikeudellinenKerrosala lupamaaraykset) => "101")
+      )))
+
+
 (facts "CGI sample verdict"
   (let [xml (xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
         cases (->verdicts xml ->standard-verdicts)]
