@@ -16,7 +16,8 @@
         {name: "application-bulletin"},
         {name: "bulletins-search"},
         {name: "autocomplete-municipalities"},
-        {name: "autocomplete-states"}];
+        {name: "autocomplete-states"},
+        {name: "bulletin-comment"}];
 
     _.forEach(components, function(component) {
       ko.components.register(component.name, {

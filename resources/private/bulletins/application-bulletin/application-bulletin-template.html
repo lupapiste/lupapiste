@@ -8,11 +8,11 @@
         <div class="container">
           <div class="preamble">
             <div class="application_summary_info" data-bind="with: bulletin">
-              <h1 data-bind="text: address" data-test-id="bulletin-address"></h1>
-              <h2 data-bind="if: primaryOperation">
+              <h4 data-bind="text: address" data-test-id="bulletin-address"></h4>
+              <h5 data-bind="if: primaryOperation">
                     <span data-test-id="bulletin-primary-operation"
                           data-bind="ltext: 'operations.' + primaryOperation.name, attr: {'data-test-primary-operation-id': primaryOperation.name}"></span>
-              </h2>
+              </h5>
 
               <!-- State: -->
               <div class="state-indication" data-bind="attr: {'data-test-state': bulletinState}" data-test-id="bulletin-state" >
@@ -81,13 +81,21 @@
       </div>
       <div class="container">
         <div class="bulletin-info">
-          <h1 data-bind="ltext: 'bulletin.tab.info'"></h1>
+          <h3 data-bind="ltext: 'bulletin.tab.info'"></h3>
           <div id="bulletinDocgen" class="docgen-content">
               <!-- This is where the generated documents will be placed. -->
           </div>
         </div>
       </div>
-
+      <div class="container bulletin-comment">
+        <h5 data-bind="ltext: 'bulletin.comment.title'"></h5>
+        <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'help.bulletin.comment' } }"></span>
+        <p>
+          <span data-bind="ltext: 'bulletin.comment.endDate'"></span>
+          <span data-bind="dateTimeString: $data.proclamationEndsAt"></span>
+        </p>
+        <div data-bind="component: { name: 'bulletin-comment', params: { bulletinId: bulletinId } }"></div>
+      </div>
     </script>
   </section>
 </body>

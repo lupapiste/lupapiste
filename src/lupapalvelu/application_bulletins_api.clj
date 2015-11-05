@@ -1,10 +1,11 @@
 (ns lupapalvelu.application-bulletins-api
   (:require [monger.operators :refer :all]
             [monger.query :as query]
+            [noir.response :as resp]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.property :as p]
-            [lupapalvelu.action :refer [defquery defcommand] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
@@ -91,6 +92,17 @@
   (let [states (mongo/distinct :application-bulletins :versions.bulletinState)]
     (ok :states states)))
 
+;; TODO user-roles Vetuma autheticated person
+(defraw add-bulletin-comment
+  {:description "Add comment to bulletin"
+   :feature :publish-bulletin
+   :user-roles #{:anonymous}}
+  [{{files :files bulletin-id :bulletin-id bulletin-comment :bulletin-comment-field} :data created :created :as action}]
+  (prn created files bulletin-id bulletin-comment)
+  (->> {:ok true}
+    (resp/json)
+    (resp/content-type "application/json")
+    (resp/status 200)))
 
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))

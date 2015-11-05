@@ -8,6 +8,9 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
       .center(404168, 6693765, 14);
 
   self.bulletin = bulletinService.bulletin;
+
+  self.bulletinId = params.bulletinId;
+
   self.selectedTab = ko.observable("info");
 
   self.bulletinStateLoc = ko.pureComputed(function() {
@@ -28,5 +31,5 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     id.dispose();
   };
 
-  hub.send("bulletinService::fetchBulletin", {id: params.bulletinId});
+  hub.send("bulletinService::fetchBulletin", {id: self.bulletinId});
 };
