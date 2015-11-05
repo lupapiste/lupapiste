@@ -96,7 +96,7 @@
 
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
 
-    (let [verdict (first (:paatokset (last cases)))
+    (let [verdict        (-> cases last :paatokset first)
           lupamaaraykset (:lupamaaraykset verdict)
           paivamaarat    (:paivamaarat verdict)
           poytakirjat    (:poytakirjat verdict)]
@@ -174,7 +174,7 @@
     (fact "xml is parsed" cases => truthy)
     (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
 
-    (let [verdict (first (:paatokset (last cases)))
+    (let [verdict        (-> cases last :paatokset first)
           lupamaaraykset (:lupamaaraykset verdict)
           maaraykset     (:maaraykset lupamaaraykset)
           vaaditut-erityissuunnitelmat (:vaaditutErityissuunnitelmat lupamaaraykset)]
@@ -216,17 +216,20 @@
 
 
 (facts "KRYSP verdict 2.2.0"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.2.0"))
+  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.2.0.xml"))
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
 
-    (let [lupamaaraykset (:lupamaaraykset verdict)]
+    (let [verdict        (-> cases last :paatokset first)
+          lupamaaraykset (:lupamaaraykset verdict)]
 
       (facts "lupamaaraukset data is correct"
         lupamaaraykset => truthy
-        (:rakennusoikeudellinenKerrosala lupamaaraykset) => "101")
+        (:rakennusoikeudellinenKerrosala lupamaaraykset) => "101"
+        (:vaaditutTyonjohtajat lupamaaraykset) => "IV-ty\u00f6njohtaja, KVV-ty\u00f6njohtaja, vastaava ty\u00f6njohtaja"
+        )
       )))
 
 
