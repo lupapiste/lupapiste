@@ -95,14 +95,16 @@
 ;; TODO user-roles Vetuma autheticated person
 (defraw add-bulletin-comment
   {:description "Add comment to bulletin"
-   :feature :publish-bulletin
-   :user-roles #{:anonymous}}
-  [{{files :files bulletin-id :bulletin-id bulletin-comment :bulletin-comment-field} :data created :created :as action}]
-  (prn created files bulletin-id bulletin-comment)
+   :feature     :publish-bulletin
+   :user-roles  #{:anonymous}}
+  [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field} :data created :created :as action}]
+  (let [comment      (bulletins/create-comment comment created)
+        stored-files (bulletins/store-files bulletin-id (:id comment) files)]
+    (mongo/update-by-id :application-bulletins bulletin-id {$push {:versions.0.comments (assoc comment :attachments stored-files)}}))
   (->> {:ok true}
-    (resp/json)
-    (resp/content-type "application/json")
-    (resp/status 200)))
+       (resp/json)
+       (resp/content-type "application/json")
+       (resp/status 200)))
 
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))

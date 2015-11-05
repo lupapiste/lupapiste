@@ -3,49 +3,7 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="bulletin-comment-template">
-      <form data-bind="submit: sendComment" class="form-grid form-grid--no-border">
-        <div class="row">
-           <div class="col-4"
-               data-bind="component: {name: 'textarea-field',
-                                      params: {value: comment,
-                                               id: 'bulletin-comment-field',
-                                               lLabel: 'bulletin.comment',
-                                               lPlaceholder: 'bulletin.comment.placeholder'}}"></div>
-        </div>
-        <div class="row">
-          <label data-bind="ltext: 'bulletin.comment.selectedAttachments'"></label>
-          <input class="hidden" type="file" data-bind="event: {change: fileChanged}"/>
-          <input class="hidden" type="text" name="bulletin-id" data-bind="value: bulletinId"/>
-          <!-- ko if: attachments().length > 0 -->
-          <ul class="bulletin-comment__attachment-list" data-bind="foreach: attachments">
-            <li>
-              <span data-bind="text: $data.name"></span>
-              <span data-bind="size: $data.size"></span>
-              <span>
-                <a href="#" data-bind="click: $component.removeAttachment">
-                  <span data-bind="ltext: 'remove'"></span>
-                </a>
-              </span>
-            </li>
-          </ul>
-          <!-- /ko -->
-          <!-- ko if: attachments().length === 0 -->
-          <p data-bind="ltext: 'bulletin.comment.noAttachments'"></p>
-          <!-- /ko -->
-        </div>
-        <div class="row">
-          <button class="bulletin" data-bind="click: addAttachment">
-            <i class="lupicon-paperclip"></i>
-            <span data-bind="ltext: 'bulletin.comment.addAttachment'"></span>
-          </button>
-        </div>
-        <div class="row">
-          <button type="submit" class="positive" data-bind="enable: comment">
-            <i class="lupicon-comment"></i>
-            <span data-bind="ltext: 'bulletin.comment.send'"></span>
-          </button>
-        </div>
-      </form>
+      
     </script>
   </section>
 </body>
