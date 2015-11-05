@@ -379,7 +379,7 @@
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
                :js ["header.js"
-                    "bulletins.js" "bulletins-model.js"
+                    "bulletins.js" "component-base-model.js" "bulletins-model.js"
                     "application-bulletins-service.js"
                     "application-bulletin/application-bulletin-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"

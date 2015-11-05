@@ -2,11 +2,12 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+
   self.bulletinId = params.bulletinId;
-
   self.comment = ko.observable();
-
   self.attachments = ko.observableArray([]);
+  self.pending = ko.observable(false);
 
   self.fileChanged = function(data, event) {
     self.attachments.push(util.getIn(_.first($(event.target)), ["files", 0]));
@@ -26,6 +27,12 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   };
 
   self.sendComment = function(form) {
-    hub.send("bulletinService::sendComment", {commentForm: form, files: self.attachments(), onSuccess: self.onSuccess});
+    hub.send("bulletinService::sendComment", {commentForm: form, files: self.attachments()});
   };
+
+  self.addEventListener("bulletinService", "commentSubmitted", self.onSuccess);
+
+  self.addEventListener("bulletinService", "commentPending", function(event) {
+    self.pending(event.value);
+  });
 };
