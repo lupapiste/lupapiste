@@ -1195,7 +1195,9 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body party}
+    :body (body
+            party
+            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
 
    {:info {:name "hakija-r"
            :i18name "osapuoli"
@@ -1209,7 +1211,9 @@
            :section-help "party.section.help"
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body party}
+    :body (body
+            party
+            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
 
    {:info {:name "hakija-ya"
            :i18name "osapuoli"
@@ -1222,7 +1226,9 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
-    :body (schema-body-without-element-by-name ya-party turvakielto)}
+    :body (body
+            (schema-body-without-element-by-name ya-party turvakielto)
+            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
 
    {:info {:name "ilmoittaja"
            :i18name "osapuoli"
@@ -1236,7 +1242,9 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body party}
+    :body (body
+            party
+            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
 
    {:info {:name "paasuunnittelija"
            :i18name "osapuoli"
