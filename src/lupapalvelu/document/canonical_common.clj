@@ -277,19 +277,25 @@
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
+(defn assoc-country
+  "Augments given (address) map with country and foreign address
+  information (based on data), if needed."
+  [address data]
+  (let [maa (or (:maa data) "FIN")]
+    (merge address
+           {:valtioSuomeksi        (i18n/localize :fi (str "country." maa))
+            :valtioKansainvalinen  maa}
+           (when-not (= maa "FIN")
+             {:ulkomainenLahiosoite       (:katu data)
+              :ulkomainenPostitoimipaikka (:postitoimipaikannimi data)}))))
+
 (defn get-simple-osoite
-  [{:keys [katu postinumero postitoimipaikannimi maa] :as osoite}]
+  [{:keys [katu postinumero postitoimipaikannimi] :as osoite}]
   (when katu  ;; required field in krysp (i.e. "osoitenimi")
-    (let [maa    (or maa "FIN")
-          addr   {:osoitenimi           {:teksti katu}
-                  :postitoimipaikannimi postitoimipaikannimi
-                  :postinumero          postinumero
-                  :valtioSuomeksi       (i18n/localize :fi (str "country." maa))
-                  :valtioKansainvalinen maa}
-          abroad (when (not= maa "FIN")
-                   {:ulkomainenLahiosoite       katu
-                    :ulkomainenPostitoimipaikka postitoimipaikannimi})]
-      (merge addr abroad))))
+    (assoc-country {:osoitenimi           {:teksti katu}
+                    :postitoimipaikannimi postitoimipaikannimi
+                    :postinumero          postinumero}
+                   osoite)))
 
 (defn- get-name [henkilotiedot]
   {:nimi (select-keys henkilotiedot [:etunimi :sukunimi])})
@@ -736,9 +742,10 @@
      (filter #(contains? values (get-in % [:schema-info prop])) docs))))
 
 (defn ->postiosoite-type [address]
-  (merge {:osoitenimi (entry :katu address :teksti)}
-         (entry :postinumero address)
-         (entry :postitoimipaikannimi address)))
+  (assoc-country (merge {:osoitenimi (entry :katu address :teksti)}
+                        (entry :postinumero address)
+                        (entry :postitoimipaikannimi address))
+                 address))
 
 (defmulti osapuolitieto :_selected)
 
