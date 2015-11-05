@@ -14,6 +14,7 @@
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
             [lupapalvelu.document.rakennuslupa-canonical-test :as rakennus-test]))
 
+
 (testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-mapping enrich-attachments-with-operation-data)
 
 (def test-attachments [{:id :attachment1
@@ -99,20 +100,22 @@
 
       (fl/facts* "Hakija"
         (let [hakijat (get-in canonical [:UusiAsia :Hakijat :Hakija]) => truthy
-              data    (tools/unwrapped (get-in application [:documents 0 :data :henkilo])) => truthy
-              henkilo (get-in (first hakijat) [:Henkilo])]
+              data (tools/unwrapped (get-in application [:documents 0 :data])) => truthy
+              data-henkilo (:henkilo data) => truthy
+              henkilo (-> hakijat first :Henkilo) => truthy]
           (fact "First Hakija of Hakijat has only Henkilo" (keys (first hakijat)) => (just [:Henkilo]))
           (fact "Henkilo expected fields"
-            (keys henkilo) => (just [:Etunimi :Sukunimi :Yhteystiedot :Henkilotunnus :Turvakielto]))
-          (fact "Etunimi" (:Etunimi henkilo) => (get-in data [:henkilotiedot :etunimi]))
-          (fact "Sukunimi" (:Sukunimi henkilo) => (get-in data [:henkilotiedot :sukunimi]))
-          (fact "Jakeluosoite" (get-in henkilo [:Yhteystiedot :Jakeluosoite]) => (get-in data [:osoite :katu]))
-          (fact "Postinumero" (get-in henkilo [:Yhteystiedot :Postinumero]) => (get-in data [:osoite :postinumero]))
-          (fact "Postitoimipaikka" (get-in henkilo [:Yhteystiedot :Postitoimipaikka]) => (get-in data [:osoite :postitoimipaikannimi]))
-          (fact "Email" (get-in henkilo [:Yhteystiedot :Email]) => (get-in data [:yhteystiedot :email]))
-          (fact "Puhelinnumero" (get-in henkilo [:Yhteystiedot :Puhelinnumero]) => (get-in data [:yhteystiedot :puhelin]))
-          (fact "Hetu" (get-in henkilo [:Henkilotunnus]) => (get-in data [:henkilotiedot :hetu]))
-          (fact "Turvakielto" (get-in henkilo [:Turvakielto]) => (get-in data [:henkilotiedot :turvakieltoKytkin]))))
+            (keys henkilo) => (just [:Etunimi :Sukunimi :Yhteystiedot :Henkilotunnus :VainSahkoinenAsiointi :Turvakielto]))
+          (fact "Etunimi" (:Etunimi henkilo) => (get-in data-henkilo [:henkilotiedot :etunimi]))
+          (fact "Sukunimi" (:Sukunimi henkilo) => (get-in data-henkilo [:henkilotiedot :sukunimi]))
+          (fact "Jakeluosoite" (get-in henkilo [:Yhteystiedot :Jakeluosoite]) => (get-in data-henkilo [:osoite :katu]))
+          (fact "Postinumero" (get-in henkilo [:Yhteystiedot :Postinumero]) => (get-in data-henkilo [:osoite :postinumero]))
+          (fact "Postitoimipaikka" (get-in henkilo [:Yhteystiedot :Postitoimipaikka]) => (get-in data-henkilo [:osoite :postitoimipaikannimi]))
+          (fact "Email" (get-in henkilo [:Yhteystiedot :Email]) => (get-in data-henkilo [:yhteystiedot :email]))
+          (fact "Puhelinnumero" (get-in henkilo [:Yhteystiedot :Puhelinnumero]) => (get-in data-henkilo [:yhteystiedot :puhelin]))
+          (fact "Hetu" (get-in henkilo [:Henkilotunnus]) => (get-in data-henkilo [:henkilotiedot :hetu]))
+          (fact "VainSahkoinenAsiointi" (get-in henkilo [:VainSahkoinenAsiointi]) => (:vainsahkoinenAsiointiKytkin data))
+          (fact "Turvakielto" (get-in henkilo [:Turvakielto]) => (get-in data-henkilo [:henkilotiedot :turvakieltoKytkin]))))
 
       (facts "Maksaja"
         (let [maksaja (get-in canonical [:UusiAsia :Maksaja])

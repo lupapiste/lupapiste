@@ -40,7 +40,7 @@
      :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
      :Yhteystiedot (ua-get-yhteystiedot (:henkilo data))
      :Henkilotunnus (get-in data [:henkilo :henkilotiedot :hetu])
-     :VainSahkoinenAsiointi nil ; TODO tulossa myohemmin kayttoon
+     :VainSahkoinenAsiointi (:vainsahkoinenAsiointiKytkin data)
      :Turvakielto (get-in data [:henkilo :henkilotiedot :turvakieltoKytkin])}))
 
 (defn- ua-get-yritys [data]
@@ -169,7 +169,8 @@
   "Return canonical, does not contain attachments"
   [application lang]
   (let [documents (tools/unwrapped (common/documents-without-blanks application))]
-    (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
+    (-> ua-root-element
+      (assoc-in [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
       (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (domain/get-applicant-documents documents)))

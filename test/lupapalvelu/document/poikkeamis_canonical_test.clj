@@ -39,7 +39,7 @@
                               :osoite {:katu {:value "Paapankuja 12"}
                                        :postinumero {:value "10203"}
                                        :postitoimipaikannimi {:value "Piippola"}}}
-                     :vainsahkoinenAsiointiKytkin true}})
+                     :vainsahkoinenAsiointiKytkin {:value true}}})
 
 (def- uusi {:id "523844e1da063788effc1c57"
             :created 1379419361123
@@ -256,6 +256,7 @@
         hakija (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "hakija") %) osapuolitieto) => truthy
         Osapuoli (:Osapuoli hakija) => truthy
         _ (:turvakieltoKytkin Osapuoli) => true
+        _ (:VainSahkoinenAsiointi Osapuoli) => true
         henkilo (:henkilo Osapuoli) => truthy
         _ (get-in henkilo [:nimi :etunimi]) => "Pena"
         _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
