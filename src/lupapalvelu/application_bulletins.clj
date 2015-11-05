@@ -1,8 +1,10 @@
 (ns lupapalvelu.application-bulletins
   (:require [monger.operators :refer :all]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [sade.util :refer [fn->]]))
 
+(def bulletin-state-seq (sm/state-seq states/bulletin-version-states))
 
 (defn bulletin-state [app-state] ; TODO state machine for bulletins
   (condp contains? app-state
