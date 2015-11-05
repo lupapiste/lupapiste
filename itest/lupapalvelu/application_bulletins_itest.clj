@@ -13,6 +13,9 @@
                                                   :x 430109.3125 :y 7210461.375
                                                   :address "Oulu 10")
           app-id (:id app)]
+      (fact "approve application to 'sent' state"
+        (command olli :approve-application :id app-id :lang "fi") => ok?)
+
       (fact "publishing with wrong id results in error"
         (command olli :publish-bulletin :id "123") => (partial expected-failure? :error.application-not-accessible))
 
@@ -31,10 +34,12 @@
                                                   :propertyId oulu-property-id
                                                   :x 430109.3125 :y 7210461.375
                                                   :address "Oulu 10")
-          sipoo-app (create-and-submit-application pena :operation "meluilmoitus"
+          sipoo-app (create-and-submit-application pena :operation "lannan-varastointi"
                                                   :propertyId sipoo-property-id
                                                   :x 406898.625 :y 6684125.375
                                                   :address "Hitantine 108")
+          _ (command olli :approve-application :id (:id oulu-app) :lang "fi") => ok?
+          _ (command sonja :approve-application :id (:id sipoo-app) :lang "fi") => ok?
           _ (command olli :publish-bulletin :id (:id oulu-app)) => ok?
           _ (command sonja :publish-bulletin :id (:id sipoo-app)) => ok?
           _ (datatables pena :application-bulletins :page "1"
@@ -46,23 +51,11 @@
       (fact "Two bulletins is returned"
         (count (:data resp)) => 2)
 
-      (fact "Bulletin query returns the latest version of snapshot"
-        (:address (query-bulletin pena (:id oulu-app))) => "Oulu 10"
-        ;; change address to distinguish versions
-        (command pena :change-location :id (:id oulu-app)
-                                       :propertyId oulu-property-id
-                                       :x 430109.3125 :y 7210461.375
-                                       :address "Ouluntulli 10") => ok?
-        ;; publish second version
-        (command olli :publish-bulletin :id (:id oulu-app)) => ok?
-        (fact "Address has changed between versions"
-          (:address (query-bulletin pena (:id oulu-app))) => "Ouluntulli 10"))
-
       (facts "Response data"
         (let [bulletin (query-bulletin pena (:id oulu-app))]
           (keys bulletin) => (just [:id :_applicantIndex :address :applicant :attachments
                                     :bulletinState :documents :location :modified :municipality
-                                    :primaryOperation :propertyId :state] :in-any-order)
+                                    :primaryOperation :propertyId :state :stateSeq] :in-any-order)
           (fact "bulletin state is 'proclaimed'"
             (:bulletinState bulletin) => "proclaimed")
           (fact "each documents has schema definition"
@@ -95,6 +88,7 @@
                                                             :propertyId oulu-property-id
                                                             :x 430109.3125 :y 7210461.375
                                                             :address "Oulu 10")]
+           (command olli :approve-application :id id :lang "fi") => ok?
            (command olli :publish-bulletin :id id)))
        (let [{p1-data :data p1-left :left} (datatables pena :application-bulletins :page 1
                                                                                    :searchText ""

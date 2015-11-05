@@ -1,7 +1,13 @@
-(ns lupapalvelu.xml.krysp.rakennuslupa_canonical_to_krysp_xml_test
-  (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
-            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical katselmus-canonical]]
-            [lupapalvelu.document.rakennuslupa_canonical-test :refer [application-rakennuslupa
+(ns lupapalvelu.xml.krysp.rakennuslupa-canonical-to-krysp-xml-test
+  (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [clojure.data.xml :refer :all]
+            [clojure.java.io :refer :all]
+            [sade.xml :as xml]
+            [sade.common-reader :as cr]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
+            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
+            [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-suunnittelijan-nimeaminen
                                                                       jatkolupa-application
@@ -16,13 +22,7 @@
             [lupapalvelu.xml.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.validator :refer :all :as validator]
-            [lupapalvelu.xml.emit :refer :all]
-            [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]
-            [clojure.data.xml :refer :all]
-            [clojure.java.io :refer :all]
-            [sade.xml :as xml]
-            [sade.common-reader :as cr]))
+            [lupapalvelu.xml.emit :refer :all]))
 
 (testable-privates lupapalvelu.xml.krysp.rakennuslupa-mapping rakennuslupa-element-to-xml)
 

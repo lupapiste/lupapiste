@@ -103,11 +103,6 @@
         "krysp/yhteiset-2.1.5.xsd"
         "krysp/rakennusvalvonta-2.1.8.xsd"))
 
-(def- rakval-2_2_0
-  (conj public-schema-sources
-        "krysp/yhteiset-2.1.6.xsd"
-        "krysp/rakennusvalvonta-2.2.0.xsd"))
-
 (def- mkmu-1_0_1
   (conj public-schema-sources
         "krysp/yhteiset-2.1.6.xsd"
@@ -143,13 +138,13 @@
 
 (def- rakval-validators
   (let [m {"2.1.2" common-validator-2_1_0
-           "2.1.3" common-validator-2_1_1
-           "2.1.4" common-validator-2_1_2
-           "2.1.5" common-validator-2_1_3
-           "2.1.6" (create-validator rakval-2_1_6)
+   "2.1.3" common-validator-2_1_1
+   "2.1.4" common-validator-2_1_2
+   "2.1.5" common-validator-2_1_3
+   "2.1.6" (create-validator rakval-2_1_6)
            "2.1.8" (create-validator rakval-2_1_8)}]
     (if (env/feature? :rakval-220)
-      (assoc m "2.2.0" (create-validator rakval-2_2_0))
+      (assoc m "2.2.0" common-validator-2_1_6)
       m)))
 
 (def- ya-validators
