@@ -79,7 +79,7 @@
 
         </div>
       </div>
-      
+
       <div class="container">
         <div class="bulletin-info">
           <h3 data-bind="ltext: 'bulletin.tab.info'"></h3>
@@ -89,7 +89,12 @@
         </div>
       </div>
 
-      <div data-bind="component: { name: 'bulletin-comment',
+      <div data-bind="visible: !authenticated(),
+                      component: { name: 'begin-vetuma-auth-button',
+                                   params: {} }"></div>
+
+      <div data-bind="visible: authenticated,
+                      component: { name: 'bulletin-comment',
                                    params: { bulletin: $data } }"></div>
     </script>
   </section>
