@@ -1,15 +1,19 @@
 (ns lupapalvelu.application-bulletins
   (:require [monger.operators :refer :all]
+            [clojure.set :refer [difference]]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [sade.util :refer [fn->]]))
 
 (def bulletin-state-seq (sm/state-seq states/bulletin-version-states))
 
-(defn bulletin-state [app-state] ; TODO state machine for bulletins
+(defn bulletin-state [app-state]
   (condp contains? app-state
-    states/pre-verdict-states :proclaimed
-    states/post-verdict-states :verdictGiven
+    states/pre-verdict-states              :proclaimed
+    #{:consideration}                      :consideration
+    (difference states/post-verdict-states
+                states/terminal-states)    :verdictGiven
+    #{:final}                              :final
     :proclaimed))
 
 ;; Snapshot
