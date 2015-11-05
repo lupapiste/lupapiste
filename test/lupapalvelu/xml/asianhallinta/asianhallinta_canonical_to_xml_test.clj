@@ -161,7 +161,7 @@
         (fact "Hakija"
           (let [hakijat (sxml/select xml-parsed [:UusiAsia :Hakijat])
                 hakijat-data (:hakija docs)]
-            (fact "Corrent count" (count (sxml/select hakijat [:Hakija])) => (count hakijat-data))
+            (fact "Correct count" (count (sxml/select hakijat [:Hakija])) => (count hakijat-data))
             (fact "Hakija is Henkilo, not yritys"
               (:tag (sxml/get-text hakijat [:Hakija])) => :Henkilo)))
 
@@ -250,7 +250,7 @@
     (fact "Hakija"
       (let [hakijat (sxml/select xml-parsed [:UusiAsia :Hakijat :Hakija])
             hakijat-data (:hakija docs)]
-        (fact "Corrent count" (count hakijat) => (count hakijat-data))
+        (fact "Correct count" (count hakijat) => (count hakijat-data))
         (fact "First Hakija is Henkilo, second is Yritys"
           (-> hakijat first :content first :tag) => :Henkilo
           (-> hakijat second :content first :tag) => :Yritys)
