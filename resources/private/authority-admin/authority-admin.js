@@ -33,6 +33,8 @@
     self.features = ko.observable();
     self.allowedRoles = ko.observable([]);
 
+    self.permitTypes = ko.observable([]);
+
     self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };
 
     ko.computed(function() {
@@ -43,6 +45,21 @@
           .error(util.showSavedIndicator)
           .call();
       }
+    });
+
+    ko.computed(function() {
+      var validateVerdictGivenDate = self.validateVerdictGivenDate();
+      if (self.initialized) {
+        ajax.command("set-organization-validate-verdict-given-date", {enabled: validateVerdictGivenDate})
+          .success(util.showSavedIndicator)
+          .error(util.showSavedIndicator)
+          .call();
+      }
+    });
+
+    self.validateVerdictGivenDateVisible = ko.pureComputed(function() {
+      var types = self.permitTypes();
+      return _.contains(types, "R") || _.contains(types, "P");
     });
 
     function toAttachments(attachments) {
@@ -65,6 +82,8 @@
       // Required fields in app obligatory to submit app
       //
       self.appRequiredFieldsFillingObligatory(organization["app-required-fields-filling-obligatory"] || false);
+
+      self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 
       self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
 
@@ -140,6 +159,8 @@
       self.features(util.getIn(organization, ["areas"]));
 
       self.allowedRoles(organization.allowedRoles);
+
+      self.permitTypes(_(organization.scope).pluck("permitType").uniq().value());
 
       self.initialized = true;
     };
