@@ -419,6 +419,8 @@
 (defn- map-enums-212 [canonical]
   (map-tyonjohtaja-patevyysvaatimusluokka canonical))
 
+;; TODO: tanne vastaavasti uusien suunnittelijaRoolikoodien kasittely?
+
 (defn- map-enums
   "Map enumerations in canonical into values supperted by given KRYSP version"
   [canonical krysp-version]
