@@ -1032,8 +1032,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var myPath = path.join(".");
     var select = document.createElement("select");
     var selectedOption = getModelValue(model, subSchema.name);
-    var option = document.createElement("option");
+    var emptyOption = document.createElement("option");
     var span = makeEntrySpan(subSchema, myPath);
+    var unknownOption = document.createElement("option");
     span.className = "form-entry really-long";
 
     select.id = pathStrToID(myPath);
@@ -1075,12 +1076,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       };
     }
 
-    option.value = "";
-    option.appendChild(document.createTextNode(loc("selectone")));
+    emptyOption.value = "";
+    emptyOption.appendChild(document.createTextNode(loc("selectone")));
     if (selectedOption === "") {
-      option.selected = "selected";
+      emptyOption.selected = "selected";
     }
-    select.appendChild(option);
+    select.appendChild(emptyOption);
 
     $.each(self.application.buildings, function (i, building) {
           var name = building.index;
@@ -1097,6 +1098,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           }
           select.appendChild(option);
         });
+    // not known option
+    unknownOption.value = "ei tiedossa";
+    unknownOption.appendChild(document.createTextNode(loc("not-known")));
+    if (selectedOption === "ei tiedossa") {
+      unknownOption.selected = "selected";
+    }
+    select.appendChild(unknownOption);
 
     span.appendChild(makeLabel(subSchema, "select", myPath));
     span.appendChild(select);

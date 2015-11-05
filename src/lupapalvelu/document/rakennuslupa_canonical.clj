@@ -210,7 +210,7 @@
 
 (defn- get-asian-tiedot [documents-by-type]
   (let [maisematyo_documents (:maisematyo documents-by-type)
-        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents-by-type) (:hankkeen-kuvaus-minimum documents-by-type) (:aloitusoikeus documents-by-type))
+        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents-by-type) (:hankkeen-kuvaus-rakennuslupa documents-by-type) (:hankkeen-kuvaus-minimum documents-by-type) (:aloitusoikeus documents-by-type))
         asian-tiedot (:data (first hankkeen-kuvaus-doc))
         maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
                                (str "\n\n" (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc))
@@ -225,6 +225,9 @@
   (if (and (contains? documents-by-type :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
+
+(defn- get-hankkeen-vaativuus [documents-by-type]
+  (get-in documents-by-type [:hankkeen-kuvaus-rakennuslupa 0 :data :hankkeenVaativuus]))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
@@ -252,7 +255,8 @@
                                         "aloitusoikeus" "Uusi aloitusoikeus"
                                         (get-kayttotapaus documents-by-type toimenpiteet)))
                       :asianTiedot (get-asian-tiedot documents-by-type)
-                      :lisatiedot (get-lisatiedot documents-by-type lang)}}}}
+                      :lisatiedot (get-lisatiedot documents-by-type lang)
+                      :hankkeenVaativuus (get-hankkeen-vaativuus documents-by-type)}}}}
         canonical (if link-permit-data
                     (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
                       (get-viitelupatieto link-permit-data))
