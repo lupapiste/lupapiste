@@ -419,7 +419,7 @@
 (defn- valid-antopvm? [anto-pvm]
   (or (not anto-pvm) (> (now) anto-pvm)))
 
-(defn- standard-verdicts-validator [xml]
+(defn- standard-verdicts-validator [xml organization]
   (let [paatos-xml-without-ns (select (cr/strip-xml-namespaces xml) [:paatostieto :Paatos])
         poytakirjat (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
         poytakirja  (poytakirja-with-paatos-data poytakirjat)
@@ -546,7 +546,7 @@
 (def backend-preverdict-state
   #{"" "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"})
 
-(defn- simple-verdicts-validator [xml]
+(defn- simple-verdicts-validator [xml organization]
   (let [xml-without-ns (cr/strip-xml-namespaces xml)
         app-state      (application-state xml-without-ns)
         paivamaarat    (filter number? (map (comp cr/to-timestamp get-text) (select xml-without-ns [:paatostieto :Paatos :paatosdokumentinPvm])))
