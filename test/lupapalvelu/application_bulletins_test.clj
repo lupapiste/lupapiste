@@ -33,3 +33,14 @@
       updates => {$push {:versions snapshot}
                   $set  {:modified 123}})))
 
+(fact "Bulletin states mapping from app states"
+  (bulletin-state :draft) => :proclaimed
+  (bulletin-state :submitted) => :proclaimed
+  (bulletin-state :sent) => :proclaimed
+  (bulletin-state :consideration) => :consideration
+  (bulletin-state :verdictGiven) => :verdictGiven
+  (bulletin-state :final) => :final
+  (bulletin-state :appealed) => :verdictGiven
+  (fact "default is 'proclaimed'"
+    (bulletin-state :foo) => :proclaimed))
+
