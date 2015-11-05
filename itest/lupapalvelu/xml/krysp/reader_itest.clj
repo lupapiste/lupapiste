@@ -82,7 +82,8 @@
                            :porras "G"
                            :huoneisto "99"
                            :postinumero "04200"
-                           :postitoimipaikannimi "KERAVA"}
+                           :postitoimipaikannimi "KERAVA"
+                           :maa "FIN"}
                   :luokitus {:energialuokka "10"
                              :paloluokka "P1 / P2"
                              :energiatehokkuusluku ""
@@ -135,7 +136,7 @@
           (:0 omistajat) =>
                     {:_selected "yritys"
                      :henkilo {:henkilotiedot {:etunimi "", :hetu nil, :sukunimi "", :turvakieltoKytkin false}
-                               :osoite {:katu "", :postinumero "", :postitoimipaikannimi ""}
+                               :osoite {:katu "", :postinumero "", :postitoimipaikannimi "" :maa "FIN"}
                                :userId nil
                                :yhteystiedot {:email "", :puhelin ""}
                                :kytkimet {:suoramarkkinointilupa false}}
@@ -144,7 +145,8 @@
                               :liikeJaYhteisoTunnus "1234567-1"
                               :osoite {:katu "Testikatu 1 A 11477"
                                        :postinumero "00380"
-                                       :postitoimipaikannimi "HELSINKI"}
+                                       :postitoimipaikannimi "HELSINKI"
+                                       :maa "FIN"}
                               :yritysnimi "Testiyritys 11477"
                               :yhteyshenkilo {:henkilotiedot {:etunimi "", :sukunimi "",
                                                               :turvakieltoKytkin false}

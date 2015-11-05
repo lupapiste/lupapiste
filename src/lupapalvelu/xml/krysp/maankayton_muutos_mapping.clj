@@ -10,7 +10,8 @@
 
 
 (defn ->mapping [muutos]
-  (let [osoite [{:osoitenimi :teksti} :postinumero :postitoimipaikannimi]]
+  (let [osoite [:valtioSuomeksi :valtioKansainvalinen {:osoitenimi :teksti} :ulkomainenLahiosoite
+                :postinumero :postitoimipaikannimi :ulkomainenPostitoimipaikka]]
     {:tag :Maankaytonmuutos :ns "mkmu"
      :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :MM "1.0.1")
                    :xmlns:mkmu "http://www.paikkatietopalvelu.fi/gml/maankaytonmuutos"}
