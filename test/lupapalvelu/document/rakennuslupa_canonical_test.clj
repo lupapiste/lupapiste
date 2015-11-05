@@ -54,13 +54,15 @@
   {:id "hakija-henkilo" :schema-info {:name "hakija-r"
                                       :subtype "hakija"
                                       :version 1}
-   :data {:henkilo henkilo}})
+   :data {:henkilo henkilo
+          :vainsahkoinenAsiointiKytkin {:value true}}})
 
 (def- hakija-yritys
   {:id "hakija-yritys" :schema-info {:name "hakija-r"
                                      :subtype "hakija"
                                      :version 1}
-   :data {:_selected {:value "yritys"}, :yritys yritys}})
+   :data {:_selected {:value "yritys"}
+          :yritys yritys}})
 
 (def- paasuunnittelija
   {:id "50bc85e4ea3e790c9ff7cdb2"
@@ -128,8 +130,7 @@
    :data {:henkilo henkilo}})
 
 (def- maksaja-yritys
-  {:id "maksaja-yritys" :schema-info {:name "maksaja"
-                                      :version 1}
+  {:id "maksaja-yritys" :schema-info {:name "maksaja" :version 1}
    :data {:_selected {:value "yritys"}
           :yritys (merge yritys
                          {:verkkolaskutustieto
@@ -519,6 +520,7 @@
     (fact "kuntaRooliKoodi" (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
+    (fact "VainSahkoinenAsiointi" (:VainSahkoinenAsiointi hakija-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
 

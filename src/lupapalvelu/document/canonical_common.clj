@@ -357,7 +357,7 @@
           {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
            :kuntaRooliKoodi kuntaRoolicode
            :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin))
-           :VainSahkoinenAsiointi (:vainsahkoinenAsiointiKytkin osapuoli)
+           :VainSahkoinenAsiointi (true? (:vainsahkoinenAsiointiKytkin osapuoli))
            ;; Only explicit check allows direct marketing
            :suoramarkkinointikieltoKytkin (-> henkilo :kytkimet :suoramarkkinointilupa true? not)
            :henkilo (merge
