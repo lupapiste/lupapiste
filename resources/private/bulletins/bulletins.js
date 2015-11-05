@@ -18,7 +18,8 @@
         {name: "autocomplete-municipalities"},
         {name: "autocomplete-states"},
         {name: "bulletin-comment"},
-        {name: "bulletin-comment-box"}];
+        {name: "bulletin-comment-box"},
+        {name: "begin-vetuma-auth-button"}];
 
     _.forEach(components, function(component) {
       ko.components.register(component.name, {
