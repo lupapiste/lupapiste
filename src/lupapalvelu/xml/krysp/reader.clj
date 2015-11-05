@@ -427,8 +427,8 @@
     (cond
       (not (seq poytakirjat))                               (fail :info.no-verdicts-found-from-backend)
       (not (seq poytakirja))                                (fail :info.paatos-details-missing)
-      (or
-        (not (valid-paatospvm? (:paatospvm poytakirja)))
+      (not (valid-paatospvm? (:paatospvm poytakirja)))      (fail :info.paatos-future-date)
+      (and validate-verdict-given-date
         (not-any? #(valid-antopvm? (:anto %)) paivamaarat)) (fail :info.paatos-future-date))))
 
 (defn- ->standard-verdicts [xml-without-ns]
@@ -436,10 +436,7 @@
          (let [poytakirjat      (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
                poytakirja       (poytakirja-with-paatos-data poytakirjat)
                paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])]
-           (when (and
-                   poytakirja
-                   (valid-paatospvm? (:paatospvm poytakirja))
-                   (valid-antopvm? (:anto paivamaarat)))
+           (when (and poytakirja (valid-paatospvm? (:paatospvm poytakirja)))
              {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
               :paivamaarat    paivamaarat
               :poytakirjat    (seq poytakirjat)})))
