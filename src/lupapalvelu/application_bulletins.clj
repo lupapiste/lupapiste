@@ -8,7 +8,7 @@
 (def bulletin-state-seq (sm/state-seq states/bulletin-version-states))
 
 (defn bulletin-state [app-state]
-  (condp contains? app-state
+  (condp contains? (keyword app-state)
     states/pre-verdict-states              :proclaimed
     #{:consideration}                      :consideration
     (difference states/post-verdict-states
