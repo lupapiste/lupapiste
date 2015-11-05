@@ -42,5 +42,5 @@
   (bulletin-state :final) => :final
   (bulletin-state :appealed) => :verdictGiven
   (fact "default is 'proclaimed'"
-    (bulletin-state :foo) => :proclaimed))
+    (bulletin-state :foo) => (throws IllegalArgumentException "No matching clause: :foo")))
 

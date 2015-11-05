@@ -13,8 +13,7 @@
     #{:consideration}                      :consideration
     (difference states/post-verdict-states
                 states/terminal-states)    :verdictGiven
-    #{:final}                              :final
-    :proclaimed))
+    #{:final}                              :final))
 
 ;; Snapshot
 
