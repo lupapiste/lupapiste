@@ -40,6 +40,12 @@ LUPAPISTE.ApplicationBulletinsService = function() {
 
   self.bulletin = ko.observable();
 
+  var commentPending = ko.observable(false);
+
+  ko.computed(function() {
+    hub.send("bulletinService::commentPending", {value: commentPending()});
+  });
+
   function fetchMunicipalities() {
     ajax.query("application-bulletin-municipalities", {})
       .success(function(res) {
@@ -92,6 +98,10 @@ LUPAPISTE.ApplicationBulletinsService = function() {
     fetchBulletin(event.id);
   });
 
+  var commentSent = function() {
+    hub.send("bulletinService::commentSubmitted");
+  };
+
   hub.subscribe("bulletinService::sendComment", function(event) {
     var form = event.commentForm;
     var formData = new FormData(form);
@@ -104,7 +114,8 @@ LUPAPISTE.ApplicationBulletinsService = function() {
       });
     }
     ajax.form("add-bulletin-comment", formData)
-    .success(event.onSuccess || _.noop)
+    .success(commentSent)
+    .pending(commentPending)
     .call();
   });
 };
