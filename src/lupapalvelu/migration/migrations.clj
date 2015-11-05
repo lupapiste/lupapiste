@@ -1254,6 +1254,27 @@
       (let [applications (mongo/select collection {:state {$ne "draft"}, :infoRequest false} [:opened :sent :submitted :canceled :complementNeeded :started :closed :startedBy :closedBy :history])]
         (count (map #(mongo/update-by-id collection (:id %) (populate-application-history %)) applications))))))
 
+(defn update-document-tila-metadata [doc]
+  (if-let [tila (get-in doc [:metadata :tila])]
+    (let [new-tila (if (.equalsIgnoreCase "valmis" tila) :valmis :luonnos)]
+      (assoc-in doc [:metadata :tila] new-tila))
+    doc))
+
+(defn update-array-metadata [application]
+  (->> [:attachments :verdicts :statements]
+       (map (fn [k] (if-let [docs (seq (k application))]
+                      [k (map update-document-tila-metadata docs)]
+                      nil)))
+       (remove nil?)
+       (into {})))
+
+(defmigration update-tila-metadata-value-in-all-metadata-maps
+  {:apply-when (pos? (mongo/count :applications {$and [{"metadata.tila" {$exists true}} {"metadata.tila" {$nin ["luonnos" "valmis" "arkistoitu"]}}]}))}
+  (doseq [application (mongo/select :applications {$and [{"metadata.tila" {$exists true}} {"metadata.tila" {$nin ["luonnos" "valmis" "arkistoitu"]}}]})]
+    (let [data-for-$set (-> (update-array-metadata application)
+                            (merge {:metadata (:metadata (update-document-tila-metadata application))}))]
+      (mongo/update-n :applications {:_id (:id application)} {$set data-for-$set}))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

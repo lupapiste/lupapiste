@@ -457,4 +457,26 @@
       });
     }
   };
+
+  ko.observable.fn.increment = function () {
+    this(this() + 1);
+  };
+
+  ko.extenders.limited = function(target, optionObj) {
+    var result = ko.pureComputed({
+        read: target,
+        write: function(newValue) {
+          if (_.includes(optionObj.values, newValue)) {
+            if (newValue !== target()) {
+              target(newValue);
+            }
+          } else {
+            target(optionObj.defaultValue);
+          }
+        }
+    });
+    result(target());
+    return result;
+  };
+
 })(jQuery);

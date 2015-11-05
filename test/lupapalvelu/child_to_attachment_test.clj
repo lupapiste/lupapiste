@@ -12,6 +12,7 @@
             [lupapalvelu.organization :as organization])
   (:import (java.io File)))
 
+(def build-attachment #'lupapalvelu.child-to-attachment/build-attachment)
 
 (def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
                        "poikkeusasian-rakennuspaikka"
@@ -41,11 +42,11 @@
    :given nil
    :status status
    :text text
-   :person {:name name}
+   :person {:name name :text "Paloviranomainen"}
    :attachments [{:target {:type "statement"}} {:target {:type "something else"}}]})
 
 
-(defn- dummy-neighbour [id name status]
+(defn- dummy-neighbour [id name status message]
   {:propertyId id
    :owner {:type "luonnollinen"
            :name name
@@ -57,37 +58,42 @@
             :city "Helsinki"
             :zip "00100"}}
    :id id
-   :status [{:state status
+   :status [{:state nil
+             :user {:firstName nil :lastName nil}
+             :created nil}
+            {:state status
+             :message message
              :user {:firstName "Sonja" :lastName "Sibbo"}
+             :vetuma {:firstName "TESTAA" :lastName "PORTAALIA"}
              :created 1444902294666}]})
 
-(defn filename-and-size-exists [data]
-  (and (.exists (:content data))
-       (> (:size data) 0)))
 
-(facts " Generate PDF from dummy application statements "
-       (let [dummy-statements [(dummy-statement "2" " Matti Malli " nil " Lorelei ipsum ")
-                               (dummy-statement "1" " Minna Malli " " joku status " " Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero. ")]
+(background (lupapalvelu.pdf.pdfa-conversion/pdf-a-required? anything) => false)
+
+(facts " Generate attachment from dummy application statements "
+       (let [dummy-statements [(dummy-statement "2" "Matti Malli" nil "Lorelei ipsum")
+                               (dummy-statement "1" "Minna Malli" "joku status" "Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero.")]
              application (dummy-application "LP-1" :statements dummy-statements)]
          (doseq [lang i18n/languages]
-           (debug " org ok : " (not-empty (:organization application)))
-           (fact {:midje/description (name lang)}
-                 (let [pdf-content (child-to-attachment/generate-attachment-from-children nil application lang :statements "2")]
-                   (debug " Exported statement file: " (:content pdf-content))
-                   (debug " Exported statement : " pdf-content)
-                   pdf-content
-                   ) => filename-and-size-exists
-                 (provided (lupapalvelu.pdf-conversion/pdf-a-required? anything) => false)))))
+           (let [file (File/createTempFile (str "child-test-statement-" (name lang)) ".pdf")
+                 att (build-attachment nil application :statements "2" lang file)]
+             (fact " :contents"
+                   (:contents att) => "Paloviranomainen")
+             (fact " :attachment-type"
+                   (:attachment-type att) => {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"})
+             (fact " :archivable"
+                   (:archivable att) => false)))))
 
-(facts " Generate PDF from dummy application neighbours "
-       (let [dummy-neighbours [(dummy-neighbour "2" " Matti Malli " "mark-done")
-                               (dummy-neighbour "1" " Minna Malli " "open")]
+(facts " Generate attachment from dummy application neightbors "
+       (let [dummy-neighbours [(dummy-neighbour "2" "Matti Malli" "response-given" "SigloXX")
+                               (dummy-neighbour "1" "Minna Malli" "open" "nada")]
              application (dummy-application "LP-1" :neighbors dummy-neighbours)]
          (doseq [lang i18n/languages]
-           (fact {:midje/description (name lang)}
-                 (let [pdf-content (child-to-attachment/generate-attachment-from-children nil application lang :neighbors "2")]
-                   (debug " Exported neighbours file: " (:content pdf-content))
-                   (debug " Exported neighbours: " pdf-content)
-                   pdf-content
-                   ) => filename-and-size-exists
-                 (provided (lupapalvelu.pdf-conversion/pdf-a-required? anything) => false)))))
+           (let [file (File/createTempFile (str "child-test-statement-" (name lang)) ".pdf")
+                 att (build-attachment nil application :neighbors "2" lang file)]
+             (fact " :contents"
+                   (:contents att) => "Matti Malli")
+             (fact " :attachment-type"
+                   (:attachment-type att) => {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"})
+             (fact " :archivable"
+                   (:archivable att) => false)))))

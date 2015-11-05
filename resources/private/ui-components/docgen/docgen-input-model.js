@@ -3,6 +3,8 @@ LUPAPISTE.DocgenInputModel = function(params) {
   var self = this;
   self.params = params;
 
+  self.authModel = params.authModel || lupapisteApp.models.applicationAuthModel;
+
   self.size = uiComponents.sizeClasses[self.params.schema.size];
   self.value = ko.observable(self.params.model ? self.params.model.value : undefined);
   self.path = self.params.path;
@@ -58,7 +60,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
 
   self.readonly = ko.observable(self.params.schema.readonly || self.params.readonly);
 
-  self.disabled = ko.observable(!lupapisteApp.models.applicationAuthModel.ok("update-doc") ||
+  self.disabled = ko.observable(params.isDisabled || !self.authModel.ok("update-doc") ||
                                 util.getIn(params, ["model", "disabled"]));
   var save = function(val) {
     uiComponents.save("update-doc",

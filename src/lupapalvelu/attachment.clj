@@ -13,12 +13,12 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.pdf-export :as pdf-export]
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.preview :as preview]
-            [lupapalvelu.pdf-conversion :as pdf-conversion])
+            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
            [org.apache.commons.io FilenameUtils]
@@ -69,17 +69,19 @@
    :B5
    :muu])
 
-(def- attachment-types-by-permit-type
-  {:R attachment-types/Rakennusluvat
-   :P attachment-types/Rakennusluvat
-   :YA attachment-types/YleistenAlueidenLuvat
-   :YI attachment-types/Ymparistoilmoitukset
-   :YL attachment-types/Ymparistolupa
-   :YM attachment-types/MuutYmparistoluvat
-   :VVVL attachment-types/Ymparistoilmoitukset
-   :MAL attachment-types/Maa-ainesluvat
-   :MM attachment-types/Kiinteistotoimitus
-   :KT attachment-types/Kiinteistotoimitus})
+(def- attachment-types-by-permit-type-unevaluated
+  {:R 'attachment-types/Rakennusluvat
+   :P 'attachment-types/Rakennusluvat
+   :YA 'attachment-types/YleistenAlueidenLuvat
+   :YI 'attachment-types/Ymparistoilmoitukset
+   :YL 'attachment-types/Ymparistolupa
+   :YM 'attachment-types/MuutYmparistoluvat
+   :VVVL 'attachment-types/Ymparistoilmoitukset
+   :MAL 'attachment-types/Maa-ainesluvat
+   :MM 'attachment-types/Kiinteistotoimitus
+   :KT 'attachment-types/Kiinteistotoimitus})
+
+(def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
 
 (defn attachment-ids-from-tree [tree]
   {:pre [(sequential? tree)]}
@@ -96,10 +98,11 @@
           [(i18n/localize lang (ss/join "." ["attachmentType" (name title) "_group_label"]))
            (reduce
              (fn [result attachment-name]
-               (conj
-                 result
-                 (i18n/localize lang
-                   (ss/join "." ["attachmentType" (name title) (name attachment-name)]))))
+               (let [lockey                    (ss/join "." ["attachmentType" (name title) (name attachment-name)])
+                     localized-attachment-name (i18n/localize lang lockey)]
+                 (conj
+                   result
+                   (ss/join "; " [(name attachment-name) localized-attachment-name]))))
              []
              attachment-names)])]
     (reduce
@@ -113,6 +116,17 @@
      ["fi" "sv"]))
 
   )
+
+(defn print-attachment-types-by-permit-type []
+  (let [permit-types-with-names (into {}
+                                      (for [[k v] attachment-types-by-permit-type-unevaluated]
+                                        [k (name v)]))]
+    (doseq [[permit-type permit-type-name] permit-types-with-names]
+    (println permit-type-name)
+    (doseq [[group-name types] (:fi (localised-attachments-by-permit-type permit-type))]
+      (println "\t" group-name)
+      (doseq [type types]
+        (println "\t\t" type))))))
 
 ;;
 ;; Api
@@ -149,7 +163,7 @@
   {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
-(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id]]
+(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id contents]]
   (cond-> {:id (or attachment-id (mongo/create-id))
            :type attachment-type
            :modified now
@@ -165,7 +179,8 @@
            :forPrinting false
            :op op
            :signatures []
-           :versions []}
+           :versions []
+           :contents contents}
           (and (seq metadata) (env/feature? :tiedonohjaus)) (assoc :metadata metadata)))
 
 (defn make-attachments
@@ -176,10 +191,10 @@
 (defn- default-metadata-for-attachment-type [type {:keys [:organization :tosFunction]}]
   (tos/metadata-for-document organization tosFunction type))
 
-(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id]]
+(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents]]
   {:pre [(map? application)]}
   (let [metadata (default-metadata-for-attachment-type attachment-type application)
-        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id)]
+        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id contents)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -326,13 +341,13 @@
 (defn- update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked required] :as options}]
+  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked required contents] :as options}]
   {:pre [(map? application)]}
   (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? (:user options)))
         att-id (cond
-                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority?)
+                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority? nil contents)
                  (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
-                 :else (create-attachment application attachment-type op created target locked required requested-by-authority? attachment-id))]
+                 :else (create-attachment application attachment-type op created target locked required requested-by-authority? attachment-id contents))]
     (set-attachment-version (assoc options :attachment-id att-id :now created :stamped false))))
 
 (defn parse-attachment-type [attachment-type]

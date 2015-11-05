@@ -250,6 +250,41 @@ var util = (function($) {
     }
   }
 
+  function createSortableColumn(index, text, opts) {
+    index = index || "";
+    text = text || "";
+    var colspan = util.getIn(opts, ["colspan"], 1);
+    var sortable = util.getIn(opts, ["sortable"], true);
+    var sortField = util.getIn(opts, ["sortField"], "");
+    var currentSort = util.getIn(opts, ["currentSort"], {field: ko.observable(), asc: ko.observable(false)});
+
+    function sortBy(target) {
+      if ( target === currentSort.field() ) {
+        currentSort.asc(!currentSort.asc()); // toggle direction
+      } else {
+        currentSort.field(target);
+        currentSort.asc(false);
+      }
+    }
+
+    var css = [index];
+    if (sortable) {
+      css.push("sorting");
+    }
+
+    return { click: sortable ? _.partial(sortBy, sortField) : _.noop,
+             css: css.join(" "),
+             ltext: text,
+             attr: {colspan: colspan, "data-test-id": "search-column-" + loc(text)},
+             isDescending: ko.pureComputed(function() {
+               return currentSort.field() === sortField && !currentSort.asc();
+             }),
+             isAscending: ko.pureComputed(function() {
+               return currentSort.field() === sortField && currentSort.asc();
+             }) };
+  }
+
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -284,7 +319,8 @@ var util = (function($) {
     withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery,
     showSavedIndicator: showSavedIndicator,
-    isNonNegative: isNonNegative
+    isNonNegative: isNonNegative,
+    createSortableColumn: createSortableColumn
   };
 
 })(jQuery);

@@ -247,22 +247,22 @@
      :kuntalupatunnus (-> application :verdicts first :kuntalupatunnus))})
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
-  {"Rakennusvalvonta-asian hakija"                  "hakija"
-   "Ilmoituksen tekij\u00e4"                        "hakija"
+  {"Rakennusvalvonta-asian hakija"  "hakija"
+   "Ilmoituksen tekij\u00e4"        "hakija"
    "Hakijan asiamies"                               "hakija"
-   "Rakennusvalvonta-asian laskun maksaja"          "maksaja"
-   "p\u00e4\u00e4suunnittelija"                     "p\u00e4\u00e4suunnittelija"
-   "GEO-suunnittelija"                              "erityissuunnittelija"
-   "LVI-suunnittelija" `                            "erityissuunnittelija"
-   "RAK-rakennesuunnittelija"                       "erityissuunnittelija"
-   "ARK-rakennussuunnittelija"                      "rakennussuunnittelija"
-   "KVV-ty\u00F6njohtaja"                           "ty\u00f6njohtaja"
-   "IV-ty\u00F6njohtaja"                            "ty\u00f6njohtaja"
-   "erityisalojen ty\u00F6njohtaja"                 "ty\u00f6njohtaja"
-   "vastaava ty\u00F6njohtaja"                      "ty\u00f6njohtaja"
-   "ty\u00F6njohtaja"                               "ty\u00f6njohtaja"
-   "ei tiedossa"                                    "ei tiedossa"
-   "Rakennuksen omistaja"                           "rakennuksen omistaja"
+   "Rakennusvalvonta-asian laskun maksaja"  "maksaja"
+   "p\u00e4\u00e4suunnittelija"     "p\u00e4\u00e4suunnittelija"
+   "GEO-suunnittelija"              "erityissuunnittelija"
+   "LVI-suunnittelija" `            "erityissuunnittelija"
+   "RAK-rakennesuunnittelija"       "erityissuunnittelija"
+   "ARK-rakennussuunnittelija"      "rakennussuunnittelija"
+   "KVV-ty\u00F6njohtaja"           "ty\u00f6njohtaja"
+   "IV-ty\u00F6njohtaja"            "ty\u00f6njohtaja"
+   "erityisalojen ty\u00F6njohtaja" "ty\u00f6njohtaja"
+   "vastaava ty\u00F6njohtaja"      "ty\u00f6njohtaja"
+   "ty\u00F6njohtaja"               "ty\u00f6njohtaja"
+   "ei tiedossa"                    "ei tiedossa"
+   "Rakennuksen omistaja"           "rakennuksen omistaja"
    "rakennussuunnittelija"                          "rakennussuunnittelija"
    "kantavien rakenteiden suunnittelija"            "erityissuunnittelija"
    "pohjarakenteiden suunnittelija"                 "erityissuunnittelija"
@@ -270,11 +270,11 @@
    "kiinteist\u00F6n vesi- ja viem\u00e4r\u00F6intilaitteiston suunnittelija"  "erityissuunnittelija"
    "rakennusfysikaalinen suunnittelija"             "erityissuunnittelija"
    "kosteusvaurion korjausty\u00F6n suunnittelija"  "erityissuunnittelija"
-   :rakennuspaikanomistaja                          "rakennuspaikan omistaja"
-   :lupapaatoksentoimittaminen                      "lupap\u00e4\u00e4t\u00f6ksen toimittaminen"
-   :naapuri                                         "naapuri"
-   :lisatietojenantaja                              "lis\u00e4tietojen antaja"
-   :muu                                             "muu osapuoli"})
+   :rakennuspaikanomistaja          "rakennuspaikan omistaja"
+   :lupapaatoksentoimittaminen      "lupap\u00e4\u00e4t\u00f6ksen toimittaminen"
+   :naapuri                         "naapuri"
+   :lisatietojenantaja              "lis\u00e4tietojen antaja"
+   :muu                             "muu osapuoli"})
 
 (def kuntaRoolikoodit
   {:paasuunnittelija       "p\u00e4\u00e4suunnittelija"
@@ -284,11 +284,25 @@
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
-(defn get-simple-osoite [{:keys [katu postinumero postitoimipaikannimi] :as osoite}]
+(defn assoc-country
+  "Augments given (address) map with country and foreign address
+  information (based on data), if needed."
+  [address data]
+  (let [maa (or (:maa data) "FIN")]
+    (merge address
+           {:valtioSuomeksi        (i18n/localize :fi (str "country." maa))
+            :valtioKansainvalinen  maa}
+           (when-not (= maa "FIN")
+             {:ulkomainenLahiosoite       (:katu data)
+              :ulkomainenPostitoimipaikka (:postitoimipaikannimi data)}))))
+
+(defn get-simple-osoite
+  [{:keys [katu postinumero postitoimipaikannimi] :as osoite}]
   (when katu  ;; required field in krysp (i.e. "osoitenimi")
-    {:osoitenimi {:teksti katu}
+    (assoc-country {:osoitenimi           {:teksti katu}
      :postitoimipaikannimi postitoimipaikannimi
-     :postinumero postinumero}))
+                    :postinumero          postinumero}
+                   osoite)))
 
 (defn- get-name [henkilotiedot]
   {:nimi (select-keys henkilotiedot [:etunimi :sukunimi])})
@@ -344,6 +358,8 @@
            :kuntaRooliKoodi kuntaRoolicode
            :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin))
            :VainSahkoinenAsiointi (:vainsahkoinenAsiointiKytkin osapuoli)
+           ;; Only explicit check allows direct marketing
+           :suoramarkkinointikieltoKytkin (-> henkilo :kytkimet :suoramarkkinointilupa true? not)
            :henkilo (merge
                       (get-name (:henkilotiedot henkilo))
                       (get-yhteystiedot-data (:yhteystiedot henkilo))
@@ -734,9 +750,10 @@
      (filter #(contains? values (get-in % [:schema-info prop])) docs))))
 
 (defn ->postiosoite-type [address]
-  (merge {:osoitenimi (entry :katu address :teksti)}
+  (assoc-country (merge {:osoitenimi (entry :katu address :teksti)}
          (entry :postinumero address)
-         (entry :postitoimipaikannimi address)))
+                        (entry :postitoimipaikannimi address))
+                 address))
 
 (defmulti osapuolitieto :_selected)
 
@@ -771,7 +788,7 @@
 (defn- process-party [lang {{role :subtype} :schema-info data :data}]
   {:Osapuoli (merge
                {:roolikoodi (ss/capitalize role)
-                :asioimiskieli lang
+                     :asioimiskieli lang
                 :vainsahkoinenAsiointiKytkin false}
                (osapuolitieto data))})
 

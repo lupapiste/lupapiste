@@ -9,7 +9,8 @@
             [lupapalvelu.xml.validator :as  validator]
             [clojure.data.xml :refer :all]
             [sade.xml :as xml]
-            [sade.common-reader :as cr]))
+            [sade.common-reader :as cr]
+            [sade.util :as util]))
 
 (fact ":tag is set, 2.1.2" (has-tag mapping/poikkeamis_to_krysp_212) => true)
 (fact ":tag is set, 2.1.3" (has-tag mapping/poikkeamis_to_krysp_213) => true)
@@ -53,3 +54,23 @@
         (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil
         (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosala]) => "200"))
     ))
+
+(facts "Poikkeaminen without toimenpidetieto is valid"
+  (let [canonical (poikkeus-application-to-canonical poikkari-hakemus "fi")
+        canonical-no-toimenpidetieto (util/dissoc-in canonical
+                                                     [:Popast :poikkeamisasiatieto :Poikkeamisasia :toimenpidetieto])
+        xml_212 (element-to-xml canonical-no-toimenpidetieto mapping/poikkeamis_to_krysp_212)
+        xml_214 (element-to-xml canonical-no-toimenpidetieto mapping/poikkeamis_to_krysp_214)
+        xml_215 (element-to-xml canonical-no-toimenpidetieto mapping/poikkeamis_to_krysp_215)
+        xml_220 (element-to-xml canonical-no-toimenpidetieto mapping/poikkeamis_to_krysp_220)
+        xml_221 (element-to-xml canonical-no-toimenpidetieto mapping/poikkeamis_to_krysp_221)
+        xml_212_s (indent-str xml_212)
+        xml_214_s (indent-str xml_214)
+        xml_215_s (indent-str xml_215)
+        xml_220_s (indent-str xml_220)
+        xml_221_s (indent-str xml_221)]
+    (validator/validate xml_212_s (:permitType poikkari-hakemus) "2.1.2") => nil
+    (validator/validate xml_214_s (:permitType poikkari-hakemus) "2.1.4") => nil
+    (validator/validate xml_215_s (:permitType poikkari-hakemus) "2.1.5") => nil
+    (validator/validate xml_220_s (:permitType poikkari-hakemus) "2.2.0") => nil
+    (validator/validate xml_221_s (:permitType poikkari-hakemus) "2.2.1") => nil))
