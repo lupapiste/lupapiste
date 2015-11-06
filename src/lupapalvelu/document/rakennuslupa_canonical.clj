@@ -38,15 +38,23 @@
   (when-let [osapuoli (get-osapuoli-data omistaja :rakennuksenomistaja)]
     {:Omistaja osapuoli}))
 
-(defn- get-rakennustunnus [toimenpide application]
+(defn- operation-description [{primary :primaryOperation secondaries :secondaryOperations} op-id]
+  (let [ops (cons primary secondaries)]
+    (->> ops (filter #(= op-id (:id %))) first :description)))
+
+(defn- get-rakennustunnus [toimenpide application {{op-id :id} :op}]
   (let [defaults {:jarjestysnumero nil :kiinttun (:propertyId application)}
         {:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} toimenpide]
     (cond
       manuaalinen_rakennusnro (assoc defaults :rakennusnro manuaalinen_rakennusnro)
-      rakennusnro             (util/assoc-when defaults :rakennusnro rakennusnro :valtakunnallinenNumero valtakunnallinenNumero)
+      rakennusnro             (util/assoc-when defaults
+                                               :rakennusnro rakennusnro
+                                               :valtakunnallinenNumero valtakunnallinenNumero
+                                               :muuTunnustieto {:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                                               :rakennuksenSelite (operation-description application op-id))
       :default defaults)))
 
-(defn- get-rakennus [toimenpide application {id :id created :created}]
+(defn- get-rakennus [toimenpide application {id :id created :created info :schema-info}]
   (let [{:keys [kaytto mitat rakenne lammitys luokitus huoneistot]} toimenpide
         kuvaus (:toimenpiteenKuvaus toimenpide)
         kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (:muuRakennusaine rakenne)
@@ -82,7 +90,7 @@
                                                    :saunoja (-> toimenpide :varusteet :saunoja)
                                                    :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}
                                        :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))
-                                       :rakennustunnus (get-rakennustunnus toimenpide application)}
+                                       :rakennustunnus (get-rakennustunnus toimenpide application info)}
         rakennuksen-tiedot (merge
                              (select-keys mitat [:tilavuus :kokonaisala :kellarinpinta-ala :kerrosluku :kerrosala])
                              (select-keys luokitus [:energialuokka :energiatehokkuusluku :paloluokka])

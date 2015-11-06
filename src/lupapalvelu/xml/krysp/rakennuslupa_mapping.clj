@@ -45,6 +45,15 @@
     {:tag :katselmusOsittainen}
     {:tag :kayttoonottoKytkin}))
 
+(def- muu-tunnus
+  [{:tag :MuuTunnus :child [{:tag :tunnus :ns "yht"}
+                            {:tag :sovellus :ns "yht"}]}])
+
+(def- rakennustunnus_220
+  (conj rakennustunnus_213
+        {:tag :muuTunnustieto :child muu-tunnus}
+        {:tag :rakennuksenSelite}))
+
 (def- rakennus
   {:tag :Rakennus
    :child [{:tag :yksilointitieto :ns "yht"}
@@ -114,20 +123,23 @@
                                :child [{:tag :muu}
                                        {:tag :omistajalaji}]}]}))
 
-(def rakennus_220
-  (update-in rakennus [:child] mapping-common/update-child-element
-      [:omistajatieto :Omistaja]
-      {:tag :Omistaja :child [{:tag :kuntaRooliKoodi :ns "yht"}
-                              {:tag :VRKrooliKoodi :ns "yht"}
-                              mapping-common/henkilo
-                              mapping-common/yritys_213
-                              {:tag :turvakieltoKytkin :ns "yht"}
-                              {:tag :suoramarkkinointikieltoKytkin :ns "yht"}
-                              {:tag :omistajalaji :ns "rakval"
-                               :child [{:tag :muu}
-                                       {:tag :omistajalaji}]}]}))
-
-
+(def- rakennus_220
+  (-> rakennus
+      (update-in [:child] mapping-common/update-child-element
+                 [:omistajatieto :Omistaja]
+                 {:tag :Omistaja :child [{:tag :kuntaRooliKoodi :ns "yht"}
+                                         {:tag :VRKrooliKoodi :ns "yht"}
+                                         mapping-common/henkilo
+                                         mapping-common/yritys_213
+                                         {:tag :turvakieltoKytkin :ns "yht"}
+                                         {:tag :suoramarkkinointikieltoKytkin :ns "yht"}
+                                         {:tag :omistajalaji :ns "rakval"
+                                          :child [{:tag :muu}
+                                                  {:tag :omistajalaji}]}]})
+      (update-in [:child]
+                 mapping-common/update-child-element
+                 [:rakennuksenTiedot :rakennustunnus]
+                 {:tag :rakennustunnus :child rakennustunnus_220})))
 
 (def- katselmustieto
   {:tag :katselmustieto
@@ -236,6 +248,11 @@
   (update-in katselmus_213 [:child] mapping-common/update-child-element
       [:Katselmus :katselmuspoytakirja]
       {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
+
+(def- katselmus_220
+  (update-in katselmus_215 [:child] mapping-common/update-child-element
+      [:Katselmus :katselmuksenRakennustieto :KatselmuksenRakennus]
+      {:tag :KatselmuksenRakennus :child rakennustunnus_220}))
 
 (def rakennuslupa_to_krysp_213
   (-> rakennuslupa_to_krysp_212
