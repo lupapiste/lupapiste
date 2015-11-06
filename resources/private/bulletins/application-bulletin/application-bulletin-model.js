@@ -13,6 +13,9 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   self.bulletinStateLoc = ko.pureComputed(function() {
     return ["bulletin", "state", self.bulletin().bulletinState].join(".");
   });
+  self.currentStateInSeq = ko.pureComputed(function() {
+    return _.contains(self.bulletin().stateSeq, self.bulletin().bulletinState);
+  });
 
   var id = self.bulletin.subscribe(function(bulletin) {
     if (util.getIn(self, ["bulletin", "id"])) {

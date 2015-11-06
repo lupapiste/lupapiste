@@ -65,8 +65,10 @@
   ^{:doc "See default-application-state-graph"}
   ymp-application-state-graph
   (merge
-    (select-keys default-application-state-graph [:draft :open :submitted :sent :complementNeeded :canceled])
-    {:verdictGiven [:final :appealed :canceled]
+    (select-keys default-application-state-graph [:draft :open :submitted :complementNeeded :canceled])
+    {:sent [:consideration :complementNeeded :canceled]
+     :consideration [:verdictGiven :complementNeeded]
+     :verdictGiven [:final :appealed :canceled]
      :appealed     [:complementNeeded :verdictGiven :final :canceled] ; Valitettu
      :final        [] ; Lain voimainen
      }))
@@ -95,6 +97,14 @@
      :sessionHeld [:registered :canceled] ; Kokous pidetty
      :registered [] ; Kiinteistorekisterissa
      }))
+
+(def
+  ^{:doc "States for bulletin version snapshot"}
+  bulletin-version-states
+  {:proclaimed [:consideration]
+   :consideration [:verdictGiven]
+   :verdictGiven [:final]
+   :final []})
 
 
 (def pre-verdict-states #{:draft :info :answered :open :submitted :complementNeeded :sent})
