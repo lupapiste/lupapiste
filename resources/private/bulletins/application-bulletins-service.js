@@ -43,7 +43,8 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   var commentPending = ko.observable(false);
 
   ko.computed(function() {
-    hub.send("bulletinService::commentPending", {value: commentPending()});
+    var state = commentPending() ? "pending" : "finished";
+    hub.send("bulletinService::commentProcessing", {state: state});
   });
 
   function fetchMunicipalities() {
@@ -99,7 +100,7 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   });
 
   var commentSent = function() {
-    hub.send("bulletinService::commentSubmitted");
+    hub.send("bulletinService::commentSubmitted", {status: "success"});
   };
 
   hub.subscribe("bulletinService::sendComment", function(event) {

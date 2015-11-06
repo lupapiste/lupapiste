@@ -9,6 +9,10 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   self.attachments = ko.observableArray([]);
   self.pending = ko.observable(false);
 
+  self.isDisabled = ko.pureComputed(function() {
+    return self.pending() || !self.comment();
+  });
+
   self.fileChanged = function(data, event) {
     self.attachments.push(util.getIn(_.first($(event.target)), ["files", 0]));
   };
@@ -21,18 +25,21 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     self.attachments.remove(attachment);
   };
 
-  self.onSuccess = function() {
-    self.comment("");
-    self.attachments([]);
-  };
-
   self.sendComment = function(form) {
     hub.send("bulletinService::sendComment", {commentForm: form, files: self.attachments()});
   };
 
-  self.addEventListener("bulletinService", "commentSubmitted", self.onSuccess);
+  self.addEventListener("bulletinService", "commentSubmitted", function(event) {
+    if (event.status === "success") {
+      self.comment("");
+      self.attachments([]);
+    } else {
+      // TODO show error
+    }
+  });
 
-  self.addEventListener("bulletinService", "commentPending", function(event) {
-    self.pending(event.value);
+  self.addEventListener("bulletinService", "commentProcessing", function(event) {
+    var state = event.state;
+    self.pending(state === "pending");
   });
 };
