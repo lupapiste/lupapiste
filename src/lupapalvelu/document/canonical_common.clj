@@ -249,6 +249,7 @@
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
    "Ilmoituksen tekij\u00e4"        "hakija"
+   "Hakijan asiamies"                               "hakija"
    "Rakennusvalvonta-asian laskun maksaja"  "maksaja"
    "p\u00e4\u00e4suunnittelija"     "p\u00e4\u00e4suunnittelija"
    "GEO-suunnittelija"              "erityissuunnittelija"
@@ -262,7 +263,13 @@
    "ty\u00F6njohtaja"               "ty\u00f6njohtaja"
    "ei tiedossa"                    "ei tiedossa"
    "Rakennuksen omistaja"           "rakennuksen omistaja"
-
+   "rakennussuunnittelija"                          "rakennussuunnittelija"
+   "kantavien rakenteiden suunnittelija"            "erityissuunnittelija"
+   "pohjarakenteiden suunnittelija"                 "erityissuunnittelija"
+   "ilmanvaihdon suunnittelija"                     "erityissuunnittelija"
+   "kiinteist\u00F6n vesi- ja viem\u00e4r\u00F6intilaitteiston suunnittelija"  "erityissuunnittelija"
+   "rakennusfysikaalinen suunnittelija"             "erityissuunnittelija"
+   "kosteusvaurion korjausty\u00F6n suunnittelija"  "erityissuunnittelija"
    :rakennuspaikanomistaja          "rakennuspaikan omistaja"
    :lupapaatoksentoimittaminen      "lupap\u00e4\u00e4t\u00f6ksen toimittaminen"
    :naapuri                         "naapuri"
@@ -277,11 +284,25 @@
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
-(defn get-simple-osoite [{:keys [katu postinumero postitoimipaikannimi] :as osoite}]
+(defn assoc-country
+  "Augments given (address) map with country and foreign address
+  information (based on data), if needed."
+  [address data]
+  (let [maa (or (:maa data) "FIN")]
+    (merge address
+           {:valtioSuomeksi        (i18n/localize :fi (str "country." maa))
+            :valtioKansainvalinen  maa}
+           (when-not (= maa "FIN")
+             {:ulkomainenLahiosoite       (:katu data)
+              :ulkomainenPostitoimipaikka (:postitoimipaikannimi data)}))))
+
+(defn get-simple-osoite
+  [{:keys [katu postinumero postitoimipaikannimi] :as osoite}]
   (when katu  ;; required field in krysp (i.e. "osoitenimi")
-    {:osoitenimi {:teksti katu}
+    (assoc-country {:osoitenimi           {:teksti katu}
      :postitoimipaikannimi postitoimipaikannimi
-     :postinumero postinumero}))
+                    :postinumero          postinumero}
+                   osoite)))
 
 (defn- get-name [henkilotiedot]
   {:nimi (select-keys henkilotiedot [:etunimi :sukunimi])})
@@ -336,6 +357,9 @@
           {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
            :kuntaRooliKoodi kuntaRoolicode
            :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin))
+           :VainSahkoinenAsiointi (true? (:vainsahkoinenAsiointiKytkin osapuoli))
+           ;; Only explicit check allows direct marketing
+           :suoramarkkinointikieltoKytkin (-> henkilo :kytkimet :suoramarkkinointilupa true? not)
            :henkilo (merge
                       (get-name (:henkilotiedot henkilo))
                       (get-yhteystiedot-data (:yhteystiedot henkilo))
@@ -726,24 +750,24 @@
      (filter #(contains? values (get-in % [:schema-info prop])) docs))))
 
 (defn ->postiosoite-type [address]
-  (merge {:osoitenimi (entry :katu address :teksti)}
+  (assoc-country (merge {:osoitenimi (entry :katu address :teksti)}
          (entry :postinumero address)
-         (entry :postitoimipaikannimi address)))
+                        (entry :postitoimipaikannimi address))
+                 address))
 
 (defmulti osapuolitieto :_selected)
 
 (defmethod osapuolitieto "henkilo"
-  [{{contact :yhteystiedot personal :henkilotiedot address :osoite} :henkilo}]
-  (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
+  [{{:keys [yhteystiedot henkilotiedot osoite]} :henkilo :as data}]
+  (merge (entry :turvakieltoKytkin henkilotiedot :turvakieltokytkin)
          {:henkilotieto {:Henkilo
-                         (merge {:nimi (merge (entry :etunimi personal)
-                                              (entry :sukunimi personal))}
-                                {:osoite (->postiosoite-type address)}
-                                (entry :email contact :sahkopostiosoite)
-                                (entry :puhelin contact)
-                                (entry :hetu personal :henkilotunnus))}}))
-
-
+                         (merge {:nimi (merge (entry :etunimi henkilotiedot)
+                                         (entry :sukunimi henkilotiedot))}
+                           {:osoite (->postiosoite-type osoite)}
+                           (entry :email yhteystiedot :sahkopostiosoite)
+                           (entry :puhelin yhteystiedot)
+                           (entry :hetu henkilotiedot :henkilotunnus))}}
+         (entry :vainsahkoinenAsiointiKytkin data)))
 
 (defmethod osapuolitieto "yritys"
   [data]
@@ -758,12 +782,15 @@
                                          {:postiosoitetieto {:postiosoite (->postiosoite-type (:osoite company))}}
                                          (entry :puhelin contact)
                                          (entry :email contact :sahkopostiosoite)
-                                         billing-information)}})))
+                                         billing-information)}}
+           (entry :vainsahkoinenAsiointiKytkin company))))
 
 (defn- process-party [lang {{role :subtype} :schema-info data :data}]
-  {:Osapuoli (merge {:roolikoodi (ss/capitalize role)
+  {:Osapuoli (merge
+               {:roolikoodi (ss/capitalize role)
                      :asioimiskieli lang
-                     :vainsahkoinenAsiointiKytkin false} (osapuolitieto data))})
+                :vainsahkoinenAsiointiKytkin false}
+               (osapuolitieto data))})
 
 (defn process-parties [docs lang]
   (map (partial process-party lang) (schema-info-filter docs :type "party")))

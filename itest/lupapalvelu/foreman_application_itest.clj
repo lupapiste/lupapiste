@@ -41,7 +41,7 @@
     (fact "Document data is copied to foreman application"
       (fact "Hankkeen kuvaus"
         (let [foreman-hankkeen-kuvaus (domain/get-document-by-name foreman-application "hankkeen-kuvaus-minimum")
-              app-hankkeen-kuvaus     (domain/get-document-by-name application "hankkeen-kuvaus")]
+              app-hankkeen-kuvaus     (domain/get-document-by-name application "hankkeen-kuvaus-rakennuslupa")]
 
           (get-in app-hankkeen-kuvaus [:data :kuvaus :value]) => (get-in foreman-hankkeen-kuvaus [:data :kuvaus :value])))
 

@@ -12,7 +12,8 @@
                   "2.1.4" "2.1.2"
                   "2.1.5" "2.1.3"
                   "2.1.6" "2.1.5"
-                  "2.1.8" "2.1.5"})
+                  "2.1.8" "2.1.5"
+                  "2.2.0" "2.1.6"})
 
 (def- ya-yht {"2.1.2" "2.1.0"
               "2.1.3" "2.1.3"
@@ -303,19 +304,21 @@
 (def yritys_213 {:tag :yritys :ns "yht" :child yritys-child_213})
 (def yritys_215 {:tag :yritys :ns "yht" :child yritys-child_215})
 
-(def osapuoli-body_211 {:tag :Osapuoli
+(def- osapuoli-body_211 {:tag :Osapuoli
                         :child [{:tag :kuntaRooliKoodi}
                                 {:tag :VRKrooliKoodi}
                                 henkilo
                                 yritys_211
                                 {:tag :turvakieltoKytkin}]})
 
-(def osapuoli-body_213 (update-in osapuoli-body_211 [:child] update-child-element [:yritys] yritys_213))
+(def- osapuoli-body_213 (update-in osapuoli-body_211 [:child] update-child-element [:yritys] yritys_213))
 
-(def osapuoli-body_215
-  (-> osapuoli-body_213
+(def- osapuoli-body_215 (-> osapuoli-body_213
     (update-in [:child] update-child-element [:henkilo] henkilo_215)
     (update-in [:child] update-child-element [:yritys] yritys_215)))
+
+(def osapuoli-body_216
+  (update-in osapuoli-body_215 [:child] concat [{:tag :suoramarkkinointikieltoKytkin}]))
 
 (def- naapuri {:tag :naapuritieto
                :child [{:tag :Naapuri
@@ -455,28 +458,25 @@
            naapuri]})
 
 (def osapuolet_212
-  {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto :child [osapuoli-body_211]}
-           suunnittelijatieto_211
-           tyonjohtajatieto_212
-           naapuri]})
+  (-> osapuolet_211
+    (update-in [:child] update-child-element [:tyonjohtajatieto] tyonjohtajatieto_212)))
 
 (def osapuolet_213
-  {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto :child [osapuoli-body_213]}
-           suunnittelijatieto_213
-           tyonjohtajatieto_213
-           naapuri]})
+  (-> osapuolet_212
+    (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_213)
+    (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_213)
+    (update-in [:child] update-child-element [:tyonjohtajatieto] tyonjohtajatieto_213)))
 
 (def osapuolet_215
-  {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto :child [osapuoli-body_215]}
-           suunnittelijatieto_215
-           tyonjohtajatieto_215
-           naapuri]})
+  (-> osapuolet_213
+    (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_215)
+    (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_215)
+    (update-in [:child] update-child-element [:tyonjohtajatieto] tyonjohtajatieto_215)))
 
 (def osapuolet_216
-  (update-in osapuolet_215 [:child] update-child-element [:naapuritieto] naapuri-216))
+  (-> osapuolet_215
+    (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_216)
+    (update-in [:child] update-child-element [:naapuritieto] naapuri-216)))
 
 
 (def tilamuutos
