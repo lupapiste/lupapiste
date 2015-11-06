@@ -815,7 +815,7 @@
 
 (def rakennelman-kayttotarkoitukset ["Aallonmurtaja" "Aita" "Antenni" "Asuntovaunu" "Autosuoja" "Autotalli" "Ei tiedossa" "Hyppyrim\u00e4ki" "Ikkuna" "Infotaulu (jalankulkuopastaulu)" "Jakokaappi" "Jalasm\u00f6kki" "J\u00e4tekatos tai -aitaus" "J\u00e4tevesij\u00e4rjestelm\u00e4" "Kasvihuone" "Katos/pergola" "Katsomo" "Katumainostaulu" "Kelluva rakennelma" "Kierr\u00e4tyspiste" "Kioski" "Kolmiopilari" "Laituri" "Lastauslaituri" "Liikuteltava grillikioski" "Lipputankoryhm\u00e4" "Maakellari" "Maal\u00e4mp\u00f6pumppuj\u00e4rjestelm\u00e4" "Mainoslaite" "Markiisi" "Masto" "Muu k\u00e4ytt\u00f6" "Muu rakennelma" "Muu toimenpide" "Muu vesirajalaite" "Muuntamo" "Muuri" "N\u00e4k\u00f6torni" "Odotuskatos" "Opaste" "Ovi" "Parvekelasitus" "Pihaj\u00e4rjestely" "Piippu" "Portti" "Puhelinkioski" "Pylv\u00e4sbanderolli" "Pylv\u00e4staulu" "Pys\u00e4kkikatos" "Pys\u00e4k\u00f6intialue" "Py\u00f6re\u00e4 mainospilari" "Rantamuuri" "Savupiippu" "Siirtopuutarham\u00f6kki" "Suurtaulu, sis\u00e4lt\u00e4 valaistu" "Suurtaulu, ulkoa valaistu" "Taideteos" "Taksikatos" "Tuulivoimala" "Ulkomainoslaite" "Ulkotarjoilualue" "Vaja" "Valaisinpylv\u00e4s" "Varasto" "Varastointialue" "Viestint\u00e4torni" "Yleis\u00f6teltta" "Yleis\u00f6-WC"])
 
-(def rakennelman-kayttotarkoitus {:name "rakennelman-kayttotarkoitus"
+(def rakennelman-kayttotarkoitus {:name "kayttotarkoitus"
                                   :type :select
                                   :body (mapv (partial hash-map :name) rakennelman-kayttotarkoitukset)})
 
@@ -1263,7 +1263,9 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body party}
+    :body (body
+            party
+            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
 
    {:info {:name "hakija-r"
            :i18name "osapuoli"
@@ -1277,7 +1279,9 @@
            :section-help "party.section.help"
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body party}
+    :body (body
+            party
+            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
 
    {:info {:name "hakija-ya"
            :i18name "osapuoli"
@@ -1290,7 +1294,9 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
-    :body (schema-body-without-element-by-name ya-party turvakielto)}
+    :body (body
+            (schema-body-without-element-by-name ya-party turvakielto)
+            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
 
    {:info {:name "ilmoittaja"
            :i18name "osapuoli"
@@ -1304,7 +1310,9 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body party}
+    :body (body
+            party
+            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
 
    {:info {:name "paasuunnittelija"
            :i18name "osapuoli"

@@ -145,7 +145,7 @@
                    {:field :inPostVerdictState :fn in-post-verdict-state?}
                    {:field :applicantPhone :fn get-applicant-phone}
                    {:field :organizationMeta :fn organization-meta}
-                   {:field :stateSeq :fn #(sm/state-seq %2)}
+                   {:field :stateSeq :fn #(sm/application-state-seq %2)}
                    {:field :submittable :fn (fn [_ _] true)}))
 
 (defn- enrich-with-meta-fields [fields user app]
