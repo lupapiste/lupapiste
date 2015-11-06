@@ -145,7 +145,7 @@
 
 (defn get-verdict-validator
   "Returns a function that validates verdicts from KRYSP xml.
-   Function takes xml as parameter.
+   Function takes xml and organization map as parameters.
    Use get-application-xml-getter to fetch the XML."
   [permit-type]
   (get-metadata permit-type :verdict-krysp-validator))
