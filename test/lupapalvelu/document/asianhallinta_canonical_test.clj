@@ -105,7 +105,7 @@
               henkilo (-> hakijat first :Henkilo) => truthy]
           (fact "First Hakija of Hakijat has only Henkilo" (keys (first hakijat)) => (just [:Henkilo]))
           (fact "Henkilo expected fields"
-            (keys henkilo) => (just [:Etunimi :Sukunimi :Yhteystiedot :Henkilotunnus :kytkimet :Turvakielto]))
+            (keys henkilo) => (just [:Etunimi :Sukunimi :Yhteystiedot :Henkilotunnus :VainSahkoinenAsiointi :Turvakielto]))
           (fact "Etunimi" (:Etunimi henkilo) => (get-in data-henkilo [:henkilotiedot :etunimi]))
           (fact "Sukunimi" (:Sukunimi henkilo) => (get-in data-henkilo [:henkilotiedot :sukunimi]))
           (fact "Jakeluosoite" (get-in henkilo [:Yhteystiedot :Jakeluosoite]) => (get-in data-henkilo [:osoite :katu]))
@@ -114,7 +114,7 @@
           (fact "Email" (get-in henkilo [:Yhteystiedot :Email]) => (get-in data-henkilo [:yhteystiedot :email]))
           (fact "Puhelinnumero" (get-in henkilo [:Yhteystiedot :Puhelinnumero]) => (get-in data-henkilo [:yhteystiedot :puhelin]))
           (fact "Hetu" (get-in henkilo [:Henkilotunnus]) => (get-in data-henkilo [:henkilotiedot :hetu]))
-          (fact "VainSahkoinenAsiointi" (get-in henkilo [:vainsahkoinenAsiointiKytkin]) => (get-in data-henkilo [:kytkimet :vainsahkoinenAsiointiKytkin]))
+          (fact "VainSahkoinenAsiointi" (get-in henkilo [:VainSahkoinenAsiointi]) => (get-in data-henkilo [:kytkimet :vainsahkoinenAsiointiKytkin]))
           (fact "Turvakielto" (get-in henkilo [:Turvakielto]) => (get-in data-henkilo [:henkilotiedot :turvakieltoKytkin]))))
 
       (facts "Maksaja"
