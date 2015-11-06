@@ -123,8 +123,7 @@ Link foreman approval to base app
   Focus  xpath=//select[@data-test-id="foreman-selection"]
   Select From List By Value  xpath=//tr[@data-test-name="Vastaava työnjohtaja"]//select[@data-test-id="foreman-selection"]  ${foremanAppId}
 
-  # This is wrong!
-  Wait Until  Required foreman state is  Vastaava työnjohtaja  new
+  Wait Until  Required foreman state is  Vastaava työnjohtaja  ok
 
 On second thought, complement is needed
   Open foreman application  1
@@ -159,8 +158,7 @@ Re-send and give verdict
 Foreman state has changed on base app
   Go back to project application
   Open tab  tasks
-  # This is wrong
-  Wait Until  Required foreman state is  Vastaava työnjohtaja  new
+  Wait Until  Required foreman state is  Vastaava työnjohtaja  ok
 
 Deleting the verdict sets application back to previous state
   Open foreman application  1
