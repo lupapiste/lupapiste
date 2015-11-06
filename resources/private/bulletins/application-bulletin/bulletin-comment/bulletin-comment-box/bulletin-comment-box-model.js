@@ -26,10 +26,10 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   };
 
   self.sendComment = function(form) {
-    hub.send("bulletinService::sendComment", {commentForm: form, files: self.attachments()});
+    hub.send("bulletinService::newComment", {commentForm: form, files: self.attachments()});
   };
 
-  self.addEventListener("bulletinService", "commentSubmitted", function(event) {
+  self.addEventListener("bulletinService", "commentProcessed", function(event) {
     if (event.status === "success") {
       self.comment("");
       self.attachments([]);

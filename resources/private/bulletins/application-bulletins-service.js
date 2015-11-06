@@ -100,10 +100,10 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   });
 
   var commentSent = function() {
-    hub.send("bulletinService::commentSubmitted", {status: "success"});
+    hub.send("bulletinService::commentProcessed", {status: "success"});
   };
 
-  hub.subscribe("bulletinService::sendComment", function(event) {
+  hub.subscribe("bulletinService::newComment", function(event) {
     var form = event.commentForm;
     var formData = new FormData(form);
     var files = event.files;
