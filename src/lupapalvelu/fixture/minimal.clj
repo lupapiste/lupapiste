@@ -533,6 +533,7 @@
                                             :ya-jatkoaika                                                      [[:muut :muu]]})
 
 (def- default-keys-for-organizations {:app-required-fields-filling-obligatory false
+                                      :validate-verdict-given-date true
                                       :kopiolaitos-email nil
                                       :kopiolaitos-orderer-address nil
                                       :kopiolaitos-orderer-email nil
