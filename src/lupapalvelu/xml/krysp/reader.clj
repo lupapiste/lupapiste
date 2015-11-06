@@ -351,7 +351,9 @@
 
     ; KRYSP yhteiset 2.1.1+
     (util/ensure-sequential :vaadittuTyonjohtajatieto)
-    (#(let [tyonjohtajat (map (comp :tyonjohtajaLaji :VaadittuTyonjohtaja) (:vaadittuTyonjohtajatieto %))]
+    (#(let [tyonjohtajat (map
+                           (comp (fn [tj] (util/some-key tj :tyonjohtajaLaji :tyonjohtajaRooliKoodi)) :VaadittuTyonjohtaja)  ;; "tyonjohtajaRooliKoodi" in KRYSP Yhteiset 2.1.6->
+                           (:vaadittuTyonjohtajatieto %))]
         (if (seq tyonjohtajat)
           (-> %
             (assoc :vaadittuTyonjohtajatieto tyonjohtajat)
@@ -419,7 +421,7 @@
 (defn- valid-antopvm? [anto-pvm]
   (or (not anto-pvm) (> (now) anto-pvm)))
 
-(defn- standard-verdicts-validator [xml]
+(defn- standard-verdicts-validator [xml {validate-verdict-given-date :validate-verdict-given-date}]
   (let [paatos-xml-without-ns (select (cr/strip-xml-namespaces xml) [:paatostieto :Paatos])
         poytakirjat (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
         poytakirja  (poytakirja-with-paatos-data poytakirjat)
@@ -427,8 +429,8 @@
     (cond
       (not (seq poytakirjat))                               (fail :info.no-verdicts-found-from-backend)
       (not (seq poytakirja))                                (fail :info.paatos-details-missing)
-      (or
-        (not (valid-paatospvm? (:paatospvm poytakirja)))
+      (not (valid-paatospvm? (:paatospvm poytakirja)))      (fail :info.paatos-future-date)
+      (and validate-verdict-given-date
         (not-any? #(valid-antopvm? (:anto %)) paivamaarat)) (fail :info.paatos-future-date))))
 
 (defn- ->standard-verdicts [xml-without-ns]
@@ -436,10 +438,7 @@
          (let [poytakirjat      (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
                poytakirja       (poytakirja-with-paatos-data poytakirjat)
                paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])]
-           (when (and
-                   poytakirja
-                   (valid-paatospvm? (:paatospvm poytakirja))
-                   (valid-antopvm? (:anto paivamaarat)))
+           (when (and poytakirja (valid-paatospvm? (:paatospvm poytakirja)))
              {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
               :paivamaarat    paivamaarat
               :poytakirjat    (seq poytakirjat)})))
@@ -546,7 +545,7 @@
 (def backend-preverdict-state
   #{"" "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"})
 
-(defn- simple-verdicts-validator [xml]
+(defn- simple-verdicts-validator [xml organization]
   (let [xml-without-ns (cr/strip-xml-namespaces xml)
         app-state      (application-state xml-without-ns)
         paivamaarat    (filter number? (map (comp cr/to-timestamp get-text) (select xml-without-ns [:paatostieto :Paatos :paatosdokumentinPvm])))

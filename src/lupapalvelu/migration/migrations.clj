@@ -1275,6 +1275,24 @@
                             (merge {:metadata (:metadata (update-document-tila-metadata application))}))]
       (mongo/update-n :applications {:_id (:id application)} {$set data-for-$set}))))
 
+(defmigration r-application-hankkeen-kuvaus-documents-to-hankkeen-kuvaus-rakennuslupa
+  {:apply-when (or (pos? (mongo/count :applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]}))
+                   (pos? (mongo/count :submitted-applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]})))}
+  (update-applications-array
+    :documents
+    (fn [{schema-info :schema-info :as doc}]
+      (if (= "hankkeen-kuvaus" (:name schema-info))
+        (assoc-in doc [:schema-info :name] "hankkeen-kuvaus-rakennuslupa")
+        doc))
+    {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]}))
+
+(defmigration validate-verdict-given-date
+  {:apply-when (pos? (mongo/count :organizations {:validate-verdict-given-date {$exists false}}))}
+  (mongo/update-n :organizations {} {$set {:validate-verdict-given-date true}}))
+
+(defmigration validate-verdict-given-date-in-helsinki
+  (mongo/update-n :organizations {:_id "091-R"} {$set {:validate-verdict-given-date false}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

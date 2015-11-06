@@ -1,7 +1,8 @@
 (ns lupapalvelu.document.poikkeamis-canonical
   (:require [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
-            [clojure.string :as s]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 (defn- root-element [application lang]
   {:Popast
@@ -20,14 +21,18 @@
                                                                                :paakayttotarkoitusKoodi (:kayttotarkoitus toimenpide)}}}}}))
 
 (defn- get-toimenpidefull [{{toimenpiteet :toimenpiteet kaytettykerrosala :kaytettykerrosala} :data :as toimenpide}]
-  (let [kaytettykerrosala-canonical (when-not (s/blank? (:pintaAla kaytettykerrosala))
+  (let [kaytettykerrosala-canonical (when-not (ss/blank? (:pintaAla kaytettykerrosala))
                                       {:kerrosalatieto {:kerrosala {:pintaAla (:pintaAla kaytettykerrosala)
                                                                     :paakayttotarkoitusKoodi (:kayttotarkoitusKoodi kaytettykerrosala)}}})]
       {:Toimenpide (get-toimenpide (:data toimenpide) kaytettykerrosala-canonical)}))
 
 
 (defn- get-toimenpiteet [toimenpiteet]
-  (map get-toimenpidefull toimenpiteet))
+  (remove
+    #(or (nil? %) (empty? %))
+    (map (comp util/strip-empty-maps
+               util/strip-nils
+               get-toimenpidefull) toimenpiteet)))
 
 
 (defn common-poikkeamis-asia [application poikkeamisasia-path lang kuvaus-avain kayttotapaus]

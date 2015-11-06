@@ -7,7 +7,7 @@
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]
-            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical
+            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical
                                                                  katselmus-canonical
                                                                  unsent-attachments-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
@@ -237,6 +237,11 @@
       [:Katselmus :katselmuspoytakirja]
       {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
 
+(def- katselmus_220
+  (update-in katselmus_215 [:child] mapping-common/update-child-element
+             [:Katselmus :katselmuspoytakirja]
+             {:tag :liitetieto :child [{:tag :liite :child mapping-common/liite-children_216}]}))
+
 (def rakennuslupa_to_krysp_213
   (-> rakennuslupa_to_krysp_212
     (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :R "2.1.3"))
@@ -310,8 +315,14 @@
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto]
                  {:tag :rakennustieto :child [rakennus_220]})
       (update-in [:child] mapping-common/update-child-element
-                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :hankkeenVaativuus]
-                 {:tag :hankkeenVaativuus})))
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
+                 #(update-in % [:child] concat [{:tag :hankkeenVaativuus}]))
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma]
+                 #(update-in % [:child] concat [{:tag :kayttotarkoitus}]))
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
+                 katselmus_220)))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
@@ -365,7 +376,9 @@
                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)
                       %))
                     (#(if poytakirja
-                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
+                        (-> %
+                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
+                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :liitetieto :liite] canonical-pk))
                        %)))
 
         xml (element-to-xml canonical (get-rakennuslupa-mapping krysp-version))
@@ -453,6 +466,8 @@
 
 (defn- map-enums-212 [canonical]
   (map-tyonjohtaja-patevyysvaatimusluokka canonical))
+
+;; TODO: tanne vastaavasti uusien suunnittelijaRoolikoodien kasittely?
 
 (defn- map-enums
   "Map enumerations in canonical into values supperted by given KRYSP version"

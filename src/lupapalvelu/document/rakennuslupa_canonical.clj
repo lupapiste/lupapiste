@@ -1,4 +1,4 @@
-(ns lupapalvelu.document.rakennuslupa_canonical
+(ns lupapalvelu.document.rakennuslupa-canonical
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.string :as s]
@@ -171,6 +171,7 @@
                                                  :alkuHetki (util/to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
                                                  :sijaintitieto {:Sijainti {:tyhja empty-tag}}
                                                  :kokonaisala (-> toimenpide :kokonaisala)
+                                                 :kayttotarkoitus (-> toimenpide :kayttotarkoitus)
                                                  :kuvaus {:kuvaus (-> toimenpide :kuvaus)}
                                                  :tunnus {:jarjestysnumero nil}
                                                  :kiinttun (:propertyId application)}}}
@@ -178,9 +179,11 @@
 
 
 (defn get-maalampokaivo [kaupunkikuvatoimenpide-doc application]
-  (util/dissoc-in
-    (get-kaupunkikuvatoimenpide kaupunkikuvatoimenpide-doc application)
-    [:Toimenpide :rakennelmatieto :Rakennelma :kokonaisala]))
+  (-> (get-kaupunkikuvatoimenpide kaupunkikuvatoimenpide-doc application)
+      (util/dissoc-in
+       [:Toimenpide :rakennelmatieto :Rakennelma :kokonaisala])
+      (assoc-in
+       [:kayttotarkoitus] "Maal\u00e4mp\u00f6pumppuj\u00e4rjestelm\u00e4")))
 
 (defn- get-toimenpide-with-count [toimenpide n]
   (clojure.walk/postwalk #(if (and (map? %) (contains? % :jarjestysnumero))
