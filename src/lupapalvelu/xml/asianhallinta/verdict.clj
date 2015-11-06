@@ -61,7 +61,7 @@
                         (:permitType application))
         batchrun-user (user/batchrun-user (map :id orgs))
         target        {:type "verdict" :id verdict-id :poytakirjaId poytakirja-id}
-        attachment-id (pandect/sha1 (:LinkkiLiitteeseen attachment))]
+        attachment-id (mongo/create-id)]
     (attachment/attach-file! {:application application
                               :filename filename
                               :size file-size
