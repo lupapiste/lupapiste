@@ -531,13 +531,14 @@
                                  #(vector (:id %) (mongo/create-id))
                                  (conj secondary-ops primary-op)))
         state (if (user/authority? user) :open :draft)
-        muutoslupa-app (merge (select-keys application
+        muutoslupa-app (merge domain/application-skeleton
+                              (select-keys application
                                 [:auth
                                  :propertyId, :location
                                  :schema-version
                                  :address, :title
                                  :foreman, :foremanRole
-                                 :applicant,  :_applicantIndex
+                                 :applicant, :_applicantIndex
                                  :municipality, :organization
                                  :drawings
                                  :metadata])

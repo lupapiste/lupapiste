@@ -151,7 +151,8 @@
                               :yhteyshenkilo {:henkilotiedot {:etunimi "", :sukunimi "",
                                                               :turvakieltoKytkin false}
                                               :yhteystiedot {:email "", :puhelin ""}
-                                              :kytkimet {:suoramarkkinointilupa false}}}})))))
+                                              :kytkimet {:suoramarkkinointilupa false
+                                                         :vainsahkoinenAsiointiKytkin false}}}})))))
 
 (fact "converting rakval verdict krysp to lupapiste domain model, using lupapistetunnus"
   (let [xml (rakval-application-xml local-krysp nil id :application-id false)]

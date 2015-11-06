@@ -7,8 +7,6 @@
             [lupapalvelu.xml.emit :as emit]))
 
 
-
-
 (defn ->mapping [muutos]
   (let [osoite [:valtioSuomeksi :valtioKansainvalinen {:osoitenimi :teksti} :ulkomainenLahiosoite
                 :postinumero :postitoimipaikannimi :ulkomainenPostitoimipaikka]]
@@ -16,40 +14,34 @@
      :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :MM "1.0.1")
                    :xmlns:mkmu "http://www.paikkatietopalvelu.fi/gml/maankaytonmuutos"}
                   mapping-common/common-namespaces)
-     :child [(mapping-common/mapper {:maankayttomuutosTieto
-                      {muutos
-                       [{:toimituksenTiedottieto
-                         {:ToimituksenTiedot/yht [:aineistonnimi :aineistotoimittaja :tila :toimitusPvm :kuntakoodi
-                                                  :kielitieto]}}
-                        {:hakemustieto
-                         [{:Hakemus
-                           [{:osapuolitieto
-                             {:Osapuoli
-                              [:roolikoodi :turvakieltokytkin :asioimiskieli
-                               {:henkilotieto
-                                {:Henkilo/yht [{:nimi [:etunimi :sukunimi]}
-                                               {:osoite osoite}
-                                               :sahkopostiosoite
-                                               :faksinumero
-                                               :puhelin
-                                               :henkilotunnus]}}
-                               {:yritystieto
-                                {:Yritys/yht [:nimi :liikeJaYhteisotunnus
-                                              {:postiosoitetieto {:postiosoite osoite}}
-                                              :puhelin
-                                              :sahkopostiosoite
-                                              {:verkkolaskutustieto
-                                               {:Verkkolaskutus [:ovtTunnus :verkkolaskuTunnus :valittajaTunnus]}}]}}
-                               :vainsahkoinenAsiointiKytkin]}}
-                            {:sijaintitieto {:Sijainti/yht [{:osoite [:yksilointitieto :alkuHetki {:osoitenimi :teksti}]}
-                                                            {:piste/gml {:Point :pos}}]}}
-                            :kohdekiinteisto
-                            :maaraAla
-                            {:tilatieto {:Tila [:pvm :kasittelija :hakemuksenTila]}}]}]}
-                        :toimituksenTila
-                        {:liitetieto {:Liite/yht [:kuvaus :linkkiliitteeseen :muokkausHetki :versionumero]}}
-                        :uusiKytkin
-                        :kuvaus]}})]}))
+     :child [(mapping-common/mapper
+               {:maankayttomuutosTieto
+                {muutos [{:toimituksenTiedottieto
+                          {:ToimituksenTiedot/yht [:aineistonnimi :aineistotoimittaja :tila :toimitusPvm :kuntakoodi :kielitieto]}}
+                         {:hakemustieto [{:Hakemus [{:osapuolitieto
+                                                     {:Osapuoli
+                                                      [:roolikoodi :turvakieltokytkin :asioimiskieli
+                                                       {:henkilotieto
+                                                        {:Henkilo/yht [{:nimi [:etunimi :sukunimi]}
+                                                                       {:osoite osoite}
+                                                                       :sahkopostiosoite
+                                                                       :faksinumero
+                                                                       :puhelin
+                                                                       :henkilotunnus]}}
+                                                       {:yritystieto
+                                                        {:Yritys/yht [:nimi :liikeJaYhteisotunnus
+                                                                      {:postiosoitetieto {:postiosoite osoite}}
+                                                                      :puhelin
+                                                                      :sahkopostiosoite
+                                                                      {:verkkolaskutustieto
+                                                                       {:Verkkolaskutus [:ovtTunnus :verkkolaskuTunnus :valittajaTunnus]}}]}}
+                                                       :vainsahkoinenAsiointiKytkin]}}
+                                                    {:sijaintitieto {:Sijainti/yht [{:osoite [:yksilointitieto :alkuHetki {:osoitenimi :teksti}]}
+                                                                                    {:piste/gml {:Point :pos}}]}}
+                                                    :kohdekiinteisto :maaraAla {:tilatieto {:Tila [:pvm :kasittelija :hakemuksenTila]}}]}]}
+                         :toimituksenTila {:liitetieto {:Liite/yht [:kuvaus :linkkiliitteeseen :muokkausHetki :versionumero]}}
+                         :uusiKytkin
+                         :kuvaus]}})]}))
 
 
 (defn save-application-as-krysp
@@ -61,11 +53,12 @@
         muutos (-> canonical-without-attachments :Maankaytonmuutos :maankayttomuutosTieto first key)
         canonical (assoc-in
                     canonical-without-attachments
-                    [:Maankaytonmuutos :maankayttomuutosTieto muutos :liitetieto ]
+                    [:Maankaytonmuutos :maankayttomuutosTieto muutos :liitetieto]
                     attachments-canonical)
         mapping (->mapping muutos)
         xml (emit/element-to-xml canonical mapping)
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
+
     (writer/write-to-disk
       application
       attachments-for-write

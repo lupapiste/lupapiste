@@ -329,7 +329,10 @@
                                 :postiosoitetieto {:postiosoite postiosoite} ; 2.1.5+
                                 :puhelin (:puhelin yhteystiedot)
                                 :sahkopostiosoite (:email yhteystiedot)}
-        yritys-canonical (merge (get-simple-yritys yritys) yhteystiedot-canonical)]
+        yritys-canonical (merge
+                           (get-simple-yritys yritys)
+                           yhteystiedot-canonical
+                           {:vainsahkoinenAsiointiKytkin (true? (-> yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin))})]
     (util/assoc-when yritys-canonical :verkkolaskutustieto (get-verkkolaskutus yritys))))
 
 (def- default-role "ei tiedossa")
@@ -357,7 +360,6 @@
           {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
            :kuntaRooliKoodi kuntaRoolicode
            :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin))
-           :VainSahkoinenAsiointi (true? (:vainsahkoinenAsiointiKytkin osapuoli))
            ;; Only explicit check allows direct marketing
            :suoramarkkinointikieltoKytkin (-> henkilo :kytkimet :suoramarkkinointilupa true? not)
            :henkilo (merge
@@ -365,7 +367,8 @@
                       (get-yhteystiedot-data (:yhteystiedot henkilo))
                       (when-not yritys-type-osapuoli?
                         {:henkilotunnus (-> (:henkilotiedot henkilo) :hetu)
-                         :osoite (get-simple-osoite (:osoite henkilo))}))}
+                         :osoite (get-simple-osoite (:osoite henkilo))
+                         :vainsahkoinenAsiointiKytkin (true? (-> henkilo :kytkimet :vainsahkoinenAsiointiKytkin))}))}
           (when yritys-type-osapuoli?
             {:yritys (get-yritys-data (:yritys osapuoli))})
           (when omistajalaji {:omistajalaji omistajalaji}))))))
@@ -758,16 +761,17 @@
 (defmulti osapuolitieto :_selected)
 
 (defmethod osapuolitieto "henkilo"
-  [{{:keys [yhteystiedot henkilotiedot osoite]} :henkilo :as data}]
+  [{{:keys [yhteystiedot henkilotiedot osoite kytkimet]} :henkilo}]
   (merge (entry :turvakieltoKytkin henkilotiedot :turvakieltokytkin)
+         {:vainsahkoinenAsiointiKytkin (true? (-> kytkimet :vainsahkoinenAsiointiKytkin))}
          {:henkilotieto {:Henkilo
-                         (merge {:nimi (merge (entry :etunimi henkilotiedot)
+                         (merge
+                           {:nimi (merge (entry :etunimi henkilotiedot)
                                          (entry :sukunimi henkilotiedot))}
                            {:osoite (->postiosoite-type osoite)}
                            (entry :email yhteystiedot :sahkopostiosoite)
                            (entry :puhelin yhteystiedot)
-                           (entry :hetu henkilotiedot :henkilotunnus))}}
-         (entry :vainsahkoinenAsiointiKytkin data)))
+                           (entry :hetu henkilotiedot :henkilotunnus))}}))
 
 (defmethod osapuolitieto "yritys"
   [data]
@@ -777,19 +781,18 @@
         billing-information (when billing
                               {:verkkolaskutustieto billing})]
     (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
+           {:vainsahkoinenAsiointiKytkin (true? (-> company :kytkimet :vainsahkoinenAsiointiKytkin))}
            {:yritystieto {:Yritys (merge (entry :yritysnimi company :nimi)
                                          (entry :liikeJaYhteisoTunnus company :liikeJaYhteisotunnus )
                                          {:postiosoitetieto {:postiosoite (->postiosoite-type (:osoite company))}}
                                          (entry :puhelin contact)
                                          (entry :email contact :sahkopostiosoite)
-                                         billing-information)}}
-           (entry :vainsahkoinenAsiointiKytkin company))))
+                                         billing-information)}})))
 
 (defn- process-party [lang {{role :subtype} :schema-info data :data}]
   {:Osapuoli (merge
                {:roolikoodi (ss/capitalize role)
-                     :asioimiskieli lang
-                :vainsahkoinenAsiointiKytkin false}
+                :asioimiskieli lang}
                (osapuolitieto data))})
 
 (defn process-parties [docs lang]
