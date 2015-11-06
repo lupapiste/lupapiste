@@ -220,7 +220,7 @@
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
-    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+    (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
 
     (let [verdict        (-> cases last :paatokset first)
           lupamaaraykset (:lupamaaraykset verdict)]
@@ -228,10 +228,7 @@
       (facts "lupamaaraukset data is correct"
         lupamaaraykset => truthy
         (:rakennusoikeudellinenKerrosala lupamaaraykset) => "101"
-        (:vaaditutTyonjohtajat lupamaaraykset) => "IV-ty\u00f6njohtaja, KVV-ty\u00f6njohtaja, vastaava ty\u00f6njohtaja"
-        )
-      )))
-
+        (:vaaditutTyonjohtajat lupamaaraykset) => "IV-ty\u00f6njohtaja, KVV-ty\u00f6njohtaja, vastaava ty\u00f6njohtaja"))))
 
 (facts "CGI sample verdict"
   (let [xml (xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
