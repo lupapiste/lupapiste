@@ -127,12 +127,14 @@
 (def turvakielto "turvakieltoKytkin")
 
 (def suoramarkkinointilupa {:name "suoramarkkinointilupa" :type :checkbox :layout :full-width :i18nkey "osapuoli.suoramarkkinointilupa"})
+(def vain-sahkoinen-asiointi {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})
 
-(def kytkimet {:name "kytkimet" :type :group :i18nkey "empty" :body [suoramarkkinointilupa] })
+(def kytkimet {:name "kytkimet" :type :group :i18nkey "empty" :body [suoramarkkinointilupa]})
+(def kytkimet-with-vain-sahkoinen-asiointi (update-in kytkimet [:body] conj vain-sahkoinen-asiointi))
 
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
-(def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil 
+(def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil
                          :body [{:name "AA"}
                                 {:name "A"}
                                 {:name "B"}
@@ -210,7 +212,7 @@
                [henkilotiedot]
                simple-osoite
                yhteystiedot
-               kytkimet))
+               kytkimet-with-vain-sahkoinen-asiointi))
 
 (def henkilo-maksaja (body
                        henkilo-valitsin
@@ -241,7 +243,7 @@
                :body (body
                        [henkilotiedot-minimal]
                        yhteystiedot
-                       kytkimet)}))
+                       kytkimet-with-vain-sahkoinen-asiointi)}))
 
 (def yritys-maksaja (body
                       yritys-valitsin
@@ -1263,9 +1265,7 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body (body
-            party
-            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
+    :body party}
 
    {:info {:name "hakija-r"
            :i18name "osapuoli"
@@ -1279,9 +1279,7 @@
            :section-help "party.section.help"
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body (body
-            party
-            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
+    :body party}
 
    {:info {:name "hakija-ya"
            :i18name "osapuoli"
@@ -1293,10 +1291,9 @@
            :subtype "hakija"
            :group-help nil
            :section-help nil
-           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
-    :body (body
-            (schema-body-without-element-by-name ya-party turvakielto)
-            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           }
+    :body (schema-body-without-element-by-name ya-party turvakielto)}
 
    {:info {:name "ilmoittaja"
            :i18name "osapuoli"
@@ -1310,9 +1307,7 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body (body
-            party
-            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
+    :body party}
 
    {:info {:name "paasuunnittelija"
            :i18name "osapuoli"

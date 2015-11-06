@@ -47,22 +47,21 @@
     yritysnimi-ja-ytunnus
     {:osoite osoite
      :yhteyshenkilo {:henkilotiedot (dissoc henkilotiedot :hetu)
-                     :yhteystiedot {:email {:value "solita@solita.fi"},
+                     :yhteystiedot {:email {:value "solita@solita.fi"}
                                     :puhelin {:value "03-389 1380"}}}}))
 
 (def- hakija-henkilo
   {:id "hakija-henkilo" :schema-info {:name "hakija-r"
                                       :subtype "hakija"
                                       :version 1}
-   :data {:henkilo henkilo
-          :vainsahkoinenAsiointiKytkin {:value true}}})
+   :data {:henkilo (assoc henkilo :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}})}})
 
 (def- hakija-yritys
   {:id "hakija-yritys" :schema-info {:name "hakija-r"
                                      :subtype "hakija"
                                      :version 1}
    :data {:_selected {:value "yritys"}
-          :yritys yritys}})
+          :yritys (assoc-in yritys [:yhteyshenkilo :kytkimet] {:vainsahkoinenAsiointiKytkin {:value true}})}})
 
 (def- paasuunnittelija
   {:id "50bc85e4ea3e790c9ff7cdb2"
@@ -520,7 +519,7 @@
     (fact "kuntaRooliKoodi" (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
-    (fact "VainSahkoinenAsiointi" (:VainSahkoinenAsiointi hakija-model) => true)
+    (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin henkilo) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
 
@@ -533,6 +532,7 @@
     (fact "kuntaRooliKoodi" (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
+    (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin yritys) => true)
     (validate-minimal-person henkilo)
     (validate-company yritys)))
 

@@ -32,7 +32,8 @@
   (util/strip-nils
     {:Etunimi (get-in data [:yhteyshenkilo :henkilotiedot :etunimi])
      :Sukunimi (get-in data [:yhteyshenkilo :henkilotiedot :sukunimi])
-     :Yhteystiedot (ua-get-yhteystiedot (:yhteyshenkilo data))}))
+     :Yhteystiedot (ua-get-yhteystiedot (:yhteyshenkilo data))
+     :VainSahkoinenAsiointi (true? (get-in data [:yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin]))}))
 
 (defn- ua-get-henkilo [data]
   (util/strip-nils
@@ -40,8 +41,8 @@
      :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
      :Yhteystiedot (ua-get-yhteystiedot (:henkilo data))
      :Henkilotunnus (get-in data [:henkilo :henkilotiedot :hetu])
-     :VainSahkoinenAsiointi (:vainsahkoinenAsiointiKytkin data)
-     :Turvakielto (get-in data [:henkilo :henkilotiedot :turvakieltoKytkin])}))
+     :VainSahkoinenAsiointi (true? (get-in data [:henkilo :kytkimet :vainsahkoinenAsiointiKytkin]))
+     :Turvakielto (true? (get-in data [:henkilo :henkilotiedot :turvakieltoKytkin]))}))
 
 (defn- ua-get-yritys [data]
   {:Nimi (get-in data [:yritys :yritysnimi])
