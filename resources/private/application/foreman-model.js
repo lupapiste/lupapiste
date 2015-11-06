@@ -61,7 +61,7 @@ LUPAPISTE.ForemanModel = function() {
                     "firstName":   firstname,
                     "lastName":    lastname,
                     "name":        name,
-                    "statusName":  app.state === "verdictGiven" ? "ok" : "new",
+                    "statusName":  app.state === "acknowledged" || _.contains(LUPAPISTE.config.postVerdictStates, app.state) ? "ok" : "new",
                     "displayRole": name ? loc(["osapuoli.tyonjohtaja.kuntaRoolikoodi", name]) : ""};
 
         data.displayName = ko.pureComputed(function() {
