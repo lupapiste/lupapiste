@@ -85,22 +85,22 @@
 
 (defcommand update-foreman-other-applications
   {:user-roles #{:applicant :authority}
-   :states states/all-states
+   :states     states/all-states
    :parameters [:id foremanHetu]
    :pre-checks [application/validate-authority-in-drafts]}
   [{application :application user :user :as command}]
-  (when-let [foreman-applications (seq (foreman/get-foreman-project-applications application foremanHetu))]
-    (let [other-applications (map #(foreman/other-project-document % (:created command)) foreman-applications)
-          tyonjohtaja-doc (update-in (domain/get-document-by-name application "tyonjohtaja-v2") [:data :muutHankkeet] 
-                                     (fn [muut-hankkeet]                      
-                                       (->> (vals muut-hankkeet)
-                                            (remove #(get-in % [:autoupdated :value]))
-                                            (concat other-applications)
-                                            (map vector (map (comp keyword str) (range)))
-                                            (into {}))))
-          documents (map (fn [doc] (if (= (:id doc) (:id tyonjohtaja-doc)) tyonjohtaja-doc doc)) (:documents application))]
-      (update-application command {$set {:documents documents}}))
-    (ok)))
+  (let [foreman-applications (seq (foreman/get-foreman-project-applications application foremanHetu))
+        other-applications (map #(foreman/other-project-document % (:created command)) foreman-applications)
+        tyonjohtaja-doc (update-in (domain/get-document-by-name application "tyonjohtaja-v2") [:data :muutHankkeet]
+                                   (fn [muut-hankkeet]
+                                     (->> (vals muut-hankkeet)
+                                          (remove #(get-in % [:autoupdated :value]))
+                                          (concat other-applications)
+                                          (map vector (map (comp keyword str) (range)))
+                                          (into {}))))
+        documents (map (fn [doc] (if (= (:id doc) (:id tyonjohtaja-doc)) tyonjohtaja-doc doc)) (:documents application))]
+    (update-application command {$set {:documents documents}}))
+  (ok))
 
 (defcommand link-foreman-task
   {:user-roles #{:applicant :authority}
