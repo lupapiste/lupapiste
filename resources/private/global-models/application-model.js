@@ -325,14 +325,6 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
-  self.publishApplicationBulletin = function() {
-    ajax.command("publish-bulletin", {id: self.id()})
-      .success(_.noop)
-      .error(_.noop)
-      .processing(self.processing)
-      .call();
-  };
-
   self.refreshKTJ = function() {
     ajax.command("refresh-ktj", {id: self.id()})
       .success(function() {

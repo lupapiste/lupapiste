@@ -1146,15 +1146,9 @@
                     <div id="application-bulletin-tab" data-bind="with: application" class="tab-content">
                       <div data-bind="attr: {'class': features.enabled('publish-bulletin') ? 'feature' : ''}">
                         <h1>JPano komponentti</h1>
-                          <button data-bind="click: publishApplicationBulletin,
-                                             visible: $root.authorization.ok('publish-bulletin'),
-                                             enable: !processing(),
-                                             attr: {'title': loc('tooltip.publishBulletin')}"
-                                  data-test-id="publish-bulletin"
-                                  class="positive caps">
-                              <i class="lupicon-circle-arrow-right"></i>
-                              <span data-bind="ltext: 'application.publishBulletin'"></span>
-                          </button>
+                        <div data-bind="component: {name: 'publish-bulletin',
+                                                    params: {appId: id(),
+                                                             authModel: $root.authorization}}"></div>
                       </div>
                     </div>
 
