@@ -37,4 +37,12 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   };
 
   hub.send("bulletinService::fetchBulletin", {id: self.bulletinId});
+
+  var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletin/" + self.bulletin.id;
+  self.vetumaParams = {success: returnUrl,
+                       cancel:  returnUrl,
+                       error:   returnUrl,
+                       y:       returnUrl,
+                       vtj:     returnUrl,
+                       id:      "vetuma-init"};
 };

@@ -94,13 +94,18 @@
         </div>
       </div>
 
-      <div data-bind="visible: !authenticated(),
-                      component: { name: 'begin-vetuma-auth-button',
-                                   params: {} }"></div>
-
-      <div data-bind="visible: authenticated,
-                      component: { name: 'bulletin-comment',
+      <!-- ko if: authenticated -->
+      <div data-bind="component: { name: 'bulletin-comment',
                                    params: { bulletin: $data } }"></div>
+      <!-- /ko -->
+
+      <!-- ko if: !authenticated() -->
+      <div class="container">
+        <div data-bind="component: { name: 'vetuma-init',
+                                     params: vetumaParams }"></div>
+      </div>
+      <!-- /ko -->
+
     </script>
   </section>
 </body>
