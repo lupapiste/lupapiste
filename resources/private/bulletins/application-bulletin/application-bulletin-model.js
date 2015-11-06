@@ -38,7 +38,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   hub.send("bulletinService::fetchBulletin", {id: self.bulletinId});
 
-  var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletin/" + self.bulletin.id;
+  var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + self.bulletinId;
   self.vetumaParams = {success: returnUrl,
                        cancel:  returnUrl,
                        error:   returnUrl,
