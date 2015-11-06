@@ -351,7 +351,9 @@
 
     ; KRYSP yhteiset 2.1.1+
     (util/ensure-sequential :vaadittuTyonjohtajatieto)
-    (#(let [tyonjohtajat (map (comp :tyonjohtajaLaji :VaadittuTyonjohtaja) (:vaadittuTyonjohtajatieto %))]
+    (#(let [tyonjohtajat (map
+                           (comp (fn [tj] (util/some-key tj :tyonjohtajaLaji :tyonjohtajaRooliKoodi)) :VaadittuTyonjohtaja)  ;; "tyonjohtajaRooliKoodi" in KRYSP Yhteiset 2.1.6->
+                           (:vaadittuTyonjohtajatieto %))]
         (if (seq tyonjohtajat)
           (-> %
             (assoc :vaadittuTyonjohtajatieto tyonjohtajat)

@@ -1,7 +1,7 @@
-(ns lupapalvelu.document.rakennuslupa_canonical-test
+(ns lupapalvelu.document.rakennuslupa-canonical-test
   (:require [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.canonical-common :refer :all]
-            [lupapalvelu.document.rakennuslupa_canonical :refer :all]
+            [lupapalvelu.document.rakennuslupa-canonical :refer :all]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.xml.emit :refer :all]
@@ -54,13 +54,15 @@
   {:id "hakija-henkilo" :schema-info {:name "hakija-r"
                                       :subtype "hakija"
                                       :version 1}
-   :data {:henkilo henkilo}})
+   :data {:henkilo henkilo
+          :vainsahkoinenAsiointiKytkin {:value true}}})
 
 (def- hakija-yritys
   {:id "hakija-yritys" :schema-info {:name "hakija-r"
                                      :subtype "hakija"
                                      :version 1}
-   :data {:_selected {:value "yritys"}, :yritys yritys}})
+   :data {:_selected {:value "yritys"}
+          :yritys yritys}})
 
 (def- paasuunnittelija
   {:id "50bc85e4ea3e790c9ff7cdb2"
@@ -128,8 +130,7 @@
    :data {:henkilo henkilo}})
 
 (def- maksaja-yritys
-  {:id "maksaja-yritys" :schema-info {:name "maksaja"
-                                      :version 1}
+  {:id "maksaja-yritys" :schema-info {:name "maksaja" :version 1}
    :data {:_selected {:value "yritys"}
           :yritys (merge yritys
                          {:verkkolaskutustieto
@@ -519,6 +520,7 @@
     (fact "kuntaRooliKoodi" (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
+    (fact "VainSahkoinenAsiointi" (:VainSahkoinenAsiointi hakija-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
 
@@ -722,14 +724,14 @@
     (fact "etunimi" (:etunimi name) => "Sonja")
     (fact "sukunimi" (:sukunimi name) => "Sibbo")))
 
-(testable-privates lupapalvelu.document.rakennuslupa_canonical get-operations)
+(testable-privates lupapalvelu.document.rakennuslupa-canonical get-operations)
 
 (facts "Toimenpiteet"
   (let [documents (by-type (:documents (tools/unwrapped application-rakennuslupa)))
         actions (get-operations documents (tools/unwrapped application-rakennuslupa))]
     (fact "actions" (seq actions) => truthy)))
 
-(testable-privates lupapalvelu.document.rakennuslupa_canonical get-huoneisto-data)
+(testable-privates lupapalvelu.document.rakennuslupa-canonical get-huoneisto-data)
 
 (facts "Huoneisto is correct"
   (let [huoneistot (-> uusi-rakennus
@@ -768,7 +770,7 @@
     (fact "h2 huoneistotunnus: huoneistonumero" (-> h1 :huoneistotunnus :huoneistonumero) => "001")
     (fact "h2 huoneistotunnus: jakokirjain" (-> h1 :huoneistotunnus :jakokirjain) => "a")))
 
-(testable-privates lupapalvelu.document.rakennuslupa_canonical get-rakennus)
+(testable-privates lupapalvelu.document.rakennuslupa-canonical get-rakennus)
 
 (facts "When muu-lammonlahde is empty, lammonlahde is used"
   (let [toimenpide (tools/unwrapped {:lammitys {:lammitystapa {:value nil}
