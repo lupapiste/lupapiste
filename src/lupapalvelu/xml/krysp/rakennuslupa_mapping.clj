@@ -237,6 +237,11 @@
       [:Katselmus :katselmuspoytakirja]
       {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
 
+(def- katselmus_220
+  (update-in katselmus_215 [:child] mapping-common/update-child-element
+             [:Katselmus :katselmuspoytakirja]
+             {:tag :liitetieto :child [{:tag :liite :child mapping-common/liite-children_216}]}))
+
 (def rakennuslupa_to_krysp_213
   (-> rakennuslupa_to_krysp_212
     (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :R "2.1.3"))
