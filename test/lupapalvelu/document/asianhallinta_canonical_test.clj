@@ -114,7 +114,7 @@
           (fact "Email" (get-in henkilo [:Yhteystiedot :Email]) => (get-in data-henkilo [:yhteystiedot :email]))
           (fact "Puhelinnumero" (get-in henkilo [:Yhteystiedot :Puhelinnumero]) => (get-in data-henkilo [:yhteystiedot :puhelin]))
           (fact "Hetu" (get-in henkilo [:Henkilotunnus]) => (get-in data-henkilo [:henkilotiedot :hetu]))
-          (fact "VainSahkoinenAsiointi" (get-in henkilo [:VainSahkoinenAsiointi]) => (:vainsahkoinenAsiointiKytkin data))
+          (fact "VainSahkoinenAsiointi" (get-in henkilo [:VainSahkoinenAsiointi]) => (get-in data-henkilo [:kytkimet :vainsahkoinenAsiointiKytkin]))
           (fact "Turvakielto" (get-in henkilo [:Turvakielto]) => (get-in data-henkilo [:henkilotiedot :turvakieltoKytkin]))))
 
       (facts "Maksaja"
