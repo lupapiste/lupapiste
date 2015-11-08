@@ -186,6 +186,9 @@ Open accordion by test id
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
 
+Positive indicator should not be visible
+  Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-positive"]
+
 #
 # Login stuff
 #
