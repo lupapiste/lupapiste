@@ -14,3 +14,23 @@
   }
 }
 
+// Municipality maps
+.munimaps {
+  h3 {
+    margin-top: .5em;
+  }
+  .munimaps--wide {
+    //width: 100%;
+
+    input, select {
+      width: 90%;
+    }
+  }
+  .munimaps--error {
+    color: $red-dark;
+    margin: $marginS $marginS $marginS $marginS;
+  }
+  .munimaps--check input {
+    margin-left: $marginL;
+  }
+}

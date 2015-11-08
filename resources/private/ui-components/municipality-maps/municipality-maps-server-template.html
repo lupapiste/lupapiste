@@ -8,21 +8,24 @@
           <thead>
             <tr>
               <th data-bind="ltext: 'auth-admin.parameter'"></th>
-              <th data-bind="ltext: 'auth-admin.value'"></th>
+              <th data-bind="ltext: 'auth-admin.value'"
+                  class="munimaps--wide"></th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td data-bind="ltext: 'auth-admin.municipality-maps.url'"></td>
-              <td><input data-bind="value: url"></td>
+              <td class="munimaps--wide"><input type="url" data-bind="value: url"></td>
             </tr>
             <tr>
               <td data-bind="ltext: 'auth-admin.municipality-maps.username'"></td>
-              <td><input data-bind="value: username"></td>
+              <td class="munimaps--wide"><input type="text" data-bind="value: username"></td>
             </tr>
             <tr>
               <td data-bind="ltext: 'auth-admin.municipality-maps.password'"></td>
-              <td><input data-bind="value: password" type="password"></td>
+              <td class="munimaps--wide">
+                <input data-bind="value: password" type="password">
+              </td>
             </tr>
           </tbody>
         </table>

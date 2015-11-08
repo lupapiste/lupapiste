@@ -19,9 +19,11 @@
               <td data-bind="text: $parent.shortLoc(name())"></td>
               <!-- /ko -->
               <!-- ko ifnot: fixed -->
-              <td><input type="text" data-bind="value: name"></td>
+              <td class="munimaps--wide">
+                <input type="text" data-bind="value: name">
+              </td>
               <!-- /ko -->
-              <td>
+              <td class="munimaps--wide">
                 <select data-bind="value: id,
                                    options: $parent.serverLayers,
                                    optionsText: 'title',
@@ -30,8 +32,10 @@
                                    valueAllowUnset: true">
                 </select>
               </td>
-              <td><input type="checkbox" data-bind="checked: preview "></td>
-              <td>
+              <td class="munimaps--check">
+                <input type="checkbox" data-bind="checked: preview ">
+              </td>
+              <td class="munimaps--action">
                 <a href="#" data-bind="ifnot: fixed">
                   <span data-bind="text: '[' + loc( 'remove' ) + ']',
                                    click: $parent.removeLayer"></span>

@@ -1,7 +1,6 @@
 
 LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
   "use strict";
-  var self = this;
 
   var PROJECTION = "EPSG:3067";
   var PROXY        = params.PROXY;
@@ -36,15 +35,12 @@ LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
   });
 
   ko.computed( function() {
-    console.log( "updateMap", userLayers);
+    map.getLayers().clear();
     var caps = capabilities();
     if( caps && serverLayers()) {
       var extent = null;
-      map.getLayers().clear();
       _.each( userLayers(), function( layer ) {
-        console.log( "Layer:", layer);
         if( layer.id()) {
-          console.log( "Add layer");
           map.addLayer( new ol.layer.Tile( {
             id: layer.id(),
             visible: layer.preview(),
@@ -67,10 +63,7 @@ LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
       });
       if( !mapFitted() && extent ) {
         mapFitted(true);
-        console.log( "Fit view:", extent);
         map.getView().fit( extent, map.getSize());
-        // map.getView().setCenter(extent[0] + ((extent[2] - extent[0]) / 2),
-        //                         extent[1] + ((extent[3] - extent[1]) / 2));
       }
     }
   });

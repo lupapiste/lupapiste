@@ -4,12 +4,14 @@
     <section class="page container">
       <script type="text/x-jquery-tmpl" id="municipality-maps-template">
         <h2 data-bind="ltext: 'auth-admin.municipality-maps.title'"></h2>
-        <div data-bind="component: {name: 'municipality-maps-server',
-                        params: serverParams}"></div>
-        <div data-bind="component: {name: 'municipality-maps-layers',
-                                    params: layersParams}"></div>
-        <div data-bind="component: {name: 'municipality-maps-map',
-                                    params: mapParams}"></div>
+        <div class="munimaps">
+          <div data-bind="component: {name: 'municipality-maps-server',
+                          params: serverParams}"></div>
+          <div data-bind="component: {name: 'municipality-maps-layers',
+                          params: layersParams}"></div>
+          <div data-bind="component: {name: 'municipality-maps-map',
+                          params: mapParams}"></div>
+        </div>
       </script>
     </section>
   </body>

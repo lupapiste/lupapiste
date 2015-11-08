@@ -11,10 +11,7 @@ LUPAPISTE.MunicipalityMapsServerModel = function( params ) {
 
   self.error = params.error;
 
-  console.log( "Server params:", params);
-
   ko.computed( function() {
-    console.log( "Server computed");
     var server = params.server();
     if(server) {
       self.url( server.url);
@@ -24,17 +21,10 @@ LUPAPISTE.MunicipalityMapsServerModel = function( params ) {
   });
 
   self.updateServerDetails = function() {
-    params.server( {
-        url: self.url(),
-        username: self.username(),
-        password: self.password()
+    params.channel.send( {
+      url: self.url(),
+      username: self.username(),
+      password: self.password()
     });
-    // params.channel.send( {
-    //   server: {
-    //     url: self.url(),
-    //     username: self.username(),
-    //     password: self.password()
-    //   }
-    // });
   };
 };
