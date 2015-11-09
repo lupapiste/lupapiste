@@ -97,10 +97,10 @@
   {:description "Add comment to bulletin"
    :feature     :publish-bulletin
    :user-roles  #{:anonymous}}
-  [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field} :data created :created :as action}]
+  [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field bulletin-version-id :bulletin-version-id} :data created :created :as action}]
   (let [comment      (bulletins/create-comment comment created)
         stored-files (bulletins/store-files bulletin-id (:id comment) files)]
-    (mongo/update-by-id :application-bulletins bulletin-id {$push {:versions.0.comments (assoc comment :attachments stored-files)}}))
+    (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments stored-files)}}))
   (->> {:ok true}
        (resp/json)
        (resp/content-type "application/json")
@@ -124,7 +124,9 @@
 
 (def bulletin-fields
   (merge bulletins-fields
-    {:versions._applicantIndex 1 :versions.documents 1
+    {:versions._applicantIndex 1
+     :versions.documents 1
+     :versions.id 1
      :versions.attachments 1}))
 
 (defquery bulletin
@@ -132,7 +134,9 @@
    :feature :publish-bulletin
    :user-roles #{:anonymous}}
   (if-let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
-    (let [bulletin-version (assoc (-> bulletin :versions first) :id (:id bulletin))
+    (let [latest-version   (-> bulletin :versions first)
+          bulletin-version   (assoc latest-version :versionId (:id latest-version)
+                                                   :id (:id bulletin))
           append-schema-fn (fn [{schema-info :schema-info :as doc}]
                              (assoc doc :schema (schemas/get-schema schema-info)))
           bulletin (-> bulletin-version
