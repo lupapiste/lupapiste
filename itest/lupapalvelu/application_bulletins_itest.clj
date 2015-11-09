@@ -2,10 +2,22 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [clojure.java.io :as io]))
 
 (when (sade.env/feature? :publish-bulletin)
   (apply-remote-minimal)
+
+  (defn- send-comment [apikey id comment & [filename]]
+    (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
+          uploadfile  (io/file filename)
+          uri         (str (server-address) "/api/raw/add-bulletin-comment")]
+      (http-post uri
+                 {:headers {"authorization" (str "apikey=" apikey)}
+                  :multipart [{:name "bulletin-id" :content id}
+                              {:name "bulletin-comment-field" :content comment}
+                              {:name "files[]" :content uploadfile}]
+                  :throw-exceptions false})))
 
   (facts "Publishing bulletins"
     (let [app (create-and-submit-application pena :operation "jatteen-keraystoiminta"
@@ -26,6 +38,15 @@
         (command olli :publish-bulletin :id app-id) => ok?)
       (fact "Regular user can't publish bulletin"
         (command pena :publish-bulletin :id app-id) => fail?)))
+
+  (facts "Add comment for published bulletin"
+    (let [app (create-and-submit-application pena :operation "lannan-varastointi"
+                                             :propertyId sipoo-property-id
+                                             :x 406898.625 :y 6684125.375
+                                             :address "Hitantine 108")]
+      (command sonja :publish-bulletin :id (:id app)) => ok?
+      (command sonja :publish-bulletin :id (:id app)) => ok?
+      (:body (decode-response (send-comment sonja-id (:id app) "foobar"))) => ok?))
 
   (clear-collection "application-bulletins")
 
