@@ -1,8 +1,10 @@
 (ns lupapalvelu.application-bulletins-api
-  (:require [monger.operators :refer :all]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+            [monger.operators :refer :all]
             [monger.query :as query]
             [noir.response :as resp]
-            [sade.core :refer :all]
+            [sade.core :refer [ok fail fail! now]]
+            [slingshot.slingshot :refer [try+]]
             [sade.strings :as ss]
             [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
@@ -92,19 +94,35 @@
   (let [states (mongo/distinct :application-bulletins :versions.bulletinState)]
     (ok :states states)))
 
+(defn- bulletin-version-is-latest! [bulletin-id bulletin-version-id]
+  (let [bulletin (mongo/by-id :application-bulletins bulletin-id)
+        latest-version-id (:id (last (:versions bulletin)))]
+    (when-not (= bulletin-version-id latest-version-id)
+      (fail! :error.invalid-version-id))))
+
 ;; TODO user-roles Vetuma autheticated person
 (defraw add-bulletin-comment
   {:description "Add comment to bulletin"
    :feature     :publish-bulletin
    :user-roles  #{:anonymous}}
   [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field bulletin-version-id :bulletin-version-id} :data created :created :as action}]
-  (let [comment      (bulletins/create-comment comment created)
-        stored-files (bulletins/store-files bulletin-id (:id comment) files)]
-    (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments stored-files)}}))
-  (->> {:ok true}
-       (resp/json)
-       (resp/content-type "application/json")
-       (resp/status 200)))
+  (try+
+    (bulletin-version-is-latest! bulletin-id bulletin-version-id)
+    (let [comment      (bulletins/create-comment comment created)
+          stored-files (bulletins/store-files bulletin-id (:id comment) files)]
+      (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments stored-files)}})
+         (->> {:ok true}
+              (resp/json)
+              (resp/content-type "application/json")
+              (resp/status 200)))
+    (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
+      (->> {:ok false :text text}
+           (resp/json)
+           (resp/content-type "application/json")
+           (resp/status 200)))
+    (catch Throwable t
+      (error "Failed to store bulletin comment" t)
+      (resp/status 400 :error.storing-bulletin-command-failed))))
 
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
