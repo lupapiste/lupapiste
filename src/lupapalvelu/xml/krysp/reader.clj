@@ -324,7 +324,13 @@
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
 (defn- extract-vaadittuErityissuunnitelma-elements [lupamaaraykset]
-  (let [vaadittuErityissuunnitelma-array (->> lupamaaraykset :vaadittuErityissuunnitelma (map ss/trim) (remove ss/blank?))]
+  (let [vaadittuErityissuunnitelma-array (->>
+                                           (or
+                                             (->> lupamaaraykset :vaadittuErityissuunnitelmatieto (map :vaadittuErityissuunnitelma) seq)  ;; Yhteiset Krysp 2.1.6 ->
+                                             (:vaadittuErityissuunnitelma lupamaaraykset))                                                ;; Yhteiset Krysp -> 2.1.5
+                                           (map ss/trim)
+                                           (remove ss/blank?))]
+
     ;; resolving Tekla way of giving vaadittuErityissuunnitelmas: one "vaadittuErityissuunnitelma" with line breaks is divided into multiple "vaadittuErityissuunnitelma"s
     (if (and
           (= 1 (count vaadittuErityissuunnitelma-array))
@@ -340,7 +346,7 @@
     (util/ensure-sequential :vaadittuErityissuunnitelma)
     (#(let [vaaditut-es (extract-vaadittuErityissuunnitelma-elements %)]
         (if (seq vaaditut-es)
-          (-> % (assoc :vaaditutErityissuunnitelmat vaaditut-es) (dissoc % :vaadittuErityissuunnitelma))
+          (-> % (assoc :vaaditutErityissuunnitelmat vaaditut-es) (dissoc % :vaadittuErityissuunnitelma :vaadittuErityissuunnitelmatieto))
           (dissoc % :vaadittuErityissuunnitelma))))
 
     (util/ensure-sequential :vaaditutKatselmukset)
@@ -363,7 +369,6 @@
           (dissoc % :vaadittuTyonjohtajatieto))))
 
     (util/ensure-sequential :maarays)
-
     (#(if (:maarays %)
         (let [maaraykset (cr/convert-keys-to-timestamps (:maarays %) [:maaraysaika :maaraysPvm :toteutusHetki])
               ;; KRYSP 2.1.5+ renamed :maaraysaika -> :maaraysPvm
