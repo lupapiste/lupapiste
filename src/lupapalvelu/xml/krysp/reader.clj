@@ -291,6 +291,7 @@
                         :paloluokka         (get-text rakennus :paloluokka)}
              :mitat {:kellarinpinta-ala     (get-text rakennus :kellarinpinta-ala)
                      :kerrosala             (get-text rakennus :kerrosala)
+                     :rakennusoikeudellinenKerrosala (get-text rakennus :rakennusoikeudellinenKerrosala)
                      :kerrosluku            (get-text rakennus :kerrosluku)
                      :kokonaisala           (get-text rakennus :kokonaisala)
                      :tilavuus              (get-text rakennus :tilavuus)}
