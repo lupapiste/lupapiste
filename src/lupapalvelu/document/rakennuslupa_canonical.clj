@@ -84,7 +84,7 @@
                                        :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))
                                        :rakennustunnus (get-rakennustunnus toimenpide application)}
         rakennuksen-tiedot (merge
-                             (select-keys mitat [:tilavuus :kokonaisala :kellarinpinta-ala :kerrosluku :kerrosala])
+                             (select-keys mitat [:tilavuus :kokonaisala :kellarinpinta-ala :kerrosluku :kerrosala :rakennusoikeudellinenKerrosala])
                              (select-keys luokitus [:energialuokka :energiatehokkuusluku :paloluokka])
                              (when-not (ss/blank? (:energiatehokkuusluku luokitus))
                                (select-keys luokitus [:energiatehokkuusluvunYksikko]))
@@ -129,16 +129,12 @@
      :created (:created rakennuksen-muuttaminen-doc)}))
 
 (defn- get-rakennuksen-laajentaminen-toimenpide [laajentaminen-doc application]
-  (let [toimenpide (:data laajentaminen-doc)
-        mitat (-> toimenpide :laajennuksen-tiedot :mitat )]
+  (let [toimenpide (:data laajentaminen-doc)]
     {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
-                                   {:perusparannusKytkin (true? (-> laajentaminen-doc :data :laajennuksen-tiedot :perusparannuskytkin))}
-                                   {:laajennuksentiedot {:tilavuus (-> mitat :tilavuus)
-                                                         :kerrosala (-> mitat :kerrosala)
-                                                         :kokonaisala (-> mitat :kokonaisala)
-                                                         :huoneistoala (for [huoneistoala (vals (:huoneistoala mitat))]
-                                                                         {:pintaAla (-> huoneistoala :pintaAla)
-                                                                          :kayttotarkoitusKoodi (-> huoneistoala :kayttotarkoitusKoodi)})}})
+                                   {:perusparannusKytkin (true? (get-in laajentaminen-doc [:data :laajennuksen-tiedot :perusparannuskytkin]))}
+                                   {:laajennuksentiedot (-> (get-in toimenpide [:laajennuksen-tiedot :mitat])
+                                                            (select-keys [:tilavuus :kerrosala :kokonaisala :rakennusoikeudellinenKerrosala :huoneistoala])
+                                                            (update :huoneistoala (fn [huoneistoala] (map #(select-keys % [:pintaAla :kayttotarkoitusKoodi]) (vals huoneistoala)))))})
                   :rakennustieto (get-rakennus-data toimenpide application laajentaminen-doc)}
      :created (:created laajentaminen-doc)}))
 
