@@ -37,7 +37,7 @@
             content-length  (util/->int (get-in resp [:headers "content-length"] 0))
             urlhash         (pandect/sha1 url)
             attachment-id   urlhash
-            attachment-type {:type-group "muut" :type-id "muu"}
+            attachment-type {:type-group "muut" :type-id "paatosote"}
             target          {:type "verdict" :id verdict-id :urlHash urlhash}
             attachment-time (get-in pk [:liite :muokkausHetki] timestamp)
             ; Reload application from DB, attachments have changed
