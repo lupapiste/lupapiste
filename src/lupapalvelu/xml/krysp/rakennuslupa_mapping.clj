@@ -331,7 +331,10 @@
                  #(update-in % [:child] concat [{:tag :hankkeenVaativuus}]))
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma]
-                 #(update-in % [:child] concat [{:tag :kayttotarkoitus}]))))
+                 #(update-in % [:child] concat [{:tag :kayttotarkoitus}]))
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
+                 katselmus_220)))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
@@ -418,7 +421,7 @@
       lang
       output-dir
       (:id katselmus)
-      (:taskname katselmus)
+      (:Tasknamepf katselmus)
       pitoPvm
       buildings
       user
@@ -436,7 +439,9 @@
 
 (permit/register-function permit/R :review-krysp-mapper save-katselmus-as-krysp)
 
-(defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index localShortId nationalId propertyId] :as building} user krysp-version]
+(defn save-aloitusilmoitus-as-krysp [application lang output-dir started
+                                     {:keys [index localShortId nationalId propertyId] :as building}
+                                     user krysp-version]
   (let [building-id {:rakennus {:jarjestysnumero index
                                 :kiinttun        propertyId
                                 :rakennusnro     localShortId

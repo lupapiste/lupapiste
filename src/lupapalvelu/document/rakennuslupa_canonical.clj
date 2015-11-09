@@ -325,10 +325,15 @@
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
                         {:rakennustunnus (let [building (-> buildings first :rakennus)]
+                                           (>pprint building)
                                            (util/assoc-when
                                              (select-keys building [:jarjestysnumero :kiinttun])
                                              :rakennusnro (:rakennusnro building)
-                                             :valtakunnallinenNumero (:valtakunnallinenNumero building))) ; v2.1.2
+                                             :valtakunnallinenNumero (:valtakunnallinenNumero building)  ; v2.1.2
+                                             :muuTunnustieto (map (fn [{:keys [tag id]}]
+                                                                    {:Muutunnus {:tunnus tag :sovellus id}})
+                                                                  (:tags building))
+                                             :rakennusSelite (:descriptions building)))  ; v2.2.0
                          :katselmuksenRakennustieto (map #(let [building (:rakennus %)
                                                                 building-canonical (merge
                                                                                      (select-keys building [:jarjestysnumero :kiinttun])
