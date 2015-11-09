@@ -92,6 +92,7 @@
                            :rakentajaTyyppi nil}
                   :mitat {:kerrosluku "5"
                           :kerrosala "1785"
+                          :rakennusoikeudellinenKerrosala ""
                           :kokonaisala "2682"
                           :kellarinpinta-ala "100"
                           :tilavuus "8240"}
