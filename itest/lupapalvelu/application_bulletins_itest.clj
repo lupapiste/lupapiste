@@ -8,13 +8,14 @@
 (when (sade.env/feature? :publish-bulletin)
   (apply-remote-minimal)
 
-  (defn- send-comment [apikey id comment & [filename]]
+  (defn- send-comment [apikey id version-id comment & [filename]]
     (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
           uploadfile  (io/file filename)
           uri         (str (server-address) "/api/raw/add-bulletin-comment")]
       (http-post uri
                  {:headers {"authorization" (str "apikey=" apikey)}
                   :multipart [{:name "bulletin-id" :content id}
+                              {:name "bulletin-version-id" :content version-id}
                               {:name "bulletin-comment-field" :content comment}
                               {:name "files[]" :content uploadfile}]
                   :throw-exceptions false})))
@@ -43,10 +44,15 @@
     (let [app (create-and-submit-application pena :operation "lannan-varastointi"
                                              :propertyId sipoo-property-id
                                              :x 406898.625 :y 6684125.375
-                                             :address "Hitantine 108")]
-      (command sonja :publish-bulletin :id (:id app)) => ok?
-      (command sonja :publish-bulletin :id (:id app)) => ok?
-      (:body (decode-response (send-comment sonja-id (:id app) "foobar"))) => ok?))
+                                             :address "Hitantine 108")
+          _ (command sonja :publish-bulletin :id (:id app))
+          old-bulletin (:bulletin (query pena :bulletin :bulletinId (:id app)))
+          _ (command sonja :publish-bulletin :id (:id app))
+          bulletin (:bulletin (query pena :bulletin :bulletinId (:id app)))]
+      (fact "unable to add comment for older version"
+        (:body (decode-response (send-comment sonja-id (:id app) (:versionId old-bulletin) "foobar"))) => {:ok false :text "error.invalid-version-id"})
+      (fact "approve comment for latest version"
+        (:body (decode-response (send-comment sonja-id (:id app) (:versionId bulletin) "foobar"))) => ok?)))
 
   (clear-collection "application-bulletins")
 
@@ -74,7 +80,7 @@
 
       (facts "Response data"
         (let [bulletin (query-bulletin pena (:id oulu-app))]
-          (keys bulletin) => (just [:id :_applicantIndex :address :applicant :attachments
+          (keys bulletin) => (just [:id :_applicantIndex :address :applicant :attachments :versionId
                                     :bulletinState :documents :location :modified :municipality
                                     :primaryOperation :propertyId :state :stateSeq] :in-any-order)
           (fact "bulletin state is 'proclaimed'"
