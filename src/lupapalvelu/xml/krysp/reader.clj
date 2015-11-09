@@ -377,9 +377,8 @@
                                (-> maar (assoc :maaraysaika (:maaraysPvm maar)) (dissoc :maaraysPvm))
                                maar))
                            maaraykset))]
-          (assoc % :maaraykset maaraykset))
+          (-> % (assoc :maaraykset maaraykset) (dissoc :maarays)))
         %))
-    (dissoc :maarays)
 
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan
                               :autopaikkojaVahintaan
