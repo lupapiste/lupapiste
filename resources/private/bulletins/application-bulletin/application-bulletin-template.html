@@ -99,7 +99,7 @@
           <span data-bind="ltext: 'bulletin.comment.endDate'"></span>
           <span data-bind="dateTimeString: $data.proclamationEndsAt"></span>
         </p>
-        <div data-bind="component: { name: 'bulletin-comment-box', params: { bulletinId: bulletinId } }"></div>
+        <div data-bind="component: { name: 'bulletin-comment-box', params: { bulletinId: bulletinId, versionId: versionId } }"></div>
       </div>
     </script>
   </section>

@@ -16,6 +16,7 @@
           <label data-bind="ltext: 'bulletin.comment.selectedAttachments'"></label>
           <input class="hidden" type="file" data-bind="event: {change: fileChanged}"/>
           <input class="hidden" type="text" name="bulletin-id" data-bind="value: bulletinId"/>
+          <input class="hidden" type="text" name="bulletin-version-id" data-bind="value: versionId"/>
           <!-- ko if: attachments().length > 0 -->
           <ul class="bulletin-comment__attachment-list" data-bind="foreach: attachments">
             <li>

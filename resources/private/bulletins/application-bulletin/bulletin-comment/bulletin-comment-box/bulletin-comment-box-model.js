@@ -5,6 +5,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   self.bulletinId = params.bulletinId;
+  self.versionId = params.versionId;
   self.comment = ko.observable();
   self.attachments = ko.observableArray([]);
   self.pending = ko.observable(false);
