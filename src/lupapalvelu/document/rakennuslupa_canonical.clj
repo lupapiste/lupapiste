@@ -134,7 +134,7 @@
                                    {:perusparannusKytkin (true? (get-in laajentaminen-doc [:data :laajennuksen-tiedot :perusparannuskytkin]))}
                                    {:laajennuksentiedot (-> (get-in toimenpide [:laajennuksen-tiedot :mitat])
                                                             (select-keys [:tilavuus :kerrosala :kokonaisala :rakennusoikeudellinenKerrosala :huoneistoala])
-                                                            (update :huoneistoala (fn [huoneistoala] (map #(select-keys % [:pintaAla :kayttotarkoitusKoodi]) (vals huoneistoala)))))})
+                                                            (update :huoneistoala #(map select-keys (vals %) (repeat [:pintaAla :kayttotarkoitusKoodi]))))})
                   :rakennustieto (get-rakennus-data toimenpide application laajentaminen-doc)}
      :created (:created laajentaminen-doc)}))
 
