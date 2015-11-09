@@ -344,9 +344,10 @@
 
     ;; KRYSP yhteiset 2.1.5+
     (util/ensure-sequential :vaadittuErityissuunnitelma)
+    (util/ensure-sequential :vaadittuErityissuunnitelmatieto)
     (#(let [vaaditut-es (extract-vaadittuErityissuunnitelma-elements %)]
-        (if (seq vaaditut-es) (assoc % :vaaditutErityissuunnitelmat vaaditut-es) %)
-        (dissoc % :vaadittuErityissuunnitelma :vaadittuErityissuunnitelmatieto)))
+        (if (seq vaaditut-es) (assoc % :vaaditutErityissuunnitelmat vaaditut-es) %)))
+    (dissoc :vaadittuErityissuunnitelma :vaadittuErityissuunnitelmatieto)
 
     (util/ensure-sequential :vaaditutKatselmukset)
     (#(let [kats (map :Katselmus (:vaaditutKatselmukset %))]
