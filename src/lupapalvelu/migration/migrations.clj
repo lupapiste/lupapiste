@@ -1293,6 +1293,10 @@
 (defmigration set-validate-verdict-given-date-in-helsinki
   (mongo/update-n :organizations {:_id "091-R"} {$set {:validate-verdict-given-date false}}))
 
+(defmigration reset-pdf2pdf-page-counter-to-zero
+  {:apply-when (pos? (mongo/count :statistics {$and [{:type "pdfa-conversion"} {"years.2015" {$exists true}}]}))}
+  (mongo/update :statistics {:type "pdfa-conversion"} {$unset {"years.2015" ""}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
