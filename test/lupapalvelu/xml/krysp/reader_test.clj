@@ -402,6 +402,13 @@
         (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
         (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))))
 
+(facts "KRYSP rakval 2.2.0"
+  (let [xml (xml/parse (slurp "resources/krysp/sample/building_220.xml"))
+        buildings (->buildings-summary xml)
+        building-id (:buildingId (first buildings))
+        building    (->rakennuksen-tiedot xml building-id)]
+    (fact "mitat - kerrosala" (get-in building [:mitat :kerrosala]) => "1785")
+    (fact "mitat - rakennusoikeudellinenKerrosala" (get-in building [:mitat :rakennusoikeudellinenKerrosala]) => "1780")))
 
 ;; YA verdict
 
