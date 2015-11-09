@@ -1288,10 +1288,14 @@
 
 (defmigration validate-verdict-given-date
   {:apply-when (pos? (mongo/count :organizations {:validate-verdict-given-date {$exists false}}))}
-  (mongo/update-n :organizations {} {$set {:validate-verdict-given-date true}}))
+  (mongo/update-n :organizations {} {$set {:validate-verdict-given-date true}} :multi true))
 
-(defmigration validate-verdict-given-date-in-helsinki
+(defmigration set-validate-verdict-given-date-in-helsinki
   (mongo/update-n :organizations {:_id "091-R"} {$set {:validate-verdict-given-date false}}))
+
+(defmigration reset-pdf2pdf-page-counter-to-zero
+  {:apply-when (pos? (mongo/count :statistics {$and [{:type "pdfa-conversion"} {"years.2015" {$exists true}}]}))}
+  (mongo/update :statistics {:type "pdfa-conversion"} {$unset {"years.2015" ""}}))
 
 ;;
 ;; ****** NOTE! ******
