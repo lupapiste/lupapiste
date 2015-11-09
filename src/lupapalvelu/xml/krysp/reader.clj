@@ -338,6 +338,14 @@
       (-> vaadittuErityissuunnitelma-array first (ss/split #"\n") ((partial remove ss/blank?)))
       vaadittuErityissuunnitelma-array)))
 
+(defn- extract-maarays-elements [lupamaaraykset]
+  (let [maaraykset (or
+                     (->> lupamaaraykset :maaraystieto (map :Maarays) seq)  ;; Yhteiset Krysp 2.1.6 ->
+                     (:maarays lupamaaraykset))]                            ;; Yhteiset Krysp -> 2.1.5
+    (->> (cr/convert-keys-to-timestamps maaraykset [:maaraysaika :maaraysPvm :toteutusHetki])
+      (map #(rename-keys % {:maaraysPvm :maaraysaika}))
+      (remove nil?))))
+
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
@@ -369,17 +377,11 @@
           (dissoc % :vaadittuTyonjohtajatieto))))
 
     (util/ensure-sequential :maarays)
-    (#(if (:maarays %)
-        (let [maaraykset (cr/convert-keys-to-timestamps (:maarays %) [:maaraysaika :maaraysPvm :toteutusHetki])
-              ;; KRYSP 2.1.5+ renamed :maaraysaika -> :maaraysPvm
-              maaraykset (remove nil? (mapv
-                           (fn [maar]
-                             (if (:maaraysPvm maar)
-                               (-> maar (assoc :maaraysaika (:maaraysPvm maar)) (dissoc :maaraysPvm))
-                               maar))
-                           maaraykset))]
-          (-> % (assoc :maaraykset maaraykset) (dissoc :maarays)))
+    (util/ensure-sequential :maaraystieto)
+    (#(if-let [maaraykset (seq (extract-maarays-elements %))]
+        (assoc % :maaraykset maaraykset)
         %))
+    (dissoc :maarays :maaraystieto)
 
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan
                               :autopaikkojaVahintaan
