@@ -162,7 +162,7 @@
                     :permitType
                     :id
                     :municipality])
-      (assoc :location (location->object application))
+      location->object
       (assoc :attachments (->> application
                                :attachments
                                (filter (fn-> :type :type-group (= "paapiirustus")))

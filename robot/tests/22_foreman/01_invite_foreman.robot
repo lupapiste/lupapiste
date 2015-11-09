@@ -149,7 +149,7 @@ Pena can link existing foreman application to foreman task
   Pena logs in
   Open project application
   Open tab  tasks
-  Select From List By Value  foreman-selection  ${foremanAppId}
+  Select From List By Value  xpath=//select[@data-test-id="foreman-selection"]  ${foremanAppId}
 
 Pena can move to linked foreman application and back
   Click by test id  foreman-application-link-${foremanAppId}
