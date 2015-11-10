@@ -28,7 +28,7 @@ Open foreman application
   [Arguments]  ${index}
   ${foremanAppId} =  Get From List  ${foremanApps}  ${index}
   Open application by id  ${foremanAppId}
-  Page should contain  Työnjohtajan nimeäminen
+  Wait Until  Page should contain  Työnjohtajan nimeäminen
 
 Open foreman accordions
   Open accordions  parties
@@ -76,17 +76,14 @@ Foreman sets role and difficulty to foreman application
 
 Open application by id
   [Arguments]  ${appId}
-  Go to page  applications
-  Wait until element is visible  xpath=//table[@id='applications-list']//tr[@data-id='${appId}']
-  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-id='${appId}']
-  Wait for jQuery
-
-  Wait until  Element Should Be Visible  application
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${appId}
+  ${user-role} =  Get role
+  Go to  ${SERVER}/app/fi/${user-role}#!/application/${appId}
+  Wait until  Element Should Be Visible  xpath=//section[@id='application']
 
 Open project application
   ${appId} =   Get From List  ${applicationIds}  0
   Open application by id  ${appId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${appId}
 
 Foreman history should have text X times
   [Arguments]  ${text}  ${times}
@@ -115,3 +112,8 @@ Add työnjohtaja task to current application
   Input text  create-task-name  ${role}
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task
+
+Required foreman state is
+  [Arguments]  ${role}  ${state}
+  ${s} =  Get Element Attribute  xpath=//table[@class="tasks-foreman"]//tr[@data-test-name="${role}"]//td[@data-test-state]@data-test-state
+  Should be equal  ${s}  ${state}

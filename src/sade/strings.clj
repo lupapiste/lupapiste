@@ -130,3 +130,7 @@
     (s/replace
       (last-n windows-filename-max-length de-accented)
       #"[^a-zA-Z0-9\.\-_ ]" "-")))
+
+(defn escaped-re-pattern
+  [string]
+  (re-pattern (str "\\Q" string "\\E")))

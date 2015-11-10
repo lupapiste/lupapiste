@@ -12,7 +12,8 @@
                   "2.1.4" "2.1.2"
                   "2.1.5" "2.1.3"
                   "2.1.6" "2.1.5"
-                  "2.1.8" "2.1.5"})
+                  "2.1.8" "2.1.5"
+                  "2.2.0" "2.1.6"})
 
 (def- ya-yht {"2.1.2" "2.1.0"
               "2.1.3" "2.1.3"
@@ -101,6 +102,11 @@
     children))
 
 (defn in-yhteiset-ns [coll] (mapv (fn [m] (assoc m :ns "yht")) coll))
+
+(defn merge-into-coll-after-tag 
+  "Merges coll-to-merge in the collection just after the element tagged with tag"
+  [coll tag coll-to-merge] 
+  (mapcat (fn [{t :tag :as d}] (if (= t tag) (cons d coll-to-merge) [d])) coll))
 
 (def tunnus-children [{:tag :valtakunnallinenNumero}
                       {:tag :jarjestysnumero}
@@ -303,19 +309,21 @@
 (def yritys_213 {:tag :yritys :ns "yht" :child yritys-child_213})
 (def yritys_215 {:tag :yritys :ns "yht" :child yritys-child_215})
 
-(def osapuoli-body_211 {:tag :Osapuoli
+(def- osapuoli-body_211 {:tag :Osapuoli
                         :child [{:tag :kuntaRooliKoodi}
                                 {:tag :VRKrooliKoodi}
                                 henkilo
                                 yritys_211
                                 {:tag :turvakieltoKytkin}]})
 
-(def osapuoli-body_213 (update-in osapuoli-body_211 [:child] update-child-element [:yritys] yritys_213))
+(def- osapuoli-body_213 (update-in osapuoli-body_211 [:child] update-child-element [:yritys] yritys_213))
 
-(def osapuoli-body_215
-  (-> osapuoli-body_213
+(def- osapuoli-body_215 (-> osapuoli-body_213
     (update-in [:child] update-child-element [:henkilo] henkilo_215)
     (update-in [:child] update-child-element [:yritys] yritys_215)))
+
+(def osapuoli-body_216
+  (update-in osapuoli-body_215 [:child] concat [{:tag :suoramarkkinointikieltoKytkin}]))
 
 (def- naapuri {:tag :naapuritieto
                :child [{:tag :Naapuri
@@ -455,28 +463,25 @@
            naapuri]})
 
 (def osapuolet_212
-  {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto :child [osapuoli-body_211]}
-           suunnittelijatieto_211
-           tyonjohtajatieto_212
-           naapuri]})
+  (-> osapuolet_211
+    (update-in [:child] update-child-element [:tyonjohtajatieto] tyonjohtajatieto_212)))
 
 (def osapuolet_213
-  {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto :child [osapuoli-body_213]}
-           suunnittelijatieto_213
-           tyonjohtajatieto_213
-           naapuri]})
+  (-> osapuolet_212
+    (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_213)
+    (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_213)
+    (update-in [:child] update-child-element [:tyonjohtajatieto] tyonjohtajatieto_213)))
 
 (def osapuolet_215
-  {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto :child [osapuoli-body_215]}
-           suunnittelijatieto_215
-           tyonjohtajatieto_215
-           naapuri]})
+  (-> osapuolet_213
+    (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_215)
+    (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_215)
+    (update-in [:child] update-child-element [:tyonjohtajatieto] tyonjohtajatieto_215)))
 
 (def osapuolet_216
-  (update-in osapuolet_215 [:child] update-child-element [:naapuritieto] naapuri-216))
+  (-> osapuolet_215
+    (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_216)
+    (update-in [:child] update-child-element [:naapuritieto] naapuri-216)))
 
 
 (def tilamuutos
@@ -607,11 +612,33 @@
    :filename filename})
 
 (defn- create-metatieto [k v]
-  {:metatieto {:metatietoNimi k :metatietoArvo v}
-   :Metatieto {:metatietoNimi k :metatietoArvo v}})
+  (when v
+    {:metatieto {:metatietoNimi k :metatietoArvo v}
+     :Metatieto {:metatietoNimi k :metatietoArvo v}}))
 
-(defn- get-attachment-meta [attachment]
-  (let [signatures (:signatures attachment)
+(defn- all-operation-ids [application]
+  (let [primary (-> application :primaryOperation :id)
+        secondaries (map :id (:secondaryOperations application))]
+    (remove nil? (conj secondaries primary))))
+
+(defn- operation-attachment-meta
+  "Operation id and VRK-PRK from either the attachment's 'own'
+  operation or every operation if the attachment is not bound to any
+  specific op."
+  [attachment application]
+  (let [ops (or (-> attachment :op :id) (all-operation-ids application))
+        ops (-> ops list flatten)
+        metas (for [op-id ops
+                    :let [docs  (filter #(= op-id (-> % :schema-info :op :id))
+                                        (:documents application))]]
+                [(create-metatieto "toimenpideId" op-id)
+                (map #(create-metatieto "VRK-PRT" (-> % :data :valtakunnallinenNumero :value))
+                     docs)])]
+    (->> metas flatten (remove nil?) )))
+
+(defn- get-attachment-meta [attachment application]
+  (let [op-metas (operation-attachment-meta attachment application)
+        signatures (:signatures attachment)
         latestVersion (:latestVersion attachment)
         liitepohja [(create-metatieto "liiteId" (:id attachment))]
         signatures (->> signatures
@@ -626,7 +653,8 @@
                                    (create-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
                            (flatten)
                            (vec))]
-    (if (empty? signatures)
+    (remove empty? (concat liitepohja op-metas signatures))
+    #_(if (empty? signatures)
       liitepohja
       (into liitepohja signatures))))
 
@@ -636,7 +664,7 @@
         file-id (get-in attachment [:latestVersion :fileId])
         attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
         link (str begin-of-link attachment-file-name)
-        meta (get-attachment-meta attachment)]
+        meta (get-attachment-meta attachment application)]
     {:Liite (get-Liite title link attachment type file-id attachment-file-name meta)}))
 
 (defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
@@ -650,7 +678,7 @@
                                                 (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
 
-(defn get-attachments-as-canonical [{:keys [attachments title]} begin-of-link & [target]]
+(defn get-attachments-as-canonical [{:keys [attachments title] :as application} begin-of-link & [target]]
   (not-empty (for [attachment attachments
                    :when (and (:latestVersion attachment)
                            (not= "statement" (-> attachment :target :type))
@@ -665,7 +693,7 @@
                          file-id (get-in attachment [:latestVersion :fileId])
                          attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                          link (str begin-of-link attachment-file-name)
-                         meta (get-attachment-meta attachment)]]
+                         meta (get-attachment-meta attachment application)]]
                {:Liite (get-Liite attachment-title link attachment type-id file-id attachment-file-name meta)})))
 
 (defn add-statement-attachments [canonical statement-attachments lausunto-path]

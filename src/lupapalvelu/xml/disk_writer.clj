@@ -7,7 +7,7 @@
             [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.pdf-export :as pdf-export]
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.xml.validator :as validator]))
 
 (defn get-file-name-on-server [file-id file-name]

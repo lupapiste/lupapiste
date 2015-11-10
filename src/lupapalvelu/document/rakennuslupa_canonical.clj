@@ -1,4 +1,4 @@
-(ns lupapalvelu.document.rakennuslupa_canonical
+(ns lupapalvelu.document.rakennuslupa-canonical
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.string :as s]
@@ -84,7 +84,7 @@
                                        :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))
                                        :rakennustunnus (get-rakennustunnus toimenpide application)}
         rakennuksen-tiedot (merge
-                             (select-keys mitat [:tilavuus :kokonaisala :kellarinpinta-ala :kerrosluku :kerrosala])
+                             (select-keys mitat [:tilavuus :kokonaisala :kellarinpinta-ala :kerrosluku :kerrosala :rakennusoikeudellinenKerrosala])
                              (select-keys luokitus [:energialuokka :energiatehokkuusluku :paloluokka])
                              (when-not (ss/blank? (:energiatehokkuusluku luokitus))
                                (select-keys luokitus [:energiatehokkuusluvunYksikko]))
@@ -129,16 +129,12 @@
      :created (:created rakennuksen-muuttaminen-doc)}))
 
 (defn- get-rakennuksen-laajentaminen-toimenpide [laajentaminen-doc application]
-  (let [toimenpide (:data laajentaminen-doc)
-        mitat (-> toimenpide :laajennuksen-tiedot :mitat )]
+  (let [toimenpide (:data laajentaminen-doc)]
     {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
-                                   {:perusparannusKytkin (true? (-> laajentaminen-doc :data :laajennuksen-tiedot :perusparannuskytkin))}
-                                   {:laajennuksentiedot {:tilavuus (-> mitat :tilavuus)
-                                                         :kerrosala (-> mitat :kerrosala)
-                                                         :kokonaisala (-> mitat :kokonaisala)
-                                                         :huoneistoala (for [huoneistoala (vals (:huoneistoala mitat))]
-                                                                         {:pintaAla (-> huoneistoala :pintaAla)
-                                                                          :kayttotarkoitusKoodi (-> huoneistoala :kayttotarkoitusKoodi)})}})
+                                   {:perusparannusKytkin (true? (get-in laajentaminen-doc [:data :laajennuksen-tiedot :perusparannuskytkin]))}
+                                   {:laajennuksentiedot (-> (get-in toimenpide [:laajennuksen-tiedot :mitat])
+                                                            (select-keys [:tilavuus :kerrosala :kokonaisala :rakennusoikeudellinenKerrosala :huoneistoala])
+                                                            (update :huoneistoala #(map select-keys (vals %) (repeat [:pintaAla :kayttotarkoitusKoodi]))))})
                   :rakennustieto (get-rakennus-data toimenpide application laajentaminen-doc)}
      :created (:created laajentaminen-doc)}))
 
@@ -171,6 +167,7 @@
                                                  :alkuHetki (util/to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
                                                  :sijaintitieto {:Sijainti {:tyhja empty-tag}}
                                                  :kokonaisala (-> toimenpide :kokonaisala)
+                                                 :kayttotarkoitus (-> toimenpide :kayttotarkoitus)
                                                  :kuvaus {:kuvaus (-> toimenpide :kuvaus)}
                                                  :tunnus {:jarjestysnumero nil}
                                                  :kiinttun (:propertyId application)}}}
@@ -178,9 +175,11 @@
 
 
 (defn get-maalampokaivo [kaupunkikuvatoimenpide-doc application]
-  (util/dissoc-in
-    (get-kaupunkikuvatoimenpide kaupunkikuvatoimenpide-doc application)
-    [:Toimenpide :rakennelmatieto :Rakennelma :kokonaisala]))
+  (-> (get-kaupunkikuvatoimenpide kaupunkikuvatoimenpide-doc application)
+      (util/dissoc-in
+       [:Toimenpide :rakennelmatieto :Rakennelma :kokonaisala])
+      (assoc-in
+       [:kayttotarkoitus] "Maal\u00e4mp\u00f6pumppuj\u00e4rjestelm\u00e4")))
 
 (defn- get-toimenpide-with-count [toimenpide n]
   (clojure.walk/postwalk #(if (and (map? %) (contains? % :jarjestysnumero))
@@ -210,7 +209,7 @@
 
 (defn- get-asian-tiedot [documents-by-type]
   (let [maisematyo_documents (:maisematyo documents-by-type)
-        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents-by-type) (:hankkeen-kuvaus-minimum documents-by-type) (:aloitusoikeus documents-by-type))
+        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents-by-type) (:hankkeen-kuvaus-rakennuslupa documents-by-type) (:hankkeen-kuvaus-minimum documents-by-type) (:aloitusoikeus documents-by-type))
         asian-tiedot (:data (first hankkeen-kuvaus-doc))
         maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
                                (str "\n\n" (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc))
@@ -225,6 +224,9 @@
   (if (and (contains? documents-by-type :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
+
+(defn- get-hankkeen-vaativuus [documents-by-type]
+  (get-in documents-by-type [:hankkeen-kuvaus-rakennuslupa 0 :data :hankkeenVaativuus]))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
@@ -252,7 +254,8 @@
                                         "aloitusoikeus" "Uusi aloitusoikeus"
                                         (get-kayttotapaus documents-by-type toimenpiteet)))
                       :asianTiedot (get-asian-tiedot documents-by-type)
-                      :lisatiedot (get-lisatiedot documents-by-type lang)}}}}
+                      :lisatiedot (get-lisatiedot documents-by-type lang)
+                      :hankkeenVaativuus (get-hankkeen-vaativuus documents-by-type)}}}}
         canonical (if link-permit-data
                     (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
                       (get-viitelupatieto link-permit-data))

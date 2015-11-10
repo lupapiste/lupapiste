@@ -1,6 +1,6 @@
-(ns lupapalvelu.xml.asianhallinta.asianhallinta_mapping
-  (:require [lupapalvelu.document.asianhallinta_canonical :as canonical]
-            [lupapalvelu.xml.asianhallinta.mapping_common :as ah]
+(ns lupapalvelu.xml.asianhallinta.asianhallinta-mapping
+  (:require [lupapalvelu.document.asianhallinta-canonical :as canonical]
+            [lupapalvelu.xml.asianhallinta.mapping-common :as ah]
             [lupapalvelu.xml.emit :as emit]
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.mapping-common :as common]

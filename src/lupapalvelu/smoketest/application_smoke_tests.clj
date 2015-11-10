@@ -57,7 +57,7 @@
   (when-not (every? (fn [a] (or (empty? (:versions a)) (= (:latestVersion a) (last (:versions a))))) (:attachments application))
     (:id application)))
 
-(defmonster attachment-latest-version-in-sycn
+(defmonster attachment-latest-version-in-sync
   (if-let [results (seq (remove nil? (map latest-version-mismatch @applications)))]
     {:ok false :results results}
     {:ok true}))

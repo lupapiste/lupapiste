@@ -13,7 +13,9 @@
       (comment-application pena id true) => ok?)
 
     (fact "application is now in open state"
-      (:state (query-application pena id)) => "open")
+      (let [app (query-application pena id)]
+        (:state app) => "open"
+        (-> app :history last :state) => "open"))
 
     (fact "authority can now see the application"
       (query sonja :application :id id) => ok?)

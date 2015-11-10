@@ -1,4 +1,4 @@
-(ns lupapalvelu.xml.krysp.poikkeamis_canonical_to_krysp_xml_test
+(ns lupapalvelu.xml.krysp.poikkeamis-canonical-to-krysp-xml-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]

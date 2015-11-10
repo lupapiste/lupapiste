@@ -18,7 +18,7 @@
       [lupapalvelu.xml.krysp.vesihuolto-mapping :refer [vesihuolto-to-krysp]]
       [lupapalvelu.xml.krysp.yleiset-alueet-mapping :refer [get-yleiset-alueet-krysp-mapping]]
       [lupapalvelu.document.canonical-common :refer [by-type ya-operation-type-to-schema-name-key]]
-      [lupapalvelu.document.rakennuslupa_canonical :as rakennuslupa_canonical]
+      [lupapalvelu.document.rakennuslupa-canonical :as rakennuslupa_canonical]
       [lupapalvelu.document.yleiset-alueet-canonical :as yleiset-alueet-canonical]
       [lupapalvelu.document.poikkeamis-canonical :as poikkeamis-canonical]
       [lupapalvelu.document.ymparisto-ilmoitukset-canonical :as ympilm-canonical]
@@ -306,6 +306,7 @@
                    (let [application (query-application pena application-id)
                          email (last-email)]
                         (:state application) => "complementNeeded"
+                        (-> application :history last :state) => "complementNeeded"
                         (:to email) => (contains (email-for-key pena))
                         (:subject email) => "Lupapiste.fi: Ryspitie 289 - hakemuksen tila muuttunut"
                         (get-in email [:body :plain]) => (contains "T\u00e4ydennett\u00e4v\u00e4n\u00e4")

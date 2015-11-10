@@ -58,7 +58,7 @@
       <div class="attachment-row">
         <div class="archival-status" data-bind="visible: $parents[1].showWillPublish">
            <input type="checkbox" data-bind="visible: archivable, checked: sendToArchive">
-           <span class="icon missing" data-bind="visible: !archivable, attr: {title: loc('attachment.invalid-pdfa')}"></span>
+           <span class="icon missing" data-bind="visible: !archivable, attr: {title: loc(archivabilityError)}"></span>
         </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
           <div class="small-columns">

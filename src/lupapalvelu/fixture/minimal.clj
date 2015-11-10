@@ -289,9 +289,9 @@
     :email "olli.uleaborg@ouka.fi"
     :enabled true
     :role "authority"
-    :orgAuthz {:564-R #{:authority}
-               :529-R #{:authority}
-               :564-YMP #{:authority}}
+    :orgAuthz {:564-R #{:authority :approver}
+               :529-R #{:authority :approver}
+               :564-YMP #{:authority :approver}}
     :firstName "Olli"
     :lastName "Ule\u00E5borg"
     :phone "121212"
@@ -533,6 +533,7 @@
                                             :ya-jatkoaika                                                      [[:muut :muu]]})
 
 (def- default-keys-for-organizations {:app-required-fields-filling-obligatory false
+                                      :validate-verdict-given-date true
                                       :kopiolaitos-email nil
                                       :kopiolaitos-orderer-address nil
                                       :kopiolaitos-orderer-email nil
@@ -562,6 +563,7 @@
                               :sv "Sipoon rakennusvalvonta"}
                        :scope [{:municipality "753" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "P" :inforequest-enabled true :new-application-enabled true}
+                               {:municipality "753" :permitType "YM" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YI" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YL" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "MAL" :inforequest-enabled true :new-application-enabled true}

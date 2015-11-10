@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :refer [error]]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :refer [permit-type]]
-            [lupapalvelu.xml.asianhallinta.asianhallinta_mapping :as ah-mapping]
+            [lupapalvelu.xml.asianhallinta.asianhallinta-mapping :as ah-mapping]
             [lupapalvelu.xml.validator :as v]
             [sade.core :refer [fail! def-]]
             [sade.env :as env]

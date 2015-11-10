@@ -16,10 +16,12 @@ ${SLOWEST_SPEED}                0.5
 
 ${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
 ${LOGOUT URL}                   ${SERVER}/app/fi/logout
+${BULLETINS URL}                ${SERVER}/app/fi/bulletins
 ${APPLICATIONS PATH}            /app/fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
-${CREATE URL}                   ${SERVER}/dev/create
+${CREATE URL}                   ${SERVER}/dev/create?redirect=true
+${CREATE BULLETIN URL}          ${SERVER}/dev/publish-bulletin-quickly
 ${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
 ${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
 ${SELENIUM}                     ${EMPTY}
@@ -52,6 +54,11 @@ Go to login page
   Go to  ${LOGIN URL}
   Wait Until  Title should be  Lupapiste
   Wait Until  Page should contain  Haluan kirjautua palveluun
+
+Go to bulletins page
+  Go to  ${BULLETINS URL}
+  Wait Until  Title should be  Lupapiste
+  Wait Until  Page should contain  Kuntien julkipanoilmoitukset
 
 Open last email
   Go to  ${LAST EMAIL URL}
@@ -102,6 +109,10 @@ Wait for jQuery
 
 Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
+
+Resurrect dev-box
+  Execute Javascript  $(".dev-debug").show();
+  Wait until  Element should be visible  //div[@class="dev-debug"]
 
 Language To
   [Arguments]  ${lang}
@@ -175,6 +186,9 @@ Open accordion by test id
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
 
+Positive indicator should not be visible
+  Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-positive"]
+
 #
 # Login stuff
 #
@@ -217,15 +231,15 @@ User logs in
 Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  User role should be  applicant
   User nav menu is visible
+  User role should be  applicant
   Applications page should be open
 
 Authority logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  User role should be  authority
   User nav menu is visible
+  User role should be  authority
   Authority applications page should be open
 
 Authority-admin logs in
@@ -237,13 +251,16 @@ Authority-admin logs in
 Admin logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  User role should be  admin
   User nav menu is visible
+  User role should be  admin
   Admin front page should be open
+
+Get role
+  Run Keyword And Return  Get Element Attribute  user-name@data-test-role
 
 User role should be
   [Arguments]  ${expected-role}
-  ${user-role}=  Execute JavaScript  return window.lupapisteApp.models.currentUser.role();
+  ${user-role} =  Get role
   Should Be Equal  ${expected-role}  ${user-role}
 
 User nav menu is visible
@@ -275,6 +292,10 @@ As Sipoo
 As Solitaadmin
   Go to login page
   Solitaadmin logs in
+
+As Velho
+  Go to login page
+  Velho logs in
 
 Mikko logs in
   Applicant logs in  mikko@example.com  mikko123  Mikko Intonen
@@ -342,24 +363,38 @@ Select From List by test id
 Select From Autocomplete
   [Arguments]  ${container}  ${value}
   Wait until  Element should be visible  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
-  Click Element  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
+
+  ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  xpath=//${container}//div[@class="autocomplete-dropdown"]
+  Run Keyword If  ${autocompleteListNotOpen}  Click Element  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
+
   Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
   Wait until  Element should be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
   Click Element  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
   Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]
   Wait for jQuery
 
+Select From Autocomplete By Test Id
+  [Arguments]  ${data-test-id}  ${value}
+  Select From Autocomplete  *[@data-test-id="${data-test-id}"]  ${value}
+
 Autocomplete selectable values should not contain
   [Arguments]  ${container}  ${value}
   # Open dropdown if it is not open
-  ${autocompleteListNotOpen} =  Element should not be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[@class="autocomplete-dropdown"]
-  Run Keyword If  '${autocompleteListNotOpen}' == 'PASS'  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//span[contains(@class, "autocomplete-selection")]
+  ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[@class="autocomplete-dropdown"]
+  Run Keyword If  ${autocompleteListNotOpen}  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//span[contains(@class, "autocomplete-selection")]
   Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
 
 Autocomplete option list should contain
-  [Arguments]  @{options}
+  [Arguments]  ${data-test-id}  @{options}
   :FOR  ${element}  IN  @{options}
-  \  Element should contain  xpath=//div[@data-test-id="operations-filter-component"]//ul[@class="autocomplete-result autocomplete-result-grouped"]  ${element}
+  \  Element should contain  xpath=//div[@data-test-id="${data-test-id}"]//ul[contains(@class, "autocomplete-result")]  ${element}
+
+Autocomplete option list should contain by test id
+  [Arguments]  ${data-test-id}  @{options}
+  Click Element  xpath=//div[@data-test-id="${data-test-id}"]//span[contains(@class, "autocomplete-selection")]
+  Wait until  Element should be visible  xpath=//div[@data-test-id="${data-test-id}"]//div[@class="autocomplete-dropdown"]
+  :FOR  ${element}  IN  @{options}
+  \  Element should contain  xpath=//div[@data-test-id="${data-test-id}"]//ul[contains(@class, "autocomplete-result")]  ${element}
 
 Click by id
   [Arguments]  ${id}
@@ -409,25 +444,34 @@ Operation description is
   [Arguments]  ${doc}  ${text}
   Wait until  Element text should be  xpath=//div[@id='application-info-tab']//span[@data-test-id='op-description-${doc}']  - ${text}
 
+Table with id should have rowcount
+  [Arguments]  ${id}  ${expectedRowcount}
+  ${rowcount}=  Get Matching XPath Count  //table[@id='${id}']/tbody/tr
+  Should be equal  ${rowcount}  ${expectedRowcount}
+
 #
 # Helper for inforequest and application crud operations:
 #
 
 Create application the fast way
   [Arguments]  ${address}  ${propertyId}  ${operation}
-  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
+  Go to  ${CREATE URL}&address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
 Create application with state
   [Arguments]  ${address}  ${propertyId}  ${operation}  ${state}
-  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
+  Go to  ${CREATE URL}&address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
+Create bulletins the fast way
+  [Arguments]  ${count}
+  Go to  ${CREATE BULLETIN URL}?count=${count}
+
 Create inforequest the fast way
   [Arguments]  ${address}  ${x}  ${y}   ${propertyId}  ${operation}  ${message}
-  Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&operation=${operation}&x=${x}&y=${y}&message=${message}
+  Go to  ${CREATE URL}&infoRequest=true&address=${address}&propertyId=${propertyId}&operation=${operation}&x=${x}&y=${y}&message=${message}
   Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
   Kill dev-box
 
@@ -795,7 +839,7 @@ Foreman count is
 
 Apply minimal fixture now
   Go to  ${FIXTURE URL}/minimal
-  Page should contain  true
+  Wait until  Page should contain  true
   Go to login page
 
 #

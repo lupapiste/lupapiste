@@ -141,6 +141,12 @@
 (defn- remove-app-links [id]
   (mongo/remove-many :app-links {:link {$in [id]}}))
 
+(defn- do-cancel [{:keys [created user data] :as command}]
+  {:pre [(seq (:application command))]}
+  (update-application command (a/state-transition-update :canceled created user))
+  (remove-app-links (:id data))
+  (ok))
+
 (defcommand cancel-inforequest
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
@@ -148,13 +154,8 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified created
-                             :canceled created
-                             :state    :canceled}})
-  (remove-app-links id)
-  (ok))
+  [command]
+  (do-cancel command))
 
 (defcommand cancel-application
   {:parameters       [id]
@@ -164,13 +165,8 @@
    :on-success       (notify :application-state-change)
    :states           #{:draft :info :open :submitted}
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified created
-                             :canceled created
-                             :state    :canceled}})
-  (remove-app-links id)
-  (ok))
+  [command]
+  (do-cancel command))
 
 (defcommand cancel-application-authority
   {:parameters       [id text lang]
@@ -180,9 +176,10 @@
    :on-success       (notify :application-state-change)
    :pre-checks       [a/validate-authority-in-drafts
                       (partial sm/validate-state-transition :canceled)]}
-  [{:keys [created application] :as command}]
+  [{:keys [created application user] :as command}]
   (update-application command
     (util/deep-merge
+      (a/state-transition-update :canceled created user)
       (when (seq text)
         (comment/comment-mongo-update
           (:state application)
@@ -195,10 +192,7 @@
           false
           (:user command)
           nil
-          created))
-      {$set {:modified created
-             :canceled created
-             :state    :canceled}}))
+          created))))
   (remove-app-links id)
   (ok))
 
@@ -210,19 +204,19 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified         created
-                             :complementNeeded created
-                             :state            :complementNeeded}}))
-
+  [{:keys [created user] :as command}]
+  (update-application command (util/deep-merge (a/state-transition-update :complementNeeded created user))))
 
 (defn- do-submit [command application created]
-  (update-application command
-                      {$set {:state     :submitted
-                             :modified  created
-                             :opened    (or (:opened application) created)
-                             :submitted (or (:submitted application) created)}})
+  (let [history-entries (remove nil?
+                          [(when-not (:opened application) (a/history-entry :open created (:user command)))
+                           (a/history-entry :submitted created (:user command))])]
+    (update-application command
+      {$set {:state     :submitted
+             :modified  created
+             :opened    (or (:opened application) created)
+             :submitted (or (:submitted application) created)}
+       $push {:history {$each history-entries}}}))
   (try
     (mongo/insert :submitted-applications (-> application
                                             meta-fields/enrich-with-link-permit-data
@@ -537,13 +531,14 @@
                                  #(vector (:id %) (mongo/create-id))
                                  (conj secondary-ops primary-op)))
         state (if (user/authority? user) :open :draft)
-        muutoslupa-app (merge (select-keys application
+        muutoslupa-app (merge domain/application-skeleton
+                              (select-keys application
                                 [:auth
                                  :propertyId, :location
                                  :schema-version
                                  :address, :title
                                  :foreman, :foremanRole
-                                 :applicant,  :_applicantIndex
+                                 :applicant, :_applicantIndex
                                  :municipality, :organization
                                  :drawings
                                  :metadata])
@@ -563,23 +558,13 @@
                                                          (:documents application)))
                                :state         state
 
-                               :history [{:state state, :ts created, :user (user/summary user)}]
+                               :history [(a/history-entry state created user)]
                                :infoRequest false
                                :openInfoRequest false
                                :convertedToApplication nil
 
                                :primaryOperation (assoc primary-op :id (op-id-mapping (:id primary-op)))
-                               :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops) }
-
-                              ; Keys to reset
-                              (select-keys domain/application-skeleton
-                                [:attachments :statements :verdicts :tasks :buildings :neighbors
-                                 :comments :authorityNotice :urgency ; comment panel content
-                                 :submitted :sent :acknowledged :closed :closedBy :started :startedBy ; timestamps
-                                 :_statements-seen-by :_comments-seen-by :_verdicts-seen-by :_attachment_indicator_reset ; indicators
-                                 :reminder-sent :transfers ; logs
-                                 :authority
-                                 :tosFunction]))]
+                               :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops)})]
 
     (a/do-add-link-permit muutoslupa-app (:id application))
     (a/insert-application muutoslupa-app)
@@ -659,14 +644,14 @@
   (let [op (:primaryOperation application)
         organization (organization/get-organization (:organization application))]
     (update-application command
-                        {$set  {:infoRequest            false
-                                :openInfoRequest        false
-                                :state                  :open
-                                :opened                 created
-                                :convertedToApplication created
-                                :documents              (a/make-documents user created op application)
-                                :modified               created}
-                         $push {:attachments {$each (a/make-attachments created op organization (:state application) (:tosFunction application))}}})
+                        (util/deep-merge
+                          (a/state-transition-update :open created user)
+                          {$set  {:infoRequest            false
+                                  :openInfoRequest        false
+                                  :convertedToApplication created
+                                  :documents              (a/make-documents user created op application)
+                                  :modified               created}
+                           $push {:attachments {$each (a/make-attachments created op organization (:state application) (:tosFunction application))}}}))
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
 
@@ -720,22 +705,3 @@
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
 
-(def app-snapshot-fields [:address :primaryOperation :created :modified
-                          :state :permitType :organization :verdicts :documents
-                          :propertyId :location])
-
-(defcommand publish-bulletin
-  {:parameters [id]
-   :user-roles #{:authority}
-   :states     states/all-application-states
-   :pre-checks [a/validate-authority-in-drafts]}
-  [{:keys [application created] :as command}]
-  (let [app-snapshot (select-keys application app-snapshot-fields)
-        attachments  (->> (:attachments application)
-                          (filter :latestVersion)
-                          (map #(dissoc % :versions)))
-        app-snapshot (assoc app-snapshot :attachments attachments)
-        changes      {$push {:versions app-snapshot}
-                      $set  {:modified created}}]
-    (mongo/update-by-id :application-bulletins id changes :upsert true)
-    (ok)))

@@ -322,6 +322,21 @@ $app-gray-darkest: $gray187;
             display: none;
           }
         }
+        &.proclaimed {
+          .proclaimed-box {
+            @include active-state;
+          }
+        }
+        &.consideration {
+          .consideration-box {
+            @include active-state;
+          }
+        }
+        &.final {
+          .final-box {
+            @include active-state;
+          }
+        }
       }
     }
   }

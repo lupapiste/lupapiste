@@ -9,15 +9,18 @@ Resource       ../../common_resource.robot
 ## For some strange reason, firstName and lastName fields are left blank.
 
 Mikko goes to own page
+  [Tags]  firefox
   Mikko logs in
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
   Title Should Be  Lupapiste
 
 There is no company info
+  [Tags]  firefox
   Element should not be visible  //div[@data-test-id='mypage-company-accordion']
 
 Mikko changes his name and experience
+  [Tags]  firefox
   Change Textfield Value  firstName  Mikko  Mika
   Change Textfield Value  lastName  Intonen  Intola
   Select From List  architect-degree-select  Arkkitehti
@@ -31,6 +34,7 @@ Mikko changes his name and experience
   User should be logged in  Mika Intola
 
 Name and experience should have changed in Swedish page too
+  [Tags]  firefox
   Language To  SV
   Wait for Page to Load  Mika  Intola
   User should be logged in  Mika Intola
@@ -40,6 +44,7 @@ Name and experience should have changed in Swedish page too
   Textfield Value Should Be  architect.fise  fise
 
 Mika changes the name and experience back
+  [Tags]  firefox
   Change Textfield Value  firstName  Mika  Mikko
   Change Textfield Value  lastName  Intola  Intonen
   Select From List  architect-degree-select  Timmerman
@@ -50,6 +55,7 @@ Mika changes the name and experience back
   Positive indicator should be visible
 
 Name and experience should have changed in Finnish page too
+  [Tags]  firefox
   Language To  FI
   Wait for Page to Load  Mikko  Intonen
   User should be logged in  Mikko Intonen

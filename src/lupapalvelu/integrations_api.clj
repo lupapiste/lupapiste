@@ -1,7 +1,7 @@
 (ns lupapalvelu.integrations-api
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
   (:require [taoensso.timbre :as timbre :refer [infof info error errorf]]
-            [monger.operators :refer [$in $set $unset $push $elemMatch]]
+            [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
             [lupapalvelu.action :refer [defcommand update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
@@ -90,6 +90,8 @@
         timestamps  (zipmap (conj #{:modified :sent} next-state) (repeat created))
         _           (assert (every? (partial contains? domain/application-skeleton) (keys timestamps)))
 
+        history-entries (map #(application/history-entry % created user) (set [:sent next-state]))
+
         app-updates (merge
                       {:state next-state
                        :authority (if (domain/assigned? application) (:authority application) (user/summary user))} ; LUPA-1450
@@ -106,7 +108,8 @@
         do-update (fn [attachments-updates]
                     (update-application command
                       mongo-query
-                      {$push {:transfers transfer}
+                      {$push {:transfers transfer
+                              :history {$each history-entries}}
                        $set (util/deep-merge app-updates attachments-updates indicator-updates)})
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
@@ -262,18 +265,18 @@
                                        :type "kuntalupatunnus"})
                       application)
         submitted-application (mongo/by-id :submitted-applications id)
-        app-updates {:modified created
-                     :sent created
-                     :authority (if (domain/assigned? application) (:authority application) (user/summary user))
-                     :state :sent}
+
+        app-updates {:modified created, :authority (if (domain/assigned? application) (:authority application) (user/summary user))}
         organization (organization/get-organization (:organization application))
         indicator-updates (application/mark-indicators-seen-updates application user created)
         file-ids (ah/save-as-asianhallinta application lang submitted-application organization) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) file-ids created) {})
         transfer (get-transfer-item :exported-to-asianhallinta command)]
     (update-application command
-                        {$push {:transfers transfer}
-                         $set (util/deep-merge app-updates attachments-updates indicator-updates)})
+                        (util/deep-merge
+                          (application/state-transition-update (sm/next-state application) created user)
+                          {$push {:transfers transfer}
+                           $set (util/deep-merge app-updates attachments-updates indicator-updates)}))
     (ok)))
 
 (defn- update-kuntalupatunnus [application]

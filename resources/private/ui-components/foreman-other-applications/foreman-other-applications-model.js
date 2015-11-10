@@ -24,7 +24,8 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
       var item = {
         applicationId: self.params.applicationId,
         documentId: self.params.documentId,
-        path: self.params.path,
+        path: self.params.path.concat([index, schema.name]),
+        i18npath: self.params.schemaI18name.concat(self.params.path).concat(schema.name),
         schemaI18name: self.params.schemaI18name,
         index: index,
         schema: schema,
@@ -39,7 +40,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
 
   var rows = [];
   var autoupdatedRows = [];
-  for (var key in self.params.model) {
+  for (var key in _(self.params.model).keys().filter(_.flow(_.parseInt, _.isFinite)).value()) {
     var model = self.params.model[key];
     if (util.getIn(model, ["autoupdated", "value"])) {
       autoupdatedRows.push(createRow(model, key));
