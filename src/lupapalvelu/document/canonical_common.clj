@@ -405,6 +405,7 @@
         {:koulutus koulutus
          :patevyysvaatimusluokka (:patevyysluokka patevyys)
          :valmistumisvuosi (:valmistumisvuosi patevyys)
+         :FISEpatevyyskortti (:fise patevyys)
          :kokemusvuodet (:kokemus patevyys)}
         (when (-> henkilo :nimi :sukunimi)
           {:henkilo henkilo})
