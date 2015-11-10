@@ -353,7 +353,7 @@
                                     <span data-bind="ltext: 'attachment.tosMetadata'"></span>
                                 </a></li>
 
-                            <li data-bind="if: features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin'),
+                            <li data-bind="if: features.enabled('publish-bulletin'),
                                            css: {'active': $parent.selectedTabName() === 'bulletin'}">
                                 <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab" class="link-btn">
                                   <span data-bind="ltext: 'bulletin'"></span>
@@ -1141,7 +1141,7 @@
                     <!-- /ko -->
 
                     <!-- Bulletin tab -->
-                    <!-- ko if: selectedTabName() === 'bulletin' && features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin') -->
+                    <!-- ko if: selectedTabName() === 'bulletin' && features.enabled('publish-bulletin') -->
                     <div id="application-bulletin-tab" data-bind="with: application" class="tab-content">
                       <div data-bind="attr: {'class': features.enabled('publish-bulletin') ? 'feature' : ''}">
                         <div data-bind="component: {name: 'publish-bulletin',
