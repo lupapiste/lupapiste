@@ -355,9 +355,8 @@
 
                             <li data-bind="if: features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin'),
                                            css: {'active': $parent.selectedTabName() === 'bulletin'}">
-                                <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab"
-                                   class="link-btn">
-                                    <span data-bind="text: 'JPano'"></span>
+                                <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab" class="link-btn">
+                                  <span data-bind="ltext: 'bulletin'"></span>
                                 </a></li>
                         </ul>
                     </div>
@@ -1145,9 +1144,9 @@
                     <!-- ko if: selectedTabName() === 'bulletin' && features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin') -->
                     <div id="application-bulletin-tab" data-bind="with: application" class="tab-content">
                       <div data-bind="attr: {'class': features.enabled('publish-bulletin') ? 'feature' : ''}">
-                        <h1>JPano komponentti</h1>
                         <div data-bind="component: {name: 'publish-bulletin',
-                                                    params: {appId: id(),
+                                                    params: {appId: id,
+                                                             appState: state,
                                                              authModel: $root.authorization,
                                                              bulletinStates: LUPAPISTE.config.bulletinStates}}"></div>
                       </div>
