@@ -833,7 +833,8 @@
 
 (def rakennelman-kayttotarkoitus {:name "kayttotarkoitus"
                                   :type :select
-                                  :body (mapv (partial hash-map :name) rakennelman-kayttotarkoitukset)})
+                                  :i18nkey "rakennelman-kayttotarkoitus"
+                                  :body (mapv #(hash-map :i18nkey (str "rakennelman-kayttotarkoitus." %) :name %) rakennelman-kayttotarkoitukset)})
 
 (def rakennelma (body {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
                       rakennelman-kayttotarkoitus
