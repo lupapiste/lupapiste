@@ -468,10 +468,22 @@
               (update-in [:Tyonjohtaja :vaadittuPatevyysluokka] patevyysvaatimusluokka212)))
        %)))
 
-(defn- map-enums-212 [canonical]
-  (map-tyonjohtaja-patevyysvaatimusluokka canonical))
+(def designer-new-roles-220 #{"rakennussuunnittelija" "kantavien rakenteiden suunnittelija"
+                              "pohjarakenteiden suunnittelija" "ilmanvaihdon suunnittelija"
+                              "kiinteistön vesi- ja viemäröintilaitteiston suunnittelija"
+                              "rakennusfysikaalinen suunnittelija"
+                              "kosteusvaurion korjaustyön suunnittelija"})
 
-;; TODO: tanne vastaavasti uusien suunnittelijaRoolikoodien kasittely?
+(defn map-suunnittelija-kuntaroolikoodi-pre220 [canonical]
+  (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :suunnittelijatieto]
+    #(map (fn [suunnittelija]
+            (update-in suunnittelija [:Suunnittelija :suunnittelijaRoolikoodi]
+              (fn [role] (if (designer-new-roles-220 role) "ei tiedossa" role))))
+       %)))
+
+(def map-enums-212 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-tyonjohtaja-patevyysvaatimusluokka))
+
+(def map-enums-213-218 map-suunnittelija-kuntaroolikoodi-pre220)
 
 (defn- map-enums
   "Map enumerations in canonical into values supperted by given KRYSP version"
@@ -479,6 +491,12 @@
   {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.2" (map-enums-212 canonical)
+    "2.1.3" (map-enums-213-218 canonical)
+    "2.1.4" (map-enums-213-218 canonical)
+    "2.1.5" (map-enums-213-218 canonical)
+    "2.1.6" (map-enums-213-218 canonical)
+    "2.1.7" (map-enums-213-218 canonical)
+    "2.1.8" (map-enums-213-218 canonical)
     canonical ; default: no conversions
     ))
 
