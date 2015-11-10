@@ -143,7 +143,9 @@
                                 :jaljennos_perunkirjasta
                                 :valokuva :rasitesopimus
                                 :valtakirja
-                                :muu))
+                                :muu
+                                :paatos
+                                :paatosote))
         all-except-commons (remove known-duplicates all-attachment-type-ids)
         all-unique (set all-except-commons)]
 
