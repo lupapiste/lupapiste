@@ -406,8 +406,8 @@
   (let [xml      (xml/parse (slurp "resources/krysp/sample/building_220.xml"))
         building (->> xml ->buildings-summary first :buildingId (->rakennuksen-tiedot xml))]
     (fact "mitat - kerrosala" (get-in building [:mitat :kerrosala]) => "1785")
-    (fact "mitat - rakennusoikeudellinenKerrosala" (get-in building [:mitat :rakennusoikeudellinenKerrosala]) => "1780"))
-    (fact "omistaja - yrityksen yhteyshenkilo - kytkimet" (get-in building [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo :kytkimet]) => {:suoramarkkinointilupa false, :vainsahkoinenAsiointiKytkin false}))
+    (fact "mitat - rakennusoikeudellinenKerrosala" (get-in building [:mitat :rakennusoikeudellinenKerrosala]) => "1780")
+    (fact "omistaja - yrityksen yhteyshenkilo - kytkimet" (get-in building [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo :kytkimet]) => nil)))
 
 ;; YA verdict
 
