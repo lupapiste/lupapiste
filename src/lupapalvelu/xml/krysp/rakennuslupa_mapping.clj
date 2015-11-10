@@ -115,17 +115,21 @@
                                        {:tag :omistajalaji}]}]}))
 
 (def rakennus_220
-  (update-in rakennus [:child] mapping-common/update-child-element
-      [:omistajatieto :Omistaja]
-      {:tag :Omistaja :child [{:tag :kuntaRooliKoodi :ns "yht"}
-                              {:tag :VRKrooliKoodi :ns "yht"}
-                              mapping-common/henkilo
-                              mapping-common/yritys_213
-                              {:tag :turvakieltoKytkin :ns "yht"}
-                              {:tag :suoramarkkinointikieltoKytkin :ns "yht"}
-                              {:tag :omistajalaji :ns "rakval"
-                               :child [{:tag :muu}
-                                       {:tag :omistajalaji}]}]}))
+  (-> rakennus
+      (update-in [:child] mapping-common/update-child-element
+                 [:omistajatieto :Omistaja]
+                 {:tag :Omistaja :child [{:tag :kuntaRooliKoodi :ns "yht"}
+                                         {:tag :VRKrooliKoodi :ns "yht"}
+                                         mapping-common/henkilo
+                                         mapping-common/yritys_213
+                                         {:tag :turvakieltoKytkin :ns "yht"}
+                                         {:tag :suoramarkkinointikieltoKytkin :ns "yht"}
+                                         {:tag :omistajalaji :ns "rakval"
+                                          :child [{:tag :muu}
+                                                  {:tag :omistajalaji}]}]})
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennuksenTiedot]
+                 #(update-in % [:child] mapping-common/merge-into-coll-after-tag :kerrosala [{:tag :rakennusoikeudellinenKerrosala}]))))
 
 
 
