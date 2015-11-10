@@ -33,10 +33,13 @@
 (defn- read-sheet [headers sheet]
   (->> sheet seq rest (map xls/read-row) (map (partial zipmap headers))))
 
+(defn- read-translations-txt [resource-name]
+  (commons/keys-by-language (commons/read-translations (io/resource resource-name))))
+
 (defn- load-translations []
   (merge-with conj
-              (-> (commons/read-translations (io/resource "shared_translations.txt"))
-                  commons/keys-by-language)
+              (read-translations-txt "shared_translations.txt")
+              (read-translations-txt "i18n/schemas_i18n.txt")
               (with-open [in (io/input-stream (io/resource "i18n.xlsx"))]
                 (let [wb      (xls/load-workbook in)
                       langs   (-> wb seq first first xls/read-row rest)
