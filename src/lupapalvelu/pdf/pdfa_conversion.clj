@@ -113,7 +113,7 @@
   (and (env/feature? :arkistointi)
        (organization/some-organization-has-archive-enabled? #{organization-id})))
 
-(defn convert-file-to-pdf-in-place [src-file]
+(defn- convert-file-to-pdf-in-place [src-file]
   "Convert a PDF file to PDF/A in place. Fail-safe, if conversion fails returns false otherwie true.
    Original file is overwritten."
   (let [temp-file (File/createTempFile "lupapiste.pdf.a." ".tmp")]
