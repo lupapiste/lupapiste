@@ -3,14 +3,16 @@
   <body>
     <section class="page container">
       <script type="text/x-jquery-tmpl" id="municipality-maps-template">
-        <h2 data-bind="ltext: 'auth-admin.municipality-maps.title'"></h2>
-        <div class="munimaps">
-          <div data-bind="component: {name: 'municipality-maps-server',
-                          params: serverParams}"></div>
-          <div data-bind="component: {name: 'municipality-maps-layers',
-                          params: layersParams}"></div>
-          <div data-bind="component: {name: 'municipality-maps-map',
-                          params: mapParams}"></div>
+        <div data-bind="if: features.enabled( 'municipality-maps')" class="feature">
+          <h2 data-bind="ltext: 'auth-admin.municipality-maps.title'"></h2>
+          <div class="munimaps">
+            <div data-bind="component: {name: 'municipality-maps-server',
+                            params: serverParams}"></div>
+            <div data-bind="component: {name: 'municipality-maps-layers',
+                            params: layersParams}"></div>
+            <div data-bind="component: {name: 'municipality-maps-map',
+                            params: mapParams}"></div>
+          </div>
         </div>
       </script>
     </section>

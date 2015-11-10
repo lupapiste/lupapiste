@@ -10124,18 +10124,27 @@ td.comment-text {
 .munimaps h3 {
   margin-top: .5em;
 }
-/* line 25, ../sass/views/_authority_admin.scss */
+/* line 23, ../sass/views/_authority_admin.scss */
 .munimaps .munimaps--wide input, .munimaps .munimaps--wide select {
   width: 90%;
 }
-/* line 29, ../sass/views/_authority_admin.scss */
+/* line 27, ../sass/views/_authority_admin.scss */
 .munimaps .munimaps--error {
   color: #df3215;
-  margin: 6px 6px 6px 6px;
+  margin-left: 6px;
+  margin-right: 6px;
+  margin-bottom: 24px;
+  font-size: 16px;
 }
-/* line 33, ../sass/views/_authority_admin.scss */
+/* line 36, ../sass/views/_authority_admin.scss */
 .munimaps .munimaps--check input {
   margin-left: 24px;
+}
+/* line 39, ../sass/views/_authority_admin.scss */
+.munimaps .munimaps__map {
+  width: 100%;
+  height: 500px;
+  margin-top: 24px;
 }
 
 /* line 2, ../sass/views/_neighbor.scss */

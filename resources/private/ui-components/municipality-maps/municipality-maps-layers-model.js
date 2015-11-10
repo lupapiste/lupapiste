@@ -10,11 +10,11 @@ LUPAPISTE.MunicipalityMapsLayersModel = function( params ) {
   };
 
   self.addLayer = function() {
-    params.channel.send( {op: "addLayer"});
+    params.channel.send( {op: "add"});
   };
 
   self.removeLayer = function( layer ) {
-    params.channel.send( {op: "removeLayer", layer: layer});
+    params.channel.send( {op: "remove", layer: layer});
   };
 
 };

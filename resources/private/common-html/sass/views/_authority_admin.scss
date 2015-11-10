@@ -20,17 +20,25 @@
     margin-top: .5em;
   }
   .munimaps--wide {
-    //width: 100%;
-
     input, select {
       width: 90%;
     }
   }
   .munimaps--error {
     color: $red-dark;
-    margin: $marginS $marginS $marginS $marginS;
+    margin: {
+      left: $marginS;
+      right: $marginS;
+      bottom: $marginL;
+    }
+    font-size: 16px;
   }
   .munimaps--check input {
     margin-left: $marginL;
+  }
+  .munimaps__map {
+    width: 100%;
+    height: 500px;
+    margin-top: $marginL;
   }
 }
