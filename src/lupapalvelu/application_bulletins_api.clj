@@ -3,7 +3,7 @@
             [monger.operators :refer :all]
             [monger.query :as query]
             [noir.response :as resp]
-            [sade.core :refer [ok fail fail! now]]
+            [sade.core :refer [ok fail fail! now def-]]
             [slingshot.slingshot :refer [try+]]
             [sade.strings :as ss]
             [sade.property :as p]
