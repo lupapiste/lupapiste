@@ -8,3 +8,6 @@ bulletin.comment.addAttachment:  Lisää kommenttiin liitetiedosto
 bulletin.comment.send:  Lähetä kommentti
 bulletin.comment.noAttachments:  Ei valittuja liitetiedostoja
 bulletin.comment.selectedAttachments:  Kommentin mukana lähtevät liitetiedostot
+
+bulletin.comment.save.success:  Kommentti lähetetty
+bulletin.comment.save.failed:  Kommentin lähetys epäonnistui

@@ -34,8 +34,9 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     if (event.status === "success") {
       self.comment("");
       self.attachments([]);
+      hub.send("indicator", {style: "positive", message: "bulletin.comment.save.success"});
     } else {
-      // TODO show error
+      hub.send("indicator", {style: "negative", message: "bulletin.comment.save.failed"});
     }
   });
 

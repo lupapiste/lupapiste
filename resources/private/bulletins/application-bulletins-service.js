@@ -99,10 +99,6 @@ LUPAPISTE.ApplicationBulletinsService = function() {
     fetchBulletin(event.id);
   });
 
-  var commentSent = function() {
-    hub.send("bulletinService::commentProcessed", {status: "success"});
-  };
-
   hub.subscribe("bulletinService::newComment", function(event) {
     var form = event.commentForm;
     var formData = new FormData(form);
@@ -115,7 +111,12 @@ LUPAPISTE.ApplicationBulletinsService = function() {
       });
     }
     ajax.form("add-bulletin-comment", formData)
-    .success(commentSent)
+    .success(function() {
+      hub.send("bulletinService::commentProcessed", {status: "success"});
+    })
+    .error(function() {
+      hub.send("bulletinService::commentProcessed", {status: "failed"});
+    })
     .pending(commentPending)
     .call();
   });
