@@ -1,1 +1,3 @@
 bulletin:  Julkipano
+bulletin.publish:  Julkaise
+bulletin.application.next.state.open:  Hakemus tulee ensin siirtää käsittelyyn, jotta sen voi julkaista Julkinpano-sivustolla.
