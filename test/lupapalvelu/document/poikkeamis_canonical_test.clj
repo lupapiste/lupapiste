@@ -30,16 +30,17 @@
                                               :puhelin {:value "0102030405"}}
                                :osoite {:katu {:value "Paapankuja 12"}
                                         :postinumero {:value "10203"}
-                                        :postitoimipaikannimi {:value "Piippola"}}}
+                                        :postitoimipaikannimi {:value "Piippola"}}
+                               :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}}}
                      :yritys {:yhteyshenkilo {:henkilotiedot {:etunimi {:value "Pena"}
                                                               :sukunimi {:value "Panaani"}
                                                               :turvakieltoKytkin {:value true}}
                                               :yhteystiedot {:email {:value "pena@example.com"}
-                                                             :puhelin {:value "0102030405"}}}
+                                                             :puhelin {:value "0102030405"}}
+                                              :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}}}
                               :osoite {:katu {:value "Paapankuja 12"}
                                        :postinumero {:value "10203"}
-                                       :postitoimipaikannimi {:value "Piippola"}}}
-                     :vainsahkoinenAsiointiKytkin {:value true}}})
+                                       :postitoimipaikannimi {:value "Piippola"}}}}})
 
 (def- uusi {:id "523844e1da063788effc1c57"
             :created 1379419361123
@@ -256,11 +257,11 @@
         hakija (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "hakija") %) osapuolitieto) => truthy
         Osapuoli (:Osapuoli hakija) => truthy
         _ (:turvakieltoKytkin Osapuoli) => true
-        _ (:VainSahkoinenAsiointi Osapuoli) => true
         henkilo (:henkilo Osapuoli) => truthy
         _ (get-in henkilo [:nimi :etunimi]) => "Pena"
         _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
         _ (:henkilotunnus henkilo) => "210281-9988"
+        _ (get-in henkilo [:vainsahkoinenAsiointiKytkin]) => true
         osoite (:osoite henkilo) => truthy
         _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
         _ (:postinumero osoite) => "10203"

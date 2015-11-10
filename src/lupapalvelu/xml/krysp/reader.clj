@@ -265,43 +265,44 @@
           (util/dissoc-in [:huoneistot :0 :muutostapa]))
         (polished
           (util/assoc-when
-            {:muutostyolaji                 ...notimplemented...
-             :valtakunnallinenNumero        (pysyva-rakennustunnus (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
+            {:muutostyolaji                          ...notimplemented...
+             :valtakunnallinenNumero                 (pysyva-rakennustunnus (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
              ;; TODO: Add support for kunnanSisainenPysyvaRakennusnumero (rakval krysp 2.1.6 +)
 ;             :kunnanSisainenPysyvaRakennusnumero (get-text rakennus :rakennustunnus :kunnanSisainenPysyvaRakennusnumero)
-             :rakennusnro                   (ss/trim (get-text rakennus :rakennustunnus :rakennusnro))
-             :manuaalinen_rakennusnro       ""
-             :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
-             :kiinttun                      (get-text rakennus :rakennustunnus :kiinttun)
-             :verkostoliittymat             (cr/all-of rakennus [:verkostoliittymat])
+             :rakennusnro                            (ss/trim (get-text rakennus :rakennustunnus :rakennusnro))
+             :manuaalinen_rakennusnro                ""
+             :jarjestysnumero                        (get-text rakennus :rakennustunnus :jarjestysnumero)
+             :kiinttun                               (get-text rakennus :rakennustunnus :kiinttun)
+             :verkostoliittymat                      (cr/all-of rakennus [:verkostoliittymat])
 
-             :osoite {:kunta                (get-text rakennus :osoite :kunta)
-                      :lahiosoite           (get-text rakennus :osoite :osoitenimi :teksti)
-                      :osoitenumero         (get-text rakennus :osoite :osoitenumero)
-                      :osoitenumero2        (get-text rakennus :osoite :osoitenumero2)
-                      :jakokirjain          (get-text rakennus :osoite :jakokirjain)
-                      :jakokirjain2         (get-text rakennus :osoite :jakokirjain2)
-                      :porras               (get-text rakennus :osoite :porras)
-                      :huoneisto            (get-text rakennus :osoite :huoneisto)
-                      :postinumero          (get-text rakennus :osoite :postinumero)
-                      :postitoimipaikannimi (get-text rakennus :osoite :postitoimipaikannimi)}
-             :kaytto {:kayttotarkoitus      (get-text rakennus :kayttotarkoitus)
-                      :rakentajaTyyppi      (get-text rakennus :rakentajaTyyppi)}
-             :luokitus {:energialuokka      (get-text rakennus :energialuokka)
-                        :paloluokka         (get-text rakennus :paloluokka)}
-             :mitat {:kellarinpinta-ala     (get-text rakennus :kellarinpinta-ala)
-                     :kerrosala             (get-text rakennus :kerrosala)
-                     :kerrosluku            (get-text rakennus :kerrosluku)
-                     :kokonaisala           (get-text rakennus :kokonaisala)
-                     :tilavuus              (get-text rakennus :tilavuus)}
-             :rakenne {:julkisivu           (get-text rakennus :julkisivumateriaali)
-                       :kantavaRakennusaine (get-text rakennus :rakennusaine)
-                       :rakentamistapa      (get-text rakennus :rakentamistapa)}
-             :lammitys {:lammitystapa       (get-text rakennus :lammitystapa)
-                        :lammonlahde        (get-text rakennus :polttoaine)}
-             :varusteet                     (-> (cr/all-of rakennus :varusteet)
-                                              (dissoc :uima-altaita) ; key :uima-altaita has been removed from lupapiste
-                                              (merge {:liitettyJatevesijarjestelmaanKytkin (get-text rakennus :liitettyJatevesijarjestelmaanKytkin)}))}
+             :osoite {:kunta                         (get-text rakennus :osoite :kunta)
+                      :lahiosoite                    (get-text rakennus :osoite :osoitenimi :teksti)
+                      :osoitenumero                  (get-text rakennus :osoite :osoitenumero)
+                      :osoitenumero2                 (get-text rakennus :osoite :osoitenumero2)
+                      :jakokirjain                   (get-text rakennus :osoite :jakokirjain)
+                      :jakokirjain2                  (get-text rakennus :osoite :jakokirjain2)
+                      :porras                        (get-text rakennus :osoite :porras)
+                      :huoneisto                     (get-text rakennus :osoite :huoneisto)
+                      :postinumero                   (get-text rakennus :osoite :postinumero)
+                      :postitoimipaikannimi          (get-text rakennus :osoite :postitoimipaikannimi)}
+             :kaytto {:kayttotarkoitus               (get-text rakennus :kayttotarkoitus)
+                      :rakentajaTyyppi               (get-text rakennus :rakentajaTyyppi)}
+             :luokitus {:energialuokka               (get-text rakennus :energialuokka)
+                        :paloluokka                  (get-text rakennus :paloluokka)}
+             :mitat {:kellarinpinta-ala              (get-text rakennus :kellarinpinta-ala)
+                     :kerrosala                      (get-text rakennus :kerrosala)
+                     :rakennusoikeudellinenKerrosala (get-text rakennus :rakennusoikeudellinenKerrosala)
+                     :kerrosluku                     (get-text rakennus :kerrosluku)
+                     :kokonaisala                    (get-text rakennus :kokonaisala)
+                     :tilavuus                       (get-text rakennus :tilavuus)}
+             :rakenne {:julkisivu                    (get-text rakennus :julkisivumateriaali)
+                       :kantavaRakennusaine          (get-text rakennus :rakennusaine)
+                       :rakentamistapa               (get-text rakennus :rakentamistapa)}
+             :lammitys {:lammitystapa                (get-text rakennus :lammitystapa)
+                        :lammonlahde                 (get-text rakennus :polttoaine)}
+             :varusteet                              (-> (cr/all-of rakennus :varusteet)
+                                                         (dissoc :uima-altaita) ; key :uima-altaita has been removed from lupapiste
+                                                         (merge {:liitettyJatevesijarjestelmaanKytkin (get-text rakennus :liitettyJatevesijarjestelmaanKytkin)}))}
 
             :rakennuksenOmistajat (->> (select rakennus [:omistaja]) (map ->rakennuksen-omistaja))
             :huoneistot (->> (select rakennus [:valmisHuoneisto])
@@ -421,7 +422,7 @@
 (defn- valid-antopvm? [anto-pvm]
   (or (not anto-pvm) (> (now) anto-pvm)))
 
-(defn- standard-verdicts-validator [xml]
+(defn- standard-verdicts-validator [xml {validate-verdict-given-date :validate-verdict-given-date}]
   (let [paatos-xml-without-ns (select (cr/strip-xml-namespaces xml) [:paatostieto :Paatos])
         poytakirjat (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
         poytakirja  (poytakirja-with-paatos-data poytakirjat)
@@ -429,8 +430,8 @@
     (cond
       (not (seq poytakirjat))                               (fail :info.no-verdicts-found-from-backend)
       (not (seq poytakirja))                                (fail :info.paatos-details-missing)
-      (or
-        (not (valid-paatospvm? (:paatospvm poytakirja)))
+      (not (valid-paatospvm? (:paatospvm poytakirja)))      (fail :info.paatos-future-date)
+      (and validate-verdict-given-date
         (not-any? #(valid-antopvm? (:anto %)) paivamaarat)) (fail :info.paatos-future-date))))
 
 (defn- ->standard-verdicts [xml-without-ns]
@@ -438,10 +439,7 @@
          (let [poytakirjat      (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
                poytakirja       (poytakirja-with-paatos-data poytakirjat)
                paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])]
-           (when (and
-                   poytakirja
-                   (valid-paatospvm? (:paatospvm poytakirja))
-                   (valid-antopvm? (:anto paivamaarat)))
+           (when (and poytakirja (valid-paatospvm? (:paatospvm poytakirja)))
              {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
               :paivamaarat    paivamaarat
               :poytakirjat    (seq poytakirjat)})))
@@ -548,7 +546,7 @@
 (def backend-preverdict-state
   #{"" "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"})
 
-(defn- simple-verdicts-validator [xml]
+(defn- simple-verdicts-validator [xml organization]
   (let [xml-without-ns (cr/strip-xml-namespaces xml)
         app-state      (application-state xml-without-ns)
         paivamaarat    (filter number? (map (comp cr/to-timestamp get-text) (select xml-without-ns [:paatostieto :Paatos :paatosdokumentinPvm])))

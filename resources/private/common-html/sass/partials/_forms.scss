@@ -1064,7 +1064,7 @@ $max-columns: 12;
     border: 0;
   }
 
-  input[type=text], input[type=password], select {
+  input[type=text], input[type=password], select, textarea {
     padding: 0 $marginM;
     min-height: $grid-input-height;
     height: $grid-input-height;
@@ -1081,6 +1081,11 @@ $max-columns: 12;
       color: $input-focus-color;
       border-color: $input-focus-border-color;
     }
+  }
+
+  textarea {
+    height: $grid-textarea-height;
+    padding: $marginS $marginM;
   }
 
   input[type=checkbox], input[type=radio] {

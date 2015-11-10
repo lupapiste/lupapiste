@@ -94,6 +94,14 @@ var ajax = (function($) {
       return self;
     };
 
+    self.form = function(formData) {
+      self.request.data = formData;
+      self.request.processData = false;
+      self.request.contentType = false;
+      self.request.enctype = "multipart/form-data";
+      return self;
+    };
+
     self.success = function(f, savedThis) {
       self.successHandler = f;
       self.savedThis = savedThis;
@@ -204,13 +212,18 @@ var ajax = (function($) {
     return new Call("/api/datatables/" + name, "POST").json(data);
   }
 
+  function form(name, formData) {
+    return new Call("/api/raw/" + name, "POST").form(formData);
+  }
+
   return {
     post:      post,
     postJson:  postJson,
     get:       get,
     command:   command,
     query:     query,
-    datatables: datatables
+    datatables: datatables,
+    form: form
   };
 
 })(jQuery);
