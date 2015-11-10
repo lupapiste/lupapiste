@@ -223,12 +223,20 @@
     (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
 
     (let [verdict        (-> cases last :paatokset first)
-          lupamaaraykset (:lupamaaraykset verdict)]
+          lupamaaraykset (:lupamaaraykset verdict)
+          maaraykset     (:maaraykset lupamaaraykset)]
 
       (facts "lupamaaraukset data is correct"
         lupamaaraykset => truthy
         (:rakennusoikeudellinenKerrosala lupamaaraykset) => "101"
-        (:vaaditutTyonjohtajat lupamaaraykset) => "IV-ty\u00f6njohtaja, KVV-ty\u00f6njohtaja, vastaava ty\u00f6njohtaja"))))
+        (:vaaditutTyonjohtajat lupamaaraykset) => "IV-ty\u00f6njohtaja, KVV-ty\u00f6njohtaja, vastaava ty\u00f6njohtaja"
+        (:vaaditutErityissuunnitelmat lupamaaraykset) => (just ["ES 1" "ES 22" "ES 333"] :in-any-order))
+
+      (fact "m\u00e4\u00e4r\u00e4ykset"
+        (count maaraykset) => 2
+        (:sisalto (first maaraykset)) => "Radontekninen suunnitelma"
+        (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
+        (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
 
 (facts "CGI sample verdict"
   (let [xml (xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
@@ -406,8 +414,8 @@
   (let [xml      (xml/parse (slurp "resources/krysp/sample/building_220.xml"))
         building (->> xml ->buildings-summary first :buildingId (->rakennuksen-tiedot xml))]
     (fact "mitat - kerrosala" (get-in building [:mitat :kerrosala]) => "1785")
-    (fact "mitat - rakennusoikeudellinenKerrosala" (get-in building [:mitat :rakennusoikeudellinenKerrosala]) => "1780"))
-    (fact "omistaja - yrityksen yhteyshenkilo - kytkimet" (get-in building [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo :kytkimet]) => {:suoramarkkinointilupa false, :vainsahkoinenAsiointiKytkin false}))
+    (fact "mitat - rakennusoikeudellinenKerrosala" (get-in building [:mitat :rakennusoikeudellinenKerrosala]) => "1780")
+    (fact "omistaja - yrityksen yhteyshenkilo - kytkimet" (get-in building [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo :kytkimet]) => nil)))
 
 ;; YA verdict
 

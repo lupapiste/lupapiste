@@ -231,28 +231,18 @@
                                   yhteystiedot
                                   kytkimet))
 
-(def yhteyshenkilo
-  {:name "yhteyshenkilo"
-   :type :group
-   :body (body
-           [henkilotiedot-minimal]
-           yhteystiedot
-           kytkimet-with-vain-sahkoinen-asiointi)})
-
-(def yhteyshenkilo-suoramarkkinointi
-  {:name "yhteyshenkilo"
-   :type :group
-   :body (body
-           [henkilotiedot-minimal]
-           yhteystiedot
-           kytkimet)})
-
 (def yhteyshenkilo-without-kytkimet
   {:name "yhteyshenkilo"
    :type :group
    :body (body
            [henkilotiedot-minimal]
            yhteystiedot)})
+
+(def yhteyshenkilo-suoramarkkinointi
+  (update-in yhteyshenkilo-without-kytkimet [:body] concat [kytkimet]))
+
+(def yhteyshenkilo
+  (update-in yhteyshenkilo-without-kytkimet [:body] concat [kytkimet-with-vain-sahkoinen-asiointi]))
 
 (def yritys-minimal [{:name "yritysnimi" :type :string :required true :size "l"}
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
@@ -843,7 +833,8 @@
 
 (def rakennelman-kayttotarkoitus {:name "kayttotarkoitus"
                                   :type :select
-                                  :body (mapv (partial hash-map :name) rakennelman-kayttotarkoitukset)})
+                                  :i18nkey "rakennelman-kayttotarkoitus"
+                                  :body (mapv #(hash-map :i18nkey (str "rakennelman-kayttotarkoitus." %) :name %) rakennelman-kayttotarkoitukset)})
 
 (def rakennelma (body {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
                       rakennelman-kayttotarkoitus
