@@ -401,6 +401,7 @@
   [application katselmus user lang krysp-version output-dir begin-of-link]
   (let [find-national-id (fn [{:keys [kiinttun rakennusnro]}]
                            (:nationalId (some #(when (and (= kiinttun (:propertyId %)) (= rakennusnro (:localShortId %))) %) (:buildings application))))
+        find-building (fn [nid] (some #(when (= (:nationalId %) nid) %) (:buildings application)))
         data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
@@ -409,9 +410,20 @@
                        (map
                          (fn [{rakennus :rakennus :as b}]
                            (when rakennus
-                             (if (ss/blank? (:valtakunnallinenNumero rakennus))
-                              (assoc-in b [:rakennus :valtakunnallinenNumero] (find-national-id rakennus))
-                              b))))
+                             (let [nid (if (ss/blank? (:valtakunnallinenNumero rakennus))
+                                         (find-national-id rakennus)
+                                         (:valtakunnallinenNumero rakennus))
+                                   _ (println "Nid:" nid)
+                                   b (assoc-in b [:rakennus :valtakunnallinenNumero] nid)
+                                   tags (:tags (find-building nid))
+                                   _ (println "Tags:" tags)
+                                   b (if tags (assoc-in b [:rakennus :tags] tags) b)
+                                   descs (:descriptions (find-building nid))
+                                   b (if descs (assoc-in b [:rakennus :descriptions] descs) b)]
+                               b
+                               #_ (if (ss/blank? (:valtakunnallinenNumero rakennus))
+                                    (assoc-in b [:rakennus :valtakunnallinenNumero] (find-national-id rakennus))
+                                    b)))))
                        (remove
                          #(or
                             (nil? %)
@@ -421,7 +433,7 @@
       lang
       output-dir
       (:id katselmus)
-      (:Tasknamepf katselmus)
+      (:taskname katselmus)
       pitoPvm
       buildings
       user

@@ -290,7 +290,8 @@
    :created 2
    :schema-info {:name "uusiRakennus"
                  :version 1
-                 :op {:name "kerrostalo-rivitalo"}}
+                 :op {:name "kerrostalo-rivitalo"
+                      :id "kerrostalo-rivitalo-id"}}
    :data common-rakennus})
 
 (def- rakennuksen-muuttaminen
@@ -298,7 +299,8 @@
    :created 1
    :schema-info {:name "rakennuksen-muuttaminen"
                  :version 1
-                 :op {:name "muu-laajentaminen"}}
+                 :op {:name "muu-laajentaminen"
+                      :id "muu-laajentaminen-id"}}
    :data (conj
            common-rakennus
            {:rakennusnro {:value "001"}
@@ -312,7 +314,8 @@
    :created 3
    :schema-info {:name "rakennuksen-laajentaminen"
                  :version 1
-                 :op {:name "laajentaminen"}}
+                 :op {:name "laajentaminen"
+                      :id "laajentaminen-id"}}
    :data (conj
            common-rakennus
            {:rakennusnro {:value "001"}
@@ -331,7 +334,8 @@
                       :created 4
                       :schema-info {:name "purkaminen"
                                     :version 1
-                                    :op {:name "purkaminen"}}
+                                    :op {:name "purkaminen"
+                                         :id "purkaminen-id"}}
                       :data (conj
                               (->
                                 common-rakennus
@@ -397,6 +401,9 @@
                 puun-kaataminen
                 purku])
 
+(defn op-info [doc]
+  (select-keys (-> doc :schema-info :op) [:id :name :description]))
+
 (def application-rakennuslupa
   {:id "LP-753-2013-00001"
    :permitType "R"
@@ -433,7 +440,11 @@
                  :requested 1368080102631
                  :status "ehdoilla"
                  :text "Savupiippu pit\u00e4\u00e4 olla."}]
-   :neighbors ctc/neighbors})
+   :neighbors ctc/neighbors
+   :primaryOperation (op-info rakennuksen-muuttaminen)
+   :secondaryOperations (map op-info [uusi-rakennus laajentaminen
+                                      aidan-rakentaminen puun-kaataminen
+                                      purku])})
 
 (ctc/validate-all-documents application-rakennuslupa)
 
