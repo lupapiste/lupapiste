@@ -112,3 +112,8 @@ Add työnjohtaja task to current application
   Input text  create-task-name  ${role}
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task
+
+Required foreman state is
+  [Arguments]  ${role}  ${state}
+  ${s} =  Get Element Attribute  xpath=//table[@class="tasks-foreman"]//tr[@data-test-name="${role}"]//td[@data-test-state]@data-test-state
+  Should be equal  ${s}  ${state}

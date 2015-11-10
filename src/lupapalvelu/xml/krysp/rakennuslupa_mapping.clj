@@ -139,7 +139,10 @@
       (update-in [:child]
                  mapping-common/update-child-element
                  [:rakennuksenTiedot :rakennustunnus]
-                 {:tag :rakennustunnus :child rakennustunnus_220})))
+                 {:tag :rakennustunnus :child rakennustunnus_220})
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennuksenTiedot]
+                 #(update-in % [:child] mapping-common/merge-into-coll-after-tag :kerrosala [{:tag :rakennusoikeudellinenKerrosala}]))))
 
 (def- katselmustieto
   {:tag :katselmustieto
@@ -250,9 +253,13 @@
       {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
 
 (def- katselmus_220
-  (update-in katselmus_215 [:child] mapping-common/update-child-element
-      [:Katselmus :katselmuksenRakennustieto :KatselmuksenRakennus]
-      {:tag :KatselmuksenRakennus :child rakennustunnus_220}))
+  (-> katselmus_215
+      (update-in [:child] mapping-common/update-child-element
+              [:Katselmus :katselmuksenRakennustieto :KatselmuksenRakennus]
+              {:tag :KatselmuksenRakennus :child rakennustunnus_220})
+      (update-in [:child] mapping-common/update-child-element
+             [:Katselmus :katselmuspoytakirja]
+             {:tag :liitetieto :child [{:tag :liite :child mapping-common/liite-children_216}]})))
 
 (def rakennuslupa_to_krysp_213
   (-> rakennuslupa_to_krysp_212
@@ -388,7 +395,9 @@
                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)
                       %))
                     (#(if poytakirja
-                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
+                        (-> %
+                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
+                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :liitetieto :liite] canonical-pk))
                        %)))
 
         xml (element-to-xml canonical (get-rakennuslupa-mapping krysp-version))
@@ -413,17 +422,12 @@
                              (let [nid (if (ss/blank? (:valtakunnallinenNumero rakennus))
                                          (find-national-id rakennus)
                                          (:valtakunnallinenNumero rakennus))
-                                   _ (println "Nid:" nid)
                                    b (assoc-in b [:rakennus :valtakunnallinenNumero] nid)
                                    tags (:tags (find-building nid))
-                                   _ (println "Tags:" tags)
                                    b (if tags (assoc-in b [:rakennus :tags] tags) b)
                                    descs (:descriptions (find-building nid))
                                    b (if descs (assoc-in b [:rakennus :descriptions] descs) b)]
-                               b
-                               #_ (if (ss/blank? (:valtakunnallinenNumero rakennus))
-                                    (assoc-in b [:rakennus :valtakunnallinenNumero] (find-national-id rakennus))
-                                    b)))))
+                               b))))
                        (remove
                          #(or
                             (nil? %)

@@ -186,6 +186,9 @@ Open accordion by test id
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
 
+Positive indicator should not be visible
+  Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-positive"]
+
 #
 # Login stuff
 #
@@ -836,7 +839,7 @@ Foreman count is
 
 Apply minimal fixture now
   Go to  ${FIXTURE URL}/minimal
-  Page should contain  true
+  Wait until  Page should contain  true
   Go to login page
 
 #

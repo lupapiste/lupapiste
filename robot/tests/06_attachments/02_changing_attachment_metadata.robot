@@ -55,28 +55,32 @@ Mikko opens attachment details
 Mikko can change related operation
   Element should be visible  xpath=//select[@data-test-id="attachment-operation-select"]
   Select From List  xpath=//select[@data-test-id='attachment-operation-select']  Muun rakennuksen rakentaminen - Talo B
+  Positive indicator should be visible
 
 Mikko can change size
+  Positive indicator should not be visible
   Element should be visible  xpath=//select[@data-test-id='attachment-size-select']
   Select From List  xpath=//select[@data-test-id='attachment-size-select']  B0
+  Positive indicator should be visible
 
 Mikko can change scale
+  Positive indicator should not be visible
   Element should be visible  xpath=//select[@data-test-id='attachment-scale-select']
   Select From List  xpath=//select[@data-test-id='attachment-scale-select']  1:200
+  Positive indicator should be visible
 
 Mikko can change contents
+  Positive indicator should not be visible
   Element should be visible  xpath=//input[@data-test-id='attachment-contents-input']
   Input text by test id  attachment-contents-input  PuuCee
-  Sleep  1
-  [Teardown]  logout
+  Positive indicator should be visible
 
-Mikko logs in and goes to attachments tab
-  Mikko logs in
-  Open application  ${appname}  753-416-25-30
-  Open tab  attachments
+Mikko goes to fresh attachments tab
+  Go Back
+  Reload Page
 
 Mikko sees that contents metadata is visible in attachments list
-  Element Text Should Be  xpath=//div[@id="application-attachments-tab"]//span[@data-test-id="attachment-contents"]  PuuCee
+  Wait Until  Element Text Should Be  xpath=//div[@id="application-attachments-tab"]//span[@data-test-id="attachment-contents"]  PuuCee
 
 Mikko sees that attachments are grouped by operations
   Xpath Should Match X Times  //div[@id="application-attachments-tab"]//tr[@class="attachment-group-header"]  2
