@@ -149,7 +149,8 @@
                    "organization-filter-service.js"
                    "organization-tags-service.js"
                    "handler-filter-service.js"
-                   "application-filters-service.js"]}
+                   "application-filters-service.js"
+                   "publish-bulletin-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -381,7 +382,7 @@
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
                :js ["header.js"
-                    "bulletins.js" "component-base-model.js" "bulletins-model.js"
+                    "bulletins.js" "bulletins-model.js"
                     "application-bulletins-service.js"
                     "application-bulletin/application-bulletin-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
