@@ -402,11 +402,9 @@
         (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
         (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))))
 
-(facts "KRYSP rakval 2.2.0"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/building_220.xml"))
-        buildings (->buildings-summary xml)
-        building-id (:buildingId (first buildings))
-        building    (->rakennuksen-tiedot xml building-id)]
+(facts "KRYSP rakval 2.2.0 ->rakennuksen-tiedot"
+  (let [xml      (xml/parse (slurp "resources/krysp/sample/building_220.xml"))
+        building (->> xml ->buildings-summary first :buildingId (->rakennuksen-tiedot xml))]
     (fact "mitat - kerrosala" (get-in building [:mitat :kerrosala]) => "1785")
     (fact "mitat - rakennusoikeudellinenKerrosala" (get-in building [:mitat :rakennusoikeudellinenKerrosala]) => "1780")))
 
