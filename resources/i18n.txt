@@ -1,0 +1,4 @@
+purku.mitat.rakennusoikeudellinenKerrosala: Rakennusoikeudellinen kerrosala
+rakennuksen-laajentaminen.laajennuksen-tiedot.mitat.rakennusoikeudellinenKerrosala: Rakennusoikeudellinen kerrosala
+rakennuksen-muuttaminen.mitat.rakennusoikeudellinenKerrosala: Rakennusoikeudellinen kerrosala
+uusiRakennus.mitat.rakennusoikeudellinenKerrosala: Rakennusoikeudellinen kerrosala
