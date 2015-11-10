@@ -529,19 +529,40 @@
     (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data application lang))
     (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data application lang))))
 
-(defn- get-neighbor [neighbor-name property-id]
-  {:Naapuri {:henkilo neighbor-name
-             :kiinteistotunnus property-id
-             :hallintasuhde "Ei tiedossa"}})
+(defn- address->osoitetieto [{katu :street postinumero :zip postitoimipaikannimi :city :as address}]
+  (when katu
+    (util/assoc-when {} 
+                     :osoitenimi {:teksti katu}
+                     :postinumero postinumero
+                     :postitoimipaikannimi postitoimipaikannimi)))
+
+(defn- get-neighbor [{status :status property-id :propertyId owner :owner :as neighbor}]
+  (let [{state :state vetuma :vetuma message :message} (last status)
+        neighbor (util/assoc-when {}
+                                  :henkilo (:name owner)
+                                  :osoite (address->osoitetieto (:address owner))
+                                  :kiinteistotunnus property-id
+                                  :hallintasuhde "Ei tiedossa"
+                                  :saanutTiedoksiannonKytkin (-> (map :state status) (set) (contains? "email-sent"))
+                                  :huomautettavaaKytkin nil
+                                  :haluaaPaatoksenKytkin nil
+                                  :huomautus nil)]
+    {:Naapuri (case state
+                "response-given-comments" (util/assoc-when neighbor
+                                                           :henkilo (str (:firstName vetuma) " " (:lastName vetuma)) 
+                                                           :osoite (address->osoitetieto vetuma)
+                                                           :huomautettavaaKytkin true
+                                                           :huomautus message)
+                "response-given-ok"       (util/assoc-when neighbor 
+                                                           :henkilo (str (:firstName vetuma) " " (:lastName vetuma)) 
+                                                           :osoite (address->osoitetieto vetuma)
+                                                           :huomautettavaaKytkin false)
+                "mark-done"               neighbor
+                nil)}))
 
 (defn- get-neighbors [neighbors]
-  (remove nil? (for [neighbor neighbors]
-                   (let [status (last (:status neighbor))
-                         propertyId (:propertyId neighbor)]
-                     (case (:state status)
-                       "response-given-ok" (get-neighbor (str (-> status :vetuma :firstName) " " (-> status :vetuma :lastName)) propertyId)
-                       "mark-done" (get-neighbor (-> neighbor :owner :name) propertyId)
-                       nil)))))
+  (->> (map get-neighbor neighbors)
+       (filter val)))
 
 (defn osapuolet [{neighbors :neighbors :as application} documents-by-type lang]
   {:pre [(map? documents-by-type) (string? lang)]}
@@ -549,7 +570,7 @@
    {:osapuolitieto (get-parties application documents-by-type)
     :suunnittelijatieto (get-designers documents-by-type)
     :tyonjohtajatieto (get-foremen application documents-by-type lang)
-    ;:naapuritieto (get-neighbors neighbors)LPK-215
+    :naapuritieto (get-neighbors neighbors);LPK-215
     }})
 
 (defn change-value-to-when [value to_compare new_val]
