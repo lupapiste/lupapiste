@@ -392,9 +392,9 @@
                               {:name "kantavien rakenteiden suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.kantavien rakenteiden suunnittelija"}
                               {:name "pohjarakenteiden suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.pohjarakenteiden suunnittelija"}
                               {:name "ilmanvaihdon suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.ilmanvaihdon suunnittelija"}
-                              {:name "kiinteistön vesi- ja viemäröintilaitteiston suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.vesiviemarisuunnittelija"}
+                              {:name "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.vesiviemarisuunnittelija"}
                               {:name "rakennusfysikaalinen suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.rakennusfysikaalinen suunnittelija"}
-                              {:name "kosteusvaurion korjaustyön suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.kosteusvaurion korjaustyön suunnittelija"}
+                              {:name "kosteusvaurion korjausty\u00f6n suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.kosteusvaurion korjausty\u00f6n suunnittelija"}
 
                               {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}
                               ]}])
