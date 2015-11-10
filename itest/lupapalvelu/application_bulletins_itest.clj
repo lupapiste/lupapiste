@@ -51,6 +51,10 @@
           bulletin (:bulletin (query pena :bulletin :bulletinId (:id app)))]
       (fact "unable to add comment for older version"
         (:body (decode-response (send-comment sonja-id (:id app) (:versionId old-bulletin) "foobar"))) => {:ok false :text "error.invalid-version-id"})
+      (fact "unable to add empty comment"
+        (:body (decode-response (send-comment sonja-id (:id app) (:versionId bulletin) ""))) => {:ok false :text "error.empty-comment"})
+      (fact "unable to add comment for unknown bulletin"
+        (:body (decode-response (send-comment sonja-id "not-found!" (:versionId bulletin) "foobar"))) => {:ok false :text "error.invalid-bulletin-id"})
       (fact "approve comment for latest version"
         (:body (decode-response (send-comment sonja-id (:id app) (:versionId bulletin) "foobar"))) => ok?)))
 

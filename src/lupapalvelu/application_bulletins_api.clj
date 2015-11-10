@@ -94,11 +94,24 @@
   (let [states (mongo/distinct :application-bulletins :versions.bulletinState)]
     (ok :states states)))
 
-(defn- bulletin-version-is-latest! [bulletin-id bulletin-version-id]
-  (let [bulletin (mongo/by-id :application-bulletins bulletin-id)
-        latest-version-id (:id (last (:versions bulletin)))]
+(defn- bulletin-exists! [bulletin-id]
+  (let [bulletin (mongo/by-id :application-bulletins bulletin-id)]
+    (when-not bulletin
+      (fail! :error.invalid-bulletin-id))
+    bulletin))
+
+(defn- bulletin-version-is-latest! [bulletin bulletin-version-id]
+  (let [latest-version-id (:id (last (:versions bulletin)))]
     (when-not (= bulletin-version-id latest-version-id)
       (fail! :error.invalid-version-id))))
+
+(defn- comment-can-be-added! [bulletin-id bulletin-version-id comment]
+  (when (ss/blank? comment)
+    (fail! :error.empty-comment))
+  (let [bulletin (bulletin-exists! bulletin-id)]
+    (when-not (= (:bulletinState bulletin) "proclaimed")
+      (fail! :error.invalid-bulletin-state))
+    (bulletin-version-is-latest! bulletin bulletin-version-id)))
 
 ;; TODO user-roles Vetuma autheticated person
 (defraw add-bulletin-comment
@@ -107,7 +120,7 @@
    :user-roles  #{:anonymous}}
   [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field bulletin-version-id :bulletin-version-id} :data created :created :as action}]
   (try+
-    (bulletin-version-is-latest! bulletin-id bulletin-version-id)
+    (comment-can-be-added! bulletin-id bulletin-version-id comment)
     (let [comment      (bulletins/create-comment comment created)
           stored-files (bulletins/store-files bulletin-id (:id comment) files)]
       (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments stored-files)}})
