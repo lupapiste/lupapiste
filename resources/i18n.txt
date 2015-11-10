@@ -1,1 +1,0 @@
-hankkeen-kuvaus.hankkeenVaativuus.help: Rakennusvalvontaviranomainen määrittää aina hankekohtaisesti rakennushankkeen sekä suunnittelutehtävien vaativuusluokan.
