@@ -7,10 +7,15 @@
             [sade.util :as util]
             [midje.sweet :refer :all]
             [pdfboxing.text :as pdfbox]
-            [lupapalvelu.mongo :as mongo])
-  (:import (java.io File)))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.document.schemas :as schemas])
+  (:import (java.io File FileOutputStream)))
 
 (apply-remote-minimal)
+
+(def pdfa #'lupapalvelu.pdf.pdf-export/generate-pdf-with-child)
 
 (defn- localize-value [value]
   (cond
@@ -30,6 +35,52 @@
     nil
     node)
   )
+(def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
+                       "poikkeusasian-rakennuspaikka"
+                       "hulevedet"
+                       "talousvedet"
+                       "ottamismaara"
+                       "ottamis-suunnitelman-laatija"
+                       "kaupunkikuvatoimenpide"
+                       "task-katselmus"
+                       "approval-model-with-approvals"
+                       "approval-model-without-approvals"})
+
+(defn- localized-doc-headings [schema-names]
+  (map #(loc (str % "._group_label")) schema-names))
+
+(def yesterday (- (System/currentTimeMillis) (* 1000 60 60 24)))
+(def today (System/currentTimeMillis))
+
+(defn- dummy-statement [id name status text]
+  {:id id
+   :requested 1444802294666
+   :given 1444902294666
+   :status status
+   :text text
+   :person {:name name}
+   :attachments [{:target {:type "statement"}} {:target {:type "something else"}}]})
+
+(defn- dummy-neighbour [id name status message]
+  {:propertyId id
+   :owner {:type "luonnollinen"
+           :name name
+           :email nil
+           :businessID nil
+           :nameOfDeceased nil
+           :address
+           {:street "Valli & kuja I/X:s Gaatta"
+            :city "Helsinki"
+            :zip "00100"}}
+   :id id
+   :status [{:state nil
+             :user {:firstName nil :lastName nil}
+             :created nil}
+            {:state status
+             :message message
+             :user {:firstName "Sonja" :lastName "Sibbo"}
+             :vetuma {:firstName "TESTAA" :lastName "PORTAALIA"}
+             :created 1444902294666}]})
 
 (fact "Generate PDF from an R application with dummy document values"
   (let [test-municipality        444
@@ -82,3 +133,24 @@
         (doseq [doc-data documents-data]
           (clojure.walk/prewalk (partial walk-function pdf-content) doc-data)))
         (.delete file))))
+
+(facts "Generated statement PDF is valid PDF/A"
+       (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
+             dummy-docs (map dummy-doc schema-names)
+             dummy-statements [(dummy-statement "2" "Matti Malli" "puollettu" "Lorelei ipsum")
+                               (dummy-statement "1" "Minna Malli" "joku status" "Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero.")]
+             application (merge domain/application-skeleton {:id "LP-1"
+                                                             :address "Korpikuusen kannon alla 1 "
+                                                             :documents dummy-docs
+                                                             :statements dummy-statements
+                                                             :municipality "444"
+                                                             :state "draft"})]
+            (doseq [lang i18n/languages]
+                   (facts {:midje/description (name lang)}
+                          (let [file (File/createTempFile (str "export-test-statement-pdfa-" (name lang)) ".pdf")
+                                fis (FileOutputStream. file)]
+                               (pdfa :statements "2" lang fis)
+                               (fact "File exists " (.exists file))
+                               (fact "File not empty " (> (.length file) 1))
+                               (fact "File is valid PDF/A " (lupapalvelu.pdf.pdfa-conversion/convert-file-to-pdf-in-place file))
+                               (.delete file))))))
