@@ -231,28 +231,18 @@
                                   yhteystiedot
                                   kytkimet))
 
-(def yhteyshenkilo
-  {:name "yhteyshenkilo"
-   :type :group
-   :body (body
-           [henkilotiedot-minimal]
-           yhteystiedot
-           kytkimet-with-vain-sahkoinen-asiointi)})
-
-(def yhteyshenkilo-suoramarkkinointi
-  {:name "yhteyshenkilo"
-   :type :group
-   :body (body
-           [henkilotiedot-minimal]
-           yhteystiedot
-           kytkimet)})
-
 (def yhteyshenkilo-without-kytkimet
   {:name "yhteyshenkilo"
    :type :group
    :body (body
            [henkilotiedot-minimal]
            yhteystiedot)})
+
+(def yhteyshenkilo-suoramarkkinointi
+  (update-in yhteyshenkilo-without-kytkimet [:body] concat [kytkimet]))
+
+(def yhteyshenkilo
+  (update-in yhteyshenkilo-without-kytkimet [:body] concat [kytkimet-with-vain-sahkoinen-asiointi]))
 
 (def yritys-minimal [{:name "yritysnimi" :type :string :required true :size "l"}
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
