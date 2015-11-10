@@ -40,6 +40,13 @@ LUPAPISTE.ApplicationBulletinsService = function() {
 
   self.bulletin = ko.observable();
 
+  var commentPending = ko.observable(false);
+
+  ko.computed(function() {
+    var state = commentPending() ? "pending" : "finished";
+    hub.send("bulletinService::commentProcessing", {state: state});
+  });
+
   function fetchMunicipalities() {
     ajax.query("application-bulletin-municipalities", {})
       .success(function(res) {
@@ -90,6 +97,28 @@ LUPAPISTE.ApplicationBulletinsService = function() {
 
   hub.subscribe("bulletinService::fetchBulletin", function(event) {
     fetchBulletin(event.id);
+  });
+
+  hub.subscribe("bulletinService::newComment", function(event) {
+    var form = event.commentForm;
+    var formData = new FormData(form);
+    var files = event.files;
+    if (files.length === 1) {
+      formData.append("files[]", _.first(files));
+    } else {
+      _.forEach(event.files, function(file) {
+        formData.append("files", file);
+      });
+    }
+    ajax.form("add-bulletin-comment", formData)
+    .success(function() {
+      hub.send("bulletinService::commentProcessed", {status: "success"});
+    })
+    .error(function() {
+      hub.send("bulletinService::commentProcessed", {status: "failed"});
+    })
+    .pending(commentPending)
+    .call();
   });
 };
 

@@ -332,7 +332,7 @@
         yritys-canonical (merge
                            (get-simple-yritys yritys)
                            yhteystiedot-canonical
-                           {:vainsahkoinenAsiointiKytkin (true? (-> yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin))})]
+                           {:vainsahkoinenAsiointiKytkin (-> yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin true?)})]
     (util/assoc-when yritys-canonical :verkkolaskutustieto (get-verkkolaskutus yritys))))
 
 (def- default-role "ei tiedossa")
@@ -354,8 +354,8 @@
     (when (-> henkilo :henkilotiedot :sukunimi)
       (let [kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type)
             omistajalaji   (muu-select-map
-                             :muu (-> osapuoli :muu-omistajalaji)
-                             :omistajalaji (-> osapuoli :omistajalaji))]
+                             :muu (:muu-omistajalaji osapuoli)
+                             :omistajalaji (:omistajalaji osapuoli))]
         (merge
           {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
            :kuntaRooliKoodi kuntaRoolicode
@@ -366,9 +366,9 @@
                       (get-name (:henkilotiedot henkilo))
                       (get-yhteystiedot-data (:yhteystiedot henkilo))
                       (when-not yritys-type-osapuoli?
-                        {:henkilotunnus (-> (:henkilotiedot henkilo) :hetu)
+                        {:henkilotunnus (get-in henkilo [:henkilotiedot :hetu])
                          :osoite (get-simple-osoite (:osoite henkilo))
-                         :vainsahkoinenAsiointiKytkin (true? (-> henkilo :kytkimet :vainsahkoinenAsiointiKytkin))}))}
+                         :vainsahkoinenAsiointiKytkin (-> henkilo :kytkimet :vainsahkoinenAsiointiKytkin true?)}))}
           (when yritys-type-osapuoli?
             {:yritys (get-yritys-data (:yritys osapuoli))})
           (when omistajalaji {:omistajalaji omistajalaji}))))))
@@ -763,7 +763,7 @@
 (defmethod osapuolitieto "henkilo"
   [{{:keys [yhteystiedot henkilotiedot osoite kytkimet]} :henkilo}]
   (merge (entry :turvakieltoKytkin henkilotiedot :turvakieltokytkin)
-         {:vainsahkoinenAsiointiKytkin (true? (-> kytkimet :vainsahkoinenAsiointiKytkin))}
+         {:vainsahkoinenAsiointiKytkin (-> kytkimet :vainsahkoinenAsiointiKytkin true?)}
          {:henkilotieto {:Henkilo
                          (merge
                            {:nimi (merge (entry :etunimi henkilotiedot)
@@ -781,7 +781,7 @@
         billing-information (when billing
                               {:verkkolaskutustieto billing})]
     (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
-           {:vainsahkoinenAsiointiKytkin (true? (-> company :kytkimet :vainsahkoinenAsiointiKytkin))}
+           {:vainsahkoinenAsiointiKytkin (-> company :kytkimet :vainsahkoinenAsiointiKytkin true?)}
            {:yritystieto {:Yritys (merge (entry :yritysnimi company :nimi)
                                          (entry :liikeJaYhteisoTunnus company :liikeJaYhteisotunnus )
                                          {:postiosoitetieto {:postiosoite (->postiosoite-type (:osoite company))}}
