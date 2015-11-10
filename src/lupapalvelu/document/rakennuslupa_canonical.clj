@@ -341,7 +341,7 @@
                                                                                     :muuTunnustieto (map (fn [{:keys [tag id]}]
                                                                                                            {:MuuTunnus {:tunnus tag :sovellus id}})
                                                                                                          (:tags building))
-                                                                                    :rakennuksenSelite (ss/join ", " (:descriptions building))) ; v2.2.0
+                                                                                    :rakennuksenSelite (:description building)) ; v2.2.0
                                                                 ]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
                       (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv

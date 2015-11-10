@@ -166,7 +166,7 @@
      :area         (get-text xml-no-ns :kokonaisala)
      :created      (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))
      :tags         (map (fn [{{:keys [tunnus sovellus]} :Muutunnus}] {:tag tunnus :id sovellus}) (->list (:muuTunnustieto edn)))
-     :descriptions (->list (:rakennuksenSelite edn))}))
+     :description (:rakennuksenSelite edn)}))
 
 (defn ->buildings-summary [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)]

@@ -653,10 +653,7 @@
                                    (create-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
                            (flatten)
                            (vec))]
-    (remove empty? (concat liitepohja op-metas signatures))
-    #_(if (empty? signatures)
-      liitepohja
-      (into liitepohja signatures))))
+    (remove empty? (concat liitepohja op-metas signatures))))
 
 (defn get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"

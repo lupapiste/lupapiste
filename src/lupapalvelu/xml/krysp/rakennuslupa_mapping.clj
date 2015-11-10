@@ -425,8 +425,8 @@
                                    b (assoc-in b [:rakennus :valtakunnallinenNumero] nid)
                                    tags (:tags (find-building nid))
                                    b (if tags (assoc-in b [:rakennus :tags] tags) b)
-                                   descs (:descriptions (find-building nid))
-                                   b (if descs (assoc-in b [:rakennus :descriptions] descs) b)]
+                                   desc (:description (find-building nid))
+                                   b (if desc (assoc-in b [:rakennus :description] desc) b)]
                                b))))
                        (remove
                          #(or
