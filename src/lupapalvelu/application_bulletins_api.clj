@@ -144,7 +144,7 @@
   {:parameters [id]
    :feature :publish-bulletin
    :user-roles #{:authority}
-   :states     (states/all-application-states-but :draft)}
+   :states     (states/all-application-states-but :draft :open)}
   [{:keys [application created] :as command}]
   (let [app-snapshot (bulletins/create-bulletin-snapshot application)
         search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
