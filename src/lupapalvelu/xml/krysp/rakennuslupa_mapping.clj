@@ -470,9 +470,9 @@
 
 (def designer-new-roles-220 #{"rakennussuunnittelija" "kantavien rakenteiden suunnittelija"
                               "pohjarakenteiden suunnittelija" "ilmanvaihdon suunnittelija"
-                              "kiinteistön vesi- ja viemäröintilaitteiston suunnittelija"
+                              "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija"
                               "rakennusfysikaalinen suunnittelija"
-                              "kosteusvaurion korjaustyön suunnittelija"})
+                              "kosteusvaurion korjausty\u00f6n suunnittelija"})
 
 (defn map-suunnittelija-kuntaroolikoodi-pre220 [canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :suunnittelijatieto]
