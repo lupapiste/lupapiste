@@ -472,5 +472,5 @@
   ([app child-type id lang]
    "Returns PDF ByteArrayInputStream of given application child (Document, Statemtn, Verdict)"
    (let [out (ByteArrayOutputStream.)]
-     (generate-pdf-with-child app child-type out id lang)
+     (generate-pdf-with-child app child-type id lang out)
      (ByteArrayInputStream. (.toByteArray out)))))

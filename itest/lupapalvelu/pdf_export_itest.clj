@@ -1,16 +1,16 @@
 (ns lupapalvelu.pdf-export-itest
-  (:require [clojure.java.io :as io]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.pdf.pdf-export :as pdf-export]
-            [lupapalvelu.i18n :refer [with-lang loc]]
-            [sade.util :as util]
-            [midje.sweet :refer :all]
-            [pdfboxing.text :as pdfbox]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas])
+    (:require [clojure.java.io :as io]
+      [lupapalvelu.itest-util :refer :all]
+      [lupapalvelu.factlet :refer :all]
+      [lupapalvelu.pdf.pdf-export :as pdf-export]
+      [lupapalvelu.i18n :refer [with-lang loc]]
+      [sade.util :as util]
+      [midje.sweet :refer :all]
+      [pdfboxing.text :as pdfbox]
+      [lupapalvelu.mongo :as mongo]
+      [lupapalvelu.i18n :as i18n]
+      [lupapalvelu.domain :as domain]
+      [lupapalvelu.document.schemas :as schemas] [lupapalvelu.domain :as domain])
   (:import (java.io File FileOutputStream)))
 
 (apply-remote-minimal)
@@ -139,17 +139,17 @@
              dummy-docs (map dummy-doc schema-names)
              dummy-statements [(dummy-statement "2" "Matti Malli" "puollettu" "Lorelei ipsum")
                                (dummy-statement "1" "Minna Malli" "joku status" "Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero.")]
-             application (merge domain/application-skeleton {:id "LP-1"
-                                                             :address "Korpikuusen kannon alla 1 "
-                                                             :documents dummy-docs
-                                                             :statements dummy-statements
+             application (merge domain/application-skeleton {:id           "LP-1"
+                                                             :address      "Korpikuusen kannon alla 1 "
+                                                             :documents    dummy-docs
+                                                             :statements   dummy-statements
                                                              :municipality "444"
-                                                             :state "draft"})]
+                                                             :state        "draft"})]
             (doseq [lang i18n/languages]
                    (facts {:midje/description (name lang)}
                           (let [file (File/createTempFile (str "export-test-statement-pdfa-" (name lang)) ".pdf")
                                 fis (FileOutputStream. file)]
-                               (pdfa :statements "2" lang fis)
+                               (pdfa application :statements "2" lang fis)
                                (fact "File exists " (.exists file))
                                (fact "File not empty " (> (.length file) 1))
                                (fact "File is valid PDF/A " (lupapalvelu.pdf.pdfa-conversion/convert-file-to-pdf-in-place file))

@@ -92,6 +92,7 @@
                            :rakentajaTyyppi nil}
                   :mitat {:kerrosluku "5"
                           :kerrosala "1785"
+                          :rakennusoikeudellinenKerrosala ""
                           :kokonaisala "2682"
                           :kellarinpinta-ala "100"
                           :tilavuus "8240"}
@@ -150,9 +151,7 @@
                               :yritysnimi "Testiyritys 11477"
                               :yhteyshenkilo {:henkilotiedot {:etunimi "", :sukunimi "",
                                                               :turvakieltoKytkin false}
-                                              :yhteystiedot {:email "", :puhelin ""}
-                                              :kytkimet {:suoramarkkinointilupa false
-                                                         :vainsahkoinenAsiointiKytkin false}}}})))))
+                                              :yhteystiedot {:email "", :puhelin ""}}}})))))
 
 (fact "converting rakval verdict krysp to lupapiste domain model, using lupapistetunnus"
   (let [xml (rakval-application-xml local-krysp nil id :application-id false)]

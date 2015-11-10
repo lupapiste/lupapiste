@@ -898,6 +898,7 @@
           (seq? in) (seq-to-doc in out)
           :else (write-doc in out))))
 
+
 ;;;templating
 (defmacro template [t]
   `(fn [~'items]

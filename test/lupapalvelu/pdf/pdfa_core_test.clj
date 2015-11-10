@@ -5,8 +5,11 @@
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [lupapalvelu.pdf.pdf-export :as pdf-export])
   (:import (org.apache.pdfbox.pdmodel PDDocument)
-           (java.io File FileOutputStream)
-           (java.util List ArrayList)))
+           (java.io File FileOutputStream FileInputStream)
+           (java.util List ArrayList)
+           (com.lowagie.text.rtf.parser RtfParser)
+           (com.lowagie.text Document)
+           (com.lowagie.text.pdf PdfWriter)))
 
 
 (facts "Valid embedded Fonts "
@@ -35,5 +38,23 @@
 
            ;(debug "dc meta:                   "  (.getInputStreamAsString (.getMetadata (.getDocumentCatalog doc))))
            )
-         (.delete file)
-         ))
+         (.delete file)))
+
+#_(facts "rtf to pdf/a"
+         (debug "env: " (System/getenv "os.name"))
+         (System/setProperty "SystemRoot" "/usr/share")
+         (.exec (Runtime/getRuntime) "env --unset \"BASH_FUNC_mc%%\"") ;
+
+         (let [file (File. "/home/michaelho/Documents/Lounaslista 2015 vk46.rtf")
+               fis (FileInputStream. file)
+               parser (RtfParser. nil)
+               doc (Document.)
+               output-stream (FileOutputStream. "/tmp/test-rtf-to-pdf.pdf")
+               pdf-writer (PdfWriter/getInstance doc output-stream)
+               ]
+           (.open doc)
+           (.convertRtfDocument parser fis doc)
+           (.close doc)
+           )
+         )
+
