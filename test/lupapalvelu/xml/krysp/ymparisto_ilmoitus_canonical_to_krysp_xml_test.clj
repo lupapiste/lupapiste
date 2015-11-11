@@ -24,7 +24,7 @@
         xml_212_s     (indent-str xml_212)
         xml_221_s     (indent-str xml_221)
         lp-xml_212    (cr/strip-xml-namespaces (xml/parse xml_212_s))
-        lp-xml_212    (cr/strip-xml-namespaces (xml/parse xml_221_s))]
+        lp-xml_221    (cr/strip-xml-namespaces (xml/parse xml_221_s))]
 
     (validator/validate (indent-str xml_212) (:permitType application) "2.1.2")
     (validator/validate (indent-str xml_221) (:permitType application) "2.2.1")
@@ -42,6 +42,11 @@
     (fact "koneet"
       (xml/get-text lp-xml_212 [:Melutarina :koneidenLkm]) => "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. ")
 
+    (fact "ilmoittaja"
+      (let [ilmoittaja (xml/select lp-xml_221 [:Melutarina :ilmoittaja])]
+        (xml/get-text ilmoittaja [:yTunnus]) => "1060155-5"
+        (fact "maa"
+          (xml/get-text ilmoittaja [:osoitetieto :Osoite :valtioKansainvalinen]) => "FIN")))
     ))
 
 
