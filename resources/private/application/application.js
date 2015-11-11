@@ -111,12 +111,14 @@
   }
 
   function initAvailableTosFunctions(organizationId) {
-    ajax
-      .query("available-tos-functions", {organizationId: organizationId})
-      .success(function(data) {
-        tosFunctions(data.functions);
-      })
-      .call();
+    if (authorizationModel.ok("available-tos-functions")) {
+      ajax
+        .query("available-tos-functions", {organizationId: organizationId})
+        .success(function(data) {
+          tosFunctions(data.functions);
+        })
+        .call();
+    }
   }
 
   function showApplication(applicationDetails) {
