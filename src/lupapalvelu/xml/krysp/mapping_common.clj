@@ -325,6 +325,19 @@
 (def osapuoli-body_216
   (update-in osapuoli-body_215 [:child] concat [{:tag :suoramarkkinointikieltoKytkin}]))
 
+(def osapuolitieto_210
+  {:tag :osapuolitieto :child [osapuoli-body_211]})
+
+(def osapuolitieto_213
+  {:tag :osapuolitieto :child [osapuoli-body_213]})
+
+(def osapuolitieto_215
+  {:tag :osapuolitieto :child [osapuoli-body_215]})
+
+(def osapuolitieto_216
+  {:tag :osapuolitieto :child [osapuoli-body_216]})
+
+
 (def- naapuri {:tag :naapuritieto
                :child [{:tag :Naapuri
                         :child [{:tag :henkilo}
@@ -463,7 +476,7 @@
 
 (def osapuolet_210
   {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto :child [osapuoli-body_211]}
+   :child [osapuolitieto_210
            suunnittelijatieto_210
            tyonjohtajatieto_210
            naapuri]})
@@ -479,19 +492,19 @@
 
 (def osapuolet_213
   (-> osapuolet_212
-    (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_213)
+    (update-in [:child] update-child-element [:osapuolitieto] osapuolitieto_213)
     (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_213)
     (update-in [:child] update-child-element [:tyonjohtajatieto] tyonjohtajatieto_213)))
 
 (def osapuolet_215
   (-> osapuolet_213
-    (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_215)
+    (update-in [:child] update-child-element [:osapuolitieto] osapuolitieto_215)
     (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_215)
     (update-in [:child] update-child-element [:tyonjohtajatieto] tyonjohtajatieto_215)))
 
 (def osapuolet_216
   (-> osapuolet_215
-    (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_216)
+    (update-in [:child] update-child-element [:osapuolitieto] osapuolitieto_216)
     (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_216)
     (update-in [:child] update-child-element [:naapuritieto] naapuri-216)))
 
