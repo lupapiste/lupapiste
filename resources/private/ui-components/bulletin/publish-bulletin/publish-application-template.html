@@ -5,8 +5,12 @@
     <script type="text/x-jquery-tmpl" id="publish-application-template">
       <h1 data-bind="ltext: 'bulletin'"></h1>
       <span data-bind="component: { name: 'help-toggle', params: { lhtml: helpText } }"></span>
-      <p data-bind="ltext: 'bulletin.application.next.state.open'"></p>
+      <!-- ko ifnot: canPublish -->
+      <p data-bind="ltext: 'bulletin.application.canNotPublish'"></p>
+      <!-- /ko -->
+      <!-- ko if: canProclaim -->
       <div data-bind="component: { name: 'proclaim-application', params: { appId: appId, canPublish: canPublish } }"></div>
+      <!-- /ko -->
     </script>
   </section>
 </body>
