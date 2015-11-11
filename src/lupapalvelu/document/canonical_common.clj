@@ -405,6 +405,7 @@
         {:koulutus koulutus
          :patevyysvaatimusluokka (:patevyysluokka patevyys)
          :valmistumisvuosi (:valmistumisvuosi patevyys)
+         :FISEpatevyyskortti (:fise patevyys)
          :kokemusvuodet (:kokemus patevyys)}
         (when (-> henkilo :nimi :sukunimi)
           {:henkilo henkilo})
@@ -463,7 +464,7 @@
            tyotehtavat))})))
 
 (defn get-tyonjohtaja-data [application lang tyonjohtaja party-type]
-  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
+  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi :FISEpatevyyskortti)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         ;; The mappings in backing system providers' end make us pass "muu" when "muu koulutus" is selected.
         ;; Thus cannot use just this as koulutus:
@@ -495,7 +496,7 @@
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
 (defn get-tyonjohtaja-v2-data [application lang tyonjohtaja party-type]
-  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
+  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi :FISEpatevyyskortti)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         koulutus (if (= "other" (:koulutusvalinta patevyys))
                    "muu"
@@ -529,19 +530,29 @@
     (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data application lang))
     (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data application lang))))
 
-(defn- get-neighbor [neighbor-name property-id]
-  {:Naapuri {:henkilo neighbor-name
-             :kiinteistotunnus property-id
-             :hallintasuhde "Ei tiedossa"}})
+(defn address->osoitetieto [{katu :street postinumero :zip postitoimipaikannimi :city :as address}]
+  (when-not (util/empty-or-nil? katu)
+    (util/assoc-when {} 
+                     :osoitenimi {:teksti katu}
+                     :postinumero postinumero
+                     :postitoimipaikannimi postitoimipaikannimi)))
 
-(defn- get-neighbors [neighbors]
-  (remove nil? (for [neighbor neighbors]
-                   (let [status (last (:status neighbor))
-                         propertyId (:propertyId neighbor)]
-                     (case (:state status)
-                       "response-given-ok" (get-neighbor (str (-> status :vetuma :firstName) " " (-> status :vetuma :lastName)) propertyId)
-                       "mark-done" (get-neighbor (-> neighbor :owner :name) propertyId)
-                       nil)))))
+(defn get-neighbor [{status :status property-id :propertyId :as neighbor}]
+  (let [{state :state vetuma :vetuma message :message} (last status)
+        neighbor (util/assoc-when {}
+                                  :henkilo (str (:firstName vetuma) " " (:lastName vetuma))
+                                  :osoite (address->osoitetieto vetuma)
+                                  :kiinteistotunnus property-id
+                                  :hallintasuhde "Ei tiedossa"
+                                  :huomautus message)]
+    (case state
+      "response-given-comments" {:Naapuri (assoc neighbor :huomautettavaaKytkin true)}
+      "response-given-ok"       {:Naapuri (assoc neighbor :huomautettavaaKytkin false)}
+      nil)))
+
+(defn get-neighbors [neighbors]
+  (->> (map get-neighbor neighbors)
+       (remove nil?)))
 
 (defn osapuolet [{neighbors :neighbors :as application} documents-by-type lang]
   {:pre [(map? documents-by-type) (string? lang)]}
@@ -549,7 +560,7 @@
    {:osapuolitieto (get-parties application documents-by-type)
     :suunnittelijatieto (get-designers documents-by-type)
     :tyonjohtajatieto (get-foremen application documents-by-type lang)
-    ;:naapuritieto (get-neighbors neighbors)LPK-215
+    ;:naapuritieto (get-neighbors neighbors);LPK-215
     }})
 
 (defn change-value-to-when [value to_compare new_val]
