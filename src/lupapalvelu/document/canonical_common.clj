@@ -559,7 +559,7 @@
    {:osapuolitieto (get-parties application documents-by-type)
     :suunnittelijatieto (get-designers documents-by-type)
     :tyonjohtajatieto (get-foremen application documents-by-type lang)
-    :naapuritieto (get-neighbors neighbors);LPK-215
+    ;:naapuritieto (get-neighbors neighbors);LPK-215
     }})
 
 (defn change-value-to-when [value to_compare new_val]
