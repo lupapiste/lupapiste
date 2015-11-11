@@ -341,7 +341,10 @@
                  #(update-in % [:child] concat [{:tag :kayttotarkoitus}]))
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
-                 katselmus_220)))
+                 katselmus_220)
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto :Liite]
+                 {:tag :Liite :child mapping-common/liite-children_216})))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}

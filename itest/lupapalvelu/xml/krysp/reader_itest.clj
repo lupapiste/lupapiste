@@ -33,7 +33,7 @@
                               :area        "2682"
                               :index       nil
                               :tags       '()
-                              :descriptions nil
+                              :description nil
                               :created     "1962"})
 
       (fact "second building has correct data"
@@ -46,7 +46,7 @@
                                :area         "281"
                                :index        nil
                                :tags       '()
-                               :descriptions nil
+                               :description nil
                                :created     "1998"}))))
 
 (fact "converting building krysp to lupapiste domain model"
