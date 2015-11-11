@@ -32,8 +32,7 @@
     :child [{:tag :peruste} ; string
             {:tag :kuvaus} ;string
             {:tag :luvanHakemisenSyy}]} ;optional string
-   {:tag :laitoksentiedot :child [{:tag :Laitos :child [;{:tag :yht:metatieto}
-                                                        mapping-common/yksilointitieto
+   {:tag :laitoksentiedot :child [{:tag :Laitos :child [mapping-common/yksilointitieto
                                                         mapping-common/alkuHetki
                                                         {:tag :laitoksenNimi}
                                                         {:tag :osoite :child mapping-common/postiosoite-children-ns-yht}
@@ -83,6 +82,28 @@
   (-> ymparistolupa_to_krysp_212
       (assoc-in [:attr :xsi:schemaLocation]
                 (mapping-common/schemalocation :YL "2.2.1"))
+
+      (update-in [:child] mapping-common/update-child-element
+                 [:ymparistolupatieto :Ymparistolupa :lausuntotieto]
+                 {:tag :lausuntotieto :child [mapping-common/lausunto_216]})
+
+      (update-in [:child] mapping-common/update-child-element
+                 [:ymparistolupatieto :Ymparistolupa :maksajatieto]
+                 {:tag :maksajatieto :child [{:tag :Maksaja :child mapping-common/maksajatype-children_215}]}) ; OK
+
+      (update-in [:child] mapping-common/update-child-element
+                 [:ymparistolupatieto :Ymparistolupa :hakija]
+                 {:tag :hakija :child mapping-common/yhteystietotype-children_215}) ; OK
+
+      (update-in [:child] mapping-common/update-child-element
+                 [:ymparistolupatieto :Ymparistolupa :laitoksentiedot :Laitos :osoite]
+                 {:tag :osoite :child mapping-common/postiosoite-children-ns-yht-215})
+
+      (update-in [:child] mapping-common/update-child-element
+                 [:ymparistolupatieto :Ymparistolupa :laitoksentiedot :Laitos :yhteyshenkilo]
+                 {:tag :yhteyshenkilo :child mapping-common/henkilo-child-ns-yht-215})
+
+      ; No change to attachments
       ))
 
 (defn- get-mapping [krysp-version]

@@ -603,6 +603,11 @@
      {:tag :suoramarkkinointikielto}
      {:tag :verkkolaskutustieto :child [verkkolaskutus_213]}]))
 
+(def yhteystietotype-children_215
+  (update-child-element yhteystietotype-children_213
+    [:osoitetieto :Osoite]
+    {:tag :Osoite :child postiosoite-children-ns-yht-215}))
+
 (def maksajatype-children_213
   (conj yhteystietotype-children_213 {:tag :laskuviite :ns "yht"}))
 
