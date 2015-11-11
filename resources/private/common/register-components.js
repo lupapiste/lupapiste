@@ -75,7 +75,7 @@ jQuery(document).ready(function() {
     {name: "group-approval"},
     {name: "submit-button"},
     {name: "remove-button"},
-    {name: "publish-bulletin"},
+    {name: "publish-application"},
     {name: "proclaim-application"}
   ];
 
