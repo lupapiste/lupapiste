@@ -27,9 +27,11 @@
                 "2.2.0" "2.1.5"
                 "2.2.1" "2.1.6"})
 
-(def- ymp-yht {"2.1.2" "2.1.3"})
+(def- ymp-yht {"2.1.2" "2.1.3"
+               "2.2.1" "2.1.6"})
 
-(def- vvvl-yht {"2.1.3" "2.1.3"})
+(def- vvvl-yht {"2.1.3" "2.1.3"
+                "2.2.1" "2.1.6"})
 
 (def- kt-yht {"0.9"   "2.1.3"
               "0.9.1" "2.1.4"
@@ -600,6 +602,11 @@
      {:tag :sahkopostiosoite}
      {:tag :suoramarkkinointikielto}
      {:tag :verkkolaskutustieto :child [verkkolaskutus_213]}]))
+
+(def yhteystietotype-children_215
+  (update-child-element yhteystietotype-children_213
+    [:osoitetieto :Osoite]
+    {:tag :Osoite :child postiosoite-children-ns-yht-215}))
 
 (def maksajatype-children_213
   (conj yhteystietotype-children_213 {:tag :laskuviite :ns "yht"}))

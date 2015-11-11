@@ -300,9 +300,9 @@
   [{:keys [katu postinumero postitoimipaikannimi] :as osoite}]
   (when katu  ;; required field in krysp (i.e. "osoitenimi")
     (assoc-country {:osoitenimi           {:teksti katu}
-     :postitoimipaikannimi postitoimipaikannimi
+                    :postitoimipaikannimi postitoimipaikannimi
                     :postinumero          postinumero}
-                   osoite)))
+      osoite)))
 
 (defn- get-name [henkilotiedot]
   {:nimi (select-keys henkilotiedot [:etunimi :sukunimi])})
@@ -532,7 +532,7 @@
 
 (defn address->osoitetieto [{katu :street postinumero :zip postitoimipaikannimi :city :as address}]
   (when-not (util/empty-or-nil? katu)
-    (util/assoc-when {} 
+    (util/assoc-when {}
                      :osoitenimi {:teksti katu}
                      :postinumero postinumero
                      :postitoimipaikannimi postitoimipaikannimi)))
@@ -672,20 +672,16 @@
           :puhelinnumero puhelin
           :sahkopostiosoite email)))
     (when-let [henkilo (-> unwrapped-party-doc :data :henkilo)]
-      (let [{:keys [henkilotiedot osoite yhteystiedot]} henkilo
-            teksti (util/assoc-when {} :teksti (:katu osoite))
-            osoite (util/assoc-when {}
-                     :osoitenimi teksti
-                     :postinumero (:postinumero osoite)
-                     :postitoimipaikannimi (:postitoimipaikannimi osoite))]
+      (let [{:keys [henkilotiedot yhteystiedot]} henkilo
+            osoite (get-simple-osoite (:osoite henkilo))]
         (not-empty
-         (util/assoc-when {}
-           :henkilotunnus (:hetu henkilotiedot)
-           :sukunimi (:sukunimi henkilotiedot)
-           :etunimi (:etunimi henkilotiedot)
-           :osoitetieto (when (seq osoite) {:Osoite osoite})
-           :puhelinnumero (:puhelin yhteystiedot)
-           :sahkopostiosoite (:email yhteystiedot))))
+          (util/assoc-when {}
+            :henkilotunnus (:hetu henkilotiedot)
+            :sukunimi (:sukunimi henkilotiedot)
+            :etunimi (:etunimi henkilotiedot)
+            :osoitetieto (when (seq osoite) {:Osoite osoite})
+            :puhelinnumero (:puhelin yhteystiedot)
+            :sahkopostiosoite (:email yhteystiedot))))
       )))
 
 (defn get-maksajatiedot [unwrapped-party-doc]

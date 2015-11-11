@@ -112,6 +112,8 @@
         (:teksti osoitenimi) => "Murskaajankatu 5"
         (:postinumero postiosoite) => "36570"
         (:postitoimipaikannimi postiosoite) => "Kaivanto"
+        (:valtioKansainvalinen postiosoite) => "FIN"
+        (:valtioSuomeksi postiosoite) => "Suomi"
         (:etunimi hakija) => "Pekka"
         (:sukunimi hakija) => "Borga"
         (:sahkopostiosoite hakija) => "pekka.borga@porvoo.fi"
