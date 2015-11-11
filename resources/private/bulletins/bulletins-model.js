@@ -9,6 +9,7 @@ LUPAPISTE.BulletinsModel = function(params) {
   });
 
   var bulletinService = params.bulletinService;
+  var vetumaService = params.vetumaService;
 
   self.pageParams = ko.pureComputed(function () {
     var defaultParams = {
@@ -17,7 +18,7 @@ LUPAPISTE.BulletinsModel = function(params) {
 
     return self.page() === "bulletin" ?
       _.extend(defaultParams, { bulletinId: bulletinId,
-                                bulletinService: params.bulletinService }) :
+                                authenticated: vetumaService.authenticated }) :
       defaultParams;
   });
 
