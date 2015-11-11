@@ -103,9 +103,9 @@
 
 (defn in-yhteiset-ns [coll] (mapv (fn [m] (assoc m :ns "yht")) coll))
 
-(defn merge-into-coll-after-tag 
+(defn merge-into-coll-after-tag
   "Merges coll-to-merge in the collection just after the element tagged with tag"
-  [coll tag coll-to-merge] 
+  [coll tag coll-to-merge]
   (mapcat (fn [{t :tag :as d}] (if (= t tag) (cons d coll-to-merge) [d])) coll))
 
 (def tunnus-children [{:tag :valtakunnallinenNumero}
@@ -419,41 +419,53 @@
 (def tyonjohtajatieto_215
   {:tag :tyonjohtajatieto :child [tyonjohtaja_215]})
 
-(def osapuolet_210
-  {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto
-            :child [osapuoli-body_211]}
-           {:tag :suunnittelijatieto
-            :child [{:tag :Suunnittelija
-                     :child [{:tag :suunnittelijaRoolikoodi}
-                             {:tag :VRKrooliKoodi}
-                             henkilo
-                             yritys_211
-                             {:tag :patevyysvaatimusluokka}
-                             {:tag :koulutus}
-                             ]}]}
-           tyonjohtajatieto_210
-           naapuri]})
+
+(def- suunnittelija_210
+  {:tag :Suunnittelija
+   :child [{:tag :suunnittelijaRoolikoodi}
+           {:tag :VRKrooliKoodi}
+           henkilo
+           yritys_211
+           {:tag :patevyysvaatimusluokka}
+           {:tag :koulutus}]})
+
+(def- suunnittelija_211
+  (update-in suunnittelija_210 [:child] concat [{:tag :valmistumisvuosi}
+                                                {:tag :kokemusvuodet}]))
+
+(def- suunnittelija_213
+  (update-in suunnittelija_211 [:child] update-child-element [:yritys] yritys_213))
+
+(def- suunnittelija_215
+  (-> suunnittelija_213
+    (update-in [:child] update-child-element [:yritys] yritys_215)
+    (update-in [:child] update-child-element [:henkilo] henkilo_215)))
+
+(def- suunnittelija_216
+  (update-in suunnittelija_215 [:child] concat [{:tag :FISEpatevyyskortti}]))
+
+(def suunnittelijatieto_210
+  {:tag :suunnittelijatieto :child [suunnittelija_210]})
 
 (def suunnittelijatieto_211
-  {:tag :suunnittelijatieto
-   :child [{:tag :Suunnittelija
-            :child [{:tag :suunnittelijaRoolikoodi}
-                    {:tag :VRKrooliKoodi}
-                    henkilo
-                    yritys_211
-                    {:tag :patevyysvaatimusluokka}
-                    {:tag :koulutus}
-                    {:tag :valmistumisvuosi}
-                    {:tag :kokemusvuodet}]}]})
+  {:tag :suunnittelijatieto :child [suunnittelija_211]})
 
 (def suunnittelijatieto_213
-  (update-in suunnittelijatieto_211 [:child] update-child-element [:Suunnittelija :yritys] yritys_213))
+  {:tag :suunnittelijatieto :child [suunnittelija_213]})
 
 (def suunnittelijatieto_215
-  (-> suunnittelijatieto_213
-    (update-in [:child] update-child-element [:Suunnittelija :yritys] yritys_215)
-    (update-in [:child] update-child-element [:Suunnittelija :henkilo] henkilo_215)))
+  {:tag :suunnittelijatieto :child [suunnittelija_215]})
+
+(def suunnittelijatieto_216
+  {:tag :suunnittelijatieto :child [suunnittelija_216]})
+
+
+(def osapuolet_210
+  {:tag :Osapuolet :ns "yht"
+   :child [{:tag :osapuolitieto :child [osapuoli-body_211]}
+           suunnittelijatieto_210
+           tyonjohtajatieto_210
+           naapuri]})
 
 (def osapuolet_211
   {:tag :Osapuolet :ns "yht"
@@ -481,6 +493,7 @@
 (def osapuolet_216
   (-> osapuolet_215
     (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_216)
+    (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_216)
     (update-in [:child] update-child-element [:naapuritieto] naapuri-216)))
 
 
