@@ -468,11 +468,9 @@
            naapuri]})
 
 (def osapuolet_211
-  {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto :child [osapuoli-body_211]}
-           suunnittelijatieto_211
-           tyonjohtajatieto_211
-           naapuri]})
+  (-> osapuolet_210
+    (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_211)
+    (update-in [:child] update-child-element [:tyonjohtajatieto] tyonjohtajatieto_211)))
 
 (def osapuolet_212
   (-> osapuolet_211
