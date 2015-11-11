@@ -83,9 +83,7 @@
       (assoc-in [:attr :xsi:schemaLocation]
                 (mapping-common/schemalocation :YL "2.2.1"))
 
-      (update-in [:child] mapping-common/update-child-element
-                 [:ymparistolupatieto :Ymparistolupa :lausuntotieto]
-                 {:tag :lausuntotieto :child [mapping-common/lausunto_216]})
+      ; Uses LausuntoYmpType where attachments have not changed
 
       (update-in [:child] mapping-common/update-child-element
                  [:ymparistolupatieto :Ymparistolupa :maksajatieto]
@@ -97,11 +95,11 @@
 
       (update-in [:child] mapping-common/update-child-element
                  [:ymparistolupatieto :Ymparistolupa :laitoksentiedot :Laitos :osoite]
-                 {:tag :osoite :child mapping-common/postiosoite-children-ns-yht-215})
+                 {:tag :osoite :child mapping-common/postiosoite-children-ns-yht-215}) ; Not in canonical or form schemas
 
       (update-in [:child] mapping-common/update-child-element
                  [:ymparistolupatieto :Ymparistolupa :laitoksentiedot :Laitos :yhteyshenkilo]
-                 {:tag :yhteyshenkilo :child mapping-common/henkilo-child-ns-yht-215})
+                 {:tag :yhteyshenkilo :child mapping-common/henkilo-child-ns-yht-215}) ; Not in canonical or form schemas
 
       ; No change to attachments
       ))
