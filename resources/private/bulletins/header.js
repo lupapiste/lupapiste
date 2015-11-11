@@ -16,7 +16,7 @@
       self.languageMenuVisible( !self.languageMenuVisible() );
     };
 
-    var cancel =   _.partial( self.languageMenuVisible, false);
+    var cancel = _.partial(self.languageMenuVisible, false);
 
     // We cancel (aka close the menu), on dialog-close event
     // that denotes user pressing esc key and clicks outside
@@ -28,10 +28,23 @@
     $(document).on( "click", cancel );
   }
 
+  function UserMenu(vetumaService) {
+    var self = this;
+
+    self.authenticated = vetumaService.authenticated;
+    self.userName = ko.computed(function() {
+      return [vetumaService.userInfo.firstName(),
+        vetumaService.userInfo.lastName()].join(" ");
+    });
+  }
+
   var langs = new Languages();
 
   $(function() {
-    $( "#language-select").applyBindings( langs );
-    $( ".language-menu").applyBindings( langs );
+    $("#language-select").applyBindings( langs );
+    $(".language-menu").applyBindings( langs );
+    hub.subscribe("vetumaService::serviceCreated", function(vetumaService) {
+      $("#header-user-menu").applyBindings(new UserMenu(vetumaService));
+    });
   });
 })();
