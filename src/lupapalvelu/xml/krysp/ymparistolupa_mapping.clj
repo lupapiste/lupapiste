@@ -70,7 +70,7 @@
    {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}
    {:tag :asianKuvaus}])
 
-(def ymparistolupa_to_krysp
+(def ymparistolupa_to_krysp_212
   {:tag :Ymparistoluvat
    :ns "ymy"
    :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :YL "2.1.2")
@@ -79,11 +79,13 @@
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :ymparistolupatieto :child [{:tag :Ymparistolupa :child ymparistolupaType}]}]})
 
+(def ymparistolupa_to_krysp_221 ymparistolupa_to_krysp_212)
+
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
-    "2.1.2" ymparistolupa_to_krysp
-    "2.2.1" ymparistolupa_to_krysp
+    "2.1.2" ymparistolupa_to_krysp_212
+    "2.2.1" ymparistolupa_to_krysp_221
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn ymparistolupa-element-to-xml [canonical krysp-version]

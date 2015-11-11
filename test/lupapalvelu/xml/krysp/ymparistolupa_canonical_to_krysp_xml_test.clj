@@ -2,7 +2,7 @@
   (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
             [lupapalvelu.document.ymparistolupa-canonical :refer [ymparistolupa-canonical]]
             [lupapalvelu.document.ymparistolupa-canonical-test :refer [application application-yritysmaksaja]]
-            [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa-element-to-xml]]
+            [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa-element-to-xml ymparistolupa_to_krysp_212 ymparistolupa_to_krysp_221]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.validator :as validator]
             [midje.sweet :refer :all]
@@ -11,14 +11,18 @@
             [sade.xml :as xml]
             [sade.common-reader :as cr]))
 
-(fact "2.1.2: :tag is set" (has-tag ymparistolupa_to_krysp) => true)
+(fact "2.1.2: :tag is set" (has-tag ymparistolupa_to_krysp_212) => true)
+(fact "2.2.1: :tag is set" (has-tag ymparistolupa_to_krysp_221) => true)
 
 (facts "Ymparistolupa type of permit to canonical and then to xml with schema validation"
 
   (let [canonical (ymparistolupa-canonical application "fi")
         xml_212   (ymparistolupa-element-to-xml canonical "2.1.2")
+        xml_221   (ymparistolupa-element-to-xml canonical "2.2.1")
         xml_212_s     (indent-str xml_212)
-        lp-xml_212    (cr/strip-xml-namespaces (xml/parse xml_212_s))]
+        xml_221_s     (indent-str xml_221)
+        lp-xml_212    (cr/strip-xml-namespaces (xml/parse xml_212_s))
+        lp-xml_221    (cr/strip-xml-namespaces (xml/parse xml_221_s))]
 
     (validator/validate xml_212_s (:permitType application) "2.1.2") ; throws exception
 
@@ -59,9 +63,12 @@
 
 (facts "Ymparistolupa with yritysmaksaja"
   (let [canonical (ymparistolupa-canonical application-yritysmaksaja "fi")
-        xml_212 (element-to-xml canonical ymparistolupa_to_krysp)
+        xml_212   (ymparistolupa-element-to-xml canonical "2.1.2")
+        xml_221   (ymparistolupa-element-to-xml canonical "2.2.1")
         xml_212_s     (indent-str xml_212)
-        lp-xml_212    (cr/strip-xml-namespaces (xml/parse xml_212_s))]
+        xml_221_s     (indent-str xml_221)
+        lp-xml_212    (cr/strip-xml-namespaces (xml/parse xml_212_s))
+        lp-xml_221    (cr/strip-xml-namespaces (xml/parse xml_221_s))]
 
     ; TODO - other fields could/should be tested as well
 
