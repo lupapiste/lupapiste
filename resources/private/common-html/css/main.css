@@ -8808,34 +8808,8 @@ ul.attachments-list li.mandatory-attachments {
   position: relative;
 }
 /* line 29, ../sass/partials/_datepicker.scss */
-#ui-datepicker-div .ui-icon.ui-icon-circle-triangle-w:after {
-  position: absolute;
-  content: " ";
-  display: block;
-  top: 3px;
-  left: 0;
-  width: 0;
-  height: 0;
-  border-top: 5px solid transparent;
-  border-right: 10px solid black;
-  border-bottom: 5px solid transparent;
-}
-/* line 42, ../sass/partials/_datepicker.scss */
 #ui-datepicker-div .ui-icon.ui-icon-circle-triangle-e {
   position: relative;
-}
-/* line 45, ../sass/partials/_datepicker.scss */
-#ui-datepicker-div .ui-icon.ui-icon-circle-triangle-e:after {
-  position: absolute;
-  content: " ";
-  display: block;
-  top: 3px;
-  left: 0;
-  width: 0;
-  height: 0;
-  border-top: 5px solid transparent;
-  border-left: 10px solid black;
-  border-bottom: 5px solid transparent;
 }
 
 /* line 12, ../sass/partials/_screenmessage.scss */
