@@ -405,6 +405,7 @@
         {:koulutus koulutus
          :patevyysvaatimusluokka (:patevyysluokka patevyys)
          :valmistumisvuosi (:valmistumisvuosi patevyys)
+         :FISEpatevyyskortti (:fise patevyys)
          :kokemusvuodet (:kokemus patevyys)}
         (when (-> henkilo :nimi :sukunimi)
           {:henkilo henkilo})
@@ -463,7 +464,7 @@
            tyotehtavat))})))
 
 (defn get-tyonjohtaja-data [application lang tyonjohtaja party-type]
-  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
+  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi :FISEpatevyyskortti)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         ;; The mappings in backing system providers' end make us pass "muu" when "muu koulutus" is selected.
         ;; Thus cannot use just this as koulutus:
@@ -495,7 +496,7 @@
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
 (defn get-tyonjohtaja-v2-data [application lang tyonjohtaja party-type]
-  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
+  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi :FISEpatevyyskortti)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         koulutus (if (= "other" (:koulutusvalinta patevyys))
                    "muu"
