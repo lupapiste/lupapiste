@@ -765,6 +765,9 @@
                         (entry :postitoimipaikannimi address))
                  address))
 
+(defn- ->nimi [personal]
+  {:nimi (select-keys personal [:etunimi :sukunimi])})
+
 (defmulti osapuolitieto :_selected)
 
 (defmethod osapuolitieto "henkilo"
@@ -773,9 +776,8 @@
          {:vainsahkoinenAsiointiKytkin (-> kytkimet :vainsahkoinenAsiointiKytkin true?)}
          {:henkilotieto {:Henkilo
                          (merge
-                           {:nimi (merge (entry :etunimi henkilotiedot)
-                                         (entry :sukunimi henkilotiedot))}
-                           {:osoite (->postiosoite-type osoite)}
+                          (->nimi henkilotiedot)
+                          {:osoite (->postiosoite-type osoite)}
                            (entry :email yhteystiedot :sahkopostiosoite)
                            (entry :puhelin yhteystiedot)
                            (entry :hetu henkilotiedot :henkilotunnus))}}))
@@ -783,13 +785,14 @@
 (defmethod osapuolitieto "yritys"
   [data]
   (let [company (:yritys data)
-        {contact :yhteystiedot personal :henkilotiedot} (:yhteyshenkilo company)
+        {contact :yhteystiedot personal :henkilotiedot kytkimet :kytkimet} (:yhteyshenkilo company)
         billing (get-verkkolaskutus {:data data})
         billing-information (when billing
                               {:verkkolaskutustieto billing})]
     (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
-           {:vainsahkoinenAsiointiKytkin (-> company :kytkimet :vainsahkoinenAsiointiKytkin true?)}
-           {:yritystieto {:Yritys (merge (entry :yritysnimi company :nimi)
+           {:vainsahkoinenAsiointiKytkin (true? (-> company :yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin))
+            :henkilotieto {:Henkilo (->nimi personal)}
+            :yritystieto {:Yritys (merge (entry :yritysnimi company :nimi)
                                          (entry :liikeJaYhteisoTunnus company :liikeJaYhteisotunnus )
                                          {:postiosoitetieto {:postiosoite (->postiosoite-type (:osoite company))}}
                                          (entry :puhelin contact)
