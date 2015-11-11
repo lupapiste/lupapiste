@@ -1,3 +1,12 @@
 bulletin:  Julkipano
 bulletin.publish:  Julkaise
 bulletin.application.next.state.open:  Hakemus tulee ensin siirtää käsittelyyn, jotta sen voi julkaista Julkinpano-sivustolla.
+
+help.undefined.publish:
+bulletin.application.next.state.submitted:  Kuulutettavana
+bulletin.proclamation.startsAt:  Kuulutus alkaa
+bulletin.proclamation.endsAt:  Kuulutus päättyy
+bulletin.proclamation.text:  Kuulutusteksti
+bulletin.proclamation.text.placeholder:  Kirjoita kuulutusteksti...
+
+bulletin.application.state.label:  Hakemus julkaistaan seuraavaksi tilaan:
