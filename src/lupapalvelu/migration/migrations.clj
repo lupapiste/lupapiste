@@ -1220,21 +1220,26 @@
   (mongo/update-by-query :applications {:state "complement-needed"} {$set {:state "complementNeeded"}}))
 
 (defn change-valid-pdfa-to-archivable [version]
-  (let [valid-pdfa? (:valid-pdfa version)]
-    (when-not (nil? valid-pdfa?)
+  {:post [%]}
+  (if (contains? version :valid-pdfa)
+    (let [valid-pdfa? (boolean (:valid-pdfa version))]
       (-> (assoc version :archivable valid-pdfa? :archivabilityError (when-not valid-pdfa? :invalid-pdfa))
-          (dissoc :valid-pdfa)))))
+          (dissoc :valid-pdfa)))
+    version))
 
-(defmigration set-general-archivability-boolean
-  {:apply-when (pos? (mongo/count :applications {"attachments.latestVersion.valid-pdfa" {$exists true}}))}
+(defn update-valid-pdfa-to-arhivable-on-attachment-versions [attachment]
+  {:post [%]}
+  (if (:latestVersion attachment)
+    (-> (assoc attachment :versions (map change-valid-pdfa-to-archivable (:versions attachment)))
+        (assoc :latestVersion (change-valid-pdfa-to-archivable (:latestVersion attachment))))
+    attachment))
+
+(defmigration set-general-archivability-boolean-v2
+  {:apply-when (pos? (mongo/count :applications {"attachments.versions.valid-pdfa" {$exists true}}))}
   (update-applications-array
     :attachments
-    (fn [attachment]
-      (if (:latestVersion attachment)
-        (-> (assoc attachment :versions (map change-valid-pdfa-to-archivable (:versions attachment)))
-            (assoc :latestVersion (change-valid-pdfa-to-archivable (:latestVersion attachment))))
-        attachment))
-    {"attachments.latestVersion.valid-pdfa" {$exists true}}))
+    update-valid-pdfa-to-arhivable-on-attachment-versions
+    {"attachments.versions.valid-pdfa" {$exists true}}))
 
 
 (defn populate-application-history [application]

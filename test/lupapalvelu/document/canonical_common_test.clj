@@ -67,3 +67,13 @@
   (fact "5 num" (maaraalatunnus {:kiinteistoTunnus "kt", :maaraalaTunnus "12345"}) => nil)
   (fact "M+1 num with app" (maaraalatunnus {:kiinteistoTunnus "kt", :maaraalaTunnus "1"}, {:propertyId "kiinteisto"}) => "kiinteistoM0001")
   )
+
+(facts address->osoitetieto
+  (address->osoitetieto {}) => nil
+  (address->osoitetieto {:street nil :zip "12312" :city "kaupunki"}) => nil
+  (address->osoitetieto {:street ""  :zip "12312" :city "kaupunki"}) => nil
+  (address->osoitetieto {:street "katukatu"}) => {:osoitenimi {:teksti "katukatu"}}
+  (address->osoitetieto {:street "katukatu" :zip "12312" :city "kaupunki"}) => {:osoitenimi {:teksti "katukatu"} :postinumero "12312" :postitoimipaikannimi "kaupunki"})
+
+
+
