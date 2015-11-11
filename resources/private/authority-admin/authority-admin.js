@@ -15,6 +15,8 @@
       usersList = null,
       editRolesDialogModel;
 
+  var authorizationModel = lupapisteApp.models.globalAuthModel;
+
   function OrganizationModel() {
     var self = this;
     self.initialized = false;
@@ -146,15 +148,18 @@
 
       self.selectedOperations(_.sortBy(localizedSelectedOperationsPerPermitType, "permitType"));
 
-      ajax
-        .query("available-tos-functions", {organizationId: organization.id})
-        .success(function(data) {
-          self.tosFunctions(data.functions);
-          if (data.functions.length > 0 && organization["permanent-archive-enabled"]) {
-            self.tosFunctionVisible(true);
-          }
-        })
-        .call();
+      // TODO test properly for timing issues
+      if (authorizationModel.ok("available-tos-functions")) {
+        ajax
+          .query("available-tos-functions", {organizationId: organization.id})
+          .success(function(data) {
+            self.tosFunctions(data.functions);
+            if (data.functions.length > 0 && organization["permanent-archive-enabled"]) {
+              self.tosFunctionVisible(true);
+            }
+          })
+          .call();
+      }
 
       self.features(util.getIn(organization, ["areas"]));
 
