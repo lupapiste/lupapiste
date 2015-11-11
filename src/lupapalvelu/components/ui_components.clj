@@ -383,6 +383,7 @@
                :js ["header.js"
                     "bulletins.js" "component-base-model.js" "bulletins-model.js"
                     "application-bulletins-service.js"
+                    "vetuma-service.js"
                     "application-bulletin/application-bulletin-model.js"
                     "application-bulletin/begin-vetuma-auth-button/begin-vetuma-auth-button-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-model.js"

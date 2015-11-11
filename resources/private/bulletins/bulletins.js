@@ -29,5 +29,6 @@
     });
 
     $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService()});
+    window.vetumaService = new LUPAPISTE.VetumaService();
   });
 })();
