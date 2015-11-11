@@ -79,6 +79,16 @@
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :ymparistolupatieto :child [{:tag :Ymparistolupa :child ymparistolupaType}]}]})
 
+(defn- get-mapping [krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.2" ymparistolupa_to_krysp
+    "2.2.1" ymparistolupa_to_krysp
+    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
+
+(defn ymparistolupa-element-to-xml [canonical krysp-version]
+  (element-to-xml canonical (get-mapping krysp-version)))
+
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
    3rd parameter (submitted-application) is not used on YL applications."
@@ -94,7 +104,7 @@
                     canonical-with-statement-attachments
                     [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :liitetieto]
                     attachments-canonical)
-        xml (element-to-xml canonical ymparistolupa_to_krysp)
+        xml (ymparistolupa-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
