@@ -317,7 +317,7 @@
         (invalid-state-in-application command application)
         (user-is-not-allowed-to-access? command application)))))
 
-(defn- response? [r]
+(defn response? [r]
   (and (map? r) (:status r)))
 
 (defn get-post-fns [{ok :ok} {:keys [on-complete on-success on-fail]}]
