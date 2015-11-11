@@ -35,10 +35,13 @@
       (xml/get-text lp-xml_212 [:toiminta :peruste]) => "Hankkeen peruste")
 
     (fact "hakijat"
-      (let [hakijat (xml/select lp-xml_212 [:hakija])]
+      (let [hakijat (xml/select lp-xml_221 [:hakija])]
        (count hakijat) => 2
        (xml/get-text (first hakijat) [:sukunimi]) => "Borga"
-       (xml/get-text (second hakijat) [:yTunnus]) => "1060155-5"))
+        (xml/get-text (second hakijat) [:yTunnus]) => "1060155-5"
+
+        (fact "maa"
+          (xml/get-text (first hakijat) [:osoitetieto :Osoite :valtioKansainvalinen]) => "FIN")))
 
     (fact "luvat"
       (let [luvat (xml/select lp-xml_212 [:voimassaOlevatLuvat :lupa])]
@@ -57,10 +60,16 @@
         (xml/get-text sijainti [:piste :Point :pos]) =>  "428195.77099609 6686701.3931274"))
 
     (fact "maksaja"
-      (let [maksaja (xml/select lp-xml_212 [:maksajatieto :Maksaja])]
+      (let [maksaja (xml/select lp-xml_221 [:maksajatieto :Maksaja])]
         (fact "etunimi" (xml/get-text maksaja [:etunimi]) => "Pappa")
         (fact "sukunimi" (xml/get-text maksaja [:sukunimi]) => "Betalare")
-        (fact "laskuviite" (xml/get-text maksaja [:laskuviite]) => "1686343528523")))))
+        (fact "laskuviite" (xml/get-text maksaja [:laskuviite]) => "1686343528523")
+
+        (fact "maa"
+          (xml/get-text maksaja [:osoitetieto :Osoite :valtioKansainvalinen]) => "FIN")
+        )
+
+      )))
 
 (facts "Ymparistolupa with yritysmaksaja"
   (let [canonical (ymparistolupa-canonical application-yritysmaksaja "fi")
