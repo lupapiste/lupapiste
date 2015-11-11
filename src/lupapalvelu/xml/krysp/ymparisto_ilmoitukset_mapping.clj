@@ -58,7 +58,23 @@
                              {:tag :koontikentta}
                              {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]} ]}]}]})
 
-(def ymparistoilmoitus_to_krysp_221 ymparistoilmoitus_to_krysp_212)
+(def ilmoitus_to_krysp_221
+  (-> ilmoitus_to_krysp_212
+      (assoc-in [:attr :xsi:schemaLocation]
+                (mapping-common/schemalocation :YI "2.2.1"))
+
+      ; Uses LausuntoYmpType where attachments have not changed
+
+      (update-in [:child] mapping-common/update-child-element
+                 [:melutarina :Melutarina :toiminnanSijaintitieto :ToiminnanSijainti :Osoite]
+                 {:tag :Osoite :child mapping-common/postiosoite-children-ns-yht-215})
+
+      (update-in [:child] mapping-common/update-child-element
+                 [:melutarina :Melutarina :ilmoittaja]
+                 {:tag :ilmoittaja :child mapping-common/yhteystietotype-children_215})
+
+      ; No change to attachments
+      ))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
