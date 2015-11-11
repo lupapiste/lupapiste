@@ -65,15 +65,17 @@
 
       ; Uses LausuntoYmpType where attachments have not changed
 
+      ; Address is read from application, no actual changes
       (update-in [:child] mapping-common/update-child-element
                  [:melutarina :Melutarina :toiminnanSijaintitieto :ToiminnanSijainti :Osoite]
                  {:tag :Osoite :child mapping-common/postiosoite-children-ns-yht-215})
 
+      ; Support for foreign addresses
       (update-in [:child] mapping-common/update-child-element
                  [:melutarina :Melutarina :ilmoittaja]
                  {:tag :ilmoittaja :child mapping-common/yhteystietotype-children_215})
 
-      ; No change to attachments
+      ; No changes to attachments
       ))
 
 (defn- get-mapping [krysp-version]
