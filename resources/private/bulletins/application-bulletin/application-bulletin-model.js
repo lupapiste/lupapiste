@@ -13,7 +13,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   self.versionId  = ko.observable();
   self.selectedTab = ko.observable("info");
 
-  self.authenticated = params.authenticated || ko.observable(false);
+  self.authenticated = params.authenticated;
 
   self.bulletinStateLoc = ko.pureComputed(function() {
     return ["bulletin", "state", self.bulletin().bulletinState].join(".");

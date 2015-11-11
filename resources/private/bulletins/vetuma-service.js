@@ -18,4 +18,6 @@ LUPAPISTE.VetumaService = function() {
       self.authenticated(false);
     });  
   });
+
+  hub.send("vetumaService::serviceCreated", this);
 };
