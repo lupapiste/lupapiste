@@ -6,7 +6,7 @@
     [lupapalvelu.permit :as permit]
     [lupapalvelu.xml.disk-writer :as writer]))
 
-(def ilmoitus_to_krysp
+(def ilmoitus_to_krysp_212
   {:tag :Ilmoitukset
    :ns "ymi"
    :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :YI "2.1.2")
@@ -58,6 +58,35 @@
                              {:tag :koontikentta}
                              {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]} ]}]}]})
 
+(def ilmoitus_to_krysp_221
+  (-> ilmoitus_to_krysp_212
+      (assoc-in [:attr :xsi:schemaLocation]
+                (mapping-common/schemalocation :YI "2.2.1"))
+
+      ; Uses LausuntoYmpType where attachments have not changed
+
+      ; Address is read from application, no actual changes
+      (update-in [:child] mapping-common/update-child-element
+                 [:melutarina :Melutarina :toiminnanSijaintitieto :ToiminnanSijainti :Osoite]
+                 {:tag :Osoite :child mapping-common/postiosoite-children-ns-yht-215})
+
+      ; Support for foreign addresses
+      (update-in [:child] mapping-common/update-child-element
+                 [:melutarina :Melutarina :ilmoittaja]
+                 {:tag :ilmoittaja :child mapping-common/yhteystietotype-children_215})
+
+      ; No changes to attachments
+      ))
+
+(defn- get-mapping [krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.2" ilmoitus_to_krysp_212
+    "2.2.1" ilmoitus_to_krysp_221
+    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
+
+(defn ymparistoilmoitus-element-to-xml [canonical krysp-version]
+  (element-to-xml canonical (get-mapping krysp-version)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -73,7 +102,7 @@
                     canonical-with-statement-attachments
                     [:Ilmoitukset :melutarina :Melutarina :liitetieto]
                     attachments-canonical)
-        xml (element-to-xml canonical ilmoitus_to_krysp)
+        xml (ymparistoilmoitus-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
