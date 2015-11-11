@@ -167,6 +167,7 @@
 
 (def- ymp-validators
   {"2.1.2" common-validator-2_1_3
+   "2.2.1" common-validator-2_1_6
    "ah-1.1" asianhallinta-validator-1_1
    "ah-1.2" asianhallinta-validator-1_2})
 
@@ -189,6 +190,7 @@
    :YI  ymp-validators
    :MAL ymp-validators
    :VVVL {"2.1.3" common-validator-2_1_3
+          "2.2.1" common-validator-2_1_6
           "ah-1.1" asianhallinta-validator-1_1
           "ah-1.2" asianhallinta-validator-1_2}
    :YL  ymp-validators
