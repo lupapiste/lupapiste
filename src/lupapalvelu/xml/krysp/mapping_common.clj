@@ -442,7 +442,8 @@
     (update-in [:child] update-child-element [:henkilo] henkilo_215)))
 
 (def- suunnittelija_216
-  (update-in suunnittelija_215 [:child] concat [{:tag :FISEpatevyyskortti}]))
+  (update-in suunnittelija_215 [:child] concat [{:tag :FISEpatevyyskortti}
+                                                {:tag :FISEkelpoisuus}]))
 
 (def suunnittelijatieto_210
   {:tag :suunnittelijatieto :child [suunnittelija_210]})
