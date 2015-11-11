@@ -25,6 +25,7 @@
         lp-xml_221    (cr/strip-xml-namespaces (xml/parse xml_221_s))]
 
     (validator/validate xml_212_s (:permitType application) "2.1.2") ; throws exception
+    (validator/validate xml_221_s (:permitType application) "2.2.1") ; throws exception
 
     (fact "kiinteistotunnus"
       (xml/get-text lp-xml_212 [:laitoksentiedot :Laitos :kiinttun]) => (:propertyId application))

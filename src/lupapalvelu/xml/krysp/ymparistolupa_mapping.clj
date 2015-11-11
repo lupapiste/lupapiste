@@ -79,7 +79,11 @@
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :ymparistolupatieto :child [{:tag :Ymparistolupa :child ymparistolupaType}]}]})
 
-(def ymparistolupa_to_krysp_221 ymparistolupa_to_krysp_212)
+(def ymparistolupa_to_krysp_221
+  (-> ymparistolupa_to_krysp_212
+      (assoc-in [:attr :xsi:schemaLocation]
+                (mapping-common/schemalocation :YL "2.2.1"))
+      ))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
