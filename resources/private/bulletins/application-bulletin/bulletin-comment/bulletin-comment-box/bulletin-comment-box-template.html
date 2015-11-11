@@ -16,6 +16,7 @@
           <label data-bind="ltext: 'bulletin.comment.selectedAttachments'"></label>
           <input class="hidden" type="file" data-bind="event: {change: fileChanged}"/>
           <input class="hidden" type="text" name="bulletin-id" data-bind="value: bulletinId"/>
+          <input class="hidden" type="text" name="bulletin-version-id" data-bind="value: versionId"/>
           <!-- ko if: attachments().length > 0 -->
           <ul class="bulletin-comment__attachment-list" data-bind="foreach: attachments">
             <li>
@@ -40,8 +41,7 @@
           </button>
         </div>
         <div class="row">
-          <button type="submit" class="positive" data-bind="enable: comment,
-                                                            disable: pending,
+          <button type="submit" class="positive" data-bind="disable: isDisabled,
                                                             css: {waiting: pending}">
             <i class="lupicon-comment"></i>
             <i class="wait spin lupicon-refresh"></i>

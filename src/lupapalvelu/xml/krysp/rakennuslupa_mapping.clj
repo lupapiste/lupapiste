@@ -115,17 +115,21 @@
                                        {:tag :omistajalaji}]}]}))
 
 (def rakennus_220
-  (update-in rakennus [:child] mapping-common/update-child-element
-      [:omistajatieto :Omistaja]
-      {:tag :Omistaja :child [{:tag :kuntaRooliKoodi :ns "yht"}
-                              {:tag :VRKrooliKoodi :ns "yht"}
-                              mapping-common/henkilo
-                              mapping-common/yritys_213
-                              {:tag :turvakieltoKytkin :ns "yht"}
-                              {:tag :suoramarkkinointikieltoKytkin :ns "yht"}
-                              {:tag :omistajalaji :ns "rakval"
-                               :child [{:tag :muu}
-                                       {:tag :omistajalaji}]}]}))
+  (-> rakennus
+      (update-in [:child] mapping-common/update-child-element
+                 [:omistajatieto :Omistaja]
+                 {:tag :Omistaja :child [{:tag :kuntaRooliKoodi :ns "yht"}
+                                         {:tag :VRKrooliKoodi :ns "yht"}
+                                         mapping-common/henkilo
+                                         mapping-common/yritys_213
+                                         {:tag :turvakieltoKytkin :ns "yht"}
+                                         {:tag :suoramarkkinointikieltoKytkin :ns "yht"}
+                                         {:tag :omistajalaji :ns "rakval"
+                                          :child [{:tag :muu}
+                                                  {:tag :omistajalaji}]}]})
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennuksenTiedot]
+                 #(update-in % [:child] mapping-common/merge-into-coll-after-tag :kerrosala [{:tag :rakennusoikeudellinenKerrosala}]))))
 
 
 
@@ -237,6 +241,11 @@
       [:Katselmus :katselmuspoytakirja]
       {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
 
+(def- katselmus_220
+  (update-in katselmus_215 [:child] mapping-common/update-child-element
+             [:Katselmus :katselmuspoytakirja]
+             {:tag :liitetieto :child [{:tag :liite :child mapping-common/liite-children_216}]}))
+
 (def rakennuslupa_to_krysp_213
   (-> rakennuslupa_to_krysp_212
     (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :R "2.1.3"))
@@ -314,7 +323,10 @@
                  #(update-in % [:child] concat [{:tag :hankkeenVaativuus}]))
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma]
-                 #(update-in % [:child] concat [{:tag :kayttotarkoitus}]))))
+                 #(update-in % [:child] concat [{:tag :kayttotarkoitus}]))
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
+                 katselmus_220)))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
@@ -368,7 +380,9 @@
                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)
                       %))
                     (#(if poytakirja
-                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
+                        (-> %
+                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
+                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :liitetieto :liite] canonical-pk))
                        %)))
 
         xml (element-to-xml canonical (get-rakennuslupa-mapping krysp-version))
@@ -454,10 +468,22 @@
               (update-in [:Tyonjohtaja :vaadittuPatevyysluokka] patevyysvaatimusluokka212)))
        %)))
 
-(defn- map-enums-212 [canonical]
-  (map-tyonjohtaja-patevyysvaatimusluokka canonical))
+(def designer-new-roles-220 #{"rakennussuunnittelija" "kantavien rakenteiden suunnittelija"
+                              "pohjarakenteiden suunnittelija" "ilmanvaihdon suunnittelija"
+                              "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija"
+                              "rakennusfysikaalinen suunnittelija"
+                              "kosteusvaurion korjausty\u00f6n suunnittelija"})
 
-;; TODO: tanne vastaavasti uusien suunnittelijaRoolikoodien kasittely?
+(defn map-suunnittelija-kuntaroolikoodi-pre220 [canonical]
+  (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :suunnittelijatieto]
+    #(map (fn [suunnittelija]
+            (update-in suunnittelija [:Suunnittelija :suunnittelijaRoolikoodi]
+              (fn [role] (if (designer-new-roles-220 role) "ei tiedossa" role))))
+       %)))
+
+(def map-enums-212 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-tyonjohtaja-patevyysvaatimusluokka))
+
+(def map-enums-213-218 map-suunnittelija-kuntaroolikoodi-pre220)
 
 (defn- map-enums
   "Map enumerations in canonical into values supperted by given KRYSP version"
@@ -465,6 +491,12 @@
   {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.2" (map-enums-212 canonical)
+    "2.1.3" (map-enums-213-218 canonical)
+    "2.1.4" (map-enums-213-218 canonical)
+    "2.1.5" (map-enums-213-218 canonical)
+    "2.1.6" (map-enums-213-218 canonical)
+    "2.1.7" (map-enums-213-218 canonical)
+    "2.1.8" (map-enums-213-218 canonical)
     canonical ; default: no conversions
     ))
 

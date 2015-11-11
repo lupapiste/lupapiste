@@ -127,12 +127,14 @@
 (def turvakielto "turvakieltoKytkin")
 
 (def suoramarkkinointilupa {:name "suoramarkkinointilupa" :type :checkbox :layout :full-width :i18nkey "osapuoli.suoramarkkinointilupa"})
+(def vain-sahkoinen-asiointi {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width :i18nkey "osapuoli.vainsahkoinenAsiointiKytkin"})
 
-(def kytkimet {:name "kytkimet" :type :group :i18nkey "empty" :body [suoramarkkinointilupa] })
+(def kytkimet {:name "kytkimet" :type :group :i18nkey "empty" :body [suoramarkkinointilupa]})
+(def kytkimet-with-vain-sahkoinen-asiointi (update-in kytkimet [:body] conj vain-sahkoinen-asiointi))
 
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
-(def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil 
+(def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil
                          :body [{:name "AA"}
                                 {:name "A"}
                                 {:name "B"}
@@ -210,7 +212,7 @@
                [henkilotiedot]
                simple-osoite
                yhteystiedot
-               kytkimet))
+               kytkimet-with-vain-sahkoinen-asiointi))
 
 (def henkilo-maksaja (body
                        henkilo-valitsin
@@ -229,6 +231,19 @@
                                   yhteystiedot
                                   kytkimet))
 
+(def yhteyshenkilo-without-kytkimet
+  {:name "yhteyshenkilo"
+   :type :group
+   :body (body
+           [henkilotiedot-minimal]
+           yhteystiedot)})
+
+(def yhteyshenkilo-suoramarkkinointi
+  (update-in yhteyshenkilo-without-kytkimet [:body] concat [kytkimet]))
+
+(def yhteyshenkilo
+  (update-in yhteyshenkilo-without-kytkimet [:body] concat [kytkimet-with-vain-sahkoinen-asiointi]))
+
 (def yritys-minimal [{:name "yritysnimi" :type :string :required true :size "l"}
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
 
@@ -236,23 +251,20 @@
               yritys-valitsin
               yritys-minimal
               simple-osoite
-              {:name "yhteyshenkilo"
-               :type :group
-               :body (body
-                       [henkilotiedot-minimal]
-                       yhteystiedot
-                       kytkimet)}))
+              yhteyshenkilo))
 
 (def yritys-maksaja (body
                       yritys-valitsin
                       yritys-minimal
                       simple-osoite-maksaja
-                      {:name "yhteyshenkilo"
-                       :type :group
-                       :body (body
-                               [henkilotiedot-minimal]
-                               yhteystiedot
-                               kytkimet)}))
+                      yhteyshenkilo-suoramarkkinointi))
+
+(def yritys-without-kytkimet
+  (body
+    yritys-valitsin
+    yritys-minimal
+    simple-osoite
+    yhteyshenkilo-without-kytkimet))
 
 (def e-invoice-operators [{:name "BAWCFI22"} ; Basware Oyj
                           {:name "003714377140"} ; Enfo Zender Oy
@@ -306,7 +318,10 @@
 
 (def party (henkilo-yritys-select-group))
 (def ya-party (henkilo-yritys-select-group :default "yritys"))
-(def party-with-required-hetu (henkilo-yritys-select-group :henkilo-body henkilo-with-required-hetu))
+(def building-parties (henkilo-yritys-select-group
+                        :henkilo-body henkilo-with-required-hetu
+                        :yritys-body yritys-without-kytkimet))
+
 
 (def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus" :other-key "koulutus" :required true
                       :body [{:name "arkkitehti"}
@@ -371,7 +386,18 @@
                               {:name "RAK-rakennesuunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.RAK-rakennesuunnittelija"}
                               {:name "ARK-rakennussuunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.ARK-rakennussuunnittelija"}
                               {:name "Vaikeiden t\u00F6iden suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.Vaikeiden t\u00f6iden suunnittelija"}
-                              {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
+
+                              ; KRYSP yht 2.1.6
+                              {:name "rakennussuunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.rakennussuunnittelija"}
+                              {:name "kantavien rakenteiden suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.kantavien rakenteiden suunnittelija"}
+                              {:name "pohjarakenteiden suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.pohjarakenteiden suunnittelija"}
+                              {:name "ilmanvaihdon suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.ilmanvaihdon suunnittelija"}
+                              {:name "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.vesiviemarisuunnittelija"}
+                              {:name "rakennusfysikaalinen suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.rakennusfysikaalinen suunnittelija"}
+                              {:name "kosteusvaurion korjausty\u00f6n suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.kosteusvaurion korjausty\u00f6n suunnittelija"}
+
+                              {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}
+                              ]}])
 
 (def suunnittelija (body
                      kuntaroolikoodi
@@ -651,6 +677,7 @@
             :type :group
             :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 0 :max 9999999}
                    {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 0 :max 9999999}
+                   {:name "rakennusoikeudellinenKerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
                    {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 0 :max 9999999}
                    {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
                    {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 0 :max 9999999}]})
@@ -817,7 +844,8 @@
 
 (def rakennelman-kayttotarkoitus {:name "kayttotarkoitus"
                                   :type :select
-                                  :body (mapv (partial hash-map :name) rakennelman-kayttotarkoitukset)})
+                                  :i18nkey "rakennelman-kayttotarkoitus"
+                                  :body (mapv #(hash-map :i18nkey (str "rakennelman-kayttotarkoitus." %) :name %) rakennelman-kayttotarkoitukset)})
 
 (def rakennelma (body {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
                       rakennelman-kayttotarkoitus
@@ -828,7 +856,7 @@
                              :type :group
                              :repeating true
                              :approvable true
-                             :body (body party-with-required-hetu
+                             :body (body building-parties
                                      [{:name "omistajalaji" :type :select :sortBy :displayname :other-key "muu-omistajalaji" :required true :size "l"
                                        :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                               {:name "muu yksityinen henkil\u00f6 tai perikunta"}
@@ -925,6 +953,7 @@
                              :type :group
                              :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
                                     {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                                    {:name "rakennusoikeudellinenKerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
                                     {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
                                     {:name "huoneistoala" :type :group :repeating true :removable true
                                      :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
@@ -1263,9 +1292,7 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body (body
-            party
-            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
+    :body party}
 
    {:info {:name "hakija-r"
            :i18name "osapuoli"
@@ -1279,9 +1306,7 @@
            :section-help "party.section.help"
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body (body
-            party
-            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
+    :body party}
 
    {:info {:name "hakija-ya"
            :i18name "osapuoli"
@@ -1293,10 +1318,9 @@
            :subtype "hakija"
            :group-help nil
            :section-help nil
-           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
-    :body (body
-            (schema-body-without-element-by-name ya-party turvakielto)
-            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           }
+    :body (schema-body-without-element-by-name ya-party turvakielto)}
 
    {:info {:name "ilmoittaja"
            :i18name "osapuoli"
@@ -1310,9 +1334,7 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body (body
-            party
-            {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width})}
+    :body party}
 
    {:info {:name "paasuunnittelija"
            :i18name "osapuoli"

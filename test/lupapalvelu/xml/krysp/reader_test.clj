@@ -48,11 +48,11 @@
   (against-background
     (sade.util/get-timestamp-ago :day 1) => (+ (to-timestamp "1970-01-01") 100))
   (fact "Missing details"
-    (standard-verdicts-validator (verdict-skeleton [])) => {:ok false, :text "info.paatos-details-missing"})
+    (standard-verdicts-validator (verdict-skeleton []) {}) => {:ok false, :text "info.paatos-details-missing"})
   (fact "Future date"
-    (standard-verdicts-validator future-verdict) => {:ok false, :text "info.paatos-future-date"} )
+    (standard-verdicts-validator future-verdict {}) => {:ok false, :text "info.paatos-future-date"} )
   (fact "Past date"
-    (standard-verdicts-validator past-verdict) => nil))
+    (standard-verdicts-validator past-verdict {}) => nil))
 
 (defn simple-verdicts-skeleton [state verdict-date]
   {:tag :Kayttolupa
@@ -67,15 +67,15 @@
   (against-background
     (sade.core/now) => 100)
   (fact "Empty state"
-    (simple-verdicts-validator (simple-verdicts-skeleton "" "")) => {:ok false, :text "info.application-backend-preverdict-state"})
+    (simple-verdicts-validator (simple-verdicts-skeleton "" "") {}) => {:ok false, :text "info.application-backend-preverdict-state"})
   (fact "Still in application state"
-    (simple-verdicts-validator (simple-verdicts-skeleton "hakemus" "1970-01-02")) => {:ok false, :text "info.application-backend-preverdict-state"})
+    (simple-verdicts-validator (simple-verdicts-skeleton "hakemus" "1970-01-02") {}) => {:ok false, :text "info.application-backend-preverdict-state"})
   (fact "Nil date"
-    (simple-verdicts-validator (simple-verdicts-skeleton nil nil)) => {:ok false, :text "info.paatos-date-missing"})
+    (simple-verdicts-validator (simple-verdicts-skeleton nil nil) {}) => {:ok false, :text "info.paatos-date-missing"})
   (fact "Future date"
-    (simple-verdicts-validator (simple-verdicts-skeleton "OK" "1970-01-02")) => {:ok false, :text "info.paatos-future-date"} )
+    (simple-verdicts-validator (simple-verdicts-skeleton "OK" "1970-01-02") {}) => {:ok false, :text "info.paatos-future-date"} )
   (fact "Past date"
-    (simple-verdicts-validator (simple-verdicts-skeleton "OK" "1970-01-01")) => nil))
+    (simple-verdicts-validator (simple-verdicts-skeleton "OK" "1970-01-01") {}) => nil))
 
 (facts "pysyva-rakennustunnus"
   (fact (pysyva-rakennustunnus nil) => nil)
@@ -89,7 +89,7 @@
 
     (fact "xml is parsed" cases => truthy)
 
-    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+    (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
 
     (fact "xml has 2 cases" (count cases) => 2)
     (fact "second case has 2 verdicts" (-> cases last :paatokset count) => 2)
@@ -172,7 +172,7 @@
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
-    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+    (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
 
     (let [verdict        (-> cases last :paatokset first)
           lupamaaraykset (:lupamaaraykset verdict)
@@ -201,7 +201,7 @@
        cases (->verdicts xml ->standard-verdicts)]
 
    (fact "xml is parsed" cases => truthy)
-   (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+   (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
 
    (let [verdict (first (:paatokset (last cases)))
          lupamaaraykset (:lupamaaraykset verdict)
@@ -220,18 +220,23 @@
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
-    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+    (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
 
     (let [verdict        (-> cases last :paatokset first)
-          lupamaaraykset (:lupamaaraykset verdict)]
+          lupamaaraykset (:lupamaaraykset verdict)
+          maaraykset     (:maaraykset lupamaaraykset)]
 
       (facts "lupamaaraukset data is correct"
         lupamaaraykset => truthy
         (:rakennusoikeudellinenKerrosala lupamaaraykset) => "101"
         (:vaaditutTyonjohtajat lupamaaraykset) => "IV-ty\u00f6njohtaja, KVV-ty\u00f6njohtaja, vastaava ty\u00f6njohtaja"
-        )
-      )))
+        (:vaaditutErityissuunnitelmat lupamaaraykset) => (just ["ES 1" "ES 22" "ES 333"] :in-any-order))
 
+      (fact "m\u00e4\u00e4r\u00e4ykset"
+        (count maaraykset) => 2
+        (:sisalto (first maaraykset)) => "Radontekninen suunnitelma"
+        (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
+        (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
 
 (facts "CGI sample verdict"
   (let [xml (xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
@@ -289,7 +294,7 @@
 
     (fact "xml is parsed" cases => truthy)
 
-    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+    (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
 
     (fact "xml has one case" (count cases) => 1)
     (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
@@ -322,7 +327,7 @@
         cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has no cases" (count cases) => 0)
-    (fact "validator does not find verdicts" (standard-verdicts-validator xml) => {:ok false, :text "info.no-verdicts-found-from-backend"})))
+    (fact "validator does not find verdicts" (standard-verdicts-validator xml {}) => {:ok false, :text "info.no-verdicts-found-from-backend"})))
 
 (facts "nil xml"
   (let [cases (->verdicts nil ->standard-verdicts)]
@@ -335,7 +340,7 @@
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
-    (fact "validator does not find verdicts" (standard-verdicts-validator xml) => {:ok false, :text "info.no-verdicts-found-from-backend"})
+    (fact "validator does not find verdicts" (standard-verdicts-validator xml {}) => {:ok false, :text "info.no-verdicts-found-from-backend"})
     (fact "case has no verdicts" (-> cases last :paatokset count) => 0)))
 
 (facts "KRYSP yhteiset 2.1.0"
@@ -405,6 +410,12 @@
         (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
         (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))))
 
+(facts "KRYSP rakval 2.2.0 ->rakennuksen-tiedot"
+  (let [xml      (xml/parse (slurp "resources/krysp/sample/building_220.xml"))
+        building (->> xml ->buildings-summary first :buildingId (->rakennuksen-tiedot xml))]
+    (fact "mitat - kerrosala" (get-in building [:mitat :kerrosala]) => "1785")
+    (fact "mitat - rakennusoikeudellinenKerrosala" (get-in building [:mitat :rakennusoikeudellinenKerrosala]) => "1780")
+    (fact "omistaja - yrityksen yhteyshenkilo - kytkimet" (get-in building [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo :kytkimet]) => nil)))
 
 ;; YA verdict
 
@@ -416,7 +427,7 @@
     (fact "xml has 1 cases" (count cases) => 1)
     (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
 
-    (fact "validator finds verdicts" (simple-verdicts-validator xml) => nil)
+    (fact "validator finds verdicts" (simple-verdicts-validator xml {}) => nil)
 
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "523")
 
@@ -454,7 +465,7 @@
       (fact "xml has 1 cases" (count cases) => 1)
       (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
 
-      (fact "validator finds verdicts" (simple-verdicts-validator xml) => nil)
+      (fact "validator finds verdicts" (simple-verdicts-validator xml {}) => nil)
 
       (fact "kuntalupatunnus"
         (:kuntalupatunnus (last cases)) => #(.startsWith % "638-2014-"))

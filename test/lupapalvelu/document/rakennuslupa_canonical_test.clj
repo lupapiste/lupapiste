@@ -47,22 +47,21 @@
     yritysnimi-ja-ytunnus
     {:osoite osoite
      :yhteyshenkilo {:henkilotiedot (dissoc henkilotiedot :hetu)
-                     :yhteystiedot {:email {:value "solita@solita.fi"},
+                     :yhteystiedot {:email {:value "solita@solita.fi"}
                                     :puhelin {:value "03-389 1380"}}}}))
 
 (def- hakija-henkilo
   {:id "hakija-henkilo" :schema-info {:name "hakija-r"
                                       :subtype "hakija"
                                       :version 1}
-   :data {:henkilo henkilo
-          :vainsahkoinenAsiointiKytkin {:value true}}})
+   :data {:henkilo (assoc henkilo :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}})}})
 
 (def- hakija-yritys
   {:id "hakija-yritys" :schema-info {:name "hakija-r"
                                      :subtype "hakija"
                                      :version 1}
    :data {:_selected {:value "yritys"}
-          :yritys yritys}})
+          :yritys (assoc-in yritys [:yhteyshenkilo :kytkimet] {:vainsahkoinenAsiointiKytkin {:value true}})}})
 
 (def- paasuunnittelija
   {:id "50bc85e4ea3e790c9ff7cdb2"
@@ -81,7 +80,7 @@
   {:id "suunnittelija1" :schema-info {:name "suunnittelija"
                                       :version 1}
    :data (merge suunnittelija-henkilo
-                {:kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}}
+                {:kuntaRoolikoodi {:value "rakennusfysikaalinen suunnittelija"}}
                 {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
@@ -235,7 +234,8 @@
            :kokonaisala {:value "1000"}
            :kellarinpinta-ala {:value "100"}
            :kerrosluku {:value "2"}
-           :kerrosala {:value "180"}}
+           :kerrosala {:value "180"}
+           :rakennusoikeudellinenKerrosala {:value "160"}}
    :rakenne {:rakentamistapa {:value "elementti"}
              :kantavaRakennusaine {:value "puu"}
              :muuRakennusaine {:value ""}
@@ -321,6 +321,7 @@
             :laajennuksen-tiedot {:perusparannuskytkin {:value true}
                                   :mitat {:tilavuus {:value "1500"}
                                           :kerrosala {:value "180"}
+                                          :rakennusoikeudellinenKerrosala {:value "160"}
                                           :kokonaisala {:value "150"}
                                           :huoneistoala {:0 {:pintaAla {:value "150"}
                                                              :kayttotarkoitusKoodi {:value "asuntotilaa(ei vapaa-ajan asunnoista)"}}
@@ -520,7 +521,7 @@
     (fact "kuntaRooliKoodi" (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
-    (fact "VainSahkoinenAsiointi" (:VainSahkoinenAsiointi hakija-model) => true)
+    (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin henkilo) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
 
@@ -533,6 +534,7 @@
     (fact "kuntaRooliKoodi" (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
+    (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin yritys) => true)
     (validate-minimal-person henkilo)
     (validate-company yritys)))
 
@@ -559,8 +561,8 @@
   (let [suunnittelija (tools/unwrapped (:data suunnittelija1))
         suunnittelija-model (get-suunnittelija-data suunnittelija :suunnittelija)]
     (fact "model" suunnittelija-model => truthy)
-    (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
-    (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
+    (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "rakennusfysikaalinen suunnittelija")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
@@ -935,6 +937,7 @@
     (fact "kellarinpinta-ala" (:kellarinpinta-ala rakennuksentiedot) => "100")
     (fact "kerrosluku" (:kerrosluku rakennuksentiedot) => "2")
     (fact "kerrosala" (:kerrosala rakennuksentiedot) => "180")
+    (fact "rakennusoikeudellinenKerrosala" (:rakennusoikeudellinenKerrosala rakennuksentiedot) => "160")
 
     (fact "paloluokka" (:paloluokka rakennuksentiedot) => "P1")
     (fact "energialuokka" (:energialuokka rakennuksentiedot) => "C")
@@ -961,7 +964,10 @@
     (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
     (fact "Laajennuksen rakennuksen tunnus" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 3)
     (fact "Laajennuksen rakennuksen kiintun" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun) => "21111111111111")
-    (fact "Laajennuksen pintaalat" (count (-> laajennus-t :laajennus :laajennuksentiedot :huoneistoala)) => 2)
+    (fact "Laajennuksen pintaalat" (-> laajennus-t (get-in [:laajennus :laajennuksentiedot :huoneistoala]) count) => 2)
+    (fact "Laajennuksen pintaala keys" (-> laajennus-t (get-in [:laajennus :laajennuksentiedot :huoneistoala]) first keys) => (just #{:kayttotarkoitusKoodi :pintaAla}))
+    (fact "Laajennuksen kerrosala" (get-in laajennus-t [:laajennus :laajennuksentiedot :kerrosala]) => "180")
+    (fact "Laajennuksen rakennusoikeudellinenKerrosala" (get-in laajennus-t [:laajennus :laajennuksentiedot :rakennusoikeudellinenKerrosala]) => "160")
     (fact "Purkamisen kuvaus" (-> purku-t :purkaminen :kuvaus) => "Rakennuksen purkaminen")
     (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
     (fact "Purku: syy" (-> purku-t :purkaminen :purkamisenSyy) => "tuhoutunut")

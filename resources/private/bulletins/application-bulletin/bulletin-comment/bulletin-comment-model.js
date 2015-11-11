@@ -3,4 +3,5 @@ LUPAPISTE.BulletinCommentModel = function(params) {
   var self = this;
 
   self.bulletin = params.bulletin;
+  self.versionId = params.versionId;
 };

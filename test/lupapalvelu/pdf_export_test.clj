@@ -72,7 +72,7 @@
            (facts {:midje/description (name lang)}
                   (pdf-export/generate application lang file)
                   (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
-                        rows (remove str/blank? (str/split pdf-content #"\n"))]
+                        rows (remove str/blank? (str/split pdf-content #"\r?\n"))]
 
                     (fact "All localized document headers are present in the PDF"
                           (with-lang lang
@@ -98,10 +98,9 @@
                                                              :state "draft"})]
          (doseq [lang i18n/languages]
            (facts {:midje/description (name lang)}
-                  (let [file (File/createTempFile (str "export-test-statement-" (name lang)) ".pdf")
+                  (let [file (File/createTempFile (str "export-test-statement-" (name lang) "-") ".pdf")
                         fis (FileOutputStream. file)]
                     (pdf-export/generate-pdf-with-child application :statements "2" lang fis)
-                    (debug " Exported statement to: " (.getAbsolutePath file) ", size: " (.length file))
                     (fact "File exists " (.exists file))
                     (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
                           rows (remove str/blank? (str/split pdf-content #"\r?\n"))]
@@ -126,10 +125,9 @@
                                                              :state "draft"})]
          (doseq [lang i18n/languages]
            (facts {:midje/description (name lang)}
-                  (let [file (File/createTempFile (str "export-test-neighbor-" (name lang)) ".pdf")
+                  (let [file (File/createTempFile (str "export-test-neighbor-" (name lang) "-") ".pdf")
                         fis (FileOutputStream. file)]
                     (pdf-export/generate-pdf-with-child application :neighbors "2" lang fis)
-                    (debug " Exported neighbor to: " (.getAbsolutePath file) ", size: " (.length file))
                     (fact "File exists " (.exists file))
                     (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
                           expected-state (if (= lang :fi) "Vastattu" "Besvarad")

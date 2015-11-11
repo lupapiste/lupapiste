@@ -57,6 +57,11 @@
       (update-child-element small-mapping [:a :b] #(update-in % [:attr] inc))           => [{:tag :a :child [{:tag :b :attr 2}]}]
       (update-child-element small-mapping [:a :b] (fn [elem] (assoc elem :meta "foo"))) => [{:tag :a :child [{:tag :b :attr 1 :meta "foo"}]}])))
 
+(fact merge-into-coll-after-tag
+  (merge-into-coll-after-tag [{:tag :a} {:tag :b} {:tag :c}] :b [{:tag :x}])           => [{:tag :a} {:tag :b} {:tag :x} {:tag :c}]
+  (merge-into-coll-after-tag [{:tag :a} {:tag :b} {:tag :c}] :b [{:tag :x} {:tag :y}]) => [{:tag :a} {:tag :b} {:tag :x} {:tag :y} {:tag :c}]
+  (merge-into-coll-after-tag [{:tag :a} {:tag :b} {:tag :c}] :z {:tag :x})             => [{:tag :a} {:tag :b} {:tag :c}])
+
 (facts "get-child-element"
   (let [sample-mapping {:tag :top
                         :child [{:tag :a :child [{:tag :b  :child [{:tag :c} {:tag :x}]} {:tag :y}]}

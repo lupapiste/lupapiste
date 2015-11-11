@@ -136,7 +136,11 @@
       (resp/json
         (if (nil? municipality)
           (map create-layer-object (map wfs/layer-to-name layers))
-          (filter #(= (re-find #"^\d+" (:wmsName %)) municipality) (map create-layer-object (map wfs/layer-to-name layers)))
+          (filter
+            #(and
+               (not= "0" (:id %))      ;; TODO: This is quick fix to make service working again.  Find better fix.
+               (= (re-find #"^\d+" (:wmsName %)) municipality))
+            (map create-layer-object (map wfs/layer-to-name layers)))
           )
         )
       (resp/status 503 "Service temporarily unavailable"))))

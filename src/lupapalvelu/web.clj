@@ -186,9 +186,11 @@
         user    (basic-authentication request)]
     (if user
       (let [response (execute (assoc (action/make-raw name (from-query request)) :user user))]
-        (if (false? (:ok response))
-          (resp/status 404 (resp/json response))
-          response))
+        (if (action/response? response)
+          response
+          (if (:ok response)
+            (resp/status 200 (resp/json response))
+            (resp/status 404 (resp/json response)))))
       basic-401)))
 
 (defpage [:get "/data-api/json/:name"] {name :name}

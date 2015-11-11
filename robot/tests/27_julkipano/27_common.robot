@@ -50,7 +50,7 @@ Open bulletin by index
   ${address}=  Get text  //table[@id='application-bulletins-list']//tr[${idx}]/td[3]
   ${address}=  Convert to upper case  ${address}
   Click element  //table[@id='application-bulletins-list']/tbody/tr[${idx}]
-  Wait until  Element text should be  //div[@id='bulletin-component']//h1[@data-test-id='bulletin-address']  ${address}
+  Wait until  Element text should be  //div[@id='bulletin-component']//*[@data-test-id='bulletin-address']  ${address}
 
 Bulletin state is
   [Arguments]  ${state}

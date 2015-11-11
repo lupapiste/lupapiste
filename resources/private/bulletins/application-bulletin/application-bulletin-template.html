@@ -96,9 +96,9 @@
 
       <!-- ko if: authenticated -->
       <div data-bind="component: { name: 'bulletin-comment',
-                                   params: { bulletin: $data } }"></div>
+                                   params: { bulletin: $data,
+                                             versionId: versionId } }"></div>
       <!-- /ko -->
-
       <!-- ko if: !authenticated() -->
       <div class="container">
         <div data-bind="component: { name: 'vetuma-init',
