@@ -2,7 +2,7 @@
   (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
             [lupapalvelu.document.ymparisto-ilmoitukset-canonical :refer [meluilmoitus-canonical]]
             [lupapalvelu.document.ymparisto-ilmoitukset-canonical-test :refer [meluilmoitus-yritys-application ]]
-            [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :refer [ilmoitus_to_krysp]]
+            [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :refer [ilmoitus_to_krysp_212]]
             [lupapalvelu.xml.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.validator :refer :all :as validator]
@@ -14,11 +14,11 @@
             [sade.xml :as xml]
             [sade.common-reader :as cr]))
 
-(fact "2.1.2: :tag is set" (has-tag ilmoitus_to_krysp) => true)
+(fact "2.1.2: :tag is set" (has-tag ilmoitus_to_krysp_212) => true)
 
 (defn- do-test [application]
   (let [canonical (meluilmoitus-canonical application "fi")
-        xml (element-to-xml canonical ilmoitus_to_krysp)
+        xml (element-to-xml canonical ilmoitus_to_krysp_212)
         xml-s     (indent-str xml)
         lp-xml    (cr/strip-xml-namespaces (xml/parse xml-s))]
 
