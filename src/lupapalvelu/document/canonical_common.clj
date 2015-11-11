@@ -529,8 +529,8 @@
     (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data application lang))
     (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data application lang))))
 
-(defn- address->osoitetieto [{katu :street postinumero :zip postitoimipaikannimi :city :as address}]
-  (when katu
+(defn address->osoitetieto [{katu :street postinumero :zip postitoimipaikannimi :city :as address}]
+  (when-not (util/empty-or-nil? katu)
     (util/assoc-when {} 
                      :osoitenimi {:teksti katu}
                      :postinumero postinumero
