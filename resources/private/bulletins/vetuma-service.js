@@ -10,11 +10,9 @@ LUPAPISTE.VetumaService = function() {
 
   hub.subscribe("vetumaService::authenticateUser", function() {
     vetuma.getUser(function(resp) { // onFound
-      console.log("FOUND!");
       ko.mapping.fromJS(_.pick(resp, ["firstName", "lastName"]), self.userInfo);
       self.authenticated(true);
     }, function() { // onNotFound
-      console.log("NOT FOUND");
       self.authenticated(false);
     });  
   });

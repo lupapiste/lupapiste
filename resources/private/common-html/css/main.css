@@ -1565,6 +1565,12 @@ nav .julkipano-brand .header-box a span {
   vertical-align: middle;
 }
 /* line 171, ../sass/partials/_header.scss */
+nav .julkipano-brand #header-user-menu {
+  display: inline-block;
+  position: absolute;
+  right: 0px;
+}
+/* line 176, ../sass/partials/_header.scss */
 nav .julkipano-brand .header-box, nav .julkipano-brand .julkipano-user {
   font-size: 16px;
   vertical-align: middle;
@@ -1575,12 +1581,13 @@ nav .julkipano-brand .header-box, nav .julkipano-brand .julkipano-user {
   text-overflow: ellipsis;
   line-height: 60px;
   color: #fff;
+  margin-right: 24px;
 }
-/* line 181, ../sass/partials/_header.scss */
+/* line 187, ../sass/partials/_header.scss */
 nav .julkipano-brand .header-box span, nav .julkipano-brand .julkipano-user span {
   vertical-align: middle;
 }
-/* line 185, ../sass/partials/_header.scss */
+/* line 191, ../sass/partials/_header.scss */
 nav .julkipano-brand .language-closed {
   background-color: inherit;
   display: inline-block;
@@ -1633,7 +1640,7 @@ nav .julkipano-brand .language-closed a, nav .julkipano-brand .language-closed s
   text-transform: uppercase;
   overflow: hidden;
 }
-/* line 188, ../sass/partials/_header.scss */
+/* line 194, ../sass/partials/_header.scss */
 nav .julkipano-brand .language-open {
   background-color: #555555;
   display: inline-block;
@@ -1719,7 +1726,7 @@ nav .julkipano-brand .nav-bottom ul li a span {
   vertical-align: middle;
 }
 
-/* line 209, ../sass/partials/_header.scss */
+/* line 215, ../sass/partials/_header.scss */
 .nav-notification {
   width: 100%;
   background-color: #f39129;
@@ -1733,12 +1740,12 @@ nav .julkipano-brand .nav-bottom ul li a span {
   margin-top: 60px;
   margin-bottom: -60px;
 }
-/* line 220, ../sass/partials/_header.scss */
+/* line 226, ../sass/partials/_header.scss */
 .nav-notification:after {
   clear: both;
 }
 
-/* line 228, ../sass/partials/_header.scss */
+/* line 234, ../sass/partials/_header.scss */
 .admin .nav-notification {
   margin-top: 106px;
   margin-bottom: -48px;

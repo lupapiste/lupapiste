@@ -36,6 +36,10 @@
       return [vetumaService.userInfo.firstName(),
         vetumaService.userInfo.lastName()].join(" ");
     });
+
+    self.vetumaLogout = function() {
+      console.log("FOO");
+    };
   }
 
   var langs = new Languages();
