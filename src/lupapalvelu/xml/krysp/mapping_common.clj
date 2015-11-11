@@ -310,17 +310,17 @@
 (def yritys_215 {:tag :yritys :ns "yht" :child yritys-child_215})
 
 (def- osapuoli-body_211 {:tag :Osapuoli
-                        :child [{:tag :kuntaRooliKoodi}
-                                {:tag :VRKrooliKoodi}
-                                henkilo
-                                yritys_211
-                                {:tag :turvakieltoKytkin}]})
+                         :child [{:tag :kuntaRooliKoodi}
+                                 {:tag :VRKrooliKoodi}
+                                 henkilo
+                                 yritys_211
+                                 {:tag :turvakieltoKytkin}]})
 
 (def- osapuoli-body_213 (update-in osapuoli-body_211 [:child] update-child-element [:yritys] yritys_213))
 
 (def- osapuoli-body_215 (-> osapuoli-body_213
-    (update-in [:child] update-child-element [:henkilo] henkilo_215)
-    (update-in [:child] update-child-element [:yritys] yritys_215)))
+                          (update-in [:child] update-child-element [:henkilo] henkilo_215)
+                          (update-in [:child] update-child-element [:yritys] yritys_215)))
 
 (def osapuoli-body_216
   (update-in osapuoli-body_215 [:child] concat [{:tag :suoramarkkinointikieltoKytkin}]))
