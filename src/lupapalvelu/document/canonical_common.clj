@@ -536,33 +536,22 @@
                      :postinumero postinumero
                      :postitoimipaikannimi postitoimipaikannimi)))
 
-(defn- get-neighbor [{status :status property-id :propertyId owner :owner :as neighbor}]
+(defn get-neighbor [{status :status property-id :propertyId :as neighbor}]
   (let [{state :state vetuma :vetuma message :message} (last status)
         neighbor (util/assoc-when {}
-                                  :henkilo (:name owner)
-                                  :osoite (address->osoitetieto (:address owner))
+                                  :henkilo (str (:firstName vetuma) " " (:lastName vetuma))
+                                  :osoite (address->osoitetieto vetuma)
                                   :kiinteistotunnus property-id
                                   :hallintasuhde "Ei tiedossa"
-                                  :saanutTiedoksiannonKytkin (-> (map :state status) (set) (contains? "email-sent"))
-                                  :huomautettavaaKytkin nil
-                                  :haluaaPaatoksenKytkin nil
-                                  :huomautus nil)]
-    {:Naapuri (case state
-                "response-given-comments" (util/assoc-when neighbor
-                                                           :henkilo (str (:firstName vetuma) " " (:lastName vetuma)) 
-                                                           :osoite (address->osoitetieto vetuma)
-                                                           :huomautettavaaKytkin true
-                                                           :huomautus message)
-                "response-given-ok"       (util/assoc-when neighbor 
-                                                           :henkilo (str (:firstName vetuma) " " (:lastName vetuma)) 
-                                                           :osoite (address->osoitetieto vetuma)
-                                                           :huomautettavaaKytkin false)
-                "mark-done"               neighbor
-                nil)}))
+                                  :huomautus message)]
+    (case state
+      "response-given-comments" {:Naapuri (assoc neighbor :huomautettavaaKytkin true)}
+      "response-given-ok"       {:Naapuri (assoc neighbor :huomautettavaaKytkin false)}
+      nil)))
 
-(defn- get-neighbors [neighbors]
+(defn get-neighbors [neighbors]
   (->> (map get-neighbor neighbors)
-       (filter val)))
+       (remove nil?)))
 
 (defn osapuolet [{neighbors :neighbors :as application} documents-by-type lang]
   {:pre [(map? documents-by-type) (string? lang)]}
