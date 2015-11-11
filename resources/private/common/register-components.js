@@ -75,7 +75,8 @@ jQuery(document).ready(function() {
     {name: "group-approval"},
     {name: "submit-button"},
     {name: "remove-button"},
-    {name: "publish-bulletin"}
+    {name: "publish-bulletin"},
+    {name: "proclaim-application"}
   ];
 
   _.forEach(components, function(component) {
