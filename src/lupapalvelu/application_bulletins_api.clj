@@ -57,10 +57,10 @@
 (defn- get-application-bulletins [page searchText municipality state sort]
   (let [query (or (make-query searchText municipality state) {})
         apps (mongo/with-collection "application-bulletins"
-               (query/find query)
-               (query/fields bulletins-fields)
-               (query/sort (make-sort sort))
-               (query/paginate :page page :per-page bulletin-page-size))]
+                                    (query/find query)
+                                    (query/fields bulletins-fields)
+                                    (query/sort (make-sort sort))
+                                    (query/paginate :page page :per-page bulletin-page-size))]
     (map
       #(assoc (first (:versions %)) :id (:_id %))
       apps)))
@@ -124,10 +124,10 @@
     (let [comment      (bulletins/create-comment comment created)
           stored-files (bulletins/store-files bulletin-id (:id comment) files)]
       (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments stored-files)}})
-         (->> {:ok true}
-              (resp/json)
-              (resp/content-type "application/json")
-              (resp/status 200)))
+      (->> {:ok true}
+           (resp/json)
+           (resp/content-type "application/json")
+           (resp/status 200)))
     (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
       (->> {:ok false :text text}
            (resp/json)
@@ -144,7 +144,7 @@
   {:parameters [id]
    :feature :publish-bulletin
    :user-roles #{:authority}
-   :states     (states/all-application-states-but :draft :open)}
+   :states     (states/all-application-states-but :draft :open :submitted)}
   [{:keys [application created] :as command}]
   (let [app-snapshot (bulletins/create-bulletin-snapshot application)
         search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
@@ -153,25 +153,36 @@
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
-(def bulletin-fields
-  (merge bulletins-fields
-    {:versions._applicantIndex 1
-     :versions.documents 1
-     :versions.id 1
-     :versions.attachments 1}))
-
 (defquery bulletin
   {:parameters [bulletinId]
    :feature :publish-bulletin
    :user-roles #{:anonymous}}
-  (if-let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
-    (let [latest-version   (-> bulletin :versions first)
-          bulletin-version   (assoc latest-version :versionId (:id latest-version)
-                                                   :id (:id bulletin))
-          append-schema-fn (fn [{schema-info :schema-info :as doc}]
-                             (assoc doc :schema (schemas/get-schema schema-info)))
-          bulletin (-> bulletin-version
-                     (update-in [:documents] (partial map append-schema-fn))
-                     (assoc :stateSeq bulletins/bulletin-state-seq))]
-      (ok :bulletin bulletin))
-    (fail :error.bulletin.not-found)))
+  "return only latest version for application bulletin"
+  (let [bulletin-fields (merge bulletins-fields
+                               {:versions._applicantIndex 1
+                                :versions.documents 1
+                                :versions.id 1
+                                :versions.attachments 1})]
+    (if-let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
+      (let [latest-version   (-> bulletin :versions first)
+            bulletin-version   (assoc latest-version :versionId (:id latest-version)
+                                                     :id (:id bulletin))
+            append-schema-fn (fn [{schema-info :schema-info :as doc}]
+                               (assoc doc :schema (schemas/get-schema schema-info)))
+            bulletin (-> bulletin-version
+                         (update-in [:documents] (partial map append-schema-fn))
+                         (assoc :stateSeq bulletins/bulletin-state-seq))]
+        (ok :bulletin bulletin))
+      (fail :error.bulletin.not-found))))
+
+(defquery bulletin-versions
+  "returns all bulletin versions for application bulletin with comments"
+  {:parameters [bulletinId]
+   :feature    :publish-bulletin
+   :user-roles #{:authority}}
+  (prn "perkele")
+  (let [bulletin-fields (-> bulletin-fields
+                            (dissoc :versions)
+                            (merge {:comments 1}))
+        bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
+    (ok :bulletin bulletin)))
