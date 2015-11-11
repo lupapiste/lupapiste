@@ -87,11 +87,11 @@
 
       (update-in [:child] mapping-common/update-child-element
                  [:ymparistolupatieto :Ymparistolupa :maksajatieto]
-                 {:tag :maksajatieto :child [{:tag :Maksaja :child mapping-common/maksajatype-children_215}]}) ; OK
+                 {:tag :maksajatieto :child [{:tag :Maksaja :child mapping-common/maksajatype-children_215}]})
 
       (update-in [:child] mapping-common/update-child-element
                  [:ymparistolupatieto :Ymparistolupa :hakija]
-                 {:tag :hakija :child mapping-common/yhteystietotype-children_215}) ; OK
+                 {:tag :hakija :child mapping-common/yhteystietotype-children_215})
 
       (update-in [:child] mapping-common/update-child-element
                  [:ymparistolupatieto :Ymparistolupa :laitoksentiedot :Laitos :osoite]
