@@ -857,3 +857,9 @@ $app-gray-darkest: $gray187;
 h2 > i.is-right {
   float: right;
 }
+
+#application-bulletin-tab {
+  .bulletin-state {
+    font-weight: bold;
+  }
+}

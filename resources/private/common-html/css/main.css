@@ -11154,6 +11154,11 @@ h2 > i.is-right {
   float: right;
 }
 
+/* line 862, ../sass/views/_application.scss */
+#application-bulletin-tab .bulletin-state {
+  font-weight: bold;
+}
+
 /* line 1, ../sass/views/_create_application.scss */
 .ui-autocomplete-loading {
   background: white url("/img/ajax-loader-16.gif") right center no-repeat;
