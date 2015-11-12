@@ -708,7 +708,7 @@
                             doc))))
                  (remove nil?))]
     (for [[i doc] (zipmap (range (count docs)) docs)
-          ;; Remove keys wit blank (or nil) values.
+          ;; Remove keys with blank (or nil) values.
           :let [data (reduce (fn [acc [k v]] (if-not (or (nil? v)
                                                          (and (string? v) (ss/blank? v)))
                                              (assoc acc k v)
