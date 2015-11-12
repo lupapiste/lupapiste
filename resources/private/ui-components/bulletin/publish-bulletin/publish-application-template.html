@@ -9,7 +9,7 @@
       <p data-bind="ltext: 'bulletin.application.canNotPublish'"></p>
       <!-- /ko -->
       <!-- ko if: canProclaim -->
-      <div data-bind="component: { name: 'proclaim-application', params: { appId: appId, canPublish: canPublish } }"></div>
+      <div data-bind="component: { name: 'proclaim-application', params: { appId: appId, canPublish: canPublish, bulletinState: bulletinState } }"></div>
       <!-- /ko -->
     </script>
   </section>

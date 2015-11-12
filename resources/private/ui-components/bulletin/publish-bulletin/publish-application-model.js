@@ -12,6 +12,10 @@ LUPAPISTE.PublishApplicationModel = function(params) {
 
   self.bulletin = params.bulletin;
 
+  self.bulletinState = ko.pureComputed(function() {
+    return util.getIn(self, ["bulletin", "bulletinState"]);
+  });
+
   self.processing = ko.observable();
 
   self.helpText = ko.pureComputed(function() {
