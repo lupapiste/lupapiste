@@ -6,52 +6,63 @@
     [lupapalvelu.document.vesihuolto-canonical :as vesihuolto-canonical]
     [lupapalvelu.xml.disk-writer :as writer]))
 
-(def vesihuolto-to-krysp {:tag :Vesihuoltolaki :ns "ymv"
-                          :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :VVVL "2.1.3")
-                                        :xmlns:ymv "http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"}
-                                       mapping-common/common-namespaces)
-                          :child
-                          [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
-                           {:tag :vapautukset
-                            :child [{:tag :Vapautus
-                                     :child [{:tag :kasittelytietotieto
-                                              :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children }]}
-                                             {:tag :luvanTunnistetiedot
-                                              :child [mapping-common/lupatunnus]}
-                                             {:tag :lausuntotieto
-                                              :child [mapping-common/lausunto_213]}
-                                             {:tag :vapautusperuste}
-                                             {:tag :vapautushakemustieto
-                                              :child [{:tag :Vapautushakemus
-                                                       :child [{:tag :hakija
-                                                                :child mapping-common/yhteystietotype-children_213}
-                                                               {:tag :kohde
-                                                                :child [{:tag :kiinteistorekisteritunnus}
-                                                                        {:tag :kiinteistonRakennusTieto
-                                                                         :child [{:tag :KiinteistonRakennus
-                                                                                  :child [{:tag :kayttotarkoitustieto
-                                                                                           :child [{:tag :kayttotarkoitus}
-                                                                                                   {:tag :muu}]}
-                                                                                          {:tag :kohteenVarustelutaso}
-                                                                                          {:tag :haetaanVapautustaKytkin}]}]}
-                                                                        {:tag :hulevedet
-                                                                         :child [{:tag :muu}
-                                                                                 {:tag :hulevedet}]}
-                                                                        {:tag :talousvedet
-                                                                         :child
-                                                                         [{:tag :hankinta
-                                                                           :child [{:tag :muu}
-                                                                                   {:tag :hankinta}]}
-                                                                          {:tag :johdatus}
-                                                                          {:tag :riittavyys}]}
-                                                                        {:tag :jatevedet}]}
-                                                               (mapping-common/sijaintitieto "yht")]}]}
-                                             {:tag :liitetieto
-                                              :child [{:tag :Liite :child mapping-common/liite-children_213}]}
-                                             {:tag :asianKuvaus}]}]}]})
+(def vesihuolto-to-krysp_213
+  {:tag :Vesihuoltolaki :ns "ymv"
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :VVVL "2.1.3")
+                 :xmlns:ymv "http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"}
+           mapping-common/common-namespaces)
+   :child
+   [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
+    {:tag :vapautukset
+     :child [{:tag :Vapautus
+              :child [{:tag :kasittelytietotieto
+                       :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children }]}
+                      {:tag :luvanTunnistetiedot
+                       :child [mapping-common/lupatunnus]}
+                      {:tag :lausuntotieto
+                       :child [mapping-common/lausunto_213]}
+                      {:tag :vapautusperuste}
+                      {:tag :vapautushakemustieto
+                       :child [{:tag :Vapautushakemus
+                                :child [{:tag :hakija
+                                         :child mapping-common/yhteystietotype-children_213}
+                                        {:tag :kohde
+                                         :child [{:tag :kiinteistorekisteritunnus}
+                                                 {:tag :kiinteistonRakennusTieto
+                                                  :child [{:tag :KiinteistonRakennus
+                                                           :child [{:tag :kayttotarkoitustieto
+                                                                    :child [{:tag :kayttotarkoitus}
+                                                                            {:tag :muu}]}
+                                                                   {:tag :kohteenVarustelutaso}
+                                                                   {:tag :haetaanVapautustaKytkin}]}]}
+                                                 {:tag :hulevedet
+                                                  :child [{:tag :muu}
+                                                          {:tag :hulevedet}]}
+                                                 {:tag :talousvedet
+                                                  :child
+                                                  [{:tag :hankinta
+                                                    :child [{:tag :muu}
+                                                            {:tag :hankinta}]}
+                                                   {:tag :johdatus}
+                                                   {:tag :riittavyys}]}
+                                                 {:tag :jatevedet}]}
+                                        (mapping-common/sijaintitieto "yht")]}]}
+                      {:tag :liitetieto
+                       :child [{:tag :Liite :child mapping-common/liite-children_213}]}
+                      {:tag :asianKuvaus}]}]}]})
 
+(def vesihuolto-to-krysp_221
+  vesihuolto-to-krysp_213)
 
+(defn- get-mapping [krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.3" vesihuolto-to-krysp_213
+    "2.2.1" vesihuolto-to-krysp_221
+    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
+(defn vesihuolto-element-to-xml [canonical krysp-version]
+  (element-to-xml canonical (get-mapping krysp-version)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
@@ -68,7 +79,7 @@
                     canonical-with-statement-attachments
                     [:Vesihuoltolaki :vapautukset :Vapautus :liitetieto]
                     attachments-canonical)
-        xml (element-to-xml canonical vesihuolto-to-krysp)
+        xml (vesihuolto-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
