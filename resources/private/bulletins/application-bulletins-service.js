@@ -2,7 +2,7 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   "use strict";
   var self = this;
 
-  self.data = ko.observableArray([]);
+  self.bulletins = ko.observableArray([]);
   self.bulletinsLeft = ko.observable(0);
 
   self.query = {
@@ -20,9 +20,9 @@ LUPAPISTE.ApplicationBulletinsService = function() {
       .success(function(res) {
         self.bulletinsLeft(res.left);
         if (query.page === 1) {
-          self.data(res.data);
+          self.bulletins(res.data);
         } else {
-          self.data(self.data().concat(res.data));
+          self.bulletins(self.bulletins().concat(res.data));
         }
       })
       .pending(self.fetchBulletinsPending)
