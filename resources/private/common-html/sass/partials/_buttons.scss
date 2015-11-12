@@ -259,7 +259,7 @@ i.btn-small {
 @include button-div-a-i-span ( authority ) {
   @include styled-input( $bg: $turqo-link, $hover-bg: $turqo-hover, $active-bg: $turqo-active );
 }
-
+/*
 @include button-div-a-i-span ( bulletin ) {
   @include styled-input( $bg: $blue-link, $hover-bg: $blue-hover, $active-bg: $blue-active );
 }
@@ -267,7 +267,7 @@ i.btn-small {
 @include button-div-a-i-span ( bulletin-inverse ) {
   @include styled-input( $bg: $blue-active, $hover-bg: $blue-hover, $active-bg: $blue-link );
 }
-
+*/
 @mixin function ($text, $hover-text, $active-text ) {
   @include styled-input($bg: white, $hover-bg: white, $active-bg: white,
                         $text: $text, $hover-text: $hover-text, $active-text: $active-text,
@@ -306,10 +306,11 @@ button.function {
   @include function( $turqo-link, $turqo-hover, $gray51 );
 }
 
+/*
 @include button-div-a-i-span ("function.julkipano") {
   @include function( $blue-link, $blue-hover, $gray51 );
 }
-
+*/
 // Link button is a link that is laid out as button.
 // However, no background or borders.
 
@@ -320,7 +321,7 @@ a.link-btn {
                          $active-text: $orange-active, $disabled-bg: none);
   cursor: pointer;
 }
-
+/*
 a.link-btn-julkipano {
   @extend .like-btn;
   @include styled-input( none, none, none,
@@ -328,7 +329,7 @@ a.link-btn-julkipano {
                          $active-text: $blue-active, $disabled-bg: none);
   cursor: pointer;
 }
-
+*/
 // Waiting animation
 
 // Example:
