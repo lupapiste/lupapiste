@@ -69,6 +69,12 @@
           tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
           tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])]
 
+      (fact "hakija and maksaja parties exist"
+        (let [osapuoli-codes (->> (xml/select lp-xml_220 [:osapuolettieto :Osapuoli])
+                               (map (comp :kuntaRooliKoodi cr/all-of)))]
+          (->> osapuoli-codes (filter #(= % "Rakennusvalvonta-asian hakija")) count) => pos?
+          (->> osapuoli-codes (filter #(= % "Rakennusvalvonta-asian laskun maksaja")) count) => pos?))
+
       (fact "saapumisPvm"
         (let [expected (sade.util/to-xml-date (:submitted application))]
           (xml/get-text lp-xml_212 [:luvanTunnisteTiedot :LupaTunnus :saapumisPvm]) => expected
@@ -86,8 +92,9 @@
 
           (when (= :v1 validate-tyonjohtaja-type)
 
-            (let [suunnittelijat (map cr/all-of (xml/select lp-xml_220 [:osapuolettieto :Suunnittelija]))]
-              (fact "FISEpatevyyskortti" (every? (comp string? :FISEpatevyyskortti) suunnittelijat))))
+            (fact "FISEpatevyyskortti" (->> (xml/select lp-xml_220 [:osapuolettieto :Suunnittelija])
+                                         (map cr/all-of)
+                                         (every? (comp string? :FISEpatevyyskortti))) => true))
 
           (when (= :v2 validate-tyonjohtaja-type)
             (fact "In KRYSP 2.1.6, :vainTamaHankeKytkin was added (Yhteiset schema was updated to 2.1.5 and tyonjohtaja along with it)"
