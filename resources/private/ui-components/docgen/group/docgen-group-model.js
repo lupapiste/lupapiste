@@ -11,7 +11,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.documentId = params.documentId;
   self.groupId = ["group", params.documentId].concat(self.path).join("-");
   self.groupLabel = params.i18npath.concat("_group_label").join(".");
-  self.groupHelp = params.schema['group-help'] && params.i18npath.concat(params.schema['group-help']).join(".");
+  self.groupHelp = params.schema["group-help"] && params.i18npath.concat(params.schema["group-help"]).join(".");
 
   self.indicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});
@@ -26,7 +26,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
       i18npath: i18npath,
       applicationId: params.applicationId,
       documentId: params.documentId,
-      model: model[schema.name],
+      model: model[schema.name]
     });
   });
 

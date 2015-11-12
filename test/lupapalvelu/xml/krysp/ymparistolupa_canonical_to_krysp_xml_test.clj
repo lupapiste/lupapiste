@@ -38,10 +38,10 @@
       (let [hakijat (xml/select lp-xml_221 [:hakija])]
        (count hakijat) => 2
        (xml/get-text (first hakijat) [:sukunimi]) => "Borga"
-        (xml/get-text (second hakijat) [:yTunnus]) => "1060155-5"
+       (xml/get-text (second hakijat) [:yTunnus]) => "1060155-5"
 
-        (fact "maa"
-          (xml/get-text (first hakijat) [:osoitetieto :Osoite :valtioKansainvalinen]) => "FIN")))
+       (fact "maa"
+         (xml/get-text (first hakijat) [:osoitetieto :Osoite :valtioKansainvalinen]) => "FIN")))
 
     (fact "luvat"
       (let [luvat (xml/select lp-xml_212 [:voimassaOlevatLuvat :lupa])]
