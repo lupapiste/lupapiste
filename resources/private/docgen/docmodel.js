@@ -1480,7 +1480,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         parent$.append(makeElem(myModel, count));
       };
 
-      var copyElement = function() {
+      var copyElement = function(event) {
+        var clickedButton = event.currentTarget || event.target;
+        var updates = {paths: [], values: []};
         var parent$ = $(this).closest(".accordion-fields").find("tbody");
         var count = parent$.find("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.find("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
@@ -1495,6 +1497,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         // copy last element items to new
         lastItem$.find("td").each(function(index) {
           var newInput$ = $($(newItem).find("input, select")[index]);
+          var path = newInput$.attr("data-docgen-path");
           var oldInput$ = $(this).find("input, select");
           var prop = "value";
           if(oldInput$.is(":checkbox")) {
@@ -1502,11 +1505,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           }
           var oldValue = oldInput$.prop(prop);
           if(oldValue) {
-            newInput$.prop(prop, oldInput$.prop(prop));
-            newInput$.change();
+            newInput$.prop(prop, oldValue);
+            updates.paths.push(path);
+            updates.values.push(oldValue);
           }
         });
-
+        saveMany(clickedButton, updates);
         parent$.append(newItem);
       };
 
@@ -1718,7 +1722,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     hub.send(eventType, {appId: self.appId, documentId: self.docId, status: status, results: results});
 
 
-    if (callback) { callback(); }
+    if (callback) { callback(status, results); }
     // No return value or stopping the event propagation:
     // That would prevent moving to the next field with tab key in IE8.
   }
@@ -1742,6 +1746,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
+  }
+
+  function saveMany(target, updates, callback) {
+    var indicator = createIndicator(target);
+    saveForReal(updates.paths, updates.values, _.partial(afterSave, null, null, indicator, callback));
   }
 
   var emitters = {
