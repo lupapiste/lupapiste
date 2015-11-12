@@ -38,7 +38,7 @@
     });
 
     self.vetumaLogout = function() {
-      console.log("FOO");
+      hub.send("vetumaService::logoutRequested");
     };
   }
 
