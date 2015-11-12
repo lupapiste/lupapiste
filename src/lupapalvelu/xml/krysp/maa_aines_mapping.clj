@@ -55,7 +55,7 @@
    {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}
    {:tag :asianKuvaus}])
 
-(def maa-aines_to_krysp
+(def maa-aines_to_krysp_212
   {:tag :MaaAinesluvat
    :ns "ymm"
    :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :MAL "2.1.2")
@@ -65,6 +65,17 @@
            {:tag :maaAineslupaAsiatieto :child [{:tag :MaaAineslupaAsia :child maaAineslupaAsia}]}
            {:tag :kotitarveottoasiaTieto} ; To be mapped in the future?
            ]})
+
+
+(defn- get-mapping [krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.2" maa-aines_to_krysp_212
+    "2.2.1" maa-aines_to_krysp_212
+    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
+
+(defn maa-aines-element-to-xml [canonical krysp-version]
+  (element-to-xml canonical (get-mapping krysp-version)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
@@ -81,7 +92,7 @@
                     canonical-with-statement-attachments
                     [:MaaAinesluvat :maaAineslupaAsiatieto :MaaAineslupaAsia :liitetieto]
                     attachments-canonical)
-        xml (element-to-xml canonical maa-aines_to_krysp)
+        xml (maa-aines-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
