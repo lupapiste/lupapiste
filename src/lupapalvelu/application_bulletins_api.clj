@@ -183,6 +183,7 @@
   (prn "perkele")
   (let [bulletin-fields (-> bulletin-fields
                             (dissoc :versions)
-                            (merge {:comments 1}))
+                            (merge {:comments 1
+                                    :bulletinState 1}))
         bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
     (ok :bulletin bulletin)))
