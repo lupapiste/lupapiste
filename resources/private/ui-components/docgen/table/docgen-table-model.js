@@ -12,13 +12,13 @@ LUPAPISTE.DocgenTableModel = function(params) {
 
   self.groupId = ["table", params.documentId].concat(self.path).join("-");
   self.groupLabel = params.i18npath.concat("_group_label").join(".");
-  self.groupHelp = params.schema['group-help'] && params.i18npath.concat(params.schema['group-help']).join(".");
+  self.groupHelp = params.schema["group-help"] && params.i18npath.concat(params.schema["group-help"]).join(".");
 
   self.columnHeaders = _.map(params.schema.body, function(schema) {
     return params.i18npath.concat(schema.name);
   });
 
-  self.columnHeaders.push('remove');
+  self.columnHeaders.push("remove");
 
   self.subSchemas = _.map(params.schema.body, function(schema) {
     var uicomponent = schema.uicomponent || "docgen-" + schema.type;
@@ -28,8 +28,7 @@ LUPAPISTE.DocgenTableModel = function(params) {
       schemaI18name: params.schemaI18name,
       i18npath: i18npath,
       applicationId: params.applicationId,
-      documentId: params.documentId,
+      documentId: params.documentId
     });
   });
-  
 };

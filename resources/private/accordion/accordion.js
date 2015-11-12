@@ -97,7 +97,7 @@ var accordion = (function() {
 // Collection of accordion isOpen observables.
 // See accordion-toolbar component for details.
 // Flag values: true is open and false closed.
-var AccordionState = function() {
+var AccordionState = (function() {
   "use strict";
 
   var observables = {};
@@ -122,12 +122,12 @@ var AccordionState = function() {
   function toggleAll( flag ) {
     _.each(_.values(observables), function( obs ) {
       obs( Boolean( flag ));
-    })
+    });
   }
   return {
     get: get,
     register: register,
     set: set,
     toggleAll: toggleAll
-  }
-}()
+  };
+})();

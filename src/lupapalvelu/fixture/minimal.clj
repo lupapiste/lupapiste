@@ -289,9 +289,9 @@
     :email "olli.uleaborg@ouka.fi"
     :enabled true
     :role "authority"
-    :orgAuthz {:564-R #{:authority}
-               :529-R #{:authority}
-               :564-YMP #{:authority}}
+    :orgAuthz {:564-R #{:authority :approver}
+               :529-R #{:authority :approver}
+               :564-YMP #{:authority :approver}}
     :firstName "Olli"
     :lastName "Ule\u00E5borg"
     :phone "121212"
@@ -533,6 +533,7 @@
                                             :ya-jatkoaika                                                      [[:muut :muu]]})
 
 (def- default-keys-for-organizations {:app-required-fields-filling-obligatory false
+                                      :validate-verdict-given-date true
                                       :kopiolaitos-email nil
                                       :kopiolaitos-orderer-address nil
                                       :kopiolaitos-orderer-email nil
@@ -562,6 +563,7 @@
                               :sv "Sipoon rakennusvalvonta"}
                        :scope [{:municipality "753" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "P" :inforequest-enabled true :new-application-enabled true}
+                               {:municipality "753" :permitType "YM" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YI" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YL" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "MAL" :inforequest-enabled true :new-application-enabled true}
@@ -588,10 +590,10 @@
                                                 "vvvl-vesijohdosta" [[:muut :muu]]}
                        :krysp {:R {:url local-krysp, :ftpUser "dev_sipoo", :version "2.1.6"}
                                :P {:ftpUser "dev_poik_sipoo" :version "2.1.2"}
-                               :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.2"}
-                               :YL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.2"}
-                               :MAL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.2"}
-                               :VVVL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.3"}
+                               :YI {:ftpUser "dev_ymp_sipoo" :version "2.2.1"}
+                               :YL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.2.1"}
+                               :MAL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.2.1"}
+                               :VVVL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.2.1"}
                                :KT {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "1.0.2"}
                                :MM {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "1.0.1"}}
                        :statementGivers [{:id "516560d6c2e6f603beb85147"

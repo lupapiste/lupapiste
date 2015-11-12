@@ -1,10 +1,13 @@
 (ns lupapalvelu.application-bulletins-api
-  (:require [monger.operators :refer :all]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+            [monger.operators :refer :all]
             [monger.query :as query]
+            [noir.response :as resp]
             [sade.core :refer :all]
+            [slingshot.slingshot :refer [try+]]
             [sade.strings :as ss]
             [sade.property :as p]
-            [lupapalvelu.action :refer [defquery defcommand] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
@@ -91,6 +94,48 @@
   (let [states (mongo/distinct :application-bulletins :versions.bulletinState)]
     (ok :states states)))
 
+(defn- bulletin-exists! [bulletin-id]
+  (let [bulletin (mongo/by-id :application-bulletins bulletin-id)]
+    (when-not bulletin
+      (fail! :error.invalid-bulletin-id))
+    bulletin))
+
+(defn- bulletin-version-is-latest! [bulletin bulletin-version-id]
+  (let [latest-version-id (:id (last (:versions bulletin)))]
+    (when-not (= bulletin-version-id latest-version-id)
+      (fail! :error.invalid-version-id))))
+
+(defn- comment-can-be-added! [bulletin-id bulletin-version-id comment]
+  (when (ss/blank? comment)
+    (fail! :error.empty-comment))
+  (let [bulletin (bulletin-exists! bulletin-id)]
+    (when-not (= (:bulletinState bulletin) "proclaimed")
+      (fail! :error.invalid-bulletin-state))
+    (bulletin-version-is-latest! bulletin bulletin-version-id)))
+
+;; TODO user-roles Vetuma autheticated person
+(defraw add-bulletin-comment
+  {:description "Add comment to bulletin"
+   :feature     :publish-bulletin
+   :user-roles  #{:anonymous}}
+  [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field bulletin-version-id :bulletin-version-id} :data created :created :as action}]
+  (try+
+    (comment-can-be-added! bulletin-id bulletin-version-id comment)
+    (let [comment      (bulletins/create-comment comment created)
+          stored-files (bulletins/store-files bulletin-id (:id comment) files)]
+      (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments stored-files)}})
+         (->> {:ok true}
+              (resp/json)
+              (resp/content-type "application/json")
+              (resp/status 200)))
+    (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
+      (->> {:ok false :text text}
+           (resp/json)
+           (resp/content-type "application/json")
+           (resp/status 200)))
+    (catch Throwable t
+      (error "Failed to store bulletin comment" t)
+      (resp/status 400 :error.storing-bulletin-command-failed))))
 
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
@@ -110,7 +155,9 @@
 
 (def bulletin-fields
   (merge bulletins-fields
-    {:versions._applicantIndex 1 :versions.documents 1
+    {:versions._applicantIndex 1
+     :versions.documents 1
+     :versions.id 1
      :versions.attachments 1}))
 
 (defquery bulletin
@@ -118,9 +165,13 @@
    :feature :publish-bulletin
    :user-roles #{:anonymous}}
   (if-let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
-    (let [bulletin-version (assoc (-> bulletin :versions first) :id (:id bulletin))
+    (let [latest-version   (-> bulletin :versions first)
+          bulletin-version   (assoc latest-version :versionId (:id latest-version)
+                                                   :id (:id bulletin))
           append-schema-fn (fn [{schema-info :schema-info :as doc}]
                              (assoc doc :schema (schemas/get-schema schema-info)))
-          bulletin (update-in bulletin-version [:documents] (partial map append-schema-fn))]
+          bulletin (-> bulletin-version
+                     (update-in [:documents] (partial map append-schema-fn))
+                     (assoc :stateSeq bulletins/bulletin-state-seq))]
       (ok :bulletin bulletin))
     (fail :error.bulletin.not-found)))

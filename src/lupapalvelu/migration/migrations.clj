@@ -1220,21 +1220,26 @@
   (mongo/update-by-query :applications {:state "complement-needed"} {$set {:state "complementNeeded"}}))
 
 (defn change-valid-pdfa-to-archivable [version]
-  (let [valid-pdfa? (:valid-pdfa version)]
-    (when-not (nil? valid-pdfa?)
+  {:post [%]}
+  (if (contains? version :valid-pdfa)
+    (let [valid-pdfa? (boolean (:valid-pdfa version))]
       (-> (assoc version :archivable valid-pdfa? :archivabilityError (when-not valid-pdfa? :invalid-pdfa))
-          (dissoc :valid-pdfa)))))
+          (dissoc :valid-pdfa)))
+    version))
 
-(defmigration set-general-archivability-boolean
-  {:apply-when (pos? (mongo/count :applications {"attachments.latestVersion.valid-pdfa" {$exists true}}))}
+(defn update-valid-pdfa-to-arhivable-on-attachment-versions [attachment]
+  {:post [%]}
+  (if (:latestVersion attachment)
+    (-> (assoc attachment :versions (map change-valid-pdfa-to-archivable (:versions attachment)))
+        (assoc :latestVersion (change-valid-pdfa-to-archivable (:latestVersion attachment))))
+    attachment))
+
+(defmigration set-general-archivability-boolean-v2
+  {:apply-when (pos? (mongo/count :applications {"attachments.versions.valid-pdfa" {$exists true}}))}
   (update-applications-array
     :attachments
-    (fn [attachment]
-      (if (:latestVersion attachment)
-        (-> (assoc attachment :versions (map change-valid-pdfa-to-archivable (:versions attachment)))
-            (assoc :latestVersion (change-valid-pdfa-to-archivable (:latestVersion attachment))))
-        attachment))
-    {"attachments.latestVersion.valid-pdfa" {$exists true}}))
+    update-valid-pdfa-to-arhivable-on-attachment-versions
+    {"attachments.versions.valid-pdfa" {$exists true}}))
 
 
 (defn populate-application-history [application]
@@ -1274,6 +1279,28 @@
     (let [data-for-$set (-> (update-array-metadata application)
                             (merge {:metadata (:metadata (update-document-tila-metadata application))}))]
       (mongo/update-n :applications {:_id (:id application)} {$set data-for-$set}))))
+
+(defmigration r-application-hankkeen-kuvaus-documents-to-hankkeen-kuvaus-rakennuslupa
+  {:apply-when (or (pos? (mongo/count :applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]}))
+                   (pos? (mongo/count :submitted-applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]})))}
+  (update-applications-array
+    :documents
+    (fn [{schema-info :schema-info :as doc}]
+      (if (= "hankkeen-kuvaus" (:name schema-info))
+        (assoc-in doc [:schema-info :name] "hankkeen-kuvaus-rakennuslupa")
+        doc))
+    {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]}))
+
+(defmigration validate-verdict-given-date
+  {:apply-when (pos? (mongo/count :organizations {:validate-verdict-given-date {$exists false}}))}
+  (mongo/update-n :organizations {} {$set {:validate-verdict-given-date true}} :multi true))
+
+(defmigration set-validate-verdict-given-date-in-helsinki
+  (mongo/update-n :organizations {:_id "091-R"} {$set {:validate-verdict-given-date false}}))
+
+(defmigration reset-pdf2pdf-page-counter-to-zero
+  {:apply-when (pos? (mongo/count :statistics {$and [{:type "pdfa-conversion"} {"years.2015" {$exists true}}]}))}
+  (mongo/update :statistics {:type "pdfa-conversion"} {$unset {"years.2015" ""}}))
 
 ;;
 ;; ****** NOTE! ******

@@ -1,7 +1,13 @@
-(ns lupapalvelu.xml.krysp.rakennuslupa_canonical_to_krysp_xml_test
-  (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
-            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical katselmus-canonical]]
-            [lupapalvelu.document.rakennuslupa_canonical-test :refer [application-rakennuslupa
+(ns lupapalvelu.xml.krysp.rakennuslupa-canonical-to-krysp-xml-test
+  (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [clojure.data.xml :refer :all]
+            [clojure.java.io :refer :all]
+            [sade.xml :as xml]
+            [sade.common-reader :as cr]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
+            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
+            [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-suunnittelijan-nimeaminen
                                                                       jatkolupa-application
@@ -12,17 +18,12 @@
                                                                 rakennuslupa_to_krysp_215
                                                                 rakennuslupa_to_krysp_216
                                                                 rakennuslupa_to_krysp_218
+                                                                rakennuslupa_to_krysp_220
                                                                 save-katselmus-as-krysp]]
             [lupapalvelu.xml.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.validator :refer :all :as validator]
-            [lupapalvelu.xml.emit :refer :all]
-            [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]
-            [clojure.data.xml :refer :all]
-            [clojure.java.io :refer :all]
-            [sade.xml :as xml]
-            [sade.common-reader :as cr]))
+            [lupapalvelu.xml.emit :refer :all]))
 
 (testable-privates lupapalvelu.xml.krysp.rakennuslupa-mapping rakennuslupa-element-to-xml)
 
@@ -32,6 +33,7 @@
 (fact "2.1.5: :tag is set" (has-tag rakennuslupa_to_krysp_215) => true)
 (fact "2.1.6: :tag is set" (has-tag rakennuslupa_to_krysp_216) => true)
 (fact "2.1.8: :tag is set" (has-tag rakennuslupa_to_krysp_218) => true)
+(fact "2.2.0: :tag is set" (has-tag rakennuslupa_to_krysp_220) => true)
 
 (defn- do-test [application validate-tyonjohtaja-type validate-pysyva-tunnus?]
   (let [canonical (application-to-canonical application "fi")
@@ -41,12 +43,14 @@
         xml_215 (rakennuslupa-element-to-xml canonical "2.1.5")
         xml_216 (rakennuslupa-element-to-xml canonical "2.1.6")
         xml_218 (rakennuslupa-element-to-xml canonical "2.1.8")
+        xml_220 (rakennuslupa-element-to-xml canonical "2.2.0")
         xml_212_s (indent-str xml_212)
         xml_213_s (indent-str xml_213)
         xml_214_s (indent-str xml_214)
         xml_215_s (indent-str xml_215)
         xml_216_s (indent-str xml_216)
-        xml_218_s (indent-str xml_218)]
+        xml_218_s (indent-str xml_218)
+        xml_220_s (indent-str xml_220)]
 
     (fact "2.1.2: xml exist" xml_212 => truthy)
     (fact "2.1.3: xml exist" xml_213 => truthy)
@@ -54,13 +58,13 @@
     (fact "2.1.5: xml exist" xml_215 => truthy)
     (fact "2.1.6: xml exist" xml_216 => truthy)
     (fact "2.1.8: xml exist" xml_218 => truthy)
-
-
+    (fact "2.2.0: xml exist" xml_220 => truthy)
 
     (let [lp-xml_212 (cr/strip-xml-namespaces (xml/parse xml_212_s))
           lp-xml_213 (cr/strip-xml-namespaces (xml/parse xml_213_s))
           lp-xml_216 (cr/strip-xml-namespaces (xml/parse xml_216_s))
           lp-xml_218 (cr/strip-xml-namespaces (xml/parse xml_218_s))
+          lp-xml_220 (cr/strip-xml-namespaces (xml/parse xml_220_s))
           tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
           tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
           tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])]
@@ -79,6 +83,11 @@
           (fact "In KRYSP 2.1.3, patevyysvaatimusluokka/vaadittuPatevyysluokka A is not mapped"
             (xml/get-text tyonjohtaja_213 :patevyysvaatimusluokka) => "A"
             (xml/get-text tyonjohtaja_213 :vaadittuPatevyysluokka) => "A")
+
+          (when (= :v1 validate-tyonjohtaja-type)
+
+            (let [suunnittelijat (map cr/all-of (xml/select lp-xml_220 [:osapuolettieto :Suunnittelija]))]
+              (fact "FISEpatevyyskortti" (every? (comp string? :FISEpatevyyskortti) suunnittelijat))))
 
           (when (= :v2 validate-tyonjohtaja-type)
             (fact "In KRYSP 2.1.6, :vainTamaHankeKytkin was added (Yhteiset schema was updated to 2.1.5 and tyonjohtaja along with it)"
@@ -101,15 +110,13 @@
       (xml/get-text lp-xml_215 [:osapuolitieto :Osapuoli :yritys :verkkolaskutustieto :Verkkolaskutus :verkkolaskuTunnus]) => "laskutunnus-1234"
       (xml/get-text lp-xml_215 [:osapuolitieto :Osapuoli :yritys :verkkolaskutustieto :Verkkolaskutus :valittajaTunnus]) => "BAWCFI22")
 
-
-    ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
-
     (validator/validate xml_212_s (:permitType application) "2.1.2")
     (validator/validate xml_213_s (:permitType application) "2.1.3")
     (validator/validate xml_214_s (:permitType application) "2.1.4")
     (validator/validate xml_215_s (:permitType application) "2.1.5")
     (validator/validate xml_216_s (:permitType application) "2.1.6")
     (validator/validate xml_218_s (:permitType application) "2.1.8")
+    (validator/validate xml_220_s (:permitType application) "2.2.0")
     ))
 
 

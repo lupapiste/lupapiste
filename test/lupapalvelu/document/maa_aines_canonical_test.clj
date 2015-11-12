@@ -100,7 +100,9 @@
                                     :yhteyshenkilonNimi "Pertti Yritt\u00e4j\u00e4"
                                     :osoitetieto {:Osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
                                                            :postitoimipaikannimi "kuuva",
-                                                           :postinumero "43640"}}
+                                                           :postinumero "43640"
+                                                           :valtioSuomeksi "Suomi"
+                                                           :valtioKansainvalinen "FIN"}}
                                     :puhelinnumero "060222155"
                                     :sahkopostiosoite "tew@gjr.fi"})
 
@@ -111,6 +113,7 @@
         (:teksti osoitenimi) => "Murskaajankatu 5"
         (:postinumero postiosoite) => "36570"
         (:postitoimipaikannimi postiosoite) => "Kaivanto"
+        (:valtioKansainvalinen postiosoite) => "FIN"
         (:etunimi maksaja) => "Pekka"
         (:sukunimi maksaja) => "Borga"
         (:henkilotunnus maksaja) => "210281-9988"
