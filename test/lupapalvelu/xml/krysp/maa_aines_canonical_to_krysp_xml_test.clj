@@ -16,13 +16,17 @@
 
   (let [canonical (maa-aines-canonical application "fi")
         xml_212 (maa-aines-element-to-xml canonical "2.1.2")
+        xml_221 (maa-aines-element-to-xml canonical "2.2.1")
         xml_212_s     (indent-str xml_212)
-        lp-xml_212    (cr/strip-xml-namespaces (xml/parse xml_212_s))]
+        xml_221_s     (indent-str xml_221)
+        lp-xml_212    (cr/strip-xml-namespaces (xml/parse xml_212_s))
+        lp-xml_221    (cr/strip-xml-namespaces (xml/parse xml_221_s))]
 
     ;(clojure.pprint/pprint canonical)
-    ;(println xml_212_s)
+    ;(println xml_221_s)
 
     (validator/validate xml_212_s (:permitType application) "2.1.2") ; throws exception
+    (validator/validate xml_221_s (:permitType application) "2.2.1") ; throws exception
 
     (fact "property id"
       (xml/get-text lp-xml_212 [:kiinteistotunnus])  => (:propertyId application))
@@ -34,13 +38,15 @@
       (xml/get-text lp-xml_212 [:asianKuvaus]) => "Hankkeen synopsis")
 
     (fact "hakija"
-      (let [hakija (xml/select1 lp-xml_212 [:hakija])]
-        (xml/get-text hakija [:puhelinnumero]) => "060222155"))
+      (let [hakija (xml/select1 lp-xml_221 [:hakija])]
+        (xml/get-text hakija [:puhelinnumero]) => "060222155"
+        (fact "maa" (xml/get-text hakija [:osoitetieto :Osoite :valtioSuomeksi]) => "Suomi")))
 
     (fact "maksaja"
-      (let [maksaja (xml/select1 lp-xml_212 [:maksajatieto])]
-       (xml/get-text maksaja [:puhelinnumero]) => "121212"
-       (xml/get-text maksaja [:henkilotunnus]) => "210281-9988"))
+      (let [maksaja (xml/select1 lp-xml_221 [:maksajatieto :Maksaja])]
+        (xml/get-text maksaja [:puhelinnumero]) => "121212"
+        (xml/get-text maksaja [:henkilotunnus]) => "210281-9988"
+        (fact "maa" (xml/get-text maksaja [:valtioSuomeksi]) => "Suomi")))
 
     (fact "sijainti"
       (let [sijainti (xml/select1 lp-xml_212 [:sijaintitieto :Sijainti])

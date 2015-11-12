@@ -66,12 +66,45 @@
            {:tag :kotitarveottoasiaTieto} ; To be mapped in the future?
            ]})
 
+(def maa-aines_to_krysp_221
+  (-> maa-aines_to_krysp_212
+      (assoc-in [:attr :xsi:schemaLocation]
+                (mapping-common/schemalocation :MAL "2.2.1"))
+
+      ; Support for foreign addresses
+      (update-in [:child] mapping-common/update-child-element
+                 [:maaAineslupaAsiatieto :MaaAineslupaAsia :hakemustieto :Hakemus :hakija]
+                 {:tag :hakija :child mapping-common/yhteystietotype-children_215})
+
+      ; Support for foreign addresses
+      (update-in [:child] mapping-common/update-child-element
+                 [:maaAineslupaAsiatieto :MaaAineslupaAsia :hakemustieto :Hakemus :omistaja]
+                 {:tag :omistaja :child mapping-common/henkilo-child-ns-yht-215})
+
+      ; Support for foreign addresses
+      (update-in [:child] mapping-common/update-child-element
+                 [:maaAineslupaAsiatieto :MaaAineslupaAsia :hakemustieto :Hakemus :ottamistoiminnanYhteyshenkilo]
+                 {:tag :ottamistoiminnanYhteyshenkilo :child mapping-common/henkilo-child-ns-yht-215})
+
+      ; Support for foreign addresses
+      (update-in [:child] mapping-common/update-child-element
+                 [:maaAineslupaAsiatieto :MaaAineslupaAsia :maksajatieto :Maksaja]
+                 {:tag :Maksaja :child mapping-common/maksajatype-children_215})
+
+      ; Uses LausuntoYmpType where attachments have not changed
+
+;      (update-in [:child] mapping-common/update-child-element
+;                 [:maaAineslupaAsiatieto :MaaAineslupaAsia :toiminnanSijaintitieto :ToiminnanSijainti :Osoite]
+;                 {:tag :Osoite :child mapping-common/postiosoite-children-ns-yht-215})
+
+      ; No changes to attachments
+      ))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.2" maa-aines_to_krysp_212
-    "2.2.1" maa-aines_to_krysp_212
+    "2.2.1" maa-aines_to_krysp_221
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn maa-aines-element-to-xml [canonical krysp-version]
