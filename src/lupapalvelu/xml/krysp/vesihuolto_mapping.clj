@@ -52,7 +52,19 @@
                       {:tag :asianKuvaus}]}]}]})
 
 (def vesihuolto-to-krysp_221
-  vesihuolto-to-krysp_213)
+  (-> vesihuolto-to-krysp_213
+      (assoc-in [:attr :xsi:schemaLocation]
+        (mapping-common/schemalocation :VVVL "2.2.1"))
+
+      ; Uses LausuntoYmpType where attachments have not changed
+
+      ; Support for foreign addresses
+      (update-in [:child] mapping-common/update-child-element
+                 [:vapautukset :Vapautus :vapautushakemustieto :Vapautushakemus :hakija]
+                 {:tag :hakija :child mapping-common/yhteystietotype-children_215})
+
+      ; No changes to attachments
+  ))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}

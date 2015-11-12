@@ -20,8 +20,8 @@
   (let [canonical (vapautus-canonical vapautus-vesijohdosta-ja-viemarista-hakemus "fi")
         xml_213 (element-to-xml canonical vesihuolto-to-krysp_213)
         xml_221 (element-to-xml canonical vesihuolto-to-krysp_221)
-        xml_221_s     (indent-str xml_221)
         xml_213_s     (indent-str xml_213)
+        xml_221_s     (indent-str xml_221)
         lp-xml_213    (cr/strip-xml-namespaces (xml/parse xml_213_s))
         lp-xml_221    (cr/strip-xml-namespaces (xml/parse xml_221_s))]
 
@@ -30,4 +30,9 @@
 
     (validator/validate xml_213_s (:permitType vapautus-vesijohdosta-ja-viemarista-hakemus) "2.1.3")
     (validator/validate xml_221_s (:permitType vapautus-vesijohdosta-ja-viemarista-hakemus) "2.2.1")
-    ))
+
+    (fact "Hakija"
+      (let [hakija (xml/select1 lp-xml_221 [:Vesihuoltolaki :Vapautus :Vapautushakemus :hakija])]
+        (xml/get-text hakija [:sukunimi]) => "Borga"
+        (fact "maa" (xml/get-text hakija [:osoitetieto :Osoite :valtioKansainvalinen]) => "FIN")))
+))
