@@ -180,7 +180,6 @@
   {:parameters [bulletinId]
    :feature    :publish-bulletin
    :user-roles #{:authority}}
-  (prn "perkele")
   (let [bulletin-fields (-> bulletin-fields
                             (dissoc :versions)
                             (merge {:comments 1
