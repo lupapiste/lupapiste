@@ -69,6 +69,12 @@
           tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
           tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])]
 
+      (fact "hakija and maksaja parties exist"
+        (let [osapuoli-codes (->> (xml/select lp-xml_220 [:osapuolettieto :Osapuoli])
+                               (map (comp :kuntaRooliKoodi cr/all-of)))]
+          (->> osapuoli-codes (filter #(= % "Rakennusvalvonta-asian hakija")) count) => pos?
+          (->> osapuoli-codes (filter #(= % "Rakennusvalvonta-asian laskun maksaja")) count) => pos?))
+
       (fact "saapumisPvm"
         (let [expected (sade.util/to-xml-date (:submitted application))]
           (xml/get-text lp-xml_212 [:luvanTunnisteTiedot :LupaTunnus :saapumisPvm]) => expected
