@@ -140,16 +140,31 @@
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
 
+(defn- create-bulletin [application created]
+  (let [app-snapshot (bulletins/create-bulletin-snapshot application)
+        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
+        search-updates (get-search-fields search-fields app-snapshot)]
+    (bulletins/snapshot-updates app-snapshot search-updates created)))
+
 (defcommand publish-bulletin
   {:parameters [id]
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     (states/all-application-states-but :draft :open :submitted)}
   [{:keys [application created] :as command}]
-  (let [app-snapshot (bulletins/create-bulletin-snapshot application)
-        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
-        search-updates (get-search-fields search-fields app-snapshot)
-        updates (bulletins/snapshot-updates app-snapshot search-updates created)]
+  (mongo/update-by-id :application-bulletins id (create-bulletin application created) :upsert true)
+  (ok))
+
+(defcommand proclaim-bulletin
+  {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     #{:sent :complementNeeded}}
+  [{:keys [application created] :as command}]
+  (let [updates (create-bulletin application created)
+        updates (merge {:proclamationEndsAt proclamationEndsAt
+                        :proclamationStartsAt proclamationStartsAt
+                        :proclamationText proclamationText})]
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
