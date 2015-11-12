@@ -60,6 +60,8 @@
                                       :julkisivumateriaali (:julkisivu rakenne))
         lammitystapa (:lammitystapa lammitys)
         huoneistot {:huoneisto (get-huoneisto-data huoneistot)}
+        vaestonsuoja-value (ss/trim (get-in toimenpide [:varusteet :vaestonsuoja]))
+        vaestonsuoja (when (ss/numeric? vaestonsuoja-value) (util/->int vaestonsuoja-value))
         rakennuksen-tiedot-basic-info {:kayttotarkoitus (:kayttotarkoitus kaytto)
                                        :rakentamistapa (:rakentamistapa rakenne)
                                        :verkostoliittymat {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin))
@@ -80,7 +82,7 @@
                                                    :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
                                                    :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
                                                    :saunoja (-> toimenpide :varusteet :saunoja)
-                                                   :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}
+                                                   :vaestonsuoja vaestonsuoja}
                                        :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))
                                        :rakennustunnus (get-rakennustunnus toimenpide application)}
         rakennuksen-tiedot (merge
