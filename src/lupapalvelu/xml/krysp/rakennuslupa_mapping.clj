@@ -132,27 +132,49 @@
                  #(update-in % [:child] mapping-common/merge-into-coll-after-tag :kerrosala [{:tag :rakennusoikeudellinenKerrosala}]))))
 
 
+(def- katselmus-body [{:tag :tilanneKoodi}
+                      {:tag :pitoPvm}
+                      {:tag :osittainen}
+                      {:tag :pitaja}
+                      {:tag :katselmuksenLaji}
+                      {:tag :vaadittuLupaehtonaKytkin}
+                      {:tag :huomautukset
+                       :child [{:tag :huomautus
+                                :child [{:tag :kuvaus}
+                                        {:tag :maaraAika}
+                                        {:tag :toteamisHetki}
+                                        {:tag :toteaja}]}]}
+                      {:tag :katselmuspoytakirja :child mapping-common/liite-children_211}
+                      {:tag :tarkastuksenTaiKatselmuksenNimi}
+                      {:tag :lasnaolijat}
+                      {:tag :poikkeamat}])
 
 (def- katselmustieto
   {:tag :katselmustieto
    :child [{:tag :Katselmus
-            :child [{:tag :rakennustunnus :child rakennustunnus}
-                    {:tag :tilanneKoodi}
-                    {:tag :pitoPvm}
-                    {:tag :osittainen}
-                    {:tag :pitaja}
-                    {:tag :katselmuksenLaji}
-                    {:tag :vaadittuLupaehtonaKytkin}
-                    {:tag :huomautukset
-                     :child [{:tag :huomautus
-                              :child [{:tag :kuvaus}
-                                      {:tag :maaraAika}
-                                      {:tag :toteamisHetki}
-                                      {:tag :toteaja}]}]}
-                    {:tag :katselmuspoytakirja :child mapping-common/liite-children_211}
-                    {:tag :tarkastuksenTaiKatselmuksenNimi}
-                    {:tag :lasnaolijat}
-                    {:tag :poikkeamat}]}]})
+            :child (concat
+                     [{:tag :rakennustunnus :child rakennustunnus}]
+                     katselmus-body)}]})
+
+(def- katselmustieto_213
+  {:tag :katselmustieto
+   :child [{:tag :Katselmus
+            :child (concat
+                     [{:tag :katselmuksenRakennustieto :child [{:tag :KatselmuksenRakennus :child rakennustunnus_213}]}
+                      {:tag :muuTunnustieto :child [{:tag :MuuTunnus :child [{:tag :tunnus :ns "yht"}
+                                                                             {:tag :sovellus :ns "yht"}]}]}]
+                     katselmus-body)}]})
+
+(def- katselmustieto_215
+  (update-in katselmustieto_213 [:child] mapping-common/update-child-element
+    [:Katselmus :katselmuspoytakirja]
+    {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
+
+(def- katselmustieto_220
+  (update-in katselmustieto_215 [:child] mapping-common/update-child-element
+    [:Katselmus :katselmuspoytakirja]
+    {:tag :liitetieto :child [{:tag :liite :child mapping-common/liite-children_216}]}))
+
 
 (def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
@@ -216,42 +238,12 @@
                                        :child [{:tag :vahainenPoikkeaminen}
                                                 {:tag :rakennusvalvontaasianKuvaus}]}]}]}]}]})
 
-(def- katselmus_213
-  {:tag :katselmustieto
-   :child [{:tag :Katselmus
-            :child [{:tag :katselmuksenRakennustieto :child [{:tag :KatselmuksenRakennus :child rakennustunnus_213}]}
-                    {:tag :muuTunnustieto :child [{:tag :MuuTunnus :child [{:tag :tunnus :ns "yht"} {:tag :sovellus :ns "yht"}]}]}
-                    {:tag :tilanneKoodi}
-                    {:tag :pitoPvm}
-                    {:tag :osittainen}
-                    {:tag :pitaja}
-                    {:tag :katselmuksenLaji}
-                    {:tag :vaadittuLupaehtonaKytkin}
-                    {:tag :huomautukset :child [{:tag :huomautus :child [{:tag :kuvaus}
-                                                                         {:tag :maaraAika}
-                                                                         {:tag :toteamisHetki}
-                                                                         {:tag :toteaja}]}]}
-                    {:tag :katselmuspoytakirja :child mapping-common/liite-children_211}
-                    {:tag :tarkastuksenTaiKatselmuksenNimi}
-                    {:tag :lasnaolijat}
-                    {:tag :poikkeamat}]}]})
-
-(def- katselmus_215
-  (update-in katselmus_213 [:child] mapping-common/update-child-element
-      [:Katselmus :katselmuspoytakirja]
-      {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
-
-(def- katselmus_220
-  (update-in katselmus_215 [:child] mapping-common/update-child-element
-             [:Katselmus :katselmuspoytakirja]
-             {:tag :liitetieto :child [{:tag :liite :child mapping-common/liite-children_216}]}))
-
 (def rakennuslupa_to_krysp_213
   (-> rakennuslupa_to_krysp_212
     (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :R "2.1.3"))
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
-      katselmus_213)
+      katselmustieto_213)
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
       {:tag :osapuolettieto :child [mapping-common/osapuolet_211]})
@@ -285,7 +277,7 @@
 
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
-      katselmus_215)
+      katselmustieto_215)
 
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
@@ -326,7 +318,7 @@
                  #(update-in % [:child] concat [{:tag :kayttotarkoitus}]))
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
-                 katselmus_220)))
+                 katselmustieto_220)))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
