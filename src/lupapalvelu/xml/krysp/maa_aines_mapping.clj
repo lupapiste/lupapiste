@@ -71,31 +71,36 @@
       (assoc-in [:attr :xsi:schemaLocation]
                 (mapping-common/schemalocation :MAL "2.2.1"))
 
+      ; Uses LausuntoYmpType where attachments have not changed
+
       ; Support for foreign addresses
       (update-in [:child] mapping-common/update-child-element
                  [:maaAineslupaAsiatieto :MaaAineslupaAsia :hakemustieto :Hakemus :hakija]
                  {:tag :hakija :child mapping-common/yhteystietotype-children_215})
 
       ; Support for foreign addresses
+      ; (omistaja element not in the canonical model at the time of writing)
       (update-in [:child] mapping-common/update-child-element
                  [:maaAineslupaAsiatieto :MaaAineslupaAsia :hakemustieto :Hakemus :omistaja]
                  {:tag :omistaja :child mapping-common/henkilo-child-ns-yht-215})
 
       ; Support for foreign addresses
+      ; (ottamistoiminnanYhteyshenkilo element not in the canonical model at the time of writing)
       (update-in [:child] mapping-common/update-child-element
                  [:maaAineslupaAsiatieto :MaaAineslupaAsia :hakemustieto :Hakemus :ottamistoiminnanYhteyshenkilo]
                  {:tag :ottamistoiminnanYhteyshenkilo :child mapping-common/henkilo-child-ns-yht-215})
 
       ; Support for foreign addresses
+      ; (ottamissuunnitelmanLaatija element not in the canonical model at the time of writing)
+      (update-in [:child] mapping-common/update-child-element
+                 [:maaAineslupaAsiatieto :MaaAineslupaAsia :hakemustieto :Hakemus :ottamissuunnitelmatieto :Ottamissuunnitelma :ottamissuunnitelmanLaatija]
+                 {:tag :ottamissuunnitelmanLaatija
+                  :child (conj mapping-common/henkilo-child-ns-yht-215 {:tag :ammatti} {:tag :koulutus})})
+
+      ; Support for foreign addresses
       (update-in [:child] mapping-common/update-child-element
                  [:maaAineslupaAsiatieto :MaaAineslupaAsia :maksajatieto :Maksaja]
                  {:tag :Maksaja :child mapping-common/maksajatype-children_215})
-
-      ; Uses LausuntoYmpType where attachments have not changed
-
-;      (update-in [:child] mapping-common/update-child-element
-;                 [:maaAineslupaAsiatieto :MaaAineslupaAsia :toiminnanSijaintitieto :ToiminnanSijainti :Osoite]
-;                 {:tag :Osoite :child mapping-common/postiosoite-children-ns-yht-215})
 
       ; No changes to attachments
       ))
