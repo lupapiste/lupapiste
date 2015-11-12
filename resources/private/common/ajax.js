@@ -196,6 +196,10 @@ var ajax = (function($) {
     return new Call(url, "POST").raw();
   }
 
+  function deleteReq(url) {
+    return new Call(url, "DELETE").raw();
+  }
+
   function postJson(url, data) {
     return new Call(url, "POST").raw().json(data);
   }
@@ -220,6 +224,7 @@ var ajax = (function($) {
     post:      post,
     postJson:  postJson,
     get:       get,
+    deleteReq: deleteReq,
     command:   command,
     query:     query,
     datatables: datatables,
