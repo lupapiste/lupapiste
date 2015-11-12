@@ -1,4 +1,4 @@
-(ns lupapalvelu.xml.krysp.maa-aines-canonical-to-xml_212-test
+(ns lupapalvelu.xml.krysp.maa-aines-canonical-to-krysp-xml-test
   (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
             [lupapalvelu.document.maa-aines-canonical :refer [maa-aines-canonical]]
             [lupapalvelu.document.maa-aines-canonical-test :refer [application]]
