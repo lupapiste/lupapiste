@@ -34,33 +34,36 @@
   (ss/join ", " (map (fn [[op c]] (str (if (> c 1) (str c " \u00D7 ")) op))
                      (frequencies (map :name (remove nil? (conj (seq secondaryOperations) primaryOperation)))))))
 
+(def td-style {:style "border: 1.2px solid black; " :align "left" })
+(def p-style {:style "margin-left: 10px;"})
+
 (defn- render [title app data]
   (hiccup/html
     [:html {:lang "fi"}
      [:head [:title "Lupapiste.fi"]]
      [:body
+      [:div {:style "margin: 40px;"}]
       [:img {:src (.getAbsolutePath (File. (.toURI (io/resource "public/img/logo-v2-flat.png"))))}]
       [:h1 title]
       [:h2 (:title app)]
       [:hr]
-      [:div {:style "width: 400px;"}
-       [:table {:width "100%", :border "1"}
-        [:tbody
-         [:tr [:td [:h4 "Asiointikunta"] (:municipality app)] [:td [:h4 "Hakemuksen vaihe"] (:state app)]]
-         [:tr [:td [:h4 "Kiinteist&ouml;tunnus"] (:propertyId app)] [:td [:h4 "Hakemus j&aumltetty"] (:created app)]]
-         [:tr [:td [:h4 "Asiointitunnus"] (:id app)] [:td [:h4 "K&auml;sitteluj&auml;"] (str (get-in app [:authority :lastName]) (get-in app [:authority :firstName]))]]
-         [:tr [:td [:h4 "Hankkeen osoite"] (:address app)] [:td [:h4 "Hakija"] (clojure.string/join ", " (:_applicantIndex app))]]
-         [:tr [:td {:colspan "2"} [:h4 "Toimenpiteet"] (get-operations app)]]]]]
-      [:div {:style "width: 400px;"}
-       [:table {:width "100%", :border "1"}
-        data]]]]))
+      [:table {:width "100%"}
+       [:tbody
+        [:tr [:td td-style [:h4 "Asiointikunta"] [:p p-style (:municipality app)]] [:td td-style [:h4 "Hakemuksen vaihe"] [:p p-style (:state app)]]]
+        [:tr [:td td-style [:h4 "Kiinteist&ouml;tunnus"] [:p p-style (:propertyId app)]] [:td td-style [:h4 "Hakemus j&aumltetty"] [:p p-style (:created app)]]]
+        [:tr [:td td-style [:h4 "Asiointitunnus"] [:p p-style (:id app)]] [:td td-style [:h4 "K&auml;sitteluj&auml;"] [:p p-style (str (get-in app [:authority :lastName]) (get-in app [:authority :firstName]))]]]
+        [:tr [:td td-style [:h4 "Hankkeen osoite"] [:p p-style (:address app)]] [:td td-style [:h4 "Hakija"] [:p p-style (clojure.string/join ", " (:_applicantIndex app))]]]
+        [:tr [:td (assoc td-style :colspan "2") [:h4 "Toimenpiteet"] [:p p-style (get-operations app)]]]]]]
+     [:br]
+     [:table {:width "100%"}
+      data]]))
 
 (defn- render-statement [stm]
   [:tbody
-   [:tr [:th {:colspan "2" :align "left" :style "font-size: 2em; background-color: lightgrey; padding: 1em;"} [:h4 {:style "color: #000000;"} "Lausunto"]]]
-   [:tr [:td [:h4 "Lausunnon pyyntop&auml;iv&auml;"] (:requested stm)] [:td [:h4 "Lausunnon antaja"] (get-in stm [:person :name])]]
-   [:tr [:td [:h4 "Lausunnon antop&auml;iv&auml;"] (:given stm)] [:td [:h4 "Puoltotieto"] (:status stm)]]
-   [:tr [:td {:colspan "2"} [:h4 "Lausuntoteksti"] (:text stm)]]])
+   [:tr [:th {:colspan "2" :style "font-size: 2em; background-color: lightgrey; padding: 1em; border: 1.2px solid black;"} [:h4 {:style "color: #000000;"} "Lausunto"]]]
+   [:tr [:td td-style [:h4 "Lausunnon pyyntop&auml;iv&auml;"] [:p p-style (:requested stm)]] [:td td-style [:h4 "Lausunnon antaja"] [:p p-style (get-in stm [:person :name])]]]
+   [:tr [:td td-style [:h4 "Lausunnon antop&auml;iv&auml;"] [:p p-style (:given stm)]] [:td td-style [:h4 "Puoltotieto"] [:p p-style (:status stm)]]]
+   [:tr [:td (assoc td-style :colspan "2") [:h4 "Lausuntoteksti"] [:p p-style (:text stm)]]]])
 
 (defn unoconv-render-pdf [src-file dst-file]
   "Converts any statement readable by LibreOffice to PDF/A1A using unoconv command
