@@ -90,6 +90,30 @@
        "  </wfs:Query>
         </wfs:GetFeature>"))
 
+(defn trimble-kaavamaaraykset-point-to-bbox [x y]
+(str "" (apply str x) "," (apply str y) " " (apply str (str (+ (util/->double (str x)) 0.01))) "," (apply str (str (+ (util/->double y) 0.01))) ) )
+
+
+; tm35fin to trimble wfs coordifate system using params from properties file
+
+(defn trimble-kaavamaaraykset-muunnax [x y municipality]
+(let [k (keyword municipality)]
+(let [[a b c d e] (s/split (env/value :trimble-kaavamaaraykset k :muunnosparams :x) #",")]
+(format "%s" (+ (util/->double a) (* (util/->double b) (- (util/->double x) (util/->double c))) (* (util/->double d) (- (util/->double y) (util/->double e)))))
+ )))
+
+(defn trimble-kaavamaaraykset-muunnay [x y municipality]
+(let [k (keyword municipality)]
+(let [[a b c d e] (s/split (env/value :trimble-kaavamaaraykset k :muunnosparams :y) #",")]
+(format "%s" (+ (util/->double a) (* (util/->double b) (- (util/->double y) (util/->double c))) (* (util/->double d) (- (util/->double x) (util/->double e)))))
+ )))
+
+;;
+
+(defn trimble-kaavamaaraykset-request [x y municipality]
+  (let [bbox [(trimble-kaavamaaraykset-point-to-bbox (trimble-kaavamaaraykset-muunnax x y municipality) (trimble-kaavamaaraykset-muunnay x y municipality))]]
+  (str "<?xml version='1.0' encoding='utf-8'?><GetFeature xmlns='http://www.opengis.net/wfs' xmlns:akaava='http://www.paikkatietopalvelu.fi/gml/asemakaava' xmlns:ogc='http://www.opengis.net/ogc' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:gml='http://www.opengis.net/gml' service='WFS' version='1.0.0' outputFormat='GML2' maxFeatures='1' handle='' ><Query typeName='akaava:Kaava' srsName='EPSG:3877' ><ogc:Filter><ogc:BBOX><ogc:PropertyName>voimassaolosijainti</ogc:PropertyName><gml:Box srsName='EPSG:3877'><gml:coordinates>" (apply str bbox) "</gml:coordinates></gml:Box></ogc:BBOX></ogc:Filter></Query></GetFeature>" )))
+		
 (defn ogc-sort-by
   ([property-names]
     (ogc-sort-by property-names "desc"))
@@ -268,6 +292,40 @@
       body)))
 
 ;;
+;;
+;;
+
+(defn- exec-trimble-kaavamaaraykset-post [method url user passwd q picurltemplate]
+  (let [[http-fn param-key] (method http-method)
+        timeout (env/value :http-client :conn-timeout)
+        request {:throw-exceptions false
+                 :basic-auth [user passwd]
+                 param-key q}
+        task (future* (exec-http http-fn url request))
+        [status data] (deref task timeout [:timeout])]
+    (condp = status
+      :timeout (do (errorf "wfs timeout: url=%s" url) nil)
+      :error   (do (errorf "wfs status %s: url=%s" data url) nil)
+      :failure (do (errorf data "wfs failure: url=%s" url) nil)
+      :ok      (let [features (-> data
+                                (->features sxml/startparse-sax-no-doctype "UTF-8"))]
+				 (let [muukaavatunnus (first(xml-> features :gml:featureMember :akaava:Kaava :akaava:muuKaavatunnus text))]
+				 (for [maarays (xml-> features :gml:featureMember :akaava:Kaava :akaava:yhteisetkaavamaaraykset :akaava:Kaavamaarays)] 
+				 { 
+				 :pic (format picurltemplate muukaavatunnus (first(xml-> maarays :akaava:tunnus text)))
+				 :desc (first(xml-> maarays :akaava:maaraysteksti_primaari text))
+				 }
+				 ))))))
+
+;;
+
+(defn trimble-kaavamaaraykset-post [municipality q]
+(let [k (keyword municipality)]
+(let [url (env/value :trimble-kaavamaaraykset k :url)
+        picurltemplate (env/value :trimble-kaavamaaraykset k :picurltemplate) user (env/value :trimble-kaavamaaraykset k :user) passwd (env/value :trimble-kaavamaaraykset k :passwd)]	 
+  (exec-trimble-kaavamaaraykset-post :post url user passwd q picurltemplate))))
+  
+;;
 ;; Public queries:
 ;;
 
@@ -388,6 +446,7 @@
   (when gfi
     (xml-> (->features gfi startparse-sax-non-validating) :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi")))))
 
+	
 (defn feature-to-feature-info-sito  [feature]
   (when feature
     {:id (first (xml-> feature :lupapiste:TUNNUS text))
@@ -450,8 +509,13 @@
           features (-> ktj-xml reader/strip-xml-namespaces sxml/xml->edn)]
       (get-in features [:FeatureCollection :featureMember :RekisteriyksikonTietoja]))))
 
+	
 
-;;
+(defn trimble-kaavamaaraykset-by-point [x y municipality]
+(trimble-kaavamaaraykset-post municipality (trimble-kaavamaaraykset-request x y municipality) ))
+
+
+
 ;; Raster images:
 ;;
 (defn raster-images [request service]

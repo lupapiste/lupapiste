@@ -115,6 +115,13 @@
       (resp/json (map wfs/general-plan-feature-to-feature-info (wfs/gfi-to-general-plan-features response)))
       (resp/status 503 "Service temporarily unavailable"))))
 
+(defn trimble-kaavamaaraykset-by-point-proxy [request]
+  (let [{x :x y :y municipality :municipality} (:params request)
+        response (wfs/trimble-kaavamaaraykset-by-point x y municipality)]
+    (if response
+      (resp/json response)
+      (resp/status 503 "Service temporarily unavailable"))))
+
 ;
 ; Utils:
 ;
@@ -151,5 +158,6 @@
                "wmscap" wms-capabilities-proxy
                "plan-urls-by-point" plan-urls-by-point-proxy
                "general-plan-urls-by-point" general-plan-urls-by-point-proxy
-               "plandocument" (cache (* 3 60 60 24) (secure wfs/raster-images "plandocument"))})
+               "plandocument" (cache (* 3 60 60 24) (secure wfs/raster-images "plandocument"))
+			   "trimble-kaavamaaraykset-by-point" trimble-kaavamaaraykset-by-point-proxy})
 
