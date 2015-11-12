@@ -592,7 +592,7 @@
                                :P {:ftpUser "dev_poik_sipoo" :version "2.1.2"}
                                :YI {:ftpUser "dev_ymp_sipoo" :version "2.2.1"}
                                :YL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.2.1"}
-                               :MAL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.2"}
+                               :MAL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.2.1"}
                                :VVVL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.3"}
                                :KT {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "1.0.2"}
                                :MM {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "1.0.1"}}
