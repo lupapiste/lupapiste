@@ -40,8 +40,8 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + self.bulletinId;
   self.vetumaParams = {success: returnUrl,
-                       cancel:  returnUrl,
-                       error:   returnUrl,
+                       cancel:  returnUrl + "/cancel",
+                       error:   returnUrl + "/error",
                        y:       returnUrl,
                        vtj:     returnUrl,
                        id:      "vetuma-init"};
