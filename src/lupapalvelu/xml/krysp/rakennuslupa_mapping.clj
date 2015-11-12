@@ -343,6 +343,9 @@
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
                  katselmus_220)
       (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
+                 {:tag :lausuntotieto :child [mapping-common/lausunto_216]})
+      (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto :Liite]
                  {:tag :Liite :child mapping-common/liite-children_216})))
 

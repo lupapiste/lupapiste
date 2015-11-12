@@ -726,8 +726,9 @@
         file-id (get-in attachment [:latestVersion :fileId])
         attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
         link (str begin-of-link attachment-file-name)
-        meta (get-attachment-meta attachment application)]
-    {:Liite (get-Liite title link attachment type file-id attachment-file-name meta)}))
+        meta (get-attachment-meta attachment application)
+        building-ids (get-attachment-building-ids attachment (tools/unwrapped application))]
+    {:Liite (get-Liite title link attachment type file-id attachment-file-name meta building-ids)}))
 
 (defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
   (let [statement-attachments-by-id (group-by
