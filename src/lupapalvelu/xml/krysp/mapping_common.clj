@@ -27,9 +27,11 @@
                 "2.2.0" "2.1.5"
                 "2.2.1" "2.1.6"})
 
-(def- ymp-yht {"2.1.2" "2.1.3"})
+(def- ymp-yht {"2.1.2" "2.1.3"
+               "2.2.1" "2.1.6"})
 
-(def- vvvl-yht {"2.1.3" "2.1.3"})
+(def- vvvl-yht {"2.1.3" "2.1.3"
+                "2.2.1" "2.1.6"})
 
 (def- kt-yht {"0.9"   "2.1.3"
               "0.9.1" "2.1.4"
@@ -103,9 +105,9 @@
 
 (defn in-yhteiset-ns [coll] (mapv (fn [m] (assoc m :ns "yht")) coll))
 
-(defn merge-into-coll-after-tag 
+(defn merge-into-coll-after-tag
   "Merges coll-to-merge in the collection just after the element tagged with tag"
-  [coll tag coll-to-merge] 
+  [coll tag coll-to-merge]
   (mapcat (fn [{t :tag :as d}] (if (= t tag) (cons d coll-to-merge) [d])) coll))
 
 (def tunnus-children [{:tag :valtakunnallinenNumero}
@@ -310,20 +312,33 @@
 (def yritys_215 {:tag :yritys :ns "yht" :child yritys-child_215})
 
 (def- osapuoli-body_211 {:tag :Osapuoli
-                        :child [{:tag :kuntaRooliKoodi}
-                                {:tag :VRKrooliKoodi}
-                                henkilo
-                                yritys_211
-                                {:tag :turvakieltoKytkin}]})
+                         :child [{:tag :kuntaRooliKoodi}
+                                 {:tag :VRKrooliKoodi}
+                                 henkilo
+                                 yritys_211
+                                 {:tag :turvakieltoKytkin}]})
 
 (def- osapuoli-body_213 (update-in osapuoli-body_211 [:child] update-child-element [:yritys] yritys_213))
 
 (def- osapuoli-body_215 (-> osapuoli-body_213
-    (update-in [:child] update-child-element [:henkilo] henkilo_215)
-    (update-in [:child] update-child-element [:yritys] yritys_215)))
+                          (update-in [:child] update-child-element [:henkilo] henkilo_215)
+                          (update-in [:child] update-child-element [:yritys] yritys_215)))
 
 (def osapuoli-body_216
   (update-in osapuoli-body_215 [:child] concat [{:tag :suoramarkkinointikieltoKytkin}]))
+
+(def osapuolitieto_210
+  {:tag :osapuolitieto :child [osapuoli-body_211]})
+
+(def osapuolitieto_213
+  {:tag :osapuolitieto :child [osapuoli-body_213]})
+
+(def osapuolitieto_215
+  {:tag :osapuolitieto :child [osapuoli-body_215]})
+
+(def osapuolitieto_216
+  {:tag :osapuolitieto :child [osapuoli-body_216]})
+
 
 (def- naapuri {:tag :naapuritieto
                :child [{:tag :Naapuri
@@ -419,48 +434,59 @@
 (def tyonjohtajatieto_215
   {:tag :tyonjohtajatieto :child [tyonjohtaja_215]})
 
+
+(def- suunnittelija_210
+  {:tag :Suunnittelija
+   :child [{:tag :suunnittelijaRoolikoodi}
+           {:tag :VRKrooliKoodi}
+           henkilo
+           yritys_211
+           {:tag :patevyysvaatimusluokka}
+           {:tag :koulutus}]})
+
+(def- suunnittelija_211
+  (update-in suunnittelija_210 [:child] concat [{:tag :valmistumisvuosi}
+                                                {:tag :kokemusvuodet}]))
+
+(def- suunnittelija_213
+  (update-in suunnittelija_211 [:child] update-child-element [:yritys] yritys_213))
+
+(def- suunnittelija_215
+  (-> suunnittelija_213
+    (update-in [:child] update-child-element [:yritys] yritys_215)
+    (update-in [:child] update-child-element [:henkilo] henkilo_215)))
+
+(def- suunnittelija_216
+  (update-in suunnittelija_215 [:child] concat [{:tag :FISEpatevyyskortti}
+                                                {:tag :FISEkelpoisuus}]))
+
+(def suunnittelijatieto_210
+  {:tag :suunnittelijatieto :child [suunnittelija_210]})
+
+(def suunnittelijatieto_211
+  {:tag :suunnittelijatieto :child [suunnittelija_211]})
+
+(def suunnittelijatieto_213
+  {:tag :suunnittelijatieto :child [suunnittelija_213]})
+
+(def suunnittelijatieto_215
+  {:tag :suunnittelijatieto :child [suunnittelija_215]})
+
+(def suunnittelijatieto_216
+  {:tag :suunnittelijatieto :child [suunnittelija_216]})
+
+
 (def osapuolet_210
   {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto
-            :child [osapuoli-body_211]}
-           {:tag :suunnittelijatieto
-            :child [{:tag :Suunnittelija
-                     :child [{:tag :suunnittelijaRoolikoodi}
-                             {:tag :VRKrooliKoodi}
-                             henkilo
-                             yritys_211
-                             {:tag :patevyysvaatimusluokka}
-                             {:tag :koulutus}
-                             ]}]}
+   :child [osapuolitieto_210
+           suunnittelijatieto_210
            tyonjohtajatieto_210
            naapuri]})
 
-(def suunnittelijatieto_211
-  {:tag :suunnittelijatieto
-   :child [{:tag :Suunnittelija
-            :child [{:tag :suunnittelijaRoolikoodi}
-                    {:tag :VRKrooliKoodi}
-                    henkilo
-                    yritys_211
-                    {:tag :patevyysvaatimusluokka}
-                    {:tag :koulutus}
-                    {:tag :valmistumisvuosi}
-                    {:tag :kokemusvuodet}]}]})
-
-(def suunnittelijatieto_213
-  (update-in suunnittelijatieto_211 [:child] update-child-element [:Suunnittelija :yritys] yritys_213))
-
-(def suunnittelijatieto_215
-  (-> suunnittelijatieto_213
-    (update-in [:child] update-child-element [:Suunnittelija :yritys] yritys_215)
-    (update-in [:child] update-child-element [:Suunnittelija :henkilo] henkilo_215)))
-
 (def osapuolet_211
-  {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto :child [osapuoli-body_211]}
-           suunnittelijatieto_211
-           tyonjohtajatieto_211
-           naapuri]})
+  (-> osapuolet_210
+    (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_211)
+    (update-in [:child] update-child-element [:tyonjohtajatieto] tyonjohtajatieto_211)))
 
 (def osapuolet_212
   (-> osapuolet_211
@@ -468,19 +494,20 @@
 
 (def osapuolet_213
   (-> osapuolet_212
-    (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_213)
+    (update-in [:child] update-child-element [:osapuolitieto] osapuolitieto_213)
     (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_213)
     (update-in [:child] update-child-element [:tyonjohtajatieto] tyonjohtajatieto_213)))
 
 (def osapuolet_215
   (-> osapuolet_213
-    (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_215)
+    (update-in [:child] update-child-element [:osapuolitieto] osapuolitieto_215)
     (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_215)
     (update-in [:child] update-child-element [:tyonjohtajatieto] tyonjohtajatieto_215)))
 
 (def osapuolet_216
   (-> osapuolet_215
-    (update-in [:child] update-child-element [:osapuolitieto] osapuoli-body_216)
+    (update-in [:child] update-child-element [:osapuolitieto] osapuolitieto_216)
+    (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_216)
     (update-in [:child] update-child-element [:naapuritieto] naapuri-216)))
 
 
@@ -575,6 +602,11 @@
      {:tag :sahkopostiosoite}
      {:tag :suoramarkkinointikielto}
      {:tag :verkkolaskutustieto :child [verkkolaskutus_213]}]))
+
+(def yhteystietotype-children_215
+  (update-child-element yhteystietotype-children_213
+    [:osoitetieto :Osoite]
+    {:tag :Osoite :child postiosoite-children-ns-yht-215}))
 
 (def maksajatype-children_213
   (conj yhteystietotype-children_213 {:tag :laskuviite :ns "yht"}))

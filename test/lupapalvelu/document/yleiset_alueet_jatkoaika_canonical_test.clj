@@ -178,7 +178,10 @@
       (:henkilotunnus maksaja) => (:hetu (tools/unwrapped henkilotiedot))
       (:sahkopostiosoite maksaja) => (:email (tools/unwrapped yhteystiedot))
       (:laskuviite maksaja) => (tools/unwrapped _laskuviite)
-      (get-in maksaja [:osoitetieto :Osoite]) => {:osoitenimi {:teksti "Paapankuja 12"}, :postinumero "33800", :postitoimipaikannimi "Piippola"})
+      (get-in maksaja [:osoitetieto :Osoite]) => (contains {:osoitenimi {:teksti "Paapankuja 12"}, :postinumero "33800", :postitoimipaikannimi "Piippola"}))
+
+    (fact "Country (2.2.1)"
+      (get-in maksaja [:osoitetieto :Osoite :valtioSuomeksi]) => "Suomi")
 
 ;    ;; Osapuoli: Hakija
 ;    (fact "hakija-vastuuhenkilo-rooliKoodi" (:rooliKoodi hakija-Vastuuhenkilo) => rooliKoodi-hankkeen-vastuuhenkilo)

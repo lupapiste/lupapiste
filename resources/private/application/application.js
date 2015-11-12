@@ -131,7 +131,8 @@
       applicationModel._js = app;
 
       // Update observables
-      ko.mapping.fromJS(app, {}, applicationModel);
+      var mappingOptions = {ignore: ["documents"]};
+      ko.mapping.fromJS(app, mappingOptions, applicationModel);
 
       // Invite
       inviteModel.setApplicationId(app.id);

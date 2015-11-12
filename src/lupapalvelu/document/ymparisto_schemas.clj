@@ -401,7 +401,7 @@
    {:info {:name "yl-hankkeen-kuvaus"
            :order 1}
     :body [kuvaus
-           {:name "peruste" :type :text :max-len 4000 :required false :layout :full-width}]}
+           {:name "peruste" :type :text :max-len 4000 :required true :layout :full-width}]}
    {:info {:name "maa-aineslupa-kuvaus"
            :order 1}
     :body [kuvaus]}
