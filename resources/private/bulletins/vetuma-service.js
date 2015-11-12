@@ -8,11 +8,16 @@ LUPAPISTE.VetumaService = function() {
     lastName: undefined
   });
 
-  hub.subscribe("vetumaService::authenticateUser", function() {
+  hub.subscribe("vetumaService::authenticateUser", function(params) {
     vetuma.getUser(function(resp) { // onFound
       ko.mapping.fromJS(_.pick(resp, ["firstName", "lastName"]), self.userInfo);
       self.authenticated(true);
     }, function() { // onNotFound
+      if(params.errorType) {
+        var errorMsgLockey = ["bulletin", params.errorType].join(".");
+        hub.send("indicator", { message: errorMsgLockey,
+                                style: "negative" });
+      }
       self.authenticated(false);
     });  
   });
