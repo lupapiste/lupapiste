@@ -12,9 +12,9 @@
       [lupapalvelu.xml.validator :refer [validate]]
       [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [get-rakennuslupa-mapping]]
       [lupapalvelu.xml.krysp.poikkeamis-mapping :refer [poikkeamis_to_krysp_212]]
-      [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :refer [ilmoitus_to_krysp]]
-      [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa_to_krysp]]
-      [lupapalvelu.xml.krysp.maa-aines-mapping :refer [maa-aines_to_krysp]]
+      [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :refer [ilmoitus_to_krysp_221]]
+      [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa_to_krysp_221]]
+      [lupapalvelu.xml.krysp.maa-aines-mapping :refer [maa-aines_to_krysp_212]]
       [lupapalvelu.xml.krysp.vesihuolto-mapping :refer [vesihuolto-to-krysp]]
       [lupapalvelu.xml.krysp.yleiset-alueet-mapping :refer [get-yleiset-alueet-krysp-mapping]]
       [lupapalvelu.document.canonical-common :refer [by-type ya-operation-type-to-schema-name-key]]
@@ -268,9 +268,9 @@
                                             :R (get-rakennuslupa-mapping krysp-version)
                                             :YA (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version)
                                             :P poikkeamis_to_krysp_212
-                                            :YI ilmoitus_to_krysp
-                                            :YL ymparistolupa_to_krysp
-                                            :MAL maa-aines_to_krysp
+                                            :YI ilmoitus_to_krysp_221
+                                            :YL ymparistolupa_to_krysp_221
+                                            :MAL maa-aines_to_krysp_212
                                             :VVVL vesihuolto-to-krysp)
                               xml (element-to-xml canonical mapping)
                               xml-s (indent-str xml)]
