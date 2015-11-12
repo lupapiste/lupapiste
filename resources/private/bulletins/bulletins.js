@@ -31,6 +31,9 @@
     $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService(),
                                     vetumaService: new LUPAPISTE.VetumaService()});
     
-    hub.send("vetumaService::authenticateUser");
+    var errorType = pageutil.subPage() === pageutil.lastSubPage() ?
+      undefined :
+      pageutil.lastSubPage();
+    hub.send("vetumaService::authenticateUser", {errorType: errorType});
   });
 })();
