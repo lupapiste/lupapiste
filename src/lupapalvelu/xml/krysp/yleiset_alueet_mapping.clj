@@ -113,76 +113,99 @@
                                                           :child [{:tag :etunimi}
                                                                   {:tag :sukunimi}]}]}]}]}]}])
 
+(def- katselmus {:tag :Katselmus
+                 :child [{:tag :pitoPvm}
+                         {:tag :pitaja}
+                         {:tag :katselmuksenLaji}
+                         {:tag :vaadittuLupaehtonaKytkin}
+                         {:tag :huomautustieto
+                          :child [{:tag :Huomautus
+                                   :child [{:tag :kuvaus}
+                                           {:tag :maaraAika}
+                                           {:tag :toteamisHetki}
+                                           {:tag :toteaja}]}]}
+                         {:tag :katselmuspoytakirja :child mapping-common/liite-children_211}
+                         {:tag :tarkastuksenTaiKatselmuksenNimi}
+                         {:tag :lasnaolijat}
+                         {:tag :poikkeamat}]} )
+
+(def- krysp-body
+  [{:tag :kasittelytietotieto
+    :child kasittelytieto}
+   {:tag :luvanTunnisteTiedot
+    :child [mapping-common/lupatunnus]}
+   {:tag :alkuPvm}
+   {:tag :loppuPvm}
+   (mapping-common/sijaintitieto)
+   {:tag :pintaala}
+   {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa
+    :child [{:tag :Osapuoli
+             :child osapuoli}]}
+   {:tag :vastuuhenkilotieto
+    :child vastuuhenkilo}   ;; tyomaasta-vastaavan henkilo-osa
+   {:tag :maksajatieto
+    :child [{:tag :Maksaja
+             :child maksaja}]}
+   {:tag :liitetieto
+    :child liitetieto}
+   {:tag :katselmustieto :child [katselmus]}
+   {:tag :lausuntotieto
+    :child lausunto}
+   {:tag :lupaAsianKuvaus}
+   {:tag :lupakohtainenLisatietotieto
+    :child [{:tag :LupakohtainenLisatieto
+             :child [{:tag :selitysteksti :ns "yht"}
+                     {:tag :arvo :ns "yht"}]}]}
+   {:tag :kayttojaksotieto
+    :child [{:tag :Kayttojakso
+             :child [{:tag :alkuHetki :ns "yht"}
+                     {:tag :loppuHetki :ns "yht"}]}]}
+   {:tag :toimintajaksotieto
+    :child [{:tag :Toimintajakso
+             :child [{:tag :alkuHetki :ns "yht"}
+                     {:tag :loppuHetki :ns "yht"}]}]}
+   {:tag :valmistumisilmoitusPvm}
+   {:tag :lisaaikatieto
+    :child [{:tag :Lisaaika
+             :child [{:tag :alkuPvm :ns "yht"}
+                     {:tag :loppuPvm :ns "yht"}
+                     {:tag :perustelu}]}]}
+   {:tag :sijoituslupaviitetieto
+    :child [{:tag :Sijoituslupaviite
+             :child [{:tag :vaadittuKytkin}
+                     {:tag :tunniste}]}]}
+   {:tag :kayttotarkoitus}
+   {:tag :johtoselvitysviitetieto
+    :child [{:tag :Johtoselvitysviite
+             :child [{:tag :vaadittuKytkin
+                      ;:tag :tunniste
+                      }]}]}])
+
 (defn get-yleiset-alueet-krysp-mapping [lupa-name-key krysp-version]
   {:pre [krysp-version]}
   (let [ya_to_krysp_2_1_2 {:tag :YleisetAlueet
                            :ns "yak"
                            :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :YA "2.1.2")
                                          :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"}
-                                        mapping-common/common-namespaces)
-
+                                   mapping-common/common-namespaces)
                            :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
                                    {:tag :yleinenAlueAsiatieto
-                                    :child [{:tag lupa-name-key
-                                             :child [{:tag :kasittelytietotieto
-                                                      :child kasittelytieto}
-                                                     {:tag :luvanTunnisteTiedot
-                                                      :child [mapping-common/lupatunnus]}
-                                                     {:tag :alkuPvm}
-                                                     {:tag :loppuPvm}
-                                                     (mapping-common/sijaintitieto)
-                                                     {:tag :pintaala}
-                                                     {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa
-                                                      :child [{:tag :Osapuoli
-                                                               :child osapuoli}]}
-                                                     {:tag :vastuuhenkilotieto
-                                                      :child vastuuhenkilo}   ;; tyomaasta-vastaavan henkilo-osa
-                                                     {:tag :maksajatieto
-                                                      :child [{:tag :Maksaja
-                                                               :child maksaja}]}
-                                                     {:tag :liitetieto
-                                                      :child liitetieto}
-                                                     {:tag :lausuntotieto
-                                                      :child lausunto}
-                                                     {:tag :lupaAsianKuvaus}
-                                                     {:tag :lupakohtainenLisatietotieto
-                                                      :child [{:tag :LupakohtainenLisatieto
-                                                               :child [{:tag :selitysteksti :ns "yht"}
-                                                                       {:tag :arvo :ns "yht"}]}]}
-                                                     {:tag :kayttojaksotieto
-                                                      :child [{:tag :Kayttojakso
-                                                               :child [{:tag :alkuHetki :ns "yht"}
-                                                                       {:tag :loppuHetki :ns "yht"}]}]}
-                                                     {:tag :toimintajaksotieto
-                                                      :child [{:tag :Toimintajakso
-                                                               :child [{:tag :alkuHetki :ns "yht"}
-                                                                       {:tag :loppuHetki :ns "yht"}]}]}
-                                                     {:tag :valmistumisilmoitusPvm}
-                                                     {:tag :lisaaikatieto
-                                                      :child [{:tag :Lisaaika
-                                                               :child [{:tag :alkuPvm :ns "yht"}
-                                                                       {:tag :loppuPvm :ns "yht"}
-                                                                       {:tag :perustelu}]}]}
-                                                     {:tag :sijoituslupaviitetieto
-                                                      :child [{:tag :Sijoituslupaviite
-                                                               :child [{:tag :vaadittuKytkin}
-                                                                       {:tag :tunniste}]}]}
-                                                     {:tag :kayttotarkoitus}
-                                                     {:tag :johtoselvitysviitetieto
-                                                      :child [{:tag :Johtoselvitysviite
-                                                               :child [{:tag :vaadittuKytkin
-                                                                        ;:tag :tunniste
-                                                                        }]}]}]}]}]}
-        ya_to_krysp_2_1_3 (-> ya_to_krysp_2_1_2 (assoc-in [:attr :xsi:schemaLocation]
-                                                          (mapping-common/schemalocation :YA "2.1.3"))
+                                    :child [{:tag lupa-name-key :child (remove #(= :katselmustieto (:tag %)) krysp-body)}]}]}
+        ya_to_krysp_2_1_3 (-> ya_to_krysp_2_1_2
+                            (assoc-in [:attr :xsi:schemaLocation]
+                                      (mapping-common/schemalocation :YA "2.1.3"))
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key]
+                                       {:tag lupa-name-key :child krysp-body})
                             (update-in [:child] mapping-common/update-child-element
                                        [:yleinenAlueAsiatieto lupa-name-key :maksajatieto :Maksaja]
                                        {:tag :Maksaja :child mapping-common/maksajatype-children_213})
                             (update-in [:child] mapping-common/update-child-element
                                        [:yleinenAlueAsiatieto lupa-name-key :osapuolitieto :Osapuoli :yritystieto :Yritys]
                                        {:tag :Yritys :child mapping-common/yritys-child_213}))
-        ya_to_krysp_2_2_0 (-> ya_to_krysp_2_1_3 (assoc-in [:attr :xsi:schemaLocation]
-                                                  (mapping-common/schemalocation :YA "2.2.0"))
+        ya_to_krysp_2_2_0 (-> ya_to_krysp_2_1_3
+                            (assoc-in [:attr :xsi:schemaLocation]
+                                      (mapping-common/schemalocation :YA "2.2.0"))
                             (update-in [:child] mapping-common/update-child-element
                                        [:yleinenAlueAsiatieto lupa-name-key :sijaintitieto]
                                        {:tag :sijaintitieto :child [mapping-common/sijantiType_215]})
@@ -203,7 +226,7 @@
                                        {:tag :vastuuhenkilotieto :child vastuuhenkilo-215}))
         ya_to_krysp_2_2_1 (-> ya_to_krysp_2_2_0
                             (assoc-in [:attr :xsi:schemaLocation]
-                              (mapping-common/schemalocation :YA "2.2.1")))]
+                                      (mapping-common/schemalocation :YA "2.2.1")))]
     (case (name krysp-version)
       "2.1.2" ya_to_krysp_2_1_2
       "2.1.3" ya_to_krysp_2_1_3
