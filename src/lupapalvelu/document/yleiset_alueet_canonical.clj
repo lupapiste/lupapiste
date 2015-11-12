@@ -3,6 +3,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [sade.util :as util]
+            [sade.strings :as ss]
             [sade.core :refer :all]
             [clojure.walk :as walk]))
 
@@ -347,4 +348,47 @@
                               :johtoselvitysviitetieto johtoselvitysviitetieto
                               }}}}))
 
-
+; TODO
+(defn katselmus-canonical [application lang task-id task-name pitoPvm user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
+  (let [application (tools/unwrapped application)
+        documents-by-type (documents-by-type-without-blanks application)
+        katselmus (util/strip-nils
+                    (merge
+                      {:pitoPvm (if (number? pitoPvm) (util/to-xml-date pitoPvm) (util/to-xml-date-from-string pitoPvm))
+                       ; TODO own values to ya task schema + migration
+                       :katselmuksenLaji (case katselmuksen-nimi
+                                           "aloituskokous" "Aloituskatselmus"
+                                           "loppukatselmus" "Loppukatselmus"
+                                           "Muu valvontakäynti")
+                       :vaadittuLupaehtonaKytkin (true? lupaehtona)
+                       :osittainen osittainen
+                       :lasnaolijat lasnaolijat
+                       :pitaja pitaja
+                       :poikkeamat poikkeamat
+                       :tarkastuksenTaiKatselmuksenNimi task-name}
+                      (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}})
+                      (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
+                                                                                (fn [m k v] (if-not (ss/blank? v)
+                                                                                              (assoc m k (util/to-xml-date-from-string v))
+                                                                                              m))
+                                                                                (select-keys huomautukset [:kuvaus :toteaja])
+                                                                                (select-keys huomautukset [:maaraAika :toteamisHetki]))}})))
+        canonical {:YleisetAlueet
+                   {:toimituksenTiedot (toimituksen-tiedot application lang)
+                    :yleinenAlueAsiatieto
+                    {:xxx
+                     {:kasittelynTilatieto (get-state application)
+                      :luvanTunnisteTiedot (lupatunnus application)
+;                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
+;                                                                              :henkilo {:nimi {:etunimi (:firstName user)
+;                                                                                               :sukunimi (:lastName user)}
+;                                                                                        :osoite {:osoitenimi {:teksti (or (:street user) "")}
+;                                                                                                 :postitoimipaikannimi (:city user)
+;                                                                                                 :postinumero (:zip user)}
+;                                                                                         :sahkopostiosoite (:email user)
+;                                                                                         :puhelin (:phone user)}}}}}
+                      :katselmustieto {:Katselmus katselmus}
+;                      :lisatiedot (get-lisatiedot (:lisatiedot documents-by-type) lang)
+;                      :kayttotapaus (katselmus-kayttotapaus katselmuksen-nimi tyyppi)
+                      }}}}]
+    canonical))
