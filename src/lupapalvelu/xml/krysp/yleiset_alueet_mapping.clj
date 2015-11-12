@@ -129,7 +129,7 @@
                          {:tag :lasnaolijat}
                          {:tag :poikkeamat}]} )
 
-(def- krysp-body
+(def- case-body
   [{:tag :kasittelytietotieto
     :child kasittelytieto}
    {:tag :luvanTunnisteTiedot
@@ -190,13 +190,13 @@
                                    mapping-common/common-namespaces)
                            :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
                                    {:tag :yleinenAlueAsiatieto
-                                    :child [{:tag lupa-name-key :child (remove #(= :katselmustieto (:tag %)) krysp-body)}]}]}
+                                    :child [{:tag lupa-name-key :child (remove #(= :katselmustieto (:tag %)) case-body)}]}]}
         ya_to_krysp_2_1_3 (-> ya_to_krysp_2_1_2
                             (assoc-in [:attr :xsi:schemaLocation]
                                       (mapping-common/schemalocation :YA "2.1.3"))
                             (update-in [:child] mapping-common/update-child-element
                                        [:yleinenAlueAsiatieto lupa-name-key]
-                                       {:tag lupa-name-key :child krysp-body})
+                                       {:tag lupa-name-key :child case-body})
                             (update-in [:child] mapping-common/update-child-element
                                        [:yleinenAlueAsiatieto lupa-name-key :maksajatieto :Maksaja]
                                        {:tag :Maksaja :child mapping-common/maksajatype-children_213})
