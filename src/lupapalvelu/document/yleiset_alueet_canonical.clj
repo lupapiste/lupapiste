@@ -349,7 +349,7 @@
                               }}}}))
 
 ; TODO
-(defn katselmus-canonical [application lang task-id task-name pitoPvm user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
+(defn katselmus-canonical [application lang task-id task-name pitoPvm user katselmuksen-nimi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
         katselmus (util/strip-nils

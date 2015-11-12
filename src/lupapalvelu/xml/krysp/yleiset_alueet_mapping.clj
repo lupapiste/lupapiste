@@ -5,6 +5,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
             [lupapalvelu.document.yleiset-alueet-canonical :as ya-canonical]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.disk-writer :as writer]))
 
@@ -306,3 +307,53 @@
           xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
 
       (writer/write-to-disk application nil xml krysp-version output-dir)))
+
+; TODO
+(defn save-katselmus-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application katselmus user lang krysp-version output-dir begin-of-link]
+  (let [lupa-name-key (ya-operation-type-to-schema-name-key
+                        (-> application :primaryOperation :name keyword))
+        data (tools/unwrapped (:data katselmus))
+        {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
+        {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
+        huomautukset (-> data :katselmus :huomautukset)
+        task-id (:id katselmus)
+        task-name (:taskname katselmus)
+        started pitoPvm
+        attachment-target {:type "task" :id (:id katselmus)}
+
+        attachments (filter #(= attachment-target (:target %)) (:attachments application))
+        poytakirja  (some #(when (=  {:type-group "muut", :type-id "katselmuksen_tai_tarkastuksen_poytakirja"} (:type %) ) %) attachments)
+        attachments-wo-pk (filter #(not= (:id %) (:id poytakirja)) attachments)
+        canonical-attachments (when attachment-target (mapping-common/get-attachments-as-canonical
+                                                        {:attachments attachments-wo-pk :title (:title application)}
+                                                        begin-of-link attachment-target))
+        canonical-pk-liite (first (mapping-common/get-attachments-as-canonical
+                                     {:attachments [poytakirja] :title (:title application)}
+                                     begin-of-link attachment-target))
+        canonical-pk (:Liite canonical-pk-liite)
+
+        all-canonical-attachments (seq (filter identity (conj canonical-attachments canonical-pk-liite)))
+
+        canonical-without-attachments (ya-canonical/katselmus-canonical application lang task-id task-name started user
+                                                           katselmuksenLaji tila pitaja vaadittuLupaehtona
+                                                           huomautukset lasnaolijat poikkeamat)
+        canonical (-> canonical-without-attachments
+                    (#(if (seq canonical-attachments)
+                      (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)
+                      %))
+                    (#(if poytakirja
+                        (-> %
+                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
+                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :liitetieto :liite] canonical-pk))
+                       %)))
+
+        xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
+
+    (writer/write-to-disk application attachments-for-write xml krysp-version output-dir))
+
+    )
+
+(permit/register-function permit/YA :review-krysp-mapper save-katselmus-as-krysp)
