@@ -14,7 +14,7 @@ LUPAPISTE.VetumaService = function() {
       self.authenticated(true);
     }, function() { // onNotFound
       if(params.errorType) {
-        var errorMsgLockey = ["bulletin", params.errorType].join(".");
+        var errorMsgLockey = ["bulletins", "vetuma", params.errorType].join(".");
         hub.send("indicator", { message: errorMsgLockey,
                                 style: "negative" });
       }
