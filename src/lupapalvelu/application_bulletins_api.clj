@@ -140,8 +140,11 @@
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
 
-(defn- create-bulletin [application created]
+(defn- create-bulletin [application created & [updates]]
   (let [app-snapshot (bulletins/create-bulletin-snapshot application)
+        app-snapshot (if updates
+                       (merge app-snapshot updates)
+                       app-snapshot)
         search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
         search-updates (get-search-fields search-fields app-snapshot)]
     (bulletins/snapshot-updates app-snapshot search-updates created)))
@@ -161,10 +164,9 @@
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}}
   [{:keys [application created] :as command}]
-  (let [updates (create-bulletin application created)
-        updates (merge {:proclamationEndsAt proclamationEndsAt
-                        :proclamationStartsAt proclamationStartsAt
-                        :proclamationText proclamationText})]
+  (let [updates (->> (create-bulletin application created {:proclamationEndsAt proclamationEndsAt
+                                                           :proclamationStartsAt proclamationStartsAt
+                                                           :proclamationText proclamationText}))]
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
