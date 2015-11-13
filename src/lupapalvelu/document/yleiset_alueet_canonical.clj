@@ -328,7 +328,7 @@
          :katselmuksenLaji (case katselmuksenLaji
                              "aloituskokous" "Aloituskatselmus"
                              "loppukatselmus" "Loppukatselmus"
-                             "Muu valvontakäynti")
+                             "Muu valvontak\u00e4ynti")
          :vaadittuLupaehtonaKytkin (true? vaadittuLupaehtona)
          :osittainen tila
          :lasnaolijat lasnaolijat
