@@ -129,8 +129,8 @@
                  [:omistajatieto :Omistaja]
                  {:tag :Omistaja :child [{:tag :kuntaRooliKoodi :ns "yht"}
                                          {:tag :VRKrooliKoodi :ns "yht"}
-                                         mapping-common/henkilo
-                                         mapping-common/yritys_213
+                                         mapping-common/henkilo_215
+                                         mapping-common/yritys_215
                                          {:tag :turvakieltoKytkin :ns "yht"}
                                          {:tag :suoramarkkinointikieltoKytkin :ns "yht"}
                                          {:tag :omistajalaji :ns "rakval"
