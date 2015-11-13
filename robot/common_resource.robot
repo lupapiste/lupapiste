@@ -417,6 +417,14 @@ Click enabled by test id
   Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
 
+Element should be visible by test id
+  [Arguments]  ${id}
+  Wait Until  Element Should Be Visible  xpath=//*[@data-test-id="${id}"]
+
+Element should not be visible by test id
+  [Arguments]  ${id}
+  Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id="${id}"]
+
 #
 # The following do not take data-test-id as argument
 #
