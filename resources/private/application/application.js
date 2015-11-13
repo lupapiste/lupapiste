@@ -131,7 +131,7 @@
       applicationModel._js = app;
 
       // Update observables
-      var mappingOptions = {ignore: ["documents", "tasks"]};
+      var mappingOptions = {ignore: ["documents", "tasks", "buildings"]};
       ko.mapping.fromJS(app, mappingOptions, applicationModel);
 
       // Invite
