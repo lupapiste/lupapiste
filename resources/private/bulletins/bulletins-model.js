@@ -18,7 +18,8 @@ LUPAPISTE.BulletinsModel = function(params) {
 
     return self.page() === "bulletin" ?
       _.extend(defaultParams, { bulletinId: bulletinId,
-                                authenticated: vetumaService.authenticated }) :
+                                authenticated: vetumaService.authenticated,
+                                userInfo: vetumaService.userInfo }) :
       defaultParams;
   });
 

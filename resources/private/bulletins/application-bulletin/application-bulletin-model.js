@@ -8,6 +8,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
       .center(404168, 6693765, 14);
 
   self.bulletin = bulletinService.bulletin;
+  self.userInfo = params.userInfo;
 
   self.bulletinId = params.bulletinId;
   self.versionId  = ko.observable();

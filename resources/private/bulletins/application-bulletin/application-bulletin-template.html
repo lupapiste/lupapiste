@@ -97,7 +97,8 @@
       <!-- ko if: authenticated -->
       <div data-bind="component: { name: 'bulletin-comment',
                                    params: { bulletin: $data,
-                                             versionId: versionId } }"></div>
+                                             versionId: versionId,
+                                             userInfo: userInfo } }"></div>
       <!-- /ko -->
       <!-- ko if: !authenticated() -->
       <div class="container">
