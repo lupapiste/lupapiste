@@ -3,7 +3,9 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="bulletin-comment-box-template">
-      <form data-bind="submit: sendComment" class="form-grid form-grid--no-border">
+      <form data-bind="submit: sendComment"
+            data-test-id="bulletin-comment-box-form"
+            class="form-grid form-grid--no-border">
         <div class="row">
            <div class="col-4"
                data-bind="component: {name: 'textarea-field',
