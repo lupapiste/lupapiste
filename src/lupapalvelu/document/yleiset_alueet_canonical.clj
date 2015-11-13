@@ -26,7 +26,7 @@
         :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi)))))
 
 (defn- get-yritys [yritys]
-  (let [postiosoite (get-postiosoite yritys)
+  (let [postiosoite (get-simple-osoite (:osoite yritys));(get-postiosoite yritys)
         yritys-basic (not-empty
                        (util/assoc-when {}
                          :nimi (-> yritys :yritysnimi)
@@ -55,12 +55,14 @@
       (update-in hakija [:Osapuoli] merge {:rooliKoodi "hakija"}))))
 
 (defn- get-vastuuhenkilo-osoitetieto [osoite]
-  (let [osoitenimi (util/assoc-when {} :teksti (-> osoite :katu))
-        osoite (not-empty
-                 (util/assoc-when {}
-                   :osoitenimi osoitenimi
-                   :postinumero (-> osoite :postinumero)
-                   :postitoimipaikannimi (-> osoite :postitoimipaikannimi)))]
+  (let [osoite (get-simple-osoite osoite)
+        ;; osoitenimi (util/assoc-when {} :teksti (-> osoite :katu))
+        ;; osoite (not-empty
+        ;;          (util/assoc-when {}
+        ;;            :osoitenimi osoitenimi
+        ;;            :postinumero (-> osoite :postinumero)
+        ;;            :postitoimipaikannimi (-> osoite :postitoimipaikannimi)))
+        ]
     (when osoite {:osoite osoite})))
 
 (defn- get-vastuuhenkilo [vastuuhenkilo type roolikoodi]
@@ -279,7 +281,6 @@
                              {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
                            (when (:closed application)
                              (get-construction-ready-info application))))]
-
     {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
                      :yleinenAlueAsiatieto {permit-name-key canonical-body}}}))
 

@@ -259,7 +259,9 @@
     ))
 
 (defn yleisetalueet-element-to-xml [canonical lupa-name-key krysp-version]
-  (element-to-xml (map-enums canonical lupa-name-key krysp-version) (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version)))
+  (let [canon   (map-enums canonical lupa-name-key krysp-version)
+        mapping (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version)]
+    (element-to-xml canon mapping )))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
