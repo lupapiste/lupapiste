@@ -118,10 +118,11 @@
   {:description "Add comment to bulletin"
    :feature     :publish-bulletin
    :user-roles  #{:anonymous}}
-  [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field bulletin-version-id :bulletin-version-id} :data created :created :as action}]
+  [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field bulletin-version-id :bulletin-version-id
+     email :email emailPreferred :emailPreferred} :data created :created :as action}]
   (try+
     (comment-can-be-added! bulletin-id bulletin-version-id comment)
-    (let [comment      (bulletins/create-comment comment created)
+    (let [comment      (bulletins/create-comment comment email (= emailPreferred "on") created)
           stored-files (bulletins/store-files bulletin-id (:id comment) files)]
       (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments stored-files)}})
          (->> {:ok true}
