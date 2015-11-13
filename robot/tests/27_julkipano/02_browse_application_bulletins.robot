@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation   Admin edits authority admin users
+Documentation   User browses bulletins from Julkipano.fi bulletin list
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
