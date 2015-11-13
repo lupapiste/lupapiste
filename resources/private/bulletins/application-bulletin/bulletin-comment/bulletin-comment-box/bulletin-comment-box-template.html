@@ -6,14 +6,64 @@
       <form data-bind="submit: sendComment"
             data-test-id="bulletin-comment-box-form"
             class="form-grid form-grid--no-border">
-        
+
         <!-- hlotiedot -->
         <div data-bind="with: userInfo">
-          <label>Etunimi</label>
-          <input data-bind="value: firstName"/>
-
-          <label>Sukunimi</label>
-          <input data-bind="value: lastName"/>
+          <div class="row">
+            <div class="col-1">
+              <div data-bind="component: {name: 'text-field',
+                                          params: {value: firstName,
+                                                   id: 'firstName',
+                                                   lLabel: 'userinfo.firstName',
+                                                   required: true}}"></div>
+            </div>
+            <div class="col-1">
+              <div data-bind="component: {name: 'text-field',
+                                          params: {value: lastName,
+                                                   id: 'lastName',
+                                                   lLabel: 'userinfo.lastName',
+                                                   required: true}}"></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-1">
+              <div data-bind="component: {name: 'text-field',
+                                          params: {value: street,
+                                                   id: 'street',
+                                                   lLabel: 'userinfo.street',
+                                                   required: true}}"></div>
+            </div>
+            <div class="col-1">
+              <div data-bind="component: {name: 'text-field',
+                                          params: {value: zip,
+                                                   id: 'zip',
+                                                   lLabel: 'userinfo.zip',
+                                                   required: true}}"></div>
+            </div>
+            <div class="col-1">
+              <div data-bind="component: {name: 'text-field',
+                                          params: {value: city,
+                                                   id: 'city',
+                                                   lLabel: 'userinfo.city',
+                                                   required: true}}"></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-1">
+              <div data-bind="component: {name: 'text-field',
+                                          params: {value: email,
+                                                   id: 'email',
+                                                   lLabel: 'userinfo.email',
+                                                   required: true}}"></div>
+            </div>
+            <div class="col-1">
+              <br/>
+              <div data-bind="component: {name: 'checkbox-field',
+                                          params: {value: emailPreferred,
+                                                   id: 'emailPreferred',
+                                                   lLabel: 'bulletin.comment.emailPreferred'}}"></div>
+            </div>
+          </div>
 
           <label>Katuosoite</label>
           <input data-bind="value: street"/>
