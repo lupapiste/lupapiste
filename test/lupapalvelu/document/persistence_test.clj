@@ -4,6 +4,8 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.model :as model]))
 
+(testable-privates lupapalvelu.document.persistence empty-op-attachments-ids)
+
 (def some-time 123456789)
 
 (model/with-timestamp some-time
@@ -36,4 +38,27 @@
         "documents.$.data.mitat.kerrosluku.modified" some-time
         "documents.$.data.henkilo.nimi.value"        ..nimi..
         "documents.$.data.henkilo.nimi.modified"     some-time}))
+
+
+(def attachments [{:id "1" :op {:id "123"}}
+                  {:id "2" :op nil}
+                  {:id "3" :op {:id "123"} :versions [{:v 1}]}
+                  {:id "4" :op {:id "123"} :versions [{:v 1}]}
+                  {:id "5" :op {:id "321"} :versions [{:v 1}]}
+                  {:id "6" :op {:id "111"}}
+                  {:id "7" :op {:id "112"} :versions []}
+                  {:id "9" :op {:id "112"} :versions nil}
+                  {:id "8" :op {:id "123"}}])
+
+(fact "removable attachments with operation"
+  (empty-op-attachments-ids nil nil) => nil
+  (empty-op-attachments-ids [] nil) => nil
+  (empty-op-attachments-ids attachments nil) => nil
+  (empty-op-attachments-ids attachments "") => nil
+  (empty-op-attachments-ids attachments "012") => nil
+  (empty-op-attachments-ids attachments "123") => ["1" "8"]
+  (empty-op-attachments-ids attachments "321") => nil
+  (empty-op-attachments-ids attachments "111") => ["6"]
+  (empty-op-attachments-ids attachments "112") => ["7" "9"])
+
 
