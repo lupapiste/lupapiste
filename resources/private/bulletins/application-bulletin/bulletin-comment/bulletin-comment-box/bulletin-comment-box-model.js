@@ -10,6 +10,14 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   self.attachments = ko.observableArray([]);
   self.pending = ko.observable(false);
 
+  self.userInfo = params.userInfo || {
+    firstName: "Jeejee",
+    lastName: "Virtanen",
+    address: "Katukuja 3",
+    zip: "00300",
+    city: "Sipoo"
+  };
+
   self.isDisabled = ko.pureComputed(function() {
     return self.pending() || !self.comment();
   });

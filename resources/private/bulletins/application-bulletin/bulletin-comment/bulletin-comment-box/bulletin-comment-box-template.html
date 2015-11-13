@@ -6,6 +6,25 @@
       <form data-bind="submit: sendComment"
             data-test-id="bulletin-comment-box-form"
             class="form-grid form-grid--no-border">
+        
+        <!-- hlotiedot -->
+        <div data-bind="with: userInfo">
+          <label>Etunimi</label>
+          <input data-bind="value: firstName"/>
+
+          <label>Sukunimi</label>
+          <input data-bind="value: lastName"/>
+
+          <label>Katuosoite</label>
+          <input data-bind="value: address"/>
+
+          <label>Postinumero</label>
+          <input data-bind="value: zip"/>
+
+          <label>Kaupunki</label>
+          <input data-bind="value: city"/>
+        </div>
+        
         <div class="row">
            <div class="col-4"
                data-bind="component: {name: 'textarea-field',
