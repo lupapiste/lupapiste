@@ -149,7 +149,6 @@
                                             {:tyomaasta-vastaava true :johtoselvitysviitetieto true})
    :Sijoituslupa                          (merge default-config
                                             {:tyoaika false :dummy-alku-and-loppu-pvm true})
-
    :ya-kayttolupa-nostotyot               kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-vaihtolavat             kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-kattolumien-pudotustyot kayttolupa-config-plus-tyomaastavastaava
@@ -157,7 +156,6 @@
    :ya-kayttolupa-talon-julkisivutyot     kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-talon-rakennustyot      kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-muu-tyomaakaytto        kayttolupa-config-plus-tyomaastavastaava
-
    :ya-kayttolupa-mainostus-ja-viitoitus  {:mainostus-viitoitus-tapahtuma-pvm   true
                                            :mainostus-viitoitus-lisatiedot      true}})
 
@@ -203,13 +201,11 @@
     [alku-pvm loppu-pvm main-viit-tapahtuma-info]))
 
 (defn- get-canonical-body [application operation-name-key config documents-by-type]
-
   ;;
   ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
   ;;               -> Maksaja gets Hakija's henkilotieto, AlkuPvm/LoppuPvm both get application's "modified" date.
   ;;
-  (let [[alku-pvm loppu-pvm main-viit-tapahtuma-info] (get-alku-loppu-pvm-main-viit-tapahtuma-info application documents-by-type config)
-        [main-viit-tapahtuma-name main-viit-tapahtuma] (-> main-viit-tapahtuma-info seq first)
+  (let [[alku-pvm loppu-pvm _] (get-alku-loppu-pvm-main-viit-tapahtuma-info application documents-by-type config)
         hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
         maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
         maksajatieto-2-1-3 (get-maksajatiedot (-> documents-by-type :yleiset-alueet-maksaja first))
@@ -223,14 +219,6 @@
         vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
                              (vec (filter :Vastuuhenkilo [tyomaasta-vastaava
                                                           maksaja])))
-        lupakohtainenLisatietotieto (filter #(seq (:LupakohtainenLisatieto %))
-                                      (flatten
-                                        (vector
-                                          (when-let [erikoiskuvaus-operaatiosta (ya-operation-type-to-additional-usage-description operation-name-key)]
-                                            {:LupakohtainenLisatieto {:selitysteksti "Lis\u00e4tietoja k\u00e4ytt\u00f6tarkoituksesta"
-                                                                      :arvo erikoiskuvaus-operaatiosta}})
-                                          (when (:mainostus-viitoitus-lisatiedot config)
-                                            (get-mainostus-viitoitus-lisatiedot main-viit-tapahtuma)))))
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false}})
         ]
@@ -243,12 +231,7 @@
      :vastuuhenkilotieto vastuuhenkilotieto
      :maksajatieto maksajatieto
      :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
-     :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
-     :johtoselvitysviitetieto johtoselvitysviitetieto
-     (when (and main-viit-tapahtuma (= "mainostus-tapahtuma-valinta" (name main-viit-tapahtuma-name)))
-       {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
-     (when (:closed application)
-       (get-construction-ready-info application))}))
+     :johtoselvitysviitetieto johtoselvitysviitetieto}))
 
 
 (defn application-to-canonical
@@ -260,6 +243,8 @@
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
 
+        [_ _ main-viit-tapahtuma-info] (get-alku-loppu-pvm-main-viit-tapahtuma-info application documents-by-type config)
+        [main-viit-tapahtuma-name main-viit-tapahtuma] (-> main-viit-tapahtuma-info seq first)
         hankkeen-kuvaus (when (:hankkeen-kuvaus config)
                           (->
                             (or
@@ -275,13 +260,27 @@
                                  (when-let [tunniste (-> hankkeen-kuvaus :sijoitusLuvanTunniste)]
                                    {:Sijoituslupaviite {:vaadittuKytkin false
                                                         :tunniste tunniste}}))
+        lupakohtainenLisatietotieto (filter #(seq (:LupakohtainenLisatieto %))
+                                      (flatten
+                                        (vector
+                                          (when-let [erikoiskuvaus-operaatiosta (ya-operation-type-to-additional-usage-description operation-name-key)]
+                                            {:LupakohtainenLisatieto {:selitysteksti "Lis\u00e4tietoja k\u00e4ytt\u00f6tarkoituksesta"
+                                                                      :arvo erikoiskuvaus-operaatiosta}})
+                                          (when (:mainostus-viitoitus-lisatiedot config)
+                                            (get-mainostus-viitoitus-lisatiedot main-viit-tapahtuma)))))
         canonical-body (util/strip-nils
                          (merge
                            (get-canonical-body application operation-name-key config documents-by-type)
                            {:pintaala pinta-ala
                             :lausuntotieto (get-statements (:statements application))
                             :lupaAsianKuvaus lupaAsianKuvaus
-                            :sijoituslupaviitetieto sijoituslupaviitetieto}))]
+                            :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
+                            :sijoituslupaviitetieto sijoituslupaviitetieto
+                            (when (and main-viit-tapahtuma (= "mainostus-tapahtuma-valinta" (name main-viit-tapahtuma-name)))
+                              {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
+                            (when (:closed application)
+                              (get-construction-ready-info application))
+                            }))]
 
     {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
                      :yleinenAlueAsiatieto {permit-name-key canonical-body}}}))
@@ -330,7 +329,8 @@
                              "loppukatselmus" "Loppukatselmus"
                              "Muu valvontak\u00e4ynti")
          :vaadittuLupaehtonaKytkin (true? vaadittuLupaehtona)
-         :osittainen tila
+         ;; NOTE: katselmuksen tila not supported in YA krysp
+         ;:osittainen tila
          :lasnaolijat lasnaolijat
          :pitaja pitaja
          :poikkeamat poikkeamat
