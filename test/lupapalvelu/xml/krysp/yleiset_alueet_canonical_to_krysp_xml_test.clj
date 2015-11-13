@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.yleiset-alueet-canonical-to-krysp-xml-test
-  (:require [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
-            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test :refer [kaivulupa-application-with-link-permit-data]]
+  (:require [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical katselmus-canonical]]
+            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test :refer [kaivulupa-application-with-link-permit-data kaivulupa-application-with-review katselmus]]
             [lupapalvelu.document.yleiset-alueet-kayttolupa-canonical-test :refer [kayttolupa-application]]
             [lupapalvelu.document.yleiset-alueet-sijoituslupa-canonical-test :refer [sijoituslupa-application valmistumisilmoitus]]
             [lupapalvelu.document.yleiset-alueet-kayttolupa-mainostus-viitoitus-canonical-test
@@ -143,3 +143,19 @@
 
     (fact "Valmistumisilmoitus application -> canonical -> xml"
       (do-test valmistumisilmoitus)))
+
+
+(fact "YA katselmus"
+  (let [application kaivulupa-application-with-review
+        canonical (katselmus-canonical application  katselmus "fi" {})
+        operation-name-key (-> application :primaryOperation :name keyword)
+        lupa-name-key (ya-operation-type-to-schema-name-key operation-name-key)
+        xml-221 (yleisetalueet-element-to-xml canonical lupa-name-key "2.2.1")
+        xml-221s (indent-str xml-221)
+        lp-xml-221 (cr/strip-xml-namespaces (xml/parse xml-221s))]
+
+    (validator/validate xml-221s (:permitType application) "2.2.1")
+
+    )
+
+  )
