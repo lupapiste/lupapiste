@@ -119,11 +119,11 @@
                 <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
                 <th></th>
               </tr>
-              <!-- ko foreach: application.attachments -->
+              <!-- ko foreach: application._js.attachments -->
               <!-- ko if: $data.latestVersion && latestVersion.filename -->
               <tr>
                 <td>
-                    <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId()}"></a><br/>
+                    <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId}"></a><br/>
                     <i data-bind="ltext: latestVersion.contentType"></i>
                     <i data-bind="size: latestVersion.size"></i>
                 </td>

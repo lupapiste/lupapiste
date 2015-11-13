@@ -23,9 +23,8 @@ LUPAPISTE.ApplicationModel = function() {
   self.startedBy = ko.observable();
   self.closed = ko.observable();
   self.closedBy = ko.observable();
-  self.attachments = ko.observable([]);
   self.hasAttachment = ko.computed(function() {
-    return _.some((ko.toJS(self.attachments) || []), function(a) {return a.versions && a.versions.length;});
+    return _.some((self._js.attachments || []), function(a) {return a.versions && a.versions.length;});
   });
   self.address = ko.observable();
   self.secondaryOperations = ko.observable();
@@ -600,12 +599,12 @@ LUPAPISTE.ApplicationModel = function() {
 
   function extractMissingAttachments(attachments) {
     var missingAttachments = _.filter(attachments, function(a) {
-      var required = a.required ? a.required() : false;
-      var notNeeded = a.notNeeded ? a.notNeeded() : false;
-      var versionsExist = a.versions() && a.versions().length;
+      var required = a.required ? a.required : false;
+      var notNeeded = a.notNeeded ? a.notNeeded : false;
+      var versionsExist = a.versions && a.versions.length;
       return required && !notNeeded && !versionsExist;
     });
-    missingAttachments = _.groupBy(missingAttachments, function(a){ return a.type["type-group"](); });
+    missingAttachments = _.groupBy(missingAttachments, function(a){ return a.type["type-group"]; });
     missingAttachments = _.map(_.keys(missingAttachments), function(k) {
       return [k, missingAttachments[k]];
     });
@@ -615,7 +614,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.updateMissingApplicationInfo = function(errors) {
     self.incorrectlyFilledRequiredFields(util.extractRequiredErrors(errors));
     self.fieldWarnings(util.extractWarnErrors(errors));
-    self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
+    self.missingRequiredAttachments(extractMissingAttachments(self._js.attachments));
   };
 
   self.toggleHelp = function(param) {
