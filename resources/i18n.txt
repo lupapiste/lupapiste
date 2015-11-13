@@ -1,2 +1,4 @@
 bulletins.vetuma.error:  Vetuma-tunnistautuminen epäonnistui
 bulletins.vetuma.cancel:  Vetuma-tunnistautuminen peruutettiin
+
+bulletin.comment.emailPreferred:  Haluan tiedoksiannon sähköisesti

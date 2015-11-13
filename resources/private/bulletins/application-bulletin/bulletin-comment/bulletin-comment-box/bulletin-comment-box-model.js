@@ -11,11 +11,13 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   self.pending = ko.observable(false);
 
   self.userInfo = params.userInfo || {
-    firstName: "Jeejee",
-    lastName: "Virtanen",
-    address: "Katukuja 3",
-    zip: "00300",
-    city: "Sipoo"
+    firstName: ko.observable("Jeejee"),
+    lastName: ko.observable("Virtanen"),
+    street: ko.observable("Katukuja 3"),
+    zip: ko.observable("00300"),
+    city: ko.observable("Sipoo"),
+    email: ko.observable(),
+    emailPreferred: ko.observable(false)
   };
 
   self.isDisabled = ko.pureComputed(function() {
