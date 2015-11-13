@@ -173,19 +173,20 @@
       (update-in base-with-link [:LupaTunnus] #(into % kuntalupatunnus-link))
       base-with-link)))
 
-;; Note: Agreed with Vianova 5.3.2014 that:
-;;       Mainostuslupa's mainostusaika is put into alku-pvm and loppu-pvm, and tapahtuma-aika into toimintajaksotieto.
-;;       On the contrary, Viitoituslupa's tapahtuma-aika is put into alku-pvm and loppu-pvm.
-(defn- get-alku-loppu-pvm-main-viit-tapahtuma-info [application documents-by-type config]
+(defn- get-main-viit-tapahtuma-info [documents-by-type]
   (let [;; If user has manually selected the mainostus/viitoitus type, the _selected key exists.
         ;; Otherwise the type is the first key in the map.
         main-viit-tapahtuma-doc (-> documents-by-type :mainosten-tai-viitoitusten-sijoittaminen first :data)
         main-viit-tapahtuma-name (or
                                    (-> main-viit-tapahtuma-doc :_selected keyword)
-                                   (some-> main-viit-tapahtuma-doc first key))
-        main-viit-tapahtuma-info (select-keys main-viit-tapahtuma-doc [main-viit-tapahtuma-name])
-        main-viit-tapahtuma (get main-viit-tapahtuma-doc main-viit-tapahtuma-name)
+                                   (some-> main-viit-tapahtuma-doc first key))]
+    (select-keys main-viit-tapahtuma-doc [main-viit-tapahtuma-name])))
 
+;; Note: Agreed with Vianova 5.3.2014 that:
+;;       Mainostuslupa's mainostusaika is put into alku-pvm and loppu-pvm, and tapahtuma-aika into toimintajaksotieto.
+;;       On the contrary, Viitoituslupa's tapahtuma-aika is put into alku-pvm and loppu-pvm.
+(defn- get-alku-loppu-pvm [application documents-by-type config]
+  (let [main-viit-tapahtuma (-> documents-by-type get-main-viit-tapahtuma-info vals first)
         tyoaika-doc (when (:tyoaika config) (-> (util/some-key documents-by-type :tyoaika :tyo-aika-for-jatkoaika) first :data))
         alku-pvm (if (:dummy-alku-and-loppu-pvm config)
                    (util/to-xml-date (:submitted application))
@@ -197,15 +198,14 @@
                     (if (:mainostus-viitoitus-tapahtuma-pvm config)
                       (util/to-xml-date-from-string (util/some-key main-viit-tapahtuma :mainostus-paattyy-pvm :tapahtuma-aika-paattyy-pvm))
                       (util/to-xml-date-from-string (:tyoaika-paattyy-pvm tyoaika-doc))))]
-
-    [alku-pvm loppu-pvm main-viit-tapahtuma-info]))
+    [alku-pvm loppu-pvm]))
 
 (defn- get-canonical-body [application operation-name-key config documents-by-type]
   ;;
   ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
   ;;               -> Maksaja gets Hakija's henkilotieto, AlkuPvm/LoppuPvm both get application's "modified" date.
   ;;
-  (let [[alku-pvm loppu-pvm _] (get-alku-loppu-pvm-main-viit-tapahtuma-info application documents-by-type config)
+  (let [[alku-pvm loppu-pvm] (get-alku-loppu-pvm application documents-by-type config)
         hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
         maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
         maksajatieto-2-1-3 (get-maksajatiedot (-> documents-by-type :yleiset-alueet-maksaja first))
@@ -243,8 +243,7 @@
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
 
-        [_ _ main-viit-tapahtuma-info] (get-alku-loppu-pvm-main-viit-tapahtuma-info application documents-by-type config)
-        [main-viit-tapahtuma-name main-viit-tapahtuma] (-> main-viit-tapahtuma-info seq first)
+        [main-viit-tapahtuma-name main-viit-tapahtuma] (-> documents-by-type get-main-viit-tapahtuma-info seq first)
         hankkeen-kuvaus (when (:hankkeen-kuvaus config)
                           (->
                             (or
@@ -275,12 +274,11 @@
                             :lausuntotieto (get-statements (:statements application))
                             :lupaAsianKuvaus lupaAsianKuvaus
                             :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
-                            :sijoituslupaviitetieto sijoituslupaviitetieto
-                            (when (and main-viit-tapahtuma (= "mainostus-tapahtuma-valinta" (name main-viit-tapahtuma-name)))
-                              {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
-                            (when (:closed application)
-                              (get-construction-ready-info application))
-                            }))]
+                            :sijoituslupaviitetieto sijoituslupaviitetieto}
+                           (when (and main-viit-tapahtuma (= "mainostus-tapahtuma-valinta" (name main-viit-tapahtuma-name)))
+                             {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
+                           (when (:closed application)
+                             (get-construction-ready-info application))))]
 
     {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
                      :yleinenAlueAsiatieto {permit-name-key canonical-body}}}))
@@ -296,7 +294,7 @@
         operation-name-key (or (-> link-permit-data :operation keyword) :ya-katulupa-vesi-ja-viemarityot)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
-        [alku-pvm loppu-pvm _] (get-alku-loppu-pvm-main-viit-tapahtuma-info application documents-by-type config)
+        [alku-pvm loppu-pvm] (get-alku-loppu-pvm application documents-by-type config)
         hankkeen-kuvaus (-> documents-by-type :hankkeen-kuvaus-jatkoaika first :data :kuvaus)
         lisaaikatieto (when alku-pvm {:Lisaaika {:alkuPvm alku-pvm
                                                  :loppuPvm loppu-pvm
