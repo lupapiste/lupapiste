@@ -146,7 +146,7 @@
 
     (fact* "sauna doc and operation are removed"
       (let [sauna-attachment (first (attachment/get-attachments-by-operation application (:id (first sec-operations))))
-            _ (upload-attachment pena application-id attachment true)
+            _ (upload-attachment pena application-id sauna-attachment true)
             _ (command pena :remove-doc :id application-id :docId (:id sauna)) => ok?
             updated-app (query-application pena application-id)]
         (domain/get-document-by-name updated-app "uusi-rakennus-ei-huoneistoa") => nil
