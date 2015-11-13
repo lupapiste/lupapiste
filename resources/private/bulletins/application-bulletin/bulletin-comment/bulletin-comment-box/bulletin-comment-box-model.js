@@ -24,7 +24,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   });
 
   self.isDisabled = ko.pureComputed(function() {
-    return self.pending() || !self.comment();
+    return self.pending() || !self.comment() || !self.email.isValid();
   });
 
   self.fileChanged = function(data, event) {
