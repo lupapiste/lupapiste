@@ -36,7 +36,7 @@
                   </div>
                 </div>
               </div>
-              <div class="row">
+              <div class="row" data-bind="ifnot: otherReceiver">
                 <div class="col-4" data-bind="slider: !otherReceiver()">
                   <div class="col-1">
                     <div data-bind="component: {name: 'text-field',
@@ -101,20 +101,20 @@
                                                        required: true}}"></div>
                 </div>
               </div>
-              <div class="row">
+              <div class="row" data-bind="if: $component.otherReceiver">
                 <div class="col-1">
                   <div data-bind="component: {name: 'text-field',
-                                              params: {value: email,
+                                              params: {value: $component.email,
                                                        id: 'email',
                                                        lLabel: 'userinfo.email'}}"></div>
                 </div>
                 <div class="col-1">
                   <br/>
                   <div data-bind="component: {name: 'checkbox-field',
-                                              params: {value: emailPreferred,
+                                              params: {value: $component.emailPreferred,
                                                        id: 'emailPreferred',
                                                        lLabel: 'bulletin.comment.emailPreferred',
-                                                       disable: emailIsBlank}}"></div>
+                                                       disable: $component.emailIsBlank}}"></div>
                 </div>
               </div>
             </div>
