@@ -8,6 +8,7 @@
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical katselmus-canonical]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.canonical-test-common :as ctc]
+            [lupapalvelu.tasks]
             [sade.util :as util]
             [sade.core :refer :all]))
 
