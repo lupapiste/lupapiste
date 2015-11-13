@@ -175,80 +175,54 @@
       (update-in base-with-link [:LupaTunnus] #(into % kuntalupatunnus-link))
       base-with-link)))
 
+;; Note: Agreed with Vianova 5.3.2014 that:
+;;       Mainostuslupa's mainostusaika is put into alku-pvm and loppu-pvm, and tapahtuma-aika into toimintajaksotieto.
+;;       On the contrary, Viitoituslupa's tapahtuma-aika is put into alku-pvm and loppu-pvm.
+(defn- get-alku-loppu-pvm-main-viit-tapahtuma-info [application documents-by-type config]
+  (let [;; If user has manually selected the mainostus/viitoitus type, the _selected key exists.
+        ;; Otherwise the type is the first key in the map.
+        main-viit-tapahtuma-doc (-> documents-by-type :mainosten-tai-viitoitusten-sijoittaminen first :data)
+        main-viit-tapahtuma-name (or
+                                   (-> main-viit-tapahtuma-doc :_selected keyword)
+                                   (some-> main-viit-tapahtuma-doc first key))
+        main-viit-tapahtuma-info (select-keys main-viit-tapahtuma-doc [main-viit-tapahtuma-name])
+        main-viit-tapahtuma (get main-viit-tapahtuma-doc main-viit-tapahtuma-name)
 
-(defn- permits [application]
+        tyoaika-doc (when (:tyoaika config) (-> documents-by-type :tyoaika first :data))
+        alku-pvm (if (:dummy-alku-and-loppu-pvm config)
+                   (util/to-xml-date (:submitted application))
+                   (if (:mainostus-viitoitus-tapahtuma-pvm config)
+                     (util/to-xml-date-from-string (util/some-key main-viit-tapahtuma :mainostus-alkaa-pvm :tapahtuma-aika-alkaa-pvm))
+                     (util/to-xml-date-from-string (:tyoaika-alkaa-pvm tyoaika-doc))))
+        loppu-pvm (if (:dummy-alku-and-loppu-pvm config)
+                    (util/to-xml-date (:modified application))
+                    (if (:mainostus-viitoitus-tapahtuma-pvm config)
+                      (util/to-xml-date-from-string (util/some-key main-viit-tapahtuma :mainostus-paattyy-pvm :tapahtuma-aika-paattyy-pvm))
+                      (util/to-xml-date-from-string (:tyoaika-paattyy-pvm tyoaika-doc))))]
+
+    [alku-pvm loppu-pvm main-viit-tapahtuma-info]))
+
+(defn- get-canonical-body [application operation-name-key config documents-by-type]
+
   ;;
   ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
   ;;               -> Maksaja gets Hakija's henkilotieto, AlkuPvm/LoppuPvm both get application's "modified" date.
   ;;
-  (let [application (tools/unwrapped application)
-        documents-by-type (documents-by-type-without-blanks application)
-
-        operation-name-key (-> application :primaryOperation :name keyword)
-        permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
-
-        config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
-
-;        hakija (get-yritys-and-henkilo (-> documents-by-type :hakija-ya first :data) "hakija")
+  (let [[alku-pvm loppu-pvm main-viit-tapahtuma-info] (get-alku-loppu-pvm-main-viit-tapahtuma-info application documents-by-type config)
+        [main-viit-tapahtuma-name main-viit-tapahtuma] (-> main-viit-tapahtuma-info seq first)
         hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
-
-        tyoaika-doc (when (:tyoaika config)
-                      (-> documents-by-type :tyoaika first :data))
-
-        main-viit-tapahtuma-doc (-> documents-by-type :mainosten-tai-viitoitusten-sijoittaminen first :data)
-        ;; If user has manually selected the mainostus/viitoitus type, the _selected key exists.
-        ;; Otherwise the type is the first key in the map.
-        main-viit-tapahtuma-name (when main-viit-tapahtuma-doc
-                                   (or
-                                     (-> main-viit-tapahtuma-doc :_selected keyword)
-                                     (-> main-viit-tapahtuma-doc first key)))
-        main-viit-tapahtuma (when main-viit-tapahtuma-doc
-                             (main-viit-tapahtuma-doc main-viit-tapahtuma-name))
-
-        ;; Note: Agreed with Vianova 5.3.2014 that:
-        ;;       Mainostuslupa's mainostusaika is put into alku-pvm and loppu-pvm, and tapahtuma-aika into toimintajaksotieto.
-        ;;       On the contrary, Viitoituslupa's tapahtuma-aika is put into alku-pvm and loppu-pvm.
-        alku-pvm (if (:dummy-alku-and-loppu-pvm config)
-                   (util/to-xml-date (:submitted application))
-                   (if (:mainostus-viitoitus-tapahtuma-pvm config)
-                     (or
-                       (util/to-xml-date-from-string (-> main-viit-tapahtuma :mainostus-alkaa-pvm))
-                       (util/to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-alkaa-pvm)))
-                     (util/to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm))))
-        loppu-pvm (if (:dummy-alku-and-loppu-pvm config)
-                    (util/to-xml-date (:modified application))
-                    (if (:mainostus-viitoitus-tapahtuma-pvm config)
-                      (or
-                        (util/to-xml-date-from-string (-> main-viit-tapahtuma :mainostus-paattyy-pvm))
-                        (util/to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-paattyy-pvm)))
-                      (util/to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))))
         maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
         maksajatieto-2-1-3 (get-maksajatiedot (-> documents-by-type :yleiset-alueet-maksaja first))
         maksajatieto (when maksaja {:Maksaja (util/deep-merge maksajatieto-2-1-3 (:Osapuoli maksaja))})
         tyomaasta-vastaava (when (:tyomaasta-vastaava config)
                              (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data)))
-        ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter the resulting nil out.
+        ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter out the resulting nil.
         osapuolitieto (vec (filter :Osapuoli [hakija
                                               tyomaasta-vastaava]))
         ;; If tyomaasta-vastaava does not have :vastuuhenkilotieto, we filter the resulting nil out.
         vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
-                             (vec (filter :Vastuuhenkilo [;hakija
-                                                          tyomaasta-vastaava
+                             (vec (filter :Vastuuhenkilo [tyomaasta-vastaava
                                                           maksaja])))
-        hankkeen-kuvaus (when (:hankkeen-kuvaus config)
-                          (->
-                            (or
-                              (:yleiset-alueet-hankkeen-kuvaus-sijoituslupa documents-by-type)
-                              (:yleiset-alueet-hankkeen-kuvaus-kayttolupa documents-by-type)
-                              (:yleiset-alueet-hankkeen-kuvaus-kaivulupa documents-by-type))
-                            first :data))
-
-        lupaAsianKuvaus (when (:hankkeen-kuvaus config)
-                          (-> hankkeen-kuvaus :kayttotarkoitus))
-
-        pinta-ala (when (:hankkeen-kuvaus config)
-                    (-> hankkeen-kuvaus :varattava-pinta-ala))
-
         lupakohtainenLisatietotieto (filter #(seq (:LupakohtainenLisatieto %))
                                       (flatten
                                         (vector
@@ -257,42 +231,60 @@
                                                                       :arvo erikoiskuvaus-operaatiosta}})
                                           (when (:mainostus-viitoitus-lisatiedot config)
                                             (get-mainostus-viitoitus-lisatiedot main-viit-tapahtuma)))))
-
-        sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
-                                 (when-let [tunniste (-> hankkeen-kuvaus :sijoitusLuvanTunniste)]
-                                   {:Sijoituslupaviite {:vaadittuKytkin false
-                                                        :tunniste tunniste}}))
-
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false}})
+        ]
+    {:kasittelytietotieto (get-kasittelytieto application)
+     :luvanTunnisteTiedot (get-luvan-tunniste-tiedot application)
+     :alkuPvm alku-pvm
+     :loppuPvm loppu-pvm
+     :sijaintitieto (get-sijaintitieto application)
+     :osapuolitieto osapuolitieto
+     :vastuuhenkilotieto vastuuhenkilotieto
+     :maksajatieto maksajatieto
+     :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
+     :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
+     :johtoselvitysviitetieto johtoselvitysviitetieto
+     (when (and main-viit-tapahtuma (= "mainostus-tapahtuma-valinta" (name main-viit-tapahtuma-name)))
+       {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
+     (when (:closed application)
+       (get-construction-ready-info application))}))
 
-        body {permit-name-key (merge
-                                {:kasittelytietotieto (get-kasittelytieto application)
-                                 :luvanTunnisteTiedot (get-luvan-tunniste-tiedot application)
-                                 :alkuPvm alku-pvm
-                                 :loppuPvm loppu-pvm
-                                 :sijaintitieto (get-sijaintitieto application)
-                                 :pintaala pinta-ala
-                                 :osapuolitieto osapuolitieto
-                                 :vastuuhenkilotieto vastuuhenkilotieto
-                                 :maksajatieto maksajatieto
-                                 :lausuntotieto (get-statements (:statements application))
-                                 :lupaAsianKuvaus lupaAsianKuvaus
-                                 :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
-                                 :sijoituslupaviitetieto sijoituslupaviitetieto
-                                 :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
-                                 :johtoselvitysviitetieto johtoselvitysviitetieto}
-                                (when (and main-viit-tapahtuma (= "mainostus-tapahtuma-valinta" (name main-viit-tapahtuma-name)))
-                                  {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
-                                (when (:closed application)
-                                  (get-construction-ready-info application)))}]
-    (util/strip-nils body)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]
-  {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
-                   :yleinenAlueAsiatieto (permits application)}})
+  (let [application (tools/unwrapped application)
+        documents-by-type (documents-by-type-without-blanks application)
+        operation-name-key (-> application :primaryOperation :name keyword)
+        permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
+        config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
+
+        hankkeen-kuvaus (when (:hankkeen-kuvaus config)
+                          (->
+                            (or
+                              (:yleiset-alueet-hankkeen-kuvaus-sijoituslupa documents-by-type)
+                              (:yleiset-alueet-hankkeen-kuvaus-kayttolupa documents-by-type)
+                              (:yleiset-alueet-hankkeen-kuvaus-kaivulupa documents-by-type))
+                            first :data))
+        pinta-ala (when (:hankkeen-kuvaus config)
+                    (:varattava-pinta-ala hankkeen-kuvaus))
+        lupaAsianKuvaus (when (:hankkeen-kuvaus config)
+                          (:kayttotarkoitus hankkeen-kuvaus))
+        sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
+                                 (when-let [tunniste (-> hankkeen-kuvaus :sijoitusLuvanTunniste)]
+                                   {:Sijoituslupaviite {:vaadittuKytkin false
+                                                        :tunniste tunniste}}))
+        canonical-body (util/strip-nils
+                         (merge
+                           (get-canonical-body application operation-name-key config documents-by-type)
+                           {:pintaala pinta-ala
+                            :lausuntotieto (get-statements (:statements application))
+                            :lupaAsianKuvaus lupaAsianKuvaus
+                            :sijoituslupaviitetieto sijoituslupaviitetieto}))]
+
+    {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
+                     :yleinenAlueAsiatieto {permit-name-key canonical-body}}}))
 
 
 (defn jatkoaika-to-canonical
@@ -300,141 +292,71 @@
   [application lang]
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
-
         link-permit-data (-> application :linkPermitData first)
-
         ;; When operation is missing, setting kaivulupa as the operation (app created via op tree)
         operation-name-key (or (-> link-permit-data :operation keyword) :ya-katulupa-vesi-ja-viemarityot)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
-
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
-
-;        hakija (get-yritys-and-henkilo (-> documents-by-type :hakija-ya first :data) "hakija")
-        hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
-
-        tyoaika-doc (-> documents-by-type :tyo-aika-for-jatkoaika first :data)
-        alku-pvm (if-let [tyoaika-alkaa-value (-> tyoaika-doc :tyoaika-alkaa-pvm)]
-                   (util/to-xml-date-from-string tyoaika-alkaa-value)
-                   (util/to-xml-date (:submitted application)))
-        loppu-pvm (util/to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))
-        maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
-        maksajatieto-2-1-3 (get-maksajatiedot (-> documents-by-type :yleiset-alueet-maksaja first))
-        maksajatieto (when maksaja {:Maksaja (util/deep-merge maksajatieto-2-1-3 (:Osapuoli maksaja))})
-        osapuolitieto (vec (filter :Osapuoli [hakija]))
-        vastuuhenkilotieto (vec (filter :Vastuuhenkilo [;hakija
-                                                        maksaja]))
+        [alku-pvm loppu-pvm _] (get-alku-loppu-pvm-main-viit-tapahtuma-info application documents-by-type config)
         hankkeen-kuvaus (-> documents-by-type :hankkeen-kuvaus-jatkoaika first :data :kuvaus)
-        lisaaikatieto (when alku-pvm
-                        {:Lisaaika {:alkuPvm alku-pvm
-                                    :loppuPvm loppu-pvm
-                                    :perustelu hankkeen-kuvaus}})
-        johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
-                                  {:Johtoselvitysviite {:vaadittuKytkin false
-                                                        ;:tunniste "..."
-                                                        }})]
-    {:YleisetAlueet
-     {:toimituksenTiedot (toimituksen-tiedot application lang)
-      :yleinenAlueAsiatieto {permit-name-key
-                             {:kasittelytietotieto (get-kasittelytieto application)
-                              :luvanTunnisteTiedot (get-luvan-tunniste-tiedot application)
-                              :alkuPvm alku-pvm
-                              :loppuPvm loppu-pvm
-                              :sijaintitieto (get-sijaintitieto application)
-                              :osapuolitieto osapuolitieto
-                              :vastuuhenkilotieto vastuuhenkilotieto
-                              :maksajatieto maksajatieto
-                              :lisaaikatieto lisaaikatieto
-                              :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
-                              :johtoselvitysviitetieto johtoselvitysviitetieto
-                              }}}}))
+        lisaaikatieto (when alku-pvm {:Lisaaika {:alkuPvm alku-pvm
+                                                 :loppuPvm loppu-pvm
+                                                 :perustelu hankkeen-kuvaus}})
+        canonical-body (util/strip-nils
+                         (merge
+                           (get-canonical-body application operation-name-key config documents-by-type)
+                           {:lisaaikatieto lisaaikatieto}))]
 
-; TODO
-(defn katselmus-canonical [application
-                           katselmus
-                           lang
-                           user
-;                           lang task-id task-name pitoPvm user katselmuksen-nimi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat
-                           ]
-  (let [application (tools/unwrapped application)
-        documents-by-type (documents-by-type-without-blanks application)
-
-        operation-name-key (-> application :primaryOperation :name keyword)
-        permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
-
-        _ (println "\n operation-name-key: " operation-name-key "\n")
-        _ (println "\n permit-name-key: " permit-name-key "\n")
+    {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
+                     :yleinenAlueAsiatieto {permit-name-key canonical-body}}}))
 
 
-        data (tools/unwrapped (:data katselmus))
+(defn- get-ya-katselmus [katselmus]
+  (let [data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
         huomautukset (-> data :katselmus :huomautukset)
         task-id (:id katselmus)
-        task-name (:taskname katselmus)
+        task-name (:taskname katselmus)]
+    (util/strip-nils
+      (merge
+        {:pitoPvm (if (number? pitoPvm) (util/to-xml-date pitoPvm) (util/to-xml-date-from-string pitoPvm))
+         ;;
+         ;;
+         ;; TODO: own values to ya task schema + migration
+         ;;
+         :katselmuksenLaji (case katselmuksenLaji
+                             "aloituskokous" "Aloituskatselmus"
+                             "loppukatselmus" "Loppukatselmus"
+                             "Muu valvontakäynti")
+         :vaadittuLupaehtonaKytkin (true? vaadittuLupaehtona)
+         :osittainen tila
+         :lasnaolijat lasnaolijat
+         :pitaja pitaja
+         :poikkeamat poikkeamat
+         :tarkastuksenTaiKatselmuksenNimi task-name}
+        (when task-id
+          {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}})
+        (when (:kuvaus huomautukset)
+          {:huomautustieto {:Huomautus (reduce-kv
+                                         (fn [m k v]
+                                           (if-not (ss/blank? v)
+                                             (assoc m k (util/to-xml-date-from-string v))
+                                             m))
+                                         (select-keys huomautukset [:kuvaus :toteaja])
+                                         (select-keys huomautukset [:maaraAika :toteamisHetki]))}})))))
 
+(defn katselmus-canonical [application katselmus lang user]
+  (let [application (tools/unwrapped application)
+        documents-by-type (documents-by-type-without-blanks application)
+        operation-name-key (-> application :primaryOperation :name keyword)
+        permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
+        config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
+        canonical-body (util/strip-nils
+                         (merge
+                           (get-canonical-body application operation-name-key config documents-by-type)
+                           {:katselmustieto {:Katselmus (get-ya-katselmus katselmus)}}))]
 
-        ;; TODO
-        alku-pvm nil
-        loppu-pvm nil
-        vastuuhenkilotieto nil
-        maksajatieto nil
-        johtoselvitysviitetieto nil
-        osapuolitieto nil
+    {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
+                     :yleinenAlueAsiatieto {permit-name-key canonical-body}}}))
 
-        katselmus (util/strip-nils
-                    (merge
-                      {:pitoPvm (if (number? pitoPvm) (util/to-xml-date pitoPvm) (util/to-xml-date-from-string pitoPvm))
-                       ; TODO own values to ya task schema + migration
-                       :katselmuksenLaji (case katselmuksenLaji
-                                           "aloituskokous" "Aloituskatselmus"
-                                           "loppukatselmus" "Loppukatselmus"
-                                           "Muu valvontakäynti")
-                       :vaadittuLupaehtonaKytkin (true? vaadittuLupaehtona)
-                       :osittainen tila
-                       :lasnaolijat lasnaolijat
-                       :pitaja pitaja
-                       :poikkeamat poikkeamat
-                       :tarkastuksenTaiKatselmuksenNimi task-name}
-                      (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}})
-                      (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
-                                                                                (fn [m k v] (if-not (ss/blank? v)
-                                                                                              (assoc m k (util/to-xml-date-from-string v))
-                                                                                              m))
-                                                                                (select-keys huomautukset [:kuvaus :toteaja])
-                                                                                (select-keys huomautukset [:maaraAika :toteamisHetki]))}})))
-        canonical {:YleisetAlueet
-                   {:toimituksenTiedot (toimituksen-tiedot application lang)
-                    :yleinenAlueAsiatieto
-                    {permit-name-key
-                     {:kasittelytietotieto (get-kasittelytieto application)
-                      :luvanTunnisteTiedot (get-luvan-tunniste-tiedot application)
-
-                      ;; pakollisia
-                      :alkuPvm alku-pvm
-                      :loppuPvm loppu-pvm
-                      :sijaintitieto (get-sijaintitieto application)
-                      :osapuolitieto osapuolitieto
-                      :vastuuhenkilotieto vastuuhenkilotieto
-                      :maksajatieto maksajatieto
-                      :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
-                      :johtoselvitysviitetieto johtoselvitysviitetieto
-
-                      ;; TODO: Tuleeko nama?
-;                      :lupaAsianKuvaus lupaAsianKuvaus
-;                      :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
-;                      :sijoituslupaviitetieto sijoituslupaviitetieto
-
-
-;                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
-;                                                                              :henkilo {:nimi {:etunimi (:firstName user)
-;                                                                                               :sukunimi (:lastName user)}
-;                                                                                        :osoite {:osoitenimi {:teksti (or (:street user) "")}
-;                                                                                                 :postitoimipaikannimi (:city user)
-;                                                                                                 :postinumero (:zip user)}
-;                                                                                         :sahkopostiosoite (:email user)
-;                                                                                         :puhelin (:phone user)}}}}}
-                      :katselmustieto {:Katselmus katselmus}
-;                      :lisatiedot (get-lisatiedot (:lisatiedot documents-by-type) lang)
-;                      :kayttotapaus (katselmus-kayttotapaus katselmuksenLaji tyyppi)
-                      }}}}]
-    canonical))
