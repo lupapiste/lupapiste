@@ -639,14 +639,10 @@
                           empty-tag)}})
 
 (defn get-henkilo [henkilo]
-  (let [nimi (util/assoc-when {}
-                         :etunimi (-> henkilo :henkilotiedot :etunimi)
-                         :sukunimi (-> henkilo :henkilotiedot :sukunimi))
-        teksti (util/assoc-when {} :teksti (-> henkilo :osoite :katu))
-        osoite (util/assoc-when {}
-                           :osoitenimi teksti
-                           :postinumero (-> henkilo :osoite :postinumero)
-                           :postitoimipaikannimi (-> henkilo :osoite :postitoimipaikannimi))]
+  (let [nimi   (util/assoc-when {}
+                                :etunimi (-> henkilo :henkilotiedot :etunimi)
+                                :sukunimi (-> henkilo :henkilotiedot :sukunimi))
+        osoite (get-simple-osoite (:osoite henkilo))]
     (not-empty
       (util/assoc-when {}
                   :nimi nimi

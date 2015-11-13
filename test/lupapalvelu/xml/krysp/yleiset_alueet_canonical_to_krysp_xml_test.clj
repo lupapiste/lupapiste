@@ -16,8 +16,8 @@
             [clojure.data.xml :refer :all]
             [sade.xml :as xml]
             [sade.common-reader :as cr]
-            [lupapalvelu.domain :refer [get-document-by-name]
-            [lupapalvelu.tasks]]))
+            [lupapalvelu.domain :refer [get-document-by-name]]
+            [lupapalvelu.tasks]))
 
 (defn- do-test [application]
   (let [operation-name-key (-> application :primaryOperation :name keyword)
