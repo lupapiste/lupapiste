@@ -38,15 +38,23 @@
   (when-let [osapuoli (get-osapuoli-data omistaja :rakennuksenomistaja)]
     {:Omistaja osapuoli}))
 
-(defn- get-rakennustunnus [toimenpide application]
+(defn- operation-description [{primary :primaryOperation secondaries :secondaryOperations} op-id]
+  (let [ops (cons primary secondaries)]
+    (->> ops (filter #(= op-id (:id %))) first :description)))
+
+(defn get-rakennustunnus [toimenpide application {{op-id :id} :op}]
   (let [defaults {:jarjestysnumero nil :kiinttun (:propertyId application)}
         {:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} toimenpide]
     (cond
       manuaalinen_rakennusnro (assoc defaults :rakennusnro manuaalinen_rakennusnro)
-      rakennusnro             (util/assoc-when defaults :rakennusnro rakennusnro :valtakunnallinenNumero valtakunnallinenNumero)
+      rakennusnro             (util/assoc-when defaults
+                                               :rakennusnro rakennusnro
+                                               :valtakunnallinenNumero valtakunnallinenNumero
+                                               :muuTunnustieto {:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                                               :rakennuksenSelite (operation-description application op-id))
       :default defaults)))
 
-(defn- get-rakennus [toimenpide application {id :id created :created}]
+(defn- get-rakennus [toimenpide application {id :id created :created info :schema-info}]
   (let [{:keys [kaytto mitat rakenne lammitys luokitus huoneistot]} toimenpide
         kuvaus (:toimenpiteenKuvaus toimenpide)
         kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (:muuRakennusaine rakenne)
@@ -60,6 +68,8 @@
                                       :julkisivumateriaali (:julkisivu rakenne))
         lammitystapa (:lammitystapa lammitys)
         huoneistot {:huoneisto (get-huoneisto-data huoneistot)}
+        vaestonsuoja-value (ss/trim (get-in toimenpide [:varusteet :vaestonsuoja]))
+        vaestonsuoja (when (ss/numeric? vaestonsuoja-value) (util/->int vaestonsuoja-value))
         rakennuksen-tiedot-basic-info {:kayttotarkoitus (:kayttotarkoitus kaytto)
                                        :rakentamistapa (:rakentamistapa rakenne)
                                        :verkostoliittymat {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin))
@@ -80,9 +90,9 @@
                                                    :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
                                                    :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
                                                    :saunoja (-> toimenpide :varusteet :saunoja)
-                                                   :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}
+                                                   :vaestonsuoja vaestonsuoja}
                                        :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))
-                                       :rakennustunnus (get-rakennustunnus toimenpide application)}
+                                       :rakennustunnus (get-rakennustunnus toimenpide application info)}
         rakennuksen-tiedot (merge
                              (select-keys mitat [:tilavuus :kokonaisala :kellarinpinta-ala :kerrosluku :kerrosala :rakennusoikeudellinenKerrosala])
                              (select-keys luokitus [:energialuokka :energiatehokkuusluku :paloluokka])
@@ -316,7 +326,8 @@
                                            (util/assoc-when
                                              (select-keys building [:jarjestysnumero :kiinttun])
                                              :rakennusnro (:rakennusnro building)
-                                             :valtakunnallinenNumero (:valtakunnallinenNumero building))) ; v2.1.2
+                                             :valtakunnallinenNumero (:valtakunnallinenNumero building)  ; v2.1.2
+                                             ))
                          :katselmuksenRakennustieto (map #(let [building (:rakennus %)
                                                                 building-canonical (merge
                                                                                      (select-keys building [:jarjestysnumero :kiinttun])
@@ -326,7 +337,14 @@
                                                                                       :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})
                                                                 building-canonical (if (s/blank? (:kiinttun building-canonical))
                                                                                      (assoc building-canonical :kiinttun (:propertyId application))
-                                                                                     building-canonical)]
+                                                                                     building-canonical)
+                                                                building-canonical (util/assoc-when
+                                                                                    building-canonical
+                                                                                    :muuTunnustieto (map (fn [{:keys [tag id]}]
+                                                                                                           {:MuuTunnus {:tunnus tag :sovellus id}})
+                                                                                                         (:tags building))
+                                                                                    :rakennuksenSelite (:description building)) ; v2.2.0
+                                                                ]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
                       (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
                                                                                 (fn [m k v] (if-not (ss/blank? v)

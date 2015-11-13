@@ -1,6 +1,6 @@
 (ns lupapalvelu.tiff-validation
   (:require [clojure.java.io :as io]
-            [taoensso.timbre :refer [error]])
+            [taoensso.timbre :refer [error info]])
   (:import [javax.imageio ImageIO]
            (javax.imageio.stream FileImageInputStream)
            (com.sun.media.imageio.plugins.tiff BaselineTIFFTagSet)))
@@ -42,10 +42,10 @@
       (if (empty? errors)
         true
         (do
-          (error "TIFF image" file "failed validation.")
+          (info "TIFF image" file "failed validation.")
           (doseq [err errors]
-            (error err))
+            (info err))
           false)))
     (catch Exception e
-      (do (error "TIFF validation for image" file "caused an exception:" e)
+      (do (error e (str "TIFF validation for image" file "caused an exception:"))
           false))))

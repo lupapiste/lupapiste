@@ -105,10 +105,12 @@
 
 (defn building-xml
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
-  [server credentials property-id]
-  (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
-    (trace "Get building: " url)
-    (or (cr/get-xml url credentials) {})))
+  ([server credentials property-id]
+   (building-xml server credentials property-id false))
+  ([server credentials property-id raw?]
+   (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
+     (trace "Get building: " url)
+     (or (cr/get-xml url credentials raw?) {}))))
 
 (defn- application-xml [type-name id-path server credentials id raw?]
   (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))]
@@ -151,9 +153,11 @@
       building-id)))
 
 (defn- ->building-ids [id-container xml-no-ns]
+  (defn ->list "a as list or nil. a -> [a], [b] -> [b]" [a] (when a (-> a list flatten)))
   (let [national-id    (pysyva-rakennustunnus (get-text xml-no-ns id-container :valtakunnallinenNumero))
         local-short-id (-> (get-text xml-no-ns id-container :rakennusnro) ss/trim (#(when-not (ss/blank? %) %)))
-        local-id       (-> (get-text xml-no-ns id-container :kunnanSisainenPysyvaRakennusnumero) ss/trim (#(when-not (ss/blank? %) %)))]
+        local-id       (-> (get-text xml-no-ns id-container :kunnanSisainenPysyvaRakennusnumero) ss/trim (#(when-not (ss/blank? %) %)))
+        edn            (-> xml-no-ns (select [:Rakennus :rakennustunnus]) first xml->edn :rakennustunnus)]
     {:propertyId   (get-text xml-no-ns id-container :kiinttun)
      :buildingId   (first (remove ss/blank? [national-id local-short-id]))
      :nationalId   national-id
@@ -162,7 +166,9 @@
      :index        (get-text xml-no-ns id-container :jarjestysnumero)
      :usage        (or (get-text xml-no-ns :kayttotarkoitus) "")
      :area         (get-text xml-no-ns :kokonaisala)
-     :created      (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))}))
+     :created      (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))
+     :tags         (map (fn [{{:keys [tunnus sovellus]} :Muutunnus}] {:tag tunnus :id sovellus}) (->list (:muuTunnustieto edn)))
+     :description (:rakennuksenSelite edn)}))
 
 (defn ->buildings-summary [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)]
