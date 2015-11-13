@@ -188,7 +188,7 @@
         main-viit-tapahtuma-info (select-keys main-viit-tapahtuma-doc [main-viit-tapahtuma-name])
         main-viit-tapahtuma (get main-viit-tapahtuma-doc main-viit-tapahtuma-name)
 
-        tyoaika-doc (when (:tyoaika config) (-> documents-by-type :tyoaika first :data))
+        tyoaika-doc (when (:tyoaika config) (-> (util/some-key documents-by-type :tyoaika :tyo-aika-for-jatkoaika) first :data))
         alku-pvm (if (:dummy-alku-and-loppu-pvm config)
                    (util/to-xml-date (:submitted application))
                    (if (:mainostus-viitoitus-tapahtuma-pvm config)
