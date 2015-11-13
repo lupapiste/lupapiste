@@ -7,7 +7,7 @@
             data-test-id="bulletin-comment-box-form"
             class="form-grid form-grid--no-border">
 
-        <!-- hlotiedot -->
+        <!-- personal details -->
         <div data-bind="with: userInfo">
           <div class="row">
             <div class="col-1">
@@ -56,7 +56,7 @@
           <div class="row">
             <div class="col-1">
               <div data-bind="component: {name: 'text-field',
-                                          params: {value: email,
+                                          params: {value: $component.email,
                                                    id: 'email',
                                                    lLabel: 'userinfo.email',
                                                    required: true}}"></div>
@@ -64,20 +64,11 @@
             <div class="col-1">
               <br/>
               <div data-bind="component: {name: 'checkbox-field',
-                                          params: {value: emailPreferred,
+                                          params: {value: $component.emailPreferred,
                                                    id: 'emailPreferred',
                                                    lLabel: 'bulletin.comment.emailPreferred'}}"></div>
             </div>
           </div>
-
-          <label>Katuosoite</label>
-          <input data-bind="value: street"/>
-
-          <label>Postinumero</label>
-          <input data-bind="value: zip"/>
-
-          <label>Kaupunki</label>
-          <input data-bind="value: city"/>
         </div>
 
         <div class="row">

@@ -10,6 +10,9 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   self.attachments = ko.observableArray([]);
   self.pending = ko.observable(false);
 
+  self.email = ko.observable();
+  self.emailPreferred = ko.observable();
+
   self.userInfo = params.userInfo;
 
   self.isDisabled = ko.pureComputed(function() {
