@@ -17,24 +17,28 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
 
   self.otherReceiver = ko.observable(false);
 
+  ko.computed(function() {
+    if (!self.otherReceiver()) {
+      _.mapKeys(self.otherReceiverInfo, function(value, key) {
+        self.otherReceiverInfo[key](undefined);
+        self.otherReceiverInfo[key].isModified(false);
+      });
+    }
+    self.email(undefined);
+    self.emailPreferred(undefined);
+  });
+
   // User can select different receiving address for verdict messages i.e. solicitor
   self.otherReceiverInfo = {
     firstName: ko.observable(),
     lastName: ko.observable(),
     street: ko.observable(),
     zip: ko.observable(),
-    city: ko.observable(),
-    email: ko.observable().extend({email: true}),
-    emailPreferred: ko.observable()
+    city: ko.observable()
   };
 
-  self.otherReceiverInfo.emailIsBlank = ko.pureComputed(function() {
-    return _.isBlank(self.otherReceiverInfo.email());
-  });
-
-  ko.computed(function() {
-    self.otherReceiverInfo.emailPreferred(!self.otherReceiverInfo.emailIsBlank());
-  });
+  self.allOtherInfo = ko.validatedObservable([self.otherReceiverInfo.firstName, self.otherReceiverInfo.lastName,
+                                              self.otherReceiverInfo.street, self.otherReceiverInfo.zip, self.otherReceiverInfo.city]);
 
   self.emailIsBlank = ko.pureComputed(function() {
     return _.isBlank(self.email());
@@ -45,7 +49,8 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   });
 
   self.isDisabled = ko.pureComputed(function() {
-    return self.pending() || !self.comment() || !self.email.isValid();
+    var allOtherInfoIsValid = !self.otherReceiver() || self.otherReceiver() && self.allOtherInfo.isValid();
+    return self.pending() || !self.comment() || !self.email.isValid() || !allOtherInfoIsValid;
   });
 
   self.fileChanged = function(data, event) {
