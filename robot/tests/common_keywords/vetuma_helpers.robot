@@ -37,3 +37,10 @@ Authenticate via Nordea via Vetuma
   Click element  xpath=//input[@type='submit']
   Wait Until  Element Should Be Visible  xpath=//button[@type='submit']
   Click element  xpath=//button[@type='submit']
+
+Start Vetuma authentication but cancel via Nordea
+  Click element  vetuma-init
+  Wait Until  Element Should Be Visible  xpath=//a[@title='<< Palaa palveluun: Lupapiste']
+  Click element  xpath=//a[@title='<< Palaa palveluun: Lupapiste']
+  Wait Until  Element Should Be Visible  xpath=//button[@title='Palaa palveluun: Lupapiste']
+  Click element  xpath=//button[@title='Palaa palveluun: Lupapiste']
