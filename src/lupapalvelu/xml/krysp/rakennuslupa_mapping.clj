@@ -45,6 +45,15 @@
     {:tag :katselmusOsittainen}
     {:tag :kayttoonottoKytkin}))
 
+(def- muu-tunnus
+  [{:tag :MuuTunnus :child [{:tag :tunnus :ns "yht"}
+                            {:tag :sovellus :ns "yht"}]}])
+
+(def- rakennustunnus_220
+  (conj rakennustunnus_213
+        {:tag :muuTunnustieto :child muu-tunnus}
+        {:tag :rakennuksenSelite}))
+
 (def- rakennus
   {:tag :Rakennus
    :child [{:tag :yksilointitieto :ns "yht"}
@@ -114,7 +123,7 @@
                                :child [{:tag :muu}
                                        {:tag :omistajalaji}]}]}))
 
-(def rakennus_220
+(def- rakennus_220
   (-> rakennus
       (update-in [:child] mapping-common/update-child-element
                  [:omistajatieto :Omistaja]
@@ -127,11 +136,13 @@
                                          {:tag :omistajalaji :ns "rakval"
                                           :child [{:tag :muu}
                                                   {:tag :omistajalaji}]}]})
+      (update-in [:child]
+                 mapping-common/update-child-element
+                 [:rakennuksenTiedot :rakennustunnus]
+                 {:tag :rakennustunnus :child rakennustunnus_220})
       (update-in [:child] mapping-common/update-child-element
                  [:rakennuksenTiedot]
                  #(update-in % [:child] mapping-common/merge-into-coll-after-tag :kerrosala [{:tag :rakennusoikeudellinenKerrosala}]))))
-
-
 
 (def- katselmustieto
   {:tag :katselmustieto
@@ -242,9 +253,13 @@
       {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
 
 (def- katselmus_220
-  (update-in katselmus_215 [:child] mapping-common/update-child-element
+  (-> katselmus_215
+      (update-in [:child] mapping-common/update-child-element
+              [:Katselmus :katselmuksenRakennustieto :KatselmuksenRakennus]
+              {:tag :KatselmuksenRakennus :child rakennustunnus_220})
+      (update-in [:child] mapping-common/update-child-element
              [:Katselmus :katselmuspoytakirja]
-             {:tag :liitetieto :child [{:tag :liite :child mapping-common/liite-children_216}]}))
+             {:tag :liitetieto :child [{:tag :liite :child mapping-common/liite-children_216}]})))
 
 (def rakennuslupa_to_krysp_213
   (-> rakennuslupa_to_krysp_212
@@ -326,7 +341,13 @@
                  #(update-in % [:child] concat [{:tag :kayttotarkoitus}]))
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
-                 katselmus_220)))
+                 katselmus_220)
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
+                 {:tag :lausuntotieto :child [mapping-common/lausunto_216]})
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto :Liite]
+                 {:tag :Liite :child mapping-common/liite-children_216})))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
@@ -395,6 +416,7 @@
   [application katselmus user lang krysp-version output-dir begin-of-link]
   (let [find-national-id (fn [{:keys [kiinttun rakennusnro]}]
                            (:nationalId (some #(when (and (= kiinttun (:propertyId %)) (= rakennusnro (:localShortId %))) %) (:buildings application))))
+        find-building (fn [nid] (some #(when (= (:nationalId %) nid) %) (:buildings application)))
         data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
@@ -403,9 +425,15 @@
                        (map
                          (fn [{rakennus :rakennus :as b}]
                            (when rakennus
-                             (if (ss/blank? (:valtakunnallinenNumero rakennus))
-                              (assoc-in b [:rakennus :valtakunnallinenNumero] (find-national-id rakennus))
-                              b))))
+                             (let [nid (if (ss/blank? (:valtakunnallinenNumero rakennus))
+                                         (find-national-id rakennus)
+                                         (:valtakunnallinenNumero rakennus))
+                                   b (assoc-in b [:rakennus :valtakunnallinenNumero] nid)
+                                   tags (:tags (find-building nid))
+                                   b (if tags (assoc-in b [:rakennus :tags] tags) b)
+                                   desc (:description (find-building nid))
+                                   b (if desc (assoc-in b [:rakennus :description] desc) b)]
+                               b))))
                        (remove
                          #(or
                             (nil? %)
@@ -433,7 +461,9 @@
 
 (permit/register-function permit/R :review-krysp-mapper save-katselmus-as-krysp)
 
-(defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index localShortId nationalId propertyId] :as building} user krysp-version]
+(defn save-aloitusilmoitus-as-krysp [application lang output-dir started
+                                     {:keys [index localShortId nationalId propertyId] :as building}
+                                     user krysp-version]
   (let [building-id {:rakennus {:jarjestysnumero index
                                 :kiinttun        propertyId
                                 :rakennusnro     localShortId
