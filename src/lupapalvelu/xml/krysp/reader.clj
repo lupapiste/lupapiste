@@ -105,10 +105,12 @@
 
 (defn building-xml
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
-  [server credentials property-id]
-  (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
-    (trace "Get building: " url)
-    (or (cr/get-xml url credentials) {})))
+  ([server credentials property-id]
+   (building-xml server credentials property-id false))
+  ([server credentials property-id raw?]
+   (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
+     (trace "Get building: " url)
+     (or (cr/get-xml url credentials raw?) {}))))
 
 (defn- application-xml [type-name id-path server credentials id raw?]
   (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))]
