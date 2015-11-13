@@ -11,6 +11,7 @@ LUPAPISTE.MoveToProclaimedModel = function (params) {
   self.proclamationStartsAt = ko.observable();
   self.proclamationEndsAt   = ko.observable();
   self.proclamationText     = ko.observable();
+  self.proclaimAgain        = ko.observable(false);
 
   self.pending = ko.observable();
 
@@ -18,6 +19,10 @@ LUPAPISTE.MoveToProclaimedModel = function (params) {
 
   self.isValid = ko.pureComputed(function() {
     return self.all.isValid();
+  });
+
+  self.alreadyProclaimed = ko.pureComputed(function() {
+    return ko.unwrap(self.bulletinState) === "proclaimed";
   });
 
   self.publishApplicationBulletin = function() {

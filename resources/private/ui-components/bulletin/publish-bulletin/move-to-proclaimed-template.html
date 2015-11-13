@@ -3,6 +3,7 @@
     <span data-bind="ltext: 'bulletin.state.label'"></span>
     <span class="bulletin-state" data-bind="ltext: 'bulletin.state.proclaimed'"></span>
   </p>
+  <!-- ko if: !alreadyProclaimed() || proclaimAgain() -->
   <p>
     <span data-bind="ltext: 'bulletin.application.state.label'"></span>
     <span class="bulletin-state" data-bind="ltext: 'bulletin.state.proclaimed'"></span>
@@ -44,4 +45,10 @@
     <i class="wait spin lupicon-refresh"></i>
     <span data-bind="ltext: 'bulletin.publish'"></span>
   </button>
+  <!-- /ko -->
+  <!-- ko if: alreadyProclaimed() && !proclaimAgain() -->
+  <button class="primary" data-bind="toggleClick: proclaimAgain">
+    <span data-bind="ltext: 'bulletin.proclamation.proclaimAgain'"></span>
+  </button>
+  <!-- /ko -->
 </script>
