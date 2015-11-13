@@ -346,6 +346,7 @@
 
 (def katselmus
   (-> (dummy-doc "task-katselmus-ya")
+      (assoc :taskname "testikatselmus")
       (assoc-in [:data :katselmus :pitaja :value] "Viranomaisen nimi")
       (assoc-in [:data :katselmus :pitoPvm :value] "01.05.1974")
       (assoc-in [:data :katselmus :huomautukset :kuvaus :value] "huomautus - kuvaus")
@@ -385,7 +386,7 @@
                                       :toteamisHetki "1974-05-02"
                                       :toteaja "huomautus - viranomaisen nimi"}})
     (fact "katselmuspoytakirja" katselmuspoytakirja => nil)
-    (fact "tarkastuksenTaiKatselmuksenNimi" tarkastuksenTaiKatselmuksenNimi => nil)
+    (fact "tarkastuksenTaiKatselmuksenNimi" tarkastuksenTaiKatselmuksenNimi => "testikatselmus")
     (fact "lasnaolijat" lasnaolijat => "paikallaolijat")
     (fact "poikkeamat" poikkeamat => "jotain poikkeamia oli")
     )
