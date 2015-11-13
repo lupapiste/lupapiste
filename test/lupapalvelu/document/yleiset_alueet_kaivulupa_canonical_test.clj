@@ -1,11 +1,11 @@
 (ns lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test
   (:require [lupapalvelu.document.yleiset-alueet-canonical-test-common :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.test-util :refer [xml-datetime-is-roughly?]]
+            [lupapalvelu.test-util :refer [xml-datetime-is-roughly? dummy-doc]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
-            [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
+            [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical katselmus-canonical]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [sade.util :as util]
@@ -63,7 +63,6 @@
                             :drawings ctc/drawings})
 
 (ctc/validate-all-documents kaivulupa-application)
-
 
 (def- link-permit-data {:id "LP-753-2013-00003"
                                  :type "kuntalupatunnus"
@@ -343,3 +342,53 @@
     (fact "Viitelupa"
       (:tunnus viitelupatunnus) => (:id link-permit-data)
       (:sovellus viitelupatunnus) => "Viitelupa")))
+
+
+(def katselmus
+  (-> (dummy-doc "task-katselmus-ya")
+      (assoc-in [:data :katselmus :pitaja :value] "Viranomaisen nimi")
+      (assoc-in [:data :katselmus :pitoPvm :value] "01.05.1974")
+      (assoc-in [:data :katselmus :huomautukset :kuvaus :value] "huomautus - kuvaus")
+      (assoc-in [:data :katselmus :huomautukset :toteaja :value] "huomautus - viranomaisen nimi")
+      (assoc-in [:data :katselmus :huomautukset :maaraAika :value] "02.06.1974")
+      (assoc-in [:data :katselmus :lasnaolijat :value] "paikallaolijat")
+      (assoc-in [:data :katselmus :poikkeamat :value] "jotain poikkeamia oli")
+      (assoc-in [:data :katselmus :tila :value] "lopullinen")
+      ))
+
+(def kaivulupa-application-with-review (assoc kaivulupa-application :tasks [katselmus]))
+
+(ctc/validate-all-documents kaivulupa-application-with-review :tasks)
+
+(facts "Katselmus canonical"
+  (let [canonical (katselmus-canonical kaivulupa-application-with-review katselmus "fi" {})
+        review    (get-in canonical [:YleisetAlueet :yleinenAlueAsiatieto :Tyolupa :katselmustieto :Katselmus])
+        {:keys [pitoPvm pitaja
+                katselmuksenLaji
+                vaadittuLupaehtonaKytkin
+                huomautustieto
+                katselmuspoytakirja
+                tarkastuksenTaiKatselmuksenNimi
+                lasnaolijat poikkeamat]}           review]
+
+    review => map?
+
+    ;(println review)
+
+    (fact "pitaja" pitaja => "Viranomaisen nimi")
+    (fact "pitoPvm" pitoPvm => "1974-05-01")
+    (fact "katselmuksenLaji" katselmuksenLaji => "Muu valvontakäynti")
+    (fact "vaadittuLupaehtonaKytkin" vaadittuLupaehtonaKytkin => true)
+    (fact "huomautustieto"
+      huomautustieto  => {:Huomautus {:kuvaus "huomautus - kuvaus"
+                                      :maaraAika "1974-06-02"
+                                      :toteamisHetki "1974-05-02"
+                                      :toteaja "huomautus - viranomaisen nimi"}})
+    (fact "katselmuspoytakirja" katselmuspoytakirja => nil)
+    (fact "tarkastuksenTaiKatselmuksenNimi" tarkastuksenTaiKatselmuksenNimi => nil)
+    (fact "lasnaolijat" lasnaolijat => "paikallaolijat")
+    (fact "poikkeamat" poikkeamat => "jotain poikkeamia oli")
+    )
+
+  )
+
