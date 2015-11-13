@@ -300,9 +300,9 @@
   [{:keys [katu postinumero postitoimipaikannimi] :as osoite}]
   (when katu  ;; required field in krysp (i.e. "osoitenimi")
     (assoc-country {:osoitenimi           {:teksti katu}
-     :postitoimipaikannimi postitoimipaikannimi
+                    :postitoimipaikannimi postitoimipaikannimi
                     :postinumero          postinumero}
-                   osoite)))
+      osoite)))
 
 (defn- get-name [henkilotiedot]
   {:nimi (select-keys henkilotiedot [:etunimi :sukunimi])})
@@ -332,7 +332,7 @@
         yritys-canonical (merge
                            (get-simple-yritys yritys)
                            yhteystiedot-canonical
-                           {:vainsahkoinenAsiointiKytkin (true? (-> yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin))})]
+                           {:vainsahkoinenAsiointiKytkin (-> yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin true?)})]
     (util/assoc-when yritys-canonical :verkkolaskutustieto (get-verkkolaskutus yritys))))
 
 (def- default-role "ei tiedossa")
@@ -354,8 +354,8 @@
     (when (-> henkilo :henkilotiedot :sukunimi)
       (let [kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type)
             omistajalaji   (muu-select-map
-                             :muu (-> osapuoli :muu-omistajalaji)
-                             :omistajalaji (-> osapuoli :omistajalaji))]
+                             :muu (:muu-omistajalaji osapuoli)
+                             :omistajalaji (:omistajalaji osapuoli))]
         (merge
           {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
            :kuntaRooliKoodi kuntaRoolicode
@@ -366,9 +366,9 @@
                       (get-name (:henkilotiedot henkilo))
                       (get-yhteystiedot-data (:yhteystiedot henkilo))
                       (when-not yritys-type-osapuoli?
-                        {:henkilotunnus (-> (:henkilotiedot henkilo) :hetu)
+                        {:henkilotunnus (get-in henkilo [:henkilotiedot :hetu])
                          :osoite (get-simple-osoite (:osoite henkilo))
-                         :vainsahkoinenAsiointiKytkin (true? (-> henkilo :kytkimet :vainsahkoinenAsiointiKytkin))}))}
+                         :vainsahkoinenAsiointiKytkin (-> henkilo :kytkimet :vainsahkoinenAsiointiKytkin true?)}))}
           (when yritys-type-osapuoli?
             {:yritys (get-yritys-data (:yritys osapuoli))})
           (when omistajalaji {:omistajalaji omistajalaji}))))))
@@ -405,6 +405,7 @@
         {:koulutus koulutus
          :patevyysvaatimusluokka (:patevyysluokka patevyys)
          :valmistumisvuosi (:valmistumisvuosi patevyys)
+         :FISEpatevyyskortti (:fise patevyys)
          :kokemusvuodet (:kokemus patevyys)}
         (when (-> henkilo :nimi :sukunimi)
           {:henkilo henkilo})
@@ -463,7 +464,7 @@
            tyotehtavat))})))
 
 (defn get-tyonjohtaja-data [application lang tyonjohtaja party-type]
-  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
+  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi :FISEpatevyyskortti)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         ;; The mappings in backing system providers' end make us pass "muu" when "muu koulutus" is selected.
         ;; Thus cannot use just this as koulutus:
@@ -495,7 +496,7 @@
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
 (defn get-tyonjohtaja-v2-data [application lang tyonjohtaja party-type]
-  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
+  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi :FISEpatevyyskortti)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         koulutus (if (= "other" (:koulutusvalinta patevyys))
                    "muu"
@@ -529,19 +530,29 @@
     (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data application lang))
     (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data application lang))))
 
-(defn- get-neighbor [neighbor-name property-id]
-  {:Naapuri {:henkilo neighbor-name
-             :kiinteistotunnus property-id
-             :hallintasuhde "Ei tiedossa"}})
+(defn address->osoitetieto [{katu :street postinumero :zip postitoimipaikannimi :city :as address}]
+  (when-not (util/empty-or-nil? katu)
+    (util/assoc-when {}
+                     :osoitenimi {:teksti katu}
+                     :postinumero postinumero
+                     :postitoimipaikannimi postitoimipaikannimi)))
 
-(defn- get-neighbors [neighbors]
-  (remove nil? (for [neighbor neighbors]
-                   (let [status (last (:status neighbor))
-                         propertyId (:propertyId neighbor)]
-                     (case (:state status)
-                       "response-given-ok" (get-neighbor (str (-> status :vetuma :firstName) " " (-> status :vetuma :lastName)) propertyId)
-                       "mark-done" (get-neighbor (-> neighbor :owner :name) propertyId)
-                       nil)))))
+(defn get-neighbor [{status :status property-id :propertyId :as neighbor}]
+  (let [{state :state vetuma :vetuma message :message} (last status)
+        neighbor (util/assoc-when {}
+                                  :henkilo (str (:firstName vetuma) " " (:lastName vetuma))
+                                  :osoite (address->osoitetieto vetuma)
+                                  :kiinteistotunnus property-id
+                                  :hallintasuhde "Ei tiedossa"
+                                  :huomautus message)]
+    (case state
+      "response-given-comments" {:Naapuri (assoc neighbor :huomautettavaaKytkin true)}
+      "response-given-ok"       {:Naapuri (assoc neighbor :huomautettavaaKytkin false)}
+      nil)))
+
+(defn get-neighbors [neighbors]
+  (->> (map get-neighbor neighbors)
+       (remove nil?)))
 
 (defn osapuolet [{neighbors :neighbors :as application} documents-by-type lang]
   {:pre [(map? documents-by-type) (string? lang)]}
@@ -549,7 +560,7 @@
    {:osapuolitieto (get-parties application documents-by-type)
     :suunnittelijatieto (get-designers documents-by-type)
     :tyonjohtajatieto (get-foremen application documents-by-type lang)
-    ;:naapuritieto (get-neighbors neighbors)LPK-215
+    ;:naapuritieto (get-neighbors neighbors);LPK-215
     }})
 
 (defn change-value-to-when [value to_compare new_val]
@@ -661,20 +672,16 @@
           :puhelinnumero puhelin
           :sahkopostiosoite email)))
     (when-let [henkilo (-> unwrapped-party-doc :data :henkilo)]
-      (let [{:keys [henkilotiedot osoite yhteystiedot]} henkilo
-            teksti (util/assoc-when {} :teksti (:katu osoite))
-            osoite (util/assoc-when {}
-                     :osoitenimi teksti
-                     :postinumero (:postinumero osoite)
-                     :postitoimipaikannimi (:postitoimipaikannimi osoite))]
+      (let [{:keys [henkilotiedot yhteystiedot]} henkilo
+            osoite (get-simple-osoite (:osoite henkilo))]
         (not-empty
-         (util/assoc-when {}
-           :henkilotunnus (:hetu henkilotiedot)
-           :sukunimi (:sukunimi henkilotiedot)
-           :etunimi (:etunimi henkilotiedot)
-           :osoitetieto (when (seq osoite) {:Osoite osoite})
-           :puhelinnumero (:puhelin yhteystiedot)
-           :sahkopostiosoite (:email yhteystiedot))))
+          (util/assoc-when {}
+            :henkilotunnus (:hetu henkilotiedot)
+            :sukunimi (:sukunimi henkilotiedot)
+            :etunimi (:etunimi henkilotiedot)
+            :osoitetieto (when (seq osoite) {:Osoite osoite})
+            :puhelinnumero (:puhelin yhteystiedot)
+            :sahkopostiosoite (:email yhteystiedot))))
       )))
 
 (defn get-maksajatiedot [unwrapped-party-doc]
@@ -758,17 +765,19 @@
                         (entry :postitoimipaikannimi address))
                  address))
 
+(defn- ->nimi [personal]
+  {:nimi (select-keys personal [:etunimi :sukunimi])})
+
 (defmulti osapuolitieto :_selected)
 
 (defmethod osapuolitieto "henkilo"
   [{{:keys [yhteystiedot henkilotiedot osoite kytkimet]} :henkilo}]
   (merge (entry :turvakieltoKytkin henkilotiedot :turvakieltokytkin)
-         {:vainsahkoinenAsiointiKytkin (true? (-> kytkimet :vainsahkoinenAsiointiKytkin))}
+         {:vainsahkoinenAsiointiKytkin (-> kytkimet :vainsahkoinenAsiointiKytkin true?)}
          {:henkilotieto {:Henkilo
                          (merge
-                           {:nimi (merge (entry :etunimi henkilotiedot)
-                                         (entry :sukunimi henkilotiedot))}
-                           {:osoite (->postiosoite-type osoite)}
+                          (->nimi henkilotiedot)
+                          {:osoite (->postiosoite-type osoite)}
                            (entry :email yhteystiedot :sahkopostiosoite)
                            (entry :puhelin yhteystiedot)
                            (entry :hetu henkilotiedot :henkilotunnus))}}))
@@ -776,13 +785,14 @@
 (defmethod osapuolitieto "yritys"
   [data]
   (let [company (:yritys data)
-        {contact :yhteystiedot personal :henkilotiedot} (:yhteyshenkilo company)
+        {contact :yhteystiedot personal :henkilotiedot kytkimet :kytkimet} (:yhteyshenkilo company)
         billing (get-verkkolaskutus {:data data})
         billing-information (when billing
                               {:verkkolaskutustieto billing})]
     (merge (entry :turvakieltoKytkin personal :turvakieltokytkin)
-           {:vainsahkoinenAsiointiKytkin (true? (-> company :kytkimet :vainsahkoinenAsiointiKytkin))}
-           {:yritystieto {:Yritys (merge (entry :yritysnimi company :nimi)
+           {:vainsahkoinenAsiointiKytkin (true? (-> company :yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin))
+            :henkilotieto {:Henkilo (->nimi personal)}
+            :yritystieto {:Yritys (merge (entry :yritysnimi company :nimi)
                                          (entry :liikeJaYhteisoTunnus company :liikeJaYhteisotunnus )
                                          {:postiosoitetieto {:postiosoite (->postiosoite-type (:osoite company))}}
                                          (entry :puhelin contact)

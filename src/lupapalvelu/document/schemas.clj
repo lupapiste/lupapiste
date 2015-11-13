@@ -231,28 +231,18 @@
                                   yhteystiedot
                                   kytkimet))
 
-(def yhteyshenkilo
-  {:name "yhteyshenkilo"
-   :type :group
-   :body (body
-           [henkilotiedot-minimal]
-           yhteystiedot
-           kytkimet-with-vain-sahkoinen-asiointi)})
-
-(def yhteyshenkilo-suoramarkkinointi
-  {:name "yhteyshenkilo"
-   :type :group
-   :body (body
-           [henkilotiedot-minimal]
-           yhteystiedot
-           kytkimet)})
-
 (def yhteyshenkilo-without-kytkimet
   {:name "yhteyshenkilo"
    :type :group
    :body (body
            [henkilotiedot-minimal]
            yhteystiedot)})
+
+(def yhteyshenkilo-suoramarkkinointi
+  (update-in yhteyshenkilo-without-kytkimet [:body] concat [kytkimet]))
+
+(def yhteyshenkilo
+  (update-in yhteyshenkilo-without-kytkimet [:body] concat [kytkimet-with-vain-sahkoinen-asiointi]))
 
 (def yritys-minimal [{:name "yritysnimi" :type :string :required true :size "l"}
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
@@ -396,7 +386,18 @@
                               {:name "RAK-rakennesuunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.RAK-rakennesuunnittelija"}
                               {:name "ARK-rakennussuunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.ARK-rakennussuunnittelija"}
                               {:name "Vaikeiden t\u00F6iden suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.Vaikeiden t\u00f6iden suunnittelija"}
-                              {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
+
+                              ; KRYSP yht 2.1.6
+                              {:name "rakennussuunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.rakennussuunnittelija"}
+                              {:name "kantavien rakenteiden suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.kantavien rakenteiden suunnittelija"}
+                              {:name "pohjarakenteiden suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.pohjarakenteiden suunnittelija"}
+                              {:name "ilmanvaihdon suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.ilmanvaihdon suunnittelija"}
+                              {:name "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.vesiviemarisuunnittelija"}
+                              {:name "rakennusfysikaalinen suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.rakennusfysikaalinen suunnittelija"}
+                              {:name "kosteusvaurion korjausty\u00f6n suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.kosteusvaurion korjausty\u00f6n suunnittelija"}
+
+                              {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}
+                              ]}])
 
 (def suunnittelija (body
                      kuntaroolikoodi
@@ -747,7 +748,7 @@
                        {:name "lamminvesiKytkin" :type :checkbox}
                        {:name "aurinkopaneeliKytkin" :type :checkbox}
                        {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
-                       {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
+                       {:name "vaestonsuoja" :type :string :subtype :number :min 0 :max 99999 :size "s" :unit "hengelle"}
                        {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
 
 (def luokitus {:name "luokitus"
@@ -843,7 +844,8 @@
 
 (def rakennelman-kayttotarkoitus {:name "kayttotarkoitus"
                                   :type :select
-                                  :body (mapv (partial hash-map :name) rakennelman-kayttotarkoitukset)})
+                                  :i18nkey "rakennelman-kayttotarkoitus"
+                                  :body (mapv #(hash-map :i18nkey (str "rakennelman-kayttotarkoitus." %) :name %) rakennelman-kayttotarkoitukset)})
 
 (def rakennelma (body {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
                       rakennelman-kayttotarkoitus

@@ -129,6 +129,7 @@
                                     :order 2}
                       :data {:hallintaperuste {:value "oma"}
                              :kaavanaste {:value "ei kaavaa"}
+                             :kaavatilanne {:value "maakuntakaava"}
                              :kiinteisto {:maaraalaTunnus {:value "0008"}
                                           :tilanNimi {:value "Omatila"}
                                           :rantaKytkin {:value true}}}})

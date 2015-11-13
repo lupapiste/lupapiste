@@ -21,7 +21,7 @@ var uiComponents = (function() {
         _(e.result).filter(function(r) {
           return _.contains(paths, r.path);
         }).forEach(function(r) {
-          result(r.result)
+          result(r.result);
         }).value();
         indicator({type: "saved"});
         cb();
@@ -36,8 +36,8 @@ var uiComponents = (function() {
   };
 
   var save = function(command, documentId, applicationId, element, path, val, indicator, result, cb) {
-    return saveMany(command, documentId, applicationId, element, [path], [val], indicator, result, cb)
-  }
+    return saveMany(command, documentId, applicationId, element, [path], [val], indicator, result, cb);
+  };
 
 
   var copyRow = function(documentId, applicationId, path, sourceIndex, targetIndex, indicator, result, cb) {
@@ -98,7 +98,7 @@ var uiComponents = (function() {
     save: save,
     saveMany: saveMany,
     copyRow: copyRow,
-    removeRow: removeRow,
+    removeRow: removeRow
   };
 
 })();

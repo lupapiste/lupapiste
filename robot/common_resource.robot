@@ -839,7 +839,7 @@ Foreman count is
 
 Apply minimal fixture now
   Go to  ${FIXTURE URL}/minimal
-  Page should contain  true
+  Wait until  Page should contain  true
   Go to login page
 
 #

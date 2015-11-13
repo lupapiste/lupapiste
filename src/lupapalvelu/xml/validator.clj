@@ -137,15 +137,13 @@
 ; be generated from a single source.
 
 (def- rakval-validators
-  (let [m {"2.1.2" common-validator-2_1_0
+  {"2.1.2" common-validator-2_1_0
    "2.1.3" common-validator-2_1_1
    "2.1.4" common-validator-2_1_2
    "2.1.5" common-validator-2_1_3
    "2.1.6" (create-validator rakval-2_1_6)
-           "2.1.8" (create-validator rakval-2_1_8)}]
-    (if (env/feature? :rakval-220)
-      (assoc m "2.2.0" common-validator-2_1_6)
-      m)))
+   "2.1.8" (create-validator rakval-2_1_8)
+   "2.2.0" common-validator-2_1_6})
 
 (def- ya-validators
   {"2.1.2" common-validator-2_1_0
@@ -167,6 +165,7 @@
 
 (def- ymp-validators
   {"2.1.2" common-validator-2_1_3
+   "2.2.1" common-validator-2_1_6
    "ah-1.1" asianhallinta-validator-1_1
    "ah-1.2" asianhallinta-validator-1_2})
 
@@ -189,6 +188,7 @@
    :YI  ymp-validators
    :MAL ymp-validators
    :VVVL {"2.1.3" common-validator-2_1_3
+          "2.2.1" common-validator-2_1_6
           "ah-1.1" asianhallinta-validator-1_1
           "ah-1.2" asianhallinta-validator-1_2}
    :YL  ymp-validators

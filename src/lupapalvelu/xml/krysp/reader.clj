@@ -105,10 +105,12 @@
 
 (defn building-xml
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
-  [server credentials property-id]
-  (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
-    (trace "Get building: " url)
-    (or (cr/get-xml url credentials) {})))
+  ([server credentials property-id]
+   (building-xml server credentials property-id false))
+  ([server credentials property-id raw?]
+   (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
+     (trace "Get building: " url)
+     (or (cr/get-xml url credentials raw?) {}))))
 
 (defn- application-xml [type-name id-path server credentials id raw?]
   (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))]
@@ -151,9 +153,11 @@
       building-id)))
 
 (defn- ->building-ids [id-container xml-no-ns]
+  (defn ->list "a as list or nil. a -> [a], [b] -> [b]" [a] (when a (-> a list flatten)))
   (let [national-id    (pysyva-rakennustunnus (get-text xml-no-ns id-container :valtakunnallinenNumero))
         local-short-id (-> (get-text xml-no-ns id-container :rakennusnro) ss/trim (#(when-not (ss/blank? %) %)))
-        local-id       (-> (get-text xml-no-ns id-container :kunnanSisainenPysyvaRakennusnumero) ss/trim (#(when-not (ss/blank? %) %)))]
+        local-id       (-> (get-text xml-no-ns id-container :kunnanSisainenPysyvaRakennusnumero) ss/trim (#(when-not (ss/blank? %) %)))
+        edn            (-> xml-no-ns (select [:Rakennus :rakennustunnus]) first xml->edn :rakennustunnus)]
     {:propertyId   (get-text xml-no-ns id-container :kiinttun)
      :buildingId   (first (remove ss/blank? [national-id local-short-id]))
      :nationalId   national-id
@@ -162,7 +166,9 @@
      :index        (get-text xml-no-ns id-container :jarjestysnumero)
      :usage        (or (get-text xml-no-ns :kayttotarkoitus) "")
      :area         (get-text xml-no-ns :kokonaisala)
-     :created      (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))}))
+     :created      (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))
+     :tags         (map (fn [{{:keys [tunnus sovellus]} :Muutunnus}] {:tag tunnus :id sovellus}) (->list (:muuTunnustieto edn)))
+     :description (:rakennuksenSelite edn)}))
 
 (defn ->buildings-summary [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)]
@@ -325,7 +331,13 @@
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
 (defn- extract-vaadittuErityissuunnitelma-elements [lupamaaraykset]
-  (let [vaadittuErityissuunnitelma-array (->> lupamaaraykset :vaadittuErityissuunnitelma (map ss/trim) (remove ss/blank?))]
+  (let [vaadittuErityissuunnitelma-array (->>
+                                           (or
+                                             (->> lupamaaraykset :vaadittuErityissuunnitelmatieto (map :vaadittuErityissuunnitelma) seq)  ;; Yhteiset Krysp 2.1.6 ->
+                                             (:vaadittuErityissuunnitelma lupamaaraykset))                                                ;; Yhteiset Krysp -> 2.1.5
+                                           (map ss/trim)
+                                           (remove ss/blank?))]
+
     ;; resolving Tekla way of giving vaadittuErityissuunnitelmas: one "vaadittuErityissuunnitelma" with line breaks is divided into multiple "vaadittuErityissuunnitelma"s
     (if (and
           (= 1 (count vaadittuErityissuunnitelma-array))
@@ -333,16 +345,24 @@
       (-> vaadittuErityissuunnitelma-array first (ss/split #"\n") ((partial remove ss/blank?)))
       vaadittuErityissuunnitelma-array)))
 
+(defn- extract-maarays-elements [lupamaaraykset]
+  (let [maaraykset (or
+                     (->> lupamaaraykset :maaraystieto (map :Maarays) seq)  ;; Yhteiset Krysp 2.1.6 ->
+                     (:maarays lupamaaraykset))]                            ;; Yhteiset Krysp -> 2.1.5
+    (->> (cr/convert-keys-to-timestamps maaraykset [:maaraysaika :maaraysPvm :toteutusHetki])
+      (map #(rename-keys % {:maaraysPvm :maaraysaika}))
+      (remove nil?))))
+
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
 
     ;; KRYSP yhteiset 2.1.5+
     (util/ensure-sequential :vaadittuErityissuunnitelma)
+    (util/ensure-sequential :vaadittuErityissuunnitelmatieto)
     (#(let [vaaditut-es (extract-vaadittuErityissuunnitelma-elements %)]
-        (if (seq vaaditut-es)
-          (-> % (assoc :vaaditutErityissuunnitelmat vaaditut-es) (dissoc % :vaadittuErityissuunnitelma))
-          (dissoc % :vaadittuErityissuunnitelma))))
+        (if (seq vaaditut-es) (assoc % :vaaditutErityissuunnitelmat vaaditut-es) %)))
+    (dissoc :vaadittuErityissuunnitelma :vaadittuErityissuunnitelmatieto)
 
     (util/ensure-sequential :vaaditutKatselmukset)
     (#(let [kats (map :Katselmus (:vaaditutKatselmukset %))]
@@ -364,19 +384,11 @@
           (dissoc % :vaadittuTyonjohtajatieto))))
 
     (util/ensure-sequential :maarays)
-
-    (#(if (:maarays %)
-        (let [maaraykset (cr/convert-keys-to-timestamps (:maarays %) [:maaraysaika :maaraysPvm :toteutusHetki])
-              ;; KRYSP 2.1.5+ renamed :maaraysaika -> :maaraysPvm
-              maaraykset (remove nil? (mapv
-                           (fn [maar]
-                             (if (:maaraysPvm maar)
-                               (-> maar (assoc :maaraysaika (:maaraysPvm maar)) (dissoc :maaraysPvm))
-                               maar))
-                           maaraykset))]
-          (assoc % :maaraykset maaraykset))
+    (util/ensure-sequential :maaraystieto)
+    (#(if-let [maaraykset (seq (extract-maarays-elements %))]
+        (assoc % :maaraykset maaraykset)
         %))
-    (dissoc :maarays)
+    (dissoc :maarays :maaraystieto)
 
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan
                               :autopaikkojaVahintaan
