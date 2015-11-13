@@ -16,12 +16,12 @@ LUPAPISTE.ExportAttachmentsModel = function(params) {
 
   self.exportAttachmentsToBackingSystem = ko.pureComputed(function() {
     return self.authorizationModel.ok("move-attachments-to-backing-system") &&
-          self.appModel.hasAttachment() && unsentAttachmentFound(lupapisteApp.models.application._js.attachments);
+          self.appModel.hasAttachment() && unsentAttachmentFound(ko.mapping.toJS(lupapisteApp.models.application.attachments));
   });
 
   self.exportAttachmentsToAsianhallinta = ko.pureComputed(function() {
     return self.authorizationModel.ok("attachments-to-asianhallinta") &&
-           self.appModel.hasAttachment() && unsentAttachmentFound(lupapisteApp.models.application._js.attachments);
+           self.appModel.hasAttachment() && unsentAttachmentFound(ko.mapping.toJS(lupapisteApp.models.application.attachments));
   });
 
   self.startExportingAttachmentsToBackingSystem = function() {

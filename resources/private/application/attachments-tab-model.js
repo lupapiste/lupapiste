@@ -245,7 +245,7 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
       return templateModel;
     };
   }();
-/*
+
   hub.subscribe("op-description-changed", function(e) {
     var opid = e["op-id"];
     var desc = e["op-desc"];
@@ -258,5 +258,5 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
 
     self.refresh(self.appModel);
   });
-*/
+
 };

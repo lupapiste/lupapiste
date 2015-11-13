@@ -130,7 +130,7 @@
 
   var model = function(params) {
     var self = this;
-    self.attachments = ko.mapping.fromJS(params.application._js.attachments);
+    self.attachments = params.application.attachments;
     var preAttachments = ko.pureComputed(function() {
       return addAdditionalFieldsToAttachments(getPreAttachments(self.attachments()), params.application.id());
     });
