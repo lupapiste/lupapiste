@@ -47,7 +47,6 @@ LUPAPISTE.ApplicationModel = function() {
   self.authority = ko.observable({});
   self.neighbors = ko.observable([]);
   self.statements = ko.observable([]);
-  self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
   self.metadata = ko.observable();
 
@@ -96,7 +95,7 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.taskGroups = ko.pureComputed(function() {
-    var tasks = ko.toJS(self.tasks) || [];
+    var tasks = self._js.tasks || [];
     // TODO query without foreman tasks
     tasks = _.filter(tasks, function(task) {
       return task["schema-info"].name !== "task-vaadittu-tyonjohtaja";
