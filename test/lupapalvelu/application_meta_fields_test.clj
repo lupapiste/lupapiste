@@ -1,7 +1,7 @@
 (ns lupapalvelu.application-meta-fields-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.itest-util :as itest-util]
+            [lupapalvelu.test-util :as test-util]
             [lupapalvelu.application-meta-fields :as amf]))
 
 (testable-privates lupapalvelu.application-meta-fields count-unseen-comments count-unseen-statements count-unseen-verdicts count-attachments-requiring-action indicator-sum)
@@ -9,8 +9,8 @@
 (facts "foreman-index-update"
   (let [expected-firstname "Etunimi"
         expected-name (str "Ilkka " expected-firstname) ; Ilkka from dummy doc genaration
-        tj-v1 (assoc-in (itest-util/dummy-doc "tyonjohtaja") [:data :henkilotiedot :etunimi :value] expected-firstname)
-        tj-v2 (assoc-in (itest-util/dummy-doc "tyonjohtaja-v2") [:data :henkilotiedot :etunimi :value] expected-firstname)]
+        tj-v1 (assoc-in (test-util/dummy-doc "tyonjohtaja") [:data :henkilotiedot :etunimi :value] expected-firstname)
+        tj-v2 (assoc-in (test-util/dummy-doc "tyonjohtaja-v2") [:data :henkilotiedot :etunimi :value] expected-firstname)]
 
     (fact "TJ v1"
       (let [update (amf/foreman-index-update {:documents [tj-v1]})]
