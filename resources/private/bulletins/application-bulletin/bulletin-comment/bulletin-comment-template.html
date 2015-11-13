@@ -12,7 +12,7 @@
           <span data-bind="dateTimeString: bulletin.proclamationEndsAt"></span>
         </p>
         <div data-bind="component: { name: 'bulletin-comment-box',
-                                     params: { bulletinId: bulletin.id,
+                                     params: { bulletinId: bulletin.bulletinId,
                                                versionId: versionId,
                                                userInfo: userInfo } }"></div>
       </div>
