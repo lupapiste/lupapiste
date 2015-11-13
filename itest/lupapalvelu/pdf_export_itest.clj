@@ -1,6 +1,7 @@
 (ns lupapalvelu.pdf-export-itest
     (:require [clojure.java.io :as io]
-      [lupapalvelu.itest-util :refer :all]
+      [lupapalvelu.test-util :refer [dummy-doc]]
+      [lupapalvelu.itest-util :refer [apply-remote-minimal pena query-application] :as itu]
       [lupapalvelu.factlet :refer :all]
       [lupapalvelu.pdf.pdf-export :as pdf-export]
       [lupapalvelu.i18n :refer [with-lang loc]]
@@ -91,8 +92,8 @@
         test-primaryOperation    {:name "kerrostalo-rivitalo"}
         test-secondaryoperations [{:name "aita"}]
 
-        application (create-and-submit-application pena)
-        _           (generate-documents application pena)
+        application (itu/create-and-submit-application pena)
+        _           (itu/generate-documents application pena)
         application (query-application pena (:id application))
 
         ; Add some manual test data to application common fields

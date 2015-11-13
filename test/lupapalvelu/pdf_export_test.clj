@@ -3,7 +3,7 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.itest-util :as util]
+            [lupapalvelu.test-util :as test-util]
             [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
             [midje.sweet :refer :all]
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
@@ -62,7 +62,7 @@
 
 (facts "Generate PDF file from application with all documents"
        (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
-             dummy-docs (map util/dummy-doc schema-names)
+             dummy-docs (map test-util/dummy-doc schema-names)
              application (merge domain/application-skeleton {:documents dummy-docs
                                                              :municipality "444"
                                                              :state "draft"})
@@ -87,7 +87,7 @@
 
 (facts "Generate PDF from application statements"
        (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
-             dummy-docs (map util/dummy-doc schema-names)
+             dummy-docs (map test-util/dummy-doc schema-names)
              dummy-statements [(dummy-statement "2" "Matti Malli" "puollettu" "Lorelei ipsum")
                                (dummy-statement "1" "Minna Malli" "joku status" "Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero.")]
              application (merge domain/application-skeleton {:id "LP-1"
@@ -114,7 +114,7 @@
 
 (facts "Generate PDF from application neigbors - signed"
        (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
-             dummy-docs (map util/dummy-doc schema-names)
+             dummy-docs (map test-util/dummy-doc schema-names)
              dummy-neighbours [(dummy-neighbour "2" "Matti Malli" "response-given" "SigloXX")
                                (dummy-neighbour "1" "Minna Malli" "open" "nada")]
              application (merge domain/application-skeleton {:id "LP-1"
