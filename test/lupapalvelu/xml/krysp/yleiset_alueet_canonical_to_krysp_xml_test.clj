@@ -161,7 +161,7 @@
 
     (fact "pitaja" (xml/get-text katselmus [:pitaja]) => "Viranomaisen nimi")
     (fact "pitoPvm" (xml/get-text katselmus [:pitoPvm]) => "1974-05-01")
-    (fact "katselmuksenLaji" (xml/get-text katselmus  [:katselmuksenLaji]) => "Muu valvontakäynti")
+    (fact "katselmuksenLaji" (xml/get-text katselmus  [:katselmuksenLaji]) => "Muu valvontak\u00e4ynti")
     (fact "vaadittuLupaehtonaKytkin" (xml/get-text katselmus [:vaadittuLupaehtonaKytkin]) => "true")
     (facts "huomautus"
       (fact "kuvaus" (xml/get-text huomautus [:kuvaus]) => "huomautus - kuvaus")

@@ -378,7 +378,7 @@
 
     (fact "pitaja" pitaja => "Viranomaisen nimi")
     (fact "pitoPvm" pitoPvm => "1974-05-01")
-    (fact "katselmuksenLaji" katselmuksenLaji => "Muu valvontakäynti")
+    (fact "katselmuksenLaji" katselmuksenLaji => "Muu valvontak\u00e4ynti")
     (fact "vaadittuLupaehtonaKytkin" vaadittuLupaehtonaKytkin => true)
     (fact "huomautustieto"
       huomautustieto  => {:Huomautus {:kuvaus "huomautus - kuvaus"
