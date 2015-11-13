@@ -158,7 +158,7 @@
   (mongo/update-by-id :application-bulletins id (create-bulletin application created) :upsert true)
   (ok))
 
-(defcommand proclaim-bulletin
+(defcommand move-to-proclaimed
   {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
    :feature :publish-bulletin
    :user-roles #{:authority}

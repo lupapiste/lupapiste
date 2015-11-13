@@ -8,8 +8,8 @@
       <!-- ko ifnot: canPublish -->
       <p data-bind="ltext: 'bulletin.application.canNotPublish'"></p>
       <!-- /ko -->
-      <!-- ko if: canProclaim -->
-      <div data-bind="component: { name: 'proclaim-application', params: { appId: appId, canPublish: canPublish, bulletinState: bulletinState } }"></div>
+      <!-- ko if: canMoveToProclaimed -->
+      <div data-bind="component: { name: 'move-to-proclaimed', params: { appId: appId, canPublish: canPublish, bulletinState: bulletinState } }"></div>
       <!-- /ko -->
     </script>
   </section>

@@ -10,11 +10,8 @@ LUPAPISTE.PublishBulletinService = function() {
     hub.send("publishBulletinService::publishProcessing", {state: state});
   });
 
-  var publishBulletin = function(state, event) {
-    ajax.command(state + "-bulletin", {id:                  event.id,
-                                      proclamationEndsAt:   event.proclamationEndsAt,
-                                      proclamationStartsAt: event.proclamationStartsAt,
-                                      proclamationText:     event.proclamationText || ""})
+  var publishBulletin = function(command, opts) {
+    ajax.command(command, opts)
       .pending(self.publishPending)
       .success(function() {
         hub.send("publishBulletinService::publishProcessed", {status: "success"});
@@ -25,8 +22,11 @@ LUPAPISTE.PublishBulletinService = function() {
       .call();
   };
 
-  hub.subscribe("publishBulletinService::proclaimBulletin", function(event) {
-    publishBulletin("proclaim", event);
+  hub.subscribe("publishBulletinService::moveToProclaimed", function(event) {
+    publishBulletin("move-to-proclaimed", {id: event.id,
+                                           proclamationEndsAt:   event.proclamationEndsAt,
+                                           proclamationStartsAt: event.proclamationStartsAt,
+                                           proclamationText:     event.proclamationText || ""});
   });
 
   var fetchBulletinVersions = _.debounce(function(bulletinId) {
