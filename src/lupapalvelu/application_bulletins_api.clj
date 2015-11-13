@@ -197,7 +197,7 @@
   {:parameters [bulletinId]
    :feature    :publish-bulletin
    :user-roles #{:authority}}
-  (let [bulletin-fields (-> bulletin-fields
+  (let [bulletin-fields (-> bulletins-fields
                             (dissoc :versions)
                             (merge {:comments 1
                                     :bulletinState 1}))
