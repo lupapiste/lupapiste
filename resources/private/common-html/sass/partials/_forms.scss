@@ -1146,8 +1146,9 @@ $max-columns: 12;
     vertical-align: middle;
   }
 
-  input[type=text]:disabled {
-    border-color: $input-disabled-border-color
+  input[type=text]:disabled, .checkbox-wrapper.disabled {
+    border-color: $input-disabled-border-color;
+    background-color: $input-disabled-background-color;
   }
 
   input[type=text].err, input[type=password].err {
