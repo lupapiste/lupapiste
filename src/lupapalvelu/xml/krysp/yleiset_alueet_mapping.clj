@@ -314,13 +314,13 @@
   [application katselmus user lang krysp-version output-dir begin-of-link]
   (let [lupa-name-key (ya-operation-type-to-schema-name-key
                         (-> application :primaryOperation :name keyword))
-        data (tools/unwrapped (:data katselmus))
-        {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
-        {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
-        huomautukset (-> data :katselmus :huomautukset)
-        task-id (:id katselmus)
-        task-name (:taskname katselmus)
-        started pitoPvm
+;        data (tools/unwrapped (:data katselmus))
+;        {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
+;        {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
+;        huomautukset (-> data :katselmus :huomautukset)
+;        task-id (:id katselmus)
+;        task-name (:taskname katselmus)
+;        started pitoPvm
         attachment-target {:type "task" :id (:id katselmus)}
 
         attachments (filter #(= attachment-target (:target %)) (:attachments application))
@@ -336,9 +336,14 @@
 
         all-canonical-attachments (seq (filter identity (conj canonical-attachments canonical-pk-liite)))
 
-        canonical-without-attachments (ya-canonical/katselmus-canonical application lang task-id task-name started user
-                                                           katselmuksenLaji tila pitaja vaadittuLupaehtona
-                                                           huomautukset lasnaolijat poikkeamat)
+        canonical-without-attachments (ya-canonical/katselmus-canonical application
+                                        katselmus
+                                        lang
+                                        user
+;                                        task-id task-name started
+;                                        katselmuksenLaji tila pitaja vaadittuLupaehtona
+;                                        huomautukset lasnaolijat poikkeamat
+                                        )
         canonical (-> canonical-without-attachments
                     (#(if (seq canonical-attachments)
                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)

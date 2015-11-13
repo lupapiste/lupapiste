@@ -137,23 +137,18 @@
 
 ;; Configs
 
-(def- default-config {:hankkeen-kuvaus                                true
-                               :tyoaika                                        true})
+(def- default-config {:hankkeen-kuvaus true
+                      :tyoaika         true})
 
 (def- kayttolupa-config-plus-tyomaastavastaava
-  (merge default-config {:tyomaasta-vastaava                                   true}))
+  (merge default-config {:tyomaasta-vastaava true}))
 
 (def- configs-per-permit-name
-  {:Kayttolupa                  default-config
-
-   :Tyolupa                     (merge default-config
-                                  {:tyomaasta-vastaava                         true
-                                   :johtoselvitysviitetieto                    true})
-
-
-   :Sijoituslupa                (merge default-config
-                                  {:tyoaika                                    false
-                                   :dummy-alku-and-loppu-pvm                   true})
+  {:Kayttolupa                            default-config
+   :Tyolupa                               (merge default-config
+                                            {:tyomaasta-vastaava true :johtoselvitysviitetieto true})
+   :Sijoituslupa                          (merge default-config
+                                            {:tyoaika false :dummy-alku-and-loppu-pvm true})
 
    :ya-kayttolupa-nostotyot               kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-vaihtolavat             kayttolupa-config-plus-tyomaastavastaava
@@ -163,18 +158,23 @@
    :ya-kayttolupa-talon-rakennustyot      kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-muu-tyomaakaytto        kayttolupa-config-plus-tyomaastavastaava
 
-   :ya-kayttolupa-mainostus-ja-viitoitus {:mainostus-viitoitus-tapahtuma-pvm   true
-                                          :mainostus-viitoitus-lisatiedot      true}})
+   :ya-kayttolupa-mainostus-ja-viitoitus  {:mainostus-viitoitus-tapahtuma-pvm   true
+                                           :mainostus-viitoitus-lisatiedot      true}})
 
 
 (defn- get-luvan-tunniste-tiedot [application]
-  (let [base-id (update-in (lupatunnus application) [:LupaTunnus :muuTunnustieto] vector)
-        link-permits (map (fn [{id :id}] {:MuuTunnus {:tunnus id, :sovellus "Viitelupa"}}) (:linkPermitData application))
-        base-with-link (update-in base-id [:LupaTunnus :muuTunnustieto] #(into % link-permits))
-        kuntalupatunnus-link (some #(if (= (:type %) "kuntalupatunnus") {:kuntalupatunnus (:id %)}) (:linkPermitData application))]
+  (let [link-permits (map
+                       (fn [{id :id}] {:MuuTunnus {:tunnus id, :sovellus "Viitelupa"}})
+                       (:linkPermitData application))
+        base-id (lupatunnus application)
+        base-with-link (update-in base-id [:LupaTunnus :muuTunnustieto] #(into (vector %) link-permits))
+        kuntalupatunnus-link (some
+                               #(when (= (:type %) "kuntalupatunnus") {:kuntalupatunnus (:id %)})
+                               (:linkPermitData application))]
     (if kuntalupatunnus-link
       (update-in base-with-link [:LupaTunnus] #(into % kuntalupatunnus-link))
       base-with-link)))
+
 
 (defn- permits [application]
   ;;
@@ -349,19 +349,48 @@
                               }}}}))
 
 ; TODO
-(defn katselmus-canonical [application lang task-id task-name pitoPvm user katselmuksen-nimi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
+(defn katselmus-canonical [application
+                           katselmus
+                           lang
+                           user
+;                           lang task-id task-name pitoPvm user katselmuksen-nimi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat
+                           ]
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
+
+        operation-name-key (-> application :primaryOperation :name keyword)
+        permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
+
+        _ (println "\n operation-name-key: " operation-name-key "\n")
+        _ (println "\n permit-name-key: " permit-name-key "\n")
+
+
+        data (tools/unwrapped (:data katselmus))
+        {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
+        {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
+        huomautukset (-> data :katselmus :huomautukset)
+        task-id (:id katselmus)
+        task-name (:taskname katselmus)
+
+
+        ;; TODO
+        alku-pvm nil
+        loppu-pvm nil
+        vastuuhenkilotieto nil
+        maksajatieto nil
+        johtoselvitysviitetieto nil
+        osapuolitieto nil
+
         katselmus (util/strip-nils
                     (merge
                       {:pitoPvm (if (number? pitoPvm) (util/to-xml-date pitoPvm) (util/to-xml-date-from-string pitoPvm))
                        ; TODO own values to ya task schema + migration
-                       :katselmuksenLaji (case katselmuksen-nimi
+                       :katselmuksenLaji (case katselmuksenLaji
                                            "aloituskokous" "Aloituskatselmus"
                                            "loppukatselmus" "Loppukatselmus"
                                            "Muu valvontakäynti")
-                       :vaadittuLupaehtonaKytkin (true? lupaehtona)
-                       :osittainen osittainen
+                       :vaadittuLupaehtonaKytkin (true? vaadittuLupaehtona)
+                       :osittainen tila
                        :lasnaolijat lasnaolijat
                        :pitaja pitaja
                        :poikkeamat poikkeamat
@@ -376,9 +405,26 @@
         canonical {:YleisetAlueet
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
                     :yleinenAlueAsiatieto
-                    {:xxx
-                     {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus application)
+                    {permit-name-key
+                     {:kasittelytietotieto (get-kasittelytieto application)
+                      :luvanTunnisteTiedot (get-luvan-tunniste-tiedot application)
+
+                      ;; pakollisia
+                      :alkuPvm alku-pvm
+                      :loppuPvm loppu-pvm
+                      :sijaintitieto (get-sijaintitieto application)
+                      :osapuolitieto osapuolitieto
+                      :vastuuhenkilotieto vastuuhenkilotieto
+                      :maksajatieto maksajatieto
+                      :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
+                      :johtoselvitysviitetieto johtoselvitysviitetieto
+
+                      ;; TODO: Tuleeko nama?
+;                      :lupaAsianKuvaus lupaAsianKuvaus
+;                      :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
+;                      :sijoituslupaviitetieto sijoituslupaviitetieto
+
+
 ;                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
 ;                                                                              :henkilo {:nimi {:etunimi (:firstName user)
 ;                                                                                               :sukunimi (:lastName user)}
@@ -389,6 +435,6 @@
 ;                                                                                         :puhelin (:phone user)}}}}}
                       :katselmustieto {:Katselmus katselmus}
 ;                      :lisatiedot (get-lisatiedot (:lisatiedot documents-by-type) lang)
-;                      :kayttotapaus (katselmus-kayttotapaus katselmuksen-nimi tyyppi)
+;                      :kayttotapaus (katselmus-kayttotapaus katselmuksenLaji tyyppi)
                       }}}}]
     canonical))
