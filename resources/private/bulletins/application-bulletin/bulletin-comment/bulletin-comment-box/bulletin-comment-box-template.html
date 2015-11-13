@@ -3,73 +3,117 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="bulletin-comment-box-template">
+      <p data-bind="ltext: 'bulletin.comment.delivery'"></p>
       <form data-bind="submit: sendComment"
             data-test-id="bulletin-comment-box-form"
             class="form-grid form-grid--no-border">
 
         <!-- personal details -->
-        <div data-bind="with: userInfo">
+        <div class="row">
+          <div class="col-4">
+            <br/>
+            <div data-bind="component: {name: 'checkbox-field',
+                                        params: {value: otherReceiver,
+                                                 id: 'otherReceiver',
+                                                 lLabel: 'bulletin.comment.otherReceiver'}}"></div>
+          </div>
+        </div>
+
+        <div class="row" data-bind="slider: !otherReceiver()">
           <div class="row">
-            <div class="col-1">
-              <div data-bind="component: {name: 'text-field',
-                                          params: {value: firstName,
-                                                   id: 'firstName',
-                                                   lLabel: 'userinfo.firstName',
-                                                   required: true,
-                                                   disable: true}}"></div>
-            </div>
-            <div class="col-1">
-              <div data-bind="component: {name: 'text-field',
-                                          params: {value: lastName,
-                                                   id: 'lastName',
-                                                   lLabel: 'userinfo.lastName',
-                                                   required: true,
-                                                   disable: true}}"></div>
+            <div class="col-4" data-bind="with: userInfo">
+              <div>
+                <span data-bind="text: firstName"></span>
+                <span data-bind="text: lastName"></span>
+              </div>
+              <div>
+                <span data-bind="text: street"></span>
+              </div>
+              <div>
+                <span data-bind="text: zip"></span>
+                <span data-bind="text: city"></span>
+              </div>
             </div>
           </div>
           <div class="row">
-            <div class="col-1">
-              <div data-bind="component: {name: 'text-field',
-                                          params: {value: street,
-                                                   id: 'street',
-                                                   lLabel: 'userinfo.street',
-                                                   required: true,
-                                                   disable: true}}"></div>
-            </div>
-            <div class="col-1">
-              <div data-bind="component: {name: 'text-field',
-                                          params: {value: zip,
-                                                   id: 'zip',
-                                                   lLabel: 'userinfo.zip',
-                                                   required: true,
-                                                   disable: true}}"></div>
-            </div>
-            <div class="col-1">
-              <div data-bind="component: {name: 'text-field',
-                                          params: {value: city,
-                                                   id: 'city',
-                                                   lLabel: 'userinfo.city',
-                                                   required: true,
-                                                   disable: true}}"></div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-1">
-              <div data-bind="component: {name: 'text-field',
-                                          params: {value: $component.email,
-                                                   id: 'email',
-                                                   lLabel: 'userinfo.email'}}"></div>
-            </div>
-            <div class="col-1">
-              <br/>
-              <div data-bind="component: {name: 'checkbox-field',
-                                          params: {value: $component.emailPreferred,
-                                                   id: 'emailPreferred',
-                                                   lLabel: 'bulletin.comment.emailPreferred',
-                                                   disable: $component.emailIsBlank}}"></div>
+            <div class="col-4" data-bind="slider: !otherReceiver()">
+              <div class="col-1">
+                <div data-bind="component: {name: 'text-field',
+                                            params: {value: email,
+                                                     id: 'email',
+                                                     lLabel: 'userinfo.email'}}"></div>
+              </div>
+              <div class="col-1">
+                <br/>
+                <div data-bind="component: {name: 'checkbox-field',
+                                            params: {value: emailPreferred,
+                                                     id: 'emailPreferred',
+                                                     lLabel: 'bulletin.comment.emailPreferred',
+                                                     disable: emailIsBlank}}"></div>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- ko with: otherReceiverInfo -->
+        <div data-bind="slider: $component.otherReceiver">
+        <div class="row">
+          <div class="col-1">
+            <div data-bind="component: {name: 'text-field',
+                                        params: {value: firstName,
+                                                 id: 'firstName',
+                                                 lLabel: 'userinfo.firstName',
+                                                 required: true}}"></div>
+          </div>
+          <div class="col-1">
+            <div data-bind="component: {name: 'text-field',
+                                        params: {value: lastName,
+                                                 id: 'lastName',
+                                                 lLabel: 'userinfo.lastName',
+                                                 required: true}}"></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-1">
+            <div data-bind="component: {name: 'text-field',
+                                        params: {value: street,
+                                                 id: 'street',
+                                                 lLabel: 'userinfo.street',
+                                                 required: true}}"></div>
+          </div>
+          <div class="col-1">
+            <div data-bind="component: {name: 'text-field',
+                                        params: {value: zip,
+                                                 id: 'zip',
+                                                 lLabel: 'userinfo.zip',
+                                                 required: true}}"></div>
+          </div>
+          <div class="col-1">
+            <div data-bind="component: {name: 'text-field',
+                                        params: {value: city,
+                                                 id: 'city',
+                                                 lLabel: 'userinfo.city',
+                                                 required: true}}"></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-1">
+            <div data-bind="component: {name: 'text-field',
+                                        params: {value: email,
+                                                 id: 'email',
+                                                 lLabel: 'userinfo.email'}}"></div>
+          </div>
+          <div class="col-1">
+            <br/>
+            <div data-bind="component: {name: 'checkbox-field',
+                                        params: {value: emailPreferred,
+                                                 id: 'emailPreferred',
+                                                 lLabel: 'bulletin.comment.emailPreferred',
+                                                 disable: emailIsBlank}}"></div>
+          </div>
+        </div>
+        </div>
+        <!-- /ko -->
 
         <div class="row">
            <div class="col-4"

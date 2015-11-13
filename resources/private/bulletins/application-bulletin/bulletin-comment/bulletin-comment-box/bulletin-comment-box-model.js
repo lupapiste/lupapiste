@@ -15,6 +15,27 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
 
   self.userInfo = params.userInfo;
 
+  self.otherReceiver = ko.observable(false);
+
+  // User can select different receiving address for verdict messages i.e. solicitor
+  self.otherReceiverInfo = {
+    firstName: ko.observable(),
+    lastName: ko.observable(),
+    street: ko.observable(),
+    zip: ko.observable(),
+    city: ko.observable(),
+    email: ko.observable().extend({email: true}),
+    emailPreferred: ko.observable()
+  };
+
+  self.otherReceiverInfo.emailIsBlank = ko.pureComputed(function() {
+    return _.isBlank(self.otherReceiverInfo.email());
+  });
+
+  ko.computed(function() {
+    self.otherReceiverInfo.emailPreferred(!self.otherReceiverInfo.emailIsBlank());
+  });
+
   self.emailIsBlank = ko.pureComputed(function() {
     return _.isBlank(self.email());
   });
