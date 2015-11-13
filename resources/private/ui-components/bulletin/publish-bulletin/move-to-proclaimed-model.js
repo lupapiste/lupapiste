@@ -42,6 +42,7 @@ LUPAPISTE.MoveToProclaimedModel = function (params) {
   self.addEventListener("publishBulletinService", "publishProcessed", function(event) {
     if (event.status === "success") {
       hub.send("indicator", {style: "positive"});
+      self.proclaimAgain(false);
       self.sendEvent("publishBulletinService", "fetchBulletinVersions", {bulletinId: self.appId()});
     } else {
       hub.send("indicator", {style: "negative"});
