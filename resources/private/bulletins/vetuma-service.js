@@ -8,9 +8,11 @@ LUPAPISTE.VetumaService = function() {
     lastName: undefined
   });
 
+  var RELEVANT_USER_FIELDS = ["firstName", "lastName", "street", "zip", "city"];
+
   hub.subscribe("vetumaService::authenticateUser", function(params) {
     vetuma.getUser(function(resp) { // onFound
-      ko.mapping.fromJS(_.pick(resp, ["firstName", "lastName"]), self.userInfo);
+      ko.mapping.fromJS(_.pick(resp, RELEVANT_USER_FIELDS), self.userInfo);
       self.authenticated(true);
     }, function() { // onNotFound
       if(params.errorType) {
