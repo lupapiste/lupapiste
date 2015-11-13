@@ -58,15 +58,15 @@
               <div data-bind="component: {name: 'text-field',
                                           params: {value: $component.email,
                                                    id: 'email',
-                                                   lLabel: 'userinfo.email',
-                                                   required: true}}"></div>
+                                                   lLabel: 'userinfo.email'}}"></div>
             </div>
             <div class="col-1">
               <br/>
               <div data-bind="component: {name: 'checkbox-field',
                                           params: {value: $component.emailPreferred,
                                                    id: 'emailPreferred',
-                                                   lLabel: 'bulletin.comment.emailPreferred'}}"></div>
+                                                   lLabel: 'bulletin.comment.emailPreferred',
+                                                   disable: $component.emailIsBlank}}"></div>
             </div>
           </div>
         </div>
