@@ -333,12 +333,12 @@
         canonical-without-attachments (ya-canonical/katselmus-canonical application katselmus lang user)
         canonical (-> canonical-without-attachments
                     (#(if (seq canonical-attachments)
-                      (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)
+                      (assoc-in % [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto] canonical-attachments)
                       %))
                     (#(if poytakirja
                         (-> %
-                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
-                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :liitetieto :liite] canonical-pk))
+                            (assoc-in [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
+                            (assoc-in [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :katselmustieto :Katselmus :liitetieto :liite] canonical-pk))
                        %)))
 
         xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version))
