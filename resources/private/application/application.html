@@ -950,6 +950,8 @@
                                                             <label data-bind="ltext: 'verdict.autopaikkojaUlkopuolella'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaUlkopuolella"></span></div>
                                                         <div data-bind="if: lupamaaraykset.kerrosala" class="key-value-pair">
                                                             <label data-bind="ltext: 'verdict.kerrosala'"></label><span class="value" data-bind="text: lupamaaraykset.kerrosala"></span></div>
+                                                        <div data-bind="if: lupamaaraykset.rakennusoikeudellinenKerrosala" class="key-value-pair">
+                                                            <label data-bind="ltext: 'verdict.rakennusoikeudellinenKerrosala'"></label><span class="value" data-bind="text: lupamaaraykset.rakennusoikeudellinenKerrosala"></span></div>
                                                         <div data-bind="if: lupamaaraykset.kokonaisala" class="key-value-pair">
                                                             <label data-bind="ltext: 'verdict.kokonaisala'"></label><span class="value" data-bind="text: lupamaaraykset.kokonaisala"></span></div>
 
@@ -1027,8 +1029,14 @@
                                                             </thead>
                                                             <tbody data-bind="foreach: $data.poytakirjat">
                                                                 <tr class="statement-row">
-                                                                    <td data-bind="if: $data.status">
-                                                                        <span data-bind="ltext: 'verdict.status.'+$data.status"></span></td>
+                                                                    <td>
+                                                                      <!-- ko if: $data.status -->
+                                                                      <span data-bind="ltext: 'verdict.status.'+$data.status"></span>
+                                                                      <!-- /ko -->
+                                                                      <!-- ko if: !$data.status && $data.paatoskoodi -->
+                                                                      <span data-bind="text: $data.paatoskoodi"></span>
+                                                                      <!-- /ko -->
+                                                                    </td>
                                                                     <td data-bind="text: $data.paatos" class="verdict-text"></td>
                                                                     <td data-bind="text: $data.pykala"></td>
                                                                     <td data-bind="text: $data.paatoksentekija"></td>
@@ -1251,7 +1259,7 @@
                                          name: 'help-toggle',
                                          params: {lhtml: 'help.' + permitType() + '.tasksDesc'}
                                          }"></span>
-                        <div data-bind="if: buildings() && buildings().length > 0 && $root.authorization.ok('inform-building-construction-started')">
+                        <div data-bind="if: _js.buildings && _js.buildings.length > 0 && $root.authorization.ok('inform-building-construction-started')">
 
                             <table>
                                 <thead>

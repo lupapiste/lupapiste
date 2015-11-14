@@ -7,7 +7,7 @@
             [lupapalvelu.document.validators :refer :all]
             [lupapalvelu.document.model :refer :all]
             [lupapalvelu.document.validator :as v]
-            [lupapalvelu.itest-util :refer :all]))
+            [lupapalvelu.test-util :refer [dummy-doc]]))
 
 (defn check-validator
   "Runs generated facts of a single validator."

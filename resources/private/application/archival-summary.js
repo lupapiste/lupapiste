@@ -117,7 +117,8 @@
             .call();
         });
       }
-      attachment.archivable = attachment.latestVersion ? attachment.latestVersion['valid-pdfa']() : false;
+      attachment.archivable = util.getIn(attachment, ["latestVersion", "archivable"]) ? attachment.latestVersion['archivable']() : false;
+      attachment.archivabilityError = util.getIn(attachment, ["latestVersion", "archivabilityError"]) ? attachment.latestVersion['archivabilityError']() : null;
       attachment.sendToArchive = ko.observable(false);
       return attachment;
     });
@@ -212,6 +213,13 @@
         doc.sendToArchive(true);
       });
     };
+
+    self.caseFile = ko.observableArray();
+    ajax.query('case-file-data', {id: params.application.id})
+      .success(function(data) {
+        self.caseFile(data.process);
+      })
+      .call();
   };
 
   ko.components.register("archival-summary", {

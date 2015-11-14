@@ -34,7 +34,7 @@
             [lupapalvelu.application-api :as application]
             [lupapalvelu.foreman-api :as foreman-api]
             [lupapalvelu.open-inforequest-api]
-            [lupapalvelu.pdf-export-api]
+            [lupapalvelu.pdf.pdf-export-api]
             [lupapalvelu.logging-api]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
@@ -186,9 +186,11 @@
         user    (basic-authentication request)]
     (if user
       (let [response (execute (assoc (action/make-raw name (from-query request)) :user user))]
-        (if (false? (:ok response))
-          (resp/status 404 (resp/json response))
-          response))
+        (if (action/response? response)
+          response
+          (if (:ok response)
+            (resp/status 200 (resp/json response))
+            (resp/status 404 (resp/json response)))))
       basic-401)))
 
 (defpage [:get "/data-api/json/:name"] {name :name}
@@ -235,7 +237,7 @@
                    :welcome anyone
                    :oskari anyone
                    :neighbor anyone
-                   :bulletin anyone})
+                   :bulletins anyone})
 
 (defn cache-headers [resource-type]
   (if (env/feature? :no-cache)
@@ -618,7 +620,7 @@
         (resp/status 200 (str response))
         (resp/json response))))
 
-  (defpage "/dev/create" {:keys [infoRequest propertyId message] :as query-params}
+  (defpage "/dev/create" {:keys [infoRequest propertyId message redirect] :as query-params}
     (let [request (request/ring-request)
           property (p/to-property-id propertyId)
           params (assoc (from-query request) :propertyId property :messages (if message [message] []))
@@ -628,11 +630,36 @@
           (when-let [opt-data (not-empty (select-keys query-params [:state]))]
             (do
               (mongo/update-by-id :applications (:id response) {$set opt-data})))
-          (redirect "fi" (str (user/applicationpage-for (:role (user/current-user request)))
-                              "#!/" (if infoRequest "inforequest" "application") "/" (:id response))))
-
-
+          (if redirect
+            (resp/redirect (str "/app/fi/" (str (user/applicationpage-for (:role (user/current-user request)))
+                                                "#!/" (if infoRequest "inforequest" "application") "/" (:id response))))
+            (resp/status 200 (:id response))))
         (resp/status 400 (str response)))))
+
+  (defpage "/dev/publish-bulletin" {:keys [id]}
+    (let [request (request/ring-request)
+          params (assoc (from-query request) :id id)
+          response (execute-command "publish-bulletin" params request)]
+      (core/ok? response)))
+
+  (defn- create-app-and-publish-bulletin []
+    (let [request (request/ring-request)
+          params (assoc (from-query request) :operation "kerrostalo-rivitalo"
+                                             :address "Latokuja 3"
+                                             :propertyId (p/to-property-id "753-416-25-22")
+                                             :x "360603.153"
+                                             :y "6734222.95")
+          {id :id} (execute-command "create-application" params request)
+          params  (assoc (from-query request) :id id)
+          response (execute-command "publish-bulletin" params request)]
+      (core/ok? response)))
+
+  (defpage "/dev/publish-bulletin-quickly" {:keys [count] :or {count "1"}}
+    (println count)
+    (let [results (take (util/to-long count) (repeatedly create-app-and-publish-bulletin))]
+      (if (every? true? results)
+        (resp/status 200 "OK")
+        (resp/status 400 "FAIL"))))
 
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
@@ -659,6 +686,9 @@
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors-api/->public r)}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
+
+  (defpage "/dev/clear/:collection" {:keys [collection]}
+    (resp/status 200 (resp/json {:ok true :status (mongo/remove-many collection {})})))
 
   (defpage [:get "/api/proxy-ctrl"] []
     (resp/json {:ok true :data (not @env/proxy-off)}))

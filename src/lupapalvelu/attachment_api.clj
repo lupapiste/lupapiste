@@ -27,8 +27,9 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application :refer [get-operations]]
-            [lupapalvelu.pdf-conversion :as pdf-conversion]
-            [lupapalvelu.pdftk :as pdftk])
+            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
+            [lupapalvelu.pdftk :as pdftk]
+            [lupapalvelu.tiff-validation :as tiff-validation])
   (:import [java.io File]))
 
 ;; Validators
@@ -281,9 +282,14 @@
 (def- base-upload-options
   {:comment-text nil
    :required false
-   :valid-pdfa false
+   :archivable false
+   :archivabilityError :invalid-mime-type
    :upload-pdfa-only false
    :missing-fonts []})
+
+(defn- attach-or-fail! [attachment-data]
+  (when-not (attachment/attach-file! attachment-data)
+    (fail :error.unknown)))
 
 (defn- convert-pdf-and-upload! [processing-result {:keys [attachment-id application filename upload-pdfa-only] :as attachment-data}]
   (if (:pdfa? processing-result)
@@ -295,22 +301,24 @@
                                  :attachment-id new-id
                                  :content (:output-file processing-result)
                                  :filename new-filename
-                                 :valid-pdfa true)]
-      (when-not (attachment/attach-file! pdfa-attachment-data)
-        (fail :error.unknown)))
+                                 :archivable true
+                                 :archivabilityError nil)]
+      (attach-or-fail! pdfa-attachment-data))
     (let [missing-fonts (or (:missing-fonts processing-result) [])]
-      (when-not (attachment/attach-file! (assoc attachment-data :missing-fonts missing-fonts))
-        (fail :error.unknown)))))
+      (attach-or-fail! (assoc attachment-data :missing-fonts missing-fonts :archivabilityError :invalid-pdfa)))))
 
 (defn- upload! [{:keys [filename content application] :as attachment-data}]
-  (if (and (= (mime/mime-type filename) "application/pdf") (pdf-conversion/pdf-a-required? (:organization application)))
-    (let [processing-result (pdf-conversion/convert-to-pdf-a content)]
-      (if (:already-valid-pdfa? processing-result)
-        (when-not (attachment/attach-file! (assoc attachment-data :valid-pdfa true))
-          (fail :error.unknown))
-        (convert-pdf-and-upload! processing-result attachment-data)))
-    (when-not (attachment/attach-file! attachment-data)
-      (fail :error.unknown))))
+  (case (mime/mime-type filename)
+    "application/pdf" (if (pdf-conversion/pdf-a-required? (:organization application))
+                        (let [processing-result (pdf-conversion/convert-to-pdf-a content)]
+                          (if (:already-valid-pdfa? processing-result)
+                            (attach-or-fail! (assoc attachment-data :archivable true :archivabilityError nil))
+                            (convert-pdf-and-upload! processing-result attachment-data)))
+                        (attach-or-fail! attachment-data))
+    "image/tiff"      (let [valid? (tiff-validation/valid-tiff? content)
+                            attachment-data (assoc attachment-data :archivable valid? :archivabilityError (when-not valid? :invalid-tiff))]
+                        (attach-or-fail! attachment-data))
+    (attach-or-fail! attachment-data)))
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
@@ -403,7 +411,7 @@
   (let [versions   (-> attachment :versions reverse)
         re-stamp?  (:stamped (first versions))
         source     (if re-stamp? (second versions) (first versions))]
-    (assoc (select-keys source [:contentType :fileId :filename :size :valid-pdfa])
+    (assoc (select-keys source [:contentType :fileId :filename :size :archivable])
            :re-stamp? re-stamp?
            :attachment-id (:id attachment))))
 
@@ -414,16 +422,17 @@
         new-file-id (mongo/create-id)]
     (with-open [out (io/output-stream file)]
       (stamper/stamp stamp fileId out x-margin y-margin transparency))
-    (let [is-pdf-a? (pdf-conversion/ensure-pdf-a file (:organization application))]
+    (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))]
       (debug "uploading stamped file: " (.getAbsolutePath file))
       (mongo/upload new-file-id filename contentType file :application (:id application))
       (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-        (attachment/update-latest-version-content application attachment-id new-file-id (.length file) now)
+        (attachment/update-latest-version-content user application attachment-id new-file-id (.length file) now)
         (attachment/set-attachment-version {:application application :attachment-id attachment-id
                                             :file-id new-file-id :filename filename
                                             :content-type contentType :size (.length file)
                                             :comment-text nil :now now :user user
-                                            :valid-pdfa is-pdf-a?
+                                            :archivable is-pdf-a?
+                                            :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
                                             :stamped true :make-comment false :state :ok}))
       (attachment/delete-file! file))
     new-file-id))

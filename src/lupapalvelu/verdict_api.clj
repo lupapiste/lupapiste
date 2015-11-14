@@ -6,10 +6,12 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [ok fail fail! ok?]]
+            [lupapalvelu.application :as application]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.verdict :as verdict]
@@ -31,8 +33,9 @@
   {:pre [(every? command [:application :user :created])]}
   (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
     (or
-      (let [validator-fn (permit/get-verdict-validator (permit/permit-type application))]
-        (validator-fn app-xml))
+      (let [organization (organization/get-organization (:organization application))
+            validator-fn (permit/get-verdict-validator (permit/permit-type application))]
+        (validator-fn app-xml organization))
       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
         (when updates
           (update-application command updates))
@@ -122,10 +125,10 @@
     (when-let [next-state (sm/verdict-given-state application)]
       (do
         (update-application command
-         {:verdicts {$elemMatch {:id id}}}
-         {$set {:modified timestamp
-                :state    next-state
-                :verdicts.$.draft false}})
+          {:verdicts {$elemMatch {:id id}}}
+          (util/deep-merge
+            (application/state-transition-update next-state timestamp (:user command))
+            {$set {:verdicts.$.draft false}}))
         (ok)))
     (fail :error.no-verdict-municipality-id)))
 

@@ -30,7 +30,7 @@
   "Creates model-updates from ui-format."
   [updates]
   (for [[k v] updates]
-    (let [keys (mapv keyword (s/split k #"\."))]
+    (let [keys (mapv keyword (if (coll? k) k (s/split k #"\.")))]
       [keys v])))
 
 (defn ->mongo-updates
@@ -114,12 +114,24 @@
     (validate-against-whitelist! document model-updates role)
     (persist-model-updates application collection document model-updates timestamp)))
 
+(defn- empty-op-attachments-ids
+  "Returns attachment ids, which don't have verions and have op-id as operation id. Returns nil when none found"
+  [attachments op-id]
+  (when (and op-id attachments)
+    (seq (map :id (filter
+                    (fn [{op :op versions :versions}]
+                      (and (= (:id op) op-id)
+                           (empty? versions)))
+                    attachments)))))
+
 (defn remove! [{application :application timestamp :created :as command} doc-id collection]
   (let [document      (by-id application collection doc-id)
-        updated-app (update-in application [:documents] (fn [c] (filter #(not= (:id %) doc-id) c)))
-          trigger-fn ( get-after-update-trigger-fn document)
-          extra-updates (trigger-fn updated-app)
-          op-id (get-in document [:schema-info :op :id])]
+        updated-app   (update-in application [:documents] (fn [c] (filter #(not= (:id %) doc-id) c)))
+        trigger-fn    (get-after-update-trigger-fn document)
+        extra-updates (trigger-fn updated-app)
+        op-id         (get-in document [:schema-info :op :id])
+        removable-attachment-ids (when op-id
+                                   (empty-op-attachments-ids (:attachments application) op-id))]
     (when-not document (fail! :error.document-not-found))
     (update-application command
       (util/deep-merge
@@ -135,7 +147,9 @@
                      :attachments
                      (:attachments application)
                      #(= (:id (:op %)) op-id)
-                     :op nil)))}))))
+                     :op nil)))}))
+    (when (seq removable-attachment-ids)
+      (update-application command {$pull {:attachments {:id {$in removable-attachment-ids}}}}))))
 
 (defn do-create-doc [{{:keys [schemaName]} :data created :created application :application :as command} & updates]
   (let [schema (schemas/get-schema (:schema-version application) schemaName)]

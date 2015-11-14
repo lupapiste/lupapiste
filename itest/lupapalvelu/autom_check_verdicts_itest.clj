@@ -1,4 +1,4 @@
-(ns lupapalvelu.autom_check_verdicts_itest
+(ns lupapalvelu.autom-check-verdicts-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
@@ -14,19 +14,19 @@
 (def db-name (str "test_autom-check-verdicts-itest_" (now)))
 
 (mongo/connect!)
-(mongo/with-db db-name 
+(mongo/with-db db-name
   (fixture/apply-fixture "minimal")
   (mongo/remove-many :organizations {})
   (mongo/remove-many :applications {}))
 
-(mongo/with-db db-name 
+(mongo/with-db db-name
   (let [krysp-url (str (server-address) "/dev/krysp")
         organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)]
     (dorun (map (partial mongo/insert :organizations) organizations))))
 
 
 (facts "Automatic checking for verdicts"
-  (mongo/with-db db-name 
+  (mongo/with-db db-name
     (let [application-submitted         (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 17")
           application-id-submitted      (:id application-submitted)
           application-sent              (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 18")
@@ -66,4 +66,8 @@
             application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy]
         (:state application-submitted) => "submitted"
         (:state application-sent) => "verdictGiven"
-        (:state application-verdict-given) => "verdictGiven"))))
+        (:state application-verdict-given) => "verdictGiven"
+
+        (fact "state history"
+          (-> application-sent :history last :state) => "verdictGiven"
+          (-> application-verdict-given :history last :state) => "verdictGiven")))))

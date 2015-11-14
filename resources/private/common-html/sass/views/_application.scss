@@ -31,6 +31,7 @@ $app-gray-darkest: $gray187;
   // Preamble is not used in neighbors' view (no actions).
   .preamble {
     position: relative;
+    min-height: 280px; // at least the size of the map container
     padding: {
       left: $map-width;
       right: 24%;
@@ -319,6 +320,21 @@ $app-gray-darkest: $gray187;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
+          }
+        }
+        &.proclaimed {
+          .proclaimed-box {
+            @include active-state;
+          }
+        }
+        &.consideration {
+          .consideration-box {
+            @include active-state;
+          }
+        }
+        &.final {
+          .final-box {
+            @include active-state;
           }
         }
       }

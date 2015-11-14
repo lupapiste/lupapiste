@@ -52,13 +52,23 @@
   (documents-are-valid @submitted-applications "illegal-hetu"))
 
 ;; Latest attachment version and latestVersion match
+(defn valid-latest-versions? [{versions :versions latestVersion :latestVersion}]
+  (or (empty? versions) (= latestVersion (last versions))))
 
-(defn latest-version-mismatch [application]
-  (when-not (every? (fn [a] (or (empty? (:versions a)) (= (:latestVersion a) (last (:versions a))))) (:attachments application))
-    (:id application)))
+;; Every attachment version is a map
+(defn valid-attachment-versions? [{versions :versions}]
+  (every? map? versions))                               ; TODO attachment schema
 
-(defmonster attachment-latest-version-in-sycn
-  (if-let [results (seq (remove nil? (map latest-version-mismatch @applications)))]
+(defn validate-attachments [attachments]
+  (when-let [invalids (seq (remove #(and (valid-attachment-versions? %) (valid-latest-versions? %)) attachments))]
+    (map :id invalids)))
+
+(defmonster attachment-versions-valid
+  (if-let [results (seq (remove nil? (map
+                                       (fn [{attachments :attachments id :id}]
+                                         (when-let [invalid-attachments (validate-attachments attachments)]
+                                           {:applicationId id :attachmentIds invalid-attachments}))
+                                       @applications)))]
     {:ok false :results results}
     {:ok true}))
 

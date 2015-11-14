@@ -50,6 +50,7 @@
             [lupapalvelu.perf-mon-api]
             [lupapalvelu.user-notification-api]
             [lupapalvelu.tiedonohjaus-api]
+            [lupapalvelu.application-bulletins-api]
             [lupapalvelu.application-tabs-api]))
 
 (defonce jetty (atom nil))

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="docgen-button-template">
+        <button data-bind="attr: { 'id': id, 'class': className },
+                           click: clickFn">
+            <!-- ko if: icon -->
+            <i data-bind="attr: { 'class': icon }"></i>
+            <!-- /ko -->
+            <span data-bind="ltext: label"></span>
+        </button>
+    </script>
+  </section>
+</body>
+</html>

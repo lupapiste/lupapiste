@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.yleiset-alueet-canonical-to-krysp-xml-test
-  (:require [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
-            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test :refer [kaivulupa-application-with-link-permit-data]]
+  (:require [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical katselmus-canonical]]
+            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test :refer [kaivulupa-application-with-link-permit-data kaivulupa-application-with-review katselmus]]
             [lupapalvelu.document.yleiset-alueet-kayttolupa-canonical-test :refer [kayttolupa-application]]
             [lupapalvelu.document.yleiset-alueet-sijoituslupa-canonical-test :refer [sijoituslupa-application valmistumisilmoitus]]
             [lupapalvelu.document.yleiset-alueet-kayttolupa-mainostus-viitoitus-canonical-test
@@ -143,3 +143,35 @@
 
     (fact "Valmistumisilmoitus application -> canonical -> xml"
       (do-test valmistumisilmoitus)))
+
+
+(fact "YA katselmus"
+  (let [application kaivulupa-application-with-review
+        canonical (katselmus-canonical application  katselmus "fi" {})
+        operation-name-key (-> application :primaryOperation :name keyword)
+        lupa-name-key (ya-operation-type-to-schema-name-key operation-name-key)
+        xml-221 (yleisetalueet-element-to-xml canonical lupa-name-key "2.2.1")
+        xml-221s (indent-str xml-221)
+        lp-xml-221 (cr/strip-xml-namespaces (xml/parse xml-221s))
+
+        katselmus (xml/select1 lp-xml-221 [:katselmustieto :Katselmus])
+        huomautus (xml/select1 katselmus [:Huomautus])]
+
+    (validator/validate xml-221s (:permitType application) "2.2.1")
+
+    (fact "pitaja" (xml/get-text katselmus [:pitaja]) => "Viranomaisen nimi")
+    (fact "pitoPvm" (xml/get-text katselmus [:pitoPvm]) => "1974-05-01")
+    (fact "katselmuksenLaji" (xml/get-text katselmus  [:katselmuksenLaji]) => "Muu valvontak\u00e4ynti")
+    (fact "vaadittuLupaehtonaKytkin" (xml/get-text katselmus [:vaadittuLupaehtonaKytkin]) => "true")
+    (facts "huomautus"
+      (fact "kuvaus" (xml/get-text huomautus [:kuvaus]) => "huomautus - kuvaus")
+      (fact "maaraAika" (xml/get-text huomautus [:maaraAika]) => "1974-06-02" )
+      (fact "toteamisHetki" (xml/get-text huomautus [:toteamisHetki]) => "1974-05-02")
+      (fact "toteaja" (xml/get-text huomautus [:toteaja]) => "huomautus - viranomaisen nimi"))
+    (fact "katselmuspoytakirja" (xml/get-text katselmus [:katselmuspoytakirja]) => nil)
+    (fact "tarkastuksenTaiKatselmuksenNimi" (xml/get-text katselmus [:tarkastuksenTaiKatselmuksenNimi]) => "testikatselmus")
+    (fact "lasnaolijat" (xml/get-text katselmus [:lasnaolijat]) => "paikallaolijat")
+    (fact "poikkeamat" (xml/get-text katselmus [:poikkeamat]) => "jotain poikkeamia oli")
+    )
+
+  )

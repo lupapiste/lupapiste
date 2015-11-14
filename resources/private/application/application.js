@@ -77,8 +77,8 @@
     if (isInitializing || !authorizationModel.ok("change-permit-sub-type")) { return; }
 
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
-      .success(function() {
-        hub.send("indicator", {style: "positive"});
+      .success(function(resp) {
+        util.showSavedIndicator(resp);
         applicationModel.reload();
       })
       .call();
@@ -111,12 +111,14 @@
   }
 
   function initAvailableTosFunctions(organizationId) {
-    ajax
-      .query("available-tos-functions", {organizationId: organizationId})
-      .success(function(data) {
-        tosFunctions(data.functions);
-      })
-      .call();
+    if (authorizationModel.ok("available-tos-functions")) {
+      ajax
+        .query("available-tos-functions", {organizationId: organizationId})
+        .success(function(data) {
+          tosFunctions(data.functions);
+        })
+        .call();
+    }
   }
 
   function showApplication(applicationDetails) {
@@ -129,7 +131,8 @@
       applicationModel._js = app;
 
       // Update observables
-      ko.mapping.fromJS(app, {}, applicationModel);
+      var mappingOptions = {ignore: ["documents", "tasks", "buildings", "verdicts", "transfers"]};
+      ko.mapping.fromJS(app, mappingOptions, applicationModel);
 
       // Invite
       inviteModel.setApplicationId(app.id);
@@ -268,6 +271,7 @@
     if (newId === currentId && tab) {
       selectTab(tab);
     } else {
+      hub.send("track-click", {category:"Applications", label: kind, event:"openApplication"});
       pageutil.showAjaxWait();
       if (newId !== currentId) { // close sidepanel if it's open
         var sidePanel = $("#side-panel div.content-wrapper > div").filter(":visible");
@@ -280,7 +284,12 @@
       repository.load(currentId, applicationModel.pending, function(application) {
         var fallbackTab = function(application) {
           if (application.inPostVerdictState) {
-            return application.primaryOperation.name.match(/tyonjohtaja/) ? "applicationSummary" : "tasks";
+            var name = application.primaryOperation.name;
+            if (name) {
+              return name.match(/tyonjohtaja/) ? "applicationSummary" : "tasks";
+            } else {
+              return "tasks";
+            }
           } else {
             return "info";
           }

@@ -11,146 +11,149 @@
 
 
 (def- hakija {:id "523844e1da063788effc1c58"
-                       :created 1379419361123
-                       :schema-info {:approvable true
-                                     :subtype "hakija"
-                                     :name "hakija"
-                                     :removable true
-                                     :repeating true
-                                     :version 1
-                                     :type "party"
-                                     :order 3}
-                       :data {:_selected {:value "henkilo"}
-                              :henkilo {:userId {:value "777777777777777777000020"}
-                                        :henkilotiedot {:hetu {:value "210281-9988"}
-                                                        :etunimi {:value "Pena"}
-                                                        :sukunimi {:value "Panaani"}
-                                                        :turvakieltoKytkin {:value true}}
-                                        :yhteystiedot {:email {:value "pena@example.com"}
-                                                       :puhelin {:value "0102030405"}}
-                                        :osoite {:katu {:value "Paapankuja 12"}
-                                                 :postinumero {:value "10203"}
-                                                 :postitoimipaikannimi {:value "Piippola"}}}
-                              :yritys {:yhteyshenkilo {:henkilotiedot {:etunimi {:value "Pena"}
-                                                                       :sukunimi {:value "Panaani"}
-                                                                       :turvakieltoKytkin {:value true}}
-                                                       :yhteystiedot {:email {:value "pena@example.com"}
-                                                                      :puhelin {:value "0102030405"}}}
-                                       :osoite {:katu {:value "Paapankuja 12"}
-                                                :postinumero {:value "10203"}
-                                                :postitoimipaikannimi {:value "Piippola"}}}}})
+              :created 1379419361123
+              :schema-info {:approvable true
+                            :subtype "hakija"
+                            :name "hakija"
+                            :removable true
+                            :repeating true
+                            :version 1
+                            :type "party"
+                            :order 3}
+              :data {:_selected {:value "henkilo"}
+                     :henkilo {:userId {:value "777777777777777777000020"}
+                               :henkilotiedot {:hetu {:value "210281-9988"}
+                                               :etunimi {:value "Pena"}
+                                               :sukunimi {:value "Panaani"}
+                                               :turvakieltoKytkin {:value true}}
+                               :yhteystiedot {:email {:value "pena@example.com"}
+                                              :puhelin {:value "0102030405"}}
+                               :osoite {:katu {:value "Paapankuja 12"}
+                                        :postinumero {:value "10203"}
+                                        :postitoimipaikannimi {:value "Piippola"}}
+                               :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}}}
+                     :yritys {:yhteyshenkilo {:henkilotiedot {:etunimi {:value "Pena"}
+                                                              :sukunimi {:value "Panaani"}
+                                                              :turvakieltoKytkin {:value true}}
+                                              :yhteystiedot {:email {:value "pena@example.com"}
+                                                             :puhelin {:value "0102030405"}}
+                                              :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}}}
+                              :osoite {:katu {:value "Paapankuja 12"}
+                                       :postinumero {:value "10203"}
+                                       :postitoimipaikannimi {:value "Piippola"}}}}})
 
 (def- uusi {:id "523844e1da063788effc1c57"
-                     :created 1379419361123
-                     :schema-info {:order 50
-                                   :version 1
-                                   :name "rakennushanke"
-                                   :op {:id "523844e1da063788effc1c56"
-                                        :name "poikkeamis"
-                                        :created 1379419361123}
-                                   :removable true}
-                     :data {:toimenpiteet {:Toimenpide {:value "uusi"}
-                                           :huoneistoja {:value "1"}
-                                           :kayttotarkoitus {:value "011 yhden asunnon talot"}
-                                           :kerroksia {:value "2"}
-                                           :kerrosala {:value "200"}
-                                           :kokonaisala {:value "220"}}}})
+            :created 1379419361123
+            :schema-info {:order 50
+                          :version 1
+                          :name "rakennushanke"
+                          :op {:id "523844e1da063788effc1c56"
+                               :name "poikkeamis"
+                               :created 1379419361123}
+                          :removable true}
+            :data {:toimenpiteet {:Toimenpide {:value "uusi"}
+                                  :huoneistoja {:value "1"}
+                                  :kayttotarkoitus {:value "011 yhden asunnon talot"}
+                                  :kerroksia {:value "2"}
+                                  :kerrosala {:value "200"}
+                                  :kokonaisala {:value "220"}}}})
 
 (def- uusi2 {:id "523844e1da063788effc1c57"
-                      :created 1379419361123
-                      :schema-info {:order 50
-                                    :version 1
-                                    :name "rakennushanke"
-                                    :op {:id "523844e1da063788effc1c56"
-                                         :name "poikkeamis"
-                                         :created 1379419361123}
-                                    :removable true}
-                      :data {:toimenpiteet  {:Toimenpide {:value "uusi"}
-                                             :kayttotarkoitus {:value "941 talousrakennukset"}
-                                             :kerroksia {:value "1"}
-                                             :kerrosala {:value "25"}
-                                             :kokonaisala {:value "30"}}}})
+             :created 1379419361123
+             :schema-info {:order 50
+                           :version 1
+                           :name "rakennushanke"
+                           :op {:id "523844e1da063788effc1c56"
+                                :name "poikkeamis"
+                                :created 1379419361123}
+                           :removable true}
+             :data {:toimenpiteet  {:Toimenpide {:value "uusi"}
+                                    :kayttotarkoitus {:value "941 talousrakennukset"}
+                                    :kerroksia {:value "1"}
+                                    :kerrosala {:value "25"}
+                                    :kokonaisala {:value "30"}}}})
 
 (def- laajennus {:id "523844e1da063788effc1c57"
-                          :created 1379419361123
-                          :schema-info {:order 50
-                                        :version 1
-                                        :name "rakennushanke"
-                                        :op {:id "523844e1da063788effc1c56"
-                                             :name "poikkeamis"
-                                             :created 1379419361123}
-                                        :removable true}
-                          :data {:kaytettykerrosala {:kayttotarkoitusKoodi {:value "013 muut erilliset talot"}
-                                                     :pintaAla {:value "99"}}
-                                 :toimenpiteet {:Toimenpide {:value "laajennus"}
-                                                :kayttotarkoitus {:value "941 talousrakennukset"}
-                                                :kerroksia {:value "1"}
-                                                :kerrosala {:value "25"}
-                                                :kokonaisala {:value "30"}}}})
+                 :created 1379419361123
+                 :schema-info {:order 50
+                               :version 1
+                               :name "rakennushanke"
+                               :op {:id "523844e1da063788effc1c56"
+                                    :name "poikkeamis"
+                                    :created 1379419361123}
+                               :removable true}
+                 :data {:kaytettykerrosala {:kayttotarkoitusKoodi {:value "013 muut erilliset talot"}
+                                            :pintaAla {:value "99"}}
+                        :toimenpiteet {:Toimenpide {:value "laajennus"}
+                                       :kayttotarkoitus {:value "941 talousrakennukset"}
+                                       :kerroksia {:value "1"}
+                                       :kerrosala {:value "25"}
+                                       :kokonaisala {:value "30"}}}})
 
 (def- hanke {:id "523844e1da063788effc1c59"
-                      :created 1379419361123
-                      :schema-info {:approvable true
-                                    :name "hankkeen-kuvaus"
-                                    :version 1
-                                    :order 1}
-                      :data {:kuvaus {:value "Omakotitalon ja tallin rakentaminen."}
-                             :poikkeamat {:value "Alueelle ei voimassa olevaa kaava."}}})
+             :created 1379419361123
+             :schema-info {:approvable true
+                           :name "hankkeen-kuvaus"
+                           :version 1
+                           :order 1}
+             :data {:kuvaus {:value "Omakotitalon ja tallin rakentaminen."}
+                    :poikkeamat {:value "Alueelle ei voimassa olevaa kaava."}}})
 
 (def- maksaja {:id "523844e1da063788effc1c5a"
-                        :created 1379419361123
-                        :schema-info {:approvable true
-                                      :name "maksaja"
-                                      :removable true
-                                      :repeating true
-                                      :version 1
-                                      :type "party"
-                                      :subtype "maksaja"
-                                      :order 6}
-                        :data {:_selected {:value "yritys"}
-                               :laskuviite {:value "LVI99997"}
-                               :yritys {:liikeJaYhteisoTunnus {:value "1743842-0"}
-                                        :osoite {:katu {:value "Koivukuja 2"}
-                                                 :postinumero {:value "23500"}
-                                                 :postitoimipaikannimi {:value "Helsinki"}}
-                                        :yhteyshenkilo {:henkilotiedot {:etunimi {:value "Toimi"}
-                                                                        :sukunimi {:value "Toimari"}}
-                                                        :yhteystiedot {:email {:value "paajehu@yit.foo"}
-                                                                       :puhelin {:value "020202"}}}
-                                        :yritysnimi {:value "YIT"}}}})
+               :created 1379419361123
+               :schema-info {:approvable true
+                             :name "maksaja"
+                             :removable true
+                             :repeating true
+                             :version 1
+                             :type "party"
+                             :subtype "maksaja"
+                             :order 6}
+               :data {:_selected {:value "yritys"}
+                      :laskuviite {:value "LVI99997"}
+                      :yritys {:liikeJaYhteisoTunnus {:value "1743842-0"}
+                               :osoite {:katu {:value "Koivukuja 2"}
+                                        :postinumero {:value "23500"}
+                                        :postitoimipaikannimi {:value "Helsinki"}}
+                               :yhteyshenkilo {:henkilotiedot {:etunimi {:value "Toimi"}
+                                                               :sukunimi {:value "Toimari"}}
+                                               :yhteystiedot {:email {:value "paajehu@yit.foo"}
+                                                              :puhelin {:value "020202"}}}
+                               :yritysnimi {:value "YIT"}}}})
 
 (def- rakennuspaikka {:id "523844e1da063788effc1c5b"
-                               :created 1379419361123
-                               :schema-info {:approvable true
-                                             :name "poikkeusasian-rakennuspaikka"
-                                             :version 1
-                                             :order 2}
-                               :data {:hallintaperuste {:value "oma"}
-                                      :kaavanaste {:value "ei kaavaa"}
-                                      :kiinteisto {:maaraalaTunnus {:value "0008"}
-                                                   :tilanNimi {:value "Omatila"}
-                                                   :rantaKytkin {:value true}}}})
+                      :created 1379419361123
+                      :schema-info {:approvable true
+                                    :name "poikkeusasian-rakennuspaikka"
+                                    :version 1
+                                    :order 2}
+                      :data {:hallintaperuste {:value "oma"}
+                             :kaavanaste {:value "ei kaavaa"}
+                             :kaavatilanne {:value "maakuntakaava"}
+                             :kiinteisto {:maaraalaTunnus {:value "0008"}
+                                          :tilanNimi {:value "Omatila"}
+                                          :rantaKytkin {:value true}}}})
 
 (def- lisaosa {:id "523844e1da063788effc1c5f"
-                        :created 1379419361123
-                        :schema-info {:name "suunnittelutarveratkaisun-lisaosa"
-                                      :version 1
-                                      :order 52}
-                        :data {:kaavoituksen_ja_alueiden_tilanne {:rajoittuuko_tiehen {:value true}
-                                                                  :tienkayttooikeus {:value true}}
-                               :luonto_ja_kulttuuri {:kulttuurisesti_merkittava {:value true}}
-                               :maisema {:metsan_reunassa {:value true}
-                                         :metsassa {:value false}}
-                               :merkittavyys {:rakentamisen_vaikutusten_merkittavyys {:value "Vain pient\u00e4 maisemallista haittaa."}}
-                               :muut_vaikutukset {:etaisyys_viemariverkosta {:value "2000"}
-                                                  :pohjavesialuetta {:value true}}
-                               :vaikutukset_yhdyskuntakehykselle {:etaisyys_kauppaan {:value "12"}
-                                                                  :etaisyys_kuntakeskuksen_palveluihin {:value "12"}
-                                                                  :etaisyys_paivakotiin {:value "11"}
-                                                                  :etaisyys_alakouluun {:value "10"}
-                                                                  :etaisyys_ylakouluun {:value "20"}
-                                                                  :muita_vaikutuksia {:value "Maisemallisesti talo tulee sijoittumaan m\u00e4en harjalle."}}
-                               :virkistys_tarpeet {:ulkoilu_ja_virkistysaluetta_varattu {:value true}}}})
+               :created 1379419361123
+               :schema-info {:name "suunnittelutarveratkaisun-lisaosa"
+                             :version 1
+                             :order 52}
+               :data {:kaavoituksen_ja_alueiden_tilanne {:rajoittuuko_tiehen {:value true}
+                                                         :tienkayttooikeus {:value true}}
+                      :luonto_ja_kulttuuri {:kulttuurisesti_merkittava {:value true}}
+                      :maisema {:metsan_reunassa {:value true}
+                                :metsassa {:value false}}
+                      :merkittavyys {:rakentamisen_vaikutusten_merkittavyys {:value "Vain pient\u00e4 maisemallista haittaa."}}
+                      :muut_vaikutukset {:etaisyys_viemariverkosta {:value "2000"}
+                                         :pohjavesialuetta {:value true}}
+                      :vaikutukset_yhdyskuntakehykselle {:etaisyys_kauppaan {:value "12"}
+                                                         :etaisyys_kuntakeskuksen_palveluihin {:value "12"}
+                                                         :etaisyys_paivakotiin {:value "11"}
+                                                         :etaisyys_alakouluun {:value "10"}
+                                                         :etaisyys_ylakouluun {:value "20"}
+                                                         :muita_vaikutuksia {:value "Maisemallisesti talo tulee sijoittumaan m\u00e4en harjalle."}}
+                      :virkistys_tarpeet {:ulkoilu_ja_virkistysaluetta_varattu {:value true}}}})
 
 (def- documents [hakija
                  uusi
@@ -259,6 +262,7 @@
         _ (get-in henkilo [:nimi :etunimi]) => "Pena"
         _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
         _ (:henkilotunnus henkilo) => "210281-9988"
+        _ (get-in henkilo [:vainsahkoinenAsiointiKytkin]) => true
         osoite (:osoite henkilo) => truthy
         _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
         _ (:postinumero osoite) => "10203"

@@ -14,11 +14,12 @@
   (:import (schema.core EnumSchema)))
 
 (defquery available-tos-functions
-          {:user-roles #{:anonymous}
-           :parameters [organizationId]
-           :input-validators [(partial non-blank-parameters [:organizationId])]}
-          (let [functions (t/available-tos-functions organizationId)]
-            (ok :functions functions)))
+  {:user-roles #{:anonymous}
+   :parameters [organizationId]
+   :input-validators [(partial non-blank-parameters [:organizationId])]
+   :feature :tiedonohjaus}
+  (let [functions (t/available-tos-functions organizationId)]
+    (ok :functions functions)))
 
 (defn- store-function-code [operation function-code user]
   (let [orgId (user/authority-admins-organization-id user)
@@ -55,14 +56,16 @@
 (defcommand set-tos-function-for-operation
   {:parameters [operation functionCode]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:functionCode :operation])]}
+   :input-validators [(partial non-blank-parameters [:functionCode :operation])]
+   :feature :tiedonohjaus}
   [{user :user}]
   (store-function-code operation functionCode user))
 
 (defcommand set-tos-function-for-application
   {:parameters [:id functionCode]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal}
+   :states states/all-but-draft-or-terminal
+   :feature :tiedonohjaus}
   [{:keys [application created user] :as command}]
   (let [orgId (:organization application)
         code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]
@@ -103,8 +106,9 @@
                               (dissoc :schema))))
 
 (defquery tos-metadata-schema
-          {:user-roles #{:anonymous}}
-          (ok :schema (map metadata-schema-for-ui editable-metadata-fields)))
+  {:user-roles #{:anonymous}
+   :feature :tiedonohjaus}
+  (ok :schema (map metadata-schema-for-ui editable-metadata-fields)))
 
 (defn- revert-unauthorized-modifications [roles old-metadata new-metadata]
   (let [disallowed-metadata (filter (fn [field] (when-let [role (:require-role field)]
@@ -118,56 +122,66 @@
   (let [old-metadata (keywordize-keys-and-some-values (:metadata document) [])
         metadata (->> (keywordize-keys-and-some-values metadata [])
                       (revert-unauthorized-modifications user-roles old-metadata)
-                      (#(assoc % :tila (or (:tila old-metadata) "Valmis")))
+                      (#(assoc % :tila (or (:tila old-metadata) :luonnos)))
                       (tms/sanitize-metadata))]
     (assoc document :metadata metadata)))
 
 (defn- update-application-child-metadata! [{:keys [application created user] :as command} type id metadata]
-  (when (env/feature? :tiedonohjaus)
-    (try
-      (if-let [child (first (filter #(= (:id %) id) (type application)))]
-        (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
-              updated-child (update-document-metadata child metadata user-roles)
-              updated-children (-> (remove #(= % child) (type application)) (conj updated-child))]
-          (action/update-application command {$set {:modified created type updated-children}}))
-        (fail "error.child.id"))
-      (catch RuntimeException e
-        (timbre/error e)
-        (fail "error.invalid.metadata")))))
+  (try
+    (if-let [child (first (filter #(= (:id %) id) (type application)))]
+      (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
+            updated-child (update-document-metadata child metadata user-roles)
+            updated-children (-> (remove #(= % child) (type application)) (conj updated-child))]
+        (action/update-application command {$set {:modified created type updated-children}}))
+      (fail "error.child.id"))
+    (catch RuntimeException e
+      (timbre/error e)
+      (fail "error.invalid.metadata"))))
 
 (defcommand store-tos-metadata-for-verdict
   {:parameters [:id verdictId metadata]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal}
+   :states states/all-but-draft-or-terminal
+   :feature :tiedonohjaus}
   [command]
   (update-application-child-metadata! command :verdicts verdictId metadata))
 
 (defcommand store-tos-metadata-for-statement
   {:parameters [:id statementId metadata]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal}
+   :states states/all-but-draft-or-terminal
+   :feature :tiedonohjaus}
   [command]
   (update-application-child-metadata! command :statements statementId metadata))
 
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal}
+   :states states/all-but-draft-or-terminal
+   :feature :tiedonohjaus}
   [command]
   (update-application-child-metadata! command :attachments attachmentId metadata))
 
 (defcommand store-tos-metadata-for-application
   {:parameters [:id metadata]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal}
+   :states states/all-but-draft-or-terminal
+   :feature :tiedonohjaus}
   [{:keys [application created user] :as command}]
-  (when (env/feature? :tiedonohjaus)
-    (try
-      (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
-            processed-metadata (->> (update-document-metadata application metadata user-roles)
-                                    (:metadata))]
-        (action/update-application command {$set {:modified created
-                                                  :metadata processed-metadata}}))
-      (catch RuntimeException e
-        (timbre/error e)
-        (fail "error.invalid.metadata")))))
+  (try
+    (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
+          processed-metadata (->> (update-document-metadata application metadata user-roles)
+                                  (:metadata))]
+      (action/update-application command {$set {:modified created
+                                                :metadata processed-metadata}}))
+    (catch RuntimeException e
+      (timbre/error e)
+      (fail "error.invalid.metadata"))))
+
+(defquery case-file-data
+  {:parameters [:id]
+   :user-roles #{:authority}
+   :states states/all-application-states
+   :feature :tiedonohjaus}
+  [{:keys [application]}]
+  (ok :process (t/generate-case-file-data application)))

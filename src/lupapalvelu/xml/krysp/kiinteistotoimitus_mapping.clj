@@ -7,13 +7,15 @@
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
 
 (defn ->mapping []
-  (let [osoite [{:osoitenimi :teksti} :postinumero :postitoimipaikannimi]
+  (let [osoite [:valtioSuomeksi :valtioKansainvalinen {:osoitenimi :teksti} :ulkomainenLahiosoite
+                :postinumero :postitoimipaikannimi :ulkomainenPostitoimipaikka]
         toimitus [{:toimituksenTiedottieto
                    {:ToimituksenTiedot/yht [:aineistonnimi :aineistotoimittaja :tila :toimitusPvm :kuntakoodi
                                             :kielitieto]}}
                   {:toimitushakemustieto
                    [{:Toimitushakemus
-                     [{:osapuolitieto
+                     [{:hakemustunnustieto {:Hakemustunnus/yht [:tunnus :sovellus]}}
+                      {:osapuolitieto
                        {:Osapuoli
                         [:roolikoodi :turvakieltokytkin :asioimiskieli
                          {:henkilotieto
@@ -41,7 +43,8 @@
                   {:kiinteistotieto {:Kiinteisto :kiinteistotunnus}}
                   {:maaraAlatieto {:MaaraAla :maaraAlatunnus}}]
         basic (conj toimitus :kuvaus)
-        toimitus-types {:featureMembers/kiito [{:Lohkominen (concat toimitus [:lohkomisenTyyppi :kuvaus])}
+        toimitus-types {:featureMembers/kiito
+                        [{:Lohkominen (concat toimitus [:lohkomisenTyyppi :kuvaus])}
                          {:YhtAlueenOsuuksienSiirto basic}
                          {:Rasitetoimitus (conj toimitus {:kayttooikeustieto
                                                           {:KayttoOikeus [:kayttooikeuslaji :kayttaja :antaja

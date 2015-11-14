@@ -121,7 +121,6 @@ var attachment = (function() {
     sizes:                        ko.observableArray(LUPAPISTE.config.attachmentSizes),
     isVerdictAttachment:          ko.observable(),
     subscriptions:                [],
-    indicator:                    ko.observable().extend({notify: "always"}),
     showAttachmentVersionHistory: ko.observable(),
     showHelp:                     ko.observable(false),
     init:                         ko.observable(false),
@@ -295,12 +294,8 @@ var attachment = (function() {
     ajax
       .command("set-attachment-meta", data)
       .success(function() {
-        model.indicator({name: name, type: "saved"});
+        hub.send("indicator", {style: "positive"});
         model.dirty = true;
-      })
-      .error(function(e) {
-        error(e.text);
-        model.indicator({name: name, type: "err"});
       })
       .call();
   }
@@ -355,6 +350,7 @@ var attachment = (function() {
         unSelectedAttachmentIds: isVerdictAttachment ? [] : [attachmentId]
       })
       .success(function() {
+        hub.send("indicator", {style: "positive"});
         repository.load(applicationId);
       })
       .error(function(e) {
@@ -467,7 +463,6 @@ var attachment = (function() {
     model.showTosMetadata(false);
 
     pageutil.hideAjaxWait();
-    model.indicator(false);
     model.dirty = false;
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {
       model.init(true);
@@ -478,7 +473,7 @@ var attachment = (function() {
       }
     });
 
-    var rawAttachments = ko.mapping.toJS(model.application.attachments());
+    var rawAttachments = model.application._js.attachments;
 
     var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
     var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);

@@ -36,6 +36,8 @@
       <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false, attachmentTypes: selectableAttachmentTypes}}"></div>
     </div>
 
+    <div data-bind="template: {name: 'case-file-report-template', data: {actions: caseFile}}"></div>
+
   </script>
   <script type="text/x-jquery-tmpl" id="archival-summary-attachment-table">
     <div class="table archival-summary-table" data-bind="foreach: groups">
@@ -56,7 +58,7 @@
       <div class="attachment-row">
         <div class="archival-status" data-bind="visible: $parents[1].showWillPublish">
            <input type="checkbox" data-bind="visible: archivable, checked: sendToArchive">
-           <span class="icon missing" data-bind="visible: !archivable, attr: {title: loc('attachment.invalid-pdfa')}"></span>
+           <span class="icon missing" data-bind="visible: !archivable, attr: {title: loc(archivabilityError)}"></span>
         </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
           <div class="small-columns">
@@ -133,7 +135,6 @@
   </script>
 
   <script type="text/x-jquery-tmpl" id="archival-summary-document-table">
-
     <div class="table archival-summary-table">
       <div class="attachment-group-header" data-bind="ltext: 'archivalSummary.mainDocuments'"></div>
 
@@ -192,7 +193,41 @@
       </div>
       <!-- /ko -->
     </div>
+  </script>
 
+  <script type="text/x-jquery-tmpl" id="case-file-report-template">
+    <div class="table case-file-table">
+    <h1 data-bind="ltext: 'caseFile.heading'"></h1>
+    <table>
+      <thead>
+      <tr>
+        <th data-bind="ltext: 'caseFile.action'"></th>
+        <th data-bind="ltext: 'document'"></th>
+        <th data-bind="ltext: 'attachment'"></th>
+        <th data-bind="ltext: 'caseFile.actionDate'"></th>
+        <th data-bind="ltext: 'caseFile.documentDate'"></th>
+      </tr>
+      </thead>
+      <tbody data-bind="foreach: actions">
+      <tr>
+        <td data-bind="text: action"></td>
+        <td></td>
+        <td></td>
+        <td data-bind="dateString: start"></td>
+        <td></td>
+      </tr>
+      <!-- ko foreach: documents -->
+      <tr>
+        <td></td>
+        <td><div data-bind="if: category == 'document'"><span data-bind="ltext: type"></span></div></td>
+        <td><div data-bind="if: category == 'attachment'"><span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>, v. <span data-bind="version: version"></span></div></td>
+        <td></td>
+        <td data-bind="dateString: ts"></td>
+      </tr>
+      <!-- /ko -->
+      </tbody>
+    </table>
+  </div>
   </script>
 
 </section>

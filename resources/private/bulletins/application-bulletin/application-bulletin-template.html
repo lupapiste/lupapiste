@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="application-bulletin-template">
+
+      <div class="application_summary">
+        <div class="container">
+          <div class="preamble">
+            <div class="application_summary_info" data-bind="with: bulletin">
+              <h4 data-bind="text: address" data-test-id="bulletin-address"></h4>
+              <h5 data-bind="if: primaryOperation">
+                    <span data-test-id="bulletin-primary-operation"
+                          data-bind="ltext: 'operations.' + primaryOperation.name, attr: {'data-test-primary-operation-id': primaryOperation.name}"></span>
+              </h5>
+
+              <!-- State: -->
+              <div class="state-indication" data-bind="attr: {'data-test-state': bulletinState}" data-test-id="bulletin-state" >
+                <div data-bind="attr: {'class': bulletinState}">
+                  <!-- ko ifnot: $parent.currentStateInSeq() -->
+                  <span data-bind="ltext: $parent.bulletinStateLoc(), attr: {'title' : loc([$parent.bulletinStateLoc(), 'title']), 'class': bulletinState + '-box'}"></span>
+                  <!-- /ko -->
+                  <!-- ko foreach: stateSeq -->
+                    <span data-bind="ltext: 'bulletin.state.' + $data, attr: {'title' : loc(['bulletin.state', $data, 'title']), 'class': $data + '-box'}"></span>
+                  <!-- /ko -->
+                </div>
+              </div>
+              <!-- Property ID: -->
+              <div>
+                <p data-bind="ltext: 'application.property'"></p>
+                <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="bulletin-property-id"></span>
+              </div>
+
+              <!-- Municipality: -->
+              <div>
+                <p data-bind="ltext: 'application.municipality'"></p>
+                <span class="application_summary_text" data-bind="text: loc(['municipality', municipality])"></span>
+              </div>
+              <div>
+                <p data-bind="text: loc('bulletin.applicants') + ':'"></p>
+                <ul data-bind="foreach: _applicantIndex">
+                  <li data-bind="text: $data"></li>
+                </ul>
+              </div>
+            </div>
+            <div class="application-map-container">
+              <div id="bulletin-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+            </div>
+
+              <!-- Actions: -->
+            <div class="application_actions stacked" data-test-id="bulletin-actions">
+              <button class="function julkipano"
+                      data-bind=""
+                      data-test-id="comment-bulletin">
+                  <i class="lupicon-comment"></i>
+                  <span data-bind="ltext: 'bulletin.comment'"></span>
+              </button>
+              <button class="function julkipano"
+                      data-bind=""
+                      data-test-id="print-bulletin">
+                  <i class="lupicon-print"></i>
+                  <span data-bind="ltext: 'bulletin.pdf'"></span>
+              </button>
+              <button class="function julkipano"
+                      data-bind=""
+                      data-test-id="download-bulletin-attachments">
+                  <i class="lupicon-print"></i>
+                  <span data-bind="ltext: 'bulletin.attachments.download'"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabs: -->
+          <div class="tabs-container" data-bind="with: bulletin">
+            <ul class="tabs" id="">
+              <li data-bind="css: {'active': $parent.selectedTab() === 'info'}">
+                  <a data-bind="" href="#" class="link-btn-julkipano">
+                      <span data-bind="ltext: 'application.tabInfo'"></span> </a></li>
+              <li data-bind="css: {'active': $parent.selectedTab() === 'attachments'}">
+                  <a data-bind="click: function() {return;}" href="#" data-test-id="application-open-attachments-tab" class="link-btn-julkipano">
+                      <span data-bind="ltext: 'application.tabAttachments'"></span></a></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+      <div class="container">
+        <div class="bulletin-info">
+          <h3 data-bind="ltext: 'bulletin.tab.info'"></h3>
+          <div id="bulletinDocgen" class="docgen-content">
+              <!-- This is where the generated documents will be placed. -->
+          </div>
+        </div>
+      </div>
+      <div class="container bulletin-comment">
+        <h5 data-bind="ltext: 'bulletin.comment.title'"></h5>
+        <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'help.bulletin.comment' } }"></span>
+        <p>
+          <span data-bind="ltext: 'bulletin.comment.endDate'"></span>
+          <span data-bind="dateTimeString: $data.proclamationEndsAt"></span>
+        </p>
+        <div data-bind="component: { name: 'bulletin-comment-box', params: { bulletinId: bulletinId, versionId: versionId } }"></div>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

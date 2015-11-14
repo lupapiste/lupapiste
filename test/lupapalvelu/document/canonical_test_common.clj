@@ -14,9 +14,10 @@
   [application document]
   (validate application document (get-document-schema document)))
 
-(defn validate-all-documents [application]
+(defn validate-all-documents [application & [collection-name]]
   "Validates all the documents of the application given as parameter."
-  (let [documents (:documents application)
+  (let [collection (or collection-name :documents)
+        documents (get application collection)
         reduced-application (select-keys application [:auth])]
     (doseq [document documents]
       (fact {:midje/description document}
@@ -76,8 +77,8 @@
                                                      :sukunimi {:modified 1391415662591, :value "Borga"}},
                                      :osoite {:katu {:modified 1391415683882, :value "Murskaajankatu 5"},
                                               :postinumero {:modified 1391415686665, :value "36570"},
-                                              :postitoimipaikannimi
-                                              {:modified 1391415696674, :value "Kaivanto"}},
+                                              :postitoimipaikannimi {:modified 1391415696674, :value "Kaivanto"}
+                                              :maa {:modified 1391415686665, :value "FIN"}},
                                      :userId {:modified 1391415662621, :value "777777777777777777000033"},
                                      :yhteystiedot {:email {:modified 1391415662591, :value "pekka.borga@porvoo.fi"},
                                                     :puhelin {:modified 1391415662591, :value "121212"}}}}})
