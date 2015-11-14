@@ -488,15 +488,10 @@
         (error "Failed to parse shapefile" t)
         (resp/status 400 :error.shapefile-parsing-failed)))))
 
-;; (defquery get-all-map-layers
-;;   {:description "Every map layer from the organization map server."
-;;    :user-roles       #{:authorityAdmin :authority}}
-;;   [{user :user}]
-;;   (ok :layers (o/all-layers-from-map-server (user/authority-admins-organization-id user))))
-
 (defquery get-map-layers-data
   {:description "Organization server and layer details."
-   :user-roles #{:authorityAdmin}}
+   :user-roles #{:authorityAdmin}
+   :feature :municipality-maps}
   [{user :user}]
   (ok (-> (user/authority-admins-organization-id user)
           o/get-organization
@@ -504,7 +499,8 @@
 
 (defcommand update-map-server-details
   {:parameters [url username password]
-   :user-roles #{:authorityAdmin}}
+   :user-roles #{:authorityAdmin}
+   :feature :municipality-maps}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user)
                          {$set {:map-layers.server {:url url
@@ -514,19 +510,9 @@
 
 (defcommand update-user-layers
   {:parameters [layers]
-   :user-roles #{:authorityAdmin}}
+   :user-roles #{:authorityAdmin}
+   :feature :municipality-maps}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user)
                          {$set {:map-layers.layers layers}})
   (ok))
-
-;; (defraw organization-map-server-proxy
-;;   {:description "hiihoo"
-;;    :user-roles #{:authorityAdmin}}
-;;   [{params :data user :user headers :headers}]
-;;   (let [response (o/query-organization-map-server (user/authority-admins-organization-id user)
-;;                                                   params
-;;                                                   headers)
-;;         te (-> response :headers :transfer-encoding)]
-;;     (println "--------------------------- " te " --------------------------- " )
-;;     response))
