@@ -28,7 +28,9 @@
 
 (def- henkilotiedot (assoc nimi :hetu {:value "210281-9988"} :turvakieltoKytkin {:value true}))
 
-(def- osoite {:katu {:value "katu"} :postinumero {:value "33800"} :postitoimipaikannimi {:value "Tuonela"}})
+(def- osoite {:katu {:value "katu"}
+              :postinumero {:value "33800"} :postitoimipaikannimi {:value "Tuonela"}
+              :maa {:value "CHN"}})
 
 (def- henkilo
   {:henkilotiedot henkilotiedot
@@ -54,14 +56,16 @@
   {:id "hakija-henkilo" :schema-info {:name "hakija-r"
                                       :subtype "hakija"
                                       :version 1}
-   :data {:henkilo (assoc henkilo :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}})}})
+   :data {:henkilo (assoc henkilo :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}
+                                             :suoramarkkinointilupa {:value false}})}})
 
 (def- hakija-yritys
   {:id "hakija-yritys" :schema-info {:name "hakija-r"
                                      :subtype "hakija"
                                      :version 1}
    :data {:_selected {:value "yritys"}
-          :yritys (assoc-in yritys [:yhteyshenkilo :kytkimet] {:vainsahkoinenAsiointiKytkin {:value true}})}})
+          :yritys (assoc-in yritys [:yhteyshenkilo :kytkimet] {:vainsahkoinenAsiointiKytkin {:value true}
+                                                               :suoramarkkinointilupa {:value true}})}})
 
 (def- paasuunnittelija
   {:id "50bc85e4ea3e790c9ff7cdb2"
@@ -290,7 +294,8 @@
    :created 2
    :schema-info {:name "uusiRakennus"
                  :version 1
-                 :op {:name "kerrostalo-rivitalo"}}
+                 :op {:name "kerrostalo-rivitalo"
+                      :id "kerrostalo-rivitalo-id"}}
    :data common-rakennus})
 
 (def- rakennuksen-muuttaminen
@@ -298,7 +303,8 @@
    :created 1
    :schema-info {:name "rakennuksen-muuttaminen"
                  :version 1
-                 :op {:name "muu-laajentaminen"}}
+                 :op {:name "muu-laajentaminen"
+                      :id "muu-laajentaminen-id"}}
    :data (conj
            common-rakennus
            {:rakennusnro {:value "001"}
@@ -312,7 +318,8 @@
    :created 3
    :schema-info {:name "rakennuksen-laajentaminen"
                  :version 1
-                 :op {:name "laajentaminen"}}
+                 :op {:name "laajentaminen"
+                      :id "laajentaminen-id"}}
    :data (conj
            common-rakennus
            {:rakennusnro {:value "001"}
@@ -332,7 +339,8 @@
                       :created 4
                       :schema-info {:name "purkaminen"
                                     :version 1
-                                    :op {:name "purkaminen"}}
+                                    :op {:name "purkaminen"
+                                         :id "purkaminen-id"}}
                       :data (conj
                               (->
                                 common-rakennus
@@ -398,6 +406,9 @@
                 puun-kaataminen
                 purku])
 
+(defn op-info [doc]
+  (select-keys (-> doc :schema-info :op) [:id :name :description]))
+
 (def application-rakennuslupa
   {:id "LP-753-2013-00001"
    :permitType "R"
@@ -434,7 +445,11 @@
                  :requested 1368080102631
                  :status "ehdoilla"
                  :text "Savupiippu pit\u00e4\u00e4 olla."}]
-   :neighbors ctc/neighbors})
+   :neighbors ctc/neighbors
+   :primaryOperation (op-info rakennuksen-muuttaminen)
+   :secondaryOperations (map op-info [uusi-rakennus laajentaminen
+                                      aidan-rakentaminen puun-kaataminen
+                                      purku])})
 
 (ctc/validate-all-documents application-rakennuslupa)
 
@@ -481,11 +496,19 @@
 (defn- validate-address [address]
   (let [person-katu (:teksti (:osoitenimi address))
         person-postinumero (:postinumero address)
-        person-postitoimipaikannimi (:postitoimipaikannimi address)]
+        person-postitoimipaikannimi (:postitoimipaikannimi address)
+        person-maa (:valtioSuomeksi address)
+        person-country (:valtioKansainvalinen address)
+        person-address (:ulkomainenLahiosoite address)
+        person-post (:ulkomainenPostitoimipaikka address)]
     (fact address => truthy)
     (fact person-katu => "katu")
     (fact person-postinumero =>"33800")
-    (fact person-postitoimipaikannimi => "Tuonela")))
+    (fact person-postitoimipaikannimi => "Tuonela")
+    (fact person-maa => "Kiina")
+    (fact person-country => "CHN")
+    (fact person-address => "katu")
+    (fact person-post => "Tuonela")))
 
 (defn- validate-contact [m]
   (fact m => (contains {:puhelin "+358401234567"
@@ -522,6 +545,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin henkilo) => true)
+    (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin hakija-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
 
@@ -535,6 +559,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin yritys) => true)
+    (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin hakija-model) => false)
     (validate-minimal-person henkilo)
     (validate-company yritys)))
 

@@ -633,7 +633,7 @@
                                 :new-application-enabled true}]
                        :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                                 :url "http://sipoo.fi"}]
-                       :krysp {:YA {:url local-krysp :ftpUser "dev_ya_sipoo" :version "2.1.3"}}
+                       :krysp {:YA {:url local-krysp :ftpUser "dev_ya_sipoo" :version "2.2.1"}}
                        :statementGivers [{:id "516560d6c2e6f603beb85147"
                                            :text "Paloviranomainen",
                                            :email "sonja.sibbo@sipoo.fi",

@@ -1259,7 +1259,7 @@
                                          name: 'help-toggle',
                                          params: {lhtml: 'help.' + permitType() + '.tasksDesc'}
                                          }"></span>
-                        <div data-bind="if: buildings() && buildings().length > 0 && $root.authorization.ok('inform-building-construction-started')">
+                        <div data-bind="if: _js.buildings && _js.buildings.length > 0 && $root.authorization.ok('inform-building-construction-started')">
 
                             <table>
                                 <thead>

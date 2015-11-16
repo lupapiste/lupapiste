@@ -3,7 +3,7 @@
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.itest-util :as util]
+            [lupapalvelu.test-util :as test-util]
             [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
             [midje.sweet :refer :all]
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
@@ -29,7 +29,7 @@
   (merge domain/application-skeleton
          {:id id
           :address " Korpikuusen kannon alla 1 "
-          :documents (map util/dummy-doc (remove ignored-schemas (keys (schemas/get-schemas 1))))
+          :documents (map test-util/dummy-doc (remove ignored-schemas (keys (schemas/get-schemas 1))))
           :municipality "444"
           :organization "753-R"
           :tosFunction "10.3.0.1"

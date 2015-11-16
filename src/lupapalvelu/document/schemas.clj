@@ -748,7 +748,7 @@
                        {:name "lamminvesiKytkin" :type :checkbox}
                        {:name "aurinkopaneeliKytkin" :type :checkbox}
                        {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
-                       {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
+                       {:name "vaestonsuoja" :type :string :subtype :number :min 0 :max 99999 :size "s" :unit "hengelle"}
                        {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
 
 (def luokitus {:name "luokitus"

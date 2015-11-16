@@ -7,6 +7,8 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.attachment :as attachment]))
 
+(apply-remote-minimal)
+
 (facts* "facts about update-doc and validate-doc commands"
   (let [application-id   (create-app-id pena)
         application0     (query-application pena application-id) => truthy
@@ -85,6 +87,7 @@
     (fact (-> three-apartments :huoneistot keys count) => 3)
     (fact (-> two-apartments :huoneistot keys count) => 2)))
 
+
 (facts "facts about party-document-names query"
   (let [application-id        (create-app-id pena)
         application0          (query-application pena application-id)
@@ -140,10 +143,16 @@
     (fact "primary operation cannot be removed"
       (command pena :remove-doc :id application-id :docId (:id uusi-rakennus)) => fail?)
 
-    (fact "sauna doc and operation are removed"
-      (command pena :remove-doc :id application-id :docId (:id sauna)) => ok?
-      (let [updated-app (query-application pena application-id)]
+
+    (fact* "sauna doc and operation are removed"
+      (let [sauna-attachment (first (attachment/get-attachments-by-operation application (:id (first sec-operations))))
+            _ (upload-attachment pena application-id sauna-attachment true)
+            _ (command pena :remove-doc :id application-id :docId (:id sauna)) => ok?
+            updated-app (query-application pena application-id)]
         (domain/get-document-by-name updated-app "uusi-rakennus-ei-huoneistoa") => nil
         (:primaryOperation updated-app) =not=> nil?
         (count (:secondaryOperations updated-app)) => 0
-        (fact "attachments belonging to operation don't exist anymore" (count (attachment/get-attachments-by-operation updated-app (:id (first sec-operations)))) => 0)))))
+        (fact "attachments belonging to operation don't exist anymore"
+          (count (attachment/get-attachments-by-operation updated-app (:id (first sec-operations)))) => 0)
+        (fact "old sauna attachment still exists after remove, because it had attachment versions uploaded"
+          (some (hash-set (:id sauna-attachment)) (map :id (:attachments updated-app))))))))
