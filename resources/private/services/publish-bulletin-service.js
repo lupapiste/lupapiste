@@ -47,13 +47,14 @@ LUPAPISTE.PublishBulletinService = function() {
       .success(function(res) {
         if (util.getIn(res, ["bulletin", "id"])) {
           self.bulletin(res.bulletin);
+        } else {
+          self.bulletin(undefined);
         }
       })
       .call();
-  });
+  }, 100);
 
   hub.subscribe("publishBulletinService::fetchBulletinVersions", function(event) {
     fetchBulletinVersions(event.bulletinId);
   });
-
 };
