@@ -21,6 +21,7 @@
    :versions.address 1 :versions.location 1
    :versions.primaryOperation 1 :versions.propertyId 1
    :versions.applicant 1 :versions.modified 1
+   :versions.proclamationEndsAt 1
    :modified 1})
 
 (def bulletin-page-size 10)

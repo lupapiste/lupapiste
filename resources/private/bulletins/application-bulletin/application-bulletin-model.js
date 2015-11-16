@@ -12,6 +12,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   self.bulletinId = params.bulletinId;
   self.versionId  = ko.observable();
   self.selectedTab = ko.observable("info");
+  self.proclamationEndsAt = ko.observable();
 
   self.bulletinStateLoc = ko.pureComputed(function() {
     return ["bulletin", "state", self.bulletin().bulletinState].join(".");
@@ -24,6 +25,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     if (util.getIn(self, ["bulletin", "id"])) {
       var location = bulletin.location;
       self.versionId(bulletin.versionId);
+      self.proclamationEndsAt(bulletin.proclamationEndsAt);
       map.clear().updateSize().center(location[0], location[1]).add({x: location[0], y: location[1]});
       // This can be called only once
       docgen.displayDocuments("#bulletinDocgen", bulletin, bulletin.documents, {ok: function() { return false; }}, {disabled: true});

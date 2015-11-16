@@ -95,10 +95,12 @@
       <div class="container bulletin-comment">
         <h5 data-bind="ltext: 'bulletin.comment.title'"></h5>
         <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'help.bulletin.comment' } }"></span>
+        <!-- ko if: proclamationEndsAt -->
         <p>
           <span data-bind="ltext: 'bulletin.comment.endDate'"></span>
-          <span data-bind="dateTimeString: $data.proclamationEndsAt"></span>
+          <span data-bind="dateString: proclamationEndsAt"></span>
         </p>
+        <!-- /ko -->
         <div data-bind="component: { name: 'bulletin-comment-box', params: { bulletinId: bulletinId, versionId: versionId } }"></div>
       </div>
     </script>
