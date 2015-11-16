@@ -17,6 +17,12 @@
       <!-- ko if: canMoveToFinal -->
       <div data-bind="component: { name: 'move-to-final', params: { appId: appId, canPublish: canMoveToFinal, bulletinState: bulletinState } }"></div>
       <!-- /ko -->
+      <!-- ko if: isInFinalState -->
+      <p>
+        <span data-bind="ltext: 'bulletin.state.label'"></span>
+        <span class="bulletin-state" data-bind="ltext: 'bulletin.state.final'"></span>
+      </p>
+      <!-- /ko -->
     </script>
   </section>
 </body>

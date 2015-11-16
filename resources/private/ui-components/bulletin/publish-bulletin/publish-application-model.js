@@ -36,10 +36,15 @@ LUPAPISTE.PublishApplicationModel = function(params) {
     return self.authModel.ok("move-to-final") && self.bulletinState() === "verdictGiven";
   });
 
+  self.isInFinalState = ko.pureComputed(function() {
+    return self.bulletinState() === "final";
+  });
+
   ko.computed(function() {
     var id = self.appId();
     if(id) {
       self.sendEvent("publishBulletinService", "fetchBulletinVersions", {bulletinId: id});
     }
   });
+
 };
