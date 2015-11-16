@@ -138,10 +138,12 @@ LUPAPISTE.DocumentDataService = function() {
   // Repeating utilities
   //
 
-  function createRepeatingGroupDataModel(schema, rawModel, path, index) {
+  function createRepeatingUnitDataModel(schema, rawModel, path, index) {
     return _.extend(
         {index: index},
-        createGroupDataModel(schema, rawModel, path.concat(index))
+        isGroupType(schema) ? 
+          createGroupDataModel(schema, rawModel, path.concat(index)) : 
+          createInputDataModel(schema, rawModel, path.concat(index))
     );
   }
 
@@ -150,7 +152,7 @@ LUPAPISTE.DocumentDataService = function() {
       path: path,
       schema: schema,
       model: ko.observableArray(_.map(rawModel, function(subModel, index) {
-        return createRepeatingGroupDataModel(schema, subModel, path, index);
+        return createRepeatingUnitDataModel(schema, subModel, path, index);
       }))
     };
   }
@@ -168,7 +170,7 @@ LUPAPISTE.DocumentDataService = function() {
   function pushToRepeating(repeatingModel, rawModel) {
     var ind = _.parseInt( _(repeatingModel.model()).map("index").max() ) + 1 || 0;
     var path = repeatingModel.path;
-    return repeatingModel.model.push(createRepeatingGroupDataModel(repeatingModel.schema, rawModel, path, ind));
+    return repeatingModel.model.push(createRepeatingUnitDataModel(repeatingModel.schema, rawModel, path, ind));
   }
 
   //
