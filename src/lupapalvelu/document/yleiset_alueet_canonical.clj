@@ -318,22 +318,14 @@
         task-name (:taskname katselmus)]
     (util/strip-nils
       (merge
-        {:pitoPvm (if (number? pitoPvm) (util/to-xml-date pitoPvm) (util/to-xml-date-from-string pitoPvm))
-         ;;
-         ;;
-         ;; TODO: own values to ya task schema + migration
-         ;;
-         :katselmuksenLaji (case katselmuksenLaji
-                             "aloituskokous" "Aloituskatselmus"
-                             "loppukatselmus" "Loppukatselmus"
-                             "Muu valvontak\u00e4ynti")
-         :vaadittuLupaehtonaKytkin (true? vaadittuLupaehtona)
-         ;; NOTE: katselmuksen tila not supported in YA krysp
-         ;:osittainen tila
-         :lasnaolijat lasnaolijat
-         :pitaja pitaja
-         :poikkeamat poikkeamat
-         :tarkastuksenTaiKatselmuksenNimi task-name}
+        (util/assoc-when {}
+          :pitoPvm (if (number? pitoPvm) (util/to-xml-date pitoPvm) (util/to-xml-date-from-string pitoPvm))
+          :katselmuksenLaji katselmuksenLaji
+          :vaadittuLupaehtonaKytkin (true? vaadittuLupaehtona)
+          :lasnaolijat lasnaolijat
+          :pitaja pitaja
+          :poikkeamat poikkeamat
+          :tarkastuksenTaiKatselmuksenNimi task-name)
         (when task-id
           {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}})
         (when (:kuvaus huomautukset)
@@ -342,8 +334,8 @@
                                            (if-not (ss/blank? v)
                                              (assoc m k (util/to-xml-date-from-string v))
                                              m))
-                                         (select-keys huomautukset [:kuvaus :toteaja])
-                                         (select-keys huomautukset [:maaraAika :toteamisHetki]))}})))))
+                                         (select-keys huomautukset [:kuvaus])
+                                         (select-keys huomautukset [:toteaja :maaraAika :toteamisHetki]))}})))))
 
 (defn katselmus-canonical [application katselmus lang user]
   (let [application (tools/unwrapped application)
