@@ -3,9 +3,8 @@ var uiComponents = (function() {
 
   var sizeClasses = { "t": "tiny", "s": "short", "m": "medium", "l": "long"};
 
-  // TODO: show warning indicator
   // TODO: refactor
-  var saveMany = function(command, documentId, applicationId, element, paths, vals, indicator, result, cb) {
+  var saveMany = function(command, documentId, applicationId, paths, vals, indicator, result, cb) {
     cb = cb || _.noop;
     var updates = _(paths)
       .map(function(p) { return p.join("."); })
@@ -23,7 +22,7 @@ var uiComponents = (function() {
         }).forEach(function(r) {
           result(r.result);
         }).value();
-        util.showSavedIndicator(e);
+        indicator({type: "saved"});
         cb();
       })
       .error(function () {
@@ -35,8 +34,8 @@ var uiComponents = (function() {
       .call();
   };
 
-  var save = function(command, documentId, applicationId, element, path, val, indicator, result, cb) {
-    return saveMany(command, documentId, applicationId, element, [path], [val], indicator, result, cb);
+  var save = function(command, documentId, applicationId, path, val, indicator, result, cb) {
+    return saveMany(command, documentId, applicationId, [path], [val], indicator, result, cb);
   };
 
   var removeRow = function (documentId, applicationId, path, indicator, result, cb) {
@@ -52,11 +51,15 @@ var uiComponents = (function() {
           return _.isEqual(result.path, path);
         });
         result(res ? res.result : undefined);
-        util.showSavedIndicator(e);
+        indicator({type: "saved"});
         cb(e);
       })
-      .error(util.showSavedIndicator)
-      .fail(util.showSavedIndicator)
+      .error(function () {
+        indicator({type: "err"});
+      })
+      .fail(function () {
+        indicator({type: "err"});
+      })
       .call();
   };
 

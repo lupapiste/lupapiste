@@ -33,7 +33,6 @@ LUPAPISTE.CompanySelectorModel = function(params) {
       uiComponents.save("update-doc",
                          params.documentId,
                          params.id,
-                         params.schema.name,
                          params.path.split(".").concat([params.schema.name]),
                          id,
                          self.indicator,

@@ -68,7 +68,6 @@ LUPAPISTE.DocgenInputModel = function(params) {
     uiComponents.save("update-doc",
                        self.documentId,
                        self.params.applicationId,
-                       self.params.schema.name,
                        self.path,
                        val,
                        self.indicator,
