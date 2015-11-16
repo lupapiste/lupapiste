@@ -85,13 +85,9 @@
         </div>
       </div>
       <div class="container">
-        <div class="bulletin-info">
-          <h3 data-bind="ltext: 'bulletin.tab.info'"></h3>
-          <div id="bulletinDocgen" class="docgen-content">
-              <!-- This is where the generated documents will be placed. -->
-          </div>
-        </div>
+        <div data-bind="template: { name: 'application-bulletin-' + selectedTab() + '-tab-template'}"></div>
       </div>
+
       <div class="container bulletin-comment">
         <h5 data-bind="ltext: 'bulletin.comment.title'"></h5>
         <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'help.bulletin.comment' } }"></span>

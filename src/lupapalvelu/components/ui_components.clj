@@ -371,6 +371,7 @@
                :html ["header.html" "footer.html"
                       "bulletins.html" "bulletins-template.html"
                       "application-bulletin/application-bulletin-template.html"
+                      "application-bulletin/tab-templates/application-bulletin-info-tab-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
                       "application-bulletins/application-bulletins-template.html"
                       "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
