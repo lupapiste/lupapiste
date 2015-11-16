@@ -170,6 +170,19 @@
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
+(defcommand move-to-verdict-given
+  {:parameters [id verdictGivenAt appealPeriodStartsAt appealPeriodEndsAt verdictGivenText]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     #{:verdictGiven}}
+  [{:keys [application created] :as command}]
+  (let [updates (->> (create-bulletin application created {:verdictGivenAt verdictGivenAt
+                                                           :appealPeriodStartsAt appealPeriodStartsAt
+                                                           :appealPeriodEndsAt appealPeriodEndsAt
+                                                           :verdictGivenText verdictGivenText}))]
+    (mongo/update-by-id :application-bulletins id updates :upsert true)
+    (ok)))
+
 (defquery bulletin
   {:parameters [bulletinId]
    :feature :publish-bulletin

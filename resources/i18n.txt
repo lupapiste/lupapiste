@@ -16,3 +16,10 @@ bulletin.state.label:  Hakemuksen tila Julkipano-sivustolla:
 bulletin.application.state.label:  Hakemus julkaistaan seuraavaksi tilaan:
 
 bulletin.proclamation.proclaimAgain:  Kuuluta uudelleen
+
+help.bulletin.application.state.verdictGiven:  Kun hakemuksesta julkaistaan päätös:<br/>- Julkipano-sivustolle viedään Lupapisteessä oleva päätös liitteineen<br/>- Hakemustiedot poistuvat Julkipano-sivustolta
+bulletin.verdict.verdictGivenAt:  Päätöksen antopäivämäärä
+bulletin.verdict.appealPeriodStartsAt:  Valitusaika alkaa
+bulletin.verdict.appealPeriodEndsAt:  Valitusaika päättyy
+bulletin.appeal.text.label:  Valitusohje
+bulletin.appeal.text.placeholder:  Kirjoita valitusohje...

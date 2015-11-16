@@ -27,6 +27,11 @@ LUPAPISTE.PublishApplicationModel = function(params) {
     return self.authModel.ok("move-to-proclaimed");
   });
 
+  self.canMoveToVerdictGiven = ko.pureComputed(function() {
+    // TODO bulletin state check in backend
+    return self.authModel.ok("move-to-verdict-given") && self.bulletinState() === "proclaimed";
+  });
+
   ko.computed(function() {
     var id = self.appId();
     if(id) {

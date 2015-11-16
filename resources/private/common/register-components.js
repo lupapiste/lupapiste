@@ -77,7 +77,8 @@ jQuery(document).ready(function() {
     {name: "submit-button"},
     {name: "remove-button"},
     {name: "publish-application"},
-    {name: "move-to-proclaimed"}
+    {name: "move-to-proclaimed"},
+    {name: "move-to-verdict-given"}
   ];
 
   _.forEach(components, function(component) {

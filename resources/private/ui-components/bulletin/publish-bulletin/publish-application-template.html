@@ -9,7 +9,10 @@
       <p data-bind="ltext: 'bulletin.application.canNotPublish'"></p>
       <!-- /ko -->
       <!-- ko if: canMoveToProclaimed -->
-      <div data-bind="component: { name: 'move-to-proclaimed', params: { appId: appId, canPublish: canPublish, bulletinState: bulletinState } }"></div>
+      <div data-bind="component: { name: 'move-to-proclaimed', params: { appId: appId, canPublish: canMoveToProclaimed, bulletinState: bulletinState } }"></div>
+      <!-- /ko -->
+      <!-- ko if: canMoveToVerdictGiven -->
+      <div data-bind="component: { name: 'move-to-verdict-given', params: { appId: appId, canPublish: canMoveToVerdictGiven, bulletinState: bulletinState } }"></div>
       <!-- /ko -->
     </script>
   </section>
