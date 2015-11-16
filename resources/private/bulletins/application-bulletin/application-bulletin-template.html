@@ -86,6 +86,10 @@
       </div>
       <div class="container">
         <div data-bind="template: { name: 'application-bulletin-' + selectedTab() + '-tab-template'}"></div>
+
+        <div data-bind="visible: selectedTab() === 'info'" id="bulletinDocgen" class="docgen-content">
+            <!-- This is where the generated documents will be placed. -->
+        </div>
       </div>
 
       <div class="container bulletin-comment">
