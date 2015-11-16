@@ -39,35 +39,6 @@ var uiComponents = (function() {
     return saveMany(command, documentId, applicationId, element, [path], [val], indicator, result, cb);
   };
 
-
-  var copyRow = function(documentId, applicationId, path, sourceIndex, targetIndex, indicator, result, cb) {
-    cb = cb || _.noop;
-    ajax
-      .command("copy-row", {
-        doc: documentId,
-        id: applicationId,
-        path: path,
-        "source-index": sourceIndex,
-        "target-index": targetIndex,
-        collection: "documents"})
-      .success(function (e) {
-        repository.load(applicationId);
-        var res = _.find(e.results, function(result) {
-          return _.isEqual(result.path, path);
-        });
-        result(res ? res.result : undefined);
-        indicator({type: "saved"});
-        cb(e);
-      })
-      .error(function () {
-        indicator({type: "err"});
-      })
-      .fail(function () {
-        indicator({type: "err"});
-      })
-      .call();
-  };
-
   var removeRow = function (documentId, applicationId, path, indicator, result, cb) {
     ajax
       .command("remove-document-data", {
@@ -97,7 +68,6 @@ var uiComponents = (function() {
     sizeClasses: sizeClasses,
     save: save,
     saveMany: saveMany,
-    copyRow: copyRow,
     removeRow: removeRow
   };
 

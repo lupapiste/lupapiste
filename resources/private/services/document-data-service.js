@@ -46,7 +46,12 @@ LUPAPISTE.DocumentDataService = function() {
     return self.model.remove(self.findDocumentById(id));
   }
 
-  self.copyRepeatingRow = function(documentId, path, index) {
+  self.addRepeatingGroup = function(documentId, path) {
+    var repeatingModel = self.getInDocument(documentId, path);
+    return pushToRepeating(repeatingModel, {});
+  }
+
+  self.copyRepeatingGroup = function(documentId, path, index) {
     var repeatingModel = self.getInDocument(documentId, path);
     var rawModel = getAsRaw(findByIndex(repeatingModel, index));
     var repLength = pushToRepeating(repeatingModel, rawModel);

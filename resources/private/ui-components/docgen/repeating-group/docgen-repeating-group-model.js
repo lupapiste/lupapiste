@@ -11,12 +11,13 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.appendLabel = params.i18npath.concat("_append_label").join(".");
   self.copyLabel = params.i18npath.concat("_copy_label").join(".");
 
-  self.groups = lupapisteApp.services.documentDataService.getInDocument(params.documentId, self.path);
+  self.data = lupapisteApp.services.documentDataService.getInDocument(params.documentId, self.path);
+  self.groups = self.data.model;
 
   self.indicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});
 
-  var createGroup = function(groupModel) {
+  var createGroup = function(groupModel, index) {
     return _.extend({}, self.params, {
       index: index,
       path: self.path.concat(index),
@@ -48,22 +49,22 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   };
 
   self.addGroup = function() {
-    var dataIndex = parseInt( _(self.groups()).map("index").max() ) + 1;
-    self.groups.push(createGroup({}, dataIndex || 0));
+    lupapisteApp.services.documentDataService.addRepeatingGroup(self.params.documentId, self.params.path);
   };
 
   self.duplicateLastGroup = function() {
-    var sourceIndex = parseInt( _(self.groups()).map("index").max() );
-    uiComponents.copyRow(self.params.documentId,
-                         self.params.applicationId,
-                         self.path,
-                         sourceIndex,
-                         sourceIndex + 1,
-                         self.indicator,
-                         self.result);
+    var sourceIndex = _.parseInt( _(self.groups()).map("index").max() );
+    var updates = lupapisteApp.services.documentDataService.copyRepeatingGroup(self.params.documentId, self.params.path, sourceIndex);
+    uiComponents.saveMany(
+      "update-doc", 
+      self.params.documentId, 
+      self.params.applicationId, 
+      self.params.schema.name, 
+      _.map(updates, 0), 
+      _.map(updates, 1),
+      self.indicator, 
+      self.result);
   };
-
-  //self.groups(_.map(params.model, createGroup));
 
   var addOneIfEmpty = function(groups) {
     if ( _.isEmpty(groups) ) {
