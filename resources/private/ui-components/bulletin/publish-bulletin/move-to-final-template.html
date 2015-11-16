@@ -1,0 +1,32 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="move-to-final-template">
+  <p data-bind="if: bulletinState">
+    <span data-bind="ltext: 'bulletin.state.label'"></span>
+    <span class="bulletin-state" data-bind="ltext: 'bulletin.state.verdictGiven'"></span>
+  </p>
+  <p>
+    <span data-bind="ltext: 'bulletin.application.state.label'"></span>
+    <span class="bulletin-state" data-bind="ltext: 'bulletin.state.final'"></span>
+  </p>
+  <div class="form-grid form-grid--no-border">
+    <div class="row">
+      <div class="col-1">
+        <div data-bind="component: {name: 'date-field',
+                                    params: {value: officialAt,
+                                             lLabel: 'bulletin.verdict.officialAt',
+                                             lPlaceholder: 'choose',
+                                             required: true}}"></div>
+      </div>
+    </div>
+  </div>
+
+  <button data-bind="click:  publishApplicationBulletin,
+                     enable: canPublish() && isValid(),
+                     attr:   {'title': loc('tooltip.publishBulletin')},
+                     css:    {waiting: pending}"
+          data-test-id="publish-bulletin"
+          class="positive">
+    <i class="lupicon-circle-arrow-right"></i>
+    <i class="wait spin lupicon-refresh"></i>
+    <span data-bind="ltext: 'bulletin.publish'"></span>
+  </button>
+</script>

@@ -14,6 +14,9 @@
       <!-- ko if: canMoveToVerdictGiven -->
       <div data-bind="component: { name: 'move-to-verdict-given', params: { appId: appId, canPublish: canMoveToVerdictGiven, bulletinState: bulletinState } }"></div>
       <!-- /ko -->
+      <!-- ko if: canMoveToFinal -->
+      <div data-bind="component: { name: 'move-to-final', params: { appId: appId, canPublish: canMoveToFinal, bulletinState: bulletinState } }"></div>
+      <!-- /ko -->
     </script>
   </section>
 </body>

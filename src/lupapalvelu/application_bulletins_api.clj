@@ -183,6 +183,19 @@
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
+(defcommand move-to-final
+  {:parameters [id officialAt]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     #{:verdictGiven}}
+  [{:keys [application created] :as command}]
+  ; Note there is currently no way to move application to final state so we sent bulletin state manuall
+  (let [updates (->> (create-bulletin application created {:officialAt officialAt
+                                                           :bulletinState :final}))]
+    (clojure.pprint/pprint updates)
+    (mongo/update-by-id :application-bulletins id updates :upsert true)
+    (ok)))
+
 (defquery bulletin
   {:parameters [bulletinId]
    :feature :publish-bulletin

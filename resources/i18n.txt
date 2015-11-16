@@ -23,3 +23,5 @@ bulletin.verdict.appealPeriodStartsAt:  Valitusaika alkaa
 bulletin.verdict.appealPeriodEndsAt:  Valitusaika päättyy
 bulletin.appeal.text.label:  Valitusohje
 bulletin.appeal.text.placeholder:  Kirjoita valitusohje...
+
+bulletin.verdict.officialAt:  Lainvoimainen alkaen

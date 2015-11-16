@@ -78,7 +78,8 @@ jQuery(document).ready(function() {
     {name: "remove-button"},
     {name: "publish-application"},
     {name: "move-to-proclaimed"},
-    {name: "move-to-verdict-given"}
+    {name: "move-to-verdict-given"},
+    {name: "move-to-final"}
   ];
 
   _.forEach(components, function(component) {

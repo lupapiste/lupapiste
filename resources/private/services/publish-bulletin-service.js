@@ -37,6 +37,11 @@ LUPAPISTE.PublishBulletinService = function() {
                                               verdictGivenText:     event.verdictGivenText || ""});
   });
 
+  hub.subscribe("publishBulletinService::moveToFinal", function(event) {
+    publishBulletin("move-to-final", {id: event.id,
+                                      officialAt: event.officialAt });
+  });
+
   var fetchBulletinVersions = _.debounce(function(bulletinId) {
     ajax.query("bulletin-versions", {bulletinId: bulletinId})
       .success(function(res) {
