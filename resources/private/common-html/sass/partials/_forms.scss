@@ -1215,6 +1215,10 @@ $max-columns: 12;
     margin: 0;
   }
 
+  .row--no-bottom-margin {
+    margin-bottom: 0;
+  }
+
   .autocomplete-component {
     width: 100%;
   }
