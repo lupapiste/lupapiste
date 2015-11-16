@@ -25,8 +25,13 @@ LUPAPISTE.PublishApplicationModel = function(params) {
     }
   });
 
-  self.canPublish = ko.pureComputed(function() {
-    return self.authModel.ok("publish-bulletin");
+  self.canNotPublishForAuthority = ko.pureComputed(function() {
+    return self.appState() !== "sent" && lupapisteApp.models.currentUser.isAuthority();
+  });
+
+  self.notYetPublishedForApplicant = ko.pureComputed(function() {
+    console.log("state", self.bulletinState());
+    return !self.bulletinState() && lupapisteApp.models.currentUser.isApplicant();
   });
 
   self.canMoveToProclaimed = ko.pureComputed(function() {
@@ -42,8 +47,8 @@ LUPAPISTE.PublishApplicationModel = function(params) {
     return self.authModel.ok("move-to-final") && self.bulletinState() === "verdictGiven";
   });
 
-  self.isInFinalState = ko.pureComputed(function() {
-    return self.bulletinState() === "final";
+  self.showBulletinState = ko.pureComputed(function() {
+    return self.bulletinState() ? "bulletin.state." + self.bulletinState() : undefined;
   });
 
   ko.computed(function() {

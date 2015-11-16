@@ -5,8 +5,17 @@
     <script type="text/x-jquery-tmpl" id="publish-application-template">
       <h1 data-bind="ltext: 'bulletin'"></h1>
       <span data-bind="component: { name: 'help-toggle', params: { lhtml: helpText } }"></span>
-      <!-- ko ifnot: canPublish -->
+      <!-- ko if: notYetPublishedForApplicant -->
+      <p data-bind="ltext: 'bulletin.application.notYetPublished'"></p>
+      <!-- /ko -->
+      <!-- ko if: canNotPublishForAuthority -->
       <p data-bind="ltext: 'bulletin.application.canNotPublish'"></p>
+      <!-- /ko -->
+      <!-- ko if: showBulletinState -->
+      <p>
+        <span data-bind="ltext: 'bulletin.state.label'"></span>
+        <span class="bulletin-state" data-bind="ltext: showBulletinState"></span>
+      </p>
       <!-- /ko -->
       <!-- ko if: canMoveToProclaimed -->
       <div data-bind="component: { name: 'move-to-proclaimed', params: { appId: appId, canPublish: canMoveToProclaimed, bulletinState: bulletinState } }"></div>
@@ -16,12 +25,6 @@
       <!-- /ko -->
       <!-- ko if: canMoveToFinal -->
       <div data-bind="component: { name: 'move-to-final', params: { appId: appId, canPublish: canMoveToFinal, bulletinState: bulletinState } }"></div>
-      <!-- /ko -->
-      <!-- ko if: isInFinalState -->
-      <p>
-        <span data-bind="ltext: 'bulletin.state.label'"></span>
-        <span class="bulletin-state" data-bind="ltext: 'bulletin.state.final'"></span>
-      </p>
       <!-- /ko -->
     </script>
   </section>

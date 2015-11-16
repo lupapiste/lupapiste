@@ -2,6 +2,8 @@ bulletin:  Julkipano
 bulletin.publish:  Julkaise
 bulletin.application.canNotPublish:  Hakemus tulee ensin siirtää käsittelyyn, jotta sen voi julkaista Julkipano-sivustolla.
 
+bulletin.application.notYetPublished:  Hakemusta ei ole vielä julkaistu Julkipano-sivustolla
+
 help.bulletin.state.proclaimed:  Kuulutusaikana:<br/>- Muistutuksia ja mielipiteitä voi jättää Julkipano-sivustolla<br/>- Lausuntoja ja vastineita voi antaa Lupapisteessa<br/>- Hakemus on muilta osin lukittu Lupapisteessä ja sitä ei voi täydentää tai muokata<br/>- Kuulutusaikaa voi pidentää tai lyhentää Lupapisteessa
 bulletin.state.proclaimed:  Kuulutettavana
 

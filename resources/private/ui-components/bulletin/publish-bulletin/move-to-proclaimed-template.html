@@ -1,8 +1,4 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="move-to-proclaimed-template">
-  <p data-bind="if: bulletinState">
-    <span data-bind="ltext: 'bulletin.state.label'"></span>
-    <span class="bulletin-state" data-bind="ltext: 'bulletin.state.proclaimed'"></span>
-  </p>
   <!-- ko if: !alreadyProclaimed() || proclaimAgain() -->
   <p>
     <span data-bind="ltext: 'bulletin.application.state.label'"></span>

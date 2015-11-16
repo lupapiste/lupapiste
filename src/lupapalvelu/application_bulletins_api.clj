@@ -223,7 +223,7 @@
   "returns all bulletin versions for application bulletin with comments"
   {:parameters [bulletinId]
    :feature    :publish-bulletin
-   :user-roles #{:authority}}
+   :user-roles #{:authority :applicant}}
   (let [bulletin-fields (-> bulletins-fields
                             (dissoc :versions)
                             (merge {:comments 1
