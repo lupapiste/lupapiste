@@ -139,7 +139,6 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.foremanTasks = ko.observable();
 
-  self.buildings = ko.observable([]);
   self.nonpartyDocumentIndicator = ko.observable(0);
   self.partyDocumentIndicator = ko.observable(0);
   self.linkPermitData = ko.observable(null);

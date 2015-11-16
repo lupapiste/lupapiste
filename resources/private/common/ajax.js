@@ -39,13 +39,15 @@ var ajax = (function($) {
       rawData:   false,
       complete:  self.onComplete,
       success: function(e) {
-        if (self.rawData || e.ok) {
+        if (self.rawData || e && e.ok) {
           self.successHandler.call(self.savedThis, e);
-        } else {
+        } else if (e) {
           var res = resolveErrorHandler(e).call(self.savedThis, e);
           if (res && res.ok === false) {
             defaultError(e);
           }
+        } else {
+          error("Ajax: No response from " + self.url);
         }
       },
       error: function(jqXHR, textStatus, errorThrown) {

@@ -14,9 +14,10 @@
   [application document]
   (validate application document (get-document-schema document)))
 
-(defn validate-all-documents [application]
+(defn validate-all-documents [application & [collection-name]]
   "Validates all the documents of the application given as parameter."
-  (let [documents (:documents application)
+  (let [collection (or collection-name :documents)
+        documents (get application collection)
         reduced-application (select-keys application [:auth])]
     (doseq [document documents]
       (fact {:midje/description document}
