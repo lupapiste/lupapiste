@@ -59,11 +59,11 @@ LUPAPISTE.DocumentDataService = function() {
     var rawModel = getAsRaw(findByIndex(repeatingModel, index));
     var repLength = pushToRepeating(repeatingModel, rawModel);
     var updates = getAsUpdates(repeatingModel.model()[repLength - 1]);
-    self.save(documentId, 
-              _.map(updates, 0), 
-              _.map(updates, 1),
-              indicator,
-              result);
+    self.updateDoc(documentId, 
+                   _.map(updates, 0), 
+                   _.map(updates, 1),
+                   indicator,
+                   result);
   }
 
   self.removeRepeatingGroup = function(documentId, path, index, indicator, result) {
@@ -79,16 +79,18 @@ LUPAPISTE.DocumentDataService = function() {
                      cb);
   }
 
-  self.save = save;
-  
-  function save(documentId, paths, vals, indicator, result, cb) {
+  self.updateDoc = function(documentId, paths, vals, indicator, result, cb) {
+    return save("update-doc", documentId, paths, vals, indicator, result, cb);
+  }
+
+  function save(command, documentId, paths, vals, indicator, result, cb) {
     cb = cb || _.noop;
     var updates = _(paths)
       .map(function(p) { return p.join("."); })
       .zip(vals)
       .value();
     ajax
-      .command("update-doc", {
+      .command(command, {
         doc: documentId,
         id: self.applicationId(),
         updates: updates,

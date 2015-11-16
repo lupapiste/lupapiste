@@ -32,12 +32,12 @@ LUPAPISTE.CompanySelectorModel = function(params) {
         repository.load(params.id);
       }
 
-      self.service.save(params.documentId,
-                        [params.path.split(".").concat([params.schema.name])],
-                        [id],
-                        self.indicator,
-                        self.result,
-                        cb);
+      self.service.updateDoc(params.documentId,
+                             [params.path.split(".").concat([params.schema.name])],
+                             [id],
+                             self.indicator,
+                             self.result,
+                             cb);
     })
     .call();
   });
