@@ -2,9 +2,7 @@ bulletin:  Julkipano
 bulletin.publish:  Julkaise
 bulletin.application.canNotPublish:  Hakemus tulee ensin siirtää käsittelyyn, jotta sen voi julkaista Julkipano-sivustolla.
 
-help.bulletin.application.state.open:
-
-help.bulletin.application.state.sent:  Kuulutusaikana:<br/>- Muistutuksia ja mielipiteitä voi jättää Julkipano-sivustolla<br/>- Lausuntoja ja vastineita voi antaa Lupapisteessa<br/>- Hakemus on muilta osin lukittu Lupapisteessä ja sitä ei voi täydentää tai muokata<br/>- Kuulutusaikaa voi pidentää tai lyhentää Lupapisteessa
+help.bulletin.state.proclaimed:  Kuulutusaikana:<br/>- Muistutuksia ja mielipiteitä voi jättää Julkipano-sivustolla<br/>- Lausuntoja ja vastineita voi antaa Lupapisteessa<br/>- Hakemus on muilta osin lukittu Lupapisteessä ja sitä ei voi täydentää tai muokata<br/>- Kuulutusaikaa voi pidentää tai lyhentää Lupapisteessa
 bulletin.state.proclaimed:  Kuulutettavana
 
 bulletin.proclamation.startsAt:  Kuulutus alkaa
@@ -17,7 +15,7 @@ bulletin.application.state.label:  Hakemus julkaistaan seuraavaksi tilaan:
 
 bulletin.proclamation.proclaimAgain:  Kuuluta uudelleen
 
-help.bulletin.application.state.verdictGiven:  Kun hakemuksesta julkaistaan päätös:<br/>- Julkipano-sivustolle viedään Lupapisteessä oleva päätös liitteineen<br/>- Hakemustiedot poistuvat Julkipano-sivustolta
+help.bulletin.state.verdictGiven:  Kun hakemuksesta julkaistaan päätös:<br/>- Julkipano-sivustolle viedään Lupapisteessä oleva päätös liitteineen<br/>- Hakemustiedot poistuvat Julkipano-sivustolta
 bulletin.verdict.verdictGivenAt:  Päätöksen antopäivämäärä
 bulletin.verdict.appealPeriodStartsAt:  Valitusaika alkaa
 bulletin.verdict.appealPeriodEndsAt:  Valitusaika päättyy
@@ -25,3 +23,5 @@ bulletin.appeal.text.label:  Valitusohje
 bulletin.appeal.text.placeholder:  Kirjoita valitusohje...
 
 bulletin.verdict.officialAt:  Lainvoimainen alkaen
+
+help.bulletin.state.final:  Kun Lupapisteessä annettu päätös julkaistaan lainvoimaisena, Julkipano-sivustolla olevaan päätökseen päivittyy tieto lainvoimaisuudesta.

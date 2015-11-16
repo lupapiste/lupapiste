@@ -16,7 +16,13 @@ LUPAPISTE.PublishApplicationModel = function(params) {
   });
 
   self.helpText = ko.pureComputed(function() {
-    return "help.bulletin.application.state." + self.appState();
+    if (self.appState() === "sent") {
+      return "help.bulletin.state.proclaimed";
+    } else if (self.appState() === "verdictGiven" && self.bulletinState() === "proclaimed") {
+      return "help.bulletin.state.verdictGiven";
+    } else if (self.appState() === "verdictGiven" && self.bulletinState() === "verdictGiven") {
+      return "help.bulletin.state.final";
+    }
   });
 
   self.canPublish = ko.pureComputed(function() {
@@ -46,5 +52,4 @@ LUPAPISTE.PublishApplicationModel = function(params) {
       self.sendEvent("publishBulletinService", "fetchBulletinVersions", {bulletinId: id});
     }
   });
-
 };
