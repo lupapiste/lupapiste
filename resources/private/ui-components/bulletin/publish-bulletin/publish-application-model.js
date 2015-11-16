@@ -26,7 +26,7 @@ LUPAPISTE.PublishApplicationModel = function(params) {
   });
 
   self.canNotPublishForAuthority = ko.pureComputed(function() {
-    return self.appState() !== "sent" && lupapisteApp.models.currentUser.isAuthority();
+    return !self.authModel.ok("publish-bulletin") && lupapisteApp.models.currentUser.isAuthority();
   });
 
   self.notYetPublishedForApplicant = ko.pureComputed(function() {
