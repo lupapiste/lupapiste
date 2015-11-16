@@ -49,7 +49,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   });
 
   self.isDisabled = ko.pureComputed(function() {
-    var allOtherInfoIsValid = !self.otherReceiver() || self.otherReceiver() && self.allOtherInfo.isValid();
+    var allOtherInfoIsValid = self.otherReceiver() ? self.allOtherInfo.isValid() : true;
     return self.pending() || !self.comment() || !self.email.isValid() || !allOtherInfoIsValid;
   });
 

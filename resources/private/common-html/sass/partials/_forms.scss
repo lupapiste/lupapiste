@@ -1209,7 +1209,6 @@ $max-columns: 12;
   .row {
     @include clearfix;
     margin: $grid-margin 0;
-    // overflow-y: hidden;
   }
 
   .row--no-margin {

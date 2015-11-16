@@ -3,26 +3,19 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="bulletin-comment-box-template">
-      <p data-bind="ltext: 'bulletin.comment.delivery'"></p>
       <form data-bind="submit: sendComment"
             data-test-id="bulletin-comment-box-form"
             class="form-grid form-grid--no-border">
 
         <!-- personal details -->
-        <div class="row">
-          <div class="col-4">
-            <div data-bind="component: {name: 'checkbox-field',
-                                        params: {value: otherReceiver,
-                                                 id: 'otherReceiver',
-                                                 lLabel: 'bulletin.comment.otherReceiver'}}"></div>
-          </div>
-        </div>
-
         <div class="row" data-bind="slider: !otherReceiver()">
           <div class="col-4">
             <div class="form-grid form-grid--no-border">
               <div class="row row--no-margin">
-                <div class="col-4" data-bind="with: userInfo">
+                <div class="col-4">
+                  <label data-bind="ltext: 'bulletin.comment.delivery'"></label>
+                </div>
+                <div class="col-4 user-info" data-bind="with: userInfo">
                   <div>
                     <span data-bind="text: firstName"></span>
                     <span data-bind="text: lastName"></span>
@@ -55,6 +48,15 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-4">
+            <div data-bind="component: {name: 'checkbox-field',
+                                        params: {value: otherReceiver,
+                                                 id: 'otherReceiver',
+                                                 lLabel: 'bulletin.comment.otherReceiver'}}"></div>
           </div>
         </div>
 
@@ -122,7 +124,7 @@
         </div>
         <!-- /ko -->
 
-        <div class="row row--no-margin">
+        <div class="row">
            <div class="col-4"
                data-bind="component: {name: 'textarea-field',
                                       params: {value: comment,
