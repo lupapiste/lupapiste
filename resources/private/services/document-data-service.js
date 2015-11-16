@@ -22,6 +22,9 @@ LUPAPISTE.DocumentDataService = function() {
   }
 
   self.addDocument = function(doc, options) {
+    if (!self.applicationId) {
+      self.setApplication(lupapisteApp.models.application)
+    }
     if (self.findDocumentById(doc.id)) {
       return -1;
     } else {
@@ -51,12 +54,85 @@ LUPAPISTE.DocumentDataService = function() {
     return pushToRepeating(repeatingModel, {});
   }
 
-  self.copyRepeatingGroup = function(documentId, path, index) {
+  self.copyRepeatingGroup = function(documentId, path, index, indicator, result) {
     var repeatingModel = self.getInDocument(documentId, path);
     var rawModel = getAsRaw(findByIndex(repeatingModel, index));
     var repLength = pushToRepeating(repeatingModel, rawModel);
-    return getAsUpdates(repeatingModel.model()[repLength - 1]);
+    var updates = getAsUpdates(repeatingModel.model()[repLength - 1]);
+    self.save(documentId, 
+              _.map(updates, 0), 
+              _.map(updates, 1),
+              indicator,
+              result);
   }
+
+  self.removeRepeatingGroup = function(documentId, path, index, indicator, result) {
+    var repeatingModel = self.getInDocument(documentId, path);
+    var cb = function() {
+      removeByIndex(repeatingModel, index);
+    };
+    self.removeRow(documentId, 
+                   self.applicationId(), 
+                   path.concat(index), 
+                   indicator,
+                   result, 
+                   cb);
+  }
+
+  self.save = function(documentId, paths, vals, indicator, result, cb) {
+    cb = cb || _.noop;
+    var updates = _(paths)
+      .map(function(p) { return p.join("."); })
+      .zip(vals)
+      .value();
+    ajax
+      .command("update-doc", {
+        doc: documentId,
+        id: self.applicationId(),
+        updates: updates,
+        collection: "documents"})
+      .success(function (e) {
+        _(e.result).filter(function(r) {
+          return _.contains(paths, r.path);
+        }).forEach(function(r) {
+          result(r.result);
+        }).value();
+        indicator({type: "saved"});
+        cb();
+      })
+      .error(function () {
+        indicator({type: "err"});
+      })
+      .fail(function () {
+        indicator({type: "err"});
+      })
+      .call();
+  };
+
+  self.removeRow = function (documentId, applicationId, path, indicator, result, cb) {
+    ajax
+      .command("remove-document-data", {
+        doc: documentId,
+        id: self.applicationId(),
+        path: path,
+        collection: "documents"
+      })
+      .success(function(e) {
+        var res = _.find(e.results, function(result) {
+          return _.isEqual(result.path, path);
+        });
+        result(res ? res.result : undefined);
+        indicator({type: "saved"});
+        cb(e);
+      })
+      .error(function () {
+        indicator({type: "err"});
+      })
+      .fail(function () {
+        indicator({type: "err"});
+      })
+      .call();
+  };
 
   //
   // Repeating utilities

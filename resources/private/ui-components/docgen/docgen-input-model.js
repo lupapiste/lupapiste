@@ -5,6 +5,8 @@ LUPAPISTE.DocgenInputModel = function(params) {
 
   self.authModel = params.authModel || lupapisteApp.models.applicationAuthModel;
 
+  self.service = lupapisteApp.services.documentDataService;
+
   self.size = uiComponents.sizeClasses[self.params.schema.size];
   //self.value = ko.observable(self.params.model ? self.params.model.value : undefined);
   self.path = self.params.path;
@@ -65,13 +67,11 @@ LUPAPISTE.DocgenInputModel = function(params) {
   self.disabled = ko.observable(params.isDisabled || !self.authModel.ok("update-doc") ||
                                 util.getIn(params, ["model", "disabled"]));
   var save = function(val) {
-    uiComponents.save("update-doc",
-                       self.documentId,
-                       self.params.applicationId,
-                       self.path,
-                       val,
-                       self.indicator,
-                       self.result);
+    self.service.save(self.documentId,
+                      [self.path],
+                      [val],
+                      self.indicator,
+                      self.result);
   };
   self.value.subscribe(_.debounce(save, 500));
 };
