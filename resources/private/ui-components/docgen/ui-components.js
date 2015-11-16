@@ -23,7 +23,7 @@ var uiComponents = (function() {
         }).forEach(function(r) {
           result(r.result);
         }).value();
-        indicator({type: "saved"});
+        util.showSavedIndicator(e);
         cb();
       })
       .error(function () {
@@ -52,15 +52,11 @@ var uiComponents = (function() {
           return _.isEqual(result.path, path);
         });
         result(res ? res.result : undefined);
-        indicator({type: "saved"});
+        util.showSavedIndicator(e);
         cb(e);
       })
-      .error(function () {
-        indicator({type: "err"});
-      })
-      .fail(function () {
-        indicator({type: "err"});
-      })
+      .error(util.showSavedIndicator)
+      .fail(util.showSavedIndicator)
       .call();
   };
 

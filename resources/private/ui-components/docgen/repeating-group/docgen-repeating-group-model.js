@@ -14,7 +14,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.data = lupapisteApp.services.documentDataService.getInDocument(params.documentId, self.path);
   self.groups = self.data.model;
 
-  self.indicator = ko.observable().extend({notify: "always"});
+  self.copyIndicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});
 
   var createGroup = function(groupModel, index) {
@@ -62,7 +62,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
       self.params.schema.name, 
       _.map(updates, 0), 
       _.map(updates, 1),
-      self.indicator, 
+      self.copyIndicator, 
       self.result);
   };
 
