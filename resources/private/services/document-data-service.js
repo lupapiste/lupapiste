@@ -71,15 +71,17 @@ LUPAPISTE.DocumentDataService = function() {
     var cb = function() {
       removeByIndex(repeatingModel, index);
     };
-    self.removeRow(documentId, 
-                   self.applicationId(), 
-                   path.concat(index), 
-                   indicator,
-                   result, 
-                   cb);
+    self.removeGroup(documentId, 
+                     self.applicationId(), 
+                     path.concat(index), 
+                     indicator,
+                     result, 
+                     cb);
   }
 
-  self.save = function(documentId, paths, vals, indicator, result, cb) {
+  self.save = save;
+  
+  function save(documentId, paths, vals, indicator, result, cb) {
     cb = cb || _.noop;
     var updates = _(paths)
       .map(function(p) { return p.join("."); })
@@ -109,7 +111,7 @@ LUPAPISTE.DocumentDataService = function() {
       .call();
   };
 
-  self.removeRow = function (documentId, applicationId, path, indicator, result, cb) {
+  function removeGroup(documentId, applicationId, path, indicator, result, cb) {
     ajax
       .command("remove-document-data", {
         doc: documentId,

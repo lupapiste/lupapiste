@@ -25,14 +25,6 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
     self.errorMessage(resultMsg);
   });
 
-  var createGroup = function(groupModel, index) {
-    return _.extend({}, self.params, {
-      index: index,
-      path: self.path.concat(index),
-      model: groupModel
-    });
-  };
-
   self.removeGroup = function(group) {
     var path = self.params.path.concat(group.index);
 
