@@ -46,6 +46,12 @@ LUPAPISTE.DocumentDataService = function() {
     return self.model.remove(self.findDocumentById(id));
   }
 
+  self.copyRepeatingRow = function(documentId, path, index) {
+    var repeatingModel = self.getInDocument(documentId, path);
+    var rawModel = getAsRaw(findByIndex(repeatingModel, index));
+    var repLength = pushToRepeating(repeatingModel, rawModel);
+    return getAsUpdates(repeatingModel.model()[repLength - 1]);
+  }
 
   //
   // Repeating utilities
@@ -166,6 +172,29 @@ LUPAPISTE.DocumentDataService = function() {
 
     } else {
       return {value: model};
+    }
+  }
+
+  function getAsUpdates(dataModel) {
+
+    if (ko.isObservable(dataModel)) {
+      return getAsUpdates(dataModel());
+
+    } else if (ko.isObservable(dataModel.model)) {
+      return getAsUpdates(_.extend({},
+        dataModel,
+        {model: dataModel.model()}
+      ));
+
+    } else if (_.isObject(dataModel.model)) {
+      return _(dataModel.model)
+        .map(getAsUpdates)
+        .flatten()
+        .filter(1)
+        .value();
+
+    } else {
+      return [[dataModel.path, dataModel.model]];
     }
   }
 }
