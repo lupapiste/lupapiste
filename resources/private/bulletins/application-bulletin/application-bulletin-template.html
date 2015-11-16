@@ -71,13 +71,13 @@
           </div>
 
           <!-- Tabs: -->
-          <div class="tabs-container" data-bind="with: bulletin">
+          <div class="tabs-container">
             <ul class="tabs" id="">
-              <li data-bind="css: {'active': $parent.selectedTab() === 'info'}">
-                  <a data-bind="" href="#" class="link-btn-julkipano">
+              <li data-bind="css: {'active': selectedTab() === 'info'}">
+                  <a data-bind="click: selectedTab.bind($data, 'info')" href="#" class="link-btn-julkipano">
                       <span data-bind="ltext: 'application.tabInfo'"></span> </a></li>
-              <li data-bind="css: {'active': $parent.selectedTab() === 'attachments'}">
-                  <a data-bind="click: function() {return;}" href="#" data-test-id="application-open-attachments-tab" class="link-btn-julkipano">
+              <li data-bind="css: {'active': selectedTab() === 'attachments'}">
+                  <a data-bind="click: selectedTab.bind($data, 'attachments')" href="#" data-test-id="bulletin-open-attachments-tab" class="link-btn-julkipano">
                       <span data-bind="ltext: 'application.tabAttachments'"></span></a></li>
             </ul>
           </div>
