@@ -1,5 +1,5 @@
 auth-admin.municipality-maps.title: Kunnan omat kartta-aineistot
-auth-admin.municipality-maps.server-details: Karttpalvelimen tiedot
+auth-admin.municipality-maps.server-details: Karttapalvelimen tiedot
 auth-admin.municipality-maps.url: Karttapalvelimen osoite (URL)
 auth-admin.municipality-maps.username: Käyttäjätunnus (jos tarpeen)
 auth-admin.municipality-maps.password: Salasana (jos tarpeen)

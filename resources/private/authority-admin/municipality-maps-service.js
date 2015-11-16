@@ -63,7 +63,8 @@ LUPAPISTE.MunicipalityMapsService = function() {
   // Whenever the server details change,
   // the map server capabilities are reloaded.
   ko.computed( function() {
-    if( serverDetails()) {
+    var server = serverDetails();
+      if( server && server.url ) {
       $.get( PROXY,
              {request: "GetCapabilities",
               service: "wms"},
@@ -116,16 +117,19 @@ LUPAPISTE.MunicipalityMapsService = function() {
         var layers = _.map( res.layers, function( layer, i ) {
           return new Layer({name: layer.name,
                             id: layer.id,
-                            fixed: i < 2});
+                            fixed: layer.base });
         });
         mapFitted( false );
         userLayers( layers);
-        saveLayersFlag = true;
+      } else {
+        resetUserLayers();
       }
     })
     .error( function() {
       error( true );
       resetUserLayers();
+    })
+    .complete( function() {
       saveLayersFlag = true;
     })
     .call();
@@ -145,7 +149,8 @@ LUPAPISTE.MunicipalityMapsService = function() {
                                     function( layer ) {
                                       return {
                                         name: layer.name(),
-                                        id: layer.id()
+                                        id: layer.id(),
+                                        base: Boolean( layer.fixed)
                                       };
                                     })})
       .complete( function( res ) {

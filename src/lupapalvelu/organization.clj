@@ -183,23 +183,23 @@
 
 
 
-(defmulti layer-info (fn [a]
-                       (cond
-                         (map? a) :map
-                         (sequential? a) :sequential)))
+;; (defmulti layer-info (fn [a]
+;;                        (cond
+;;                          (map? a) :map
+;;                          (sequential? a) :sequential)))
 
-(defmethod layer-info :map
-  [a]
-  (let [m {:title (:Title a)
-           :name (:Name a)}
-        layer (:Layer a)]
-    (if layer
-      (assoc m :layer (layer-info layer))
-      m)))
+;; (defmethod layer-info :map
+;;   [a]
+;;   (let [m {:title (:Title a)
+;;            :name (:Name a)}
+;;         layer (:Layer a)]
+;;     (if layer
+;;       (assoc m :layer (layer-info layer))
+;;       m)))
 
-(defmethod layer-info :sequential
-  [a]
-  (map layer-info a))
+;; (defmethod layer-info :sequential
+;;   [a]
+;;   (map layer-info a))
 
 
 ;; (defn all-layers-from-map-server

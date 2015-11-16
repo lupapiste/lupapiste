@@ -130,10 +130,21 @@
      :baseLayerId layer-id
      :isBaseLayer (or (= layer-category "asemakaava") (= layer-category "kantakartta"))}))
 
+(defn municipality-layers
+  "TODO: Not finished."
+  [municipality]
+  (->> (org/get-organizations)
+       (filter (fn [{:keys [id map-layers]}]
+                 (and map-layers (ss/starts-with id municipality))))
+       (reduce (fn [acc {:keys [id map-layers server]}])))
+  )
+
+
 (defn wms-capabilities-proxy [request]
   (let [{municipality :municipality} (:params request)
         capabilities (wfs/getcapabilities request)
         layers (wfs/capabilities-to-layers capabilities)
+        municipality-layers (municipality-layers municipality)
         ]
     (if layers
       (resp/json
