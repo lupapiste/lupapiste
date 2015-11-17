@@ -1309,7 +1309,7 @@
                                                                                  {"data.katselmuksenLaji.value" {$exists true
                                                                                                                  $nin ["Aloituskatselmus"
                                                                                                                        "Loppukatselmus"
-                                                                                                                       "Muu valvontakäynti"
+                                                                                                                       "Muu valvontak\u00e4ynti"
                                                                                                                        ""]}}]}]}}}))}
   (update-applications-array
     :tasks
@@ -1335,7 +1335,7 @@
                                      {"data.katselmuksenLaji.value" {$exists true
                                                                      $nin ["Aloituskatselmus"
                                                                            "Loppukatselmus"
-                                                                           "Muu valvontakäynti"
+                                                                           "Muu valvontak\u00e4ynti"
                                                                            ""]}}]}]}}}))
 
 
