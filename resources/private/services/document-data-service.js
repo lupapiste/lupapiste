@@ -21,6 +21,16 @@ LUPAPISTE.DocumentDataService = function() {
     });    
   }
 
+  function resolveUpdateCommand(doc, options) {
+    if (options && options.updateCommand) {
+      return options.updateCommand;
+    } else if (doc.schema.info["construction-time"]) {
+      return "update-construction-time-doc";
+    } else {
+      return "update-doc";
+    }
+  }
+
   self.addDocument = function(doc, options) {
     if (!self.applicationId) {
       self.setApplication(lupapisteApp.models.application)
@@ -33,7 +43,8 @@ LUPAPISTE.DocumentDataService = function() {
           path: [],
           name: doc.schema.info.name,
           schema: doc.schema,
-          isDisabled: options && options.disabled
+          isDisabled: options && options.disabled,
+          updateCommand: resolveUpdateCommand(doc, options)
         },
         createDataModel(_.extend({type: "document"}, doc.schema.info, doc.schema), doc.data, [])
       ));
@@ -78,13 +89,17 @@ LUPAPISTE.DocumentDataService = function() {
     });
   }
 
+  self.getUpdateCommand = function(documentId) {
+    return self.findDocumentById(documentId).updateCommand;
+  }
+
   self.updateDoc = function(documentId, updates, indicator, results, cb) {
     var params = {
       updates: _.map(updates, function(update) {
         return [update[0].join("."), update[1]];
       })
     };
-    command("update-doc", documentId, params, {
+    command(self.getUpdateCommand(documentId), documentId, params, {
       indicator: indicator,
       results: results,
       cb: cb
