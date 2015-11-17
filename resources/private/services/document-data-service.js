@@ -21,19 +21,16 @@ LUPAPISTE.DocumentDataService = function() {
     });    
   }
 
-  function resolveUpdateCommand(doc, options) {
-    if (options && options.updateCommand) {
-      return options.updateCommand;
-    } else if (doc.schema.info["construction-time"]) {
-      return "update-construction-time-doc";
-    } else {
-      return "update-doc";
-    }
+  function resolveCommandNames(doc, options) {
+    var docDefaults = doc.schema.info["construction-time"] ?
+      {updateCommand: "update-construction-time-doc", removeCommand: "remove-construction-time-document-data"} :
+      {updateCommand: "update-doc",                   removeCommand: "remove-document-data"}
+    return _.extend(docDefaults, _.pick(options, 'updateCommand', 'removeCommand'));
   }
 
   self.addDocument = function(doc, options) {
     if (!self.applicationId) {
-      self.setApplication(lupapisteApp.models.application)
+      self.setApplication(lupapisteApp.models.application);
     }
     if (self.findDocumentById(doc.id)) {
       return -1;
@@ -43,9 +40,9 @@ LUPAPISTE.DocumentDataService = function() {
           path: [],
           name: doc.schema.info.name,
           schema: doc.schema,
-          isDisabled: options && options.disabled,
-          updateCommand: resolveUpdateCommand(doc, options)
+          isDisabled: options && options.disabled
         },
+        resolveCommandNames(doc, options),
         createDataModel(_.extend({type: "document"}, doc.schema.info, doc.schema), doc.data, [])
       ));
     }
@@ -90,7 +87,13 @@ LUPAPISTE.DocumentDataService = function() {
   }
 
   self.getUpdateCommand = function(documentId) {
-    return self.findDocumentById(documentId).updateCommand;
+    var doc = self.findDocumentById(documentId);
+    return doc && doc.updateCommand || "update-doc";
+  }
+
+  self.getRemoveCommand = function(documentId) {
+    var doc = self.findDocumentById(documentId);
+    return doc && doc.removeCommand || "remove-document-data";
   }
 
   self.updateDoc = function(documentId, updates, indicator, results, cb) {

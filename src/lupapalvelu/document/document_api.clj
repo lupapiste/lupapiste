@@ -18,6 +18,14 @@
 
 (def approve-doc-states (states/all-application-states-but (conj states/terminal-states :draft :sent :verdictGiven :constructionStarted)))
 
+(defn validate-is-construction-time-doc
+  [{{doc-id :doc} :data} {state :state documents :documents}]
+  (when doc-id
+    (when-not (some-> (domain/get-document-by-id documents doc-id)
+                      (model/get-document-schema)
+                      (get-in [:info :construction-time]))
+      (fail :error.document-not-construction-time-doc))))
+
 ;;
 ;; CRUD
 ;;
@@ -64,7 +72,7 @@
   {:parameters [id doc updates]
    :user-roles #{:applicant :authority}
    :states     states/post-verdict-states
-   :pre-checks [application/validate-authority-in-drafts application/validate-is-construction-time-doc]}
+   :pre-checks [application/validate-authority-in-drafts validate-is-construction-time-doc]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
@@ -76,21 +84,33 @@
   [command]
   (doc-persistence/update! command doc updates "tasks"))
 
+(defn- do-remove-document-data [{application :application :as command} doc-id path collection]
+  (let [document  (doc-persistence/by-id application collection doc-id)
+        str-path  (ss/join "." path)
+        data-path (str collection ".$.data." str-path)
+        meta-path (str collection ".$.meta." str-path)]
+    (when-not document (fail! :error.document-not-found))
+    (update-application command
+                        {:documents {$elemMatch {:id (:id document)}}}
+                        {$unset {data-path "" meta-path ""}})))
+
 (defcommand remove-document-data
   {:parameters       [id doc path collection]
    :user-roles       #{:applicant :authority}
    :states           #{:draft :answered :open :submitted :complementNeeded}
    :input-validators [doc-persistence/validate-collection]
    :pre-checks       [application/validate-authority-in-drafts]}
-  [{:keys [created application] :as command}]
-  (let [document  (doc-persistence/by-id application collection doc)
-        str-path  (ss/join "." path)
-        data-path (str collection ".$.data." str-path)
-        meta-path (str collection ".$.meta." str-path)]
-    (when-not document (fail! :error.document-not-found))
-    (update-application command
-      {:documents {$elemMatch {:id (:id document)}}}
-      {$unset {data-path "" meta-path ""}})))
+  [command]
+  (do-remove-document-data command doc path collection))
+
+(defcommand remove-construction-time-document-data
+  {:parameters       [id doc path collection]
+   :user-roles       #{:applicant :authority}
+   :states           states/post-verdict-states
+   :input-validators [doc-persistence/validate-collection]
+   :pre-checks       [application/validate-authority-in-drafts validate-is-construction-time-doc]}
+  [command]
+  (do-remove-document-data command doc path collection))
 
 ;;
 ;; Document validation
@@ -135,7 +155,7 @@
   {:parameters [:id :doc :path :collection]
    :user-roles #{:authority}
    :states     states/post-verdict-states
-   :pre-checks [application/validate-is-construction-time-doc]}
+   :pre-checks [validate-is-construction-time-doc]}
   [command]
   (ok :approval (approve command "approved")))
 
@@ -151,7 +171,7 @@
   {:parameters [:id :doc :path :collection]
    :user-roles #{:authority}
    :states     states/post-verdict-states
-   :pre-checks [application/validate-is-construction-time-doc]}
+   :pre-checks [validate-is-construction-time-doc]}
   [command]
   (ok :approval (approve command "rejected")))
 
