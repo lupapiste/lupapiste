@@ -54,19 +54,17 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   });
 
   self.fileChanged = function(data, event) {
-    self.attachments.push(util.getIn(_.first($(event.target)), ["files", 0]));
+    self.attachments(util.getIn(_.first($(event.target)), ["files", 0]));
   };
 
   self.addAttachment = function(data, event) {
     $(event.target).closest("form").find("input[type='file']").click();
   };
 
-  self.removeAttachment = function(attachment) {
-    self.attachments.remove(attachment);
-  };
+  hub.send("bulletinService::registerUploadForm", {form: "#bulletin-comment-form"});
 
-  self.sendComment = function(form) {
-    hub.send("bulletinService::newComment", {commentForm: form, files: self.attachments()});
+  self.sendComment = function() {
+    hub.send("bulletinService::newComment");
   };
 
   self.addEventListener("bulletinService", "commentProcessed", function(event) {

@@ -99,26 +99,29 @@ LUPAPISTE.ApplicationBulletinsService = function() {
     fetchBulletin(event.id);
   });
 
-  hub.subscribe("bulletinService::newComment", function(event) {
-    var form = event.commentForm;
-    var formData = new FormData(form);
-    var files = event.files;
-    if (files.length === 1) {
-      formData.append("files[]", _.first(files));
-    } else {
-      _.forEach(event.files, function(file) {
-        formData.append("files", file);
-      });
-    }
-    ajax.form("add-bulletin-comment", formData)
-    .success(function() {
-      hub.send("bulletinService::commentProcessed", {status: "success"});
-    })
-    .error(function() {
-      hub.send("bulletinService::commentProcessed", {status: "failed"});
-    })
-    .pending(commentPending)
-    .call();
+  var commentForm;
+
+  hub.subscribe("bulletinService::registerUploadForm", function(event) {
+    $(event.form).fileupload({
+      url: "/api/raw/add-bulletin-comment",
+      type: "POST",
+      dataType: "json",
+      replaceFileInput: true,
+      autoUpload: false,
+      add: function(e, data) {
+        console.log("mystinen data", data);
+        commentForm = data;
+      },
+      done: function() {
+        hub.send("bulletinService::commentProcessed", {status: "success"});
+      },
+      fail: function() {
+        hub.send("bulletinService::commentProcessed", {status: "failed"});
+      }
+    });
+  });
+
+  hub.subscribe("bulletinService::newComment", function() {
+    commentForm.submit();
   });
 };
-
