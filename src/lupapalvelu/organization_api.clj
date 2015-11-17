@@ -24,7 +24,7 @@
             [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.states :as states]
-            [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -327,7 +327,7 @@
   (let [organization-id (user/authority-admins-organization-id user)
         krysp-config    (o/get-krysp-wfs organization-id permitType)
         password        (if (s/blank? password) (second (:credentials krysp-config)) password)]
-    (if (or (s/blank? url) (krysp/wfs-is-alive? url username password))
+    (if (or (s/blank? url) (krysp-reader/wfs-is-alive? url username password))
       (o/set-krysp-endpoint organization-id url username password permitType version)
       (fail :auth-admin.legacyNotResponding))))
 
