@@ -496,8 +496,12 @@
 (defn get-capabilities-xml
   "Returns capabilities XML without namespaces"
   [base-url username password]
-  (let [capabilities-resp  (query-get-capabilities base-url username password true)]
-    (-> capabilities-resp :body sxml/parse reader/strip-xml-namespaces)))
+  (let [capabilities-resp  (query-get-capabilities base-url username password true)
+        xml-s (:body capabilities-resp)]
+    (-> xml-s sxml/parse reader/strip-xml-namespaces)))
+
+(defn feature-types [xml-no-ns]
+  (sxml/select xml-no-ns [:FeatureType]))
 
 (defn wfs-is-alive?
   "checks if the given system is Web Feature Service -enabled. kindof."
