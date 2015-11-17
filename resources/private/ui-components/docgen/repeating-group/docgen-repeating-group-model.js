@@ -9,6 +9,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.service = lupapisteApp.services.documentDataService;
 
   self.path = _.isArray(params.path) ? params.path : [params.path];
+  self.documentId = params.documentId;
   self.groupId = ["repeating-group", params.documentId].concat(self.path).join("-");
   self.appendLabel = params.i18npath.concat("_append_label").join(".");
   self.copyLabel = params.i18npath.concat("_copy_label").join(".");
