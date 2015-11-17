@@ -81,3 +81,11 @@
                                     :contentType (:content-type file)}))]
     (map store-file-fn files)))
 
+(defn get-bulletin [bulletinId]
+  (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields)))
+
+(defn get-bulletin-attachment [attachment-id]
+  (when-let [attachment-file (mongo/download attachment-id)]
+    (when-let [bulletin (get-bulletin (:application attachment-file))]
+      (when (seq bulletin) attachment-file))))
+
