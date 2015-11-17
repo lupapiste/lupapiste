@@ -26,7 +26,7 @@ LUPAPISTE.WFSModel = function () {
         }));
       })
       .call();
-};
+  };
 
   self.save = function() {
     ajax.command("set-krysp-endpoint", {
