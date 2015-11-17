@@ -247,6 +247,13 @@
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-file-as user)))
 
+(defraw "download-bulletin-attachment"
+  {:parameters [attachment-id]
+   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
+   :user-roles #{:anonymous}}
+  [_]
+  (attachment/output-attachment attachment-id true bulletins/get-bulletin-attachment))
+
 (defraw "download-all-attachments"
   {:parameters [:id]
    :user-roles #{:applicant :authority :oirAuthority}
