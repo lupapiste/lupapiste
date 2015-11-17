@@ -15,27 +15,27 @@ LUPAPISTE.WFSModel = function () {
 
   self.load = function() {
     ajax.query("krysp-config")
-    .success(function(d) {
-      var data = d.krysp || [];
-      // change map into a list where map key is one of the element keys
-      // for easier handling with knockout
-      self.data(_.map(_.keys(data), function(k) {
-        var conf = data[k];
-        conf.permitType = k;
-        return conf;
-      }));
-    })
-    .call();
+      .success(function(d) {
+        var data = d.krysp || [];
+        // change map into a list where map key is one of the element keys
+        // for easier handling with knockout
+        self.data(_.map(_.keys(data), function(k) {
+          var conf = data[k];
+          conf.permitType = k;
+          return conf;
+        }));
+      })
+      .call();
 };
 
   self.save = function() {
     ajax.command("set-krysp-endpoint", {
-      url: self.editUrl(),
-      username: self.editUsername(),
-      password: self.editPassword(),
-      version: self.editVersion(),
-      permitType: self.editContext.permitType
-    })
+        url: self.editUrl(),
+        username: self.editUsername(),
+        password: self.editPassword(),
+        version: self.editVersion(),
+        permitType: self.editContext.permitType
+      })
       .success(function() {
         self.load();
         self.error(false);
@@ -54,7 +54,11 @@ LUPAPISTE.WFSModel = function () {
     var password = model.password || "";
     var version = model.version || "";
     var versionsAvailable = LUPAPISTE.config.kryspVersions[model.permitType];
-    if (!versionsAvailable) {error("No supported KRYSP versions for permit type", model.permitType);}
+
+    if (!versionsAvailable) {
+      error("No supported KRYSP versions for permit type", model.permitType);
+    }
+
     self.versions(versionsAvailable);
     self.editUrl(url);
     self.editUsername(username);
