@@ -96,7 +96,7 @@ LUPAPISTE.DocumentDataService = function() {
     var indicator = opts.indicator || _.noop;
     var cb = opts.cb || _.noop;
     ajax
-      .command(command, _.extend({
+      .command(commandName, _.extend({
           doc: documentId,
           id: self.applicationId(),
           collection: "documents"
