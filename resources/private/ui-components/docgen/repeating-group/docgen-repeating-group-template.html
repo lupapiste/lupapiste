@@ -15,7 +15,7 @@
                                                    label: 'remove',
                                                    index: index,
                                                    clickFn: $parent.removeGroup }},
-                             visible: lupapisteApp.models.applicationAuthModel.ok($component.service.getRemoveCommand($component.documentId))">
+                             visible: $component.groupsRemovable">
             </span>
           </div>
 
@@ -32,7 +32,7 @@
         </div>
       </div>
         
-      <div class="button-group" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok(service.getUpdateCommand(documentId))">
+      <div class="button-group" data-bind="visible: updatable">
         <span data-bind="component: { name: 'docgen-button',
                                       params: { id: groupId + '-append-button', 
                                                 className: 'positive', 
