@@ -60,6 +60,14 @@
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
+(defcommand update-construction-time-doc
+  {:parameters [id doc updates]
+   :user-roles #{:applicant :authority}
+   :states     #{:constructionStarted}
+   :pre-checks [application/validate-authority-in-drafts application/validate-is-construction-time-doc]}
+  [command]
+  (doc-persistence/update! command doc updates "documents"))
+
 (defcommand update-task
   {:parameters [id doc updates]
    :user-roles #{:applicant :authority}
@@ -123,11 +131,27 @@
   [command]
   (ok :approval (approve command "approved")))
 
+(defcommand approve-construction-time-doc
+  {:parameters [:id :doc :path :collection]
+   :user-roles #{:authority}
+   :states     #{:constructionStarted}
+   :pre-checks [application/validate-is-construction-time-doc]}
+  [command]
+  (ok :approval (approve command "approved")))
+
 (defcommand reject-doc
   {:parameters [:id :doc :path :collection]
    :input-validators [doc-persistence/validate-collection]
    :user-roles #{:authority}
    :states     approve-doc-states}
+  [command]
+  (ok :approval (approve command "rejected")))
+
+(defcommand reject-construction-time-doc
+  {:parameters [:id :doc :path :collection]
+   :user-roles #{:authority}
+   :states     #{:constructionStarted}
+   :pre-checks [application/validate-is-construction-time-doc]}
   [command]
   (ok :approval (approve command "rejected")))
 

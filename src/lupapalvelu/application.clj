@@ -71,6 +71,14 @@
   (when (and (= :draft (keyword state)) (user/authority? user))
     unauthorized))
 
+(defn validate-is-construction-time-doc
+  [{{doc-id :doc} :data} {state :state documents :documents}]
+  (when doc-id
+    (when-not (some-> (domain/get-document-by-id documents nil)
+                      (model/get-document-schema)
+                      (get-in [:info :construction-time]))
+      (fail :error.document-not-construction-time-doc))))
+
 (defn validate-has-subtypes [_ application]
   (when (empty? (resolve-valid-subtypes application))
     (fail :error.permit-has-no-subtypes)))
