@@ -17,6 +17,24 @@
                 states/terminal-states)    :verdictGiven
     #{:final}                              :final))
 
+;; Query/Projection fields
+
+
+(def bulletins-fields
+  {:versions {$slice -1} :versions.bulletinState 1
+   :versions.state 1 :versions.municipality 1
+   :versions.address 1 :versions.location 1
+   :versions.primaryOperation 1 :versions.propertyId 1
+   :versions.applicant 1 :versions.modified 1
+   :modified 1})
+
+(def bulletin-fields
+  (merge bulletins-fields
+         {:versions._applicantIndex 1
+          :versions.documents 1
+          :versions.id 1
+          :versions.attachments 1}))
+
 ;; Snapshot
 
 (def app-snapshot-fields
@@ -62,3 +80,4 @@
                                     :size (:size file)
                                     :contentType (:content-type file)}))]
     (map store-file-fn files)))
+
