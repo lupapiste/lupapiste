@@ -26,7 +26,8 @@
                  :approvable :removable :deny-removing-last-document
                  :group-help :section-help
                  :after-update
-                 :repeating :no-repeat-button :order})
+                 :repeating :no-repeat-button :order
+                 :construction-time})
 
 (def updateable-keys #{:removable})
 (def immutable-keys (set/difference info-keys updateable-keys) )
@@ -1420,6 +1421,7 @@
     :body (body rakennusjatesuunnitelma)}
    {:info {:name "rakennusjateselvitys"
            :order 201
+           :construction-time true
            :section-help "rakennusjate.help"}
     :body (body rakennusjateselvitys)}
 
