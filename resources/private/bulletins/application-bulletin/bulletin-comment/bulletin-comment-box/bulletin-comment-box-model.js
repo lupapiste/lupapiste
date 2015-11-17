@@ -17,6 +17,16 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
 
   self.otherReceiver = ko.observable(false);
 
+  self.formDataSupported = window.FormData === undefined;
+
+  self.filesAttr = ko.pureComputed(function() {
+    if (self.formDataSupported) {
+      return "";
+    } else {
+      return self.attachments().length > 1 ? "files" : "files[]";
+    }
+  });
+
   ko.computed(function() {
     if (!self.otherReceiver()) {
       _.mapKeys(self.otherReceiverInfo, function(value, key) {
@@ -54,17 +64,27 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   });
 
   self.fileChanged = function(data, event) {
-    self.attachments(util.getIn(_.first($(event.target)), ["files", 0]));
+    if (self.formDataSupported) {
+      self.attachments.push(util.getIn(_.first($(event.target)), ["files", 0]));
+    } else {
+      self.attachments(util.getIn(_.first($(event.target)), ["files"]));
+    }
   };
 
   self.addAttachment = function(data, event) {
     $(event.target).closest("form").find("input[type='file']").click();
   };
 
-  hub.send("bulletinService::registerUploadForm", {form: "#bulletin-comment-form"});
+  self.removeAttachment = function(attachment) {
+    self.attachments.remove(attachment);
+  };
 
-  self.sendComment = function() {
-    hub.send("bulletinService::newComment");
+  if (!self.formDataSupported) {
+    hub.send("bulletinService::registerUploadForm", {form: "#bulletin-comment-form"});
+  }
+
+  self.sendComment = function(form) {
+    hub.send("bulletinService::newComment", {commentForm: form, files: self.attachments()});
   };
 
   self.addEventListener("bulletinService", "commentProcessed", function(event) {

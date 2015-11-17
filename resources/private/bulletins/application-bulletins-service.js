@@ -109,7 +109,6 @@ LUPAPISTE.ApplicationBulletinsService = function() {
       replaceFileInput: true,
       autoUpload: false,
       add: function(e, data) {
-        console.log("mystinen data", data);
         commentForm = data;
       },
       done: function() {
@@ -121,7 +120,29 @@ LUPAPISTE.ApplicationBulletinsService = function() {
     });
   });
 
-  hub.subscribe("bulletinService::newComment", function() {
-    commentForm.submit();
+  hub.subscribe("bulletinService::newComment", function(event) {
+    if (window.FormData !== undefined) {
+      commentForm.submit();
+    } else {
+      var form = event.commentForm;
+      var formData = new FormData(form);
+      var files = event.files;
+      if (files.length === 1) {
+        formData.append("files[]", _.first(files));
+      } else {
+        _.forEach(event.files, function(file) {
+          formData.append("files", file);
+        });
+      }
+      ajax.form("add-bulletin-comment", formData)
+      .success(function() {
+        hub.send("bulletinService::commentProcessed", {status: "success"});
+      })
+      .error(function() {
+        hub.send("bulletinService::commentProcessed", {status: "failed"});
+      })
+      .pending(commentPending)
+      .call();
+    }
   });
 };
