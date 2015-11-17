@@ -9,6 +9,7 @@
             [sade.strings :as ss]
             [sade.util :as util :refer [future*]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
