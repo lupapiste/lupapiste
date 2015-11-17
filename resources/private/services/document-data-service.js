@@ -72,6 +72,16 @@ LUPAPISTE.DocumentDataService = function() {
                    indicator);
   }
 
+  self.getRemoveCommand = function(documentId) {
+    var doc = self.findDocumentById(documentId);
+    return doc && doc.removeCommand || "remove-document-data";
+  }
+
+  self.getUpdateCommand = function(documentId) {
+    var doc = self.findDocumentById(documentId);
+    return doc && doc.updateCommand || "update-doc";
+  }
+
   self.removeRepeatingGroup = function(documentId, path, index, indicator) {
     var repeatingModel = self.getInDocument(documentId, path);
     var cb = function() {
@@ -80,20 +90,10 @@ LUPAPISTE.DocumentDataService = function() {
     var params = {
       path: path.concat(index)
     };
-    command("remove-document-data", documentId, params, {
+    command(self.getRemoveCommand(documentId), documentId, params, {
       indicator: indicator,
       cb: cb
     });
-  }
-
-  self.getUpdateCommand = function(documentId) {
-    var doc = self.findDocumentById(documentId);
-    return doc && doc.updateCommand || "update-doc";
-  }
-
-  self.getRemoveCommand = function(documentId) {
-    var doc = self.findDocumentById(documentId);
-    return doc && doc.removeCommand || "remove-document-data";
   }
 
   self.updateDoc = function(documentId, updates, indicator, results, cb) {
