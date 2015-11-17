@@ -312,7 +312,7 @@
 (defn- get-ya-katselmus [katselmus]
   (let [data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
-        {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
+        {:keys [pitoPvm pitaja lasnaolijat poikkeamat]} (:katselmus data)
         huomautukset (-> data :katselmus :huomautukset)
         task-id (:id katselmus)
         task-name (:taskname katselmus)]

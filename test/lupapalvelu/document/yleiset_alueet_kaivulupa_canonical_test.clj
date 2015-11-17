@@ -381,16 +381,13 @@
     (fact "pitoPvm" pitoPvm => "1974-05-01")
     (fact "katselmuksenLaji" katselmuksenLaji => "Muu valvontak\u00e4ynti")
     (fact "vaadittuLupaehtonaKytkin" vaadittuLupaehtonaKytkin => true)
-    (fact "huomautustieto"
-      huomautustieto  => {:Huomautus {:kuvaus "huomautus - kuvaus"
-                                      :maaraAika "1974-06-02"
-                                      :toteamisHetki "1974-05-02"
-                                      :toteaja "huomautus - viranomaisen nimi"}})
+    (fact "huomautustieto" huomautustieto  => {:Huomautus {:kuvaus "huomautus - kuvaus"
+                                                           :maaraAika "1974-06-02"
+                                                           :toteamisHetki "1974-05-02"
+                                                           :toteaja "huomautus - viranomaisen nimi"}})
     (fact "katselmuspoytakirja" katselmuspoytakirja => nil)
     (fact "tarkastuksenTaiKatselmuksenNimi" tarkastuksenTaiKatselmuksenNimi => "testikatselmus")
     (fact "lasnaolijat" lasnaolijat => "paikallaolijat")
     (fact "poikkeamat" poikkeamat => "jotain poikkeamia oli")
-    )
-
-  )
+    ))
 
