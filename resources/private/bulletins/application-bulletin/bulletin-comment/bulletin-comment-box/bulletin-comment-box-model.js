@@ -65,7 +65,8 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
 
   self.fileChanged = function(data, event) {
     if (self.formDataSupported) {
-      self.attachments.push(util.getIn(_.first($(event.target)), ["files", 0]));
+      var allFiles = self.attachments().concat(_.values(util.getIn(_.first($(event.target)), ["files"])));
+      self.attachments(allFiles);
     } else {
       self.attachments(util.getIn(_.first($(event.target)), ["files"]));
     }

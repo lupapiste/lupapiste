@@ -135,7 +135,7 @@
         </div>
         <div class="row">
           <label data-bind="ltext: 'bulletin.comment.selectedAttachments'"></label>
-          <input class="hidden" type="file" name="files[]" data-bind="event: {change: fileChanged}, attr: {name: filesAttr}"/>
+          <input class="hidden" type="file" name="files[]" data-bind="event: {change: fileChanged}, attr: {name: filesAttr}" multiple/>
           <input class="hidden" type="text" name="bulletin-id" data-bind="value: bulletinId"/>
           <input class="hidden" type="text" name="bulletin-version-id" data-bind="value: versionId"/>
           <!-- ko if: attachments().length > 0 -->
