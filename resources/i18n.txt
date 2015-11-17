@@ -5,3 +5,5 @@ bulletin.comment.emailPreferred:  Haluan tiedoksiannon sähköisesti
 bulletin.comment.otherReceiver:  Toimita toiseen osoitteeseen
 
 bulletin.comment.delivery:  Päätös toimitetaan osoitteeseen:
+
+bulletin.actions.comment:  Haluan kommentoida ilmoitusta
