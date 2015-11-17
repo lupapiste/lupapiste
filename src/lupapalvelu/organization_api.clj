@@ -310,7 +310,7 @@
   (let [organization-id (user/authority-admins-organization-id user)]
     (if-let [organization (o/get-organization organization-id)]
       (let [permit-types (mapv (comp keyword :permitType) (:scope organization))
-            krysp-keys (conj permit-types :osoitteet)
+            krysp-keys (if (env/feature? :kunnan-osoiteaineisto) (conj permit-types :osoitteet) permit-types)
             empty-confs (zipmap krysp-keys (repeat {}))]
         (ok :krysp (merge empty-confs (:krysp organization))))
       (fail :error.unknown-organization))))
@@ -319,7 +319,9 @@
   {:parameters [url username password permitType version]
    :user-roles #{:authorityAdmin}
    :input-validators [(fn [{{permit-type :permitType} :data}]
-                        (when (and (not= "osoitteet" permit-type) (not (permit/valid-permit-type? permit-type)))
+                        (when-not (or
+                                    (and (env/feature? :kunnan-osoiteaineisto) (= "osoitteet" permit-type))
+                                    (permit/valid-permit-type? permit-type))
                           (fail :error.missing-parameters :parameters [:permitType])))]}
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)
