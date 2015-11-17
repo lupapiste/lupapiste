@@ -329,13 +329,15 @@
         (when task-id
           {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}})
         (when (:kuvaus huomautukset)
-          {:huomautustieto {:Huomautus (reduce-kv
-                                         (fn [m k v]
-                                           (if-not (ss/blank? v)
-                                             (assoc m k (util/to-xml-date-from-string v))
-                                             m))
-                                         (select-keys huomautukset [:kuvaus])
-                                         (select-keys huomautukset [:toteaja :maaraAika :toteamisHetki]))}})))))
+          {:huomautustieto {:Huomautus (util/strip-nils (reduce-kv
+                                                          (fn [m k v]
+                                                            (if-not (ss/blank? v)
+                                                              (assoc m k (util/to-xml-date-from-string v))
+                                                              m))
+                                                          (util/assoc-when {}
+                                                            :kuvaus (:kuvaus huomautukset)
+                                                            :toteaja (:toteaja huomautukset))
+                                                          (select-keys huomautukset [:maaraAika :toteamisHetki])))}})))))
 
 (defn katselmus-canonical [application katselmus lang user]
   (let [application (tools/unwrapped application)
