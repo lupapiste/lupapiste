@@ -126,7 +126,7 @@
     (comment-can-be-added! bulletin-id bulletin-version-id comment)
     (let [address-source   (if otherReceiver data (get-in (lupapalvelu.vetuma/vetuma-session) [:user]))
           delivery-address (select-keys address-source delivery-address-fields)
-          comment      (bulletins/create-comment comment email (= emailPreferred "on") created)
+          comment      (bulletins/create-comment comment email (= emailPreferred "on") created delivery-address)
           stored-files (bulletins/store-files bulletin-id (:id comment) files)]
       (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments stored-files)}})
       (->> {:ok true}
