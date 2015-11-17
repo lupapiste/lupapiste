@@ -348,6 +348,7 @@
 (def katselmus
   (-> (dummy-doc "task-katselmus-ya")
       (assoc :taskname "testikatselmus")
+      (assoc-in [:data :katselmuksenLaji :value] "Muu valvontak\u00e4ynti")
       (assoc-in [:data :katselmus :pitaja :value] "Viranomaisen nimi")
       (assoc-in [:data :katselmus :pitoPvm :value] "01.05.1974")
       (assoc-in [:data :katselmus :huomautukset :kuvaus :value] "huomautus - kuvaus")
@@ -355,7 +356,6 @@
       (assoc-in [:data :katselmus :huomautukset :maaraAika :value] "02.06.1974")
       (assoc-in [:data :katselmus :lasnaolijat :value] "paikallaolijat")
       (assoc-in [:data :katselmus :poikkeamat :value] "jotain poikkeamia oli")
-      (assoc-in [:data :katselmus :tila :value] "lopullinen")
       ))
 
 (def kaivulupa-application-with-review (assoc kaivulupa-application :tasks [katselmus]))
