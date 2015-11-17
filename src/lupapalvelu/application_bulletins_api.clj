@@ -113,16 +113,20 @@
       (fail! :error.invalid-bulletin-state))
     (bulletin-version-is-latest! bulletin bulletin-version-id)))
 
+(def delivery-address-fields #{:firstName :lastName :street :zip :city})
+
 ;; TODO user-roles Vetuma autheticated person
 (defraw add-bulletin-comment
   {:description "Add comment to bulletin"
    :feature     :publish-bulletin
    :user-roles  #{:anonymous}}
   [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field bulletin-version-id :bulletin-version-id
-     email :email emailPreferred :emailPreferred :as data} :data created :created :as action}]
+     email :email emailPreferred :emailPreferred otherReceiver :otherReceiver :as data} :data created :created :as action}]
   (try+
     (comment-can-be-added! bulletin-id bulletin-version-id comment)
-    (let [comment      (bulletins/create-comment comment email (= emailPreferred "on") created)
+    (let [address-source   (if otherReceiver data (get-in (lupapalvelu.vetuma/vetuma-session) [:user]))
+          delivery-address (select-keys address-source delivery-address-fields)
+          comment      (bulletins/create-comment comment email (= emailPreferred "on") created)
           stored-files (bulletins/store-files bulletin-id (:id comment) files)]
       (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments stored-files)}})
       (->> {:ok true}
