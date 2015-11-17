@@ -493,6 +493,12 @@
                        credentials)]
      (http/get url options))))
 
+(defn get-capabilities-xml
+  "Returns capabilities XML without namespaces"
+  [base-url username password]
+  (let [capabilities-resp  (query-get-capabilities base-url username password true)]
+    (-> capabilities-resp :body sxml/parse reader/strip-xml-namespaces)))
+
 (defn wfs-is-alive?
   "checks if the given system is Web Feature Service -enabled. kindof."
   [url username password]
@@ -512,11 +518,9 @@
 
 (def get-rekisteriyksikontietojaFeatureAddress
   (memoize
-    #(let [ktj-capabilities-resp  (query-get-capabilities ktjkii (get-in auth [ktjkii 0]) (get-in auth [ktjkii 1]) true)
-           selector [:WFS_Capabilities :OperationsMetadata [:Operation (enlive/attr= :name "DescribeFeatureType")] :DCP :HTTP [:Get]]
-           attribute-to-get :xlink:href]
-       (let [namespace-stripped-xml (reader/strip-xml-namespaces (sxml/parse (:body ktj-capabilities-resp)))]
-         (sxml/select1-attribute-value namespace-stripped-xml selector attribute-to-get)))))
+    #(let [namespace-stripped-xml (get-capabilities-xml  ktjkii (get-in auth [ktjkii 0]) (get-in auth [ktjkii 1]))
+           selector [:WFS_Capabilities :OperationsMetadata [:Operation (enlive/attr= :name "DescribeFeatureType")] :DCP :HTTP [:Get]]]
+       (sxml/select1-attribute-value namespace-stripped-xml selector :xlink:href))))
 
 (defn rekisteritiedot-xml [rekisteriyksikon-tunnus]
   (if (env/feature? :disable-ktj-on-create)
