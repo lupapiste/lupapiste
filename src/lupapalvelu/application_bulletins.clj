@@ -46,10 +46,8 @@
   {$push {:versions snapshot}
    $set  (merge {:modified ts} search-fields)})
 
-(defn create-comment [comment email emailPreferred? created delivery-address]
+(defn create-comment [comment contact-info created]
   (let [id          (mongo/create-id)
-        contact-info (merge delivery-address {:email          email
-                                              :emailPreferred emailPreferred?})
         new-comment {:id           id
                      :comment      comment
                      :created      created
