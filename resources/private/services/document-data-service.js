@@ -240,48 +240,40 @@ LUPAPISTE.DocumentDataService = function() {
   }
 
   function getAsRaw(model) {
+    var recur = function(dataModel) {
+      if (_.has(dataModel, "model")) {
+        return recur(dataModel.model);
 
-    if (ko.isObservable(model)) {
-      return getAsRaw(model());
+      } else if (_.isArray(dataModel)) {
+        return _(dataModel)
+          .map(function(rep) { return [rep.index, rep.model]; })
+          .zipObject()
+          .mapValues(recur)
+          .value();
 
-    } else if (_.has(model, "model")) {
-      return getAsRaw(model.model);
+      } else if (_.isObject(dataModel)) {
+        return _.mapValues(dataModel, recur);
 
-    } else if (_.has(_.first(model), "index")) {
-      return _(model)
-        .map(function(rep) { return [rep.index, rep.model]; })
-        .zipObject()
-        .mapValues(getAsRaw)
-        .value();
-
-    } else if (_.isObject(model)) {
-      return _.mapValues(model, getAsRaw);
-
-    } else {
-      return {value: model};
+      } else {
+        return {value: dataModel};
+      }
     }
+    return recur(ko.toJS(model));
   }
 
   function getAsUpdates(dataModel) {
-
-    if (ko.isObservable(dataModel)) {
-      return getAsUpdates(dataModel());
-
-    } else if (ko.isObservable(dataModel.model)) {
-      return getAsUpdates(_.extend({},
-        dataModel,
-        {model: dataModel.model()}
-      ));
-
-    } else if (_.isObject(dataModel.model)) {
-      return _(dataModel.model)
-        .map(getAsUpdates)
-        .flatten()
-        .filter(1)
-        .value();
-
-    } else {
-      return [[dataModel.path, dataModel.model]];
+    var recur = function(dataModel) {
+      if (_.isObject(dataModel.model)) {
+        return _(dataModel.model)
+          .map(recur)
+          .flatten()
+          .filter(1)
+          .value();
+          
+      } else {
+        return [[dataModel.path, dataModel.model]];
+      }
     }
+    return recur(ko.toJS(dataModel));
   }
 }
