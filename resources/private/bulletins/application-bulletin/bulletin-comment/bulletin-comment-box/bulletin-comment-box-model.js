@@ -17,7 +17,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
 
   self.otherReceiver = ko.observable(false);
 
-  self.formDataSupported = window.FormData === undefined;
+  self.formDataSupported = window.FormData !== undefined;
 
   self.filesAttr = ko.pureComputed(function() {
     if (self.formDataSupported) {
