@@ -482,13 +482,14 @@
      :type "yleiskaava"}))
 
 (defn query-get-capabilities
-  ([url] (query-get-capabilities url nil nil))
-  ([url username password]
+  ([url]
+    (query-get-capabilities url nil nil true))
+  ([url username password throw-exceptions?]
     {:pre [(not (ss/blank? url))]}
     (let [credentials (when-not (ss/blank? username) {:basic-auth [username password]})
          options     (merge {:socket-timeout 30000, :conn-timeout 30000 ; 30 secs should be enough for GetCapabilities
                              :query-params {:request "GetCapabilities", :service "WFS", :version "1.1.0"}
-                             :throw-exceptions false}
+                             :throw-exceptions  throw-exceptions?}
                        credentials)]
      (http/get url options))))
 
@@ -497,7 +498,7 @@
   [url username password]
   (when-not (s/blank? url)
     (try
-      (let [resp (query-get-capabilities url username password)]
+      (let [resp (query-get-capabilities url username password false)]
         (or
           (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
           (warn "Response not OK or did not contain XML. Response was: " resp)))
@@ -511,15 +512,11 @@
 
 (def get-rekisteriyksikontietojaFeatureAddress
   (memoize
-    #(let [ktj-capabilities-resp  (query-get-capabilities ktjkii (get-in auth [ktjkii 0]) (get-in auth [ktjkii 1]))
+    #(let [ktj-capabilities-resp  (query-get-capabilities ktjkii (get-in auth [ktjkii 0]) (get-in auth [ktjkii 1]) true)
            selector [:WFS_Capabilities :OperationsMetadata [:Operation (enlive/attr= :name "DescribeFeatureType")] :DCP :HTTP [:Get]]
            attribute-to-get :xlink:href]
-       (if (= 200 (:status ktj-capabilities-resp))
-         (let [namespace-stripped-xml (reader/strip-xml-namespaces (sxml/parse (:body ktj-capabilities-resp)))]
-           (sxml/select1-attribute-value namespace-stripped-xml selector attribute-to-get))
-         (let [body (-> ktj-capabilities-resp :body (ss/replace #"[\r\n]+" " ") (ss/limit 220 "..."))]
-           (errorf "%s did not respond OK but %s, response body=%s" ktjkii (:status ktj-capabilities-resp) body)
-           (fail! :error.unknown))))))
+       (let [namespace-stripped-xml (reader/strip-xml-namespaces (sxml/parse (:body ktj-capabilities-resp)))]
+         (sxml/select1-attribute-value namespace-stripped-xml selector attribute-to-get)))))
 
 (defn rekisteritiedot-xml [rekisteriyksikon-tunnus]
   (if (env/feature? :disable-ktj-on-create)
