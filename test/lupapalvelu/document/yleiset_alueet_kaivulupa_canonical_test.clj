@@ -348,6 +348,7 @@
 (def katselmus
   (-> (dummy-doc "task-katselmus-ya")
       (assoc :taskname "testikatselmus")
+      (assoc-in [:data :katselmuksenLaji :value] "Muu valvontak\u00e4ynti")
       (assoc-in [:data :katselmus :pitaja :value] "Viranomaisen nimi")
       (assoc-in [:data :katselmus :pitoPvm :value] "01.05.1974")
       (assoc-in [:data :katselmus :huomautukset :kuvaus :value] "huomautus - kuvaus")
@@ -355,7 +356,6 @@
       (assoc-in [:data :katselmus :huomautukset :maaraAika :value] "02.06.1974")
       (assoc-in [:data :katselmus :lasnaolijat :value] "paikallaolijat")
       (assoc-in [:data :katselmus :poikkeamat :value] "jotain poikkeamia oli")
-      (assoc-in [:data :katselmus :tila :value] "lopullinen")
       ))
 
 (def kaivulupa-application-with-review (assoc kaivulupa-application :tasks [katselmus]))
@@ -381,16 +381,13 @@
     (fact "pitoPvm" pitoPvm => "1974-05-01")
     (fact "katselmuksenLaji" katselmuksenLaji => "Muu valvontak\u00e4ynti")
     (fact "vaadittuLupaehtonaKytkin" vaadittuLupaehtonaKytkin => true)
-    (fact "huomautustieto"
-      huomautustieto  => {:Huomautus {:kuvaus "huomautus - kuvaus"
-                                      :maaraAika "1974-06-02"
-                                      :toteamisHetki "1974-05-02"
-                                      :toteaja "huomautus - viranomaisen nimi"}})
+    (fact "huomautustieto" huomautustieto  => {:Huomautus {:kuvaus "huomautus - kuvaus"
+                                                           :maaraAika "1974-06-02"
+                                                           :toteamisHetki "1974-05-02"
+                                                           :toteaja "huomautus - viranomaisen nimi"}})
     (fact "katselmuspoytakirja" katselmuspoytakirja => nil)
     (fact "tarkastuksenTaiKatselmuksenNimi" tarkastuksenTaiKatselmuksenNimi => "testikatselmus")
     (fact "lasnaolijat" lasnaolijat => "paikallaolijat")
     (fact "poikkeamat" poikkeamat => "jotain poikkeamia oli")
-    )
-
-  )
+    ))
 
