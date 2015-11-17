@@ -41,6 +41,10 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     $("#vetuma-init")[0].click();
   };
 
+  self.scrollToCommenting = function() {
+    $("#bulletin-comment")[0].scrollIntoView(true);
+  };
+
   hub.send("bulletinService::fetchBulletin", {id: self.bulletinId});
 
   var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + self.bulletinId;

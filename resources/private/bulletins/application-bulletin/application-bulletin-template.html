@@ -53,6 +53,10 @@
                       data-bind=""
                       data-test-id="comment-bulletin">
                   <i class="lupicon-comment"></i>
+                  <!-- ko if: authenticated-->
+                  <span data-bind="ltext: 'bulletin.actions.comment',
+                                   click: scrollToCommenting"></span>
+                  <!-- /ko -->
                   <!-- ko if: !authenticated() -->
                   <span data-bind="ltext: 'bulletin.actions.comment',
                                    click: clickAuthenticationButton"></span>
