@@ -129,9 +129,8 @@
 
 (defn wms-capabilities-proxy [request]
   (let [{municipality :municipality} (:params request)
-        capabilities (wfs/getcapabilities request)
-        layers (wfs/capabilities-to-layers capabilities)
-        ]
+        capabilities (wfs/get-our-capabilities)
+        layers (wfs/capabilities-to-layers capabilities)]
     (if layers
       (resp/json
         (if (nil? municipality)
@@ -141,8 +140,7 @@
                (not= "0" (:id %))      ;; TODO: This is quick fix to make service working again.  Find better fix.
                (= (re-find #"^\d+" (:wmsName %)) municipality))
             (map create-layer-object (map wfs/layer-to-name layers)))
-          )
-        )
+          ))
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn plan-urls-by-point-proxy [{{:keys [x y municipality]} :params}]
