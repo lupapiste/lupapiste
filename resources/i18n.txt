@@ -1,3 +1,0 @@
-task-katselmus-ya.katselmuksenLaji.Aloituskatselmus: Aloituskatselmus
-task-katselmus-ya.katselmuksenLaji.Loppukatselmus: Loppukatselmus
-task-katselmus-ya.katselmuksenLaji.Muu valvontakäynti: Muu valvontakäynti
