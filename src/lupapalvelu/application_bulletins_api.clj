@@ -150,7 +150,7 @@
   {:parameters [bulletinId]
    :feature :publish-bulletin
    :user-roles #{:anonymous}}
-  (if-let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletins/bulletin-fields))]
+  (if-let [bulletin (bulletins/get-bulletin bulletinId)]
     (let [latest-version   (-> bulletin :versions first)
           bulletin-version   (assoc latest-version :versionId (:id latest-version)
                                                    :id (:id bulletin))
