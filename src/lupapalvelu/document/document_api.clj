@@ -63,7 +63,7 @@
 (defcommand update-construction-time-doc
   {:parameters [id doc updates]
    :user-roles #{:applicant :authority}
-   :states     #{:constructionStarted}
+   :states     states/post-verdict-states
    :pre-checks [application/validate-authority-in-drafts application/validate-is-construction-time-doc]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
@@ -134,7 +134,7 @@
 (defcommand approve-construction-time-doc
   {:parameters [:id :doc :path :collection]
    :user-roles #{:authority}
-   :states     #{:constructionStarted}
+   :states     states/post-verdict-states
    :pre-checks [application/validate-is-construction-time-doc]}
   [command]
   (ok :approval (approve command "approved")))
@@ -150,7 +150,7 @@
 (defcommand reject-construction-time-doc
   {:parameters [:id :doc :path :collection]
    :user-roles #{:authority}
-   :states     #{:constructionStarted}
+   :states     states/post-verdict-states
    :pre-checks [application/validate-is-construction-time-doc]}
   [command]
   (ok :approval (approve command "rejected")))

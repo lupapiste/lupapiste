@@ -74,7 +74,7 @@
 (defn validate-is-construction-time-doc
   [{{doc-id :doc} :data} {state :state documents :documents}]
   (when doc-id
-    (when-not (some-> (domain/get-document-by-id documents nil)
+    (when-not (some-> (domain/get-document-by-id documents doc-id)
                       (model/get-document-schema)
                       (get-in [:info :construction-time]))
       (fail :error.document-not-construction-time-doc))))
