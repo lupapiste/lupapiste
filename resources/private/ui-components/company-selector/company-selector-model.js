@@ -12,6 +12,8 @@ LUPAPISTE.CompanySelectorModel = function(params) {
   self.companies = ko.observableArray(params.companies);
   self.selected = ko.observable(_.isEmpty(params.selected) ? undefined : params.selected);
 
+  self.path = (_.isArray(params.path) ? params.path : params.path.split(".")).concat(params.schema.name);
+
   self.setOptionDisable = function(option, item) {
     if (!item) {
       return;
@@ -33,10 +35,9 @@ LUPAPISTE.CompanySelectorModel = function(params) {
       }
 
       self.service.updateDoc(params.documentId,
-                             [params.path.split(".").concat([params.schema.name])],
-                             [id],
+                             [[self.path, id]],
                              self.indicator,
-                             self.result,
+                             [[self.path, self.result]],
                              cb);
     })
     .call();

@@ -54,78 +54,65 @@ LUPAPISTE.DocumentDataService = function() {
     return pushToRepeating(repeatingModel, {});
   }
 
-  self.copyRepeatingGroup = function(documentId, path, index, indicator, result) {
+  self.copyRepeatingGroup = function(documentId, path, index, indicator) {
     var repeatingModel = self.getInDocument(documentId, path);
     var rawModel = getAsRaw(findByIndex(repeatingModel, index));
     var repLength = pushToRepeating(repeatingModel, rawModel);
     var updates = getAsUpdates(repeatingModel.model()[repLength - 1]);
     self.updateDoc(documentId, 
-                   _.map(updates, 0), 
-                   _.map(updates, 1),
-                   indicator,
-                   result);
+                   updates,
+                   indicator);
   }
 
-  self.removeRepeatingGroup = function(documentId, path, index, indicator, result) {
+  self.removeRepeatingGroup = function(documentId, path, index, indicator) {
     var repeatingModel = self.getInDocument(documentId, path);
     var cb = function() {
       removeByIndex(repeatingModel, index);
     };
-    self.removeGroup(documentId, 
-                     self.applicationId(), 
-                     path.concat(index), 
-                     indicator,
-                     result, 
-                     cb);
+    var params = {
+      path: path.concat(index)
+    };
+    command("remove-document-data", documentId, params, {
+      indicator: indicator,
+      cb: cb
+    });
   }
 
-  self.updateDoc = function(documentId, paths, vals, indicator, result, cb) {
-    return save("update-doc", documentId, paths, vals, indicator, result, cb);
+  self.updateDoc = function(documentId, updates, indicator, results, cb) {
+    var params = {
+      updates: _.map(updates, function(update) {
+        return [update[0].join("."), update[1]];
+      })
+    };
+    command("update-doc", documentId, params, {
+      indicator: indicator,
+      results: results,
+      cb: cb
+    });
   }
 
-  function save(command, documentId, paths, vals, indicator, result, cb) {
-    cb = cb || _.noop;
-    var updates = _(paths)
-      .map(function(p) { return p.join("."); })
-      .zip(vals)
-      .value();
+  function command(commandName, documentId, params, opts) {
+    var results = opts.results || {};
+    var indicator = opts.indicator || _.noop;
+    var cb = opts.cb || _.noop;
     ajax
-      .command(command, {
-        doc: documentId,
-        id: self.applicationId(),
-        updates: updates,
-        collection: "documents"})
-      .success(function (e) {
-        _(e.result).filter(function(r) {
-          return _.contains(paths, r.path);
-        }).forEach(function(r) {
-          result(r.result);
-        }).value();
-        indicator({type: "saved"});
-        cb();
-      })
-      .error(function () {
-        indicator({type: "err"});
-      })
-      .fail(function () {
-        indicator({type: "err"});
-      })
-      .call();
-  };
-
-  function removeGroup(documentId, applicationId, path, indicator, result, cb) {
-    ajax
-      .command("remove-document-data", {
-        doc: documentId,
-        id: self.applicationId(),
-        path: path,
-        collection: "documents"
-      })
+      .command(command, _.extend({
+          doc: documentId,
+          id: self.applicationId(),
+          collection: "documents"
+        }, 
+        params)
+      )
       .success(function(e) {
-        var res = _.find(e.results, function(result) {
-          return _.isEqual(result.path, path);
+        _.forEach(results, function(result) {
+          // TODO: hub.send(result)
+          var path = result[0], resultObs = result[1];
+          var res = _.find(e.results, function(res) {
+            return _.isEqual(res.path, path);
+          });
+          resultObs(res && res.result);
         });
-        result(res ? res.result : undefined);
+      
         indicator({type: "saved"});
         cb(e);
       })

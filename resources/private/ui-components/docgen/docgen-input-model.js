@@ -68,10 +68,9 @@ LUPAPISTE.DocgenInputModel = function(params) {
                                 util.getIn(params, ["model", "disabled"]));
   var save = function(val) {
     self.service.updateDoc(self.documentId,
-                           [self.path],
-                           [val],
+                           [[self.path, val]],
                            self.indicator,
-                           self.result);
+                           [[self.path, self.result]]);
   };
   self.value.subscribe(_.debounce(save, 500));
 };
