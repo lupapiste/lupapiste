@@ -487,19 +487,25 @@
      :linkki (first (xml-> feature :lupapiste:linkki text))
      :type "yleiskaava"}))
 
+(defn query-get-capabilities [url username password]
+  (let [credentials (when-not (s/blank? username) {:basic-auth [username password]})
+        options     (merge {:socket-timeout 30000, :conn-timeout 30000 ; 30 secs should be enough for GetCapabilities
+                            :query-params {:request "GetCapabilities", :service "WFS", :version "1.1.0"}
+                            :throw-exceptions false}
+                      credentials)]
+    (http/get url options)))
+
 (defn wfs-is-alive?
   "checks if the given system is Web Feature Service -enabled. kindof."
   [url username password]
   (when-not (s/blank? url)
     (try
-      (let [credentials (when-not (s/blank? username) {:basic-auth [username password]})
-            options     (merge {:query-params {:request "GetCapabilities"} :throw-exceptions false} credentials)
-            resp        (http/get url options)]
-       (or
-         (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
-         (warn "Response not OK or did not contain XML. Response was: " resp)))
-     (catch Exception e
-       (warn (str "Could not connect to WFS: " url ", exception was " e))))))
+      (let [resp (query-get-capabilities url username password)]
+        (or
+          (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
+          (warn "Response not OK or did not contain XML. Response was: " resp)))
+      (catch Exception e
+        (warn (str "Could not connect to WFS: " url ", exception was " e))))))
 
 (defn get-rekisteriyksikontietojaFeatureAddress []
   (let [url-for-get-ktj-capabilities (str ktjkii "?service=WFS&request=GetCapabilities&version=1.1.0")
