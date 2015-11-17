@@ -176,11 +176,12 @@
       }
 
       // Documents
-      var nonpartyDocs = _.filter(app.documents, util.isNotPartyDoc);
-      var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
-      var partyDocs = _.filter(app.documents, util.isPartyDoc);
-      var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
       var constructionTimeDocs = _.filter(app.documents, "schema-info.construction-time");
+      var nonConstructionTimeDocs = _.reject(app.documents, "schema-info.construction-time");
+      var nonpartyDocs = _.filter(nonConstructionTimeDocs, util.isNotPartyDoc);
+      var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
+      var partyDocs = _.filter(nonConstructionTimeDocs, util.isPartyDoc);
+      var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
 
       var nonpartyDocErrors = _.map(sortedNonpartyDocs, function(doc) { return doc.validationErrors; });
       var partyDocErrors = _.map(sortedPartyDocs, function(doc) { return doc.validationErrors; });
