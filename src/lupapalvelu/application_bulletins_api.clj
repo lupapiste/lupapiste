@@ -119,16 +119,16 @@
    :feature     :publish-bulletin
    :user-roles  #{:anonymous}}
   [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field bulletin-version-id :bulletin-version-id
-     email :email emailPreferred :emailPreferred} :data created :created :as action}]
+     email :email emailPreferred :emailPreferred :as data} :data created :created :as action}]
   (try+
     (comment-can-be-added! bulletin-id bulletin-version-id comment)
     (let [comment      (bulletins/create-comment comment email (= emailPreferred "on") created)
           stored-files (bulletins/store-files bulletin-id (:id comment) files)]
       (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments stored-files)}})
-         (->> {:ok true}
-              (resp/json)
-              (resp/content-type "application/json")
-              (resp/status 200)))
+      (->> {:ok true}
+           (resp/json)
+           (resp/content-type "application/json")
+           (resp/status 200)))
     (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
       (->> {:ok false :text text}
            (resp/json)
