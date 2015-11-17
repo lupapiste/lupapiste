@@ -309,14 +309,18 @@
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)]
     (if-let [organization (o/get-organization organization-id)]
-      (let [empty-confs (zipmap (map (comp keyword :permitType) (:scope organization)) (repeat {}))]
+      (let [permit-types (mapv (comp keyword :permitType) (:scope organization))
+            krysp-keys (conj permit-types :osoitteet)
+            empty-confs (zipmap krysp-keys (repeat {}))]
         (ok :krysp (merge empty-confs (:krysp organization))))
       (fail :error.unknown-organization))))
 
 (defcommand set-krysp-endpoint
   {:parameters [url username password permitType version]
    :user-roles #{:authorityAdmin}
-   :input-validators [permit/permit-type-validator]}
+   :input-validators [(fn [{{permit-type :permitType} :data}]
+                        (when (and (not= "osoitteet" permit-type) (not (permit/valid-permit-type? permit-type)))
+                          (fail :error.missing-parameters :parameters [:permitType])))]}
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)
         krysp-config    (o/get-krysp-wfs organization-id permitType)
