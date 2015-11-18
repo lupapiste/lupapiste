@@ -20,9 +20,9 @@
       false)))
 
 (defn- find-pdf2pdf-executable []
-  (let [exetuable-name "pdf2pdf"]
-    (when (executable-exists? exetuable-name)
-      exetuable-name)))
+  (let [executable-name "pdf2pdf"]
+    (when (executable-exists? executable-name)
+      executable-name)))
 
 (def pdf2pdf-executable
   (memo/ttl find-pdf2pdf-executable
