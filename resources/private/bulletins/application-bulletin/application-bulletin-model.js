@@ -9,7 +9,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   self.bulletin = bulletinService.bulletin;
 
-  self.bulletinId = params.bulletinId;
+  self.bulletinId = params.bulletinId();
   self.versionId  = ko.observable();
   self.selectedTab = ko.observable().extend({
     limited: {values: ["info", "attachments"], defaultValue: "info"}
