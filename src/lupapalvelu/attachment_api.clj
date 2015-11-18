@@ -392,7 +392,7 @@
           (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
           (upload! (assoc upload-options :size (.length temp-pdf))))
         (finally
-          (attachment/delete-file! temp-pdf))))
+          (io/delete-file temp-pdf :silently))))
     (fail :error.unknown)))
 
 ;;
@@ -438,7 +438,7 @@
                                             :archivable is-pdf-a?
                                             :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
                                             :stamped true :make-comment false :state :ok}))
-      (attachment/delete-file! file))
+      (io/delete-file file :silently))
     new-file-id))
 
 (defn- stamp-attachments!

@@ -526,5 +526,3 @@
         (proxy-super close)
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
-
-(defn delete-file! [^File file] (try (.delete file) (catch Exception _)))
