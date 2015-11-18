@@ -2,19 +2,19 @@ LUPAPISTE.FileuploadService = function() {
   "use strict";
   var self = this;
 
-  var inputId = "fileupload-input";
+  self.fileInputId = util.randomElementId("fileupload-input");
 
-  if (!document.getElementById(inputId)) {
+  if (!document.getElementById(self.fileInputId)) {
     var input = document.createElement("input");
     input.className = "hidden";
     input.type = "file";
     input.name = "files[]";
     input.setAttribute("multiple", true);
-    input.setAttribute("id", inputId);
+    input.setAttribute("id", self.fileInputId);
     document.body.appendChild(input);
   }
 
-  $("#" + inputId).fileupload({
+  $("#" + self.fileInputId).fileupload({
     url: "/upload/file",
     type: "POST",
     dataType: "json",
