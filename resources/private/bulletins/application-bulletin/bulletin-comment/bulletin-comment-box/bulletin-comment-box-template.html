@@ -155,8 +155,9 @@
           <!-- /ko -->
         </div>
         <div class="row">
-          <button class="bulletin" data-bind="click: addAttachment">
+          <button class="bulletin" data-bind="click: addAttachment, css: {waiting: filePending}">
             <i class="lupicon-paperclip"></i>
+            <i class="wait spin lupicon-refresh"></i>
             <span data-bind="ltext: 'bulletin.comment.addAttachment'"></span>
           </button>
         </div>

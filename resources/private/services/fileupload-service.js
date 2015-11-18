@@ -18,8 +18,18 @@ LUPAPISTE.FileuploadService = function() {
     url: "/upload/file",
     type: "POST",
     dataType: "json",
+    start: function(e, data) {
+      hub.send("fileuploadService::filesUploading", {state: "pending"});
+    },
+    always: function(e, data) {
+      hub.send("fileuploadService::filesUploading", {state: "finished"});
+    },
     done: function(e, data) {
-      hub.send("fileuploadService::filesUploaded", {files: data.result.files});
+      hub.send("fileuploadService::filesUploaded", {status: "success",
+                                                    files: data.result.files});
+    },
+    fail: function(e, data) {
+      hub.send("fileuploadService::filesUploaded", {status: "failed"});
     }
   });
 
