@@ -13,7 +13,8 @@ LUPAPISTE.BulletinsModel = function(params) {
 
   self.pageParams = ko.pureComputed(function () {
     var defaultParams = {
-      bulletinService: bulletinService
+      bulletinService: bulletinService,
+      pagePath: self.pagePath()
     };
 
     return self.page() === "bulletin" ?
