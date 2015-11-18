@@ -10240,11 +10240,6 @@ div.search i {
   padding-right: 24px;
 }
 
-/* line 246, ../sass/partials/_bulletins.scss */
-#fileupload-input {
-  margin-top: 100px;
-}
-
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
