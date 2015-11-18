@@ -35,11 +35,14 @@
   [(pdf2pdf-executable) "-mp" "-rd" "-lk" (pdf2pdf-key) input-file output-file])
 
 (defn- parse-log-file [output-filename]
-  (let [log-filename (str (ss/substring output-filename 0 (- (count output-filename) 4)) "-log.txt")]
-    (try (with-open [reader (io/reader log-filename)]
-           (vec (line-seq reader)))
-         (catch FileNotFoundException fnf
-           []))))
+  (try
+    (let [log-filename (str (ss/substring output-filename 0 (- (count output-filename) 4)) "-log.txt")
+          lines (with-open [reader (io/reader log-filename)]
+                  (vec (line-seq reader)))]
+      (io/delete-file log-filename :silently)
+      lines)
+    (catch FileNotFoundException fnf
+      [])))
 
 (defn- parse-errors-from-log-lines [lines]
   (when (seq lines)
@@ -69,6 +72,7 @@
             {:pdfa? true
              :output-file (File. output-file)})
       6 (let [error-lines (parse-errors-from-log-lines log-lines)]
+          (io/delete-file output-file :silently)
           (if-let [fonts (parse-missing-fonts-from-log-lines error-lines)]
             {:pdfa? false
              :missing-fonts fonts}
