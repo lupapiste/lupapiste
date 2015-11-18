@@ -16,8 +16,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.appendLabel = params.i18npath.concat("_append_label").join(".");
   self.copyLabel = params.i18npath.concat("_copy_label").join(".");
 
-  self.data = self.service.getInDocument(params.documentId, self.path);
-  self.groups = self.data.model;
+  self.groups = self.service.getInDocument(params.documentId, self.path).model;
 
   self.indicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});

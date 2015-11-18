@@ -22,11 +22,10 @@
                 <span class="form-entry"
                   data-bind="component: { name: uicomponent,
                                           params: { schema: $data,
-                                                    path: $component.path.concat([$parent.index, name]),
+                                                    path: $parent.path.concat(name),
                                                     i18npath: i18npath,
                                                     applicationId: applicationId,
-                                                    documentId: documentId,
-                                                    model: $parent.model[name].model }}">
+                                                    documentId: documentId }}">
                 </span>
               </td>
               <!-- /ko -->
