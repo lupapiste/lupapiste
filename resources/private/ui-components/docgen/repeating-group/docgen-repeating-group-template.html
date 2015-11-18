@@ -26,8 +26,11 @@
           <!-- /ko -->
 
           <div data-bind="component: { name: 'docgen-group',
-                                       index: index,
-                                       params: $data }">
+                                       params: { schema: $data.schema,
+                                                 path: $component.path.concat(index),
+                                                 i18npath: $component.i18npath,
+                                                 applicationId: $component.applicationId,
+                                                 documentId: $component.documentId }}">
           </div>
         </div>
       </div>

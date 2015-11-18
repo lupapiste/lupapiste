@@ -8,7 +8,6 @@ LUPAPISTE.DocgenInputModel = function(params) {
   self.service = lupapisteApp.services.documentDataService;
 
   self.size = uiComponents.sizeClasses[self.params.schema.size];
-  //self.value = ko.observable(self.params.model ? self.params.model.value : undefined);
   self.path = self.params.path;
   self.documentId = self.params.documentId || self.params.schema.documentId;
   self.value = lupapisteApp.services.documentDataService.getInDocument(self.documentId, self.path).model;
