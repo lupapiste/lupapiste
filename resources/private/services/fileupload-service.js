@@ -6,7 +6,7 @@ LUPAPISTE.FileuploadService = function() {
 
   if (!document.getElementById(inputId)) {
     var input = document.createElement("input");
-    // input.className = "hidden";
+    input.className = "hidden";
     input.type = "file";
     input.name = "files[]";
     input.setAttribute("multiple", true);
