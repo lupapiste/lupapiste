@@ -21,13 +21,13 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   self.maaraalaTunnus = self.service.getInDocument(self.documentId, self.path).model;
 
   self.isMaaraala = params.isMaaraala;
-  if (self.maaraalaTunnus()) {
+  if (!_.isEmpty(self.maaraalaTunnus())) {
     self.isMaaraala(true);
   }
 
   self.isMaaraala.subscribe(function(isMaaraala) {
     if (!isMaaraala) {
-      self.maaraalaTunnus(null);
+      self.maaraalaTunnus("");
     }
   });
 
