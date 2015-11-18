@@ -590,6 +590,10 @@
       (resp/content-type "text/plain") ; IE is fucking stupid: must use content type text/plain, or else IE prompts to download response.
       (resp/status 200))))
 
+(defpage [:post "/api/upload/file"] {files :files attachmentType :attachmentType}
+  (println "FOO!")
+  (resp/status 200 "SUCCESS"))
+
 (defraw download-user-attachment
   {:parameters [attachment-id]
    :user-roles #{:applicant}}
