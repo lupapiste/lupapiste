@@ -849,7 +849,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildGroupComponent (name, subSchema, model, path) {
-    name = (name === "docgen-group" && subSchema.repeating) ? "docgen-repeating-group" : name;
     var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(_.reject(path, _.isNumber));
 
     lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
@@ -871,7 +870,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildDocgenGroup (subSchema, model, path) {
-    return buildGroupComponent("docgen-group", subSchema, model, path);
+    var name = subSchema.repeating ? "docgen-repeating-group" : "docgen-group";
+    return buildGroupComponent(name, subSchema, model, path);
   }
 
   function buildPropertyGroup (subSchema, model, path) {
@@ -880,6 +880,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildDocgenTable (subSchema, model, path) {
     return buildGroupComponent("docgen-table", subSchema, model, path);
+  }
+
+  function buildConstructionWasteReport (subSchema, model, path) {
+    return buildGroupComponent("construction-waste-report", subSchema, model, path);
   }
 
   function buildRadioGroup(subSchema, model, path) {
@@ -1334,6 +1338,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     docgenGroup: buildDocgenGroup,
     docgenTable: buildDocgenTable,
     propertyGroup: buildPropertyGroup,
+    constructionWasteReport: buildConstructionWasteReport,
     string: buildString,
     hetu: buildString,
     text: buildText,
