@@ -155,11 +155,12 @@
           <!-- /ko -->
         </div>
         <div class="row">
-          <button class="bulletin" data-bind="click: addAttachment, css: {waiting: filePending}">
+          <!-- TODO get for attr value from service -->
+          <label class="btn bulletin" for="fileupload-input" data-bind="css: {waiting: filePending}">
             <i class="lupicon-paperclip"></i>
             <i class="wait spin lupicon-refresh"></i>
             <span data-bind="ltext: 'bulletin.comment.addAttachment'"></span>
-          </button>
+          </label>
         </div>
         <div class="row">
           <button type="submit" class="positive" data-bind="disable: isDisabled,
