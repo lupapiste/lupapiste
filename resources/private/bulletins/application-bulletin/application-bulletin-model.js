@@ -14,7 +14,10 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   self.selectedTab = ko.observable().extend({
     limited: {values: ["info", "attachments"], defaultValue: "info"}
   });
-  self.selectedTab(params.pagePath[1]);
+
+  ko.computed(function() {
+    self.selectedTab(params.pagePath()[1]);
+  });
 
   self.tabComponentParams = ko.pureComputed(function() {
     return {bulletin: self.bulletin, attachments: self.bulletin() ? self.bulletin().attachments : []};
