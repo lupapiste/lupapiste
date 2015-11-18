@@ -593,7 +593,7 @@
 (defn- save-file [file]
   (let [file-id (mongo/create-id)]
     {:id file-id
-     :fileName (:filename file)
+     :filename (:filename file)
      :size (:size file)}))
 
 (defpage [:post "/upload/file"] {files :files}
