@@ -31,4 +31,4 @@ LUPAPISTE.DocgenTableModel = function(params) {
       documentId: params.documentId
     });
   });
-  
+};
