@@ -19,12 +19,11 @@ LUPAPISTE.FileuploadService = function() {
     type: "POST",
     dataType: "json",
     done: function(e, data) {
-      console.log("done", data.result.files);
-      hub.send("fileUploadService::filesUploaded", {files: data.result.files});
+      hub.send("fileuploadService::filesUploaded", {files: data.result.files});
     }
   });
 
-  hub.subscribe("fileUploadService::uploadFile", function() {
+  hub.subscribe("fileuploadService::uploadFile", function() {
     $("#fileupload-input").click();
   });
 };

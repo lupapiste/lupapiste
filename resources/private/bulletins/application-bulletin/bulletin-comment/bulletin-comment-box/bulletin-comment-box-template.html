@@ -135,15 +135,14 @@
         </div>
         <div class="row">
           <label data-bind="ltext: 'bulletin.comment.selectedAttachments'"></label>
-          <input class="hidden" type="file" name="files[]" data-bind="event: {change: fileChanged}, attr: {name: filesAttr}" multiple/>
           <input class="hidden" type="text" name="bulletin-id" data-bind="value: bulletinId"/>
           <input class="hidden" type="text" name="bulletin-version-id" data-bind="value: versionId"/>
           <!-- ko if: attachments().length > 0 -->
           <ul class="bulletin-comment__attachment-list" data-bind="foreach: attachments">
             <li>
-              <span data-bind="text: $data.name"></span>
+              <span data-bind="text: $data.filename"></span>
               <span data-bind="size: $data.size"></span>
-              <span data-bind="if: $component.formDataSupported">
+              <span>
                 <a href="#" data-bind="click: $component.removeAttachment">
                   <span data-bind="ltext: 'remove'"></span>
                 </a>

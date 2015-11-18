@@ -9,23 +9,13 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   self.comment = ko.observable();
   self.attachments = ko.observableArray([]);
   self.pending = ko.observable(false);
-
+  self.filePending = ko.observable(false);
   self.email = ko.observable().extend({email: true});
   self.emailPreferred = ko.observable();
 
   self.userInfo = params.userInfo;
 
   self.otherReceiver = ko.observable(false);
-
-  self.formDataSupported = window.FormData !== undefined;
-
-  self.filesAttr = ko.pureComputed(function() {
-    if (self.formDataSupported) {
-      return "";
-    } else {
-      return self.attachments().length > 1 ? "files" : "files[]";
-    }
-  });
 
   ko.computed(function() {
     if (!self.otherReceiver()) {
@@ -63,30 +53,25 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     return self.pending() || !self.comment() || !self.email.isValid() || !allOtherInfoIsValid;
   });
 
-  self.fileChanged = function(data, event) {
-    if (self.formDataSupported) {
-      var allFiles = self.attachments().concat(_.values(util.getIn(_.first($(event.target)), ["files"])));
-      self.attachments(allFiles);
-    } else {
-      self.attachments(util.getIn(_.first($(event.target)), ["files"]));
-    }
-  };
-
-  self.addAttachment = function(data, event) {
-    $(event.target).closest("form").find("input[type='file']").click();
+  self.addAttachment = function() {
+    hub.send("fileuploadService::uploadFile");
   };
 
   self.removeAttachment = function(attachment) {
     self.attachments.remove(attachment);
   };
 
-  if (!self.formDataSupported) {
-    hub.send("bulletinService::registerUploadForm", {form: "#bulletin-comment-form"});
-  }
-
   self.sendComment = function(form) {
     hub.send("bulletinService::newComment", {commentForm: form, files: self.attachments()});
   };
+
+  self.addEventListener("fileuploadService", "filesUploading", function(event) {
+    self.filePending(event.state === "pending");
+  });
+
+  self.addEventListener("fileuploadService", "filesUploaded", function(event) {
+    self.attachments(self.attachments().concat(event.files));
+  });
 
   self.addEventListener("bulletinService", "commentProcessed", function(event) {
     if (event.status === "success") {
@@ -103,3 +88,4 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     self.pending(state === "pending");
   });
 };
+
