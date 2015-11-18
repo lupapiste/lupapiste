@@ -96,7 +96,8 @@ var pageutil = (function($) {
     openApplicationPage:  openApplicationPage,
     openFrontpage:        openFrontpage,
     openPage:             openPage,
-    frontpage:            frontpage
+    frontpage:            frontpage,
+    getPagePath:          pagePath
   };
 
 })(jQuery);
