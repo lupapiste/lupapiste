@@ -29,8 +29,9 @@
     });
 
     $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService(),
-                                    vetumaService: new LUPAPISTE.VetumaService()});
-    
+                                    vetumaService: new LUPAPISTE.VetumaService(),
+                                    uploadService: new LUPAPISTE.FileuploadService()});
+
     var errorType = pageutil.subPage() === pageutil.lastSubPage() ?
       undefined :
       pageutil.lastSubPage();
