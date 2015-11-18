@@ -147,7 +147,8 @@
                    "organization-filter-service.js"
                    "organization-tags-service.js"
                    "handler-filter-service.js"
-                   "application-filters-service.js"]}
+                   "application-filters-service.js"
+                   "fileupload-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -380,7 +381,8 @@
                       "application-bulletins/bulletins-search/bulletins-search-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
-               :js ["header.js"
+               :js ["../services/fileupload-service.js"
+                    "header.js"
                     "bulletins.js" "component-base-model.js" "bulletins-model.js"
                     "application-bulletins-service.js"
                     "vetuma-service.js"
