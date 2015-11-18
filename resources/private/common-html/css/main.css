@@ -9901,6 +9901,10 @@ div.search i {
 #bulletins table.bulletin-attachments tr td:first-child {
   padding-left: 12px;
 }
+/* line 250, ../sass/partials/_bulletins.scss */
+#bulletins .bulletin-tab-content h3 {
+  margin-bottom: 24px;
+}
 
 /* VIEWS
 ------------------------------------------------------------------------------*/
