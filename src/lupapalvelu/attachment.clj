@@ -17,8 +17,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapiste-commons.attachment-types :as attachment-types]
-            [lupapalvelu.preview :as preview]
-            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
+            [lupapalvelu.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
            [org.apache.commons.io FilenameUtils]
@@ -529,11 +528,3 @@
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
 (defn delete-file! [^File file] (try (.delete file) (catch Exception _)))
-
-(defn application-to-pdf-a
-  "Returns application data in PDF/A temp file"
-  [application lang]
-  (let [file (File/createTempFile "application-pdf-a-" ".tmp")
-        stream (pdf-export/generate application lang)]
-    (io/copy stream file)
-    (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))))
