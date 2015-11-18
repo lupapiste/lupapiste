@@ -9894,6 +9894,14 @@ div.search i {
   display: table-cell;
   padding-right: 24px;
 }
+/* line 243, ../sass/partials/_bulletins.scss */
+#bulletins table.bulletin-attachments tr td {
+  word-wrap: break-word;
+}
+/* line 245, ../sass/partials/_bulletins.scss */
+#bulletins table.bulletin-attachments tr td:first-child {
+  padding-left: 12px;
+}
 
 /* VIEWS
 ------------------------------------------------------------------------------*/
