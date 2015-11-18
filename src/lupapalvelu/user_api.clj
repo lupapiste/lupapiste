@@ -590,13 +590,19 @@
       (resp/content-type "text/plain") ; IE is fucking stupid: must use content type text/plain, or else IE prompts to download response.
       (resp/status 200))))
 
-(defpage [:post "/api/upload/file"] {files :files attachmentType :attachmentType}
-  (println "FOO!")
-  (->> {:ok true}
-       (resp/json)
-       (resp/content-type "text/plain")
-       (resp/status 200))
-  )
+(defn- save-file [file]
+  (let [file-id (mongo/create-id)]
+    {:id file-id
+     :fileName (:filename file)
+     :size (:size file)}))
+
+(defpage [:post "/upload/file"] {files :files}
+  (prn "command" files)
+  (let [file-info {:files (map save-file files)}]
+    (->> (assoc file-info :ok true)
+         (resp/json)
+         (resp/content-type "text/plain")
+         (resp/status 200))))
 
 (defraw download-user-attachment
   {:parameters [attachment-id]
