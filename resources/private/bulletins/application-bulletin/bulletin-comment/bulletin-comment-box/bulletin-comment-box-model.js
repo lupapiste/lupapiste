@@ -37,6 +37,8 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     city: ko.observable()
   };
 
+  self.fileInputId = ko.observable("fileupload-input");
+
   self.allOtherInfo = ko.validatedObservable([self.otherReceiverInfo.firstName, self.otherReceiverInfo.lastName,
                                               self.otherReceiverInfo.street, self.otherReceiverInfo.zip, self.otherReceiverInfo.city]);
 
@@ -48,9 +50,10 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     self.emailPreferred(!_.isBlank(self.email()));
   });
 
-  self.isDisabled = ko.pureComputed(function() {
+  self.isSubmitDisabled = ko.pureComputed(function() {
     var allOtherInfoIsValid = self.otherReceiver() ? self.allOtherInfo.isValid() : true;
-    return self.pending() || !self.comment() || !self.email.isValid() || !allOtherInfoIsValid;
+    var isPending = self.pending() || self.filePending();
+    return isPending || !self.comment() || !self.email.isValid() || !allOtherInfoIsValid;
   });
 
   self.addAttachment = function() {

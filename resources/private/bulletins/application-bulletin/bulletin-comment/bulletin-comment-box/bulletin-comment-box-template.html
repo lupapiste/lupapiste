@@ -156,14 +156,15 @@
         </div>
         <div class="row">
           <!-- TODO get for attr value from service -->
-          <label class="btn bulletin" for="fileupload-input" data-bind="css: {waiting: filePending}">
+          <label class="btn bulletin" data-bind="css: {waiting: filePending},
+                                                 attr: {for: fileInputId}">
             <i class="lupicon-paperclip"></i>
             <i class="wait spin lupicon-refresh"></i>
             <span data-bind="ltext: 'bulletin.comment.addAttachment'"></span>
           </label>
         </div>
         <div class="row">
-          <button type="submit" class="positive" data-bind="disable: isDisabled,
+          <button type="submit" class="positive" data-bind="disable: isSubmitDisabled,
                                                             css: {waiting: pending}">
             <i class="lupicon-comment"></i>
             <i class="wait spin lupicon-refresh"></i>
