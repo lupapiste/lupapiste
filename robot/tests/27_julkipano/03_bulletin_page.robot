@@ -26,6 +26,6 @@ Map is visible
 
 Action buttons are visible
   Element should be visible  //div[@id='bulletin-component']//div[@data-test-id='bulletin-actions']/button[@data-test-id='comment-bulletin']
-  Element should be visible  //div[@id='bulletin-component']//div[@data-test-id='bulletin-actions']/button[@data-test-id='print-bulletin']
-  Element should be visible  //div[@id='bulletin-component']//div[@data-test-id='bulletin-actions']/button[@data-test-id='download-bulletin-attachments']
+
+
 
