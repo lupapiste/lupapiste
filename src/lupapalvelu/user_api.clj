@@ -592,7 +592,11 @@
 
 (defpage [:post "/api/upload/file"] {files :files attachmentType :attachmentType}
   (println "FOO!")
-  (resp/status 200 "SUCCESS"))
+  (->> {:ok true}
+       (resp/json)
+       (resp/content-type "text/plain")
+       (resp/status 200))
+  )
 
 (defraw download-user-attachment
   {:parameters [attachment-id]
