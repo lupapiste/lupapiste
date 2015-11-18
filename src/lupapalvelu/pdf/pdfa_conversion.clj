@@ -135,7 +135,7 @@
           (error "Unknown exception in PDF/A conversion, file was not converted." e)
           false))
       (finally
-        (.deleteOnExit temp-file)))))
+        (io/delete-file temp-file :silently)))))
 
 (defn ensure-pdf-a-by-organization
   "Ensures PDF file PDF/A compatibility status if the organization uses permanent archive"
