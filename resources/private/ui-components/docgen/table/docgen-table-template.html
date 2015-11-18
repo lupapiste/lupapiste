@@ -32,7 +32,7 @@
 
               <td class="action-column">
                 <i class="lupicon-remove primary" data-bind="click: $parent.removeGroup,
-                                                             visible: $component.groupsRemovable"></i>
+                                                             visible: $component.groupsRemovable()"></i>
               </td>
 
             </tr>
@@ -40,7 +40,7 @@
         </table>
       </div>
 
-      <div class="button-group" data-bind="visible: updatable">
+      <div class="button-group" data-bind="visible: updatable()">
         <span data-bind="saveIndicator: indicator"></span>
         <span data-bind="component: { name: 'docgen-button',
                                      params: { id: groupId + '-append-button', 

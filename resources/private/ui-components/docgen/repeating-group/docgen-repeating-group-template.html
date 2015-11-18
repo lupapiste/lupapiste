@@ -15,7 +15,7 @@
                                                    label: 'remove',
                                                    index: index,
                                                    clickFn: $parent.removeGroup }},
-                             visible: $component.groupsRemovable">
+                             visible: $component.groupsRemovable()">
             </span>
           </div>
 
@@ -35,7 +35,7 @@
         </div>
       </div>
         
-      <div class="button-group" data-bind="visible: updatable">
+      <div class="button-group" data-bind="visible: updatable()">
         <span data-bind="component: { name: 'docgen-button',
                                       params: { id: groupId + '-append-button', 
                                                 className: 'positive', 
