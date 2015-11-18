@@ -22,11 +22,11 @@
         existing-app  (domain/get-application-as {:verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user :include-canceled-apps? false)]
 
     (if existing-app
-      (resp/json (ok :id (:id existing-app) :text :already-existing-application))
+      (ok :id (:id existing-app) :text :already-existing-application)
       (let [result (prev-permit/fetch-prev-application! command)]
         (if (ok? result)
-          (resp/json (assoc result :text :created-new-application))
-          (resp/status 404 (resp/json result)))))))
+          (ok :id (:id result) :text :created-new-application)
+          (select-keys result [:ok :text]))))))
 
 (defcommand create-application-from-previous-permit
   {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus]

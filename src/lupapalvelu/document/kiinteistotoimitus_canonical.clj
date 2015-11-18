@@ -46,9 +46,9 @@
 
 (defmethod operation-details :rajankaynti
   [{data :data}]
-  [{:name :KiinteistonMaaritys
-    :details {:selvitettavaAsia (:rajankayntiTyyppi data)
-              :kuvaus (:kuvaus data)}}])
+  {:name :KiinteistonMaaritys
+   :details {:selvitettavaAsia (:rajankayntiTyyppi data)
+             :kuvaus (:kuvaus data)}})
 
 (defn property-details
   "List of maps with either :property-id or :mat (kiinteisto- and maaraalatunnus)"

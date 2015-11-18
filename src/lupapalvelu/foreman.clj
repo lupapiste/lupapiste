@@ -158,8 +158,8 @@
       (assoc-in [:data :henkilo :userId] {:value nil})))
 
 (defn create-foreman-docs [application foreman-app role]
-  (let [hankkeen-kuvaus      (get-in (domain/get-document-by-name application "hankkeen-kuvaus") [:data :kuvaus :value])
-        hankkeen-kuvaus-doc  (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum")
+  (let [hankkeen-kuvaus      (-> (domain/get-documents-by-subtype (:documents application) "hankkeen-kuvaus") first (get-in [:data :kuvaus :value]))
+        hankkeen-kuvaus-doc  (first (domain/get-documents-by-subtype (:documents foreman-app) "hankkeen-kuvaus"))
         hankkeen-kuvaus-doc  (if hankkeen-kuvaus
                                (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
                                hankkeen-kuvaus-doc)

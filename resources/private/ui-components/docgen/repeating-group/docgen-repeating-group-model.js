@@ -18,9 +18,9 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
     return _.extend({}, self.params, {
       index: index,
       path: self.path.concat(index),
-      model: groupModel,
+      model: groupModel
     });
-  }
+  };
 
   self.removeGroup = function(group) {
     var path = self.params.path.concat(group.index);
@@ -43,15 +43,15 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
                              component: "yes-no-dialog",
                              componentParams: {ltext: message,
                                                yesFn: removeFn}});
-  }
+  };
 
   self.addGroup = function() {
-    var dataIndex = parseInt( _(self.groups()).map('index').max() ) + 1;
+    var dataIndex = parseInt( _(self.groups()).map("index").max() ) + 1;
     self.groups.push(createGroup({}, dataIndex || 0));
-  }
+  };
 
   self.duplicateLastGroup = function() {
-    var sourceIndex = parseInt( _(self.groups()).map('index').max() );
+    var sourceIndex = parseInt( _(self.groups()).map("index").max() );
     uiComponents.copyRow(self.params.documentId,
                          self.params.applicationId,
                          self.path,
@@ -67,7 +67,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
     if ( _.isEmpty(groups) ) {
       self.addGroup();
     }
-  }
+  };
 
   self.groups.subscribe(addOneIfEmpty);
   addOneIfEmpty(self.groups());

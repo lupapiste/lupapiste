@@ -37,6 +37,7 @@
 
 (def abstract-poikkeamistype-213
   (-> abstract-poikkeamistype-212
+   (mapping-common/update-child-element [:rakennuspaikkatieto] {:tag :rakennuspaikkatieto :child [mapping-common/rakennuspaikka_211]})
    (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_211]})
    (mapping-common/update-child-element [:toimenpidetieto :Toimenpide :tavoitetilatieto] {:tag :tavoitetilatieto :child [tavoitetila-213]})))
 

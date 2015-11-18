@@ -675,6 +675,7 @@
                         :turvakieltoKytkin {:value false}}
         :yhteystiedot {:email          {:value ""}
                        :puhelin        {:value ""}}
+        :kytkimet {:suoramarkkinointilupa {:value false}}
         :osoite {:katu                 {:value ""}
                  :postinumero          {:value ""}
                  :postitoimipaikannimi {:value "city"}}

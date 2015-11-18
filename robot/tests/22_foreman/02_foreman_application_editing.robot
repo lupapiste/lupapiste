@@ -103,12 +103,30 @@ Approve base app
   Click enabled by test id  approve-application
   Wait until  Application state should be  sent
 
+Fetch verdict to base app
+  Open tab  verdict
+  Fetch verdict
+
 Approve foreman app
   Open foreman application  1
   Click enabled by test id  approve-application
   Wait Until  Application state should be  acknowledged
 
+Link foreman approval to base app
+  Go back to project application
+  Wait Until  Application state should be  verdictGiven
+  Open tab  tasks
+
+  Required foreman state is  Vastaava työnjohtaja  missing
+
+  ${foremanAppId} =  Get From List  ${foremanApps}  1
+  Focus  xpath=//select[@data-test-id="foreman-selection"]
+  Select From List By Value  xpath=//tr[@data-test-name="Vastaava työnjohtaja"]//select[@data-test-id="foreman-selection"]  ${foremanAppId}
+
+  Wait Until  Required foreman state is  Vastaava työnjohtaja  ok
+
 On second thought, complement is needed
+  Open foreman application  1
   Click enabled by test id  request-for-complement
   Wait Until  Application state should be  complementNeeded
 
@@ -116,20 +134,34 @@ Verdict can't be given
   Open tab  verdict
   Element should not be visible  //div[@id="application-verdict-tab"]//button[@data-test-id="give-verdict"]
 
+Foreman state has reset on base app
+  Go back to project application
+  Wait Until  Application state should be  verdictGiven
+  Open tab  tasks
+  Wait Until  Required foreman state is  Vastaava työnjohtaja  new
+
 Change subtype back to foreman application
+  Open foreman application  1
   Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
   Positive indicator should be visible
 
 Verdict could be given
+  Open tab  verdict
   Wait Until  Element should be visible  //div[@id="application-verdict-tab"]//button[@data-test-id="give-verdict"]
 
 Re-send and give verdict
   Click enabled by test id  approve-application
   Wait until  Application state should be  sent
   Submit empty verdict  foremanVerdictGiven
+  Application state should be  foremanVerdictGiven
+
+Foreman state has changed on base app
+  Go back to project application
+  Open tab  tasks
+  Wait Until  Required foreman state is  Vastaava työnjohtaja  ok
 
 Deleting the verdict sets application back to previous state
-  Application state should be  foremanVerdictGiven
+  Open foreman application  1
   Open tab  verdict
 
   Wait Until  Element should be visible  //div[@id="application-verdict-tab"]//*[@data-test-id="delete-verdict-from-listing"]
@@ -138,3 +170,8 @@ Deleting the verdict sets application back to previous state
   Wait Until  Element should not be visible  //div[@id="application-verdict-tab"]//*[@data-test-id="delete-verdict-from-listing"]
 
   Application state should be  sent
+
+Foreman state has reset again on base app
+  Go back to project application
+  Open tab  tasks
+  Wait Until  Required foreman state is  Vastaava työnjohtaja  new

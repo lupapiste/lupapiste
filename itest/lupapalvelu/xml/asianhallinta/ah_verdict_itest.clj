@@ -173,20 +173,23 @@
                 paatos (first (:paatokset new-verdict))
                 poytakirja (first (:poytakirjat paatos))]
 
-            (fact "application state is verdictGiven" (keyword (:state application)) => :verdictGiven)
-            (let [email (last (dummy-email/messages :reset true))]
-              (:to email) => (contains (email-for-key pena))
-              (:subject email) => "Lupapiste.fi: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
-              email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant"))
+            (fact "application state is verdictGiven"
 
-            (:kuntalupatunnus new-verdict) => (:AsianTunnus AsianPaatos)
-            (:paatostunnus paatos) => (:PaatoksenTunnus AsianPaatos)
-            (:anto (:paivamaarat paatos)) => (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
+              (keyword (:state application)) => :verdictGiven
 
-            (:paatoksentekija poytakirja) => (:PaatoksenTekija AsianPaatos)
-            (:pykala poytakirja) => (:Pykala AsianPaatos)
-            (:paatospvm poytakirja) => (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
-            (:paatoskoodi poytakirja) => (:PaatosKoodi AsianPaatos)))
+              (let [email (last (dummy-email/messages :reset true))]
+                (:to email) => (contains (email-for-key pena))
+                (:subject email) => "Lupapiste.fi: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
+                email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant"))
+
+              (:kuntalupatunnus new-verdict) => (:AsianTunnus AsianPaatos)
+              (:paatostunnus paatos) => (:PaatoksenTunnus AsianPaatos)
+              (:anto (:paivamaarat paatos)) => (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
+
+              (:paatoksentekija poytakirja) => (:PaatoksenTekija AsianPaatos)
+              (:pykala poytakirja) => (:Pykala AsianPaatos)
+              (:paatospvm poytakirja) => (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
+              (:paatoskoodi poytakirja) => (:PaatosKoodi AsianPaatos))))
 
         (fact* "Pushes verdict if there exists previous verdicts"
           (fixture/apply-fixture "minimal")                 ; must empty applications because the app-is is hard coded in the xml :(

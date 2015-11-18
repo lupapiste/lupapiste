@@ -1,4 +1,4 @@
-(ns lupapalvelu.autom_check_verdicts_itest
+(ns lupapalvelu.autom-check-verdicts-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]

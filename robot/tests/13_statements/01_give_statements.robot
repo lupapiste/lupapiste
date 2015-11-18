@@ -147,11 +147,11 @@ Statement is not disabled
 
 Statement person count is
   [Arguments]  ${amount}
-  Wait until  Xpath Should Match X Times  //tr[@class="statement-giver-row"]  ${amount}
+  Wait until  Xpath Should Match X Times  //tr[@data-test-type="statement-giver-row"]  ${amount}
 
 Create statement person
   [Arguments]  ${email}  ${text}
-  ${count} =  Get Matching Xpath Count  //tr[@class="statement-giver-row"]
+  ${count} =  Get Matching Xpath Count  //tr[@data-test-type="statement-giver-row"]
   Click enabled by test id  create-statement-giver
   Wait until  Element should be visible  //label[@for='statement-giver-email']
   Input text  statement-giver-email  ${email}

@@ -13,7 +13,7 @@ Mikko creates a new application
   [Tags]  ie8
   Mikko logs in
   Create first application  create-app  753  753-423-2-41  R
-  Title Should Be  create-app - Lupapiste
+  Wait until  Title Should Be  create-app - Lupapiste
   It is possible to add operation
 
 Mikko sees application in list
@@ -26,7 +26,7 @@ Mikko creates a new inforequest
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Intonen Mikko
   Wait until  Element should be visible  //section[@id='inforequest']//span[@data-test-primary-operation-id='kerrostalo-rivitalo']
   Element should not be visible  //h2[@data-test-id='wanna-join']
-  Title Should Be  create-info - Lupapiste
+  Wait until  Title Should Be  create-info - Lupapiste
 
 Mikko sees one application and one inforequest
   Go to page  applications

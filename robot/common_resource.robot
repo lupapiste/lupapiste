@@ -186,6 +186,9 @@ Open accordion by test id
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
 
+Positive indicator should not be visible
+  Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-positive"]
+
 #
 # Login stuff
 #
@@ -228,15 +231,15 @@ User logs in
 Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  User role should be  applicant
   User nav menu is visible
+  User role should be  applicant
   Applications page should be open
 
 Authority logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  User role should be  authority
   User nav menu is visible
+  User role should be  authority
   Authority applications page should be open
 
 Authority-admin logs in
@@ -248,13 +251,16 @@ Authority-admin logs in
 Admin logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  User role should be  admin
   User nav menu is visible
+  User role should be  admin
   Admin front page should be open
+
+Get role
+  Run Keyword And Return  Get Element Attribute  user-name@data-test-role
 
 User role should be
   [Arguments]  ${expected-role}
-  ${user-role}=  Execute JavaScript  return window.lupapisteApp.models.currentUser.role();
+  ${user-role} =  Get role
   Should Be Equal  ${expected-role}  ${user-role}
 
 User nav menu is visible
@@ -833,7 +839,7 @@ Foreman count is
 
 Apply minimal fixture now
   Go to  ${FIXTURE URL}/minimal
-  Page should contain  true
+  Wait until  Page should contain  true
   Go to login page
 
 #

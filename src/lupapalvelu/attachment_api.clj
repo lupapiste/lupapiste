@@ -27,7 +27,7 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application :refer [get-operations]]
-            [lupapalvelu.pdf-conversion :as pdf-conversion]
+            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.tiff-validation :as tiff-validation])
   (:import [java.io File]))

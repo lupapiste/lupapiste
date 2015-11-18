@@ -83,7 +83,8 @@
   (= (subs prt 9 10) (rakennustunnus-checksum prt)))
 
 (defn rakennustunnus? [^String prt]
-  (and (not (nil? prt)) (re-matches #"^\d{9}[0-9A-FHJ-NPR-Y]$" prt) (rakennustunnus-checksum-matches? prt)))
+  ;; KRYSP: ([1][0-9]{8})[0-9ABCDEFHJKLMNPRSTUVWXY]
+  (and (not (nil? prt)) (re-matches #"^1\d{8}[0-9A-FHJ-NPR-Y]$" prt) (rakennustunnus-checksum-matches? prt)))
 
 (defn finnish-zip? [^String zip-code]
   (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))

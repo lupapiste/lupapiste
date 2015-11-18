@@ -32,8 +32,7 @@
     :child [{:tag :peruste} ; string
             {:tag :kuvaus} ;string
             {:tag :luvanHakemisenSyy}]} ;optional string
-   {:tag :laitoksentiedot :child [{:tag :Laitos :child [;{:tag :yht:metatieto}
-                                                        mapping-common/yksilointitieto
+   {:tag :laitoksentiedot :child [{:tag :Laitos :child [mapping-common/yksilointitieto
                                                         mapping-common/alkuHetki
                                                         {:tag :laitoksenNimi}
                                                         {:tag :osoite :child mapping-common/postiosoite-children-ns-yht}
@@ -70,7 +69,7 @@
    {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}
    {:tag :asianKuvaus}])
 
-(def ymparistolupa_to_krysp
+(def ymparistolupa_to_krysp_212
   {:tag :Ymparistoluvat
    :ns "ymy"
    :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :YL "2.1.2")
@@ -78,6 +77,42 @@
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :ymparistolupatieto :child [{:tag :Ymparistolupa :child ymparistolupaType}]}]})
+
+(def ymparistolupa_to_krysp_221
+  (-> ymparistolupa_to_krysp_212
+      (assoc-in [:attr :xsi:schemaLocation]
+                (mapping-common/schemalocation :YL "2.2.1"))
+
+      ; Uses LausuntoYmpType where attachments have not changed
+
+      (update-in [:child] mapping-common/update-child-element
+                 [:ymparistolupatieto :Ymparistolupa :maksajatieto]
+                 {:tag :maksajatieto :child [{:tag :Maksaja :child mapping-common/maksajatype-children_215}]})
+
+      (update-in [:child] mapping-common/update-child-element
+                 [:ymparistolupatieto :Ymparistolupa :hakija]
+                 {:tag :hakija :child mapping-common/yhteystietotype-children_215})
+
+      (update-in [:child] mapping-common/update-child-element
+                 [:ymparistolupatieto :Ymparistolupa :laitoksentiedot :Laitos :osoite]
+                 {:tag :osoite :child mapping-common/postiosoite-children-ns-yht-215}) ; Not in canonical or form schemas
+
+      (update-in [:child] mapping-common/update-child-element
+                 [:ymparistolupatieto :Ymparistolupa :laitoksentiedot :Laitos :yhteyshenkilo]
+                 {:tag :yhteyshenkilo :child mapping-common/henkilo-child-ns-yht-215}) ; Not in canonical or form schemas
+
+      ; No change to attachments
+      ))
+
+(defn- get-mapping [krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.2" ymparistolupa_to_krysp_212
+    "2.2.1" ymparistolupa_to_krysp_221
+    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
+
+(defn ymparistolupa-element-to-xml [canonical krysp-version]
+  (element-to-xml canonical (get-mapping krysp-version)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
@@ -94,7 +129,7 @@
                     canonical-with-statement-attachments
                     [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :liitetieto]
                     attachments-canonical)
-        xml (element-to-xml canonical ymparistolupa_to_krysp)
+        xml (ymparistolupa-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 

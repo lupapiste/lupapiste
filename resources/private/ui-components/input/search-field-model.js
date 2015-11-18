@@ -11,4 +11,4 @@ LUPAPISTE.SearchFieldModel = function(params) {
   self.throttledValue.subscribe(function(val) {
     value(val);
   });
-}
+};

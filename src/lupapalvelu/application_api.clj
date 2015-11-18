@@ -531,13 +531,14 @@
                                  #(vector (:id %) (mongo/create-id))
                                  (conj secondary-ops primary-op)))
         state (if (user/authority? user) :open :draft)
-        muutoslupa-app (merge (select-keys application
+        muutoslupa-app (merge domain/application-skeleton
+                              (select-keys application
                                 [:auth
                                  :propertyId, :location
                                  :schema-version
                                  :address, :title
                                  :foreman, :foremanRole
-                                 :applicant,  :_applicantIndex
+                                 :applicant, :_applicantIndex
                                  :municipality, :organization
                                  :drawings
                                  :metadata])
@@ -563,17 +564,7 @@
                                :convertedToApplication nil
 
                                :primaryOperation (assoc primary-op :id (op-id-mapping (:id primary-op)))
-                               :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops) }
-
-                              ; Keys to reset
-                              (select-keys domain/application-skeleton
-                                [:attachments :statements :verdicts :tasks :buildings :neighbors
-                                 :comments :authorityNotice :urgency ; comment panel content
-                                 :submitted :sent :complementNeeded :acknowledged :closed :closedBy :started :startedBy ; timestamps
-                                 :_statements-seen-by :_comments-seen-by :_verdicts-seen-by :_attachment_indicator_reset ; indicators
-                                 :reminder-sent :transfers ; logs
-                                 :authority
-                                 :tosFunction]))]
+                               :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops)})]
 
     (a/do-add-link-permit muutoslupa-app (:id application))
     (a/insert-application muutoslupa-app)

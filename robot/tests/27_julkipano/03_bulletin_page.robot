@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Bulletin page
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ./27_common.robot
 

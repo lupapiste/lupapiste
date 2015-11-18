@@ -400,7 +400,8 @@
        :proposal
        :registered
        :proposalApproved
-       :sessionProposal ]
+       :sessionProposal
+       :consideration]
       (repeat nil))))
 
 (assert (= states/all-application-states (set (keys timestamp-key))))

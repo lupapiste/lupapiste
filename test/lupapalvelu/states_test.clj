@@ -22,7 +22,7 @@
 (fact "all states"
   all-inforequest-states => #{:info :answered}
 
-  all-application-states => #{:draft :open :submitted :sent :complementNeeded
+  all-application-states => #{:draft :open :submitted :sent :complementNeeded :consideration
                               :verdictGiven :constructionStarted :closed :canceled
                               :extinct
                               :acknowledged :foremanVerdictGiven

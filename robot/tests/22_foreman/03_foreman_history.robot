@@ -11,13 +11,14 @@ Mikko invites foreman and goes back to application
   Go back to project application
 
 *** Test Cases ***
-Foreman sets his information to several applications
+Mikko creates applications
   Mikko logs in
   Create project application
   Submit application
 
   Repeat Keyword  5  Mikko invites foreman and goes back to application
 
+Foreman sets his information to several applications
   Foreman logs in
   Foreman sets role and difficulty to foreman application  0  KVV-työnjohtaja  B
   Foreman sets role and difficulty to foreman application  1  KVV-työnjohtaja  B

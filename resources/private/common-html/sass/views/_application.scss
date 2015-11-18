@@ -327,6 +327,16 @@ $app-gray-darkest: $gray187;
             @include active-state;
           }
         }
+        &.consideration {
+          .consideration-box {
+            @include active-state;
+          }
+        }
+        &.final {
+          .final-box {
+            @include active-state;
+          }
+        }
       }
     }
   }

@@ -12,6 +12,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.verdict :as verdict]
@@ -33,9 +34,10 @@
   {:pre [(every? command [:application :user :created])]}
   (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
     (or
-      (let [validator-fn (permit/get-verdict-validator (permit/permit-type application))]
-        (validator-fn app-xml))
-      (let [updates (verdict/find-verdicts-from-xml command app-xml)]                    
+      (let [organization (organization/get-organization (:organization application))
+            validator-fn (permit/get-verdict-validator (permit/permit-type application))]
+        (validator-fn app-xml organization))
+      (let [updates (verdict/find-verdicts-from-xml command app-xml)]
         (when updates
           (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
             (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))))

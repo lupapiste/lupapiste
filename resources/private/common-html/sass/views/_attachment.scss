@@ -89,6 +89,7 @@ $previewHeight: 500px;
     padding-right: $marginM;
     width: 49%;
     vertical-align: top;
+
   }
 
   .col2 {
@@ -96,6 +97,15 @@ $previewHeight: 500px;
     padding-left: $marginM;
     width: 49%;
     vertical-align: top;
+  }
+  @media (max-width: $narrow-breakpoint) {
+    .col1, .col2 {
+      display: block;
+      width: 100%;
+      padding-left: 0;
+      padding-right: 0;
+      margin-top: $marginS;
+    }
   }
 
   .attachment-actions {
@@ -183,8 +193,8 @@ td.comment-text {
   input {
     display: block;
     margin: 0;
-    width: $cols4 - 0.5em;
-    height: 25px;
+    width: 100%;
+    height: 26px;
   }
 
   input[type="checkbox"] {
@@ -194,7 +204,7 @@ td.comment-text {
 
   select {
     display: block;
-    width: $cols4;
+    width: 100%;
   }
 
   .attachment-info-field {

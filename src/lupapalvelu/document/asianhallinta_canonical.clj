@@ -1,4 +1,4 @@
-(ns lupapalvelu.document.asianhallinta_canonical
+(ns lupapalvelu.document.asianhallinta-canonical
   (:require [clojure.string :as s]
             [sade.core :refer :all]
             [sade.util :as util]
@@ -32,15 +32,19 @@
   (util/strip-nils
     {:Etunimi (get-in data [:yhteyshenkilo :henkilotiedot :etunimi])
      :Sukunimi (get-in data [:yhteyshenkilo :henkilotiedot :sukunimi])
-     :Yhteystiedot (ua-get-yhteystiedot (:yhteyshenkilo data))}))
+     :Yhteystiedot (ua-get-yhteystiedot (:yhteyshenkilo data))
+     :VainSahkoinenAsiointi (get-in data [:yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin])}))
 
 (defn- ua-get-henkilo [data]
+
+
+
   (util/strip-nils
     {:Etunimi (get-in data [:henkilo :henkilotiedot :etunimi])
      :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
      :Yhteystiedot (ua-get-yhteystiedot (:henkilo data))
      :Henkilotunnus (get-in data [:henkilo :henkilotiedot :hetu])
-     :VainSahkoinenAsiointi nil ; TODO tulossa myohemmin kayttoon
+     :VainSahkoinenAsiointi (get-in data [:henkilo :kytkimet :vainsahkoinenAsiointiKytkin])
      :Turvakielto (get-in data [:henkilo :henkilotiedot :turvakieltoKytkin])}))
 
 (defn- ua-get-yritys [data]
@@ -169,7 +173,8 @@
   "Return canonical, does not contain attachments"
   [application lang]
   (let [documents (tools/unwrapped (common/documents-without-blanks application))]
-    (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
+    (-> ua-root-element
+      (assoc-in [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
       (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (domain/get-applicant-documents documents)))

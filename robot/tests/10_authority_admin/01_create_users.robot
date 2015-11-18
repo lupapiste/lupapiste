@@ -39,18 +39,6 @@ Hessu activates account via email
 
 Hessu can login
   User logs in  hessu.kesa@example.com  hessu123  Hessu Kesa
-  [Teardown]  Logout
-
-## TODO muutetaan testi sellaiseksi etta lisataan henkilo joka ei ole organsisaatiossa
-## (feature/statementGiver)
-Authority admin adds existing authority as a statement person
-  Sipoo logs in
-  Set Suite Variable  ${statementGiverRowXpath}  //tr[@class='statement-giver-row']
-  ${userCount} =  Get Matching Xpath Count  ${statementGiverRowXpath}
-  Create statement person  ronja.sibbo@sipoo.fi  Asiantuntija
-  ${userCountAfter} =  Evaluate  ${userCount} + 1
-  Statement person count is  ${userCountAfter}
-  Wait Until  Page should contain  Asiantuntija
 
 *** Keywords ***
 

@@ -7,7 +7,8 @@
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
 
 (defn ->mapping []
-  (let [osoite [{:osoitenimi :teksti} :postinumero :postitoimipaikannimi]
+  (let [osoite [:valtioSuomeksi :valtioKansainvalinen {:osoitenimi :teksti} :ulkomainenLahiosoite
+                :postinumero :postitoimipaikannimi :ulkomainenPostitoimipaikka]
         toimitus [{:toimituksenTiedottieto
                    {:ToimituksenTiedot/yht [:aineistonnimi :aineistotoimittaja :tila :toimitusPvm :kuntakoodi
                                             :kielitieto]}}

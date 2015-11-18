@@ -20,8 +20,8 @@ Readonly authority opens the application
   Open application  ${appname}  ${propertyId}
 
 Form is disabled
-  Wait Until  Element should be disabled  xpath=//section[@data-doc-type="hankkeen-kuvaus"]//textarea
-  Element should not be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
+  Wait Until  Element should be disabled  xpath=//section[@data-doc-type="hankkeen-kuvaus-rakennuslupa"]//textarea
+  Element should not be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus-rakennuslupa']
 
 Actions are disabled
   Open tab  requiredFieldSummary
