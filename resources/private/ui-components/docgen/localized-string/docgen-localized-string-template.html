@@ -9,7 +9,7 @@
         <label data-bind="visible: label, ltext: label"></label>
         <span class="form-string"
                  type="text"
-                 data-bind="ltext: value() && params.schema.locPrefix + '.' + value(),
+                 data-bind="ltext: value() && schema.locPrefix + '.' + value(),
                             css: classes,
                             event: events,
                             attr: { 'data-test-id': path.join('.') }">

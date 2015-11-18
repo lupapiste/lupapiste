@@ -1,20 +1,20 @@
 LUPAPISTE.DocgenInputModel = function(params) {
   "use strict";
   var self = this;
-  self.params = params;
 
   self.authModel = params.authModel || lupapisteApp.models.applicationAuthModel;
 
   self.service = lupapisteApp.services.documentDataService;
 
-  self.size = uiComponents.sizeClasses[self.params.schema.size];
-  self.path = self.params.path;
-  self.documentId = self.params.documentId || self.params.schema.documentId;
-  self.value = lupapisteApp.services.documentDataService.getInDocument(self.documentId, self.path).model;
+  self.size = uiComponents.sizeClasses[params.schema.size];
+  self.schema = params.schema;
+  self.path = params.path;
+  self.documentId = params.documentId || params.schema.documentId;
+  self.value = self.service.getInDocument(self.documentId, params.path).model;
   
-  self.i18npath = self.params.schema.i18nkey ? [self.params.schema.i18nkey] : self.params.schema.i18npath;
+  self.i18npath = params.schema.i18nkey ? [params.schema.i18nkey] : params.schema.i18npath;
   if (!self.i18npath) {
-    self.i18npath = [util.locKeyFromDocPath([self.params.schemaI18name].concat(self.params.path).join("."))];
+    self.i18npath = [util.locKeyFromDocPath([params.schemaI18name].concat(params.path).join("."))];
   }
 
   self.label = (params.schema.label === false || params.schema.label === "false") ? null : self.i18npath.join(".");
@@ -43,8 +43,8 @@ LUPAPISTE.DocgenInputModel = function(params) {
   }
 
   // set initial validation errors
-  var res = _.find(self.params.validationErrors, function(errors) {
-    return _.isEqual(errors.path, self.path);
+  var res = _.find(params.validationErrors, function(errors) {
+    return _.isEqual(errors.path, params.path);
   });
 
   if (res) {
@@ -61,15 +61,15 @@ LUPAPISTE.DocgenInputModel = function(params) {
     return classes.join(" ");
   });
 
-  self.readonly = ko.observable(self.params.schema.readonly || self.params.readonly);
+  self.readonly = ko.observable(params.schema.readonly || params.readonly);
 
   self.disabled = ko.observable(params.isDisabled || !self.authModel.ok(self.service.getUpdateCommand(self.documentId)) ||
                                 util.getIn(params, ["model", "disabled"]));
   var save = function(val) {
     self.service.updateDoc(self.documentId,
-                           [[self.path, val]],
+                           [[params.path, val]],
                            self.indicator,
-                           [[self.path, self.result]]);
+                           [[params.path, self.result]]);
   };
   self.value.subscribe(_.debounce(save, 500));
 };
