@@ -20,7 +20,6 @@
                                                path: maaraalaSchema.path,
                                                applicationId: applicationId,
                                                documentId: documentId,
-                                               model: maaraalaSchema.model,
                                                isMaaraala: isMaaraala,
                                                propertyId: propertyId(),
                                                isDisabled: isDisabled,
@@ -31,7 +30,6 @@
                data-bind="component: { name: uicomponent,
                                        params: { schema: $data,
                                                  path: path,
-                                                 model: model,
                                                  isDisabled: $component.isDisabled,
                                                  authModel: $component.authModel }}"></div>
         </span>
