@@ -1,8 +1,20 @@
-LUPAPISTE.FileUploadService = function() {
+LUPAPISTE.FileuploadService = function() {
   "use strict";
   var self = this;
 
-  $("#fileupload-input").fileupload({
+  var inputId = "fileupload-input";
+
+  if (!document.getElementById(inputId)) {
+    var input = document.createElement("input");
+    // input.className = "hidden";
+    input.type = "file";
+    input.name = "files[]";
+    input.setAttribute("multiple", true);
+    input.setAttribute("id", inputId);
+    document.body.appendChild(input);
+  }
+
+  $("#" + inputId).fileupload({
     url: "/upload/file",
     type: "POST",
     dataType: "json",
@@ -13,25 +25,6 @@ LUPAPISTE.FileUploadService = function() {
   });
 
   hub.subscribe("fileUploadService::uploadFile", function() {
-
-    $("label[for=fileupload-input]").click();
+    $("#fileupload-input").click();
   });
 };
-
-$(function() {
-  "use strict";
-
-  var input = document.createElement("input");
-  // input.className = "hidden";
-  input.type = "file";
-  input.name = "files[]";
-  input.setAttribute("multiple", true);
-  input.setAttribute("id", "fileupload-input");
-
-  var label = document.createElement("label");
-  label.setAttribute("for", "fileupload-input");
-  label.textContent = "foobar";
-  document.body.insertBefore(input, document.body.firstChild);
-  document.body.insertBefore(label, input);
-  label.appendChild(input);
-});
