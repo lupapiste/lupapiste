@@ -74,10 +74,10 @@
           <div class="tabs-container">
             <ul class="tabs" id="">
               <li data-bind="css: {'active': selectedTab() === 'info'}">
-                  <a data-bind="click: selectedTab.bind($data, 'info')" href="#" class="link-btn-julkipano">
+                  <a data-bind="click: _.partial(openTab, 'info')" href="#" class="link-btn-julkipano">
                       <span data-bind="ltext: 'application.tabInfo'"></span> </a></li>
               <li data-bind="css: {'active': selectedTab() === 'attachments'}">
-                  <a data-bind="click: selectedTab.bind($data, 'attachments')" href="#" data-test-id="bulletin-open-attachments-tab" class="link-btn-julkipano">
+                  <a data-bind="click: _.partial(openTab, 'attachments')" href="#" data-test-id="bulletin-open-attachments-tab" class="link-btn-julkipano">
                       <span data-bind="ltext: 'application.tabAttachments'"></span></a></li>
             </ul>
           </div>

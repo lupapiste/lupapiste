@@ -4,5 +4,4 @@ LUPAPISTE.BulletinAttachmentsTabModel = function(params) {
   self.params = params;
 
   self.attachments = params.attachments;
-  console.log(params);
 };

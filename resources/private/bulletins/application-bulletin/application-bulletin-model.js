@@ -41,5 +41,10 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     id.dispose();
   };
 
+  self.openTab = function(tab) {
+    self.selectedTab(tab);
+    pageutil.openPage("bulletin", [self.bulletinId, tab]);
+  };
+
   hub.send("bulletinService::fetchBulletin", {id: self.bulletinId});
 };
