@@ -30,6 +30,10 @@ LUPAPISTE.FileuploadService = function() {
     },
     fail: function(e, data) {
       hub.send("fileuploadService::filesUploaded", {status: "failed"});
+    },
+    progress: function (e, data) {
+      var progress = parseInt(data.loaded / data.total * 100, 10);
+      hub.send("fileuploadService::filesUploadingProgress", {progress: progress});
     }
   });
 
