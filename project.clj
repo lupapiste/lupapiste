@@ -89,14 +89,14 @@
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug"]}
-  :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
+  :repositories [["solita-archiva" {:url "http://mvn.solita.fi/repository/solita"
                                     :checksum :ignore}]
                  ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
                                        :snapshots false}]
                  ["osgeo" {:url "http://download.osgeo.org/webdav/geotools"}]
                  ["com.levigo.jbig2" {:url "http://jbig2-imageio.googlecode.com/svn/maven-repository"
                                       :snapshots false}]]
-  :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
+  :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/repository/solita"
                                            :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "stest"       ["with-profile" "dev,stest" "midje"]
