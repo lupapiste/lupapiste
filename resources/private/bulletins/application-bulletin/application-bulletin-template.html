@@ -105,7 +105,8 @@
       <div data-bind="component: { name: 'bulletin-comment',
                                    params: { bulletin: $data,
                                              versionId: versionId,
-                                             userInfo: userInfo } }"></div>
+                                             userInfo: userInfo,
+                                             fileuploadService: fileuploadService } }"></div>
       <!-- /ko -->
       <!-- ko if: !authenticated() -->
       <div class="container">

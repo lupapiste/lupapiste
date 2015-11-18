@@ -17,6 +17,8 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
 
   self.otherReceiver = ko.observable(false);
 
+  self.fileInputId = params.fileInputId;
+
   ko.computed(function() {
     if (!self.otherReceiver()) {
       _.mapKeys(self.otherReceiverInfo, function(value, key) {
@@ -36,8 +38,6 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     zip: ko.observable(),
     city: ko.observable()
   };
-
-  self.fileInputId = ko.observable("fileupload-input");
 
   self.allOtherInfo = ko.validatedObservable([self.otherReceiverInfo.firstName, self.otherReceiverInfo.lastName,
                                               self.otherReceiverInfo.street, self.otherReceiverInfo.zip, self.otherReceiverInfo.city]);
