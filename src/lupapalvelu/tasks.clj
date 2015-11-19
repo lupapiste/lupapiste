@@ -16,23 +16,31 @@
 (def- task-name-max-len 80)
 
 
+(def- katselmuksenLaji
+  {:name "katselmuksenLaji"
+   :type :select :sortBy :displayname
+   :required true
+   :whitelist {:roles [:authority] :otherwise :disabled}
+   :default "muu katselmus"
+   :body [{:name "muu katselmus"}
+          {:name "muu tarkastus"}
+          {:name "aloituskokous"}
+          {:name "rakennuksen paikan merkitseminen"}
+          {:name "rakennuksen paikan tarkastaminen"}
+          {:name "pohjakatselmus"}
+          {:name "rakennekatselmus"}
+          {:name "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"}
+          {:name "osittainen loppukatselmus"}
+          {:name "loppukatselmus"}
+          {:name "ei tiedossa"}]})
+
+(def- katselmuksenLaji-ya
+  (assoc katselmuksenLaji :body [{:name "Aloituskatselmus"}
+                                 {:name "Loppukatselmus"}
+                                 {:name "Muu valvontak\u00e4ynti"}]))
+
 (def- task-katselmus-body
-  [{:name "katselmuksenLaji"
-    :type :select :sortBy :displayname
-    :required true
-    :whitelist {:roles [:authority] :otherwise :disabled}
-    :default "muu katselmus"
-    :body [{:name "muu katselmus"}
-           {:name "muu tarkastus"}
-           {:name "aloituskokous"}
-           {:name "rakennuksen paikan merkitseminen"}
-           {:name "rakennuksen paikan tarkastaminen"}
-           {:name "pohjakatselmus"}
-           {:name "rakennekatselmus"}
-           {:name "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"}
-           {:name "osittainen loppukatselmus"}
-           {:name "loppukatselmus"}
-           {:name "ei tiedossa"}]}
+  [katselmuksenLaji
    {:name "vaadittuLupaehtona"
     :type :checkbox
     :whitelist {:roles [:authority] :otherwise :disabled}
@@ -60,7 +68,8 @@
      {:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}]}])
 
 (def- task-katselmus-body-ya
-  (tools/schema-body-without-element-by-name task-katselmus-body "rakennus"))
+  (concat [katselmuksenLaji-ya]
+    (tools/schema-body-without-element-by-name task-katselmus-body "rakennus" "tila" "katselmuksenLaji")))
 
 (schemas/defschemas
   task-schemas-version

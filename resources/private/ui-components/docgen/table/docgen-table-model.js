@@ -20,7 +20,7 @@ LUPAPISTE.DocgenTableModel = function(params) {
 
   self.columnHeaders.push("remove");
 
-  var subSchemas = _.map(params.schema.body, function(schema) {
+  self.subSchemas = _.map(params.schema.body, function(schema) {
     var uicomponent = schema.uicomponent || "docgen-" + schema.type;
     var i18npath = schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(schema.name);
     return _.extend({}, schema, {
@@ -31,18 +31,4 @@ LUPAPISTE.DocgenTableModel = function(params) {
       documentId: params.documentId
     });
   });
-
-  self.rows = ko.computed(function() {
-    return _.map(self.groups(), function(group) {
-      return _.extend({}, group, {
-        subSchemas: _.map(subSchemas, function(schema) {
-          return _.extend({}, schema, {
-            model: group.model[schema.name],
-            path: group.path.concat(schema.name)
-          });
-        })
-      });
-    });
-  });
-
 };

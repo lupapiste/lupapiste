@@ -665,7 +665,7 @@
     (-> ops list flatten set)))
 
 (defn- operation-attachment-meta
-  "Operation id and VRK-PRK from either the attachment's 'own'
+  "Operation id and VTJ-PRT from either the attachment's 'own'
   operation or every operation if the attachment is not bound to any
   specific op."
   [attachment application]
@@ -674,7 +674,7 @@
                     :let [docs  (filter #(= op-id (-> % :schema-info :op :id))
                                         (:documents application))]]
                 [(create-metatieto "toimenpideId" op-id)
-                (map #(create-metatieto "VRK-PRT" (-> % :data :valtakunnallinenNumero :value))
+                (map #(create-metatieto "VTJ-PRT" (-> % :data :valtakunnallinenNumero :value))
                      docs)])]
     (->> metas flatten (remove nil?) )))
 
