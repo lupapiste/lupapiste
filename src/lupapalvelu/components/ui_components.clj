@@ -371,7 +371,7 @@
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}
 
-   :bulletins {:depends [:ui-components :map :docgen]
+   :bulletins {:depends [:ui-components :map :docgen :services]
                :html ["header.html" "footer.html"
                       "bulletins.html" "bulletins-template.html"
                       "application-bulletin/application-bulletin-template.html"
@@ -387,8 +387,7 @@
                       "application-bulletins/bulletins-search/bulletins-search-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
-               :js ["../services/fileupload-service.js"
-                    "header.js"
+               :js ["header.js"
                     "bulletins.js" "bulletins-model.js"
                     "application-bulletins-service.js"
                     "vetuma-service.js"
