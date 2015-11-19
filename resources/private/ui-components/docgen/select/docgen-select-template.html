@@ -13,7 +13,7 @@
                            value: value,
                            valueAllowUnset: valueAllowUnset,
                            optionsCaption: optionsCaption,
-                           disable: disabled,
+                           disable: disabled() || readonly(),
                            css: classes">
         </select>
         <span data-bind="saveIndicator: indicator, label: false"></span>
