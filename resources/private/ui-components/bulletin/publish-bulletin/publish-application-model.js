@@ -30,7 +30,6 @@ LUPAPISTE.PublishApplicationModel = function(params) {
   });
 
   self.notYetPublishedForApplicant = ko.pureComputed(function() {
-    console.log("state", self.bulletinState());
     return !self.bulletinState() && lupapisteApp.models.currentUser.isApplicant();
   });
 
