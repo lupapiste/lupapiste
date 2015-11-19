@@ -61,11 +61,26 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   };
 
   self.removeAttachment = function(attachment) {
-    self.attachments.remove(attachment);
+    self.attachments.remove(attachment); // TODO: do this properly
   };
 
-  self.sendComment = function(form) {
-    hub.send("bulletinService::newComment", {commentForm: form, files: self.attachments()});
+  function otherReceiverFields(self) {
+    return _.merge(commentFields(self), ko.toJS(self.otherReceiverInfo));
+  }
+
+  function commentFields(self) {
+    return {
+      comment: self.comment(),
+      email: self.email(),
+      emailPreferred: self.emailPreferred()
+    };
+  }
+
+  self.sendComment = function() {
+    var comment = self.otherReceiver() ? otherReceiverFields(self) : commentFields(self);
+    comment.files = self.attachments();
+
+    hub.send("bulletinService::newComment", comment);
   };
 
   self.addEventListener("fileuploadService", "filesUploading", function(event) {
