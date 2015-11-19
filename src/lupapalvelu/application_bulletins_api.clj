@@ -13,7 +13,8 @@
             [lupapalvelu.document.schemas :as schemas]
             [monger.operators :refer :all]
             [lupapalvelu.states :as states]
-            [lupapalvelu.application-search :refer [make-text-query dir]]))
+            [lupapalvelu.application-search :refer [make-text-query dir]]
+            [lupapalvelu.vetuma :as vetuma]))
 
 (def bulletins-fields
   {:versions {$slice -1} :versions.bulletinState 1
@@ -105,7 +106,8 @@
     (when-not (= bulletin-version-id latest-version-id)
       (fail! :error.invalid-version-id))))
 
-(defn- comment-can-be-added! [bulletin-id bulletin-version-id comment]
+(defn- comment-can-be-added!
+  [{{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId comment :comment} :data}]
   (when (ss/blank? comment)
     (fail! :error.empty-comment))
   (let [bulletin (bulletin-exists! bulletin-id)]
@@ -113,36 +115,28 @@
       (fail! :error.invalid-bulletin-state))
     (bulletin-version-is-latest! bulletin bulletin-version-id)))
 
+(defn- referenced-file-can-be-attached!
+  [{{files :files} :data}]
+  (let [files-found (map #(mongo/any? :fs.files {:_id (:id %) "metadata.sessionId" (vetuma/session-id)}) files)]
+    (when-not (every? true? files-found)
+      (fail! :error.invalid-files-attached-to-comment))))
+
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
 
-;; TODO user-roles Vetuma autheticated person
-(defraw add-bulletin-comment
-  {:description "Add comment to bulletin"
-   :feature     :publish-bulletin
-   :user-roles  #{:anonymous}}
-  [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field bulletin-version-id :bulletin-version-id
+(defcommand add-bulletin-comment
+  {:description      "Add comment to bulletin"
+   :feature          :publish-bulletin
+   :input-validators [comment-can-be-added! referenced-file-can-be-attached!]
+   :user-roles       #{:anonymous}}
+  [{{files :files bulletin-id :bulletinId comment :comment bulletin-version-id :bulletinVersionId
      email :email emailPreferred :emailPreferred otherReceiver :otherReceiver :as data} :data created :created :as action}]
-  (try+
-    (comment-can-be-added! bulletin-id bulletin-version-id comment)
-    (let [address-source   (if otherReceiver data (get-in (lupapalvelu.vetuma/vetuma-session) [:user]))
-          delivery-address (select-keys address-source delivery-address-fields)
-          contact-info     (merge delivery-address {:email email
-                                                    :emailPreferred (= emailPreferred "on")})
-          comment      (bulletins/create-comment comment contact-info created)
-          stored-files (bulletins/store-files bulletin-id (:id comment) files)]
-      (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments stored-files)}})
-      (->> {:ok true}
-           (resp/json)
-           (resp/content-type "application/json")
-           (resp/status 200)))
-    (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
-      (->> {:ok false :text text}
-           (resp/json)
-           (resp/content-type "application/json")
-           (resp/status 200)))
-    (catch Throwable t
-      (error "Failed to store bulletin comment" t)
-      (resp/status 400 :error.storing-bulletin-command-failed))))
+  (let [address-source (if otherReceiver data (get-in (vetuma/vetuma-session) [:user]))
+        delivery-address (select-keys address-source delivery-address-fields)
+        contact-info (merge delivery-address {:email          email
+                                              :emailPreferred (= emailPreferred "on")})
+        comment (bulletins/create-comment comment contact-info created)]
+    (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments files)}})
+    (ok)))
 
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
