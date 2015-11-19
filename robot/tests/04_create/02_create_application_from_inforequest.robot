@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Mikko creates a new inforequest and then an application from it.
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***

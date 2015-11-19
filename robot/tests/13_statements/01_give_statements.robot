@@ -1,8 +1,8 @@
 *** Settings ***
 
 Documentation   Application statements are managed
-Suite setup     Apply minimal fixture now
-Suite teardown  Logout
+Suite Setup     Apply minimal fixture now
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
@@ -31,8 +31,7 @@ New applications does not have statements
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Salibandyhalli${secs}
-  Create application the fast way  ${appname}  753-416-25-22  kerrostalo-rivitalo
-  Open to authorities  Salibandyhalli FTW!
+  Create application with state  ${appname}  753-416-25-22  kerrostalo-rivitalo  open
 
   Open tab  statement
   Element should be visible  xpath=//div[@id='application-statement-tab']//*[@data-test-id='application-no-statements']
@@ -41,7 +40,7 @@ New applications does not have statements
 Sonja sees indicators from pre-filled fields
   Sonja logs in
   # The unseen changes count includes changes in property information + "Rakennuksen kayttotarkoitus" and "Huoneistotiedot" documents.
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  7
+  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
 
 Sonja adds four statement persons to application
   Open application  ${appname}  753-416-25-22
@@ -94,14 +93,21 @@ Sonja can regive statement to own statement
 Another comment is added
   Open statement  2
   Wait until  Comment count is  2
+  [Teardown]  logout
 
 Veikko can see statements as he is beeing requested a statement to the application
-  Logout
   Veikko logs in
   Open application  ${appname}  753-416-25-22
-  Open tab  statement
+
+Statement giver sees comments
+  # 1+2 statement comments, 2 auto generated attachments
+  Comment count is  5
+
+Statement can export application as PDF
+  Element Should Be Visible  xpath=//button[@data-test-id="application-pdf-btn"]
 
 Veikko from Tampere can give verdict to own statement
+  Open tab  statement
   Open statement  1
   Wait Until  element should be enabled  statement-text
   Input text  statement-text  uittotunnelin vieressa on tilaa.
@@ -113,7 +119,7 @@ Veikko from Tampere can give verdict to own statement
 
 Sonja can see statement indicator
   Sonja logs in
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  8
+  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
 
 # add attachment
 
@@ -141,11 +147,11 @@ Statement is not disabled
 
 Statement person count is
   [Arguments]  ${amount}
-  Wait until  Xpath Should Match X Times  //tr[@class="statement-giver-row"]  ${amount}
+  Wait until  Xpath Should Match X Times  //tr[@data-test-type="statement-giver-row"]  ${amount}
 
 Create statement person
   [Arguments]  ${email}  ${text}
-  ${count} =  Get Matching Xpath Count  //tr[@class="statement-giver-row"]
+  ${count} =  Get Matching Xpath Count  //tr[@data-test-type="statement-giver-row"]
   Click enabled by test id  create-statement-giver
   Wait until  Element should be visible  //label[@for='statement-giver-email']
   Input text  statement-giver-email  ${email}

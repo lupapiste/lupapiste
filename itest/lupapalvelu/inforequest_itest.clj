@@ -41,7 +41,11 @@
       (command sonja :can-mark-answered :id id) => fail?)
 
     (fact "Pena can convert-to-application"
-      (command pena :convert-to-application :id id) => ok?))
+      (command pena :convert-to-application :id id) => ok?
+
+      (let [application (query-application pena id)]
+        application => (in-state? :open)
+        (-> application :history last :state) => "open")))
 
 
   (fact "Pena cannot create app for organization that has inforequests disabled"

@@ -33,7 +33,7 @@
 
     (get-in doc-after [:data :rakennusnro :value]) => "001"
     (get-in doc-after [:data :manuaalinen_rakennusnro :value]) => ss/blank?
-    (get-in doc-after [:data :valtakunnallinenNumero :value]) => "481123123R"
+    (get-in doc-after [:data :valtakunnallinenNumero :value]) => "122334455R"
     (count (get-in doc-after [:data :huoneistot])) => 21
     (get-in doc-after [:data :kaytto :kayttotarkoitus :value]) => "039 muut asuinkerrostalot"
     (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"
@@ -91,7 +91,7 @@
           (get-in doc-after-3 [:data :kaytto :kayttotarkoitus :value]) => "039 muut asuinkerrostalot")
 
         (fact "ID has changed"
-          (get-in doc-after-3 [:data :valtakunnallinenNumero :value]) => "478123123J"
+          (get-in doc-after-3 [:data :valtakunnallinenNumero :value]) => "199887766E"
           (get-in doc-after-3 [:data :rakennusnro :value]) => "002"
           (get-in doc-after-3 [:data :manuaalinen_rakennusnro :value]) => ss/blank?)))
 

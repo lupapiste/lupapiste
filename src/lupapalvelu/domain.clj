@@ -15,7 +15,7 @@
 ;;
 
 (defn basic-application-query-for [user]
-  (let [organizations (user/organization-ids-by-roles user #{:authority :reader})]
+  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter})]
     (case (keyword (:role user))
       :applicant    (if-let [company-id (get-in user [:company :id])]
                       {$or [{:auth.id (:id user)} {:auth.id company-id}]}
@@ -232,13 +232,14 @@
 
 (defn ->paatos
   "Returns a verdict data structure, compatible with KRYSP schema"
-  [{:keys [verdictId backendId timestamp name given status official text section draft agreement]}]
+  [{:keys [verdictId backendId timestamp name given status official text section draft agreement metadata]}]
   (let [verdict-id (or verdictId (mongo/create-id))]
     {:id verdict-id
     :kuntalupatunnus backendId
     :draft (if (nil? draft) false draft)
     :timestamp timestamp
     :sopimus agreement ; not in KRYSP
+    :metadata metadata ; not in KRYSP?
     :paatokset [{:paivamaarat {:anto             given
                                :lainvoimainen    official}
                  :poytakirjat [{:paatoksentekija name
@@ -277,6 +278,7 @@
    :_comments-seen-by        {}
    :_statements-seen-by      {}
    :_verdicts-seen-by        {}
+   :acknowledged             nil ; timestamp
    :address                  ""
    :applicant                ""
    :attachments              []
@@ -288,9 +290,13 @@
    :closedBy                 {}
    :convertedToApplication   nil ; timestamp
    :comments                 []
+   :complementNeeded         nil ; timestamp
    :created                  nil ; timestamp
    :documents                []
    :drawings                 []
+   :foreman                  ""
+   :foremanRole              ""
+   :history                  [] ; state transition audit log
    :infoRequest              false
    :location                 {}
    :modified                 nil ; timestamp

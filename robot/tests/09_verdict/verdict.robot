@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Application gets verdict
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Variables       variables.py
 
@@ -27,11 +27,17 @@ Sonja logs in
 Sonja fetches verdict from municipality KRYSP service
   Open tab  verdict
   Fetch verdict
-  Verdict is given  2013-01  0
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
   Page Should Contain Element  //div[@data-test-id="given-verdict-id-0-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
   Page Should Not Contain Element  //div[@data-test-id="given-verdict-id-1-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
+
+Check task counts
+  Open tab  tasks
+  # 3+3+3 tasks from backend
+  Task count is  task-katselmus  3
+  Foreman count is  3
+  Task count is  task-lupamaarays  3
 
 Sonja creates verdict with adds comment
   Go to give new verdict
@@ -40,31 +46,29 @@ Sonja creates verdict with adds comment
   Comment verdict  Myönnetään...
 
 Add katselmus
-  # 3 tasks from backend
-  Task count is  task-katselmus  3
   Create task  task-katselmus  Lopullinen loppukatselmus
-  # One on this verdict screen and one hidden in tasks tab
-  Task count is  task-katselmus  5
+  # One on this verdict screen (and 3 hidden in tasks tab)
+  Task count is  task-katselmus  1
 
 Add foreman
-  # 3 tasks from backend
-  Foreman count is  3
   Create task  task-vaadittu-tyonjohtaja  TJ0
-  # One on this verdict screen and one hidden in tasks tab
+  # One on this verdict screen (and 3 hidden in tasks tab)
   Task count is  task-vaadittu-tyonjohtaja  1
-  Foreman count is  4
 
 Add other task
-  # 3 tasks from backend
-  Task count is  task-lupamaarays  3
   Create task  task-lupamaarays  Bajamajoja oltava riittävästi
-  # One on this verdict screen and one hidden in tasks tab
-  Task count is  task-lupamaarays  5
+  # One on this verdict screen (and 3 hidden in tasks tab)
+  Task count is  task-lupamaarays  1
 
-Return to application
+Return to application and check total task numbers
   Click by test id  return-from-verdict
+  Open tab  tasks
+  Task count is  task-katselmus  4
+  Foreman count is  4
+  Task count is  task-lupamaarays  4
 
 Verdict has tasks
+  Open tab  verdict
   Page Should Not Contain Element  xpath=//div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
   Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"]  Lopullinen loppukatselmus
   Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//ul[@data-bind="foreach: lupamaaraykset.muutMaaraykset"]/li  Bajamajoja oltava riittävästi
@@ -117,7 +121,7 @@ Stamping page opens, verdict details can be seen
 
 Mikko sees that the application has verdicts
   Mikko logs in
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  3
+  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
   Verdict is given  2013-01  0
@@ -144,11 +148,6 @@ Mikko signs the verdict
   Element should Contain  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']  ${CURRENT_DATE}
 
 *** Keywords ***
-
-Verdict is given
-  [Arguments]  ${kuntalupatunnus}  ${i}
-  Wait until  Element should be visible  application-verdict-details
-  Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
 
 Verdict count is
   [Arguments]  ${amount}

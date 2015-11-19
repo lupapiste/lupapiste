@@ -5,9 +5,9 @@
     <script type="text/x-jquery-tmpl" id="comment-template">
       <div data-bind="with: $data.comment">
         <form>
-          <h3 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h3>
+          <h3 data-bind="ltext: 'application.conversationPrompt', visible: $parent.authorization.ok('add-comment')"></h3>
           <textarea
-            data-bind="attr: {placeholder: loc('comment.placeholder')}, textInput: text, hasFocus: isSelected"
+            data-bind="attr: {placeholder: loc('comment.placeholder')}, textInput: text, hasFocus: isSelected, visible: $parent.authorization.ok('add-comment')"
             data-test-id="application-new-comment-text"
             class="form-input textarea"
             rows="3"

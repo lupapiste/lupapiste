@@ -40,11 +40,11 @@
   }
 
 
-  div.sticky > button.approved > .icons > .approved {
+  div.sticky button.positive > span.icons > .approved {
     display: table-cell;
   }
 
-  div.sticky > button.rejected > .icons >  .rejected {
+  div.sticky button.rejected > span.icons >  .rejected {
     display: table-cell;
   }
 
@@ -54,10 +54,9 @@
     display: none;
     padding: {
       top: $marginS;
-      bottom: $marginS;
+      //bottom: $marginS;
     }
     position: relative;
-    //background: darken($lp-light-grey, 5%);
     border: 1px solid $gray221;
     border-top: none;
     .accordion-content-part {
@@ -89,6 +88,9 @@
   }
 }
 
+.accordion-fields > .button-group:last-child {
+  border-bottom: none;
+}
 
 .accordion-indicator {
   z-index: 12000;

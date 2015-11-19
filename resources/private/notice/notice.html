@@ -4,8 +4,8 @@
   <section class="page container" id="notices">
     <script type="text/x-jquery-tmpl" id="notice-template">
       <div class="content-row application-tags" data-bind="if: authorization.ok('add-application-tags')">
-        <!-- ko if: features.enabled('alueellisetOrganisaatiot') && showTagsComponent() -->
-        <div class="feature content-cell">
+        <!-- ko if: showTagsComponent() -->
+        <div class="content-cell">
           <label data-bind="ltext: 'application.tags'"></label>
           <span data-bind="saveIndicator: indicator, name: 'tags'"></span>
           <div data-test-id="autocomplete-application-tags-component" data-bind="component: {name: 'autocomplete-application-tags', params: {tags: true, selectedValues: selectedTags}}"></div>

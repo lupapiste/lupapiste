@@ -5,33 +5,18 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
 
 
   self.dataProvider = params.dataProvider;
-  self.data = self.dataProvider.applications;
-  self.tabs = ko.observableArray(["all",
-                                  "application",
-                                  "construction",
-                                  "inforequest",
-                                  "canceled"]);
-
+  self.data = ko.pureComputed(function() {
+    return _.map(self.dataProvider.applications(), function(item) {
+      item.kuntalupatunnus = util.getIn(item, ["verdicts", 0, "kuntalupatunnus"]);
+      if (item.foremanRole) {
+        item.foremanRoleI18nkey = "osapuoli.tyonjohtaja.kuntaRoolikoodi." + item.foremanRole;
+      }
+      return item;
+    });
+  });
   self.gotResults = params.gotResults;
 
   self.selectedTab = self.dataProvider.applicationType;
-
-  self.selectTab = function(item) {
-    hub.send("track-click", {category:"Applications", label: item, event:"radioTab"});
-    self.selectedTab(item);
-    self.dataProvider.skip(0);
-  };
-
-  self.sortBy = function(target) {
-    self.dataProvider.skip(0);
-    var sortObj = self.dataProvider.sort;
-    if ( target === sortObj.field() ) {
-      sortObj.asc(!sortObj.asc()); // toggle direction
-    } else {
-      sortObj.field(target);
-      sortObj.asc(false);
-    }
-  };
 
   self.offset = 0;
   self.onPageLoad = hub.onPageLoad(pageutil.getPage(), function() {
@@ -48,4 +33,30 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
 
   self.dispose = _.partial(hub.unsubscribe, self.onPageLoad);
 
+  ko.computed(function () {
+    ko.mapping.toJS(self.dataProvider.sort);
+    self.dataProvider.skip(0);
+  });
+
+  self.columns = [
+    util.createSortableColumn("first",   "applications.indicators", {colspan: lupapisteApp.models.currentUser.isAuthority() ? "4" : "3",
+                                                                     sortable: false,
+                                                                     currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("second",  "applications.type",       {sortField: "type",
+                                                                     currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("third",   "applications.location",   {sortField: "location",
+                                                                     currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("fourth",  "applications.operation",  {sortable: false,
+                                                                     currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("fifth",   "applications.applicant",  {sortField: "applicant",
+                                                                     currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("sixth",   "applications.sent",       {sortField: "submitted",
+                                                                     currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("seventh", "applications.updated",    {sortField: "modified",
+                                                                     currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("eight",   "applications.status",     {sortField: "state",
+                                                                     currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("ninth",   "applications.authority",  {sortField: "handler",
+                                                                     currentSort: self.dataProvider.sort})
+  ];
 };

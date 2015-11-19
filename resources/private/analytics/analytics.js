@@ -25,7 +25,7 @@
     var gaConfig = window.location.hostname === "localhost" ? {"cookieDomain": "none"}: "auto";
     ga("create", LUPAPISTE.config.analytics.id, gaConfig);
   } else {
-    window.ga = util.nop;
+    window.ga = _.noop;
   }
 
   hub.subscribe("page-load", function(e) {

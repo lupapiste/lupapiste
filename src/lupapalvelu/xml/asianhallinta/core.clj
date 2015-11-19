@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :refer [error]]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :refer [permit-type]]
-            [lupapalvelu.xml.asianhallinta.asianhallinta_mapping :as ah-mapping]
+            [lupapalvelu.xml.asianhallinta.asianhallinta-mapping :as ah-mapping]
             [lupapalvelu.xml.validator :as v]
             [sade.core :refer [fail! def-]]
             [sade.env :as env]
@@ -68,4 +68,4 @@
         scope         (organization/resolve-organization-scope (:municipality application) permit-type)
         ah-version    (resolve-ah-version scope)
         output-dir    (resolve-output-directory scope)]
-       (ah-mapping/taydennys-asiaan-from-application application attachments lang ah-version begin-of-link output-dir)))
+    (ah-mapping/taydennys-asiaan-from-application application attachments lang ah-version begin-of-link output-dir)))

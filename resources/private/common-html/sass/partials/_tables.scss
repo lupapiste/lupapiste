@@ -4,27 +4,30 @@
 table {
   width:100%;
   margin-bottom: $marginL;
+  color: $gray51;
 }
 
 th {
-  background: darken($lp-light-grey, 10%);
-  font-family: $font-heading;
-  font-size: 0.85em;
-  font-weight: 700;
-  letter-spacing: 0.125em;
+  background: $gray221;
+  padding-left: $marginM;
+  padding-right: $marginM;
+  vertical-align: middle;
+  // font-family: $font-heading;
+  // font-size: 0.85em;
+  // font-weight: 700;
+  // letter-spacing: 0.125em;
 }
 
 tr {
   background: white;
-  border-bottom: 1px solid darken($lp-light-grey, 5%);
+  border: 1px solid $gray221;
   &:nth-child(even) {
-    background: darken($lp-light-grey, .5%);
+    background: $gray246;
   }
   &:hover {
-    background-color: lighten($lp-orange, 40%);
+    background-color: $gray238;
     &:active {
-      background-color: lighten($lp-orange, 20%);
-      color: black;
+      background-color: $gray221;
     }
   }
   &.attachment-row {
@@ -53,8 +56,10 @@ tr {
 }
 
 th, td {
-  padding:6px 16px;
+  padding:$marginS $marginM;
   text-align:left;
+  height: $grid-min-height;
+  min-height: $grid-min-height;
   &.btn{
     margin-bottom: 0px;
   }
@@ -70,8 +75,6 @@ th.action-column, td.action-column {
 }
 
 tbody, tfoot {
-  color: #555;
-  font-size: 0.875em;
   td {
     vertical-align:middle;
   }

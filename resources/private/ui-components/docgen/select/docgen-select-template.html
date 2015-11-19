@@ -6,11 +6,13 @@
       <span class="form-entry">
         <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
         <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
-        <label data-bind="visible: params.schema.label">Select</label>
+        <label data-bind="visible: label, ltext: label"></label>
         <select class="form-input combobox" data-bind="options: params.schema.body,
-                           optionsText: function(item) { return item.i18nkey ? loc(item.i18nkey) : item.name },
+                           optionsText: optionsTextFn,
                            optionsValue: 'name',
                            value: value,
+                           valueAllowUnset: valueAllowUnset,
+                           optionsCaption: optionsCaption,
                            disable: disabled,
                            css: classes">
         </select>

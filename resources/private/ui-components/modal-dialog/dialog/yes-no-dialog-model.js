@@ -8,7 +8,7 @@ LUPAPISTE.YesNoDialogModel = function (params) {
 
   self.noTitle = params.lnoTitle ? loc(params.lnoTitle) : params.noTitle;
 
-  self.yes = params.yesFn || function() { _.noop(); };
+  self.yes = params.yesFn || _.noop;
 
-  self.no = params.noFn || function() { _.noop(); };
+  self.no = params.noFn || _.noop;
 };

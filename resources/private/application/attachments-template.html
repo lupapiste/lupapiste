@@ -4,7 +4,7 @@
         <section class="page" id="attachments-template" style="visibility: hidden; display: block;">
         <script type="text/x-jquery-tmpl"
                 id="attachments-template-op">
-         <table class="table attachments-template-table" data-test-id="attachments-template-table">
+          <table class="table attachments-template-table" data-test-id="attachments-template-table">
            <tbody data-bind="foreach: $data">
             <tr class="attachment-group-header">
              <td data-bind="text: name" colspan="8" data-test-id="attachment-group-header-text"></td>
@@ -85,8 +85,8 @@
                                                     disable: $data.notNeededFieldDisabled() || !$root.authorization.ok('set-attachment-not-needed'),
                                                     attr: {'data-test-id': ['attachment-not-needed', type['type-group'], type['type-id']].join('-'),
                                                            'notneeded': notNeeded},
-                                                    click: function(){return true;},
-                                                    clickBubble: false"></input>
+                                                    click: _.partial( $root.attachmentsTab.toggleNeeded, $data ),
+                                                    clickBubble: false"/>
               </td>
               <td class="attachment-file-info">
                 <span data-bind="if: $data.latestVersion">

@@ -190,45 +190,45 @@
     padding-left: 0;
     padding-right: 0;
     font-weight: bold;
-    color: #fff;
+    color: $primary;
     text-align: center;
     width: 22px;
     padding: 3px;
   }
   div {padding-top: 3px; height: 30px;}
-  .urgent {
-    @include spite-bg;
-    background-position: 0 -5300px;
-    height: 24px;
-    width: 24px;
-  }
-  .pending {
-    @include spite-bg;
-    background-position: 0 -5500px;
-    width: 24px;
-    height: 24px;
-  }
-  .normal {
-    @include spite-bg;
-    background-position: 0 -5600px;
-    width: 24px;
-    height: 24px;
-  }
-  .unseen-comments {
-    @include spite-bg;
-    background-position: 0 -4295px;
-    width: 21px;
-  }
-  .unseen-indicators {
-    @include spite-bg;
-    background-position: 0 -4597px;
-    width: 25px;
-  }
-  .unseen-attachments {
-    @include spite-bg;
-    background-position: 0 -4496px;
-    width: 21px;
-  }
+  // .urgent {
+  //   @include spite-bg;
+  //   background-position: 0 -5300px;
+  //   height: 24px;
+  //   width: 24px;
+  // }
+  // .pending {
+  //   @include spite-bg;
+  //   background-position: 0 -5500px;
+  //   width: 24px;
+  //   height: 24px;
+  // }
+  // .normal {
+  //   @include spite-bg;
+  //   background-position: 0 -5600px;
+  //   width: 24px;
+  //   height: 24px;
+  // }
+  // .unseen-comments {
+  //   @include spite-bg;
+  //   background-position: 0 -4295px;
+  //   width: 21px;
+  // }
+  // .unseen-indicators {
+  //   @include spite-bg;
+  //   background-position: 0 -4597px;
+  //   width: 25px;
+  // }
+  // .unseen-attachments {
+  //   @include spite-bg;
+  //   background-position: 0 -4496px;
+  //   width: 21px;
+  // }
 }
 
 .clearable{

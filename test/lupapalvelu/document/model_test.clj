@@ -492,6 +492,7 @@
 (facts "blacklists"
   (fact "no blacklist, no changes"
     (strip-blacklisted-data nil nil) => nil
+    (strip-blacklisted-data {:schema-info {}} nil) => {:schema-info {}}
     (strip-blacklisted-data hakija nil) => hakija
     (strip-blacklisted-data hakija :x) => hakija
     (strip-blacklisted-data uusiRakennus :x) => uusiRakennus)
@@ -674,6 +675,7 @@
                         :turvakieltoKytkin {:value false}}
         :yhteystiedot {:email          {:value ""}
                        :puhelin        {:value ""}}
+        :kytkimet {:suoramarkkinointilupa {:value false}}
         :osoite {:katu                 {:value ""}
                  :postinumero          {:value ""}
                  :postitoimipaikannimi {:value "city"}}

@@ -112,6 +112,8 @@
         (:teksti osoitenimi) => "Murskaajankatu 5"
         (:postinumero postiosoite) => "36570"
         (:postitoimipaikannimi postiosoite) => "Kaivanto"
+        (:valtioKansainvalinen postiosoite) => "FIN"
+        (:valtioSuomeksi postiosoite) => "Suomi"
         (:etunimi hakija) => "Pekka"
         (:sukunimi hakija) => "Borga"
         (:sahkopostiosoite hakija) => "pekka.borga@porvoo.fi"
@@ -121,8 +123,10 @@
                            :yrityksenNimi "Yrtti Oy"
                            :yhteyshenkilonNimi "Pertti Yritt\u00e4j\u00e4"
                            :osoitetieto {:Osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
-                                                 :postitoimipaikannimi "kuuva",
-                                                 :postinumero "43640"}}
+                                                  :postitoimipaikannimi "kuuva",
+                                                  :postinumero "43640"
+                                                  :valtioSuomeksi "Suomi"
+                                                  :valtioKansainvalinen "FIN"}}
                            :puhelinnumero "060222155"
                            :sahkopostiosoite "tew@gjr.fi"})
 

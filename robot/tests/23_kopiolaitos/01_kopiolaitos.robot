@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Kopiolaitos interaction
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Variables      ../06_attachments/variables.py
 
@@ -71,7 +71,6 @@ There should be now one verdict attachment
 Sonja gives verdict
   Open tab  verdict
   Fetch verdict
-  Wait until  Element text should be  xpath=//div[@id='application-verdict-tab']//span[@data-test-id='given-verdict-id-0']  2013-01
 
 An option to order verdict attachments has appeared into the Toiminnot dropdown in the Attachments tab
   Open tab  attachments
@@ -117,7 +116,7 @@ Sonja checks that email was sent
   Page Should Contain  Sipoon rakennusvalvonta, Sonja Sibbo
   Page Should Contain  tilaaja@example.com
   Page Should Contain  ${TXT_TESTFILE_NAME}
-  Go Back
+  [Teardown]  Go Back
 
 Sonja opens the kopiolaitos order history dialog
   Wait until  Element should be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']

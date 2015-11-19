@@ -31,7 +31,9 @@
     ;; Started application
     (let [application (query-application sonja application-id) => truthy
           email       (last-email) => truthy]
-      (:state application) => "constructionStarted"
+      (fact "state is constructionStarted"
+        (:state application) => "constructionStarted"
+        (-> application :history last :state) => "constructionStarted")
       (:to email) => (contains (email-for-key sonja))
       (:subject email) => "Lupapiste.fi: Paatoskuja 11 - hakemuksen tila muuttunut"
       (get-in email [:body :plain]) => (contains "Rakennusty\u00f6t aloitettu")
@@ -39,14 +41,18 @@
 
       (fact "Verdicts can be fetched even in construction started state, state doesn't change"
         (command sonja :check-for-verdict :id application-id) => ok?
-        (:state (query-application sonja application-id)) => "constructionStarted")
+        (:state (query-application sonja application-id)) => "constructionStarted"
+        (-> application :history last :state) => "constructionStarted")
 
       (command sonja :inform-construction-ready :id application-id :readyTimestampStr "31.12.2013" :lang "fi") => ok?
 
       ;; Closed application
       (let [application (query-application sonja application-id) => truthy
             email       (last-email) => truthy]
-        (:state application) => "closed"
+        (fact "state is closed"
+          (:state application) => "closed"
+          (-> application :history last :state) => "closed")
+
         sonja =not=> (allowed? :inform-construction-started :id application-id)
         sonja =not=> (allowed? :create-continuation-period-permit :id application-id)
 

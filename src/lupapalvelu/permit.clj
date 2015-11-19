@@ -30,7 +30,7 @@
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
    :sftp-directory   "/rakennus"
-   :applicant-doc-schema "hakija-r"
+   :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values true
    :wfs-krysp-ns-name "rakennusvalvonta"
@@ -39,7 +39,7 @@
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes             []
    :sftp-directory       "/yleiset_alueet"
-   :applicant-doc-schema "hakija-ya"
+   :allowed-task-schemas #{"task-katselmus-ya" "task-lupamaarays"}
    :multiple-parties-allowed false
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "yleisenalueenkaytonlupahakemus"
@@ -48,7 +48,7 @@
 (defpermit YI  "Ymparistoilmoitukset"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/ilmoitukset"})
@@ -56,16 +56,23 @@
 (defpermit YL  "Ymparistolupa"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/ymparistoluvat"
    :wfs-krysp-url-asia-prefix "ymy:luvanTunnistetiedot/"})
 
+(defpermit YM  "Muut ymparistoluvat"
+  {:subtypes       []
+   :sftp-directory "/ymparisto"
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
+   :multiple-parties-allowed true
+   :extra-statement-selection-values false})
+
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/vesihuoltolaki"
@@ -74,7 +81,7 @@
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
    :sftp-directory   "/poikkeusasiat"
-   :applicant-doc-schema "hakija"
+   :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values true
    :wfs-krysp-ns-name "poikkeamispaatos_ja_suunnittelutarveratkaisu"
@@ -83,7 +90,7 @@
 (defpermit MAL "Maa-ainesluvat"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "ymparisto/maa_ainesluvat"
@@ -92,7 +99,7 @@
 (defpermit KT "Kiinteistotoimitus"
   {:subtypes       []
    :sftp-directory "/kiinteistotoimitus"
-   :applicant-doc-schema "hakija"
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "kiinteistotoimitus"})
@@ -100,7 +107,7 @@
 (defpermit MM "Maankayton muutos"
   {:subtypes       []
    :sftp-directory "/maankaytonmuutos"
-   :applicant-doc-schema "hakija"
+   :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "maankaytonmuutos"})
@@ -118,9 +125,6 @@
 
 (defn get-sftp-directory [permit-type]
   (get-metadata permit-type :sftp-directory))
-
-(defn get-applicant-doc-schema [permit-type]
-  (get-metadata permit-type :applicant-doc-schema))
 
 (defn get-application-mapper
   "Returns a function that maps application into KRYSP XML and saves the XML to disk."
@@ -141,7 +145,7 @@
 
 (defn get-verdict-validator
   "Returns a function that validates verdicts from KRYSP xml.
-   Function takes xml as parameter.
+   Function takes xml and organization map as parameters.
    Use get-application-xml-getter to fetch the XML."
   [permit-type]
   (get-metadata permit-type :verdict-krysp-validator))
@@ -162,9 +166,10 @@
 (defn get-application-xml-getter
   "Returns a function that fetches KRYSP XML from municipality backend.
    Function parameters: 1) url,
-                        2) id,
-                        3) keyword parameter: search-type (e.g. :application-id or :kuntalupatunnus)
-                        4) optional boolean parameter: raw form."
+                        2) credentials [username password],
+                        3) id,
+                        4) keyword parameter: search-type (e.g. :application-id or :kuntalupatunnus)
+                        5) optional boolean parameter: raw form."
   [permit-type]
   (get-metadata permit-type :xml-from-krysp))
 
@@ -174,7 +179,7 @@
 (defn permit-type
   "gets the permit-type of application"
   [application]
-  {:post [(not= % nil)]}
+  {:post [(string? %)]}
   (:permitType application))
 
 ;;
@@ -186,18 +191,18 @@
     (warn "invalid permit type" permitType)
     (fail :error.missing-parameters :parameters [:permitType])))
 
-(defn validate-permit-type-is-not [validator-permit-type]
-  (fn [_ application]
-    (if application
-      (let [application-permit-type (permit-type application)]
-        (when (= (keyword application-permit-type) (keyword validator-permit-type))
-          (fail :error.invalid-permit-type :permit-type validator-permit-type)))
-      (fail :error.invalid-application-parameter))))
+(defn validate-permit-type-is-not [& validator-permit-types]
+  (let [invalid-permit-types (set (map name validator-permit-types))]
+    (fn [_ application]
+      (if application
+        (when (invalid-permit-types (permit-type application))
+          (fail :error.invalid-permit-type :permit-type validator-permit-types))
+        (fail :error.invalid-application-parameter)))))
 
-(defn validate-permit-type-is [validator-permit-type]
-  (fn [_ application]
-    (if application
-      (let [application-permit-type (permit-type application)]
-        (when-not (= (keyword application-permit-type) (keyword validator-permit-type))
-          (fail :error.invalid-permit-type :permit-type validator-permit-type)))
-      (fail :error.invalid-application-parameter))))
+(defn validate-permit-type-is [& validator-permit-types]
+  (let [valid-permit-types (set (map name validator-permit-types))]
+    (fn [_ application]
+      (if application
+        (when-not (valid-permit-types (permit-type application))
+          (fail :error.invalid-permit-type :permit-type validator-permit-types))
+        (fail :error.invalid-application-parameter)))))

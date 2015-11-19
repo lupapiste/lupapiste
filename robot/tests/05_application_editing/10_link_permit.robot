@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Adding and removing of link permits
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***

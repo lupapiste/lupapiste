@@ -1,5 +1,6 @@
 (ns lupapalvelu.geojson
-  (:require [sade.coordinate :as coord]
+  (:require [clojure.walk :as walk]
+            [sade.coordinate :as coord]
             [sade.core :refer [fail]]))
 
 ;; Resolve polygons from GeoJSON Features
@@ -27,4 +28,22 @@
 
 (defn validate-features [features]
   (reduce (fn [res feature] (or res (validate-feature feature))) nil features))
+
+
+(defn- select-coordinates
+  "If given coordinates are numbers, returns first two numbers,
+   else returns the sequential untouched.
+   [2 4 1] => [2 4]"
+  [coordinates]
+  (if (and (sequential? coordinates) (every? number? coordinates))
+    (take 2 coordinates)
+    coordinates))
+
+(defn- ensure-feature-points [features]
+  (map
+    #(update-in % [:geometry :coordinates] (partial walk/prewalk select-coordinates))
+    features))
+
+(defn ensure-features [areas]
+  (update-in areas [:features] ensure-feature-points))
 

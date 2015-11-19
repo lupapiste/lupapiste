@@ -50,10 +50,9 @@
             </thead>
             <tbody data-bind="foreach: $data.foremen">
               <tr data-bind="attr: {'data-test-name': $data.name}">
-                <td class="task-state">
+                <td class="task-state" data-bind="attr: {'data-test-state': $data.statusName}">
                   <i data-bind="attr: {
                                 'class': LUPAPISTE.statusIcon(statusName),
-                                'data-test-state': $data.state,
                                 'title': loc(['foreman', 'task', statusName, 'title'])}"></i>
                 </td>
                 <td>
@@ -61,7 +60,7 @@
                 </td>
                 <td data-bind="attr: {'data-test-col-name': 'foreman-name-or-invite'}">
                   <select
-                     id="foreman-selection"
+                     data-test-id="foreman-selection"
                      name="foreman-selection"
                      class="form-input combobox long"
                      data-bind="options: $data.selectableForemen,

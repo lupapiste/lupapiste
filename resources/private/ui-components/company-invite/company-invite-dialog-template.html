@@ -7,7 +7,7 @@
       <div data-bind="ifnot: confirm">
         <div class="content">
           <p data-bind="ltext: 'company-invite.desc'" class="dialog-desc"></p>
-          <div data-bind="component: {name: 'autocomplete', params: {options: companiesProvider.data, query: companiesProvider.query, selectedOptions: selected}}"></div>
+          <div data-bind="component: {name: 'autocomplete', params: {options: companiesProvider.data, query: companiesProvider.query, selectedOption: selected}}"></div>
         </div>
         <div data-bind="component: {name:'submit-button-group',
                                     params: { isSubmitVisible: isConfirmVisible,

@@ -35,7 +35,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.permitSubtypeHelp = ko.pureComputed(function() {
     var opName = util.getIn(self, ["primaryOperation", "name"]);
     if (loc.hasTerm(["help", opName ,"subtype"])) {
-      return "help." + opName + ".subtype"
+      return "help." + opName + ".subtype";
     }
     return undefined;
   });
@@ -59,6 +59,8 @@ LUPAPISTE.ApplicationModel = function() {
 
   // Application metadata fields
   self.inPostVerdictState = ko.observable(false);
+  self.stateSeq = ko.observable([]);
+  self.currentStateInSeq = ko.pureComputed(function() {return _.contains(self.stateSeq(), self.state());});
   self.inPostSubmittedState = ko.observable(false); // TODO: remove
   self.vendorBackendId = ko.observable(); // TODO: remove
   self.applicantPhone = ko.observable();
@@ -83,6 +85,10 @@ LUPAPISTE.ApplicationModel = function() {
   self.incorrectlyFilledRequiredFields = ko.observable([]);
   self.hasIncorrectlyFilledRequiredFields = ko.pureComputed(function() {
     return self.incorrectlyFilledRequiredFields() && self.incorrectlyFilledRequiredFields().length > 0;
+  });
+  self.fieldWarnings = ko.observable([]);
+  self.hasFieldWarnings = ko.computed(function() {
+    return self.fieldWarnings() && self.fieldWarnings().length > 0;
   });
 
   self.summaryAvailable = ko.pureComputed(function() {
@@ -133,7 +139,6 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.foremanTasks = ko.observable();
 
-  self.buildings = ko.observable([]);
   self.nonpartyDocumentIndicator = ko.observable(0);
   self.partyDocumentIndicator = ko.observable(0);
   self.linkPermitData = ko.observable(null);
@@ -212,12 +217,12 @@ LUPAPISTE.ApplicationModel = function() {
     return self.missingRequiredAttachments() && self.missingRequiredAttachments().length > 0;
   });
 
-  self.missingRequiredInfo = ko.computed(function() {
-    return self.hasIncorrectlyFilledRequiredFields() || self.hasMissingRequiredAttachments();
+  self.missingSomeInfo = ko.computed(function() {
+    return self.hasFieldWarnings() || self.hasIncorrectlyFilledRequiredFields() || self.hasMissingRequiredAttachments();
   });
 
   self.submitButtonEnabled = ko.computed(function() {
-    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingRequiredInfo()) && self.submittable();
+    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && self.submittable();
   });
 
 
@@ -243,12 +248,18 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.openOskariMap = function() {
-    var coords = "&coord=" + self.location().x() + "_" + self.location().y();
-    var zoom = "&zoomLevel=12";
-    var features = "&addPoint=1&addArea=1";
-    var lang = "&lang=" + loc.getCurrentLanguage();
-    var municipality = "&municipality=" + self.municipality();
-    var url = "/oskari/fullmap.html?build=" + LUPAPISTE.config.build + "&id=" + self.id() + coords + zoom + features + lang + municipality;
+    var featureParams = ["addPoint", "addArea", "addLine", "addCircle", "addEllipse"];
+    var featuresEnabled = lupapisteApp.models.applicationAuthModel.ok("save-application-drawings") ? 1 : 0;
+    var features = _.map(featureParams, function (f) {return f + "=" + featuresEnabled;}).join("&");
+    var params = ["build=" + LUPAPISTE.config.build,
+                  "id=" + self.id(),
+                  "coord=" + self.location().x() + "_" + self.location().y(),
+                  "zoomLevel=12",
+                  "lang=" + loc.getCurrentLanguage(),
+                  "municipality=" + self.municipality(),
+                  features];
+
+    var url = "/oskari/fullmap.html?" + params.join("&");
     window.open(url);
     hub.send("track-click", {category:"Application", label:"map", event:"openOskariMap"});
   };
@@ -311,6 +322,14 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
     hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
     return false;
+  };
+
+  self.publishApplicationBulletin = function() {
+    ajax.command("publish-bulletin", {id: self.id()})
+      .success(_.noop)
+      .error(_.noop)
+      .processing(self.processing)
+      .call();
   };
 
   self.refreshKTJ = function() {
@@ -570,6 +589,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.moveToIncorrectlyFilledRequiredField = function(fieldInfo) {
+    AccordionState.set( fieldInfo.document.id, true );
     var targetId = fieldInfo.document.id + "-" + fieldInfo.path.join("-");
     self.targetTab({tab: (fieldInfo.document.type !== "party") ? "info" : "parties", id: targetId});
   };
@@ -595,6 +615,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.updateMissingApplicationInfo = function(errors) {
     self.incorrectlyFilledRequiredFields(util.extractRequiredErrors(errors));
+    self.fieldWarnings(util.extractWarnErrors(errors));
     self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
   };
 
@@ -622,5 +643,18 @@ LUPAPISTE.ApplicationModel = function() {
                                                  lnoTitle: "application.showApplication",
                                                  yesFn: self.approveInvite}});
     }
+  };
+
+  self.showAddPropertyButton = ko.pureComputed( function () {
+    var primaryOp = lupapisteApp.models.application.primaryOperation();
+
+    return lupapisteApp.models.applicationAuthModel.ok("create-doc") &&
+      _.includes(util.getIn(primaryOp, ["optional"]), "secondary-kiinteistot");
+  });
+
+  self.addProperty = function() {
+    hub.send("show-dialog", {ltitle: "application.dialog.add-property.title",
+                             size: "medium",
+                             component: "add-property-dialog"});
   };
 };

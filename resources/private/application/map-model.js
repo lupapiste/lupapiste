@@ -136,6 +136,8 @@ LUPAPISTE.MapModel = function(authorizationModel) {
   };
 
   self.refresh = function(application) {
+    var map;
+    var mapKind = application.infoRequest ? "inforequest" : "application";
     currentAppId = application.id;
 
     var x = application.location.x;
@@ -144,6 +146,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     if (!x && !y) {
       $("#application-map").css("display", "none");
       $("#inforequest-map").css("display", "none");
+      return;
     } else {
       $("#application-map").css("display", "inline-block");
       $("#inforequest-map").css("display", "inline-block");
@@ -151,7 +154,13 @@ LUPAPISTE.MapModel = function(authorizationModel) {
 
     drawings = application.drawings;
 
-    var map = getOrCreateMap(application.infoRequest ? "inforequest" : "application");
+    try {
+      map = getOrCreateMap(mapKind);
+    } catch (e) {
+      // Trying to figure out when LPK-816 occurs
+      error("Unable to get or create map for " + mapKind, e);
+      return;
+    }
 
     map.clear().updateSize().center(x, y).add({x: x, y: y});
 

@@ -28,7 +28,18 @@
 
 (defn ->model-updates
   "Creates model-updates from ui-format."
-  [updates] (for [[k v] updates] [(-> k (s/split #"\.") (->> (map keyword)) vec) v]))
+  [updates]
+  (for [[k v] updates]
+    (let [keys (mapv keyword (if (coll? k) k (s/split k #"\.")))]
+      [keys v])))
+
+(defn data-model->model-updates
+  "Creates model updates from data returned by mongo query"
+  [path data-model]
+  (if (contains? data-model :value)
+    [[path (:value data-model)]]
+    (->> (filter (comp map? val) data-model)
+         (mapcat (fn [[k m]] (data-model->model-updates (conj path (keyword k)) m))))))
 
 (defn ->mongo-updates
   "Creates full paths to document update values to be $set.
@@ -43,6 +54,17 @@
                        (assoc (field "modified") (model/current-timestamp)))))
     {} updates))
 
+(defn get-after-update-trigger-fn [document]
+  (let [schema (schemas/get-schema (:schema-info document))
+        trigger-ref (get-in schema [:info :after-update])]
+    (if trigger-ref
+      (resolve trigger-ref)
+      (constantly nil))))
+
+(defn after-update-triggered-updates [application collection original-doc updated-doc]
+  (->> (update application (keyword collection) (partial util/update-by-id updated-doc))
+       ((get-after-update-trigger-fn original-doc))))
+
 (defn validated-model-updates
   "Returns a map with keys: :mongo-query, :mongo-updates, :post-results.
    Throws fail! if validation fails."
@@ -54,28 +76,19 @@
       (when-not document (fail! :unknown-document))
       (when (model/has-errors? pre-results) (fail! :document-in-error-before-update :results pre-results))
       (when (model/has-errors? post-results) (fail! :document-would-be-in-error-after-update :results post-results))
-
+      
       {:mongo-query   {collection {$elemMatch {:id (:id document)}}}
-       :mongo-updates {$set (assoc
+       :mongo-updates (util/deep-merge 
+                       {$set (assoc
                               (->mongo-updates (str (name collection) ".$.data") model-updates (apply hash-map meta-data))
                               :modified timestamp)}
-       :post-results  post-results
-       :updated-doc   updated-doc})))
-
-(defn get-after-update-trigger-fn [document]
-  (let [schema (schemas/get-schema (:schema-info document))
-        trigger-ref (get-in schema [:info :after-update])]
-    (if trigger-ref
-      (resolve trigger-ref)
-      (constantly nil))))
+                       (after-update-triggered-updates application collection document updated-doc))
+       :post-results  post-results})))
 
 (defn persist-model-updates [application collection document model-updates timestamp & meta-data]
   (let [command (application->command application)
-        {:keys [mongo-query mongo-updates post-results updated-doc]} (apply validated-model-updates application collection document model-updates timestamp meta-data)
-        updated-app (update-in application [(keyword collection)] (fn [c] (map #(if (= (:id %) (:id updated-doc)) updated-doc %) c)))
-        trigger-fn (get-after-update-trigger-fn document)
-        extra-updates (trigger-fn updated-app)]
-    (update-application command mongo-query (util/deep-merge mongo-updates extra-updates))
+        {:keys [mongo-query mongo-updates post-results]} (apply validated-model-updates application collection document model-updates timestamp meta-data)]
+    (update-application command mongo-query mongo-updates)
     (ok :results post-results)))
 
 (defn validate-collection [{{collection :collection} :data}]
@@ -111,12 +124,24 @@
     (validate-against-whitelist! document model-updates role)
     (persist-model-updates application collection document model-updates timestamp)))
 
+(defn- empty-op-attachments-ids
+  "Returns attachment ids, which don't have verions and have op-id as operation id. Returns nil when none found"
+  [attachments op-id]
+  (when (and op-id attachments)
+    (seq (map :id (filter
+                    (fn [{op :op versions :versions}]
+                      (and (= (:id op) op-id)
+                           (empty? versions)))
+                    attachments)))))
+
 (defn remove! [{application :application timestamp :created :as command} doc-id collection]
   (let [document      (by-id application collection doc-id)
-        updated-app (update-in application [:documents] (fn [c] (filter #(not= (:id %) doc-id) c)))
-          trigger-fn ( get-after-update-trigger-fn document)
-          extra-updates (trigger-fn updated-app)
-          op-id (get-in document [:schema-info :op :id])]
+        updated-app   (update-in application [:documents] (fn [c] (filter #(not= (:id %) doc-id) c)))
+        trigger-fn    (get-after-update-trigger-fn document)
+        extra-updates (trigger-fn updated-app)
+        op-id         (get-in document [:schema-info :op :id])
+        removable-attachment-ids (when op-id
+                                   (empty-op-attachments-ids (:attachments application) op-id))]
     (when-not document (fail! :error.document-not-found))
     (update-application command
       (util/deep-merge
@@ -132,16 +157,24 @@
                      :attachments
                      (:attachments application)
                      #(= (:id (:op %)) op-id)
-                     :op nil)))})))
-  )
+                     :op nil)))}))
+    (when (seq removable-attachment-ids)
+      (update-application command {$pull {:attachments {:id {$in removable-attachment-ids}}}}))))
 
-(defn do-create-doc [{{:keys [id schemaName]} :data created :created application :application :as command}]
-  (let [schema (schemas/get-schema (:schema-version application) schemaName)]
+(defn create-empty-doc [{created :created {schema-version :schema-version} :application :as command} schema-name]
+  (let [document (-> (schemas/get-schema schema-version schema-name)
+                     (model/new-document created))]
+    (update-application command {$push {:documents document}
+                                 $set {:modified created}})
+    document))
+
+(defn do-create-doc [{created :created application :application :as command} schema-name & updates]
+  (let [schema (schemas/get-schema (:schema-version application) schema-name)]
     (when-not (:repeating (:info schema)) (fail! :illegal-schema))
-    (let [document (model/new-document schema created)]
-      (update-application command
-        {$push {:documents document}
-         $set {:modified created}})
+    (let [document (create-empty-doc command schema-name)]
+      (when updates
+        (let [model-updates (->model-updates (first updates))]
+          (persist-model-updates application "documents" document model-updates created)))
       document)))
 
 (defn- update-key-in-schema? [schema [update-key _]]
@@ -190,8 +223,6 @@
                        (filter (partial update-key-in-schema? (:body schema))))]
       (when-not schema (fail! :error.schema-not-found))
       (when-not company (fail! :error.company-not-found))
-      (when-not (and (domain/has-auth? application company-id) (domain/no-pending-invites? application company-id))
-        (fail! :error.application-does-not-have-given-auth))
       (debugf "merging company %s into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
       (persist-model-updates application "documents" document updates timestamp))))
 

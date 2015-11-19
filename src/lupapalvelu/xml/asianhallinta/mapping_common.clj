@@ -1,5 +1,5 @@
-(ns lupapalvelu.xml.asianhallinta.mapping_common
-  (:require [lupapalvelu.document.asianhallinta_canonical :as ahc]
+(ns lupapalvelu.xml.asianhallinta.mapping-common
+  (:require [lupapalvelu.document.asianhallinta-canonical :as ahc]
             [sade.util :as util]))
 
 (def yhteystiedot-type
@@ -51,6 +51,15 @@
 
 (def liite-type
   [{:tag :Kuvaus}
+   {:tag :Tyyppi}
+   {:tag :LinkkiLiitteeseen}
+   {:tag :Luotu}
+   {:tag :Metatiedot :child [{:tag :Metatieto :child metatieto-type}]}])
+
+(def liite-type-1_2
+  [{:tag :Kuvaus}
+   {:tag :KuvausFi}
+   {:tag :KuvausSv}
    {:tag :Tyyppi}
    {:tag :LinkkiLiitteeseen}
    {:tag :Luotu}

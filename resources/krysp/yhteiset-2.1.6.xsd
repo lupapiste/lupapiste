@@ -585,13 +585,25 @@ tiedot</xs:documentation>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="vaadittuErityissuunnitelma" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-			<xs:element name="maarays" minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="maaraystieto" minOccurs="0" maxOccurs="unbounded">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="sisalto" type="xs:string" minOccurs="0"/>
-						<xs:element name="maaraysPvm" type="xs:date" minOccurs="0"/>
-						<xs:element name="toteutusHetki" type="xs:date" minOccurs="0"/>
+						<xs:element name="Maarays">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="sisalto" type="xs:string" minOccurs="0"/>
+									<xs:element name="maaraysPvm" type="xs:date" minOccurs="0"/>
+									<xs:element name="toteutusHetki" type="xs:date" minOccurs="0"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="vaadittuErityissuunnitelmatieto" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="vaadittuErityissuunnitelma" type="xs:string"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
@@ -855,7 +867,13 @@ C vähäinen
 			</xs:element>
 			<xs:element name="koulutus" type="xs:string" minOccurs="0"/>
 			<xs:element name="valmistumisvuosi" type="xs:string" minOccurs="0"/>
-			<xs:element name="liite" type="yht:RakennusvalvontaLiiteType" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Liite" type="yht:RakennusvalvontaLiiteType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 			<xs:element name="vaadittuPatevyysluokka" type="yht:PatevyysluokkaType" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>Kunnan vaatima.
@@ -924,7 +942,13 @@ C vähäinen
 			</xs:element>
 			<xs:element name="koulutus" type="xs:string" minOccurs="0"/>
 			<xs:element name="valmistumisvuosi" type="xs:string" minOccurs="0"/>
-			<xs:element name="liite" type="yht:RakennusvalvontaLiiteType" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Liite" type="yht:RakennusvalvontaLiiteType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 			<xs:element name="alkamisPvm" type="xs:date" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>vastuun alkamis päivämäärä</xs:documentation>

@@ -11,13 +11,40 @@
 (facts
   (let [uri "http://127.0.0.1:8000/dev/krysp"]
     (fact "pena can't set krysp-url"
-      (command pena :set-krysp-endpoint :url uri :permitType "R" :version "1") => unauthorized?)
+      (command pena :set-krysp-endpoint :url uri :username "" :password "" :permitType "R" :version "1") => unauthorized?)
 
     (fact "sipoo can set working krysp-url"
-      (command sipoo :set-krysp-endpoint :url uri :permitType "YA" :version "2") => ok?)
+      (command sipoo :set-krysp-endpoint :url uri :username "" :password "" :permitType "YA" :version "2") => ok?)
 
-    (fact "sipoo cant set incorrect krysp-url"
-      (command sipoo :set-krysp-endpoint :url "BROKEN_URL" :permitType "R"  :version "1") => fail?)))
+   (fact "sipoo cant set incorrect krysp-url"
+      (command sipoo :set-krysp-endpoint :url "BROKEN_URL" :username "" :password "" :permitType "R"  :version "1") => fail?)))
+
+(facts
+  (let [uri "http://127.0.0.1:8000/dev/private-krysp"]
+
+    (fact "sipoo can not set working krysp-url without credentials"
+      (command sipoo :set-krysp-endpoint :url uri :username "" :password "" :permitType "R" :version "2") => fail?)
+
+    (fact "sipoo can not set working krysp-url with incorrect credentials"
+      (command sipoo :set-krysp-endpoint :url uri :username "foo" :password "bar" :permitType "R" :version "2") => fail?)
+
+    (fact "sipoo can set working krysp-url with correct credentials"
+      (command sipoo :set-krysp-endpoint :url uri :username "pena" :password "pena" :permitType "R" :version "2") => ok?)
+
+    (fact "sipoo can not set working krysp-url with incorrect username and saved password"
+      (command sipoo :set-krysp-endpoint :url uri :username "foo" :password "" :permitType "R" :version "2") => fail?)
+
+    (fact "sipoo can set working krysp-url with only username set"
+      (command sipoo :set-krysp-endpoint :url uri :username "pena" :password "" :permitType "R" :version "2") => ok?)
+
+    (fact "query krysp config - no url or credentials set for P endpoint"
+      (-> (query sipoo :krysp-config) :krysp :P (select-keys [:url :username :password])) => {})
+
+    (fact "query krysp config - credentials not set for YA endpoint"
+      (-> (query sipoo :krysp-config) :krysp :YA (select-keys [:url :username :password])) => (just {:url anything}))
+
+    (fact "query krysp config - credentials set for R endpoint - password is not returned"
+      (-> (query sipoo :krysp-config) :krysp :R (select-keys [:url :username :password])) => (just {:url uri :username "pena"}))))
 
 
 (facts* "users-in-same-organizations"
@@ -146,11 +173,11 @@
           kopiolaitos-orderer-phone "123"
           kopiolaitos-orderer-email "orderer@example.com"]
 
-;      (fact "the 'app-required-fields-filling-obligatory' and 'kopiolaitos-email' flags have not yet been set for organization in db"
-;        (:app-required-fields-filling-obligatory org) => nil
-;        (-> app :organizationMeta :requiredFieldsFillingObligatory) => false)
+      (fact "the 'app-required-fields-filling-obligatory' and 'kopiolaitos-email' flags have not yet been set for organization in db"
+        (:app-required-fields-filling-obligatory org) => falsey
+        (-> app :organizationMeta :requiredFieldsFillingObligatory) => falsey)
 
-;      (command sipoo "set-organization-app-required-fields-filling-obligatory" :isObligatory false) => ok?
+      (command sipoo "set-organization-app-required-fields-filling-obligatory" :enabled false) => ok?
 
       (let [app    (query-application pena app-id)
             org    (query admin "organization-by-id" :organizationId  (:organization app))
@@ -171,7 +198,7 @@
           (:kopiolaitos-orderer-phone org) => "0501231234"
           (get-in organizationMeta [:kopiolaitos :kopiolaitosOrdererPhone]) => "0501231234"))
 
-      (command sipoo "set-organization-app-required-fields-filling-obligatory" :isObligatory true) => ok?
+      (command sipoo "set-organization-app-required-fields-filling-obligatory" :enabled true) => ok?
       (command sipoo "set-kopiolaitos-info"
         :kopiolaitosEmail kopiolaitos-email
         :kopiolaitosOrdererAddress kopiolaitos-orderer-address

@@ -47,7 +47,7 @@
 
   function initMarking(appModel) {
     model.appModel = appModel;
-    model.filteredAttachments = filterAttachments(ko.mapping.toJS(appModel.attachments()));
+    model.filteredAttachments = filterAttachments(appModel._js.attachments);
     model.authorization = lupapisteApp.models.applicationAuthModel;
 
     pageutil.openPage("verdict-attachments-select", model.appModel.id());
@@ -67,6 +67,7 @@
           model.appModel = lupapisteApp.models.application;
 
           ko.mapping.fromJS(application, {}, model.appModel);
+          model.appModel._js = application;
 
           model.filteredAttachments = filterAttachments(application.attachments);
 

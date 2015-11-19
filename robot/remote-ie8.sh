@@ -11,9 +11,6 @@ if [ -z $server ] ; then
 	server="https://www-dev.lupapiste.fi"
 fi
 
-hubert='hubert.solita.fi'
-hubertxp='192.168.7.122'
+source remote-config.sh
 
-remote=$hubertxp
-
-pybot -d target --include ie8 --exclude integration --exclude fail --variable BROWSER:internetexplorer --variable WAIT_DELAY:15 --variable SELENIUM:http://$remote:4444/wd/hub --variable SERVER:$server $target
+pybot -d target --include ie8 --exclude integration --exclude fail --variable BROWSER:internetexplorer --variable WAIT_DELAY:15 --variable SELENIUM:http://$remotexp:4444/wd/hub --variable SERVER:$server $target

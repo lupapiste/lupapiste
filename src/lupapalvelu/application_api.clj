@@ -15,9 +15,8 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.document.document :as document]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
@@ -29,7 +28,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
-            [lupapalvelu.state-machine :as state-machine]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as user]))
 
 ;; Notifications
@@ -82,40 +81,26 @@
   (let [authorities (find-authorities-in-applications-organization application)]
     (ok :authorities (map #(select-keys % [:id :firstName :lastName]) authorities))))
 
-(def ktj-format (tf/formatter "yyyyMMdd"))
-(def output-format (tf/formatter "dd.MM.yyyy"))
-
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
-    (when-let [rakennuspaikka (domain/get-document-by-type application :location)]
-      (when-let [ktj-tiedot (wfs/rekisteritiedot-xml (:propertyId application))]
-        (let [updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
-                       [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
-                       [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
-                       [[:kiinteisto :rekisterointipvm] (or
-                                                          (try
-                                                            (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                            (catch Exception e (:rekisterointipvm ktj-tiedot)))
-                                                          "")]]
-              schema (schemas/get-schema (:schema-info rakennuspaikka))
-              updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
-          (doc-persistence/persist-model-updates
-            application
-            "documents"
-            rakennuspaikka
-            updates
-            time))))))
+    (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]
+      (doseq [rakennuspaikka rakennuspaikka-docs
+              :when (seq rakennuspaikka)]
+        (let [property-id (or
+                            (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
+                            (:propertyId application))]
+          (document/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
 
 (defquery party-document-names
-          {:parameters [:id]
-           :user-roles #{:applicant :authority}
-           :states     states/all-application-states}
-          [{application :application}]
-          (let [documents (:documents application)
-                initialOp (:name (:primaryOperation application))
-                original-schema-names (-> initialOp keyword operations/operations :required)
-                original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
-            (ok :partyDocumentNames (conj original-party-documents (permit/get-applicant-doc-schema (permit/permit-type application))))))
+  {:parameters [:id]
+   :user-roles #{:applicant :authority}
+   :states     states/all-application-states}
+  [{application :application}]
+  (let [documents (:documents application)
+        op-meta (operations/get-primary-operation-metadata application)
+        original-schema-names (->> (select-keys op-meta [:required :optional]) vals (apply concat))
+        original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
+    (ok :partyDocumentNames (conj original-party-documents (operations/get-applicant-doc-schema-name application)))))
 
 (defcommand mark-seen
   {:parameters       [:id type]
@@ -156,20 +141,21 @@
 (defn- remove-app-links [id]
   (mongo/remove-many :app-links {:link {$in [id]}}))
 
+(defn- do-cancel [{:keys [created user data] :as command}]
+  {:pre [(seq (:application command))]}
+  (update-application command (a/state-transition-update :canceled created user))
+  (remove-app-links (:id data))
+  (ok))
+
 (defcommand cancel-inforequest
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority :oirAuthority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(partial state-machine/validate-state-transition :canceled)]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified created
-                             :canceled created
-                             :state    :canceled}})
-  (remove-app-links id)
-  (ok))
+   :pre-checks       [(partial sm/validate-state-transition :canceled)]}
+  [command]
+  (do-cancel command))
 
 (defcommand cancel-application
   {:parameters       [id]
@@ -178,14 +164,9 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :states           #{:draft :info :open :submitted}
-   :pre-checks       [(partial state-machine/validate-state-transition :canceled)]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified created
-                             :canceled created
-                             :state    :canceled}})
-  (remove-app-links id)
-  (ok))
+   :pre-checks       [(partial sm/validate-state-transition :canceled)]}
+  [command]
+  (do-cancel command))
 
 (defcommand cancel-application-authority
   {:parameters       [id text lang]
@@ -194,10 +175,11 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [a/validate-authority-in-drafts
-                      (partial state-machine/validate-state-transition :canceled)]}
-  [{:keys [created application] :as command}]
+                      (partial sm/validate-state-transition :canceled)]}
+  [{:keys [created application user] :as command}]
   (update-application command
     (util/deep-merge
+      (a/state-transition-update :canceled created user)
       (when (seq text)
         (comment/comment-mongo-update
           (:state application)
@@ -210,10 +192,7 @@
           false
           (:user command)
           nil
-          created))
-      {$set {:modified created
-             :canceled created
-             :state    :canceled}}))
+          created))))
   (remove-app-links id)
   (ok))
 
@@ -224,20 +203,20 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(partial state-machine/validate-state-transition :complement-needed)]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified         created
-                             :complementNeeded created
-                             :state            :complement-needed}}))
-
+   :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
+  [{:keys [created user] :as command}]
+  (update-application command (util/deep-merge (a/state-transition-update :complementNeeded created user))))
 
 (defn- do-submit [command application created]
-  (update-application command
-                      {$set {:state     :submitted
-                             :modified  created
-                             :opened    (or (:opened application) created)
-                             :submitted (or (:submitted application) created)}})
+  (let [history-entries (remove nil?
+                          [(when-not (:opened application) (a/history-entry :open created (:user command)))
+                           (a/history-entry :submitted created (:user command))])]
+    (update-application command
+      {$set {:state     :submitted
+             :modified  created
+             :opened    (or (:opened application) created)
+             :submitted (or (:submitted application) created)}
+       $push {:history {$each history-entries}}}))
   (try
     (mongo/insert :submitted-applications (-> application
                                             meta-fields/enrich-with-link-permit-data
@@ -256,7 +235,7 @@
    :on-success       (notify :application-state-change)
    :pre-checks       [domain/validate-owner-or-write-access
                       a/validate-authority-in-drafts
-                      (partial state-machine/validate-state-transition :submitted)]}
+                      (partial sm/validate-state-transition :submitted)]}
   [{:keys [application created] :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)]
     (or
@@ -267,7 +246,7 @@
 (defcommand refresh-ktj
   {:parameters [:id]
    :user-roles #{:authority}
-   :states     (states/all-states-but [:draft])}
+   :states     (states/all-application-states-but (conj states/terminal-states :draft))}
   [{:keys [application created]}]
   (autofill-rakennuspaikka application created)
   (ok))
@@ -276,7 +255,7 @@
   {:parameters       [:id drawings]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :states           #{:draft :info :answered :open :submitted :complement-needed}
+   :states           #{:draft :info :answered :open :submitted :complementNeeded}
    :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
@@ -408,10 +387,11 @@
         new-secondary-ops (if old-primary-op ; production data contains applications with nil in primaryOperation
                             (conj secondary-ops-without-old-primary-op old-primary-op)
                             secondary-ops-without-old-primary-op)]
-    (when-not new-primary-op
-      (fail! :error.unknown-operation))
-    (update-application command {$set {:primaryOperation new-primary-op
-                                       :secondaryOperations new-secondary-ops}})
+    (when-not (= (:id old-primary-op) secondaryOperationId)
+      (when-not new-primary-op
+        (fail! :error.unknown-operation))
+      (update-application command {$set {:primaryOperation    new-primary-op
+                                         :secondaryOperations new-secondary-ops}}))
     (ok)))
 
 (defcommand change-permit-sub-type
@@ -467,60 +447,54 @@
                              (fail :error.link-permit-not-required)))]})
 
 (defquery app-matches-for-link-permits
-          {:parameters [id]
-           :user-roles #{:applicant :authority}
-           :states     (states/all-application-states-but (conj states/terminal-states :sent))}
-          [{{:keys [propertyId] :as application} :application user :user :as command}]
-          (let [application (meta-fields/enrich-with-link-permit-data application)
-                ;; exclude from results the current application itself, and the applications that have a link-permit relation to it
-                ignore-ids (-> application
-                               (#(concat (:linkPermitData %) (:appsLinkingToUs %)))
-                               (#(map :id %))
-                               (conj id))
-                results (mongo/select :applications
-                                      (merge (domain/application-query-for user) {:_id             {$nin ignore-ids}
-                                                                                  :infoRequest     false
-                                                                                  :permitType      (:permitType application)
-                                                                                  :secondaryOperations.name {$nin ["ya-jatkoaika"]}
-                                                                                  :primaryOperation.name {$nin ["ya-jatkoaika"]}})
-
-                                      [:permitType :address :propertyId])
-                ;; add the text to show in the dropdown for selections
-                enriched-results (map
-                                   (fn [r] (assoc r :text (str (:address r) ", " (:id r))))
-                                   results)
-                ;; sort the results
-                same-property-id-fn #(= propertyId (:propertyId %))
-                with-same-property-id (vec (filter same-property-id-fn enriched-results))
-                without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
-                organized-results (flatten (conj with-same-property-id without-same-property-id))
-                final-results (map #(select-keys % [:id :text]) organized-results)]
-            (ok :app-links final-results)))
-
-
-(defn- validate-jatkolupa-zero-link-permits [_ application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)]
-    (when (and (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
-               (pos? (-> application :linkPermitData count)))
-      (fail :error.jatkolupa-can-only-be-added-one-link-permit))))
-
-(defn- validate-link-permit-id [{:keys [data]} application]
+  {:parameters [id]
+   :user-roles #{:applicant :authority}
+   :states     (states/all-application-states-but (conj states/terminal-states :sent))}
+  [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
+        ;; exclude from results the current application itself, and the applications that have a link-permit relation to it
         ignore-ids (-> application
                        (#(concat (:linkPermitData %) (:appsLinkingToUs %)))
                        (#(map :id %))
-                       (conj (:id application)))]
-    (when (some
-            #(= (:id %) (:linkPermitId data))
-            (:appsLinkingToUs application))
-      (fail :error.link-permit-already-having-us-as-link-permit))))
+                       (conj id))
+        results (mongo/select :applications
+                              (merge (domain/application-query-for user) {:_id             {$nin ignore-ids}
+                                                                          :infoRequest     false
+                                                                          :permitType      (:permitType application)
+                                                                          :secondaryOperations.name {$nin ["ya-jatkoaika"]}
+                                                                          :primaryOperation.name {$nin ["ya-jatkoaika"]}})
+
+                              [:permitType :address :propertyId])
+        ;; add the text to show in the dropdown for selections
+        enriched-results (map
+                           (fn [r] (assoc r :text (str (:address r) ", " (:id r))))
+                           results)
+        ;; sort the results
+        same-property-id-fn #(= propertyId (:propertyId %))
+        with-same-property-id (vec (filter same-property-id-fn enriched-results))
+        without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
+        organized-results (flatten (conj with-same-property-id without-same-property-id))
+        final-results (map #(select-keys % [:id :text]) organized-results)]
+    (ok :app-links final-results)))
+
+(defn- validate-linking [command app]
+  (let [link-permit-id (ss/trim (get-in command [:data :linkPermitId]))
+        {:keys [appsLinkingToUs linkPermitData]} (meta-fields/enrich-with-link-permit-data app)
+        max-outgoing-link-permits (operations/get-primary-operation-metadata app :max-outgoing-link-permits)
+        links    (concat appsLinkingToUs linkPermitData)
+        illegal-apps (conj links app)]
+    (cond
+      (and link-permit-id (util/find-by-id link-permit-id illegal-apps))
+      (fail :error.link-permit-already-having-us-as-link-permit)
+
+      (and max-outgoing-link-permits (= max-outgoing-link-permits (count linkPermitData)))
+      (fail :error.max-outgoing-link-permits))))
 
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
    :user-roles       #{:applicant :authority}
    :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
-   :pre-checks       [validate-jatkolupa-zero-link-permits
-                      validate-link-permit-id
+   :pre-checks       [validate-linking
                       a/validate-authority-in-drafts]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
                       (fn [{data :data}] (when (= (:id data) (ss/trim (:linkPermitId data))) (fail :error.link-permit-self-reference)))
@@ -556,10 +530,24 @@
         op-id-mapping (into {} (map
                                  #(vector (:id %) (mongo/create-id))
                                  (conj secondary-ops primary-op)))
-        muutoslupa-app (merge application
+        state (if (user/authority? user) :open :draft)
+        muutoslupa-app (merge domain/application-skeleton
+                              (select-keys application
+                                [:auth
+                                 :propertyId, :location
+                                 :schema-version
+                                 :address, :title
+                                 :foreman, :foremanRole
+                                 :applicant, :_applicantIndex
+                                 :municipality, :organization
+                                 :drawings
+                                 :metadata])
+
                               {:id            muutoslupa-app-id
+                               :permitType    permit/R
+                               :permitSubtype :muutoslupa
                                :created       created
-                               :opened        created
+                               :opened        (when (user/authority? user) created)
                                :modified      created
                                :documents     (into [] (map
                                                          (fn [doc]
@@ -568,16 +556,16 @@
                                                                (update-in doc [:schema-info :op :id] op-id-mapping)
                                                                doc)))
                                                          (:documents application)))
-                               :state         (cond
-                                                (user/authority? user) :open
-                                                :else :draft)
-                               :permitSubtype :muutoslupa
+                               :state         state
+
+                               :history [(a/history-entry state created user)]
+                               :infoRequest false
+                               :openInfoRequest false
+                               :convertedToApplication nil
+
                                :primaryOperation (assoc primary-op :id (op-id-mapping (:id primary-op)))
-                               :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops) }
-                              (select-keys
-                                domain/application-skeleton
-                                [:attachments :statements :verdicts :comments :submitted :sent :neighbors
-                                 :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
+                               :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %))) secondary-ops)})]
+
     (a/do-add-link-permit muutoslupa-app (:id application))
     (a/insert-application muutoslupa-app)
     (ok :id muutoslupa-app-id)))
@@ -656,14 +644,14 @@
   (let [op (:primaryOperation application)
         organization (organization/get-organization (:organization application))]
     (update-application command
-                        {$set  {:infoRequest            false
-                                :openInfoRequest        false
-                                :state                  :open
-                                :opened                 created
-                                :convertedToApplication created
-                                :documents              (a/make-documents user created op application)
-                                :modified               created}
-                         $push {:attachments {$each (a/make-attachments created op organization (:state application) (:tosFunction application))}}})
+                        (util/deep-merge
+                          (a/state-transition-update :open created user)
+                          {$set  {:infoRequest            false
+                                  :openInfoRequest        false
+                                  :convertedToApplication created
+                                  :documents              (a/make-documents user created op application)
+                                  :modified               created}
+                           $push {:attachments {$each (a/make-attachments created op organization (:state application) (:tosFunction application))}}}))
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
 
@@ -716,3 +704,4 @@
         redirect-url               (apply str url-parts)]
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
+

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <body>
-  <section class="page container" id="applications" data-test-id="own-applications">
+  <section class="page" id="applications" data-test-id="own-applications">
     <div id="invitations" data-bind="with: invitesModel">
-      <div class="invitations" data-bind="if: invites().length">
+      <div class="invitations container" data-bind="if: invites().length">
         <h2 data-bind="ltext: 'application.invites'"></h2>
         <div data-bind="foreach: invites" >
           <div class="invitation">

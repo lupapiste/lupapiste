@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Neighbor logs in with Vetuma and comments the application
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ../02_register/keywords.robot
 

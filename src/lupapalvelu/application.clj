@@ -4,6 +4,7 @@
             [clj-time.local :refer [local-now]]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
+            [monger.operators :refer [$set $push]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
@@ -19,6 +20,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as user]
+            [lupapalvelu.states :as states]
             [sade.core :refer :all]
             [sade.property :as p]
             [sade.util :as util]
@@ -34,6 +36,9 @@
   (let [op-subtypes (operations/get-primary-operation-metadata {:primaryOperation op} :subtypes)
         permit-subtypes (permit/permit-subtypes permit-type)]
     (concat op-subtypes permit-subtypes)))
+
+(defn history-entry [to-state timestamp user]
+  {:state to-state, :ts timestamp, :user (user/summary user)})
 
 ;;
 ;; Validators
@@ -60,7 +65,7 @@
       (fail :error.permit-must-have-link-permit))))
 
 (defn validate-authority-in-drafts
-  "Validator: Restric authority access in draft application.
+  "Validator: Restrict authority access in draft application.
    To be used in commands' :pre-checks vector."
   [{user :user} {state :state}]
   (when (and (= :draft (keyword state)) (user/authority? user))
@@ -75,11 +80,31 @@
     (when-not (util/contains-value? (resolve-valid-subtypes application) (keyword subtype))
       (fail :error.permit-has-no-such-subtype))))
 
+(defn submitted? [{:keys [submitted state primaryOperation]}]
+  (or
+    (not (nil? submitted))
+    (and
+      (= "aiemmalla-luvalla-hakeminen" (:name primaryOperation))
+      (states/post-submitted-states state))))
+
+(defn- link-permit-submitted? [link-id]
+  (submitted? (domain/get-application-no-access-checking link-id)))
+
+; Foreman
+(defn- foreman-submittable? [application]
+  (let [result (when (-> application :state keyword #{:draft :open :submitted :complementNeeded})
+                 (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
+                   (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
+    (if (nil? result)
+      true
+      result)))
+
 ;;
 ;; Helpers
 ;;
 
 (defn insert-application [application]
+  {:pre [(every? (partial contains? application)  (keys domain/application-skeleton))]}
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
 
 (defn filter-repeating-party-docs [schema-version schema-names]
@@ -153,23 +178,18 @@
 ;; Application query post process
 ;;
 
-(defn- link-permit-submitted? [link-id]
-  (-> (mongo/by-id "applications" link-id [:state])
-    :state keyword #{:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed :canceled} nil? not))
-
-; Foreman
-(defn- foreman-submittable? [application]
-  (let [result (when (-> application :state keyword #{:draft :open :submitted :complement-needed})
-                 (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
-                   (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
-    (if (nil? result)
-      true
-      result)))
-
 (defn- process-foreman-v2 [application]
   (if (= (-> application :primaryOperation :name) "tyonjohtajan-nimeaminen-v2")
     (assoc application :submittable (foreman-submittable? application))
     application))
+
+;; Meta fields with default values.
+(def- operation-meta-fields-to-enrich {:optional []})
+(defn- enrich-primary-operation-with-metadata [app]
+  (let [enrichable-fields (-> (operations/get-primary-operation-metadata app)
+                              (select-keys (keys operation-meta-fields-to-enrich)))
+        fields-with-defaults (merge operation-meta-fields-to-enrich enrichable-fields)]
+    (update app :primaryOperation merge fields-with-defaults)))
 
 (defn post-process-app [app user]
   (->> app
@@ -178,7 +198,8 @@
        action/without-system-keys
        process-foreman-v2
        (process-documents-and-tasks user)
-       location->object))
+       location->object
+       enrich-primary-operation-with-metadata))
 
 ;;
 ;; Application creation
@@ -222,15 +243,16 @@
                                    created))}))
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
-        new-docs (-<>> (:documents application)
-                       (map (comp :name :schema-info))      ;; existing schema names
-                       set
-                       (remove <> (:required op-info))      ;; required schema names
-                       (map make)                           ;; required docs
-                       (cons op-doc))]                      ;; new docs
+        existing-schemas (->> (:documents application)
+                              (map (comp :name :schema-info))      ;; existing schema names
+                              set)
+        new-docs (->> (:required op-info)
+                      (remove existing-schemas)      ;; required schema names
+                      (map make)                           ;; required docs
+                      (cons op-doc))]                      ;; new docs
     (if-not user
       new-docs
-      (conj new-docs (make (permit/get-applicant-doc-schema (permit/permit-type application)))))))
+      (conj new-docs (make (operations/get-applicant-doc-schema-name application))))))
 
 
 (defn make-op [op-name created]
@@ -269,6 +291,7 @@
                        :openInfoRequest     open-inforequest?
                        :secondaryOperations []
                        :state               state
+                       :history             [(history-entry state created user)]
                        :municipality        municipality
                        :location            (->location x y)
                        :organization        (:id organization)
@@ -318,13 +341,23 @@
     (str app-id "|" link-permit-id)
     (str link-permit-id "|" app-id)))
 
-(defn do-add-link-permit [{:keys [id propertyId primaryOperation]} link-permit-id]
+(defn do-add-link-permit [{:keys [id propertyId primaryOperation] :as application} link-permit-id]
   {:pre [(mongo/valid-key? link-permit-id)
          (not= id link-permit-id)]}
   (let [db-id (make-mongo-id-for-link-permit id link-permit-id)
-        is-lupapiste-app (mongo/any? :applications {:_id link-permit-id})
-        linked-app (when is-lupapiste-app
-                     (domain/get-application-no-access-checking link-permit-id))]
+        link-application (some-> link-permit-id
+                     domain/get-application-no-access-checking
+                     meta-fields/enrich-with-link-permit-data)
+        max-incoming-link-permits (operations/get-primary-operation-metadata link-application :max-incoming-link-permits)
+        allowed-link-permit-types (operations/get-primary-operation-metadata application :allowed-link-permit-types)]
+
+    (when link-application
+      (if (and max-incoming-link-permits (>= (count (:appsLinkingToUs link-application)) max-incoming-link-permits))
+        (fail! :error.max-incoming-link-permits))
+
+      (if (and allowed-link-permit-types (not (allowed-link-permit-types (permit/permit-type link-application))))
+        (fail! :error.link-permit-wrong-type)))
+
     (mongo/update-by-id :app-links db-id
                         {:_id           db-id
                          :link          [id link-permit-id]
@@ -332,11 +365,51 @@
                                          :apptype    (:name primaryOperation)
                                          :propertyId propertyId}
                          link-permit-id {:type           "linkpermit"
-                                         :linkpermittype (if is-lupapiste-app
+                                         :linkpermittype (if link-application
                                                            "lupapistetunnus"
                                                            "kuntalupatunnus")
-                                         :apptype        (->> linked-app
-                                                              (:primaryOperation)
-                                                              (:name))}}
+                                         :apptype (get-in link-application [:primaryOperation :name])}}
                         :upsert true)))
 
+;;
+;; Updates
+;;
+
+(def timestamp-key
+  (merge
+    ; Currently used states
+    {:draft :created
+     :open :opened
+     :submitted :submitted
+     :sent :sent
+     :complementNeeded :complementNeeded
+     :verdictGiven nil
+     :constructionStarted :started
+     :acknowledged :acknowledged
+     :foremanVerdictGiven nil
+     :closed :closed
+     :canceled :canceled}
+    ; New states, timestamps to be determined
+    (zipmap
+      [:appealed
+       :extinct
+       :hearing
+       :final
+       :survey
+       :sessionHeld
+       :proposal
+       :registered
+       :proposalApproved
+       :sessionProposal
+       :consideration]
+      (repeat nil))))
+
+(assert (= states/all-application-states (set (keys timestamp-key))))
+
+(defn state-transition-update
+  "Returns a MongoDB update map for state transition"
+  [to-state timestamp user]
+  {$set (merge
+          {:state to-state, :modified timestamp}
+          (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
+   $push {:history (history-entry to-state timestamp user)}})

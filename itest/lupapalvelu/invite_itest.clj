@@ -32,9 +32,9 @@
       (fact "Empty email is rejected"
         (:text (invite mikko application-id suunnittelija-doc "suunnittelija" "")) => "error.missing-parameters")
       (fact "Email contains whitespace"
-        (:text (invite mikko application-id suunnittelija-doc "suunnittelija" "juha jokimaki@solita.fi")) => "error.email")
+        (:text (invite mikko application-id suunnittelija-doc "suunnittelija" "eero eratuli@example.com")) => "error.email")
       (fact "Email contains non-ascii chars"
-        (:text (invite mikko application-id suunnittelija-doc "suunnittelija" "juha.jokim\u00e4ki@solita.fi")) => "error.email"))
+        (:text (invite mikko application-id suunnittelija-doc "suunnittelija" "eero.er\u00e4tuli@example.com")) => "error.email"))
 
     (fact "Teppo must not be able to invite himself!"
       (invite teppo application-id suunnittelija-doc "suunnittelija" (email-for-key teppo)) => not-accessible?)
@@ -51,12 +51,15 @@
         (count (:invites invs)) => 1
 
         (fact "invite response has correct application map keys"
-          (keys (:application (first (:invites invs)))) => (just [:id :municipality :address :primaryOperation] :in-any-order))
+          (-> invs :invites first :application keys) => (just [:id :municipality :address :primaryOperation] :in-any-order))
 
-        email => (partial contains-application-link? application-id "applicant")
-        (:to email) => (contains (email-for-key teppo))
-        (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"
-        (get-in email [:body :plain]) => (contains "Hei, sinut on kutsuttu")))
+        (fact "invite email contents"
+          email => (partial contains-application-link? application-id "applicant")
+          (:to email) => (contains (email-for-key teppo))
+          (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"
+          (get-in email [:body :plain]) => (contains "Hei, sinut on kutsuttu")
+          (get-in email [:body :plain]) => (contains (email-for-key teppo))
+          (get-in email [:body :plain]) => (contains (email-for-key mikko)))))
 
     (fact "Sonja must NOT be able to uninvite Teppo!"
       (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => unauthorized?

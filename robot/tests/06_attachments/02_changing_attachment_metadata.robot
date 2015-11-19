@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Sonja should see only applications from Sipoo
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
 
@@ -15,9 +15,7 @@ Mikko creates application
 
 Mikko edits operation description
   Open accordions  info
-  Wait and click  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//button[@data-test-id='edit-op-description']
-  Input text by test id  op-description-editor  Talo A
-  Wait until  Page should contain  Tallennettu
+  Edit operation description  uusiRakennus  Talo A
 
 Mikko adds an operation
   Set animations off
@@ -32,10 +30,10 @@ Mikko adds an operation
 
 Mikko edits operation B description
   Open accordions  info
-  ${button} =  Set Variable  $("#application-info-tab button[data-test-id='edit-op-description']:last")
-  Execute Javascript  ${button}.click();
+  ${button} =  Set Variable  $("#application-info-tab button[data-test-id='edit-op-description-uusiRakennus']:last")
+  Execute Javascript  ${button}.mousedown();
 
-  ${selector} =   Set Variable  $("input[data-test-id='op-description-editor']:visible")
+  ${selector} =   Set Variable  $("input[data-test-id='op-description-editor-uusiRakennus']:visible")
   Wait For Condition  return ${selector}.length===1;  10
 
   Execute Javascript  ${selector}.val("Talo B").change().blur();
@@ -57,28 +55,32 @@ Mikko opens attachment details
 Mikko can change related operation
   Element should be visible  xpath=//select[@data-test-id="attachment-operation-select"]
   Select From List  xpath=//select[@data-test-id='attachment-operation-select']  Muun rakennuksen rakentaminen - Talo B
+  Positive indicator should be visible
 
 Mikko can change size
+  Positive indicator should not be visible
   Element should be visible  xpath=//select[@data-test-id='attachment-size-select']
   Select From List  xpath=//select[@data-test-id='attachment-size-select']  B0
+  Positive indicator should be visible
 
 Mikko can change scale
+  Positive indicator should not be visible
   Element should be visible  xpath=//select[@data-test-id='attachment-scale-select']
   Select From List  xpath=//select[@data-test-id='attachment-scale-select']  1:200
+  Positive indicator should be visible
 
 Mikko can change contents
+  Positive indicator should not be visible
   Element should be visible  xpath=//input[@data-test-id='attachment-contents-input']
   Input text by test id  attachment-contents-input  PuuCee
-  Sleep  1
-  [Teardown]  logout
+  Positive indicator should be visible
 
-Mikko logs in and goes to attachments tab
-  Mikko logs in
-  Open application  ${appname}  753-416-25-30
-  Open tab  attachments
+Mikko goes to fresh attachments tab
+  Go Back
+  Reload Page
 
 Mikko sees that contents metadata is visible in attachments list
-  Element Text Should Be  xpath=//div[@id="application-attachments-tab"]//span[@data-test-id="attachment-contents"]  PuuCee
+  Wait Until  Element Text Should Be  xpath=//div[@id="application-attachments-tab"]//span[@data-test-id="attachment-contents"]  PuuCee
 
 Mikko sees that attachments are grouped by operations
   Xpath Should Match X Times  //div[@id="application-attachments-tab"]//tr[@class="attachment-group-header"]  2

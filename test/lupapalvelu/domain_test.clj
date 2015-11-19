@@ -36,12 +36,13 @@
 (facts "get documents by subtype"
   (let [documents [{:id 1 :data "jee" :schema-info {:name "hakija-ya" :type :location :subtype "hakija"}}
                    {:id 2 :data "jee2" :schema-info {:name "hakija-r" :type :location :subtype "hakija"}}
-                   {:id 3 :data "error type" :schema-info {:name "other" :type :location :subtype "error"}}
-                   {:id 4 :data "keyword" :schema-info {:name "other" :type :location :subtype :keyword}}]]
-    (fact "two hakija docs" (get-documents-by-subtype documents "hakija") => (just [(first documents) (second documents)]))
-    (fact "one error docs" (get-documents-by-subtype documents "error") => [{:id 3 :data "error type" :schema-info {:name "other" :type :location :subtype "error"}}])
+                   {:id 3 :data "jee3" :schema-info {:name "ilmoittaja" :type :location :subtype "hakija"}}
+                   {:id 4 :data "error type" :schema-info {:name "other" :type :location :subtype "error"}}
+                   {:id 5 :data "keyword" :schema-info {:name "other" :type :location :subtype :keyword}}]]
+    (fact "two hakija docs" (get-documents-by-subtype documents "hakija") => (just [(first documents) (second documents) (nth documents 2)]))
+    (fact "one error docs" (get-documents-by-subtype documents "error") => [(nth documents 3)])
     (fact "unknown returns in empty list" (get-documents-by-subtype documents "unknown") => empty?)
-    (fact "keyword also works" (get-documents-by-subtype documents :hakija) => (just [(first documents) (second documents)]))
+    (fact "keyword also works" (get-documents-by-subtype documents :hakija) => (just [(first documents) (second documents) (nth documents 2)]))
     (fact "keyword as subtype value" (get-documents-by-subtype documents :keyword) => (just [(last documents)]))))
 
 (facts "invites"

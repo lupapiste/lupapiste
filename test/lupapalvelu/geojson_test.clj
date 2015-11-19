@@ -1,7 +1,10 @@
 (ns lupapalvelu.geojson-test
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.geojson :refer :all]
             [sade.core :refer [fail?]]))
+
+(testable-privates lupapalvelu.geojson select-coordinates)
 
 (facts "Validate Point" ; Coordinate values tested in coordinate_test.clj
   (validate-point [10001 6610000]) => nil
@@ -63,4 +66,12 @@
     (resolve-polygons multi-feature-simple) => (resolve-polygons polygon-feature))
   (fact "returns two Polygons"
     (count (resolve-polygons multi-feature)) => 2))
+
+(facts "Ensuring coordinates format"
+  (select-coordinates nil) => nil
+  (fact "Convert points to 2d"
+    (select-coordinates [2.2 3.3 4.4]) => [2.2 3.3])
+  (fact "if it's not sequence of numbers, arg is returned"
+    (select-coordinates [[2.2 3.3 4.4]]) => [[2.2 3.3 4.4]]
+    (select-coordinates []) => []))
 

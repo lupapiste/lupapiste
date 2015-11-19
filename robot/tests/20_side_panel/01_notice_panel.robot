@@ -42,7 +42,7 @@ Sonja can set application urgency to urgent
 
 Ronja can see urgent application
   Ronja logs in
-  Wait until  Element should be visible  //td[@data-test-col-name='urgent']//div[@class='urgency urgent']
+  Wait until  Element should be visible  //div[contains(@class, 'urgent')]
 
 Ronja can click notice icon -> application page is opened with notice panel open
   Click element  xpath=//td[@data-test-col-name='urgent']/div
@@ -61,5 +61,5 @@ Sonja can set application urgency to pending
 Ronja can see pending application
   Ronja logs in
   Request should be visible  ${appname}
-  Wait until  Element should be visible  //td[@data-test-col-name='urgent']//div[@class='urgency pending']
+  Wait until  Element should be visible  //div[contains(@class, 'pending')]
   Logout

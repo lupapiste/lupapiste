@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Admin edits authority admin users
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***

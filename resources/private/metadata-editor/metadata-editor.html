@@ -18,7 +18,10 @@
         </div>
         <div class="editor-form" data-bind="if: !_.isEmpty(editedMetadata())">
 
-          <div data-bind="template: {name: 'metadata-list-template', data: {schemaList: schema, values: editedMetadata, invalidFields: invalidFields, editable: editable}}"></div>
+          <div data-bind="template: {name: 'metadata-list-template',
+                          data: {schemaList: schema, values: editedMetadata, invalidFields: invalidFields,
+                                 editable: editable, disabledFields: disabledFields, disableAll: false}}">
+          </div>
 
           <div data-bind="if: editable" class="editor-buttons">
             <button class="btn-primary save" data-bind="click: save, ltext: 'save', enable: invalidFields().length === 0"></button>
@@ -38,20 +41,23 @@
                            options: values,
                            optionsText: loc,
                            value: $parent.values()[type],
-                           valueAllowUnset: true" ></select>
+                           valueAllowUnset: true,
+                           disable: $parent.disableAll || $parent.disabledFields && _.contains($parent.disabledFields(), type)"></select>
       </div>
       <div data-bind="if: $data.inputType" class="text-input-container">
         <label data-bind="ltext: type"></label><br>
         <span data-bind="if: inputType === 'checkbox'">
           <input type="checkbox" class="form-input" data-bind="visible: $parent.editable, checked: $parent.values()[type],
-                                                               css: {invalid: $parent.invalidFields().indexOf(type) >= 0}">
+                                                               css: {invalid: $parent.invalidFields().indexOf(type) >= 0},
+                                                               disable: $parent.disableAll || $parent.disabledFields &&  _.contains($parent.disabledFields(), type)">
           <span data-bind="visible: !$parent.editable() && $parent.values()[type](), ltext: 'yes'"></span>
           <span data-bind="visible: !$parent.editable() && !$parent.values()[type](), ltext: 'no'"></span>
         </span>
         <span data-bind="if: inputType !== 'checkbox'">
           <input class="form-input" data-bind="visible: $parent.editable, attr: {type: inputType},
                                                textInput: $parent.values()[type],
-                                               css: {invalid: $parent.invalidFields().indexOf(type) >= 0}">
+                                               css: {invalid: $parent.invalidFields().indexOf(type) >= 0},
+                                               disable: $parent.disableAll || $parent.disabledFields && _.contains($parent.disabledFields(), type)">
           <span data-bind="visible: !$parent.editable(), text: $parent.values()[type]"></span>
         </span>
         <span data-bind="visible: inputType === 'number', ltext: 'vuotta'" class="year-label"></span>
@@ -60,12 +66,14 @@
       <div class="subtable">
         <h4 data-bind="ltext: type"></h4>
         <div data-bind="template: {name: 'metadata-list-template',
-                        data: {schemaList: subfields, values: function() {return $parent.values()[type]}, invalidFields: $parent.invalidFields, editable: $parent.editable}}"></div>
+                        data: {schemaList: subfields, values: function() {return $parent.values()[type]}, invalidFields: $parent.invalidFields,
+                               editable: $parent.editable, disableAll: $parent.disableAll || $parent.disabledFields && _.contains($parent.disabledFields(), type)}}"></div>
       </div>
       <!-- /ko -->
       <!-- ko if: $data.dependencies && _.isFunction($parent.values()[type]) && $data.dependencies[$parent.values()[type]()] -->
       <div data-bind="template: {name: 'metadata-list-template',
-                      data: {schemaList: $data.dependencies[$parent.values()[type]()], values: $parent.values, invalidFields: $parent.invalidFields, editable: $parent.editable}}"></div>
+                      data: {schemaList: $data.dependencies[$parent.values()[type]()], values: $parent.values, invalidFields: $parent.invalidFields,
+                             editable: $parent.editable, disableAll: $parent.disableAll || $parent.disabledFields && _.contains($parent.disabledFields(), type)}},"></div>
       <!-- /ko -->
     </div>
   </script>

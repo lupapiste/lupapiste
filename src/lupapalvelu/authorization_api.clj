@@ -9,10 +9,10 @@
             [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application notify] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user-api :as user-api]
             [lupapalvelu.user :as user]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
@@ -41,7 +41,8 @@
 (defn- create-invite-email-model [command conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
     :message (get-in command [:data :text])
-    :recipient-email (:email recipient)))
+    :recipient-email (:email recipient)
+    :inviter-email (-> command :user :email)))
 
 (notifications/defemail :invite  {:recipients-fn :recipients
                                   :model-fn create-invite-email-model})
@@ -58,19 +59,6 @@
 (defn- valid-role [role]
   (#{:writer :foreman} (keyword role)))
 
-(defn- create-invite-auth [inviter invited application-id text document-name document-id path role timestamp]
-  (let [invite {:application  application-id
-                :text         text
-                :path         path
-                :documentName document-name
-                :documentId   document-id
-                :created      timestamp
-                :email        (:email invited)
-                :role         role
-                :user         (user/summary invited)
-                :inviter      (user/summary inviter)}]
-    (assoc (user/user-in-role invited :reader) :invite invite)))
-
 (defn send-invite! [{{:keys [email text documentName documentId path role notification]} :data
                      timestamp :created
                      inviter :user
@@ -81,15 +69,16 @@
         existing-user (user/get-user-by-email email)]
     (if (or (domain/invite application email) (domain/has-auth? application (:id existing-user)))
       (fail :invite.already-has-auth)
-      (let [invited (user-api/get-or-create-user-by-email email inviter)
-            auth    (create-invite-auth inviter invited (:id application) text documentName documentId path role timestamp)]
+      (let [invited (user/get-or-create-user-by-email email inviter)
+            auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)
+            email-template (if (= notification "invite-to-prev-permit")
+                             :invite-to-prev-permit
+                             :invite)]
         (update-application command
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
           {$push {:auth     auth}
            $set  {:modified timestamp}})
-        (if (= notification "invite-to-prev-permit")
-          (notifications/notify! :invite-to-prev-permit (assoc command :recipients [invited]))
-          (notifications/notify! :invite (assoc command :recipients [invited])))
+        (notifications/notify! email-template (assoc command :recipients [invited]))
         (ok)))))
 
 (defn- role-validator [{{role :role} :data}]

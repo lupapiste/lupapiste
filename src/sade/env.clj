@@ -15,8 +15,8 @@
       (catch java.io.FileNotFoundException _
         nil))))
 
-(def buildinfo (read-string (slurp (io/resource "buildinfo.clj"))))
-(defn hgnotes [] (read-string (slurp (io/resource "hgnotes.clj"))))
+(def buildinfo (read-string (slurp (io/resource "buildid.edn"))))
+(defn hgnotes [] (read-string (slurp (io/resource "hgnotes.edn"))))
 
 (defn- parse-target-env [buildinfo] (or (re-find #"[PRODEVTSQA]+" (or buildinfo "")) "local"))
 (def target-env (parse-target-env (:build-tag buildinfo)))

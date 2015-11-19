@@ -26,8 +26,8 @@
             <td data-bind="text: loc(['municipality', municipality])"></td>
             <td data-bind="text: loc(['osapuoli.patevyysvaatimusluokka', difficulty])"></td>
             <td data-bind="text: loc(limitedApproval)"></td>
-            <td><span data-bind="text: loc(['osapuoli.tyonjohtaja.kuntaRoolikoodi', jobDescription])"></span> (<span href="#" data-bind="text: foremanAppId"></span>)</td>
-            <td><span data-bind="text: loc(['operations', operation])"></span> (<a href="#" data-bind="click: $parent.followAppLink, text: linkedAppId"></a>)</td>
+            <td><span data-bind="text: loc(['osapuoli.tyonjohtaja.kuntaRoolikoodi', jobDescription])"></span> (<span data-bind="text: foremanAppId"></span>)</td>
+            <td><span data-bind="text: loc(['operations', operation])"></span> (<a data-bind="attr: {href: '#!/application/' + linkedAppId}, text: linkedAppId"></a>)</td>
           </tr>
         </tbody>
       </table>

@@ -2,8 +2,11 @@
 <html>
 <body>
   <section class="page container" id="mypage">
-    <!-- TODO opening first accordion causes form to submit, don't know why -->
     <div id="own-info-form">
+      <button class="secondary" data-bind="click: function() { history.go(-1); }">
+        <i class="lupicon-chevron-start"></i>
+        <span data-bind="ltext: 'back'"></span>
+      </button>
       <h1 data-bind="ltext: 'mypage.title'"></h1>
       <div data-bind="lhtml:'mypage.desc'" class="page-info"></div>
 
@@ -50,7 +53,7 @@
                                           params: {value: companyId,
                                                    id: 'architect.company.id',
                                                    lLabel: 'userinfo.architect.company.id',
-                                                   placeholder: '000009-1'}}"></div>
+                                                   placeholder: loc( 'mypage.ytunnus.placeholder')}}"></div>
             </div>
             <!-- /ko -->
 
@@ -326,8 +329,8 @@
 
           <select name="attachmentType" data-bind="options: availableAttachmentTypes, value: attachmentType, optionsText: 'name', optionsValue: 'id', optionsCaption: loc('userinfo.architect.qualification.choose')"></select>
           <div class="clear"></div>
-          <input type="file" name="files[]" class="file-upload"></input>
-          <input data-bind="attr: {value: csrf}" type="hidden" name="__anti-forgery-token"></input>
+          <input type="file" name="files[]" class="file-upload"/>
+          <input data-bind="attr: {value: csrf}" type="hidden" name="__anti-forgery-token"/>
         </form>
 
         <div>

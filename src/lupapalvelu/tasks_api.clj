@@ -48,7 +48,9 @@
   [{:keys [created application user data] :as command}]
   (when-not (some #(let [{:keys [name type]} (:info %)] (and (= name schemaName ) (= type :task))) (tasks/task-schemas application))
     (fail! :illegal-schema))
-  (let [task (tasks/new-task schemaName taskName {} {:created created :assignee user} (or (valid-source (:source data)) {:type :authority :id (:id user)}))]
+  (let [meta {:created created :assignee user}
+        source (or (valid-source (:source data)) {:type :authority :id (:id user)})
+        task (tasks/new-task schemaName taskName {} meta source)]
     (update-application command
       {$push {:tasks task}
        $set {:modified created}})
@@ -89,13 +91,14 @@
   {:description "Authority can send task info to municipality backend system."
    :parameters  [id taskId lang]
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
-   :pre-checks  [(permit/validate-permit-type-is permit/R)] ; KRYPS mapping currently implemented only for R
+   :pre-checks  [(permit/validate-permit-type-is permit/R permit/YA)] ; KRYPS mapping currently implemented only for R & YA
    :user-roles #{:authority}
    :states      valid-states}
   [{application :application user :user created :created :as command}]
   (assert-task-state-in [:ok :sent] command)
-  (let [task (get-task (:tasks application) taskId)]
-    (when-not (= "task-katselmus" (-> task :schema-info :name)) (fail! :error.invalid-task-type))
+  (let [task (get-task (:tasks application) taskId)
+        task-type (-> task :schema-info :name)]
+    (when-not (#{"task-katselmus" "task-katselmus-ya"} task-type) (fail! :error.invalid-task-type))
     (when (ss/blank? (get-in task [:data :katselmuksenLaji :value])) (fail! :error.missing-parameters))
     (let [sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
           set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
@@ -107,4 +110,7 @@
    :user-roles #{:authority}
    :states     states/all-states}
   [{application :application}]
-  (ok :schemas (map (comp :name :info) (sort-by (comp :order :info) (tasks/task-schemas application)))))
+  (ok :schemas (->> application
+                 (tasks/task-schemas)
+                 (sort-by (comp :order :info))
+                 (map (comp :name :info)))))

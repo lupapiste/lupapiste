@@ -25,13 +25,14 @@ var LUPAPISTE = LUPAPISTE || {};
     self.session = undefined;
     self.allowAnonymous = params.allowAnonymous;
     self.showUserMenu = (params.showUserMenu !== undefined) ? params.showUserMenu : !params.allowAnonymous;
+    self.componentPages = params.componentPages || [];
     self.previousHash = "";
     self.currentHash = "";
 
     // Global models
     self.models = {};
 
-    // Gobal service
+    // Global services
     self.services = {};
 
     /**
@@ -57,30 +58,31 @@ var LUPAPISTE = LUPAPISTE || {};
       trace("pageId", pageId, "pagePath", pagePath);
 
       if (pageId !== self.currentPage) {
-        $(".page").removeClass("visible");
+        // if pages are component controlled, skip element selection
+        if (!_.includes(self.componentPages, pageId) || !self.currentPage) {
+          $(".page").removeClass("visible");
 
-        var page$ = $("#" + pageId);
-        if (page$.length === 0) {
-          pageId = self.startPage;
-          pagePath = [];
-          page$ = $("#" + pageId);
+          var page$ = $("#" + pageId);
+          if (page$.length === 0) {
+            pageId = self.startPage;
+            pagePath = [];
+            page$ = $("#" + pageId);
+          }
+
+          if (page$.length === 0) {
+            // Something is seriously wrong, even startPage was not found
+            error("Unknown page " + pageId + " and failed to default to " + self.startPage);
+            return;
+          }
+
+          page$.addClass("visible");
+          // Set focus on the first field
+          util.autofocus(page$);
         }
-
-        if (page$.length === 0) {
-          // Something is seriously wrong, even startPage was not found
-          error("Unknown page " + pageId + " and failed to default to " + self.startPage);
-          return;
-        }
-
-        page$.addClass("visible");
         window.scrollTo(0, 0);
         self.currentPage = pageId;
-
         // Reset title. Pages can override title when they handle page-load event.
         document.title = self.defaultTitle;
-
-        // Set focus on the first field
-        util.autofocus(page$);
       }
 
       hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
@@ -151,16 +153,20 @@ var LUPAPISTE = LUPAPISTE || {};
         .call();
     };
 
-    self.redirectToHashbang = function() {
+    self.getHashbangUrl = function() {
       var href = window.location.href;
       var hash = window.location.hash;
       if (hash && hash.length > 0) {
         var withoutHash = href.substring(0, href.indexOf("#"));
-        window.location = withoutHash + "?redirect-after-login=" + encodeURIComponent(hash.substring(1, hash.length));
+        return withoutHash + "?redirect-after-login=" + encodeURIComponent(hash.substring(1, hash.length));
       } else {
         // No hashbang. Go directly to front page.
-        window.location = "/app/" + loc.getCurrentLanguage();
+        return "/app/" + loc.getCurrentLanguage();
       }
+    };
+
+    self.redirectToHashbang = function() {
+      window.location = self.getHashbangUrl();
       return false;
     };
 
@@ -198,6 +204,14 @@ var LUPAPISTE = LUPAPISTE || {};
       });
     };
 
+    self.showArchiveMenuOptions = ko.observable(false);
+    if (util.getIn(window, ["lupapisteApp", "models", "globalAuthModel"])) {
+      self.showArchiveMenuOptions(lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled"));
+    }
+    hub.subscribe("global-auth-model-loaded", function() {
+      self.showArchiveMenuOptions(lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled"));
+    });
+
     /**
      * Complete the App initialization after DOM is loaded.
      */
@@ -217,7 +231,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
       $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
-        function openStartPage() {
+      function openStartPage() {
         if (self.logoPath) {
           window.location = window.location.protocol + "//" + window.location.host + self.logoPath;
         } else if (self.startPage && self.startPage.charAt(0) !== "/") {
@@ -238,7 +252,8 @@ var LUPAPISTE = LUPAPISTE || {};
       var model = {
         currentLanguage: loc.getCurrentLanguage(),
         openStartPage: openStartPage,
-        showUserMenu: self.showUserMenu
+        showUserMenu: self.showUserMenu,
+        showArchiveMenuOptions: self.showArchiveMenuOptions
       };
 
       $("#app").applyBindings(lupapisteApp.models.rootVMO);

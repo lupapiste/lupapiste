@@ -13,12 +13,11 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.pdf-export :as pdf-export]
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapiste-commons.attachment-types :as attachment-types]
-            [lupapalvelu.preview :as preview]
-            [lupapalvelu.pdf-conversion :as pdf-conversion])
+            [lupapalvelu.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
            [org.apache.commons.io FilenameUtils]
@@ -69,17 +68,19 @@
    :B5
    :muu])
 
-(def- attachment-types-R attachment-types/Rakennusluvat)
+(def- attachment-types-by-permit-type-unevaluated
+  {:R 'attachment-types/Rakennusluvat
+   :P 'attachment-types/Rakennusluvat
+   :YA 'attachment-types/YleistenAlueidenLuvat
+   :YI 'attachment-types/Ymparistoilmoitukset
+   :YL 'attachment-types/Ymparistolupa
+   :YM 'attachment-types/MuutYmparistoluvat
+   :VVVL 'attachment-types/Ymparistoilmoitukset
+   :MAL 'attachment-types/Maa-ainesluvat
+   :MM 'attachment-types/Kiinteistotoimitus
+   :KT 'attachment-types/Kiinteistotoimitus})
 
-(def- attachment-types-YA attachment-types/YleistenAlueidenLuvat)
-
-(def- attachment-types-YI attachment-types/Ymparistoilmoitukset)
-
-(def- attachment-types-YL attachment-types/Ymparistolupa)
-
-(def- attachment-types-MAL attachment-types/Maa-ainesluvat)
-
-(def- attachment-types-KT attachment-types/Kiinteistotoimitus)
+(def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
 
 (defn attachment-ids-from-tree [tree]
   {:pre [(sequential? tree)]}
@@ -87,13 +88,44 @@
 
 (def all-attachment-type-ids
   (attachment-ids-from-tree
-    (concat
-      attachment-types-R
-      attachment-types-YA
-      attachment-types-YI
-      attachment-types-YL
-      attachment-types-MAL
-      attachment-types-KT)))
+    (apply concat (set (vals attachment-types-by-permit-type)))))
+
+;; Helper for reporting purposes
+(defn localised-attachments-by-permit-type [permit-type]
+  (let [localize-attachment-section
+        (fn [lang [title attachment-names]]
+          [(i18n/localize lang (ss/join "." ["attachmentType" (name title) "_group_label"]))
+           (reduce
+             (fn [result attachment-name]
+               (let [lockey                    (ss/join "." ["attachmentType" (name title) (name attachment-name)])
+                     localized-attachment-name (i18n/localize lang lockey)]
+                 (conj
+                   result
+                   (ss/join "; " [(name attachment-name) localized-attachment-name]))))
+             []
+             attachment-names)])]
+    (reduce
+      (fn [accu lang]
+        (assoc accu (keyword lang)
+          (->> (get attachment-types-by-permit-type (keyword permit-type))
+            (partition 2)
+            (map (partial localize-attachment-section lang))
+            vec)))
+      {}
+     ["fi" "sv"]))
+
+  )
+
+(defn print-attachment-types-by-permit-type []
+  (let [permit-types-with-names (into {}
+                                      (for [[k v] attachment-types-by-permit-type-unevaluated]
+                                        [k (name v)]))]
+    (doseq [[permit-type permit-type-name] permit-types-with-names]
+    (println permit-type-name)
+    (doseq [[group-name types] (:fi (localised-attachments-by-permit-type permit-type))]
+      (println "\t" group-name)
+      (doseq [type types]
+        (println "\t\t" type))))))
 
 ;;
 ;; Api
@@ -121,25 +153,16 @@
   "Returns partitioned list of allowed attachment types or throws exception"
   [permit-type]
   {:pre [permit-type]}
-  (partition 2
-    (case (keyword permit-type)
-      :R  attachment-types-R
-      :YA attachment-types-YA
-      :P  attachment-types-R
-      :YI attachment-types-YI
-      :YL attachment-types-YL
-      :VVVL attachment-types-YI ;TODO Put correct attachment list here
-      :MM attachment-types-KT ;TODO Put correct attachment list here
-      :MAL attachment-types-MAL
-      :KT attachment-types-KT
-      (fail! (str "unsupported permit-type: " (name permit-type))))))
+  (if-let [types (get attachment-types-by-permit-type (keyword permit-type))]
+    (partition 2 types)
+    (fail! (str "unsupported permit-type: " (name permit-type)))))
 
 (defn get-attachment-types-for-application
   [application]
   {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
-(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id]]
+(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id contents]]
   (cond-> {:id (or attachment-id (mongo/create-id))
            :type attachment-type
            :modified now
@@ -155,7 +178,8 @@
            :forPrinting false
            :op op
            :signatures []
-           :versions []}
+           :versions []
+           :contents contents}
           (and (seq metadata) (env/feature? :tiedonohjaus)) (assoc :metadata metadata)))
 
 (defn make-attachments
@@ -166,10 +190,10 @@
 (defn- default-metadata-for-attachment-type [type {:keys [:organization :tosFunction]}]
   (tos/metadata-for-document organization tosFunction type))
 
-(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id]]
+(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents]]
   {:pre [(map? application)]}
   (let [metadata (default-metadata-for-attachment-type attachment-type application)
-        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id)]
+        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id contents)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -226,7 +250,7 @@
   ([options]
     {:pre [(map? options)]}
     (set-attachment-version options 5))
-  ([{:keys [application attachment-id file-id filename content-type size comment-text now user stamped make-comment state target valid-pdfa missing-fonts]
+  ([{:keys [application attachment-id file-id filename content-type size comment-text now user stamped make-comment state target archivable archivabilityError missing-fonts]
      :or {make-comment true state :requires_authority_action} :as options}
     retry-limit]
     {:pre [(map? options) (map? application) (string? attachment-id) (string? file-id) (string? filename) (string? content-type) (number? size) (number? now) (map? user) (not (nil? stamped))]}
@@ -245,7 +269,8 @@
                            :contentType content-type
                            :size size
                            :stamped stamped
-                           :valid-pdfa valid-pdfa
+                           :archivable archivable
+                           :archivabilityError archivabilityError
                            :missing-fonts missing-fonts}
 
             comment-target {:type :attachment
@@ -289,7 +314,7 @@
               (when set-app-modified? {:modified now})
               (when set-attachment-modified? {:attachments.$.modified now}))})))
 
-(defn update-latest-version-content [application attachment-id file-id size now]
+(defn update-latest-version-content [user application attachment-id file-id size now]
   (let [attachment (get-attachment-info application attachment-id)
         latest-version-index (-> attachment :versions count dec)
         latest-version-path (str "attachments.$.versions." latest-version-index ".")
@@ -303,9 +328,11 @@
       {:attachments {$elemMatch {:id attachment-id}}}
       {$set {:modified now
              :attachments.$.modified now
+             (str latest-version-path "user") user
              (str latest-version-path "fileId") file-id
              (str latest-version-path "size") size
              (str latest-version-path "created") now
+             :attachments.$.latestVersion.user user
              :attachments.$.latestVersion.fileId file-id
              :attachments.$.latestVersion.size size
              :attachments.$.latestVersion.created now}})))
@@ -313,13 +340,13 @@
 (defn- update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked required] :as options}]
+  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked required contents] :as options}]
   {:pre [(map? application)]}
   (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? (:user options)))
         att-id (cond
-                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority?)
+                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority? nil contents)
                  (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
-                 :else (create-attachment application attachment-type op created target locked required requested-by-authority? attachment-id))]
+                 :else (create-attachment application attachment-type op created target locked required requested-by-authority? attachment-id contents))]
     (set-attachment-version (assoc options :attachment-id att-id :now created :stamped false))))
 
 (defn parse-attachment-type [attachment-type]
@@ -381,24 +408,23 @@
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
-(defn get-attachment-as
-  "Returns the attachment if user has access to application, otherwise nil."
+(defn get-attachment-file-as
+  "Returns the attachment file if user has access to application, otherwise nil."
   [user file-id]
-  (when-let [attachment (mongo/download file-id)]
-    (when-let [application (get-application-as (:application attachment) user :include-canceled-apps? true)]
-      (when (seq application) attachment))))
+  (when-let [attachment-file (mongo/download file-id)]
+    (when-let [application (get-application-as (:application attachment-file) user :include-canceled-apps? true)]
+      (when (seq application) attachment-file))))
 
-(defn get-attachment
-  "Returns the attachment without access checking, otherwise nil."
+(defn get-attachment-file
+  "Returns the attachment file without access checking, otherwise nil."
   [file-id]
-  (when-let [attachment (mongo/download file-id)]
-    (when-let [application (get-application-no-access-checking (:application attachment))]
-      (when (seq application) attachment))))
+  (when-let [attachment-file (mongo/download file-id)]
+    (when-let [application (get-application-no-access-checking (:application attachment-file))]
+      (when (seq application) attachment-file))))
 
 (defn output-attachment
-  [attachment-id download? attachment-fn]
-  (debugf "file download: attachment-id=%s" attachment-id)
-  (if-let [attachment (attachment-fn attachment-id)]
+  [file-id download? attachment-fn]
+  (if-let [attachment (attachment-fn file-id)]
     (let [response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:content-type attachment)
@@ -425,15 +451,16 @@
 
 (defn output-attachment-preview
   "Outputs attachment preview creating it if is it does not already exist"
-  [attachment-id attachment-fn]
-  (let [preview-id (str attachment-id "-preview")]
-    (when (= 0 (mongo/count :fs.files {:_id preview-id}))
-      (let [attachment (get-attachment attachment-id)
+  [file-id attachment-fn]
+  (let [preview-id (str file-id "-preview")]
+    (when (zero? (mongo/count :fs.files {:_id preview-id}))
+      (let [attachment (get-attachment-file file-id)
             file-name (:file-name attachment)
             content-type (:content-type attachment)
-            content ((:content attachment))
+            content-fn (:content attachment)
             application-id (:application attachment)]
-        (create-preview attachment-id file-name content-type content application-id)))
+        (assert content-fn (str "content for file " file-id))
+        (create-preview file-id file-name content-type (content-fn) application-id)))
     (output-attachment preview-id false attachment-fn)))
 
 (defn attach-file!
@@ -451,6 +478,7 @@
         options (merge options {:file-id file-id
                                 :filename sanitazed-filename
                                 :content-type content-type})]
+    (debug "         uploading to mongo: "  content)
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
     (.submit preview-threadpool #(create-preview file-id sanitazed-filename content-type content application-id db-name))
     (update-or-create-attachment options)))
@@ -498,26 +526,3 @@
         (proxy-super close)
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
-
-(defn delete-file! [^File file] (try (.delete file) (catch Exception _)))
-
-(defn ensure-pdf-a
-  "Ensures PDF file PDF/A compatibility status based on original attachment status"
-  [temp-file valid-pdfa]
-  (debug "  ensuring PDF/A for file:" (.getAbsolutePath temp-file) "is PDF/A:" (true? valid-pdfa))
-  (if (not valid-pdfa)
-    (do (debugf "    no PDF/A required, no conversion") {:file temp-file :pdfa false})
-    (let [a-temp-file (File/createTempFile "lupapiste.stamp.a." ".tmp")
-          conversion-result (pdf-conversion/run-pdf-to-pdf-a-conversion (.getAbsolutePath temp-file) (.getAbsolutePath a-temp-file))]
-      (cond
-        (:already-valid-pdfa? conversion-result) (do (debugf "      file valid PDF/A, no conversion") {:file temp-file :pdfa true})
-        (:pdfa? conversion-result) (do (debug "      converting to PDF/A file: " (.getAbsolutePath a-temp-file)) (delete-file! temp-file) {:file a-temp-file :pdfa true})
-        :else (do (errorf "Ensuring PDF/A failed, file is not PDF/A") {:file temp-file :pdfa false})))))
-
-(defn application-to-pdf-a
-  "Returns application data in PDF/A temp file"
-  [application lang]
-  (let [file (File/createTempFile "application-pdf-a-" ".tmp")
-        stream (pdf-export/generate application lang)]
-    (io/copy stream file)
-  (ensure-pdf-a file true)))

@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [monger.operators :refer [$set $push]]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :refer :all]
@@ -70,8 +71,7 @@
   (fact "ya-jatkoaika requires" (is-link-permit-required {:secondaryOperations [{:name "ya-jatkoaika"}]}) => truthy))
 
 (facts "Add operation allowed"
-  (let [not-allowed-for #{:raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :tilan-rekisteroiminen-tontiksi :yhdistaminen :rajankaynnin-hakeminen
-                          :tonttijaon-hakeminen :tontin-lohkominen :rasitetoimitus :tonttijaon-muutoksen-hakeminen :rajannayton-hakeminen :halkominen :aiemmalla-luvalla-hakeminen}
+       (let [not-allowed-for #{:raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen :rajankaynti}
         error {:ok false :text "error.add-operation-not-allowed"}]
 
     (doseq [operation lupapalvelu.operations/operations]
@@ -79,7 +79,7 @@
             application {:primaryOperation {:name (name op)} :permitSubtype nil}
             operation-allowed (add-operation-allowed? nil application)]
         (fact {:midje/description (name op)}
-          (if (or (not= permit-type "R") (not-allowed-for op))
+              (if (or (not (contains? #{"R" "KT"} permit-type)) (not-allowed-for op))
             (fact "Add operation not allowed" operation-allowed => error)
             (fact "Add operation allowed" operation-allowed => nil?)))))
 
@@ -91,3 +91,9 @@
   (validate-has-subtypes nil {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => nil
   (validate-has-subtypes nil {:permitType "R"}) => {:ok false :text "error.permit-has-no-subtypes"}
   (validate-has-subtypes nil nil) => {:ok false :text "error.permit-has-no-subtypes"})
+
+(fact "State transitions"
+  (let [pena {:username "pena", :firstName "Pena" :lastName "Panaani"}]
+    (state-transition-update :open 1 pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
+    (state-transition-update :submitted 2 pena) => {$set {:state :submitted, :submitted 2, :modified 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
+    (state-transition-update :verdictGiven 3 pena) => {$set {:state :verdictGiven, :modified 3}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}}))

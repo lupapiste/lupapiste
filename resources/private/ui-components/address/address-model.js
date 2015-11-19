@@ -15,5 +15,5 @@ LUPAPISTE.AddressModel = function( params ) {
   };
   self.isAuthorized = function() {
     return app.authorization.ok( "change-location");
-  }
+  };
 };

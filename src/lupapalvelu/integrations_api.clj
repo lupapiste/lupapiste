@@ -1,7 +1,7 @@
 (ns lupapalvelu.integrations-api
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
   (:require [taoensso.timbre :as timbre :refer [infof info error errorf]]
-            [monger.operators :refer [$in $set $unset $push $elemMatch]]
+            [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
             [lupapalvelu.action :refer [defcommand update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
@@ -18,6 +18,7 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
@@ -77,33 +78,38 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           #{:submitted :complement-needed}
+   :states           #{:submitted :complementNeeded}
    :org-authz-roles  #{:approver}}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
-        foreman-notice? (foreman/notice? application)
+        next-state   (if jatkoaika-app?
+                       :closed ; FIXME create a state machine for :ya-jatkoaika
+                       (sm/next-state application))
+        _           (assert next-state)
+
+        timestamps  (zipmap (conj #{:modified :sent} next-state) (repeat created))
+        _           (assert (every? (partial contains? domain/application-skeleton) (keys timestamps)))
+
+        history-entries (map #(application/history-entry % created user) (set [:sent next-state]))
+
         app-updates (merge
-                      {:modified created
-                       :sent created
+                      {:state next-state
                        :authority (if (domain/assigned? application) (:authority application) (user/summary user))} ; LUPA-1450
-                      (if (or jatkoaika-app? foreman-notice?)
-                        {:state :closed :closed created}
-                        {:state :sent}))
+                      timestamps)
         application (-> application
                       meta-fields/enrich-with-link-permit-data
                       (#(if (= "lupapistetunnus" (-> % :linkPermitData first :type))
                          (update-link-permit-data-with-kuntalupatunnus-from-verdict %)
                          %))
                       (merge app-updates))
-        mongo-query (if (or jatkoaika-app? foreman-notice?)
-                      {:state {$in ["submitted" "complement-needed"]}}
-                      {})
+        mongo-query {:state {$in ["submitted" "complementNeeded"]}}
         indicator-updates (application/mark-indicators-seen-updates application user created)
         transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
         do-update (fn [attachments-updates]
                     (update-application command
                       mongo-query
-                      {$push {:transfers transfer}
+                      {$push {:transfers transfer
+                              :history {$each history-entries}}
                        $set (util/deep-merge app-updates attachments-updates indicator-updates)})
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
@@ -122,7 +128,7 @@
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)
                 (application-already-exported :exported-to-backing-system)]
-   :states     #{:sent :verdictGiven :constructionStarted}
+   :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 
@@ -154,8 +160,8 @@
 (defn add-value-metadata [m meta-data]
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
-(defn- load-building-data [url property-id building-id overwrite-all?]
-  (let [all-data (krysp-reader/->rakennuksen-tiedot (krysp-reader/building-xml url property-id) building-id)]
+(defn- load-building-data [url credentials property-id building-id overwrite-all?]
+  (let [all-data (krysp-reader/->rakennuksen-tiedot (krysp-reader/building-xml url credentials property-id) building-id)]
     (if overwrite-all?
       all-data
       (select-keys all-data (keys krysp-reader/empty-building-ids)))))
@@ -169,7 +175,7 @@
    :states     krysp-enrichment-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
-  (let [{url :url} (organization/get-krysp-wfs application)
+  (let [{url :url credentials :credentials} (organization/get-krysp-wfs application)
         clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
     (if (or clear-ids? url)
       (let [document     (doc-persistence/by-id application collection documentId)
@@ -198,7 +204,7 @@
                             (tools/path-vals
                               (if clear-ids?
                                 krysp-reader/empty-building-ids
-                                (load-building-data url propertyId buildingId overwrite))))
+                                (load-building-data url credentials propertyId buildingId overwrite))))
             krysp-update-map (doc-persistence/validated-model-updates application collection document krysp-updates created :source "krysp")
 
             {:keys [mongo-query mongo-updates]} (util/deep-merge
@@ -219,10 +225,10 @@
    :states     krysp-enrichment-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
-  (if-let [{url :url} (organization/get-krysp-wfs application)]
+  (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
     (try
-      (let [kryspxml  (krysp-reader/building-xml url propertyId)
-            buildings (krysp-reader/->buildings-summary kryspxml)]
+      (let [kryspxml    (krysp-reader/building-xml url credentials propertyId)
+            buildings   (krysp-reader/->buildings-summary kryspxml)]
         (ok :data buildings))
       (catch java.io.IOException e
         (errorf "Unable to get building info from %s backend: %s" (i18n/loc "municipality" municipality) (.getMessage e))
@@ -249,7 +255,7 @@
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [has-asianhallinta-operation]
-   :states     #{:submitted :complement-needed}}
+   :states     #{:submitted :complementNeeded}}
   [{:keys [application created user]:as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
         application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
@@ -259,18 +265,18 @@
                                        :type "kuntalupatunnus"})
                       application)
         submitted-application (mongo/by-id :submitted-applications id)
-        app-updates {:modified created
-                     :sent created
-                     :authority (if (domain/assigned? application) (:authority application) (user/summary user))
-                     :state :sent}
+
+        app-updates {:modified created, :authority (if (domain/assigned? application) (:authority application) (user/summary user))}
         organization (organization/get-organization (:organization application))
         indicator-updates (application/mark-indicators-seen-updates application user created)
         file-ids (ah/save-as-asianhallinta application lang submitted-application organization) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) file-ids created) {})
         transfer (get-transfer-item :exported-to-asianhallinta command)]
     (update-application command
-                        {$push {:transfers transfer}
-                         $set (util/deep-merge app-updates attachments-updates indicator-updates)})
+                        (util/deep-merge
+                          (application/state-transition-update (sm/next-state application) created user)
+                          {$push {:transfers transfer}
+                           $set (util/deep-merge app-updates attachments-updates indicator-updates)}))
     (ok)))
 
 (defn- update-kuntalupatunnus [application]
@@ -290,7 +296,7 @@
   {:parameters [id lang attachmentIds]
    :user-roles #{:authority}
    :pre-checks [has-asianhallinta-operation (application-already-exported :exported-to-asianhallinta)]
-   :states     #{:verdictGiven :sent}
+   :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 

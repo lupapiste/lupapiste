@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="bulletins-template">
+    <div id="bulletins-component" data-bind="attr: {'id': page()+'-component'},
+                                             component: {name: 'application-' + page(),
+                                                         params: pageParams}"></div>
+    </script>
+  </section>
+</body>
+</html>

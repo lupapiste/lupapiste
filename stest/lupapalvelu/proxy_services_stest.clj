@@ -6,6 +6,7 @@
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [now]]
             [sade.env :as env]
+            [sade.coordinate :as coord]
             [cheshire.core :as json]))
 
 ; make sure proxies are enabled:
@@ -64,10 +65,15 @@
         response (point-by-property-id-proxy request)]
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)
-          data (:data body)]
-      (fact data => vector?)
-      (fact (count data) => 1)
-      (fact (keys (first data)) => (just #{:x :y})))))
+          data (:data body)
+          {:keys [x y]} (first data)]
+      (fact "collection format"
+        (count data) => 1
+        (keys (first data)) => (just #{:x :y})
+        x => string?
+        y => string?)
+      (fact "valid x" x => coord/valid-x?)
+      (fact "valid y" y => coord/valid-y?))))
 
 (facts "property-id-by-point"
   (let [x 385648
@@ -77,6 +83,42 @@
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)]
       (fact body => "09100200990013"))))
+
+(defn property-info-for-75341600380021 [params]
+  (let [response (property-info-by-wkt-proxy {:params params})]
+    (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
+    (let [body (json/decode (:body response) true)
+          {:keys [x y rekisteriyksikkolaji kiinttunnus]} (first body)
+          {:keys [id selite]} rekisteriyksikkolaji]
+
+      (fact "collection format"
+        (count body) => 1
+        (keys (first body)) => (just #{:x :y :rekisteriyksikkolaji :kiinttunnus}))
+      (fact "valid x" x => coord/valid-x?)
+      (fact "valid y" y => coord/valid-y?)
+      (fact "kiinttunnus" kiinttunnus => "75341600380021")
+      (fact "rekisteriyksikkolaji"
+        id => "1"
+        selite => {:fi "Tila", :sv "L\u00e4genhet"})))
+  )
+
+(facts "property-info-by-point"
+  (fact "missing params"
+    (let [response (property-info-by-wkt-proxy {:params {}})]
+      response => map?
+      (:status response) => 503))
+
+  (fact "404271,6693892"
+    (property-info-for-75341600380021 {:wkt "POINT(404271 6693892)"})))
+
+(facts "property-info-by-point with radius"
+  (property-info-for-75341600380021 {:wkt "POINT(404271 6693892)", :radius "30"}))
+
+(facts "property-info-by-line"
+  (property-info-for-75341600380021 {:wkt "LINESTRING(404271 6693892,404273 6693895)"}))
+
+(facts "property-info-by-polygon"
+  (property-info-for-75341600380021 {:wkt "POLYGON((404270 6693890,404270 6693895,404275 6693890,404270 6693890))"}))
 
 (facts "address-by-point - street number not null"
   (let [x 333168
@@ -100,6 +142,20 @@
       (fact (:number body) => #"\d")
       (fact (:fi (:name body)) => "Sipoo"))))
 
+(facts "area-by-property-id"
+  (let [response (area-by-property-id-proxy {:params {:property-id "75341600380021"}})]
+    (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
+    (let [body (json/decode (:body response) true)
+          data (:data body)
+          {:keys [kiinttunnus wkt]} (first data)]
+
+      (fact "collection format"
+        (count data) => 1
+        (keys (first data)) => (just #{:kiinttunnus :wkt}))
+
+      (fact "property id is echoed" kiinttunnus => "75341600380021")
+      (fact "wkt" wkt => #"^POLYGON"))))
+
 (facts "plan-urls-by-point-proxy"
 
   (fact "Helsinki"
@@ -112,23 +168,24 @@
                       :linkki "http://img.sito.fi/kaavamaaraykset/91/8755.pdf"
                       :type "sito"}))
 
-  (fact "Mikkeli"
-   (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
-         body (json/decode (:body response) true)]
+  ; Mikkeli server is down at the moment
+  #_(fact "Mikkeli"
+    (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
+          body (json/decode (:body response) true)]
 
-     (first body) => {:id "1436"
-                      :kaavanro "12891"
-                      :kaavalaji "RKM"
-                      :kasitt_pvm "3/31/1989 12:00:00 AM"
-                      :linkki "http://194.111.49.141/asemakaavapdf/12891.pdf"
-                      :type "bentley"}
+      (first body) => {:id "1436"
+                       :kaavanro "12891"
+                       :kaavalaji "RKM"
+                       :kasitt_pvm "3/31/1989 12:00:00 AM"
+                       :linkki "http://194.111.49.141/asemakaavapdf/12891.pdf"
+                       :type "bentley"}
 
-     (second body) => {:id "1440"
-                       :kaavanro "12021"
-                       :kaavalaji "RK"
-                       :kasitt_pvm "6/1/1984 12:00:00 AM"
-                       :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
-                       :type "bentley"})))
+      (second body) => {:id "1440"
+                        :kaavanro "12021"
+                        :kaavalaji "RK"
+                        :kasitt_pvm "6/1/1984 12:00:00 AM"
+                        :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
+                        :type "bentley"})))
 
 (facts "general-plan-urls-by-point-proxy"
 
@@ -172,11 +229,11 @@
                     "BBOX"   "208384,6715136,208640,6715392"}
                    {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Naantali"
                     "BBOX"   "226816,6713856,227328,6714368"}]]
-      (let [request {:query-params (merge base-params layer)
-                     :headers {"accept-encoding" "gzip, deflate"}
-                     :as :stream}]
-        (println "Checking" (get layer "LAYERS"))
-        (http-get (env/value :maps :geoserver) request) => http200?))))
+      (fact {:midje/description (get layer "LAYERS")}
+        (let [request {:query-params (merge base-params layer)
+                       :headers {"accept-encoding" "gzip, deflate"}
+                       :as :stream}]
+          (http-get (env/value :maps :geoserver) request) => http200?)))))
 
 (facts "WMTS layers"
   (let [base-params {:FORMAT "image/png"
@@ -191,10 +248,10 @@
     (doseq [layer [{:LAYER "taustakartta"}
                    {:LAYER "kiinteistojaotus"}
                    {:LAYER "kiinteistotunnukset"}]]
-      (let [request {:params (merge base-params layer)
-                     :headers {"accept-encoding" "gzip, deflate"}}]
-        (println "Checking" (get layer :LAYER))
-        (wfs/raster-images request "wmts") => http200?))))
+      (fact {:midje/description (get layer "LAYERS")}
+        (let [request {:params (merge base-params layer)
+                       :headers {"accept-encoding" "gzip, deflate"}}]
+          (wfs/raster-images request "wmts") => http200?)))))
 
 (facts "WMS layers"
   (let [base-params {"FORMAT" "image/png"
@@ -214,10 +271,10 @@
                    {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}
                    {"LAYERS" "yleiskaava"}
                    {"LAYERS" "yleiskaava_poikkeavat"}]]
-      (let [request {:params (merge base-params layer)
-                     :headers {"accept-encoding" "gzip, deflate"}}]
-        (println "Checking" (get layer "LAYERS"))
-        (wfs/raster-images request "wms") => http200?))))
+      (fact {:midje/description (get layer "LAYERS")}
+        (let [request {:params (merge base-params layer)
+                       :headers {"accept-encoding" "gzip, deflate"}}]
+         (wfs/raster-images request "wms") => http200?)))))
 
 (fact "WMS capabilites"
   (http-get (str (server-address) "/proxy/wmscap")
@@ -227,5 +284,4 @@
 (fact "General plan documents"
   (let [request {:params {:id "0911001"}
                  :headers {"accept-encoding" "gzip, deflate"}}]
-    (println "Checking plandocument 0911001")
     (wfs/raster-images request "plandocument") => http200?))

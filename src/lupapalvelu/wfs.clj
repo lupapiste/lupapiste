@@ -32,7 +32,8 @@
 ;; config:
 ;;
 
-(def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
+(def ktjkii "https://ws.nls.fi/ktjkii/wfs-2015/wfs")
+
 (def maasto "https://ws.nls.fi/maasto/wfs")
 (def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
 
@@ -76,19 +77,18 @@
 ;;
 
 (defn query [attrs & e]
-  (str "<?xml version='1.0' encoding='UTF-8'?>
-        <wfs:GetFeature version='1.1.0'
-            xmlns:oso='http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02'
-            xmlns:ktjkiiwfs='http://xml.nls.fi/ktjkiiwfs/2010/02'
-            xmlns:wfs='http://www.opengis.net/wfs'
-            xmlns:gml='http://www.opengis.net/gml'
-            xmlns:ogc='http://www.opengis.net/ogc'
-            xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-            xsi:schemaLocation='http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd'>
-          <wfs:Query" (apply str (map (fn [[k v]] (format " %s='%s'" k v)) attrs)) ">"
-            (apply str e)
-       "  </wfs:Query>
-        </wfs:GetFeature>"))
+  (str
+    "<wfs:GetFeature version=\"1.1.0\"
+            xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
+            xmlns:ktjkiiwfs=\"http://xml.nls.fi/ktjkiiwfs/2010/02\"
+            xmlns:wfs=\"http://www.opengis.net/wfs\"
+            xmlns:gml=\"http://www.opengis.net/gml\"
+            xmlns:ogc=\"http://www.opengis.net/ogc\"
+            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+            xsi:schemaLocation=\"http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
+      <wfs:Query" (apply str (map (fn [[k v]] (format " %s=\"%s\"" k v)) attrs)) ">"
+    (apply str e)
+    "</wfs:Query></wfs:GetFeature>"))
 
 (defn trimble-kaavamaaraykset-point-to-bbox [x y]
 (str "" (apply str x) "," (apply str y) " " (apply str (str (+ (util/->double (str x)) 0.01))) "," (apply str (str (+ (util/->double y) 0.01))) ) )
@@ -136,44 +136,50 @@
 (defn intersects [& e]
   (str "<ogc:Intersects>" (apply str e) "</ogc:Intersects>"))
 
+(defn within [& e]
+  (str "<ogc:DWithin>" (apply str e) "</ogc:DWithin>"))
+
+(defn distance [distance]
+  (str "<ogc:Distance units=\"m\">" distance "</ogc:Distance>"))
+
 (defn point [x y]
   (format "<gml:Point><gml:pos>%s %s</gml:pos></gml:Point>" x y))
 
 (defn line [c]
-  (format "<gml:LineString><gml:posList srsDimension='2'>%s</gml:posList></gml:LineString>" (s/join " " c)))
+  (format "<gml:LineString><gml:posList srsDimension=\"2\">%s</gml:posList></gml:LineString>" (s/join " " c)))
 
 (defn polygon [c]
-  (format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension='2'>%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
+  (format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension=\"2\">%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
 
-(defn property-name [n]
-  (str "<wfs:PropertyName>" n "</wfs:PropertyName>"))
+(defn property-name [prop-name]
+  (str "<ogc:PropertyName>" prop-name "</ogc:PropertyName>"))
 
-(defn property-filter [filter-name property-name property-value]
+(defn property-filter [filter-name prop-name value]
   (str
-    "<ogc:" filter-name " wildCard='*' singleChar='?' escape='!' matchCase='false'>
-       <ogc:PropertyName>" property-name "</ogc:PropertyName>
-       <ogc:Literal>" property-value "</ogc:Literal>
-     </ogc:" filter-name ">"))
+    "<ogc:" filter-name " wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">"
+    (property-name prop-name)
+    "<ogc:Literal>" value "</ogc:Literal>"
+    "</ogc:" filter-name ">"))
 
-(defn property-is-like [property-name property-value]
-  (property-filter "PropertyIsLike" property-name property-value))
+(defn property-is-like [prop-name value]
+  (property-filter "PropertyIsLike" prop-name value))
 
-(defn property-is-equal [property-name property-value]
-  (property-filter "PropertyIsEqualTo" property-name property-value))
+(defn property-is-equal [prop-name value]
+  (property-filter "PropertyIsEqualTo" prop-name value))
 
-(defn property-is-less [property-name property-value]
-  (property-filter "PropertyIsLessThan" property-name property-value))
+(defn property-is-less [prop-name value]
+  (property-filter "PropertyIsLessThan" prop-name value))
 
-(defn property-is-greater [property-name property-value]
-  (property-filter "PropertyIsGreaterThan" property-name property-value))
+(defn property-is-greater [prop-name value]
+  (property-filter "PropertyIsGreaterThan" prop-name value))
 
-(defn property-is-between [property-name property-lower-value property-upper-value]
+(defn property-is-between [name lower-value upper-value]
   (str
-    "<ogc:PropertyIsBetween wildCard='*' singleChar='?' escape='!' matchCase='false'>
-       <ogc:PropertyName>" property-name "</ogc:PropertyName>
-       <ogc:LowerBoundary>" property-lower-value "</ogc:LowerBoundary>"
-    "  <ogc:UpperBoundary>" property-upper-value "</ogc:UpperBoundary>
-     </ogc:PropertyIsBetween>"))
+    "<ogc:PropertyIsBetween wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">"
+    (property-name name)
+    "<ogc:LowerBoundary>" lower-value "</ogc:LowerBoundary>"
+    "<ogc:UpperBoundary>" upper-value "</ogc:UpperBoundary>"
+    "</ogc:PropertyIsBetween>"))
 
 ;;
 ;; Helpers for result parsing:
@@ -208,6 +214,18 @@
 (defn feature-to-position [feature]
   (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
     {:x x :y y}))
+
+(defn extract-coordinates [ring]
+  (s/replace (first (xml-> ring :gml:LinearRing :gml:posList text)) #"(\d+\.*\d*)\s+(\d+\.*\d*)\s+" "$1 $2, "))
+
+(defn feature-to-area [feature]
+  (when feature
+    (let [polygonpatch (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:sijainti :gml:Surface :gml:patches :gml:PolygonPatch))
+          exterior (extract-coordinates (first (xml-> polygonpatch :gml:exterior)))
+          interiors (map extract-coordinates (xml-> polygonpatch :gml:interior))]
+    {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))
+     :wkt (str "POLYGON ((" exterior ")" (apply str(map #(str ",(" % ")") interiors)) ")")
+     })))
 
 (defn feature-to-property-id [feature]
   (when feature
@@ -254,7 +272,7 @@
     (let [{status :status body :body} (http-fn url request)]
       (if (= status 200)
         [:ok body]
-        [:error status]))
+        [:error status body]))
     (catch Exception e
       [:failure e])))
 
@@ -265,10 +283,15 @@
                  :basic-auth (auth url)
                  param-key q}
         task (future* (exec-http http-fn url request))
-        [status data] (deref task timeout [:timeout])]
+        [status data error-body] (deref task timeout [:timeout])
+        error-text (-> error-body  (ss/replace #"[\r\n]+" " ") (ss/limit 400 "..."))]
     (condp = status
       :timeout (do (errorf "wfs timeout: url=%s" url) nil)
-      :error   (do (errorf "wfs status %s: url=%s" data url) nil)
+      :error   (do
+                 (case data
+                   400 (errorf "wfs status 400 Bad Request '%s', url=%s, response body=%s" (ss/limit (str q) 220 "...") url error-text)
+                   (errorf "wfs status %s: url=%s, response body=%s" data url error-text))
+                 nil)
       :failure (do (errorf data "wfs failure: url=%s" url) nil)
       :ok      (let [features (-> data
                                 (s/replace "UTF-8" "ISO-8859-1")
@@ -355,6 +378,26 @@
       (ogc-filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
+(defn area-by-property-id [property-id]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (property-name "ktjkiiwfs:sijainti")
+      (ogc-filter
+        (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
+
+(defn property-info-by-radius [x y radius]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (property-name "ktjkiiwfs:kiinteistotunnus")
+      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (ogc-filter
+        (within
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (point x y)
+          (distance radius))))))
+
 (defn property-info-by-point [x y]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
@@ -363,7 +406,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
       (ogc-filter
         (intersects
-          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (point x y))))))
 
 (defn property-info-by-line [l]
@@ -374,7 +417,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
       (ogc-filter
         (intersects
-          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (line l))))))
 
 (defn property-info-by-polygon [p]
@@ -385,7 +428,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
       (ogc-filter
         (intersects
-          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (polygon p))))))
 
 (defn getcapabilities [request]
@@ -444,7 +487,7 @@
 
 (defn gfi-to-features-sito [gfi municipality]
   (when gfi
-    (xml-> (->features gfi startparse-sax-non-validating) :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi")))))
+    (xml-> (->features gfi startparse-sax-non-validating "UTF-8") :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi")))))
 
 	
 (defn feature-to-feature-info-sito  [feature]
@@ -455,6 +498,15 @@
      :vahvistett_pvm (first (xml-> feature :lupapiste:VAHVISTETT text))
      :linkki (first (xml-> feature :lupapiste:LINKKI text))
      :type "sito"}))
+
+(defn feature-to-feature-info-liiteri-ak  [feature]
+  (when feature
+    {:id (first (xml-> feature :lupapiste:tunnus text))
+     :kuntanro (first (xml-> feature :lupapiste:kuntaid text))
+     :kunta (first (xml-> feature :lupapiste:kunta text))
+     :kaavanro (first (xml-> feature :lupapiste:tunnus text))
+     :linkki (first (xml-> feature :lupapiste:merkinnat text))
+     :type "liiteri-ak"}))
 
 (defn general-plan-info-by-point [x y]
   (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]
@@ -548,4 +600,3 @@
                          {:query-params (:params request)
                           :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
                           :as :stream})))))
-

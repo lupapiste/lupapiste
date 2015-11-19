@@ -4,10 +4,6 @@
 @set server=%2
 @if [%server%]==[] set server=http://localhost:8000
 
-set hubert=hubert.solita.fi
-set bianca=192.168.7.253
-
-rem set remote=%bianca%
-set remote=%hubert%
+call remote-config.bat
 
 pybot --exclude integration --exclude fail --RunEmptySuite --variable SELENIUM:http://%remote%:4444/wd/hub --variable SERVER:%server% -d target common/setup %target% common/teardown

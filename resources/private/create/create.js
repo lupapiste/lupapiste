@@ -473,6 +473,10 @@
         return;
       }
 
+      // Remove all the extra whitespace
+      // "   hii  haa hoo hee  " -> "hii haa hoo hee"
+      var kuntalupatunnus = (self.kuntalupatunnusFromPrevPermit() || "" ).trim().split(/\s+/).join( " ");
+
       ajax.command("create-application-from-previous-permit", {
         lang: loc.getCurrentLanguage(),
         y: self.y(),
@@ -480,7 +484,7 @@
         address: self.addressString(),
         propertyId: self.propertyId(),
         organizationId: self.selectedPrevPermitOrganization(),
-        kuntalupatunnus: self.kuntalupatunnusFromPrevPermit()
+        kuntalupatunnus: kuntalupatunnus
       })
       .processing(self.processing)
       .pending(self.pending)

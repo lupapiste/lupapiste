@@ -10,11 +10,6 @@
           schema (cons schema required)]
     (schemas/get-schema (schemas/get-latest-schema-version) schema) => truthy))
 
-(facts "verify that every operation has link-permit-required set"
-  (doseq [[op propeties] operations]
-    (fact {:midje/description op}
-      (contains? propeties :link-permit-required))))
-
 (facts "check that correct operations require a linkPermit"
   (fact "operation names"
     (let [ops [:ya-jatkoaika

@@ -19,10 +19,6 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
     })
     .call();
 
-  self.followAppLink = function(project) {
-    pageutil.openApplicationPage({id: project.linkedAppId});
-  };
-
   self.showAllProjects = function() {
     hub.send("show-dialog", { ltitle: "tyonjohtaja.historia.otsikko",
                               component: "foreman-history",

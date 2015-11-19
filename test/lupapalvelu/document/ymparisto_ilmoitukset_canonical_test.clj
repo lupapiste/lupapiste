@@ -72,7 +72,7 @@
                                :_comments-seen-by {},
                                :propertyId "63844900010004",
                                :verdicts [],
-                               :documents [ctc/henkilohakija
+                               :documents [ctc/henkiloilmoittaja
                                            meluilmo
                                            kesto],
                                :_statements-seen-by {},
@@ -124,7 +124,7 @@
                                       :_comments-seen-by {},
                                       :propertyId "63844900010004",
                                       :verdicts [],
-                                      :documents [ctc/yrityshakija
+                                      :documents [ctc/yritysilmoittaja
                                                   meluilmo
                                                   kesto],
                                       :_statements-seen-by {},
@@ -213,6 +213,8 @@
         (:teksti osoitenimi) => "Murskaajankatu 5"
         (:postinumero postiosoite) => "36570"
         (:postitoimipaikannimi postiosoite) => "Kaivanto"
+        (:valtioSuomeksi postiosoite) => "Suomi"
+        (:valtioKansainvalinen postiosoite) => "FIN"
         (:etunimi ilmoittaja) => "Pekka"
         (:sukunimi ilmoittaja) => "Borga"
         (:sahkopostiosoite ilmoittaja) => "pekka.borga@porvoo.fi"
@@ -230,7 +232,7 @@
       (:sunnuntaiLoppuAika toiminnanKesto) => "18:00:00")
     ))
 
-(fl/facts* "Meluilmoitus yrityshakija to canonical"
+(fl/facts* "Meluilmoitus yritysilmoittaja to canonical"
   (let [canonical (yic/meluilmoitus-canonical meluilmoitus-yritys-application "fi") => truthy
         Ilmoitukset (:Ilmoitukset canonical) => truthy
         toimutuksenTiedot (:toimituksenTiedot Ilmoitukset) => truthy
@@ -252,7 +254,9 @@
                                    :yhteyshenkilonNimi "Pertti Yritt\u00e4j\u00e4"
                                    :osoitetieto {:Osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
                                                           :postitoimipaikannimi "kuuva",
-                                                          :postinumero "43640"}}
+                                                          :postinumero "43640"
+                                                          :valtioSuomeksi "Suomi"
+                                                          :valtioKansainvalinen "FIN" }}
                                    :puhelinnumero "060222155"
                                    :sahkopostiosoite "tew@gjr.fi"})
     ))

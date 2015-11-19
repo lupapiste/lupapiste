@@ -1,13 +1,17 @@
-LUPAPISTE.AutocompleteOrganizationsModel = function() {
+LUPAPISTE.AutocompleteOrganizationsModel = function(params) {
   "use strict";
   var self = this;
+
+  self.lPlaceholder = params.lPlaceholder;
 
   self.selected = lupapisteApp.services.organizationFilterService.selected;
 
   self.query = ko.observable("");
 
   self.data = ko.pureComputed(function() {
-    var filteredData = util.filterDataByQuery(lupapisteApp.services.organizationFilterService.data(), self.query() || "", self.selected());
+    var filteredData = util.filterDataByQuery({data: lupapisteApp.services.organizationFilterService.data(),
+                                               query: self.query(),
+                                               selected: self.selected()});
     return _.sortBy(filteredData, "label");
   });
 };

@@ -1,12 +1,12 @@
 (ns lupapalvelu.attachment-test
   (:require [clojure.string :as s]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [sade.strings :refer [encode-filename]]
             [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
-            [clojure.test :refer :all]
-            [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]))
+            [lupapalvelu.i18n :as i18n]))
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -77,6 +77,7 @@
                                                                                :target nil
                                                                                :type :a
                                                                                :applicationState :draft
+                                                                               :contents nil
                                                                                :signatures []
                                                                                :versions []
                                                                                :notNeeded false
@@ -91,6 +92,7 @@
                                                                                :target nil
                                                                                :type :b
                                                                                :applicationState :draft
+                                                                               :contents nil
                                                                                :signatures []
                                                                                :versions []
                                                                                :notNeeded false
@@ -141,11 +143,37 @@
                                 :jaljennos_perunkirjasta
                                 :valokuva :rasitesopimus
                                 :valtakirja
-                                :muu))
+                                :muu
+                                :paatos
+                                :paatosote))
         all-except-commons (remove known-duplicates all-attachment-type-ids)
         all-unique (set all-except-commons)]
 
     (count all-except-commons) => (count all-unique)))
+
+(fact "All attachments are localized"
+  (let [attachment-group-type-paths (->>
+                                      (vals attachment-types-by-permit-type)
+                                      set
+                                      (apply concat)
+                                      (partition 2)
+                                      (map (fn [[g ts]] (map (fn [t] [g t]) ts)))
+                                      (apply concat))]
+    (fact "Meta: collected all types"
+      (count attachment-group-type-paths) => (count all-attachment-type-ids))
+
+    (doseq [lang ["fi" "sv"]
+            path attachment-group-type-paths
+            :let [i18n-path (cons :attachmentType path)
+                  args (map name (cons lang i18n-path))
+                  info-args (concat args ["info"])]]
+
+      (fact {:midje/description (str lang " " (s/join "." (rest args)))}
+        (apply i18n/has-term? args) => true)
+
+      (fact {:midje/description (str lang " " (s/join "." (rest info-args)))}
+        (apply i18n/has-term? info-args) => true))))
+
 
 (when (env/feature? :tiedonohjaus)
   (fact "make attachments with metadata"
@@ -159,6 +187,7 @@
                                                                                :target nil
                                                                                :type :a
                                                                                :applicationState :draft
+                                                                               :contents nil
                                                                                :signatures []
                                                                                :versions []
                                                                                :notNeeded false
@@ -174,6 +203,7 @@
                                                                                :target nil
                                                                                :type :b
                                                                                :applicationState :draft
+                                                                               :contents nil
                                                                                :signatures []
                                                                                :versions []
                                                                                :notNeeded false

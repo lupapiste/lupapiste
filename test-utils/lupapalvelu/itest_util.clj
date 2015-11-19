@@ -20,11 +20,11 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as u])
+            [lupapalvelu.user :as u]
+            [lupapalvelu.organization :as organization])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
 
@@ -58,6 +58,10 @@
 (def sonja-muni  "753")
 (def ronja       (apikey-for "ronja"))
 (def ronja-id    (id-for "ronja"))
+(def luukas      (apikey-for "luukas"))
+(def luukas-id   (id-for "luukas"))
+(def kosti       (apikey-for "kosti"))
+(def kosti-id    (id-for "kosti"))
 (def sipoo       (apikey-for "sipoo"))
 (def tampere-ya  (apikey-for "tampere-ya"))
 (def naantali    (apikey-for "admin@naantali.fi"))
@@ -72,13 +76,16 @@
 (def velho-muni "297")
 (def velho-id   (id-for "velho"))
 (def jarvenpaa  (apikey-for "admin@jarvenpaa.fi"))
+(def olli       (apikey-for "olli"))
+(def olli-id    (id-for "olli"))
 
 (def sipoo-property-id "75300000000000")
 (def jarvenpaa-property-id "18600000000000")
 (def tampere-property-id "83700000000000")
 (def kuopio-property-id "29700000000000")
 (def oir-property-id "43300000000000")
-(def no-backend-property-id "56400000000000") ; Oulu
+(def oulu-property-id "56400000000000")
+(def no-backend-property-id oulu-property-id)
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
@@ -150,11 +157,14 @@
   (decode-response
     (http-post
       (str (server-address) "/api/" (name action-type) "/" (name command-name))
-      {:headers {"authorization" (str "apikey=" apikey)
-                 "content-type" "application/json;charset=utf-8"}
-       :body (json/encode (apply hash-map args))
-       :follow-redirects false
-       :throw-exceptions false})))
+      (let [args (if (map? (first args))
+                   (first args)
+                   (apply hash-map args))]
+        {:headers {"authorization" (str "apikey=" apikey)
+                   "content-type" "application/json;charset=utf-8"}
+         :body (json/encode args)
+         :follow-redirects false
+       :throw-exceptions false}))))
 
 (defn raw-command [apikey command-name & args]
   (apply decode-post :command apikey command-name args))
@@ -175,6 +185,10 @@
     (assert (-> resp :body :ok) (str "Response not ok: fixture: \"" fixture-name "\": response: " (pr-str resp)))))
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
+
+(defn clear-collection [collection]
+  (let [resp (decode-response (http-get (str (server-address) "/dev/clear/" collection) {}))]
+    (assert (-> resp :body :ok) (str "Response not ok: clearing collection: \"" collection "\": response: " (pr-str resp)))))
 
 (defn create-app-with-fn [f apikey & args]
   (let [args (apply hash-map args)
@@ -256,6 +270,9 @@
 (defn http303? [{:keys [status]}]
   (= status 303))
 
+(defn http400? [{:keys [status]}]
+  (= status 400))
+
 (defn http401? [{:keys [status]}]
   (= status 401))
 
@@ -268,6 +285,20 @@
 ;;
 ;; DSLs
 ;;
+
+(defn remove-krysp-xml-overrides [apikey org-id permit-type]
+  (let [org  (organization-from-minimal-by-id org-id)
+        args (select-keys (get-in org [:krysp permit-type]) [:url :version])
+        args (assoc args :permitType permit-type :username "" :password "")]
+    (command apikey :set-krysp-endpoint args)))
+
+(defn override-krysp-xml [apikey org-id permit-type overrides]
+  (let [org         (organization-from-minimal-by-id org-id)
+        current-url (get-in org [:krysp permit-type :url])
+        new-url     (str current-url "?overrides=" (json/generate-string overrides))
+        args        (select-keys (get-in org [:krysp permit-type]) [:version])
+        args        (assoc args :permitType permit-type :url new-url :username "" :password "")]
+    (command apikey :set-krysp-endpoint args)))
 
 (defn set-anti-csrf! [value] (query pena :set-feature :feature "disable-anti-csrf" :value (not value)))
 (defn feature? [& feature]
@@ -282,6 +313,8 @@
          (set-anti-csrf! (not old-value#))))))
 
 (defn comment-application
+  ([apikey id]
+    (comment-application apikey id false nil))
   ([apikey id open?]
     {:pre [(instance? Boolean open?)]}
     (comment-application apikey id open? nil))
@@ -331,6 +364,30 @@
       (assert ok)
       application)))
 
+(defn query-bulletin
+  "Fetch application bulletin from server.
+   Asserts that bulletin is found and that the bulletin data looks sane.
+   Takes an optional query function (query or local-query)"
+  ([apikey id] (query-bulletin query apikey id))
+  ([f apikey id]
+    {:pre  [id]
+     :post [(:id %)
+            (not (s/blank? (:applicant %)))
+            (:modified %) (pos? (:modified %))
+            (:primaryOperation %)
+            (:state %)
+            (:bulletinState %)
+            (:municipality %)
+            (:location %)
+            (:address %)
+            (:propertyId %)
+            (:documents %)
+            (:attachments %)
+            (every? (fn [a] (or (empty? (:versions a)) (= (:latestVersion a) (last (:versions a))))) (:attachments %))]}
+    (let [{:keys [bulletin ok]} (f apikey :bulletin :bulletinId id)]
+      (assert ok)
+      bulletin)))
+
 (defn- test-application-create-successful [resp app-id]
   (fact "Application created"
     resp => ok?
@@ -355,7 +412,7 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (apply create-app-id apikey args)
-        resp  (command apikey :submit-application :id id)] ; confirm parameter used only with foreman notice
+        resp  (command apikey :submit-application :id id)]
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
@@ -380,6 +437,7 @@
   {:post [(or (nil? %)
             (and (:to %) (:subject %) (not (.contains (:subject %) "???")) (-> % :body :html) (-> % :body :plain))
             (println %))]}
+  (Thread/sleep 20) ; A little wait to allow mails to be delivered
   (let [{:keys [ok message]} (query pena :last-email :reset true)] ; query with any user will do
     (assert ok)
     message))
@@ -387,6 +445,7 @@
 (defn sent-emails
   "Returns a list of emails and clears the inbox"
   []
+  (Thread/sleep 20) ; A little wait to allow mails to be delivered
   (let [{:keys [ok messages]} (query pena :sent-emails :reset true)] ; query with any user will do
     (assert ok)
     messages))
@@ -432,7 +491,7 @@
   (apply give-verdict-with-fn local-command apikey application-id args))
 
 (defn create-foreman-application [project-app-id apikey userId role difficulty]
-  (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role)
+  (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role :foremanEmail "")
         foreman-app          (query-application apikey foreman-app-id)
         foreman-doc          (domain/get-document-by-name foreman-app "tyonjohtaja-v2")]
     (command apikey :set-user-to-document :id foreman-app-id :documentId (:id foreman-doc) :userId userId :path "" :collection "documents")
@@ -543,12 +602,6 @@
           :id (:id application)
           :doc (:id document)
           :updates updates) => ok?))))
-
-(defn dummy-doc [schema-name]
-  (let [schema (schemas/get-schema (schemas/get-latest-schema-version) schema-name)
-        data   (tools/create-document-data schema (partial tools/dummy-values nil))]
-    {:schema-info (:info schema)
-     :data        data}))
 
 ;;
 ;; Vetuma

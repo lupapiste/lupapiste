@@ -3,12 +3,13 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [slingshot.slingshot :refer [try+]]
+            [monger.operators :refer [$set $push $pull]]
             [schema.core :as sc]
-            [sade.dns :as dns]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
@@ -46,10 +47,7 @@
   ([command] (email-validator :email command))
   ([email-param-name command]
     (let [email (get-in command [:data email-param-name])]
-      (when-not (or (ss/blank? email)
-                  (and
-                    (util/valid-email? email)
-                    (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email))))
+      (when-not (v/email-and-domain-valid? email)
         (fail :error.email)))))
 
 
@@ -63,9 +61,10 @@
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
 (def all-authz-roles (conj all-authz-writer-roles :reader))
 
-(def default-org-authz-roles #{:authority})
-(def reader-org-authz-roles #{:authority :reader})
-(def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin :reader :tos-editor :tos-publisher :approver))
+(def default-org-authz-roles #{:authority :approver})
+(def commenter-org-authz-roles (conj default-org-authz-roles :commenter))
+(def reader-org-authz-roles (conj commenter-org-authz-roles :reader))
+(def all-org-authz-roles (conj reader-org-authz-roles :authorityAdmin :tos-editor :tos-publisher :archivist))
 
 ;; Notificator
 
@@ -140,6 +139,18 @@
   ([command mongo-query changes]
     (update-application command mongo-query changes false))
   ([command mongo-query changes return-count?]
+
+    (when-let [new-state (get-in changes [$set :state])]
+      (assert
+        (or
+          ; Require history entry
+          (seq (get-in changes [$push :history]))
+          ; Inforequest state chenges don't require logging
+          (states/all-inforequest-states new-state)
+          ; delete-verdict commands sets state back, but no logging is required (LPK-917)
+          (seq (get-in changes [$pull :verdicts])))
+        "event must be pushed to history array when state is set"))
+
     (with-application command
       (fn [{:keys [id]}]
         (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
@@ -306,7 +317,7 @@
         (invalid-state-in-application command application)
         (user-is-not-allowed-to-access? command application)))))
 
-(defn- response? [r]
+(defn response? [r]
   (and (map? r) (:status r)))
 
 (defn get-post-fns [{ok :ok} {:keys [on-complete on-success on-fail]}]
@@ -390,6 +401,7 @@
    ; Parameters can be keywords or symbols. Symbols will be available in the action body.
    ; If a parameter is missing from request, an error will be raised.
    (sc/optional-key :parameters)  [(sc/either sc/Keyword sc/Symbol)]
+   (sc/optional-key :optional-parameters)  [(sc/either sc/Keyword sc/Symbol)]
    ; Set of application context role keywords.
    (sc/optional-key :user-authz-roles)  (subset-of all-authz-roles)
    ; Set of application organization context role keywords
@@ -468,10 +480,12 @@
         bindings    (when (vector? (first args)) (first args))
         body        (if bindings (rest args) args)
         bindings    (or bindings ['_])
-        parameters  (:parameters meta-data)
-        letkeys     (filter symbol? parameters)
-        parameters  (map (comp keyword name) parameters)
-        meta-data   (assoc meta-data :parameters (vec parameters))
+        letkeys     (->> (util/select-values meta-data [:parameters :optional-parameters])
+                         (apply concat)
+                         (filter symbol?))
+        keywordize  (comp keyword name)
+        meta-data   (assoc meta-data :parameters (mapv keywordize (:parameters meta-data))
+                                     :optional-parameters (mapv keywordize (:optional-parameters meta-data)))
         line-number (:line form-meta)
         ns-str      (str *ns*)
         defname     (symbol (str (name action-type) "-" action-name))

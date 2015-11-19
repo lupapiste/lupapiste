@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-...            More about robot http://code.google.com/p/robotframework/.
 Library        Selenium2Library   timeout=10  run_on_failure=Nothing
 Library        String
 
@@ -17,10 +16,12 @@ ${SLOWEST_SPEED}                0.5
 
 ${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
 ${LOGOUT URL}                   ${SERVER}/app/fi/logout
+${BULLETINS URL}                ${SERVER}/app/fi/bulletins
 ${APPLICATIONS PATH}            /app/fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
-${CREATE URL}                   ${SERVER}/dev/create
+${CREATE URL}                   ${SERVER}/dev/create?redirect=true
+${CREATE BULLETIN URL}          ${SERVER}/dev/publish-bulletin-quickly
 ${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
 ${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
 ${SELENIUM}                     ${EMPTY}
@@ -53,6 +54,11 @@ Go to login page
   Go to  ${LOGIN URL}
   Wait Until  Title should be  Lupapiste
   Wait Until  Page should contain  Haluan kirjautua palveluun
+
+Go to bulletins page
+  Go to  ${BULLETINS URL}
+  Wait Until  Title should be  Lupapiste
+  Wait Until  Page should contain  Kuntien julkipanoilmoitukset
 
 Open last email
   Go to  ${LAST EMAIL URL}
@@ -103,6 +109,10 @@ Wait for jQuery
 
 Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
+
+Resurrect dev-box
+  Execute Javascript  $(".dev-debug").show();
+  Wait until  Element should be visible  //div[@class="dev-debug"]
 
 Language To
   [Arguments]  ${lang}
@@ -160,11 +170,13 @@ Close side panel
 
 Open accordions
   [Arguments]  ${tab}
-  # The accordion-toggle class can either be in button or its container.
-  Execute Javascript  $("#application-${tab}-tab button.accordion-toggle.toggled").click();
-  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle.toggled [data-accordion-id]").click();
-  Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
-  Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
+  # Open all accordions regardless of tab.
+  Execute Javascript  AccordionState.toggleAll( true );
+  # # The accordion-toggle class can either be in button or its container.
+  # Execute Javascript  $("#application-${tab}-tab button.accordion-toggle.toggled").click();
+  # Execute Javascript  $("#application-${tab}-tab div.accordion-toggle.toggled [data-accordion-id]").click();
+  # Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
+  # Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
 
 Open accordion by test id
   [Arguments]  ${testId}
@@ -173,6 +185,9 @@ Open accordion by test id
 
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
+
+Positive indicator should not be visible
+  Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-positive"]
 
 #
 # Login stuff
@@ -216,15 +231,15 @@ User logs in
 Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  User role should be  applicant
   User nav menu is visible
+  User role should be  applicant
   Applications page should be open
 
 Authority logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  User role should be  authority
   User nav menu is visible
+  User role should be  authority
   Authority applications page should be open
 
 Authority-admin logs in
@@ -236,13 +251,16 @@ Authority-admin logs in
 Admin logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  User role should be  admin
   User nav menu is visible
+  User role should be  admin
   Admin front page should be open
+
+Get role
+  Run Keyword And Return  Get Element Attribute  user-name@data-test-role
 
 User role should be
   [Arguments]  ${expected-role}
-  ${user-role}=  Execute JavaScript  return window.lupapisteApp.models.currentUser.role();
+  ${user-role} =  Get role
   Should Be Equal  ${expected-role}  ${user-role}
 
 User nav menu is visible
@@ -252,28 +270,32 @@ User nav menu is not visible
   Element should not be visible  //*[@data-test-id='user-nav-menu']
 
 As Mikko
-  Open browser to login page
+  Go to login page
   Mikko logs in
 
 As Teppo
-  Open browser to login page
+  Go to login page
   Teppo logs in
 
 As Veikko
-  Open browser to login page
+  Go to login page
   Veikko logs in
 
 As Sonja
-  Open browser to login page
+  Go to login page
   Sonja logs in
 
 As Sipoo
-  Open browser to login page
+  Go to login page
   Sipoo logs in
 
 As Solitaadmin
-  Open browser to login page
+  Go to login page
   Solitaadmin logs in
+
+As Velho
+  Go to login page
+  Velho logs in
 
 Mikko logs in
   Applicant logs in  mikko@example.com  mikko123  Mikko Intonen
@@ -340,24 +362,39 @@ Select From List by test id
 
 Select From Autocomplete
   [Arguments]  ${container}  ${value}
-  Wait until  Element should be visible  xpath=//${container}//span[@class='autocomplete-selection']
-  Click Element  xpath=//${container}//span[@class='autocomplete-selection']
+  Wait until  Element should be visible  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
+
+  ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  xpath=//${container}//div[@class="autocomplete-dropdown"]
+  Run Keyword If  ${autocompleteListNotOpen}  Click Element  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
+
   Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
   Wait until  Element should be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
   Click Element  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
+  Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]
   Wait for jQuery
+
+Select From Autocomplete By Test Id
+  [Arguments]  ${data-test-id}  ${value}
+  Select From Autocomplete  *[@data-test-id="${data-test-id}"]  ${value}
 
 Autocomplete selectable values should not contain
   [Arguments]  ${container}  ${value}
   # Open dropdown if it is not open
-  ${autocompleteListNotOpen} =  Element should not be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[@class="autocomplete-dropdown"]
-  Run Keyword If  '${autocompleteListNotOpen}' == 'PASS'  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//span[@class='autocomplete-selection']
+  ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[@class="autocomplete-dropdown"]
+  Run Keyword If  ${autocompleteListNotOpen}  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//span[contains(@class, "autocomplete-selection")]
   Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
 
 Autocomplete option list should contain
-  [Arguments]  @{options}
+  [Arguments]  ${data-test-id}  @{options}
   :FOR  ${element}  IN  @{options}
-  \  Element should contain  xpath=//div[@data-test-id="operations-filter-component"]//ul[@class="autocomplete-result autocomplete-result-grouped"]  ${element}
+  \  Element should contain  xpath=//div[@data-test-id="${data-test-id}"]//ul[contains(@class, "autocomplete-result")]  ${element}
+
+Autocomplete option list should contain by test id
+  [Arguments]  ${data-test-id}  @{options}
+  Click Element  xpath=//div[@data-test-id="${data-test-id}"]//span[contains(@class, "autocomplete-selection")]
+  Wait until  Element should be visible  xpath=//div[@data-test-id="${data-test-id}"]//div[@class="autocomplete-dropdown"]
+  :FOR  ${element}  IN  @{options}
+  \  Element should contain  xpath=//div[@data-test-id="${data-test-id}"]//ul[contains(@class, "autocomplete-result")]  ${element}
 
 Click by id
   [Arguments]  ${id}
@@ -380,9 +417,37 @@ Click enabled by test id
   Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
 
+#
+# The following do not take data-test-id as argument
+#
+
 Primary operation is
   [Arguments]  ${opId}
   Element should be visible  xpath=//span[@data-test-primary-operation-id="${opId}"]
+
+# This only works if there is only one applicable document.
+Edit operation description
+  [Arguments]  ${doc}  ${text}
+  Wait until element is visible  jquery=div#application-info-tab button[data-test-id=edit-op-description-${doc}] :first
+  #Mouse Down  jquery=div#application-info-tab [data-test-id=edit-op-description-${doc}] :first
+  Execute Javascript  $('div#application-info-tab [data-test-id=edit-op-description-${doc}] :first').mousedown();
+  Wait until element is visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
+  Input text by test id  op-description-editor-${doc}  ${text}
+  # Close the input bubble. Press key fails if the bubble has already been closed.
+  Run Keyword And Ignore Error  Press Key  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]  \\13
+
+  Positive indicator should be visible
+  Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
+
+# This only works if there is only one applicable document.
+Operation description is
+  [Arguments]  ${doc}  ${text}
+  Wait until  Element text should be  xpath=//div[@id='application-info-tab']//span[@data-test-id='op-description-${doc}']  - ${text}
+
+Table with id should have rowcount
+  [Arguments]  ${id}  ${expectedRowcount}
+  ${rowcount}=  Get Matching XPath Count  //table[@id='${id}']/tbody/tr
+  Should be equal  ${rowcount}  ${expectedRowcount}
 
 #
 # Helper for inforequest and application crud operations:
@@ -390,19 +455,23 @@ Primary operation is
 
 Create application the fast way
   [Arguments]  ${address}  ${propertyId}  ${operation}
-  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
+  Go to  ${CREATE URL}&address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
 Create application with state
   [Arguments]  ${address}  ${propertyId}  ${operation}  ${state}
-  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
+  Go to  ${CREATE URL}&address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
+Create bulletins the fast way
+  [Arguments]  ${count}
+  Go to  ${CREATE BULLETIN URL}?count=${count}
+
 Create inforequest the fast way
   [Arguments]  ${address}  ${x}  ${y}   ${propertyId}  ${operation}  ${message}
-  Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&operation=${operation}&x=${x}&y=${y}&message=${message}
+  Go to  ${CREATE URL}&infoRequest=true&address=${address}&propertyId=${propertyId}&operation=${operation}&x=${x}&y=${y}&message=${message}
   Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
   Kill dev-box
 
@@ -445,7 +514,7 @@ Do create inforequest
 Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
-  Click by test id  applications-create-new
+  Click by test id  applications-create-new-application
   Do prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
 
 Prepare first request
@@ -770,7 +839,7 @@ Foreman count is
 
 Apply minimal fixture now
   Go to  ${FIXTURE URL}/minimal
-  Page should contain  true
+  Wait until  Page should contain  true
   Go to login page
 
 #
@@ -876,17 +945,33 @@ Input verdict
   Execute JavaScript  $("#verdict-name").change();
 
 Submit empty verdict
+  [Arguments]  ${targetState}=verdictGiven
   Go to give new verdict
   Input verdict  -  6  01.05.2018  01.06.2018  -
   Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Application state should be  verdictGiven
+  Wait until  Application state should be  ${targetState}
 
-Fetch verdict
+Do fetch verdict
+  [Arguments]  ${fetchConfirmationText}
   Click enabled by test id  fetch-verdict
   Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
-  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
+  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  ${fetchConfirmationText}
   Confirm  dynamic-ok-confirm-dialog
+
+Fetch verdict
+  Do fetch verdict  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
+  Verdict is given  2013-01  0
+
+Fetch YA verdict
+  Do fetch verdict  Taustajärjestelmästä haettiin 1 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 2 uutta vaatimusta Rakentaminen-välilehdelle.
+  Verdict is given  523  0
+
+Verdict is given
+  [Arguments]  ${kuntalupatunnus}  ${i}
+  Wait until  Element should be visible  application-verdict-details
+  Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
+
 
 # User management
 

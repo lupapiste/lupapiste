@@ -1,4 +1,4 @@
-(ns lupapalvelu.document.asianhallinta_canonical
+(ns lupapalvelu.document.asianhallinta-canonical
   (:require [clojure.string :as s]
             [sade.core :refer :all]
             [sade.util :as util]
@@ -32,15 +32,19 @@
   (util/strip-nils
     {:Etunimi (get-in data [:yhteyshenkilo :henkilotiedot :etunimi])
      :Sukunimi (get-in data [:yhteyshenkilo :henkilotiedot :sukunimi])
-     :Yhteystiedot (ua-get-yhteystiedot (:yhteyshenkilo data))}))
+     :Yhteystiedot (ua-get-yhteystiedot (:yhteyshenkilo data))
+     :VainSahkoinenAsiointi (get-in data [:yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin])}))
 
 (defn- ua-get-henkilo [data]
+
+
+
   (util/strip-nils
     {:Etunimi (get-in data [:henkilo :henkilotiedot :etunimi])
      :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
      :Yhteystiedot (ua-get-yhteystiedot (:henkilo data))
      :Henkilotunnus (get-in data [:henkilo :henkilotiedot :hetu])
-     :VainSahkoinenAsiointi nil ; TODO tulossa myohemmin kayttoon
+     :VainSahkoinenAsiointi (get-in data [:henkilo :kytkimet :vainsahkoinenAsiointiKytkin])
      :Turvakielto (get-in data [:henkilo :henkilotiedot :turvakieltoKytkin])}))
 
 (defn- ua-get-yritys [data]
@@ -88,8 +92,9 @@
      :ToimenpideTeksti (i18n/localize lang "operations" (:name operation))}))
 
 (defn- ua-get-toimenpiteet [{:keys [primaryOperation secondaryOperations]} lang]
-  (let [operations (conj secondaryOperations primaryOperation)] (when (seq operations)
-    {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)})))
+  (let [operations (conj secondaryOperations primaryOperation)]
+    (when (seq operations)
+      {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)})))
 
 (defn- ua-get-viitelupa [linkPermit]
   (if (= (:type linkPermit) "lupapistetunnus")
@@ -109,12 +114,16 @@
 (defn- ua-get-liite
   "Return attachment in canonical format, with provided link as LinkkiLiitteeseen"
   [attachment link]
-  (util/strip-nils
-    {:Kuvaus (get-in attachment [:type :type-id])
-     :Tyyppi (get-in attachment [:latestVersion :contentType])
-     :LinkkiLiitteeseen link
-     :Luotu (util/to-xml-date (:modified attachment))
-     :Metatiedot {:Metatieto (ua-get-metatiedot attachment)}}))
+  (let [attachment-type (get-in attachment [:type :type-id])
+        attachment-group (get-in attachment [:type :type-group])]
+    (util/strip-nils
+      {:Kuvaus attachment-type
+       :KuvausFi (i18n/localize "fi" "attachmentType" attachment-group attachment-type)
+       :KuvausSv (i18n/localize "sv" "attachmentType" attachment-group attachment-type)
+       :Tyyppi (get-in attachment [:latestVersion :contentType])
+       :LinkkiLiitteeseen link
+       :Luotu (util/to-xml-date (:modified attachment))
+       :Metatiedot {:Metatieto (ua-get-metatiedot attachment)}})))
 
 ;; Public
 
@@ -132,6 +141,8 @@
 
 (defn get-submitted-application-pdf [{:keys [id submitted]} begin-of-link]
   {:Kuvaus "Vireille tullut hakemus"
+   :KuvausFi "Vireille tullut hakemus"
+   :KuvausSv "Ans\u00f6kan under behandling"
    :Tyyppi "application/pdf"
    :LinkkiLiitteeseen (str begin-of-link (writer/get-submitted-filename id))
    :Luotu (util/to-xml-date submitted)
@@ -140,6 +151,8 @@
 
 (defn get-current-application-pdf [{:keys [id]} begin-of-link]
   {:Kuvaus "J\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
+   :KuvausFi "Hakemus j\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
+   :KuvausSv "Ans\u00f6kan i system\u00f6verf\u00f6ring"
    :Tyyppi "application/pdf"
    :LinkkiLiitteeseen (str begin-of-link (writer/get-current-filename id))
    :Luotu (util/to-xml-date (sade.core/now))
@@ -160,7 +173,8 @@
   "Return canonical, does not contain attachments"
   [application lang]
   (let [documents (tools/unwrapped (common/documents-without-blanks application))]
-    (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
+    (-> ua-root-element
+      (assoc-in [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
       (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (domain/get-applicant-documents documents)))

@@ -9,8 +9,10 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.document.vrk]
+            [lupapalvelu.document.vrk :refer :all]
+            [lupapalvelu.document.document-field-validators :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
@@ -65,7 +67,7 @@
 (defmethod validate-field :hetu [_ _ v]
   (cond
     (ss/blank? v) nil
-    (re-matches util/finnish-hetu-regex v) (when-not (util/valid-hetu? v) [:err "illegal-hetu"])
+    (re-matches v/finnish-hetu-regex v) (when-not (v/valid-hetu? v) [:err "illegal-hetu"])
     :else [:err "illegal-hetu"]))
 
 (defmethod validate-field :checkbox [_ _ v]
@@ -100,11 +102,13 @@
   (cond
     (ss/blank? v) nil
     (= "other" v) nil
-    (util/rakennusnumero? v) nil
-    (util/rakennustunnus? v) nil
+    (v/rakennusnumero? v) nil
+    (v/rakennustunnus? v) nil
     :else [:warn "illegal-rakennusnumero"]))
 
-(defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))
+(defmethod validate-field :newBuildingSelector [_ elem v]
+  (when (not= v "ei tiedossa")
+    (subtype/subtype-validation {:subtype :number} v)))
 
 (defmethod validate-field :personSelector [application elem v]
   (when-not (ss/blank? v)
@@ -114,15 +118,18 @@
       [:err "application-does-not-have-given-auth"])))
 
 (defmethod validate-field :companySelector [application elem v]
-  (when-not (ss/blank? v)
-    (when-not (and
-                (domain/has-auth? application v)
-                (domain/no-pending-invites? application v))
-      [:err "application-does-not-have-given-auth"])))
+  (when-not (or (string? v) (nil? v))
+    [:err "unknown-type"]))
 
 (defmethod validate-field :fillMyInfoButton [_ _ _] nil)
 (defmethod validate-field :foremanHistory [_ _ _] nil)
 (defmethod validate-field :foremanOtherApplications [_ _ _] nil)
+
+(defmethod validate-field :maaraalaTunnus [_ _ v]
+  (cond
+    (ss/blank? v) nil
+    (re-matches v/maara-alatunnus-pattern v) nil
+    :else [:warn "illegal-maaraala-tunnus"]))
 
 (defmethod validate-field nil [_ _ _]
   [:err "illegal-key"])
@@ -147,15 +154,14 @@
         (find-by-name (:body elem) ks)))))
 
 (defn- resolve-element-loc-key [info element path]
-  (let [loc-key (str (-> info :document :locKey) "." (join "." (map name path)))]
-    (if (:i18nkey element)
-      (:i18nkey element)
-      (-> (if (= :select (:type element))
-            (str loc-key "._group_label")
-            loc-key)
-        (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
-        (s/replace #"\.+" ".")))     ;; removes multiple dots: "a..b" => "a.b"
-    ))
+  (if (:i18nkey element)
+    (:i18nkey element)
+    (->
+      (str
+        (join "." (concat [(-> info :document :locKey)] (map name path)))
+        (when (= :select (:type element)) "._group_label"))
+      (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
+      (s/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
 
 (defn- ->validation-result [info data path element result]
   (when result
@@ -218,6 +224,13 @@
    :post [%]}
   (schemas/get-schema schema-info))
 
+(defn- validate-document [schema document info data]
+  (let [doc-validation-results (validator/validate document)]
+    (map
+      #(let [element (find-by-name (:schema-body info) (:path %))]
+         (->validation-result info data (:path %) element (:result %)))
+      doc-validation-results)))
+
 (defn validate
   "Validates document against schema and document level rules. Returns list of validation errors.
    If schema is not given, uses schema defined in document."
@@ -227,10 +240,9 @@
     {:pre [(map? application) (map? document)]}
     (let [data (:data document)
           schema (or schema (get-document-schema document))
-          document-loc-key (or (-> schema :info :i18name) (-> schema :info :name))
           info {:document {:id (:id document)
                            :name (-> schema :info :name)
-                           :locKey document-loc-key
+                           :locKey (or (-> schema :info :i18name) (-> schema :info :name))
                            :type (-> schema :info :type)}
                 :schema-body (:body schema)}]
       (when data
@@ -238,7 +250,7 @@
           (concat
             (validate-fields application info nil data [])
             (validate-required-fields info [] data [])
-            (validator/validate document)))))))
+            (validate-document schema document info data)))))))
 
 (defn has-errors?
   [results]
@@ -376,7 +388,8 @@
    If predicate matches, value is outputted using emitter function.
    Both predicate and emitter take two parameters: element schema definition and the value map."
   [pred emitter {data :data :as document} initial-path]
-  (when data
+  (if-not data
+    document
     (letfn [(doc-walk [schema-body path]
               (into {}
                 (map
@@ -444,10 +457,13 @@
     (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
       (boolean (find-by-name schema-body full-path)))))
 
+(defn good-flag? [flag]
+  (or (nil? flag) (util/boolean? flag)))
+
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId turvakieltokytkin
-                         companyName companyId
+                         companyName companyId allowDirectMarketing
                          fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults?]}]
-  {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
+  {:pre [(good-flag? turvakieltokytkin) (good-flag? allowDirectMarketing)]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
       {:userId                                  (wrap id)
@@ -457,6 +473,7 @@
                        :turvakieltoKytkin       (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
        :yhteystiedot {:email                    (wrap email)
                       :puhelin                  (wrap phone)}
+       :kytkimet {:suoramarkkinointilupa        (when (or allowDirectMarketing with-empty-defaults?) (boolean allowDirectMarketing))}
        :osoite {:katu                           (wrap street)
                 :postinumero                    (wrap zip)
                 :postitoimipaikannimi           (wrap city)}
@@ -474,9 +491,9 @@
       util/strip-empty-maps
       tools/wrapped)))
 
-(defn ->yritys [{:keys [firstName lastName email phone address1 zip po turvakieltokytkin name y ovt pop]}
+(defn ->yritys [{:keys [firstName lastName email phone address1 zip po turvakieltokytkin name y ovt pop allowDirectMarketing]}
                 & {:keys [with-empty-defaults?]}]
-  {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
+  {:pre [(good-flag? turvakieltokytkin) (good-flag? allowDirectMarketing)]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
       {:yritysnimi                                    (wrap name)
@@ -488,7 +505,8 @@
                                        :sukunimi      (wrap lastName)
                                        :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
                        :yhteystiedot {:email          (wrap email)
-                                      :puhelin        (wrap phone)}}
+                                      :puhelin        (wrap phone)}
+                       :kytkimet {:suoramarkkinointilupa (when (or allowDirectMarketing with-empty-defaults?) (boolean allowDirectMarketing))}}
        :verkkolaskutustieto {:ovtTunnus               (wrap ovt)
                              :verkkolaskuTunnus       ""
                              :valittajaTunnus         (wrap pop)}}

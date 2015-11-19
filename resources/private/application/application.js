@@ -54,7 +54,7 @@
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
-  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(applicationModel, signingModel, verdictAttachmentPrintsOrderModel);
+  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(signingModel, verdictAttachmentPrintsOrderModel);
   var foremanModel = new LUPAPISTE.ForemanModel();
 
   var authorities = ko.observableArray([]);
@@ -77,9 +77,9 @@
     if (isInitializing || !authorizationModel.ok("change-permit-sub-type")) { return; }
 
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
-      .success(function() {
-        authorizationModel.refresh(currentId);
-        hub.send("indicator", {style: "positive"});
+      .success(function(resp) {
+        util.showSavedIndicator(resp);
+        applicationModel.reload();
       })
       .call();
   }
@@ -111,12 +111,14 @@
   }
 
   function initAvailableTosFunctions(organizationId) {
-    ajax
-      .query("available-tos-functions", {organizationId: organizationId})
-      .success(function(data) {
-        tosFunctions(data.functions);
-      })
-      .call();
+    if (authorizationModel.ok("available-tos-functions")) {
+      ajax
+        .query("available-tos-functions", {organizationId: organizationId})
+        .success(function(data) {
+          tosFunctions(data.functions);
+        })
+        .call();
+    }
   }
 
   function showApplication(applicationDetails) {
@@ -129,7 +131,8 @@
       applicationModel._js = app;
 
       // Update observables
-      ko.mapping.fromJS(app, {}, applicationModel);
+      var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers"]};
+      ko.mapping.fromJS(app, mappingOptions, applicationModel);
 
       // Invite
       inviteModel.setApplicationId(app.id);
@@ -148,10 +151,10 @@
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.secondaryOperations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      verdictAttachmentPrintsOrderModel.refresh(applicationModel);
-      verdictAttachmentPrintsOrderHistoryModel.refresh(applicationModel);
+      verdictAttachmentPrintsOrderModel.refresh();
+      verdictAttachmentPrintsOrderHistoryModel.refresh();
 
-      attachmentsTab.refresh(applicationModel);
+      attachmentsTab.refresh();
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
@@ -268,6 +271,7 @@
     if (newId === currentId && tab) {
       selectTab(tab);
     } else {
+      hub.send("track-click", {category:"Applications", label: kind, event:"openApplication"});
       pageutil.showAjaxWait();
       if (newId !== currentId) { // close sidepanel if it's open
         var sidePanel = $("#side-panel div.content-wrapper > div").filter(":visible");
@@ -278,7 +282,20 @@
       }
       currentId = newId;
       repository.load(currentId, applicationModel.pending, function(application) {
-        selectTab(tab || (application.inPostVerdictState ? "tasks" : "info"));
+        var fallbackTab = function(application) {
+          if (application.inPostVerdictState) {
+            var name = application.primaryOperation.name;
+            if (name) {
+              return name.match(/tyonjohtaja/) ? "applicationSummary" : "tasks";
+            } else {
+              return "tasks";
+            }
+          } else {
+            return "info";
+          }
+        };
+
+        selectTab(tab || fallbackTab(application));
       });
     }
   }
@@ -327,7 +344,7 @@
     markDone: function(neighbor) {
       ajax
         .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.id()})
-        .complete(_.partial(repository.load, currentId, util.nop))
+        .complete(_.partial(repository.load, currentId, _.noop))
         .call();
     },
     statusCompleted: function(neighbor) {

@@ -15,8 +15,11 @@
       usersList = null,
       editRolesDialogModel;
 
+  var authorizationModel = lupapisteApp.models.globalAuthModel;
+
   function OrganizationModel() {
     var self = this;
+    self.initialized = false;
 
     self.organizationId = ko.observable();
     self.links = ko.observableArray();
@@ -25,19 +28,40 @@
     self.selectedOperations = ko.observableArray();
     self.allOperations = [];
     self.appRequiredFieldsFillingObligatory = ko.observable(false);
+    self.validateVerdictGivenDate = ko.observable(true);
     self.tosFunctions = ko.observableArray();
     self.tosFunctionVisible = ko.observable(false);
     self.permanentArchiveEnabled = ko.observable(true);
     self.features = ko.observable();
     self.allowedRoles = ko.observable([]);
 
+    self.permitTypes = ko.observable([]);
+
     self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };
 
-    self.appRequiredFieldsFillingObligatory.subscribe( function() {
-      ajax
-        .command("set-organization-app-required-fields-filling-obligatory", {isObligatory: self.appRequiredFieldsFillingObligatory()})
-        .success(self.load)
-        .call();
+    ko.computed(function() {
+      var isObligatory = self.appRequiredFieldsFillingObligatory();
+      if (self.initialized) {
+        ajax.command("set-organization-app-required-fields-filling-obligatory", {enabled: isObligatory})
+          .success(util.showSavedIndicator)
+          .error(util.showSavedIndicator)
+          .call();
+      }
+    });
+
+    ko.computed(function() {
+      var validateVerdictGivenDate = self.validateVerdictGivenDate();
+      if (self.initialized) {
+        ajax.command("set-organization-validate-verdict-given-date", {enabled: validateVerdictGivenDate})
+          .success(util.showSavedIndicator)
+          .error(util.showSavedIndicator)
+          .call();
+      }
+    });
+
+    self.validateVerdictGivenDateVisible = ko.pureComputed(function() {
+      var types = self.permitTypes();
+      return _.contains(types, "R") || _.contains(types, "P");
     });
 
     function toAttachments(attachments) {
@@ -60,6 +84,8 @@
       // Required fields in app obligatory to submit app
       //
       self.appRequiredFieldsFillingObligatory(organization["app-required-fields-filling-obligatory"] || false);
+
+      self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 
       self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
 
@@ -122,19 +148,26 @@
 
       self.selectedOperations(_.sortBy(localizedSelectedOperationsPerPermitType, "permitType"));
 
-      ajax
-        .query("available-tos-functions", {organizationId: organization.id})
-        .success(function(data) {
-          self.tosFunctions(data.functions);
-          if (data.functions.length > 0 && organization["permanent-archive-enabled"]) {
-            self.tosFunctionVisible(true);
-          }
-        })
-        .call();
+      // TODO test properly for timing issues
+      if (authorizationModel.ok("available-tos-functions")) {
+        ajax
+          .query("available-tos-functions", {organizationId: organization.id})
+          .success(function(data) {
+            self.tosFunctions(data.functions);
+            if (data.functions.length > 0 && organization["permanent-archive-enabled"]) {
+              self.tosFunctionVisible(true);
+            }
+          })
+          .call();
+      }
 
       self.features(util.getIn(organization, ["areas"]));
 
       self.allowedRoles(organization.allowedRoles);
+
+      self.permitTypes(_(organization.scope).pluck("permitType").uniq().value());
+
+      self.initialized = true;
     };
 
     self.editLink = function(indexFn) {
@@ -348,6 +381,8 @@
 
     self.data = ko.observable();
     self.editUrl = ko.observable();
+    self.editUsername = ko.observable();
+    self.editPassword = ko.observable();
     self.versions = ko.observable([]);
     self.editVersion = ko.observable();
     self.editContext = null;
@@ -369,7 +404,13 @@
     };
 
     self.save = function() {
-      ajax.command("set-krysp-endpoint", {url: self.editUrl(), version: self.editVersion(), permitType: self.editContext.permitType})
+      ajax.command("set-krysp-endpoint", {
+        url: self.editUrl(),
+        username: self.editUsername(),
+        password: self.editPassword(),
+        version: self.editVersion(),
+        permitType: self.editContext.permitType
+      })
         .success(function() {
           self.load();
           self.error(false);
@@ -384,11 +425,15 @@
 
     self.openDialog = function(model) {
       var url = model.url || "";
+      var username = model.username || "";
+      var password = model.password || "";
       var version = model.version || "";
       var versionsAvailable = LUPAPISTE.config.kryspVersions[model.permitType];
       if (!versionsAvailable) {error("No supported KRYSP versions for permit type", model.permitType);}
       self.versions(versionsAvailable);
       self.editUrl(url);
+      self.editUsername(username);
+      self.editPassword(password);
       self.editVersion(version);
       self.editContext = model;
       self.error(false);

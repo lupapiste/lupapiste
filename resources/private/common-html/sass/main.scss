@@ -17,10 +17,11 @@
   white-space:nowrap;
 }
 
-@mixin clearfix {
+@mixin clearfix() {
   *zoom: 1;
-  &:before, &:after {
-    content: "";
+  &:before,
+  &:after {
+    content: " ";
     display: table;
   }
   &:after {
@@ -116,6 +117,7 @@
 @import "partials/_archival-summary";
 @import "partials/_applications_search";
 @import "partials/_indicator";
+@import "partials/_bulletins";
 
 /* VIEWS
 ------------------------------------------------------------------------------*/

@@ -22,8 +22,7 @@
   {:parameters [id authorityNotice]
    :states (states/all-states-but [:draft])
    :user-authz-roles #{:statementGiver}
-   :user-roles #{:authority}
-   :org-authz-roles action/reader-org-authz-roles}
+   :user-roles #{:authority}}
   [command]
   (update-application command {$set {:authorityNotice authorityNotice}}))
 

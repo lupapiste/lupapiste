@@ -2,14 +2,14 @@
   (:require [sade.util :as util]
             [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.operations :as operations]))
 
 (defn ymparistolupa-canonical [application lang]
   (let [documents (tools/unwrapped (canonical-common/documents-by-type-without-blanks application))
         kuvaus    (-> documents :yl-hankkeen-kuvaus first :data)
         generic-id {:yksilointitieto (:id application)
                     :alkuHetki (util/to-xml-datetime (:created application))}
-        hakija-key (keyword (permit/get-applicant-doc-schema (permit/permit-type application)))]
+        hakija-key (keyword (operations/get-applicant-doc-schema-name application))]
     {:Ymparistoluvat
      {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
       :ymparistolupatieto

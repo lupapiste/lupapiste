@@ -2,7 +2,8 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.domain :as domain]
+            [sade.util :as util]))
 
 (fact* "Give verdict"
   (last-email) ; Inbox zero
@@ -67,18 +68,41 @@
 
       (fact "Publish verdict" (command sonja :publish-verdict :id application-id :verdictId verdict-id) => ok?)
 
-      (fact "Authority is still able to add an attachment"
-        (let [application (query-application sonja application-id)
-              first-attachment (get-in application [:attachments 0])]
+      (let [application (query-application sonja application-id)
+            first-attachment (get-in application [:attachments 0])]
+
+        (fact "verdict is given"
+          (:state application) => "verdictGiven"
+          (-> application :history last :state) => "verdictGiven")
+
+        (fact "Authority is still able to add an attachment"
 
           (let [email (last-email)]
             (:to email) => (contains (email-for-key pena))
             (:subject email) => "Lupapiste.fi: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
             email => (partial contains-application-link-with-tab? application-id "verdict" "applicant"))
 
-          (:state application) => "verdictGiven"
           (upload-attachment sonja (:id application) first-attachment true)
           (upload-attachment pena (:id application) first-attachment false))))))
+
+(fact "Fetch verdict when all antoPvms are in the future"
+  (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
+        app-id (:id application)
+        future-timestamp (util/get-timestamp-from-now :week 1)]
+    (override-krysp-xml sipoo "753-R" :R [{:selector [:yht:antoPvm] :value (util/to-xml-date future-timestamp)}])
+
+    (command sonja :check-for-verdict :id app-id) => (partial expected-failure? "info.paatos-future-date")
+    (fact "No verdicts"
+      (-> (query-application mikko app-id) :verdicts count) => 0)
+
+    (fact "Disable antoPvm check"
+      (command sipoo :set-organization-validate-verdict-given-date :enabled false) => ok?
+
+      (fact "Verdict is now read"
+        (command sonja :check-for-verdict :id app-id) => ok?
+        (-> (query-application mikko app-id) :verdicts count) => pos?)))
+
+  (against-background (after :facts (remove-krysp-xml-overrides sipoo "753-R" :R))))
 
 (facts* "Fetch verdict from KRYSP backend"
   (last-email) ; Inbox zero

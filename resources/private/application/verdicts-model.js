@@ -48,7 +48,10 @@ LUPAPISTE.VerdictsModel = function() {
       var pk = util.getIn(paatokset, [0, "poytakirjat", 0]) || {};
       var dates = util.getIn(paatokset, [0, "paivamaarat"]) || {};
       verdict.canBePublished = verdict.kuntalupatunnus && pk.status && pk.paatoksentekija && dates.anto && dates.lainvoimainen;
-
+      verdict.showTosMetadata = ko.observable(false);
+      verdict.toggleTosMetadata = function() {
+        verdict.showTosMetadata(!verdict.showTosMetadata());
+      };
       return verdict;
     });
 

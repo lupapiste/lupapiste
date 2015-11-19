@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Authority admin can enable asianhallinta
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***

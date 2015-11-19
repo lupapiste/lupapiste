@@ -1,17 +1,17 @@
-(ns lupapalvelu.xml.asianhallinta.asianhallinta_canonical_to_xml_test
+(ns lupapalvelu.xml.asianhallinta.asianhallinta-canonical-to-xml-test
   (:require [clojure.data.xml :as xml]
             [lupapalvelu.factlet :as fl]
             [midje.sweet :refer :all]
             [midje.util :as mu]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.asianhallinta_canonical :as ah]
+            [lupapalvelu.document.asianhallinta-canonical :as ah]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
-            [lupapalvelu.document.rakennuslupa_canonical-test :as rakennus-test]
+            [lupapalvelu.document.rakennuslupa-canonical-test :as rakennus-test]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.asianhallinta.core]
-            [lupapalvelu.xml.asianhallinta.asianhallinta_mapping :as ua-mapping]
+            [lupapalvelu.xml.asianhallinta.asianhallinta-mapping :as ua-mapping]
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
@@ -24,7 +24,7 @@
             [sade.xml :as sxml]))
 
 (mu/testable-privates lupapalvelu.xml.asianhallinta.core begin-of-link)
-(mu/testable-privates lupapalvelu.xml.asianhallinta.asianhallinta_mapping attachments-for-write)
+(mu/testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-mapping attachments-for-write)
 
 (defn- has-attachment-types [meta]
   (fact "type-group and type-id"
@@ -161,7 +161,7 @@
         (fact "Hakija"
           (let [hakijat (sxml/select xml-parsed [:UusiAsia :Hakijat])
                 hakijat-data (:hakija docs)]
-            (fact "Corrent count" (count (sxml/select hakijat [:Hakija])) => (count hakijat-data))
+            (fact "Correct count" (count (sxml/select hakijat [:Hakija])) => (count hakijat-data))
             (fact "Hakija is Henkilo, not yritys"
               (:tag (sxml/get-text hakijat [:Hakija])) => :Henkilo)))
 
@@ -250,7 +250,7 @@
     (fact "Hakija"
       (let [hakijat (sxml/select xml-parsed [:UusiAsia :Hakijat :Hakija])
             hakijat-data (:hakija docs)]
-        (fact "Corrent count" (count hakijat) => (count hakijat-data))
+        (fact "Correct count" (count hakijat) => (count hakijat-data))
         (fact "First Hakija is Henkilo, second is Yritys"
           (-> hakijat first :content first :tag) => :Henkilo
           (-> hakijat second :content first :tag) => :Yritys)
@@ -263,6 +263,38 @@
 
     (fact "Maksaja is Yritys 1743842-0 (first)"
       (sxml/get-text xml-parsed [:UusiAsia :Maksaja :Yritys :Ytunnus]) => (get-in docs [:maksaja 0 :data :yritys :liikeJaYhteisoTunnus]))))
+
+(fl/facts* "Schema version 1.2"
+  (let [application    (ua-mapping/enrich-application
+                         (assoc poikkeus-test/poikkari-hakemus :attachments attachments))
+        canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
+        canonical      (assoc-in canonical
+                         [:UusiAsia :Liitteet :Liite]
+                         (ah/get-attachments-as-canonical (:attachments application) begin-of-link))
+        schema-version "ah-1.2"
+        mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
+        xml            (element-to-xml canonical mapping) => truthy
+        xml-s          (xml/indent-str xml) => truthy
+        permit-type    (:permitType application)
+        xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
+
+    (fact "Validator for Asianhallinta exists"
+      ((keyword permit-type) validator/supported-versions-by-permit-type) => (contains schema-version))
+
+    (fact "Validate UusiAsia XML"
+      (validator/validate xml-s permit-type schema-version) => nil)
+
+    (facts "Liitteet has KuvausFi and KuvausSv added in schema 1.2"
+      (let [liitteet (sxml/select1 xml-parsed [:UusiAsia :Liitteet])
+            liit1 (first (:content liitteet))
+            liit2 (second (:content liitteet))]
+        liitteet => truthy
+        (facts "1st Liite"
+          (fact "KuvausFi" (sxml/get-text liit1 [:KuvausFi]) => "Asemapiirros")
+          (fact "KuvausSv" (sxml/get-text liit1 [:KuvausSv]) => "Situationsplan"))
+        (facts "2nd Liite"
+          (fact "KuvausFi" (sxml/get-text liit2 [:KuvausFi]) => "Valtakirja")
+          (fact "KuvausSv" (sxml/get-text liit2 [:KuvausSv]) => "Fullmakt"))))))
 
 
 (facts "Unit tests - attachments-for-write"

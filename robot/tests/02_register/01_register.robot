@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Mikko registers
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        keywords.robot
 

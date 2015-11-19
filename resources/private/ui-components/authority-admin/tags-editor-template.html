@@ -17,7 +17,7 @@
                              attr: {'data-test-id': 'tag-label-' + $index()}"></span>
             <input class="tag-editor"
                    data-bind="visible: edit, hasFocus: edit, value: $data.label, event: {keypress: $parent.onKeypress},
-                              attr: {'data-test-id': 'edit-tag-input-' + $index()}"></input>
+                              attr: {'data-test-id': 'edit-tag-input-' + $index()}"/>
             <span class="tag-edit icon edit"
                   data-bind="visible: !edit(), click: $parent.editTag"></span>
           </li>

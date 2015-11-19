@@ -172,16 +172,19 @@
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => nil
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => nil
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => nil
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => nil)
 
-            )
         (fact "has no comments"
           (:comments application) => empty?)
+
+        (fact "has coordinates (LPK-894)"
+          (-> application :location :x) => pos?
+          (-> application :location :y) => pos?)
 
         (let [document-types (set (map (comp :name :schema-info) (:documents application)))
               has-doc (fn [doc-schema-name] (document-types doc-schema-name))]
           (fact "has hakija document" "hakija-r" => has-doc)
-          (fact "has hankkeen-kuvaus document" "hankkeen-kuvaus" => has-doc)
+          (fact "has hankkeen-kuvaus-rakennuslupa document" "hankkeen-kuvaus-rakennuslupa" => has-doc)
           (fact "has rakennuspaikka document" "rakennuspaikka" => has-doc)
           (fact "does not have paatoksen-toimitus-rakval document" "paatoksen-toimitus-rakval" =not=> has-doc))
 
