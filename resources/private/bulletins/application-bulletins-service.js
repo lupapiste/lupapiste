@@ -121,30 +121,8 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   });
 
   hub.subscribe("bulletinService::newComment", function(comment) {
-    
-    // if (window.FormData === undefined) {
-    //   // TODO how we can access data object if no attachment were added
-    //   commentForm.submit();
-    // } else {
-    //   var form = event.commentForm;
-    //   var formData = new FormData(form);
-    //   var files = event.files;
-    //   if (files.length === 1) {
-    //     formData.append("files[]", _.first(files));
-    //   } else {
-    //     _.forEach(event.files, function(file) {
-    //       formData.append("files", file);
-    //     });
-    //   }
-    //   ajax.form("add-bulletin-comment", formData)
-    //   .success(function() {
-    //     hub.send("bulletinService::commentProcessed", {status: "success"});
-    //   })
-    //   .error(function() {
-    //     hub.send("bulletinService::commentProcessed", {status: "failed"});
-    //   })
-    //   .pending(commentPending)
-    //   .call();
-    // }
+    ajax
+      .command("add-bulletin-comment", comment)
+      .call();
   });
 };
