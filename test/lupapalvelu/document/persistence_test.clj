@@ -73,4 +73,27 @@
   (removing-updates-by-path :someCollection "123" [])
   => {})
 
+(fact "validate-readonly-updates! - valid update"
+  (validate-readonly-updates! {:schema-info {:name "rakennusjatesuunnitelma"}}
+                              [[:rakennusJaPurkujate :0 :suunniteltuMaara]])
+  => nil)
 
+(fact "validate-readonly-updates! - contains readonly"
+  (validate-readonly-updates! {:schema-info {:name "rakennusjateselvitys"}}
+                              [[:rakennusJaPurkujate :suunniteltuJate :0 :suunniteltuMaara]])
+  => (throws Exception))
+
+(fact "validate-readonly-updates! - another valid update"
+  (validate-readonly-updates! {:schema-info {:name "rakennusjateselvitys"}}
+                              [[:rakennusJaPurkujate :suunniteltuJate :0 :arvioituMaara]])
+  => nil)
+
+(fact "validate-readonly-removes! - valid"
+  (validate-readonly-updates! {:schema-info {:name "rakennusjatesuunnitelma"}}
+                              [[:rakennusJaPurkujate :0]])
+  => nil)
+
+(fact "validate-readonly-removes! - contains readonly"
+  (validate-readonly-removes! {:schema-info {:name "rakennusjateselvitys"}}
+                              [[:rakennusJaPurkujate :suunniteltuJate :0]])
+  => (throws Exception))
