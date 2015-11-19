@@ -15,7 +15,6 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.application-search :refer [make-text-query dir]]))
 
-
 (def bulletin-page-size 10)
 
 (defn- make-query [search-text municipality state]
@@ -106,21 +105,28 @@
       (fail! :error.invalid-bulletin-state))
     (bulletin-version-is-latest! bulletin bulletin-version-id)))
 
+(def delivery-address-fields #{:firstName :lastName :street :zip :city})
+
 ;; TODO user-roles Vetuma autheticated person
 (defraw add-bulletin-comment
   {:description "Add comment to bulletin"
    :feature     :publish-bulletin
    :user-roles  #{:anonymous}}
-  [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field bulletin-version-id :bulletin-version-id} :data created :created :as action}]
+  [{{files :files bulletin-id :bulletin-id comment :bulletin-comment-field bulletin-version-id :bulletin-version-id
+     email :email emailPreferred :emailPreferred otherReceiver :otherReceiver :as data} :data created :created :as action}]
   (try+
     (comment-can-be-added! bulletin-id bulletin-version-id comment)
-    (let [comment      (bulletins/create-comment comment created)
+    (let [address-source   (if otherReceiver data (get-in (lupapalvelu.vetuma/vetuma-session) [:user]))
+          delivery-address (select-keys address-source delivery-address-fields)
+          contact-info     (merge delivery-address {:email email
+                                                    :emailPreferred (= emailPreferred "on")})
+          comment      (bulletins/create-comment comment contact-info created)
           stored-files (bulletins/store-files bulletin-id (:id comment) files)]
       (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments stored-files)}})
-         (->> {:ok true}
-              (resp/json)
-              (resp/content-type "application/json")
-              (resp/status 200)))
+      (->> {:ok true}
+           (resp/json)
+           (resp/content-type "application/json")
+           (resp/status 200)))
     (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
       (->> {:ok false :text text}
            (resp/json)
@@ -133,16 +139,59 @@
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
 
+(defn- create-bulletin [application created & [updates]]
+  (let [app-snapshot (bulletins/create-bulletin-snapshot application)
+        app-snapshot (if updates
+                       (merge app-snapshot updates)
+                       app-snapshot)
+        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
+        search-updates (get-search-fields search-fields app-snapshot)]
+    (bulletins/snapshot-updates app-snapshot search-updates created)))
+
 (defcommand publish-bulletin
   {:parameters [id]
    :feature :publish-bulletin
    :user-roles #{:authority}
-   :states     (states/all-application-states-but :draft)}
+   :states     (states/all-application-states-but :draft :open :submitted)}
   [{:keys [application created] :as command}]
-  (let [app-snapshot (bulletins/create-bulletin-snapshot application)
-        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
-        search-updates (get-search-fields search-fields app-snapshot)
-        updates (bulletins/snapshot-updates app-snapshot search-updates created)]
+  (mongo/update-by-id :application-bulletins id (create-bulletin application created) :upsert true)
+  (ok))
+
+(defcommand move-to-proclaimed
+  {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     #{:sent :complementNeeded}}
+  [{:keys [application created] :as command}]
+  (let [updates (->> (create-bulletin application created {:proclamationEndsAt proclamationEndsAt
+                                                           :proclamationStartsAt proclamationStartsAt
+                                                           :proclamationText proclamationText}))]
+    (mongo/update-by-id :application-bulletins id updates :upsert true)
+    (ok)))
+
+(defcommand move-to-verdict-given
+  {:parameters [id verdictGivenAt appealPeriodStartsAt appealPeriodEndsAt verdictGivenText]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     #{:verdictGiven}}
+  [{:keys [application created] :as command}]
+  (let [updates (->> (create-bulletin application created {:verdictGivenAt verdictGivenAt
+                                                           :appealPeriodStartsAt appealPeriodStartsAt
+                                                           :appealPeriodEndsAt appealPeriodEndsAt
+                                                           :verdictGivenText verdictGivenText}))]
+    (mongo/update-by-id :application-bulletins id updates :upsert true)
+    (ok)))
+
+(defcommand move-to-final
+  {:parameters [id officialAt]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     #{:verdictGiven}}
+  [{:keys [application created] :as command}]
+  ; Note there is currently no way to move application to final state so we sent bulletin state manuall
+  (let [updates (->> (create-bulletin application created {:officialAt officialAt
+                                                           :bulletinState :final}))]
+    (clojure.pprint/pprint updates)
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
@@ -150,14 +199,27 @@
   {:parameters [bulletinId]
    :feature :publish-bulletin
    :user-roles #{:anonymous}}
+  "return only latest version for application bulletin"
   (if-let [bulletin (bulletins/get-bulletin bulletinId)]
-    (let [latest-version   (-> bulletin :versions first)
-          bulletin-version   (assoc latest-version :versionId (:id latest-version)
-                                                   :id (:id bulletin))
+    (let [latest-version (-> bulletin :versions first)
+          bulletin-version (assoc latest-version :versionId (:id latest-version)
+                                                 :id (:id bulletin))
           append-schema-fn (fn [{schema-info :schema-info :as doc}]
                              (assoc doc :schema (schemas/get-schema schema-info)))
           bulletin (-> bulletin-version
-                     (update-in [:documents] (partial map append-schema-fn))
-                     (assoc :stateSeq bulletins/bulletin-state-seq))]
+                       (update-in [:documents] (partial map append-schema-fn))
+                       (assoc :stateSeq bulletins/bulletin-state-seq))]
       (ok :bulletin bulletin))
     (fail :error.bulletin.not-found)))
+
+(defquery bulletin-versions
+  "returns all bulletin versions for application bulletin with comments"
+  {:parameters [bulletinId]
+   :feature    :publish-bulletin
+   :user-roles #{:authority :applicant}}
+  (let [bulletin-fields (-> bulletins/bulletins-fields
+                            (dissoc :versions)
+                            (merge {:comments 1
+                                    :bulletinState 1}))
+        bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
+    (ok :bulletin bulletin)))

@@ -67,7 +67,8 @@
       :nav    (concat (:nav c)    (enlive/select h [:nav]))
       :info   (concat (:info c)   (enlive/select h [:div.notification]))
       :footer (concat (:footer c) (enlive/select h [:footer]))
-      :page   (concat (:page  c)  (enlive/select h [:section.page])))))
+      :page   (concat (:page  c)  (enlive/select h [:section.page]))
+      :templates (concat (:templates c) (enlive/select h [:script.ko-template])))))
 
 (defn- resource-url [component kind]
   (str (kind (env/value :cdn)) (:build-number env/buildinfo) "/" (name component) "." (name kind)))
@@ -80,7 +81,7 @@
           (tc/to-date (tc/from-long (:time env/buildinfo)))
           (:build-number env/buildinfo)))
 
-(defn inject-content [t {:keys [nav info page footer]} component]
+(defn inject-content [t {:keys [nav info page footer templates]} component]
   (enlive/emit* (-> t
                   (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
                   (enlive/transform [:nav] (enlive/content (map :content nav)))
@@ -90,7 +91,8 @@
                   (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (resource-url :common :js)) e)))
                   (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-app") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
                   (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
-                  (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary)))))
+                  (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary))
+                  (enlive/transform [:div.ko-templates] (enlive/content templates)))))
 
 (defn- compress-html [^String html]
   (let [c (doto (HtmlCompressor.)

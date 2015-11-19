@@ -53,7 +53,14 @@
                       data-bind=""
                       data-test-id="comment-bulletin">
                   <i class="lupicon-comment"></i>
-                  <span data-bind="ltext: 'bulletin.comment'"></span>
+                  <!-- ko if: authenticated-->
+                  <span data-bind="ltext: 'bulletin.actions.comment',
+                                   click: scrollToCommenting"></span>
+                  <!-- /ko -->
+                  <!-- ko if: !authenticated() -->
+                  <span data-bind="ltext: 'bulletin.actions.comment',
+                                   click: clickAuthenticationButton"></span>
+                  <!-- /ko -->
               </button>
             </div>
           </div>
@@ -72,6 +79,7 @@
 
         </div>
       </div>
+
       <div class="container">
         <div class="bulletin-tab-content" data-bind="component: { name: 'bulletin-' + selectedTab() + '-tab', params: tabComponentParams}, attr: {'id': 'bulletin-' + selectedTab() + '-tab-component'}"></div>
 
@@ -79,16 +87,20 @@
             <!-- This is where the generated documents will be placed. -->
         </div>
       </div>
-
-      <div class="container bulletin-comment">
-        <h5 data-bind="ltext: 'bulletin.comment.title'"></h5>
-        <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'help.bulletin.comment' } }"></span>
-        <p>
-          <span data-bind="ltext: 'bulletin.comment.endDate'"></span>
-          <span data-bind="dateTimeString: $data.proclamationEndsAt"></span>
-        </p>
-        <div data-bind="component: { name: 'bulletin-comment-box', params: { bulletinId: bulletinId, versionId: versionId } }"></div>
+      <!-- ko if: authenticated -->
+      <div data-bind="component: { name: 'bulletin-comment',
+                                   params: { bulletin: $data,
+                                             versionId: versionId,
+                                             userInfo: userInfo,
+                                             fileuploadService: fileuploadService } }"></div>
+      <!-- /ko -->
+      <!-- ko if: !authenticated() -->
+      <div class="container">
+        <div data-bind="component: { name: 'vetuma-init',
+                                     params: vetumaParams }"></div>
       </div>
+      <!-- /ko -->
+
     </script>
   </section>
 </body>

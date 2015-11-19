@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="date-field-template">
+      <div class="col--vertical">
+        <label data-bind="text: label, attr: {'for': id}, css: {'required': required}, visible: label"></label>
+        <input class="input" type="text"
+               data-bind="datepicker: value, attr: {placeholder: placeholder, name: id},
+                          hasFocus: isSelected,
+                          css: {required: required && !value()},
+                          disable: disable"
+               maxlength="255"/>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

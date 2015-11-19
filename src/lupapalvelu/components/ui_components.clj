@@ -13,6 +13,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
@@ -52,6 +53,7 @@
                                           validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))
                  :degrees               (map :name (:body schemas/koulutusvalinta))
+                 :bulletinStates        bulletins/bulletin-state-seq
                  :features              (into {} (filter second (env/features)))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -95,7 +97,7 @@
   {;; 3rd party libs
    :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
-   :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
+   :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js" "jquery.xdr-transport.js"]}
    :knockout       {:js ["knockout-3.3.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js"]}
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
@@ -147,7 +149,9 @@
                    "organization-filter-service.js"
                    "organization-tags-service.js"
                    "handler-filter-service.js"
-                   "application-filters-service.js"]}
+                   "application-filters-service.js"
+                   "publish-bulletin-service.js"
+                   "fileupload-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -367,10 +371,12 @@
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}
 
-   :bulletins {:depends [:ui-components :map :docgen]
+   :bulletins {:depends [:ui-components :map :docgen :services]
                :html ["header.html" "footer.html"
                       "bulletins.html" "bulletins-template.html"
                       "application-bulletin/application-bulletin-template.html"
+                      "application-bulletin/begin-vetuma-auth-button/begin-vetuma-auth-button-template.html"
+                      "application-bulletin/bulletin-comment/bulletin-comment-template.html"
                       "application-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
                       "application-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
                       "application-bulletin/tabs/info/bulletin-info-tab-template.html"
@@ -382,9 +388,12 @@
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
                :js ["header.js"
-                    "bulletins.js" "component-base-model.js" "bulletins-model.js"
+                    "bulletins.js" "bulletins-model.js"
                     "application-bulletins-service.js"
+                    "vetuma-service.js"
                     "application-bulletin/application-bulletin-model.js"
+                    "application-bulletin/begin-vetuma-auth-button/begin-vetuma-auth-button-model.js"
+                    "application-bulletin/bulletin-comment/bulletin-comment-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
                     "application-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
                     "application-bulletins/application-bulletins-model.js"

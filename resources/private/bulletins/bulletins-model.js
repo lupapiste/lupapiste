@@ -10,12 +10,17 @@ LUPAPISTE.BulletinsModel = function(params) {
   self.pagePath = ko.observableArray([]);
 
   var bulletinService = params.bulletinService;
+  var vetumaService = params.vetumaService;
+  var fileuploadService = params.fileuploadService;
 
   self.bulletinId = ko.observable(pageutil.subPage());
 
   self.pageParams = {bulletinService: bulletinService,
                      pagePath: self.pagePath,
-                     bulletinId: self.bulletinId};
+                     bulletinId: self.bulletinId,
+                     authenticated: vetumaService.authenticated,
+                     userInfo: vetumaService.userInfo,
+                     fileuploadService: fileuploadService};
 
   hub.onPageLoad("bulletins", function(e) {
     self.page(e.pageId);

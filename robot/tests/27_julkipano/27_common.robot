@@ -6,7 +6,7 @@ Variables  ../21_stamping/variables.py
 Create bulletins
   [Arguments]  ${count}
   As Sonja
-  Create bulletins the fast way  11
+  Create bulletins the fast way  ${count}
 
 Bulletin list should have no rows
   Element should not be visible  //table[@id="application-bulletins-list"]/tbody/tr
@@ -37,7 +37,11 @@ Load more bulletins
 Create application and publish bulletin
   [Arguments]  ${address}  ${propertyId}
   Create application with state  ${address}  ${propertyId}  vapaa-ajan-asuinrakennus  sent
+  Open tab  bulletin
   Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
+  Input text with jQuery  input[name="proclamationStartsAt"]  23.11.2015
+  Input text with jQuery  input[name="proclamationEndsAt"]  23.12.2015
+  Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
 
 Search bulletins by text
@@ -86,3 +90,7 @@ Bulletin attachments count is
 
 Bulletin commenting is visible
   Element should be visible  bulletin-comment-field
+
+Create sent application
+  [Arguments]  ${address}=Vaalantie 540  ${propertyId}=564-404-26-102
+  Create application with state  ${address}  ${propertyId}  koeluontoinen-toiminta  sent
