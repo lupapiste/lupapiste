@@ -67,9 +67,9 @@
 
           <!-- Tabs: -->
           <div class="tabs-container">
-            <ul class="tabs" id="">
+            <ul class="tabs" id="bulletin-tabs">
               <li data-bind="css: {'active': selectedTab() === 'info'}">
-                  <a data-bind="click: _.partial(openTab, 'info')" href="#" class="link-btn-julkipano">
+                  <a data-bind="click: _.partial(openTab, 'info')" href="#" class="link-btn-julkipano" data-test-id="bulletin-open-info-tab">
                       <span data-bind="ltext: 'application.tabInfo'"></span> </a></li>
               <li data-bind="css: {'active': selectedTab() === 'attachments'}">
                   <a data-bind="click: _.partial(openTab, 'attachments')" href="#" data-test-id="bulletin-open-attachments-tab" class="link-btn-julkipano">
@@ -81,7 +81,7 @@
       </div>
 
       <div class="container">
-        <div class="bulletin-tab-content" data-bind="component: { name: 'bulletin-' + selectedTab() + '-tab', params: tabComponentParams}"></div>
+        <div class="bulletin-tab-content" data-bind="component: { name: 'bulletin-' + selectedTab() + '-tab', params: tabComponentParams}, attr: {'id': 'bulletin-' + selectedTab() + '-tab-component'}"></div>
 
         <div data-bind="visible: selectedTab() === 'info'" id="bulletinDocgen" class="docgen-content">
             <!-- This is where the generated documents will be placed. -->

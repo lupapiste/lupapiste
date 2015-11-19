@@ -27,5 +27,10 @@ Map is visible
 Action buttons are visible
   Element should be visible  //div[@id='bulletin-component']//div[@data-test-id='bulletin-actions']/button[@data-test-id='comment-bulletin']
 
+Tabs are visible
+  Element should be visible  bulletin-tabs
+  Element should be visible  xpath=//ul[@id='bulletin-tabs']/li/a[@data-test-id='bulletin-open-info-tab']
+  Element should be visible  xpath=//ul[@id='bulletin-tabs']/li/a[@data-test-id='bulletin-open-attachments-tab']
+
 
 
