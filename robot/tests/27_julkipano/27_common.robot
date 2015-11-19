@@ -37,7 +37,11 @@ Load more bulletins
 Create application and publish bulletin
   [Arguments]  ${address}  ${propertyId}
   Create application with state  ${address}  ${propertyId}  vapaa-ajan-asuinrakennus  sent
+  Open tab  bulletin
   Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
+  Input text with jQuery  input[name="proclamationStartsAt"]  23.11.2015
+  Input text with jQuery  input[name="proclamationEndsAt"]  23.12.2015
+  Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
 
 Search bulletins by text
