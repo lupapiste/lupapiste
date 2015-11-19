@@ -15,9 +15,12 @@ LUPAPISTE.FileuploadService = function() {
   }
 
   $("#" + self.fileInputId).fileupload({
-    url: "/upload/file",
+    url: "/api/upload/file",
     type: "POST",
     dataType: "json",
+    formData: [
+      { name: '__anti-forgery-token', value: $.cookie("anti-csrf-token") }
+    ],
     start: function(e, data) {
       hub.send("fileuploadService::filesUploading", {state: "pending"});
     },
