@@ -84,16 +84,6 @@
   [command]
   (doc-persistence/update! command doc updates "tasks"))
 
-(defn- do-remove-document-data [{application :application :as command} doc-id path collection]
-  (let [document  (doc-persistence/by-id application collection doc-id)
-        str-path  (ss/join "." path)
-        data-path (str collection ".$.data." str-path)
-        meta-path (str collection ".$.meta." str-path)]
-    (when-not document (fail! :error.document-not-found))
-    (update-application command
-                        {:documents {$elemMatch {:id (:id document)}}}
-                        {$unset {data-path "" meta-path ""}})))
-
 (defcommand remove-document-data
   {:parameters       [id doc path collection]
    :user-roles       #{:applicant :authority}
@@ -101,7 +91,7 @@
    :input-validators [doc-persistence/validate-collection]
    :pre-checks       [application/validate-authority-in-drafts]}
   [command]
-  (do-remove-document-data command doc path collection))
+  (doc-persistence/remove-document-data command doc [path] collection))
 
 (defcommand remove-construction-time-document-data
   {:parameters       [id doc path collection]
@@ -110,7 +100,7 @@
    :input-validators [doc-persistence/validate-collection]
    :pre-checks       [application/validate-authority-in-drafts validate-is-construction-time-doc]}
   [command]
-  (do-remove-document-data command doc path collection))
+  (doc-persistence/remove-document-data command doc [path] collection))
 
 ;;
 ;; Document validation

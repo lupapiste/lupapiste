@@ -161,6 +161,23 @@
     (when (seq removable-attachment-ids)
       (update-application command {$pull {:attachments {:id {$in removable-attachment-ids}}}}))))
 
+(defn removing-updates-by-path [collection doc-id paths]
+  (letfn [(build-path [path] (->> (map name path)
+                                  (ss/join ".")
+                                  ((juxt (partial str (name collection) ".$.data.")
+                                         (partial str (name collection) ".$.meta.")))))]
+    (if-let [paths (not-empty (remove empty? paths))]
+      {:mongo-query   {(keyword collection) {$elemMatch {:id doc-id}}}
+       :mongo-updates {$unset (-> (mapcat build-path paths) 
+                                  (zipmap (repeat "")))}}
+      {})))
+
+(defn remove-document-data [{application :application :as command} doc-id paths collection]
+  (when-not (by-id application collection doc-id) (fail! :error.document-not-found))
+  (->> (removing-updates-by-path collection doc-id paths)
+       ((juxt :mongo-query :mongo-updates))
+       (apply update-application command)))
+
 (defn create-empty-doc [{created :created {schema-version :schema-version} :application :as command} schema-name]
   (let [document (-> (schemas/get-schema schema-version schema-name)
                      (model/new-document created))]

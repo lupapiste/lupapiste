@@ -61,4 +61,16 @@
   (empty-op-attachments-ids attachments "111") => ["6"]
   (empty-op-attachments-ids attachments "112") => ["7" "9"])
 
+(fact "removing-updates-by-path - two paths"
+  (removing-updates-by-path :someCollection "123" [[:path :to :removed :item] [:path "to" :another "removed" :item]])
+  =>  {:mongo-query   {:someCollection {"$elemMatch" {:id "123"}}}, 
+       :mongo-updates {"$unset" {"someCollection.$.data.path.to.removed.item" "", 
+                                 "someCollection.$.meta.path.to.removed.item" "", 
+                                 "someCollection.$.data.path.to.another.removed.item" "", 
+                                 "someCollection.$.meta.path.to.another.removed.item" ""}}})
+
+(fact "removing-updates-by-path - no paths"
+  (removing-updates-by-path :someCollection "123" [])
+  => {})
+
 
