@@ -13,7 +13,7 @@
      :filename (:filename file)
      :size (:size file)}))
 
-(defpage [:post "/upload/file"] {files :files}
+(defpage [:post "/api/upload/file"] {files :files}
   (let [file-info {:files (pmap save-file files)}]
     (->> (assoc file-info :ok true)
       (resp/json)
