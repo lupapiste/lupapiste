@@ -148,7 +148,7 @@
    :states     (states/all-application-states-but :draft)}
   [{:keys [application created] :as command}]
   (let [app-snapshot (bulletins/create-bulletin-snapshot application)
-        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
+        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]b
         search-updates (get-search-fields search-fields app-snapshot)
         updates (bulletins/snapshot-updates app-snapshot search-updates created)]
     (mongo/update-by-id :application-bulletins id updates :upsert true)
