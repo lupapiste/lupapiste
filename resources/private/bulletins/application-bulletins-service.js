@@ -121,7 +121,7 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   });
 
   hub.subscribe("bulletinService::newComment", function(comment) {
-    
+    hub.send("bulletinService::commentProcessed", {status: "success"});
     // if (window.FormData === undefined) {
     //   // TODO how we can access data object if no attachment were added
     //   commentForm.submit();
