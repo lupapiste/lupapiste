@@ -20,7 +20,8 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   });
 
   self.tabComponentParams = ko.pureComputed(function() {
-    return {bulletin: self.bulletin, attachments: self.bulletin() ? self.bulletin().attachments : []};
+    return {bulletin: self.bulletin,
+            attachments: self.bulletin() ? self.bulletin().attachments : []};
   });
 
   self.bulletinStateLoc = ko.pureComputed(function() {
