@@ -12,8 +12,8 @@
             [sade.property :as p]
             [sade.strings :as ss]
             [sade.core :refer :all]
-            [sade.env :as env])
-  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
+            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
+  (:import [java.io ByteArrayOutputStream ByteArrayInputStream File]
            [javax.imageio ImageIO]))
 
 ; ----------------------- combining schema and data
@@ -474,3 +474,10 @@
    (let [out (ByteArrayOutputStream.)]
      (generate-pdf-with-child app child-type id lang out)
      (ByteArrayInputStream. (.toByteArray out)))))
+
+(defn generate-pdf-a
+  "Returns application data in PDF/A temp file"
+  [application lang]
+  (let [file (File/createTempFile "application-pdf-a-" ".tmp")]
+    (generate application lang file)
+    (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))))

@@ -12,7 +12,6 @@
 (defn bulletin-state [app-state]
   (condp contains? (keyword app-state)
     states/pre-verdict-states              :proclaimed
-    #{:consideration}                      :consideration
     (difference states/post-verdict-states
                 states/terminal-states)    :verdictGiven
     #{:final}                              :final))
