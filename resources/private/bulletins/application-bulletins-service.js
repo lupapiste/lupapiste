@@ -121,8 +121,15 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   });
 
   hub.subscribe("bulletinService::newComment", function(comment) {
+    hub.send("bulletinService::commentProcessing");
     ajax
       .command("add-bulletin-comment", comment)
+      .success(function() {
+        hub.send("bulletinService::commentProcessed", {status: "success"});
+      })
+      .error(function() {
+        hub.send("bulletinService::commentProcessed", {status: "error"});
+      })
       .call();
   });
 };
