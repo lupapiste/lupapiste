@@ -7,5 +7,22 @@
 </script>
 
 <script class="ko-template" type="text/x-jquery-tmpl" id="bulletin-versions-accordion-content">
-
+  <table class="table" data-test-id="bulletin-versions-table">
+    <thead>
+      <tr>
+        <th data-bind="ltext: 'bulletin.versions.published'"></th>
+        <th data-bind="ltext: 'bulletin.versions.state'"></th>
+        <th data-bind="ltext: 'bulletin.versions.comments'"></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: versions">
+      <tr>
+        <td data-bind="dateString: modified"></td>
+        <td data-bind="ltext: 'bulletin.state.' + bulletinState"></td>
+        <td data-bind="text: comments ? comments.length : ''"></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
 </script>
