@@ -241,4 +241,17 @@
       }
     }
   }
+  table.bulletin-attachments {
+    tr td {
+      word-wrap: break-word;
+      &:first-child {
+        padding-left: 12px;
+      }
+    }
+  }
+  .bulletin-tab-content {
+    h3 {
+      margin-bottom: $marginL;
+    }
+  }
 }

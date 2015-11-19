@@ -15,15 +15,6 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.application-search :refer [make-text-query dir]]))
 
-(def bulletins-fields
-  {:versions {$slice -1} :versions.bulletinState 1
-   :versions.state 1 :versions.municipality 1
-   :versions.address 1 :versions.location 1
-   :versions.primaryOperation 1 :versions.propertyId 1
-   :versions.applicant 1 :versions.modified 1
-   :versions.proclamationEndsAt 1
-   :modified 1})
-
 (def bulletin-page-size 10)
 
 (defn- make-query [search-text municipality state]
@@ -58,10 +49,10 @@
 (defn- get-application-bulletins [page searchText municipality state sort]
   (let [query (or (make-query searchText municipality state) {})
         apps (mongo/with-collection "application-bulletins"
-                                    (query/find query)
-                                    (query/fields bulletins-fields)
-                                    (query/sort (make-sort sort))
-                                    (query/paginate :page page :per-page bulletin-page-size))]
+               (query/find query)
+               (query/fields bulletins/bulletins-fields)
+               (query/sort (make-sort sort))
+               (query/paginate :page page :per-page bulletin-page-size))]
     (map
       #(assoc (first (:versions %)) :id (:_id %))
       apps)))
@@ -209,29 +200,24 @@
    :feature :publish-bulletin
    :user-roles #{:anonymous}}
   "return only latest version for application bulletin"
-  (let [bulletin-fields (merge bulletins-fields
-                               {:versions._applicantIndex 1
-                                :versions.documents 1
-                                :versions.id 1
-                                :versions.attachments 1})]
-    (if-let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
-      (let [latest-version   (-> bulletin :versions first)
-            bulletin-version   (assoc latest-version :versionId (:id latest-version)
-                                                     :id (:id bulletin))
-            append-schema-fn (fn [{schema-info :schema-info :as doc}]
-                               (assoc doc :schema (schemas/get-schema schema-info)))
-            bulletin (-> bulletin-version
-                         (update-in [:documents] (partial map append-schema-fn))
-                         (assoc :stateSeq bulletins/bulletin-state-seq))]
-        (ok :bulletin bulletin))
-      (fail :error.bulletin.not-found))))
+  (if-let [bulletin (bulletins/get-bulletin bulletinId)]
+    (let [latest-version (-> bulletin :versions first)
+          bulletin-version (assoc latest-version :versionId (:id latest-version)
+                                                 :id (:id bulletin))
+          append-schema-fn (fn [{schema-info :schema-info :as doc}]
+                             (assoc doc :schema (schemas/get-schema schema-info)))
+          bulletin (-> bulletin-version
+                       (update-in [:documents] (partial map append-schema-fn))
+                       (assoc :stateSeq bulletins/bulletin-state-seq))]
+      (ok :bulletin bulletin))
+    (fail :error.bulletin.not-found)))
 
 (defquery bulletin-versions
   "returns all bulletin versions for application bulletin with comments"
   {:parameters [bulletinId]
    :feature    :publish-bulletin
    :user-roles #{:authority :applicant}}
-  (let [bulletin-fields (-> bulletins-fields
+  (let [bulletin-fields (-> bulletins/bulletins-fields
                             (dissoc :versions)
                             (merge {:comments 1
                                     :bulletinState 1}))

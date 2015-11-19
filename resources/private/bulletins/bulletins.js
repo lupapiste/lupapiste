@@ -19,7 +19,9 @@
         {name: "autocomplete-states"},
         {name: "bulletin-comment"},
         {name: "bulletin-comment-box"},
-        {name: "begin-vetuma-auth-button"}];
+        {name: "begin-vetuma-auth-button"},
+        {name: "bulletin-attachments-tab"},
+        {name: "bulletin-info-tab"}];
 
     _.forEach(components, function(component) {
       ko.components.register(component.name, {

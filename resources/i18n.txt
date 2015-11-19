@@ -36,4 +36,4 @@ bulletin.comment.otherReceiver:  Toimita toiseen osoitteeseen
 
 bulletin.comment.delivery:  Päätös toimitetaan osoitteeseen:
 
-bulletin.actions.comment:  Haluan kommentoida ilmoitusta>>>>>>> theirs
+bulletin.actions.comment:  Haluan kommentoida ilmoitusta

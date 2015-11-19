@@ -11,12 +11,23 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   self.userInfo = params.userInfo;
   self.fileuploadService = params.fileuploadService;
 
-  self.bulletinId = params.bulletinId;
+  self.bulletinId = params.bulletinId();
   self.versionId  = ko.observable();
-  self.selectedTab = ko.observable("info");
   self.proclamationEndsAt = ko.observable();
 
   self.authenticated = params.authenticated;
+
+  self.selectedTab = ko.observable().extend({
+    limited: {values: ["info", "attachments"], defaultValue: "info"}
+  });
+
+  ko.computed(function() {
+    self.selectedTab(params.pagePath()[1]);
+  });
+
+  self.tabComponentParams = ko.pureComputed(function() {
+    return {bulletin: self.bulletin, attachments: self.bulletin() ? self.bulletin().attachments : []};
+  });
 
   self.bulletinStateLoc = ko.pureComputed(function() {
     return ["bulletin", "state", self.bulletin().bulletinState].join(".");
@@ -46,6 +57,11 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   self.scrollToCommenting = function() {
     $("#bulletin-comment")[0].scrollIntoView(true);
+  };
+
+  self.openTab = function(tab) {
+    self.selectedTab(tab);
+    pageutil.openPage("bulletin", [self.bulletinId, tab]);
   };
 
   hub.send("bulletinService::fetchBulletin", {id: self.bulletinId});
