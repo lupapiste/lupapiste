@@ -52,6 +52,30 @@ Mikko opens attachment details
   [Tags]  attachments
   Open attachment details  muut.muu
 
+# Tests against bug fix LPK-1042
+Mikko returns to application right away
+  [Tags]  attachments
+  Click element  jquery=[data-test-id=back-to-application-from-attachment]
+  Wait Until Page Contains  ${propertyId}
+
+Attachment is needed
+  [Tags]  attachments
+  Checkbox Should Not Be Selected  jquery=td.attachment-not-needed input
+
+Mikko checks Not needed for the attachment
+  [Tags]  attachments
+  Select checkbox  jquery=td.attachment-not-needed input
+
+Not needed should be checked after reload
+  [Tags]  attachments
+  Reload Page
+  Wait Until  Element should be visible  jquery=td.attachment-not-needed input
+  Checkbox Should Be Selected  jquery=td.attachment-not-needed input
+
+Mikko opens attachment details again
+  [Tags]  attachments
+  Open attachment details  muut.muu
+
 Mikko does not see Reject-button
   [Tags]  attachments
   Element should not be visible  test-attachment-reject

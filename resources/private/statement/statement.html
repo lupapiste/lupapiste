@@ -49,13 +49,16 @@
           </textarea>
         </div>
         <button
-          data-bind="disable: disabled, click: submit, ltext: submitLtext, visible: $root.authorization.ok('give-statement')"
-          id="statement-submit"
-          type="submit"
-          class="btn btn-primary">
-          J&auml;t&auml; lausunto
+          data-bind="disable: disabled,
+                     click: submit,
+                     visible: $root.authorization.ok('give-statement'),
+                     css: {waiting: submitting}"
+           id="statement-submit"
+           type="submit"
+           class="positive">
+          <span data-bind="ltext: submitLtext"></span>
+          <i class="wait spin lupicon-refresh"></i>
         </button>
-        <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
       </form>
     </div>
 
