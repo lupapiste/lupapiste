@@ -1146,8 +1146,9 @@ $max-columns: 12;
     vertical-align: middle;
   }
 
-  input[type=text]:disabled {
-    border-color: $input-disabled-border-color
+  input[type=text]:disabled, .checkbox-wrapper.disabled {
+    border-color: $input-disabled-border-color;
+    background-color: $input-disabled-background-color;
   }
 
   input[type=text].err, input[type=password].err {
@@ -1208,11 +1209,14 @@ $max-columns: 12;
   .row {
     @include clearfix;
     margin: $grid-margin 0;
-    // overflow-y: hidden;
   }
 
   .row--no-margin {
     margin: 0;
+  }
+
+  .row--no-bottom-margin {
+    margin-bottom: 0;
   }
 
   .autocomplete-component {

@@ -2,7 +2,7 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   "use strict";
   var self = this;
 
-  self.data = ko.observableArray([]);
+  self.bulletins = ko.observableArray([]);
   self.bulletinsLeft = ko.observable(0);
 
   self.query = {
@@ -20,9 +20,9 @@ LUPAPISTE.ApplicationBulletinsService = function() {
       .success(function(res) {
         self.bulletinsLeft(res.left);
         if (query.page === 1) {
-          self.data(res.data);
+          self.bulletins(res.data);
         } else {
-          self.data(self.data().concat(res.data));
+          self.bulletins(self.bulletins().concat(res.data));
         }
       })
       .pending(self.fetchBulletinsPending)
@@ -99,26 +99,52 @@ LUPAPISTE.ApplicationBulletinsService = function() {
     fetchBulletin(event.id);
   });
 
-  hub.subscribe("bulletinService::newComment", function(event) {
-    var form = event.commentForm;
-    var formData = new FormData(form);
-    var files = event.files;
-    if (files.length === 1) {
-      formData.append("files[]", _.first(files));
-    } else {
-      _.forEach(event.files, function(file) {
-        formData.append("files", file);
-      });
-    }
-    ajax.form("add-bulletin-comment", formData)
-    .success(function() {
-      hub.send("bulletinService::commentProcessed", {status: "success"});
-    })
-    .error(function() {
-      hub.send("bulletinService::commentProcessed", {status: "failed"});
-    })
-    .pending(commentPending)
-    .call();
+  var commentForm;
+
+  hub.subscribe("bulletinService::registerUploadForm", function(event) {
+    $(event.form).fileupload({
+      url: "/api/raw/add-bulletin-comment",
+      type: "POST",
+      dataType: "json",
+      replaceFileInput: true,
+      autoUpload: false,
+      add: function(e, data) {
+        commentForm = data;
+      },
+      done: function() {
+        hub.send("bulletinService::commentProcessed", {status: "success"});
+      },
+      fail: function() {
+        hub.send("bulletinService::commentProcessed", {status: "failed"});
+      }
+    });
+  });
+
+  hub.subscribe("bulletinService::newComment", function(comment) {
+    hub.send("bulletinService::commentProcessed", {status: "success"});
+    // if (window.FormData === undefined) {
+    //   // TODO how we can access data object if no attachment were added
+    //   commentForm.submit();
+    // } else {
+    //   var form = event.commentForm;
+    //   var formData = new FormData(form);
+    //   var files = event.files;
+    //   if (files.length === 1) {
+    //     formData.append("files[]", _.first(files));
+    //   } else {
+    //     _.forEach(event.files, function(file) {
+    //       formData.append("files", file);
+    //     });
+    //   }
+    //   ajax.form("add-bulletin-comment", formData)
+    //   .success(function() {
+    //     hub.send("bulletinService::commentProcessed", {status: "success"});
+    //   })
+    //   .error(function() {
+    //     hub.send("bulletinService::commentProcessed", {status: "failed"});
+    //   })
+    //   .pending(commentPending)
+    //   .call();
+    // }
   });
 };
-

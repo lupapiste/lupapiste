@@ -8,11 +8,15 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
       .center(404168, 6693765, 14);
 
   self.bulletin = bulletinService.bulletin;
+  self.userInfo = params.userInfo;
+  self.fileuploadService = params.fileuploadService;
 
   self.bulletinId = params.bulletinId;
   self.versionId  = ko.observable();
   self.selectedTab = ko.observable("info");
   self.proclamationEndsAt = ko.observable();
+
+  self.authenticated = params.authenticated;
 
   self.bulletinStateLoc = ko.pureComputed(function() {
     return ["bulletin", "state", self.bulletin().bulletinState].join(".");
@@ -36,5 +40,21 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     id.dispose();
   };
 
+  self.clickAuthenticationButton = function() {
+    $("#vetuma-init")[0].click();
+  };
+
+  self.scrollToCommenting = function() {
+    $("#bulletin-comment")[0].scrollIntoView(true);
+  };
+
   hub.send("bulletinService::fetchBulletin", {id: self.bulletinId});
+
+  var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + self.bulletinId;
+  self.vetumaParams = {success: returnUrl,
+                       cancel:  returnUrl + "/cancel",
+                       error:   returnUrl + "/error",
+                       y:       returnUrl,
+                       vtj:     returnUrl,
+                       id:      "vetuma-init"};
 };
