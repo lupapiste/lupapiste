@@ -133,10 +133,21 @@
 (defn municipality-layers
   "TODO: Not finished."
   [municipality]
+  (letfn [(in-municipality-has-layers? [{:keys [id map-layers]}]
+            (and map-layers (ss/starts-with id municipality)))
+          (annotate-org-layers [{:keys [layers server]}]
+            (map #(assoc % :server (:url server) )))
+          (layer-slot-filled? [layer server slot]
+            (let [{:keys id name base} slot
+                  {{url :url} :server} slot]
+              (or
+               (and base (:base layer) (= name (:name layer)))
+               (and (= id (:id layer) (= url (:url server)))))))])
   (->> (org/get-organizations)
-       (filter (fn [{:keys [id map-layers]}]
-                 (and map-layers (ss/starts-with id municipality))))
-       (reduce (fn [acc {:keys [id map-layers server]}])))
+       (filter in-municipality-has-layers?)
+       (map )
+       (reduce (fn [acc {:keys [id map-layers]}])
+               (if (some (partial layer-slot-filled? ) ))))
   )
 
 
