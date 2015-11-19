@@ -6,12 +6,15 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
 
   self.bulletinId = params.bulletinId;
   self.versionId = params.versionId;
-  self.comment = ko.observable();
   self.attachments = ko.observableArray([]);
   self.pending = ko.observable(false);
   self.filePending = ko.observable(false);
-  self.email = ko.observable().extend({email: true});
-  self.emailPreferred = ko.observable();
+  
+  self.basicCommentFields = {
+    comment: ko.observable(),
+    email: ko.observable().extend({email: true}),
+    emailPreferred: ko.observable()
+  };
 
   self.userInfo = params.userInfo;
 
@@ -26,8 +29,8 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
         self.otherReceiverInfo[key].isModified(false);
       });
     }
-    self.email(undefined);
-    self.emailPreferred(undefined);
+    self.basicCommentFields.email(undefined);
+    self.basicCommentFields.emailPreferred(undefined);
   });
 
   // User can select different receiving address for verdict messages i.e. solicitor
@@ -43,17 +46,17 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
                                               self.otherReceiverInfo.street, self.otherReceiverInfo.zip, self.otherReceiverInfo.city]);
 
   self.emailIsBlank = ko.pureComputed(function() {
-    return _.isBlank(self.email());
+    return _.isBlank(self.basicCommentFields.email());
   });
 
   ko.computed(function() {
-    self.emailPreferred(!_.isBlank(self.email()));
+    self.basicCommentFields.emailPreferred(!_.isBlank(self.basicCommentFields.email()));
   });
 
   self.isSubmitDisabled = ko.pureComputed(function() {
     var allOtherInfoIsValid = self.otherReceiver() ? self.allOtherInfo.isValid() : true;
     var isPending = self.pending() || self.filePending();
-    return isPending || !self.comment() || !self.email.isValid() || !allOtherInfoIsValid;
+    return isPending || !self.basicCommentFields.comment() || !self.basicCommentFields.email.isValid() || !allOtherInfoIsValid;
   });
 
   self.addAttachment = function() {
@@ -64,20 +67,10 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     self.attachments.remove(attachment); // TODO: do this properly
   };
 
-  function otherReceiverFields(self) {
-    return _.merge(commentFields(self), ko.toJS(self.otherReceiverInfo));
-  }
-
-  function commentFields(self) {
-    return {
-      comment: self.comment(),
-      email: self.email(),
-      emailPreferred: self.emailPreferred()
-    };
-  }
-
   self.sendComment = function() {
-    var comment = self.otherReceiver() ? otherReceiverFields(self) : commentFields(self);
+    var comment = self.otherReceiver() ?
+      _.merge(ko.toJS(self.basicCommentFields), ko.toJS(self.otherReceiverInfo)) :
+      ko.toJS(self.basicCommentFields);
     comment.files = self.attachments();
 
     hub.send("bulletinService::newComment", comment);
@@ -93,7 +86,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
 
   self.addEventListener("bulletinService", "commentProcessed", function(event) {
     if (event.status === "success") {
-      self.comment("");
+      self.basicCommentFields.comment("");
       self.attachments([]);
       hub.send("indicator", {style: "positive", message: "bulletin.comment.save.success"});
     } else {

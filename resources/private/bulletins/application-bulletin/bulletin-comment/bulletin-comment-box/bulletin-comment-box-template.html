@@ -34,14 +34,14 @@
                 <div class="col-4" data-bind="slider: !otherReceiver()">
                   <div class="col-1">
                     <div data-bind="component: {name: 'text-field',
-                                                params: {value: email,
+                                                params: {value: basicCommentFields.email,
                                                          id: 'email',
                                                          lLabel: 'userinfo.email'}}"></div>
                   </div>
                   <div class="col-1">
                     <br/>
                     <div data-bind="component: {name: 'checkbox-field',
-                                                params: {value: emailPreferred,
+                                                params: {value: basicCommentFields.emailPreferred,
                                                          id: 'emailPreferred',
                                                          lLabel: 'bulletin.comment.emailPreferred',
                                                          disable: emailIsBlank}}"></div>
@@ -107,14 +107,14 @@
               <div class="row" data-bind="if: $component.otherReceiver">
                 <div class="col-1">
                   <div data-bind="component: {name: 'text-field',
-                                              params: {value: $component.email,
+                                              params: {value: $component.basicCommentFields.email,
                                                        id: 'email',
                                                        lLabel: 'userinfo.email'}}"></div>
                 </div>
                 <div class="col-1">
                   <br/>
                   <div data-bind="component: {name: 'checkbox-field',
-                                              params: {value: $component.emailPreferred,
+                                              params: {value: $component.basicCommentFields.emailPreferred,
                                                        id: 'emailPreferred',
                                                        lLabel: 'bulletin.comment.emailPreferred',
                                                        disable: $component.emailIsBlank}}"></div>
@@ -128,7 +128,7 @@
         <div class="row">
            <div class="col-4"
                data-bind="component: {name: 'textarea-field',
-                                      params: {value: comment,
+                                      params: {value: basicCommentFields.comment,
                                                id: 'bulletin-comment-field',
                                                lLabel: 'bulletin.comment',
                                                lPlaceholder: 'bulletin.comment.placeholder'}}"></div>

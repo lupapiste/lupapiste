@@ -120,8 +120,7 @@ LUPAPISTE.ApplicationBulletinsService = function() {
     });
   });
 
-  hub.subscribe("bulletinService::newComment", function(event) {
-    
+  hub.subscribe("bulletinService::newComment", function(comment) {
     
     // if (window.FormData === undefined) {
     //   // TODO how we can access data object if no attachment were added
