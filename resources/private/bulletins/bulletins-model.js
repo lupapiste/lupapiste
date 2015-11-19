@@ -7,29 +7,27 @@ LUPAPISTE.BulletinsModel = function(params) {
   self.page = ko.observable().extend({
     limited: {values: supportedPages, defaultValue: "bulletins"}
   });
+  self.pagePath = ko.observableArray([]);
 
   var bulletinService = params.bulletinService;
 
-  self.pageParams = ko.pureComputed(function () {
-    var defaultParams = {
-      bulletinService: bulletinService
-    };
+  self.bulletinId = ko.observable(pageutil.subPage());
 
-    return self.page() === "bulletin" ?
-      _.extend(defaultParams, { bulletinId: bulletinId,
-                                bulletinService: params.bulletinService }) :
-      defaultParams;
-  });
+  self.pageParams = {bulletinService: bulletinService,
+                     pagePath: self.pagePath,
+                     bulletinId: self.bulletinId};
 
   hub.onPageLoad("bulletins", function(e) {
     self.page(e.pageId);
+    self.pagePath(e.pagePath);
   });
 
   hub.onPageLoad("bulletin", function(e) {
-    bulletinId = _.first(e.pagePath);
+    self.bulletinId(_.first(e.pagePath));
     self.page(e.pageId);
+    self.pagePath(e.pagePath);
   });
 
   self.page(pageutil.getPage());
-  var bulletinId = pageutil.subPage();
+  self.pagePath(pageutil.getPagePath());
 };

@@ -9893,6 +9893,18 @@ div.search i {
   display: table-cell;
   padding-right: 24px;
 }
+/* line 242, ../sass/partials/_bulletins.scss */
+#bulletins table.bulletin-attachments tr td {
+  word-wrap: break-word;
+}
+/* line 244, ../sass/partials/_bulletins.scss */
+#bulletins table.bulletin-attachments tr td:first-child {
+  padding-left: 12px;
+}
+/* line 250, ../sass/partials/_bulletins.scss */
+#bulletins .bulletin-tab-content h3 {
+  margin-bottom: 24px;
+}
 
 /* VIEWS
 ------------------------------------------------------------------------------*/
