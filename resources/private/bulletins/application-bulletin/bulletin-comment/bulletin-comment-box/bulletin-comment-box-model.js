@@ -94,11 +94,11 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     } else {
       hub.send("indicator", {style: "negative", message: "bulletin.comment.save.failed"});
     }
+    self.pending(false);
   });
 
-  self.addEventListener("bulletinService", "commentProcessing", function(event) {
-    var state = event.state;
-    self.pending(state === "pending");
+  self.addEventListener("bulletinService", "commentProcessing", function() {
+    self.pending(true);
   });
 };
 
