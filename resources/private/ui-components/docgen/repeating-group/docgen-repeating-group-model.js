@@ -23,8 +23,9 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
     self.errorMessage(resultMsg);
   });
 
-  self.groupsRemovable = function() {
-    return lupapisteApp.models.applicationAuthModel.ok(self.service.getRemoveCommand(params.documentId));
+  self.groupsRemovable = function(schema) {
+    return !_.some(schema.body, "readonly") &&
+            lupapisteApp.models.applicationAuthModel.ok(self.service.getRemoveCommand(params.documentId));
   };
 
   self.updatable = function() {
