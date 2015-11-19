@@ -86,3 +86,7 @@ Bulletin attachments count is
 
 Bulletin commenting is visible
   Element should be visible  bulletin-comment-field
+
+Create sent application
+  [Arguments]  ${address}=Vaalantie 540  ${propertyId}=564-404-26-102
+  Create application with state  ${address}  ${propertyId}  koeluontoinen-toiminta  sent
