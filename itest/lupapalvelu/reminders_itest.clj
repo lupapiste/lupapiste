@@ -275,6 +275,7 @@
      (mongo/with-db db-name
        (let [now-timestamp (now)]
 
+         (Thread/sleep 10)
          (batchrun/statement-request-reminder)
 
          (let [app (mongo/by-id :applications (:id reminder-application))]
@@ -296,6 +297,7 @@
         {:statements {$elemMatch {:id (:id statement-matching)}}}
         {$set {:statements.$.reminder-sent timestamp-the-beginning-of-time}})
 
+       (Thread/sleep 10)
        (batchrun/statement-request-reminder)
 
        (let [app (mongo/by-id :applications (:id reminder-application))]
@@ -315,6 +317,7 @@
      (mongo/with-db db-name
        (let [now-timestamp (now)]
 
+         (Thread/sleep 10)
          (batchrun/open-inforequest-reminder)
 
          (let [oir-matching (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-matching))
@@ -334,6 +337,7 @@
        (mongo/update-by-id :open-inforequest-token (:_id open-inforequest-entry-matching)
                            {$set {:reminder-sent timestamp-the-beginning-of-time}})
 
+       (Thread/sleep 10)
        (batchrun/open-inforequest-reminder)
 
        (let [oir (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-matching))]
@@ -353,6 +357,7 @@
      (mongo/with-db db-name
        (let [now-timestamp (now)]
 
+         (Thread/sleep 10)
          (batchrun/neighbor-reminder)
 
          (let [app (mongo/by-id :applications (:id reminder-application))
@@ -385,6 +390,7 @@
      (mongo/with-db db-name
        (let [now-timestamp (now)]
 
+         (Thread/sleep 10)
          (batchrun/application-state-reminder)
 
          (let [app (mongo/by-id :applications (:id reminder-application))]
@@ -401,6 +407,7 @@
        (update-application (application->command reminder-application)
                            {$set {:reminder-sent timestamp-the-beginning-of-time}})
 
+       (Thread/sleep 10)
        (batchrun/application-state-reminder)
 
        (let [app (mongo/by-id :applications (:id reminder-application))]
