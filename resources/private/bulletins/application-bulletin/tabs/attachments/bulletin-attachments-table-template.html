@@ -25,8 +25,9 @@
             <td>
               <span data-bind="if: $data.latestVersion">
                 <a href="#" data-bind="text: latestVersion.filename,
-                                       attr: {href: '/api/raw/download-bulletin-attachment?attachment-id=' + latestVersion.fileId,
-                                              title: loc('download')},
+                                       attr: {'href': '/api/raw/download-bulletin-attachment?attachment-id=' + latestVersion.fileId,
+                                              'title': loc('download'),
+                                              'data-test-id': 'download-bulletin-attachment-' + $index()},
                                        click: function() {return true;},
                                        clickBubble: false"></a><br/>
                 <i data-bind="ltext: latestVersion.contentType"></i>

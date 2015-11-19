@@ -297,6 +297,13 @@ As Velho
   Go to login page
   Velho logs in
 
+As Olli
+  Go to login page
+  Olli logs in
+
+Olli logs in
+  Authority logs in  olli  olli  Olli Ule\u00e5borg
+
 Mikko logs in
   Applicant logs in  mikko@example.com  mikko123  Mikko Intonen
 
