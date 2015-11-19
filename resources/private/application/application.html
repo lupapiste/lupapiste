@@ -1150,6 +1150,10 @@
                                                              authModel: $root.authorization,
                                                              bulletin: lupapisteApp.services.publishBulletinService.bulletin,
                                                              bulletinStates: LUPAPISTE.config.bulletinStates}}"></div>
+                        <div data-bind="component: {name: 'bulletin-versions',
+                                                    params: {appId: id,
+                                                             authModel: $root.authorization,
+                                                             bulletin: lupapisteApp.services.publishBulletinService.bulletin}}"></div>
                       </div>
                     </div>
 

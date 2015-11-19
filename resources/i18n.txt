@@ -37,3 +37,10 @@ bulletin.comment.otherReceiver:  Toimita toiseen osoitteeseen
 bulletin.comment.delivery:  Päätös toimitetaan osoitteeseen:
 
 bulletin.actions.comment:  Haluan kommentoida ilmoitusta
+
+bulletin.versions.history: Julkaishistoria
+bulletin.versions.published: Julkaistu
+bulletin.versions.state: Tila
+bulletin.versions.comments: Mielipiteitä
+bulletin.versions.comments.show: Näytä mielipiteet
+bulletin.versions.version.show: Näytä hakemus
