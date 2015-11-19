@@ -7,6 +7,7 @@
                                            componentPages: ["bulletin"]});
   $(function() {
     lupapisteApp.domReady();
+    lupapisteApp.setTitle("Julkipano");
 
     var components = [
         {name: "bulletins"},

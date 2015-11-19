@@ -20,12 +20,14 @@ LUPAPISTE.BulletinsModel = function(params) {
   hub.onPageLoad("bulletins", function(e) {
     self.page(e.pageId);
     self.pagePath(e.pagePath);
+    window.lupapisteApp.setTitle("Julkipano");
   });
 
   hub.onPageLoad("bulletin", function(e) {
     self.bulletinId(_.first(e.pagePath));
     self.page(e.pageId);
     self.pagePath(e.pagePath);
+    window.lupapisteApp.setTitle("Julkipano");
   });
 
   self.page(pageutil.getPage());
