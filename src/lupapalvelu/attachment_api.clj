@@ -291,20 +291,24 @@
   (when-not (attachment/attach-file! attachment-data)
     (fail :error.unknown)))
 
-(defn- convert-pdf-and-upload! [processing-result {:keys [attachment-id application filename upload-pdfa-only] :as attachment-data}]
-  (if (:pdfa? processing-result)
+(defn- convert-pdf-and-upload! [{:keys [pdfa? output-file missing-fonts]}
+                                {:keys [attachment-id application filename upload-pdfa-only] :as attachment-data}]
+  (if pdfa?
     (let [attach-file-result (or upload-pdfa-only (attachment/attach-file! attachment-data) (fail! :error.unknown))
           new-filename (ss/replace filename #"(-PDFA)?\.pdf$" "-PDFA.pdf" )
           new-id       (or (:id attach-file-result) attachment-id)
           pdfa-attachment-data (assoc attachment-data
                                  :application (domain/get-application-no-access-checking (:id application)) ; Refresh attachment versions
                                  :attachment-id new-id
-                                 :content (:output-file processing-result)
+                                 :content output-file
                                  :filename new-filename
                                  :archivable true
                                  :archivabilityError nil)]
-      (attach-or-fail! pdfa-attachment-data))
-    (let [missing-fonts (or (:missing-fonts processing-result) [])]
+      (if (attachment/attach-file! pdfa-attachment-data)
+        (do (io/delete-file output-file :silently)
+            nil)
+        (fail :error.unknown)))
+    (let [missing-fonts (or missing-fonts [])]
       (attach-or-fail! (assoc attachment-data :missing-fonts missing-fonts :archivabilityError :invalid-pdfa)))))
 
 (defn- upload! [{:keys [filename content application] :as attachment-data}]
@@ -388,7 +392,7 @@
           (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
           (upload! (assoc upload-options :size (.length temp-pdf))))
         (finally
-          (attachment/delete-file! temp-pdf))))
+          (io/delete-file temp-pdf :silently))))
     (fail :error.unknown)))
 
 ;;
@@ -434,7 +438,7 @@
                                             :archivable is-pdf-a?
                                             :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
                                             :stamped true :make-comment false :state :ok}))
-      (attachment/delete-file! file))
+      (io/delete-file file :silently))
     new-file-id))
 
 (defn- stamp-attachments!
