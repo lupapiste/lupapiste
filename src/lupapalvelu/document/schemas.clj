@@ -627,8 +627,7 @@
 
 (def rakennusjatesuunnitelmaRow [(assoc rakennusjatemaara :name "suunniteltuMaara")
                                  jateyksikko
-                                 (assoc rakennusjatemaara :name "painoT")
-                                 {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true}])
+                                 (assoc rakennusjatemaara :name "painoT")])
 
 (def rakennusjateselvitysUusiRow [(assoc rakennusjatemaara :name "toteutunutMaara")
                                   jateyksikko
