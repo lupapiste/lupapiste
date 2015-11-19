@@ -36,15 +36,5 @@
       </div>
     </div>
   </div>
-
-  <button data-bind="click:  publishApplicationBulletin,
-                     enable: canPublish() && isValid(),
-                     attr:   {'title': loc('tooltip.publishBulletin')},
-                     css:    {waiting: pending}"
-          data-test-id="publish-bulletin"
-          class="positive">
-    <i class="lupicon-circle-arrow-right"></i>
-    <i class="wait spin lupicon-refresh"></i>
-    <span data-bind="ltext: 'bulletin.publish'"></span>
-  </button>
+  <div data-bind="template: 'publish-button-template'"></div>
 </script>
