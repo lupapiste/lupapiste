@@ -45,7 +45,6 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   };
 
   self.openTab = function(tab) {
-    self.selectedTab(tab);
     pageutil.openPage("bulletin", [self.bulletinId, tab]);
   };
 
