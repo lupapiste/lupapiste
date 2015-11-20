@@ -95,41 +95,39 @@
   (let [states (mongo/distinct :application-bulletins :versions.bulletinState)]
     (ok :states states)))
 
-(defn- bulletin-exists! [bulletin-id]
-  (let [bulletin (mongo/by-id :application-bulletins bulletin-id)]
-    (when-not bulletin
-      (fail! :error.invalid-bulletin-id))
-    bulletin))
+(defn- get-bulletin [bulletin-id]
+  (mongo/by-id :application-bulletins bulletin-id))
 
 (defn- bulletin-version-is-latest! [bulletin bulletin-version-id]
   (let [latest-version-id (:id (last (:versions bulletin)))]
     (when-not (= bulletin-version-id latest-version-id)
-      (fail! :error.invalid-version-id))))
+      (fail :error.invalid-version-id))))
 
-(defn- comment-can-be-added!
+(defn- comment-can-be-added
   [{{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId comment :comment} :data}]
   (when (ss/blank? comment)
-    (fail! :error.empty-comment))
-  (let [bulletin (bulletin-exists! bulletin-id)]
+    (fail :error.empty-comment))
+  (let [bulletin (get-bulletin bulletin-id)]
+    (when-not bulletin
+      (fail :error.invalid-bulletin-id))
     (when-not (= (:bulletinState bulletin) "proclaimed")
-      (fail! :error.invalid-bulletin-state))
+      (fail :error.invalid-bulletin-state))
     (bulletin-version-is-latest! bulletin bulletin-version-id)))
 
-(defn- referenced-file-can-be-attached!
+(defn- referenced-file-can-be-attached
   [{{files :files} :data}]
   (let [files-found (map #(mongo/any? :fs.files {:_id (:id %) "metadata.sessionId" (vetuma/session-id)}) files)]
     (when-not (every? true? files-found)
-      (fail! :error.invalid-files-attached-to-comment))))
+      (fail :error.invalid-files-attached-to-comment))))
 
-(defn- bulletin-can-be-commented!
-  [{{bulletin-id :bulletinId} :data :as command}]
-
-  (let [{bulletin-state :bulletinState} (mongo/select-one :application-bulletins {:_id bulletin-id} {:bulletinState 1})]
+(defn- bulletin-can-be-commented
+  [{{bulletin-id :bulletinId} :data} _]
+  (let [{bulletin-state :bulletinState} (mongo/select-one :application-bulletins {:_id bulletin-id} {:bulletinState 1})] ; TODO: use get-bulletin, add projection
     ; 1. in proclaimed state
     (when-not (= bulletin-state "proclaimed")
-      (fail! :error.bulletin-not-in-commentable-state))
+      (fail :error.bulletin-not-in-commentable-state))
     ; 2. commenting time period has not passed
-    
+    ; TODO
     ))
 
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
@@ -137,7 +135,8 @@
 (defcommand add-bulletin-comment
   {:description      "Add comment to bulletin"
    :feature          :publish-bulletin
-   :input-validators [comment-can-be-added! referenced-file-can-be-attached! bulletin-can-be-commented!]
+   :pre-checks       [bulletin-can-be-commented]
+   :input-validators [comment-can-be-added referenced-file-can-be-attached]
    :user-roles       #{:anonymous}}
   [{{files :files bulletin-id :bulletinId comment :comment bulletin-version-id :bulletinVersionId
      email :email emailPreferred :emailPreferred otherReceiver :otherReceiver :as data} :data created :created :as action}]
