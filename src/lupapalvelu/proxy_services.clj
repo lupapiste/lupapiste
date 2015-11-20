@@ -144,7 +144,7 @@
         )
       (resp/status 503 "Service temporarily unavailable"))))
 
-;; The value of "municipality" is ”liiteri” when searching from liiteri and municipality code when searching from municipalities
+;; The value of "municipality" is "liiteri" when searching from Liiteri and municipality code when searching from municipalities.
 (defn plan-urls-by-point-proxy [{{:keys [x y municipality]} :params}]
   (let [municipality (trim municipality)]
     (if (and (coord/valid-x? x) (coord/valid-y? y) (or (= "liiteri" (ss/lower-case municipality)) (ss/numeric? municipality)))
