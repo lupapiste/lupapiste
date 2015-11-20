@@ -158,6 +158,8 @@
 
 (facts "plan-urls-by-point-proxy"
 
+  ;; TODO: Testaa "Liiteri"
+
   (fact "Helsinki"
    (let [response (plan-urls-by-point-proxy {:params {:x "395628" :y "6677704" :municipality "091"}})
          body     (json/decode (:body response) true)]
