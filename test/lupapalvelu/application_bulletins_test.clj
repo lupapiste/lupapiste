@@ -37,7 +37,6 @@
   (bulletin-state :draft) => :proclaimed
   (bulletin-state :submitted) => :proclaimed
   (bulletin-state :sent) => :proclaimed
-  (bulletin-state :consideration) => :consideration
   (bulletin-state :verdictGiven) => :verdictGiven
   (bulletin-state :final) => :final
   (bulletin-state :appealed) => :verdictGiven

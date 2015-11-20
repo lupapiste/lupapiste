@@ -45,7 +45,8 @@
   ;; Check if we have in database an application of same organization that has a verdict with the given kuntalupatunnus.
   (if-let [app-with-verdict (domain/get-application-as
                               {:organization organizationId
-                               :verdicts     {$elemMatch {:kuntalupatunnus kuntalupatunnus}}}
+                               :verdicts     {$elemMatch {:kuntalupatunnus kuntalupatunnus}}
+                               :permitType :R}
                               user
                               :include-canceled-apps? false)]
     ;;Found an application of same organization that has a verdict with the given kuntalupatunnus -> Open it.

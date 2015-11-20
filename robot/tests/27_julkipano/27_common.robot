@@ -1,5 +1,6 @@
 *** Settings ***
 Resource  ../../common_resource.robot
+Variables  ../21_stamping/variables.py
 
 *** Keywords ***
 Create bulletins
@@ -56,3 +57,32 @@ Bulletin state is
   [Arguments]  ${state}
   ${elemStateVal}=  Get Element Attribute  //div[@id='bulletin-component']//div[@data-test-id='bulletin-state']@data-test-state
   Should Be Equal As Strings  ${state}  ${elemStateVal}
+
+Create application with attachment and publish it as bulletin
+  [Arguments]  ${address}=Vaalantie 540  ${propertyId}=564-404-26-102
+  Create application with state  ${address}  ${propertyId}  koeluontoinen-toiminta  submitted
+  Open tab  attachments
+  Add attachment  application  ${PDF_TESTFILE_PATH1}  ${EMPTY}  Koeluontoinen toiminta
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME1}')]
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  Koeluontoinen toiminta
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
+  Click by test id  publish-bulletin
+  Logout
+
+Bulletin tab should be visible
+  [Arguments]  ${tab}
+  Wait until  Element should be visible  bulletin-${tab}-tab-component
+
+Open bulletin tab
+  [Arguments]  ${tab}
+  Click by test id  bulletin-open-${tab}-tab
+  Bulletin tab should be visible  ${tab}
+
+Bulletin attachments count is
+  [Arguments]  ${count}
+  Element should be visible  xpath=//section[@id='bulletins']//table[@data-test-id='bulletin-attachments-template-table']
+  Xpath Should Match X Times  //section[@id='bulletins']//table[@data-test-id='bulletin-attachments-template-table']/tbody/tr  ${count}
+
+Bulletin commenting is visible
+  Element should be visible  bulletin-comment-field
