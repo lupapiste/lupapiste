@@ -121,12 +121,15 @@
     (when-not (every? true? files-found)
       (fail! :error.invalid-files-attached-to-comment))))
 
+(defn- bulletin-can-be-commented!
+  [command])
+
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
 
 (defcommand add-bulletin-comment
   {:description      "Add comment to bulletin"
    :feature          :publish-bulletin
-   :input-validators [comment-can-be-added! referenced-file-can-be-attached!]
+   :input-validators [comment-can-be-added! referenced-file-can-be-attached! bulletin-can-be-commented!]
    :user-roles       #{:anonymous}}
   [{{files :files bulletin-id :bulletinId comment :comment bulletin-version-id :bulletinVersionId
      email :email emailPreferred :emailPreferred otherReceiver :otherReceiver :as data} :data created :created :as action}]
@@ -148,7 +151,7 @@
    :states     (states/all-application-states-but :draft)}
   [{:keys [application created] :as command}]
   (let [app-snapshot (bulletins/create-bulletin-snapshot application)
-        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]b
+        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
         search-updates (get-search-fields search-fields app-snapshot)
         updates (bulletins/snapshot-updates app-snapshot search-updates created)]
     (mongo/update-by-id :application-bulletins id updates :upsert true)
