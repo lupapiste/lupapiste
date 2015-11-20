@@ -29,10 +29,15 @@ var authorization = (function() {
       self.refreshWithCallback(params, callback);
     };
 
+    self.refreshWithoutAppId = function(extraParams, callback) {
+      self.refreshWithCallback(extraParams || {}, callback);
+    };
+
     return {
       ok: self.ok,
       refreshWithCallback: self.refreshWithCallback,
-      refresh: self.refresh
+      refresh: self.refresh,
+      refreshWithoutAppId: self.refreshWithoutAppId
     };
   }
 
