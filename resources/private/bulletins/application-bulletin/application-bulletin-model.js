@@ -23,7 +23,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   self.authenticated = params.authenticated;
   self.auth = params.auth;
-  self.auth.refreshWithoutAppId({bulletinId: self.bulletinId});
+  self.auth.refreshWithoutAppId({bulletinId: self.bulletinId()});
   self.tabComponentParams = ko.pureComputed(function() {
     return {bulletin: self.bulletin,
             attachments: self.bulletin() ? self.bulletin().attachments : []};
@@ -63,7 +63,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   hub.send("bulletinService::fetchBulletin", {id: self.bulletinId()});
 
-  var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + self.bulletinId;
+  var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + self.bulletinId();
   self.vetumaParams = {success: returnUrl,
                        cancel:  returnUrl + "/cancel",
                        error:   returnUrl + "/error",

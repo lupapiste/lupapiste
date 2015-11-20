@@ -21,7 +21,7 @@
         {name: "bulletin-comment"},
         {name: "bulletin-comment-box"},
         {name: "bulletin-attachments-tab"},
-        {name: "begin-vetuma-auth-button"}];
+        {name: "begin-vetuma-auth-button"},
         {name: "bulletin-info-tab"}];
 
     _.forEach(components, function(component) {
