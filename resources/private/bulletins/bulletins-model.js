@@ -11,6 +11,7 @@ LUPAPISTE.BulletinsModel = function(params) {
   var bulletinService = params.bulletinService;
   var vetumaService = params.vetumaService;
   var fileuploadService = params.fileuploadService;
+  var auth = params.auth;
 
   self.pageParams = ko.pureComputed(function () {
     var defaultParams = {
@@ -21,7 +22,8 @@ LUPAPISTE.BulletinsModel = function(params) {
       _.extend(defaultParams, { bulletinId: bulletinId,
                                 authenticated: vetumaService.authenticated,
                                 userInfo: vetumaService.userInfo,
-                                fileuploadService: fileuploadService}) :
+                                fileuploadService: fileuploadService,
+                                auth: auth }) :
       defaultParams;
   });
 

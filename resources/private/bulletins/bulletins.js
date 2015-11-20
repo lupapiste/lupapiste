@@ -30,7 +30,8 @@
 
     $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService(),
                                     vetumaService: new LUPAPISTE.VetumaService(),
-                                    fileuploadService: new LUPAPISTE.FileuploadService()});
+                                    fileuploadService: new LUPAPISTE.FileuploadService(),
+                                    auth: authorization.create()});
 
     var errorType = pageutil.subPage() === pageutil.lastSubPage() ?
       undefined :
