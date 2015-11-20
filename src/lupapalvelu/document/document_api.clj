@@ -38,7 +38,7 @@
    :pre-checks [create-doc-validator
                 application/validate-authority-in-drafts]}
   [{{schema-name :schemaName} :data :as command}]
-  (let [document (doc-persistence/do-create-doc command schema-name updates)]
+  (let [document (doc-persistence/do-create-doc! command schema-name updates)]
     (when fetchRakennuspaikka
       (let [
             property-id (or

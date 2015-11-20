@@ -56,20 +56,20 @@
                                         {:suunniteltuJate
                                          {:0
                                           {:suunniteltuMaara {:value "2"}}}}}})
-  => [[:rakennusJaPurkujate :suunniteltuJate :0]]
+  => [[:rakennusJaPurkujate :suunniteltuJate :0]])
 
-  (fact "rakennusjateselvitys-removed-paths - no removed rows"
-    (rakennusjateselvitys-removed-paths {:data 
-                                         {:rakennusJaPurkujate
-                                          {:0
-                                           {:suunniteltuMaara {:value "2"}}}}}
-                                        
-                                        {:data 
-                                         {:rakennusJaPurkujate
-                                          {:suunniteltuJate
-                                           {:0
-                                            {:suunniteltuMaara {:value "2"}}}}}})
-    => []))
+(fact "rakennusjateselvitys-removed-paths - no removed rows"
+  (rakennusjateselvitys-removed-paths {:data 
+                                       {:rakennusJaPurkujate
+                                        {:0
+                                         {:suunniteltuMaara {:value "2"}}}}}
+                                      
+                                      {:data 
+                                       {:rakennusJaPurkujate
+                                        {:suunniteltuJate
+                                         {:0
+                                          {:suunniteltuMaara {:value "2"}}}}}})
+  => [])
 
 (fact "rakennusjateselvitys-removed-paths - new row"
   (rakennusjateselvitys-removed-paths {:data 

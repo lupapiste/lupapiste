@@ -192,10 +192,9 @@
                                   ((juxt (partial str (name collection) ".$.data.")
                                          (partial str (name collection) ".$.meta.")))))]
     (if-let [paths (not-empty (remove empty? paths))]
-      (do
-        {:mongo-query   {(keyword collection) {$elemMatch {:id doc-id}}}
-         :mongo-updates {$unset (-> (mapcat build-path paths) 
-                                    (zipmap (repeat "")))}})
+      {:mongo-query   {(keyword collection) {$elemMatch {:id doc-id}}}
+       :mongo-updates {$unset (-> (mapcat build-path paths) 
+                                  (zipmap (repeat "")))}}
       {})))
 
 (defn remove-document-data [{application :application {role :role} :user :as command} doc-id paths collection]
@@ -208,21 +207,22 @@
          ((juxt :mongo-query :mongo-updates))
          (apply update-application command))))
 
-(defn create-empty-doc [{created :created {schema-version :schema-version} :application :as command} schema-name]
-  (let [document (-> (schemas/get-schema schema-version schema-name)
-                     (model/new-document created))]
-    (update-application command {$push {:documents document}
-                                 $set {:modified created}})
-    document))
+(defn new-doc 
+  ([application schema created] (new-doc application schema created []))
+  ([application schema created updates]
+   (let [empty-document (model/new-document schema created)
+         document       (model/apply-updates empty-document updates)
+         post-results   (model/validate application document schema)]
+     (when (model/has-errors? post-results) (fail! :document-would-be-in-error-after-update :results post-results))
+     document)))
 
-(defn do-create-doc [{created :created application :application :as command} schema-name & updates]
-  (let [schema (schemas/get-schema (:schema-version application) schema-name)]
+(defn do-create-doc! [{created :created {schema-version :schema-version :as application} :application :as command} schema-name & [updates]]
+  (let [schema (schemas/get-schema (:schema-version application) schema-name)
+        document (new-doc application schema created updates)]
     (when-not (:repeating (:info schema)) (fail! :illegal-schema))
-    (let [document (create-empty-doc command schema-name)]
-      (when updates
-        (let [model-updates (->model-updates (first updates))]
-          (persist-model-updates application "documents" document model-updates created)))
-      document)))
+    (update-application command {$push {:documents document}
+                                 $set  {:modified created}})
+    document))
 
 (defn- update-key-in-schema? [schema [update-key _]]
   (model/find-by-name schema update-key))

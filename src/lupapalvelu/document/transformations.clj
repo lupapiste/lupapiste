@@ -1,7 +1,9 @@
 (ns lupapalvelu.document.transformations
   (:require [sade.util :as util]
+            [monger.operators :refer :all]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.persistence :as persistence]))
+            [lupapalvelu.document.persistence :as persistence]
+            [lupapalvelu.document.schemas :as schemas]))
 
 ;;
 ;; Application state change updates
@@ -26,15 +28,16 @@
   (concat (rakennusjate-removed-rows suunnitelma-doc selvitys-doc :rakennusJaPurkujate)
           (rakennusjate-removed-rows suunnitelma-doc selvitys-doc :vaarallisetAineet)))
 
-(defn create-rakennusjateselvitys-from-rakennusjatesuunnitelma [{application :application created :created :as command}]
-  (when-let [suunnitelma-doc (domain/get-document-by-name application "rakennusjatesuunnitelma")] 
-    (let [selvitys-doc  (or (domain/get-document-by-name application "rakennusjateselvitys")
-                            (persistence/create-empty-doc command "rakennusjateselvitys"))
-          updates       (rakennusjateselvitys-updates suunnitelma-doc)
-          removed-paths (rakennusjateselvitys-removed-paths suunnitelma-doc selvitys-doc)]
-      (util/deep-merge
-       (persistence/removing-updates-by-path :documents (:id selvitys-doc) removed-paths)
-       (persistence/validated-model-updates application :documents selvitys-doc updates created)))))
+(defn create-rakennusjateselvitys-from-rakennusjatesuunnitelma [{{schema-version :schema-version :as application} :application created :created :as command}]
+  (when-let [suunnitelma-doc (domain/get-document-by-name application "rakennusjatesuunnitelma")]
+    (let [updates (rakennusjateselvitys-updates suunnitelma-doc)
+          schema  (schemas/get-schema schema-version "rakennusjateselvitys")]
+      (if-let [selvitys-doc (domain/get-document-by-name application "rakennusjateselvitys")]
+        (let [removed-paths (rakennusjateselvitys-removed-paths suunnitelma-doc selvitys-doc)]
+          (util/deep-merge
+           (persistence/removing-updates-by-path :documents (:id selvitys-doc) removed-paths)
+           (persistence/validated-model-updates application :documents selvitys-doc updates created)))
+        {:mongo-updates {$push {:documents (persistence/new-doc application schema created updates)}}}))))
 
 (defn get-state-transition-updates [command next-state]
   (case next-state
