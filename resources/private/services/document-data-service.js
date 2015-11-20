@@ -2,16 +2,9 @@ LUPAPISTE.DocumentDataService = function() {
   "use strict";
 
   var self = this;
-  self.applicationId = null;
-  self.propertyId = null;
   self.model = ko.observableArray();
-
-  // Application
-
-  self.setApplication = function(application) {
-    self.applicationId = application.id;
-    self.propertyId = application.propertyId;
-  }
+  self.applicationId = lupapisteApp.models.application.id;
+  self.propertyId = lupapisteApp.models.application.propertyId;
 
   // Document
 
@@ -29,9 +22,6 @@ LUPAPISTE.DocumentDataService = function() {
   }
 
   self.addDocument = function(doc, options) {
-    if (!self.applicationId) {
-      self.setApplication(lupapisteApp.models.application);
-    }
     if (self.findDocumentById(doc.id)) {
       return -1;
     } else {
