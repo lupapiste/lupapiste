@@ -5,7 +5,9 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
 
   self.bulletin = params.bulletin;
 
-  self.versions = self.bulletin() ? self.bulletin().versions : [];
+  self.versions = ko.pureComputed(function() {
+    return self.bulletin() ? self.bulletin().versions : [];
+  });
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
