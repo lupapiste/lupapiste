@@ -81,7 +81,6 @@ Sonja publishes verdict
   Wait until  Application state should be  verdictGiven
   Verdict is given  123567890  2
   Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-2-content']//span[@data-bind='dateString: paivamaarat.anto']  1.5.2018
-  Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-2-content']//span[@data-bind='dateString: paivamaarat.lainvoimainen']  1.6.2018
 
 Add and delete verdict
   Verdict count is  3

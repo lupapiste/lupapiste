@@ -215,6 +215,9 @@
       color: $blue-dark;
       position: absolute;
     }
+    tbody > tr {
+      cursor: pointer;
+    }
   }
 
   .bulletin-comment {
