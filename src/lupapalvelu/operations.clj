@@ -5,8 +5,6 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery]]
-            [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.poikkeamis-schemas]
             [lupapalvelu.document.ymparisto-schemas]
@@ -15,7 +13,6 @@
             [lupapalvelu.states :as states]
             [lupapiste-commons.usage-types :as usages]
             [monger.operators :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]))
 
 (def default-description "operations.tree.default-description")

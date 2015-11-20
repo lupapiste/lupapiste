@@ -343,7 +343,7 @@
     },
     markDone: function(neighbor) {
       ajax
-        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.id()})
+        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.id(), lang: loc.getCurrentLanguage()})
         .complete(_.partial(repository.load, currentId, _.noop))
         .call();
     },

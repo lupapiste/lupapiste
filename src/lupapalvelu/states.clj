@@ -66,8 +66,7 @@
   ymp-application-state-graph
   (merge
     (select-keys default-application-state-graph [:draft :open :submitted :complementNeeded :canceled])
-    {:sent [:consideration :complementNeeded :canceled]
-     :consideration [:verdictGiven :complementNeeded]
+    {:sent [:verdictGiven :complementNeeded :canceled]
      :verdictGiven [:final :appealed :canceled]
      :appealed     [:complementNeeded :verdictGiven :final :canceled] ; Valitettu
      :final        [] ; Lain voimainen
@@ -101,8 +100,7 @@
 (def
   ^{:doc "States for bulletin version snapshot"}
   bulletin-version-states
-  {:proclaimed [:consideration]
-   :consideration [:verdictGiven]
+  {:proclaimed [:verdictGiven]
    :verdictGiven [:final]
    :final []})
 

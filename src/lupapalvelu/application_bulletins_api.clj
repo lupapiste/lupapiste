@@ -15,13 +15,6 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.application-search :refer [make-text-query dir]]))
 
-(def bulletins-fields
-  {:versions {$slice -1} :versions.bulletinState 1
-   :versions.state 1 :versions.municipality 1
-   :versions.address 1 :versions.location 1
-   :versions.primaryOperation 1 :versions.propertyId 1
-   :versions.applicant 1 :versions.modified 1
-   :modified 1})
 
 (def bulletin-page-size 10)
 
@@ -58,7 +51,7 @@
   (let [query (or (make-query searchText municipality state) {})
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
-               (query/fields bulletins-fields)
+               (query/fields bulletins/bulletins-fields)
                (query/sort (make-sort sort))
                (query/paginate :page page :per-page bulletin-page-size))]
     (map
@@ -153,18 +146,11 @@
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
-(def bulletin-fields
-  (merge bulletins-fields
-    {:versions._applicantIndex 1
-     :versions.documents 1
-     :versions.id 1
-     :versions.attachments 1}))
-
 (defquery bulletin
   {:parameters [bulletinId]
    :feature :publish-bulletin
    :user-roles #{:anonymous}}
-  (if-let [bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
+  (if-let [bulletin (bulletins/get-bulletin bulletinId)]
     (let [latest-version   (-> bulletin :versions first)
           bulletin-version   (assoc latest-version :versionId (:id latest-version)
                                                    :id (:id bulletin))

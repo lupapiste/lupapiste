@@ -122,9 +122,7 @@
 
   <section class="page" id="create-page-prev-permit">
     <div class="container">
-      <h1 data-bind="text: loc(['operations', operation()])"></h1>
-      <div data-bind="html: loc(['operations', operation(), 'desc'])"></div>
-
+      <h1 data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></h1>
       <div>
         <label data-bind="ltext: 'prev-permit-label-kuntalupatunnus'" class="form-label" for="prev-permit-kuntalupatunnus"></label>
         <input data-bind="textInput: kuntalupatunnusFromPrevPermit"
