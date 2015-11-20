@@ -275,11 +275,10 @@
      (mongo/with-db db-name
        (let [now-timestamp (now)]
 
-         (Thread/sleep 10)
          (batchrun/statement-request-reminder)
 
          (let [app (mongo/by-id :applications (:id reminder-application))]
-           (> (-> app :statements second :reminder-sent) now-timestamp) => true?
+           (>= (-> app :statements second :reminder-sent) now-timestamp) => true?
            (-> app :statements first :reminder-sent) => nil?
            )
 
@@ -297,7 +296,6 @@
         {:statements {$elemMatch {:id (:id statement-matching)}}}
         {$set {:statements.$.reminder-sent timestamp-the-beginning-of-time}})
 
-       (Thread/sleep 10)
        (batchrun/statement-request-reminder)
 
        (let [app (mongo/by-id :applications (:id reminder-application))]
@@ -317,12 +315,11 @@
      (mongo/with-db db-name
        (let [now-timestamp (now)]
 
-         (Thread/sleep 10)
          (batchrun/open-inforequest-reminder)
 
          (let [oir-matching (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-matching))
                oir-non-matching (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-non-matching))]
-           (> (:reminder-sent oir-matching) now-timestamp) => true?
+           (>= (:reminder-sent oir-matching) now-timestamp) => true?
            (:reminder-sent oir-non-matching) => nil?
            )
 
@@ -337,7 +334,6 @@
        (mongo/update-by-id :open-inforequest-token (:_id open-inforequest-entry-matching)
                            {$set {:reminder-sent timestamp-the-beginning-of-time}})
 
-       (Thread/sleep 10)
        (batchrun/open-inforequest-reminder)
 
        (let [oir (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-matching))]
@@ -357,7 +353,6 @@
      (mongo/with-db db-name
        (let [now-timestamp (now)]
 
-         (Thread/sleep 10)
          (batchrun/neighbor-reminder)
 
          (let [app (mongo/by-id :applications (:id reminder-application))
@@ -366,7 +361,7 @@
                                        (-> app :neighbors second :status))]
 
            (count reminder-sent-statuses) => 1
-           (> (:created (first reminder-sent-statuses)) now-timestamp) => true?
+           (>= (:created (first reminder-sent-statuses)) now-timestamp) => true?
            (filter
             #(= "reminder-sent" (:state %))
             (-> app :neighbors first :status)) => empty?
@@ -390,11 +385,10 @@
      (mongo/with-db db-name
        (let [now-timestamp (now)]
 
-         (Thread/sleep 10)
          (batchrun/application-state-reminder)
 
          (let [app (mongo/by-id :applications (:id reminder-application))]
-           (> (:reminder-sent app) now-timestamp) => true?
+           (>= (:reminder-sent app) now-timestamp) => true?
 
            (check-sent-reminder-email
             "pena@example.com"
@@ -407,7 +401,6 @@
        (update-application (application->command reminder-application)
                            {$set {:reminder-sent timestamp-the-beginning-of-time}})
 
-       (Thread/sleep 10)
        (batchrun/application-state-reminder)
 
        (let [app (mongo/by-id :applications (:id reminder-application))]
