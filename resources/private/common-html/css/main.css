@@ -9869,29 +9869,45 @@ div.search i {
   color: #0fa8f7;
   position: absolute;
 }
-/* line 221, ../sass/partials/_bulletins.scss */
+/* line 218, ../sass/partials/_bulletins.scss */
+#bulletins #application-bulletins-list tbody > tr {
+  cursor: pointer;
+}
+/* line 224, ../sass/partials/_bulletins.scss */
 #bulletins .bulletin-comment h5 {
   display: inline-block;
 }
-/* line 224, ../sass/partials/_bulletins.scss */
+/* line 227, ../sass/partials/_bulletins.scss */
 #bulletins .bulletin-comment .help-toggle {
   vertical-align: top;
 }
-/* line 228, ../sass/partials/_bulletins.scss */
+/* line 231, ../sass/partials/_bulletins.scss */
 #bulletins ul.bulletin-comment__attachment-list {
   display: table;
   list-style: none;
   padding: 0;
 }
-/* line 232, ../sass/partials/_bulletins.scss */
+/* line 235, ../sass/partials/_bulletins.scss */
 #bulletins ul.bulletin-comment__attachment-list li {
   display: table-row;
   padding: 0;
 }
-/* line 235, ../sass/partials/_bulletins.scss */
+/* line 238, ../sass/partials/_bulletins.scss */
 #bulletins ul.bulletin-comment__attachment-list li span {
   display: table-cell;
   padding-right: 24px;
+}
+/* line 245, ../sass/partials/_bulletins.scss */
+#bulletins table.bulletin-attachments tr td {
+  word-wrap: break-word;
+}
+/* line 247, ../sass/partials/_bulletins.scss */
+#bulletins table.bulletin-attachments tr td:first-child {
+  padding-left: 12px;
+}
+/* line 253, ../sass/partials/_bulletins.scss */
+#bulletins .bulletin-tab-content h3 {
+  margin-bottom: 24px;
 }
 
 /* VIEWS

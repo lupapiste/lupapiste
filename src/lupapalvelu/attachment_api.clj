@@ -9,6 +9,7 @@
             [sade.strings :as ss]
             [sade.util :as util :refer [future*]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -246,6 +247,13 @@
    :org-authz-roles action/reader-org-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-file-as user)))
+
+(defraw "download-bulletin-attachment"
+  {:parameters [attachment-id]
+   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
+   :user-roles #{:anonymous}}
+  [_]
+  (attachment/output-attachment attachment-id true bulletins/get-bulletin-attachment))
 
 (defraw "download-all-attachments"
   {:parameters [:id]

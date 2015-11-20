@@ -215,6 +215,9 @@
       color: $blue-dark;
       position: absolute;
     }
+    tbody > tr {
+      cursor: pointer;
+    }
   }
 
   .bulletin-comment {
@@ -236,6 +239,19 @@
         display: table-cell;
         padding-right: $marginL;
       }
+    }
+  }
+  table.bulletin-attachments {
+    tr td {
+      word-wrap: break-word;
+      &:first-child {
+        padding-left: 12px;
+      }
+    }
+  }
+  .bulletin-tab-content {
+    h3 {
+      margin-bottom: $marginL;
     }
   }
 }
