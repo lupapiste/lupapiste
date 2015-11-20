@@ -67,3 +67,5 @@ userinfo.architect.fiseKelpoisuus.choose: Valitse
 userinfo.architect.fiseKelpoisuus: FISE-kelpoisuus
 fisekelpoisuus: FISE-kelpoisuus
 
+osapuoli.patevyys.patevyys: Lisätietoa suunnittelijan kelpoisuudesta
+osapuoli.patevyys.patevyys.help: *** POISTA TÄMÄ KENTTÄ ***

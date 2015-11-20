@@ -317,11 +317,13 @@
         (command mikko :update-doc :id application-id :doc doc-id :updates
                                    [["patevyys.kokemus" "10"]
                                     ["patevyys.patevyysluokka" "AA"]
+                                    ["patevyys.patevyys" "Lis\u00e4tietoa patevyydest\u00e4"]
                                     ["patevyys.fise" "fise-linkki"]
                                     ["patevyys.fiseKelpoisuus" "vaativa akustiikkasuunnittelu (uudisrakentaminen)"]]) => ok?
         (let [updated-app          (query-application mikko application-id)
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           updated-suunnittelija => truthy
+          (get-in updated-suunnittelija [:data :patevyys :patevyys :value]) => "Lis\u00e4tietoa patevyydest\u00e4"
           (get-in updated-suunnittelija [:data :patevyys :patevyysluokka :value]) => "AA"
           (get-in updated-suunnittelija [:data :patevyys :kokemus :value]) => "10"
           (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "fise-linkki"
