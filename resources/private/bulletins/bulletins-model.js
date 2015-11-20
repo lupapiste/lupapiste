@@ -17,8 +17,10 @@ LUPAPISTE.BulletinsModel = function(params) {
   self.bulletinId = ko.observable(pageutil.subPage());
 
   self.pageParams = {bulletinService: bulletinService,
+                     authenticated: vetumaService.authenticated,
                      pagePath: self.pagePath,
                      bulletinId: self.bulletinId,
+                     userInfo: vetumaService.userInfo,
                      fileuploadService: fileuploadService,
                      auth: auth};
 
@@ -26,6 +28,7 @@ LUPAPISTE.BulletinsModel = function(params) {
     self.page(e.pageId);
     self.pagePath(e.pagePath);
     window.lupapisteApp.setTitle("Julkipano");
+    hub.send("bulletinService::fetchBulletins");
   });
 
   hub.onPageLoad("bulletin", function(e) {
