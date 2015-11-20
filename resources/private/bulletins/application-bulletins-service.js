@@ -96,9 +96,9 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   hub.subscribe("bulletinService::fetchMunicipalities", fetchMunicipalities);
 
   hub.subscribe("bulletinService::fetchBulletin", function(event) {
-    if (!self.bulletin() || event.id !== self.bulletin().id) {
+    //if (!self.bulletin() || event.id !== self.bulletin().id) {
       fetchBulletin(event.id);
-    }
+    //}
   });
 
   var commentForm;
