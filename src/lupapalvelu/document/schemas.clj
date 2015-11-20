@@ -425,7 +425,8 @@
                        {:name "B"}
                        {:name "C"}
                        {:name "ei tiedossa"}]}
-               {:name "kokemus" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}])
+               {:name "kokemus" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
+               {:name "patevyys" :type :string :required false}])
 
 (def designer-basic (body
                       (schema-body-without-element-by-name henkilotiedot turvakielto)
