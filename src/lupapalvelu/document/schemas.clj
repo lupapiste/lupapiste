@@ -1447,11 +1447,6 @@
            :section-help "rakennusjate.help"}
     :body (body rakennusjateselvitys)}
 
-   ;; TODO: "rakennusjateselvitys"-skeema: kopioi luontivaiheessa "rakennusjateilmoitus"-skeema.
-   ;; Kts. esimerkkia mm.
-   ;;   application.clj  make-documents
-   ;;   prev-permit.clj  applicant->applicant-doc
-
    {:info {:name "paatoksen-toimitus-rakval"
            :removable false
            :approvable true
