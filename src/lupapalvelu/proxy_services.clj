@@ -146,19 +146,20 @@
 
 ;; The value of "municipality" is ”liiteri” when searching from liiteri and municipality code when searching from municipalities
 (defn plan-urls-by-point-proxy [{{:keys [x y municipality]} :params}]
-  (if (and (coord/valid-x? x) (coord/valid-y? y) (ss/numeric? municipality))
-    (let [response (wfs/plan-info-by-point x y municipality)
-          k (keyword municipality)
-          gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
-                       (resolve (symbol f-name))
-                       wfs/gfi-to-features-sito)
-          feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
-                           (resolve (symbol f-name))
-                           wfs/feature-to-feature-info-sito)]
-      (if response
-        (resp/json (map feature-mapper (gfi-mapper response municipality)))
-        (resp/status 503 "Service temporarily unavailable")))
-    (resp/status 400 "Bad Request")))
+  (let [municipality (trim municipality)]
+    (if (and (coord/valid-x? x) (coord/valid-y? y) (or (= "liiteri" (ss/lower-case municipality)) (ss/numeric? municipality)))
+      (let [response (wfs/plan-info-by-point x y municipality)
+            k (keyword municipality)
+            gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
+                         (resolve (symbol f-name))
+                         wfs/gfi-to-features-sito)
+            feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
+                             (resolve (symbol f-name))
+                             wfs/feature-to-feature-info-sito)]
+        (if response
+          (resp/json (map feature-mapper (gfi-mapper response municipality)))
+          (resp/status 503 "Service temporarily unavailable")))
+      (resp/status 400 "Bad Request"))))
 
 (defn general-plan-urls-by-point-proxy [{{x :x y :y} :params}]
   (if (and (coord/valid-x? x) (coord/valid-y? y))
