@@ -1481,10 +1481,9 @@
                                    data-bind="value: id, checked: $root.requestForStatementModel.personIds, attr: {'id': id, 'data-test-id' : 'check-statement-giver-' + $index()}" />
                             <label data-bind="text: text()+' '+name() + ' (' + email() + ')', attr: {'for': id}" class="form-label"></label><br/>
                         </div>
-                        <button
-              data-bind="click: send, ltext: 'application.statement.send', disable: disabled"
-              class="btn btn-primary modal"
-              data-test-id="add-statement-giver">
+                        <button data-bind="click: send, ltext: 'application.statement.send', disable: disabled"
+                                class="btn btn-primary modal"
+                                data-test-id="add-statement-giver">
                         </button>
                         <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
                     </div>
