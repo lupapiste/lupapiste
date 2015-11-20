@@ -118,7 +118,8 @@
      [; permit/YI
       ["Meluilmoitus" :meluilmoitus]
 
-      (when (env/feature? :pima) ["Pima" :pima])
+      ; permit/YL
+      ["Pima" :pima]
 
       ; permit/MAL
       ["maa-ainesten_ottaminen" :maa-aineslupa]
@@ -315,14 +316,14 @@
   {:yl-uusi-toiminta ymparistolupa-operation
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
    :yl-toiminnan-muutos ymparistolupa-operation
-;   :pima                          {:schema "pima"
-;                                   :permit-type permit/YL
-;                                   :applicant-doc-schema applicant-doc-schema-name-hakija
-;                                   :required ["ymp-ilm-kesto-mini"]
-;                                   :attachments []
-;                                   :add-operation-allowed true
-;                                   :min-outgoing-link-permits 0
-;                                   :asianhallinta false}
+   :pima                          {:schema "pima"
+                                   :permit-type permit/YL
+                                   :applicant-doc-schema applicant-doc-schema-name-hakija
+                                   :required ["ymp-ilm-kesto-mini"]
+                                   :attachments []
+                                   :add-operation-allowed false
+                                   :min-outgoing-link-permits 0
+                                   :asianhallinta false}
    })
 
 (def- yi-operations

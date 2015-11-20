@@ -158,6 +158,8 @@
 
 (facts "plan-urls-by-point-proxy"
 
+  ;; TODO: Testaa "Liiteri"
+
   (fact "Helsinki"
    (let [response (plan-urls-by-point-proxy {:params {:x "395628" :y "6677704" :municipality "091"}})
          body     (json/decode (:body response) true)]
@@ -168,8 +170,7 @@
                       :linkki "http://img.sito.fi/kaavamaaraykset/91/8755.pdf"
                       :type "sito"}))
 
-  ; Mikkeli server is down at the moment
-  #_(fact "Mikkeli"
+  (fact "Mikkeli"
     (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
           body (json/decode (:body response) true)]
 
