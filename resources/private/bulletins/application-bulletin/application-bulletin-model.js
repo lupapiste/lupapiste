@@ -9,7 +9,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   self.bulletin = bulletinService.bulletin;
 
-  self.bulletinId = params.bulletinId();
+  self.bulletinId = params.bulletinId;
   self.versionId  = ko.observable();
   self.selectedTab = ko.observable().extend({
     limited: {values: ["info", "attachments"], defaultValue: "info"}
@@ -46,8 +46,8 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   };
 
   self.openTab = function(tab) {
-    pageutil.openPage("bulletin", [self.bulletinId, tab]);
+    pageutil.openPage("bulletin", [self.bulletinId(), tab]);
   };
 
-  hub.send("bulletinService::fetchBulletin", {id: self.bulletinId});
+  hub.send("bulletinService::fetchBulletin", {id: self.bulletinId()});
 };
