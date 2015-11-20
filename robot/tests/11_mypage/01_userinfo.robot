@@ -26,6 +26,7 @@ Mikko changes his name and experience
   Select From List  architect-degree-select  Arkkitehti
   Change Textfield Value  architect.graduatingYear  2000  2001
   Change Textfield Value  architect.fise  f  fise
+  Select From List  architect-fiseKelpoisuus-select  tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)
   Checkbox Should Not Be Selected  allowDirectMarketing
   Select Checkbox  allowDirectMarketing
 
@@ -42,6 +43,10 @@ Name and experience should have changed in Swedish page too
   Wait until  List Selection Should Be  architect-degree-select  Arkitekt
   Textfield Value Should Be  architect.graduatingYear  2001
   Textfield Value Should Be  architect.fise  fise
+  ##
+  ## TODO: Muuta tulos ruotsiksi, kun saadaan kaannokset, ja paivita tahan liittyvat (kommenteissa olevat) testit alla
+  ##
+#  Wait until  List Selection Should Be  architect-fiseKelpoisuus-select  tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen) - RUOTSIKSI
 
 Mika changes the name and experience back
   [Tags]  firefox
@@ -51,6 +56,7 @@ Mika changes the name and experience back
   Change Textfield Value  architect.graduatingYear  2001  2000
   Textfield Value Should Be  architect.graduatingYear  2000
   Change Textfield Value  architect.fise  fise  f
+#  Select From List  architect-fiseKelpoisuus-select  vaativa rakennussuunnittelu (uudisrakentaminen) - RUOTSIKSI
   Save User Data
   Positive indicator should be visible
 
@@ -63,6 +69,7 @@ Name and experience should have changed in Finnish page too
   Wait until  List Selection Should Be  architect-degree-select  Kirvesmies
   Wait until  Textfield Value Should Be  architect.graduatingYear  2000
   Textfield Value Should Be  architect.fise  f
+#  Wait until  List Selection Should Be  architect-fiseKelpoisuus-select  vaativa rakennussuunnittelu (uudisrakentaminen)
 
 *** Keywords ***
 
