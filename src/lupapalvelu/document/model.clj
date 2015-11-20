@@ -486,8 +486,7 @@
                   :fiseKelpoisuus               (wrap fiseKelpoisuus)}
        :patevyys-tyonjohtaja {:koulutusvalinta  (wrap degree)
                               :koulutus         nil
-                              :valmistumisvuosi (wrap graduatingYear)
-                              :fise             (wrap fise)}}
+                              :valmistumisvuosi (wrap graduatingYear)}}
       util/strip-nils
       util/strip-empty-maps
       tools/wrapped)))
