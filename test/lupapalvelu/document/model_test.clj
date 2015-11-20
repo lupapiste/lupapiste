@@ -680,6 +680,7 @@
                  :postinumero          {:value ""}
                  :postitoimipaikannimi {:value "city"}}
         :patevyys {:fise {:value ""}
+                   :fiseKelpoisuus {:value ""}
                    :koulutusvalinta {:value ""}
                    :valmistumisvuosi {:value ""}}
         :patevyys-tyonjohtaja {:fise {:value ""}
