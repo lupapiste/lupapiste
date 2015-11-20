@@ -20,7 +20,7 @@
       <tr>
         <td data-bind="dateString: modified"></td>
         <td data-bind="ltext: 'bulletin.state.' + bulletinState"></td>
-        <td data-bind="text: $parent.bulletin().comments[$data.id].length + ' ' + loc('unit.kpl')"></td>
+        <td data-bind="text: $parent.versionCommentsCount($data)"></td>
         <td data-bind="ltext: 'edit'"></td>
         <td data-bind="ltext: 'bulletin.versions.comments.show'"></td>
         <td data-bind="ltext: 'bulletin.versions.version.show'"></td>

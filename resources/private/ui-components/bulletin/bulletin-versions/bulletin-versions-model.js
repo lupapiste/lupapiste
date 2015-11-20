@@ -15,4 +15,9 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
       self.sendEvent("publishBulletinService", "fetchBulletinVersions", {bulletinId: id});
     }
   });
+
+  self.versionCommentsCount = function(version) {
+    var versionComments = self.bulletin().comments[version.id];
+    return versionComments ? versionComments.length + " " + loc("unit.kpl") : "";
+  };
 };
