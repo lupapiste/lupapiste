@@ -406,7 +406,7 @@
          :patevyysvaatimusluokka (:patevyysluokka patevyys)
          :valmistumisvuosi (:valmistumisvuosi patevyys)
          :FISEpatevyyskortti (:fise patevyys)
-         :FISEkelpoisuus (:FISEkelpoisuus patevyys)
+         :FISEkelpoisuus (:fiseKelpoisuus patevyys)
          :kokemusvuodet (:kokemus patevyys)}
         (when (-> henkilo :nimi :sukunimi)
           {:henkilo henkilo})

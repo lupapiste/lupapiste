@@ -78,7 +78,7 @@
                        :valmistumisvuosi {:value "2010"}
                        :kokemus {:value "5"}
                        :fise {:value "http://www.ym.fi"}
-                       :FISEkelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
+                       :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
            {:yritys yritysnimi-ja-ytunnus})})
 
 (def- suunnittelija1
@@ -91,7 +91,7 @@
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
                             :fise {:value "http://www.ym.fi"}
-                            :FISEkelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
+                            :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
 (def- suunnittelija2
@@ -104,7 +104,7 @@
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
                             :fise {:value "http://www.ym.fi"}
-                            :FISEkelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
+                            :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
 (def- suunnittelija-old-schema-LUPA-771
@@ -117,7 +117,7 @@
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
                             :fise {:value "http://www.ym.fi"}
-                            :FISEkelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}})})
+                            :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}})})
 
 (def- suunnittelija-blank-role
   {:id "suunnittelija-blank-role" :schema-info {:name "suunnittelija"
@@ -129,7 +129,7 @@
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
                             :fise {:value "http://www.ym.fi"}
-                            :FISEkelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
+                            :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
 (def- maksaja-henkilo
