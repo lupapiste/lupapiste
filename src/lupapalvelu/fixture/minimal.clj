@@ -436,6 +436,7 @@
     :companyName "Yritys Oy"
     :companyId "1234567-1"
     :fise "f"
+    :fiseKelpoisuus "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"
     :private {:password "$2a$10$sVFCAX/MB7wDKA2aNp1greq7QlHCU/r3WykMX/JKMWmg7d1cp7HSq"
               :apikey "502cb9e58426c613c8b85abc"}}
    ;; Hakija: pena / pena
