@@ -91,21 +91,21 @@
 (defn- get-bulletin [bulletin-id]
   (mongo/by-id :application-bulletins bulletin-id))
 
-(defn- bulletin-version-is-latest! [bulletin bulletin-version-id]
+(defn- bulletin-version-is-latest [bulletin bulletin-version-id]
   (let [latest-version-id (:id (last (:versions bulletin)))]
     (when-not (= bulletin-version-id latest-version-id)
       (fail :error.invalid-version-id))))
 
 (defn- comment-can-be-added
   [{{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId comment :comment} :data}]
-  (when (ss/blank? comment)
-    (fail :error.empty-comment))
-  (let [bulletin (get-bulletin bulletin-id)]
-    (when-not bulletin
-      (fail :error.invalid-bulletin-id))
-    (when-not (= (:bulletinState bulletin) "proclaimed")
-      (fail :error.invalid-bulletin-state))
-    (bulletin-version-is-latest! bulletin bulletin-version-id)))
+  (if (ss/blank? comment)
+    (fail :error.empty-comment)
+    (let [bulletin (get-bulletin bulletin-id)]
+      (if-not bulletin
+        (fail :error.invalid-bulletin-id)
+        (if-not (= (:bulletinState bulletin) "proclaimed")
+          (fail :error.invalid-bulletin-state)
+          (bulletin-version-is-latest bulletin bulletin-version-id))))))
 
 (defn- referenced-file-can-be-attached
   [{{files :files} :data}]
