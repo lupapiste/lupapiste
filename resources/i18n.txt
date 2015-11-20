@@ -44,3 +44,4 @@ bulletin.versions.state: Tila
 bulletin.versions.comments: Mielipiteitä
 bulletin.versions.comments.show: Näytä mielipiteet
 bulletin.versions.version.show: Näytä hakemus
+bulletin.versions.actions: Toiminnot

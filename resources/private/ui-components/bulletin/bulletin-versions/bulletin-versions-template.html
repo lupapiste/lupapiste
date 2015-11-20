@@ -13,17 +13,17 @@
         <th data-bind="ltext: 'bulletin.versions.published'"></th>
         <th data-bind="ltext: 'bulletin.versions.state'"></th>
         <th data-bind="ltext: 'bulletin.versions.comments'"></th>
-        <th colspan="3"></th>
+        <th colspan="3" data-bind="ltext: 'bulletin.versions.actions'"></th>
       </tr>
     </thead>
     <tbody data-bind="foreach: versions">
       <tr>
         <td data-bind="dateString: modified"></td>
         <td data-bind="ltext: 'bulletin.state.' + bulletinState"></td>
-        <td data-bind="text: $parent.bulletin().comments[$data.id].length"></td>
-        <td data-bind="text: 'Muokkaa'"></td>
-        <td data-bind="text: 'Näytä mielipiteet'"></td>
-        <td data-bind="text: 'Näytä hakemus'"></td>
+        <td data-bind="text: $parent.bulletin().comments[$data.id].length + ' ' + loc('unit.kpl')"></td>
+        <td data-bind="ltext: 'edit'"></td>
+        <td data-bind="ltext: 'bulletin.versions.comments.show'"></td>
+        <td data-bind="ltext: 'bulletin.versions.version.show'"></td>
       </tr>
     </tbody>
   </table>
