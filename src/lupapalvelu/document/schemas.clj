@@ -623,7 +623,7 @@
                          {:name "m2"}
                          {:name "m3"}]})
 
-(def rakennusjatemaara {:name "maara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m"})
+(def rakennusjatemaara {:name "maara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "s"})
 
 (def rakennusjatesuunnitelmaRow [(assoc rakennusjatemaara :name "suunniteltuMaara")
                                  jateyksikko
