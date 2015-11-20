@@ -595,7 +595,7 @@
                       :copybutton true
                       :body huoneistoRow})
 
-(def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi"
+(def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi" :required true
                   :body [{:name "betoni"}
                          {:name "kipsi"}
                          {:name "puu"}
@@ -605,7 +605,7 @@
                          {:name "paperi"}
                          {:name "maa"}]})
 
-(def vaarallinenainetyyppi {:name "vaarallinenainetyyppi" :type :select :i18nkey "vaarallinenainetyyppi"
+(def vaarallinenainetyyppi {:name "vaarallinenainetyyppi" :type :select :i18nkey "vaarallinenainetyyppi" :required true
                             :body [{:name "maalit-lakat-liimat-ja-liuottimet"}
                                    {:name "aerosolipullot"}
                                    {:name "painekyllastetty-puu"}
@@ -617,7 +617,7 @@
                                    {:name "eristeiden-ja-tiivistemassojen-haitalliset-jatteet"}
                                    {:name "sahko-ja-elektroniikkaromu"}]})
 
-(def jateyksikko {:name "yksikko" :i18nkey "jateyksikko" :type :select
+(def jateyksikko {:name "yksikko" :i18nkey "jateyksikko" :type :select :required true
                   :body [{:name "kg"}
                          {:name "tonni"}
                          {:name "m2"}
