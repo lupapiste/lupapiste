@@ -123,13 +123,14 @@
 
 (defn- bulletin-can-be-commented!
   [{{bulletin-id :bulletinId} :data :as command}]
-  ; 1. in proclaimed state
+
   (let [{bulletin-state :bulletinState} (mongo/select-one :application-bulletins {:_id bulletin-id} {:bulletinState 1})]
+    ; 1. in proclaimed state
     (when-not (= bulletin-state "proclaimed")
       (fail! :error.bulletin-not-in-commentable-state))
-    )
-  ; 2. commenting time period has not passed
-  )
+    ; 2. commenting time period has not passed
+    
+    ))
 
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
 
