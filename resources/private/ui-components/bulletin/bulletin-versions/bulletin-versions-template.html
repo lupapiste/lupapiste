@@ -20,7 +20,7 @@
       <tr>
         <td data-bind="dateString: modified"></td>
         <td data-bind="ltext: 'bulletin.state.' + bulletinState"></td>
-        <td data-bind="text: comments ? comments.length : ''"></td>
+        <td data-bind="text: $parent.bulletin().comments[$data.id].length"></td>
         <td data-bind="text: 'Muokkaa'"></td>
         <td data-bind="text: 'Näytä mielipiteet'"></td>
         <td data-bind="text: 'Näytä hakemus'"></td>
