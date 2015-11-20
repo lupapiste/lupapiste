@@ -36,9 +36,9 @@
                                     fileuploadService: new LUPAPISTE.FileuploadService(),
                                     auth: authorization.create()});
 
-    var errorType = pageutil.subPage() === pageutil.lastSubPage() ?
-      undefined :
-      pageutil.lastSubPage();
+    var errorType = _.includes(["error", "cancel"], pageutil.lastSubPage()) ?
+      pageutil.lastSubPage() :
+      undefined;
     hub.send("vetumaService::authenticateUser", {errorType: errorType});
   });
 })();
