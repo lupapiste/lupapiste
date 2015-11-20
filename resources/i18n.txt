@@ -64,7 +64,7 @@ fisekelpoisuus.poikkeuksellisen vaativa kosteusvaurion korjaussuunnittelu: poikk
 
 
 userinfo.architect.fiseKelpoisuus.choose: Valitse
-userinfo.architect.fiseKelpoisuus: FISE-kelpoisuus
+userinfo.architect.fiseKelpoisuus: FISE-kelpoisuus (oletus)
 fisekelpoisuus: FISE-kelpoisuus
 
 osapuoli.patevyys.patevyys: Lisätietoa suunnittelijan kelpoisuudesta
