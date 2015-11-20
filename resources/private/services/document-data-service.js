@@ -96,7 +96,7 @@ LUPAPISTE.DocumentDataService = function() {
     });
   }
 
-  self.updateDoc = function(documentId, updates, indicator, results, cb) {
+  self.updateDoc = function(documentId, updates, indicator, cb) {
     var params = {
       updates: _.map(updates, function(update) {
         return [update[0].join("."), update[1]];
@@ -104,13 +104,11 @@ LUPAPISTE.DocumentDataService = function() {
     };
     command(self.getUpdateCommand(documentId), documentId, params, {
       indicator: indicator,
-      results: results,
       cb: cb
     });
   }
 
   function command(commandName, documentId, params, opts) {
-    var results = opts.results || {};
     var indicator = opts.indicator || _.noop;
     var cb = opts.cb || _.noop;
     ajax
@@ -122,14 +120,7 @@ LUPAPISTE.DocumentDataService = function() {
         params)
       )
       .success(function(e) {
-        _.forEach(results, function(result) {
-          // TODO: hub.send(result)
-          var path = result[0], resultObs = result[1];
-          var res = _.find(e.results, function(res) {
-            return _.isEqual(res.path, path);
-          });
-          resultObs(res && res.result);
-        });
+        hub.send("document::validation-result", e.results);
       
         indicator({type: "saved"});
         cb(e);
@@ -148,6 +139,7 @@ LUPAPISTE.DocumentDataService = function() {
   //
 
   function createRepeatingUnitDataModel(schema, rawModel, path, index) {
+    var index = index.toString();
     return _.extend(
         {index: index},
         isGroupType(schema) ? 

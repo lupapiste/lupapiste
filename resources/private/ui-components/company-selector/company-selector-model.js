@@ -37,7 +37,6 @@ LUPAPISTE.CompanySelectorModel = function(params) {
       self.service.updateDoc(params.documentId,
                              [[self.path, id]],
                              self.indicator,
-                             [[self.path, self.result]],
                              cb);
     })
     .call();

@@ -68,8 +68,14 @@ LUPAPISTE.DocgenInputModel = function(params) {
   var save = function(val) {
     self.service.updateDoc(self.documentId,
                            [[params.path, val]],
-                           self.indicator,
-                           [[params.path, self.result]]);
+                           self.indicator);
   };
   self.value.subscribe(_.debounce(save, 500));
+
+  hub.subscribe("document::validation-result", function(results) {
+    var res = _.find(results, function(res) {
+      return _.isEqual(res.path, self.path);
+    });
+    self.result(res && res.result);
+  });
 };
