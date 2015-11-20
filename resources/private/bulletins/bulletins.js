@@ -7,6 +7,7 @@
                                            componentPages: ["bulletin"]});
   $(function() {
     lupapisteApp.domReady();
+    lupapisteApp.setTitle("Julkipano");
 
     var components = [
         {name: "bulletins"},
@@ -19,7 +20,9 @@
         {name: "autocomplete-states"},
         {name: "bulletin-comment"},
         {name: "bulletin-comment-box"},
+        {name: "bulletin-attachments-tab"},
         {name: "begin-vetuma-auth-button"}];
+        {name: "bulletin-info-tab"}];
 
     _.forEach(components, function(component) {
       ko.components.register(component.name, {

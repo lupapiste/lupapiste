@@ -7,35 +7,35 @@ LUPAPISTE.BulletinsModel = function(params) {
   self.page = ko.observable().extend({
     limited: {values: supportedPages, defaultValue: "bulletins"}
   });
+  self.pagePath = ko.observableArray([]);
 
   var bulletinService = params.bulletinService;
   var vetumaService = params.vetumaService;
   var fileuploadService = params.fileuploadService;
   var auth = params.auth;
 
-  self.pageParams = ko.pureComputed(function () {
-    var defaultParams = {
-      bulletinService: bulletinService
-    };
+  self.bulletinId = ko.observable(pageutil.subPage());
 
-    return self.page() === "bulletin" ?
-      _.extend(defaultParams, { bulletinId: bulletinId,
-                                authenticated: vetumaService.authenticated,
-                                userInfo: vetumaService.userInfo,
-                                fileuploadService: fileuploadService,
-                                auth: auth }) :
-      defaultParams;
-  });
+  self.pageParams = {bulletinService: bulletinService,
+                     pagePath: self.pagePath,
+                     bulletinId: self.bulletinId,
+                     fileuploadService: fileuploadService,
+                     auth: auth};
 
   hub.onPageLoad("bulletins", function(e) {
     self.page(e.pageId);
+    self.pagePath(e.pagePath);
+    window.lupapisteApp.setTitle("Julkipano");
   });
 
   hub.onPageLoad("bulletin", function(e) {
-    bulletinId = _.first(e.pagePath);
+    self.bulletinId(_.first(e.pagePath));
     self.page(e.pageId);
+    self.pagePath(e.pagePath);
+    window.lupapisteApp.setTitle("Julkipano");
+    hub.send("bulletinService::fetchBulletin", {id: self.bulletinId()});
   });
 
   self.page(pageutil.getPage());
-  var bulletinId = pageutil.subPage();
+  self.pagePath(pageutil.getPagePath());
 };

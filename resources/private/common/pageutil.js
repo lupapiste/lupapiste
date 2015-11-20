@@ -62,8 +62,18 @@ var pageutil = (function($) {
     window.location = window.location.protocol + "//" + window.location.host + frontpage;
   }
 
+  function suffixToStr(suffix) {
+    if (_.isArray(suffix) && _.every(suffix, _.isString)) {
+      return "/" + suffix.join("/");
+    } else if (_.isString(suffix)) {
+      return "/" + suffix;
+    } else {
+      return "";
+    }
+  }
+
   function openPage(page, suffix) {
-    var suffixStr = _.isString(suffix) ? "/" + suffix : "";
+    var suffixStr = suffixToStr(suffix);
     if (!page) {
       openFrontpage();
     } else if (page.indexOf("!/") === 0) {
@@ -96,7 +106,8 @@ var pageutil = (function($) {
     openApplicationPage:  openApplicationPage,
     openFrontpage:        openFrontpage,
     openPage:             openPage,
-    frontpage:            frontpage
+    frontpage:            frontpage,
+    getPagePath:          pagePath
   };
 
 })(jQuery);

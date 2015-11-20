@@ -71,7 +71,7 @@
   (fact "ya-jatkoaika requires" (is-link-permit-required {:secondaryOperations [{:name "ya-jatkoaika"}]}) => truthy))
 
 (facts "Add operation allowed"
-       (let [not-allowed-for #{:raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen :rajankaynti}
+       (let [not-allowed-for #{:raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen :rajankaynti :pima}
         error {:ok false :text "error.add-operation-not-allowed"}]
 
     (doseq [operation lupapalvelu.operations/operations]

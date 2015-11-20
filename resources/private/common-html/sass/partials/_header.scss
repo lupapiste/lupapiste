@@ -6,9 +6,9 @@ $language-padding: 20px;
 
 @mixin header-padding {
   padding: {
-  left: $header-padding;
-  right: $header-padding;
-}
+    left: $header-padding;
+    right: $header-padding;
+  }
 }
 
 @mixin nav-link( $link: $orange, $hover: white, $hover-bg: inherit ) {

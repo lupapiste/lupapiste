@@ -13,11 +13,21 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   self.bulletinId = params.bulletinId;
   self.versionId  = ko.observable();
-  self.selectedTab = ko.observable("info");
+  self.selectedTab = ko.observable().extend({
+    limited: {values: ["info", "attachments"], defaultValue: "info"}
+  });
+
+  ko.computed(function() {
+    self.selectedTab(params.pagePath()[1]);
+  });
 
   self.authenticated = params.authenticated;
   self.auth = params.auth;
   self.auth.refreshWithoutAppId({bulletinId: self.bulletinId});
+  self.tabComponentParams = ko.pureComputed(function() {
+    return {bulletin: self.bulletin,
+            attachments: self.bulletin() ? self.bulletin().attachments : []};
+  });
 
   self.bulletinStateLoc = ko.pureComputed(function() {
     return ["bulletin", "state", self.bulletin().bulletinState].join(".");
@@ -43,12 +53,15 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   self.clickAuthenticationButton = function() {
     $("#vetuma-init")[0].click();
   };
+  self.openTab = function(tab) {
+    pageutil.openPage("bulletin", [self.bulletinId(), tab]);
+  };
 
   self.scrollToCommenting = function() {
     $("#bulletin-comment")[0].scrollIntoView(true);
   };
 
-  hub.send("bulletinService::fetchBulletin", {id: self.bulletinId});
+  hub.send("bulletinService::fetchBulletin", {id: self.bulletinId()});
 
   var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + self.bulletinId;
   self.vetumaParams = {success: returnUrl,

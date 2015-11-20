@@ -5,8 +5,6 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery]]
-            [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.poikkeamis-schemas]
             [lupapalvelu.document.ymparisto-schemas]
@@ -15,7 +13,6 @@
             [lupapalvelu.states :as states]
             [lupapiste-commons.usage-types :as usages]
             [monger.operators :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]))
 
 (def default-description "operations.tree.default-description")
@@ -121,7 +118,8 @@
      [; permit/YI
       ["Meluilmoitus" :meluilmoitus]
 
-      (when (env/feature? :pima) ["Pima" :pima])
+      ; permit/YL
+      ["Pima" :pima]
 
       ; permit/MAL
       ["maa-ainesten_ottaminen" :maa-aineslupa]
@@ -318,14 +316,14 @@
   {:yl-uusi-toiminta ymparistolupa-operation
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
    :yl-toiminnan-muutos ymparistolupa-operation
-;   :pima                          {:schema "pima"
-;                                   :permit-type permit/YL
-;                                   :applicant-doc-schema applicant-doc-schema-name-hakija
-;                                   :required ["ymp-ilm-kesto-mini"]
-;                                   :attachments []
-;                                   :add-operation-allowed true
-;                                   :min-outgoing-link-permits 0
-;                                   :asianhallinta false}
+   :pima                          {:schema "pima"
+                                   :permit-type permit/YL
+                                   :applicant-doc-schema applicant-doc-schema-name-hakija
+                                   :required ["ymp-ilm-kesto-mini"]
+                                   :attachments []
+                                   :add-operation-allowed false
+                                   :min-outgoing-link-permits 0
+                                   :asianhallinta false}
    })
 
 (def- yi-operations
