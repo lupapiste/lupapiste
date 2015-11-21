@@ -143,20 +143,24 @@ LUPAPISTE.MunicipalityMapsService = function() {
   // The userLayers observable is partly modified
   // by the municipality-maps-layers component.
   ko.computed( function () {
-    if( _.size( userLayers()) && saveLayersFlag ) {
-      ajax.command( "update-user-layers",
-                    {layers: _.map( userLayers(),
+    if( _.size( userLayers())) {
+      // Calculated always to make sure that
+      // the computed binds to every layer.
+      var layers = _.map( userLayers(),
                                     function( layer ) {
                                       return {
                                         name: layer.name(),
                                         id: layer.id(),
                                         base: Boolean( layer.fixed)
                                       };
-                                    })})
-      .complete( function( res ) {
-        util.showSavedIndicator( res.responseJSON );
-      } )
-      .call();
+                                    });
+      if( saveLayersFlag ) {
+        ajax.command ( "update-user-layers", {layers: layers })
+        .complete ( function( res ) {
+          util.showSavedIndicator( res.responseJSON );
+        } )
+        .call ();
+      }
     }
   });
 
@@ -201,7 +205,6 @@ LUPAPISTE.MunicipalityMapsService = function() {
         channel: channel( "server")
       },
       layers: {
-        Layer: Layer,
         userLayers: ss.layers,
         serverLayers: serverLayers,
         channel: channel( "layers")

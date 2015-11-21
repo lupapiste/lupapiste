@@ -130,32 +130,52 @@
      :baseLayerId layer-id
      :isBaseLayer (or (= layer-category "asemakaava") (= layer-category "kantakartta"))}))
 
+(defn- prnt [a] (>pprint a) a)
+
 (defn municipality-layers
-  "TODO: Not finished."
+  "Examines evey organization belonging to the municipality and
+  returns list of resolved map layers. Each item in the list has the
+  following keys:
+  :base true if the layer is base layer (asemakaava or kantakartta)
+  :id   WMS layer name
+  :name Friendly name. Either given by the user or
+        predefined (asemakaava or kantakartta)
+  :org  Organization id"
   [municipality]
-  (letfn [(in-municipality-has-layers? [{:keys [id map-layers]}]
-            (and map-layers (ss/starts-with id municipality)))
-          (annotate-org-layers [{:keys [layers server]}]
-            (map #(assoc % :server (:url server) )))
-          (layer-slot-filled? [layer server slot]
-            (let [{:keys id name base} slot
-                  {{url :url} :server} slot]
+  (letfn [(in-municipality-has-layers?
+            [{:keys [id scope map-layers]}]
+            (and map-layers (= (:municipality (first scope)) municipality)))
+          (annotate-org-layer [{{:keys [layers server]} :map-layers org-id :id}]
+            (map #(assoc % :server (:url server) :org org-id) layers))
+          (layer-slot-filled? [layer slot]
+            (let [{:keys [id name base server]} slot]
               (or
                (and base (:base layer) (= name (:name layer)))
-               (and (= id (:id layer) (= url (:url server)))))))])
-  (->> (org/get-organizations)
-       (filter in-municipality-has-layers?)
-       (map )
-       (reduce (fn [acc {:keys [id map-layers]}])
-               (if (some (partial layer-slot-filled? ) ))))
-  )
+               (and (= id (:id layer)) (= server (:server layer))))))]
+    (->> (org/get-organizations)
+         ;; Include only orgs that belong to municipality and have map
+         ;; layers defined
+         (filter in-municipality-has-layers?)
+         ;; Add server and org information to layers
+         (map annotate-org-layer)
+         ;; All layers into one list
+         flatten
+         ;; Remove layers without WMS layer information
+         (remove #(ss/blank? (:id %)))
+         ;; The final list will have each base layer (asemakaava,
+         ;; kantakartta) and each WMS layer only once.
+         (reduce (fn [slots layer]
+                   (if (some (partial layer-slot-filled? layer) slots)
+                     slots
+                     (cons layer slots))) [])
+         (map #(select-keys % [:base :id :name :org])))))
 
 
 (defn wms-capabilities-proxy [request]
   (let [{municipality :municipality} (:params request)
         capabilities (wfs/getcapabilities request)
         layers (wfs/capabilities-to-layers capabilities)
-        municipality-layers (municipality-layers municipality)
+        ;;muni-layers (municipality-layers municipality)
         ]
     (if layers
       (resp/json
