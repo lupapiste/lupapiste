@@ -1302,6 +1302,43 @@
   {:apply-when (pos? (mongo/count :statistics {$and [{:type "pdfa-conversion"} {"years.2015" {$exists true}}]}))}
   (mongo/update :statistics {:type "pdfa-conversion"} {$unset {"years.2015" ""}}))
 
+(defmigration ya-katselmukset-remove-tila-and-convert-katselmuksenLaji
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                                 :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
+                                                                           {$or [{"data.tila" {$exists true}}
+                                                                                 {"data.katselmuksenLaji.value" {$exists true
+                                                                                                                 $nin ["Aloituskatselmus"
+                                                                                                                       "Loppukatselmus"
+                                                                                                                       "Muu valvontak\u00e4ynti"
+                                                                                                                       ""]}}]}]}}}))}
+  (update-applications-array
+    :tasks
+    (fn [task]
+      (if (= "task-katselmus-ya" (-> task :schema-info :name))
+        (let [new-task (-> task
+                         (dissoc-in [:data :tila])  ;; cannot be transferred in YA Krysp
+                         (#(if-not (-> % :data :katselmuksenLaji :value ((fn [laji]
+                                                                           (or
+                                                                             (ss/blank? laji)
+                                                                             (#{"Aloituskatselmus" "Loppukatselmus" "Muu valvontak\u00e4ynti"} laji)))))
+                             (update-in % [:data :katselmuksenLaji :value] (fn [old-katselmuksenLaji]
+                                                                             (case old-katselmuksenLaji
+                                                                               "aloituskokous" "Aloituskatselmus"
+                                                                               "loppukatselmus" "Loppukatselmus"
+                                                                               "Muu valvontak\u00e4ynti")))
+                             %)))]
+          new-task)
+        task))
+    {:permitType "YA"
+     :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
+                               {$or [{"data.tila" {$exists true}}
+                                     {"data.katselmuksenLaji.value" {$exists true
+                                                                     $nin ["Aloituskatselmus"
+                                                                           "Loppukatselmus"
+                                                                           "Muu valvontak\u00e4ynti"
+                                                                           ""]}}]}]}}}))
+
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

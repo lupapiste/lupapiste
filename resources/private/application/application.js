@@ -131,7 +131,7 @@
       applicationModel._js = app;
 
       // Update observables
-      var mappingOptions = {ignore: ["documents", "tasks", "buildings", "verdicts", "transfers"]};
+      var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers"]};
       ko.mapping.fromJS(app, mappingOptions, applicationModel);
 
       // Invite
@@ -343,7 +343,7 @@
     },
     markDone: function(neighbor) {
       ajax
-        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.id()})
+        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.id(), lang: loc.getCurrentLanguage()})
         .complete(_.partial(repository.load, currentId, _.noop))
         .call();
     },

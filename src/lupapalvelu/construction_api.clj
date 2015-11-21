@@ -27,7 +27,8 @@
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
     (update-application command (util/deep-merge
                                   (application/state-transition-update :constructionStarted created user)
-                                  {$set {:startedBy (select-keys user [:id :firstName :lastName])}})))
+                                  {$set {:startedBy (select-keys user [:id :firstName :lastName])
+                                         :started timestamp}})))
   (ok))
 
 (comment
@@ -87,6 +88,6 @@
     (when ftp-user?
       (mapping-to-krysp/save-application-as-krysp application lang application organization))
     (update-application command (util/deep-merge
-                                  {$set app-updates}
-                                  (application/state-transition-update :closed created user)))
+                                  (application/state-transition-update :closed created user)
+                                  {$set app-updates}))
     (ok :integrationAvailable ftp-user?)))
