@@ -101,12 +101,13 @@
 (defn set-krysp-endpoint
   [id url username password endpoint-type version]
   {:pre [(mongo/valid-key? endpoint-type)]}
-  (let [updates (->> (encode-credentials username password)
+  (let [url (ss/trim url)
+        updates (->> (encode-credentials username password)
                   (merge {:url url :version version})
                   (map (fn [[k v]] [(str "krysp." endpoint-type "." (name k)) v]))
                   (into {})
                   (hash-map $set))]
-    (if (= "osoitteet" endpoint-type)
+    (if (and (not (ss/blank? url)) (= "osoitteet" endpoint-type))
       (let [capabilities-xml (wfs/get-capabilities-xml url username password)
             osoite-feature-type (some->> (wfs/feature-types capabilities-xml)
                                          (map (comp :FeatureType sxml/xml->edn))
