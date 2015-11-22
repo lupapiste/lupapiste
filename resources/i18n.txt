@@ -1,0 +1,2 @@
+osoitteet: Osoitteet
+error.no-address-feature-type: Taustajärjestelmä ei tarjoa osoitteita

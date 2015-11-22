@@ -24,7 +24,7 @@
             [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.states :as states]
-            [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -309,19 +309,25 @@
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)]
     (if-let [organization (o/get-organization organization-id)]
-      (let [empty-confs (zipmap (map (comp keyword :permitType) (:scope organization)) (repeat {}))]
+      (let [permit-types (mapv (comp keyword :permitType) (:scope organization))
+            krysp-keys (if (env/feature? :kunnan-osoiteaineisto) (conj permit-types :osoitteet) permit-types)
+            empty-confs (zipmap krysp-keys (repeat {}))]
         (ok :krysp (merge empty-confs (:krysp organization))))
       (fail :error.unknown-organization))))
 
 (defcommand set-krysp-endpoint
   {:parameters [url username password permitType version]
    :user-roles #{:authorityAdmin}
-   :input-validators [permit/permit-type-validator]}
+   :input-validators [(fn [{{permit-type :permitType} :data}]
+                        (when-not (or
+                                    (and (env/feature? :kunnan-osoiteaineisto) (= "osoitteet" permit-type))
+                                    (permit/valid-permit-type? permit-type))
+                          (fail :error.missing-parameters :parameters [:permitType])))]}
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)
         krysp-config    (o/get-krysp-wfs organization-id permitType)
         password        (if (s/blank? password) (second (:credentials krysp-config)) password)]
-    (if (or (s/blank? url) (krysp/wfs-is-alive? url username password))
+    (if (or (s/blank? url) (wfs/wfs-is-alive? url username password))
       (o/set-krysp-endpoint organization-id url username password permitType version)
       (fail :auth-admin.legacyNotResponding))))
 
