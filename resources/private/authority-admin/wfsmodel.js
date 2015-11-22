@@ -5,6 +5,8 @@ LUPAPISTE.WFSModel = function () {
   var self = this;
 
   self.data = ko.observable();
+  self.processing = ko.observable(false);
+  self.pending = ko.observable(false);
   self.editUrl = ko.observable();
   self.editUsername = ko.observable();
   self.editPassword = ko.observable();
@@ -41,6 +43,8 @@ LUPAPISTE.WFSModel = function () {
         self.error(false);
         LUPAPISTE.ModalDialog.close();
       })
+      .processing(self.processing)
+      .pending(self.pending)
       .error(function(e) {
         self.error(e.text);
       })
@@ -58,6 +62,9 @@ LUPAPISTE.WFSModel = function () {
     if (!versionsAvailable) {
       error("No supported KRYSP versions for permit type", model.permitType);
     }
+
+    self.processing(false);
+    self.pending(false);
 
     self.versions(versionsAvailable);
     self.editUrl(url);
