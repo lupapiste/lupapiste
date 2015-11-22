@@ -1,6 +1,7 @@
 (ns lupapalvelu.proxy-services
   (:require [clojure.data.zip.xml :refer :all]
             [clojure.xml :as xml]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as user]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
@@ -129,12 +130,9 @@
      :baseLayerId layer-id
      :isBaseLayer (or (= layer-category "asemakaava") (= layer-category "kantakartta"))}))
 
-(defn- prnt [a] (>pprint a) a)
-
 (defn municipality-layers
   "Examines evey organization belonging to the municipality and
-  returns list of resolved map layers. Each item in the list has the
-  following keys:
+  returns list of resolved map layers (layer objects):
   :base true if the layer is base layer (asemakaava or kantakartta)
   :id   WMS layer name
   :name Friendly name. Either given by the user or
@@ -162,23 +160,51 @@
          ;; Remove layers without WMS layer information
          (remove #(ss/blank? (:id %)))
          ;; The final list will have each base layer (asemakaava,
-         ;; kantakartta) and each WMS layer only once.
+         ;; kantakartta) and WMS layer only once.
          (reduce (fn [slots layer]
                    (if (some (partial layer-slot-filled? layer) slots)
                      slots
                      (cons layer slots))) [])
          (map #(select-keys % [:base :id :name :org])))))
 
+(defn municipality-layer-objects
+  "Resolves layers for the given municipality and returns a list of
+  Oskari layer objects."
+  [municipality]
+  (let [layers (municipality-layers municipality)
+        names-fn (fn [name]
+                (let [path (str "auth-admin.municipality-maps." name)]
+                  (->> i18n/languages
+                       (map #(when (i18n/has-term? % path)
+                               {% (i18n/localize % path)}))
+                       (cons {:fi name :sv name :en name})
+                       (apply merge))))
+        layer-id-fn (fn [name index]
+                   (get {"asemakaava"  101
+                         "kantakartta" 102}
+                        name
+                        (str "Lupapiste-" index)))]
+    (->> layers
+         count
+         range
+         (map (fn [index]
+                (let [{:keys [base id name org]} (nth layers index)
+                      layer-id (layer-id-fn name index)]
+                  {:wmsName (str "Lupapiste-" org ":" id)
+                   :wmsUrl  "/proxy/wms"
+                   :name (names-fn name)
+                   :subtitle {:fi "" :sv "" :en ""}
+                   :id layer-id
+                   :baseLayerId layer-id
+                   :isBaseLayer base}))))))
 
 (defn wms-capabilities-proxy [request]
   (let [{municipality :municipality} (:params request)
+        muni-layers (municipality-layer-objects municipality)
+        muni-bases (->> muni-layers (map :id) (filter number?) set)
         capabilities (wfs/getcapabilities request)
-        layers (wfs/capabilities-to-layers capabilities)
-        ;;muni-layers (municipality-layers municipality)
-        ]
-    (if layers
-      (resp/json
-        (if (nil? municipality)
+        layers (or (wfs/capabilities-to-layers capabilities) [])
+        layers (if (nil? municipality)
           (map create-layer-object (map wfs/layer-to-name layers))
           (filter
             #(and
@@ -186,7 +212,11 @@
                (= (re-find #"^\d+" (:wmsName %)) municipality))
             (map create-layer-object (map wfs/layer-to-name layers)))
           )
-        )
+        layers (filter (fn [{id :id}]
+                         (not-any? #(= id %) muni-bases)) layers)
+        result (concat layers muni-layers)]
+    (if (not-empty result)
+      (resp/json result)
       (resp/status 503 "Service temporarily unavailable"))))
 
 ;; The value of "municipality" is "liiteri" when searching from Liiteri and municipality code when searching from municipalities.
