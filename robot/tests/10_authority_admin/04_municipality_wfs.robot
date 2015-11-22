@@ -12,22 +12,22 @@ Set variables
   Set suite variable   ${INVALID_LEGACY}  BROKEN
 
 Inputting invalid wfs gives an error
-  Submit wfs  ${INVALID_LEGACY}
+  Submit wfs  ${INVALID_LEGACY}  R
   There should be error
 
 Legacy can be empty
   Input WFS URL  ${EMPTY}
-  Legacy should not be set
+  Legacy should not be set  R
 
 Setting valid wfs set the wfs
-  Submit wfs  ${VALID_LEGACY}
-  Legacy should be  ${VALID_LEGACY}
+  Submit wfs  ${VALID_LEGACY}  R
+  Legacy should be  ${VALID_LEGACY}  R
 
 *** Keywords ***
 
 Submit wfs
-  [Arguments]  ${url}
-  Click element  edit-wfs-for-R
+  [Arguments]  ${url}  ${permitType}
+  Click element  edit-wfs-for-${permitType}
   Wait until  element should be visible  edit-wfs
   Input WFS URL  ${url}
 
@@ -40,9 +40,10 @@ There should be error
   Wait until  element should be visible  wfs-error
 
 Legacy should be
-  [Arguments]  ${url}
-  Wait until  Element Text Should Be  wfs-for-R  ${url}
+  [Arguments]  ${url}  ${permitType}
+  Wait until  Element Text Should Be  wfs-for-${permitType}  ${url}
 
 Legacy should not be set
-  Wait until  Element should not be visible  wfs-for-R
-  Element should be visible  wfs-not-set-R
+  [Arguments]  ${permitType}
+  Wait until  Element should not be visible  wfs-for-${permitType}
+  Element should be visible  wfs-not-set-${permitType}
