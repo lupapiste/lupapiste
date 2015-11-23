@@ -102,8 +102,8 @@
   ([property-names order]
     {:tag :ogc:SortBy
      :content (conj
-                (mapv (fn [property-name] {:tag :ogc:SortProperty :content [{:tag :ogc:PropertyName :content property-name}]}) property-names)
-                {:tag :ogc:SortOrder :content [{:tag :ogc:SortOrder :content (s/upper-case order)}]})}))
+                (mapv (fn [property-name] {:tag :ogc:SortProperty :content [{:tag :ogc:PropertyName :content [property-name]}]}) property-names)
+                {:tag :ogc:SortOrder :content [{:tag :ogc:SortOrder :content [(s/upper-case order)]}]})}))
 
 (defn ogc-filter [& e] {:tag :ogc:Filter :content e})
 
@@ -115,23 +115,23 @@
 
 (defn within [& e] {:tag :ogc:DWithin :content e})
 
-(defn distance [distance] {:tag :ogc:Distance :attrs {:units "m"} :content distance})
+(defn distance [distance] {:tag :ogc:Distance :attrs {:units "m"} :content [distance]})
 
 (defn point [x y]
   {:tag :gml:Point :attrs {:srsDimension "2"}
-   :content [{:tag :gml:pos :content (str x \space y)}]})
+   :content [{:tag :gml:pos :content [(str x \space y)]}]})
 
 (defn line [c]
   {:tag :gml:LineString
-   :content [{:tag :gml:posList :attrs {:srsDimension "2"} :content (s/join " " c)}]})
+   :content [{:tag :gml:posList :attrs {:srsDimension "2"} :content [(s/join " " c)]}]})
 
 (defn polygon [c]
   {:tag :gml:Polygon
    :content [{:tag :gml:outerBoundaryIs
               :content [{:tag :gml:LinearRing
-                         :content [{:tag :gml:posList :attrs {:srsDimension "2"} :content (s/join " " c)}]}]}]})
+                         :content [{:tag :gml:posList :attrs {:srsDimension "2"} :content [(s/join " " c)]}]}]}]})
 
-(defn property-name [prop-name] {:tag :ogc:PropertyName :content prop-name})
+(defn property-name [prop-name] {:tag :ogc:PropertyName :content [prop-name]})
 
 (defn property-filter [filter-name prop-name value & attrs]
   (let [attributes (if (map? (first attrs) )
@@ -140,7 +140,7 @@
     {:tag (str "ogc:" filter-name)
      :attrs attributes
      :content [(property-name prop-name)
-               {:tag :ogc:Literal :content value}]}))
+               {:tag :ogc:Literal :content [value]}]}))
 
 (defn property-is-like [prop-name value & [declare-xml-namespaces?]]
   (property-filter "PropertyIsLike" prop-name value
@@ -160,8 +160,8 @@
   {:tag :ogc:PropertyIsBetween
    :attrs (when declare-xml-namespaces? xml-namespaces)
    :content [(property-name name)
-             {:tag :ogc:LowerBoundary :content lower-value}
-             {:tag :ogc:UpperBoundary :content upper-value}]})
+             {:tag :ogc:LowerBoundary :content [lower-value]}
+             {:tag :ogc:UpperBoundary :content [upper-value]}]})
 
 ;;
 ;; Helpers for result parsing:
@@ -331,8 +331,6 @@
            (property-name "mkos:Osoite/yht:pistesijainti")
            (point x y)))))
 
-
-
   (exec :get "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"
    {:NAMESPACE "xmlns(mkos=http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet)"
     :TYPENAME "mkos:Osoite"
@@ -340,7 +338,18 @@
     :SERVICE "WFS"
     :VERSION "1.1.0"
     ;:COORDS (str x "," y ",EPSG:3877")
-    :FILTER (property-is-equal "yht:osoitenimi/yht:teksti" "Linnankatu")
+    :FILTER (sxml/element-to-string
+              (assoc
+                (within
+                  (property-name "yht:pistesijainti")
+                  (point x y)
+                  (distance 10))
+                #_(intersects
+                   (property-name "yht:pistesijainti")
+                   (point x y))
+                :attrs xml-namespaces)
+
+              )
     :SRSNAME "EPSG:3067"
     :MAXFEATURES "1"
     :BUFFER "500"}))
