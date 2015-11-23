@@ -136,7 +136,7 @@
   (str "<ogc:Distance units=\"m\">" distance "</ogc:Distance>"))
 
 (defn point [x y]
-  (format "<gml:Point><gml:pos>%s %s</gml:pos></gml:Point>" x y))
+  (format "<gml:Point srsDimension=\"2\"><gml:pos>%s %s</gml:pos></gml:Point>" x y))
 
 (defn line [c]
   (format "<gml:LineString><gml:posList srsDimension=\"2\">%s</gml:posList></gml:LineString>" (s/join " " c)))
