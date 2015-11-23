@@ -10,13 +10,13 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
 
   self.rows = ko.computed(function() {
     return _.reject(self.groups(), function(group) {
-      return self.service.getInModel(group, ["autoupdated"]).model();
+      return self.service.getValueIn(group, ["autoupdated"]);
     });
   });
 
   self.autoupdatedRows = ko.computed(function() {
     return _.filter(self.groups(), function(group) {
-      return self.service.getInModel(group, ["autoupdated"]).model();
+      return self.service.getValueIn(group, ["autoupdated"]);
     });
   });
 
