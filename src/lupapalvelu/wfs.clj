@@ -86,9 +86,6 @@
    "xmlns:ogc" "http://www.opengis.net/ogc"
    "xmlns:xsi" "http://www.w3.org/2001/XMLSchema-instance"})
 
-(defn- ->xml-attributes-string [attrs]
-  (ss/join (map (fn [[k v]] (format " %s=\"%s\"" (name k) (name v))) attrs)))
-
 (defn query [attrs & e]
   (sxml/element-to-string
    {:tag :wfs:GetFeature
@@ -97,65 +94,53 @@
              {:xsi:schemaLocation "http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"})
     :content [{:tag :wfs:Query
                :attrs attrs
-               :content (if (string? e) [e] e)}]})
-  #_(str
-    "<wfs:GetFeature version=\"1.1.0\"" (->xml-attributes-string xml-namespaces)
-    "  xsi:schemaLocation=\"http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
-      <wfs:Query" (->xml-attributes-string attrs) ">"
-    (ss/join e)
-    "</wfs:Query></wfs:GetFeature>"))
+               :content (if (string? e) [e] e)}]}))
 
 (defn ogc-sort-by
   ([property-names]
     (ogc-sort-by property-names "desc"))
   ([property-names order]
-    (let [sort-properties (ss/join (map #(str "<ogc:SortProperty><ogc:PropertyName>" % "</ogc:PropertyName></ogc:SortProperty>") property-names))]
-      (str "<ogc:SortBy>"
-           sort-properties
-           "<ogc:SortOrder>" (s/upper-case order) "</ogc:SortOrder>"
-           "</ogc:SortBy>"))))
+    {:tag :ogc:SortBy
+     :content (conj
+                (mapv (fn [property-name] {:tag :ogc:SortProperty :content [{:tag :ogc:PropertyName :content property-name}]}) property-names)
+                {:tag :ogc:SortOrder :content [{:tag :ogc:SortOrder :content (s/upper-case order)}]})}))
 
-(defn ogc-filter [& e]
-  (if (map? (first e))
-    (str "<ogc:Filter" (->xml-attributes-string (first e)) ">" (ss/join (rest e)) "</ogc:Filter>")
-    (str "<ogc:Filter>" (ss/join e) "</ogc:Filter>")))
+(defn ogc-filter [& e] {:tag :ogc:Filter :content e})
 
-(defn ogc-and [& e]
-  (str "<ogc:And>" (ss/join e) "</ogc:And>"))
+(defn ogc-and [& e] {:tag :ogc:And :content e})
 
-(defn ogc-or [& e]
-  (str "<ogc:Or>" (ss/join e) "</ogc:Or>"))
+(defn ogc-or [& e] {:tag :ogc:Or :content e})
 
-(defn intersects [& e]
-  (str "<ogc:Intersects>" (ss/join e) "</ogc:Intersects>"))
+(defn intersects [& e] {:tag :ogc:Intersects :content e})
 
-(defn within [& e]
-  (str "<ogc:DWithin>" (ss/join e) "</ogc:DWithin>"))
+(defn within [& e] {:tag :ogc:DWithin :content e})
 
-(defn distance [distance]
-  (str "<ogc:Distance units=\"m\">" distance "</ogc:Distance>"))
+(defn distance [distance] {:tag :ogc:Distance :attrs {:units "m"} :content distance})
 
 (defn point [x y]
-  (format "<gml:Point srsDimension=\"2\"><gml:pos>%s %s</gml:pos></gml:Point>" x y))
+  {:tag :gml:Point :attrs {:srsDimension "2"}
+   :content [{:tag :gml:pos :content (str x \space y)}]})
 
 (defn line [c]
-  (format "<gml:LineString><gml:posList srsDimension=\"2\">%s</gml:posList></gml:LineString>" (s/join " " c)))
+  {:tag :gml:LineString
+   :content [{:tag :gml:posList :attrs {:srsDimension "2"} :content (s/join " " c)}]})
 
 (defn polygon [c]
-  (format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension=\"2\">%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
+  {:tag :gml:Polygon
+   :content [{:tag :gml:outerBoundaryIs
+              :content [{:tag :gml:LinearRing
+                         :content [{:tag :gml:posList :attrs {:srsDimension "2"} :content (s/join " " c)}]}]}]})
 
-(defn property-name [prop-name]
-  (str "<ogc:PropertyName>" prop-name "</ogc:PropertyName>"))
+(defn property-name [prop-name] {:tag :ogc:PropertyName :content prop-name})
 
 (defn property-filter [filter-name prop-name value & attrs]
   (let [attributes (if (map? (first attrs) )
                      (first attrs)
-                     (partition 2 attrs))]
-  (str
-      "<ogc:" filter-name  (->xml-attributes-string attributes) " >"
-    (property-name prop-name)
-    "<ogc:Literal>" value "</ogc:Literal>"
-      "</ogc:" filter-name ">")))
+                     (apply hash-map (partition 2 attrs)))]
+    {:tag (str "ogc:" filter-name)
+     :attrs attributes
+     :content [(property-name prop-name)
+               {:tag :ogc:Literal :content value}]}))
 
 (defn property-is-like [prop-name value & [declare-xml-namespaces?]]
   (property-filter "PropertyIsLike" prop-name value
@@ -172,12 +157,11 @@
   (property-filter "PropertyIsGreaterThan" prop-name value (when declare-xml-namespaces? xml-namespaces)))
 
 (defn property-is-between [name lower-value upper-value & [declare-xml-namespaces?]]
-  (str
-    "<ogc:PropertyIsBetween" (when declare-xml-namespaces? (->xml-attributes-string xml-namespaces)) ">"
-    (property-name name)
-    "<ogc:LowerBoundary>" lower-value "</ogc:LowerBoundary>"
-    "<ogc:UpperBoundary>" upper-value "</ogc:UpperBoundary>"
-    "</ogc:PropertyIsBetween>"))
+  {:tag :ogc:PropertyIsBetween
+   :attrs (when declare-xml-namespaces? xml-namespaces)
+   :content [(property-name name)
+             {:tag :ogc:LowerBoundary :content lower-value}
+             {:tag :ogc:UpperBoundary :content upper-value}]})
 
 ;;
 ;; Helpers for result parsing:
@@ -222,7 +206,7 @@
           exterior (extract-coordinates (first (xml-> polygonpatch :gml:exterior)))
           interiors (map extract-coordinates (xml-> polygonpatch :gml:interior))]
     {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))
-     :wkt (str "POLYGON ((" exterior ")" (ss/join(map #(str ",(" % ")") interiors)) ")")
+     :wkt (str "POLYGON ((" exterior ")" (ss/join (map #(str ",(" % ")") interiors)) ")")
      })))
 
 (defn feature-to-property-id [feature]
