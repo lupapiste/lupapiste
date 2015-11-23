@@ -155,6 +155,16 @@ Mikko is unable to edit Aloituskokous (LPK-494)
   Page Should Contain Element  xpath=//section[@data-doc-type="task-katselmus"]//select
   ${selectCount} =  Get Matching Xpath Count  //section[@data-doc-type="task-katselmus"]//select
   Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//select[@disabled]  ${selectCount}
+  Click by test id  back-to-application-from-task
+
+Mikko sets started past date for YA application (LPK-1054)
+  Open application  ${appname-ya}  ${propertyId}
+  Open tab  tasks
+  Set date and check  application-inform-construction-started-btn  construction-state-change-info-started  10.8.2012
+  [Teardown]  Logout
+
+# TODO: Sonja sets ready past date for YA application (LPK-1054)
+# This would require a well-formed application with all the required fields.
 
 *** Keywords ***
 
@@ -174,3 +184,16 @@ Open task
   Wait Until  Element should be visible  xpath=//section[@id="task"]/h1/span[contains(., "${name}")]
   Wait Until  Element should be visible  taskAttachments
   Wait until  Element should be visible  taskDocgen
+
+Set date and check
+  [Arguments]  ${button}  ${span}  ${date}
+  Wait Until  Element should be visible  jquery=[data-test-id=${button}]
+  Click by test id  ${button}
+  Wait Until  Element should be visible  modal-datepicker-date
+  Input text by test id  modal-datepicker-date  ${date}
+  ## Datepickers stays open when using Selenium
+  Execute JavaScript  $("#ui-datepicker-div").hide();
+  Click enabled by test id  modal-datepicker-continue
+  Wait Until  Element should not be visible  modal-datepicker-date
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element Text Should Be  jquery=[data-test-id=${span}]  ${date}

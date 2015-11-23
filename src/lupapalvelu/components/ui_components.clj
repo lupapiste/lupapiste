@@ -147,7 +147,8 @@
                    "organization-filter-service.js"
                    "organization-tags-service.js"
                    "handler-filter-service.js"
-                   "application-filters-service.js"]}
+                   "application-filters-service.js"
+                   "document-data-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -337,7 +338,7 @@
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin-app.js" "register-authority-admin-models.js"]}
    :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer]
-                         :js [schema-versions-by-permit-type "organization-user.js" "edit-roles-dialog-model.js" "authority-admin.js"]
+                         :js [schema-versions-by-permit-type "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js" "authority-admin.js"]
                          :html ["authority-admin.html"]}
 
    :admin-app {:depends [:ui-components]
@@ -371,6 +372,9 @@
                :html ["header.html" "footer.html"
                       "bulletins.html" "bulletins-template.html"
                       "application-bulletin/application-bulletin-template.html"
+                      "application-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
+                      "application-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
+                      "application-bulletin/tabs/info/bulletin-info-tab-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
                       "application-bulletins/application-bulletins-template.html"
                       "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
@@ -383,6 +387,7 @@
                     "application-bulletins-service.js"
                     "application-bulletin/application-bulletin-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
+                    "application-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
                     "application-bulletins/application-bulletins-model.js"
                     "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
                     "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"

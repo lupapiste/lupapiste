@@ -849,8 +849,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildGroupComponent (name, subSchema, model, path) {
-    name = (name === "docgen-group" && subSchema.repeating) ? "docgen-repeating-group" : name;
     var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(_.reject(path, _.isNumber));
+
+    lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
+
     var params = {
       applicationId: self.appId,
       documentId: self.docId,
@@ -868,7 +870,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildDocgenGroup (subSchema, model, path) {
-    return buildGroupComponent("docgen-group", subSchema, model, path);
+    var name = subSchema.repeating ? "docgen-repeating-group" : "docgen-group";
+    return buildGroupComponent(name, subSchema, model, path);
   }
 
   function buildPropertyGroup (subSchema, model, path) {
@@ -877,6 +880,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildDocgenTable (subSchema, model, path) {
     return buildGroupComponent("docgen-table", subSchema, model, path);
+  }
+
+  function buildConstructionWasteReport (subSchema, model, path) {
+    return buildGroupComponent("construction-waste-report", subSchema, model, path);
   }
 
   function buildRadioGroup(subSchema, model, path) {
@@ -1136,6 +1143,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
+    lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
+    var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(_.reject(path, _.isNumber));
     var params = {
       applicationId: self.appId,
       authModel: self.authorizationModel,
@@ -1143,8 +1152,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       documentName: self.schemaName,
       hetu: undefined,
       model: model[subSchema.name] || {},
-      subSchema: subSchema,
+      schema: subSchema,
       path: path,
+      i18npath: i18npath,
       schemaI18name: self.schemaI18name,
       partOfChoice: partOfChoice,
       validationErrors: doc.validationErrors
@@ -1331,6 +1341,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     docgenGroup: buildDocgenGroup,
     docgenTable: buildDocgenTable,
     propertyGroup: buildPropertyGroup,
+    constructionWasteReport: buildConstructionWasteReport,
     string: buildString,
     hetu: buildString,
     text: buildText,
@@ -1344,7 +1355,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     newBuildingSelector: buildNewBuildingSelector,
     fillMyInfoButton: buildFillMyInfoButton,
     foremanHistory: buildForemanHistory,
-    foremanOtherApplications: buildForemanOtherApplications,
+    "hanke-table": buildForemanOtherApplications,
     personSelector: buildPersonSelector,
     companySelector: buildCompanySelector,
     table: buildTableRow,

@@ -124,6 +124,7 @@
           neighborId: self.neighborId(),
           token: self.token(),
           stamp: self.tupasUser().stamp,
+          lang: loc.getCurrentLanguage(),
           response: self.response(),
           message: self.message()
         })
