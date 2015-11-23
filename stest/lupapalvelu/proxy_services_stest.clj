@@ -88,15 +88,17 @@
   (let [response (property-info-by-wkt-proxy {:params params})]
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)
-          {:keys [x y rekisteriyksikkolaji kiinttunnus]} (first body)
+          {:keys [x y rekisteriyksikkolaji kiinttunnus kunta wkt]} (first body)
           {:keys [id selite]} rekisteriyksikkolaji]
 
       (fact "collection format"
         (count body) => 1
-        (keys (first body)) => (just #{:x :y :rekisteriyksikkolaji :kiinttunnus}))
+        (keys (first body)) => (just #{:x :y :rekisteriyksikkolaji :kiinttunnus :kunta :wkt}))
       (fact "valid x" x => coord/valid-x?)
       (fact "valid y" y => coord/valid-y?)
       (fact "kiinttunnus" kiinttunnus => "75341600380021")
+      (fact "kunta" kunta => "753")
+      (fact "wkt" wkt => #"^POLYGON")
       (fact "rekisteriyksikkolaji"
         id => "1"
         selite => {:fi "Tila", :sv "L\u00e4genhet"})))

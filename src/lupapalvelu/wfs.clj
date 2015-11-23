@@ -212,14 +212,20 @@
 (defn extract-coordinates [ring]
   (s/replace (first (xml-> ring :gml:LinearRing :gml:posList text)) #"(\d+\.*\d*)\s+(\d+\.*\d*)\s+" "$1 $2, "))
 
-(defn feature-to-area [feature]
+(defn property-borders-wkt [feature]
   (when feature
-    (let [polygonpatch (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:sijainti :gml:Surface :gml:patches :gml:PolygonPatch))
+    (let [path (if (seq (xml-> feature :ktjkiiwfs:PalstanTietoja))
+                 [:ktjkiiwfs:PalstanTietoja :ktjkiiwfs:sijainti :gml:Surface :gml:patches :gml:PolygonPatch]
+                 [:ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:rekisteriyksikonPalstanTietoja :ktjkiiwfs:RekisteriyksikonPalstanTietoja :ktjkiiwfs:sijainti :gml:Surface :gml:patches :gml:PolygonPatch])
+          polygonpatch (first (apply xml-> (cons feature path) ))
           exterior (extract-coordinates (first (xml-> polygonpatch :gml:exterior)))
           interiors (map extract-coordinates (xml-> polygonpatch :gml:interior))]
+      (str "POLYGON ((" exterior ")" (ss/join (map #(str ",(" % ")") interiors)) ")"))))
+
+(defn feature-to-area [feature]
+  (when feature
     {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))
-     :wkt (str "POLYGON ((" exterior ")" (ss/join (map #(str ",(" % ")") interiors)) ")")
-     })))
+     :wkt (property-borders-wkt feature)}))
 
 (defn feature-to-property-id [feature]
   (when feature
@@ -244,6 +250,8 @@
                              {:id id
                               :selite (rekisteriyksikkolaji id)})
      :kiinttunnus (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kiinteistotunnus text))
+     :kunta (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kuntaTieto :ktjkiiwfs:KuntaTieto :ktjkiiwfs:kuntatunnus text))
+     :wkt (property-borders-wkt feature)
      :x x
      :y y})))
 
