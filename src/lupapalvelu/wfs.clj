@@ -109,7 +109,7 @@
   ([property-names]
     (ogc-sort-by property-names "desc"))
   ([property-names order]
-    (let [sort-properties (apply str (map #(str "<ogc:SortProperty><ogc:PropertyName>" % "</ogc:PropertyName></ogc:SortProperty>") property-names))]
+    (let [sort-properties (ss/join (map #(str "<ogc:SortProperty><ogc:PropertyName>" % "</ogc:PropertyName></ogc:SortProperty>") property-names))]
       (str "<ogc:SortBy>"
            sort-properties
            "<ogc:SortOrder>" (s/upper-case order) "</ogc:SortOrder>"
@@ -119,16 +119,16 @@
   (str "<ogc:Filter>" (apply str e) "</ogc:Filter>"))
 
 (defn ogc-and [& e]
-  (str "<ogc:And>" (apply str e) "</ogc:And>"))
+  (str "<ogc:And>" (ss/join e) "</ogc:And>"))
 
 (defn ogc-or [& e]
-  (str "<ogc:Or>" (apply str e) "</ogc:Or>"))
+  (str "<ogc:Or>" (ss/join e) "</ogc:Or>"))
 
 (defn intersects [& e]
-  (str "<ogc:Intersects>" (apply str e) "</ogc:Intersects>"))
+  (str "<ogc:Intersects>" (ss/join e) "</ogc:Intersects>"))
 
 (defn within [& e]
-  (str "<ogc:DWithin>" (apply str e) "</ogc:DWithin>"))
+  (str "<ogc:DWithin>" (ss/join e) "</ogc:DWithin>"))
 
 (defn distance [distance]
   (str "<ogc:Distance units=\"m\">" distance "</ogc:Distance>"))
