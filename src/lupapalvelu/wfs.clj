@@ -116,7 +116,9 @@
            "</ogc:SortBy>"))))
 
 (defn ogc-filter [& e]
-  (str "<ogc:Filter>" (apply str e) "</ogc:Filter>"))
+  (if (map? (first e))
+    (str "<ogc:Filter" (->xml-attributes-string (first e)) ">" (ss/join (rest e)) "</ogc:Filter>")
+    (str "<ogc:Filter>" (ss/join e) "</ogc:Filter>")))
 
 (defn ogc-and [& e]
   (str "<ogc:And>" (ss/join e) "</ogc:And>"))
@@ -145,28 +147,33 @@
 (defn property-name [prop-name]
   (str "<ogc:PropertyName>" prop-name "</ogc:PropertyName>"))
 
-(defn property-filter [filter-name prop-name value]
+(defn property-filter [filter-name prop-name value & attrs]
+  (let [attributes (if (map? (first attrs) )
+                     (first attrs)
+                     (partition 2 attrs))]
   (str
-    "<ogc:" filter-name " wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">"
+      "<ogc:" filter-name  (->xml-attributes-string attributes) " >"
     (property-name prop-name)
     "<ogc:Literal>" value "</ogc:Literal>"
-    "</ogc:" filter-name ">"))
+      "</ogc:" filter-name ">")))
 
-(defn property-is-like [prop-name value]
-  (property-filter "PropertyIsLike" prop-name value))
+(defn property-is-like [prop-name value & [declare-xml-namespaces?]]
+  (property-filter "PropertyIsLike" prop-name value
+    (merge {"wildCard" "*", "singleChar" "?", "escape" "\\", "matchCase" "false"}
+      (when declare-xml-namespaces? xml-namespaces))))
 
-(defn property-is-equal [prop-name value]
-  (property-filter "PropertyIsEqualTo" prop-name value))
+(defn property-is-equal [prop-name value & [declare-xml-namespaces?]]
+  (property-filter "PropertyIsEqualTo" prop-name value (when declare-xml-namespaces? xml-namespaces)))
 
-(defn property-is-less [prop-name value]
-  (property-filter "PropertyIsLessThan" prop-name value))
+(defn property-is-less [prop-name value & [declare-xml-namespaces?]]
+  (property-filter "PropertyIsLessThan" prop-name value (when declare-xml-namespaces? xml-namespaces)))
 
-(defn property-is-greater [prop-name value]
-  (property-filter "PropertyIsGreaterThan" prop-name value))
+(defn property-is-greater [prop-name value & [declare-xml-namespaces?]]
+  (property-filter "PropertyIsGreaterThan" prop-name value (when declare-xml-namespaces? xml-namespaces)))
 
-(defn property-is-between [name lower-value upper-value]
+(defn property-is-between [name lower-value upper-value & [declare-xml-namespaces?]]
   (str
-    "<ogc:PropertyIsBetween wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">"
+    "<ogc:PropertyIsBetween" (when declare-xml-namespaces? (->xml-attributes-string xml-namespaces)) ">"
     (property-name name)
     "<ogc:LowerBoundary>" lower-value "</ogc:LowerBoundary>"
     "<ogc:UpperBoundary>" upper-value "</ogc:UpperBoundary>"
@@ -215,7 +222,7 @@
           exterior (extract-coordinates (first (xml-> polygonpatch :gml:exterior)))
           interiors (map extract-coordinates (xml-> polygonpatch :gml:interior))]
     {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))
-     :wkt (str "POLYGON ((" exterior ")" (apply str(map #(str ",(" % ")") interiors)) ")")
+     :wkt (str "POLYGON ((" exterior ")" (ss/join(map #(str ",(" % ")") interiors)) ")")
      })))
 
 (defn feature-to-property-id [feature]
