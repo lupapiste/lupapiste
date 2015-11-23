@@ -83,20 +83,21 @@
     (.append (escape-xml (name (val map-entry))))
     (.append \")))
 
+(defn- append-element [e, ^java.lang.StringBuilder b]
+  (cond
+    (string? e)    (.append b (escape-xml e))
+    (map? e)       (do
+                     (-> b (.append  \<) (.append (name (:tag e))))
+                     (doseq [attr (:attrs e)] (append-attribute b attr) )
+                     (if-not (:content e)
+                       (.append b "/>")
+                       (do
+                         (.append b ">")
+                         (doseq [c (:content e)] (append-element c b))
+                         (-> b (.append "</") (.append (name (:tag e))) (.append ">")))))
+    (not (nil? e)) (.append b e)))
+
 (defn element-to-string [e]
-  (let [emit (fn emit [e, ^java.lang.StringBuilder b]
-               (cond
-                 (coll? e)      (do
-                                  (-> b (.append  \<) (.append (name (:tag e))))
-                                  (doseq [attr (:attrs e)] (append-attribute b attr) )
-                                  (if-not (:content e)
-                                    (.append b "/>")
-                                    (do
-                                      (.append b ">")
-                                      (doseq [c (:content e)] (emit c b))
-                                      (-> b (.append "</") (.append (name (:tag e))) (.append ">")))))
-                 (string? e)    (.append b e) ; TODO escape-xml when done refactoring
-                 (not (nil? e)) (.append b e)))
-        ^java.lang.StringBuilder builder (java.lang.StringBuilder.)]
-    (emit e builder)
+  (let [^java.lang.StringBuilder builder (java.lang.StringBuilder.)]
+    (append-element e builder)
     (.toString builder)))
