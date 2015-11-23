@@ -92,7 +92,7 @@
             (.append b " ")
             (.append b (name (key attr)))
             (.append b "=\"")
-            (.append b (name (val attr)))
+            (.append b (escape-xml (name (val attr))))
             (.append b "\"")))
         (if (:content e)
           (do
