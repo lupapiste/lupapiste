@@ -83,23 +83,20 @@
     (.append (escape-xml (name (val map-entry))))
     (.append \")))
 
-(defn element-to-string
-  ([e]
-    (let [emit-element (fn [e, ^java.lang.StringBuilder b]
-                         (cond
-                           (coll? e)      (do
-                                            (-> b (.append  \<) (.append (name (:tag e))))
-                                            (doseq [attr (:attrs e)] (append-attribute b attr) )
-                                            (if-not (:content e)
-                                              (.append b "/>")
-                                              (do
-                                                (.append b ">")
-                                                (doseq [c (:content e)] (emit-element c b))
-                                                (-> b (.append "</") (.append (name (:tag e))) (.append ">")))
-                                              ))
-                           (string? e)    (.append b e) ; TODO escape-xml when done refactoring
-                           (not (nil? e)) (.append b e)))
-          ^java.lang.StringBuilder builder (java.lang.StringBuilder.)]
-      (emit-element e builder)
-      (.toString builder)))
-  )
+(defn element-to-string [e]
+  (let [emit (fn emit [e, ^java.lang.StringBuilder b]
+               (cond
+                 (coll? e)      (do
+                                  (-> b (.append  \<) (.append (name (:tag e))))
+                                  (doseq [attr (:attrs e)] (append-attribute b attr) )
+                                  (if-not (:content e)
+                                    (.append b "/>")
+                                    (do
+                                      (.append b ">")
+                                      (doseq [c (:content e)] (emit c b))
+                                      (-> b (.append "</") (.append (name (:tag e))) (.append ">")))))
+                 (string? e)    (.append b e) ; TODO escape-xml when done refactoring
+                 (not (nil? e)) (.append b e)))
+        ^java.lang.StringBuilder builder (java.lang.StringBuilder.)]
+    (emit e builder)
+    (.toString builder)))
