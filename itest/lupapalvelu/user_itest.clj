@@ -52,7 +52,7 @@
        (user/login-failed "foo") => nil
        (user/throttle-login? "foo") => true)
      (fact "Lock expires after timeout"
-       (Thread/sleep 1001)
+       (Thread/sleep 1111) ;; Should be >> value of throttle expires
        (user/throttle-login? "foo") => false))))
 
 (facts clear-login-trottle
