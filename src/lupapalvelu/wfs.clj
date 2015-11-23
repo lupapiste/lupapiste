@@ -107,6 +107,8 @@
 
 (defn ogc-filter [& e] {:tag :ogc:Filter :content e})
 
+(defn ogc-bbox [& e] {:tag :ogc:BBOX :content e})
+
 (defn ogc-and [& e] {:tag :ogc:And :content e})
 
 (defn ogc-or [& e] {:tag :ogc:Or :content e})
@@ -114,6 +116,16 @@
 (defn intersects [& e] {:tag :ogc:Intersects :content e})
 
 (defn within [& e] {:tag :ogc:DWithin :content e})
+
+(defn box [srs coords]
+  {:tag :gml:Box
+   :attrs {:srsName srs}
+   :content (ss/join " " coords)})
+
+(defn envelope [srs lower-pair upper-pair]
+  {:tag :gml:Envelope :attrs {:srsName srs}
+   :content [{:tag :gml:lowerCorner :content (ss/join " " lower-pair)}
+             {:tag :gml:upperCorner :content (ss/join " " upper-pair)}]})
 
 (defn distance [distance] {:tag :ogc:Distance :attrs {:units "m"} :content [distance]})
 
@@ -278,7 +290,8 @@
                    (errorf "wfs status %s: url=%s, response body=%s" data url error-text))
                  nil)
       :failure (do (errorf data "wfs failure: url=%s" url) nil)
-      :ok      (let [features (if (= url nearestfeature)
+      :ok      (let [;_ (println data)
+                     features (if (= url nearestfeature)
                                 (parse-features-as-latin1 data)
                                 (->features data sxml/startparse-sax-no-doctype))]
                  (xml-> features :gml:featureMember)))))
@@ -315,44 +328,43 @@
                              :BUFFER "500"}))
 
 (defn address-by-point-from-municipality [x y]
+  (let [url ;"http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"
+        "http://kartta.salo.fi/teklaogcweb/WFS.ashx"
+        filter (sxml/element-to-string
+                 (assoc
+                   (ogc-filter
+                     #_(property-is-equal "yht:osoitenimi/yht:teksti" "Helsingintie")
+                     (ogc-bbox
+                      (property-name "yht:pistesijainti/gml:Point/gml:pos")
+                      (envelope "EPSG:3067" [(- (util/->double x) 50) (- (util/->double y) 50)] [(+ (util/->double x) 50) (+ (util/->double y) 50)])
+                      )
 
-  #_(wfs/ogc-filter
-          (wfs/ogc-and
-            (wfs/property-is-like "oso:katunimi" (str street "*"))
-            (wfs/property-is-less "oso:jarjestysnumero" "10")))
+                     #_(intersects
+                        (update (point x y) :attrs assoc :srsName "http://www.opengis.net/gml/srs/epsg.xml#3067")
+                        (distance 10))
+                   #_(intersects
+                      (property-name "yht:pistesijainti/gml:Point/gml:pos")
+                      (point x y)
+                      #_(update (point x y) :attrs assoc :srsName "http://www.opengis.net/gml/srs/epsg.xml#3067"))
 
-  #_(post "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"
-    (query {"typeName" "mkos:Osoite" "srsName" "EPSG:3067" "featureVersion" "1.1.0"}
-      ;(property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
-      (property-is-like "yht:osoitenimi/yht:teksti" "Tulppaanipolku")
-      ;(property-name "ktjkiiwfs:tunnuspisteSijainti")
-      #_(ogc-filter
-         (intersects
-           (property-name "mkos:Osoite/yht:pistesijainti")
-           (point x y)))))
+                     )
+                   :attrs (dissoc xml-namespaces "xmlns:ktjkiiwfs" "xmlns:oso")))
+        ]
 
-  (exec :get "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"
-   {:NAMESPACE "xmlns(mkos=http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet)"
-    :TYPENAME "mkos:Osoite"
+    ;(println filter)
+
+    (exec :get url
+    {
     :REQUEST "GetFeature"
     :SERVICE "WFS"
     :VERSION "1.1.0"
-    ;:COORDS (str x "," y ",EPSG:3877")
-    :FILTER (sxml/element-to-string
-              (assoc
-                (within
-                  (property-name "yht:pistesijainti")
-                  (point x y)
-                  (distance 10))
-                #_(intersects
-                   (property-name "yht:pistesijainti")
-                   (point x y))
-                :attrs xml-namespaces)
-
-              )
+     :TYPENAME "mkos:Osoite"
     :SRSNAME "EPSG:3067"
-    :MAXFEATURES "1"
-    :BUFFER "500"}))
+     :FILTER filter
+     :MAXFEATURES "10"
+    })
+    nil
+    ))
 
 (defn property-id-by-point [x y]
   (post ktjkii
