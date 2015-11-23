@@ -67,12 +67,12 @@
                 <select class="form-input combobox"
                         name="architect.degree"
                         data-test-id="architect-degree-select"
-                        title="loc('userinfo.architect.degree.choose.help')"
                         data-bind="options: availableDegrees,
                                    value: degree,
                                    optionsValue: 'id',
                                    optionsText: 'name',
-                                   optionsCaption: loc('userinfo.architect.degree.choose')"></select>
+                                   optionsCaption: loc('userinfo.architect.degree.choose'),
+                                   attr: {'title': loc('userinfo.architect.degree.choose.help')}"></select>
               </div>
 
               <div class="form-entry">
@@ -90,7 +90,6 @@
                 <select class="form-input combobox"
                         name="architect.fiseKelpoisuus"
                         data-test-id="architect-fiseKelpoisuus-select"
-                        title="loc('userinfo.architect.fiseKelpoisuus.choose.help')"
                         data-bind="options: availableFiseKelpoisuusValues,
                                    value: fiseKelpoisuus,
                                    optionsValue: 'id',
