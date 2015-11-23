@@ -43,6 +43,10 @@ LUPAPISTE.DocumentDataService = function() {
     return doc && getIn(doc, path);
   }
 
+  self.getInModel = function(model, path) {
+    return getIn(model, path);
+  }
+
   self.removeDocument = function(id) {
     return self.model.remove(self.findDocumentById(id));
   }

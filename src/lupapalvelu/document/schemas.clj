@@ -522,7 +522,7 @@
                                                                                                                                                 :otherwise :disabled}}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
-                                  :type :foremanOtherApplications
+                                  :type :group
                                   :uicomponent :hanke-table
                                   :repeating true
                                   :approvable true

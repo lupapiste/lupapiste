@@ -1143,6 +1143,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
+    lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
+    var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(_.reject(path, _.isNumber));
     var params = {
       applicationId: self.appId,
       authModel: self.authorizationModel,
@@ -1150,8 +1152,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       documentName: self.schemaName,
       hetu: undefined,
       model: model[subSchema.name] || {},
-      subSchema: subSchema,
+      schema: subSchema,
       path: path,
+      i18npath: i18npath,
       schemaI18name: self.schemaI18name,
       partOfChoice: partOfChoice,
       validationErrors: doc.validationErrors
@@ -1352,7 +1355,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     newBuildingSelector: buildNewBuildingSelector,
     fillMyInfoButton: buildFillMyInfoButton,
     foremanHistory: buildForemanHistory,
-    foremanOtherApplications: buildForemanOtherApplications,
+    "hanke-table": buildForemanOtherApplications,
     personSelector: buildPersonSelector,
     companySelector: buildCompanySelector,
     table: buildTableRow,

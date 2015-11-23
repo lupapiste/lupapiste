@@ -1,0 +1,3 @@
+osapuoli.muutHankkeet._append_label: Lisää rivi
+osapuoli.muutHankkeet._copy_label: Kopioi viimeinen rivi
+document.delete.group.subGroup.message: Haluatko varmasti poistaa tiedot?
