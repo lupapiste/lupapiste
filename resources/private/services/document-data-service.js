@@ -22,20 +22,17 @@ LUPAPISTE.DocumentDataService = function() {
   }
 
   self.addDocument = function(doc, options) {
-    if (self.findDocumentById(doc.id)) {
-      return -1;
-    } else {
-      return self.model.push( _.extend({
-          id: doc.id,
-          path: [],
-          name: doc.schema.info.name,
-          schema: doc.schema,
-          isDisabled: options && options.disabled
-        },
-        resolveCommandNames(doc, options),
-        createDataModel(_.extend({type: "document"}, doc.schema.info, doc.schema), doc.data, [])
-      ));
-    }
+    self.model.remove(self.findDocumentById(doc.id));
+    return self.model.push( _.extend({
+        id: doc.id,
+        path: [],
+        name: doc.schema.info.name,
+        schema: doc.schema,
+        isDisabled: options && options.disabled
+      },
+      resolveCommandNames(doc, options),
+      createDataModel(_.extend({type: "document"}, doc.schema.info, doc.schema), doc.data, [])
+    ));
   }
 
   self.getInDocument = function(documentId, path) {
