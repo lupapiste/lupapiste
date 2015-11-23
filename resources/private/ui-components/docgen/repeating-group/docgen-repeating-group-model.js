@@ -9,8 +9,8 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.path = _.isArray(params.path) ? params.path : [params.path];
   self.i18npath = params.i18npath;
   self.groupId = ["repeating-group", params.documentId].concat(self.path).join("-");
-  self.appendLabel = params.i18npath.concat("_append_label").join(".");
-  self.copyLabel = params.i18npath.concat("_copy_label").join(".");
+  self.appendLabel = self.i18npath.concat("_append_label").join(".");
+  self.copyLabel = self.i18npath.concat("_copy_label").join(".");
 
   self.groups = self.service.getInDocument(params.documentId, self.path).model;
 

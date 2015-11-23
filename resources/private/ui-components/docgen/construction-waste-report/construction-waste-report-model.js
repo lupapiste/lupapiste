@@ -20,7 +20,7 @@ LUPAPISTE.ConstructionWasteReportModel = function(params) {
   self.groupHelp = params.schema["group-help"] && params.i18npath.concat(params.schema["group-help"]).join(".");
 
   self.buildSubSchemas = function(groupSchema) {
-    var schemaMapper = _(groupSchema.body).map('name').zipObject(groupSchema.body).value();
+    var schemaMapper = _(groupSchema.body).map("name").zipObject(groupSchema.body).value();
     return _.map(plannedWasteData.schema.body, function(schema) {
       var uicomponent = "docgen-" + schema.type;
       var path = params.path.concat([groupSchema.name, schema.name]);
