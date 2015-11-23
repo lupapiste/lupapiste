@@ -69,3 +69,37 @@
 
 (defn select1-attribute-value [xml selector attribute-name]
   (-> (first (enlive/select xml selector)) :attrs attribute-name))
+
+
+;;
+;; Emit
+;;
+
+(defn element-to-string
+  ([e]
+    (let [^java.lang.StringBuilder b (java.lang.StringBuilder.)]
+      (element-to-string e b)
+      (.toString b)))
+  ([e ^java.lang.StringBuilder b]
+    (if (string? e)
+      (.append b e)
+      (do
+        (.append b "<")
+        (.append b (name (:tag e)))
+
+        (when (:attrs e)
+          (doseq [attr (:attrs e)]
+            (.append b " ")
+            (.append b (name (key attr)))
+            (.append b "=\"")
+            (.append b (name (val attr)))
+            (.append b "\"")))
+        (if (:content e)
+          (do
+            (.append b ">")
+            (doseq [c (:content e)]
+              (element-to-string c b))
+            (.append b "</")
+            (.append b (name (:tag e)))
+            (.append b ">"))
+          (.append b "/>"))))))

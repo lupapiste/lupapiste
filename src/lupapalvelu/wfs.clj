@@ -76,18 +76,33 @@
 ;; DSL to WFS queries:
 ;;
 
+(def xml-namespaces
+  {"xmlns:oso" "http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02"
+   "xmlns:mkos" "http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+   "xmlns:yht" "http://www.paikkatietopalvelu.fi/gml/yhteiset"
+   "xmlns:ktjkiiwfs" "http://xml.nls.fi/ktjkiiwfs/2010/02"
+   "xmlns:wfs" "http://www.opengis.net/wfs"
+   "xmlns:gml" "http://www.opengis.net/gml"
+   "xmlns:ogc" "http://www.opengis.net/ogc"
+   "xmlns:xsi" "http://www.w3.org/2001/XMLSchema-instance"})
+
+(defn- ->xml-attributes-string [attrs]
+  (ss/join (map (fn [[k v]] (format " %s=\"%s\"" (name k) (name v))) attrs)))
+
 (defn query [attrs & e]
-  (str
-    "<wfs:GetFeature version=\"1.1.0\"
-            xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
-            xmlns:ktjkiiwfs=\"http://xml.nls.fi/ktjkiiwfs/2010/02\"
-            xmlns:wfs=\"http://www.opengis.net/wfs\"
-            xmlns:gml=\"http://www.opengis.net/gml\"
-            xmlns:ogc=\"http://www.opengis.net/ogc\"
-            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-            xsi:schemaLocation=\"http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
-      <wfs:Query" (apply str (map (fn [[k v]] (format " %s=\"%s\"" k v)) attrs)) ">"
-    (apply str e)
+  (sxml/element-to-string
+   {:tag :wfs:GetFeature
+    :attrs (merge {:version "1.1.0"}
+             xml-namespaces
+             {:xsi:schemaLocation "http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"})
+    :content [{:tag :wfs:Query
+               :attrs attrs
+               :content (if (string? e) [e] e)}]})
+  #_(str
+    "<wfs:GetFeature version=\"1.1.0\"" (->xml-attributes-string xml-namespaces)
+    "  xsi:schemaLocation=\"http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
+      <wfs:Query" (->xml-attributes-string attrs) ">"
+    (ss/join e)
     "</wfs:Query></wfs:GetFeature>"))
 
 (defn ogc-sort-by
