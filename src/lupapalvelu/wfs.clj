@@ -322,6 +322,9 @@
 (defn address-by-point [x y]
   (exec :get nearestfeature {:NAMESPACE "xmlns(oso=http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02)"
                              :TYPENAME "oso:Osoitepiste"
+                             :REQUEST "GetFeature"
+                             :SERVICE "WFS"
+                             :VERSION "1.1.0"
                              :COORDS (str x "," y ",EPSG:3067")
                              :SRSNAME "EPSG:3067"
                              :MAXFEATURES "1"
