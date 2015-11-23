@@ -580,7 +580,6 @@
   (doseq [attachment (:attachments application)]
     (upload-attachment apikey (:id application) attachment true)))
 
-
 (defn generate-documents [application apikey & [local?]]
   (doseq [document (:documents application)]
     (let [data    (tools/create-document-data (model/get-document-schema document) (partial tools/dummy-values (id-for-key apikey)))
@@ -591,7 +590,8 @@
           updates (filter (fn [[path value]]
                             (try
                               (let [splitted-path (ss/split path #"\.")]
-                                (doc-persistence/validate-against-whitelist! document [[splitted-path value]] user-role))
+                                (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
+                                (doc-persistence/validate-readonly-updates! document [splitted-path]))
                               true
                               (catch Exception _
                                 false)))
