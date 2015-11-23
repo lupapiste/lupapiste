@@ -56,14 +56,14 @@
 
 (defn point-by-property-id-proxy [request]
   (let [property-id (get (:params request) :property-id)
-        features (wfs/point-by-property-id property-id)]
+        features (wfs/location-info-by-property-id property-id)]
     (if features
       (resp/json {:data (map wfs/feature-to-position features)})
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn area-by-property-id-proxy [{{property-id :property-id} :params :as request}]
   (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id) )
-    (let [features (wfs/area-by-property-id property-id)]
+    (let [features (wfs/location-info-by-property-id property-id)]
       (if features
         (resp/json {:data (map wfs/feature-to-area features)})
         (resp/status 503 "Service temporarily unavailable")))

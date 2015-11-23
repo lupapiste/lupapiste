@@ -355,11 +355,11 @@
 
     (exec :get url
     {
-    :REQUEST "GetFeature"
-    :SERVICE "WFS"
-    :VERSION "1.1.0"
+     :REQUEST "GetFeature"
+     :SERVICE "WFS"
+     :VERSION "1.1.0"
      :TYPENAME "mkos:Osoite"
-    :SRSNAME "EPSG:3067"
+     :SRSNAME "EPSG:3067"
      :FILTER filter
      :MAXFEATURES "10"
     })
@@ -376,18 +376,11 @@
           (property-name "ktjkiiwfs:sijainti")
           (point x y))))))
 
-(defn point-by-property-id [property-id]
+(defn location-info-by-property-id [property-id]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
       (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (property-name "ktjkiiwfs:tunnuspisteSijainti")
-      (ogc-filter
-        (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
-
-(defn area-by-property-id [property-id]
-  (post ktjkii
-    (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
-      (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (property-name "ktjkiiwfs:sijainti")
       (ogc-filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
