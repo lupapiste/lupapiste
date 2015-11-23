@@ -4546,7 +4546,7 @@ input.form-input.inline {
 }
 /* line 547, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-input.combobox, .docgen-content select {
-  width: 10em;
+  min-width: 10em;
 }
 /* line 551, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator {
