@@ -634,7 +634,7 @@
                                   (assoc rakennusjatemaara :name "painoT")
                                   {:name "jatteenToimituspaikka" :type :string :max-len 50}])
 
-(def rakennusjateselvitysRow [(assoc rakennusjatemaara :name "suunniteltuMaara" :readonly true)
+(def rakennusjateselvitysRow [(assoc rakennusjatemaara :name "suunniteltuMaara" :readonly true :required false)
                               (assoc rakennusjatemaara :name "toteutunutMaara")
                               (assoc jateyksikko :readonly true)
                               (assoc rakennusjatemaara :name "painoT")

@@ -39,8 +39,10 @@ LUPAPISTE.ConstructionWasteReportModel = function(params) {
   }
 
   self.columnHeaders = _.map(plannedWasteData.schema.body, function(schema) {
-    return params.i18npath.concat(schema.name);
+    return {
+      name: params.i18npath.concat(schema.name),
+      required: !!schema.required
+    };
   });
-
-  self.columnHeaders.push("remove");
+  self.columnHeaders.push({name: "remove", required: false});
 };

@@ -13,7 +13,12 @@
 
         <table>
           <thead>
-            <tr data-bind="foreach: columnHeaders"><td><span data-bind="ltext: $data"></span></td></tr>
+            <tr data-bind="foreach: columnHeaders">
+              <td>
+                <span data-bind="ltext: name"></span>
+                <span data-bind="visible: required">*</span>
+              </td>
+            </tr>
           </thead>
           <tbody data-bind="foreach: groups">
             <tr data-bind="attr: { id: $component.groupId + '-row-' + index }">
