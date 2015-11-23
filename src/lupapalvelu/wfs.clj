@@ -274,6 +274,9 @@
     (catch Exception e
       [:failure e])))
 
+(defn parse-features-as-latin1 [s]
+  (-> s (s/replace-first "UTF-8" "ISO-8859-1") (->features sxml/startparse-sax-no-doctype "ISO-8859-1")))
+
 (defn- exec [method url q]
   (let [[http-fn param-key] (method http-method)
         timeout (env/value :http-client :conn-timeout)
@@ -291,9 +294,9 @@
                    (errorf "wfs status %s: url=%s, response body=%s" data url error-text))
                  nil)
       :failure (do (errorf data "wfs failure: url=%s" url) nil)
-      :ok      (let [features (-> data
-                                (s/replace "UTF-8" "ISO-8859-1")
-                                (->features sxml/startparse-sax-no-doctype "ISO-8859-1"))]
+      :ok      (let [features (if (= url nearestfeature)
+                                (parse-features-as-latin1 data)
+                                (->features data sxml/startparse-sax-no-doctype))]
                  (xml-> features :gml:featureMember)))))
 
 (defn post [url q]
@@ -323,6 +326,37 @@
                              :SRSNAME "EPSG:3067"
                              :MAXFEATURES "1"
                              :BUFFER "500"}))
+
+(defn address-by-point-from-municipality [x y]
+
+  #_(wfs/ogc-filter
+          (wfs/ogc-and
+            (wfs/property-is-like "oso:katunimi" (str street "*"))
+            (wfs/property-is-less "oso:jarjestysnumero" "10")))
+
+  #_(post "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"
+    (query {"typeName" "mkos:Osoite" "srsName" "EPSG:3067" "featureVersion" "1.1.0"}
+      ;(property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (property-is-like "yht:osoitenimi/yht:teksti" "Tulppaanipolku")
+      ;(property-name "ktjkiiwfs:tunnuspisteSijainti")
+      #_(ogc-filter
+         (intersects
+           (property-name "mkos:Osoite/yht:pistesijainti")
+           (point x y)))))
+
+
+
+  (exec :get "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"
+   {:NAMESPACE "xmlns(mkos=http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet)"
+    :TYPENAME "mkos:Osoite"
+    :REQUEST "GetFeature"
+    :SERVICE "WFS"
+    :VERSION "1.1.0"
+    ;:COORDS (str x "," y ",EPSG:3877")
+    :FILTER (property-is-equal "yht:osoitenimi/yht:teksti" "Linnankatu")
+    :SRSNAME "EPSG:3067"
+    :MAXFEATURES "1"
+    :BUFFER "500"}))
 
 (defn property-id-by-point [x y]
   (post ktjkii
