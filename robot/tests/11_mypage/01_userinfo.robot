@@ -43,10 +43,7 @@ Name and experience should have changed in Swedish page too
   Wait until  List Selection Should Be  architect-degree-select  Arkitekt
   Textfield Value Should Be  architect.graduatingYear  2001
   Textfield Value Should Be  architect.fise  fise
-  ##
-  ## TODO: Muuta tulos ruotsiksi, kun saadaan kaannokset, ja paivita tahan liittyvat (kommenteissa olevat) testit alla
-  ##
-#  Wait until  List Selection Should Be  architect-fiseKelpoisuus-select  tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen) - RUOTSIKSI
+  Wait until  List Selection Should Be  architect-fiseKelpoisuus-select  sedvanlig huvudplanering (nybyggnad)
 
 Mika changes the name and experience back
   [Tags]  firefox
@@ -56,7 +53,7 @@ Mika changes the name and experience back
   Change Textfield Value  architect.graduatingYear  2001  2000
   Textfield Value Should Be  architect.graduatingYear  2000
   Change Textfield Value  architect.fise  fise  f
-#  Select From List  architect-fiseKelpoisuus-select  vaativa rakennussuunnittelu (uudisrakentaminen) - RUOTSIKSI
+  Select From List  architect-fiseKelpoisuus-select  krävande byggnadsplanering (nybyggnad)
   Save User Data
   Positive indicator should be visible
 
@@ -69,7 +66,7 @@ Name and experience should have changed in Finnish page too
   Wait until  List Selection Should Be  architect-degree-select  Kirvesmies
   Wait until  Textfield Value Should Be  architect.graduatingYear  2000
   Textfield Value Should Be  architect.fise  f
-#  Wait until  List Selection Should Be  architect-fiseKelpoisuus-select  vaativa rakennussuunnittelu (uudisrakentaminen)
+  Wait until  List Selection Should Be  architect-fiseKelpoisuus-select  vaativa rakennussuunnittelu (uudisrakentaminen)
 
 *** Keywords ***
 
