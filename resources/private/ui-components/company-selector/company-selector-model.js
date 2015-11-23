@@ -7,8 +7,12 @@ LUPAPISTE.CompanySelectorModel = function(params) {
   self.result = ko.observable();
   self.authorization = params.authModel;
 
+  self.service = lupapisteApp.services.documentDataService;
+
   self.companies = ko.observableArray(params.companies);
   self.selected = ko.observable(_.isEmpty(params.selected) ? undefined : params.selected);
+
+  self.path = (_.isArray(params.path) ? params.path : params.path.split(".")).concat(params.schema.name);
 
   self.setOptionDisable = function(option, item) {
     if (!item) {
@@ -30,15 +34,10 @@ LUPAPISTE.CompanySelectorModel = function(params) {
         repository.load(params.id);
       }
 
-      uiComponents.save("update-doc",
-                         params.documentId,
-                         params.id,
-                         params.schema.name,
-                         params.path.split(".").concat([params.schema.name]),
-                         id,
-                         self.indicator,
-                         self.result,
-                         cb);
+      self.service.updateDoc(params.documentId,
+                             [[self.path, id]],
+                             self.indicator,
+                             cb);
     })
     .call();
   });
