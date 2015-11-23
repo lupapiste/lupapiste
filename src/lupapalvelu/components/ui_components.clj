@@ -61,6 +61,9 @@
 (defn- schema-versions-by-permit-type []
   (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
 
+(defn main-css-count []
+  (count (util/get-files-by-regex "resources/private/common-html/css" #"main.*css")))
+
 (defn- main-style-file [css-file-path scss-file-path]
   (if-let [main-css-file (io/resource (c/path css-file-path))]
     (slurp main-css-file)
