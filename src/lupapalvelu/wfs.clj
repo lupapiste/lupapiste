@@ -13,8 +13,7 @@
             [sade.util :refer [future*] :as util]
             [sade.core :refer :all]
             [sade.common-reader :as reader]
-            [lupapalvelu.logging :as logging]
-            [lupapalvelu.organization :as org]))
+            [lupapalvelu.logging :as logging]))
 
 
 ;; SAX options
@@ -484,14 +483,17 @@
 
 (defn query-get-capabilities
   ([url]
-    (query-get-capabilities url nil nil true))
-  ([url username password throw-exceptions?]
+   (query-get-capabilities url nil nil true))
+  ([url params]
+    (query-get-capabilities url nil nil true params))
+  ([url username password throw-exceptions? & [params]]
     {:pre [(not (ss/blank? url))]}
-    (let [credentials (when-not (ss/blank? username) {:basic-auth [username password]})
+   (let [credentials (when-not (ss/blank? username) {:basic-auth [username password]})
+         params      (merge {:request "GetCapabilities", :service "WFS", :version "1.1.0"} params)
          options     (merge {:socket-timeout 30000, :conn-timeout 30000 ; 30 secs should be enough for GetCapabilities
-                             :query-params {:request "GetCapabilities", :service "WFS", :version "1.1.0"}
+                             :query-params params
                              :throw-exceptions  throw-exceptions?}
-                       credentials)]
+                            credentials)]
      (http/get url options))))
 
 (defn get-capabilities-xml
@@ -516,10 +518,10 @@
       (catch Exception e
         (warn (str "Could not connect to WFS: " url ", exception was " e))))))
 
-(defn get-our-capabilities []
+(defn get-our-capabilities [& [params]]
   (let [host (env/value :geoserver :host) ; local IP from Chef environment
         path (env/value :geoserver :wms :path)]
-    (:body (query-get-capabilities (str host path)))))
+    (:body (query-get-capabilities (str host path) params))))
 
 (def get-rekisteriyksikontietojaFeatureAddress
   (memoize
@@ -539,10 +541,10 @@
 ;;
 ;; Raster images:
 ;;
-(defn raster-images [request service]
+(defn raster-images [request service & [query-organization-map-server]]
   (let [params  (:params request)
         accept-encoding (:headers request)
-        layer   (or (:LAYERS params) (:layer params))
+        layer   (or (:LAYER params) (:LAYERS params) (:layer params))
         headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}]
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
@@ -552,9 +554,9 @@
                        :as :stream})
       ;; Municipality map layers are prefixed. For example: Lupapiste-753-R:wms-layer-name
       "wms" (if-let [[_ org-id layer] (re-matches #"(?i)Lupapiste-([\d]+-[\w]+):(.+)" layer)]
-              (org/query-organization-map-server (ss/upper-case org-id)
-                                                 (merge params {:layer layer :LAYERS layer})
-                                                 headers)
+              (query-organization-map-server (ss/upper-case org-id)
+                                             (merge params {:layer layer :LAYERS layer})
+                                             headers)
               (http/get wms-url
                         {:query-params params
                          :headers headers
