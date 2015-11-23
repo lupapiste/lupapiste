@@ -13,7 +13,7 @@
             [lupapalvelu.logging :as logging]
             [lupapalvelu.verdict-api :as verdict-api]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.xml.krysp.reader]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
             [lupapalvelu.action :refer :all]
             [sade.util :as util]

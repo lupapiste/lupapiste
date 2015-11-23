@@ -374,12 +374,6 @@
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (polygon p))))))
 
-(defn getcapabilities [request]
-  (let [host (env/value :geoserver :host) ; local IP from Chef environment
-        path (env/value :geoserver :wms :path)]
-    (assert (and host path))
-    (:body (http/get (str host path) {:query-params {"version" "1.1.1", "request" "GetCapabilities"}}))))
-
 (defn capabilities-to-layers [capabilities]
   (when capabilities
     (xml-> (->features (s/trim capabilities) startparse-sax-non-validating "UTF-8") :Capability :Layer :Layer)))
@@ -488,12 +482,50 @@
      :linkki (first (xml-> feature :lupapiste:linkki text))
      :type "yleiskaava"}))
 
-(defn get-rekisteriyksikontietojaFeatureAddress []
-  (let [url-for-get-ktj-capabilities (str ktjkii "?service=WFS&request=GetCapabilities&version=1.1.0")
-        namespace-stripped-xml (reader/strip-xml-namespaces (reader/get-xml url-for-get-ktj-capabilities (get auth ktjkii) false))
-        selector [:WFS_Capabilities :OperationsMetadata [:Operation (enlive/attr= :name "DescribeFeatureType")] :DCP :HTTP [:Get]]
-        attribute-to-get :xlink:href]
-    (sxml/select1-attribute-value namespace-stripped-xml selector attribute-to-get)))
+(defn query-get-capabilities
+  ([url]
+    (query-get-capabilities url nil nil true))
+  ([url username password throw-exceptions?]
+    {:pre [(not (ss/blank? url))]}
+    (let [credentials (when-not (ss/blank? username) {:basic-auth [username password]})
+         options     (merge {:socket-timeout 30000, :conn-timeout 30000 ; 30 secs should be enough for GetCapabilities
+                             :query-params {:request "GetCapabilities", :service "WFS", :version "1.1.0"}
+                             :throw-exceptions  throw-exceptions?}
+                       credentials)]
+     (http/get url options))))
+
+(defn get-capabilities-xml
+  "Returns capabilities XML without namespaces"
+  [base-url username password]
+  (let [capabilities-resp  (query-get-capabilities base-url username password true)
+        xml-s (:body capabilities-resp)]
+    (-> xml-s sxml/parse reader/strip-xml-namespaces)))
+
+(defn feature-types [xml-no-ns]
+  (sxml/select xml-no-ns [:FeatureType]))
+
+(defn wfs-is-alive?
+  "checks if the given system is Web Feature Service -enabled. kindof."
+  [url username password]
+  (when-not (s/blank? url)
+    (try
+      (let [resp (query-get-capabilities url username password false)]
+        (or
+          (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
+          (warn "Response not OK or did not contain XML. Response was: " resp)))
+      (catch Exception e
+        (warn (str "Could not connect to WFS: " url ", exception was " e))))))
+
+(defn get-our-capabilities []
+  (let [host (env/value :geoserver :host) ; local IP from Chef environment
+        path (env/value :geoserver :wms :path)]
+    (:body (query-get-capabilities (str host path)))))
+
+(def get-rekisteriyksikontietojaFeatureAddress
+  (memoize
+    #(let [namespace-stripped-xml (get-capabilities-xml  ktjkii (get-in auth [ktjkii 0]) (get-in auth [ktjkii 1]))
+           selector [:WFS_Capabilities :OperationsMetadata [:Operation (enlive/attr= :name "DescribeFeatureType")] :DCP :HTTP [:Get]]]
+       (sxml/select1-attribute-value namespace-stripped-xml selector :xlink:href))))
 
 (defn rekisteritiedot-xml [rekisteriyksikon-tunnus]
   (if (env/feature? :disable-ktj-on-create)

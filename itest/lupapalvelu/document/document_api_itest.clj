@@ -16,13 +16,15 @@
         resp             (command pena :update-doc :id application-id :doc hakija-doc-id  :collection "documents" :updates [["henkilo.henkilotiedot.etunimi" "foo"]["henkilo.henkilotiedot.sukunimi" "bar"]]) => ok?
         modified1        (:modified (query-application pena application-id))
         rakennus-doc-id  (:id (domain/get-document-by-name application0 "rakennuspaikka")) => truthy
-        resp             (command pena :update-doc :id application-id :doc rakennus-doc-id  :collection "documents" :updates [["kiinteisto.maaraalaTunnus" "maaraalaTunnus"]["kiinteisto.tilanNimi" "tilanNimi"]]) => ok?
+        resp             (command pena :update-doc :id application-id :doc rakennus-doc-id  :collection "documents" :updates [["kiinteisto.maaraalaTunnus" "maaraalaTunnus"]]) => ok?
         application2     (query-application pena application-id)
         modified2        (:modified application2)
         hakija-doc       (domain/get-document-by-id application2 hakija-doc-id)
         rakennus-doc     (domain/get-document-by-id application2 rakennus-doc-id)
         failing-updates  [["rakennuksenOmistajat.henkilo.henkilotiedot.etunimi" "P0wnr"]]
-        failing-result   (command pena :update-doc :id application-id :doc rakennus-doc-id :updates failing-updates)]
+        failing-result   (command pena :update-doc :id application-id :doc rakennus-doc-id :updates failing-updates)
+        readonly-updates [["kiinteisto.tilanNimi" "tilannimi"]]
+        readonly-result  (command pena :update-doc :id application-id :doc rakennus-doc-id :updates readonly-updates)]
 
     (fact "hakija is valid, but missing some fieds"
       (let [resp (query pena :validate-doc :id application-id :doc hakija-doc-id :collection "documents") => ok?
@@ -46,11 +48,11 @@
       (get-in hakija-doc   [:data :henkilo :henkilotiedot :sukunimi :modified]) => modified1)
     (fact "rakennus-doc"
       (get-in rakennus-doc [:data :kiinteisto :maaraalaTunnus :value]) => "maaraalaTunnus"
-      (get-in rakennus-doc [:data :kiinteisto :maaraalaTunnus :modified]) => modified2
-      (get-in rakennus-doc [:data :kiinteisto :tilanNimi :value]) => "tilanNimi"
-      (get-in rakennus-doc [:data :kiinteisto :tilanNimi :modified]) => modified2)
+      (get-in rakennus-doc [:data :kiinteisto :maaraalaTunnus :modified]) => modified2)
     (fact (:ok failing-result) => false)
-    (fact (:text failing-result) => "document-would-be-in-error-after-update")))
+    (fact (:text failing-result) => "document-would-be-in-error-after-update")
+    (fact (:ok readonly-result) => false)
+    (fact (:text readonly-result) => "error-trying-to-update-readonly-field")))
 
 
 (facts "facts about create-doc command"

@@ -1,4 +1,5 @@
 (ns lupapalvelu.xml.krysp.reader
+  "Read the Krysp from municipality Web Feature Service"
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error]]
             [clojure.string :as s]
             [clojure.set :refer [rename-keys]]
@@ -19,24 +20,6 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.verdict :as verdict]))
-
-;;
-;; Read the Krysp from municipality Web Feature Service
-;;
-
-(defn wfs-is-alive?
-  "checks if the given system is Web Feature Service -enabled. kindof."
-  [url username password]
-  (when-not (s/blank? url)
-    (try
-      (let [credentials (when-not (s/blank? username) {:basic-auth [username password]})
-            options     (merge {:query-params {:request "GetCapabilities"} :throw-exceptions false} credentials)
-            resp        (http/get url options)]
-       (or
-         (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
-         (warn "Response not OK or did not contain XML. Response was: " resp)))
-     (catch Exception e
-       (warn (str "Could not connect to WFS: " url ", exception was " e))))))
 
 ;; Object types (URL encoded)
 (def building-type    "typeName=rakval%3AValmisRakennus")

@@ -15,9 +15,9 @@
         <div data-bind="foreach: subSchemas">
           <span class="form-entry"
                 data-bind="component: { name: uicomponent,
-                                        params: { schema: $data,
+                                        params: { schema: schema,
                                                   path: path,
-                                                  model: model,
+                                                  i18npath: i18npath,
                                                   applicationId: applicationId,
                                                   documentId: documentId }}">
           </span>

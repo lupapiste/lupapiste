@@ -18,6 +18,14 @@
 
 (def approve-doc-states (states/all-application-states-but (conj states/terminal-states :draft :sent :verdictGiven :constructionStarted)))
 
+(defn validate-is-construction-time-doc
+  [{{doc-id :doc} :data} {state :state documents :documents}]
+  (when doc-id
+    (when-not (some-> (domain/get-document-by-id documents doc-id)
+                      (model/get-document-schema)
+                      (get-in [:info :construction-time]))
+      (fail :error.document-not-construction-time-doc))))
+
 ;;
 ;; CRUD
 ;;
@@ -30,7 +38,7 @@
    :pre-checks [create-doc-validator
                 application/validate-authority-in-drafts]}
   [{{schema-name :schemaName} :data :as command}]
-  (let [document (doc-persistence/do-create-doc command schema-name updates)]
+  (let [document (doc-persistence/do-create-doc! command schema-name updates)]
     (when fetchRakennuspaikka
       (let [
             property-id (or
@@ -60,6 +68,14 @@
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
+(defcommand update-construction-time-doc
+  {:parameters [id doc updates]
+   :user-roles #{:applicant :authority}
+   :states     states/post-verdict-states
+   :pre-checks [application/validate-authority-in-drafts validate-is-construction-time-doc]}
+  [command]
+  (doc-persistence/update! command doc updates "documents"))
+
 (defcommand update-task
   {:parameters [id doc updates]
    :user-roles #{:applicant :authority}
@@ -74,15 +90,17 @@
    :states           #{:draft :answered :open :submitted :complementNeeded}
    :input-validators [doc-persistence/validate-collection]
    :pre-checks       [application/validate-authority-in-drafts]}
-  [{:keys [created application] :as command}]
-  (let [document  (doc-persistence/by-id application collection doc)
-        str-path  (ss/join "." path)
-        data-path (str collection ".$.data." str-path)
-        meta-path (str collection ".$.meta." str-path)]
-    (when-not document (fail! :error.document-not-found))
-    (update-application command
-      {:documents {$elemMatch {:id (:id document)}}}
-      {$unset {data-path "" meta-path ""}})))
+  [command]
+  (doc-persistence/remove-document-data command doc [path] collection))
+
+(defcommand remove-construction-time-document-data
+  {:parameters       [id doc path collection]
+   :user-roles       #{:applicant :authority}
+   :states           states/post-verdict-states
+   :input-validators [doc-persistence/validate-collection]
+   :pre-checks       [application/validate-authority-in-drafts validate-is-construction-time-doc]}
+  [command]
+  (doc-persistence/remove-document-data command doc [path] collection))
 
 ;;
 ;; Document validation
@@ -123,11 +141,27 @@
   [command]
   (ok :approval (approve command "approved")))
 
+(defcommand approve-construction-time-doc
+  {:parameters [:id :doc :path :collection]
+   :user-roles #{:authority}
+   :states     states/post-verdict-states
+   :pre-checks [validate-is-construction-time-doc]}
+  [command]
+  (ok :approval (approve command "approved")))
+
 (defcommand reject-doc
   {:parameters [:id :doc :path :collection]
    :input-validators [doc-persistence/validate-collection]
    :user-roles #{:authority}
    :states     approve-doc-states}
+  [command]
+  (ok :approval (approve command "rejected")))
+
+(defcommand reject-construction-time-doc
+  {:parameters [:id :doc :path :collection]
+   :user-roles #{:authority}
+   :states     states/post-verdict-states
+   :pre-checks [validate-is-construction-time-doc]}
   [command]
   (ok :approval (approve command "rejected")))
 
@@ -162,24 +196,3 @@
   (if-let [document (domain/get-document-by-id application documentId)]
     (doc-persistence/do-set-company-to-document application document companyId path (user/get-user-by-id (:id user)) created)
     (fail :error.document-not-found)))
-
-
-;;
-;; Repeating
-;;
-
-(defcommand copy-row
-  {:parameters [id doc path source-index target-index]
-   :user-roles #{:applicant :authority}
-   :states     update-doc-states
-   :pre-checks [application/validate-authority-in-drafts]}
-  [{application :application :as command}]
-  (let [document (-> application
-                     (domain/get-document-by-id doc)
-                     (get-in (cons :data (map keyword path))))
-        updates (->> (get document ((comp keyword str) source-index))
-                     (map (fn [[key {value :value}]] 
-                            [(->> key (name) (conj path (str target-index)))
-                             value]))
-                     (filter second))]
-    (doc-persistence/update! command doc updates "documents")))

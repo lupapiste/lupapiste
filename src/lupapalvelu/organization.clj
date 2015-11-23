@@ -4,16 +4,17 @@
             [clojure.walk :as walk]
             [monger.operators :refer :all]
             [cheshire.core :as json]
-            [sade.core :refer [fail]]
+            [sade.core :refer [fail fail!]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.crypt :as crypt]
             [sade.http :as http]
-            [sade.xml :as xml]
+            [sade.xml :as sxml]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.wfs :as wfs]))
 
 (def scope-skeleton
   {:permitType nil
@@ -55,7 +56,7 @@
   {:pre [(not (s/blank? id))]}
   (->> (mongo/by-id :organizations id)
        remove-sensitive-data
-       with-scope-defaults)) 
+       with-scope-defaults))
 
 (defn update-organization [id changes]
   {:pre [(not (s/blank? id))]}
@@ -99,13 +100,24 @@
       {:username username :password crypted-password :crypto-iv crypto-iv})))
 
 (defn set-krysp-endpoint
-  [id url username password permitType version]
-  (->> (encode-credentials username password)
-       (merge {:url url :version version})
-       (map (fn [[k v]] [(str "krysp." permitType "." (name k)) v]))
-       (into {})
-       (hash-map $set)
-       (update-organization id)))
+  [id url username password endpoint-type version]
+  {:pre [(mongo/valid-key? endpoint-type)]}
+  (let [url (ss/trim url)
+        updates (->> (encode-credentials username password)
+                  (merge {:url url :version version})
+                  (map (fn [[k v]] [(str "krysp." endpoint-type "." (name k)) v]))
+                  (into {})
+                  (hash-map $set))]
+    (if (and (not (ss/blank? url)) (= "osoitteet" endpoint-type))
+      (let [capabilities-xml (wfs/get-capabilities-xml url username password)
+            osoite-feature-type (some->> (wfs/feature-types capabilities-xml)
+                                         (map (comp :FeatureType sxml/xml->edn))
+                                         (filter #(re-matches #"[a-z]*:?Osoite$" (:Name %))) first)
+            address-updates (assoc-in updates [$set (str "krysp." endpoint-type "." "defaultSRS")] (:DefaultSRS osoite-feature-type))]
+        (if-not osoite-feature-type
+          (fail! :error.no-address-feature-type)
+          (update-organization id address-updates)))
+      (update-organization id updates))))
 
 (defn get-organization-name [organization]
   (let [default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]

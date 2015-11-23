@@ -147,7 +147,8 @@
                    "organization-filter-service.js"
                    "organization-tags-service.js"
                    "handler-filter-service.js"
-                   "application-filters-service.js"]}
+                   "application-filters-service.js"
+                   "document-data-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -337,7 +338,8 @@
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin-app.js" "register-authority-admin-models.js"]}
    :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer]
-                         :js [schema-versions-by-permit-type "organization-user.js" "edit-roles-dialog-model.js" "municipality-maps-service.js" "authority-admin.js"]
+                         :js [schema-versions-by-permit-type "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
+                              "municipality-maps-service.js" "authority-admin.js"]
                          :html ["authority-admin.html"]}
 
    :admin-app {:depends [:ui-components]
