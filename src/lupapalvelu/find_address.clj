@@ -40,7 +40,7 @@
   (map (fn [f] {:location (wfs/feature-to-position f)
                 :property-id (:kiinttunnus (wfs/feature-to-property-id f))
                 :kind :property-id})
-       (wfs/point-by-property-id property-id)))
+       (wfs/location-info-by-property-id property-id)))
 
 (def max-entries 25)
 
