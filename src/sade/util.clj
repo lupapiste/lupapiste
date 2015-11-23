@@ -152,6 +152,12 @@
       (checker coll)
       (= coll checker))))
 
+(defn ->keyword [x]
+  ((if (number? x)
+     (comp keyword str)
+     keyword)
+   x))
+
 (defn ->int
   "Reads a integer from input. Returns default if not an integer.
    Default default is 0"
