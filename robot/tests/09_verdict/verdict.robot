@@ -102,10 +102,10 @@ Correct tab opening elements are visible
 
 Accordions in the Application Summary tab are closed
   Open tab  applicationSummary
-  Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[contains(@class, 'accordion')]//div[@data-accordion-state='closed']  6
+  Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[contains(@class, 'accordion')]//div[@data-accordion-state='closed']  7
   Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[contains(@class, 'accordion')]//div[@data-accordion-state='open']  0
   Click by test id  accordion-application-summary-statements-header
-  Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[contains(@class, 'accordion')]//div[@data-accordion-state='closed']  5
+  Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[contains(@class, 'accordion')]//div[@data-accordion-state='closed']  6
   Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[contains(@class, 'accordion')]//div[@data-accordion-state='open']  1
   Element should be visible  //div[@id='application-applicationSummary-tab']//section[@id='accordion-application-summary-statements']//div[@class='accordion_content']
 

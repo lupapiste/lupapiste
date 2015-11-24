@@ -148,6 +148,7 @@
                    "organization-tags-service.js"
                    "handler-filter-service.js"
                    "application-filters-service.js"
+                   "document-data-service.js"]}
                    "fileupload-service.js"]}
 
    :global-models {:depends [:services]
@@ -338,7 +339,7 @@
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin-app.js" "register-authority-admin-models.js"]}
    :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer]
-                         :js [schema-versions-by-permit-type "organization-user.js" "edit-roles-dialog-model.js" "authority-admin.js"]
+                         :js [schema-versions-by-permit-type "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js" "authority-admin.js"]
                          :html ["authority-admin.html"]}
 
    :admin-app {:depends [:ui-components]

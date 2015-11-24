@@ -94,7 +94,6 @@ Teppo can edit Mikko's application
 Mikko comes back and can see Teppos modification
   Mikko logs in
   Open application  ${appname}  ${propertyId}
-  Click by test id  maaraala-checkbox
   Wait Until  Textfield Value Should Be  xpath=//input[contains(@data-test-id,'kiinteisto.maaraalaTunnus')]  1024
 
 Mikko can see that Teppo has accepted invitation

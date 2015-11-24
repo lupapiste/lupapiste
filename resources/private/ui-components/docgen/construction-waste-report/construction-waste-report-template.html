@@ -2,7 +2,7 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/x-jquery-tmpl" id="docgen-table-template">
+    <script type="text/x-jquery-tmpl" id="construction-waste-report-template">
       <div class="form-table" data-bind="attr: {id: groupId}">
 
         <label class="form-label form-label-table" data-bind="ltext: groupLabel"></label>
@@ -20,10 +20,10 @@
               </th>
             </tr>
           </thead>
-          <tbody data-bind="foreach: groups">
+          <tbody data-bind="foreach: combinedGroups">
             <tr data-bind="attr: { id: $component.groupId + '-row-' + index }">
-              <!-- ko foreach: $component.subSchemas -->
-              <td>
+              <!-- ko foreach: $component.buildSubSchemas(schema) -->
+              <td data-bind="if: renderElement">
                 <span class="form-entry"
                   data-bind="component: { name: uicomponent,
                                           params: { schema: $data,
@@ -36,8 +36,8 @@
               <!-- /ko -->
 
               <td class="action-column">
-                <i class="lupicon-remove primary" data-bind="click: $component.removeGroup,
-                                                             visible: $component.groupsRemovable($data.schema)"></i>
+                <i class="lupicon-remove primary" data-bind="click: $parent.removeGroup,
+                                                             visible: $component.groupsRemovable(schema)"></i>
               </td>
 
             </tr>

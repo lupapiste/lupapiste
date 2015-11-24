@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Tero Pietila (IT-Pie Oy) -->
+<!-- KRYSP projekti-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:mkos="http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet" xmlns:gml="http://www.opengis.net/gml" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" targetNamespace="http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.1.1">
+	<xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
+	<xs:import namespace="http://www.paikkatietopalvelu.fi/gml/yhteiset" schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd"/>
+	<!--Local usage-->
+	<!--<xs:import namespace="http://www.opengis.net/gml" schemaLocation="..\..\yhteiset\gml_dummy.xsd"/>
+	<xs:import namespace="http://www.paikkatietopalvelu.fi/gml/yhteiset" schemaLocation="..\..\yhteiset\yhteiset.xsd"/>-->
+	<!--	<xs:include schemaLocation="gml_dummy.xsd"/>-->
+	<!-- ================================================= -->
+	<!-- Package: <<XSDschema>> Osoitteet -->
+	<!-- ================================================= -->
+	<!-- Kohdejoukko: Osoitteet-->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Class: <<FeatureType>> Osoitteet-->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="Osoitteet" type="mkos:OsoitteetType" substitutionGroup="gml:_Feature">
+		<xs:annotation>
+			<xs:documentation>Skeeman juurielementti	</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="OsoitteetType">
+		<xs:annotation>
+			<xs:documentation>Opaskartta elementin sisällön määrittely</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="gml:AbstractFeatureType">
+				<xs:sequence>
+					<xs:element name="toimituksenTiedot" type="yht:AineistotoimituksentiedotType">
+						<xs:annotation>
+							<xs:documentation>Siirron tiedot</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="osoitetieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element ref="mkos:Osoite">
+									<xs:annotation>
+										<xs:documentation>Osoitetieto. Kunnan osoiterekisterin tiedot</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="osoitteenliittymatieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element ref="mkos:OsoitteenLiittyma"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="kayntiosoitetieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element ref="mkos:KayntiOsoite"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="kuvaus" type="xs:string" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="AjoOsoiteType">
+		<xs:complexContent>
+			<xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+				<xs:sequence>
+					<xs:choice>
+						<xs:annotation>
+							<xs:documentation>Osoitteeseen voidaan joko viiitata tai tuomalla koko osoitetietoelementti</xs:documentation>
+						</xs:annotation>
+						<xs:element name="osoiteID" type="xs:string">
+							<xs:annotation>
+								<xs:documentation>Viittaus osoitteen Yksilointiteto:on</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="osoitetieto">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="Osoite" type="yht:OsoiteType">
+										<xs:annotation>
+											<xs:documentation>Osoitekohde</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:choice>
+					<xs:element name="sijainti" type="gml:PointPropertyType">
+						<xs:annotation>
+							<xs:documentation>Liittymäpisteen sijainti väylällä</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="KayntiOsoiteType">
+		<xs:complexContent>
+			<xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+				<xs:sequence>
+					<xs:choice minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Osoite, jonka käyntiosoitetta kuvataan.Osoitteeseen voidaan joko viiitata tai tuomalla koko osoitetietoelementti</xs:documentation>
+						</xs:annotation>
+						<xs:element name="virallinenosoiteID" type="xs:string">
+							<xs:annotation>
+								<xs:documentation>Viittaus osoitteen Yksilointiteto:on</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="virallinenosoite" type="yht:OsoiteType">
+							<xs:annotation>
+								<xs:documentation>Osoitekohde</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:choice>
+					<xs:choice>
+						<xs:annotation>
+							<xs:documentation>Käyntiosoite</xs:documentation>
+						</xs:annotation>
+						<xs:element name="kayntiosoiteID" type="xs:string">
+							<xs:annotation>
+								<xs:documentation>Viittaus osoitteen Yksilointiteto:on</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="kayntiosoite" type="yht:OsoiteType">
+							<xs:annotation>
+								<xs:documentation>Osoitekohde</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:choice>
+					<xs:element name="sijainti" type="gml:PointPropertyType" minOccurs="0" maxOccurs="unbounded">
+						<xs:annotation>
+							<xs:documentation>Käyntiosoiteen sijainti. Esim. Oven sijainti</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="Osoite" type="yht:OsoiteType" substitutionGroup="gml:_Feature">
+		<xs:annotation>
+			<xs:documentation>Osoitetieto. Kunnan osoiterekisterin tiedot ?</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="OsoitteenLiittyma" type="mkos:AjoOsoiteType" substitutionGroup="gml:_Feature">
+		<xs:annotation>
+			<xs:documentation>Kyseisen osoitteen liiittymäpiste väylältä</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="KayntiOsoite" type="mkos:KayntiOsoiteType" substitutionGroup="gml:_Feature">
+		<xs:annotation>
+			<xs:documentation>Osoitteen käyntiosoitetieto</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+</xs:schema>
