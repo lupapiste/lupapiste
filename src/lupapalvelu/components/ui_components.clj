@@ -18,7 +18,6 @@
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
-            [scss-compiler.core :as scss]
             [me.raynes.fs :as fs]))
 
 (def debugjs {:depends [:jquery]
@@ -63,14 +62,10 @@
 (defn- schema-versions-by-permit-type []
   (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
 
-(defn- main-style-file [css-file-path scss-file-path]
-  (if-let [main-css-file (io/resource (c/path css-file-path))]
-    (slurp main-css-file)
-    (scss/scss->css (.getPath (-> scss-file-path c/path io/resource)))))
 
-(defn- read-component-list-from-fs [component pattern]
-  (let [path (str "resources/private/" (name component))
-        files (fs/find-files path (re-pattern pattern))
+
+(defn- read-component-list-from-fs [path pattern]
+  (let [files (fs/find-files path (re-pattern pattern))
         mapped-files (map #(-<>> % .getPath (s/replace <> env/file-separator "/")  (re-matches (re-pattern (str "^.*/" path "/(.*)"))) last) files)]
     mapped-files))
 
@@ -78,9 +73,8 @@
   [jar]
   (re-find (re-pattern ".jar$") jar))
 
-(defn- read-component-list-from-jar [jar component pattern]
-  (let [path (str "private/" (name component))
-        files (util/list-jar jar path)
+(defn- read-component-list-from-jar [jar path pattern]
+  (let [files (util/list-jar jar path)
         filtered-files (filter #(re-find (re-pattern pattern) %) files)]
     filtered-files))
 
@@ -90,8 +84,15 @@
                   :models ".*-model.js$"
                   :templates ".*-template.html$")]
     (if (in-jar? jar)
-      (read-component-list-from-jar jar component pattern)
-      (read-component-list-from-fs component pattern))))
+      (read-component-list-from-jar jar (str "private/" (name component)) pattern)
+      (read-component-list-from-fs (str "resources/private/" (name component)) pattern))))
+
+(defn main-css-count []
+  (let [jar (util/this-jar lupapalvelu.main)
+        file-list (if (in-jar? jar)
+                    (read-component-list-from-jar jar "public/lp-static/css" "main.*css$")
+                    (read-component-list-from-fs "resources/public/lp-static/css" "main.*css$"))]
+    (count file-list)))
 
 (def ui-components
   {;; 3rd party libs
@@ -136,7 +137,7 @@
                        "statuses.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
-                  :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
+                  :css ["jquery-ui.css"]
                   :html ["404.html"]}
 
    ;; Components to be included in a SPA

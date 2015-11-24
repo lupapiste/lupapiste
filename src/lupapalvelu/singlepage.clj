@@ -1,7 +1,7 @@
 (ns lupapalvelu.singlepage
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [clojure.java.io :as io]
-            [lupapalvelu.components.ui-components :refer [ui-components]]
+            [lupapalvelu.components.ui-components :refer [ui-components] :as uic]
             [net.cgrand.enlive-html :as enlive]
             [clj-time.coerce :as tc]
             [sade.env :as env]
@@ -81,18 +81,35 @@
           (tc/to-date (tc/from-long (:time env/buildinfo)))
           (:build-number env/buildinfo)))
 
-(defn inject-content [t {:keys [nav info page footer templates]} component]
-  (enlive/emit* (-> t
-                  (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
-                  (enlive/transform [:nav] (enlive/content (map :content nav)))
-                  (enlive/transform [:div.notification] (enlive/content (map :content info)))
-                  (enlive/transform [:section] (enlive/content page))
-                  (enlive/transform [:footer] (enlive/content (map :content footer)))
-                  (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (resource-url :common :js)) e)))
-                  (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-app") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
-                  (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
-                  (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary))
-                  (enlive/transform [:div.ko-templates] (enlive/content templates)))))
+(defn ie-main-css-fallback [template c]
+  {:pre [(> c 1)]}
+  (let [main-css-suffices (drop 2 (range (+ c 1)))
+        link-str (apply str (map
+                              #(str "<link href=\"/lp-static/css/main_" % ".css?" (:build-number env/buildinfo) "\" rel=\"stylesheet\"></link>\n")
+                              main-css-suffices))
+        fallback-str (format "<!--[if lte IE 9]>%s<![endif]-->" link-str)
+        fallback-elements (enlive/html-snippet fallback-str)]
+    (enlive/at
+      template
+      [:head :link#inject-ie-css]
+      (enlive/substitute fallback-elements))))
+
+(defn inject-content [t {:keys [nav info page footer]} component]
+  (let [main-css-count (uic/main-css-count)
+        transformed (-> t
+                        (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
+                        (enlive/transform [:nav] (enlive/content (map :content nav)))
+                        (enlive/transform [:div.notification] (enlive/content (map :content info)))
+                        (enlive/transform [:section] (enlive/content page))
+                        (enlive/transform [:footer] (enlive/content (map :content footer)))
+                        (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (resource-url :common :js)) e)))
+                        (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-app") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
+                        (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
+                        (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary))
+                        (enlive/transform [:link#main-css] (fn [e] (update-in e [:attrs :href] #(str % "?" (:build-number env/buildinfo))))))]
+    (if (> main-css-count 1)
+      (enlive/emit* (ie-main-css-fallback transformed main-css-count))
+      (enlive/emit* transformed))))
 
 (defn- compress-html [^String html]
   (let [c (doto (HtmlCompressor.)
