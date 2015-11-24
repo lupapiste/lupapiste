@@ -17,7 +17,6 @@
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
-            [scss-compiler.core :as scss]
             [me.raynes.fs :as fs]))
 
 (def debugjs {:depends [:jquery]
