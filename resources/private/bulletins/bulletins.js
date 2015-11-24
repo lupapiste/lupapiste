@@ -5,6 +5,11 @@
                                            allowAnonymous: true,
                                            showUserMenu: false,
                                            componentPages: ["bulletin"]});
+
+  window.lupapisteApp.services.documentDataService = new LUPAPISTE.DocumentDataService({
+    readOnly: true
+  });
+
   $(function() {
     lupapisteApp.domReady();
     lupapisteApp.setTitle("Julkipano");
