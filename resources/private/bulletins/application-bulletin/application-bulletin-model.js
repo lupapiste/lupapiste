@@ -8,6 +8,8 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
       .center(404168, 6693765, 14);
 
   self.bulletin = bulletinService.bulletin;
+  self.userInfo = params.userInfo;
+  self.fileuploadService = params.fileuploadService;
 
   self.bulletinId = params.bulletinId;
   self.versionId  = ko.observable();
@@ -19,6 +21,9 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     self.selectedTab(params.pagePath()[1]);
   });
 
+  self.authenticated = params.authenticated;
+  self.auth = params.auth;
+  self.auth.refreshWithoutAppId({bulletinId: self.bulletinId()});
   self.tabComponentParams = ko.pureComputed(function() {
     return {bulletin: self.bulletin,
             attachments: self.bulletin() ? self.bulletin().attachments : []};
@@ -45,9 +50,24 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     id.dispose();
   };
 
+  self.clickAuthenticationButton = function() {
+    $("#vetuma-init")[0].click();
+  };
   self.openTab = function(tab) {
     pageutil.openPage("bulletin", [self.bulletinId(), tab]);
   };
 
+  self.scrollToCommenting = function() {
+    $("#bulletin-comment")[0].scrollIntoView(true);
+  };
+
   hub.send("bulletinService::fetchBulletin", {id: self.bulletinId()});
+
+  var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + self.bulletinId();
+  self.vetumaParams = {success: returnUrl,
+                       cancel:  returnUrl + "/cancel",
+                       error:   returnUrl + "/error",
+                       y:       returnUrl,
+                       vtj:     returnUrl,
+                       id:      "vetuma-init"};
 };

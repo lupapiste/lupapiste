@@ -6,7 +6,7 @@ Variables  ../21_stamping/variables.py
 Create bulletins
   [Arguments]  ${count}
   As Sonja
-  Create bulletins the fast way  11
+  Create bulletins the fast way  ${count}
 
 Bulletin list should have no rows
   Element should not be visible  //table[@id="application-bulletins-list"]/tbody/tr
