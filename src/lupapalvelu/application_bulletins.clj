@@ -25,6 +25,7 @@
    :versions.address 1 :versions.location 1
    :versions.primaryOperation 1 :versions.propertyId 1
    :versions.applicant 1 :versions.modified 1
+   :versions.proclamationEndsAt 1
    :modified 1})
 
 (def bulletin-fields
@@ -63,22 +64,13 @@
   {$push {:versions snapshot}
    $set  (merge {:modified ts} search-fields)})
 
-(defn create-comment [comment created]
+(defn create-comment [comment contact-info created]
   (let [id          (mongo/create-id)
-        new-comment {:id          id
-                     :comment     comment
-                     :created     created}]
+        new-comment {:id           id
+                     :comment      comment
+                     :created      created
+                     :contact-info contact-info}]
     new-comment))
-
-(defn store-files [bulletin-id comment-id files]
-  (let [store-file-fn (fn [file] (let [file-id (mongo/create-id)
-                                       sanitized-filename (mime/sanitize-filename (:filename file))]
-                                   (mongo/upload file-id sanitized-filename (:content-type file) (:tempfile file) :bulletinId bulletin-id :commentId comment-id)
-                                   {:id file-id
-                                    :filename sanitized-filename
-                                    :size (:size file)
-                                    :contentType (:content-type file)}))]
-    (map store-file-fn files)))
 
 (defn get-bulletin
   ([bulletinId]
