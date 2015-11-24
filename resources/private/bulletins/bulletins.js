@@ -6,6 +6,7 @@
                                            showUserMenu: false,
                                            componentPages: ["bulletin"]});
 
+  window.lupapisteApp.models.applicationAuthModel = authorization.create();
   window.lupapisteApp.services.documentDataService = new LUPAPISTE.DocumentDataService({
     readOnly: true
   });
@@ -39,7 +40,7 @@
     $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService(),
                                     vetumaService: new LUPAPISTE.VetumaService(),
                                     fileuploadService: new LUPAPISTE.FileuploadService(),
-                                    auth: authorization.create()});
+                                    auth: window.lupapisteApp.models.applicationAuthModel});
 
     var errorType = _.includes(["error", "cancel"], pageutil.lastSubPage()) ?
       pageutil.lastSubPage() :
