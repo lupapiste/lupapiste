@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation   Admin edits authority admin users
+Documentation   User browses bulletins from Julkipano.fi bulletin list
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
@@ -25,7 +25,7 @@ Bulletins should be searchable
   Go to bulletins page
 
   Search bulletins by text  Mixintie 15
-  Bulletin list should have rows and text  1  Mixintie 15
+  Wait Until  Bulletin list should have rows and text  1  Mixintie 15
 
 Velho adds some bulletins
   As Velho
@@ -44,8 +44,8 @@ Bulletins should be filterable by municipality
 
 Bulletins should be filterable by state
   Reload Page
-  Autocomplete option list should contain by test id  states-filter-component  Kaikki ilmoitustilat  Kuulutettu
+  Autocomplete option list should contain by test id  states-filter-component  Kaikki ilmoitustilat  Kuulutettavana
 
-  Select From Autocomplete By Test Id  states-filter-component  Kuulutettu
+  Select From Autocomplete By Test Id  states-filter-component  Kuulutettavana
   Wait Until  Bulletin list should have rows  10
   Bulletin button should have bulletins left to fetch  3

@@ -9,6 +9,8 @@
 
     <!-- Cloak content until css is loaded -->
     <style type="text/css">.page{display:none}</style>
+    <link id="main-css" href="/lp-static/css/main.css" rel="stylesheet"></link>
+    <link id="inject-ie-css"></link>
     <link href="inject" rel="stylesheet"></link>
 
     <link rel="icon" href="/img/favicon-v2.png" type="image/png"/>
@@ -24,8 +26,8 @@
     <meta name="msapplication-config" content="none"/>
 
     <!--[if lt IE 9]>
-    <script src="/lib/html5shiv.js"></script>
-    <link href="/css/IE8-v1.0.css" rel="stylesheet"></link>
+    <script src="/lp-static/lib/html5shiv.js"></script>
+    <link href="/lp-static/css/IE8-v1.0.css" rel="stylesheet"></link>
     <![endif]-->
 
     <title>Lupapiste</title>
@@ -51,8 +53,9 @@
 
     <section></section>
     <footer></footer>
+    <div class="ko-templates"></div>
 
-    <!--[if lt IE 9]><script src="/lib/borderless-iframes.js"></script><![endif]-->
+    <!--[if lt IE 9]><script src="/lp-static/lib/borderless-iframes.js"></script><![endif]-->
     <script type="text/x-jquery-tmpl" id="error-template">
       <span class="error-message" data-bind="validationMessage: field"></span>
     </script>

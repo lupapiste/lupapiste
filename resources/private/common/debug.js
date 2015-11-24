@@ -101,7 +101,9 @@ jQuery(function($) {
                                   .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("YA/katulupa").
                                           click(function() { createApplication("ya-katulupa-vesi-ja-viemarityot", "YA"); }))
                                   .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("KT/kiinteistonmuodostus")
-                                          .click(function() { createApplication("kiinteistonmuodostus", "R"); })))
+                                          .click(function() { createApplication("kiinteistonmuodostus", "R"); }))
+                                  .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("VVVL/Vapautus viemäristä")
+                                          .click(function() { createApplication("vvvl-viemarista", "VVVL"); })))
                           .append($("<p>").text("Create and publish in julkipano.fi:")
                                   .append($("<span>").attr("id", "debug-create-and-publish-done").css("font-weight", "bold").hide())
                                   .append($("<a>").attr("id", "debug-create-application-and-publish-bulletin").attr("href", "#").text("R/asuinkerrostalo")

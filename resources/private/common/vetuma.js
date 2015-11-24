@@ -11,8 +11,13 @@ var vetuma = (function() {
     ajax.get("/api/vetuma/user").raw(true).success(wrapHandlers(onFound, onNotFound)).error(onError).call();
   }
 
+  function logoutUser(onSuccess) {
+    ajax.deleteReq("/api/vetuma/user").raw(true).success(onSuccess).call();
+  }
+
   return {
-    getUser: getUser
+    getUser: getUser,
+    logoutUser: logoutUser
   };
 
 })();

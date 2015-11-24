@@ -1,10 +1,11 @@
-LUPAPISTE.DocumentDataService = function() {
+LUPAPISTE.DocumentDataService = function(params) {
   "use strict";
 
   var self = this;
+  params = params || {};
+  
   self.model = ko.observableArray();
-  self.applicationId = lupapisteApp.models.application.id;
-  self.propertyId = lupapisteApp.models.application.propertyId;
+  self.applicationId = params.readOnly ? ko.observable() : lupapisteApp.models.application.id;
 
   // Document
 
@@ -12,13 +13,13 @@ LUPAPISTE.DocumentDataService = function() {
     return _.find(self.model(), function(doc) {
       return doc.id === id;
     });    
-  }
+  };
 
   function resolveCommandNames(doc, options) {
     var docDefaults = doc.schema.info["construction-time"] ?
       {updateCommand: "update-construction-time-doc", removeCommand: "remove-construction-time-document-data"} :
-      {updateCommand: "update-doc",                   removeCommand: "remove-document-data"}
-    return _.extend(docDefaults, _.pick(options, 'updateCommand', 'removeCommand'));
+      {updateCommand: "update-doc",                   removeCommand: "remove-document-data"};
+    return _.extend(docDefaults, _.pick(options, "updateCommand", "removeCommand"));
   }
 
   self.addDocument = function(doc, options) {
@@ -33,26 +34,26 @@ LUPAPISTE.DocumentDataService = function() {
       resolveCommandNames(doc, options),
       createDataModel(_.extend({type: "document"}, doc.schema.info, doc.schema), doc.data, [])
     ));
-  }
+  };
 
   self.getInDocument = function(documentId, path) {
     var doc = self.findDocumentById(documentId);
     return doc && getIn(doc, path);
-  }
+  };
 
   self.getValueIn = function(model, path) {
     var data = getIn(model, path);
     return data && data.model();
-  }
+  };
 
   self.removeDocument = function(id) {
     return self.model.remove(self.findDocumentById(id));
-  }
+  };
 
   self.addRepeatingGroup = function(documentId, path) {
     var repeatingModel = self.getInDocument(documentId, path);
     return pushToRepeating(repeatingModel, {});
-  }
+  };
 
   self.copyRepeatingGroup = function(documentId, path, index, indicator) {
     var repeatingModel = self.getInDocument(documentId, path);
@@ -62,17 +63,17 @@ LUPAPISTE.DocumentDataService = function() {
     self.updateDoc(documentId, 
                    updates,
                    indicator);
-  }
+  };
 
   self.getRemoveCommand = function(documentId) {
     var doc = self.findDocumentById(documentId);
     return doc && doc.removeCommand || "remove-document-data";
-  }
+  };
 
   self.getUpdateCommand = function(documentId) {
     var doc = self.findDocumentById(documentId);
     return doc && doc.updateCommand || "update-doc";
-  }
+  };
 
   self.removeRepeatingGroup = function(documentId, path, index, indicator) {
     var repeatingModel = self.getInDocument(documentId, path);
@@ -86,7 +87,7 @@ LUPAPISTE.DocumentDataService = function() {
       indicator: indicator,
       cb: cb
     });
-  }
+  };
 
   self.updateDoc = function(documentId, updates, indicator, cb) {
     var params = {
@@ -98,7 +99,7 @@ LUPAPISTE.DocumentDataService = function() {
       indicator: indicator,
       cb: cb
     });
-  }
+  };
 
   function command(commandName, documentId, params, opts) {
     var indicator = opts.indicator || _.noop;
@@ -124,14 +125,14 @@ LUPAPISTE.DocumentDataService = function() {
         indicator({type: "err"});
       })
       .call();
-  };
+  }
 
   //
   // Repeating utilities
   //
 
   function createRepeatingUnitDataModel(schema, rawModel, path, index) {
-    var index = index.toString();
+    index = index.toString();
     return _.extend(
         {index: index},
         isGroupType(schema) ? 
@@ -195,7 +196,7 @@ LUPAPISTE.DocumentDataService = function() {
   //
 
   function isRepeating(schema) {
-    return schema.repeating || schema.type === "table";
+    return schema.repeating && !_.contains(["document" ,"party"], schema.type);
   }
 
   function isGroupType(schema) {
@@ -246,7 +247,7 @@ LUPAPISTE.DocumentDataService = function() {
       } else {
         return {value: dataModel};
       }
-    }
+    };
     return recur(ko.toJS(model));
   }
 
@@ -262,7 +263,7 @@ LUPAPISTE.DocumentDataService = function() {
       } else {
         return [[dataModel.path, dataModel.model]];
       }
-    }
+    };
     return recur(ko.toJS(dataModel));
   }
-}
+};
