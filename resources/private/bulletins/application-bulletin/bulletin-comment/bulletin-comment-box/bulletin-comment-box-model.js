@@ -69,9 +69,11 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
 
   self.sendComment = function() {
     var comment = self.otherReceiver() ?
-      _.merge(ko.toJS(self.basicCommentFields), ko.toJS(self.otherReceiverInfo)) :
+      _.merge(ko.toJS(self.basicCommentFields), { otherReceiver: ko.toJS(self.otherReceiverInfo) }) :
       ko.toJS(self.basicCommentFields);
     comment.files = self.attachments();
+    comment.bulletinId = self.bulletinId();
+    comment.bulletinVersionId = self.versionId();
 
     hub.send("bulletinService::newComment", comment);
   };
@@ -92,11 +94,11 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     } else {
       hub.send("indicator", {style: "negative", message: "bulletin.comment.save.failed"});
     }
+    self.pending(false);
   });
 
-  self.addEventListener("bulletinService", "commentProcessing", function(event) {
-    var state = event.state;
-    self.pending(state === "pending");
+  self.addEventListener("bulletinService", "commentProcessing", function() {
+    self.pending(true);
   });
 };
 

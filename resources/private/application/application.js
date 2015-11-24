@@ -60,6 +60,7 @@
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
   var tosFunctions = ko.observableArray([]);
+  var hasConstructionTimeDocs = ko.observable();
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
@@ -175,13 +176,17 @@
       }
 
       // Documents
-      var nonpartyDocs = _.filter(app.documents, util.isNotPartyDoc);
+      var constructionTimeDocs = _.filter(app.documents, "schema-info.construction-time");
+      var nonConstructionTimeDocs = _.reject(app.documents, "schema-info.construction-time");
+      var nonpartyDocs = _.filter(nonConstructionTimeDocs, util.isNotPartyDoc);
       var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
-      var partyDocs = _.filter(app.documents, util.isPartyDoc);
+      var partyDocs = _.filter(nonConstructionTimeDocs, util.isPartyDoc);
       var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
 
       var nonpartyDocErrors = _.map(sortedNonpartyDocs, function(doc) { return doc.validationErrors; });
       var partyDocErrors = _.map(sortedPartyDocs, function(doc) { return doc.validationErrors; });
+
+      hasConstructionTimeDocs(!!constructionTimeDocs.length);
 
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
 
@@ -202,6 +207,11 @@
                               applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
                               authorizationModel,
                               {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
+      docgen.displayDocuments("#constructionTimeDocgen",
+                              app,
+                              constructionTimeDocs,
+                              authorizationModel,
+                              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
 
       // Indicators
       function sumDocIndicators(sum, doc) {
@@ -343,7 +353,7 @@
     },
     markDone: function(neighbor) {
       ajax
-        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.id()})
+        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.id(), lang: loc.getCurrentLanguage()})
         .complete(_.partial(repository.load, currentId, _.noop))
         .call();
     },
@@ -403,6 +413,7 @@
       application: applicationModel,
       authorities: authorities,
       permitSubtypes: permitSubtypes,
+      hasConstructionTimeDocs: hasConstructionTimeDocs,
       // models
       addLinkPermitModel: addLinkPermitModel,
       addPartyModel: addPartyModel,

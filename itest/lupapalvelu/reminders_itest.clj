@@ -278,7 +278,7 @@
          (batchrun/statement-request-reminder)
 
          (let [app (mongo/by-id :applications (:id reminder-application))]
-           (> (-> app :statements second :reminder-sent) now-timestamp) => true?
+           (>= (-> app :statements second :reminder-sent) now-timestamp) => true?
            (-> app :statements first :reminder-sent) => nil?
            )
 
@@ -319,7 +319,7 @@
 
          (let [oir-matching (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-matching))
                oir-non-matching (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-non-matching))]
-           (> (:reminder-sent oir-matching) now-timestamp) => true?
+           (>= (:reminder-sent oir-matching) now-timestamp) => true?
            (:reminder-sent oir-non-matching) => nil?
            )
 
@@ -361,7 +361,7 @@
                                        (-> app :neighbors second :status))]
 
            (count reminder-sent-statuses) => 1
-           (> (:created (first reminder-sent-statuses)) now-timestamp) => true?
+           (>= (:created (first reminder-sent-statuses)) now-timestamp) => true?
            (filter
             #(= "reminder-sent" (:state %))
             (-> app :neighbors first :status)) => empty?
@@ -388,7 +388,7 @@
          (batchrun/application-state-reminder)
 
          (let [app (mongo/by-id :applications (:id reminder-application))]
-           (> (:reminder-sent app) now-timestamp) => true?
+           (>= (:reminder-sent app) now-timestamp) => true?
 
            (check-sent-reminder-email
             "pena@example.com"

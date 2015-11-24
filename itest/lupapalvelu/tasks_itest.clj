@@ -2,7 +2,6 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.xml.krysp.reader :as reader]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]

@@ -8,4 +8,5 @@
   lupapisteApp.services.organizationFilterService = new LUPAPISTE.OrganizationFilterService(lupapisteApp.services.applicationFiltersService);
   lupapisteApp.services.operationFilterService = new LUPAPISTE.OperationFilterService(lupapisteApp.services.applicationFiltersService);
   lupapisteApp.services.publishBulletinService = new LUPAPISTE.PublishBulletinService();
+  lupapisteApp.services.documentDataService = new LUPAPISTE.DocumentDataService();
 })();

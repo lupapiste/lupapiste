@@ -96,7 +96,9 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   hub.subscribe("bulletinService::fetchMunicipalities", fetchMunicipalities);
 
   hub.subscribe("bulletinService::fetchBulletin", function(event) {
-    fetchBulletin(event.id);
+    //if (!self.bulletin() || event.id !== self.bulletin().id) {
+      fetchBulletin(event.id);
+    //}
   });
 
   var commentForm;
@@ -121,30 +123,15 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   });
 
   hub.subscribe("bulletinService::newComment", function(comment) {
-    hub.send("bulletinService::commentProcessed", {status: "success"});
-    // if (window.FormData === undefined) {
-    //   // TODO how we can access data object if no attachment were added
-    //   commentForm.submit();
-    // } else {
-    //   var form = event.commentForm;
-    //   var formData = new FormData(form);
-    //   var files = event.files;
-    //   if (files.length === 1) {
-    //     formData.append("files[]", _.first(files));
-    //   } else {
-    //     _.forEach(event.files, function(file) {
-    //       formData.append("files", file);
-    //     });
-    //   }
-    //   ajax.form("add-bulletin-comment", formData)
-    //   .success(function() {
-    //     hub.send("bulletinService::commentProcessed", {status: "success"});
-    //   })
-    //   .error(function() {
-    //     hub.send("bulletinService::commentProcessed", {status: "failed"});
-    //   })
-    //   .pending(commentPending)
-    //   .call();
-    // }
+    hub.send("bulletinService::commentProcessing");
+    ajax
+      .command("add-bulletin-comment", comment)
+      .success(function() {
+        hub.send("bulletinService::commentProcessed", {status: "success"});
+      })
+      .error(function() {
+        hub.send("bulletinService::commentProcessed", {status: "error"});
+      })
+      .call();
   });
 };

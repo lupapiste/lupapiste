@@ -1,23 +1,22 @@
 (ns lupapalvelu.proxy-services
   (:require [clojure.data.zip.xml :refer :all]
-            [clojure.string :as s]
             [clojure.xml :as xml]
-            [lupapalvelu.find-address :as find-address]
-            [lupapalvelu.wfs :as wfs]
+            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [noir.response :as resp]
+            [sade.coordinate :as coord]
             [sade.env :as env]
+            [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :refer [dissoc-in select ->double]]
-            [sade.coordinate :as coord]
-            [sade.property :as p]
-            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]))
+            [lupapalvelu.find-address :as find-address]
+            [lupapalvelu.wfs :as wfs]))
 
 ;;
 ;; NLS:
 ;;
 
 (defn- trim [s]
-  (when-not (s/blank? s) (s/trim s)))
+  (when-not (ss/blank? s) (ss/trim s)))
 
 (defn- parse-address [query]
   (let [[[_ street number city]] (re-seq #"([^,\d]+)\s*(\d+)?\s*(?:,\s*(.+))?" query)
@@ -90,15 +89,15 @@
 (defn property-info-by-wkt-proxy [request] ;example: wkt=POINT(404271+6693892)&radius=100
   (let [{wkt :wkt radius :radius :or {wkt ""}} (:params request)
         type (re-find wdk-type-pattern wkt)
-        coords (s/replace wkt wdk-type-pattern "")
+        coords (ss/replace wkt wdk-type-pattern "")
         features (case type
-                   "POINT" (let [[x y] (s/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
+                   "POINT" (let [[x y] (ss/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
                              (if-not (ss/numeric? radius)
                                (wfs/property-info-by-point x y)
                                (wfs/property-info-by-radius x y radius)))
-                   "LINESTRING" (wfs/property-info-by-line (s/split (s/replace coords #"[\(\)]" "") #","))
-                   "POLYGON" (let [outterring (first (s/split coords #"\)" 1))] ;;; pudotetaan reiat pois
-                               (wfs/property-info-by-polygon (s/split (s/replace outterring #"[\(\)]" "") #",")))
+                   "LINESTRING" (wfs/property-info-by-line (ss/split (ss/replace coords #"[\(\)]" "") #","))
+                   "POLYGON" (let [outterring (first (ss/split coords #"\)" 1))] ;;; pudotetaan reiat pois
+                               (wfs/property-info-by-polygon (ss/split (ss/replace outterring #"[\(\)]" "") #",")))
                    nil)]
     (if features
       (resp/json (map wfs/feature-to-property-info features))
@@ -129,9 +128,8 @@
 
 (defn wms-capabilities-proxy [request]
   (let [{municipality :municipality} (:params request)
-        capabilities (wfs/getcapabilities request)
-        layers (wfs/capabilities-to-layers capabilities)
-        ]
+        capabilities (wfs/get-our-capabilities)
+        layers (wfs/capabilities-to-layers capabilities)]
     (if layers
       (resp/json
         (if (nil? municipality)
@@ -141,24 +139,25 @@
                (not= "0" (:id %))      ;; TODO: This is quick fix to make service working again.  Find better fix.
                (= (re-find #"^\d+" (:wmsName %)) municipality))
             (map create-layer-object (map wfs/layer-to-name layers)))
-          )
-        )
+          ))
       (resp/status 503 "Service temporarily unavailable"))))
 
+;; The value of "municipality" is "liiteri" when searching from Liiteri and municipality code when searching from municipalities.
 (defn plan-urls-by-point-proxy [{{:keys [x y municipality]} :params}]
-  (if (and (coord/valid-x? x) (coord/valid-y? y) (ss/numeric? municipality))
-    (let [response (wfs/plan-info-by-point x y municipality)
-          k (keyword municipality)
-          gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
-                       (resolve (symbol f-name))
-                       wfs/gfi-to-features-sito)
-          feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
-                           (resolve (symbol f-name))
-                           wfs/feature-to-feature-info-sito)]
-      (if response
-        (resp/json (map feature-mapper (gfi-mapper response municipality)))
-        (resp/status 503 "Service temporarily unavailable")))
-    (resp/status 400 "Bad Request")))
+  (let [municipality (trim municipality)]
+    (if (and (coord/valid-x? x) (coord/valid-y? y) (or (= "liiteri" (ss/lower-case municipality)) (ss/numeric? municipality)))
+      (let [response (wfs/plan-info-by-point x y municipality)
+            k (keyword municipality)
+            gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
+                         (resolve (symbol f-name))
+                         wfs/gfi-to-features-sito)
+            feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
+                             (resolve (symbol f-name))
+                             wfs/feature-to-feature-info-sito)]
+        (if response
+          (resp/json (map feature-mapper (gfi-mapper response municipality)))
+          (resp/status 503 "Service temporarily unavailable")))
+      (resp/status 400 "Bad Request"))))
 
 (defn general-plan-urls-by-point-proxy [{{x :x y :y} :params}]
   (if (and (coord/valid-x? x) (coord/valid-y? y))
