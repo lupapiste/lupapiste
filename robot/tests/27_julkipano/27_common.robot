@@ -95,8 +95,8 @@ Bulletin attachments count is
   Element should be visible  xpath=//section[@id='bulletins']//table[@data-test-id='bulletin-attachments-template-table']
   Xpath Should Match X Times  //section[@id='bulletins']//table[@data-test-id='bulletin-attachments-template-table']/tbody/tr  ${count}
 
-Bulletin commenting is visible
-  Element should be visible  bulletin-comment-field
+Vetuma signin is visible
+  Element should be visible  vetuma-init
 
 Create sent application
   [Arguments]  ${address}=Vaalantie 540  ${propertyId}=564-404-26-102
