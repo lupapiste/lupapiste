@@ -53,7 +53,9 @@
   "Macro to create document-level validators. Unwraps data etc."
   [code validator-data & body]
   {:pre (keyword? code)}
-  (let [validator-data (update-in validator-data [:schemas] eval)  ;; needed to handle possible def given in :schemas
+  (let [validator-data (-> validator-data
+                         (update-in [:doc] eval)
+                         (update-in [:schemas] eval))  ;; needed to handle possible def given in :schemas
         validator-result (sc/check Validator validator-data)
         _ (assert (nil? validator-result) (str code validator-result))
         {:keys [doc schemas level fields facts] :or {level :warn}} validator-data
