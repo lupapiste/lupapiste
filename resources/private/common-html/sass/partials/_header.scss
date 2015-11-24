@@ -6,9 +6,9 @@ $language-padding: 20px;
 
 @mixin header-padding {
   padding: {
-  left: $header-padding;
-  right: $header-padding;
-}
+    left: $header-padding;
+    right: $header-padding;
+  }
 }
 
 @mixin nav-link( $link: $orange, $hover: white, $hover-bg: inherit ) {
@@ -168,6 +168,11 @@ nav {
     .header-box {
       @include nav-link($link: $blue, $hover: white);
     }
+    #header-user-menu {
+      display: inline-block;
+      position: absolute;
+      right: 0px;
+    }
     .header-box, .julkipano-user {
       font-size: 16px;
       vertical-align: middle;
@@ -178,6 +183,7 @@ nav {
       text-overflow: ellipsis;
       line-height: 60px;
       color: #fff;
+      margin-right: $marginL;
       span {
         vertical-align: middle;
       }

@@ -3,7 +3,7 @@
 Documentation   Identity federation
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Resource        keywords.robot
+Resource        ../common_keywords/vetuma_helpers.robot
 
 *** Test Cases ***
 

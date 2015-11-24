@@ -63,6 +63,7 @@ jQuery(document).ready(function() {
     {name: "autocomplete-saved-filters"},
     {name: "indicator"},
     {name: "accordion"},
+    {name: "date-field", model: "input-field-model"},
     {name: "text-field", model: "input-field-model"},
     {name: "textarea-field", model: "input-field-model"},
     {name: "checkbox-field", model: "input-field-model"},
@@ -75,7 +76,11 @@ jQuery(document).ready(function() {
     {name: "accordion-toolbar"},
     {name: "group-approval"},
     {name: "submit-button"},
-    {name: "remove-button"}
+    {name: "remove-button"},
+    {name: "publish-application"},
+    {name: "move-to-proclaimed"},
+    {name: "move-to-verdict-given"},
+    {name: "move-to-final"}
   ];
 
   _.forEach(components, function(component) {
