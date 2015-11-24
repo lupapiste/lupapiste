@@ -1,7 +1,7 @@
 var locationSearch = (function() {
   "use strict";
 
-  var serchPointByAddress = function(requestContext, address, onSuccess, onFail) {
+  var searchPointByAddress = function(requestContext, address, onSuccess, onFail) {
     ajax
       .get("/proxy/get-address")
       .param("query", address)
@@ -53,7 +53,7 @@ var locationSearch = (function() {
   };
 
   return {
-    pointByAddress: serchPointByAddress,
+    pointByAddress: searchPointByAddress,
     pointByPropertyId: searchPointByPropertyId,
     propertyIdByPoint: searchPropertyId,
     addressByPoint: searchAddress,
