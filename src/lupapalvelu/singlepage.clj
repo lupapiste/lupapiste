@@ -84,7 +84,7 @@
   {:pre [(> c 1)]}
   (let [main-css-suffices (drop 2 (range (+ c 1)))
         link-str (apply str (map
-                              #(str "<link href=\"/css/main_" % ".css\" rel=\"stylesheet\"></link>\n")
+                              #(str "<link href=\"/lp-static/css/main_" % ".css?" (:build-number env/buildinfo) "\" rel=\"stylesheet\"></link>\n")
                               main-css-suffices))
         fallback-str (format "<!--[if lte IE 9]>%s<![endif]-->" link-str)
         fallback-elements (enlive/html-snippet fallback-str)]
