@@ -62,10 +62,6 @@
   (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
 
 
-(defn- main-style-file [css-file-path scss-file-path]
-  (if-let [main-css-file (io/resource (c/path css-file-path))]
-    (slurp main-css-file)
-    (scss/scss->css (.getPath (-> scss-file-path c/path io/resource)))))
 
 (defn- read-component-list-from-fs [path pattern]
   (let [files (fs/find-files path (re-pattern pattern))
@@ -140,7 +136,7 @@
                        "statuses.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
-                  :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
+                  :css ["jquery-ui.css"]
                   :html ["404.html"]}
 
    ;; Components to be included in a SPA
