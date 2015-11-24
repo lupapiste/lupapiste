@@ -416,6 +416,15 @@
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
+(defn create-and-send-application
+  "Returns the application map"
+  [apikey & args]
+  (let [id    (apply create-app-id apikey args)
+        _     (command apikey :submit-application :id id)
+        resp  (command apikey :approve-application :id id :lang "fi")]
+    (fact "Submit OK" resp => ok?)
+    (query-application apikey id)))
+
 (defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
   (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id)
         verdict-id (:verdictId new-verdict-resp)]
