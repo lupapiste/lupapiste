@@ -1,10 +1,11 @@
-LUPAPISTE.DocumentDataService = function() {
+LUPAPISTE.DocumentDataService = function(params) {
   "use strict";
 
   var self = this;
+  params = params || {};
+  
   self.model = ko.observableArray();
-  self.applicationId = lupapisteApp.models.application.id;
-  self.propertyId = lupapisteApp.models.application.propertyId;
+  self.applicationId = params.readOnly ? ko.observable() : lupapisteApp.models.application.id;
 
   // Document
 
