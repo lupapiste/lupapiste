@@ -18,7 +18,6 @@
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.migration.migration :as migration]
             [lupapalvelu.perf-mon :as perf-mon]
-            [scss-compiler.core :as scss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vetuma]
             [lupapalvelu.fixture.fixture-api]
@@ -80,9 +79,6 @@
   (server/add-middleware web/session-timeout)
   (env/in-dev
    (server/add-middleware mongo/db-selection-middleware))
-
-  (when-let [gemsdir (io/resource "gems")]
-    (scss/initialize :gempath (.getPath gemsdir)))
 
   (info "*** Instrumenting performance monitoring")
   (perf-mon/init)
