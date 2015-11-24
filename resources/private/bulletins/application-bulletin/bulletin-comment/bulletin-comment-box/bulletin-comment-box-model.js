@@ -72,7 +72,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
       _.merge(ko.toJS(self.basicCommentFields), { otherReceiver: ko.toJS(self.otherReceiverInfo) }) :
       ko.toJS(self.basicCommentFields);
     comment.files = self.attachments();
-    comment.bulletinId = self.bulletinId;
+    comment.bulletinId = self.bulletinId();
     comment.bulletinVersionId = self.versionId();
 
     hub.send("bulletinService::newComment", comment);
