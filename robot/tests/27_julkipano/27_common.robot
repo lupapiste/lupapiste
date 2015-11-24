@@ -34,6 +34,14 @@ Load more bulletins
   Click by test id  load-more-bulletins
   Wait until  Element should not be visible  //span[@data-test-id='bulletins-left'][contains(text(), '${initallyBulletinsLeft}')]
 
+Publish bulletin
+  Open tab  bulletin
+  Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
+  Input text with jQuery  input[name="proclamationStartsAt"]  23.11.2015
+  Input text with jQuery  input[name="proclamationEndsAt"]  23.12.2015
+  Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
+  Click by test id  publish-bulletin
+
 Create application and publish bulletin
   [Arguments]  ${address}  ${propertyId}
   Create application with state  ${address}  ${propertyId}  vapaa-ajan-asuinrakennus  sent
@@ -64,14 +72,13 @@ Bulletin state is
 
 Create application with attachment and publish it as bulletin
   [Arguments]  ${address}=Vaalantie 540  ${propertyId}=564-404-26-102
-  Create application with state  ${address}  ${propertyId}  koeluontoinen-toiminta  submitted
+  Create application with state  ${address}  ${propertyId}  koeluontoinen-toiminta  sent
   Open tab  attachments
   Add attachment  application  ${PDF_TESTFILE_PATH1}  ${EMPTY}  Koeluontoinen toiminta
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME1}')]
   Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  Koeluontoinen toiminta
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
-  Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
-  Click by test id  publish-bulletin
+  Publish bulletin
   Logout
 
 Bulletin tab should be visible
