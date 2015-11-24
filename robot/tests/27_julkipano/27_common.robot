@@ -101,3 +101,30 @@ Vetuma signin is visible
 Create sent application
   [Arguments]  ${address}=Vaalantie 540  ${propertyId}=564-404-26-102
   Create application with state  ${address}  ${propertyId}  koeluontoinen-toiminta  sent
+
+Bulletin shows as proclaimed
+  Open tab  bulletin
+  Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Kuulutettavana
+
+Bulletin shows as proclaimed and can be moved to verdict given
+  Open tab  bulletin
+  Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Kuulutettavana  Hakemus julkaistaan seuraavaksi tilaan: Päätös annettu
+
+Move bulletin to verdict given
+  Input text with jQuery  input[name="verdictGivenAt"]  23.11.2015
+  Input text with jQuery  input[name="appealPeriodStartsAt"]  23.12.2015
+  Input text with jQuery  input[name="appealPeriodEndsAt"]  23.12.2016
+  Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
+  Click by test id  publish-bulletin
+
+Bulletin shows as verdict given and ce be moved to final
+  Open tab  bulletin
+  Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Päätös annettu  Hakemus julkaistaan seuraavaksi tilaan: Lainvoimainen
+
+Move bulletin to final
+  Input text with jQuery  input[name="officialAt"]  23.11.2016
+  Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
+  Click by test id  publish-bulletin
+
+Bulletin shows as final
+  Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Lainvoimainen
