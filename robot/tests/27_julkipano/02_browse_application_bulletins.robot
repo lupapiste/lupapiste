@@ -44,8 +44,8 @@ Bulletins should be filterable by municipality
 
 Bulletins should be filterable by state
   Reload Page
-  Autocomplete option list should contain by test id  states-filter-component  Kaikki ilmoitustilat  Kuulutettu
+  Autocomplete option list should contain by test id  states-filter-component  Kaikki ilmoitustilat  Kuulutettavana
 
-  Select From Autocomplete By Test Id  states-filter-component  Kuulutettu
+  Select From Autocomplete By Test Id  states-filter-component  Kuulutettavana
   Wait Until  Bulletin list should have rows  10
   Bulletin button should have bulletins left to fetch  3

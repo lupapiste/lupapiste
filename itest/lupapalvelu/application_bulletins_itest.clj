@@ -28,12 +28,13 @@
       (fact "Regular user can't publish bulletin"
         (command pena :publish-bulletin :id app-id) => fail?)))
 
-  (facts "Add comment for published bulletin"
-    (let [app (create-and-submit-application pena :operation "lannan-varastointi"
+  (facts* "Add comment for published bulletin"
+    (let [app (create-and-send-application sonja :operation "lannan-varastointi"
                                              :propertyId sipoo-property-id
                                              :x 406898.625 :y 6684125.375
-                                             :address "Hitantine 108")
-          _ (command sonja :publish-bulletin :id (:id app))
+                                             :address "Hitantine 108"
+                                             :state "sent")
+          _ (command sonja :publish-bulletin :id (:id app)) => ok?
           old-bulletin (:bulletin (query pena :bulletin :bulletinId (:id app)))
           _ (command sonja :publish-bulletin :id (:id app))
           bulletin (:bulletin (query pena :bulletin :bulletinId (:id app)))]
