@@ -2,7 +2,9 @@
   (:require [sade.http :as http]
             [sade.env :as env]
             [clojure.core.memoize :as memo]
-            [lupapalvelu.organization :as o]))
+            [lupapalvelu.organization :as o]
+            [lupapalvelu.action :as action]
+            [monger.operators :refer :all]))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
@@ -99,3 +101,19 @@
                                    (and (>= doc-ts ts) (or (nil? next) (< doc-ts (:ts next)))))
                            all-docs)}))
       (partition 2 1 nil (:history application)))))
+
+(defn- change-document-metadata-state [{:keys [metadata] :as doc} from-state to-state now]
+  (if (= from-state (keyword (:tila metadata)))
+    (-> (assoc-in doc [:metadata :tila] to-state)
+        (assoc :modified now))
+    doc))
+
+(defn change-app-and-attachments-metadata-state! [{:keys [created application] :as command} from-state to-state]
+  (when (and (env/feature? :tiedonohjaus) (seq (:metadata application)))
+    (let [{{new-tila :tila} :metadata} (change-document-metadata-state application from-state to-state created)
+          updated-attachments (map #(change-document-metadata-state % from-state to-state created) (:attachments application))]
+      (action/update-application
+        command
+        {$set {:modified created
+               "metadata.tila" new-tila
+               :attachments updated-attachments}}))))
