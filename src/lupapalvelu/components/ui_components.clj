@@ -13,6 +13,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
@@ -51,6 +52,7 @@
                                           validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))
                  :degrees               (map :name (:body schemas/koulutusvalinta))
+                 :bulletinStates        bulletins/bulletin-state-seq
                  :features              (into {} (filter second (env/features)))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -148,6 +150,7 @@
                    "organization-filter-service.js"
                    "organization-tags-service.js"
                    "handler-filter-service.js"
+                   "publish-bulletin-service.js"
                    "application-filters-service.js"
                    "document-data-service.js"
                    "fileupload-service.js"]}
@@ -375,6 +378,7 @@
                       "bulletins.html" "bulletins-template.html"
                       "application-bulletin/application-bulletin-template.html"
                       "application-bulletin/begin-vetuma-auth-button/begin-vetuma-auth-button-template.html"
+                      "application-bulletin/bulletin-comment/bulletin-comment-template.html"
                       "application-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
                       "application-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-template.html"
@@ -387,7 +391,7 @@
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
                :js ["header.js"
-                    "bulletins.js" "component-base-model.js" "bulletins-model.js"
+                    "bulletins.js" "bulletins-model.js"
                     "application-bulletins-service.js"
                     "vetuma-service.js"
                     "application-bulletin/application-bulletin-model.js"

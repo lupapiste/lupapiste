@@ -13,6 +13,10 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   self.bulletinId = params.bulletinId;
   self.versionId  = ko.observable();
+  self.proclamationEndsAt = ko.observable();
+
+  self.authenticated = params.authenticated;
+
   self.selectedTab = ko.observable().extend({
     limited: {values: ["info", "attachments"], defaultValue: "info"}
   });
@@ -40,6 +44,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     if (util.getIn(self, ["bulletin", "id"])) {
       var location = bulletin.location;
       self.versionId(bulletin.versionId);
+      self.proclamationEndsAt(bulletin.proclamationEndsAt);
       map.clear().updateSize().center(location[0], location[1]).add({x: location[0], y: location[1]});
       // This can be called only once
       docgen.displayDocuments("#bulletinDocgen", bulletin, bulletin.documents, {ok: function() { return false; }}, {disabled: true});
@@ -53,6 +58,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   self.clickAuthenticationButton = function() {
     $("#vetuma-init")[0].click();
   };
+
   self.openTab = function(tab) {
     pageutil.openPage("bulletin", [self.bulletinId(), tab]);
   };

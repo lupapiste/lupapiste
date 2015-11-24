@@ -67,7 +67,8 @@
       :nav    (concat (:nav c)    (enlive/select h [:nav]))
       :info   (concat (:info c)   (enlive/select h [:div.notification]))
       :footer (concat (:footer c) (enlive/select h [:footer]))
-      :page   (concat (:page  c)  (enlive/select h [:section.page])))))
+      :page   (concat (:page  c)  (enlive/select h [:section.page]))
+      :templates (concat (:templates c) (enlive/select h [:script.ko-template])))))
 
 (defn- resource-url [component kind]
   (str (kind (env/value :cdn)) (:build-number env/buildinfo) "/" (name component) "." (name kind)))
