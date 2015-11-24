@@ -27,4 +27,4 @@
 (fact "local private test krysp wfs url with credentials is alive" (wfs/wfs-is-alive? local-private-wfs "pena" "pena") => true)
 
 (fact "Get out capabilities"
-  (wfs/get-our-capabilities) => (contains "wfs:WFS_Capabilities"))
+  (wfs/get-our-capabilities) => (contains "WMT_MS_Capabilities"))
