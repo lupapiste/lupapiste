@@ -1,5 +1,5 @@
 
-class CssSplitter
+class CssSplitter # forked from https://gist.github.com/10thfloor/3559165
 
   def self.split(infile, outdir = File.dirname(infile), max_selectors = 4000)
 
@@ -42,7 +42,6 @@ class CssSplitter
   def self.count_selectors_of_rule(rule)
     rule.partition(/\{/).first.scan(/,/).count.to_i + 1
   end
-
 end
 
 # Require any additional compass plugins here.
