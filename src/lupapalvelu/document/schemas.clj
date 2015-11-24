@@ -595,7 +595,7 @@
                       :copybutton true
                       :body huoneistoRow})
 
-(def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi" :required true
+(def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi"
                   :body [{:name "betoni"}
                          {:name "kipsi"}
                          {:name "puu"}
@@ -605,7 +605,7 @@
                          {:name "paperi"}
                          {:name "maa"}]})
 
-(def vaarallinenainetyyppi {:name "vaarallinenainetyyppi" :type :select :i18nkey "vaarallinenainetyyppi" :required true
+(def vaarallinenainetyyppi {:name "vaarallinenainetyyppi" :type :select :i18nkey "vaarallinenainetyyppi"
                             :body [{:name "maalit-lakat-liimat-ja-liuottimet"}
                                    {:name "aerosolipullot"}
                                    {:name "painekyllastetty-puu"}
@@ -617,13 +617,13 @@
                                    {:name "eristeiden-ja-tiivistemassojen-haitalliset-jatteet"}
                                    {:name "sahko-ja-elektroniikkaromu"}]})
 
-(def jateyksikko {:name "yksikko" :i18nkey "jateyksikko" :type :select :required true
+(def jateyksikko {:name "yksikko" :i18nkey "jateyksikko" :type :select
                   :body [{:name "kg"}
                          {:name "tonni"}
                          {:name "m2"}
                          {:name "m3"}]})
 
-(def rakennusjatemaara {:name "maara" :type :string :subtype :decimal :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "s"})
+(def rakennusjatemaara {:name "maara" :type :string :subtype :decimal :uicomponent :docgen-string :min 0 :max 9999999 :size "s"})
 
 (def rakennusjatesuunnitelmaRow [(assoc rakennusjatemaara :name "suunniteltuMaara")
                                  jateyksikko
@@ -634,7 +634,7 @@
                                   (assoc rakennusjatemaara :name "painoT")
                                   {:name "jatteenToimituspaikka" :type :string :max-len 50}])
 
-(def rakennusjateselvitysRow [(assoc rakennusjatemaara :name "suunniteltuMaara" :readonly true :required false)
+(def rakennusjateselvitysRow [(assoc rakennusjatemaara :name "suunniteltuMaara" :readonly true)
                               (assoc rakennusjatemaara :name "toteutunutMaara")
                               (assoc jateyksikko :readonly true)
                               (assoc rakennusjatemaara :name "painoT")
