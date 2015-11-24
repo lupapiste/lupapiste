@@ -1,7 +1,7 @@
 
 class CssSplitter
 
-  def self.split(infile, outdir = File.dirname(infile), max_selectors = 4095)
+  def self.split(infile, outdir = File.dirname(infile), max_selectors = 4000)
 
     raise "infile could not be found" unless File.exists? infile
 
@@ -36,20 +36,6 @@ class CssSplitter
       end
 
       output.write rule if output
-    end
-  end
-
-  def self.count_selectors(css_file)
-    raise "file could not be found" unless File.exists? css_file
-
-    rules = IO.readlines(css_file, '}')
-    return if rules.first.nil?
-
-    charset_statement, rules[0] = rules.first.partition(/^\@charset[^;]+;/)[1,2]
-    return if rules.first.nil?
-
-    rules.inject(0) {|count, rule| count + count_selectors_of_rule(rule)}.tap do |result|
-      puts File.basename(css_file) + " contains #{result} selectors."
     end
   end
 
