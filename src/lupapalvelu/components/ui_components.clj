@@ -148,7 +148,7 @@
                    "organization-tags-service.js"
                    "handler-filter-service.js"
                    "application-filters-service.js"
-                   "document-data-service.js"]}
+                   "document-data-service.js"
                    "fileupload-service.js"]}
 
    :global-models {:depends [:services]
