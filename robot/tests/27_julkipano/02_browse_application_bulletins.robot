@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation   Admin edits authority admin users
+Documentation   User browses bulletins from Julkipano.fi bulletin list
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
@@ -25,7 +25,7 @@ Bulletins should be searchable
   Go to bulletins page
 
   Search bulletins by text  Mixintie 15
-  Bulletin list should have rows and text  1  Mixintie 15
+  Wait Until  Bulletin list should have rows and text  1  Mixintie 15
 
 Velho adds some bulletins
   As Velho

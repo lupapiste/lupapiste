@@ -18,8 +18,10 @@
         {name: "bulletins-search"},
         {name: "autocomplete-municipalities"},
         {name: "autocomplete-states"},
+        {name: "bulletin-comment"},
         {name: "bulletin-comment-box"},
         {name: "bulletin-attachments-tab"},
+        {name: "begin-vetuma-auth-button"},
         {name: "bulletin-info-tab"}];
 
     _.forEach(components, function(component) {
@@ -29,6 +31,14 @@
       });
     });
 
-    $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService()});
+    $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService(),
+                                    vetumaService: new LUPAPISTE.VetumaService(),
+                                    fileuploadService: new LUPAPISTE.FileuploadService(),
+                                    auth: authorization.create()});
+
+    var errorType = _.includes(["error", "cancel"], pageutil.lastSubPage()) ?
+      pageutil.lastSubPage() :
+      undefined;
+    hub.send("vetumaService::authenticateUser", {errorType: errorType});
   });
 })();
