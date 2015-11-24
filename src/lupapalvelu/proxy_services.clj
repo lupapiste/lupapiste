@@ -166,6 +166,12 @@
       (resp/status 503 "Service temporarily unavailable"))
     (resp/status 400 "Bad Request")))
 
+(defn polygon-points [wkt]
+  (when-not (ss/blank? wkt)
+    (when-let [point-s (second (re-matches #"POLYGON\s+\(\(([0-9\.,\s]+)\).*\)" wkt))]
+      (->> (ss/split point-s #",?\s") (map util/->double) (partition 2)))))
+
+
 ;
 ; Utils:
 ;
