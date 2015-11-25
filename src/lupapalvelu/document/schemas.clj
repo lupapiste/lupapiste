@@ -163,7 +163,7 @@
                      :validator :address
                      :blacklist [turvakielto]
                      :body [{:name "katu" :type :string :subtype :vrk-address :required true}
-                            {:name "postinumero" :type :string :size "s" :required true}
+                            {:name "postinumero" :type :string :size "s" :required true :dummy-test :postal-code}
                             {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}
                             country]}])
 
@@ -173,12 +173,13 @@
                              :validator :address
                              :blacklist [turvakielto]
                              :body [{:name "katu" :type :string :subtype :vrk-address :required true}
-                                    {:name "postinumero" :type :string :size "s" :required true}
+                                    {:name "postinumero" :type :string :size "s" :required true :dummy-test :postal-code}
                                     {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}
                                     country]}])
 
 (def rakennuksen-osoite [{:name "osoite"
                           :type :group
+                          :validator :address
                           :body [{:name "kunta" :type :string}
                                  {:name "lahiosoite" :type :string}
                                  {:name "osoitenumero" :type :string :subtype :number :min 0 :max 9999}
@@ -187,7 +188,7 @@
                                  {:name "jakokirjain2" :type :string :size "s" :hidden true :readonly true}
                                  {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s" :hidden true :readonly true}
                                  {:name "huoneisto" :type :string :size "s" :hidden true :readonly true}
-                                 {:name "postinumero" :type :string :size "s"}
+                                 {:name "postinumero" :type :string :size "s" :dummy-test :postal-code}
                                  {:name "postitoimipaikannimi" :type :string :size "m"}
                                  country]}])
 
