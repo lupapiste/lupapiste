@@ -77,6 +77,9 @@
                                                     (sc/both (util/min-length-string 4) (util/max-length-string 4))
                                                     (sc/pred ss/blank?))
            (sc/optional-key :fise)                (util/max-length-string 255)
+           (sc/optional-key :fiseKelpoisuus)      (sc/either
+                                                    (apply sc/enum (map :name schemas/fise-kelpoisuus-lajit))
+                                                    (sc/pred ss/blank?))
            (sc/optional-key :companyName)         (util/max-length-string 255)
            (sc/optional-key :companyId)           (sc/either
                                                     (sc/pred v/finnish-y? "Not valid Y code")
@@ -101,29 +104,32 @@
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]})
 
-(def RegisterUser {:email     (sc/both
-                                (sc/pred v/valid-email? "Not valid email")
-                                (util/max-length-string 255))
-                   :street    (sc/maybe (util/max-length-string 255))
-                   :city      (sc/maybe (util/max-length-string 255))
-                   :zip       (sc/either
-                                (sc/pred v/finnish-zip? "Not a valid zip code")
-                                (sc/pred ss/blank?))
-                   :phone (sc/maybe (util/max-length-string 255))
-                   (sc/optional-key :architect) sc/Bool
-                   (sc/optional-key :degree) (sc/either
-                                               (apply sc/enum (conj
-                                                                (map :name (:body schemas/koulutusvalinta))
-                                                                "other"))
-                                               (sc/pred ss/blank?))
+(def RegisterUser {:email                            (sc/both
+                                                       (sc/pred v/valid-email? "Not valid email")
+                                                       (util/max-length-string 255))
+                   :street                           (sc/maybe (util/max-length-string 255))
+                   :city                             (sc/maybe (util/max-length-string 255))
+                   :zip                              (sc/either
+                                                       (sc/pred v/finnish-zip? "Not a valid zip code")
+                                                       (sc/pred ss/blank?))
+                   :phone                            (sc/maybe (util/max-length-string 255))
+                   (sc/optional-key :architect)      sc/Bool
+                   (sc/optional-key :degree)         (sc/either
+                                                       (apply sc/enum (conj
+                                                                        (map :name (:body schemas/koulutusvalinta))
+                                                                        "other"))
+                                                       (sc/pred ss/blank?))
                    (sc/optional-key :graduatingYear) (sc/either
                                                        (sc/both (util/min-length-string 4) (util/max-length-string 4))
                                                        (sc/pred ss/blank?))
-                   (sc/optional-key :fise) (util/max-length-string 255)
-                   :allowDirectMarketing sc/Bool
-                   :rakentajafi sc/Bool
-                   :stamp (sc/maybe (util/max-length-string 255))
-                   :password (util/max-length-string 255)})
+                   (sc/optional-key :fise)           (util/max-length-string 255)
+                   (sc/optional-key :fiseKelpoisuus) (sc/either
+                                                       (apply sc/enum (map :name schemas/fise-kelpoisuus-lajit))
+                                                       (sc/pred ss/blank?))
+                   :allowDirectMarketing             sc/Bool
+                   :rakentajafi                      sc/Bool
+                   :stamp                            (sc/maybe (util/max-length-string 255))
+                   :password                         (util/max-length-string 255)})
 ;;
 ;; ==============================================================================
 ;; Utils:
@@ -433,7 +439,7 @@
       (select-keys [:email :username :role :firstName :lastName :personId
                     :phone :city :street :zip :enabled :orgAuthz
                     :allowDirectMarketing :architect :company
-                    :graduatingYear :degree :fise])
+                    :graduatingYear :degree :fise :fiseKelpoisuus])
       (merge {:firstName "" :lastName "" :username email} <>)
       (assoc
         :email email

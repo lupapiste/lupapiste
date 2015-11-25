@@ -160,23 +160,26 @@
 
 (def simple-osoite [{:name "osoite"
                      :type :group
+                     :validator :address
                      :blacklist [turvakielto]
                      :body [{:name "katu" :type :string :subtype :vrk-address :required true}
-                            {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
+                            {:name "postinumero" :type :string :size "s" :required true :dummy-test :postal-code}
                             {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}
                             country]}])
 
 (def simple-osoite-maksaja [{:name "osoite"
                              :i18nkey "osoite-maksaja"
                              :type :group
+                             :validator :address
                              :blacklist [turvakielto]
                              :body [{:name "katu" :type :string :subtype :vrk-address :required true}
-                                    {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
+                                    {:name "postinumero" :type :string :size "s" :required true :dummy-test :postal-code}
                                     {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}
                                     country]}])
 
 (def rakennuksen-osoite [{:name "osoite"
                           :type :group
+                          :validator :address
                           :body [{:name "kunta" :type :string}
                                  {:name "lahiosoite" :type :string}
                                  {:name "osoitenumero" :type :string :subtype :number :min 0 :max 9999}
@@ -185,7 +188,7 @@
                                  {:name "jakokirjain2" :type :string :size "s" :hidden true :readonly true}
                                  {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s" :hidden true :readonly true}
                                  {:name "huoneisto" :type :string :size "s" :hidden true :readonly true}
-                                 {:name "postinumero" :type :string :subtype :zip :size "s"}
+                                 {:name "postinumero" :type :string :size "s" :dummy-test :postal-code}
                                  {:name "postitoimipaikannimi" :type :string :size "m"}
                                  country]}])
 
@@ -350,18 +353,84 @@
                              {:name "tekniikan kandidaatti"}
                              {:name "teknikko"}]})
 
+(def fise-kelpoisuus-lajit
+  [{:name "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}
+   {:name "tavanomainen p\u00e4\u00e4suunnittelu (korjausrakentaminen)"}
+   {:name "vaativa p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}
+   {:name "vaativa p\u00e4\u00e4suunnittelu (korjausrakentaminen)"}
+   {:name "poikkeuksellisen vaativa p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}
+   {:name "poikkeuksellisen vaativa p\u00e4\u00e4suunnittelu (korjausrakentaminen)"}
+   {:name "tavanomainen rakennussuunnittelu (uudisrakentaminen)"}
+   {:name "tavanomainen rakennussuunnittelu (korjausrakentaminen)"}
+   {:name "vaativa rakennussuunnittelu (uudisrakentaminen)"}
+   {:name "vaativa rakennussuunnittelu (korjausrakentaminen)"}
+   {:name "poikkeuksellisen vaativa rakennussuunnittelu (uudisrakentaminen)"}
+   {:name "poikkeuksellisen vaativa rakennussuunnittelu (korjausrakentaminen)"}
+   {:name "tavanomainen betonirakenteiden suunnittelu (uudisrakentaminen)"}
+   {:name "tavanomainen betonirakenteiden suunnittelu (korjausrakentaminen)"}
+   {:name "vaativa betonirakenteiden suunnittelu (uudisrakentaminen)"}
+   {:name "vaativa betonirakenteiden suunnittelu (korjausrakentaminen)"}
+   {:name "poikkeuksellisen vaativa betonirakenteiden suunnittelu (uudisrakentaminen)"}
+   {:name "poikkeuksellisen vaativa betonirakenteiden suunnittelu (korjausrakentaminen)"}
+   {:name "tavanomainen puurakenteiden suunnittelu (uudisrakentaminen)"}
+   {:name "tavanomainen puurakenteiden suunnittelu (korjausrakentaminen)"}
+   {:name "vaativa puurakenteiden suunnittelu (uudisrakentaminen)"}
+   {:name "vaativa puurakenteiden suunnittelu (korjausrakentaminen)"}
+   {:name "poikkeuksellisen vaativa puurakenteiden suunnittelu (uudisrakentaminen)"}
+   {:name "poikkeuksellisen vaativa puurakenteiden suunnittelu (korjausrakentaminen)"}
+   {:name "tavanomainen ter\u00e4srakenteiden suunnittelu (uudisrakentaminen)"}
+   {:name "tavanomainen ter\u00e4srakenteiden suunnittelu (korjausrakentaminen)"}
+   {:name "vaativa ter\u00e4srakenteiden suunnittelu (uudisrakentaminen)"}
+   {:name "vaativa ter\u00e4srakenteiden suunnittelu (korjausrakentaminen)"}
+   {:name "poikkeuksellisen vaativa ter\u00e4srakenteiden suunnittelu (uudisrakentaminen)"}
+   {:name "poikkeuksellisen vaativa ter\u00e4srakenteiden suunnittelu (korjausrakentaminen)"}
+   {:name "tavanomainen pohjarakenteiden suunnittelu (uudisrakentaminen)"}
+   {:name "tavanomainen pohjarakenteiden suunnittelu (korjausrakentaminen)"}
+   {:name "vaativa pohjarakenteiden suunnittelu (uudisrakentaminen)"}
+   {:name "vaativa pohjarakenteiden suunnittelu (korjausrakentaminen)"}
+   {:name "poikkeuksellisen vaativa pohjarakenteiden suunnittelu (uudisrakentaminen)"}
+   {:name "poikkeuksellisen vaativa pohjarakenteiden suunnittelu (korjausrakentaminen)"}
+   {:name "tavanomainen ilmanvaihtosuunnittelu (uudisrakentaminen)"}
+   {:name "tavanomainen ilmanvaihtosuunnittelu (korjausrakentaminen)"}
+   {:name "vaativa ilmanvaihtosuunnittelu (uudisrakentaminen)"}
+   {:name "vaativa ilmanvaihtosuunnittelu (korjausrakentaminen)"}
+   {:name "poikkeuksellisen vaativa ilmanvaihtosuunnittelu (uudisrakentaminen)"}
+   {:name "poikkeuksellisen vaativa ilmanvaihtosuunnittelu (korjausrakentaminen)"}
+   {:name "tavanomainen kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnittelu (uudisrakentaminen)"}
+   {:name "tavanomainen kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnittelu (korjausrakentaminen)"}
+   {:name "vaativa kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnittelu (uudisrakentaminen)"}
+   {:name "vaativa kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnittelu (korjausrakentaminen)"}
+   {:name "poikkeuksellisen vaativa kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnittelu (uudisrakentaminen)"}
+   {:name "poikkeuksellisen vaativa kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnittelu (korjausrakentaminen)"}
+   {:name "tavanomainen rakennusfysikaalinen suunnittelu (uudisrakentaminen)"}
+   {:name "tavanomainen rakennusfysikaalinen suunnittelu (korjausrakentaminen)"}
+   {:name "vaativa rakennusfysikaalinen suunnittelu (uudisrakentaminen)"}
+   {:name "vaativa rakennusfysikaalinen suunnittelu (korjausrakentaminen)"}
+   {:name "poikkeuksellisen vaativa rakennusfysikaalinen suunnittelu (uudisrakentaminen)"}
+   {:name "poikkeuksellisen vaativa rakennusfysikaalinen suunnittelu (korjausrakentaminen)"}
+   {:name "tavanomainen akustiikkasuunnittelu (uudisrakentaminen)"}
+   {:name "tavanomainen akustiikkasuunnittelu (korjausrakentaminen)"}
+   {:name "vaativa akustiikkasuunnittelu (uudisrakentaminen)"}
+   {:name "vaativa akustiikkasuunnittelu (korjausrakentaminen)"}
+   {:name "poikkeuksellisen vaativa akustiikkasuunnittelu (uudisrakentaminen)"}
+   {:name "poikkeuksellisen vaativa akustiikkasuunnittelu (korjausrakentaminen)"}
+   {:name "tavanomainen kosteusvaurion korjaussuunnittelu"}
+   {:name "vaativa kosteusvaurion korjaussuunnittelu"}
+   {:name "poikkeuksellisen vaativa kosteusvaurion korjaussuunnittelu"}])
+
 (def patevyys [koulutusvalinta
                {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "fise" :type :string :required false}
-               {:name "patevyys" :type :string :required false}
+               {:name "fiseKelpoisuus" :type :select :sortBy :displayname :i18nkey "fisekelpoisuus" :size "l" :required false :body fise-kelpoisuus-lajit}
                {:name "patevyysluokka" :type :select :sortBy nil :required true
                 :body [{:name "AA"}
                        {:name "A"}
                        {:name "B"}
                        {:name "C"}
                        {:name "ei tiedossa"}]}
-               {:name "kokemus" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}])
+               {:name "kokemus" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
+               {:name "patevyys" :type :string :required false}])
 
 (def designer-basic (body
                       (schema-body-without-element-by-name henkilotiedot turvakielto)
@@ -660,13 +729,13 @@
                             :type :group
                             :uicomponent :constructionWasteReport
                             :approvable false
-                            :body [{:name "suunniteltuJate"
+                            :body [{:name "suunniteltuJate"      
                                     :type :table
                                     :repeating true
                                     :repeating-init-empty true
                                     :body (body (assoc jatetyyppi :readonly true) rakennusjateselvitysRow)}
-                                   {:name "suunnittelematonJate"
-                                    :type :table
+                                   {:name "suunnittelematonJate" 
+                                    :type :table 
                                     :repeating true
                                     :body (body jatetyyppi rakennusjateselvitysUusiRow)}]}
                            {:name "vaarallisetAineet"
@@ -674,14 +743,14 @@
                             :type :group
                             :uicomponent :constructionWasteReport
                             :approvable false
-                            :body [{:name "suunniteltuJate"
-                                    :type :table
-                                    :repeating true
+                            :body [{:name "suunniteltuJate"      
+                                    :type :table 
+                                    :repeating true 
                                     :repeating-init-empty true
                                     :body (body (assoc vaarallinenainetyyppi :readonly true) rakennusjateselvitysRow)}
-                                   {:name "suunnittelematonJate"
-                                    :type :table
-                                    :repeating true
+                                   {:name "suunnittelematonJate" 
+                                    :type :table 
+                                    :repeating true 
                                     :body (body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}])
 
 
