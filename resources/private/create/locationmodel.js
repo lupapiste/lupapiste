@@ -75,16 +75,19 @@ LUPAPISTE.LocationModel = function() {
   };
 
 
-  self.searchPointByAddressOrPropertyId = function(value) {
+  self.searchPoint = function(value) {
     if (!_.isEmpty(value)) {
       self.reset();
-      return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value);
-    } else {
-      return self;
+      return util.prop.isPropertyId(value) ? self._searchPointByPropertyId(value) : self._searchPointByAddress(value);
     }
+    return self;
   };
 
-  self.searchPointByAddress = function(address) {
+  //
+  // Private functions
+  //
+
+  self._searchPointByAddress = function(address) {
     locationSearch.pointByAddress(self.requestContext, address, function(result) {
         if (result.data && result.data.length > 0) {
           var data = result.data[0],
@@ -101,7 +104,7 @@ LUPAPISTE.LocationModel = function() {
     return self;
   };
 
-  self.searchPointByPropertyId = function(id) {
+  self._searchPointByPropertyId = function(id) {
     locationSearch.pointByPropertyId(self.requestContext, id, function(result) {
         if (result.data && result.data.length > 0) {
           var data = result.data[0],

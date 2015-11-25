@@ -198,7 +198,7 @@
       hub.send("track-click", {category:"Create", label:"map", event:"searchLocation"});
       self.clearMap().resetLocation();
       self.locationModel.beginUpdateRequest()
-        .searchPointByAddressOrPropertyId(self.search());
+        .searchPoint(self.search());
       return false;
     };
 
