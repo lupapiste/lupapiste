@@ -1,0 +1,27 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="bulletin-comments-template">
+  <div>
+    <button class="secondary back-button" data-bind="click: function() { showComments(undefined); }">
+      <i class="lupicon-chevron-start"></i>
+      <span data-bind="ltext: 'back'"></span>
+    </button>
+    <div>
+      <h1 data-bind="ltext: 'bulletin.comments.title'"></h1>
+      <span data-bind="component: { name: 'help-toggle', params: { lhtml: 'help.bulletin.comments' } }"></span>
+    </div>
+  </div>
+
+  <!-- ko foreach: comments -->
+  <div class="bulletin-comment">
+    <div class="bulletin-comment__header">
+      <span data-bind="fullName: $data['contact-info']"></span>
+    </div>
+    <div class="bulletin-comment__body">
+      <div class="bulletin-comment__attachments" data-bind="foreach: $data.attachments">
+        <span data-bind="text: $data.filename"></span>
+        (<span data-bind="ltext: $data.contentType"></span>
+         <span data-bind="size: $data.size"></span>)
+      </div>
+    </div>
+  </div>
+  <!-- /ko -->
+</script>
