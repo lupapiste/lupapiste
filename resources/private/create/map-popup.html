@@ -37,8 +37,7 @@
                               valueAllowUnset: true"
                    data-test-id="create-municipality-select"
                    class="form-select form-input combobox"></select>
-           <input data-bind="visible: !useManualEntry(), value: municipalityName"
-                  disabled="disabled" type="text" class="form-input text"/>
+           <span data-bind="visible: !useManualEntry(), text: municipalityName" />
          </div>
 
 
