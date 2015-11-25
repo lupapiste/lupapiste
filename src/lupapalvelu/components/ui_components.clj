@@ -18,6 +18,7 @@
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
+            [lupapiste-commons.tos-metadata-schema :as tos-meta]
             [me.raynes.fs :as fs]))
 
 (def debugjs {:depends [:jquery]
@@ -53,6 +54,7 @@
                                           (partial map #(sade.strings/suffix % "ah-")))
                  :degrees               (map :name (:body schemas/koulutusvalinta))
                  :bulletinStates        bulletins/bulletin-state-seq
+                 :attachmentVisibilities (get tos-meta/Näkyvyys :values)
                  :features              (into {} (filter second (env/features)))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
