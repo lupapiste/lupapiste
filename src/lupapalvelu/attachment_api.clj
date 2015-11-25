@@ -601,3 +601,13 @@
                                           (when (seq unSelectedAttachmentIds)
                                             (updates-fn unSelectedAttachmentIds :forPrinting false)))}))
     (ok)))
+
+(defcommand set-attachment-visibility
+  {:parameters [id attachmentId value]
+   :user-roles #{:authority}
+   :user-authz-roles #{:owner}
+   :states     states/pre-verdict-states}
+  [command]
+  (update-application command
+                      {:attachments {$elemMatch {:id attachmentId}}}
+                      {$set {:attachments.$.metadata.nakyvyys value}}))

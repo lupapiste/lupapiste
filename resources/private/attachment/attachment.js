@@ -120,6 +120,7 @@ var attachment = (function() {
     size:                         ko.observable(),
     sizes:                        ko.observableArray(LUPAPISTE.config.attachmentSizes),
     isVerdictAttachment:          ko.observable(),
+    visibility:                   ko.observable(),
     subscriptions:                [],
     showAttachmentVersionHistory: ko.observable(),
     showHelp:                     ko.observable(false),
@@ -362,6 +363,23 @@ var attachment = (function() {
     }));
 
 
+    model.subscriptions.push(model.visibility.subscribe(function(data) {
+      ajax.command("set-attachment-visibility", {
+        id: applicationId,
+        attachmentId: model.id(),
+        value: "julkinen"
+      })
+      .success(function(res) {
+        console.log(res);
+      })
+      .error(function(e) {
+        error(e.text);
+      })
+      .call();
+    }));
+
+
+
     applySubscription("contents");
     applySubscription("scale");
     applySubscription("size");
@@ -414,11 +432,13 @@ var attachment = (function() {
   }
 
   function showAttachment() {
+    console.log("showing");
     if (!applicationId || !attachmentId ||
         applicationId !== pageutil.subPage() ||
         attachmentId !== pageutil.lastSubPage()) {
       return;
     }
+    console.log("something is different now", applicationId, attachmentId);
 
     var application = applicationModel._js;
 
@@ -450,6 +470,7 @@ var attachment = (function() {
     model.scale(attachment.scale);
     model.size(attachment.size);
     model.isVerdictAttachment(attachment.forPrinting);
+    model.visibility(attachment.metadata ? attachment.metadata.nakyvyys || false : false);
     model.applicationState(attachment.applicationState);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
     model.metadata(attachment.metadata);
