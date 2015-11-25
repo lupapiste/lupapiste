@@ -81,7 +81,8 @@ jQuery(document).ready(function() {
     {name: "move-to-proclaimed"},
     {name: "move-to-verdict-given"},
     {name: "move-to-final"},
-    {name: "bulletin-versions"}
+    {name: "bulletin-versions"},
+    {name: "bulletin-tab"}
   ];
 
   _.forEach(components, function(component) {
