@@ -323,6 +323,14 @@
       }
     };
 
+    hub.subscribe("location-found", function() {
+      var zoomLevel = 14;
+      if (_.isBlank(self.propertyId)) {
+        zoomLevel = 13;
+      }
+      self.center(self.x(), self.y(), zoomLevel);
+    });
+
     self.searchPointByAddress = function(address) {
       self.resetLocation();
       locationSearch.pointByAddress(self.requestContext, address, function(result) {
@@ -331,11 +339,11 @@
                 x = data.location.x,
                 y = data.location.y;
             self
-              .center(x, y, 13)
               .setXY(x, y)
               .addressData(data)
               .beginUpdateRequest()
               .searchPropertyId(x, y);
+            hub.send("location-found");
           }
         });
       return self;
@@ -349,11 +357,11 @@
                 x = data.x,
                 y = data.y;
             self
-              .center(x, y, 14)
               .setXY(x, y)
               .propertyId(util.prop.toDbFormat(id))
               .beginUpdateRequest()
               .searchAddress(x, y);
+            hub.send("location-found");
           }
         });
       return self;
