@@ -55,8 +55,14 @@
 
     self.operations = ko.observable(null);
     self.organization = ko.observable(null);
-    self.organizationLinks = ko.computed(function() { var m = self.organization(); return m ? m.links : null; });
-    self.attachmentsForOp = ko.computed(function() { var m = self.organization(); return m ? _.map(m.attachmentsForOp, function(d) { return { group: d[0], id: d[1]};}) : null; });
+    self.organizationLinks = ko.pureComputed(function() {
+      var m = self.organization();
+      return m ? m.links : null;
+    });
+    self.attachmentsForOp = ko.pureComputed(function() {
+      var m = self.organization();
+      return m ? _.map(m.attachmentsForOp, function(d) { return { group: d[0], id: d[1]};}) : null;
+    });
 
     self.municipalityCode = self.locationModel.municipalityCode;
     self.municipalityName = self.locationModel.municipalityName;
@@ -75,7 +81,7 @@
     self.selectedPrevPermitOrganization = ko.observable(null);
     self.kuntalupatunnusFromPrevPermit = ko.observable(null);
     self.needMorePrevPermitInfo = ko.observable(false);
-    self.creatingAppWithPrevPermitOk = ko.computed(function() {
+    self.creatingAppWithPrevPermitOk = ko.pureComputed(function() {
       return !self.processing() && !self.pending() &&
              !_.isBlank(self.kuntalupatunnusFromPrevPermit()) &&
              !_.isBlank(self.selectedPrevPermitOrganization()) &&
@@ -87,13 +93,11 @@
 
     ko.computed(function() {
       var code = self.municipalityCode();
-      if (!self.creatingAppWithPrevPermit) {
-        if (code) {
-          self.findOperations(code);
-          municipalities.findById(code, function(m) {
-            self.municipalitySupported(m ? true : false);
-          });
-        }
+      if (code && !self.creatingAppWithPrevPermit) {
+        self.findOperations(code);
+        municipalities.findById(code, function(m) {
+          self.municipalitySupported(m ? true : false);
+        });
       }
     });
 
