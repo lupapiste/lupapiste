@@ -59,7 +59,7 @@
     (comp (set-kind :address :street) wfs/feature-to-address)
     (wfs/post wfs/maasto
       (wfs/query {"typeName" "oso:Osoitenimi"}
-        (wfs/ogc-sort-by [(municipality-prop)])
+        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop)] "asc")
         (wfs/ogc-filter
           (wfs/ogc-and
             (wfs/property-is-like "oso:katunimi" (str street "*"))
@@ -73,7 +73,7 @@
     (comp (set-kind :address :street-number) wfs/feature-to-address)
     (wfs/post wfs/maasto
       (wfs/query {"typeName" "oso:Osoitenimi"}
-        (wfs/ogc-sort-by [(municipality-prop)])
+        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop)] "asc")
         (wfs/ogc-filter
           (wfs/ogc-and
             (wfs/property-is-like "oso:katunimi"   (str street "*"))
@@ -85,7 +85,7 @@
     (comp (set-kind :address :street-city) wfs/feature-to-address)
     (wfs/post wfs/maasto
       (wfs/query {"typeName" "oso:Osoitenimi"}
-        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero"])
+        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop)] "asc")
         (wfs/ogc-filter
           (wfs/ogc-and
             (wfs/property-is-like "oso:katunimi" (str street "*"))
@@ -97,7 +97,7 @@
     (comp (set-kind :address :street-number-city) wfs/feature-to-address)
     (wfs/post wfs/maasto
       (wfs/query {"typeName" "oso:Osoitenimi"}
-        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero"])
+        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop)] "asc")
         (wfs/ogc-filter
           (wfs/ogc-and
             (wfs/property-is-like "oso:katunimi" (str street "*"))
