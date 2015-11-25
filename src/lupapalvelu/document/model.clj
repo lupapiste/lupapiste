@@ -495,7 +495,7 @@
 
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId turvakieltokytkin
                          companyName companyId allowDirectMarketing
-                         fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults?]}]
+                         fise fiseKelpoisuus degree graduatingYear]} & {:keys [with-hetu with-empty-defaults?]}]
   {:pre [(good-flag? turvakieltokytkin) (good-flag? allowDirectMarketing)]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
@@ -515,11 +515,11 @@
        :patevyys {:koulutusvalinta              (wrap degree)
                   :koulutus                     nil
                   :valmistumisvuosi             (wrap graduatingYear)
-                  :fise                         (wrap fise)}
+                  :fise                         (wrap fise)
+                  :fiseKelpoisuus               (wrap fiseKelpoisuus)}
        :patevyys-tyonjohtaja {:koulutusvalinta  (wrap degree)
                               :koulutus         nil
-                              :valmistumisvuosi (wrap graduatingYear)
-                              :fise             (wrap fise)}}
+                              :valmistumisvuosi (wrap graduatingYear)}}
       util/strip-nils
       util/strip-empty-maps
       tools/wrapped)))

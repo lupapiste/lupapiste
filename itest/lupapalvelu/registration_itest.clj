@@ -78,6 +78,7 @@
          new-user-architect true
          new-user-graduatingYear "1978"
          new-user-fise "foobar"
+         new-user-fise-kelpoisuus "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"
          new-user-degree "diplomi-insin\u00f6\u00f6ri"
          cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
                    :headers {"x-anti-forgery-token" "123"}}
@@ -93,6 +94,7 @@
                                   :architect new-user-architect
                                   :graduatingYear new-user-graduatingYear
                                   :fise new-user-fise
+                                  :fiseKelpoisuus new-user-fise-kelpoisuus
                                   :degree new-user-degree})
          user-id (:id resp) => string?
          email (last-email)
@@ -115,6 +117,7 @@
          (fact "architect" (:architect new-user) => new-user-architect)
          (fact "graduatingYear" (:graduatingYear new-user) => new-user-graduatingYear)
          (fact "fise" (:fise new-user) => new-user-fise)
+         (fact "fiseKelpoisuus" (:fiseKelpoisuus new-user) => new-user-fise-kelpoisuus)
          (fact "degree" (:degree new-user) => new-user-degree)
          (fact "notification" (:notification new-user) => {:messageI18nkey "user.notification.firstLogin.message"
                                                            :titleI18nkey "user.notification.firstLogin.title"})))

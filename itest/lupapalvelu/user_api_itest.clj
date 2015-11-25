@@ -191,6 +191,7 @@
                 :degree "kirvesmies"
                 :graduatingYear "2000"
                 :fise "f"
+                :fiseKelpoisuus "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"
                 :companyName "cn"
                 :companyId "1060155-5"}]
       (apply command teppo :update-user (flatten (seq data))) => ok?

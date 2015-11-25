@@ -1,12 +1,13 @@
 (ns lupapalvelu.application-bulletins-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [clj-time.coerce :as c]
+            [clj-time.core :as t]
+            [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [noir.response :as resp]
             [sade.core :refer :all]
+            [sade.util :as util]
             [slingshot.slingshot :refer [try+]]
             [sade.strings :as ss]
-            [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.mongo :as mongo]
@@ -112,15 +113,20 @@
     (when-not (every? true? files-found)
       (fail :error.invalid-files-attached-to-comment))))
 
+(defn- in-proclaimed-period
+  [version]
+  (let [[starts ends] (->> (util/select-values version [:proclamationStartsAt :proclamationEndsAt])
+                           (map c/from-long))
+        ends     (t/plus ends (t/days 1))]
+    (t/within? (t/interval starts ends) (c/from-long (now)))))
+
 (defn- bulletin-can-be-commented
   ([{{bulletin-id :bulletinId} :data}]
-   (let [{bulletin-state :bulletinState} (mongo/select-one :application-bulletins {:_id bulletin-id} {:bulletinState 1})] ; TODO: use get-bulletin, add projection
-     ; 1. in proclaimed state
-     (when-not (= bulletin-state "proclaimed")
-       (fail :error.bulletin-not-in-commentable-state))
-     ; 2. commenting time period has not passed
-     ; TODO
-     ))
+   (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
+         bulletin   (mongo/select-one :application-bulletins {:_id bulletin-id} projection)] ; TODO: use get-bulletin, add projection
+     (if-not (and (= (:bulletinState bulletin) "proclaimed")
+                  (in-proclaimed-period (-> bulletin :versions last)))
+       (fail :error.bulletin-not-in-commentable-state))))
   ([command _]
     (bulletin-can-be-commented command)))
 
