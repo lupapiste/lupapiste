@@ -139,6 +139,34 @@
   [:err "unknown-type"])
 
 ;;
+;; Group validation
+;;
+
+(declare find-by-name)
+
+(defn good-postal-code?
+    "Empty postal code is always valid. The idea here is to avoid
+  false negatives and this should be a safe assumption since the
+  required fields are enforced on the schema level."
+  [postal-code country]
+  (if (= country "FIN")
+    (or (ss/blank? postal-code) (v/finnish-zip? postal-code))
+    true))
+
+(defmulti validate-group (fn [_ _ _ element]
+                           (:validator element)))
+
+(defmethod validate-group :address
+  [info data path element]
+  (let [{:keys [postinumero maa]} (tools/unwrapped data)]
+    (when-not (good-postal-code? postinumero maa)
+      {:path     (-> (map keyword path) (concat [:postinumero]))
+       :element  (assoc (find-by-name (:body element) [:postinumero]) :locKey "postinumero")
+       :document (:document info)
+       :result   [:warn "bad-postal-code"]})))
+
+
+;;
 ;; Neue api:
 ;;
 
@@ -176,15 +204,18 @@
       (dissoc result :data))))
 
 (defn- validate-fields [application info k data path]
-  (let [current-path (if k (conj path (name k)) path)]
-    (if (contains? data :value)
-      (let [element (keywordize-keys (find-by-name (:schema-body info) current-path))
-            result  (validate-field application element (:value data))]
-        (->validation-result info data current-path element result))
-      (filter
-        (comp not nil?)
-        (map (fn [[k2 v2]]
-               (validate-fields application info k2 v2 current-path)) data)))))
+  (let [current-path (if k (conj path (name k)) path)
+        element (if (not-empty current-path)
+                  (keywordize-keys (find-by-name (:schema-body info) current-path))
+                  {})]
+    (cond
+      (:validator element) (validate-group info data current-path element)
+      (contains? data :value) (let [result  (validate-field application element (:value data))]
+                                (->validation-result info data current-path element result))
+      :else (filter
+             (comp not nil?)
+             (map (fn [[k2 v2]]
+                    (validate-fields application info k2 v2 current-path)) data)))))
 
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))

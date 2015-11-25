@@ -1,6 +1,8 @@
 (ns lupapalvelu.document.document-field-validators
-  (:require [clojure.string :as s]
-            [lupapalvelu.document.validator :refer :all]))
+  (:require [sade.strings :as ss]
+            [lupapalvelu.document.validator :refer :all]
+            [lupapalvelu.document.vrk :refer [rakennus-schemas]]
+            [sade.validators :refer [finnish-zip?]]))
 
 ;; Huom!
 ;;  Toisteisille kentille :fieldsiin pitaa antaa path muodossa [:rakennuksenOmistajat :0 :omistajalaji] eli numero mukaan.
@@ -21,4 +23,5 @@
            :fail [["other" nil]
                   ["other" ""]
                   ["other" "    "]]}}
-  (and (= "other" buildingId) (s/blank? muu)))
+  (and (= "other" buildingId) (ss/blank? muu)))
+
