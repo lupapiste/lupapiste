@@ -3,13 +3,13 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
   var self = this;
   self.params = params;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+
   self.bulletin = params.bulletin;
 
   self.versions = ko.pureComputed(function() {
     return self.bulletin() ? self.bulletin().versions : [];
   });
-
-  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   ko.computed(function() {
     var id = self.params.appId();
@@ -19,7 +19,7 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
   });
 
   self.versionCommentsCount = function(version) {
-    var versionComments = self.bulletin().comments[version.id];
-    return versionComments ? versionComments.length + " " + loc("unit.kpl") : "";
+    var versionCommentsLength = util.getIn(self, ["bulletin", "comments", version.id, "length"]);
+    return versionCommentsLength ? versionCommentsLength + " " + loc("unit.kpl") : "";
   };
 };

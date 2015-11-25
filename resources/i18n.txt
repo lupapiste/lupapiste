@@ -38,7 +38,7 @@ bulletin.comment.delivery:  Päätös toimitetaan osoitteeseen:
 
 bulletin.actions.comment:  Haluan kommentoida ilmoitusta
 
-bulletin.versions.history: Julkaishistoria
+bulletin.versions.history: Julkaisuhistoria
 bulletin.versions.published: Julkaistu
 bulletin.versions.state: Tila
 bulletin.versions.comments: Mielipiteitä
