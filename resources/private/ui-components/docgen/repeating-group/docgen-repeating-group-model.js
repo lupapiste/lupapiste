@@ -2,7 +2,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   "use strict";
   var self = this;
 
-  self.service = lupapisteApp.services.documentDataService;
+  var service = lupapisteApp.services.documentDataService;
 
   self.documentId = params.documentId;
   self.applicationId = params.applicationId;
@@ -12,7 +12,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.appendLabel = self.i18npath.concat("_append_label").join(".");
   self.copyLabel = self.i18npath.concat("_copy_label").join(".");
 
-  self.groups = self.service.getInDocument(params.documentId, self.path).model;
+  self.groups = service.getInDocument(params.documentId, self.path).model;
 
   self.indicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});
@@ -25,16 +25,17 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
 
   self.groupsRemovable = function(schema) {
     return !_.some(schema.body, "readonly") &&
-            lupapisteApp.models.applicationAuthModel.ok(self.service.getRemoveCommand(params.documentId));
+      !params.isDisabled &&
+      lupapisteApp.models.applicationAuthModel.ok(service.getRemoveCommand(params.documentId));
   };
 
   self.updatable = function() {
-    return lupapisteApp.models.applicationAuthModel.ok(self.service.getUpdateCommand(params.documentId));
+    return lupapisteApp.models.applicationAuthModel.ok(service.getUpdateCommand(params.documentId));
   };
 
   self.removeGroup = function(group) {
     var removeFn = function () {
-      self.service.removeRepeatingGroup(params.documentId, params.path, group.index, self.indicator, self.result);
+      service.removeRepeatingGroup(params.documentId, params.path, group.index, self.indicator, self.result);
     };
     var message = "document.delete." + params.schema.type + ".subGroup.message";
     hub.send("show-dialog", {ltitle: "document.delete.header",
@@ -45,12 +46,12 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   };
 
   self.addGroup = function() {
-    self.service.addRepeatingGroup(params.documentId, params.path);
+    service.addRepeatingGroup(params.documentId, params.path);
   };
 
   self.duplicateLastGroup = function() {
     var sourceIndex = _.parseInt( _(self.groups()).map("index").max() );
-    self.service.copyRepeatingGroup(params.documentId, params.path, sourceIndex, self.indicator, self.result);
+    service.copyRepeatingGroup(params.documentId, params.path, sourceIndex, self.indicator, self.result);
   };
 
   var addOneIfEmpty = function(groups) {

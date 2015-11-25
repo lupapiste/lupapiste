@@ -420,7 +420,7 @@
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "fise" :type :string :required false}
                {:name "fiseKelpoisuus" :type :select :sortBy :displayname :i18nkey "fisekelpoisuus" :size "l" :required false :body fise-kelpoisuus-lajit}
-               {:name "patevyysluokka" :type :select :sortBy nil :required false
+               {:name "patevyysluokka" :type :select :sortBy nil :required true
                 :body [{:name "AA"}
                        {:name "A"}
                        {:name "B"}
@@ -445,7 +445,7 @@
 
 (def kuntaroolikoodi [{:name "kuntaRoolikoodi"
                        :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi._group_label"
-                       :type :select :sortBy :displayname
+                       :type :select :sortBy :displayname :required true
                        :body [{:name "GEO-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.GEO-suunnittelija"}
                               {:name "LVI-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.LVI-suunnittelija"}
                               {:name "IV-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.IV-suunnittelija"}
