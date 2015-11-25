@@ -4,19 +4,21 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   self.params = params;
   self.rows = ko.observableArray();
   self.autoupdatedRows = ko.observableArray();
+  
+  var service = lupapisteApp.services.documentDataService;
 
   // inherit from DocgenGroupModel
   ko.utils.extend(self, new LUPAPISTE.DocgenRepeatingGroupModel(params));
 
   self.rows = ko.computed(function() {
     return _.reject(self.groups(), function(group) {
-      return self.service.getValueIn(group, ["autoupdated"]);
+      return service.getValueIn(group, ["autoupdated"]);
     });
   });
 
   self.autoupdatedRows = ko.computed(function() {
     return _.filter(self.groups(), function(group) {
-      return self.service.getValueIn(group, ["autoupdated"]);
+      return service.getValueIn(group, ["autoupdated"]);
     });
   });
 

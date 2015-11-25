@@ -357,7 +357,7 @@
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "fise" :type :string :required false}
                {:name "patevyys" :type :string :required false}
-               {:name "patevyysluokka" :type :select :sortBy nil :required false
+               {:name "patevyysluokka" :type :select :sortBy nil :required true
                 :body [{:name "AA"}
                        {:name "A"}
                        {:name "B"}
@@ -381,7 +381,7 @@
 
 (def kuntaroolikoodi [{:name "kuntaRoolikoodi"
                        :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi._group_label"
-                       :type :select :sortBy :displayname
+                       :type :select :sortBy :displayname :required true
                        :body [{:name "GEO-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.GEO-suunnittelija"}
                               {:name "LVI-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.LVI-suunnittelija"}
                               {:name "IV-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.IV-suunnittelija"}
@@ -561,12 +561,12 @@
                  :henkilo-body henkilo-maksaja)
                {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
-(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :label false :i18nkey "huoneistot.muutostapa" :emit [:muutostapaChanged]
+(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :size "s" :label false :i18nkey "huoneistot.muutostapa" :emit [:muutostapaChanged]
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
                         {:name "muutos"}]})
 
-(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :label false :i18nkey "huoneistot.huoneistoTyyppi" :listen [:muutostapaChanged]
+(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :size "s" :label false :i18nkey "huoneistot.huoneistoTyyppi" :listen [:muutostapaChanged]
                    :body [{:name "asuinhuoneisto"}
                           {:name "toimitila"}
                           {:name "ei tiedossa" :i18nkey "huoneistot.huoneistoTyyppi.eiTiedossa"}]}
@@ -574,7 +574,7 @@
                    {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true :label false :i18nkey "huoneistot.huoneistonumero" :listen [:muutostapaChanged]}
                    {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "t" :label false :i18nkey "huoneistot.jakokirjain" :listen [:muutostapaChanged]}
                    {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "t" :label false :i18nkey "huoneistot.huoneluku" :listen [:muutostapaChanged]}
-                   {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :label false :i18nkey "huoneistot.keittionTyyppi" :listen [:muutostapaChanged]
+                   {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :size "s" :label false :i18nkey "huoneistot.keittionTyyppi" :listen [:muutostapaChanged]
                     :body [{:name "keittio"}
                            {:name "keittokomero"}
                            {:name "keittotila"}
@@ -597,7 +597,7 @@
                       :copybutton true
                       :body huoneistoRow})
 
-(def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi" :required true
+(def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi"
                   :body [{:name "betoni"}
                          {:name "kipsi"}
                          {:name "puu"}
@@ -607,7 +607,7 @@
                          {:name "paperi"}
                          {:name "maa"}]})
 
-(def vaarallinenainetyyppi {:name "vaarallinenainetyyppi" :type :select :i18nkey "vaarallinenainetyyppi" :required true
+(def vaarallinenainetyyppi {:name "vaarallinenainetyyppi" :type :select :i18nkey "vaarallinenainetyyppi"
                             :body [{:name "maalit-lakat-liimat-ja-liuottimet"}
                                    {:name "aerosolipullot"}
                                    {:name "painekyllastetty-puu"}
@@ -619,13 +619,13 @@
                                    {:name "eristeiden-ja-tiivistemassojen-haitalliset-jatteet"}
                                    {:name "sahko-ja-elektroniikkaromu"}]})
 
-(def jateyksikko {:name "yksikko" :i18nkey "jateyksikko" :type :select :required true
+(def jateyksikko {:name "yksikko" :i18nkey "jateyksikko" :type :select
                   :body [{:name "kg"}
                          {:name "tonni"}
                          {:name "m2"}
                          {:name "m3"}]})
 
-(def rakennusjatemaara {:name "maara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "s"})
+(def rakennusjatemaara {:name "maara" :type :string :subtype :decimal :uicomponent :docgen-string :min 0 :max 9999999 :size "s"})
 
 (def rakennusjatesuunnitelmaRow [(assoc rakennusjatemaara :name "suunniteltuMaara")
                                  jateyksikko
@@ -636,7 +636,7 @@
                                   (assoc rakennusjatemaara :name "painoT")
                                   {:name "jatteenToimituspaikka" :type :string :max-len 50}])
 
-(def rakennusjateselvitysRow [(assoc rakennusjatemaara :name "suunniteltuMaara" :readonly true :required false)
+(def rakennusjateselvitysRow [(assoc rakennusjatemaara :name "suunniteltuMaara" :readonly true)
                               (assoc rakennusjatemaara :name "toteutunutMaara")
                               (assoc jateyksikko :readonly true)
                               (assoc rakennusjatemaara :name "painoT")
@@ -662,13 +662,13 @@
                             :type :group
                             :uicomponent :constructionWasteReport
                             :approvable false
-                            :body [{:name "suunniteltuJate"      
+                            :body [{:name "suunniteltuJate"
                                     :type :table
                                     :repeating true
                                     :repeating-init-empty true
                                     :body (body (assoc jatetyyppi :readonly true) rakennusjateselvitysRow)}
-                                   {:name "suunnittelematonJate" 
-                                    :type :table 
+                                   {:name "suunnittelematonJate"
+                                    :type :table
                                     :repeating true
                                     :body (body jatetyyppi rakennusjateselvitysUusiRow)}]}
                            {:name "vaarallisetAineet"
@@ -676,14 +676,14 @@
                             :type :group
                             :uicomponent :constructionWasteReport
                             :approvable false
-                            :body [{:name "suunniteltuJate"      
-                                    :type :table 
-                                    :repeating true 
+                            :body [{:name "suunniteltuJate"
+                                    :type :table
+                                    :repeating true
                                     :repeating-init-empty true
                                     :body (body (assoc vaarallinenainetyyppi :readonly true) rakennusjateselvitysRow)}
-                                   {:name "suunnittelematonJate" 
-                                    :type :table 
-                                    :repeating true 
+                                   {:name "suunnittelematonJate"
+                                    :type :table
+                                    :repeating true
                                     :body (body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}])
 
 

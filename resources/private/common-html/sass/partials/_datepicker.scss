@@ -25,34 +25,8 @@
   }
   .ui-icon.ui-icon-circle-triangle-w {
     position: relative;
-
-    &:after {
-      position: absolute;
-      content: " ";
-      display: block;
-      top: 3px;
-      left: 0;
-      width: 0;
-      height: 0;
-      border-top: 5px solid transparent;
-      border-right: 10px solid black;
-      border-bottom: 5px solid transparent;
-    }
   }
   .ui-icon.ui-icon-circle-triangle-e {
     position: relative;
-
-    &:after {
-      position: absolute;
-      content: " ";
-      display: block;
-      top: 3px;
-      left: 0;
-      width: 0;
-      height: 0;
-      border-top: 5px solid transparent;
-      border-left: 10px solid black;
-      border-bottom: 5px solid transparent;
-    }
   }
 }
