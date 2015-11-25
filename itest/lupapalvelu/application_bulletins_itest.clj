@@ -75,7 +75,7 @@
         (let [bulletin (query-bulletin pena (:id oulu-app))]
           (keys bulletin) => (just [:id :_applicantIndex :address :applicant :attachments :versionId
                                     :bulletinState :documents :location :modified :municipality
-                                    :primaryOperation :propertyId :state :stateSeq] :in-any-order)
+                                    :primaryOperation :propertyId :state :stateSeq :canComment] :in-any-order)
           (fact "bulletin state is 'proclaimed'"
             (:bulletinState bulletin) => "proclaimed")
           (fact "each documents has schema definition"
