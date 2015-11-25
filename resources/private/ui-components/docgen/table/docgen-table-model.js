@@ -9,6 +9,8 @@ LUPAPISTE.DocgenTableModel = function(params) {
   self.groupLabel = params.i18npath.concat("_group_label").join(".");
   self.groupHelp = params.schema["group-help"] && params.i18npath.concat(params.schema["group-help"]).join(".");
 
+  self.authModel = params.authModel;
+
   self.columnHeaders = _.map(params.schema.body, function(schema) {
     return {
       name: params.i18npath.concat(schema.name),
