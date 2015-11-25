@@ -95,7 +95,7 @@
 
              (fact "FISEpatevyyskortti" (->> (xml/select lp-xml_220 [:osapuolettieto :Suunnittelija])
                                              (map cr/all-of)
-                                             (every? (comp string? :FISEpatevyyskortti))) => true))
+                                             (every? #(and (-> % :FISEpatevyyskortti string?) (-> % :FISEkelpoisuus string?)))) => true))
 
            (when (= :v2 validate-tyonjohtaja-type)
              (fact "In KRYSP 2.1.6, :vainTamaHankeKytkin was added (Yhteiset schema was updated to 2.1.5 and tyonjohtaja along with it)"

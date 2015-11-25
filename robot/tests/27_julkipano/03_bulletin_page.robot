@@ -32,5 +32,3 @@ Tabs are visible
   Element should be visible  xpath=//ul[@id='bulletin-tabs']/li/a[@data-test-id='bulletin-open-info-tab']
   Element should be visible  xpath=//ul[@id='bulletin-tabs']/li/a[@data-test-id='bulletin-open-attachments-tab']
 
-
-

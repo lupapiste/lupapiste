@@ -690,10 +690,10 @@
                  :postinumero          {:value ""}
                  :postitoimipaikannimi {:value "city"}}
         :patevyys {:fise {:value ""}
+                   :fiseKelpoisuus {:value ""}
                    :koulutusvalinta {:value ""}
                    :valmistumisvuosi {:value ""}}
-        :patevyys-tyonjohtaja {:fise {:value ""}
-                               :koulutusvalinta {:value ""}
+        :patevyys-tyonjohtaja {:koulutusvalinta {:value ""}
                                :valmistumisvuosi {:value ""}}
         :yritys   {:liikeJaYhteisoTunnus {:value ""}
                    :yritysnimi {:value ""}}} )

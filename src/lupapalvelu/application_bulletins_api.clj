@@ -125,7 +125,8 @@
    (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
          bulletin   (mongo/select-one :application-bulletins {:_id bulletin-id} projection)] ; TODO: use get-bulletin, add projection
      (if-not (and (= (:bulletinState bulletin) "proclaimed")
-                  (in-proclaimed-period (-> bulletin :versions last)))
+                  (in-proclaimed-period (-> bulletin :versions last))
+                  (not-empty (vetuma/vetuma-session)))
        (fail :error.bulletin-not-in-commentable-state))))
   ([command _]
     (bulletin-can-be-commented command)))
