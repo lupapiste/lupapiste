@@ -87,7 +87,7 @@ Open project application
 
 Foreman history should have text X times
   [Arguments]  ${text}  ${times}
-  Xpath Should Match X Times  //foreman-history//td[text()='${text}']  ${times}
+  Xpath Should Match X Times  //foreman-history//td[contains(., '${text}')]  ${times}
 
 Foreman can see the first related construction info on the second foreman application
   Open foreman application  1
