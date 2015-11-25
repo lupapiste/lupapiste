@@ -50,4 +50,72 @@ LUPAPISTE.LocationModel = function() {
 
   }).extend({ throttle: 100 });
 
+  self.addressData = function(a) {
+    return self.addressString(a ? a.street + " " + a.number : "");
+  };
+
+  //
+  // Concurrency control:
+  //
+
+  self.requestContext = new RequestContext();
+  self.beginUpdateRequest = function() {
+    self.requestContext.begin();
+    return self;
+  };
+
+  self.searchPropertyId = function(x, y) {
+    locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId);
+    return self;
+  };
+
+  self.searchAddress = function(x, y) {
+    locationSearch.addressByPoint(self.requestContext, x, y, self.addressData);
+    return self;
+  };
+
+
+  self.searchPointByAddressOrPropertyId = function(value) {
+    if (!_.isEmpty(value)) {
+      self.reset();
+      return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value);
+    } else {
+      return self;
+    }
+  };
+
+  self.searchPointByAddress = function(address) {
+    locationSearch.pointByAddress(self.requestContext, address, function(result) {
+        if (result.data && result.data.length > 0) {
+          var data = result.data[0],
+              x = data.location.x,
+              y = data.location.y;
+          self
+            .x(x).y(y)
+            .addressData(data)
+            .beginUpdateRequest()
+            .searchPropertyId(x, y);
+          hub.send("location-found");
+        }
+      });
+    return self;
+  };
+
+  self.searchPointByPropertyId = function(id) {
+    locationSearch.pointByPropertyId(self.requestContext, id, function(result) {
+        if (result.data && result.data.length > 0) {
+          var data = result.data[0],
+              x = data.x,
+              y = data.y;
+          self
+            .x(x).y(y)
+            .propertyId(util.prop.toDbFormat(id))
+            .beginUpdateRequest()
+            .searchAddress(x, y);
+          hub.send("location-found");
+        }
+      });
+    return self;
+  };
+
 };

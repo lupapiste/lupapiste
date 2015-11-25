@@ -49,7 +49,6 @@
 
     self.x = self.locationModel.x;
     self.y = self.locationModel.y;
-    self.addressData = ko.observable(null);
     self.addressString = self.locationModel.addressString;
     self.propertyId = self.locationModel.propertyId;
     self.propertyIdHumanReadable = self.locationModel.propertyIdHumanReadable;
@@ -83,7 +82,6 @@
              ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
                                                   !_.isBlank(self.addressString()) &&
                                                   !_.isBlank(self.search()) &&
-                                                  self.addressData() &&
                                                   self.x() !== 0 && self.y() !== 0));
       });
 
@@ -110,10 +108,6 @@
       return self;
     };
 
-    self.addressData.subscribe(function(a) {
-      self.addressString(a ? a.street + " " + a.number : "");
-    });
-
     self.propertyId.subscribe(function(id) {
       if (id) {
         if (!util.prop.isPropertyIdInDbFormat(id)) {
@@ -132,7 +126,6 @@
     });
 
     self.resetLocation = function() {
-      self.addressData(null);
       self.locationModel.reset();
       return self;
     };
@@ -167,12 +160,10 @@
       return self;
     };
 
-    self.setXY = function(x, y) {
+    self.setPoint = function(x, y) {
       if (self.map) {
         self.map.clear().add({x: x, y: y}, true);
       }
-      self.x(x);
-      self.y(y);
       return self;
     };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
@@ -185,13 +176,6 @@
     });
 
     //
-    // Concurrency control:
-    //
-
-    self.requestContext = new RequestContext();
-    self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
-
-    //
     // Callbacks:
     //
 
@@ -199,10 +183,10 @@
 
     self.click = function(x, y) {
       hub.send("track-click", {category:"Create", label:"map", event:"mapClick"});
-      self
-        .resetLocation()
-        .setXY(x, y)
-        .beginUpdateRequest()
+      self.resetLocation().setPoint(x, y);
+      self.x(x);
+      self.y(y);
+      self.locationModel.beginUpdateRequest()
         .searchPropertyId(x, y)
         .searchAddress(x, y);
       return false;
@@ -212,10 +196,8 @@
 
     self.searchNow = function() {
       hub.send("track-click", {category:"Create", label:"map", event:"searchLocation"});
-      self
-        .resetLocation()
-        .clearMap()
-        .beginUpdateRequest()
+      self.clearMap().resetLocation();
+      self.locationModel.beginUpdateRequest()
         .searchPointByAddressOrPropertyId(self.search());
       return false;
     };
@@ -314,67 +296,13 @@
         .appendTo(ul);
     };
 
-    self.searchPointByAddressOrPropertyId = function(value) {
-      if (!_.isEmpty(value)) {
-        return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value);
-      } else {
-        return self;
-      }
-    };
-
     hub.subscribe("location-found", function() {
       var zoomLevel = 14;
       if (_.isBlank(self.propertyId)) {
         zoomLevel = 13;
       }
-      self.center(self.x(), self.y(), zoomLevel);
+      self.setPoint(self.x(), self.y()).center(self.x(), self.y(), zoomLevel);
     });
-
-    self.searchPointByAddress = function(address) {
-      self.resetLocation();
-      locationSearch.pointByAddress(self.requestContext, address, function(result) {
-          if (result.data && result.data.length > 0) {
-            var data = result.data[0],
-                x = data.location.x,
-                y = data.location.y;
-            self
-              .setXY(x, y)
-              .addressData(data)
-              .beginUpdateRequest()
-              .searchPropertyId(x, y);
-            hub.send("location-found");
-          }
-        });
-      return self;
-    };
-
-    self.searchPointByPropertyId = function(id) {
-      self.resetLocation();
-      locationSearch.pointByPropertyId(self.requestContext, id, function(result) {
-          if (result.data && result.data.length > 0) {
-            var data = result.data[0],
-                x = data.x,
-                y = data.y;
-            self
-              .setXY(x, y)
-              .propertyId(util.prop.toDbFormat(id))
-              .beginUpdateRequest()
-              .searchAddress(x, y);
-            hub.send("location-found");
-          }
-        });
-      return self;
-    };
-
-    self.searchPropertyId = function(x, y) {
-      locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId);
-      return self;
-    };
-
-    self.searchAddress = function(x, y) {
-      locationSearch.addressByPoint(self.requestContext, x, y, self.addressData);
-      return self;
-    };
 
     self.updateOrganizationDetails = function(operation) {
       if (self.municipalityCode() && operation) {
