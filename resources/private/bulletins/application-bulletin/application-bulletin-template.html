@@ -103,21 +103,21 @@
             <!-- This is where the generated documents will be placed. -->
         </div>
       </div>
-      <!-- ko if: auth.ok("add-bulletin-comment") -->
-        <!-- ko if: authenticated -->
-        <div data-bind="component: { name: 'bulletin-comment',
-                                     params: { bulletin: $data,
-                                               versionId: versionId,
-                                               userInfo: userInfo,
-                                               fileuploadService: fileuploadService } }"></div>
-        <!-- /ko -->
-        <!-- ko if: !authenticated() -->
-        <div class="container">
-          <div data-bind="component: { name: 'vetuma-init',
-                                       params: vetumaParams }"></div>
-        </div>
-        <!-- /ko -->
+      
+      <!-- ko if: authenticated -->
+      <div data-bind="component: { name: 'bulletin-comment',
+                                   params: { bulletin: $data,
+                                             versionId: versionId,
+                                             userInfo: userInfo,
+                                             fileuploadService: fileuploadService } }"></div>
       <!-- /ko -->
+      <!-- ko if: !authenticated() -->
+      <div class="container">
+        <div data-bind="component: { name: 'vetuma-init',
+                                     params: vetumaParams }"></div>
+      </div>
+      <!-- /ko -->
+
     </script>
   </section>
 </body>
