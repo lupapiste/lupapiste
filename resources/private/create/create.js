@@ -340,14 +340,14 @@
       };
 
       ajax.command("create-application", params)
-      .processing(self.processing)
-      .pending(self.pending)
-      .success(function(data) {
-        self.clear();
-        params.id = data.id;
-        pageutil.openApplicationPage(params);
-      })
-      .call();
+        .processing(self.processing)
+        .pending(self.pending)
+        .success(function(data) {
+          self.clear();
+          params.id = data.id;
+          pageutil.openApplicationPage(params);
+        })
+        .call();
       hub.send("track-click", {category:"Create", label:"tree", event:"newApplication"});
     };
     self.createApplication = self.create.bind(self, false);
