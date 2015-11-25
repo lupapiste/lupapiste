@@ -90,16 +90,12 @@
       if (!self.creatingAppWithPrevPermit) {
         if (code) {
           self.findOperations(code);
-        }
-      }
-    });
-
-    self.updateMunicipality = function(code) {
       municipalities.findById(code, function(m) {
         self.municipalitySupported(m ? true : false);
       });
-      return self;
-    };
+        }
+      }
+    });
 
     self.findOperations = function(code) {
       municipalities.operationsForMunicipality(code, function(operations) {
