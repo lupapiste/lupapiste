@@ -17,8 +17,8 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   });
   self.path = params.path;
 
-  self.service = lupapisteApp.services.documentDataService;
-  self.maaraalaTunnus = self.service.getInDocument(self.documentId, self.path).model;
+  var service = lupapisteApp.services.documentDataService;
+  self.maaraalaTunnus = service.getInDocument(self.documentId, self.path).model;
 
   self.isMaaraala = params.isMaaraala;
   if (!_.isEmpty(self.maaraalaTunnus())) {
