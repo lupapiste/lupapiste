@@ -7,6 +7,7 @@
             [sade.strings :as ss]
             [sade.property :as p]
             [sade.validators :as validators]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -648,7 +649,7 @@
          {$set {(str linkpermit-id ".apptype") apptype}}))))
 
 (defn- merge-versions [old-versions {:keys [user version] :as new-version}]
-  (let [next-ver (lupapalvelu.attachment/next-attachment-version (:version (last old-versions)) user)]
+  (let [next-ver (attachment/next-attachment-version (:version (last old-versions)) user)]
     (concat old-versions [(assoc new-version :version next-ver)])))
 
 (defn- fixed-versions [required-flags-migration-time attachments-backup updated-attachments]
