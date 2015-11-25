@@ -1,8 +1,6 @@
 ;(function() {
   "use strict";
 
-  function isBlank(s) { var v = _.isFunction(s) ? s() : s; return !v || /^\s*$/.test(v); }
-
   var tree;
 
   function operations2tree(e) {
@@ -80,11 +78,11 @@
     self.needMorePrevPermitInfo = ko.observable(false);
     self.creatingAppWithPrevPermitOk = ko.computed(function() {
       return !self.processing() && !self.pending() &&
-             !isBlank(self.kuntalupatunnusFromPrevPermit()) &&
-             !isBlank(self.selectedPrevPermitOrganization()) &&
+             !_.isBlank(self.kuntalupatunnusFromPrevPermit()) &&
+             !_.isBlank(self.selectedPrevPermitOrganization()) &&
              ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
-                                                  !isBlank(self.addressString()) &&
-                                                  !isBlank(self.search()) &&
+                                                  !_.isBlank(self.addressString()) &&
+                                                  !_.isBlank(self.search()) &&
                                                   self.addressData() &&
                                                   self.x() !== 0 && self.y() !== 0));
       });
@@ -179,8 +177,8 @@
     };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
-    self.addressOk = ko.pureComputed(function() { return self.municipalityCode() && !isBlank(self.addressString()); });
-    self.propertyIdOk = ko.pureComputed(function() { return !isBlank(self.propertyId()) && util.prop.isPropertyId(self.propertyId());});
+    self.addressOk = ko.pureComputed(function() { return self.municipalityCode() && !_.isBlank(self.addressString()); });
+    self.propertyIdOk = ko.pureComputed(function() { return !_.isBlank(self.propertyId()) && util.prop.isPropertyId(self.propertyId());});
 
     self.createOK = ko.pureComputed(function() {
       return self.propertyIdOk() && self.addressOk() && !self.processing();
@@ -422,7 +420,7 @@
         x: self.x(),
         address: self.addressString(),
         propertyId: self.propertyId(),
-        messages: isBlank(self.message()) ? [] : [self.message()]
+        messages: _.isBlank(self.message()) ? [] : [self.message()]
       };
 
       ajax.command("create-application", params)
