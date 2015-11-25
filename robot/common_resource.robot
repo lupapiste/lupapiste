@@ -540,8 +540,12 @@ Prepare first request
 
 Selected Municipality Is
   [Arguments]  ${municipality}
-  ${selectedMuni} =  Get Element Attribute  xpath=//span[@data-test-id='create-municipality-select']@data-test-value
+  ${selectedMuni} =  Get Element Attribute  xpath=//div[@id="popup-id"]//span[@data-test-id='create-municipality-select']@data-test-value
   Should Be Equal  ${selectedMuni}  ${municipality}
+
+Address is not blank
+  ${address} =  Get Element Attribute  xpath=//div[@id="popup-id"]//input[@data-test-id='create-address']@value
+  Should Not Be Equal As Strings  ${address}  ${EMPTY}
 
 Do prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
@@ -550,6 +554,7 @@ Do prepare new request
   Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
   Textfield Value Should Be  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']  ${propertyId}
   Wait Until  Selected Municipality Is  ${municipality}
+  Wait Until  Address is not blank
   Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
   Set animations off
 
