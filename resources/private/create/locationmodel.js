@@ -4,14 +4,14 @@ LUPAPISTE.LocationModel = function() {
   var floatProperties = ["x", "y"];
   var falseyProperties = ["addressString", "propertyId", "municipalityCode"];
 
-  self.activeReques = null;
+  self.activeRequest = null;
   self.processing = ko.observable(false);
 
   self.x = ko.observable(0);
   self.y = ko.observable(0);
-  self.addressString = ko.observable(null);
+  self.addressString = ko.observable("");
 
-  self.propertyId = ko.observable(null);
+  self.propertyId = ko.observable("");
   self.propertyIdHumanReadable = ko.pureComputed({
     read: function(){
       return self.propertyId() ? util.prop.toHumanFormat(self.propertyId()) : "";
@@ -21,14 +21,16 @@ LUPAPISTE.LocationModel = function() {
     },
     owner: self});
 
-  self.municipalityCode = ko.observable(null);
+  self.municipalityCode = ko.observable("");
 
   self.municipalityName = ko.pureComputed(function() {
-    if (self.municipalityCode()) {
-      return loc(["municipality", self.municipalityCode()]);
-    }
-    return "";
+    return self.municipalityCode() ? loc(["municipality", self.municipalityCode()]): "";
   });
+
+  self.reset = function() {
+    self.x(0).y(0).addressString("").propertyId("").municipalityCode("");
+  };
+
 
   ko.computed(function() {
     var missingDetails = [];
@@ -46,7 +48,6 @@ LUPAPISTE.LocationModel = function() {
 
     console.log("missingDetails", missingDetails);
 
-
-  });
+  }).extend({ throttle: 100 });
 
 };

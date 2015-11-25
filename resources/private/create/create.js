@@ -93,7 +93,8 @@
                                                   self.x() !== 0 && self.y() !== 0));
       });
 
-    self.municipalityCode.subscribe(function(code) {
+    ko.computed(function() {
+      var code = self.municipalityCode();
       if (!self.creatingAppWithPrevPermit) {
         if (code) {
           self.findOperations(code);
@@ -139,6 +140,12 @@
       }
     });
 
+    self.resetLocation = function() {
+      self.addressData(null);
+      self.locationModel.reset();
+      return self;
+    };
+
     self.clear = function() {
       var zoomLevel = 2;
       if (self.map) {
@@ -153,13 +160,8 @@
       }
       self.creatingAppWithPrevPermit = false;
       return self
+        .resetLocation()
         .search("")
-        .x(0)
-        .y(0)
-        .addressData(null)
-        .addressString("")
-        .propertyId(null)
-        .municipalityCode(null)
         .message("")
         .requestType(null)
         .kuntalupatunnusFromPrevPermit(null)
@@ -168,8 +170,21 @@
         .needMorePrevPermitInfo(false);
     };
 
-    self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0); };
-    self.setXY = function(x, y) { if (self.map) { self.map.clear().add({x: x, y: y}, true); } return self.x(x).y(y); };
+    self.clearMap = function() {
+      if (self.map) {
+        self.map.clear();
+      }
+      return self;
+    };
+
+    self.setXY = function(x, y) {
+      if (self.map) {
+        self.map.clear().add({x: x, y: y}, true);
+      }
+      self.x(x);
+      self.y(y);
+      return self;
+    };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
     self.addressOk = ko.pureComputed(function() { return self.municipalityCode() && !isBlank(self.addressString()); });
@@ -195,10 +210,8 @@
     self.click = function(x, y) {
       hub.send("track-click", {category:"Create", label:"map", event:"mapClick"});
       self
+        .resetLocation()
         .setXY(x, y)
-        .addressData(null)
-        .propertyId(null)
-        .municipalityCode(null)
         .beginUpdateRequest()
         .searchPropertyId(x, y)
         .searchAddress(x, y);
@@ -210,10 +223,8 @@
     self.searchNow = function() {
       hub.send("track-click", {category:"Create", label:"map", event:"searchLocation"});
       self
-        .resetXY()
-        .addressData(null)
-        .propertyId(null)
-        .municipalityCode(null)
+        .resetLocation()
+        .clearMap()
         .beginUpdateRequest()
         .searchPointByAddressOrPropertyId(self.search());
       return false;
