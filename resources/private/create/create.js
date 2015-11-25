@@ -74,7 +74,6 @@
     self.pending = ko.observable(false);
     self.operation = ko.observable();
     self.message = ko.observable("");
-    self.requestType = ko.observable();
 
     // Observables for creating new application from previous permit
     self.creatingAppWithPrevPermit = false;
@@ -163,7 +162,6 @@
         .resetLocation()
         .search("")
         .message("")
-        .requestType(null)
         .kuntalupatunnusFromPrevPermit(null)
         .organizationOptions([])
         .selectedPrevPermitOrganization(null)
