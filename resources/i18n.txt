@@ -1,2 +1,0 @@
-postinumero: Postinumero
-error.bad-postal-code: Postinumero on virheellinen
