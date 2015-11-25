@@ -13,7 +13,7 @@
         <th data-bind="ltext: 'bulletin.versions.published'"></th>
         <th data-bind="ltext: 'bulletin.versions.state'"></th>
         <th data-bind="ltext: 'bulletin.versions.comments'"></th>
-        <th colspan="3" data-bind="ltext: 'bulletin.versions.actions'"></th>
+        <th data-bind="ltext: 'bulletin.versions.actions'"></th>
       </tr>
     </thead>
     <tbody data-bind="foreach: versions">
@@ -21,9 +21,11 @@
         <td data-bind="dateString: modified"></td>
         <td data-bind="ltext: 'bulletin.state.' + bulletinState"></td>
         <td data-bind="text: $parent.versionCommentsCount($data)"></td>
-        <td data-bind="ltext: 'edit'"></td>
-        <td data-bind="ltext: 'bulletin.versions.comments.show'"></td>
-        <td data-bind="ltext: 'bulletin.versions.version.show'"></td>
+        <td class="actions">
+          <a href="#" class="link-btn" data-bind="ltext: 'edit'"></a>
+          <a href="#" class="link-btn" data-bind="ltext: 'bulletin.versions.comments.show'"></a>
+          <a href="#" class="link-btn" data-bind="ltext: 'bulletin.versions.version.show'"></a>
+        </td>
       </tr>
     </tbody>
   </table>
