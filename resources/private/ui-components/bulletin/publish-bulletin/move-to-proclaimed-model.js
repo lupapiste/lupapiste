@@ -7,11 +7,13 @@ LUPAPISTE.MoveToProclaimedModel = function (params) {
   self.appId = params.appId;
   self.canPublish = params.canPublish;
   self.bulletinState = params.bulletinState;
-
   self.proclamationStartsAt = ko.observable();
   self.proclamationEndsAt   = ko.observable();
   self.proclamationText     = ko.observable();
   self.proclaimAgain        = ko.observable(false);
+
+  self.proclamationStartsAt.extend({ beforeThan: self.proclamationEndsAt });
+  self.proclamationEndsAt.extend({ afterThan: self.proclamationStartsAt });
 
   self.pending = ko.observable();
 
