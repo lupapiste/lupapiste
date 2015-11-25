@@ -160,6 +160,7 @@
       // Statements
       requestForStatementModel.setApplicationId(app.id);
       requestForStatementModel.setFunctionCode(app.tosFunction);
+      requestForStatementModel.load();
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);

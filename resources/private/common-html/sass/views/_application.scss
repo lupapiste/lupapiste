@@ -475,10 +475,13 @@ $app-gray-darkest: $gray187;
   }
 }
 
-#dialog-request-for-statement {
-    button {
-        margin-top: $marginL;
-    }
+#invite-statement-givers-section {
+  margin-top: 24px;
+  margin-bottom: 24px;
+
+  button {
+      margin-top: $marginL;
+  }
 }
 
 .form-input.textarea.high {
