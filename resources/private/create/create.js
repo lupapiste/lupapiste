@@ -229,7 +229,6 @@
     // Return function that calls every function provided as arguments to 'comp'.
     function comp() {
       var fs = arguments;
-      var self = this;
       return function() {
         var args = arguments;
         _.each(fs, function(f) {
