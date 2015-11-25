@@ -50,8 +50,24 @@ LUPAPISTE.LocationModel = function() {
 
   }).extend({ throttle: 100 });
 
-  self.addressData = function(a) {
-    return self.addressString(a ? a.street + " " + a.number : "");
+  self.setAddress = function(a) {
+    return self.municipalityCode(a.municipality).addressString(a ? a.street + " " + a.number : "");
+  };
+
+  self.setPropertyId = function(id) {
+    var currentMuni = self.municipalityCode();
+    self.propertyId(id);
+    if (!currentMuni || !_.startsWith(id, currentMuni)) {
+      ajax.query("municipality-by-property-id", {propertyId: id})
+        .success(function(resp) {
+          self.municipalityCode(resp.municipality);
+        })
+        .error(function(e) {
+          error("Failed to find municipality", id, e);
+        })
+        .call();
+    }
+    return self;
   };
 
   //
@@ -64,13 +80,17 @@ LUPAPISTE.LocationModel = function() {
     return self;
   };
 
+  //
+  // Search API
+  //
+
   self.searchPropertyId = function(x, y) {
-    locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId);
+    locationSearch.propertyIdByPoint(self.requestContext, x, y, self.setPropertyId);
     return self;
   };
 
   self.searchAddress = function(x, y) {
-    locationSearch.addressByPoint(self.requestContext, x, y, self.addressData);
+    locationSearch.addressByPoint(self.requestContext, x, y, self.setAddress);
     return self;
   };
 
@@ -95,7 +115,7 @@ LUPAPISTE.LocationModel = function() {
               y = data.location.y;
           self
             .x(x).y(y)
-            .addressData(data)
+            .setAddress(data)
             .beginUpdateRequest()
             .searchPropertyId(x, y);
           hub.send("location-found");
@@ -112,7 +132,7 @@ LUPAPISTE.LocationModel = function() {
               y = data.y;
           self
             .x(x).y(y)
-            .propertyId(util.prop.toDbFormat(id))
+            .setPropertyId(util.prop.toDbFormat(id))
             .beginUpdateRequest()
             .searchAddress(x, y);
           hub.send("location-found");

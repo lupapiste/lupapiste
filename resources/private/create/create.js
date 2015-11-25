@@ -90,9 +90,9 @@
       if (!self.creatingAppWithPrevPermit) {
         if (code) {
           self.findOperations(code);
-      municipalities.findById(code, function(m) {
-        self.municipalitySupported(m ? true : false);
-      });
+          municipalities.findById(code, function(m) {
+            self.municipalitySupported(m ? true : false);
+          });
         }
       }
     });
@@ -103,23 +103,6 @@
       });
       return self;
     };
-
-    self.propertyId.subscribe(function(id) {
-      if (id) {
-        if (!util.prop.isPropertyIdInDbFormat(id)) {
-          throw "Invalid format: " + id;
-        }
-        ajax.query("municipality-by-property-id", {propertyId: id})
-          .success(function(resp) {
-            var code = resp.municipality;
-            self.municipalityCode(code).updateMunicipality(code, self.municipality);
-          })
-          .error(function(e) {
-            error("Failed to find municipality", id, e);
-          })
-          .call();
-      }
-    });
 
     self.resetLocation = function() {
       self.locationModel.reset();
