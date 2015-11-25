@@ -12,7 +12,7 @@
       <p data-bind="ltext: 'bulletin.application.canNotPublish'"></p>
       <!-- /ko -->
       <!-- ko if: showBulletinState -->
-      <p>
+      <p data-test-id="bulletin-state-paragraph">
         <span data-bind="ltext: 'bulletin.state.label'"></span>
         <span class="bulletin-state" data-bind="ltext: showBulletinState"></span>
       </p>

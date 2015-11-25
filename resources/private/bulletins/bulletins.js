@@ -5,6 +5,12 @@
                                            allowAnonymous: true,
                                            showUserMenu: false,
                                            componentPages: ["bulletin"]});
+
+  window.lupapisteApp.models.applicationAuthModel = authorization.create();
+  window.lupapisteApp.services.documentDataService = new LUPAPISTE.DocumentDataService({
+    readOnly: true
+  });
+
   $(function() {
     lupapisteApp.domReady();
     lupapisteApp.setTitle("Julkipano");
@@ -20,8 +26,8 @@
         {name: "autocomplete-states"},
         {name: "bulletin-comment"},
         {name: "bulletin-comment-box"},
-        {name: "begin-vetuma-auth-button"},
         {name: "bulletin-attachments-tab"},
+        {name: "begin-vetuma-auth-button"},
         {name: "bulletin-info-tab"}];
 
     _.forEach(components, function(component) {
@@ -33,11 +39,12 @@
 
     $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService(),
                                     vetumaService: new LUPAPISTE.VetumaService(),
-                                    fileuploadService: new LUPAPISTE.FileuploadService()});
+                                    fileuploadService: new LUPAPISTE.FileuploadService(),
+                                    auth: window.lupapisteApp.models.applicationAuthModel});
 
-    var errorType = pageutil.subPage() === pageutil.lastSubPage() ?
-      undefined :
-      pageutil.lastSubPage();
+    var errorType = _.includes(["error", "cancel"], pageutil.lastSubPage()) ?
+      pageutil.lastSubPage() :
+      undefined;
     hub.send("vetumaService::authenticateUser", {errorType: errorType});
   });
 })();

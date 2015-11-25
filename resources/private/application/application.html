@@ -1402,6 +1402,16 @@
                                            enable: $root.authorization.ok('create-task')"></button>
                     </div>
                     <!-- /ko -->
+                    <!-- ko if: $root.hasConstructionTimeDocs -->
+                    <div id="construction-time-documents" data-bind="visible: selectedTabName() === 'tasks' && $root.authorization.ok('tasks-tab-visible')">
+                      <p data-bind="lhtml: 'required.field.desc'"></p>
+                      <div class="application_section">
+                        <div id="constructionTimeDocgen" class="docgen-content">
+                          <!-- This is where generated document will be placed. -->
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /ko -->
                 </div>
             </div>
             <div id="boxes">

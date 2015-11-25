@@ -25,6 +25,9 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     self.selectedTab(params.pagePath()[1]);
   });
 
+  self.authenticated = params.authenticated;
+  self.auth = params.auth;
+  self.auth.refreshWithoutAppId({bulletinId: self.bulletinId()});
   self.tabComponentParams = ko.pureComputed(function() {
     return {bulletin: self.bulletin,
             attachments: self.bulletin() ? self.bulletin().attachments : []};
@@ -56,12 +59,12 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     $("#vetuma-init")[0].click();
   };
 
-  self.scrollToCommenting = function() {
-    $("#bulletin-comment")[0].scrollIntoView(true);
-  };
-
   self.openTab = function(tab) {
     pageutil.openPage("bulletin", [self.bulletinId(), tab]);
+  };
+
+  self.scrollToCommenting = function() {
+    $("#bulletin-comment")[0].scrollIntoView(true);
   };
 
   hub.send("bulletinService::fetchBulletin", {id: self.bulletinId()});

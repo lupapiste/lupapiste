@@ -8,18 +8,6 @@
 (when (sade.env/feature? :publish-bulletin)
   (apply-remote-minimal)
 
-  (defn- send-comment [apikey id version-id comment & [filename]]
-    (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
-          uploadfile  (io/file filename)
-          uri         (str (server-address) "/api/raw/add-bulletin-comment")]
-      (http-post uri
-                 {:headers {"authorization" (str "apikey=" apikey)}
-                  :multipart [{:name "bulletin-id" :content id}
-                              {:name "bulletin-version-id" :content version-id}
-                              {:name "bulletin-comment-field" :content comment}
-                              {:name "files[]" :content uploadfile}]
-                  :throw-exceptions false})))
-
   (facts "Publishing bulletins"
     (let [app (create-and-submit-application pena :operation "jatteen-keraystoiminta"
                                                   :propertyId oulu-property-id
@@ -40,23 +28,24 @@
       (fact "Regular user can't publish bulletin"
         (command pena :publish-bulletin :id app-id) => fail?)))
 
-  (facts "Add comment for published bulletin"
-    (let [app (create-and-submit-application pena :operation "lannan-varastointi"
+  (facts* "Add comment for published bulletin"
+    (let [app (create-and-send-application sonja :operation "lannan-varastointi"
                                              :propertyId sipoo-property-id
                                              :x 406898.625 :y 6684125.375
-                                             :address "Hitantine 108")
-          _ (command sonja :publish-bulletin :id (:id app))
+                                             :address "Hitantine 108"
+                                             :state "sent")
+          _ (command sonja :publish-bulletin :id (:id app)) => ok?
           old-bulletin (:bulletin (query pena :bulletin :bulletinId (:id app)))
           _ (command sonja :publish-bulletin :id (:id app))
           bulletin (:bulletin (query pena :bulletin :bulletinId (:id app)))]
       (fact "unable to add comment for older version"
-        (:body (decode-response (send-comment sonja-id (:id app) (:versionId old-bulletin) "foobar"))) => {:ok false :text "error.invalid-version-id"})
+        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId old-bulletin) :comment "foobar") => {:ok false :text "error.invalid-version-id"})
       (fact "unable to add empty comment"
-        (:body (decode-response (send-comment sonja-id (:id app) (:versionId bulletin) ""))) => {:ok false :text "error.empty-comment"})
+        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId bulletin) :comment "") => {:ok false :text "error.empty-comment"})
       (fact "unable to add comment for unknown bulletin"
-        (:body (decode-response (send-comment sonja-id "not-found!" (:versionId bulletin) "foobar"))) => {:ok false :text "error.invalid-bulletin-id"})
+        (command sonja :add-bulletin-comment :bulletinId "not-found" :bulletinVersionId (:versionId bulletin) :comment "foobar") => {:ok false :text "error.invalid-bulletin-id"})
       (fact "approve comment for latest version"
-        (:body (decode-response (send-comment sonja-id (:id app) (:versionId bulletin) "foobar"))) => ok?)))
+        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId bulletin) :comment "foobar") => ok?)))
 
   (clear-collection "application-bulletins")
 

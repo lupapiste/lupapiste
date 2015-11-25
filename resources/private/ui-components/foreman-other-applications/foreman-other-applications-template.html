@@ -12,7 +12,7 @@
             <th></th>
           </tr>
           <tr>
-            <!-- ko foreach: { data: params.subSchema.body, as: 'header' } -->
+            <!-- ko foreach: { data: params.schema.body, as: 'header' } -->
             <th data-bind="visible: !header.hidden, ltext: header.i18nkey"></th>
             <!-- /ko -->
             <th></th>
@@ -20,9 +20,14 @@
         </thead>
         <tbody data-bind="foreach: { data: autoupdatedRows, as: 'row' }">
           <tr>
-            <!-- ko foreach: { data: row, as: 'column' } -->
-            <td data-bind="visible: !column.schema.hidden,
-                           component: { name: column.schema.uicomponent, params: column }"></td>
+            <!-- ko foreach: { data: $component.subSchemasAutoupdated, as: 'schema' } -->
+            <td data-bind="visible: !schema.hidden,
+                           component: { name: uicomponent,
+                                        params: { schema: $data,
+                                                  path: $parent.path.concat(name),
+                                                  i18npath: i18npath,
+                                                  applicationId: applicationId,
+                                                  documentId: documentId }}"></td>
             <!-- /ko -->
             <td class="action-column">
             </td>
@@ -31,26 +36,40 @@
 
         <tbody data-bind="visible: rows().length === 0 && autoupdatedRows().length === 0">
           <tr>
-            <td data-bind="attr: { colspan: params.subSchema.body.length }, ltext: 'tyonjohtaja.noProjects'"></td>
+            <td data-bind="attr: { colspan: params.schema.body.length }, ltext: 'tyonjohtaja.noProjects'"></td>
           </tr>
         </tbody>
 
         <tbody data-bind="foreach: { data: rows, as: 'row' }">
           <tr>
-            <!-- ko foreach: { data: row, as: 'column' } -->
-            <td data-bind="visible: !column.schema.hidden,
-                           component: { name: column.schema.uicomponent, params: column },
-                           attr: { 'data-test-col-name': column.schema.name }"></td>
+            <!-- ko foreach: { data: $component.subSchemas, as: 'schema' } -->
+            <td data-bind="visible: !schema.hidden,
+                           component: { name: uicomponent,
+                                        params: { schema: $data,
+                                                  path: $parent.path.concat(name),
+                                                  i18npath: i18npath,
+                                                  applicationId: applicationId,
+                                                  documentId: documentId }},
+                           attr: { 'data-test-col-name': schema.name }"></td>
             <!-- /ko -->
+
             <td class="action-column">
-              <span class="icon remove-grey inline-right" data-bind="click: $parent.removeRow,
-                                                                     visible: $parent.params.authModel.ok('remove-document-data')"></span>
+              <i class="lupicon-remove primary" data-bind="click: $component.removeGroup,
+                                                           visible: $component.groupsRemovable($data)"></i>
+
             </td>
           </tr>
         </tbody>
       </table>
-      <button data-bind="ltext: 'muutHankkeet.addHanke', click: addRow,
-                                                         visible: params.authModel.ok('update-doc')"></button>
+      <div class="button-group" data-bind="visible: updatable()">
+        <span data-bind="saveIndicator: indicator"></span>
+        <span data-bind="component: { name: 'docgen-button',
+                                     params: { id: groupId + '-append-button', 
+                                               className: 'positive', 
+                                               icon: 'lupicon-circle-plus', 
+                                               label: appendLabel, 
+                                               clickFn: addGroup }}">
+        </span>
     </script>
   </section>
 </body>
