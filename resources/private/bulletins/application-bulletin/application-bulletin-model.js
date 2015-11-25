@@ -26,8 +26,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   });
 
   self.authenticated = params.authenticated;
-  self.auth = params.auth;
-  self.auth.refreshWithoutAppId({bulletinId: self.bulletinId()});
+  
   self.tabComponentParams = ko.pureComputed(function() {
     return {bulletin: self.bulletin,
             attachments: self.bulletin() ? self.bulletin().attachments : []};
@@ -47,7 +46,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
       self.proclamationEndsAt(bulletin.proclamationEndsAt);
       map.clear().updateSize().center(location[0], location[1]).add({x: location[0], y: location[1]});
       // This can be called only once
-      docgen.displayDocuments("#bulletinDocgen", bulletin, bulletin.documents, {ok: function() { return false; }}, {disabled: true});
+      docgen.displayDocuments("#bulletinDocgen", bulletin, bulletin.documents, params.auth, {disabled: true});
     }
   });
 
@@ -66,6 +65,10 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   self.scrollToCommenting = function() {
     $("#bulletin-comment")[0].scrollIntoView(true);
   };
+
+  self.canCommentCurrentBulletin = ko.pureComputed(function() {
+    return util.getIn(self, ["bulletin", "canComment"]);
+  });
 
   hub.send("bulletinService::fetchBulletin", {id: self.bulletinId()});
 
