@@ -1,0 +1,43 @@
+.bulletin-comment {
+  border: 1px solid $grid-border-color;
+  margin-bottom: $grid-margin;
+  .bulletin-comment__header {
+    background-color: $gray221;
+    height: $grid-min-height;
+    padding: $marginS $marginM;
+  }
+  .bulletin-comment__index {
+    margin-right: $marginS;
+    &:after {
+      content: ".";
+    }
+  }
+  .bulletin-comment__name {
+    &:after {
+      content: ",";
+    }
+  }
+  .bulletin-comment__body {
+    padding: $marginS $marginM;
+  }
+  .bulletin-comment__attachments {
+    margin-bottom: $marginS;
+    display: table;
+    .bulletin-comment__attachment {
+      display: table-row;
+      .bulletin-comment_attachment-link {
+        display: table-cell;
+        padding-right: $grid-margin;
+      }
+      .bulletin-comment__attachment-type {
+        display: table-cell;
+        &:after {
+          content: ")";
+        }
+        &:before {
+          content: "(";
+        }
+      }
+    }
+  }
+}
