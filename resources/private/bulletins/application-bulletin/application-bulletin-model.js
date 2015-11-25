@@ -26,7 +26,6 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   });
 
   self.authenticated = params.authenticated;
-  self.auth = params.auth;
   
   self.tabComponentParams = ko.pureComputed(function() {
     return {bulletin: self.bulletin,
@@ -47,7 +46,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
       self.proclamationEndsAt(bulletin.proclamationEndsAt);
       map.clear().updateSize().center(location[0], location[1]).add({x: location[0], y: location[1]});
       // This can be called only once
-      docgen.displayDocuments("#bulletinDocgen", bulletin, bulletin.documents, {ok: function() { return false; }}, {disabled: true});
+      docgen.displayDocuments("#bulletinDocgen", bulletin, bulletin.documents, params.auth, {disabled: true});
     }
   });
 
