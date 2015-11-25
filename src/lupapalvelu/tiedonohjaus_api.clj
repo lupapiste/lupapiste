@@ -71,15 +71,11 @@
         code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]
     (if code-valid?
       (let [updated-attachments (map #(t/document-with-updated-metadata % orgId functionCode) (:attachments application))
-            updated-verdicts (map #(t/document-with-updated-metadata % orgId functionCode "p\u00e4\u00e4t\u00f6s") (:verdicts application))
-            updated-statements (map #(t/document-with-updated-metadata % orgId functionCode "lausunto") (:statements application))
             {updated-metadata :metadata} (t/document-with-updated-metadata application orgId functionCode "hakemus")]
         (action/update-application command
                                    {$set {:modified created
                                           :tosFunction functionCode
                                           :metadata updated-metadata
-                                          :verdicts updated-verdicts
-                                          :statements updated-statements
                                           :attachments updated-attachments}}))
       (fail "Invalid TOS function code"))))
 
@@ -137,22 +133,6 @@
     (catch RuntimeException e
       (timbre/error e)
       (fail "error.invalid.metadata"))))
-
-(defcommand store-tos-metadata-for-verdict
-  {:parameters [:id verdictId metadata]
-   :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
-   :feature :tiedonohjaus}
-  [command]
-  (update-application-child-metadata! command :verdicts verdictId metadata))
-
-(defcommand store-tos-metadata-for-statement
-  {:parameters [:id statementId metadata]
-   :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
-   :feature :tiedonohjaus}
-  [command]
-  (update-application-child-metadata! command :statements statementId metadata))
 
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
