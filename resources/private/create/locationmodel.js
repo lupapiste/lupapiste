@@ -12,14 +12,9 @@ LUPAPISTE.LocationModel = function() {
   self.addressString = ko.observable("");
 
   self.propertyId = ko.observable("");
-  self.propertyIdHumanReadable = ko.pureComputed({
-    read: function(){
+  self.propertyIdHumanReadable = ko.pureComputed(function() {
       return self.propertyId() ? util.prop.toHumanFormat(self.propertyId()) : "";
-    },
-    write: function(value) {
-      self.propertyId(util.prop.toDbFormat(value));
-    },
-    owner: self});
+    });
 
   self.municipalityCode = ko.observable("");
 
