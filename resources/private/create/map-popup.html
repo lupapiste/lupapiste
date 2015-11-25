@@ -14,7 +14,7 @@
          <div class="form-entry">
            <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
            <input data-bind="textInput: propertyIdHumanReadable,
-                             readonly: !lupapisteApp.models.currentUser.isAuthority() || !useManualEntry()"
+                             readonly: !(useManualEntry() && lupapisteApp.models.currentUser.isAuthority())"
                   data-test-id="create-property-id" type="text"
                   class="form-input text bottom-marginM">
          </div>
