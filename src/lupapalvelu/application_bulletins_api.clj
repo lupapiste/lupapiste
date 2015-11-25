@@ -113,14 +113,16 @@
       (fail :error.invalid-files-attached-to-comment))))
 
 (defn- bulletin-can-be-commented
-  [{{bulletin-id :bulletinId} :data} _]
-  (let [{bulletin-state :bulletinState} (mongo/select-one :application-bulletins {:_id bulletin-id} {:bulletinState 1})] ; TODO: use get-bulletin, add projection
-    ; 1. in proclaimed state
-    (when-not (= bulletin-state "proclaimed")
-      (fail :error.bulletin-not-in-commentable-state))
-    ; 2. commenting time period has not passed
-    ; TODO
-    ))
+  ([{{bulletin-id :bulletinId} :data}]
+   (let [{bulletin-state :bulletinState} (mongo/select-one :application-bulletins {:_id bulletin-id} {:bulletinState 1})] ; TODO: use get-bulletin, add projection
+     ; 1. in proclaimed state
+     (when-not (= bulletin-state "proclaimed")
+       (fail :error.bulletin-not-in-commentable-state))
+     ; 2. commenting time period has not passed
+     ; TODO
+     ))
+  ([command _]
+    (bulletin-can-be-commented command)))
 
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
 
@@ -200,20 +202,22 @@
     (ok)))
 
 (defquery bulletin
-  {:parameters [bulletinId]
-   :feature :publish-bulletin
-   :user-roles #{:anonymous}}
   "return only latest version for application bulletin"
+  {:parameters [bulletinId]
+   :feature    :publish-bulletin
+   :user-roles #{:anonymous}}
+  [command]
   (if-let [bulletin (bulletins/get-bulletin bulletinId)]
-    (let [latest-version (-> bulletin :versions first)
-          bulletin-version (assoc latest-version :versionId (:id latest-version)
-                                                 :id (:id bulletin))
-          append-schema-fn (fn [{schema-info :schema-info :as doc}]
-                             (assoc doc :schema (schemas/get-schema schema-info)))
-          bulletin (-> bulletin-version
-                       (update-in [:documents] (partial map append-schema-fn))
-                       (assoc :stateSeq bulletins/bulletin-state-seq))]
-      (ok :bulletin bulletin))
+    (let [latest-version       (-> bulletin :versions first)
+          bulletin-version     (assoc latest-version :versionId (:id latest-version)
+                                                     :id (:id bulletin))
+          append-schema-fn     (fn [{schema-info :schema-info :as doc}]
+                                 (assoc doc :schema (schemas/get-schema schema-info)))
+          bulletin             (-> bulletin-version
+                                   (update-in [:documents] (partial map append-schema-fn))
+                                   (assoc :stateSeq bulletins/bulletin-state-seq))
+          bulletin-commentable (= (bulletin-can-be-commented command) nil)]
+      (ok :bulletin (merge bulletin {:canComment bulletin-commentable})))
     (fail :error.bulletin.not-found)))
 
 (defquery bulletin-versions
