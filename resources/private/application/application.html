@@ -1138,7 +1138,7 @@
 
                     <!-- Bulletin tab -->
                     <!-- ko if: selectedTabName() === 'bulletin' && features.enabled('publish-bulletin') -->
-                    <div id="application-bulletin-tab" data-bind="with: application, attr: {'class': features.enabled('publish-bulletin') ? 'feature' : ''}" class="tab-content">
+                    <div id="application-bulletin-tab" data-bind="with: application, css: {'feature': features.enabled('publish-bulletin')}" class="tab-content">
                         <div data-bind="component: {name: 'bulletin-tab',
                                                     params: {appId: id,
                                                              appState: state,
