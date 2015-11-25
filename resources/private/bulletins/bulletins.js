@@ -6,7 +6,7 @@
                                            showUserMenu: false,
                                            componentPages: ["bulletin"]});
 
-  window.lupapisteApp.models.applicationAuthModel = authorization.create();
+  window.lupapisteApp.models.applicationAuthModel = { ok: function() { return false; } };
   window.lupapisteApp.services.documentDataService = new LUPAPISTE.DocumentDataService({
     readOnly: true
   });
