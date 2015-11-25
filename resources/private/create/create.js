@@ -47,6 +47,8 @@
 
     self.search = ko.observable("");
 
+    self.searching = self.locationModel.processing;
+
     self.x = self.locationModel.x;
     self.y = self.locationModel.y;
     self.addressString = self.locationModel.addressString;
@@ -69,9 +71,9 @@
 
     self.municipalitySupported = ko.observable(true);
     self.processing = ko.observable(false);
+    self.pending = ko.observable(false);
     self.inforequestsDisabled = ko.observable(false);
     self.newApplicationsDisabled = ko.observable(false);
-    self.pending = ko.observable(false);
     self.operation = ko.observable();
     self.message = ko.observable("");
 

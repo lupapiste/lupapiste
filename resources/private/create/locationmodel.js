@@ -4,7 +4,6 @@ LUPAPISTE.LocationModel = function() {
   var floatProperties = ["x", "y"];
   var falseyProperties = ["addressString", "propertyId", "municipalityCode"];
 
-  self.activeRequest = null;
   self.processing = ko.observable(false);
 
   self.x = ko.observable(0);
@@ -79,13 +78,15 @@ LUPAPISTE.LocationModel = function() {
   // Search API
   //
 
+  self.onError = _.noop; // TODO send indicator event
+
   self.searchPropertyId = function(x, y) {
-    locationSearch.propertyIdByPoint(self.requestContext, x, y, self.setPropertyId);
+    locationSearch.propertyIdByPoint(self.requestContext, x, y, self.setPropertyId, self.onError, self.processing);
     return self;
   };
 
   self.searchAddress = function(x, y) {
-    locationSearch.addressByPoint(self.requestContext, x, y, self.setAddress);
+    locationSearch.addressByPoint(self.requestContext, x, y, self.setAddress, self.onError, self.processing);
     return self;
   };
 
@@ -115,7 +116,7 @@ LUPAPISTE.LocationModel = function() {
             .searchPropertyId(x, y);
           hub.send("location-found");
         }
-      });
+      }, self.onError, self.processing);
     return self;
   };
 
@@ -132,7 +133,7 @@ LUPAPISTE.LocationModel = function() {
             .searchAddress(x, y);
           hub.send("location-found");
         }
-      });
+      }, self.onError, self.processing);
     return self;
   };
 

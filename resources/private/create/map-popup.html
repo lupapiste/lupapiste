@@ -18,13 +18,14 @@
 
          <div class="form-entry">
            <label class="form-label" data-bind="ltext: 'newRequest.address'"></label>
-           <input data-bind="textInput: addressString"
+           <input data-bind="textInput: addressString, css: {'ui-autocomplete-loading' : searching}"
                   data-test-id="create-address" type="text" class="form-input text"/>
          </div>
 
          <div >
            <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
-           <span data-bind="text: municipalityName, attr: {'data-test-value': municipalityCode}" data-test-id="create-municipality-select"></span>
+           <span data-bind="text: municipalityName, attr: {'data-test-value': municipalityCode}, css: {'ui-autocomplete-loading' : searching}"
+                 data-test-id="create-municipality-select"></span>
          </div>
 
 
