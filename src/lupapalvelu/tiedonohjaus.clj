@@ -46,10 +46,12 @@
   (memo/ttl get-metadata-for-document-from-toj
             :ttl/threshold 10000))
 
-(defn document-with-updated-metadata [document organization tos-function & [type]]
-  (let [document-type (or type (:type document))]
-    (->> (metadata-for-document organization tos-function document-type)
-         (assoc document :metadata))))
+(defn document-with-updated-metadata [{:keys [metadata] :as document} organization tos-function & [type]]
+  (let [document-type (or type (:type document))
+        existing-tila (:tila metadata)
+        new-metadata (cond-> (metadata-for-document organization tos-function document-type)
+                             existing-tila (assoc :tila (keyword existing-tila)))]
+    (assoc document :metadata new-metadata)))
 
 (defn- get-tos-toimenpide-for-application-state-from-toj [organization tos-function state]
   (if (env/feature? :tiedonohjaus)

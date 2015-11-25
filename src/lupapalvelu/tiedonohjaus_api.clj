@@ -73,7 +73,7 @@
       (let [updated-attachments (map #(t/document-with-updated-metadata % orgId functionCode) (:attachments application))
             updated-verdicts (map #(t/document-with-updated-metadata % orgId functionCode "p\u00e4\u00e4t\u00f6s") (:verdicts application))
             updated-statements (map #(t/document-with-updated-metadata % orgId functionCode "lausunto") (:statements application))
-            updated-metadata (t/metadata-for-document orgId functionCode "hakemus")]
+            {updated-metadata :metadata} (t/document-with-updated-metadata application orgId functionCode "hakemus")]
         (action/update-application command
                                    {$set {:modified created
                                           :tosFunction functionCode
