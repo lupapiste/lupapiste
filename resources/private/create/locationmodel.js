@@ -31,7 +31,7 @@ LUPAPISTE.LocationModel = function() {
     self.x(0).y(0).addressString("").propertyId("").municipalityCode("");
   };
 
-
+  // TODO remove when done
   ko.computed(function() {
     var missingDetails = [];
 

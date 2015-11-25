@@ -324,6 +324,7 @@
     };
 
     self.searchPointByAddress = function(address) {
+      self.resetLocation();
       locationSearch.pointByAddress(self.requestContext, address, function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
@@ -341,6 +342,7 @@
     };
 
     self.searchPointByPropertyId = function(id) {
+      self.resetLocation();
       locationSearch.pointByPropertyId(self.requestContext, id, function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
