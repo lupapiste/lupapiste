@@ -22,11 +22,11 @@
         existing-app  (domain/get-application-as {:verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user :include-canceled-apps? false)]
 
     (if existing-app
-      (resp/json (ok :id (:id existing-app) :text :already-existing-application))
+      (ok :id (:id existing-app) :text :already-existing-application)
       (let [result (prev-permit/fetch-prev-application! command)]
         (if (ok? result)
-          (resp/json (assoc result :text :created-new-application))
-          (resp/status 404 (resp/json (select-keys result [:ok :text]))))))))
+          (ok :id (:id result) :text :created-new-application)
+          (select-keys result [:ok :text]))))))
 
 (defcommand create-application-from-previous-permit
   {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus]
@@ -45,7 +45,8 @@
   ;; Check if we have in database an application of same organization that has a verdict with the given kuntalupatunnus.
   (if-let [app-with-verdict (domain/get-application-as
                               {:organization organizationId
-                               :verdicts     {$elemMatch {:kuntalupatunnus kuntalupatunnus}}}
+                               :verdicts     {$elemMatch {:kuntalupatunnus kuntalupatunnus}}
+                               :permitType :R}
                               user
                               :include-canceled-apps? false)]
     ;;Found an application of same organization that has a verdict with the given kuntalupatunnus -> Open it.

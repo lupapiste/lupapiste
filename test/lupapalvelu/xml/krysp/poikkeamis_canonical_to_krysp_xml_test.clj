@@ -53,7 +53,16 @@
       (let [lp-xml    (cr/strip-xml-namespaces (xml/parse xml_214_s))]
         (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil
         (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosala]) => "200"))
-    ))
+
+    (facts "221"
+      (let [lp-xml     (cr/strip-xml-namespaces (xml/parse xml_221_s))
+            ilmoittaja (xml/select (cr/strip-xml-namespaces (xml/parse xml_221_s)))]
+        (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil
+        (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosala]) => "200"
+        (xml/get-text lp-xml [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli :henkilo :osoite :valtioKansainvalinen]) => "FIN"
+        (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava"
+        ))))
+
 
 (facts "Poikkeaminen without toimenpidetieto is valid"
   (let [canonical (poikkeus-application-to-canonical poikkari-hakemus "fi")

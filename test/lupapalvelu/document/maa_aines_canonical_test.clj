@@ -113,6 +113,7 @@
         (:teksti osoitenimi) => "Murskaajankatu 5"
         (:postinumero postiosoite) => "36570"
         (:postitoimipaikannimi postiosoite) => "Kaivanto"
+        (:valtioKansainvalinen postiosoite) => "FIN"
         (:etunimi maksaja) => "Pekka"
         (:sukunimi maksaja) => "Borga"
         (:henkilotunnus maksaja) => "210281-9988"

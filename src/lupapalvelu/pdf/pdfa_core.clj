@@ -689,7 +689,7 @@
                      :page-height height
                      :pdf-writer pdf-writer)
                    (or item [:paragraph item]))]
-      (debug "doc-elm: " (class doc-elm))
+      (trace "doc-elm: " (class doc-elm))
       ;(.setFont doc-elm (font font-style))
     (.add doc doc-elm))))
 
@@ -850,7 +850,7 @@
   (register-fonts doc-meta)
   (let [[doc width height temp-stream output-stream pdf-writer] (setup-doc doc-meta out)]
     (doseq [item content]
-      (debug "item:" item)
+      (trace "item:" item)
       (add-item item doc-meta width height doc pdf-writer))
     (.close doc)
     (when (and (not (:pages doc-meta)) (not (empty? (:page-events doc-meta)))) (write-pages temp-stream output-stream))

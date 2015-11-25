@@ -145,7 +145,8 @@
 (defcommand delete-statement
   {:parameters [id statementId]
    :states     #{:open :submitted :complementNeeded}
-   :user-roles #{:authority}}
+   :user-roles #{:authority}
+   :pre-checks [statement-not-given]}
   [command]
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 

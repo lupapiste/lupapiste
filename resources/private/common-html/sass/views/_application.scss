@@ -213,7 +213,7 @@ $app-gray-darkest: $gray187;
           }
         }
 
-        .constructionStarted-box, .closed-box, .complementNeeded-box, .verdictGiven-box, .foremanVerdictGiven-box, acknowledged-box, .canceled-box  {
+        .constructionStarted-box, .closed-box, .complementNeeded-box, .verdictGiven-box, .foremanVerdictGiven-box, acknowledged-box, .canceled-box, .final-box  {
           display: none;
         }
         &.draft {
@@ -264,6 +264,9 @@ $app-gray-darkest: $gray187;
             display: none;
           }
           .verdictGiven-box, .constructionStarted-box, .closed-box  {
+            display: inline-block;
+          }
+          .final-box {
             display: inline-block;
           }
         }
@@ -326,10 +329,8 @@ $app-gray-darkest: $gray187;
           .proclaimed-box {
             @include active-state;
           }
-        }
-        &.consideration {
-          .consideration-box {
-            @include active-state;
+          .verdictGiven-box {
+            display: inline-block;
           }
         }
         &.final {
@@ -429,6 +430,10 @@ $app-gray-darkest: $gray187;
   table {
     margin-bottom: $marginS;
   }
+}
+
+#construction-time-documents {
+  margin-top: $marginL;
 }
 
 .ajax-loading-mask {
@@ -856,4 +861,10 @@ $app-gray-darkest: $gray187;
 
 h2 > i.is-right {
   float: right;
+}
+
+#application-bulletin-tab {
+  .bulletin-state {
+    font-weight: bold;
+  }
 }

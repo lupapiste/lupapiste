@@ -37,7 +37,7 @@
                  [org.apache.poi/poi-ooxml "3.11"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js org.mozilla/rhino]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
-                 [fi.sito/oskari "0.9.50"]
+                 [fi.sito/oskari "0.9.52"]
                  [slingshot "0.12.2"]
                  [com.google.zxing/javase "2.2"]
                  [prismatic/schema "0.4.3"]
@@ -50,7 +50,6 @@
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension  "1.0.5"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx  "1.0.5"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.5" :exclusions [org.freemarker/freemarker]]
-                 [lupapiste/scss-compiler "0.2.0"]
                  [org.clojure/core.memoize "0.5.7"]
                  [org.apache.pdfbox/pdfbox "1.8.9" :exclusions [commons-logging]]
                  [com.levigo.jbig2/levigo-jbig2-imageio "1.6.3"]
@@ -70,8 +69,7 @@
                              [jonase/eastwood "0.2.1" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.0"]
                              [lupapiste/lein-nitpicker "0.5.1"]
-                             [lupapiste/lein-hgnotes "0.3.0"]
-                             [lupapiste/lein-scss-compiler "0.1.4"]]
+                             [lupapiste/lein-hgnotes "0.3.0"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G"]
@@ -89,14 +87,14 @@
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug"]}
-  :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
+  :repositories [["solita-archiva" {:url "http://mvn.solita.fi/repository/solita"
                                     :checksum :ignore}]
                  ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
                                        :snapshots false}]
                  ["osgeo" {:url "http://download.osgeo.org/webdav/geotools"}]
                  ["com.levigo.jbig2" {:url "http://jbig2-imageio.googlecode.com/svn/maven-repository"
                                       :snapshots false}]]
-  :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
+  :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/repository/solita"
                                            :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "stest"       ["with-profile" "dev,stest" "midje"]

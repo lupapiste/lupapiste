@@ -97,6 +97,11 @@
   [id col]
   (some (fn [m] (when (= id (:id m)) m)) col))
 
+(defn update-by-id
+  "Return col of maps where elements are replaced by item when element :id matches item :id"
+  [item col]
+  (map #(if (= (:id item) (:id %)) item %) col))
+
 ; From clojure.contrib/seq
 
 (defn indexed
@@ -146,6 +151,12 @@
     (if (fn? checker)
       (checker coll)
       (= coll checker))))
+
+(defn ->keyword [x]
+  ((if (number? x)
+     (comp keyword str)
+     keyword)
+   x))
 
 (defn ->int
   "Reads a integer from input. Returns default if not an integer.

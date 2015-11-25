@@ -139,7 +139,6 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.foremanTasks = ko.observable();
 
-  self.buildings = ko.observable([]);
   self.nonpartyDocumentIndicator = ko.observable(0);
   self.partyDocumentIndicator = ko.observable(0);
   self.linkPermitData = ko.observable(null);
@@ -323,14 +322,6 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
     hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
     return false;
-  };
-
-  self.publishApplicationBulletin = function() {
-    ajax.command("publish-bulletin", {id: self.id()})
-      .success(_.noop)
-      .error(_.noop)
-      .processing(self.processing)
-      .call();
   };
 
   self.refreshKTJ = function() {

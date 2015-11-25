@@ -5,8 +5,15 @@
                                            allowAnonymous: true,
                                            showUserMenu: false,
                                            componentPages: ["bulletin"]});
+
+  window.lupapisteApp.models.applicationAuthModel = authorization.create();
+  window.lupapisteApp.services.documentDataService = new LUPAPISTE.DocumentDataService({
+    readOnly: true
+  });
+
   $(function() {
     lupapisteApp.domReady();
+    lupapisteApp.setTitle("Julkipano");
 
     var components = [
         {name: "bulletins"},
@@ -17,7 +24,11 @@
         {name: "bulletins-search"},
         {name: "autocomplete-municipalities"},
         {name: "autocomplete-states"},
-        {name: "bulletin-comment-box"}];
+        {name: "bulletin-comment"},
+        {name: "bulletin-comment-box"},
+        {name: "bulletin-attachments-tab"},
+        {name: "begin-vetuma-auth-button"},
+        {name: "bulletin-info-tab"}];
 
     _.forEach(components, function(component) {
       ko.components.register(component.name, {
@@ -26,6 +37,14 @@
       });
     });
 
-    $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService()});
+    $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService(),
+                                    vetumaService: new LUPAPISTE.VetumaService(),
+                                    fileuploadService: new LUPAPISTE.FileuploadService(),
+                                    auth: window.lupapisteApp.models.applicationAuthModel});
+
+    var errorType = _.includes(["error", "cancel"], pageutil.lastSubPage()) ?
+      pageutil.lastSubPage() :
+      undefined;
+    hub.send("vetumaService::authenticateUser", {errorType: errorType});
   });
 })();

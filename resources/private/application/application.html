@@ -186,21 +186,6 @@
                         <div class="application_actions" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'application'">
                             <div class="stacked" data-bind="with: application">
                                 <!-- ko if: !hasInvites() -->
-
-                                <!-- ko if: features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin')-->
-                                <div class="feature">
-                                    <button data-bind="click: publishApplicationBulletin,
-                                                       visible: $root.authorization.ok('publish-bulletin'),
-                                                       enable: !processing(),
-                                                       attr: {'title': loc('tooltip.publishBulletin')}"
-                                            data-test-id="publish-bulletin"
-                                            class="positive caps">
-                                        <i class="lupicon-circle-arrow-right"></i>
-                                        <span data-bind="ltext: 'application.publishBulletin'"></span>
-                                    </button>
-                                </div>
-                                <!-- /ko -->
-
                                 <button data-bind="click: approveApplication,
                                                visible: $root.authorization.ok('approve-application'),
                                                enable: !processing() && $root.authorization.ok('approve-application'),
@@ -366,6 +351,12 @@
                                 <a data-bind="click: changeTab" href="#" data-target="metadata" data-test-id="application-open-tasks-tab"
                                    class="link-btn">
                                     <span data-bind="ltext: 'attachment.tosMetadata'"></span>
+                                </a></li>
+
+                            <li data-bind="if: features.enabled('publish-bulletin'),
+                                           css: {'active': $parent.selectedTabName() === 'bulletin'}">
+                                <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab" class="link-btn">
+                                  <span data-bind="ltext: 'bulletin'"></span>
                                 </a></li>
                         </ul>
                     </div>
@@ -912,10 +903,6 @@
                                                             <label data-bind="ltext: 'verdict.viimeinenValitus'"></label>
                                                             <span class="value" data-bind="dateString: paivamaarat.viimeinenValitus"></span>
                                                         </div>
-                                                        <div data-bind="if: paivamaarat.lainvoimainen" class="key-value-pair">
-                                                            <label data-bind="ltext: 'verdict.lainvoimainen'"></label>
-                                                            <span class="value" data-bind="dateString: paivamaarat.lainvoimainen"></span>
-                                                        </div>
                                                         <div data-bind="if: paivamaarat.aloitettava" class="key-value-pair">
                                                             <label data-bind="ltext: 'verdict.aloitettava'"></label>
                                                             <span class="value" data-bind="dateString: paivamaarat.aloitettava"></span>
@@ -1147,8 +1134,20 @@
                             </div>
                         </div>
                     </div>
+                    <!-- /ko -->
+
+                    <!-- Bulletin tab -->
+                    <!-- ko if: selectedTabName() === 'bulletin' && features.enabled('publish-bulletin') -->
+                    <div id="application-bulletin-tab" data-bind="with: application, css: {'feature': features.enabled('publish-bulletin')}" class="tab-content">
+                        <div data-bind="component: {name: 'bulletin-tab',
+                                                    params: {appId: id,
+                                                             appState: state,
+                                                             authModel: $root.authorization,
+                                                             bulletinService: lupapisteApp.services.publishBulletinService}}"></div>
+                    </div>
 
                     <!-- /ko -->
+                    <!-- / Bulletin tab -->
 
                     <script type="text/x-jquery-tmpl" id="statements-template">
                         <div data-bind="ifnot: $data.statements && statements().length > 0">
@@ -1259,7 +1258,7 @@
                                          name: 'help-toggle',
                                          params: {lhtml: 'help.' + permitType() + '.tasksDesc'}
                                          }"></span>
-                        <div data-bind="if: buildings() && buildings().length > 0 && $root.authorization.ok('inform-building-construction-started')">
+                        <div data-bind="if: _js.buildings && _js.buildings.length > 0 && $root.authorization.ok('inform-building-construction-started')">
 
                             <table>
                                 <thead>
@@ -1392,6 +1391,16 @@
                                            ltext: 'task.create',
                                            visible: $root.authorization.ok('create-task'),
                                            enable: $root.authorization.ok('create-task')"></button>
+                    </div>
+                    <!-- /ko -->
+                    <!-- ko if: $root.hasConstructionTimeDocs -->
+                    <div id="construction-time-documents" data-bind="visible: selectedTabName() === 'tasks' && $root.authorization.ok('tasks-tab-visible')">
+                      <p data-bind="lhtml: 'required.field.desc'"></p>
+                      <div class="application_section">
+                        <div id="constructionTimeDocgen" class="docgen-content">
+                          <!-- This is where generated document will be placed. -->
+                        </div>
+                      </div>
                     </div>
                     <!-- /ko -->
                 </div>

@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Bulletin page
-Suite teardown  Logout
+Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ./27_common.robot
 
@@ -26,6 +26,11 @@ Map is visible
 
 Action buttons are visible
   Element should be visible  //div[@id='bulletin-component']//div[@data-test-id='bulletin-actions']/button[@data-test-id='comment-bulletin']
-  Element should be visible  //div[@id='bulletin-component']//div[@data-test-id='bulletin-actions']/button[@data-test-id='print-bulletin']
-  Element should be visible  //div[@id='bulletin-component']//div[@data-test-id='bulletin-actions']/button[@data-test-id='download-bulletin-attachments']
+
+Tabs are visible
+  Element should be visible  bulletin-tabs
+  Element should be visible  xpath=//ul[@id='bulletin-tabs']/li/a[@data-test-id='bulletin-open-info-tab']
+  Element should be visible  xpath=//ul[@id='bulletin-tabs']/li/a[@data-test-id='bulletin-open-attachments-tab']
+
+
 

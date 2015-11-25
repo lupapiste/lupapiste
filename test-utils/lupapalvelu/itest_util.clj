@@ -20,7 +20,6 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
             [lupapalvelu.domain :as domain]
@@ -417,6 +416,15 @@
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
+(defn create-and-send-application
+  "Returns the application map"
+  [apikey & args]
+  (let [id    (apply create-app-id apikey args)
+        _     (command apikey :submit-application :id id)
+        resp  (command apikey :approve-application :id id :lang "fi")]
+    (fact "Submit OK" resp => ok?)
+    (query-application apikey id)))
+
 (defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
   (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id)
         verdict-id (:verdictId new-verdict-resp)]
@@ -545,7 +553,7 @@
              (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Upload should fail"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.98.html") => 0)))))
+             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.111.html") => 0)))))
 
 (defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
@@ -570,7 +578,7 @@
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Statement upload should fail"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.98.html") => 0)))))
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.111.html") => 0)))))
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
   (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))
@@ -580,7 +588,6 @@
 (defn upload-attachment-to-all-placeholders [apikey application]
   (doseq [attachment (:attachments application)]
     (upload-attachment apikey (:id application) attachment true)))
-
 
 (defn generate-documents [application apikey & [local?]]
   (doseq [document (:documents application)]
@@ -592,7 +599,8 @@
           updates (filter (fn [[path value]]
                             (try
                               (let [splitted-path (ss/split path #"\.")]
-                                (doc-persistence/validate-against-whitelist! document [[splitted-path value]] user-role))
+                                (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
+                                (doc-persistence/validate-readonly-updates! document [splitted-path]))
                               true
                               (catch Exception _
                                 false)))
@@ -603,12 +611,6 @@
           :id (:id application)
           :doc (:id document)
           :updates updates) => ok?))))
-
-(defn dummy-doc [schema-name]
-  (let [schema (schemas/get-schema (schemas/get-latest-schema-version) schema-name)
-        data   (tools/create-document-data schema (partial tools/dummy-values nil))]
-    {:schema-info (:info schema)
-     :data        data}))
 
 ;;
 ;; Vetuma

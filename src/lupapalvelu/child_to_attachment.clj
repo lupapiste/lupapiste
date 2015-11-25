@@ -6,7 +6,8 @@
     [sade.core :refer [def- now]]
     [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
     [clojure.pprint :refer [pprint]]
-    [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
+    [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
+    [clojure.java.io :as io])
   (:import (java.io File FileOutputStream)))
 
 (defn- get-child [application type id]
@@ -52,5 +53,7 @@
 
 (defn create-attachment-from-children [user app child-type id lang]
   "Generates attachment from child and saves it"
-  (let [child (generate-attachment-from-children user app child-type id lang)]
-    (attachment/attach-file! child)))
+  (let [child (generate-attachment-from-children user app child-type id lang)
+        file (:content child)]
+    (attachment/attach-file! child)
+    (io/delete-file file :silently)))

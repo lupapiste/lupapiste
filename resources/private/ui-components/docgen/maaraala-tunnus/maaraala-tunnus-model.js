@@ -2,7 +2,6 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   "use strict";
   var self = this;
 
-  self.model = params.model;
   self.isDisabled = params.isDisabled;
   self.authModel = params.authModel;
   self.applicationId = params.applicationId || (lupapisteApp.models.application && lupapisteApp.models.application.id()) || null;
@@ -11,16 +10,26 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   self.propertyIdLabel = ko.pureComputed(function() {
     return self.isMaaraala() ? loc("kiinteisto.maaraala.label") : loc("kiinteisto.kiinteisto.label");
   });
-  self.isMaaraala = params.isMaaraala;
-  if(params.model && !_.isEmpty(params.model.value)) {
-    self.isMaaraala(true);
-  }
 
   // hide input label always
   self.schema = _.extend(_.cloneDeep(params.schema), {
     label: false
   });
   self.path = params.path;
+
+  var service = lupapisteApp.services.documentDataService;
+  self.maaraalaTunnus = service.getInDocument(self.documentId, self.path).model;
+
+  self.isMaaraala = params.isMaaraala;
+  if (!_.isEmpty(self.maaraalaTunnus())) {
+    self.isMaaraala(true);
+  }
+
+  self.isMaaraala.subscribe(function(isMaaraala) {
+    if (!isMaaraala) {
+      self.maaraalaTunnus("");
+    }
+  });
 
   self.visibilityState = ko.pureComputed(function () {
     return self.isMaaraala() ? "visible" : "hidden";

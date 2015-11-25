@@ -297,6 +297,13 @@ As Velho
   Go to login page
   Velho logs in
 
+As Olli
+  Go to login page
+  Olli logs in
+
+Olli logs in
+  Authority logs in  olli  olli  Olli Ule\u00e5borg
+
 Mikko logs in
   Applicant logs in  mikko@example.com  mikko123  Mikko Intonen
 
@@ -416,6 +423,14 @@ Click enabled by test id
   Wait Until  Element Should Be Visible  ${path}
   Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
+
+Element should be visible by test id
+  [Arguments]  ${id}
+  Wait Until  Element Should Be Visible  xpath=//*[@data-test-id="${id}"]
+
+Element should not be visible by test id
+  [Arguments]  ${id}
+  Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id="${id}"]
 
 #
 # The following do not take data-test-id as argument

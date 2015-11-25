@@ -16,6 +16,7 @@ jQuery(document).ready(function() {
     {name: "docgen-localized-string", model: "docgen-input-model"},
     {name: "docgen-inline-string", model: "docgen-input-model"},
     {name: "docgen-button"},
+    {name: "construction-waste-report"},
     {name: "attachments-multiselect"},
     {name: "authority-select"},
     {name: "authority-select-dialog"},
@@ -62,6 +63,7 @@ jQuery(document).ready(function() {
     {name: "autocomplete-saved-filters"},
     {name: "indicator"},
     {name: "accordion"},
+    {name: "date-field", model: "input-field-model"},
     {name: "text-field", model: "input-field-model"},
     {name: "textarea-field", model: "input-field-model"},
     {name: "checkbox-field", model: "input-field-model"},
@@ -74,7 +76,13 @@ jQuery(document).ready(function() {
     {name: "accordion-toolbar"},
     {name: "group-approval"},
     {name: "submit-button"},
-    {name: "remove-button"}
+    {name: "remove-button"},
+    {name: "publish-application"},
+    {name: "move-to-proclaimed"},
+    {name: "move-to-verdict-given"},
+    {name: "move-to-final"},
+    {name: "bulletin-versions"},
+    {name: "bulletin-tab"}
   ];
 
   _.forEach(components, function(component) {

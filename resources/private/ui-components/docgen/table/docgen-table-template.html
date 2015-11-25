@@ -13,17 +13,22 @@
 
         <table>
           <thead>
-            <tr data-bind="foreach: columnHeaders"><td><span data-bind="ltext: $data"></span></td></tr>
+            <tr data-bind="foreach: columnHeaders">
+              <th>
+                <span data-bind="ltext: name"></span>
+                <span data-bind="visible: required">*</span>
+              </th>
+            </tr>
           </thead>
-          <tbody data-bind="foreach: rows">
+          <tbody data-bind="foreach: groups">
             <tr data-bind="attr: { id: $component.groupId + '-row-' + index }">
-              <!-- ko foreach: subSchemas -->
+              <!-- ko foreach: $component.subSchemas -->
               <td>
                 <span class="form-entry"
                   data-bind="component: { name: uicomponent,
                                           params: { schema: $data,
-                                                    path: path,
-                                                    model: model,
+                                                    path: $parent.path.concat(name),
+                                                    i18npath: i18npath,
                                                     applicationId: applicationId,
                                                     documentId: documentId }}">
                 </span>
@@ -31,8 +36,8 @@
               <!-- /ko -->
 
               <td class="action-column">
-                <i class="lupicon-remove primary" data-bind="click: $parent.removeGroup,
-                                                             visible: lupapisteApp.models.applicationAuthModel.ok('remove-document-data')"></i>
+                <i class="lupicon-remove primary" data-bind="click: $component.removeGroup,
+                                                             visible: $component.groupsRemovable($data.schema)"></i>
               </td>
 
             </tr>
@@ -40,7 +45,8 @@
         </table>
       </div>
 
-      <div class="button-group" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok('update-doc')">
+      <div class="button-group" data-bind="visible: updatable()">
+        <span data-bind="saveIndicator: indicator"></span>
         <span data-bind="component: { name: 'docgen-button',
                                      params: { id: groupId + '-append-button', 
                                                className: 'positive', 
@@ -55,7 +61,6 @@
                                                label: copyLabel, 
                                                clickFn: duplicateLastGroup }}">
         </span>
-      </div>
       </div>
     </script>
   </section>

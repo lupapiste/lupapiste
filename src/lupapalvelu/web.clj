@@ -186,9 +186,11 @@
         user    (basic-authentication request)]
     (if user
       (let [response (execute (assoc (action/make-raw name (from-query request)) :user user))]
-        (if (false? (:ok response))
-          (resp/status 404 (resp/json response))
-          response))
+        (if (action/response? response)
+          response
+          (if (:ok response)
+            (resp/status 200 (resp/json response))
+            (resp/status 404 (resp/json response)))))
       basic-401)))
 
 (defpage [:get "/data-api/json/:name"] {name :name}
@@ -450,7 +452,7 @@
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.98.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.111.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)
@@ -648,8 +650,13 @@
                                              :x "360603.153"
                                              :y "6734222.95")
           {id :id} (execute-command "create-application" params request)
-          params  (assoc (from-query request) :id id)
-          response (execute-command "publish-bulletin" params request)]
+          _        (mongo/update-by-id :applications id {$set {:state "sent"}})
+          now     (sade.core/now)
+          params  (-> (assoc (from-query request) :id id)
+                      (assoc :proclamationStartsAt now)
+                      (assoc :proclamationEndsAt (+ (* 24 60 60 1000) now))
+                      (assoc :proclamationText "proclamation"))
+          response (execute-command "move-to-proclaimed" params request)]
       (core/ok? response)))
 
   (defpage "/dev/publish-bulletin-quickly" {:keys [count] :or {count "1"}}

@@ -215,6 +215,9 @@
       color: $blue-dark;
       position: absolute;
     }
+    tbody > tr {
+      cursor: pointer;
+    }
   }
 
   .bulletin-comment {
@@ -223,6 +226,9 @@
     }
     .help-toggle {
       vertical-align: top;
+    }
+    .user-info {
+      font-style: italic;
     }
   }
   ul.bulletin-comment__attachment-list {
@@ -236,6 +242,19 @@
         display: table-cell;
         padding-right: $marginL;
       }
+    }
+  }
+  table.bulletin-attachments {
+    tr td {
+      word-wrap: break-word;
+      &:first-child {
+        padding-left: 12px;
+      }
+    }
+  }
+  .bulletin-tab-content {
+    h3 {
+      margin-bottom: $marginL;
     }
   }
 }

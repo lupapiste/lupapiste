@@ -7,6 +7,8 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.attachment :as attachment]))
 
+(apply-remote-minimal)
+
 (facts* "facts about update-doc and validate-doc commands"
   (let [application-id   (create-app-id pena)
         application0     (query-application pena application-id) => truthy
@@ -14,13 +16,15 @@
         resp             (command pena :update-doc :id application-id :doc hakija-doc-id  :collection "documents" :updates [["henkilo.henkilotiedot.etunimi" "foo"]["henkilo.henkilotiedot.sukunimi" "bar"]]) => ok?
         modified1        (:modified (query-application pena application-id))
         rakennus-doc-id  (:id (domain/get-document-by-name application0 "rakennuspaikka")) => truthy
-        resp             (command pena :update-doc :id application-id :doc rakennus-doc-id  :collection "documents" :updates [["kiinteisto.maaraalaTunnus" "maaraalaTunnus"]["kiinteisto.tilanNimi" "tilanNimi"]]) => ok?
+        resp             (command pena :update-doc :id application-id :doc rakennus-doc-id  :collection "documents" :updates [["kiinteisto.maaraalaTunnus" "maaraalaTunnus"]]) => ok?
         application2     (query-application pena application-id)
         modified2        (:modified application2)
         hakija-doc       (domain/get-document-by-id application2 hakija-doc-id)
         rakennus-doc     (domain/get-document-by-id application2 rakennus-doc-id)
         failing-updates  [["rakennuksenOmistajat.henkilo.henkilotiedot.etunimi" "P0wnr"]]
-        failing-result   (command pena :update-doc :id application-id :doc rakennus-doc-id :updates failing-updates)]
+        failing-result   (command pena :update-doc :id application-id :doc rakennus-doc-id :updates failing-updates)
+        readonly-updates [["kiinteisto.tilanNimi" "tilannimi"]]
+        readonly-result  (command pena :update-doc :id application-id :doc rakennus-doc-id :updates readonly-updates)]
 
     (fact "hakija is valid, but missing some fieds"
       (let [resp (query pena :validate-doc :id application-id :doc hakija-doc-id :collection "documents") => ok?
@@ -44,11 +48,11 @@
       (get-in hakija-doc   [:data :henkilo :henkilotiedot :sukunimi :modified]) => modified1)
     (fact "rakennus-doc"
       (get-in rakennus-doc [:data :kiinteisto :maaraalaTunnus :value]) => "maaraalaTunnus"
-      (get-in rakennus-doc [:data :kiinteisto :maaraalaTunnus :modified]) => modified2
-      (get-in rakennus-doc [:data :kiinteisto :tilanNimi :value]) => "tilanNimi"
-      (get-in rakennus-doc [:data :kiinteisto :tilanNimi :modified]) => modified2)
+      (get-in rakennus-doc [:data :kiinteisto :maaraalaTunnus :modified]) => modified2)
     (fact (:ok failing-result) => false)
-    (fact (:text failing-result) => "document-would-be-in-error-after-update")))
+    (fact (:text failing-result) => "document-would-be-in-error-after-update")
+    (fact (:ok readonly-result) => false)
+    (fact (:text readonly-result) => "error-trying-to-update-readonly-field")))
 
 
 (facts "facts about create-doc command"
@@ -84,6 +88,7 @@
     resp => ok?
     (fact (-> three-apartments :huoneistot keys count) => 3)
     (fact (-> two-apartments :huoneistot keys count) => 2)))
+
 
 (facts "facts about party-document-names query"
   (let [application-id        (create-app-id pena)
@@ -140,10 +145,16 @@
     (fact "primary operation cannot be removed"
       (command pena :remove-doc :id application-id :docId (:id uusi-rakennus)) => fail?)
 
-    (fact "sauna doc and operation are removed"
-      (command pena :remove-doc :id application-id :docId (:id sauna)) => ok?
-      (let [updated-app (query-application pena application-id)]
+
+    (fact* "sauna doc and operation are removed"
+      (let [sauna-attachment (first (attachment/get-attachments-by-operation application (:id (first sec-operations))))
+            _ (upload-attachment pena application-id sauna-attachment true)
+            _ (command pena :remove-doc :id application-id :docId (:id sauna)) => ok?
+            updated-app (query-application pena application-id)]
         (domain/get-document-by-name updated-app "uusi-rakennus-ei-huoneistoa") => nil
         (:primaryOperation updated-app) =not=> nil?
         (count (:secondaryOperations updated-app)) => 0
-        (fact "attachments belonging to operation don't exist anymore" (count (attachment/get-attachments-by-operation updated-app (:id (first sec-operations)))) => 0)))))
+        (fact "attachments belonging to operation don't exist anymore"
+          (count (attachment/get-attachments-by-operation updated-app (:id (first sec-operations)))) => 0)
+        (fact "old sauna attachment still exists after remove, because it had attachment versions uploaded"
+          (some (hash-set (:id sauna-attachment)) (map :id (:attachments updated-app))))))))

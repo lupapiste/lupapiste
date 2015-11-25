@@ -5,29 +5,6 @@
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.vesihuolto-canonical :as vc]))
 
-(def hakija {:id "532bddd0da068d67611f92f2",
-             :created 1395383760912,
-             :schema-info {:approvable true,
-                           :subtype "hakija",
-                           :name "hakija",
-                           :removable true,
-                           :repeating true,
-                           :version 1,
-                           :type "party",
-                           :order 3}
-             :data {:_selected {:value "henkilo"},
-                    :henkilo {:henkilotiedot {:etunimi {:modified 1395383987935, :value "Pena"},
-                                              :hetu {:modified 1395383987935, :value "210281-9988"},
-                                              :sukunimi {:modified 1395383987935, :value "Panaani"},
-                                              :turvakieltoKytkin {:modified 1395384005343, :value false}},
-                              :osoite {:katu {:modified 1395383987935, :value "Paapankuja 12"},
-                                       :postinumero {:modified 1395383987935, :value "10203"},
-                                       :postitoimipaikannimi
-                                       {:modified 1395383987935, :value "Piippola"}},
-                              :userId {:modified 1395383987959, :value "777777777777777777000020"},
-                              :yhteystiedot {:email {:modified 1395383987935, :value "pena@example.com"},
-                                             :puhelin {:modified 1395383987935, :value "0102030405"}}}}})
-
 (def talousvedet {:id "532bddd0da068d67611f92f1",
                   :created 1395383760912,
                   :schema-info {:order 4,
@@ -103,12 +80,12 @@
                                                               :firstName "Pekka",
                                                               :username "pekka",
                                                               :id "777777777777777777000033"},
-                                                  :auth [{:lastName "Panaani",
-                                                          :firstName "Pena",
-                                                          :username "pena",
+                                                  :auth [{:lastName "Borga",
+                                                          :firstName "Pekka",
+                                                          :username "pekka",
                                                           :type "owner",
                                                           :role "owner",
-                                                          :id "777777777777777777000020"}],
+                                                          :id "777777777777777777000033"}],
                                                   :drawings [],
                                                   :submitted 1395388008290,
                                                   :state "submitted",
@@ -136,7 +113,7 @@
                                                   :propertyId "75342300020226",
                                                   :verdicts [],
                                                   :startedBy {},
-                                                  :documents [hakija
+                                                  :documents [ctc/henkilohakija
                                                               talousvedet
                                                               kuvaus
                                                               rakennukset
@@ -185,8 +162,8 @@
         Vapautushakemus (:Vapautushakemus vapautushakemustieto) => truthy
         haetaan (:haetaan Vapautushakemus) => nil
         hakija (first (:hakija Vapautushakemus)) => truthy
-        etunimi (:etunimi hakija) => "Pena"
-        sukunimi (:sukunimi hakija) => "Panaani"
+        etunimi (:etunimi hakija) => "Pekka"
+        sukunimi (:sukunimi hakija) => "Borga"
         henkilotunnus (:henkilotunnus hakija) => "210281-9988"
 
         kohde (:kohde Vapautushakemus) => truthy

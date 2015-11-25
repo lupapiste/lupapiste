@@ -26,7 +26,8 @@
                  :approvable :removable :deny-removing-last-document
                  :group-help :section-help
                  :after-update
-                 :repeating :no-repeat-button :order})
+                 :repeating :no-repeat-button :order
+                 :construction-time})
 
 (def updateable-keys #{:removable})
 (def immutable-keys (set/difference info-keys updateable-keys) )
@@ -354,7 +355,7 @@
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "fise" :type :string :required false}
                {:name "patevyys" :type :string :required false}
-               {:name "patevyysluokka" :type :select :sortBy nil :required false
+               {:name "patevyysluokka" :type :select :sortBy nil :required true
                 :body [{:name "AA"}
                        {:name "A"}
                        {:name "B"}
@@ -378,7 +379,7 @@
 
 (def kuntaroolikoodi [{:name "kuntaRoolikoodi"
                        :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi._group_label"
-                       :type :select :sortBy :displayname
+                       :type :select :sortBy :displayname :required true
                        :body [{:name "GEO-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.GEO-suunnittelija"}
                               {:name "LVI-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.LVI-suunnittelija"}
                               {:name "IV-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.IV-suunnittelija"}
@@ -386,7 +387,18 @@
                               {:name "RAK-rakennesuunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.RAK-rakennesuunnittelija"}
                               {:name "ARK-rakennussuunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.ARK-rakennussuunnittelija"}
                               {:name "Vaikeiden t\u00F6iden suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.Vaikeiden t\u00f6iden suunnittelija"}
-                              {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
+
+                              ; KRYSP yht 2.1.6
+                              {:name "rakennussuunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.rakennussuunnittelija"}
+                              {:name "kantavien rakenteiden suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.kantavien rakenteiden suunnittelija"}
+                              {:name "pohjarakenteiden suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.pohjarakenteiden suunnittelija"}
+                              {:name "ilmanvaihdon suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.ilmanvaihdon suunnittelija"}
+                              {:name "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.vesiviemarisuunnittelija"}
+                              {:name "rakennusfysikaalinen suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.rakennusfysikaalinen suunnittelija"}
+                              {:name "kosteusvaurion korjausty\u00f6n suunnittelija" :i18nkey "osapuoli.kuntaRoolikoodi.kosteusvaurion korjausty\u00f6n suunnittelija"}
+
+                              {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}
+                              ]}])
 
 (def suunnittelija (body
                      kuntaroolikoodi
@@ -510,7 +522,7 @@
                                                                                                                                                 :otherwise :disabled}}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
-                                  :type :foremanOtherApplications
+                                  :type :group
                                   :uicomponent :hanke-table
                                   :repeating true
                                   :approvable true
@@ -547,12 +559,12 @@
                  :henkilo-body henkilo-maksaja)
                {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
-(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :label false :i18nkey "huoneistot.muutostapa" :emit [:muutostapaChanged]
+(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :size "s" :label false :i18nkey "huoneistot.muutostapa" :emit [:muutostapaChanged]
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
                         {:name "muutos"}]})
 
-(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :label false :i18nkey "huoneistot.huoneistoTyyppi" :listen [:muutostapaChanged]
+(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :size "s" :label false :i18nkey "huoneistot.huoneistoTyyppi" :listen [:muutostapaChanged]
                    :body [{:name "asuinhuoneisto"}
                           {:name "toimitila"}
                           {:name "ei tiedossa" :i18nkey "huoneistot.huoneistoTyyppi.eiTiedossa"}]}
@@ -560,7 +572,7 @@
                    {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true :label false :i18nkey "huoneistot.huoneistonumero" :listen [:muutostapaChanged]}
                    {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "t" :label false :i18nkey "huoneistot.jakokirjain" :listen [:muutostapaChanged]}
                    {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "t" :label false :i18nkey "huoneistot.huoneluku" :listen [:muutostapaChanged]}
-                   {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :label false :i18nkey "huoneistot.keittionTyyppi" :listen [:muutostapaChanged]
+                   {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :size "s" :label false :i18nkey "huoneistot.keittionTyyppi" :listen [:muutostapaChanged]
                     :body [{:name "keittio"}
                            {:name "keittokomero"}
                            {:name "keittotila"}
@@ -611,14 +623,22 @@
                          {:name "m2"}
                          {:name "m3"}]})
 
-(def rakennusjatesuunnitelmaRow [{:name "suunniteltuMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m"}
-                                 jateyksikko
-                                 {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m"}])
+(def rakennusjatemaara {:name "maara" :type :string :subtype :decimal :uicomponent :docgen-string :min 0 :max 9999999 :size "s"})
 
-(def rakennusjateselvitysRow [{:name "toteutunutMaara" :type :string :subtype :number :uicomponent :docgen-string :min 0 :max 9999999 :required true :size "m"}
-                              jateyksikko
-                              {:name "painoT" :type :string :subtype :number :min 0 :max 9999999 :required true :size "m"}
-                              {:name "jatteenToimituspaikka" :type :string :max-len 50 :size "l"}])
+(def rakennusjatesuunnitelmaRow [(assoc rakennusjatemaara :name "suunniteltuMaara")
+                                 jateyksikko
+                                 (assoc rakennusjatemaara :name "painoT")])
+
+(def rakennusjateselvitysUusiRow [(assoc rakennusjatemaara :name "toteutunutMaara")
+                                  jateyksikko
+                                  (assoc rakennusjatemaara :name "painoT")
+                                  {:name "jatteenToimituspaikka" :type :string :max-len 50}])
+
+(def rakennusjateselvitysRow [(assoc rakennusjatemaara :name "suunniteltuMaara" :readonly true)
+                              (assoc rakennusjatemaara :name "toteutunutMaara")
+                              (assoc jateyksikko :readonly true)
+                              (assoc rakennusjatemaara :name "painoT")
+                              {:name "jatteenToimituspaikka" :type :string :max-len 50}])
 
 (def rakennusjatesuunnitelma [{:name "rakennusJaPurkujate"
                                :i18nkey "rakennusJaPurkujate"
@@ -637,18 +657,32 @@
 
 (def rakennusjateselvitys [{:name "rakennusJaPurkujate"
                             :i18nkey "rakennusJaPurkujate"
-                            :type :table
-                            :uicomponent :docgenTable
-                            :repeating true
+                            :type :group
+                            :uicomponent :constructionWasteReport
                             :approvable false
-                            :body (body jatetyyppi rakennusjateselvitysRow)}
+                            :body [{:name "suunniteltuJate"
+                                    :type :table
+                                    :repeating true
+                                    :repeating-init-empty true
+                                    :body (body (assoc jatetyyppi :readonly true) rakennusjateselvitysRow)}
+                                   {:name "suunnittelematonJate"
+                                    :type :table
+                                    :repeating true
+                                    :body (body jatetyyppi rakennusjateselvitysUusiRow)}]}
                            {:name "vaarallisetAineet"
                             :i18nkey "vaarallisetAineet"
-                            :type :table
-                            :uicomponent :docgenTable
-                            :repeating true
+                            :type :group
+                            :uicomponent :constructionWasteReport
                             :approvable false
-                            :body (body vaarallinenainetyyppi rakennusjateselvitysRow)}])
+                            :body [{:name "suunniteltuJate"
+                                    :type :table
+                                    :repeating true
+                                    :repeating-init-empty true
+                                    :body (body (assoc vaarallinenainetyyppi :readonly true) rakennusjateselvitysRow)}
+                                   {:name "suunnittelematonJate"
+                                    :type :table
+                                    :repeating true
+                                    :body (body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}])
 
 
 ;; Usage type definitions have moved to lupapiste-commons.usage-types
@@ -737,7 +771,7 @@
                        {:name "lamminvesiKytkin" :type :checkbox}
                        {:name "aurinkopaneeliKytkin" :type :checkbox}
                        {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
-                       {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
+                       {:name "vaestonsuoja" :type :string :subtype :number :min 0 :max 99999 :size "s" :unit "hengelle"}
                        {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
 
 (def luokitus {:name "luokitus"
@@ -1409,13 +1443,9 @@
     :body (body rakennusjatesuunnitelma)}
    {:info {:name "rakennusjateselvitys"
            :order 201
+           :construction-time true
            :section-help "rakennusjate.help"}
     :body (body rakennusjateselvitys)}
-
-   ;; TODO: "rakennusjateselvitys"-skeema: kopioi luontivaiheessa "rakennusjateilmoitus"-skeema.
-   ;; Kts. esimerkkia mm.
-   ;;   application.clj  make-documents
-   ;;   prev-permit.clj  applicant->applicant-doc
 
    {:info {:name "paatoksen-toimitus-rakval"
            :removable false

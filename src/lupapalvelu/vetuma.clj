@@ -264,10 +264,20 @@
         "ERROR"    (handle-error params data)
         "FAILURE"  (handle-failure params data)))))
 
+(defn vetuma-session []
+  (last (mongo/select :vetuma {:sessionid (session-id), :user.stamp {$exists true}} [:user] {:created-at 1})))
+
 (defpage "/api/vetuma/user" []
-  (let [data (last (mongo/select :vetuma {:sessionid (session-id), :user.stamp {$exists true}} [:user] {:created-at 1}))
+  (let [data (vetuma-session)
         user (:user data)]
     (response/json user)))
+
+(defpage [:delete "/api/vetuma/user"] []
+  (if-let [session (vetuma-session)]
+    (if (mongo/remove :vetuma (:id session))
+      (response/json {:ok true})
+      (response/status 500 "removing vetuma session failed"))
+    (response/status 404 (str "no vetuma session for session id: " (session-id)))))
 
 ;;
 ;; public local api

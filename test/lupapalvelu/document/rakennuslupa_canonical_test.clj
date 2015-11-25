@@ -28,7 +28,9 @@
 
 (def- henkilotiedot (assoc nimi :hetu {:value "210281-9988"} :turvakieltoKytkin {:value true}))
 
-(def- osoite {:katu {:value "katu"} :postinumero {:value "33800"} :postitoimipaikannimi {:value "Tuonela"}})
+(def- osoite {:katu {:value "katu"}
+              :postinumero {:value "33800"} :postitoimipaikannimi {:value "Tuonela"}
+              :maa {:value "CHN"}})
 
 (def- henkilo
   {:henkilotiedot henkilotiedot
@@ -54,14 +56,16 @@
   {:id "hakija-henkilo" :schema-info {:name "hakija-r"
                                       :subtype "hakija"
                                       :version 1}
-   :data {:henkilo (assoc henkilo :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}})}})
+   :data {:henkilo (assoc henkilo :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}
+                                             :suoramarkkinointilupa {:value false}})}})
 
 (def- hakija-yritys
   {:id "hakija-yritys" :schema-info {:name "hakija-r"
                                      :subtype "hakija"
                                      :version 1}
    :data {:_selected {:value "yritys"}
-          :yritys (assoc-in yritys [:yhteyshenkilo :kytkimet] {:vainsahkoinenAsiointiKytkin {:value true}})}})
+          :yritys (assoc-in yritys [:yhteyshenkilo :kytkimet] {:vainsahkoinenAsiointiKytkin {:value true}
+                                                               :suoramarkkinointilupa {:value true}})}})
 
 (def- paasuunnittelija
   {:id "50bc85e4ea3e790c9ff7cdb2"
@@ -80,7 +84,7 @@
   {:id "suunnittelija1" :schema-info {:name "suunnittelija"
                                       :version 1}
    :data (merge suunnittelija-henkilo
-                {:kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}}
+                {:kuntaRoolikoodi {:value "rakennusfysikaalinen suunnittelija"}}
                 {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
@@ -290,7 +294,8 @@
    :created 2
    :schema-info {:name "uusiRakennus"
                  :version 1
-                 :op {:name "kerrostalo-rivitalo"}}
+                 :op {:name "kerrostalo-rivitalo"
+                      :id "kerrostalo-rivitalo-id"}}
    :data common-rakennus})
 
 (def- rakennuksen-muuttaminen
@@ -298,7 +303,8 @@
    :created 1
    :schema-info {:name "rakennuksen-muuttaminen"
                  :version 1
-                 :op {:name "muu-laajentaminen"}}
+                 :op {:name "muu-laajentaminen"
+                      :id "muu-laajentaminen-id"}}
    :data (conj
            common-rakennus
            {:rakennusnro {:value "001"}
@@ -312,7 +318,8 @@
    :created 3
    :schema-info {:name "rakennuksen-laajentaminen"
                  :version 1
-                 :op {:name "laajentaminen"}}
+                 :op {:name "laajentaminen"
+                      :id "laajentaminen-id"}}
    :data (conj
            common-rakennus
            {:rakennusnro {:value "001"}
@@ -332,7 +339,8 @@
                       :created 4
                       :schema-info {:name "purkaminen"
                                     :version 1
-                                    :op {:name "purkaminen"}}
+                                    :op {:name "purkaminen"
+                                         :id "purkaminen-id"}}
                       :data (conj
                               (->
                                 common-rakennus
@@ -398,6 +406,9 @@
                 puun-kaataminen
                 purku])
 
+(defn op-info [doc]
+  (select-keys (-> doc :schema-info :op) [:id :name :description]))
+
 (def application-rakennuslupa
   {:id "LP-753-2013-00001"
    :permitType "R"
@@ -434,7 +445,11 @@
                  :requested 1368080102631
                  :status "ehdoilla"
                  :text "Savupiippu pit\u00e4\u00e4 olla."}]
-   :neighbors ctc/neighbors})
+   :neighbors ctc/neighbors
+   :primaryOperation (op-info rakennuksen-muuttaminen)
+   :secondaryOperations (map op-info [uusi-rakennus laajentaminen
+                                      aidan-rakentaminen puun-kaataminen
+                                      purku])})
 
 (ctc/validate-all-documents application-rakennuslupa)
 
@@ -481,11 +496,19 @@
 (defn- validate-address [address]
   (let [person-katu (:teksti (:osoitenimi address))
         person-postinumero (:postinumero address)
-        person-postitoimipaikannimi (:postitoimipaikannimi address)]
+        person-postitoimipaikannimi (:postitoimipaikannimi address)
+        person-maa (:valtioSuomeksi address)
+        person-country (:valtioKansainvalinen address)
+        person-address (:ulkomainenLahiosoite address)
+        person-post (:ulkomainenPostitoimipaikka address)]
     (fact address => truthy)
     (fact person-katu => "katu")
     (fact person-postinumero =>"33800")
-    (fact person-postitoimipaikannimi => "Tuonela")))
+    (fact person-postitoimipaikannimi => "Tuonela")
+    (fact person-maa => "Kiina")
+    (fact person-country => "CHN")
+    (fact person-address => "katu")
+    (fact person-post => "Tuonela")))
 
 (defn- validate-contact [m]
   (fact m => (contains {:puhelin "+358401234567"
@@ -522,6 +545,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin henkilo) => true)
+    (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin hakija-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
 
@@ -535,6 +559,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin yritys) => true)
+    (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin hakija-model) => false)
     (validate-minimal-person henkilo)
     (validate-company yritys)))
 
@@ -561,8 +586,8 @@
   (let [suunnittelija (tools/unwrapped (:data suunnittelija1))
         suunnittelija-model (get-suunnittelija-data suunnittelija :suunnittelija)]
     (fact "model" suunnittelija-model => truthy)
-    (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
-    (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
+    (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "rakennusfysikaalinen suunnittelija")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
@@ -610,6 +635,8 @@
     (fact "model" tyonjohtaja-model => truthy)
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ty\u00f6njohtaja")
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => (-> tyonjohtaja :data :kuntaRoolikoodi :value))
+    (fact "no suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi tyonjohtaja-model) => nil)
+    (fact "no FISEpatevyyskortti" (::FISEpatevyyskortti tyonjohtaja-model) => nil)
     (fact "alkamisPvm" (:alkamisPvm tyonjohtaja-model) => "2014-02-13")
     (fact "paattymisPvm" (:paattymisPvm tyonjohtaja-model) => "2014-02-20")
     (fact "koulutus with 'Muu' selected" (:koulutus tyonjohtaja-model) => "muu")
