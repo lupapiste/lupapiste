@@ -1,8 +1,6 @@
 (ns lupapalvelu.document.document-field-validators
   (:require [sade.strings :as ss]
-            [lupapalvelu.document.validator :refer :all]
-            [lupapalvelu.document.vrk :refer [rakennus-schemas]]
-            [sade.validators :refer [finnish-zip?]]))
+            [lupapalvelu.document.validator :refer :all]))
 
 ;; Huom!
 ;;  Toisteisille kentille :fieldsiin pitaa antaa path muodossa [:rakennuksenOmistajat :0 :omistajalaji] eli numero mukaan.
