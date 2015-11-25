@@ -286,15 +286,23 @@
 
 (defn assoc-country
   "Augments given (address) map with country and foreign address
-  information (based on data), if needed."
+  information (based on data), if needed.
+  Note: KRYSP supports postal codes only in the Finnish format. Thus,
+  the unsupported postal codes are removed from the canonical."
   [address data]
-  (let [maa (or (:maa data) "FIN")]
-    (merge address
-           {:valtioSuomeksi        (i18n/localize :fi (str "country." maa))
-            :valtioKansainvalinen  maa}
-           (when-not (= maa "FIN")
-             {:ulkomainenLahiosoite       (:katu data)
-              :ulkomainenPostitoimipaikka (:postitoimipaikannimi data)}))))
+  (let [maa (or (:maa data) "FIN")
+        address (assoc address
+                       :valtioSuomeksi        (i18n/localize :fi (str "country." maa))
+                       :valtioKansainvalinen  maa)]
+    (if-not (= maa "FIN")
+      (let [{:keys [katu postinumero postitoimipaikannimi]} data
+            address (if (v/finnish-zip? postinumero)
+                      address
+                      (dissoc address :postinumero))]
+        (assoc address
+               :ulkomainenLahiosoite       katu
+               :ulkomainenPostitoimipaikka postitoimipaikannimi))
+      address)))
 
 (defn get-simple-osoite
   [{:keys [katu postinumero postitoimipaikannimi] :as osoite}]
