@@ -533,7 +533,5 @@
   (let [visibility (get metadata :nakyvyys)
         publicity-class (get metadata :julkisuusluokka)]
     (if (or publicity-class visibility)
-      (if publicity-class
-        (= publicity-class "julkinen")
-        (= visibility "julkinen"))
+      (= "julkinen" (or publicity-class visibility))
       true)))
