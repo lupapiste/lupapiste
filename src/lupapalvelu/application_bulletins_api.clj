@@ -1,12 +1,13 @@
 (ns lupapalvelu.application-bulletins-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [clj-time.coerce :as c]
+            [clj-time.core :as t]
+            [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [noir.response :as resp]
             [sade.core :refer :all]
+            [sade.util :as util]
             [slingshot.slingshot :refer [try+]]
             [sade.strings :as ss]
-            [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.mongo :as mongo]
@@ -112,15 +113,23 @@
     (when-not (every? true? files-found)
       (fail :error.invalid-files-attached-to-comment))))
 
+(defn- in-proclaimed-period
+  [version]
+  (let [[starts ends] (->> (util/select-values version [:proclamationStartsAt :proclamationEndsAt])
+                           (map c/from-long))
+        ends     (t/plus ends (t/days 1))]
+    (t/within? (t/interval starts ends) (c/from-long (now)))))
+
 (defn- bulletin-can-be-commented
-  [{{bulletin-id :bulletinId} :data} _]
-  (let [{bulletin-state :bulletinState} (mongo/select-one :application-bulletins {:_id bulletin-id} {:bulletinState 1})] ; TODO: use get-bulletin, add projection
-    ; 1. in proclaimed state
-    (when-not (= bulletin-state "proclaimed")
-      (fail :error.bulletin-not-in-commentable-state))
-    ; 2. commenting time period has not passed
-    ; TODO
-    ))
+  ([{{bulletin-id :bulletinId} :data}]
+   (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
+         bulletin   (mongo/select-one :application-bulletins {:_id bulletin-id} projection)] ; TODO: use get-bulletin, add projection
+     (if-not (and (= (:bulletinState bulletin) "proclaimed")
+                  (in-proclaimed-period (-> bulletin :versions last))
+                  (not-empty (vetuma/vetuma-session)))
+       (fail :error.bulletin-not-in-commentable-state))))
+  ([command _]
+    (bulletin-can-be-commented command)))
 
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
 
@@ -200,20 +209,22 @@
     (ok)))
 
 (defquery bulletin
-  {:parameters [bulletinId]
-   :feature :publish-bulletin
-   :user-roles #{:anonymous}}
   "return only latest version for application bulletin"
+  {:parameters [bulletinId]
+   :feature    :publish-bulletin
+   :user-roles #{:anonymous}}
+  [command]
   (if-let [bulletin (bulletins/get-bulletin bulletinId)]
-    (let [latest-version (-> bulletin :versions first)
-          bulletin-version (assoc latest-version :versionId (:id latest-version)
-                                                 :id (:id bulletin))
-          append-schema-fn (fn [{schema-info :schema-info :as doc}]
-                             (assoc doc :schema (schemas/get-schema schema-info)))
-          bulletin (-> bulletin-version
-                       (update-in [:documents] (partial map append-schema-fn))
-                       (assoc :stateSeq bulletins/bulletin-state-seq))]
-      (ok :bulletin bulletin))
+    (let [latest-version       (-> bulletin :versions first)
+          bulletin-version     (assoc latest-version :versionId (:id latest-version)
+                                                     :id (:id bulletin))
+          append-schema-fn     (fn [{schema-info :schema-info :as doc}]
+                                 (assoc doc :schema (schemas/get-schema schema-info)))
+          bulletin             (-> bulletin-version
+                                   (update-in [:documents] (partial map append-schema-fn))
+                                   (assoc :stateSeq bulletins/bulletin-state-seq))
+          bulletin-commentable (= (bulletin-can-be-commented command) nil)]
+      (ok :bulletin (merge bulletin {:canComment bulletin-commentable})))
     (fail :error.bulletin.not-found)))
 
 (defquery bulletin-versions
@@ -224,6 +235,7 @@
   (let [bulletin-fields (-> bulletins/bulletins-fields
                             (dissoc :versions)
                             (merge {:comments 1
+                                    :versions.id 1
                                     :bulletinState 1}))
         bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
     (ok :bulletin bulletin)))

@@ -37,7 +37,7 @@
                                                                    "sailytysaika" {"arkistointi" "ei"
                                                                                   "perustelu" "foo"}
                                                                    "myyntipalvelu" false
-                                                                   "n\u00e4kyvyys" "julkinen"}}]}
+                                                                   "nakyvyys" "julkinen"}}]}
                      :created 1000
                      :user {:orgAuthz {:753-R #{:authority :archivist}}}}]
         (update-application-child-metadata!
@@ -49,14 +49,14 @@
            "sailytysaika" {"arkistointi" "ikuisesti"
                            "perustelu" "foo"}
            "myyntipalvelu" false
-           "n\u00e4kyvyys" "julkinen"}) => nil
+           "nakyvyys" "julkinen"}) => nil
         (provided
           (lupapalvelu.action/update-application command {$set {:modified 1000 :attachments [{:id 1 :metadata {:julkisuusluokka :julkinen
                                                                                                                :henkilotiedot :ei-sisalla
                                                                                                                :sailytysaika {:arkistointi :ikuisesti
                                                                                                                               :perustelu "foo"}
                                                                                                                :myyntipalvelu false
-                                                                                                               (keyword  "n\u00e4kyvyys") :julkinen
+                                                                                                               :nakyvyys :julkinen
                                                                                                                :tila :luonnos}}]}}) => nil)))
 
     (fact "user with insufficient rights cannot update retention metadata"
@@ -66,7 +66,7 @@
                                                                    "sailytysaika" {"arkistointi" "ikuisesti"
                                                                                    "perustelu" "foo"}
                                                                    "myyntipalvelu" false
-                                                                   "n\u00e4kyvyys" "julkinen"}}]}
+                                                                   "nakyvyys" "julkinen"}}]}
                      :created 1000
                      :user {:orgAuthz {:753-R #{:authority}}}}]
         (update-application-child-metadata!
@@ -78,14 +78,14 @@
            "sailytysaika" {"arkistointi" "ei"
                            "perustelu" "foo"}
            "myyntipalvelu" false
-           "n\u00e4kyvyys" "julkinen"}) => nil
+           "nakyvyys" "julkinen"}) => nil
         (provided
           (lupapalvelu.action/update-application command {$set {:modified 1000 :attachments [{:id 1 :metadata {:julkisuusluokka :julkinen
                                                                                                                :henkilotiedot :ei-sisalla
                                                                                                                :sailytysaika {:arkistointi :ikuisesti
                                                                                                                               :perustelu "foo"}
                                                                                                                :myyntipalvelu false
-                                                                                                               (keyword  "n\u00e4kyvyys") :julkinen
+                                                                                                               :nakyvyys :julkinen
                                                                                                                :tila :luonnos}}]}}) => nil))))
 
   )  ;; /env/feature? :tiedonohjaus

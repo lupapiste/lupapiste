@@ -6,7 +6,6 @@
                                            showUserMenu: false,
                                            componentPages: ["bulletin"]});
 
-  window.lupapisteApp.models.applicationAuthModel = authorization.create();
   window.lupapisteApp.services.documentDataService = new LUPAPISTE.DocumentDataService({
     readOnly: true
   });
@@ -37,10 +36,11 @@
       });
     });
 
+    var dummyAuth = { ok: function() { return false; }};
     $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService(),
                                     vetumaService: new LUPAPISTE.VetumaService(),
                                     fileuploadService: new LUPAPISTE.FileuploadService(),
-                                    auth: window.lupapisteApp.models.applicationAuthModel});
+                                    auth: dummyAuth });
 
     var errorType = _.includes(["error", "cancel"], pageutil.lastSubPage()) ?
       pageutil.lastSubPage() :

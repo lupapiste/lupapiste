@@ -103,7 +103,8 @@
             <!-- This is where the generated documents will be placed. -->
         </div>
       </div>
-      <!-- ko if: auth.ok("add-bulletin-comment") -->
+      
+      <!-- ko if: canCommentCurrentBulletin -->
         <!-- ko if: authenticated -->
         <div data-bind="component: { name: 'bulletin-comment',
                                      params: { bulletin: $data,
@@ -118,6 +119,7 @@
         </div>
         <!-- /ko -->
       <!-- /ko -->
+
     </script>
   </section>
 </body>

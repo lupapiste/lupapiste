@@ -57,6 +57,10 @@
     }).sortBy("name").value();
     self.graduatingYear = ko.observable().extend({ number: true, minLength: 4, maxLength: 4 });
     self.fise = ko.observable().extend({ maxLength: 255 });
+    self.fiseKelpoisuus = ko.observable();
+    self.availableFiseKelpoisuusValues = _(LUPAPISTE.config.fiseKelpoisuusValues).map(function(kelp) {
+      return {id: kelp, name: loc(["fisekelpoisuus", kelp])};
+    }).sortBy("name").value();
     self.companyName = ko.observable().extend({ maxLength: 255 });
     self.companyId = ko.observable().extend( { y: true });
     self.allowDirectMarketing = ko.observable();
@@ -67,7 +71,7 @@
     });
 
     self.all = ko.validatedObservable([self.firstName, self.lastName, self.street, self.city,
-                                       self.zip, self.phone, self.degree, self.graduatingYear, self.fise,
+                                       self.zip, self.phone, self.degree, self.graduatingYear, self.fise, self.fiseKelpoisuus,
                                        self.companyName, self.companyId]);
 
     self.isValid = ko.computed(function() {
@@ -130,6 +134,7 @@
         .degree(u.degree)
         .graduatingYear(u.graduatingYear)
         .fise(u.fise)
+        .fiseKelpoisuus(u.fiseKelpoisuus)
         .companyName(u.companyName)
         .companyId(u.companyId)
         .allowDirectMarketing(u.allowDirectMarketing)
@@ -156,7 +161,7 @@
         ["firstName", "lastName",
          "street", "city", "zip", "phone",
          "architect",
-         "degree", "graduatingYear", "fise",
+         "degree", "graduatingYear", "fise", "fiseKelpoisuus",
          "companyName", "companyId",
          "allowDirectMarketing"]);
 

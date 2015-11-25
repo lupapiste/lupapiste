@@ -243,7 +243,8 @@
 
   (facts "with real schemas - required fields for henkilo hakija"
     (with-timestamp some-time
-      (let [document (-> (new-document (schemas/get-schema (schemas/get-latest-schema-version) "hakija") ..now..)
+      (let [schema (schemas/get-schema (schemas/get-latest-schema-version) "hakija")
+            document (-> (new-document schema ..now..)
                          (apply-update [:_selected] "henkilo")
                          (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
                          (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
@@ -251,6 +252,7 @@
                          (apply-update [:henkilo :osoite :katu] "katu")
                          (apply-update [:henkilo :osoite :postinumero] "12345")
                          (apply-update [:henkilo :osoite :postitoimipaikannimi] "Demola")
+                         (apply-update [:henkilo :osoite :maa] "FIN")
                          (apply-update [:henkilo :yhteystiedot :email] "tauno@example.com")
                          (apply-update [:henkilo :yhteystiedot :puhelin] "050"))]
 
@@ -262,7 +264,12 @@
         (-> document
             (apply-update [:henkilo :osoite :postinumero])) => missing-required-fields?
         (-> document
-            (apply-update [:henkilo :osoite :postitoimipaikannimi])) => missing-required-fields?))))
+            (apply-update [:henkilo :osoite :postitoimipaikannimi]))=> missing-required-fields?
+        (-> document
+            (apply-update [:henkilo :osoite :postinumero] "000")) => (invalid-with? schema [:warn "bad-postal-code"])
+        (-> document
+            (apply-update [:henkilo :osoite :postinumero] "000")
+            (apply-update [:henkilo :osoite :maa] "CHN")) => valid?))))
 
 (facts "with real schemas - required fields for yritys hakija"
   (with-timestamp some-time
@@ -273,6 +280,7 @@
                      (apply-update [:yritys :osoite :katu] "Satakunnankatu 18 A")
                      (apply-update [:yritys :osoite :postinumero] "33720")
                      (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere")
+                     (apply-update [:yritys :osoite :maa] "FIN")
                      (apply-update [:yritys :yhteyshenkilo :henkilotiedot :etunimi] "Tauno")
                      (apply-update [:yritys :yhteyshenkilo :henkilotiedot :sukunimi] "Palo")
                      (apply-update [:yritys :yhteyshenkilo :yhteystiedot :email] "tauno@example.com")
@@ -295,6 +303,7 @@
                      (apply-update [:rakennuksenOmistajat :0 :yritys :osoite :katu] "Satakunnankatu 18 A")
                      (apply-update [:rakennuksenOmistajat :0 :yritys :osoite :postinumero] "33720")
                      (apply-update [:rakennuksenOmistajat :0 :yritys :osoite :postitoimipaikannimi] "Tampere")
+                     (apply-update [:rakennuksenOmistajat :0 :yritys :osoite :maa] "FIN")
                      (apply-update [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo :henkilotiedot :etunimi] "Tauno")
                      (apply-update [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo :henkilotiedot :sukunimi] "Palo")
                      (apply-update [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo :yhteystiedot :email] "tauno@example.com")
@@ -385,7 +394,8 @@
                                                                :turvakieltoKytkin {:modified 1370856477455, :value false}}
                                                :osoite {:katu {:modified 1370856477455, :value "Paapankuja 12"}
                                                         :postinumero {:value "10203", :modified 1370856487304}
-                                                        :postitoimipaikannimi {:modified 1370856477455, :value "Piippola"}}
+                                                        :postitoimipaikannimi {:modified 1370856477455, :value "Piippola"}
+                                                        :maa {:modified 1370856477455, :value "FIN"}}
                                                :userId {:value "777777777777777777000020", :modified 1370856477473}
                                                :yhteystiedot {:email {:modified 1370856477455, :value "pena@example.com"}
                                                               :puhelin {:modified 1370856477455, :value "0102030405"}}}}}}})
@@ -680,10 +690,10 @@
                  :postinumero          {:value ""}
                  :postitoimipaikannimi {:value "city"}}
         :patevyys {:fise {:value ""}
+                   :fiseKelpoisuus {:value ""}
                    :koulutusvalinta {:value ""}
                    :valmistumisvuosi {:value ""}}
-        :patevyys-tyonjohtaja {:fise {:value ""}
-                               :koulutusvalinta {:value ""}
+        :patevyys-tyonjohtaja {:koulutusvalinta {:value ""}
                                :valmistumisvuosi {:value ""}}
         :yritys   {:liikeJaYhteisoTunnus {:value ""}
                    :yritysnimi {:value ""}}} )

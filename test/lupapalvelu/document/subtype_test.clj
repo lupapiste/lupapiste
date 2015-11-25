@@ -58,10 +58,11 @@
     (subtype-validation {:subtype :letter :case :lower} "a") => nil?
     (subtype-validation {:subtype :letter :case :lower} "A") => [:warn "illegal-letter:lower"]))
 
-(facts "Facts about zip validation"
-  (fact (subtype-validation {:subtype :zip} "") => nil?)
-  (fact (subtype-validation {:subtype :zip} "33800") => nil?)
-  (fact (subtype-validation {:subtype :zip} "123") => [:warn "illegal-zip"]))
+;; Subtype zip is not currently used. See subtype definitions for details.
+;; (facts "Facts about zip validation"
+;;   (fact (subtype-validation {:subtype :zip} "") => nil?)
+;;   (fact (subtype-validation {:subtype :zip} "33800") => nil?)
+;;   (fact (subtype-validation {:subtype :zip} "123") => [:warn "illegal-zip"]))
 
 (facts "VRK compliant name validation"
   (subtype-validation {:subtype :vrk-name} "") => nil?
