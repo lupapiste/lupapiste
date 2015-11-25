@@ -13,6 +13,8 @@
   var model = new function() {
     var self = this;
 
+    self.locationModel = new LUPAPISTE.LocationModel();
+
     self.goPhase1 = function() {
       pageutil.openPage("create-part-1");
       self.map.updateSize();
@@ -49,31 +51,21 @@
     self.map = null;
 
     self.search = ko.observable("");
-    self.x = ko.observable(0);
-    self.y = ko.observable(0.0);
+
+    self.x = self.locationModel.x;
+    self.y = self.locationModel.y;
     self.addressData = ko.observable(null);
-    self.addressString = ko.observable(null);
-    self.propertyId = ko.observable(null);
-    self.propertyIdHumanReadable = ko.pureComputed({
-      read: function(){
-        return self.propertyId() ? util.prop.toHumanFormat(self.propertyId()) : "";
-      },
-      write: function(value) {
-        self.propertyId(util.prop.toDbFormat(value));
-      },
-      owner: self});
+    self.addressString = self.locationModel.addressString;
+    self.propertyId = self.locationModel.propertyId;
+    self.propertyIdHumanReadable = self.locationModel.propertyIdHumanReadable;
+
     self.operations = ko.observable(null);
     self.organization = ko.observable(null);
     self.organizationLinks = ko.computed(function() { var m = self.organization(); return m ? m.links : null; });
     self.attachmentsForOp = ko.computed(function() { var m = self.organization(); return m ? _.map(m.attachmentsForOp, function(d) { return { group: d[0], id: d[1]};}) : null; });
-    self.municipalityCode = ko.observable(null);
-    self.municipalityName = ko.pureComputed(function() {
-      if (self.municipalityCode()) {
-        return loc(["municipality", self.municipalityCode()]);
-      }
-      return "";
-    });
 
+    self.municipalityCode = self.locationModel.municipalityCode;
+    self.municipalityName = self.locationModel.municipalityName;
 
     self.municipalitySupported = ko.observable(true);
     self.processing = ko.observable(false);

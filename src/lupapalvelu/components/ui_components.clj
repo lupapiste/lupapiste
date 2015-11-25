@@ -277,7 +277,7 @@
                   :js ["docmodel.js" "docgen.js"]}
 
    :create       {:depends [:common-html :map]
-                  :js ["municipalities.js" "create.js"]
+                  :js ["locationmodel.js" "municipalities.js" "create.js"]
                   :html ["map-popup.html" "create.html"]}
 
    :iframe       {:depends [:common-html]
