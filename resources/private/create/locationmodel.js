@@ -78,7 +78,9 @@ LUPAPISTE.LocationModel = function() {
   // Search API
   //
 
-  self.onError = _.noop; // TODO send indicator event
+  self.onError = function() {
+    hub.send("indicator", {style: "negative", message: "integration.getAddressNotWorking"});
+  };
 
   self.searchPropertyId = function(x, y) {
     locationSearch.propertyIdByPoint(self.requestContext, x, y, self.setPropertyId, self.onError, self.processing);

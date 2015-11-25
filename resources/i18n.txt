@@ -1,0 +1,1 @@
+integration.getAddressNotWorking: Kolmannen osapuolen paikkatietopalvelu ei ole käytettävissä. Ole hyvä ja yritä hetken kuluttua uudelleen.
