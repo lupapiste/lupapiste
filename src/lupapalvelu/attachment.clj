@@ -526,3 +526,14 @@
         (proxy-super close)
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
+
+(defn public-attachment?
+  "Returns false if either julkisuusluokka or nakyvyys metadata is not public. Without metadata returns true."
+  [{metadata :metadata :as attachment}]
+  (let [visibility (get metadata :nakyvyys)
+        publicity-class (get metadata :julkisuusluokka)]
+    (if (or publicity-class visibility)
+      (if publicity-class
+        (= publicity-class "julkinen")
+        (= visibility "julkinen"))
+      true)))

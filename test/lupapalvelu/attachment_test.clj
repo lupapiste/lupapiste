@@ -213,3 +213,26 @@
                                                                                :metadata {"bar" "baz"}}])
       (provided
         (mongo/create-id) => "123"))))
+
+(facts "facts about attachment publicity"
+   (let [no-metadata {}
+         no-metadata2 {:metadata {}}
+         nakyvyys-not-public {:metadata {:nakyvyys "test"}}
+         jluokka-nakyvyys-not-public {:metadata {:nakyvyys "test"
+                                                 :julkisuusluokka "test2"}}
+         nakyvyys-public {:metadata {:nakyvyys "julkinen"
+                                     :julkisuusluokka "test2"}}
+         jluokka-public {:metadata {:nakyvyys "test"
+                                    :julkisuusluokka "julkinen"}}
+         both-public {:metadata {:nakyvyys "test"
+                                 :julkisuusluokka "julkinen"}}
+         only-julkisuusluokka {:metadata {:julkisuusluokka "julkinen"}}]
+
+     (public-attachment? no-metadata) => true
+     (public-attachment? no-metadata2) => true
+     (public-attachment? nakyvyys-not-public) => false
+     (public-attachment? jluokka-nakyvyys-not-public) => false
+     (fact "julkisuusluokka overrules nakyvyys" (public-attachment? nakyvyys-public) => false)
+     (public-attachment? jluokka-public) => true
+     (public-attachment? both-public) => true
+     (public-attachment? only-julkisuusluokka) => true))
