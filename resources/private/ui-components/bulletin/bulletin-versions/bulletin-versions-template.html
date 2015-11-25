@@ -1,0 +1,32 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="bulletin-versions-template">
+  <div data-test-id="bulletin-versions-accordion"
+       data-bind="component: {name: 'accordion', params: {ltitle: 'bulletin.versions.history',
+                                                          accordionContentTemplate: 'bulletin-versions-accordion-content',
+                                                          accordionContentTemplateData: $data}}"></div>
+
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="bulletin-versions-accordion-content">
+  <table class="table" data-test-id="bulletin-versions-table">
+    <thead>
+      <tr>
+        <th data-bind="ltext: 'bulletin.versions.published'"></th>
+        <th data-bind="ltext: 'bulletin.versions.state'"></th>
+        <th data-bind="ltext: 'bulletin.versions.comments'"></th>
+        <th data-bind="ltext: 'bulletin.versions.actions'"></th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: versions">
+      <tr>
+        <td data-bind="dateString: modified"></td>
+        <td data-bind="ltext: 'bulletin.state.' + bulletinState"></td>
+        <td data-bind="text: $parent.versionCommentsCount($data)"></td>
+        <td class="actions">
+          <a href="#" class="link-btn" data-bind="ltext: 'edit'"></a>
+          <a href="#" class="link-btn" data-bind="ltext: 'bulletin.versions.comments.show'"></a>
+          <a href="#" class="link-btn" data-bind="ltext: 'bulletin.versions.version.show'"></a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</script>

@@ -15,7 +15,10 @@ LUPAPISTE.DocgenTableModel = function(params) {
       required: !!schema.required
     };
   });
-  self.columnHeaders.push({name: "remove", required: false});
+  self.columnHeaders.push({
+    name: self.groupsRemovable(params.schema) ? "remove" : "", 
+    required: false
+  });
 
   self.subSchemas = _.map(params.schema.body, function(schema) {
     var uicomponent = schema.uicomponent || "docgen-" + schema.type;

@@ -355,7 +355,7 @@
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "fise" :type :string :required false}
                {:name "patevyys" :type :string :required false}
-               {:name "patevyysluokka" :type :select :sortBy nil :required false
+               {:name "patevyysluokka" :type :select :sortBy nil :required true
                 :body [{:name "AA"}
                        {:name "A"}
                        {:name "B"}
@@ -379,7 +379,7 @@
 
 (def kuntaroolikoodi [{:name "kuntaRoolikoodi"
                        :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi._group_label"
-                       :type :select :sortBy :displayname
+                       :type :select :sortBy :displayname :required true
                        :body [{:name "GEO-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.GEO-suunnittelija"}
                               {:name "LVI-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.LVI-suunnittelija"}
                               {:name "IV-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.IV-suunnittelija"}
@@ -660,13 +660,13 @@
                             :type :group
                             :uicomponent :constructionWasteReport
                             :approvable false
-                            :body [{:name "suunniteltuJate"      
+                            :body [{:name "suunniteltuJate"
                                     :type :table
                                     :repeating true
                                     :repeating-init-empty true
                                     :body (body (assoc jatetyyppi :readonly true) rakennusjateselvitysRow)}
-                                   {:name "suunnittelematonJate" 
-                                    :type :table 
+                                   {:name "suunnittelematonJate"
+                                    :type :table
                                     :repeating true
                                     :body (body jatetyyppi rakennusjateselvitysUusiRow)}]}
                            {:name "vaarallisetAineet"
@@ -674,14 +674,14 @@
                             :type :group
                             :uicomponent :constructionWasteReport
                             :approvable false
-                            :body [{:name "suunniteltuJate"      
-                                    :type :table 
-                                    :repeating true 
+                            :body [{:name "suunniteltuJate"
+                                    :type :table
+                                    :repeating true
                                     :repeating-init-empty true
                                     :body (body (assoc vaarallinenainetyyppi :readonly true) rakennusjateselvitysRow)}
-                                   {:name "suunnittelematonJate" 
-                                    :type :table 
-                                    :repeating true 
+                                   {:name "suunnittelematonJate"
+                                    :type :table
+                                    :repeating true
                                     :body (body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}])
 
 
