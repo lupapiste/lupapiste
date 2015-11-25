@@ -142,3 +142,17 @@ Write comment for bulletin
 Send comment
   Wait until  Element should be enabled  //button[@data-test-id='send-comment']
   Click by test id  send-comment
+
+Fill out alternate receiver form
+  Wait until  Element should be visible  //div[@data-test-id='other-receiver-row']
+  Input text  //div[@data-test-id='other-receiver-row']//input[@data-test-id='firstName']  Keeko
+  Input text  //div[@data-test-id='other-receiver-row']//input[@data-test-id='lastName']  Valaskala
+  Input text  //div[@data-test-id='other-receiver-row']//input[@data-test-id='street']  Valaskatu 1
+  Input text  //div[@data-test-id='other-receiver-row']//input[@data-test-id='zip']  00001
+  Input text  //div[@data-test-id='other-receiver-row']//input[@data-test-id='city']  Äetsä
+  Fill out alternate receiver email field
+
+Fill out alternate receiver email field
+  Wait until  Element should be visible  //div[@data-test-id='other-receiver-row']
+  Input text  //div[@data-test-id='other-receiver-row']//input[@data-test-id='email']  keeko@valaskala.com
+  Wait until  Checkbox Should Be Selected  //div[@data-test-id='other-receiver-row']//input[@data-test-id='emailPreferred']

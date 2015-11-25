@@ -17,3 +17,11 @@ Comment bulletin without any additional form fields
   Write comment for bulletin  Kommentoidaan julkipantua ilmoitusta
   Send comment
   Positive indicator should be visible
+
+Comment bulletin with alternate contact info
+  Click by test id  otherReceiver
+  Fill out alternate receiver form
+  Fill out alternate receiver email field
+  Write comment for bulletin  Toinen kommentti
+  Send comment
+  Positive indicator should be visible
