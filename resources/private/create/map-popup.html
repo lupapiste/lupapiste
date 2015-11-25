@@ -8,14 +8,11 @@
        <h3 data-bind="ltext: 'newRequest.chosenLocation'"></h3>
        <p data-bind="lhtml: 'create.search-check-prompt'"></p>
 
-       <div class="use-manual-entry" data-bind="visible: useManualEntry, ltext: 'integration.getAddressNotWorking'"></div>
-
        <div>
          <div class="form-entry">
            <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
-           <input data-bind="textInput: propertyIdHumanReadable,
-                             readonly: !(useManualEntry() && lupapisteApp.models.currentUser.isAuthority())"
-                  data-test-id="create-property-id" type="text"
+           <input data-bind="textInput: propertyIdHumanReadable"
+                  data-test-id="create-property-id" type="text" readonly="readonly"
                   class="form-input text bottom-marginM">
          </div>
 
@@ -27,16 +24,7 @@
 
          <div >
            <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
-           <select data-bind="visible: useManualEntry,
-                              options: municipalities.municipalities,
-                              optionsText: function(m) { return loc(['municipality', m.id]); },
-                              optionsValue: 'id',
-                              value: municipalityCode,
-                              optionsCaption: loc('choose'),
-                              valueAllowUnset: true"
-                   data-test-id="create-municipality-select"
-                   class="form-input combobox"></select>
-           <span data-bind="visible: !useManualEntry(), text: municipalityName" ></span>
+           <span data-bind="text: municipalityName, attr: {'data-text-value': municipalityCode}" data-test-id="create-municipality-select"></span>
          </div>
 
 

@@ -45,9 +45,6 @@
       window.scrollTo(0, 0);
     };
 
-
-    self.useManualEntry = ko.observable(false);
-
     self.map = null;
 
     self.search = ko.observable("");
@@ -97,9 +94,6 @@
       if (!self.creatingAppWithPrevPermit) {
         if (code) {
           self.findOperations(code);
-        }
-        if (self.useManualEntry()) {
-          self.updateMunicipality(code);
         }
       }
     });
@@ -338,7 +332,6 @@
                 x = data.location.x,
                 y = data.location.y;
             self
-              .useManualEntry(false)
               .center(x, y, 13)
               .setXY(x, y)
               .addressData(data)
@@ -356,7 +349,6 @@
                 x = data.x,
                 y = data.y;
             self
-              .useManualEntry(false)
               .center(x, y, 14)
               .setXY(x, y)
               .propertyId(util.prop.toDbFormat(id))
