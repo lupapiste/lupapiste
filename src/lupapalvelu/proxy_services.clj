@@ -7,7 +7,7 @@
             [sade.env :as env]
             [sade.property :as p]
             [sade.strings :as ss]
-            [sade.util :refer [dissoc-in select ->double]]
+            [sade.util :as util]
             [lupapalvelu.find-address :as find-address]
             [lupapalvelu.wfs :as wfs]))
 
