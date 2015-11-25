@@ -139,7 +139,7 @@
   [:err "unknown-type"])
 
 ;;
-;; Group validation
+;; Element validation (:validator key in schema)
 ;;
 
 (declare find-by-name)
@@ -153,10 +153,10 @@
     (or (ss/blank? postal-code) (v/finnish-zip? postal-code))
     true))
 
-(defmulti validate-group (fn [_ _ _ element]
+(defmulti validate-element (fn [_ _ _ element]
                            (:validator element)))
 
-(defmethod validate-group :address
+(defmethod validate-element :address
   [info data path element]
   (let [{:keys [postinumero maa]} (tools/unwrapped data)]
     (when-not (good-postal-code? postinumero maa)
@@ -208,14 +208,16 @@
         element (if (not-empty current-path)
                   (keywordize-keys (find-by-name (:schema-body info) current-path))
                   {})]
-    (cond
-      (:validator element) (validate-group info data current-path element)
-      (contains? data :value) (let [result  (validate-field application element (:value data))]
-                                (->validation-result info data current-path element result))
-      :else (filter
-             (comp not nil?)
-             (map (fn [[k2 v2]]
-                    (validate-fields application info k2 v2 current-path)) data)))))
+    (if (contains? data :value)
+      (let [result  (validate-field application element (:value data))]
+        (->validation-result info data current-path element result))
+      (let [result (when (:validator element)
+                     (validate-element info data current-path element))]
+        (filter
+         (comp not nil?)
+         (concat (flatten [result])
+                 (map (fn [[k2 v2]]
+                        (validate-fields application info k2 v2 current-path)) data)))))))
 
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))

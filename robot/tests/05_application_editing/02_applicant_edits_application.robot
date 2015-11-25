@@ -115,6 +115,14 @@ Mikko subscribes notifications
   Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='subscribeNotifications']
   Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
 
+Mikko inputs bad postal code for hakija-r
+  Input text with jQuery  div#application-parties-tab section[data-doc-type="hakija-r"] input[data-docgen-path="henkilo.osoite.postinumero"]  000
+  Wait Until  Element should be visible  jquery=section[data-doc-type="hakija-r"] input.warn[data-docgen-path="henkilo.osoite.postinumero"]
+
+Mikko changes hakija-r country and postal code becomes valid
+  Select from list  jquery=div#application-parties-tab section[data-doc-type="hakija-r"] select[data-docgen-path="henkilo.osoite.maa"]  CHN
+  Wait Until  Element should not be visible  jquery=section[data-doc-type="hakija-r"] input.warn[data-docgen-path="henkilo.osoite.postinumero"]
+
 Mikko decides to delete maksaja
   Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1

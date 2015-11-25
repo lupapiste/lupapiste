@@ -243,7 +243,8 @@
 
   (facts "with real schemas - required fields for henkilo hakija"
     (with-timestamp some-time
-      (let [document (-> (new-document (schemas/get-schema (schemas/get-latest-schema-version) "hakija") ..now..)
+      (let [schema (schemas/get-schema (schemas/get-latest-schema-version) "hakija")
+            document (-> (new-document schema ..now..)
                          (apply-update [:_selected] "henkilo")
                          (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
                          (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
@@ -263,7 +264,12 @@
         (-> document
             (apply-update [:henkilo :osoite :postinumero])) => missing-required-fields?
         (-> document
-            (apply-update [:henkilo :osoite :postitoimipaikannimi]))=> missing-required-fields?))))
+            (apply-update [:henkilo :osoite :postitoimipaikannimi]))=> missing-required-fields?
+        (-> document
+            (apply-update [:henkilo :osoite :postinumero] "000")) => (invalid-with? schema [:warn "bad-postal-code"])
+        (-> document
+            (apply-update [:henkilo :osoite :postinumero] "000")
+            (apply-update [:henkilo :osoite :maa] "CHN")) => valid?))))
 
 (facts "with real schemas - required fields for yritys hakija"
   (with-timestamp some-time
