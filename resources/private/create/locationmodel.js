@@ -1,8 +1,6 @@
 LUPAPISTE.LocationModel = function() {
   "use strict";
   var self = this;
-  var floatProperties = ["x", "y"];
-  var falseyProperties = ["addressString", "propertyId", "municipalityCode"];
 
   self.processing = ko.observable(false);
 
@@ -24,25 +22,6 @@ LUPAPISTE.LocationModel = function() {
   self.reset = function() {
     self.x(0).y(0).addressString("").propertyId("").municipalityCode("");
   };
-
-  // TODO remove when done
-  ko.computed(function() {
-    var missingDetails = [];
-
-    _.each(floatProperties, function(p) {
-      if (self[p]() < 0.1) {
-        missingDetails.push(p);
-      }
-    });
-    _.each(falseyProperties, function(p) {
-      if (!self[p]()) {
-        missingDetails.push(p);
-      }
-    });
-
-    console.log("missingDetails", missingDetails);
-
-  }).extend({ throttle: 100 });
 
   self.setAddress = function(a) {
     return self.municipalityCode(a.municipality).addressString(a ? a.street + " " + a.number : "");
