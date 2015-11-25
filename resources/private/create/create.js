@@ -345,7 +345,7 @@
               .beginUpdateRequest()
               .searchPropertyId(x, y);
           }
-        }, _.partial(self.useManualEntry, true));
+        });
       return self;
     };
 
@@ -363,8 +363,7 @@
               .beginUpdateRequest()
               .searchAddress(x, y);
           }
-        },
-        _.partial(self.useManualEntry, true));
+        });
       return self;
     };
 
