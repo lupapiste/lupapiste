@@ -13,4 +13,6 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
     var versionCommentsLength = util.getIn(self, ["bulletin", "comments", version.id, "length"]);
     return versionCommentsLength ? versionCommentsLength + " " + loc("unit.kpl") : "";
   };
+
+  self.showVersionComments = params.showVersionComments;
 };
