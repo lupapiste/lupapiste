@@ -10,6 +10,9 @@ LUPAPISTE.BulletinTabModel = function(params) {
 
   self.bulletin = params.bulletinService.bulletin;
 
+  self.showVersions = ko.pureComputed(function() {
+  	return self.bulletin() && self.bulletin().versions.length > 0;
+  });
 
   ko.computed(function() {
     var id = self.appId();

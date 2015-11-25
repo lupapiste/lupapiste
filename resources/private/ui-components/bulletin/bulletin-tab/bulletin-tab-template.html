@@ -1,17 +1,15 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="bulletin-tab-template">
 
-
   <div data-bind="component: {name: 'publish-application',
                               params: {appId: appId,
                                        appState: appState,
                                        authModel: authModel,
                                        bulletin: bulletin,
                                        bulletinStates: LUPAPISTE.config.bulletinStates}}"></div>
-  <!-- ko if: lupapisteApp.services.publishBulletinService.bulletin() && lupapisteApp.services.publishBulletinService.bulletin().versions.length > 0 -->
+  <!-- ko if: showVersions -->
   <div data-bind="component: {name: 'bulletin-versions',
                               params: {appId: appId,
                                        authModel: authModel,
                                        bulletin: bulletin}}"></div>
   <!-- /ko -->
-</div>
 </script>
