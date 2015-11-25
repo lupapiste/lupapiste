@@ -26,7 +26,7 @@
                   data-test-id="create-address" type="text" class="form-input text"/>
          </div>
 
-         <div class="form-entry">
+         <div >
            <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
            <select data-bind="visible: useManualEntry,
                               options: municipalities.municipalities,
@@ -36,8 +36,8 @@
                               optionsCaption: loc('choose'),
                               valueAllowUnset: true"
                    data-test-id="create-municipality-select"
-                   class="form-select form-input combobox"></select>
-           <span data-bind="visible: !useManualEntry(), text: municipalityName" />
+                   class="form-input combobox"></select>
+           <span data-bind="visible: !useManualEntry(), text: municipalityName" ></span>
          </div>
 
 
