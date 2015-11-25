@@ -10,8 +10,14 @@ LUPAPISTE.BulletinTabModel = function(params) {
 
   self.bulletin = params.bulletinService.bulletin;
 
+  self.showVersionComments = ko.observable(false);
+
   self.showVersions = ko.pureComputed(function() {
-    return self.bulletin() && self.bulletin().versions.length > 0;
+    return self.bulletin() && self.bulletin().versions.length > 0 && !self.showVersionComments();
+  });
+
+  self.showPublishing = ko.pureComputed(function() {
+    return !self.showVersionComments();
   });
 
   ko.computed(function() {

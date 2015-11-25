@@ -1,3 +1,6 @@
+bulletin.comments.title:  Mielipiteet ja muistutukset
+help.bulletin.comments:
+
 fisekelpoisuus.tavanomainen pääsuunnittelu (uudisrakentaminen): tavanomainen pääsuunnittelu (uudisrakentaminen)
 fisekelpoisuus.tavanomainen pääsuunnittelu (korjausrakentaminen): tavanomainen pääsuunnittelu (korjausrakentaminen)
 fisekelpoisuus.vaativa pääsuunnittelu (uudisrakentaminen): vaativa pääsuunnittelu (uudisrakentaminen)
