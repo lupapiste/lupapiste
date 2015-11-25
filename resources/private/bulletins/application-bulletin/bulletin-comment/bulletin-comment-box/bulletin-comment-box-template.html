@@ -57,12 +57,13 @@
             <div data-bind="component: {name: 'checkbox-field',
                                         params: {value: otherReceiver,
                                                  id: 'otherReceiver',
+                                                 'data-test-id': 'otherReceiver',
                                                  lLabel: 'bulletin.comment.otherReceiver'}}"></div>
           </div>
         </div>
 
         <!-- ko with: otherReceiverInfo -->
-        <div class="row" data-bind="slider: $component.otherReceiver">
+        <div class="row" data-bind="slider: $component.otherReceiver" data-test-id="other-receiver-row">
           <div class="col-4">
             <div class="form-grid form-grid--no-border">
               <div class="row row--no-margin">
@@ -164,7 +165,8 @@
           </label>
         </div>
         <div class="row">
-          <button type="submit" class="positive" data-bind="disable: isSubmitDisabled,
+          <button type="submit" class="positive" data-test-id="send-comment"
+                  data-bind="disable: isSubmitDisabled,
                                                             css: {waiting: pending}">
             <i class="lupicon-comment"></i>
             <i class="wait spin lupicon-refresh"></i>
