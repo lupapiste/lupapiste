@@ -27,7 +27,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   self.authenticated = params.authenticated;
   self.auth = params.auth;
-  self.auth.refreshWithoutAppId({bulletinId: self.bulletinId()});
+  
   self.tabComponentParams = ko.pureComputed(function() {
     return {bulletin: self.bulletin,
             attachments: self.bulletin() ? self.bulletin().attachments : []};
