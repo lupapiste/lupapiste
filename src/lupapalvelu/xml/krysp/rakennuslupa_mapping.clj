@@ -488,17 +488,19 @@
               (update-in [:Tyonjohtaja :vaadittuPatevyysluokka] patevyysvaatimusluokka212)))
        %)))
 
-(def designer-new-roles-220 #{"rakennussuunnittelija" "kantavien rakenteiden suunnittelija"
-                              "pohjarakenteiden suunnittelija" "ilmanvaihdon suunnittelija"
-                              "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija"
-                              "rakennusfysikaalinen suunnittelija"
-                              "kosteusvaurion korjausty\u00f6n suunnittelija"})
+(def designer-roles-mapping-new-to-old-220 {"rakennussuunnittelija"                          "ARK-rakennussuunnittelija"
+                                            "kantavien rakenteiden suunnittelija"            "RAK-rakennesuunnittelija"
+                                            "pohjarakenteiden suunnittelija"                 "GEO-suunnittelija"
+                                            "ilmanvaihdon suunnittelija"                     "IV-suunnittelija"
+                                            "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija"  "KVV-suunnittelija"
+                                            "rakennusfysikaalinen suunnittelija"             "ei tiedossa"
+                                            "kosteusvaurion korjausty\u00f6n suunnittelija"  "ei tiedossa"})
 
 (defn map-suunnittelija-kuntaroolikoodi-pre220 [canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :suunnittelijatieto]
     #(map (fn [suunnittelija]
             (update-in suunnittelija [:Suunnittelija :suunnittelijaRoolikoodi]
-              (fn [role] (if (designer-new-roles-220 role) "ei tiedossa" role))))
+              (fn [role] (or (designer-roles-mapping-new-to-old-220 role) role))))
        %)))
 
 (def map-enums-212 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-tyonjohtaja-patevyysvaatimusluokka))
@@ -506,7 +508,7 @@
 (def map-enums-213-218 map-suunnittelija-kuntaroolikoodi-pre220)
 
 (defn- map-enums
-  "Map enumerations in canonical into values supperted by given KRYSP version"
+  "Map enumerations in canonical into values supported by given KRYSP version"
   [canonical krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
