@@ -66,6 +66,10 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     $("#bulletin-comment")[0].scrollIntoView(true);
   };
 
+  self.canCommentCurrentBulletin = ko.pureComputed(function() {
+    return util.getIn(self, ["bulletin", "canComment"]);
+  });
+
   hub.send("bulletinService::fetchBulletin", {id: self.bulletinId()});
 
   var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + self.bulletinId();
