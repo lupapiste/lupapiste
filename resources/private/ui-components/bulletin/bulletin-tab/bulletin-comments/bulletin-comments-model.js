@@ -11,4 +11,7 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
     return util.getIn(self, ["bulletin", "comments", util.getIn(self, ["showVersionComments", "id"])]);
   });
 
+  self.hideComments = function() {
+    self.showVersionComments(undefined);
+  };
 };
