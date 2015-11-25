@@ -77,7 +77,7 @@
       }
       return true;
     },
-    message: 'Annettu päivämäärä on päättymispäivän jälkeen'
+    message: loc("bulletin.beforeThan")
   }
 
   ko.validation.rules.afterThan = {
@@ -87,7 +87,7 @@
       }
       return true;
     },
-    message: 'Annettu päivämäärä on alkamispäivää ennen'
+    message: loc("bulletin.afterThan")
   }
 
   /*
