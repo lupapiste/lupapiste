@@ -1054,18 +1054,16 @@
                             </div>
                         </div>
 
-                        <button
-            data-bind="click: $root.verdictModel.newVerdict, visible: $root.authorization.ok('new-verdict-draft'), disable: $root.verdictModel.newProcessing"
-            class="btn btn-primary modal"
-            data-test-id="give-verdict">
+                        <button data-bind="click: $root.verdictModel.newVerdict, visible: $root.authorization.ok('new-verdict-draft'), disable: $root.verdictModel.newProcessing"
+                                class="btn btn-primary modal"
+                                data-test-id="give-verdict">
                             <em data-bind="visible: $root.verdictModel.newPending" class="button-loader"></em>
                             <span data-bind="ltext: 'application.verdict.add'"></span>
                         </button>
 
-                        <button
-            data-bind="click: $root.verdictModel.checkVerdict, visible: $root.authorization.ok('check-for-verdict'), disable: $root.verdictModel.processing"
-            class="btn btn-primary modal"
-            data-test-id="fetch-verdict">
+                        <button data-bind="click: $root.verdictModel.checkVerdict, visible: $root.authorization.ok('check-for-verdict'), disable: $root.verdictModel.processing"
+                                class="btn btn-primary modal"
+                                data-test-id="fetch-verdict">
                             <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
                             <span data-bind="ltext: 'verdict.fetch.button'"></span>
                         </button>
