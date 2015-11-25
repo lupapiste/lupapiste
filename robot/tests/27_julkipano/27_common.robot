@@ -8,6 +8,11 @@ Create bulletins
   As Sonja
   Create bulletins the fast way  ${count}
 
+Create a bulletin and go to bulletin page
+  Create bulletins  1
+  Go to bulletins page
+  Open bulletin by index  1
+
 Bulletin list should have no rows
   Element should not be visible  //table[@id="application-bulletins-list"]/tbody/tr
 
@@ -128,3 +133,12 @@ Move bulletin to final
 
 Bulletin shows as final
   Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Lainvoimainen
+
+Write comment for bulletin
+  [Arguments]  ${commentText}
+  Wait until  Element should be visible  //textarea[@data-test-id='bulletin-comment-field']
+  Input text  //textarea[@data-test-id='bulletin-comment-field']  ${commentText}
+
+Send comment
+  Wait until  Element should be enabled  //button[@data-test-id='send-comment']
+  Click by test id  send-comment
