@@ -2,8 +2,6 @@ LUPAPISTE.PublishApplicationModel = function(params) {
   "use strict";
   var self = this;
 
-  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
-
   self.authModel = params.authModel;
   self.appId     = params.appId;
   self.appState  = params.appState;
@@ -48,12 +46,5 @@ LUPAPISTE.PublishApplicationModel = function(params) {
 
   self.showBulletinState = ko.pureComputed(function() {
     return self.bulletinState() ? "bulletin.state." + self.bulletinState() : undefined;
-  });
-
-  ko.computed(function() {
-    var id = self.appId();
-    if(id) {
-      self.sendEvent("publishBulletinService", "fetchBulletinVersions", {bulletinId: id});
-    }
   });
 };

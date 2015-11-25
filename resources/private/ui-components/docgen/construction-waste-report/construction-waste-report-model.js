@@ -2,9 +2,9 @@ LUPAPISTE.ConstructionWasteReportModel = function(params) {
   "use strict";
   var self = this;
 
-  self.service = lupapisteApp.services.documentDataService;
+  var service = lupapisteApp.services.documentDataService;
 
-  var data = self.service.getInDocument(params.documentId, params.path);
+  var data = service.getInDocument(params.documentId, params.path);
   var plannedWasteData = data.model.suunniteltuJate;
   var unplannedWasteData = data.model.suunnittelematonJate;
 
@@ -44,5 +44,8 @@ LUPAPISTE.ConstructionWasteReportModel = function(params) {
       required: !!schema.required
     };
   });
-  self.columnHeaders.push({name: "remove", required: false});
+  self.columnHeaders.push({
+    name: self.groupsRemovable(unplannedWasteData.schema) ? "remove" : "", 
+    required: false
+  });
 };
