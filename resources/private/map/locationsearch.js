@@ -5,7 +5,7 @@ var locationSearch = (function() {
     ajax
       .get("/proxy/get-address")
       .param("query", address)
-      .processing(processing)
+      .processing(processing || _.noop)
       .success(requestContext.onResponse(onSuccess))
       .fail(requestContext.onResponse(onFail))
       .call();
@@ -15,7 +15,7 @@ var locationSearch = (function() {
     ajax
       .get("/proxy/point-by-property-id")
       .param("property-id", util.prop.toDbFormat(propertyId))
-      .processing(processing)
+      .processing(processing || _.noop)
       .success(requestContext.onResponse(onSuccess))
       .fail(requestContext.onResponse(onFail))
       .call();
@@ -27,7 +27,7 @@ var locationSearch = (function() {
       .get ("/proxy/property-id-by-point")
       .param ("x", x)
       .param ("y", y)
-      .processing(processing)
+      .processing(processing || _.noop)
       .success (requestContext.onResponse(onSuccess))
       .fail (requestContext.onResponse(onFail))
       .call ();
@@ -40,7 +40,7 @@ var locationSearch = (function() {
       .get("/proxy/address-by-point")
       .param("x", x)
       .param("y", y)
-      .processing(processing)
+      .processing(processing || _.noop)
       .success(requestContext.onResponse(onSuccess))
       .fail(requestContext.onResponse(onFail))
       .call();
@@ -51,7 +51,7 @@ var locationSearch = (function() {
       ajax
       .query("owners")
       .param("propertyId", propertyId)
-      .processing(processing)
+      .processing(processing || _.noop)
       .success(requestContext.onResponse(onSuccess))
       .error(requestContext.onResponse(onFail))
       .call();
