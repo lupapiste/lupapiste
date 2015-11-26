@@ -8,8 +8,14 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
 
   self.bulletin = params.bulletin
 
-  self.comments = ko.computed(function() {
-    return util.getIn(self, ["bulletin", "comments", util.getIn(self, ["showVersionComments", "id"])], []);
+  self.comments = params.comments;
+
+  ko.computed(function() {
+    var bulletinId = util.getIn(self, ["bulletin", "id"]);
+    var versionId = util.getIn(self, ["showVersionComments", "id"]);
+    self.sendEvent("publishBulletinService", "fetchBulletinComments", {bulletinId: bulletinId,
+                                                                       versionId: versionId,
+                                                                       reset: true});
   });
 
   self.hideComments = function() {
