@@ -47,7 +47,7 @@ var ajax = (function($) {
             defaultError(e);
           }
         } else {
-          error("Ajax: No response from " + self.url);
+          error("Ajax: No response from " + self.request.url);
         }
       },
       error: function(jqXHR, textStatus, errorThrown) {

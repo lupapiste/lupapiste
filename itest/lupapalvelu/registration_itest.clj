@@ -22,17 +22,8 @@
 
 (defn- decode-body [resp] (:body (decode-response resp)))
 
-(def token-query {:query-params {:success "/success"
-                                 :cancel "/cancel"
-                                 :error "/error"}})
-
 (defn- vetuma-finish [request-opts trid]
-  (vetuma-fake-respose request-opts {"TRID" trid
-                                     "STATUS" "SUCCESSFUL"
-                                     "SUBJECTDATA" "ETUNIMI=Jukka, SUKUNIMI=Palmu"
-                                     "EXTRADATA" "HETU=123456-7890"
-                                     "USERID" "123456-7890"
-                                     "VTJDATA" "<VTJHenkiloVastaussanoma/>"}))
+  (vetuma-fake-respose request-opts (default-vetuma-response-data trid)))
 
 (defn- register [base-opts user]
   (decode-body
@@ -53,16 +44,14 @@
 
 (facts* "Registration"
  (let [store (atom {})
-       params {:cookie-store (->cookie-store store)
-               :follow-redirects false
-               :throw-exceptions false}
-       trid (vetuma-init params token-query)]
+       params (default-vetuma-params (->cookie-store store))
+       trid (vetuma-init params default-token-query)]
 
    (fact "trid" trid =not=> ss/blank?)
 
    (fact "Vetuma redirect"
      (let [resp (vetuma-finish params trid)]
-       resp => (partial redirects-to (get-in token-query [:query-params :success]))))
+       resp => (partial redirects-to (get-in default-token-query [:query-params :success]))))
 
    (last-email) ; Inbox zero
 
@@ -134,7 +123,7 @@
      (fact "Register again with the same email"
        (last-email) ; Inbox zero
        (reset! store {}) ; clear cookies
-       (let [trid (vetuma-init params token-query)]
+       (let [trid (vetuma-init params default-token-query)]
          (vetuma-finish params trid))
 
        (let [stamp (:stamp (decode-body (http-get (str (server-address) "/api/vetuma/user") params))) => string?
