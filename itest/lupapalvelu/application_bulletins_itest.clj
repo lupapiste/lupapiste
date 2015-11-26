@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-bulletins-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.vetuma-itest-util :as vetuma-util]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.mongo :as mongo]
             [clojure.java.io :as io]))
@@ -29,23 +30,29 @@
         (command pena :publish-bulletin :id app-id) => fail?)))
 
   (facts* "Add comment for published bulletin"
-    (let [app (create-and-send-application sonja :operation "lannan-varastointi"
+    (let [store (atom {})
+          cookie-store (doto (->cookie-store store)
+                         (.addCookie test-db-cookie))
+          app (create-and-send-application sonja :operation "lannan-varastointi"
                                              :propertyId sipoo-property-id
                                              :x 406898.625 :y 6684125.375
                                              :address "Hitantine 108"
                                              :state "sent")
-          _ (command sonja :publish-bulletin :id (:id app)) => ok?
-          old-bulletin (:bulletin (query pena :bulletin :bulletinId (:id app)))
-          _ (command sonja :publish-bulletin :id (:id app))
-          bulletin (:bulletin (query pena :bulletin :bulletinId (:id app)))]
+          _ (command sonja :publish-bulletin :id (:id app) :cookie-store cookie-store) => ok?
+          old-bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))
+          _ (command sonja :publish-bulletin :id (:id app) :cookie-store cookie-store)
+          bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))]
+
+      (vetuma-util/authenticate-to-vetuma! cookie-store)
+
       (fact "unable to add comment for older version"
-        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId old-bulletin) :comment "foobar") => {:ok false :text "error.invalid-version-id"})
+        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId old-bulletin) :comment "foobar" :cookie-store cookie-store) => {:ok false :text "error.invalid-version-id"})
       (fact "unable to add empty comment"
-        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId bulletin) :comment "") => {:ok false :text "error.empty-comment"})
+        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId bulletin) :comment "" :cookie-store cookie-store) => {:ok false :text "error.empty-comment"})
       (fact "unable to add comment for unknown bulletin"
-        (command sonja :add-bulletin-comment :bulletinId "not-found" :bulletinVersionId (:versionId bulletin) :comment "foobar") => {:ok false :text "error.invalid-bulletin-id"})
+        (command sonja :add-bulletin-comment :bulletinId "not-found" :bulletinVersionId (:versionId bulletin) :comment "foobar" :cookie-store cookie-store) => {:ok false :text "error.invalid-bulletin-id"})
       (fact "approve comment for latest version"
-        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId bulletin) :comment "foobar") => ok?)))
+        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId bulletin) :comment "foobar" :cookie-store cookie-store) => ok?)))
 
   (clear-collection "application-bulletins")
 
@@ -75,7 +82,7 @@
         (let [bulletin (query-bulletin pena (:id oulu-app))]
           (keys bulletin) => (just [:id :_applicantIndex :address :applicant :attachments :versionId
                                     :bulletinState :documents :location :modified :municipality
-                                    :primaryOperation :propertyId :state :stateSeq] :in-any-order)
+                                    :primaryOperation :propertyId :state :stateSeq :canComment] :in-any-order)
           (fact "bulletin state is 'proclaimed'"
             (:bulletinState bulletin) => "proclaimed")
           (fact "each documents has schema definition"

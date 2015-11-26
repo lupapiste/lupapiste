@@ -1,15 +1,25 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="bulletin-tab-template">
 
-  <div data-bind="component: {name: 'publish-application',
-                              params: {appId: appId,
-                                       appState: appState,
-                                       authModel: authModel,
-                                       bulletin: bulletin,
-                                       bulletinStates: LUPAPISTE.config.bulletinStates}}"></div>
+  <!-- ko if: showPublishing -->
+  <div class="bulletin-component" data-bind="component: {name: 'publish-application',
+                                                         params: {appId: appId,
+                                                         appState: appState,
+                                                         authModel: authModel,
+                                                         bulletin: bulletin,
+                                                         bulletinStates: LUPAPISTE.config.bulletinStates}}"></div>
+  <!-- /ko -->
+
   <!-- ko if: showVersions -->
-  <div data-bind="component: {name: 'bulletin-versions',
-                              params: {appId: appId,
-                                       authModel: authModel,
-                                       bulletin: bulletin}}"></div>
+  <div class="bulletin-component" data-bind="component: {name: 'bulletin-versions',
+                                                         params: {appId: appId,
+                                                                  authModel: authModel,
+                                                                  bulletin: bulletin,
+                                                                  showVersionComments: showVersionComments}}"></div>
+  <!-- /ko -->
+
+  <!-- ko if: showVersionComments -->
+  <div class="bulletin-component" data-bind="component: {name: 'bulletin-comments',
+                                                         params: {showVersionComments: showVersionComments,
+                                                                  bulletin: bulletin}}"></div>
   <!-- /ko -->
 </script>

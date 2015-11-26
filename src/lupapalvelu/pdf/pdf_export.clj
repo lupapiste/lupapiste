@@ -80,9 +80,11 @@
   [group-schema group-doc locstring]
   (let [subgroups (->> (:body group-schema)
                        (filter is-printable-group-type)
+                       (remove :exclude-from-pdf)
                        (remove :hidden))
         group-schema-body (remove #(= schemas/select-one-of-key (:name %)) (:body group-schema)) ; remove _selected radioGroup
-        fields (filter is-field-type group-schema-body)
+        fields (->> (filter is-field-type group-schema-body)
+                    (remove :exclude-from-pdf))
         group-title (:name group-schema)
         i18name (:i18name group-schema)
         locstring (cond
@@ -128,9 +130,11 @@
         schema-body (remove #(= schemas/select-one-of-key (:name %)) (:body schema)) ; don't print _selected radioGroups
         group-schemas (->> schema-body
                            (filter is-printable-group-type)
+                           (remove :exclude-from-pdf)
                            (remove :hidden)
                            (remove #(some #{(:name %)} unselected-groups)))
-        field-schemas (filter is-field-type schema-body)
+        field-schemas (->> (filter is-field-type schema-body)
+                           (remove :exclude-from-pdf))
         doc-title (-> schema :info :name)
         doc-title (if (#{:op} (:schema-info doc))
                     (str "operations." (-> doc :schema-info :op :name))

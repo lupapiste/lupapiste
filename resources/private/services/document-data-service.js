@@ -176,7 +176,7 @@ LUPAPISTE.DocumentDataService = function(params) {
       path: path,
       schema: schema,
       model: _(schema.body).map(function(subSchema) {
-        return [subSchema.name, createDataModel(subSchema, rawModel[subSchema.name], path.concat(subSchema.name))];
+        return [subSchema.name, createDataModel(subSchema, rawModel && rawModel[subSchema.name], path.concat(subSchema.name))];
       }).zipObject().value()
     };
   }

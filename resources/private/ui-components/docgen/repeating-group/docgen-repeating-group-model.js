@@ -11,6 +11,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.groupId = ["repeating-group", params.documentId].concat(self.path).join("-");
   self.appendLabel = self.i18npath.concat("_append_label").join(".");
   self.copyLabel = self.i18npath.concat("_copy_label").join(".");
+  self.authModel = params.authModel || lupapisteApp.models.applicationAuthModel;
 
   self.groups = service.getInDocument(params.documentId, self.path).model;
 
@@ -26,11 +27,11 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.groupsRemovable = function(schema) {
     return !_.some(schema.body, "readonly") &&
       !params.isDisabled &&
-      lupapisteApp.models.applicationAuthModel.ok(service.getRemoveCommand(params.documentId));
+      self.authModel.ok(service.getRemoveCommand(params.documentId));
   };
 
   self.updatable = function() {
-    return lupapisteApp.models.applicationAuthModel.ok(service.getUpdateCommand(params.documentId));
+    return self.authModel.ok(service.getUpdateCommand(params.documentId));
   };
 
   self.removeGroup = function(group) {
