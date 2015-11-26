@@ -49,7 +49,6 @@ LUPAPISTE.ChangeLocationModel = function() {
   // Concurrency control
   //
 
-  self.requestContext = new RequestContext();
   self.beginUpdateRequest = function() {
     self.errorMessage(null);
     self.requestContext.begin();

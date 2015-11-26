@@ -28,6 +28,10 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
     return !_.isBlank(self.propertyId()) && util.prop.isPropertyId(self.propertyId());
   });
 
+  //
+  // Map and coordinate handling
+  //
+
   self._map = null;
 
   self.map = function() {
@@ -73,5 +77,13 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
     return self;
   };
 
-  return self;
+  //
+  // Concurrency control
+  //
+
+  self.requestContext = new RequestContext();
+  self.beginUpdateRequest = function() {
+    self.requestContext.begin();
+    return self;
+  };
 };

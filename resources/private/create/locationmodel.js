@@ -49,16 +49,6 @@ LUPAPISTE.LocationModel = function() {
   };
 
   //
-  // Concurrency control:
-  //
-
-  self.requestContext = new RequestContext();
-  self.beginUpdateRequest = function() {
-    self.requestContext.begin();
-    return self;
-  };
-
-  //
   // Search API
   //
 
