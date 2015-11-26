@@ -43,7 +43,6 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   self.municipalityName = ko.pureComputed(function() {
     return self.municipalityCode() ? loc(["municipality", self.municipalityCode()]): "";
   });
-  self.municipalitySupported = ko.observable(true);
 
   self.propertyIdHumanReadable = ko.pureComputed(function() {
       return self.propertyId() ? util.prop.toHumanFormat(self.propertyId()) : "";

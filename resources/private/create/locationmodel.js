@@ -15,6 +15,18 @@ LUPAPISTE.LocationModel = function() {
        },
        popupContentModel: "section#map-popup-content"});
 
+
+  self.municipalitySupported = ko.observable(true);
+  ko.computed(function() {
+    var code = self.municipalityCode();
+    self.municipalitySupported(true);
+    if (code) {
+      municipalities.findById(code, function(m) {
+        self.municipalitySupported(m ? true : false);
+      });
+    }
+  });
+
   self.reset = function() {
     return self.setXY(0,0).address("").propertyId("").municipalityCode("");
   };

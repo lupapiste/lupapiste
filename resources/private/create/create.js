@@ -54,9 +54,6 @@
       return m ? _.map(m.attachmentsForOp, function(d) { return { group: d[0], id: d[1]};}) : null;
     });
 
-    self.municipalityCode = self.locationModel.municipalityCode;
-    self.municipalitySupported = self.locationModel.municipalitySupported;
-
     self.processing = ko.observable(false);
     self.pending = ko.observable(false);
     self.inforequestsDisabled = ko.observable(false);
@@ -81,14 +78,9 @@
       });
 
     ko.computed(function() {
-      var code = self.municipalityCode();
-      self.municipalitySupported(true);
-
+      var code = self.locationModel.municipalityCode();
       if (code && !self.creatingAppWithPrevPermit) {
         self.findOperations(code);
-        municipalities.findById(code, function(m) {
-          self.municipalitySupported(m ? true : false);
-        });
       }
     });
 
@@ -234,10 +226,10 @@
     };
 
     self.updateOrganizationDetails = function(operation) {
-      if (self.municipalityCode() && operation) {
+      if (self.locationModel.municipalityCode() && operation) {
         ajax
           .query("organization-details", {
-            municipality: self.municipalityCode(),
+            municipality: self.locationModel.municipalityCode(),
             operation: operation,
             lang: loc.getCurrentLanguage()
           })
