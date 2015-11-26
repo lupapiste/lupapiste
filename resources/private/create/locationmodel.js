@@ -3,18 +3,9 @@ LUPAPISTE.CreateApplicationLocationModel = function() {
 
   var self = this;
   LUPAPISTE.LocationModelBase.call(self,
-      {mapId:"create-map",
-       initialZoom: 2,
-       zoomWheelEnabled: true,
-       clickHandler: function(x, y) {
-         hub.send("track-click", {category:"Create", label:"map", event:"mapClick"});
-         self.reset().setXY(x, y).beginUpdateRequest()
-           .searchPropertyId(x, y)
-           .searchAddress(x, y);
-         return false;
-       },
+      {mapId:"create-map", initialZoom: 2, zoomWheelEnabled: true,
+       afterClick: _.partial(hub.send, "track-click", {category:"Create", label:"map", event:"mapClick"}),
        popupContentModel: "section#map-popup-content"});
-
 
   self.municipalitySupported = ko.observable(true);
   ko.computed(function() {

@@ -4,19 +4,7 @@ LUPAPISTE.ChangeLocationModel = function() {
   var self = this;
 
   LUPAPISTE.LocationModelBase.call(self,
-      {mapId:"change-location-map",
-       initialZoom: 13,
-       zoomWheelEnabled: false,
-       clickHandler: function(x, y) {
-         self
-           .address("")
-           .propertyId("")
-           .beginUpdateRequest()
-           .setXY(x, y)
-           .searchPropertyId(x, y)
-           .searchAddress(x, y);
-       return false;}
-      });
+      {mapId:"change-location-map", initialZoom: 13, zoomWheelEnabled: false});
 
   self.dialogSelector = "#dialog-change-location";
 

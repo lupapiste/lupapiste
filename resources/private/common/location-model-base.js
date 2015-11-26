@@ -83,7 +83,11 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
       self._map = gis
         .makeMap(mapOptions.mapId, mapOptions.zoomWheelEnabled)
         .center(404168, 7205000, mapOptions.initialZoom)
-        .addClickHandler(mapOptions.clickHandler);
+        .addClickHandler(function(x, y) {
+          self.reset().setXY(x, y).beginUpdateRequest()
+            .searchPropertyId(x, y).searchAddress(x, y);
+          if (_.isFunction(mapOptions.afterClick)) {mapOptions.afterClick();}
+        });
 
       if (mapOptions.popupContentModel) {
         self._map.setPopupContentModel(self, mapOptions.popupContentModel);
