@@ -138,15 +138,19 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   };
 
   self.searchPropertyId = function(x, y) {
-    locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
+    if (x && y) {
+      locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
         self.setPropertyId(id);
         self.propertyIdValidated(true);
       }, self.onError, self.processing);
+    }
     return self;
   };
 
   self.searchAddress = function(x, y) {
-    locationSearch.addressByPoint(self.requestContext, x, y, self.setAddress, self.onError, self.processingAddress);
+    if (x && y) {
+      locationSearch.addressByPoint(self.requestContext, x, y, self.setAddress, self.onError, self.processingAddress);
+    }
     return self;
   };
 
