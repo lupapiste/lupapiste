@@ -31,7 +31,7 @@ LUPAPISTE.ChangeLocationModel = function() {
     return self.propertyIdOk && self.address() && self.propertyIdValidated();
   });
 
-  self.reset = function(app) {
+  self._setApplication = function(app) {
     self.id = app.id();
     self.x = app.location().x();
     self.y = app.location().y();
@@ -108,7 +108,7 @@ LUPAPISTE.ChangeLocationModel = function() {
   // Open the dialog
 
   self.changeLocation = function(app) {
-    self.reset(app);
+    self._setApplication(app);
     self.drawLocation();
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
     hub.send("track-click", {category:"Application", label:"", event:"changeLocation"});
