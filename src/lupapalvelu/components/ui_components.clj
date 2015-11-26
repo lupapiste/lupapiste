@@ -55,7 +55,7 @@
                  :degrees               (map :name (:body schemas/koulutusvalinta))
                  :fiseKelpoisuusValues  (map :name schemas/fise-kelpoisuus-lajit)
                  :bulletinStates        bulletins/bulletin-state-seq
-                 :attachmentVisibilities (get tos-meta/Näkyvyys :values)
+                 :attachmentVisibilities (get tos-meta/Nakyvyys :values)
                  :features              (into {} (filter second (env/features)))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 

@@ -607,7 +607,7 @@
   {:parameters [id attachmentId value]
    :user-roles #{:authority}
    :input-validators [(fn [{{nakyvyys-value :value} :data :as c}]
-                        (when-not (some (hash-set (keyword nakyvyys-value)) (:values tosmeta/Näkyvyys))
+                        (when-not (some (hash-set (keyword nakyvyys-value)) (:values tosmeta/Nakyvyys))
                           (fail :error.invalid-nakyvyys-value)))]
    :user-authz-roles #{:owner}
    :states     states/pre-verdict-states}
