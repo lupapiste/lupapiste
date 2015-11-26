@@ -5,6 +5,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as user]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [monger.operators :refer [$exists]]
             [noir.response :as resp]
             [sade.coordinate :as coord]
             [sade.env :as env]
@@ -139,20 +140,15 @@
         predefined (asemakaava or kantakartta)
   :org  Organization id"
   [municipality]
-  (letfn [(in-municipality-has-layers?
-            [{:keys [id scope map-layers]}]
-            (and map-layers (= (:municipality (first scope)) municipality)))
-          (annotate-org-layer [{{:keys [layers server]} :map-layers org-id :id}]
+  (letfn [(annotate-org-layer [{{:keys [layers server]} :map-layers org-id :id}]
             (map #(assoc % :server (:url server) :org org-id) layers))
           (layer-slot-filled? [layer slot]
             (let [{:keys [id name base server]} slot]
               (or
                (and base (:base layer) (= name (:name layer)))
                (and (= id (:id layer)) (= server (:server layer))))))]
-    (->> (org/get-organizations)
-         ;; Include only orgs that belong to municipality and have map
-         ;; layers defined
-         (filter in-municipality-has-layers?)
+    (->> (org/get-organizations {:scope.municipality municipality
+                                 :map-layers.layers {$exists true}})
          ;; Add server and org information to layers
          (map annotate-org-layer)
          ;; All layers into one list
@@ -179,24 +175,25 @@
                                {% (i18n/localize % path)}))
                        (cons {:fi name :sv name :en name})
                        (apply merge))))
-        layer-id-fn (fn [name index]
-                   (get {"asemakaava"  101
-                         "kantakartta" 102}
-                        name
-                        (str "Lupapiste-" index)))]
-    (->> layers
-         count
-         range
-         (map (fn [index]
-                (let [{:keys [base id name org]} (nth layers index)
-                      layer-id (layer-id-fn name index)]
-                  {:wmsName (str "Lupapiste-" org ":" id)
-                   :wmsUrl  "/proxy/wms"
-                   :name (names-fn name)
-                   :subtitle {:fi "" :sv "" :en ""}
-                   :id layer-id
-                   :baseLayerId layer-id
-                   :isBaseLayer base}))))))
+        layer-id-fn (fn [layer index]
+                      (let [indexed (str "Lupapiste-" index)]
+                        (if (:base layer)
+                          (get {"asemakaava"  101
+                                "kantakartta" 102}
+                               (:name layer)
+                               ;; Default index just in case. Should be never needed.
+                               indexed)
+                          indexed)))]
+    (map-indexed (fn [index layer]
+                   (let [{:keys [base id name org]} layer
+                         layer-id (layer-id-fn layer index)]
+                     {:wmsName (str "Lupapiste-" org ":" id)
+                      :wmsUrl  "/proxy/wms"
+                      :name (names-fn name)
+                      :subtitle {:fi "" :sv "" :en ""}
+                      :id layer-id
+                      :baseLayerId layer-id
+                      :isBaseLayer base})) layers)))
 
 (defn wms-capabilities-proxy [request]
   (let [{municipality :municipality} (:params request)
