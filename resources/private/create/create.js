@@ -82,6 +82,8 @@
 
     ko.computed(function() {
       var code = self.municipalityCode();
+      self.municipalitySupported(true);
+
       if (code && !self.creatingAppWithPrevPermit) {
         self.findOperations(code);
         municipalities.findById(code, function(m) {
