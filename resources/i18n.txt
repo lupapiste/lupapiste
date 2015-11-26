@@ -3,4 +3,6 @@ application.invite-statement-giver-saateText: Saateteksti
 application.invite-statement-giver-saateText-placeholder: Kirjoita saateteksti lausunnonantajalle lähetettävään viestiin.
 add-statement-giver-maaraaika: Määräaika
 
+application.statement.add-manual-statement-giver: Lisää lausunnonantaja
+
 EMAIL-TEMPLATE-LAUSUNNONANTAJA-KUTSU: Teidät on lisätty lausunnon antajaksi organisaatioon Sipoon rakennusvalvonta nimikkeellä Runonlausujaviranomainen. Teiltä ei odoteta vielä mitään toimenpiteitä. Kun teiltä pyydetään ensimmäisen kerran lausuntoa, teille tulee sähköpostiin kutsu ja linkki rekisteröitymissivulle, joka neuvoo teitä eteenpäin. Jatkossa tuleviin lausuntopyyntöihin pääsette suoraan kirjautumaan käyttäjätunnuksella ja salasanalla sähköpostiinne tulevan linkin kautta.
