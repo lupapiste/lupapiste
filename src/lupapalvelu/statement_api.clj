@@ -4,6 +4,8 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.core :refer :all]
+            [sade.strings :as ss]
+            [sade.validators :as v]
             [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.domain :as domain]
@@ -106,35 +108,64 @@
    :subject-key    "statement-request"
    :show-municipality-in-subject true})
 
-(defn make-details [now persons metadata]
-  (map #(let [user (or (user/get-user-by-email (:email %)) (fail! :error.not-found))
-              statement-id (mongo/create-id)
-              statement-giver (assoc % :userId (:id user))]
-         (cond-> {:statement {:id statement-id
-                              :person statement-giver
-                              :requested now
-                              :given nil
-                              :reminder-sent nil
-                              :metadata metadata
-                              :status nil}
-                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
-                  :recipient user}
-                 (seq metadata) (assoc :metadata metadata)))
-       persons))
+(defn- make-details [inviter now persons metadata]
+  (map
+    (fn [person]
+      (let [user (if (ss/blank? (:id person)) ;; "manually invited" statement givers lack the "id"
+                   (or (user/get-user-by-email (:email person)) (fail! :error.not-found))
+                   (user/get-or-create-user-by-email (:email person) inviter))
+            statement-id (mongo/create-id)
+            statement-giver (assoc person :userId (:id user))]
+
+        (println "\n make-details, fetched user: ")
+        (>pprint user)
+        (println "\n")
+
+        (cond-> {:statement {:id statement-id
+                             :person statement-giver
+                             :requested now
+                             :given nil
+                             :reminder-sent nil
+                             :metadata metadata
+                             :status nil}
+                 :auth (user/user-in-role user :statementGiver :statementId statement-id)
+                 :recipient user}
+          (seq metadata) (assoc :metadata metadata))))
+    persons))
+
+(defn validate-manual-persons [{{manualPersons :manualPersons} :data}]
+;  (println "\n validate-manual-persons, manualPersons: " manualPersons "\n")
+  (let [missing-keys (when (some
+                             #(some (fn [k] (or (-> % k string? not) (-> % k ss/blank?))) [:email :name :text])
+                             manualPersons)
+                       (fail :error.missing-parameters))
+        has-invalid-email (when (some #(not (v/email-and-domain-valid? (:email %))) manualPersons)
+                            (fail :error.email))]
+    (or missing-keys has-invalid-email)))
 
 (defcommand request-for-statement
-  {:parameters [functionCode id personIds]
+  {:parameters [functionCode id personIds manualPersons]
    :user-roles #{:authority}
    :states #{:open :submitted :complementNeeded}
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:personIds])
+                      (partial action/vector-parameters-with-map-items-with-required-keys [:manualPersons] [:email :name :text])
+                      validate-manual-persons]
    :notified true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
+;  (println "\n manualPersons: " manualPersons "\n")
   (organization/with-organization organization
                                   (fn [{:keys [statementGivers]}]
                                     (let [personIdSet (set personIds)
                                           persons (filter #(personIdSet (:id %)) statementGivers)
+                                          persons-combined (concat persons manualPersons)
+                                          _ (do
+                                              (println "\n persons-combined: ")
+                                              (>pprint persons-combined)
+                                              (println "\n")
+                                              )
                                           metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
-                                          details (make-details now persons metadata)
+                                          details (make-details user now persons-combined metadata)
                                           statements (map :statement details)
                                           auth (map :auth details)
                                           recipients (map :recipient details)]
