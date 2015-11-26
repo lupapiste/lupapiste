@@ -133,7 +133,8 @@
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
 
 (defn- user-is-vetuma-authenticated [_ _]
-  (not-empty (vetuma/vetuma-session)))
+  (when (empty? (vetuma/vetuma-session))
+    (fail :error.user-not-vetuma-authenticated)))
 
 (defcommand add-bulletin-comment
   {:description      "Add comment to bulletin"
