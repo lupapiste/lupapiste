@@ -45,13 +45,13 @@
 (facts* "Registration"
  (let [store (atom {})
        params (default-vetuma-params (->cookie-store store))
-       trid (vetuma-init params token-query)]
+       trid (vetuma-init params default-token-query)]
 
    (fact "trid" trid =not=> ss/blank?)
 
    (fact "Vetuma redirect"
      (let [resp (vetuma-finish params trid)]
-       resp => (partial redirects-to (get-in token-query [:query-params :success]))))
+       resp => (partial redirects-to (get-in default-token-query [:query-params :success]))))
 
    (last-email) ; Inbox zero
 
@@ -123,7 +123,7 @@
      (fact "Register again with the same email"
        (last-email) ; Inbox zero
        (reset! store {}) ; clear cookies
-       (let [trid (vetuma-init params token-query)]
+       (let [trid (vetuma-init params default-token-query)]
          (vetuma-finish params trid))
 
        (let [stamp (:stamp (decode-body (http-get (str (server-address) "/api/vetuma/user") params))) => string?
