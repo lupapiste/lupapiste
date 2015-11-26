@@ -202,7 +202,7 @@
   (let [{municipality :municipality} (:params request)
         muni-layers (municipality-layer-objects municipality)
         muni-bases (->> muni-layers (map :id) (filter number?) set)
-        capabilities (wfs/get-our-capabilities (:params request))
+        capabilities (wfs/get-our-capabilities)
         layers (or (wfs/capabilities-to-layers capabilities) [])
         layers (if (nil? municipality)
           (map create-layer-object (map wfs/layer-to-name layers))
