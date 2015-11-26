@@ -148,8 +148,8 @@
         delivery-address (select-keys address-source delivery-address-fields)
         contact-info (merge delivery-address {:email          email
                                               :emailPreferred (= emailPreferred "on")})
-        comment (bulletins/create-comment comment contact-info created)]
-    (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments files)}})
+        comment (bulletins/create-comment bulletin-id bulletin-version-id comment contact-info files created)]
+    (mongo/insert :application-bulletin-comments comment)
     (ok)))
 
 (defn- get-search-fields [fields app]
@@ -242,3 +242,17 @@
                                     :bulletinState 1}))
         bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
     (ok :bulletin bulletin)))
+
+(defquery bulletin-comments
+  "returns paginated comments related to given version id"
+  {:parameters [bulletinId versionId]
+   :feature    :publish-bulletin
+   :user-roles #{:authority :applicant}}
+  [{{skip :skip limit :limit} :data}]
+  (let [comments (mongo/with-collection "application-bulletin-comments"
+                   (query/find  {})
+                   (query/sort  {:created -1})
+                   (query/skip  (util/->int skip))
+                   (query/limit (util/->int limit)))]
+    (ok :comments comments)))
+
