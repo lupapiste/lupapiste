@@ -27,10 +27,6 @@ LUPAPISTE.CreateApplicationLocationModel = function() {
     }
   });
 
-  self.reset = function() {
-    return self.setXY(0,0).address("").propertyId("").municipalityCode("");
-  };
-
   //
   // Search API
   //
