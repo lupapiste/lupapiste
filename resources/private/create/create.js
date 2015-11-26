@@ -43,11 +43,6 @@
 
     self.search = ko.observable("");
 
-    self.searching = self.locationModel.processing;
-
-    self.propertyId = self.locationModel.propertyId;
-    self.propertyIdHumanReadable = self.locationModel.propertyIdHumanReadable;
-
     self.operations = ko.observable(null);
     self.organization = ko.observable(null);
     self.organizationLinks = ko.pureComputed(function() {
@@ -79,7 +74,7 @@
       return !self.processing() && !self.pending() &&
              !_.isBlank(self.kuntalupatunnusFromPrevPermit()) &&
              !_.isBlank(self.selectedPrevPermitOrganization()) &&
-             ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
+             ( !self.needMorePrevPermitInfo() || (self.locationModel.propertyIdOk() &&
                                                   !_.isBlank(self.locationModel.address()) &&
                                                   !_.isBlank(self.search()) &&
                                                   self.locationModel.hasXY()));
@@ -108,21 +103,6 @@
     };
 
     self.clear = function() {
-
-      /*
-      if (self.map) {
-        self.map.clear();
-        self.map.updateSize();
-      } else {
-        var zoomLevel = 2;
-        self.map = gis
-          .makeMap("create-map", true)
-          .center(404168, 7205000, zoomLevel)
-          .addClickHandler(self.click)
-          .setPopupContentModel(self, "section#map-popup-content");
-      }
-      */
-
       self.locationModel.clearMap();
 
       self.creatingAppWithPrevPermit = false;
@@ -136,15 +116,6 @@
         .needMorePrevPermitInfo(false);
     };
 
-    /*
-    self.setPoint = function(x, y) {
-      if (self.map) {
-        self.map.clear().add({x: x, y: y}, true);
-      }
-      return self;
-    };
-    */
-
     self.createOK = ko.pureComputed(function() {
       return self.locationModel.propertyIdOk() && self.locationModel.addressOk() && !self.processing();
     });
@@ -152,21 +123,6 @@
     //
     // Callbacks:
     //
-
-    // Called when user clicks on map:
-
-    /*
-    self.click = function(x, y) {
-      hub.send("track-click", {category:"Create", label:"map", event:"mapClick"});
-      self.resetLocation().setPoint(x, y);
-      self.x(x);
-      self.y(y);
-      self.locationModel.beginUpdateRequest()
-        .searchPropertyId(x, y)
-        .searchAddress(x, y);
-      return false;
-    };
-    */
 
     // Search activation:
 
@@ -275,16 +231,6 @@
         .appendTo(ul);
     };
 
-    /*
-    hub.subscribe("location-found", function() {
-      var zoomLevel = 14;
-      if (_.isBlank(self.propertyId)) {
-        zoomLevel = 13;
-      }
-      self.locationModel.center(zoomLevel);
-    });
-    */
-
     self.updateOrganizationDetails = function(operation) {
       if (self.municipalityCode() && operation) {
         ajax
@@ -335,8 +281,6 @@
       params.infoRequest = infoRequest;
       params.operation = op;
       params.messages =  _.isBlank(self.message()) ? [] : [self.message()];
-
-debug(params);
 
       ajax.command("create-application", params)
         .processing(self.processing)
