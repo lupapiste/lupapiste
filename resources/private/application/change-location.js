@@ -2,59 +2,35 @@ LUPAPISTE.ChangeLocationModel = function() {
   "use strict";
 
   var self = this;
-  LUPAPISTE.LocationModelBase.call(self);
+
+  LUPAPISTE.LocationModelBase.call(self,
+      {mapId:"change-location-map",
+       initialZoom: 13,
+       zoomWheelEnabled: false,
+       clickHandler: function(x, y) {
+         self
+           .address("")
+           .propertyId("")
+           .beginUpdateRequest()
+           .setXY(x, y)
+           .searchPropertyId(x, y)
+           .searchAddress(x, y);
+       return false;}
+      });
 
   self.dialogSelector = "#dialog-change-location";
-
-  var _map = null;
-
-  self.map = function() {
-    if (!_map) {
-      _map = gis
-        .makeMap("change-location-map", false)
-        .center(404168, 6693765, 13)
-        .addClickHandler(function(x, y) {
-          self
-            .address("")
-            .propertyId("")
-            .beginUpdateRequest()
-            .setXY(x, y)
-            .searchPropertyId(x, y)
-            .searchAddress(x, y);
-          return false;
-        });
-    }
-    return _map;
-  };
 
   // Model
 
   self.id = 0;
-  self.x = 0;
-  self.y = 0;
 
   self.propertyIdValidated = ko.observable(true);
   self.propertyIdAutoUpdated = true;
   self.errorMessage = ko.observable(null);
 
   self.ok = ko.computed(function() {
-    return util.prop.isPropertyId(self.propertyId()) && self.address() && self.propertyIdValidated();
+    return self.propertyIdOk && self.address() && self.propertyIdValidated();
   });
-
-  self.drawLocation = function() {
-    return self.map().clear().add({x: self.x, y: self.y});
-  };
-
-  self.setXY = function(x, y) {
-    self.x = x;
-    self.y = y;
-    self.drawLocation();
-    return self;
-  };
-
-  self.center = function(zoom) {
-    self.map().center(self.x, self.y, zoom);
-  };
 
   self.reset = function(app) {
     self.id = app.id();
@@ -63,8 +39,7 @@ LUPAPISTE.ChangeLocationModel = function() {
     self.address(app.address());
     self.propertyId(app.propertyId());
     self.errorMessage(null);
-    self.map().clear().updateSize();
-    self.center(14);
+    self.clearMap().center(14);
     self.processing(false);
     self.pending(false);
     self.propertyIdValidated(true);
@@ -118,7 +93,8 @@ LUPAPISTE.ChangeLocationModel = function() {
 
   self.saveNewLocation = function() {
     if (self.ok()) {
-      var data = {id: self.id, x: self.x, y: self.y, address: self.address(), propertyId: util.prop.toDbFormat(self.propertyId())};
+      var data = self.toJS();
+      data.id = self.id;
       ajax.command("change-location", data)
         .processing(self.processing)
         .pending(self.pending)

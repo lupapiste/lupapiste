@@ -15,16 +15,14 @@
 
     self.goPhase1 = function() {
       pageutil.openPage("create-part-1");
-      self.map.updateSize();
      };
 
-
-    self.goPhase2 = function() {
+    hub.subscribe("create-step-2", function() {
       hub.send("track-click", {category:"Create", label:"map", event:"mapContinue"});
       pageutil.openPage("create-part-2");
       tree.reset(_.map(self.operations(), operations2tree));
       window.scrollTo(0, 0);
-    };
+    });
 
     self.goPhase3 = function() {
       pageutil.openPage("create-part-3");
@@ -43,15 +41,10 @@
       window.scrollTo(0, 0);
     };
 
-    self.map = null;
-
     self.search = ko.observable("");
 
     self.searching = self.locationModel.processing;
 
-    self.x = self.locationModel.x;
-    self.y = self.locationModel.y;
-    self.addressString = self.locationModel.address;
     self.propertyId = self.locationModel.propertyId;
     self.propertyIdHumanReadable = self.locationModel.propertyIdHumanReadable;
 
@@ -67,9 +60,8 @@
     });
 
     self.municipalityCode = self.locationModel.municipalityCode;
-    self.municipalityName = self.locationModel.municipalityName;
+    self.municipalitySupported = self.locationModel.municipalitySupported;
 
-    self.municipalitySupported = ko.observable(true);
     self.processing = ko.observable(false);
     self.pending = ko.observable(false);
     self.inforequestsDisabled = ko.observable(false);
@@ -88,9 +80,9 @@
              !_.isBlank(self.kuntalupatunnusFromPrevPermit()) &&
              !_.isBlank(self.selectedPrevPermitOrganization()) &&
              ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
-                                                  !_.isBlank(self.addressString()) &&
+                                                  !_.isBlank(self.locationModel.address()) &&
                                                   !_.isBlank(self.search()) &&
-                                                  self.x() !== 0 && self.y() !== 0));
+                                                  self.locationModel.hasXY()));
       });
 
     ko.computed(function() {
@@ -116,17 +108,23 @@
     };
 
     self.clear = function() {
-      var zoomLevel = 2;
+
+      /*
       if (self.map) {
         self.map.clear();
         self.map.updateSize();
       } else {
+        var zoomLevel = 2;
         self.map = gis
           .makeMap("create-map", true)
           .center(404168, 7205000, zoomLevel)
           .addClickHandler(self.click)
           .setPopupContentModel(self, "section#map-popup-content");
       }
+      */
+
+      self.locationModel.clearMap();
+
       self.creatingAppWithPrevPermit = false;
       return self
         .resetLocation()
@@ -138,26 +136,17 @@
         .needMorePrevPermitInfo(false);
     };
 
-    self.clearMap = function() {
-      if (self.map) {
-        self.map.clear();
-      }
-      return self;
-    };
-
+    /*
     self.setPoint = function(x, y) {
       if (self.map) {
         self.map.clear().add({x: x, y: y}, true);
       }
       return self;
     };
-    self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
-
-    self.addressOk = ko.pureComputed(function() { return self.municipalityCode() && !_.isBlank(self.addressString()); });
-    self.propertyIdOk = ko.pureComputed(function() { return !_.isBlank(self.propertyId()) && util.prop.isPropertyId(self.propertyId());});
+    */
 
     self.createOK = ko.pureComputed(function() {
-      return self.propertyIdOk() && self.addressOk() && !self.processing();
+      return self.locationModel.propertyIdOk() && self.locationModel.addressOk() && !self.processing();
     });
 
     //
@@ -166,6 +155,7 @@
 
     // Called when user clicks on map:
 
+    /*
     self.click = function(x, y) {
       hub.send("track-click", {category:"Create", label:"map", event:"mapClick"});
       self.resetLocation().setPoint(x, y);
@@ -176,12 +166,13 @@
         .searchAddress(x, y);
       return false;
     };
+    */
 
     // Search activation:
 
     self.searchNow = function() {
       hub.send("track-click", {category:"Create", label:"map", event:"searchLocation"});
-      self.clearMap().resetLocation();
+      self.locationModel.clearMap().reset();
       self.locationModel.beginUpdateRequest()
         .searchPoint(self.search());
       return false;
@@ -204,7 +195,10 @@
       };
     }
 
-    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevelEnum[item.type] || 11); }
+    function zoom(item, level) {
+      var zoomLevel = level || zoomLevelEnum[item.type] || 11;
+      self.locationModel.center(zoomLevel, item.location.x, item.location.y);
+    }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) {
       self.search(", " + loc(["municipality", item.municipality]));
@@ -281,13 +275,15 @@
         .appendTo(ul);
     };
 
+    /*
     hub.subscribe("location-found", function() {
       var zoomLevel = 14;
       if (_.isBlank(self.propertyId)) {
         zoomLevel = 13;
       }
-      self.setPoint(self.x(), self.y()).center(self.x(), self.y(), zoomLevel);
+      self.locationModel.center(zoomLevel);
     });
+    */
 
     self.updateOrganizationDetails = function(operation) {
       if (self.municipalityCode() && operation) {
@@ -335,15 +331,12 @@
         error("No operation!", {selected: tree.getSelected(), stack: tree.getStack()});
       }
 
-      var params = {
-        infoRequest: infoRequest,
-        operation: op,
-        y: self.y(),
-        x: self.x(),
-        address: self.addressString(),
-        propertyId: self.propertyId(),
-        messages: _.isBlank(self.message()) ? [] : [self.message()]
-      };
+      var params = self.locationModel.toJS();
+      params.infoRequest = infoRequest;
+      params.operation = op;
+      params.messages =  _.isBlank(self.message()) ? [] : [self.message()];
+
+debug(params);
 
       ajax.command("create-application", params)
         .processing(self.processing)
@@ -393,37 +386,34 @@
       // "   hii  haa hoo hee  " -> "hii haa hoo hee"
       var kuntalupatunnus = (self.kuntalupatunnusFromPrevPermit() || "" ).trim().split(/\s+/).join( " ");
 
-      ajax.command("create-application-from-previous-permit", {
-        lang: loc.getCurrentLanguage(),
-        y: self.y(),
-        x: self.x(),
-        address: self.addressString(),
-        propertyId: self.propertyId(),
-        organizationId: self.selectedPrevPermitOrganization(),
-        kuntalupatunnus: kuntalupatunnus
-      })
-      .processing(self.processing)
-      .pending(self.pending)
-      .success(function(data) {
-        self.clear();
-        pageutil.openApplicationPage({id: data.id});
-      })
-      .error(function(d) {
-        // If app creation failed because the "rakennuksen tiedot" data was not received in the xml message from municipality's backend,
-        // then show user a prompt to fill up the address using autocomplete (that now appears),
-        // otherwise show user the original error message thrown.
-        // The original error is also shown after a request with additional address information about previous permit has has been made.
-        if (d.needMorePrevPermitInfo) {
-          if (self.needMorePrevPermitInfo()) {
-            notify.error(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
+      var params = self.locationModel.toJS();
+      params.lang = loc.getCurrentLanguage();
+      params.organizationId = self.selectedPrevPermitOrganization();
+      params.kuntalupatunnus = kuntalupatunnus;
+
+      ajax.command("create-application-from-previous-permit", params)
+        .processing(self.processing)
+        .pending(self.pending)
+        .success(function(data) {
+          self.clear();
+          pageutil.openApplicationPage({id: data.id});
+        })
+        .error(function(d) {
+          // If app creation failed because the "rakennuksen tiedot" data was not received in the xml message from municipality's backend,
+          // then show user a prompt to fill up the address using autocomplete (that now appears),
+          // otherwise show user the original error message thrown.
+          // The original error is also shown after a request with additional address information about previous permit has has been made.
+          if (d.needMorePrevPermitInfo) {
+            if (self.needMorePrevPermitInfo()) {
+              notify.error(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
+            } else {
+              self.needMorePrevPermitInfo(true);
+            }
           } else {
-            self.needMorePrevPermitInfo(true);
+            notify.error(loc("error.dialog.title"), loc(d.text));
           }
-        } else {
-          notify.error(loc("error.dialog.title"), loc(d.text));
-        }
-      })
-      .call();
+        })
+        .call();
     };
 
   }();

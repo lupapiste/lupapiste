@@ -2,24 +2,35 @@ LUPAPISTE.LocationModel = function() {
   "use strict";
 
   var self = this;
-  LUPAPISTE.LocationModelBase.call(self);
-
-  self.x = ko.observable(0);
-  self.y = ko.observable(0);
+  LUPAPISTE.LocationModelBase.call(self,
+      {mapId:"create-map",
+       initialZoom: 2,
+       zoomWheelEnabled: true,
+       clickHandler: function(x, y) {
+         hub.send("track-click", {category:"Create", label:"map", event:"mapClick"});
+         self.reset().setXY(x, y).beginUpdateRequest()
+           .searchPropertyId(x, y)
+           .searchAddress(x, y);
+         return false;
+       },
+       popupContentModel: "section#map-popup-content"});
 
   self.municipalityCode = ko.observable("");
 
   self.municipalityName = ko.pureComputed(function() {
     return self.municipalityCode() ? loc(["municipality", self.municipalityCode()]): "";
   });
+  self.municipalitySupported = ko.observable(true);
 
   self.reset = function() {
-    self.x(0).y(0).address("").propertyId("").municipalityCode("");
+    return self.setXY(0,0).address("").propertyId("").municipalityCode("");
   };
 
   self.setAddress = function(a) {
-    return self.municipalityCode(a.municipality).address(a ? a.street + " " + a.number : "");
+    return self.municipalityCode(a ? a.municipality : "").address(a ? a.street + " " + a.number : "");
   };
+
+  self.addressOk = ko.pureComputed(function() { return self.municipalityCode() && !_.isBlank(self.address()); });
 
   self.setPropertyId = function(id) {
     var currentMuni = self.municipalityCode();
@@ -85,7 +96,7 @@ LUPAPISTE.LocationModel = function() {
               x = data.location.x,
               y = data.location.y;
           self
-            .x(x).y(y)
+            .setXY(x,y).center(13)
             .setAddress(data)
             .beginUpdateRequest()
             .searchPropertyId(x, y);
@@ -102,7 +113,7 @@ LUPAPISTE.LocationModel = function() {
               x = data.x,
               y = data.y;
           self
-            .x(x).y(y)
+            .setXY(x,y).center(14)
             .setPropertyId(util.prop.toDbFormat(id))
             .beginUpdateRequest()
             .searchAddress(x, y);
@@ -111,6 +122,8 @@ LUPAPISTE.LocationModel = function() {
       }, self.onError, self.processing);
     return self;
   };
+
+  self.proceed = _.partial(hub.send, "create-step-2");
 
 };
 
