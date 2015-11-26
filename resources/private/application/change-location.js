@@ -37,6 +37,7 @@ LUPAPISTE.ChangeLocationModel = function() {
     self.y = app.location().y();
     self.address(app.address());
     self.propertyId(app.propertyId());
+    self.municipalityCode(app.municipality());
     self.errorMessage(null);
     self.clearMap().center(14);
     self.processing(false);

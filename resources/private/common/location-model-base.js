@@ -7,6 +7,7 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
 
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
+  self.processingAddress = ko.observable(false);
 
   self.x = 0;
   self.y = 0;
@@ -22,6 +23,23 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
     };
   };
 
+  self.setPropertyId = function(id) {
+    var currentMuni = self.municipalityCode();
+    self.propertyId(id);
+    if (!currentMuni || !_.startsWith(id, currentMuni)) {
+      ajax.query("municipality-by-property-id", {propertyId: id})
+        .success(function(resp) {
+          self.municipalityCode(resp.municipality);
+        })
+        .error(function(e) {
+          error("Failed to find municipality", id, e);
+        })
+        .processing(self.processingAddress)
+        .call();
+    }
+    return self;
+  };
+
   self.municipalityName = ko.pureComputed(function() {
     return self.municipalityCode() ? loc(["municipality", self.municipalityCode()]): "";
   });
@@ -34,6 +52,7 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   self.propertyIdOk = ko.pureComputed(function() {
     return !_.isBlank(self.propertyId()) && util.prop.isPropertyId(self.propertyId());
   });
+
   self.addressOk = ko.pureComputed(function() { return self.municipalityCode() && !_.isBlank(self.address()); });
 
   self.propertyIdValidated = ko.observable(true);
@@ -119,14 +138,14 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
 
   self.searchPropertyId = function(x, y) {
     locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
-        self.propertyId(id);
+        self.setPropertyId(id);
         self.propertyIdValidated(true);
       }, self.onError, self.processing);
     return self;
   };
 
   self.searchAddress = function(x, y) {
-    locationSearch.addressByPoint(self.requestContext, x, y, self.setAddress, self.onError, self.processing);
+    locationSearch.addressByPoint(self.requestContext, x, y, self.setAddress, self.onError, self.processingAddress);
     return self;
   };
 

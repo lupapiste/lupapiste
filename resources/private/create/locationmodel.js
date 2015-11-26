@@ -19,22 +19,6 @@ LUPAPISTE.LocationModel = function() {
     return self.setXY(0,0).address("").propertyId("").municipalityCode("");
   };
 
-  self.setPropertyId = function(id) {
-    var currentMuni = self.municipalityCode();
-    self.propertyId(id);
-    if (!currentMuni || !_.startsWith(id, currentMuni)) {
-      ajax.query("municipality-by-property-id", {propertyId: id})
-        .success(function(resp) {
-          self.municipalityCode(resp.municipality);
-        })
-        .error(function(e) {
-          error("Failed to find municipality", id, e);
-        })
-        .call();
-    }
-    return self;
-  };
-
   //
   // Search API
   //
@@ -62,7 +46,6 @@ LUPAPISTE.LocationModel = function() {
             .setAddress(data)
             .beginUpdateRequest()
             .searchPropertyId(x, y);
-          hub.send("location-found");
         }
       }, self.onError, self.processing);
     return self;
@@ -79,7 +62,6 @@ LUPAPISTE.LocationModel = function() {
             .setPropertyId(util.prop.toDbFormat(id))
             .beginUpdateRequest()
             .searchAddress(x, y);
-          hub.send("location-found");
         }
       }, self.onError, self.processing);
     return self;
