@@ -27,7 +27,7 @@ LUPAPISTE.LocationModel = function() {
   };
 
   self.setAddress = function(a) {
-    return self.municipalityCode(a ? a.municipality : "").address(a ? a.street + " " + a.number : "");
+    return self.municipalityCode(a ? a.municipality : "").address(a ? a.street + (a.number ? " " + a.number : "") : "");
   };
 
   self.addressOk = ko.pureComputed(function() { return self.municipalityCode() && !_.isBlank(self.address()); });
