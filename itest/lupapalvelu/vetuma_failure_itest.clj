@@ -8,16 +8,11 @@
             [lupapalvelu.itest-util :refer [redirects-to]]
             [lupapalvelu.vetuma-itest-util :refer :all]))
 
-(def token-query {:query-params {:success "/success"
-                                 :cancel "/cancel"
-                                 :error "/error"
-                                 :y "/y-error"
-                                 :vtj "/vtj-error"}})
+(def token-query (update-in default-token-query [:query-params] #(merge % {:y "/y-error"
+                                                                                   :vtj "/vtj-error"})))
 
 (defn create-base-context []
-  (let [params {:cookie-store (->cookie-store (atom {}))
-                :follow-redirects false
-                :throw-exceptions false}
+  (let [params (default-vetuma-params (->cookie-store (atom {})))
         trid (vetuma-init params token-query)]
     [params trid]))
 
