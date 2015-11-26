@@ -252,9 +252,9 @@
       {:rekisteriyksikkolaji {:id id, :selite (get rekisteriyksikkolaji id)}
        :kiinttunnus property-id
        :kunta municipality-code
-     :wkt (property-borders-wkt feature)
-     :x x
-     :y y})))
+       :wkt (property-borders-wkt feature)
+       :x x
+       :y y})))
 
 (defn- ->features [s parse-fn & [encoding]]
   (when s
@@ -337,9 +337,9 @@
                              :MAXFEATURES "1"
                              :BUFFER "500"}))
 
-(defn address-by-point-from-municipality [x y]
-  (let [url ;"http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"
-        "http://kartta.salo.fi/teklaogcweb/WFS.ashx"
+(defn address-by-point-from-municipality [x y {:keys [url credentials]}]
+  (let [;"http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"
+        ;"http://kartta.salo.fi/teklaogcweb/WFS.ashx"
         filter (sxml/element-to-string
                  (assoc
                    (ogc-filter
@@ -371,7 +371,7 @@
      :TYPENAME "mkos:Osoite"
      :SRSNAME "EPSG:3067"
      :FILTER filter
-     :MAXFEATURES "10"
+     :MAXFEATURES "20"
     })
     nil
     ))
