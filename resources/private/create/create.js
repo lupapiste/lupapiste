@@ -11,7 +11,7 @@
   var model = new function() {
     var self = this;
 
-    self.locationModel = new LUPAPISTE.LocationModel();
+    self.locationModel = new LUPAPISTE.CreateApplicationLocationModel();
 
     self.goPhase1 = function() {
       pageutil.openPage("create-part-1");

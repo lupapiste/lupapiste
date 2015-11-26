@@ -1,4 +1,4 @@
-LUPAPISTE.LocationModel = function() {
+LUPAPISTE.CreateApplicationLocationModel = function() {
   "use strict";
 
   var self = this;
@@ -83,4 +83,4 @@ LUPAPISTE.LocationModel = function() {
 
 };
 
-LUPAPISTE.LocationModel.prototype = _.create(LUPAPISTE.LocationModelBase.prototype, {"constructor":LUPAPISTE.LocationModel});
+LUPAPISTE.CreateApplicationLocationModel.prototype = _.create(LUPAPISTE.LocationModelBase.prototype, {"constructor":LUPAPISTE.CreateApplicationLocationModel});
