@@ -125,18 +125,20 @@
    (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
          bulletin   (mongo/select-one :application-bulletins {:_id bulletin-id} projection)] ; TODO: use get-bulletin, add projection
      (if-not (and (= (:bulletinState bulletin) "proclaimed")
-                  (in-proclaimed-period (-> bulletin :versions last))
-                  (not-empty (vetuma/vetuma-session)))
+                  (in-proclaimed-period (-> bulletin :versions last)))
        (fail :error.bulletin-not-in-commentable-state))))
   ([command _]
     (bulletin-can-be-commented command)))
 
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
 
+(defn- user-is-vetuma-authenticated [_ _]
+  (not-empty (vetuma/vetuma-session)))
+
 (defcommand add-bulletin-comment
   {:description      "Add comment to bulletin"
    :feature          :publish-bulletin
-   :pre-checks       [bulletin-can-be-commented]
+   :pre-checks       [bulletin-can-be-commented user-is-vetuma-authenticated]
    :input-validators [comment-can-be-added referenced-file-can-be-attached]
    :user-roles       #{:anonymous}}
   [{{files :files bulletin-id :bulletinId comment :comment bulletin-version-id :bulletinVersionId
