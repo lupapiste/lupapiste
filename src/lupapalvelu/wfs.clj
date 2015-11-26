@@ -282,29 +282,31 @@
 (defn parse-features-as-latin1 [s]
   (-> s (s/replace-first "UTF-8" "ISO-8859-1") (->features sxml/startparse-sax-no-doctype "ISO-8859-1")))
 
-(defn- exec [method url q]
-  (let [[http-fn param-key] (method http-method)
-        timeout (env/value :http-client :conn-timeout)
-        credentials (or (:credentials q) (auth url))
-        request {:throw-exceptions false
-                 :basic-auth credentials
-                 param-key (dissoc q :credentials)}
-        task (future* (exec-http http-fn url request))
-        [status data error-body] (deref task timeout [:timeout])
-        error-text (-> error-body  (ss/replace #"[\r\n]+" " ") (ss/limit 400 "..."))]
-    (condp = status
-      :timeout (do (errorf "wfs timeout: url=%s" url) nil)
-      :error   (do
-                 (case data
-                   400 (errorf "wfs status 400 Bad Request '%s', url=%s, response body=%s" (ss/limit (str q) 220 "...") url error-text)
-                   (errorf "wfs status %s: url=%s, response body=%s" data url error-text))
-                 nil)
-      :failure (do (errorf data "wfs failure: url=%s" url) nil)
-      :ok      (let [;_ (println data)
-                     features (if (= url nearestfeature)
-                                (parse-features-as-latin1 data)
-                                (->features data sxml/startparse-sax-no-doctype))]
-                 (xml-> features :gml:featureMember)))))
+(defn- exec
+  ([method url q] (exec method url nil q))
+  ([method url credentials q]
+    (let [[http-fn param-key] (method http-method)
+         timeout (env/value :http-client :conn-timeout)
+         credentials (or credentials (auth url))
+         request {:throw-exceptions false
+                  :basic-auth credentials
+                  param-key q}
+         task (future* (exec-http http-fn url request))
+         [status data error-body] (deref task timeout [:timeout])
+         error-text (-> error-body  (ss/replace #"[\r\n]+" " ") (ss/limit 400 "..."))]
+     (condp = status
+       :timeout (do (errorf "wfs timeout: url=%s" url) nil)
+       :error   (do
+                  (case data
+                    400 (errorf "wfs status 400 Bad Request '%s', url=%s, response body=%s" (ss/limit (str q) 220 "...") url error-text)
+                    (errorf "wfs status %s: url=%s, response body=%s" data url error-text))
+                  nil)
+       :failure (do (errorf data "wfs failure: url=%s" url) nil)
+       :ok      (let [;_ (println data)
+                      features (if (= url nearestfeature)
+                                 (parse-features-as-latin1 data)
+                                 (->features data sxml/startparse-sax-no-doctype))]
+                  (xml-> features :gml:featureMember))))))
 
 (defn post [url q]
   (exec :post url q))
@@ -364,17 +366,14 @@
     ;(println filter)
 
     (exec :get url
-    {
-     :REQUEST "GetFeature"
-     :SERVICE "WFS"
-     :VERSION "1.1.0"
-     :TYPENAME "mkos:Osoite"
-     :SRSNAME "EPSG:3067"
-     :FILTER filter
-     :MAXFEATURES "20"
-    })
-    nil
-    ))
+      credentials
+      {:REQUEST "GetFeature"
+       :SERVICE "WFS"
+       :VERSION "1.1.0"
+       :TYPENAME "mkos:Osoite"
+       :SRSNAME "EPSG:3067"
+       :FILTER filter
+       :MAXFEATURES "20"})))
 
 (defn property-id-by-point [x y]
   (post ktjkii
