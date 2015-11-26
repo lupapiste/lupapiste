@@ -227,6 +227,9 @@
     .help-toggle {
       vertical-align: top;
     }
+    .user-info {
+      font-style: italic;
+    }
   }
   ul.bulletin-comment__attachment-list {
     display: table;
@@ -253,5 +256,17 @@
     h3 {
       margin-bottom: $marginL;
     }
+  }
+}
+
+#application-bulletin-tab {
+  .bulletin-state {
+    font-weight: bold;
+  }
+  .bulletin-component {
+    margin-bottom: $marginL;
+  }
+  .back-button {
+    margin-bottom: $marginL;
   }
 }

@@ -125,6 +125,16 @@
                                             params: {value: fise,
                                                      id: 'architect.fise',
                                                      lLabel: 'userinfo.architect.fise'}}"></div>
+
+                <div class="col-1"
+                     data-bind="component: {name: 'select-field',
+                                            params: {value: fiseKelpoisuus,
+                                                     options: availableFiseKelpoisuusValues,
+                                                     optionsValue: 'id',
+                                                     optionsText: 'name',
+                                                     lOptionsCaption: 'userinfo.architect.fiseKelpoisuus.choose',
+                                                     id: 'architect-fiseKelpoisuus-select',
+                                                     lLabel: 'userinfo.architect.fiseKelpoisuus'}}"></div>
               </div>
 
               <div class="row">

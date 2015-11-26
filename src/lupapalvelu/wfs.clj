@@ -482,24 +482,21 @@
      :type "yleiskaava"}))
 
 (defn query-get-capabilities
-  ([url]
-   (query-get-capabilities url nil nil true))
-  ([url params]
-    (query-get-capabilities url nil nil true params))
-  ([url username password throw-exceptions? & [params]]
+  ([url service]
+    (query-get-capabilities url service nil nil true))
+  ([url service username password throw-exceptions?]
     {:pre [(not (ss/blank? url))]}
-   (let [credentials (when-not (ss/blank? username) {:basic-auth [username password]})
-         params      (merge {:request "GetCapabilities", :service "WFS", :version "1.1.0"} params)
+    (let [credentials (when-not (ss/blank? username) {:basic-auth [username password]})
          options     (merge {:socket-timeout 30000, :conn-timeout 30000 ; 30 secs should be enough for GetCapabilities
-                             :query-params params
+                             :query-params {:request "GetCapabilities", :service service, :version "1.1.0"}
                              :throw-exceptions  throw-exceptions?}
-                            credentials)]
+                       credentials)]
      (http/get url options))))
 
 (defn get-capabilities-xml
   "Returns capabilities XML without namespaces"
   [base-url username password]
-  (let [capabilities-resp  (query-get-capabilities base-url username password true)
+  (let [capabilities-resp  (query-get-capabilities base-url "WFS" username password true)
         xml-s (:body capabilities-resp)]
     (-> xml-s sxml/parse reader/strip-xml-namespaces)))
 
@@ -511,17 +508,17 @@
   [url username password]
   (when-not (s/blank? url)
     (try
-      (let [resp (query-get-capabilities url username password false)]
+      (let [resp (query-get-capabilities url "WFS" username password false)]
         (or
           (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
           (warn "Response not OK or did not contain XML. Response was: " resp)))
       (catch Exception e
         (warn (str "Could not connect to WFS: " url ", exception was " e))))))
 
-(defn get-our-capabilities [& [params]]
+(defn get-our-capabilities []
   (let [host (env/value :geoserver :host) ; local IP from Chef environment
         path (env/value :geoserver :wms :path)]
-    (:body (query-get-capabilities (str host path) params))))
+    (:body (query-get-capabilities (str host path) "WMS"))))
 
 (def get-rekisteriyksikontietojaFeatureAddress
   (memoize

@@ -113,17 +113,17 @@
                          (re-find #"^\d+_kantakartta$" layer-name) "kantakartta"
                          :else "other")
         layer-id (case layer-category
-                      "asemakaava" "101"
-                      "kantakartta" "102"
-                      "0")]
+                   "asemakaava" "101"
+                   "kantakartta" "102"
+                   layer-name)]
     {:wmsName layer-name
      :wmsUrl "/proxy/wms"
      :name (case layer-category
-             "asemakaava" {:fi "Asemakaava (kunta)" :sv "Detaljplan (kommun)" :en "???"}
-             "kantakartta" {:fi "Kantakartta" :sv "Baskarta" :en "???"}
-             {:fi "" :sv "" :en ""})
+             "asemakaava" {:fi "Asemakaava (kunta)" :sv "Detaljplan (kommun)" :en "Detailed Plan (municipality)"}
+             "kantakartta" {:fi "Kantakartta" :sv "Baskarta" :en "City map"}
+             {:fi layer-name :sv layer-name :en layer-name})
      :subtitle (case layer-category
-                 "asemakaava" {:fi "Kunnan palveluun toimittama ajantasa-asemakaava" :sv "Detaljplan (kommun)" :en "???"}
+                 "asemakaava" {:fi "Kunnan palveluun toimittama ajantasa-asemakaava" :sv "Detaljplan (kommun)" :en "Detailed Plan (municipality)"}
                  "kantakartta" {:fi "" :sv "" :en ""}
                  {:fi "" :sv "" :en ""})
      :id layer-id
@@ -207,9 +207,7 @@
         layers (if (nil? municipality)
           (map create-layer-object (map wfs/layer-to-name layers))
           (filter
-            #(and
-               (not= "0" (:id %))      ;; TODO: This is quick fix to make service working again.  Find better fix.
-               (= (re-find #"^\d+" (:wmsName %)) municipality))
+            #(= (re-find #"^\d+" (:wmsName %)) municipality)
             (map create-layer-object (map wfs/layer-to-name layers)))
           )
         layers (filter (fn [{id :id}]

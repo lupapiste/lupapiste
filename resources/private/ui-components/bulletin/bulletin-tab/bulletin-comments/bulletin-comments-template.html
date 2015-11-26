@@ -1,0 +1,40 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="bulletin-comments-template">
+  <div>
+    <button class="secondary back-button" data-bind="click: hideComments">
+      <i class="lupicon-chevron-start"></i>
+      <span data-bind="ltext: 'back'"></span>
+    </button>
+    <div>
+      <h1 data-bind="ltext: 'bulletin.comments.title'"></h1>
+      <span data-bind="component: { name: 'help-toggle', params: { lhtml: 'help.bulletin.comments' } }"></span>
+    </div>
+  </div>
+
+  <!-- ko foreach: comments -->
+  <div class="bulletin-comment">
+    <div class="bulletin-comment__header">
+      <span class="bulletin-comment__index" data-bind="text: $index() + 1"></span>
+      <span class="bulletin-comment__name"  data-bind="fullName: $data['contact-info']"></span>
+      <span data-bind="dateTimeString: $data.created"></span>
+    </div>
+    <div class="bulletin-comment__body">
+      <!-- ko if: $data.attachments.length > 0 -->
+      <div class="bulletin-comment__attachments" data-bind="foreach: $data.attachments">
+        <div class="bulletin-comment__attachment">
+          <a class="link-btn bulletin-comment_attachment-link" href="#" data-bind="click: function() {}">
+            <span data-bind="text: $data.filename"></span>
+          </a>
+          <span class="bulletin-comment__attachment-type">
+            <span data-bind="ltext: $data.contentType"></span>
+            <span data-bind="size: $data.size"></span>
+          </span>
+        </div>
+      </div>
+      <!-- /ko -->
+      <div>
+        <span data-bind="text: comment"></span>
+      </div>
+    </div>
+  </div>
+  <!-- /ko -->
+</script>
