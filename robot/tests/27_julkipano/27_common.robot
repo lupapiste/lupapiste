@@ -8,6 +8,11 @@ Create bulletins
   As Sonja
   Create bulletins the fast way  ${count}
 
+Create a bulletin and go to bulletin page
+  Create bulletins  1
+  Go to bulletins page
+  Open bulletin by index  1
+
 Bulletin list should have no rows
   Element should not be visible  //table[@id="application-bulletins-list"]/tbody/tr
 
@@ -128,3 +133,26 @@ Move bulletin to final
 
 Bulletin shows as final
   Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Lainvoimainen
+
+Write comment for bulletin
+  [Arguments]  ${commentText}
+  Wait until  Element should be visible  //textarea[@data-test-id='bulletin-comment-field']
+  Input text  //textarea[@data-test-id='bulletin-comment-field']  ${commentText}
+
+Send comment
+  Wait until  Element should be enabled  //button[@data-test-id='send-comment']
+  Click by test id  send-comment
+
+Fill out alternate receiver form
+  Wait until  Element should be visible  //div[@data-test-id='other-receiver-row']
+  Input text  //div[@data-test-id='other-receiver-row']//input[@data-test-id='firstName']  Keeko
+  Input text  //div[@data-test-id='other-receiver-row']//input[@data-test-id='lastName']  Valaskala
+  Input text  //div[@data-test-id='other-receiver-row']//input[@data-test-id='street']  Valaskatu 1
+  Input text  //div[@data-test-id='other-receiver-row']//input[@data-test-id='zip']  00001
+  Input text  //div[@data-test-id='other-receiver-row']//input[@data-test-id='city']  Äetsä
+  Fill out alternate receiver email field
+
+Fill out alternate receiver email field
+  Wait until  Element should be visible  //div[@data-test-id='other-receiver-row']
+  Input text  //div[@data-test-id='other-receiver-row']//input[@data-test-id='email']  keeko@valaskala.com
+  Wait until  Checkbox Should Be Selected  //div[@data-test-id='other-receiver-row']//input[@data-test-id='emailPreferred']

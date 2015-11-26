@@ -53,6 +53,7 @@
                                           validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))
                  :degrees               (map :name (:body schemas/koulutusvalinta))
+                 :fiseKelpoisuusValues  (map :name schemas/fise-kelpoisuus-lajit)
                  :bulletinStates        bulletins/bulletin-state-seq
                  :attachmentVisibilities (get tos-meta/Näkyvyys :values)
                  :features              (into {} (filter second (env/features)))}]

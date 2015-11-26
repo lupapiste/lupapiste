@@ -23,7 +23,7 @@
         <td data-bind="text: $parent.versionCommentsCount($data)"></td>
         <td class="actions">
           <a href="#" class="link-btn" data-bind="ltext: 'edit'"></a>
-          <a href="#" class="link-btn" data-bind="ltext: 'bulletin.versions.comments.show'"></a>
+          <a href="#" class="link-btn" data-bind="click: $parent.showVersionComments.bind($data), ltext: 'bulletin.versions.comments.show'"></a>
           <a href="#" class="link-btn" data-bind="ltext: 'bulletin.versions.version.show'"></a>
         </td>
       </tr>

@@ -42,8 +42,8 @@ LUPAPISTE.verdictPageController = (function($) {
         self.draft(verdict.draft);
         self.status(pk.status);
         self.name(pk.paatoksentekija);
-        self.given(dates.anto);
-        self.official(dates.lainvoimainen);
+        self.given(new Date(dates.anto));
+        self.official(new Date(dates.lainvoimainen));
         self.text(pk.paatos);
         self.agreement(verdict.sopimus);
         self.section(pk.pykala);

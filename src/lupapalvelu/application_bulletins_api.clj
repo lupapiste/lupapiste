@@ -1,12 +1,13 @@
 (ns lupapalvelu.application-bulletins-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [clj-time.coerce :as c]
+            [clj-time.core :as t]
+            [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [noir.response :as resp]
             [sade.core :refer :all]
+            [sade.util :as util]
             [slingshot.slingshot :refer [try+]]
             [sade.strings :as ss]
-            [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.mongo :as mongo]
@@ -112,24 +113,33 @@
     (when-not (every? true? files-found)
       (fail :error.invalid-files-attached-to-comment))))
 
+(defn- in-proclaimed-period
+  [version]
+  (let [[starts ends] (->> (util/select-values version [:proclamationStartsAt :proclamationEndsAt])
+                           (map c/from-long))
+        ends     (t/plus ends (t/days 1))]
+    (t/within? (t/interval starts ends) (c/from-long (now)))))
+
 (defn- bulletin-can-be-commented
   ([{{bulletin-id :bulletinId} :data}]
-   (let [{bulletin-state :bulletinState} (mongo/select-one :application-bulletins {:_id bulletin-id} {:bulletinState 1})] ; TODO: use get-bulletin, add projection
-     ; 1. in proclaimed state
-     (when-not (= bulletin-state "proclaimed")
-       (fail :error.bulletin-not-in-commentable-state))
-     ; 2. commenting time period has not passed
-     ; TODO
-     ))
+   (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
+         bulletin   (mongo/select-one :application-bulletins {:_id bulletin-id} projection)] ; TODO: use get-bulletin, add projection
+     (if-not (and (= (:bulletinState bulletin) "proclaimed")
+                  (in-proclaimed-period (-> bulletin :versions last)))
+       (fail :error.bulletin-not-in-commentable-state))))
   ([command _]
     (bulletin-can-be-commented command)))
 
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
 
+(defn- user-is-vetuma-authenticated [_ _]
+  (when (empty? (vetuma/vetuma-session))
+    (fail :error.user-not-vetuma-authenticated)))
+
 (defcommand add-bulletin-comment
   {:description      "Add comment to bulletin"
    :feature          :publish-bulletin
-   :pre-checks       [bulletin-can-be-commented]
+   :pre-checks       [bulletin-can-be-commented user-is-vetuma-authenticated]
    :input-validators [comment-can-be-added referenced-file-can-be-attached]
    :user-roles       #{:anonymous}}
   [{{files :files bulletin-id :bulletinId comment :comment bulletin-version-id :bulletinVersionId
@@ -138,8 +148,8 @@
         delivery-address (select-keys address-source delivery-address-fields)
         contact-info (merge delivery-address {:email          email
                                               :emailPreferred (= emailPreferred "on")})
-        comment (bulletins/create-comment comment contact-info created)]
-    (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments files)}})
+        comment (bulletins/create-comment bulletin-id bulletin-version-id comment contact-info files created)]
+    (mongo/insert :application-bulletin-comments comment)
     (ok)))
 
 (defn- get-search-fields [fields app]
@@ -232,3 +242,17 @@
                                     :bulletinState 1}))
         bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
     (ok :bulletin bulletin)))
+
+(defquery bulletin-comments
+  "returns paginated comments related to given version id"
+  {:parameters [bulletinId versionId]
+   :feature    :publish-bulletin
+   :user-roles #{:authority :applicant}}
+  [{{skip :skip limit :limit} :data}]
+  (let [comments (mongo/with-collection "application-bulletin-comments"
+                   (query/find  {})
+                   (query/sort  {:created -1})
+                   (query/skip  (util/->int skip))
+                   (query/limit (util/->int limit)))]
+    (ok :comments comments)))
+

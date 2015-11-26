@@ -307,6 +307,7 @@ button.function {
   @include function( $turqo-link, $turqo-hover, $gray51 );
 }
 
+
 @include button-div-a-i-span ("function.julkipano") {
   @include function( $blue-link, $blue-hover, $gray51 );
 }

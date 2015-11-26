@@ -22,45 +22,47 @@
     :foremanHistory   nil
     nil))
 
-(defn dummy-values [user-id {:keys [type subtype case name body] :as element}]
-  (condp = (keyword type)
-    :text             "text"
-    :checkbox         true
-    :date             "2.5.1974"
-    :time             "16:10"
-    :select           (-> body first :name)
-    :radioGroup       (-> body first :name)
-    :personSelector   user-id
-    :companySelector  nil
-    :buildingSelector "001"
-    :newBuildingSelector "1"
-    :hetu             "210281-9988"
-    :fillMyInfoButton nil
-    :foremanHistory   nil
-    :maaraalaTunnus   nil
-    :string           (condp = (keyword subtype)
-                        :maaraala-tunnus   "0003"
-                        :email            "example@example.com"
-                        :tel              "012 123 4567"
-                        :number           "4"
-                        :decimal          "6,9"
-                        :digit            "1"
-                        :kiinteistotunnus "09100200990013"
-                        :zip              "33800"
-                        :vrk-address      "Ranta\"tie\" 66:*"
-                        :vrk-name         "Ilkka"
-                        :y-tunnus         "2341528-4"
-                        :rakennusnumero   "001"
-                        :rakennustunnus   "1234567892"
-                        :ovt              "003712345678"
-                        nil               "string"
-                        :letter           (condp = (keyword case)
-                                            :lower "a"
-                                            :upper "A"
-                                            nil    "Z"
-                                            (missing element))
-                        (missing element))
-    (missing element)))
+(defn dummy-values [user-id {:keys [type subtype case name body dummy-test] :as element}]
+  (condp = (keyword dummy-test)
+    :postal-code "12345"
+    (condp = (keyword type)
+      :text             "text"
+      :checkbox         true
+      :date             "2.5.1974"
+      :time             "16:10"
+      :select           (-> body first :name)
+      :radioGroup       (-> body first :name)
+      :personSelector   user-id
+      :companySelector  nil
+      :buildingSelector "001"
+      :newBuildingSelector "1"
+      :hetu             "210281-9988"
+      :fillMyInfoButton nil
+      :foremanHistory   nil
+      :maaraalaTunnus   nil
+      :string           (condp = (keyword subtype)
+                          :maaraala-tunnus   "0003"
+                          :email            "example@example.com"
+                          :tel              "012 123 4567"
+                          :number           "4"
+                          :decimal          "6,9"
+                          :digit            "1"
+                          :kiinteistotunnus "09100200990013"
+                          :zip              "33800"
+                          :vrk-address      "Ranta\"tie\" 66:*"
+                          :vrk-name         "Ilkka"
+                          :y-tunnus         "2341528-4"
+                          :rakennusnumero   "001"
+                          :rakennustunnus   "1234567892"
+                          :ovt              "003712345678"
+                          nil               "string"
+                          :letter           (condp = (keyword case)
+                                              :lower "a"
+                                              :upper "A"
+                                              nil    "Z"
+                                              (missing element))
+                          (missing element))
+      (missing element))))
 
 ;;
 ;; Internal
