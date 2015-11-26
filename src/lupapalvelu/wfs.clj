@@ -285,9 +285,10 @@
 (defn- exec [method url q]
   (let [[http-fn param-key] (method http-method)
         timeout (env/value :http-client :conn-timeout)
+        credentials (or (:credentials q) (auth url))
         request {:throw-exceptions false
-                 :basic-auth (auth url)
-                 param-key q}
+                 :basic-auth credentials
+                 param-key (dissoc q :credentials)}
         task (future* (exec-http http-fn url request))
         [status data error-body] (deref task timeout [:timeout])
         error-text (-> error-body  (ss/replace #"[\r\n]+" " ") (ss/limit 400 "..."))]
