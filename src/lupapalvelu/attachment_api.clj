@@ -605,12 +605,11 @@
 
 (defcommand set-attachment-visibility
   {:parameters [id attachmentId value]
-   :user-roles #{:authority}
+   :user-roles #{:authority :applicant}
    :feature    :attachment-visibility
    :input-validators [(fn [{{nakyvyys-value :value} :data :as c}]
                         (when-not (some (hash-set (keyword nakyvyys-value)) (:values tosmeta/Nakyvyys))
-                          (fail :error.invalid-nakyvyys-value)))]
-   :user-authz-roles #{:owner}
+                          (fail :error.invalid-nakyvyys-value :value nakyvyys-value)))]
    :states     states/pre-verdict-states}
   [command]
   (update-application command
