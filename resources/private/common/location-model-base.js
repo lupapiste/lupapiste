@@ -12,6 +12,7 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   self.y = 0;
   self.address = ko.observable("");
   self.propertyId = ko.observable("");
+  self.municipalityCode = ko.observable("");
 
   self.toJS = function() {
     return {
@@ -21,12 +22,33 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
     };
   };
 
+  self.municipalityName = ko.pureComputed(function() {
+    return self.municipalityCode() ? loc(["municipality", self.municipalityCode()]): "";
+  });
+  self.municipalitySupported = ko.observable(true);
+
   self.propertyIdHumanReadable = ko.pureComputed(function() {
       return self.propertyId() ? util.prop.toHumanFormat(self.propertyId()) : "";
   });
+
   self.propertyIdOk = ko.pureComputed(function() {
     return !_.isBlank(self.propertyId()) && util.prop.isPropertyId(self.propertyId());
   });
+  self.addressOk = ko.pureComputed(function() { return self.municipalityCode() && !_.isBlank(self.address()); });
+
+  self.propertyIdValidated = ko.observable(true);
+
+
+  self.setAddress = function(a) {
+    var newAddress = "";
+    if (a) {
+      newAddress = a.street;
+      if (a.number && a.number !== "0") {
+        newAddress = newAddress + " " + a.number;
+      }
+    }
+    return self.municipalityCode(a ? a.municipality : "").address(newAddress);
+  };
 
   //
   // Map and coordinate handling
@@ -86,4 +108,26 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
     self.requestContext.begin();
     return self;
   };
+
+  //
+  // Search
+  //
+
+  self.onError = function() {
+    hub.send("indicator", {style: "negative", message: "integration.getAddressNotWorking"});
+  };
+
+  self.searchPropertyId = function(x, y) {
+    locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
+        self.propertyId(id);
+        self.propertyIdValidated(true);
+      }, self.onError, self.processing);
+    return self;
+  };
+
+  self.searchAddress = function(x, y) {
+    locationSearch.addressByPoint(self.requestContext, x, y, self.setAddress, self.onError, self.processing);
+    return self;
+  };
+
 };

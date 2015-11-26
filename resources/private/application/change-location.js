@@ -24,7 +24,6 @@ LUPAPISTE.ChangeLocationModel = function() {
 
   self.id = 0;
 
-  self.propertyIdValidated = ko.observable(true);
   self.propertyIdAutoUpdated = true;
   self.errorMessage = ko.observable(null);
 
@@ -126,30 +125,6 @@ LUPAPISTE.ChangeLocationModel = function() {
           self.errorMessage("error.invalid-property-id");
         }
       });
-    return self;
-  };
-
-  self.searchPropertyId = function(x, y) {
-    locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
-      self.propertyId(id);
-      self.propertyIdValidated(true);
-    });
-    return self;
-  };
-
-  self.searchAddress = function(x, y) {
-    locationSearch.addressByPoint(self.requestContext, x, y, function(a) {
-      var newAddress = "";
-      if (a) {
-        newAddress = a.street;
-        if (a.number && a.number !== "0") {
-          newAddress = newAddress + " " + a.number;
-        }
-      }
-      self.address(newAddress);
-      self.center();
-      hub.send("track-click", {category:"Application", label:"map", event:"changeLocationOnMap"});
-    });
     return self;
   };
 

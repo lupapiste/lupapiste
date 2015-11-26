@@ -15,22 +15,9 @@ LUPAPISTE.LocationModel = function() {
        },
        popupContentModel: "section#map-popup-content"});
 
-  self.municipalityCode = ko.observable("");
-
-  self.municipalityName = ko.pureComputed(function() {
-    return self.municipalityCode() ? loc(["municipality", self.municipalityCode()]): "";
-  });
-  self.municipalitySupported = ko.observable(true);
-
   self.reset = function() {
     return self.setXY(0,0).address("").propertyId("").municipalityCode("");
   };
-
-  self.setAddress = function(a) {
-    return self.municipalityCode(a ? a.municipality : "").address(a ? a.street + (a.number ? " " + a.number : "") : "");
-  };
-
-  self.addressOk = ko.pureComputed(function() { return self.municipalityCode() && !_.isBlank(self.address()); });
 
   self.setPropertyId = function(id) {
     var currentMuni = self.municipalityCode();
@@ -51,21 +38,6 @@ LUPAPISTE.LocationModel = function() {
   //
   // Search API
   //
-
-  self.onError = function() {
-    hub.send("indicator", {style: "negative", message: "integration.getAddressNotWorking"});
-  };
-
-  self.searchPropertyId = function(x, y) {
-    locationSearch.propertyIdByPoint(self.requestContext, x, y, self.setPropertyId, self.onError, self.processing);
-    return self;
-  };
-
-  self.searchAddress = function(x, y) {
-    locationSearch.addressByPoint(self.requestContext, x, y, self.setAddress, self.onError, self.processing);
-    return self;
-  };
-
 
   self.searchPoint = function(value) {
     if (!_.isEmpty(value)) {
