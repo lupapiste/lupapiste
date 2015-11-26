@@ -2,6 +2,8 @@ LUPAPISTE.ChangeLocationModel = function() {
   "use strict";
 
   var self = this;
+  LUPAPISTE.LocationModelBase.call(self);
+
   self.dialogSelector = "#dialog-change-location";
 
   var _map = null;
@@ -30,14 +32,10 @@ LUPAPISTE.ChangeLocationModel = function() {
   self.id = 0;
   self.x = 0;
   self.y = 0;
-  self.address = ko.observable("");
-  self.propertyId = ko.observable("");
+
   self.propertyIdValidated = ko.observable(true);
   self.propertyIdAutoUpdated = true;
   self.errorMessage = ko.observable(null);
-  self.processing = ko.observable();
-  self.pending = ko.observable();
-
 
   self.ok = ko.computed(function() {
     return util.prop.isPropertyId(self.propertyId()) && self.address() && self.propertyIdValidated();
@@ -181,3 +179,5 @@ LUPAPISTE.ChangeLocationModel = function() {
   };
 
 };
+
+LUPAPISTE.ChangeLocationModel.prototype = _.create(LUPAPISTE.LocationModelBase.prototype, {"constructor":LUPAPISTE.ChangeLocationModel});

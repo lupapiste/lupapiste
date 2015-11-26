@@ -1,17 +1,11 @@
 LUPAPISTE.LocationModel = function() {
   "use strict";
-  var self = this;
 
-  self.processing = ko.observable(false);
+  var self = this;
+  LUPAPISTE.LocationModelBase.call(self);
 
   self.x = ko.observable(0);
   self.y = ko.observable(0);
-  self.address = ko.observable("");
-
-  self.propertyId = ko.observable("");
-  self.propertyIdHumanReadable = ko.pureComputed(function() {
-      return self.propertyId() ? util.prop.toHumanFormat(self.propertyId()) : "";
-    });
 
   self.municipalityCode = ko.observable("");
 
