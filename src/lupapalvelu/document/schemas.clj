@@ -27,6 +27,7 @@
                  :group-help :section-help
                  :after-update
                  :repeating :no-repeat-button :order
+                 :exclude-from-pdf
                  :construction-time})
 
 (def updateable-keys #{:removable})
@@ -524,6 +525,7 @@
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
                                   :type :group
                                   :uicomponent :hanke-table
+                                  :exclude-from-pdf true
                                   :repeating true
                                   :approvable true
                                   :copybutton false
