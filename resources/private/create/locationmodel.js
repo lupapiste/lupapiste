@@ -6,7 +6,7 @@ LUPAPISTE.LocationModel = function() {
 
   self.x = ko.observable(0);
   self.y = ko.observable(0);
-  self.addressString = ko.observable("");
+  self.address = ko.observable("");
 
   self.propertyId = ko.observable("");
   self.propertyIdHumanReadable = ko.pureComputed(function() {
@@ -20,11 +20,11 @@ LUPAPISTE.LocationModel = function() {
   });
 
   self.reset = function() {
-    self.x(0).y(0).addressString("").propertyId("").municipalityCode("");
+    self.x(0).y(0).address("").propertyId("").municipalityCode("");
   };
 
   self.setAddress = function(a) {
-    return self.municipalityCode(a.municipality).addressString(a ? a.street + " " + a.number : "");
+    return self.municipalityCode(a.municipality).address(a ? a.street + " " + a.number : "");
   };
 
   self.setPropertyId = function(id) {

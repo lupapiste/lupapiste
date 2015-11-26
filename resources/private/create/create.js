@@ -51,7 +51,7 @@
 
     self.x = self.locationModel.x;
     self.y = self.locationModel.y;
-    self.addressString = self.locationModel.addressString;
+    self.addressString = self.locationModel.address;
     self.propertyId = self.locationModel.propertyId;
     self.propertyIdHumanReadable = self.locationModel.propertyIdHumanReadable;
 
