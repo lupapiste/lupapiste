@@ -20,8 +20,6 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
     var start  = util.getIn(self, ["showVersionComments", "proclamationStartsAt"], "");
     var end    = util.getIn(self, ["showVersionComments", "proclamationEndsAt"], "");
     var amount = util.getIn(self.comments().length);
-    console.log("start", start, end, amount);
-    console.log("foo", self.showVersionComments());
     if (start && end) {
       return "Hakemuksen kuulutusaikana " + moment(start).format("D.M.YYYY") + " - " + moment(end).format("D.M.YYYY") +
         " annettuja mielipiteitä ja muistutuksia yhteensä " + amount + " kpl."
