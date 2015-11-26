@@ -159,12 +159,16 @@
       (str (server-address) "/api/" (name action-type) "/" (name command-name))
       (let [args (if (map? (first args))
                    (first args)
-                   (apply hash-map args))]
+                   (apply hash-map args))
+
+            cookie-store (:cookie-store args)
+            args (dissoc args :cookie-store)]
         {:headers {"authorization" (str "apikey=" apikey)
                    "content-type" "application/json;charset=utf-8"}
          :body (json/encode args)
          :follow-redirects false
-       :throw-exceptions false}))))
+         :cookie-store cookie-store
+         :throw-exceptions false}))))
 
 (defn raw-command [apikey command-name & args]
   (apply decode-post :command apikey command-name args))
