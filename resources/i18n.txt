@@ -1,0 +1,2 @@
+bulletin.proclaimedHeader.duringProclamation:  Hakemuksen kuulutusaikana
+bulletin.proclaimedHeader.givenComments:  annettuja mielipiteitä ja muistutuksia yhteensä

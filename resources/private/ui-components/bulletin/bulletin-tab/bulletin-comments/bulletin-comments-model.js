@@ -21,8 +21,8 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
     var end    = util.getIn(self, ["showVersionComments", "proclamationEndsAt"], "");
     var amount = util.getIn(self.comments().length);
     if (start && end) {
-      return "Hakemuksen kuulutusaikana " + moment(start).format("D.M.YYYY") + " - " + moment(end).format("D.M.YYYY") +
-        " annettuja mielipiteitä ja muistutuksia yhteensä " + amount + " kpl."
+      return loc("bulletin.proclaimedHeader.duringProclamation") + " " + moment(start).format("D.M.YYYY") + " - " + moment(end).format("D.M.YYYY") +
+        " " + loc("bulletin.proclaimedHeader.givenComments") + " " + amount + " kpl."
     }
   });
 };
