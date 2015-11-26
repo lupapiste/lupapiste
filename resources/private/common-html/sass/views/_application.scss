@@ -478,7 +478,9 @@ $app-gray-darkest: $gray187;
 #invite-statement-givers-section {
   margin-top: 24px;
   margin-bottom: 24px;
-
+  #choose-statement-givers-title {
+    font-weight: bold;
+  }
   button {
       margin-top: $marginL;
   }
