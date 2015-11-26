@@ -131,8 +131,10 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   // Search
   //
 
-  self.onError = function() {
+  self.onError = function(e) {
+    if (e.status > 400) {
     hub.send("indicator", {style: "negative", message: "integration.getAddressNotWorking"});
+    }
   };
 
   self.searchPropertyId = function(x, y) {
