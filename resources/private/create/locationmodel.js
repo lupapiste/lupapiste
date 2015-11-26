@@ -119,3 +119,5 @@ LUPAPISTE.LocationModel = function() {
   };
 
 };
+
+LUPAPISTE.LocationModel.prototype = _.create(LUPAPISTE.LocationModelBase.prototype, {"constructor":LUPAPISTE.LocationModel});
