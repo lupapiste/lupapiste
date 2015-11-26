@@ -1118,7 +1118,8 @@
                                                        data-bind="value: id,
                                                                   checked: $root.requestForStatementModel.personIds,
                                                                   attr: {'id': id,
-                                                                         'data-test-id': 'check-statement-giver-' + $index()}" />
+                                                                         'data-test-id': 'check-statement-giver-' + $index(),
+                                                                         'disabled': isDisabled}" />
                                             </td>
                                             <td data-bind="text: text()"></td>
                                             <td data-bind="text: name()"></td>
