@@ -3,7 +3,8 @@
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
             [sade.env :as env]
-            [lupapalvelu.tiedonohjaus :refer :all]))
+            [lupapalvelu.tiedonohjaus :refer :all]
+            [lupapalvelu.action :as action]))
 
 (when (env/feature? :tiedonohjaus)
 
@@ -46,18 +47,32 @@
           (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})))
 
     (fact "application and attachment state (tila) is changed correctly"
-      (let [command {:created 12345678
-                     :data {:id 1000}
-                     :application {:id 1000
+      (let [command {:created     12345678
+                     :data        {:id 1000}
+                     :application {:id           1000
                                    :organization "753-R"
-                                   :metadata {:tila "luonnos"}
+                                   :metadata     {:tila "luonnos"}
                                    :attachments  [{:id 1 :metadata {:tila "luonnos"}}
                                                   {:id 2 :metadata {:tila "luonnos"}}]}}]
         (change-app-and-attachments-metadata-state! command :luonnos :valmis) => nil
         (provided
-          (lupapalvelu.action/update-application command {$set {:modified 12345678
-                                                                "metadata.tila" :valmis
-                                                                :attachments [{:id 1 :metadata {:tila :valmis} :modified 12345678}
-                                                                              {:id 2 :metadata {:tila :valmis} :modified 12345678}]}}) => nil))))
+          (action/update-application command {$set {:modified      12345678
+                                                    :metadata.tila :valmis
+                                                    :attachments   [{:id 1 :metadata {:tila :valmis} :modified 12345678}
+                                                                    {:id 2 :metadata {:tila :valmis} :modified 12345678}]}}) => nil)))
+    (fact "attachment state (tila) is changed correctly"
+      (let [application {:id           1000
+                         :organization "753-R"
+                         :metadata     {:tila "luonnos"}
+                         :attachments  [{:id 1 :metadata {:tila "luonnos"}}
+                                        {:id 2 :metadata {:tila "luonnos"}}]}
+            now 12345678
+            attachment-id 2]
+        (change-attachment-metadata-state! application now attachment-id :luonnos :valmis) => nil
+        (provided
+          (action/update-application (action/application->command application)
+                                     {:attachments.id attachment-id}
+                                     {$set {:modified                     now
+                                            :attachments.$.metadata.tila :valmis}}) => nil))))
   )  ;; /env/feature? :tiedonohjaus
 

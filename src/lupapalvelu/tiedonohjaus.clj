@@ -117,5 +117,15 @@
       (action/update-application
         command
         {$set {:modified created
-               "metadata.tila" new-tila
+               :metadata.tila new-tila
                :attachments updated-attachments}}))))
+
+(defn change-attachment-metadata-state! [application now attachment-id from-state to-state]
+  (let [attachment (first (filter #(= (:id %) attachment-id) (:attachments application)))]
+    (when (and (env/feature? :tiedonohjaus) (seq (:metadata attachment)))
+      (let [{{new-tila :tila} :metadata} (change-document-metadata-state attachment from-state to-state now)]
+        (action/update-application
+          (action/application->command application)
+          {:attachments.id attachment-id}
+          {$set {:modified now
+                 :attachments.$.metadata.tila new-tila}})))))
