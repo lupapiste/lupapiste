@@ -1,5 +1,6 @@
 (ns lupapalvelu.attachment-itest
-  (:require [lupapalvelu.attachment :refer :all]
+  (:require [lupapalvelu.factlet :refer [facts*]]
+            [lupapalvelu.attachment :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [midje.sweet :refer :all]))
 
@@ -312,3 +313,21 @@
             (let [attachment-after-restamp (get-attachment-by-id sonja application-id (:id attachment))]
              (:latestVersion attachment) =not=> (:latestVersion attachment-after-restamp)
              (get-in attachment [:latestVersion :stamped]) => true)))))))
+
+(facts* "Attachments visibility"
+       (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
+             application (query-application pena application-id)
+             _           (upload-attachment-to-all-placeholders pena application)
+             {attachments :attachments :as application} (query-application pena application-id)
+             aid1 (get-in attachments [0 :id])
+             aid2 (get-in attachments [1 :id])]
+
+            (fact "Can't set unknown visibility value"
+              (command pena :set-attachment-visibility :id application-id :attachmentId aid1 :value "testi") => (partial expected-failure? :error.invalid-nakyvyys-value))
+
+            #_(fact "Pena submits the application"
+              (command pena :submit-application :id application-id) => ok?
+              (:state (query-application veikko application-id)) => "submitted")
+
+
+            ))
