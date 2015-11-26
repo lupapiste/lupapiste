@@ -64,18 +64,21 @@ LUPAPISTE.PublishBulletinService = function() {
   // bulletin comment pagination
   var skip = 0;
   var limit = 1;
+  var versionId = undefined;
 
   hub.subscribe("publishBulletinService::fetchBulletinComments", function(event) {
-    if (event.reset) {
+    if (event.versionId !== versionId) {
       skip = 0;
-      limit = 1;
+      versionId = event.versionId;
+      self.comments([]);
     }
     ajax.query("bulletin-comments", {bulletinId: event.bulletinId,
                                      versionId: event.versionId,
                                      skip: skip,
                                      limit: limit})
       .success(function(res) {
-        console.log("res", res);
+        self.comments(self.comments().concat(res.comments));
+        skip += limit;
       })
       .call();
   });
