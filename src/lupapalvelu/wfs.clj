@@ -488,7 +488,7 @@
     {:pre [(not (ss/blank? url))]}
     (let [credentials (when-not (ss/blank? username) {:basic-auth [username password]})
          options     (merge {:socket-timeout 30000, :conn-timeout 30000 ; 30 secs should be enough for GetCapabilities
-                             :query-params {:request "GetCapabilities", :service service, :version "1.1.0"}
+                             :query-params {:request "GetCapabilities", :service service} ;; , :version "1.1.0"
                              :throw-exceptions  throw-exceptions?}
                        credentials)]
      (http/get url options))))

@@ -64,7 +64,8 @@ LUPAPISTE.MunicipalityMapsService = function() {
   // the map server capabilities are reloaded.
   ko.computed( function() {
     var server = serverDetails();
-      if( server && server.url ) {
+    if( server && server.url ) {
+      waiting( true );
       $.get( PROXY,
              {request: "GetCapabilities",
               service: "wms"},
@@ -76,7 +77,8 @@ LUPAPISTE.MunicipalityMapsService = function() {
              "text") // Text works both for xml and text responses.
       .fail( function() {
         error( true );
-      });
+      })
+      .always( _.partial( waiting, false ));
     }
   });
 
@@ -173,7 +175,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
     .pending( waiting )
     .complete( function( res ) {
       var body = res.responseJSON;
-      error( body.ok );
+      error( !body.ok );
       serverDetails( details );
       util.showSavedIndicator(body);
     })

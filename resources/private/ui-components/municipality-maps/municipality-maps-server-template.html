@@ -15,7 +15,8 @@
           <tbody>
             <tr>
               <td data-bind="ltext: 'auth-admin.municipality-maps.url'"></td>
-              <td class="munimaps--wide"><input type="url" data-bind="value: url"></td>
+              <td class="munimaps--wide"><input type="url" data-bind="value: url"
+                                                data-test-id="server-details-url"></td>
             </tr>
             <tr>
               <td data-bind="ltext: 'auth-admin.municipality-maps.username'"></td>
@@ -34,12 +35,12 @@
         </p>
         <button class="positive"
                 data-bind="click: updateServerDetails,
-                           css: {waiting: waiting}">
+                           css: {waiting: waiting}"
+                data-test-id="server-details-send">
           <i class="wait spin lupicon-refresh"></i>
           <span data-bind="ltext: 'auth-admin.municipality-maps.fetch'"></span>
         </button>
-
       </script>
     </section>
-  </body>
+  </body>xs
 </html>
