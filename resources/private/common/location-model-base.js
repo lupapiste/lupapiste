@@ -84,8 +84,8 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
         .makeMap(mapOptions.mapId, mapOptions.zoomWheelEnabled)
         .center(404168, 7205000, mapOptions.initialZoom)
         .addClickHandler(function(x, y) {
-          self.reset().setXY(x, y).beginUpdateRequest()
-            .searchPropertyId(x, y).searchAddress(x, y);
+          self.reset().setXY(x, y).queryLocationInfo()
+          ;//.beginUpdateRequest().searchPropertyId(x, y).searchAddress(x, y);
           if (_.isFunction(mapOptions.afterClick)) {mapOptions.afterClick();}
         });
 
@@ -159,6 +159,24 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
     if (x && y) {
       locationSearch.addressByPoint(self.requestContext, x, y, self.setAddress, self.onError, self.processingAddress);
     }
+    return self;
+  };
+
+  self.currentRequest = null;
+  self.queryLocationInfo = function () {
+    if (self.currentRequest) {
+      self.currentRequest.abort();
+    }
+    self.currentRequest = ajax.query("location-info", {x: self.x, y: self.y, municipality: self.municipalityCode()})
+      .success(function(resp) {
+        self.municipalityCode(util.getIn(resp, ["property", "kunta"]));
+        self.setPropertyId(util.getIn(resp, ["property", "kiinttunnus"]));
+        self.setAddress(resp.address);
+      })
+      .complete(function() {self.currentRequest = null;})
+      .onError("error.3rdparty-down", _.partial(hub.send, "indicator", {style: "negative", message: "integration.getAddressNotWorking"}))
+      .processing(self.processing)
+      .call();
     return self;
   };
 
