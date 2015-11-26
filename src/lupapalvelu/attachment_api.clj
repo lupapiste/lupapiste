@@ -30,7 +30,8 @@
             [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdftk :as pdftk]
-            [lupapalvelu.tiff-validation :as tiff-validation])
+            [lupapalvelu.tiff-validation :as tiff-validation]
+            [lupapiste-commons.tos-metadata-schema :as tosmeta])
   (:import [java.io File]))
 
 ;; Validators
@@ -605,6 +606,9 @@
 (defcommand set-attachment-visibility
   {:parameters [id attachmentId value]
    :user-roles #{:authority}
+   :input-validators [(fn [{nakyvyys-value :value} _]
+                        (when-not (contains? tosmeta/Näkyvyys nakyvyys-value)
+                          (fail :error.invalid-nakyvyys-value)))]
    :user-authz-roles #{:owner}
    :states     states/pre-verdict-states}
   [command]
