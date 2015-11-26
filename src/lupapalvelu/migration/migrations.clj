@@ -1340,6 +1340,19 @@
                                                                            ""]}}]}]}}}))
 
 
+(defmigration ya-katselmukset-fix-remove-tila
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                                 :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
+                                                                           {"data.katselmus.tila" {$exists true}}]}}}))}
+  (update-applications-array :tasks
+    (fn [task]
+      (if (= "task-katselmus-ya" (-> task :schema-info :name))
+        (dissoc-in task [:data :katselmus :tila])
+        task))
+    {:permitType "YA"
+     :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
+                               {"data.katselmus.tila" {$exists true}}]}}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
