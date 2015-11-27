@@ -7,6 +7,7 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.attachment-metadata :as metadata]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.states :as states]
             [lupapalvelu.comment :as comment]
@@ -529,3 +530,10 @@
 
 (defn owns-latest-version? [{latest :latestVersion} user-id]
   (= (-> latest :user :id) user-id))
+
+
+(defn filter-attachments-for [user attachments]
+  {:pre [(map? user) (sequential? attachments)]}
+  (letfn [(filter-fn [a]
+            (metadata/public-attachment? a))]
+    (filter filter-fn attachments)))
