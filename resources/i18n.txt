@@ -1,0 +1,6 @@
+operations.tree.ymparistonsuojelulain-mukaiset-ilmoitukset: Ympäristösuojelulain (YSL 527/2014) mukaiset ilmotukset
+operations.tree.maatalouden-ilmoitukset: Maatalouden ilmoitukset (Vna 1250/2014)
+operations.tree.kunnan-ympmaarayksista-poikkeaminen: Kunnan ympäristösuojelumääräyksistä poikkeaminen
+operations.tree.maa-ainekset: Maa-ainesten ottaminen (MAL 555/1981)
+operations.tree.jatelain-mukaiset-ilmoitukset: Jätelain (JL 646/2011) mukaiset ilmoitukset
+operations.tree.luonnonsuojelulain-mukaiset-ilmoitukset: Luonnonsuojelulain (LSL 1096/1996) mukaiset ilmoitukset
