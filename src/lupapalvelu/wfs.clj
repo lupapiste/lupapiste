@@ -488,7 +488,7 @@
     {:pre [(not (ss/blank? url))]}
     (let [credentials (when-not (ss/blank? username) {:basic-auth [username password]})
          options     (merge {:socket-timeout 30000, :conn-timeout 30000 ; 30 secs should be enough for GetCapabilities
-                             :query-params {:request "GetCapabilities", :service service, :version "1.1.0"}
+                             :query-params {:request "GetCapabilities", :service service} ;; , :version "1.1.0"
                              :throw-exceptions  throw-exceptions?}
                        credentials)]
      (http/get url options))))
@@ -538,19 +538,26 @@
 ;;
 ;; Raster images:
 ;;
-(defn raster-images [request service]
-  (let [layer (or (get-in request [:params :LAYER])
-                  (get-in request [:params :layer]))]
+(defn raster-images [request service & [query-organization-map-server]]
+  (let [params  (:params request)
+        accept-encoding (:headers request)
+        layer   (or (:LAYER params) (:LAYERS params) (:layer params))
+        headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}]
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
-              {:query-params (:params request)
-               :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-               :basic-auth (:raster auth)
-               :as :stream})
-      "wms" (http/get wms-url
-              {:query-params (:params request)
-               :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-               :as :stream})
+                      {:query-params params
+                       :headers headers
+                       :basic-auth (:raster auth)
+                       :as :stream})
+      ;; Municipality map layers are prefixed. For example: Lupapiste-753-R:wms-layer-name
+      "wms" (if-let [[_ org-id layer] (re-matches #"(?i)Lupapiste-([\d]+-[\w]+):(.+)" layer)]
+              (query-organization-map-server (ss/upper-case org-id)
+                                             (merge params {:layer layer :LAYERS layer})
+                                             headers)
+              (http/get wms-url
+                        {:query-params params
+                         :headers headers
+                         :as :stream}))
       "wmts" (let [{:keys [username password]} (env/value :wmts :raster)
                    url-part (case layer
                               "taustakartta" "maasto"
@@ -558,13 +565,13 @@
                               "kiinteistotunnukset" "kiinteisto")
                    wmts-url (str "https://karttakuva.maanmittauslaitos.fi/" url-part "/wmts")]
                (http/get wmts-url
-                         {:query-params (:params request)
-                          :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+                         {:query-params params
+                          :headers headers
                           :basic-auth [username password]
                           :as :stream}))
-      "plandocument" (let [id (get-in request [:params :id])]
+      "plandocument" (let [id (:id params) ]
                        (assert (ss/numeric? id))
                        (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")
-                         {:query-params (:params request)
-                          :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-                          :as :stream})))))
+                                 {:query-params params
+                                  :headers headers
+                                  :as :stream})))))
