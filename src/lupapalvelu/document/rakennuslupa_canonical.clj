@@ -105,7 +105,7 @@
                                :lammonlahde lammonlahde-map
                                :julkisivu julkisivu-map))]
 
-    (util/assoc-when {:yksilointitieto id
+    (util/assoc-when {:yksilointitieto (-> info :op :id)
                       :alkuHetki (util/to-xml-datetime  created)
                       :sijaintitieto {:Sijainti {:tyhja empty-tag}}
                       :rakentajatyyppi (:rakentajaTyyppi kaytto)
