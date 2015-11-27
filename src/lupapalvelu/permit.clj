@@ -145,7 +145,7 @@
 
 (defn get-verdict-validator
   "Returns a function that validates verdicts from KRYSP xml.
-   Function takes xml as parameter.
+   Function takes xml and organization map as parameters.
    Use get-application-xml-getter to fetch the XML."
   [permit-type]
   (get-metadata permit-type :verdict-krysp-validator))
@@ -191,18 +191,18 @@
     (warn "invalid permit type" permitType)
     (fail :error.missing-parameters :parameters [:permitType])))
 
-(defn validate-permit-type-is-not [validator-permit-type]
-  (fn [_ application]
-    (if application
-      (let [application-permit-type (permit-type application)]
-        (when (= (keyword application-permit-type) (keyword validator-permit-type))
-          (fail :error.invalid-permit-type :permit-type validator-permit-type)))
-      (fail :error.invalid-application-parameter))))
+(defn validate-permit-type-is-not [& validator-permit-types]
+  (let [invalid-permit-types (set (map name validator-permit-types))]
+    (fn [_ application]
+      (if application
+        (when (invalid-permit-types (permit-type application))
+          (fail :error.invalid-permit-type :permit-type validator-permit-types))
+        (fail :error.invalid-application-parameter)))))
 
-(defn validate-permit-type-is [validator-permit-type]
-  (fn [_ application]
-    (if application
-      (let [application-permit-type (permit-type application)]
-        (when-not (= (keyword application-permit-type) (keyword validator-permit-type))
-          (fail :error.invalid-permit-type :permit-type validator-permit-type)))
-      (fail :error.invalid-application-parameter))))
+(defn validate-permit-type-is [& validator-permit-types]
+  (let [valid-permit-types (set (map name validator-permit-types))]
+    (fn [_ application]
+      (if application
+        (when-not (valid-permit-types (permit-type application))
+          (fail :error.invalid-permit-type :permit-type validator-permit-types))
+        (fail :error.invalid-application-parameter)))))

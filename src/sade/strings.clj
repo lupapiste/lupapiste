@@ -108,7 +108,9 @@
 
 (defn trim ^String [^CharSequence x] (when x (s/trim x)))
 
-(defn split ^String [^CharSequence s ^java.util.regex.Pattern re] (when s (s/split s re)))
+(defn split
+  ([^CharSequence s ^java.util.regex.Pattern re] (when s (s/split s re)))
+  ([^CharSequence s ^java.util.regex.Pattern re ^Integer limit] (when s (s/split s re limit))))
 
 (defn replace ^String [^CharSequence s match replacement] (when s (s/replace s match replacement)))
 
@@ -130,3 +132,7 @@
     (s/replace
       (last-n windows-filename-max-length de-accented)
       #"[^a-zA-Z0-9\.\-_ ]" "-")))
+
+(defn escaped-re-pattern
+  [string]
+  (re-pattern (str "\\Q" string "\\E")))

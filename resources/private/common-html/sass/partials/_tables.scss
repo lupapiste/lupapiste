@@ -66,6 +66,14 @@ th, td {
   .icon {
     margin: $marginM $marginM $marginS $marginM;
   }
+  &.actions {
+    a {
+      margin-right: $marginM;
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
 }
 
 th.action-column, td.action-column {

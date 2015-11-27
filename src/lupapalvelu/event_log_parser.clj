@@ -23,4 +23,8 @@
   (write "mongo_scripts/prod/convertedToApplication-timestamps.js"
     (map #(format "db.applications.update({_id:'%s', convertedToApplication: null}, {$set: {convertedToApplication: NumberLong('%s')}});\n" (get-in % ["data" "id"]) (% "created") )
     (filter #(= "convert-to-application" (% "action")) (parse-events "convert-to-application-all.txt"))))
+
+  (write "mongo_scripts/prod/muutoslupa.json"
+    (map (fn [e] (str (json/encode {:_id (e "created") :user (select-keys (get e "user") (map name lupapalvelu.user/summary-keys) ), :sourceAppId (get-in e ["data" "id"])}) \newline))
+      (parse-events "muutoslupa.txt")))
   )

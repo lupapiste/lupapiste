@@ -23,7 +23,7 @@ Email is sent to Loppi rakennusvalvonta
 
 Loppi auth clicks the link in email
   Execute Javascript  document.getElementsByTagName("a")[0].click()
-  Wait until  User role should be  oirAuthority
+  Wait until  User role is oirAuthority
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Intonen Mikko
   User nav menu is not visible
   Wait Until  Title Should Be  ${appname} - Lupapiste
@@ -31,3 +31,9 @@ Loppi auth clicks the link in email
   Element should not be visible  inforequest-assignee-edit
   Element should not be visible  application-assignee-edit
   Page should contain  Jiihaa
+
+*** Keywords ***
+
+User role is oirAuthority
+  ${user-role}=  Execute JavaScript  return window.lupapisteApp.models.currentUser.role();
+  Should Be Equal  ${user-role}  oirAuthority

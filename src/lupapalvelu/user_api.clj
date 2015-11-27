@@ -146,7 +146,7 @@
 ;;
 
 (def- user-data-editable-fields [:firstName :lastName :street :city :zip :phone
-                                 :architect :degree :graduatingYear :fise
+                                 :architect :degree :graduatingYear :fise :fiseKelpoisuus
                                  :companyName :companyId :allowDirectMarketing])
 
 (defn- validate-update-user! [caller user-data]
@@ -488,7 +488,7 @@
                         (set/rename-keys vetuma-data {:userid :personId})
                         (select-keys data [:password :street :zip :city :phone :allowDirectMarketing])
                         (when (:architect data)
-                          (select-keys data [:architect :degree :graduatingYear :fise]))
+                          (select-keys data [:architect :degree :graduatingYear :fise :fiseKelpoisuus]))
                         {:email email :role "applicant" :enabled false}))]
         (do
           (activation/send-activation-mail-for user)
@@ -616,7 +616,7 @@
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
    :user-roles #{:applicant}
-   :states     #{:draft :open :submitted :complement-needed}
+   :states     #{:draft :open :submitted :complementNeeded}
    :pre-checks [(fn [command _]
                   (when-not (-> command :user :architect)
                     unauthorized))]}

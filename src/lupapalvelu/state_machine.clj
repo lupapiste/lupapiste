@@ -54,10 +54,12 @@
 (defn verdict-given-state [application]
   (util/find-first (partial valid-state? application) states/verdict-given-states))
 
-(defn state-seq [application]
-  (let [graph (state-graph application)
-        initial-state (states/initial-state graph)]
+(defn state-seq [graph]
+  (let [initial-state (states/initial-state graph)]
     (loop [state initial-state, path []]
       (if (or (states/terminal-state? graph state) (util/contains-value? path state) )
         (conj path state)
         (recur (first (graph state)) (conj path state))))))
+
+(defn application-state-seq [application]
+  (state-seq (state-graph application)))

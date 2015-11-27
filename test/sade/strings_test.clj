@@ -1,6 +1,6 @@
 (ns sade.strings-test
   (:require [sade.strings :refer :all]
-            [midje.sweet :refer [facts fact => truthy falsey]])
+            [midje.sweet :refer :all])
   (:refer-clojure :exclude [replace contains? empty?]))
 
 (facts "Test last-n"
@@ -131,3 +131,7 @@
       (capitalize "h") => "H"
       (capitalize "H") => "H"
       (capitalize "hello") => "Hello")
+
+(fact "escaped-re-pattern"
+  (escaped-re-pattern "^te-st[\\d]$.{2}") => #"\Q^te-st[\d]$.{2}\E"
+  (escaped-re-pattern "Testitiedosto 3 {2}{2}(#(#){6}=.zip") => #"\QTestitiedosto 3 {2}{2}(#(#){6}=.zip\E")

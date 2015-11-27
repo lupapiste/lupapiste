@@ -100,8 +100,11 @@ Veikko can see statements as he is beeing requested a statement to the applicati
   Open application  ${appname}  753-416-25-22
 
 Statement giver sees comments
-  # 1+2 statement comments
-  Comment count is  3
+  # 1+2 statement comments, 2 auto generated attachments
+  Comment count is  5
+
+Statement can export application as PDF
+  Element Should Be Visible  xpath=//button[@data-test-id="application-pdf-btn"]
 
 Veikko from Tampere can give verdict to own statement
   Open tab  statement
@@ -144,11 +147,11 @@ Statement is not disabled
 
 Statement person count is
   [Arguments]  ${amount}
-  Wait until  Xpath Should Match X Times  //tr[@class="statement-giver-row"]  ${amount}
+  Wait until  Xpath Should Match X Times  //tr[@data-test-type="statement-giver-row"]  ${amount}
 
 Create statement person
   [Arguments]  ${email}  ${text}
-  ${count} =  Get Matching Xpath Count  //tr[@class="statement-giver-row"]
+  ${count} =  Get Matching Xpath Count  //tr[@data-test-type="statement-giver-row"]
   Click enabled by test id  create-statement-giver
   Wait until  Element should be visible  //label[@for='statement-giver-email']
   Input text  statement-giver-email  ${email}

@@ -77,6 +77,7 @@
                                                                                :target nil
                                                                                :type :a
                                                                                :applicationState :draft
+                                                                               :contents nil
                                                                                :signatures []
                                                                                :versions []
                                                                                :notNeeded false
@@ -91,6 +92,7 @@
                                                                                :target nil
                                                                                :type :b
                                                                                :applicationState :draft
+                                                                               :contents nil
                                                                                :signatures []
                                                                                :versions []
                                                                                :notNeeded false
@@ -141,7 +143,9 @@
                                 :jaljennos_perunkirjasta
                                 :valokuva :rasitesopimus
                                 :valtakirja
-                                :muu))
+                                :muu
+                                :paatos
+                                :paatosote))
         all-except-commons (remove known-duplicates all-attachment-type-ids)
         all-unique (set all-except-commons)]
 
@@ -183,6 +187,7 @@
                                                                                :target nil
                                                                                :type :a
                                                                                :applicationState :draft
+                                                                               :contents nil
                                                                                :signatures []
                                                                                :versions []
                                                                                :notNeeded false
@@ -198,6 +203,7 @@
                                                                                :target nil
                                                                                :type :b
                                                                                :applicationState :draft
+                                                                               :contents nil
                                                                                :signatures []
                                                                                :versions []
                                                                                :notNeeded false

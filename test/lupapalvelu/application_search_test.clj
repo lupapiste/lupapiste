@@ -37,7 +37,7 @@
   (-> (make-query {} {:kind  "both"
                       :applicationType "all"
                       :handlers  ["123"]}
-                  {:role "authority"}) (get "$and") last) => (contains {"$or" [{:auth.id {"$in" ["123"]}} {:authority.id  {"$in" ["123"]}}]}))
+                  {:role "authority"}) (get "$and") second) => {"$or" [{:auth.id {"$in" ["123"]}} {:authority.id  {"$in" ["123"]}}]})
 
 (fact "query contais user query"
   (-> (make-query {:auth.id "123"} {} {}) (get "$and") first) => {:auth.id "123"})
@@ -52,10 +52,11 @@
      :applicationType "all"
      :handlers  ["321"]
      :tags ["test1" "test2"]}
-    {:role "authority"}) => (just {"$and" (just [{:auth.id "123"}
+    {:role "authority"}) => {"$and" [{:auth.id "123"}
                                                  {:state {"$nin" ["draft" "canceled"]}}
                                                  {"$or" [{:auth.id {"$in" ["321"]}} {:authority.id  {"$in" ["321"]}}]}
-                                                 {:tags {"$in" ["test1" "test2"]}}])}))
+                                     {:tags {"$in" ["test1" "test2"]}}
+                                     {:permitSubtype {"$nin" ["tyonjohtaja-hakemus" "tyonjohtaja-ilmoitus"]}}]})
 
 (fact "Organization are present in query"
   (-> (make-query {} {:organizations ["753-R" "753-YA"]} {}) (get "$and") last :organization) => {"$in" ["753-R" "753-YA"]})

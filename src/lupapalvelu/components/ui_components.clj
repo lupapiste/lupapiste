@@ -13,11 +13,11 @@
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
-            [scss-compiler.core :as scss]
             [me.raynes.fs :as fs]))
 
 (def debugjs {:depends [:jquery]
@@ -52,6 +52,8 @@
                                           validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))
                  :degrees               (map :name (:body schemas/koulutusvalinta))
+                 :fiseKelpoisuusValues  (map :name schemas/fise-kelpoisuus-lajit)
+                 :bulletinStates        bulletins/bulletin-state-seq
                  :features              (into {} (filter second (env/features)))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -61,14 +63,10 @@
 (defn- schema-versions-by-permit-type []
   (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
 
-(defn- main-style-file [css-file-path scss-file-path]
-  (if-let [main-css-file (io/resource (c/path css-file-path))]
-    (slurp main-css-file)
-    (scss/scss->css (.getPath (-> scss-file-path c/path io/resource)))))
 
-(defn- read-component-list-from-fs [component pattern]
-  (let [path (str "resources/private/" (name component))
-        files (fs/find-files path (re-pattern pattern))
+
+(defn- read-component-list-from-fs [path pattern]
+  (let [files (fs/find-files path (re-pattern pattern))
         mapped-files (map #(-<>> % .getPath (s/replace <> env/file-separator "/")  (re-matches (re-pattern (str "^.*/" path "/(.*)"))) last) files)]
     mapped-files))
 
@@ -76,9 +74,8 @@
   [jar]
   (re-find (re-pattern ".jar$") jar))
 
-(defn- read-component-list-from-jar [jar component pattern]
-  (let [path (str "private/" (name component))
-        files (util/list-jar jar path)
+(defn- read-component-list-from-jar [jar path pattern]
+  (let [files (util/list-jar jar path)
         filtered-files (filter #(re-find (re-pattern pattern) %) files)]
     filtered-files))
 
@@ -88,14 +85,21 @@
                   :models ".*-model.js$"
                   :templates ".*-template.html$")]
     (if (in-jar? jar)
-      (read-component-list-from-jar jar component pattern)
-      (read-component-list-from-fs component pattern))))
+      (read-component-list-from-jar jar (str "private/" (name component)) pattern)
+      (read-component-list-from-fs (str "resources/private/" (name component)) pattern))))
+
+(defn main-css-count []
+  (let [jar (util/this-jar lupapalvelu.main)
+        file-list (if (in-jar? jar)
+                    (read-component-list-from-jar jar "public/lp-static/css" "main.*css$")
+                    (read-component-list-from-fs "resources/public/lp-static/css" "main.*css$"))]
+    (count file-list)))
 
 (def ui-components
   {;; 3rd party libs
    :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
-   :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
+   :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js" "jquery.xdr-transport.js"]}
    :knockout       {:js ["knockout-3.3.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js"]}
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
@@ -134,8 +138,8 @@
                        "statuses.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
-                  :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
-                  :html ["404.html" "footer.html"]}
+                  :css ["jquery-ui.css"]
+                  :html ["404.html"]}
 
    ;; Components to be included in a SPA
 
@@ -147,7 +151,10 @@
                    "organization-filter-service.js"
                    "organization-tags-service.js"
                    "handler-filter-service.js"
-                   "application-filters-service.js"]}
+                   "publish-bulletin-service.js"
+                   "application-filters-service.js"
+                   "document-data-service.js"
+                   "fileupload-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -163,6 +170,8 @@
                   :html ["mypage.html"]}
 
    :header     {:html ["header.html"], :js ["header.js"]}
+
+   :footer     {:html ["footer.html"]}
 
    :modal-datepicker {:depends [:common-html]
                       :html ["modal-datepicker.html"]
@@ -306,7 +315,7 @@
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
-   :hashbang     {:depends [:common-html :ui-components :header]
+   :hashbang     {:depends [:common-html :ui-components :header :footer]
                   :js ["hashbang.js"]
                   :html ["index.html"]}
 
@@ -320,27 +329,28 @@
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :header :debug
-                             :company :analytics :register-company]}
+                             :company :analytics :register-company :footer]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
    :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
-                             :company :stamp :integration-error :analytics :metadata-editor]}
+                             :company :stamp :integration-error :analytics :metadata-editor :footer]}
 
    :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :notice :analytics :header]
+                       :docgen :debug :notice :analytics :header :footer]
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin-app.js" "register-authority-admin-models.js"]}
-   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol]
-                         :js [schema-versions-by-permit-type "organization-user.js" "edit-roles-dialog-model.js" "authority-admin.js"]
+   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer]
+                         :js [schema-versions-by-permit-type "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
+                              "municipality-maps-service.js" "authority-admin.js"]
                          :html ["authority-admin.html"]}
 
    :admin-app {:depends [:ui-components]
                :js ["admin.js" "register-admin-models.js"]}
-   :admin     {:depends [:admin-app :common-html :authenticated :admins :accordion :map :mypage :header :debug]
+   :admin     {:depends [:admin-app :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js" "notifications.js"]
                :html ["index.html" "admin.html" "organization.html"
@@ -352,7 +362,7 @@
    :welcome-app {:depends [:ui-components]
                  :js ["welcome.js"]}
 
-   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics]
+   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics :footer]
              :js ["company-user.js"]
 
              :html ["index.html" "login.html" "company-user.html"]}
@@ -361,13 +371,42 @@
 
    :neighbor-app {:depends [:ui-components]
                   :js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics]
+   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}
 
-   :bulletin-app {:depends [:ui-components]
-                  :js ["bulletin-app.js"]}
-   :bulletin {:depends [:bulletin-app :header]}
+   :bulletins {:depends [:ui-components :map :docgen :services]
+               :html ["header.html" "footer.html"
+                      "bulletins.html" "bulletins-template.html"
+                      "application-bulletin/application-bulletin-template.html"
+                      "application-bulletin/begin-vetuma-auth-button/begin-vetuma-auth-button-template.html"
+                      "application-bulletin/bulletin-comment/bulletin-comment-template.html"
+                      "application-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
+                      "application-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
+                      "application-bulletin/bulletin-comment/bulletin-comment-template.html"
+                      "application-bulletin/tabs/info/bulletin-info-tab-template.html"
+                      "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
+                      "application-bulletins/application-bulletins-template.html"
+                      "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
+                      "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-template.html"
+                      "application-bulletins/bulletins-search/bulletins-search-template.html"
+                      "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-template.html"
+                      "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
+               :js ["header.js"
+                    "bulletins.js" "bulletins-model.js"
+                    "application-bulletins-service.js"
+                    "vetuma-service.js"
+                    "application-bulletin/application-bulletin-model.js"
+                    "application-bulletin/begin-vetuma-auth-button/begin-vetuma-auth-button-model.js"
+                    "application-bulletin/bulletin-comment/bulletin-comment-model.js"
+                    "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
+                    "application-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
+                    "application-bulletins/application-bulletins-model.js"
+                    "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
+                    "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"
+                    "application-bulletins/bulletins-search/bulletins-search-model.js"
+                    "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-model.js"
+                    "application-bulletins/bulletins-search/autocomplete/autocomplete-states-model.js"]}
    })
 
 ; Make sure all dependencies are resolvable:

@@ -42,8 +42,8 @@ LUPAPISTE.verdictPageController = (function($) {
         self.draft(verdict.draft);
         self.status(pk.status);
         self.name(pk.paatoksentekija);
-        self.given(dates.anto);
-        self.official(dates.lainvoimainen);
+        self.given(new Date(dates.anto));
+        self.official(new Date(dates.lainvoimainen));
         self.text(pk.paatos);
         self.agreement(verdict.sopimus);
         self.section(pk.pykala);
@@ -167,7 +167,7 @@ LUPAPISTE.verdictPageController = (function($) {
 
   var verdictModel = new VerdictEditModel();
   var authorizationModel = lupapisteApp.models.applicationAuthModel;
-  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({}, "muut.muu");
+  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({}, "muut.paatosote");
   var createTaskController = LUPAPISTE.createTaskController;
   var authorities = ko.observableArray([]);
 

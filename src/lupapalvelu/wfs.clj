@@ -32,7 +32,8 @@
 ;; config:
 ;;
 
-(def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
+(def ktjkii "https://ws.nls.fi/ktjkii/wfs-2015/wfs")
+
 (def maasto "https://ws.nls.fi/maasto/wfs")
 (def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
 
@@ -76,19 +77,18 @@
 ;;
 
 (defn query [attrs & e]
-  (str "<?xml version='1.0' encoding='UTF-8'?>
-        <wfs:GetFeature version='1.1.0'
-            xmlns:oso='http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02'
-            xmlns:ktjkiiwfs='http://xml.nls.fi/ktjkiiwfs/2010/02'
-            xmlns:wfs='http://www.opengis.net/wfs'
-            xmlns:gml='http://www.opengis.net/gml'
-            xmlns:ogc='http://www.opengis.net/ogc'
-            xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-            xsi:schemaLocation='http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd'>
-          <wfs:Query" (apply str (map (fn [[k v]] (format " %s='%s'" k v)) attrs)) ">"
-            (apply str e)
-       "  </wfs:Query>
-        </wfs:GetFeature>"))
+  (str
+    "<wfs:GetFeature version=\"1.1.0\"
+            xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
+            xmlns:ktjkiiwfs=\"http://xml.nls.fi/ktjkiiwfs/2010/02\"
+            xmlns:wfs=\"http://www.opengis.net/wfs\"
+            xmlns:gml=\"http://www.opengis.net/gml\"
+            xmlns:ogc=\"http://www.opengis.net/ogc\"
+            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+            xsi:schemaLocation=\"http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
+      <wfs:Query" (apply str (map (fn [[k v]] (format " %s=\"%s\"" k v)) attrs)) ">"
+    (apply str e)
+    "</wfs:Query></wfs:GetFeature>"))
 
 (defn ogc-sort-by
   ([property-names]
@@ -113,49 +113,49 @@
   (str "<ogc:Intersects>" (apply str e) "</ogc:Intersects>"))
 
 (defn within [& e]
-  (str "<DWithin>" (apply str e) "</DWithin>"))
+  (str "<ogc:DWithin>" (apply str e) "</ogc:DWithin>"))
 
 (defn distance [distance]
-  (format "<Distance units='m'>%s</Distance>" distance))
+  (str "<ogc:Distance units=\"m\">" distance "</ogc:Distance>"))
 
 (defn point [x y]
   (format "<gml:Point><gml:pos>%s %s</gml:pos></gml:Point>" x y))
 
 (defn line [c]
-  (format "<gml:LineString><gml:posList srsDimension='2'>%s</gml:posList></gml:LineString>" (s/join " " c)))
+  (format "<gml:LineString><gml:posList srsDimension=\"2\">%s</gml:posList></gml:LineString>" (s/join " " c)))
 
 (defn polygon [c]
-  (format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension='2'>%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
+  (format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension=\"2\">%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
 
-(defn property-name [n]
-  (str "<wfs:PropertyName>" n "</wfs:PropertyName>"))
+(defn property-name [prop-name]
+  (str "<ogc:PropertyName>" prop-name "</ogc:PropertyName>"))
 
-(defn property-filter [filter-name property-name property-value]
+(defn property-filter [filter-name prop-name value]
   (str
-    "<ogc:" filter-name " wildCard='*' singleChar='?' escape='!' matchCase='false'>
-       <ogc:PropertyName>" property-name "</ogc:PropertyName>
-       <ogc:Literal>" property-value "</ogc:Literal>
-     </ogc:" filter-name ">"))
+    "<ogc:" filter-name " wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">"
+    (property-name prop-name)
+    "<ogc:Literal>" value "</ogc:Literal>"
+    "</ogc:" filter-name ">"))
 
-(defn property-is-like [property-name property-value]
-  (property-filter "PropertyIsLike" property-name property-value))
+(defn property-is-like [prop-name value]
+  (property-filter "PropertyIsLike" prop-name value))
 
-(defn property-is-equal [property-name property-value]
-  (property-filter "PropertyIsEqualTo" property-name property-value))
+(defn property-is-equal [prop-name value]
+  (property-filter "PropertyIsEqualTo" prop-name value))
 
-(defn property-is-less [property-name property-value]
-  (property-filter "PropertyIsLessThan" property-name property-value))
+(defn property-is-less [prop-name value]
+  (property-filter "PropertyIsLessThan" prop-name value))
 
-(defn property-is-greater [property-name property-value]
-  (property-filter "PropertyIsGreaterThan" property-name property-value))
+(defn property-is-greater [prop-name value]
+  (property-filter "PropertyIsGreaterThan" prop-name value))
 
-(defn property-is-between [property-name property-lower-value property-upper-value]
+(defn property-is-between [name lower-value upper-value]
   (str
-    "<ogc:PropertyIsBetween wildCard='*' singleChar='?' escape='!' matchCase='false'>
-       <ogc:PropertyName>" property-name "</ogc:PropertyName>
-       <ogc:LowerBoundary>" property-lower-value "</ogc:LowerBoundary>"
-    "  <ogc:UpperBoundary>" property-upper-value "</ogc:UpperBoundary>
-     </ogc:PropertyIsBetween>"))
+    "<ogc:PropertyIsBetween wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">"
+    (property-name name)
+    "<ogc:LowerBoundary>" lower-value "</ogc:LowerBoundary>"
+    "<ogc:UpperBoundary>" upper-value "</ogc:UpperBoundary>"
+    "</ogc:PropertyIsBetween>"))
 
 ;;
 ;; Helpers for result parsing:
@@ -325,7 +325,7 @@
     (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
       (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (property-name "ktjkiiwfs:sijainti")
-      (filter
+      (ogc-filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
 (defn property-info-by-radius [x y radius]
@@ -336,7 +336,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
       (ogc-filter
         (within
-          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (point x y)
           (distance radius))))))
 
@@ -348,7 +348,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
       (ogc-filter
         (intersects
-          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (point x y))))))
 
 (defn property-info-by-line [l]
@@ -359,7 +359,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
       (ogc-filter
         (intersects
-          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (line l))))))
 
 (defn property-info-by-polygon [p]
@@ -370,14 +370,8 @@
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
       (ogc-filter
         (intersects
-          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (polygon p))))))
-
-(defn getcapabilities [request]
-  (let [host (env/value :geoserver :host) ; local IP from Chef environment
-        path (env/value :geoserver :wms :path)]
-    (assert (and host path))
-    (:body (http/get (str host path) {:query-params {"version" "1.1.1", "request" "GetCapabilities"}}))))
 
 (defn capabilities-to-layers [capabilities]
   (when capabilities
@@ -487,12 +481,50 @@
      :linkki (first (xml-> feature :lupapiste:linkki text))
      :type "yleiskaava"}))
 
-(defn get-rekisteriyksikontietojaFeatureAddress []
-  (let [url-for-get-ktj-capabilities (str ktjkii "?service=WFS&request=GetCapabilities&version=1.1.0")
-        namespace-stripped-xml (reader/strip-xml-namespaces (reader/get-xml url-for-get-ktj-capabilities (get auth ktjkii) false))
-        selector [:WFS_Capabilities :OperationsMetadata [:Operation (enlive/attr= :name "DescribeFeatureType")] :DCP :HTTP [:Get]]
-        attribute-to-get :xlink:href]
-    (sxml/select1-attribute-value namespace-stripped-xml selector attribute-to-get)))
+(defn query-get-capabilities
+  ([url service]
+    (query-get-capabilities url service nil nil true))
+  ([url service username password throw-exceptions?]
+    {:pre [(not (ss/blank? url))]}
+    (let [credentials (when-not (ss/blank? username) {:basic-auth [username password]})
+         options     (merge {:socket-timeout 30000, :conn-timeout 30000 ; 30 secs should be enough for GetCapabilities
+                             :query-params {:request "GetCapabilities", :service service} ;; , :version "1.1.0"
+                             :throw-exceptions  throw-exceptions?}
+                       credentials)]
+     (http/get url options))))
+
+(defn get-capabilities-xml
+  "Returns capabilities XML without namespaces"
+  [base-url username password]
+  (let [capabilities-resp  (query-get-capabilities base-url "WFS" username password true)
+        xml-s (:body capabilities-resp)]
+    (-> xml-s sxml/parse reader/strip-xml-namespaces)))
+
+(defn feature-types [xml-no-ns]
+  (sxml/select xml-no-ns [:FeatureType]))
+
+(defn wfs-is-alive?
+  "checks if the given system is Web Feature Service -enabled. kindof."
+  [url username password]
+  (when-not (s/blank? url)
+    (try
+      (let [resp (query-get-capabilities url "WFS" username password false)]
+        (or
+          (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
+          (warn "Response not OK or did not contain XML. Response was: " resp)))
+      (catch Exception e
+        (warn (str "Could not connect to WFS: " url ", exception was " e))))))
+
+(defn get-our-capabilities []
+  (let [host (env/value :geoserver :host) ; local IP from Chef environment
+        path (env/value :geoserver :wms :path)]
+    (:body (query-get-capabilities (str host path) "WMS"))))
+
+(def get-rekisteriyksikontietojaFeatureAddress
+  (memoize
+    #(let [namespace-stripped-xml (get-capabilities-xml  ktjkii (get-in auth [ktjkii 0]) (get-in auth [ktjkii 1]))
+           selector [:WFS_Capabilities :OperationsMetadata [:Operation (enlive/attr= :name "DescribeFeatureType")] :DCP :HTTP [:Get]]]
+       (sxml/select1-attribute-value namespace-stripped-xml selector :xlink:href))))
 
 (defn rekisteritiedot-xml [rekisteriyksikon-tunnus]
   (if (env/feature? :disable-ktj-on-create)
@@ -506,19 +538,26 @@
 ;;
 ;; Raster images:
 ;;
-(defn raster-images [request service]
-  (let [layer (or (get-in request [:params :LAYER])
-                  (get-in request [:params :layer]))]
+(defn raster-images [request service & [query-organization-map-server]]
+  (let [params  (:params request)
+        accept-encoding (:headers request)
+        layer   (or (:LAYER params) (:LAYERS params) (:layer params))
+        headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}]
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
-              {:query-params (:params request)
-               :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-               :basic-auth (:raster auth)
-               :as :stream})
-      "wms" (http/get wms-url
-              {:query-params (:params request)
-               :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-               :as :stream})
+                      {:query-params params
+                       :headers headers
+                       :basic-auth (:raster auth)
+                       :as :stream})
+      ;; Municipality map layers are prefixed. For example: Lupapiste-753-R:wms-layer-name
+      "wms" (if-let [[_ org-id layer] (re-matches #"(?i)Lupapiste-([\d]+-[\w]+):(.+)" layer)]
+              (query-organization-map-server (ss/upper-case org-id)
+                                             (merge params {:layer layer :LAYERS layer})
+                                             headers)
+              (http/get wms-url
+                        {:query-params params
+                         :headers headers
+                         :as :stream}))
       "wmts" (let [{:keys [username password]} (env/value :wmts :raster)
                    url-part (case layer
                               "taustakartta" "maasto"
@@ -526,13 +565,13 @@
                               "kiinteistotunnukset" "kiinteisto")
                    wmts-url (str "https://karttakuva.maanmittauslaitos.fi/" url-part "/wmts")]
                (http/get wmts-url
-                         {:query-params (:params request)
-                          :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+                         {:query-params params
+                          :headers headers
                           :basic-auth [username password]
                           :as :stream}))
-      "plandocument" (let [id (get-in request [:params :id])]
+      "plandocument" (let [id (:id params) ]
                        (assert (ss/numeric? id))
                        (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")
-                         {:query-params (:params request)
-                          :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-                          :as :stream})))))
+                                 {:query-params params
+                                  :headers headers
+                                  :as :stream})))))

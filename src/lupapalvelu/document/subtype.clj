@@ -62,6 +62,10 @@
     (v/finnish-y? v) nil
     :else [:warn "illegal-y-tunnus"]))
 
+;; Finnish zips are currently validated with defvalidators.
+;; See lupapalvelu.document.document-field-validators for details.
+;; This validator is only applicable to addresses without country
+;; information.
 (defmethod subtype-validation :zip [_ v]
   (cond
     (blank? v) nil

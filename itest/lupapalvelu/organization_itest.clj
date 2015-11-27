@@ -3,8 +3,10 @@
             [clojure.java.io :as io]
             [lupapalvelu.organization :as local-org-api]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.proxy-services :as proxy]
             [lupapalvelu.factlet :refer [fact* facts*]]
-            [lupapalvelu.itest-util :refer :all]))
+            [lupapalvelu.itest-util :refer :all]
+            [monger.operators :refer :all]))
 
 (apply-remote-minimal)
 
@@ -19,12 +21,12 @@
    (fact "sipoo cant set incorrect krysp-url"
       (command sipoo :set-krysp-endpoint :url "BROKEN_URL" :username "" :password "" :permitType "R"  :version "1") => fail?)))
 
-(facts 
+(facts
   (let [uri "http://127.0.0.1:8000/dev/private-krysp"]
 
     (fact "sipoo can not set working krysp-url without credentials"
       (command sipoo :set-krysp-endpoint :url uri :username "" :password "" :permitType "R" :version "2") => fail?)
-    
+
     (fact "sipoo can not set working krysp-url with incorrect credentials"
       (command sipoo :set-krysp-endpoint :url uri :username "foo" :password "bar" :permitType "R" :version "2") => fail?)
 
@@ -173,11 +175,11 @@
           kopiolaitos-orderer-phone "123"
           kopiolaitos-orderer-email "orderer@example.com"]
 
-;      (fact "the 'app-required-fields-filling-obligatory' and 'kopiolaitos-email' flags have not yet been set for organization in db"
-;        (:app-required-fields-filling-obligatory org) => nil
-;        (-> app :organizationMeta :requiredFieldsFillingObligatory) => false)
+      (fact "the 'app-required-fields-filling-obligatory' and 'kopiolaitos-email' flags have not yet been set for organization in db"
+        (:app-required-fields-filling-obligatory org) => falsey
+        (-> app :organizationMeta :requiredFieldsFillingObligatory) => falsey)
 
-;      (command sipoo "set-organization-app-required-fields-filling-obligatory" :isObligatory false) => ok?
+      (command sipoo "set-organization-app-required-fields-filling-obligatory" :enabled false) => ok?
 
       (let [app    (query-application pena app-id)
             org    (query admin "organization-by-id" :organizationId  (:organization app))
@@ -198,7 +200,7 @@
           (:kopiolaitos-orderer-phone org) => "0501231234"
           (get-in organizationMeta [:kopiolaitos :kopiolaitosOrdererPhone]) => "0501231234"))
 
-      (command sipoo "set-organization-app-required-fields-filling-obligatory" :isObligatory true) => ok?
+      (command sipoo "set-organization-app-required-fields-filling-obligatory" :enabled true) => ok?
       (command sipoo "set-kopiolaitos-info"
         :kopiolaitosEmail kopiolaitos-email
         :kopiolaitosOrdererAddress kopiolaitos-orderer-address
@@ -341,3 +343,88 @@
     (fact "zip file with correct shape file can be uploaded by auth admin"
       resp => http200?
       body => ok?)))
+
+(facts "Municipality (753) maps"
+       (let [url "http://mapserver"]
+         (local-org-api/update-organization
+          "753-R"
+          {$set {:map-layers {:server {:url url}
+                              :layers [{:name "asemakaava"
+                                        :id "asemakaava-id"
+                                        :base true}
+                                       {:name "kantakartta"
+                                        :id "kantakartta-id"
+                                        :base true}
+                                       {:name "foo"
+                                        :id "foo-id"
+                                        :base false}
+                                       {:name "bar"
+                                        :id "bar-id"
+                                        :base false}]}}})
+         (local-org-api/update-organization
+          "753-YA"
+          {$set {:map-layers {:server {:url url}
+                              :layers [{:name "asemakaava"
+                                        :id "other-asemakaava-id"
+                                        :base true}
+                                       {:name "kantakartta"
+                                        :id "other-kantakartta-id"
+                                        :base true}
+                                       {:name "Other foo"
+                                        :id "foo-id"
+                                        :base false}
+                                       {:name "kantakartta" ;; not base layer
+                                        :id "hii-id"
+                                        :base false}]}}})
+         (let [layers (proxy/municipality-layers "753")
+               objects (proxy/municipality-layer-objects "753")]
+           (fact "Five layers"
+                 (count layers) => 5)
+           (fact "Only one asemakaava"
+                 (->> layers (filter #(= (:name %) "asemakaava")) count) => 1)
+           (fact "Only one with foo-id"
+                 (->> layers (filter #(= (:id %) "foo-id")) count) => 1)
+           (facts "Two layers named kantakartta"
+                  (let [kantas (filter #(= "kantakartta" (:name %)) layers)
+                        [k1 k2] kantas]
+                    (fact "Two layers" (count kantas) => 2)
+                    (fact "One of which is not a base layer"
+                          (not= (:base k1) (:base k2)) => true)))
+           (facts "Layer objects"
+                  (fact "Every layer object has an unique id"
+                        (->> objects (map :id) set count) => 5)
+                  (fact "Ids are correctly formatted"
+                        (every? #(let [{:keys [id base]} %]
+                                   (or (and base (= (name {"asemakaava" 101
+                                                           "kantakartta" 102})
+                                                    id))
+                                       (and (not base) (not (number? id))))) objects))
+                  (fact "Bar layer is correct "
+                        (let [subtitles {:fi "" :sv "" :en ""}
+                              bar-index (->> layers (map-indexed #(assoc %2 :index %1)) (some #(if (= (:id %) "bar-id") (:index %))))]
+
+                          (nth objects bar-index) => {:name {:fi "bar" :sv "bar" :en "bar"}
+                                                      :subtitle subtitles
+                                                      :id (str "Lupapiste-" bar-index)
+                                                      :baseLayerId (str "Lupapiste-" bar-index)
+                                                      :isBaseLayer false
+                                                      :wmsName "Lupapiste-753-R:bar-id"
+                                                      :wmsUrl "/proxy/wms"})))
+           (facts "New map data with different server to 753-YA"
+                  (local-org-api/update-organization
+                   "753-YA"
+                   {$set {:map-layers {:server {:url "http://different"}
+                                       :layers [{:name "asemakaava"
+                                                 :id "other-asemakaava-id"
+                                                 :base true}
+                                                {:name "kantakartta"
+                                                 :id "other-kantakartta-id"
+                                                 :base true}
+                                                {:name "Other foo"
+                                                 :id "foo-id"
+                                                 :base false}]}}})
+                  (let [layers (proxy/municipality-layers "753")]
+                    (fact "Two layers with same ids are allowed if the servers differ"
+                          (->> layers (filter #(= (:id %) "foo-id")) count) => 2)
+                    (fact "Still only two base layers"
+                          (->> layers (filter :base) count) => 2))))))

@@ -27,6 +27,7 @@
                           :set-attachment-meta
                           :upload-attachment
                           :rotate-pdf
+                          :pdf-export
                           :download-all-attachments
                           :download-attachment
                           :delete-attachment-version
@@ -72,10 +73,10 @@
         application {:organization "999-R" :auth [] :id "123" :permitType "YA"}
         allowed-actions #{; queries
                           :application :validate-doc :fetch-validation-errors
-                          :get-organization-tags :get-organization-areas
+                          :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                           :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
                           ; raw
-                          :preview-attachment :view-attachment :download-attachment :download-all-attachments}]
+                          :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export}]
     (doseq [command (ca/foreach-action user {} application)
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]

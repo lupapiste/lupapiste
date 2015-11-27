@@ -70,6 +70,26 @@
     message: ""
   };
 
+  ko.validation.rules.beforeThan = {
+    validator: function(date, otherDate) {
+      if (_.isDate(date) && _.isDate(otherDate)) {
+        return date.getTime() <= otherDate.getTime();
+      }
+      return true;
+    },
+    message: loc("bulletin.beforeThan")
+  }
+
+  ko.validation.rules.afterThan = {
+    validator: function(date, otherDate) {
+      if (_.isDate(date) && _.isDate(otherDate)) {
+        return date.getTime() >= otherDate.getTime();
+      }
+      return true;
+    },
+    message: loc("bulletin.afterThan")
+  }
+
   /*
    * Determines if a field is required or not based on a function or value
    * Parameter: boolean function, or boolean value
@@ -250,6 +270,7 @@
       ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
         $(element).datepicker("destroy");
       });
+      ko.bindingHandlers.validationCore.init(element, valueAccessor, allBindingsAccessor);
     },
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
@@ -457,4 +478,26 @@
       });
     }
   };
+
+  ko.observable.fn.increment = function () {
+    this(this() + 1);
+  };
+
+  ko.extenders.limited = function(target, optionObj) {
+    var result = ko.pureComputed({
+        read: target,
+        write: function(newValue) {
+          if (_.includes(optionObj.values, newValue)) {
+            if (newValue !== target()) {
+              target(newValue);
+            }
+          } else {
+            target(optionObj.defaultValue);
+          }
+        }
+    });
+    result(target());
+    return result;
+  };
+
 })(jQuery);

@@ -24,7 +24,7 @@
 (mongo/with-db db-name (fixture/apply-fixture "minimal"))
 
 (testable-privates lupapalvelu.xml.asianhallinta.core resolve-output-directory resolve-ah-version)
-(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta_mapping attachments-for-write)
+(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-mapping attachments-for-write)
 
 (fl/facts* "Asianhallinta itest"
   (facts "UusiAsia from poikkeamis application"
@@ -59,6 +59,7 @@
 
 
           (fact "Application is sent and timestamp is there"
+            (-> updated-application :history last :state) => "sent"
             (:state updated-application) => "sent"
             (:sent updated-application) => util/pos?)
 

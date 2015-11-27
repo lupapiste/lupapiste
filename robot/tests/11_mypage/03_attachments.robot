@@ -8,6 +8,7 @@ Variables      ../06_attachments/variables.py
 *** Test Cases ***
 
 Mikko uploads CV
+  [Tags]  firefox
   Mikko logs in
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
@@ -18,6 +19,7 @@ Mikko uploads CV
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
 
 Mikko copies his attachments to application
+  [Tags]  firefox
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Omat-liitteet-${secs}
   Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
@@ -27,6 +29,7 @@ Mikko copies his attachments to application
   Wait Until  Table Should Contain  css=table.attachments-template-table  ${TXT_TESTFILE_NAME}
 
 Copy own attachments button is not shown to non-architect
+  [Tags]  firefox
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
   Wait until  Click Element  architect

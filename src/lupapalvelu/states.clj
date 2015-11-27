@@ -44,10 +44,10 @@
     (select-keys default-application-state-graph [:draft :open :canceled])
     {:submitted  [:acknowledged :canceled]
      ; must be for tj-hakemus-state-graph compatibility:
-     ; if foreman application is in complement-needed state it can be converted
+     ; if foreman application is in complementNeeded state it can be converted
      ; to use this state graph
-     :complement-needed [:acknowledged :canceled]
-     :acknowledged [:complement-needed]}))
+     :complementNeeded [:acknowledged :canceled]
+     :acknowledged [:complementNeeded]}))
 
 (def
   ^{:doc "See default-application-state-graph"}
@@ -55,8 +55,8 @@
   (merge
     (select-keys default-application-state-graph [:draft :open :canceled])
     {:submitted    [:sent :canceled]
-     :sent         [:foremanVerdictGiven :complement-needed :canceled]
-     :complement-needed [:sent :canceled]
+     :sent         [:foremanVerdictGiven :complementNeeded :canceled]
+     :complementNeeded [:sent :canceled]
      :foremanVerdictGiven []}))
 
 ; TODO draft versions this forward
@@ -65,9 +65,10 @@
   ^{:doc "See default-application-state-graph"}
   ymp-application-state-graph
   (merge
-    (select-keys default-application-state-graph [:draft :open :submitted :sent :complement-needed :canceled])
-    {:verdictGiven [:final :appealed :canceled]
-     :appealed     [:complement-needed :verdictGiven :final :canceled] ; Valitettu
+    (select-keys default-application-state-graph [:draft :open :submitted :complementNeeded :canceled])
+    {:sent [:verdictGiven :complementNeeded :canceled]
+     :verdictGiven [:final :appealed :canceled]
+     :appealed     [:complementNeeded :verdictGiven :final :canceled] ; Valitettu
      :final        [] ; Lain voimainen
      }))
 
@@ -96,10 +97,17 @@
      :registered [] ; Kiinteistorekisterissa
      }))
 
+(def
+  ^{:doc "States for bulletin version snapshot"}
+  bulletin-version-states
+  {:proclaimed [:verdictGiven]
+   :verdictGiven [:final]
+   :final []})
 
-(def pre-verdict-states #{:draft :info :answered :open :submitted :complement-needed :sent})
 
-(def pre-sent-application-states #{:draft :open :submitted :complement-needed})
+(def pre-verdict-states #{:draft :info :answered :open :submitted :complementNeeded :sent})
+
+(def pre-sent-application-states #{:draft :open :submitted :complementNeeded})
 
 ;;
 ;; Calculated state sets

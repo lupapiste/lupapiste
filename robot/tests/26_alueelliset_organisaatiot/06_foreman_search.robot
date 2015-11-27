@@ -24,7 +24,7 @@ Teppo logs in and creates some applications
 Sonja logs in and sees some only foreman applications on foreman search tab
   Sonja logs in
   Go to page  applications
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  4
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  1
   Click Element  //label[@for="searchTypeForeman"]
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  3
 

@@ -136,10 +136,11 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     ajax.command ("update-op-description", {id: self.docModel.appId,
                                             "op-id": op.id,
                                             desc: desc  })
-    .success (function() {
+    .success (function(resp) {
       hub.send("op-description-changed", {appId: self.docModel.appId,
                                           "op-id": op.id,
                                           "op-desc": desc  });
+      util.showSavedIndicator(resp);
     })
     .call();
   });

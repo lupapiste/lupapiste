@@ -97,7 +97,8 @@ Sonja inputs new stamping info values
   Input text by test id  stamp-info-extratext  ${STAMP_EXTRATEXT}
 
 Sonja can go to attachments tab. When she returns, stamp info fields are persistent.
-  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="back-to-application-from-stamping"]
+  Execute Javascript  window.scrollTo(0, 0);
+  Wait until  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="back-to-application-from-stamping"]
   Element should be visible  application-attachments-tab
   Select attachment operation option from dropdown  stampAttachments
   Wait Until  Element should be visible  stamp-info

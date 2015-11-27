@@ -120,7 +120,9 @@
       (let [resp        (command sonja :submit-application :id application-id)
             application (query-application sonja application-id)]
         resp => ok?
-        (:state application) => "submitted"))))
+        (:state application) => "submitted"
+        (-> application :history last :state) => "submitted"
+        (-> application :history butlast last :state) => "open"))))
 
 (facts* "Application has opened when submitted from draft"
   (let [{id :id :as app1} (create-application pena) => truthy
@@ -139,7 +141,10 @@
     (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
     (fact "Sonja can cancel Mikko's application"
       (command sonja :cancel-application-authority :id application-id :text nil :lang "fi") => ok?)
-    (fact "Sonja sees the canceled application" (query sonja :application :id application-id) => ok?)
+    (fact "Sonja sees the canceled application"
+      (let [application (query-application sonja application-id)]
+        (-> application :history last :state) => "canceled"))
+
     (let [email (last-email)]
       (:to email) => (contains (email-for-key mikko))
       (:subject email) => "Lupapiste.fi: Peruutustie 23 - hakemuksen tila muuttunut"
@@ -197,6 +202,8 @@
         redirect-url   "http://www.taustajarjestelma.fi/servlet/kohde?kohde=rakennuslupatunnus&lupatunnus="]
 
     (command sonja :approve-application :id application-id :lang "fi")
+
+    (-> (query-application sonja application-id) :history last :state) => "sent"
 
     (facts "no vendor backend id (kuntalupatunnus)"
       (fact* "redirects to LP backend url if configured"
@@ -259,7 +266,9 @@
       (get-in update-doc (into company-path [:liikeJaYhteisoTunnus :value])) => (if suunnittelija? "1234567-1" nil)
       (get-in update-doc (into experience-path [:koulutusvalinta :value])) => (if suunnittelija? "kirvesmies" nil)
       (get-in update-doc (into experience-path [:valmistumisvuosi :value])) => (if suunnittelija? "2000" nil)
-      (get-in update-doc (into experience-path [:fise :value])) => (if suunnittelija? "f" nil))))
+      (get-in update-doc (into experience-path [:fise :value])) => (if suunnittelija? "f" nil)
+      (get-in update-doc (into experience-path [:fiseKelpoisuus :value])) => (if suunnittelija? "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)" nil)
+      )))
 
 (defn- check-empty-person
   ([document doc-path args]
@@ -308,13 +317,17 @@
         (command mikko :update-doc :id application-id :doc doc-id :updates
                                    [["patevyys.kokemus" "10"]
                                     ["patevyys.patevyysluokka" "AA"]
-                                    ["patevyys.patevyys" "Patevyys"]]) => ok?
+                                    ["patevyys.patevyys" "Lis\u00e4tietoa patevyydest\u00e4"]
+                                    ["patevyys.fise" "fise-linkki"]
+                                    ["patevyys.fiseKelpoisuus" "vaativa akustiikkasuunnittelu (uudisrakentaminen)"]]) => ok?
         (let [updated-app          (query-application mikko application-id)
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           updated-suunnittelija => truthy
-          (get-in updated-suunnittelija [:data :patevyys :patevyys :value]) => "Patevyys"
+          (get-in updated-suunnittelija [:data :patevyys :patevyys :value]) => "Lis\u00e4tietoa patevyydest\u00e4"
           (get-in updated-suunnittelija [:data :patevyys :patevyysluokka :value]) => "AA"
-          (get-in updated-suunnittelija [:data :patevyys :kokemus :value]) => "10"))
+          (get-in updated-suunnittelija [:data :patevyys :kokemus :value]) => "10"
+          (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "fise-linkki"
+          (get-in updated-suunnittelija [:data :patevyys :fiseKelpoisuus :value]) => "vaativa akustiikkasuunnittelu (uudisrakentaminen)"))
 
       (fact "new suunnittelija is set"
         (command mikko :set-user-to-document :id application-id :documentId (:id suunnittelija) :userId mikko-id :path "") => ok?
@@ -328,6 +341,7 @@
           (get-in updated-suunnittelija [:data :patevyys :koulutus :value]) => ""
           (get-in updated-suunnittelija [:data :patevyys :valmistumisvuosi :value]) => "2000"
           (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "f"
+          (get-in updated-suunnittelija [:data :patevyys :fiseKelpoisuus :value]) => "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"
 
           (fact "applicant sees fully masked person id"
             (get-in updated-suunnittelija [:data :henkilotiedot :hetu :value]) => "******-****")
@@ -466,11 +480,3 @@
           primary-op (:primaryOperation app)]
       (:name secondary-op) => "kerrostalo-rivitalo"
       (:name primary-op) => "varasto-tms")))
-
-(facts "Publishing bulletins"
-  (let [app    (create-and-submit-application pena)
-        app-id (:id app)]
-    (fact "Authority can publish bulletin"
-      (command sonja :publish-bulletin :id app-id) => ok?)
-    (fact "Regular user can't publish bulletin"
-      (command pena :publish-bulletin :id app-id) => fail?)))

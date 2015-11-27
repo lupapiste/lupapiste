@@ -40,7 +40,7 @@
 
 ; Key is process state, value is allowed next states:
 (def process-state {:created  #{:started :cancelled}
-                    :started  #{:done :error :fail}})
+                    :started  #{:done :cancelled :error :fail}})
 
 (def Signer {(sc/optional-key :currentUser) (sc/pred mongo/valid-key? "valid key")
              :firstName (max-length-string 64)
@@ -116,6 +116,7 @@
   (-> process-id
       (find-sign-process!)
       (process-update! :cancelled ts))
+  (mongo/delete-file {:metadata.process.id process-id})
   nil)
 
 ;

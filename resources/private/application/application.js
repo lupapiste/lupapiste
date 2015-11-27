@@ -60,6 +60,7 @@
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
   var tosFunctions = ko.observableArray([]);
+  var hasConstructionTimeDocs = ko.observable();
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
@@ -77,8 +78,8 @@
     if (isInitializing || !authorizationModel.ok("change-permit-sub-type")) { return; }
 
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
-      .success(function() {
-        hub.send("indicator", {style: "positive"});
+      .success(function(resp) {
+        util.showSavedIndicator(resp);
         applicationModel.reload();
       })
       .call();
@@ -111,12 +112,14 @@
   }
 
   function initAvailableTosFunctions(organizationId) {
-    ajax
-      .query("available-tos-functions", {organizationId: organizationId})
-      .success(function(data) {
-        tosFunctions(data.functions);
-      })
-      .call();
+    if (authorizationModel.ok("available-tos-functions")) {
+      ajax
+        .query("available-tos-functions", {organizationId: organizationId})
+        .success(function(data) {
+          tosFunctions(data.functions);
+        })
+        .call();
+    }
   }
 
   function showApplication(applicationDetails) {
@@ -129,7 +132,8 @@
       applicationModel._js = app;
 
       // Update observables
-      ko.mapping.fromJS(app, {}, applicationModel);
+      var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers"]};
+      ko.mapping.fromJS(app, mappingOptions, applicationModel);
 
       // Invite
       inviteModel.setApplicationId(app.id);
@@ -172,13 +176,17 @@
       }
 
       // Documents
-      var nonpartyDocs = _.filter(app.documents, util.isNotPartyDoc);
+      var constructionTimeDocs = _.filter(app.documents, "schema-info.construction-time");
+      var nonConstructionTimeDocs = _.reject(app.documents, "schema-info.construction-time");
+      var nonpartyDocs = _.filter(nonConstructionTimeDocs, util.isNotPartyDoc);
       var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
-      var partyDocs = _.filter(app.documents, util.isPartyDoc);
+      var partyDocs = _.filter(nonConstructionTimeDocs, util.isPartyDoc);
       var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
 
       var nonpartyDocErrors = _.map(sortedNonpartyDocs, function(doc) { return doc.validationErrors; });
       var partyDocErrors = _.map(sortedPartyDocs, function(doc) { return doc.validationErrors; });
+
+      hasConstructionTimeDocs(!!constructionTimeDocs.length);
 
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
 
@@ -199,6 +207,11 @@
                               applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
                               authorizationModel,
                               {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
+      docgen.displayDocuments("#constructionTimeDocgen",
+                              app,
+                              constructionTimeDocs,
+                              authorizationModel,
+                              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
 
       // Indicators
       function sumDocIndicators(sum, doc) {
@@ -268,6 +281,7 @@
     if (newId === currentId && tab) {
       selectTab(tab);
     } else {
+      hub.send("track-click", {category:"Applications", label: kind, event:"openApplication"});
       pageutil.showAjaxWait();
       if (newId !== currentId) { // close sidepanel if it's open
         var sidePanel = $("#side-panel div.content-wrapper > div").filter(":visible");
@@ -278,7 +292,20 @@
       }
       currentId = newId;
       repository.load(currentId, applicationModel.pending, function(application) {
-        selectTab(tab || (application.inPostVerdictState ? "tasks" : "info"));
+        var fallbackTab = function(application) {
+          if (application.inPostVerdictState) {
+            var name = application.primaryOperation.name;
+            if (name) {
+              return name.match(/tyonjohtaja/) ? "applicationSummary" : "tasks";
+            } else {
+              return "tasks";
+            }
+          } else {
+            return "info";
+          }
+        };
+
+        selectTab(tab || fallbackTab(application));
       });
     }
   }
@@ -326,7 +353,7 @@
     },
     markDone: function(neighbor) {
       ajax
-        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.id()})
+        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.id(), lang: loc.getCurrentLanguage()})
         .complete(_.partial(repository.load, currentId, _.noop))
         .call();
     },
@@ -386,6 +413,7 @@
       application: applicationModel,
       authorities: authorities,
       permitSubtypes: permitSubtypes,
+      hasConstructionTimeDocs: hasConstructionTimeDocs,
       // models
       addLinkPermitModel: addLinkPermitModel,
       addPartyModel: addPartyModel,

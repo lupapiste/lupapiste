@@ -290,11 +290,13 @@
    :closedBy                 {}
    :convertedToApplication   nil ; timestamp
    :comments                 []
+   :complementNeeded         nil ; timestamp
    :created                  nil ; timestamp
    :documents                []
    :drawings                 []
    :foreman                  ""
    :foremanRole              ""
+   :history                  [] ; state transition audit log
    :infoRequest              false
    :location                 {}
    :modified                 nil ; timestamp

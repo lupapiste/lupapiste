@@ -13,7 +13,7 @@ Mikko goes to own page
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
 
-There is no company info
+Mikko has no company info
   Element should not be visible  //div[@data-test-id="mypage-company-accordion"]
 
 Mikko opens company register accordion
@@ -33,7 +33,7 @@ Veikko goes to own page
   Click Element  user-name
   # Wait for Page to Load  Veikko  Viranomainen
 
-There is no company info
+Veikko has no company info
   Wait Until  Element should not be visible  //div[@data-test-id='mypage-company-accordion']
 
 There is no company registration accordion available

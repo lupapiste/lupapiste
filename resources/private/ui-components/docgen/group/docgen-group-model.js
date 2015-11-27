@@ -3,21 +3,26 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   var self = this;
 
   self.path = _.isArray(params.path) ? params.path : [params.path];
-  self.groupId = "group-" + params.documentId + "-" + self.path.join("-");
-  self.groupLabel = self.path.join(".") + "._group_label";
+  self.applicationId = params.applicationId;
+  self.documentId = params.documentId;
+  self.groupId = ["group", params.documentId].concat(self.path).join("-");
+  self.groupLabel = params.i18npath.concat("_group_label").join(".");
+  self.groupHelp = params.schema["group-help"] && params.i18npath.concat(params.schema["group-help"]).join(".");
 
-  var model = params.model || {};
+  self.indicator = ko.observable().extend({notify: "always"});
+  self.result = ko.observable().extend({notify: "always"});
 
-  function buildLocKey(subSchema, path) {
-    return subSchema.i18nkey || path.concat(subSchema.name).join(".");
-  }
-
-  self.subSchemas = _.map(params.subSchema.body, function(schema) {
-    var subSchemaPath = self.path.concat(schema.name);
-    return _.extend(schema, {
-      path: subSchemaPath,
-      label: [buildLocKey(params.subSchema, self.path), schema.name].join("."),
-      model: model[schema.name]
+  self.subSchemas = _.map(params.schema.body, function(schema) {
+    var uicomponent = schema.uicomponent || "docgen-" + schema.type;
+    var i18npath = schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(schema.name);
+    return _.extend({}, schema, {
+      path: self.path.concat(schema.name),
+      uicomponent: uicomponent,
+      schemaI18name: params.schemaI18name,
+      i18npath: i18npath,
+      applicationId: params.applicationId,
+      documentId: params.documentId
     });
   });
+
 };

@@ -6,9 +6,9 @@ $language-padding: 20px;
 
 @mixin header-padding {
   padding: {
-  left: $header-padding;
-  right: $header-padding;
-}
+    left: $header-padding;
+    right: $header-padding;
+  }
 }
 
 @mixin nav-link( $link: $orange, $hover: white, $hover-bg: inherit ) {
@@ -112,7 +112,6 @@ nav {
   }
   .language-closed {
     @include language-select;
-
   }
   .language-open {
     @include language-select( $link: white, $hover: $orange, $bg: $language-bg );
@@ -158,6 +157,48 @@ nav {
         margin: {
           bottom: .5em;
           top: 0;
+        }
+      }
+    }
+  }
+}
+
+nav {
+  .julkipano-brand {
+    .header-box {
+      @include nav-link($link: $blue, $hover: white);
+    }
+    #header-user-menu {
+      display: inline-block;
+      position: absolute;
+      right: 0px;
+    }
+    .header-box, .julkipano-user {
+      font-size: 16px;
+      vertical-align: middle;
+      white-space: nowrap;
+      position: relative;
+      display: inline-block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 60px;
+      color: #fff;
+      margin-right: $marginL;
+      span {
+        vertical-align: middle;
+      }
+    }
+    .language-closed {
+      @include language-select( $link: $blue );
+    }
+    .language-open {
+      @include language-select( $link: white, $hover: $blue, $bg: $language-bg );
+    }
+
+    .nav-bottom {
+      ul {
+        li {
+          @include nav-link($link: white, $hover: $blue);
         }
       }
     }

@@ -49,10 +49,10 @@ Sonja logs in for approval
 Sonja rejects hankkeen-kuvaus
   Wait Until  Element should be visible  //div[@id="application-info-tab"]
   Open accordions  info
-  Reject accordion  hankkeen-kuvaus
+  Reject accordion  hankkeen-kuvaus-rakennuslupa
 
 Sonja approves hankkeen-kuvaus
-  Approve accordion  hankkeen-kuvaus
+  Approve accordion  hankkeen-kuvaus-rakennuslupa
 
 Sonja approves group kaytto
   Group neutral  kaytto
@@ -78,7 +78,7 @@ Mikko logs in and sees correct approval state
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Open accordions  info
-  Accordion approved  hankkeen-kuvaus
+  Accordion approved  hankkeen-kuvaus-rakennuslupa
   Accordion negated  uusiRakennus
   Group rejected  mitat
   Group rejected  kaytto
@@ -113,7 +113,7 @@ Sonja sees that attachment has transferred indicator icon
 
 Sonja sees that some completion is needed
   Click enabled by test id  request-for-complement
-  Wait Until  Application state should be  complement-needed
+  Wait Until  Application state should be  complementNeeded
   Kill session
 
 Mikko comes back, fills in missing parts and no submit button enabled

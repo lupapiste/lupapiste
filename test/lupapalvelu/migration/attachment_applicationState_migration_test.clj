@@ -41,8 +41,8 @@
   (get-applicationState (application :sent 11)) => :submitted)
 
 (fact "Complement-needed" 
-  (get-applicationState (application :complement-needed)) => :submitted
-  (get-applicationState (application :complement-needed 11)) => :submitted)
+  (get-applicationState (application :complementNeeded)) => :submitted
+  (get-applicationState (application :complementNeeded 11)) => :submitted)
 
 (fact "Verdict given - post verdict" 
   (get-applicationState (application :verdictGiven nil 9)) => :verdictGiven

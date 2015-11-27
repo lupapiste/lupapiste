@@ -99,7 +99,8 @@ ul.tabs {
   }
 }
 
-.tabs li.active >  a.link-btn {
+.tabs li.active >  a.link-btn,
+.tabs li.active >  a.link-btn-julkipano {
   cursor: default;
   color: $gray51;
   pointer-events: none;

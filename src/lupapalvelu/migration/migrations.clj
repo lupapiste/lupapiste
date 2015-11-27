@@ -7,6 +7,7 @@
             [sade.strings :as ss]
             [sade.property :as p]
             [sade.validators :as validators]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -15,6 +16,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.user :as user]
             [sade.env :as env]
             [sade.excel-reader :as er]))
 
@@ -647,7 +649,7 @@
          {$set {(str linkpermit-id ".apptype") apptype}}))))
 
 (defn- merge-versions [old-versions {:keys [user version] :as new-version}]
-  (let [next-ver (lupapalvelu.attachment/next-attachment-version (:version (last old-versions)) user)]
+  (let [next-ver (attachment/next-attachment-version (:version (last old-versions)) user)]
     (concat old-versions [(assoc new-version :version next-ver)])))
 
 (defn- fixed-versions [required-flags-migration-time attachments-backup updated-attachments]
@@ -1185,6 +1187,171 @@
     (for [{:keys [id verdicts]} (mongo/select :applications {:permitSubtype "tyonjohtaja-ilmoitus", :state "verdictGiven"} [:verdicts])
           :let [timestamp (->> (map :timestamp verdicts) (filter number?) (apply min))]]
       (mongo/update-by-query :applications {:_id id} {$set {:state :acknowledged, :acknowledged timestamp}}))))
+
+(defn pena?
+  "Pena has been deleted from prod db"
+  [user] (= "777777777777777777000020" (:id user)))
+
+(defn init-application-history [{:keys [created opened infoRequest convertedToApplication permitSubtype] :as application}]
+  (let [owner-auth (first (domain/get-auths-by-role application :owner))
+        owner-user (user/find-user (select-keys owner-auth [:id]))
+        creator (cond
+                  (= permitSubtype "muutoslupa") (:user (mongo/by-id :muutoslupa created))
+                  owner-user owner-user
+                  (pena? owner-auth) (merge owner-auth {:role "applicant" :firstName "Testaaja" :lastName "Solita"}))
+
+        _ (assert (:id creator) (:id application))
+
+        state (if (= permitSubtype "muutoslupa")
+                (if (user/authority? creator) "open" "draft")
+                (cond
+                  (or infoRequest convertedToApplication)  "info"
+                  (= opened created) "open"
+                  (and (ss/blank? (:personId creator)) (user/authority? creator)) "open"
+                  :else "draft"))]
+    {$set {:history [{:state state, :ts created, :user (user/summary creator)}]}}))
+
+(defmigration init-history
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {:history.0 {$exists false}} [:created :opened :auth :infoRequest :convertedToApplication :permitSubtype])]
+        (count (map #(mongo/update-by-id collection (:id %) (init-application-history %)) applications))))))
+
+(defmigration complement-needed-camelcase
+  (mongo/update-by-query :applications {:state "complement-needed"} {$set {:state "complementNeeded"}}))
+
+(defn change-valid-pdfa-to-archivable [version]
+  {:post [%]}
+  (if (contains? version :valid-pdfa)
+    (let [valid-pdfa? (boolean (:valid-pdfa version))]
+      (-> (assoc version :archivable valid-pdfa? :archivabilityError (when-not valid-pdfa? :invalid-pdfa))
+          (dissoc :valid-pdfa)))
+    version))
+
+(defn update-valid-pdfa-to-arhivable-on-attachment-versions [attachment]
+  {:post [%]}
+  (if (:latestVersion attachment)
+    (-> (assoc attachment :versions (map change-valid-pdfa-to-archivable (:versions attachment)))
+        (assoc :latestVersion (change-valid-pdfa-to-archivable (:latestVersion attachment))))
+    attachment))
+
+(defmigration set-general-archivability-boolean-v2
+  {:apply-when (pos? (mongo/count :applications {"attachments.versions.valid-pdfa" {$exists true}}))}
+  (update-applications-array
+    :attachments
+    update-valid-pdfa-to-arhivable-on-attachment-versions
+    {"attachments.versions.valid-pdfa" {$exists true}}))
+
+
+(defn populate-application-history [application]
+  (let [{:keys [opened submitted sent canceled started complementNeeded closed startedBy closedBy history]} application
+        all-entries [(when (not= "open" (-> history first :state)) {:state :open, :ts opened, :user nil})
+                     (when submitted {:state :submitted, :ts submitted, :user nil})
+                     (when sent {:state :sent, :ts sent, :user nil})
+                     (when canceled {:state :canceled, :ts canceled, :user nil})
+                     (when complementNeeded {:state complementNeeded, :ts complementNeeded, :user nil})
+                     (when started {:state :constructionStarted, :ts started, :user (user/summary startedBy)})
+                     (when closed {:state :constructionStarted, :ts closed, :user (user/summary closedBy)})]]
+    {$push {:history {$each (remove nil? all-entries)}}}))
+
+(defmigration populate-history
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {:state {$ne "draft"}, :infoRequest false} [:opened :sent :submitted :canceled :complementNeeded :started :closed :startedBy :closedBy :history])]
+        (count (map #(mongo/update-by-id collection (:id %) (populate-application-history %)) applications))))))
+
+(defn update-document-tila-metadata [doc]
+  (if-let [tila (get-in doc [:metadata :tila])]
+    (let [new-tila (if (.equalsIgnoreCase "valmis" tila) :valmis :luonnos)]
+      (assoc-in doc [:metadata :tila] new-tila))
+    doc))
+
+(defn update-array-metadata [application]
+  (->> [:attachments :verdicts :statements]
+       (map (fn [k] (if-let [docs (seq (k application))]
+                      [k (map update-document-tila-metadata docs)]
+                      nil)))
+       (remove nil?)
+       (into {})))
+
+(defmigration update-tila-metadata-value-in-all-metadata-maps
+  {:apply-when (pos? (mongo/count :applications {$and [{"metadata.tila" {$exists true}} {"metadata.tila" {$nin ["luonnos" "valmis" "arkistoitu"]}}]}))}
+  (doseq [application (mongo/select :applications {$and [{"metadata.tila" {$exists true}} {"metadata.tila" {$nin ["luonnos" "valmis" "arkistoitu"]}}]})]
+    (let [data-for-$set (-> (update-array-metadata application)
+                            (merge {:metadata (:metadata (update-document-tila-metadata application))}))]
+      (mongo/update-n :applications {:_id (:id application)} {$set data-for-$set}))))
+
+(defmigration r-application-hankkeen-kuvaus-documents-to-hankkeen-kuvaus-rakennuslupa
+  {:apply-when (or (pos? (mongo/count :applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]}))
+                   (pos? (mongo/count :submitted-applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]})))}
+  (update-applications-array
+    :documents
+    (fn [{schema-info :schema-info :as doc}]
+      (if (= "hankkeen-kuvaus" (:name schema-info))
+        (assoc-in doc [:schema-info :name] "hankkeen-kuvaus-rakennuslupa")
+        doc))
+    {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]}))
+
+(defmigration validate-verdict-given-date
+  {:apply-when (pos? (mongo/count :organizations {:validate-verdict-given-date {$exists false}}))}
+  (mongo/update-n :organizations {} {$set {:validate-verdict-given-date true}} :multi true))
+
+(defmigration set-validate-verdict-given-date-in-helsinki
+  (mongo/update-n :organizations {:_id "091-R"} {$set {:validate-verdict-given-date false}}))
+
+(defmigration reset-pdf2pdf-page-counter-to-zero
+  {:apply-when (pos? (mongo/count :statistics {$and [{:type "pdfa-conversion"} {"years.2015" {$exists true}}]}))}
+  (mongo/update :statistics {:type "pdfa-conversion"} {$unset {"years.2015" ""}}))
+
+(defmigration ya-katselmukset-remove-tila-and-convert-katselmuksenLaji
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                                 :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
+                                                                           {$or [{"data.tila" {$exists true}}
+                                                                                 {"data.katselmuksenLaji.value" {$exists true
+                                                                                                                 $nin ["Aloituskatselmus"
+                                                                                                                       "Loppukatselmus"
+                                                                                                                       "Muu valvontak\u00e4ynti"
+                                                                                                                       ""]}}]}]}}}))}
+  (update-applications-array
+    :tasks
+    (fn [task]
+      (if (= "task-katselmus-ya" (-> task :schema-info :name))
+        (let [new-task (-> task
+                         (dissoc-in [:data :tila])  ;; cannot be transferred in YA Krysp
+                         (#(if-not (-> % :data :katselmuksenLaji :value ((fn [laji]
+                                                                           (or
+                                                                             (ss/blank? laji)
+                                                                             (#{"Aloituskatselmus" "Loppukatselmus" "Muu valvontak\u00e4ynti"} laji)))))
+                             (update-in % [:data :katselmuksenLaji :value] (fn [old-katselmuksenLaji]
+                                                                             (case old-katselmuksenLaji
+                                                                               "aloituskokous" "Aloituskatselmus"
+                                                                               "loppukatselmus" "Loppukatselmus"
+                                                                               "Muu valvontak\u00e4ynti")))
+                             %)))]
+          new-task)
+        task))
+    {:permitType "YA"
+     :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
+                               {$or [{"data.tila" {$exists true}}
+                                     {"data.katselmuksenLaji.value" {$exists true
+                                                                     $nin ["Aloituskatselmus"
+                                                                           "Loppukatselmus"
+                                                                           "Muu valvontak\u00e4ynti"
+                                                                           ""]}}]}]}}}))
+
+
+(defmigration ya-katselmukset-fix-remove-tila
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                                 :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
+                                                                           {"data.katselmus.tila" {$exists true}}]}}}))}
+  (update-applications-array :tasks
+    (fn [task]
+      (if (= "task-katselmus-ya" (-> task :schema-info :name))
+        (dissoc-in task [:data :katselmus :tila])
+        task))
+    {:permitType "YA"
+     :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
+                               {"data.katselmus.tila" {$exists true}}]}}}))
 
 ;;
 ;; ****** NOTE! ******

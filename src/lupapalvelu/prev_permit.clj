@@ -71,8 +71,7 @@
                ;; Set applicants' user info to Hakija documents
                (let [document (if (zero? i)
                                 (domain/get-applicant-document (:documents application))
-                                (doc-persistence/do-create-doc
-                                  (assoc-in command [:data :schemaName] (operations/get-applicant-doc-schema-name application))))
+                                (doc-persistence/do-create-doc! command (operations/get-applicant-doc-schema-name application)))
                      applicant-type (get-applicant-type applicant)
                      user-info (case applicant-type
                                  ;; Not including here the id of the invited user into "user-info",
@@ -148,12 +147,13 @@
         permit-type       (operations/permit-type-of-operation operation)
         dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml dummy-application :kuntalupatunnus)
-        validator-fn      (permit/get-verdict-validator permit-type)
-        validation-result (validator-fn xml)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
+        validator-fn      (permit/get-verdict-validator permit-type)
+        organization      (when (:municipality app-info) (organization/resolve-organization (:municipality app-info) permit-type))
+        validation-result (validator-fn xml organization)
         location-info     (get-location-info command app-info)
         organizations-match? (when (:municipality app-info)
-                               (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))
+                               (= organizationId (:id organization)))
         no-proper-applicants? (not-any? get-applicant-type (:hakijat app-info))]
     (cond
       (empty? app-info)            (fail :error.no-previous-permit-found-from-backend)

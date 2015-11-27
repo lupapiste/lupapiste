@@ -87,14 +87,13 @@ Teppo can edit Mikko's application
   # OnChange event does not seem to get triggered. Do it manually.
   Click by test id  maaraala-checkbox
   Input text with jQuery  input[data-test-id="kiinteisto.maaraalaTunnus"]  1024
-  Textfield Value Should Be  xpath=//input[contains(@data-test-id,'kiinteisto.maaraalaTunnus')]  1024
+  Textfield Value Should Be  xpath=//input[@data-test-id='kiinteisto.maaraalaTunnus']  1024
   Wait Until  Element should be visible  //*[@data-test-id='save-indicator']
   [Teardown]  logout
 
 Mikko comes back and can see Teppos modification
   Mikko logs in
   Open application  ${appname}  ${propertyId}
-  Click by test id  maaraala-checkbox
   Wait Until  Textfield Value Should Be  xpath=//input[contains(@data-test-id,'kiinteisto.maaraalaTunnus')]  1024
 
 Mikko can see that Teppo has accepted invitation

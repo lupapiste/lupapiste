@@ -39,13 +39,15 @@ var ajax = (function($) {
       rawData:   false,
       complete:  self.onComplete,
       success: function(e) {
-        if (self.rawData || e.ok) {
+        if (self.rawData || e && e.ok) {
           self.successHandler.call(self.savedThis, e);
-        } else {
+        } else if (e) {
           var res = resolveErrorHandler(e).call(self.savedThis, e);
           if (res && res.ok === false) {
             defaultError(e);
           }
+        } else {
+          error("Ajax: No response from " + self.request.url);
         }
       },
       error: function(jqXHR, textStatus, errorThrown) {
@@ -91,6 +93,14 @@ var ajax = (function($) {
     self.json = function(data) {
       self.request.data = data ? JSON.stringify(data) : {};
       self.request.contentType = "application/json";
+      return self;
+    };
+
+    self.form = function(formData) {
+      self.request.data = formData;
+      self.request.processData = false;
+      self.request.contentType = false;
+      self.request.enctype = "multipart/form-data";
       return self;
     };
 
@@ -188,6 +198,10 @@ var ajax = (function($) {
     return new Call(url, "POST").raw();
   }
 
+  function deleteReq(url) {
+    return new Call(url, "DELETE").raw();
+  }
+
   function postJson(url, data) {
     return new Call(url, "POST").raw().json(data);
   }
@@ -204,13 +218,19 @@ var ajax = (function($) {
     return new Call("/api/datatables/" + name, "POST").json(data);
   }
 
+  function form(name, formData) {
+    return new Call("/api/raw/" + name, "POST").form(formData);
+  }
+
   return {
     post:      post,
     postJson:  postJson,
     get:       get,
+    deleteReq: deleteReq,
     command:   command,
     query:     query,
-    datatables: datatables
+    datatables: datatables,
+    form: form
   };
 
 })(jQuery);

@@ -2,8 +2,11 @@
 <html>
 <body>
   <section class="page container" id="mypage">
-    <!-- TODO opening first accordion causes form to submit, don't know why -->
     <div id="own-info-form">
+      <button class="secondary" data-bind="click: function() { history.go(-1); }">
+        <i class="lupicon-chevron-start"></i>
+        <span data-bind="ltext: 'back'"></span>
+      </button>
       <h1 data-bind="ltext: 'mypage.title'"></h1>
       <div data-bind="lhtml:'mypage.desc'" class="page-info"></div>
 
@@ -50,7 +53,7 @@
                                           params: {value: companyId,
                                                    id: 'architect.company.id',
                                                    lLabel: 'userinfo.architect.company.id',
-                                                   placeholder: '000009-1'}}"></div>
+                                                   placeholder: loc( 'mypage.ytunnus.placeholder')}}"></div>
             </div>
             <!-- /ko -->
 
@@ -122,6 +125,16 @@
                                             params: {value: fise,
                                                      id: 'architect.fise',
                                                      lLabel: 'userinfo.architect.fise'}}"></div>
+
+                <div class="col-1"
+                     data-bind="component: {name: 'select-field',
+                                            params: {value: fiseKelpoisuus,
+                                                     options: availableFiseKelpoisuusValues,
+                                                     optionsValue: 'id',
+                                                     optionsText: 'name',
+                                                     lOptionsCaption: 'userinfo.architect.fiseKelpoisuus.choose',
+                                                     id: 'architect-fiseKelpoisuus-select',
+                                                     lLabel: 'userinfo.architect.fiseKelpoisuus'}}"></div>
               </div>
 
               <div class="row">

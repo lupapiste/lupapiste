@@ -40,17 +40,18 @@ var stamping = (function() {
   };
 
   function setStampFields() {
-    if ( !model.stampFields.organization ) {
+    var verdict = util.getIn(model.appModel._js, ["verdicts", 0]);
+
+    if (!model.stampFields.organization) {
       model.stampFields.organization = ko.observable(model.appModel.organizationName());
     }
 
-    if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
-      model.stampFields.kuntalupatunnus(_.first(model.appModel.verdicts()).kuntalupatunnus());
-      var verdict = ko.mapping.toJS(model.appModel.verdicts()[0]);
-      if ( verdict.paatokset[0] && verdict.paatokset[0].poytakirjat[0] && verdict.paatokset[0].poytakirjat[0].pykala ) {
-        var pykala = verdict.paatokset[0].poytakirjat[0].pykala;
-        pykala = _.contains(pykala, "\u00a7") ? pykala : "\u00a7 " + pykala;
-        model.stampFields.section(pykala);
+    if (verdict) {
+      model.stampFields.kuntalupatunnus(verdict.kuntalupatunnus);
+      var pykala = util.getIn(verdict, ["paatokset", 0, "poytakirjat", 0, "pykala"]);
+
+      if (pykala) {
+        model.stampFields.section(_.contains(pykala, "\u00a7") ? pykala : "\u00a7 " + pykala);
       } else {
         model.stampFields.section("\u00a7");
       }
@@ -59,14 +60,12 @@ var stamping = (function() {
       model.stampFields.section("\u00a7");
     }
 
-    if ( model.appModel.buildings ) {
-      model.stampFields.buildingIdList(model.appModel.buildings());
-    }
+    model.stampFields.buildingIdList(model.appModel._js.buildings || []);
   }
 
   function initStamp(appModel) {
     model.appModel = appModel;
-    model.attachments = model.appModel.attachments();
+    model.attachments = model.appModel._js.attachments;
     model.authorization = lupapisteApp.models.applicationAuthModel;
 
     setStampFields();
@@ -88,8 +87,9 @@ var stamping = (function() {
           model.appModel = lupapisteApp.models.application;
 
           ko.mapping.fromJS(application, {}, model.appModel);
+          model.appModel._js = application;
 
-          model.attachments = model.appModel.attachments();
+          model.attachments = application.attachments;
 
           setStampFields();
 

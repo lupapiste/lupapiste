@@ -4,6 +4,7 @@
             [clj-time.local :refer [local-now]]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
+            [monger.operators :refer [$set $push]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
@@ -35,6 +36,9 @@
   (let [op-subtypes (operations/get-primary-operation-metadata {:primaryOperation op} :subtypes)
         permit-subtypes (permit/permit-subtypes permit-type)]
     (concat op-subtypes permit-subtypes)))
+
+(defn history-entry [to-state timestamp user]
+  {:state to-state, :ts timestamp, :user (user/summary user)})
 
 ;;
 ;; Validators
@@ -88,7 +92,7 @@
 
 ; Foreman
 (defn- foreman-submittable? [application]
-  (let [result (when (-> application :state keyword #{:draft :open :submitted :complement-needed})
+  (let [result (when (-> application :state keyword #{:draft :open :submitted :complementNeeded})
                  (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
                    (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
     (if (nil? result)
@@ -100,6 +104,7 @@
 ;;
 
 (defn insert-application [application]
+  {:pre [(every? (partial contains? application)  (keys domain/application-skeleton))]}
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
 
 (defn filter-repeating-party-docs [schema-version schema-names]
@@ -286,6 +291,7 @@
                        :openInfoRequest     open-inforequest?
                        :secondaryOperations []
                        :state               state
+                       :history             [(history-entry state created user)]
                        :municipality        municipality
                        :location            (->location x y)
                        :organization        (:id organization)
@@ -365,3 +371,44 @@
                                          :apptype (get-in link-application [:primaryOperation :name])}}
                         :upsert true)))
 
+;;
+;; Updates
+;;
+
+(def timestamp-key
+  (merge
+    ; Currently used states
+    {:draft :created
+     :open :opened
+     :submitted :submitted
+     :sent :sent
+     :complementNeeded :complementNeeded
+     :verdictGiven nil
+     :constructionStarted :started
+     :acknowledged :acknowledged
+     :foremanVerdictGiven nil
+     :closed :closed
+     :canceled :canceled}
+    ; New states, timestamps to be determined
+    (zipmap
+      [:appealed
+       :extinct
+       :hearing
+       :final
+       :survey
+       :sessionHeld
+       :proposal
+       :registered
+       :proposalApproved
+       :sessionProposal]
+      (repeat nil))))
+
+(assert (= states/all-application-states (set (keys timestamp-key))))
+
+(defn state-transition-update
+  "Returns a MongoDB update map for state transition"
+  [to-state timestamp user]
+  {$set (merge
+          {:state to-state, :modified timestamp}
+          (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
+   $push {:history (history-entry to-state timestamp user)}})

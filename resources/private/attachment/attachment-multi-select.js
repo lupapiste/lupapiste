@@ -26,7 +26,7 @@ LUPAPISTE.AttachmentMultiSelect = function() {
 
   self.init = function(appModel) {
     self.model.appModel = appModel;
-    self.model.filteredAttachments = self.filterAttachments(ko.mapping.toJS(appModel.attachments()));
+    self.model.filteredAttachments = self.filterAttachments(appModel._js.attachments);
     self.model.authorization = lupapisteApp.models.applicationAuthModel;
 
     window.location.hash = self.hash + self.model.appModel.id();

@@ -131,29 +131,22 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
 
     var postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, self.appModel.allowedAttachmentTypes());
 
-    if (self.authorizationModel.ok("set-attachment-not-needed")) {
-      // The "not needed" functionality is only enabled for attachments in pre-verdict state, so here only going through "preGrouped"
-      var attArrays = _.pluck(preGrouped, "attachments");
-      _.each(attArrays, function(attArray) {
-        _.each(attArray, function(att) {
-
-          // reload application also when error occurs so that model and db dont get out of sync
-          att.notNeeded.subscribe(function(newValue) {
-            ajax.command("set-attachment-not-needed", {id: self.appModel.id(), attachmentId: att.id, notNeeded: newValue})
-            .success(self.appModel.reload)
-            .error(self.appModel.reload)
-            .processing(self.appModel.processing)
-            .call();
-          });
-
-        });
-      });
-    }
-
     self.preAttachmentsByOperation(preGrouped);
     self.postAttachmentsByOperation(postGrouped);
     self.attachmentsOperation(undefined);
     self.attachmentsOperations(updatedAttachmentsOperations(rawAttachments));
+  };
+
+  self.toggleNeeded = function( attachment ) {
+    // reload application also when error occurs so that model and db dont get out of sync
+    ajax.command("set-attachment-not-needed", {id: self.appModel.id(),
+                                               attachmentId: attachment.id,
+                                               notNeeded: attachment.notNeeded()})
+    .success(self.appModel.reload)
+    .error(self.appModel.reload)
+    .processing(self.appModel.processing)
+    .call();
+    return true;
   };
 
   self.newAttachment = function() {

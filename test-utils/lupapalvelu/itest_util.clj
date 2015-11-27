@@ -20,7 +20,6 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
             [lupapalvelu.domain :as domain]
@@ -77,13 +76,16 @@
 (def velho-muni "297")
 (def velho-id   (id-for "velho"))
 (def jarvenpaa  (apikey-for "admin@jarvenpaa.fi"))
+(def olli       (apikey-for "olli"))
+(def olli-id    (id-for "olli"))
 
 (def sipoo-property-id "75300000000000")
 (def jarvenpaa-property-id "18600000000000")
 (def tampere-property-id "83700000000000")
 (def kuopio-property-id "29700000000000")
 (def oir-property-id "43300000000000")
-(def no-backend-property-id "56400000000000") ; Oulu
+(def oulu-property-id "56400000000000")
+(def no-backend-property-id oulu-property-id)
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
@@ -157,12 +159,16 @@
       (str (server-address) "/api/" (name action-type) "/" (name command-name))
       (let [args (if (map? (first args))
                    (first args)
-                   (apply hash-map args))]
+                   (apply hash-map args))
+
+            cookie-store (:cookie-store args)
+            args (dissoc args :cookie-store)]
         {:headers {"authorization" (str "apikey=" apikey)
                    "content-type" "application/json;charset=utf-8"}
          :body (json/encode args)
          :follow-redirects false
-       :throw-exceptions false}))))
+         :cookie-store cookie-store
+         :throw-exceptions false}))))
 
 (defn raw-command [apikey command-name & args]
   (apply decode-post :command apikey command-name args))
@@ -183,6 +189,10 @@
     (assert (-> resp :body :ok) (str "Response not ok: fixture: \"" fixture-name "\": response: " (pr-str resp)))))
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
+
+(defn clear-collection [collection]
+  (let [resp (decode-response (http-get (str (server-address) "/dev/clear/" collection) {}))]
+    (assert (-> resp :body :ok) (str "Response not ok: clearing collection: \"" collection "\": response: " (pr-str resp)))))
 
 (defn create-app-with-fn [f apikey & args]
   (let [args (apply hash-map args)
@@ -264,6 +274,9 @@
 (defn http303? [{:keys [status]}]
   (= status 303))
 
+(defn http400? [{:keys [status]}]
+  (= status 400))
+
 (defn http401? [{:keys [status]}]
   (= status 401))
 
@@ -304,6 +317,8 @@
          (set-anti-csrf! (not old-value#))))))
 
 (defn comment-application
+  ([apikey id]
+    (comment-application apikey id false nil))
   ([apikey id open?]
     {:pre [(instance? Boolean open?)]}
     (comment-application apikey id open? nil))
@@ -353,6 +368,30 @@
       (assert ok)
       application)))
 
+(defn query-bulletin
+  "Fetch application bulletin from server.
+   Asserts that bulletin is found and that the bulletin data looks sane.
+   Takes an optional query function (query or local-query)"
+  ([apikey id] (query-bulletin query apikey id))
+  ([f apikey id]
+    {:pre  [id]
+     :post [(:id %)
+            (not (s/blank? (:applicant %)))
+            (:modified %) (pos? (:modified %))
+            (:primaryOperation %)
+            (:state %)
+            (:bulletinState %)
+            (:municipality %)
+            (:location %)
+            (:address %)
+            (:propertyId %)
+            (:documents %)
+            (:attachments %)
+            (every? (fn [a] (or (empty? (:versions a)) (= (:latestVersion a) (last (:versions a))))) (:attachments %))]}
+    (let [{:keys [bulletin ok]} (f apikey :bulletin :bulletinId id)]
+      (assert ok)
+      bulletin)))
+
 (defn- test-application-create-successful [resp app-id]
   (fact "Application created"
     resp => ok?
@@ -377,7 +416,16 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (apply create-app-id apikey args)
-        resp  (command apikey :submit-application :id id)] ; confirm parameter used only with foreman notice
+        resp  (command apikey :submit-application :id id)]
+    (fact "Submit OK" resp => ok?)
+    (query-application apikey id)))
+
+(defn create-and-send-application
+  "Returns the application map"
+  [apikey & args]
+  (let [id    (apply create-app-id apikey args)
+        _     (command apikey :submit-application :id id)
+        resp  (command apikey :approve-application :id id :lang "fi")]
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
@@ -509,7 +557,7 @@
              (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Upload should fail"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.98.html") => 0)))))
+             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.111.html") => 0)))))
 
 (defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
@@ -534,7 +582,7 @@
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Statement upload should fail"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.98.html") => 0)))))
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.111.html") => 0)))))
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
   (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))
@@ -544,7 +592,6 @@
 (defn upload-attachment-to-all-placeholders [apikey application]
   (doseq [attachment (:attachments application)]
     (upload-attachment apikey (:id application) attachment true)))
-
 
 (defn generate-documents [application apikey & [local?]]
   (doseq [document (:documents application)]
@@ -556,7 +603,8 @@
           updates (filter (fn [[path value]]
                             (try
                               (let [splitted-path (ss/split path #"\.")]
-                                (doc-persistence/validate-against-whitelist! document [[splitted-path value]] user-role))
+                                (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
+                                (doc-persistence/validate-readonly-updates! document [splitted-path]))
                               true
                               (catch Exception _
                                 false)))
@@ -567,12 +615,6 @@
           :id (:id application)
           :doc (:id document)
           :updates updates) => ok?))))
-
-(defn dummy-doc [schema-name]
-  (let [schema (schemas/get-schema (schemas/get-latest-schema-version) schema-name)
-        data   (tools/create-document-data schema (partial tools/dummy-values nil))]
-    {:schema-info (:info schema)
-     :data        data}))
 
 ;;
 ;; Vetuma

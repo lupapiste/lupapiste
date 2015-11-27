@@ -18,6 +18,14 @@
 
 (def approve-doc-states (states/all-application-states-but (conj states/terminal-states :draft :sent :verdictGiven :constructionStarted)))
 
+(defn validate-is-construction-time-doc
+  [{{doc-id :doc} :data} {state :state documents :documents}]
+  (when doc-id
+    (when-not (some-> (domain/get-document-by-id documents doc-id)
+                      (model/get-document-schema)
+                      (get-in [:info :construction-time]))
+      (fail :error.document-not-construction-time-doc))))
+
 ;;
 ;; CRUD
 ;;
@@ -26,11 +34,11 @@
   {:parameters [:id :schemaName]
    :optional-parameters [updates fetchRakennuspaikka]
    :user-roles #{:applicant :authority}
-   :states     #{:draft :answered :open :submitted :complement-needed}
+   :states     #{:draft :answered :open :submitted :complementNeeded}
    :pre-checks [create-doc-validator
                 application/validate-authority-in-drafts]}
-  [command]
-  (let [document (doc-persistence/do-create-doc command updates)]
+  [{{schema-name :schemaName} :data :as command}]
+  (let [document (doc-persistence/do-create-doc! command schema-name updates)]
     (when fetchRakennuspaikka
       (let [
             property-id (or
@@ -42,7 +50,7 @@
 (defcommand remove-doc
   {:parameters  [id docId]
     :user-roles #{:applicant :authority}
-    :states     #{:draft :answered :open :submitted :complement-needed}
+    :states     #{:draft :answered :open :submitted :complementNeeded}
     :pre-checks [application/validate-authority-in-drafts
                  remove-doc-validator]}
   [{:keys [application created] :as command}]
@@ -60,6 +68,14 @@
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
+(defcommand update-construction-time-doc
+  {:parameters [id doc updates]
+   :user-roles #{:applicant :authority}
+   :states     states/post-verdict-states
+   :pre-checks [application/validate-authority-in-drafts validate-is-construction-time-doc]}
+  [command]
+  (doc-persistence/update! command doc updates "documents"))
+
 (defcommand update-task
   {:parameters [id doc updates]
    :user-roles #{:applicant :authority}
@@ -71,18 +87,20 @@
 (defcommand remove-document-data
   {:parameters       [id doc path collection]
    :user-roles       #{:applicant :authority}
-   :states           #{:draft :answered :open :submitted :complement-needed}
+   :states           #{:draft :answered :open :submitted :complementNeeded}
    :input-validators [doc-persistence/validate-collection]
    :pre-checks       [application/validate-authority-in-drafts]}
-  [{:keys [created application] :as command}]
-  (let [document  (doc-persistence/by-id application collection doc)
-        str-path  (ss/join "." path)
-        data-path (str collection ".$.data." str-path)
-        meta-path (str collection ".$.meta." str-path)]
-    (when-not document (fail! :error.document-not-found))
-    (update-application command
-      {:documents {$elemMatch {:id (:id document)}}}
-      {$unset {data-path "" meta-path ""}})))
+  [command]
+  (doc-persistence/remove-document-data command doc [path] collection))
+
+(defcommand remove-construction-time-document-data
+  {:parameters       [id doc path collection]
+   :user-roles       #{:applicant :authority}
+   :states           states/post-verdict-states
+   :input-validators [doc-persistence/validate-collection]
+   :pre-checks       [application/validate-authority-in-drafts validate-is-construction-time-doc]}
+  [command]
+  (doc-persistence/remove-document-data command doc [path] collection))
 
 ;;
 ;; Document validation
@@ -123,11 +141,27 @@
   [command]
   (ok :approval (approve command "approved")))
 
+(defcommand approve-construction-time-doc
+  {:parameters [:id :doc :path :collection]
+   :user-roles #{:authority}
+   :states     states/post-verdict-states
+   :pre-checks [validate-is-construction-time-doc]}
+  [command]
+  (ok :approval (approve command "approved")))
+
 (defcommand reject-doc
   {:parameters [:id :doc :path :collection]
    :input-validators [doc-persistence/validate-collection]
    :user-roles #{:authority}
    :states     approve-doc-states}
+  [command]
+  (ok :approval (approve command "rejected")))
+
+(defcommand reject-construction-time-doc
+  {:parameters [:id :doc :path :collection]
+   :user-roles #{:authority}
+   :states     states/post-verdict-states
+   :pre-checks [validate-is-construction-time-doc]}
   [command]
   (ok :approval (approve command "rejected")))
 

@@ -106,7 +106,9 @@
     (v/rakennustunnus? v) nil
     :else [:warn "illegal-rakennusnumero"]))
 
-(defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))
+(defmethod validate-field :newBuildingSelector [_ elem v]
+  (when (not= v "ei tiedossa")
+    (subtype/subtype-validation {:subtype :number} v)))
 
 (defmethod validate-field :personSelector [application elem v]
   (when-not (ss/blank? v)
@@ -123,7 +125,11 @@
 (defmethod validate-field :foremanHistory [_ _ _] nil)
 (defmethod validate-field :foremanOtherApplications [_ _ _] nil)
 
-(defmethod validate-field :maaraalaTunnus [_ _ _] nil)
+(defmethod validate-field :maaraalaTunnus [_ _ v]
+  (cond
+    (ss/blank? v) nil
+    (re-matches v/maara-alatunnus-pattern v) nil
+    :else [:warn "illegal-maaraala-tunnus"]))
 
 (defmethod validate-field nil [_ _ _]
   [:err "illegal-key"])
@@ -131,6 +137,34 @@
 (defmethod validate-field :default [_ elem _]
   (warn "Unknown schema type: elem=[%s]" elem)
   [:err "unknown-type"])
+
+;;
+;; Element validation (:validator key in schema)
+;;
+
+(declare find-by-name)
+
+(defn good-postal-code?
+    "Empty postal code is always valid. The idea here is to avoid
+  false negatives and this should be a safe assumption since the
+  required fields are enforced on the schema level."
+  [postal-code country]
+  (if (= country "FIN")
+    (or (ss/blank? postal-code) (v/finnish-zip? postal-code))
+    true))
+
+(defmulti validate-element (fn [_ _ _ element]
+                           (:validator element)))
+
+(defmethod validate-element :address
+  [info data path element]
+  (let [{:keys [postinumero maa]} (tools/unwrapped data)]
+    (when-not (good-postal-code? postinumero maa)
+      {:path     (-> (map keyword path) (concat [:postinumero]))
+       :element  (assoc (find-by-name (:body element) [:postinumero]) :locKey "postinumero")
+       :document (:document info)
+       :result   [:warn "bad-postal-code"]})))
+
 
 ;;
 ;; Neue api:
@@ -170,15 +204,20 @@
       (dissoc result :data))))
 
 (defn- validate-fields [application info k data path]
-  (let [current-path (if k (conj path (name k)) path)]
+  (let [current-path (if k (conj path (name k)) path)
+        element (if (not-empty current-path)
+                  (keywordize-keys (find-by-name (:schema-body info) current-path))
+                  {})]
     (if (contains? data :value)
-      (let [element (keywordize-keys (find-by-name (:schema-body info) current-path))
-            result  (validate-field application element (:value data))]
+      (let [result  (validate-field application element (:value data))]
         (->validation-result info data current-path element result))
-      (filter
-        (comp not nil?)
-        (map (fn [[k2 v2]]
-               (validate-fields application info k2 v2 current-path)) data)))))
+      (let [result (when (:validator element)
+                     (validate-element info data current-path element))]
+        (filter
+         (comp not nil?)
+         (concat (flatten [result])
+                 (map (fn [[k2 v2]]
+                        (validate-fields application info k2 v2 current-path)) data)))))))
 
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
@@ -451,10 +490,13 @@
     (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
       (boolean (find-by-name schema-body full-path)))))
 
+(defn good-flag? [flag]
+  (or (nil? flag) (util/boolean? flag)))
+
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId turvakieltokytkin
-                         companyName companyId
-                         fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults?]}]
-  {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
+                         companyName companyId allowDirectMarketing
+                         fise fiseKelpoisuus degree graduatingYear]} & {:keys [with-hetu with-empty-defaults?]}]
+  {:pre [(good-flag? turvakieltokytkin) (good-flag? allowDirectMarketing)]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
       {:userId                                  (wrap id)
@@ -464,6 +506,7 @@
                        :turvakieltoKytkin       (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
        :yhteystiedot {:email                    (wrap email)
                       :puhelin                  (wrap phone)}
+       :kytkimet {:suoramarkkinointilupa        (when (or allowDirectMarketing with-empty-defaults?) (boolean allowDirectMarketing))}
        :osoite {:katu                           (wrap street)
                 :postinumero                    (wrap zip)
                 :postitoimipaikannimi           (wrap city)}
@@ -472,18 +515,18 @@
        :patevyys {:koulutusvalinta              (wrap degree)
                   :koulutus                     nil
                   :valmistumisvuosi             (wrap graduatingYear)
-                  :fise                         (wrap fise)}
+                  :fise                         (wrap fise)
+                  :fiseKelpoisuus               (wrap fiseKelpoisuus)}
        :patevyys-tyonjohtaja {:koulutusvalinta  (wrap degree)
                               :koulutus         nil
-                              :valmistumisvuosi (wrap graduatingYear)
-                              :fise             (wrap fise)}}
+                              :valmistumisvuosi (wrap graduatingYear)}}
       util/strip-nils
       util/strip-empty-maps
       tools/wrapped)))
 
-(defn ->yritys [{:keys [firstName lastName email phone address1 zip po turvakieltokytkin name y ovt pop]}
+(defn ->yritys [{:keys [firstName lastName email phone address1 zip po turvakieltokytkin name y ovt pop allowDirectMarketing]}
                 & {:keys [with-empty-defaults?]}]
-  {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
+  {:pre [(good-flag? turvakieltokytkin) (good-flag? allowDirectMarketing)]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
       {:yritysnimi                                    (wrap name)
@@ -495,7 +538,8 @@
                                        :sukunimi      (wrap lastName)
                                        :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
                        :yhteystiedot {:email          (wrap email)
-                                      :puhelin        (wrap phone)}}
+                                      :puhelin        (wrap phone)}
+                       :kytkimet {:suoramarkkinointilupa (when (or allowDirectMarketing with-empty-defaults?) (boolean allowDirectMarketing))}}
        :verkkolaskutustieto {:ovtTunnus               (wrap ovt)
                              :verkkolaskuTunnus       ""
                              :valittajaTunnus         (wrap pop)}}

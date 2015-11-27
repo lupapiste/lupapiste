@@ -30,8 +30,16 @@
   "Creates model-updates from ui-format."
   [updates]
   (for [[k v] updates]
-    (let [keys (mapv keyword (s/split k #"\."))]
+    (let [keys (mapv util/->keyword (if (coll? k) k (s/split k #"\.")))]
       [keys v])))
+
+(defn data-model->model-updates
+  "Creates model updates from data returned by mongo query"
+  [path data-model]
+  (if (contains? data-model :value)
+    [[path (:value data-model)]]
+    (->> (filter (comp map? val) data-model)
+         (mapcat (fn [[k m]] (data-model->model-updates (conj path (keyword k)) m))))))
 
 (defn ->mongo-updates
   "Creates full paths to document update values to be $set.
@@ -46,6 +54,17 @@
                        (assoc (field "modified") (model/current-timestamp)))))
     {} updates))
 
+(defn get-after-update-trigger-fn [document]
+  (let [schema (schemas/get-schema (:schema-info document))
+        trigger-ref (get-in schema [:info :after-update])]
+    (if trigger-ref
+      (resolve trigger-ref)
+      (constantly nil))))
+
+(defn after-update-triggered-updates [application collection original-doc updated-doc]
+  (->> (update application (keyword collection) (partial util/update-by-id updated-doc))
+       ((get-after-update-trigger-fn original-doc))))
+
 (defn validated-model-updates
   "Returns a map with keys: :mongo-query, :mongo-updates, :post-results.
    Throws fail! if validation fails."
@@ -57,69 +76,97 @@
       (when-not document (fail! :unknown-document))
       (when (model/has-errors? pre-results) (fail! :document-in-error-before-update :results pre-results))
       (when (model/has-errors? post-results) (fail! :document-would-be-in-error-after-update :results post-results))
-
+      
       {:mongo-query   {collection {$elemMatch {:id (:id document)}}}
-       :mongo-updates {$set (assoc
+       :mongo-updates (util/deep-merge 
+                       {$set (assoc
                               (->mongo-updates (str (name collection) ".$.data") model-updates (apply hash-map meta-data))
                               :modified timestamp)}
-       :post-results  post-results
-       :updated-doc   updated-doc})))
-
-(defn get-after-update-trigger-fn [document]
-  (let [schema (schemas/get-schema (:schema-info document))
-        trigger-ref (get-in schema [:info :after-update])]
-    (if trigger-ref
-      (resolve trigger-ref)
-      (constantly nil))))
+                       (after-update-triggered-updates application collection document updated-doc))
+       :post-results  post-results})))
 
 (defn persist-model-updates [application collection document model-updates timestamp & meta-data]
   (let [command (application->command application)
-        {:keys [mongo-query mongo-updates post-results updated-doc]} (apply validated-model-updates application collection document model-updates timestamp meta-data)
-        updated-app (update-in application [(keyword collection)] (fn [c] (map #(if (= (:id %) (:id updated-doc)) updated-doc %) c)))
-        trigger-fn (get-after-update-trigger-fn document)
-        extra-updates (trigger-fn updated-app)]
-    (update-application command mongo-query (util/deep-merge mongo-updates extra-updates))
+        {:keys [mongo-query mongo-updates post-results]} (apply validated-model-updates application collection document model-updates timestamp meta-data)]
+    (update-application command mongo-query mongo-updates)
     (ok :results post-results)))
 
 (defn validate-collection [{{collection :collection} :data}]
   (when-not (#{"documents" "tasks"} collection)
     (fail :error.unknown-type)))
 
-(defn validate-against-whitelist! [document model-updates user-role]
+(defn- get-subschema-by-name [schema sub-schema-name]
+  (some (fn [schema-body]
+          (when (= (:name schema-body) (name sub-schema-name))
+            schema-body))
+        (:body schema)))
+
+(defn- path->schema-path [path]
+  (remove (comp ss/numeric? name) path))
+
+(defn- seek-field-from-schema-path [field-name schema schema-path]
+  (reduce (fn [[schema field-value] path]
+            (let [subschema (get-subschema-by-name schema path)
+                  value (or (get subschema field-name) field-value)]
+              [subschema value]))
+          [schema nil]
+          schema-path))
+
+(defn validate-against-whitelist! [document update-paths user-role]
   (let [doc-schema            (model/get-document-schema document)
-        schema-paths          (map first model-updates)
-        get-subschema-by-name (fn [schema sub-schema-name]
-                                (some
-                                  (fn [schema-body]
-                                    (when (= (:name schema-body) (name sub-schema-name))
-                                      schema-body))
-                                  (:body schema)))]
+        schema-paths          (map path->schema-path update-paths)]
     (doseq [path schema-paths]
-      (let [path          (remove (fn [item] (ss/numeric? (name item))) path)
-            [_ whitelist] (reduce (fn [[subschema whitelist] path]
-                                    (let [subschema (get-subschema-by-name subschema path)
-                                          whitelist (or (:whitelist subschema) whitelist)]
-                                      [subschema whitelist]))
-                                  [doc-schema nil]
-                                  path)]
-        (when-not (or
-                    (empty? whitelist)
-                    (some #{(keyword user-role)} (:roles whitelist)))
+      (let [[_ whitelist] (seek-field-from-schema-path :whitelist doc-schema path)]
+        (when-not (or (empty? whitelist)
+                      (some #{(keyword user-role)} (:roles whitelist)))
           (unauthorized!))))))
+
+(defn validate-readonly-updates! [document update-paths]
+  (let [doc-schema            (model/get-document-schema document)
+        schema-paths          (map path->schema-path update-paths)]
+    (doseq [path schema-paths]
+      (let [[_ readonly] (seek-field-from-schema-path :readonly doc-schema path)]
+        (when readonly 
+          (fail! :error-trying-to-update-readonly-field))))))
+
+(defn validate-readonly-removes! [document remove-paths]
+  (let [doc-schema              (model/get-document-schema document)
+        schema-paths            (map path->schema-path remove-paths)
+        validate-all-subschemas (fn validate-all-subschemas [schema]
+                                  (or (:readonly schema)
+                                      (some validate-all-subschemas (:body schema))))]
+    (doseq [path schema-paths]
+      (let [[subschema readonly] (seek-field-from-schema-path :readonly doc-schema path)]
+        (when (or readonly (validate-all-subschemas subschema))
+          (fail! :error-trying-to-remove-readonly-field))))))
 
 (defn update! [{application :application timestamp :created {role :role} :user} doc-id updates collection]
   (let [document      (by-id application collection doc-id)
-        model-updates (->model-updates updates)]
+        model-updates (->model-updates updates)
+        update-paths  (map first model-updates)]
     (when-not document (fail! :error.document-not-found))
-    (validate-against-whitelist! document model-updates role)
+    (validate-against-whitelist! document update-paths role)
+    (validate-readonly-updates! document update-paths)
     (persist-model-updates application collection document model-updates timestamp)))
+
+(defn- empty-op-attachments-ids
+  "Returns attachment ids, which don't have verions and have op-id as operation id. Returns nil when none found"
+  [attachments op-id]
+  (when (and op-id attachments)
+    (seq (map :id (filter
+                    (fn [{op :op versions :versions}]
+                      (and (= (:id op) op-id)
+                           (empty? versions)))
+                    attachments)))))
 
 (defn remove! [{application :application timestamp :created :as command} doc-id collection]
   (let [document      (by-id application collection doc-id)
-        updated-app (update-in application [:documents] (fn [c] (filter #(not= (:id %) doc-id) c)))
-          trigger-fn ( get-after-update-trigger-fn document)
-          extra-updates (trigger-fn updated-app)
-          op-id (get-in document [:schema-info :op :id])]
+        updated-app   (update-in application [:documents] (fn [c] (filter #(not= (:id %) doc-id) c)))
+        trigger-fn    (get-after-update-trigger-fn document)
+        extra-updates (trigger-fn updated-app)
+        op-id         (get-in document [:schema-info :op :id])
+        removable-attachment-ids (when op-id
+                                   (empty-op-attachments-ids (:attachments application) op-id))]
     (when-not document (fail! :error.document-not-found))
     (update-application command
       (util/deep-merge
@@ -135,19 +182,47 @@
                      :attachments
                      (:attachments application)
                      #(= (:id (:op %)) op-id)
-                     :op nil)))}))))
+                     :op nil)))}))
+    (when (seq removable-attachment-ids)
+      (update-application command {$pull {:attachments {:id {$in removable-attachment-ids}}}}))))
 
-(defn do-create-doc [{{:keys [schemaName]} :data created :created application :application :as command} & updates]
-  (let [schema (schemas/get-schema (:schema-version application) schemaName)]
+(defn removing-updates-by-path [collection doc-id paths]
+  (letfn [(build-path [path] (->> (map name path)
+                                  (ss/join ".")
+                                  ((juxt (partial str (name collection) ".$.data.")
+                                         (partial str (name collection) ".$.meta.")))))]
+    (if-let [paths (not-empty (remove empty? paths))]
+      {:mongo-query   {(keyword collection) {$elemMatch {:id doc-id}}}
+       :mongo-updates {$unset (-> (mapcat build-path paths) 
+                                  (zipmap (repeat "")))}}
+      {})))
+
+(defn remove-document-data [{application :application {role :role} :user :as command} doc-id paths collection]
+  (let [document (by-id application collection doc-id)
+        paths (map (partial map util/->keyword) paths)]
+    (when-not document (fail! :error.document-not-found))
+    (validate-against-whitelist! document paths role)
+    (validate-readonly-removes! document paths)
+    (->> (removing-updates-by-path collection doc-id paths)
+         ((juxt :mongo-query :mongo-updates))
+         (apply update-application command))))
+
+(defn new-doc 
+  ([application schema created] (new-doc application schema created []))
+  ([application schema created updates]
+   (let [empty-document (model/new-document schema created)
+         document       (model/apply-updates empty-document updates)
+         post-results   (model/validate application document schema)]
+     (when (model/has-errors? post-results) (fail! :document-would-be-in-error-after-update :results post-results))
+     document)))
+
+(defn do-create-doc! [{created :created {schema-version :schema-version :as application} :application :as command} schema-name & [updates]]
+  (let [schema (schemas/get-schema (:schema-version application) schema-name)
+        document (new-doc application schema created updates)]
     (when-not (:repeating (:info schema)) (fail! :illegal-schema))
-    (let [document (model/new-document schema created)]
-      (update-application command
-                          {$push {:documents document}
-                           $set {:modified created}})
-      (when updates
-        (let [model-updates (->model-updates (first updates))]
-          (persist-model-updates application "documents" document model-updates created)))
-      document)))
+    (update-application command {$push {:documents document}
+                                 $set  {:modified created}})
+    document))
 
 (defn- update-key-in-schema? [schema [update-key _]]
   (model/find-by-name schema update-key))

@@ -18,7 +18,6 @@
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.migration.migration :as migration]
             [lupapalvelu.perf-mon :as perf-mon]
-            [scss-compiler.core :as scss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vetuma]
             [lupapalvelu.fixture.fixture-api]
@@ -50,7 +49,9 @@
             [lupapalvelu.perf-mon-api]
             [lupapalvelu.user-notification-api]
             [lupapalvelu.tiedonohjaus-api]
-            [lupapalvelu.application-tabs-api]))
+            [lupapalvelu.application-bulletins-api]
+            [lupapalvelu.application-tabs-api]
+            [lupapalvelu.file-upload-api]))
 
 (defonce jetty (atom nil))
 
@@ -78,9 +79,6 @@
   (server/add-middleware web/session-timeout)
   (env/in-dev
    (server/add-middleware mongo/db-selection-middleware))
-
-  (when-let [gemsdir (io/resource "gems")]
-    (scss/initialize :gempath (.getPath gemsdir)))
 
   (info "*** Instrumenting performance monitoring")
   (perf-mon/init)

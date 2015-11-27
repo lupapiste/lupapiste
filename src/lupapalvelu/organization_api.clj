@@ -24,7 +24,7 @@
             [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.states :as states]
-            [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -280,12 +280,19 @@
   (ok))
 
 (defcommand set-organization-app-required-fields-filling-obligatory
-  {:parameters [isObligatory]
+  {:parameters [enabled]
    :user-roles #{:authorityAdmin}
-   :input-validators  [(partial non-blank-parameters [:isObligatory])
-                       (partial boolean-parameters [:isObligatory])]}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
   [{user :user}]
-  (o/update-organization (user/authority-admins-organization-id user) {$set {:app-required-fields-filling-obligatory isObligatory}})
+  (o/update-organization (user/authority-admins-organization-id user) {$set {:app-required-fields-filling-obligatory enabled}})
+  (ok))
+
+(defcommand set-organization-validate-verdict-given-date
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (o/update-organization (user/authority-admins-organization-id user) {$set {:validate-verdict-given-date enabled}})
   (ok))
 
 (defcommand set-organization-permanent-archive-enabled
@@ -302,19 +309,25 @@
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)]
     (if-let [organization (o/get-organization organization-id)]
-      (let [empty-confs (zipmap (map (comp keyword :permitType) (:scope organization)) (repeat {}))]
+      (let [permit-types (mapv (comp keyword :permitType) (:scope organization))
+            krysp-keys (if (env/feature? :kunnan-osoiteaineisto) (conj permit-types :osoitteet) permit-types)
+            empty-confs (zipmap krysp-keys (repeat {}))]
         (ok :krysp (merge empty-confs (:krysp organization))))
       (fail :error.unknown-organization))))
 
 (defcommand set-krysp-endpoint
   {:parameters [url username password permitType version]
    :user-roles #{:authorityAdmin}
-   :input-validators [permit/permit-type-validator]}
+   :input-validators [(fn [{{permit-type :permitType} :data}]
+                        (when-not (or
+                                    (and (env/feature? :kunnan-osoiteaineisto) (= "osoitteet" permit-type))
+                                    (permit/valid-permit-type? permit-type))
+                          (fail :error.missing-parameters :parameters [:permitType])))]}
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)
         krysp-config    (o/get-krysp-wfs organization-id permitType)
         password        (if (s/blank? password) (second (:credentials krysp-config)) password)]
-    (if (or (s/blank? url) (krysp/wfs-is-alive? url username password))
+    (if (or (s/blank? url) (wfs/wfs-is-alive? url username password))
       (o/set-krysp-endpoint organization-id url username password permitType version)
       (fail :auth-admin.legacyNotResponding))))
 
@@ -488,3 +501,31 @@
         (error "Failed to parse shapefile" t)
         (resp/status 400 :error.shapefile-parsing-failed)))))
 
+(defquery get-map-layers-data
+  {:description "Organization server and layer details."
+   :user-roles #{:authorityAdmin}
+   :feature :municipality-maps}
+  [{user :user}]
+  (ok (-> (user/authority-admins-organization-id user)
+          o/get-organization
+          :map-layers)))
+
+(defcommand update-map-server-details
+  {:parameters [url username password]
+   :user-roles #{:authorityAdmin}
+   :feature :municipality-maps}
+  [{user :user}]
+  (o/update-organization (user/authority-admins-organization-id user)
+                         {$set {:map-layers.server {:url url
+                                                    :username username
+                                                    :password password}}})
+  (ok))
+
+(defcommand update-user-layers
+  {:parameters [layers]
+   :user-roles #{:authorityAdmin}
+   :feature :municipality-maps}
+  [{user :user}]
+  (o/update-organization (user/authority-admins-organization-id user)
+                         {$set {:map-layers.layers layers}})
+  (ok))

@@ -13,10 +13,9 @@ Mikko creates a new application
   Set Suite Variable  ${appname}  submit${secs}
   Set Suite Variable  ${propertyId}  753-416-7-1
 
-  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
+  Create application with state  ${appname}  ${propertyId}  kerrostalo-rivitalo  open
   Set Suite Variable  ${attachment-not-needed-test-id-hakija-valtakirja}  attachment-not-needed-hakija-valtakirja
   Set Suite Variable  ${attachment-not-needed-test-id-sonja}  attachment-not-needed-muut-muu
-  Open to authorities  huba huba
 
 Mikko could submit application (when required fields are not obligatory)
   Open tab  requiredFieldSummary
@@ -35,12 +34,12 @@ Sonja can not submit application
 
 Sipoo marks required fields obligatory
   Sipoo logs in
-  Wait until Element is visible  xpath=//input[@data-test-id='required-fields-obligatory-enabled']
-  Focus  xpath=//input[@id='required-fields-obligatory-enabled']
-  Checkbox Should Not Be Selected  id=required-fields-obligatory-enabled
-  Select Checkbox  id=required-fields-obligatory-enabled
+  Wait until Element is visible  required-fields-obligatory-enabled
+  Focus  required-fields-obligatory-enabled
+  Checkbox Should Not Be Selected  required-fields-obligatory-enabled
+  Select Checkbox  required-fields-obligatory-enabled
   Wait for jQuery
-  Wait Until  Checkbox Should Be Selected  id=required-fields-obligatory-enabled
+  Wait Until  Checkbox Should Be Selected  required-fields-obligatory-enabled
   Logout
 
 Mikko logs in, goes to attachments tab and sees all "not needed" checkboxes as enabled and not selected

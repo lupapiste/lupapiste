@@ -40,8 +40,15 @@
 
 (defquery companies
   {:user-roles #{:applicant :authority :admin}}
-  [_]
-  (ok :companies (c/find-companies)))
+  [{user :user}]
+  (if (u/admin? user)
+    (let [admins (->> (u/find-users {"company.role" "admin"})
+                   (partition-by (comp :id :company))
+                   (map (fn [company-admins]
+                          [(-> company-admins first :company :id), (map u/summary company-admins)]))
+                   (into {}))]
+      (ok :companies (map (fn [company] (assoc company :admins (get admins (:id company) []))) (c/find-companies))))
+    (ok :companies (c/find-companies))))
 
 (defcommand company-update
   {:user-roles #{:applicant :admin}

@@ -848,28 +848,42 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return div;
   }
 
-  function buildDocgenGroup (subSchema, model, path) {
-    var name = subSchema.name;
+  function buildGroupComponent (name, subSchema, model, path) {
+    var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(_.reject(path, _.isNumber));
+
+    lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
 
     var params = {
-      path: path,
-      subSchema: subSchema,
+      applicationId: self.appId,
       documentId: self.docId,
-      model: model[name]
+      schemaI18name: self.schemaI18name,
+      path: path,
+      i18npath: i18npath,
+      schema: subSchema,
+      model: model[subSchema.name],
+      isDisabled: self.isDisabled,
+      authModel: self.authorizationModel,
+      propertyId: self.propertyId
     };
-    return createComponent("docgen-group", params);
+
+    return createComponent(name, params);
+  }
+
+  function buildDocgenGroup (subSchema, model, path) {
+    var name = subSchema.repeating ? "docgen-repeating-group" : "docgen-group";
+    return buildGroupComponent(name, subSchema, model, path);
   }
 
   function buildPropertyGroup (subSchema, model, path) {
-    var name = subSchema.name;
+    return buildGroupComponent("property-group", subSchema, model, path);
+  }
 
-    var params = {
-      path: path,
-      subSchema: subSchema,
-      documentId: self.docId,
-      model: model[name]
-    };
-    return createComponent("property-group", params);
+  function buildDocgenTable (subSchema, model, path) {
+    return buildGroupComponent("docgen-table", subSchema, model, path);
+  }
+
+  function buildConstructionWasteReport (subSchema, model, path) {
+    return buildGroupComponent("construction-waste-report", subSchema, model, path);
   }
 
   function buildRadioGroup(subSchema, model, path) {
@@ -1025,8 +1039,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var myPath = path.join(".");
     var select = document.createElement("select");
     var selectedOption = getModelValue(model, subSchema.name);
-    var option = document.createElement("option");
+    var emptyOption = document.createElement("option");
     var span = makeEntrySpan(subSchema, myPath);
+    var unknownOption = document.createElement("option");
     span.className = "form-entry really-long";
 
     select.id = pathStrToID(myPath);
@@ -1068,12 +1083,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       };
     }
 
-    option.value = "";
-    option.appendChild(document.createTextNode(loc("selectone")));
+    emptyOption.value = "";
+    emptyOption.appendChild(document.createTextNode(loc("selectone")));
     if (selectedOption === "") {
-      option.selected = "selected";
+      emptyOption.selected = "selected";
     }
-    select.appendChild(option);
+    select.appendChild(emptyOption);
 
     $.each(self.application.buildings, function (i, building) {
           var name = building.index;
@@ -1090,6 +1105,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           }
           select.appendChild(option);
         });
+    // not known option
+    unknownOption.value = "ei tiedossa";
+    unknownOption.appendChild(document.createTextNode(loc("not-known")));
+    if (selectedOption === "ei tiedossa") {
+      unknownOption.selected = "selected";
+    }
+    select.appendChild(unknownOption);
 
     span.appendChild(makeLabel(subSchema, "select", myPath));
     span.appendChild(select);
@@ -1121,14 +1143,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
+    lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
+    var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(_.reject(path, _.isNumber));
     var params = {
       applicationId: self.appId,
+      authModel: self.authorizationModel,
       documentId: self.docId,
       documentName: self.schemaName,
       hetu: undefined,
       model: model[subSchema.name] || {},
-      subSchema: subSchema,
+      schema: subSchema,
       path: path,
+      i18npath: i18npath,
       schemaI18name: self.schemaI18name,
       partOfChoice: partOfChoice,
       validationErrors: doc.validationErrors
@@ -1138,7 +1164,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildFillMyInfoButton(subSchema, model, path) {
-    if (model.fillMyInfo && model.fillMyInfo.disabled) {
+    if (self.isDisabled || (model.fillMyInfo && model.fillMyInfo.disabled)) {
       return;
     }
 
@@ -1245,22 +1271,41 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildCompanySelector(subSchema, model, path) {
-    var myNs = path.slice(0, path.length - 1).join(".");
 
-    var params = {
-      id: self.appId,
-      documentId: self.docId,
-      documentName: self.schemaName,
-      path: myNs,
-      collection: self.getCollection(),
-      selected: getModelValue(model, subSchema.name),
-      schema: subSchema
-    };
+    function mapCompany(company) {
+      company.displayName = ko.pureComputed(function() {
+        return ko.unwrap(company.name) + " (" + ko.unwrap(company.y) + ")";
+      });
+      return company;
+    }
 
-    var span = makeEntrySpan(subSchema, path.join("."));
-    span.appendChild(createComponent("company-selector", params));
-    $(span).addClass("companySelector");
-    return span;
+    if (!self.isDisabled) {
+      var myNs = path.slice(0, path.length - 1).join(".");
+
+      var companies = _(lupapisteApp.models.application.roles() || [])
+                      .filter(function(r) {
+                        return ko.unwrap(r.type) === "company";
+                      })
+                      .map(mapCompany)
+                      .value();
+
+      var params = {
+        id: self.appId,
+        companies: companies,
+        authModel: self.authorizationModel,
+        documentId: self.docId,
+        documentName: self.schemaName,
+        path: myNs,
+        collection: self.getCollection(),
+        selected: getModelValue(model, subSchema.name),
+        schema: subSchema
+      };
+
+      var span = makeEntrySpan(subSchema, path.join("."));
+      span.appendChild(createComponent("company-selector", params));
+      $(span).addClass("companySelector");
+      return span;
+    }
   }
 
   function buildTableRow(subSchema, model, path, partOfChoice) {
@@ -1294,7 +1339,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   var builders = {
     group: buildGroup,
     docgenGroup: buildDocgenGroup,
+    docgenTable: buildDocgenTable,
     propertyGroup: buildPropertyGroup,
+    constructionWasteReport: buildConstructionWasteReport,
     string: buildString,
     hetu: buildString,
     text: buildText,
@@ -1308,7 +1355,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     newBuildingSelector: buildNewBuildingSelector,
     fillMyInfoButton: buildFillMyInfoButton,
     foremanHistory: buildForemanHistory,
-    foremanOtherApplications: buildForemanOtherApplications,
+    "hanke-table": buildForemanOtherApplications,
     personSelector: buildPersonSelector,
     companySelector: buildCompanySelector,
     table: buildTableRow,
@@ -1444,7 +1491,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         parent$.append(makeElem(myModel, count));
       };
 
-      var copyElement = function() {
+      var copyElement = function(event) {
+        var clickedButton = event.currentTarget || event.target;
+        var updates = {paths: [], values: []};
         var parent$ = $(this).closest(".accordion-fields").find("tbody");
         var count = parent$.find("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.find("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
@@ -1459,6 +1508,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         // copy last element items to new
         lastItem$.find("td").each(function(index) {
           var newInput$ = $($(newItem).find("input, select")[index]);
+          var path = newInput$.attr("data-docgen-path");
           var oldInput$ = $(this).find("input, select");
           var prop = "value";
           if(oldInput$.is(":checkbox")) {
@@ -1466,11 +1516,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           }
           var oldValue = oldInput$.prop(prop);
           if(oldValue) {
-            newInput$.prop(prop, oldInput$.prop(prop));
-            newInput$.change();
+            newInput$.prop(prop, oldValue);
+            updates.paths.push(path);
+            updates.values.push(oldValue);
           }
         });
-
+        saveMany(clickedButton, updates);
         parent$.append(newItem);
       };
 
@@ -1682,7 +1733,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     hub.send(eventType, {appId: self.appId, documentId: self.docId, status: status, results: results});
 
 
-    if (callback) { callback(); }
+    if (callback) { callback(status, results); }
     // No return value or stopping the event propagation:
     // That would prevent moving to the next field with tab key in IE8.
   }
@@ -1706,6 +1757,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
+  }
+
+  function saveMany(target, updates, callback) {
+    var indicator = createIndicator(target);
+    saveForReal(updates.paths, updates.values, _.partial(afterSave, null, null, indicator, callback));
   }
 
   var emitters = {

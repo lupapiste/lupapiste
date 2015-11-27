@@ -10,6 +10,7 @@ LUPAPISTE.InputFieldModel = function(params) {
   self.label = params.lLabel ? loc(params.lLabel) : params.label;
   self.value = params.value;
   self.placeholder = params.lPlaceholder ? loc(params.lPlaceholder) : params.placeholder;
+  self.isSelected = params.hasFocus || ko.observable();
 
   self.required = params.required || false;
   if (self.required) {
@@ -26,5 +27,4 @@ LUPAPISTE.InputFieldModel = function(params) {
   self.optionsValue = params.optionsValue || "";
   self.optionsText  = params.optionsText || "";
   self.optionsCaption = params.lOptionsCaption ? loc(params.lOptionsCaption) : params.optionsCaption;
-
 };

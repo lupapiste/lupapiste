@@ -55,7 +55,7 @@
    {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}
    {:tag :asianKuvaus}])
 
-(def maa-aines_to_krysp
+(def maa-aines_to_krysp_212
   {:tag :MaaAinesluvat
    :ns "ymm"
    :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :MAL "2.1.2")
@@ -65,6 +65,55 @@
            {:tag :maaAineslupaAsiatieto :child [{:tag :MaaAineslupaAsia :child maaAineslupaAsia}]}
            {:tag :kotitarveottoasiaTieto} ; To be mapped in the future?
            ]})
+
+(def maa-aines_to_krysp_221
+  (-> maa-aines_to_krysp_212
+      (assoc-in [:attr :xsi:schemaLocation]
+                (mapping-common/schemalocation :MAL "2.2.1"))
+
+      ; Uses LausuntoYmpType where attachments have not changed
+
+      ; Support for foreign addresses
+      (update-in [:child] mapping-common/update-child-element
+                 [:maaAineslupaAsiatieto :MaaAineslupaAsia :hakemustieto :Hakemus :hakija]
+                 {:tag :hakija :child mapping-common/yhteystietotype-children_215})
+
+      ; Support for foreign addresses
+      ; (omistaja element not in the canonical model at the time of writing)
+      (update-in [:child] mapping-common/update-child-element
+                 [:maaAineslupaAsiatieto :MaaAineslupaAsia :hakemustieto :Hakemus :omistaja]
+                 {:tag :omistaja :child mapping-common/henkilo-child-ns-yht-215})
+
+      ; Support for foreign addresses
+      ; (ottamistoiminnanYhteyshenkilo element not in the canonical model at the time of writing)
+      (update-in [:child] mapping-common/update-child-element
+                 [:maaAineslupaAsiatieto :MaaAineslupaAsia :hakemustieto :Hakemus :ottamistoiminnanYhteyshenkilo]
+                 {:tag :ottamistoiminnanYhteyshenkilo :child mapping-common/henkilo-child-ns-yht-215})
+
+      ; Support for foreign addresses
+      ; (ottamissuunnitelmanLaatija element not in the canonical model at the time of writing)
+      (update-in [:child] mapping-common/update-child-element
+                 [:maaAineslupaAsiatieto :MaaAineslupaAsia :hakemustieto :Hakemus :ottamissuunnitelmatieto :Ottamissuunnitelma :ottamissuunnitelmanLaatija]
+                 {:tag :ottamissuunnitelmanLaatija
+                  :child (conj mapping-common/henkilo-child-ns-yht-215 {:tag :ammatti} {:tag :koulutus})})
+
+      ; Support for foreign addresses
+      (update-in [:child] mapping-common/update-child-element
+                 [:maaAineslupaAsiatieto :MaaAineslupaAsia :maksajatieto :Maksaja]
+                 {:tag :Maksaja :child mapping-common/maksajatype-children_215})
+
+      ; No changes to attachments
+      ))
+
+(defn- get-mapping [krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.2" maa-aines_to_krysp_212
+    "2.2.1" maa-aines_to_krysp_221
+    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
+
+(defn maa-aines-element-to-xml [canonical krysp-version]
+  (element-to-xml canonical (get-mapping krysp-version)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
@@ -81,7 +130,7 @@
                     canonical-with-statement-attachments
                     [:MaaAinesluvat :maaAineslupaAsiatieto :MaaAineslupaAsia :liitetieto]
                     attachments-canonical)
-        xml (element-to-xml canonical maa-aines_to_krysp)
+        xml (maa-aines-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
