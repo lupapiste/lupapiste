@@ -108,7 +108,7 @@
    :subject-key    "statement-request"
    :show-municipality-in-subject true})
 
-(defn- make-details [inviter now persons metadata]
+(defn- make-details [inviter now persons metadata saateText dueDate]
   (map
     (fn [person]
       (let [user (if (ss/blank? (:id person)) ;; "manually invited" statement givers lack the "id"
@@ -121,13 +121,15 @@
         (>pprint user)
         (println "\n")
 
-        (cond-> {:statement {:id statement-id
-                             :person statement-giver
-                             :requested now
-                             :given nil
+        (cond-> {:statement {:id            statement-id
+                             :person        statement-giver
+                             :requested     now
+                             :given         nil
                              :reminder-sent nil
-                             :metadata metadata
-                             :status nil}
+                             :metadata      metadata
+                             :saateText     saateText
+                             :dueDate       dueDate
+                             :status        nil}
                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
                  :recipient user}
           (seq metadata) (assoc :metadata metadata))))
@@ -144,10 +146,11 @@
     (or missing-keys has-invalid-email)))
 
 (defcommand request-for-statement
-  {:parameters [functionCode id personIds manualPersons]
+  {:parameters [functionCode id personIds manualPersons saateText dueDate]
    :user-roles #{:authority}
    :states #{:open :submitted :complementNeeded}
-   :input-validators [(partial action/vector-parameters-with-non-blank-items [:personIds])
+   :input-validators [(partial action/non-blank-parameters [:saateText :dueDate])
+                      (partial action/vector-parameters-with-non-blank-items [:personIds])
                       (partial action/vector-parameters-with-map-items-with-required-keys [:manualPersons] [:email :name :text])
                       validate-manual-persons]
    :notified true
@@ -165,7 +168,7 @@
                                               (println "\n")
                                               )
                                           metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
-                                          details (make-details user now persons-combined metadata)
+                                          details (make-details user now persons-combined metadata saateText dueDate)
                                           statements (map :statement details)
                                           auth (map :auth details)
                                           recipients (map :recipient details)]
