@@ -436,6 +436,33 @@
     }
   };
 
+  ko.bindingHandlers.infiniteScroll = {
+    init: function(element, valueAccessor, allBindingsAccessor) {
+      var load = ko.utils.unwrapObservable(valueAccessor());
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      var cb = bindings.loadFn || _.noop;
+
+      var waypoint = new Waypoint({
+        element: element,
+        handler: function(direction) {
+          if (load && direction === "down") {
+            cb();
+          }
+        },
+        offset: 'bottom-in-view'
+      });
+    },
+    update: function(element, valueAccessor, allBindingsAccessor) {
+      var load = ko.utils.unwrapObservable(valueAccessor());
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      var cb = bindings.loadFn || _.noop;
+      Waypoint.refreshAll();
+      if (util.elementInViewport(element) && load) {
+        cb();
+      }
+    }
+  }
+
   $.fn.applyBindings = function(model) {
     if (!this.length) {
       warn(this.selector + " didn't match any elements");
