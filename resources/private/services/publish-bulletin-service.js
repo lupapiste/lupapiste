@@ -8,6 +8,8 @@ LUPAPISTE.PublishBulletinService = function() {
 
   self.comments = ko.observable([]);
 
+  self.commentsLeft = ko.observable(true);
+
   ko.computed(function() {
     var state = self.publishPending() ? "pending" : "finished";
     hub.send("publishBulletinService::publishProcessing", {state: state});
@@ -63,7 +65,7 @@ LUPAPISTE.PublishBulletinService = function() {
 
   // bulletin comment pagination
   var skip = 0;
-  var limit = 1;
+  var limit = 5;
   var versionId = undefined;
 
   hub.subscribe("publishBulletinService::fetchBulletinComments", function(event) {
@@ -78,6 +80,7 @@ LUPAPISTE.PublishBulletinService = function() {
                                      limit: limit})
       .success(function(res) {
         self.comments(self.comments().concat(res.comments));
+        self.commentsLeft(res.commentsLeft);
         skip += limit;
       })
       .call();

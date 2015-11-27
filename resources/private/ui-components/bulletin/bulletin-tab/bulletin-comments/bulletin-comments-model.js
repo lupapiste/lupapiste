@@ -10,13 +10,14 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
 
   self.comments = params.comments;
 
-  ko.computed(function() {
+  self.commentsLeft = params.commentsLeft;
+
+  self.fetchComments = _.debounce(function() {
     var bulletinId = util.getIn(self, ["bulletin", "id"]);
     var versionId = util.getIn(self, ["showVersionComments", "id"]);
     self.sendEvent("publishBulletinService", "fetchBulletinComments", {bulletinId: bulletinId,
-                                                                       versionId: versionId,
-                                                                       reset: true});
-  });
+                                                                       versionId: versionId});
+  }, 50);
 
   self.hideComments = function() {
     self.showVersionComments(undefined);

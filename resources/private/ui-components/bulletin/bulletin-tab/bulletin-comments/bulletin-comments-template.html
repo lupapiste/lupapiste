@@ -38,4 +38,5 @@
     </div>
   </div>
   <!-- /ko -->
+  <div data-bind="infiniteScroll: commentsLeft() > 0, loadFn: fetchComments"></div>
 </script>
