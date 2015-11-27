@@ -214,25 +214,41 @@
       (provided
         (mongo/create-id) => "123"))))
 
-(facts "facts about attachment publicity"
-   (let [no-metadata {}
-         no-metadata2 {:metadata {}}
-         nakyvyys-not-public {:metadata {:nakyvyys "test"}}
-         jluokka-nakyvyys-not-public {:metadata {:nakyvyys "test"
-                                                 :julkisuusluokka "test2"}}
-         nakyvyys-public {:metadata {:nakyvyys "julkinen"
-                                     :julkisuusluokka "test2"}}
-         jluokka-public {:metadata {:nakyvyys "test"
-                                    :julkisuusluokka "julkinen"}}
-         both-public {:metadata {:nakyvyys "test"
-                                 :julkisuusluokka "julkinen"}}
-         only-julkisuusluokka {:metadata {:julkisuusluokka "julkinen"}}]
+(facts "facts about attachment accessibility"
+  (fact "visibility"
+    (let [no-metadata {}
+          no-metadata2 {:metadata {}}
+          nakyvyys-not-public {:metadata {:nakyvyys "test"}}
+          jluokka-nakyvyys-not-public {:metadata {:nakyvyys "test"
+                                                  :julkisuusluokka "test2"}}
+          nakyvyys-public {:metadata {:nakyvyys "julkinen"
+                                      :julkisuusluokka "test2"}}
+          jluokka-public {:metadata {:nakyvyys "test"
+                                     :julkisuusluokka "julkinen"}}
+          both-public {:metadata {:nakyvyys "test"
+                                  :julkisuusluokka "julkinen"}}
+          only-julkisuusluokka {:metadata {:julkisuusluokka "julkinen"}}]
 
-     (public-attachment? no-metadata) => true
-     (public-attachment? no-metadata2) => true
-     (public-attachment? nakyvyys-not-public) => false
-     (public-attachment? jluokka-nakyvyys-not-public) => false
-     (fact "julkisuusluokka overrules nakyvyys" (public-attachment? nakyvyys-public) => false)
-     (public-attachment? jluokka-public) => true
-     (public-attachment? both-public) => true
-     (public-attachment? only-julkisuusluokka) => true))
+      (public-attachment? no-metadata) => true
+      (public-attachment? no-metadata2) => true
+      (public-attachment? nakyvyys-not-public) => false
+      (public-attachment? jluokka-nakyvyys-not-public) => false
+      (fact "julkisuusluokka overrules nakyvyys" (public-attachment? nakyvyys-public) => false)
+      (public-attachment? jluokka-public) => true
+      (public-attachment? both-public) => true
+      (public-attachment? only-julkisuusluokka) => true))
+
+   (facts "who can access attachment"
+     (let [user1 {:id "1"}
+           user2 {:id "2"}
+           att0-empty {}
+           att1-no-meta {:latestVersion {:fileId "322" :user {:id "1"}}
+                         :versions [{:fileId "321" :user {:id "1"}}
+                                    {:fileId "322" :user {:id "1"}}]}]
+
+       (fact "empty attachment can be accessed by anyone, to upload versions"
+         (can-access-attachment? user1 att0-empty) => true
+         (can-access-attachment? user1 att0-empty) => true)
+
+       (can-access-attachment? user1 att1-no-meta) => true
+       (can-access-attachment? user1 att1-no-meta) => true)))
