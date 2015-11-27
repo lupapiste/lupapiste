@@ -23,9 +23,6 @@
 
     self.data = ko.observable();
     self.application = ko.observable();
-    self.metadata = ko.observable();
-    self.statementId  = ko.observable();
-    self.showTosMetadata = ko.observable(false);
 
     self.statuses = ko.observableArray([]);
     self.selectedStatus = ko.observable();
@@ -48,15 +45,8 @@
       if(self.data() && self.data().status && self.data().status() !== value) { self.dirty(true); }
     });
 
-    self.toggleTosMetadata = function() {
-      self.showTosMetadata(!self.showTosMetadata());
-    };
-
     self.clear = function() {
       self.data(null);
-      self.metadata(null);
-      self.statementId(null);
-      self.showTosMetadata(false);
       self.application(null);
       self.statuses([]);
       self.selectedStatus(null);
@@ -70,8 +60,6 @@
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
       if(statement) {
         self.data(ko.mapping.fromJS(statement));
-        self.metadata(statement.metadata);
-        self.statementId(statement.id);
 
         if (!self.dirty()) {
           if (statement.status) {
