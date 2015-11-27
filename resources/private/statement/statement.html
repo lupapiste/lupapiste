@@ -103,7 +103,10 @@
 
         <button
           class="btn"
-          data-bind="ltext: 'application.attachmentsAdd', visible: canAddAttachment() && $root.authorization.ok('give-statement'), enabled: canAddAttachment() && $root.authorization.ok('give-statement'), click: newAttachment"
+          data-bind="ltext: 'application.attachmentsAdd',
+                     visible: canAddAttachment() && $root.authorization.ok('give-statement'),
+                     enabled: canAddAttachment() && $root.authorization.ok('give-statement'),
+                     click: newAttachment"
           data-test-id="add-statement-attachment">
         </button>
       </div>
