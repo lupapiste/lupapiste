@@ -59,11 +59,16 @@
       #(assoc (first (:versions %)) :id (:_id %))
       apps)))
 
+(defn- page-size-validator [{{page :page} :data}]
+  (when (> (* page bulletin-page-size) (Integer/MAX_VALUE))
+    (fail :error.page-is-too-big)))
+
 (defquery application-bulletins
   {:description "Query for Julkipano"
    :feature :publish-bulletin
    :parameters [page searchText municipality state sort]
-   :input-validators [(partial action/number-parameters [:page])]
+   :input-validators [(partial action/number-parameters [:page])
+                      page-size-validator]
    :user-roles #{:anonymous}}
   [_]
   (let [parameters [page searchText municipality state sort]]
