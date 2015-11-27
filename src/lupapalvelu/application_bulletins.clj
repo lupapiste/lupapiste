@@ -25,7 +25,7 @@
    :versions.address 1 :versions.location 1
    :versions.primaryOperation 1 :versions.propertyId 1
    :versions.applicant 1 :versions.modified 1
-   :versions.proclamationEndsAt 1
+   :versions.proclamationEndsAt 1 :versions.proclamationStartsAt 1
    :modified 1})
 
 (def bulletin-fields
@@ -64,12 +64,15 @@
   {$push {:versions snapshot}
    $set  (merge {:modified ts} search-fields)})
 
-(defn create-comment [comment contact-info created]
+(defn create-comment [bulletin-id version-id comment contact-info files created]
   (let [id          (mongo/create-id)
         new-comment {:id           id
+                     :bulletinId   bulletin-id
+                     :versionId    version-id
                      :comment      comment
                      :created      created
-                     :contact-info contact-info}]
+                     :contact-info contact-info
+                     :attachments  files}]
     new-comment))
 
 (defn get-bulletin
