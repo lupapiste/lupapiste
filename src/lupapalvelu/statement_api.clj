@@ -111,8 +111,9 @@
 (defn- make-details [inviter now persons metadata saateText dueDate]
   (map
     (fn [person]
-      (let [user (if (ss/blank? (:id person)) ;; "manually invited" statement givers lack the "id"
-                   (or (user/get-user-by-email (:email person)) (fail! :error.not-found))
+;      (println "\n make-details, person: " person "\n")
+      (let [user (if-not (ss/blank? (:id person)) ;; "manually invited" statement givers lack the "id"
+                   (or (user/get-user-by-email (:email person)) (fail! :error.user-not-found))
                    (user/get-or-create-user-by-email (:email person) inviter))
             statement-id (mongo/create-id)
             statement-giver (assoc person :userId (:id user))]
@@ -135,46 +136,49 @@
           (seq metadata) (assoc :metadata metadata))))
     persons))
 
-(defn validate-manual-persons [{{manualPersons :manualPersons} :data}]
-;  (println "\n validate-manual-persons, manualPersons: " manualPersons "\n")
-  (let [missing-keys (when (some
-                             #(some (fn [k] (or (-> % k string? not) (-> % k ss/blank?))) [:email :name :text])
-                             manualPersons)
-                       (fail :error.missing-parameters))
-        has-invalid-email (when (some #(not (v/email-and-domain-valid? (:email %))) manualPersons)
+(defn validate-selected-persons [{{selectedPersons :selectedPersons} :data}]
+;  (println "\n validate-selected-persons, selectedPersons: " selectedPersons "\n")
+  (let [non-blank-string-keys (when (some
+                                      #(some (fn [k] (or (-> % k string? not) (-> % k ss/blank?))) [:email :name :text])
+                                      selectedPersons)
+                                (fail :error.missing-parameters))
+        has-invalid-email (when (some
+                                  #(not (v/email-and-domain-valid? (:email %)))
+                                  selectedPersons)
                             (fail :error.email))]
-    (or missing-keys has-invalid-email)))
+    (or non-blank-string-keys has-invalid-email)))
 
 (defcommand request-for-statement
-  {:parameters [functionCode id personIds manualPersons saateText dueDate]
+  {:parameters [functionCode id selectedPersons saateText dueDate]
    :user-roles #{:authority}
    :states #{:open :submitted :complementNeeded}
    :input-validators [(partial action/non-blank-parameters [:saateText :dueDate])
-                      (partial action/vector-parameters-with-non-blank-items [:personIds])
-                      (partial action/vector-parameters-with-map-items-with-required-keys [:manualPersons] [:email :name :text])
-                      validate-manual-persons]
+                      (partial action/vector-parameters-with-map-items-with-required-keys [:selectedPersons] [:email :name :text])
+                      validate-selected-persons]
    :notified true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
-;  (println "\n manualPersons: " manualPersons "\n")
-  (organization/with-organization organization
-                                  (fn [{:keys [statementGivers]}]
-                                    (let [personIdSet (set personIds)
-                                          persons (filter #(personIdSet (:id %)) statementGivers)
-                                          persons-combined (concat persons manualPersons)
-                                          _ (do
-                                              (println "\n persons-combined: ")
-                                              (>pprint persons-combined)
-                                              (println "\n")
-                                              )
-                                          metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
-                                          details (make-details user now persons-combined metadata saateText dueDate)
-                                          statements (map :statement details)
-                                          auth (map :auth details)
-                                          recipients (map :recipient details)]
-                                      (update-application command {$push {:statements {$each statements}
-                                                                          :auth {$each auth}}})
-                                      (notifications/notify! :request-statement (assoc command :recipients recipients))))))
+  (let [personIdSet (->> selectedPersons (map :id) (filter identity) set)
+        manualPersons (filter #(not (:id %)) selectedPersons)]
+;    (println "\n personIdSet: " personIdSet "\n")
+;    (println "\n manualPersons: " manualPersons "\n")
+    (organization/with-organization organization
+                                    (fn [{:keys [statementGivers]}]
+                                      (let [persons (filter #(personIdSet (:id %)) statementGivers)
+                                            persons-combined (concat persons manualPersons)
+                                            _ (do
+                                                (println "\n persons-combined: ")
+                                                (>pprint persons-combined)
+                                                (println "\n")
+                                                )
+                                            metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
+                                            details (make-details user now persons-combined metadata saateText dueDate)
+                                            statements (map :statement details)
+                                            auth (map :auth details)
+                                            recipients (map :recipient details)]
+                                        (update-application command {$push {:statements {$each statements}
+                                                                            :auth {$each auth}}})
+                                        (notifications/notify! :request-statement (assoc command :recipients recipients)))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]
