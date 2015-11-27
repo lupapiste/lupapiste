@@ -1,0 +1,2 @@
+bulletin.comments.sort.desc:  Näytä vanhin ensin
+bulletin.comments.sort.asc:   Näytä uusin ensin

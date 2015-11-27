@@ -253,12 +253,13 @@
   {:parameters [bulletinId versionId]
    :feature    :publish-bulletin
    :user-roles #{:authority :applicant}}
-  [{{skip :skip limit :limit} :data}]
+  [{{skip :skip limit :limit asc :asc} :data}]
   (let [skip           (util/->int skip)
         limit          (util/->int limit)
+        sort           (if (= "false" asc) {:created -1} {:created 1})
         comments       (mongo/with-collection "application-bulletin-comments"
                          (query/find  {})
-                         (query/sort  {:created -1})
+                         (query/sort  sort)
                          (query/skip  skip)
                          (query/limit limit))
         total-comments (mongo/count :application-bulletin-comments {})

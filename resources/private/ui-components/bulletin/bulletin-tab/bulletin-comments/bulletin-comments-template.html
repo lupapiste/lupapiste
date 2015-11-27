@@ -8,13 +8,21 @@
       <h1 data-bind="ltext: 'bulletin.comments.title'"></h1>
       <span data-bind="component: { name: 'help-toggle', params: { lhtml: 'help.bulletin.comments' } }"></span>
     </div>
-    <p data-bind="text: proclaimedHeader"></p>
+    <div class="bulletin-proclamation-header">
+      <span class="bulletin-proclamation-text" data-bind="text: proclaimedHeader"></span>
+      <button class="bulletin-proclamation-sort primary" data-bind="toggleClick: asc, ltext: sortButtonText"></button>
+    </div>
   </div>
 
   <!-- ko foreach: comments -->
   <div class="bulletin-comment">
     <div class="bulletin-comment__header">
+      <!-- ko if: $parent.asc -->
+      <span class="bulletin-comment__index" data-bind="text: $index() + 1"></span>
+      <!-- /ko -->
+      <!-- ko ifnot: $parent.asc -->
       <span class="bulletin-comment__index" data-bind="text: $parent.totalComments() - $index()"></span>
+      <!-- /ko -->
       <span class="bulletin-comment__name"  data-bind="fullName: $data['contact-info']"></span>
       <span data-bind="dateTimeString: $data.created"></span>
     </div>
