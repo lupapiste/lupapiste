@@ -1114,16 +1114,24 @@
                                     <tbody data-bind="foreach: combinedData()">
                                         <tr class="statement-row">
                                             <td>
-                                                <input class="form-input" type="checkbox" data-test-id="check-statement-giver"
+<!--                                            TODO: kokeile: checkedValue: $data, -->
+                                                <input id="add-statement-giver-checkbox"
+                                                       class="form-input" type="checkbox"
                                                        data-bind="value: id,
                                                                   checked: $root.requestForStatementModel.personIds,
                                                                   attr: {'id': id,
                                                                          'data-test-id': 'check-statement-giver-' + $index(),
                                                                          'disabled': isDisabled}" />
                                             </td>
-                                            <td data-bind="text: text()"></td>
-                                            <td data-bind="text: name()"></td>
-                                            <td data-bind="text: email()"></td>
+                                            <td>
+                                              <input class="form-input" type="text" data-bind="textInput: text, attr: {'data-test-id': 'add-statement-giver-text-' + $index()}"></input>
+                                            </td>
+                                            <td>
+                                              <input class="form-input" type="text" data-bind="textInput: name, attr: {'data-test-id': 'add-statement-giver-name-' + $index()}"></input>
+                                            </td>
+                                            <td>
+                                            <input class="form-input" type="text" data-bind="textInput: email, attr: {'data-test-id': 'add-statement-giver-email-' + $index()}"></input>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
