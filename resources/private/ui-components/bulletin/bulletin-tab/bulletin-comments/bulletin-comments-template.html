@@ -38,5 +38,5 @@
     </div>
   </div>
   <!-- /ko -->
-  <div data-bind="infiniteScroll: commentsLeft() > 0, loadFn: fetchComments"></div>
+  <div class="bulletin-comment-spinner" data-bind="component: {name: 'infinite-scroll', params: {load: commentsLeft, loadFn: fetchComments}}"></div>
 </script>

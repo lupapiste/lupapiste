@@ -10,7 +10,9 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
 
   self.comments = params.comments;
 
-  self.commentsLeft = params.commentsLeft;
+  self.commentsLeft = ko.pureComputed(function() {
+    return params.commentsLeft() > 0;
+  }).extend({notify: "always"});
 
   self.fetchComments = _.debounce(function() {
     var bulletinId = util.getIn(self, ["bulletin", "id"]);
