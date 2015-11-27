@@ -261,6 +261,6 @@
                    (query/sort  {:created -1})
                    (query/skip  skip)
                    (query/limit limit))
-        comments-left (- (mongo/count :application-bulletin-comments {}) (+ skip (count comments)))]
+        comments-left (max 0 (- (mongo/count :application-bulletin-comments {}) (+ skip (count comments))))]
     (ok :comments comments :commentsLeft comments-left)))
 
