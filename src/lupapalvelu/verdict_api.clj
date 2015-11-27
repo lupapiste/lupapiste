@@ -40,7 +40,8 @@
       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
         (when updates
           (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
-            (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))))
+            (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
+            (t/change-app-and-attachments-metadata-state! command :luonnos :valmis)))
         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
     (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} (:name op))
       (verdict/fetch-tj-suunnittelija-verdict command))))
@@ -134,6 +135,7 @@
                              (:mongo-updates doc-updates)
                              (application/state-transition-update next-state timestamp (:user command))
                              {$set {:verdicts.$.draft false}}))
+        (t/change-app-and-attachments-metadata-state! command :luonnos :valmis)
         (ok)))
     (fail :error.no-verdict-municipality-id)))
 
