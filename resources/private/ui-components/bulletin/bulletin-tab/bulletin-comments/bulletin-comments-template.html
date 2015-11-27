@@ -14,7 +14,7 @@
   <!-- ko foreach: comments -->
   <div class="bulletin-comment">
     <div class="bulletin-comment__header">
-      <span class="bulletin-comment__index" data-bind="text: $index() + 1"></span>
+      <span class="bulletin-comment__index" data-bind="text: $parent.totalComments() - $index()"></span>
       <span class="bulletin-comment__name"  data-bind="fullName: $data['contact-info']"></span>
       <span data-bind="dateTimeString: $data.created"></span>
     </div>

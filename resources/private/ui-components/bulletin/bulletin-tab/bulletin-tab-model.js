@@ -10,6 +10,7 @@ LUPAPISTE.BulletinTabModel = function(params) {
   self.bulletin = params.bulletinService.bulletin;
   self.comments = params.bulletinService.comments;
   self.commentsLeft = params.bulletinService.commentsLeft;
+  self.totalComments = params.bulletinService.totalComments;
 
   self.showVersionComments = ko.observable(false);
 

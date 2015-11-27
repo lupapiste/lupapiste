@@ -10,6 +10,8 @@ LUPAPISTE.PublishBulletinService = function() {
 
   self.commentsLeft = ko.observable(true);
 
+  self.totalComments = ko.observable();
+
   ko.computed(function() {
     var state = self.publishPending() ? "pending" : "finished";
     hub.send("publishBulletinService::publishProcessing", {state: state});
@@ -81,6 +83,7 @@ LUPAPISTE.PublishBulletinService = function() {
       .success(function(res) {
         self.comments(self.comments().concat(res.comments));
         self.commentsLeft(res.commentsLeft);
+        self.totalComments(res.totalComments);
         skip += limit;
       })
       .call();
