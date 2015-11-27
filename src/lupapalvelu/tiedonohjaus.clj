@@ -2,7 +2,9 @@
   (:require [sade.http :as http]
             [sade.env :as env]
             [clojure.core.memoize :as memo]
-            [lupapalvelu.organization :as o]))
+            [lupapalvelu.organization :as o]
+            [lupapalvelu.action :as action]
+            [monger.operators :refer :all]))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
@@ -44,10 +46,12 @@
   (memo/ttl get-metadata-for-document-from-toj
             :ttl/threshold 10000))
 
-(defn document-with-updated-metadata [document organization tos-function & [type]]
-  (let [document-type (or type (:type document))]
-    (->> (metadata-for-document organization tos-function document-type)
-         (assoc document :metadata))))
+(defn document-with-updated-metadata [{:keys [metadata] :as document} organization tos-function & [type]]
+  (let [document-type (or type (:type document))
+        existing-tila (:tila metadata)
+        new-metadata (cond-> (metadata-for-document organization tos-function document-type)
+                             existing-tila (assoc :tila (keyword existing-tila)))]
+    (assoc document :metadata new-metadata)))
 
 (defn- get-tos-toimenpide-for-application-state-from-toj [organization tos-function state]
   (if (env/feature? :tiedonohjaus)
@@ -99,3 +103,29 @@
                                    (and (>= doc-ts ts) (or (nil? next) (< doc-ts (:ts next)))))
                            all-docs)}))
       (partition 2 1 nil (:history application)))))
+
+(defn- change-document-metadata-state [{:keys [metadata] :as doc} from-state to-state now]
+  (if (= from-state (keyword (:tila metadata)))
+    (-> (assoc-in doc [:metadata :tila] to-state)
+        (assoc :modified now))
+    doc))
+
+(defn change-app-and-attachments-metadata-state! [{:keys [created application] :as command} from-state to-state]
+  (when (and (env/feature? :tiedonohjaus) (seq (:metadata application)))
+    (let [{{new-tila :tila} :metadata} (change-document-metadata-state application from-state to-state created)
+          updated-attachments (map #(change-document-metadata-state % from-state to-state created) (:attachments application))]
+      (action/update-application
+        command
+        {$set {:modified created
+               :metadata.tila new-tila
+               :attachments updated-attachments}}))))
+
+(defn change-attachment-metadata-state! [application now attachment-id from-state to-state]
+  (let [attachment (first (filter #(= (:id %) attachment-id) (:attachments application)))]
+    (when (and (env/feature? :tiedonohjaus) (seq (:metadata attachment)))
+      (let [{{new-tila :tila} :metadata} (change-document-metadata-state attachment from-state to-state now)]
+        (action/update-application
+          (action/application->command application)
+          {:attachments.id attachment-id}
+          {$set {:modified now
+                 :attachments.$.metadata.tila new-tila}})))))
