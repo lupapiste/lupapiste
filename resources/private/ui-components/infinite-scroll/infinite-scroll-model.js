@@ -3,8 +3,10 @@ LUPAPISTE.InfiniteScrollModel = function(params) {
   var self = this;
 
   self.id = params.id || util.randomElementId("infinite-scroll");
-  self.waiting = ko.observable(true);
+  self.waiting = ko.observable(false);
   self.load = params.load || ko.observable(false);
+
+  self.load.extend({notify: "always"});
 
   var loadFn = params.loadFn || _.noop;
   var waypoint = undefined;
