@@ -1009,7 +1009,7 @@
     (facts "Purku: rakennus"
       (let [rakennus (get-in purku-t [:rakennustieto :Rakennus])]
         (fact "omistaja" (-> rakennus :omistajatieto first :Omistaja :henkilo :sahkopostiosoite) => "pena@example.com")
-        (fact "yksilointitieto" (-> rakennus :yksilointitieto) => "purku")
+        (fact "yksilointitieto" (-> rakennus :yksilointitieto) => "purkaminen-id")
         (fact "rakennusnro" (-> rakennus :rakennuksenTiedot :rakennustunnus :rakennusnro) => "001")
         (fact "kayttotarkoitus" (-> rakennus :rakennuksenTiedot :kayttotarkoitus) => "012 kahden asunnon talot")))
 
