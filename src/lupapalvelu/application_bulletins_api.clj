@@ -249,10 +249,13 @@
    :feature    :publish-bulletin
    :user-roles #{:authority :applicant}}
   [{{skip :skip limit :limit} :data}]
-  (let [comments (mongo/with-collection "application-bulletin-comments"
+  (let [skip     (util/->int skip)
+        limit    (util/->int limit)
+        comments (mongo/with-collection "application-bulletin-comments"
                    (query/find  {})
                    (query/sort  {:created -1})
-                   (query/skip  (util/->int skip))
-                   (query/limit (util/->int limit)))]
-    (ok :comments comments)))
+                   (query/skip  skip)
+                   (query/limit limit))
+        comments-left (- (mongo/count :application-bulletin-comments {}) (+ skip (count comments)))]
+    (ok :comments comments :commentsLeft comments-left)))
 
