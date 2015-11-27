@@ -527,11 +527,5 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
-(defn public-attachment?
-  "Returns false if either julkisuusluokka or nakyvyys metadata is not public. Without metadata returns true."
-  [{metadata :metadata :as attachment}]
-  (let [visibility (get metadata :nakyvyys)
-        publicity-class (get metadata :julkisuusluokka)]
-    (if (or publicity-class visibility)
-      (= "julkinen" (or publicity-class visibility))
-      true)))
+(defn owns-latest-version? [{latest :latestVersion} user-id]
+  (= (-> latest :user :id) user-id))

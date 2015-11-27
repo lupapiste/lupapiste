@@ -10,13 +10,14 @@
             [sade.util :as util :refer [future*]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
+            [lupapalvelu.application :as a]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment-metadata :as attachment-meta]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.application :as a]
-            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
@@ -30,8 +31,7 @@
             [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdftk :as pdftk]
-            [lupapalvelu.tiff-validation :as tiff-validation]
-            [lupapiste-commons.tos-metadata-schema :as tosmeta])
+            [lupapalvelu.tiff-validation :as tiff-validation])
   (:import [java.io File]))
 
 ;; Validators
@@ -608,7 +608,7 @@
    :user-roles #{:authority :applicant}
    :feature    :attachment-visibility
    :input-validators [(fn [{{nakyvyys-value :value} :data :as c}]
-                        (when-not (some (hash-set (keyword nakyvyys-value)) (:values tosmeta/Nakyvyys))
+                        (when-not (some (hash-set (keyword nakyvyys-value)) attachment-meta/visibilities)
                           (fail :error.invalid-nakyvyys-value :value nakyvyys-value)))]
    :states     states/pre-verdict-states}
   [command]
