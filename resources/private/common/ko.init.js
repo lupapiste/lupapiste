@@ -440,7 +440,7 @@
     init: function(element, valueAccessor, allBindingsAccessor) {
       var load = ko.utils.unwrapObservable(valueAccessor());
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
-      var cb = bindings.loadFn || _.noop;
+      var cb = bindings.loadFn || _.noop;
 
       var waypoint = new Waypoint({
         element: element,
@@ -455,7 +455,7 @@
     update: function(element, valueAccessor, allBindingsAccessor) {
       var load = ko.utils.unwrapObservable(valueAccessor());
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
-      var cb = bindings.loadFn || _.noop;
+      var cb = bindings.loadFn || _.noop;
       Waypoint.refreshAll();
       if (util.elementInViewport(element) && load) {
         cb();
