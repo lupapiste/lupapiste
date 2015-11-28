@@ -243,6 +243,19 @@
        :name {:fi (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
               :sv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))}})))
 
+(defn krysp-to-address-details [lang feature]
+  (when (seq feature)
+    (let [street-by-lang (xml-> feature :mkos:Osoite :yht:osoitenimi :yht:teksti (attr= :xml:lang lang) text)
+          street (if (seq street-by-lang)
+                   street-by-lang
+                   (xml-> feature :mkos:Osoite :yht:osoitenimi :yht:teksti text))
+          xy (ss/split (first (xml-> feature :mkos:Osoite :yht:pistesijainti :gml:Point :gml:pos text)) #"\s")]
+      {:street (first street)
+       :number (first (xml-> feature :mkos:Osoite :yht:osoitenumero text))
+       :municipality (first (xml-> feature :mkos:Osoite :yht:kunta text))
+       :x (util/->double (first xy))
+       :y (util/->double (second xy))})))
+
 (defn feature-to-property-info [feature]
   (when (seq feature)
     (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:rekisteriyksikonPalstanTietoja :ktjkiiwfs:RekisteriyksikonPalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")
@@ -340,30 +353,14 @@
                              :BUFFER "500"}))
 
 (defn address-by-point-from-municipality [x y {:keys [url credentials]}]
-  (let [;"http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"
-        ;"http://kartta.salo.fi/teklaogcweb/WFS.ashx"
-        filter (sxml/element-to-string
-                 (assoc
-                   (ogc-filter
-                     #_(property-is-equal "yht:osoitenimi/yht:teksti" "Helsingintie")
+  (let [x_d (util/->double x)
+        y_d (util/->double y)
+        radius 50
+        filter-xml (ogc-filter
                      (ogc-bbox
                       (property-name "yht:pistesijainti/gml:Point/gml:pos")
-                      (envelope "EPSG:3067" [(- (util/->double x) 50) (- (util/->double y) 50)] [(+ (util/->double x) 50) (+ (util/->double y) 50)])
-                      )
-
-                     #_(intersects
-                        (update (point x y) :attrs assoc :srsName "http://www.opengis.net/gml/srs/epsg.xml#3067")
-                        (distance 10))
-                   #_(intersects
-                      (property-name "yht:pistesijainti/gml:Point/gml:pos")
-                      (point x y)
-                      #_(update (point x y) :attrs assoc :srsName "http://www.opengis.net/gml/srs/epsg.xml#3067"))
-
-                     )
-                   :attrs (dissoc xml-namespaces "xmlns:ktjkiiwfs" "xmlns:oso")))
-        ]
-
-    ;(println filter)
+                       (envelope "EPSG:3067" [(- x_d radius) (- y_d 50)] [(+ x_d 50) (+ y_d 50)])))
+        filter-str (sxml/element-to-string (assoc filter-xml :attrs (dissoc xml-namespaces "xmlns:ktjkiiwfs" "xmlns:oso")))]
 
     (exec :get url
       credentials
@@ -372,7 +369,7 @@
        :VERSION "1.1.0"
        :TYPENAME "mkos:Osoite"
        :SRSNAME "EPSG:3067"
-       :FILTER filter
+       :FILTER filter-str
        :MAXFEATURES "20"})))
 
 (defn property-id-by-point [x y]
