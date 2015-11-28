@@ -234,12 +234,15 @@
 ;; http://www.maanmittauslaitos.fi/node/7365, i.e. "oso:katunumero" and "oso:jarjestysnumero" explained
 (defn feature-to-address-details [feature]
   (when (seq feature)
-    (let [katunumero (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))]
+    (let [katunumero (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
+          xy (ss/split (first (xml-> feature :oso:Osoitepiste :oso:sijainti :gml:Point :gml:pos text)) #"\s")]
       {:street (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
        :number (if (or (nil? katunumero) (= "0" katunumero))
                  (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:jarjestysnumero text))
                  katunumero)
        :municipality (first (xml-> feature :oso:Osoitepiste :oso:kuntatunnus text))
+       :x (util/->double (first xy))
+       :y (util/->double (second xy))
        :name {:fi (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
               :sv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))}})))
 
@@ -358,7 +361,7 @@
         radius 50
         filter-xml (ogc-filter
                      (ogc-bbox
-                      (property-name "yht:pistesijainti/gml:Point/gml:pos")
+                       (property-name "yht:pistesijainti/gml:Point/gml:pos")
                        (envelope "EPSG:3067" [(- x_d radius) (- y_d 50)] [(+ x_d 50) (+ y_d 50)])))
         filter-str (sxml/element-to-string (assoc filter-xml :attrs (dissoc xml-namespaces "xmlns:ktjkiiwfs" "xmlns:oso")))]
 
