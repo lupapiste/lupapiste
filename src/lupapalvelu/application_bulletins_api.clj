@@ -59,11 +59,16 @@
       #(assoc (first (:versions %)) :id (:_id %))
       apps)))
 
+(defn- page-size-validator [{{page :page} :data}]
+  (when (> (* page bulletin-page-size) (Integer/MAX_VALUE))
+    (fail :error.page-is-too-big)))
+
 (defquery application-bulletins
   {:description "Query for Julkipano"
    :feature :publish-bulletin
    :parameters [page searchText municipality state sort]
-   :input-validators [(partial action/number-parameters [:page])]
+   :input-validators [(partial action/number-parameters [:page])
+                      page-size-validator]
    :user-roles #{:anonymous}}
   [_]
   (let [parameters [page searchText municipality state sort]]
@@ -148,8 +153,8 @@
         delivery-address (select-keys address-source delivery-address-fields)
         contact-info (merge delivery-address {:email          email
                                               :emailPreferred (= emailPreferred "on")})
-        comment (bulletins/create-comment comment contact-info created)]
-    (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments files)}})
+        comment (bulletins/create-comment bulletin-id bulletin-version-id comment contact-info files created)]
+    (mongo/insert :application-bulletin-comments comment)
     (ok)))
 
 (defn- get-search-fields [fields app]
@@ -242,3 +247,21 @@
                                     :bulletinState 1}))
         bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
     (ok :bulletin bulletin)))
+
+(defquery bulletin-comments
+  "returns paginated comments related to given version id"
+  {:parameters [bulletinId versionId]
+   :feature    :publish-bulletin
+   :user-roles #{:authority :applicant}}
+  [{{skip :skip limit :limit asc :asc} :data}]
+  (let [skip           (util/->int skip)
+        limit          (util/->int limit)
+        sort           (if (= "false" asc) {:created -1} {:created 1})
+        comments       (mongo/with-collection "application-bulletin-comments"
+                         (query/find  {})
+                         (query/sort  sort)
+                         (query/skip  skip)
+                         (query/limit limit))
+        total-comments (mongo/count :application-bulletin-comments {})
+        comments-left  (max 0 (- total-comments (+ skip (count comments))))]
+    (ok :comments comments :totalComments total-comments :commentsLeft comments-left)))

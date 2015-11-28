@@ -3,7 +3,14 @@ LUPAPISTE.PublishBulletinService = function() {
   var self = this;
 
   self.bulletin = ko.observable();
+
   self.publishPending = ko.observable(false);
+
+  self.comments = ko.observable([]);
+
+  self.commentsLeft = ko.observable(true);
+
+  self.totalComments = ko.observable();
 
   ko.computed(function() {
     var state = self.publishPending() ? "pending" : "finished";
@@ -56,5 +63,32 @@ LUPAPISTE.PublishBulletinService = function() {
 
   hub.subscribe("publishBulletinService::fetchBulletinVersions", function(event) {
     fetchBulletinVersions(event.bulletinId);
+  });
+
+  // bulletin comment pagination
+  var skip = 0;
+  var limit = 5;
+  var versionId = undefined;
+  var asc = false;
+
+  hub.subscribe("publishBulletinService::fetchBulletinComments", function(event) {
+    if (event.versionId !== versionId || event.asc !== asc) {
+      skip = 0;
+      versionId = event.versionId;
+      self.comments([]);
+    }
+    ajax.query("bulletin-comments", {bulletinId: event.bulletinId,
+                                     versionId: event.versionId,
+                                     skip: skip,
+                                     limit: limit,
+                                     asc: event.asc})
+      .success(function(res) {
+        self.comments(self.comments().concat(res.comments));
+        self.commentsLeft(res.commentsLeft);
+        self.totalComments(res.totalComments);
+        skip += limit;
+        asc = event.asc;
+      })
+      .call();
   });
 };

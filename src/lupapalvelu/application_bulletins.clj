@@ -64,12 +64,15 @@
   {$push {:versions snapshot}
    $set  (merge {:modified ts} search-fields)})
 
-(defn create-comment [comment contact-info created]
+(defn create-comment [bulletin-id version-id comment contact-info files created]
   (let [id          (mongo/create-id)
         new-comment {:id           id
+                     :bulletinId   bulletin-id
+                     :versionId    version-id
                      :comment      comment
                      :created      created
-                     :contact-info contact-info}]
+                     :contact-info contact-info
+                     :attachments  files}]
     new-comment))
 
 (defn get-bulletin

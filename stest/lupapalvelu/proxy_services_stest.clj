@@ -172,7 +172,7 @@
                       :linkki "http://img.sito.fi/kaavamaaraykset/91/8755.pdf"
                       :type "sito"}))
 
-  (fact "Mikkeli"
+  #_(fact "Mikkeli"
     (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
           body (json/decode (:body response) true)]
 
@@ -257,23 +257,23 @@
           (wfs/raster-images request "wmts") => http200?)))))
 
 (facts "WMS layers"
-  (let [base-params {"FORMAT" "image/png"
-                     "SERVICE" "WMS"
-                     "VERSION" "1.1.1"
-                     "REQUEST" "GetMap"
-                     "STYLES"  ""
-                     "SRS"     "EPSG:3067"
-                     "BBOX"   "444416,6666496,444672,6666752"
-                     "WIDTH"   "256"
-                     "HEIGHT" "256"}]
-    (doseq [layer [{"LAYERS" "taustakartta_5k"}
-                   {"LAYERS" "taustakartta_10k"}
-                   {"LAYERS" "taustakartta_20k"}
-                   {"LAYERS" "taustakartta_40k"}
-                   {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
-                   {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}
-                   {"LAYERS" "yleiskaava"}
-                   {"LAYERS" "yleiskaava_poikkeavat"}]]
+  (let [base-params {:FORMAT "image/png"
+                     :SERVICE "WMS"
+                     :VERSION "1.1.1"
+                     :REQUEST "GetMap"
+                     :STYLES  ""
+                     :SRS     "EPSG:3067"
+                     :BBOX   "444416,6666496,444672,6666752"
+                     :WIDTH   "256"
+                     :HEIGHT "256"}]
+    (doseq [layer [{:LAYERS "taustakartta_5k"}
+                   {:LAYERS "taustakartta_10k"}
+                   {:LAYERS "taustakartta_20k"}
+                   {:LAYERS "taustakartta_40k"}
+                   {:LAYERS "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
+                   {:LAYERS "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}
+                   {:LAYERS "yleiskaava"}
+                   {:LAYERS "yleiskaava_poikkeavat"}]]
       (fact {:midje/description (get layer "LAYERS")}
         (let [request {:params (merge base-params layer)
                        :headers {"accept-encoding" "gzip, deflate"}}]

@@ -9,6 +9,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.crypt :as crypt]
+            [sade.http :as http]
             [sade.xml :as sxml]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
@@ -176,3 +177,18 @@
 
 (defn some-organization-has-archive-enabled? [organization-ids]
   (pos? (mongo/count :organizations {:_id {$in organization-ids} :permanent-archive-enabled true})))
+
+
+;;
+;; Organization/municipality provided map support.
+
+(defn query-organization-map-server
+  [org-id params headers]
+  (when-let [m (-> org-id get-organization :map-layers :server)]
+    (let [{:keys [url username password]} m]
+      (http/get url
+                (merge {:query-params params}
+                       (when-not (ss/blank? username)
+                         {:basic-auth [username password]})
+                       {:headers {"accept-encoding" (get headers "accept-encoding")}
+                        :as :stream})))))

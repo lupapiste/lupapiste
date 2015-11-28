@@ -284,6 +284,25 @@ var util = (function($) {
              }) };
   }
 
+  function elementInViewport(element) {
+    var top = element.offsetTop;
+    var left = element.offsetLeft;
+    var width = element.offsetWidth;
+    var height = element.offsetHeight;
+
+    while(element.offsetParent) {
+      element = element.offsetParent;
+      top += element.offsetTop;
+      left += element.offsetLeft;
+    }
+
+    return (
+      top >= window.pageYOffset &&
+      left >= window.pageXOffset &&
+      (top + height) <= (window.pageYOffset + window.innerHeight) &&
+      (left + width) <= (window.pageXOffset + window.innerWidth)
+    );
+  }
 
   return {
     zeropad:             zeropad,
@@ -320,7 +339,8 @@ var util = (function($) {
     filterDataByQuery: filterDataByQuery,
     showSavedIndicator: showSavedIndicator,
     isNonNegative: isNonNegative,
-    createSortableColumn: createSortableColumn
+    createSortableColumn: createSortableColumn,
+    elementInViewport: elementInViewport
   };
 
 })(jQuery);
