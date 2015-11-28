@@ -773,6 +773,20 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
+                      ;; Turku R with a public WFS server
+                      {:id "853-R"
+                       :name {:fi "Turku rakennusvalvonta"
+                              :sv "\u00c5bo byggnadstillsyn"}
+                       :scope [{:municipality "853"
+                                :permitType "R"
+                                :new-application-enabled false
+                                :inforequest-enabled true
+                                :open-inforequest true
+                                :open-inforequest-email "turku@example.com"}]
+                       :links []
+                       :krysp {:osoitteet {:url "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"}}
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
                       ;; Kuopio R, has case management (asianhallinta) enabled
                       {:id "297-R"
