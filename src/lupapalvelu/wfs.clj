@@ -318,8 +318,7 @@
                     (errorf "wfs status %s: url=%s, response body=%s" data url error-text))
                   nil)
        :failure (do (errorf data "wfs failure: url=%s" url) nil)
-       :ok      (let [;_ (println data)
-                      features (if (= url nearestfeature)
+       :ok      (let [features (if (= url nearestfeature)
                                  (parse-features-as-latin1 data)
                                  (->features data sxml/startparse-sax-no-doctype))]
                   (xml-> features :gml:featureMember))))))
