@@ -1,6 +1,6 @@
 (ns lupapalvelu.attachment-accessibility
-  (:require [lupapalvelu.attachment-metadata :as metadata]))
-
+  (:require [lupapalvelu.attachment-metadata :as metadata]
+            [lupapalvelu.user :as user]))
 
 
 (defn owns-latest-version? [user {latest :latestVersion}]
@@ -11,6 +11,7 @@
   [user {meta :metadata latest :latestVersion :as attachment}]
   (or
     (nil? latest)
+    (user/authority? user)
     (metadata/public-attachment? attachment)))
 
 (defn can-access-attachment-file? [user file-id {attachments :attachments}]
