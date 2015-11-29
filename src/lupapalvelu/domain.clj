@@ -2,7 +2,7 @@
   (:require [clojure.set :refer [difference]]
             [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
-            [lupapalvelu.attachment-accessiblity :as attachment-access]
+            [lupapalvelu.attachment-accessibility :as attachment-access]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
