@@ -2,6 +2,7 @@
   (:require [clojure.set :refer [difference]]
             [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
+            [lupapalvelu.attachment-accessiblity :as attachment-access]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
@@ -85,7 +86,7 @@
         (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (name (:role user)))) %))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
-        (update-in [:attachments] (partial attachment/filter-attachments-for user))
+        (update-in [:attachments] (partial attachment-access/filter-attachments-for user))
         (update-in [:neighbors] (partial normalize-neighbors user))
         filter-targeted-attachment-comments
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))

@@ -7,6 +7,7 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.attachment-accessibility :as access]
             [lupapalvelu.attachment-metadata :as metadata]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.states :as states]
@@ -37,20 +38,6 @@
           (.setPriority Thread/NORM_PRIORITY))))))
 
 (defonce preview-threadpool (Executors/newFixedThreadPool 1 (thread-factory)))
-
-;;
-;; Predicates / validators
-;;
-
-(defn owns-latest-version? [user {latest :latestVersion}]
-  (= (-> latest :user :id) (:id user)))
-
-
-(defn can-access-attachment?
-  [user {meta :metadata latest :latestVersion :as attachment}]
-  (or
-    (nil? latest)
-    (metadata/public-attachment? attachment)))
 
 
 ;;
@@ -424,19 +411,12 @@
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
-(defn- can-access-attachment-file? [user file-id {attachments :attachments}]
-  (boolean (when-let [attachment (some
-                                   (fn [{versions :versions :as attachment}]
-                                     (when (some #{file-id} (map :fileId versions)) attachment))
-                                   attachments)]
-             (can-access-attachment? user attachment))))
-
 (defn get-attachment-file-as
   "Returns the attachment file if user has access to application, otherwise nil."
   [user file-id]
   (when-let [attachment-file (mongo/download file-id)]
     (when-let [application (get-application-as (:application attachment-file) user :include-canceled-apps? true)]
-      (when (and (seq application) (can-access-attachment-file? user file-id application)) attachment-file))))
+      (when (and (seq application) (access/can-access-attachment-file? user file-id application)) attachment-file))))
 
 (defn get-attachment-file
   "Returns the attachment file without access checking, otherwise nil."
@@ -550,9 +530,3 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
-
-(defn filter-attachments-for [user attachments]
-  {:pre [(map? user) (sequential? attachments)]}
-  (letfn [(filter-fn [a]
-            (metadata/public-attachment? a))]
-    (filter filter-fn attachments)))
