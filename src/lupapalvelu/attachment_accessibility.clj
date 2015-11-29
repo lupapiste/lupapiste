@@ -12,6 +12,7 @@
   (or
     (nil? latest)
     (user/authority? user)
+    (owns-latest-version? user attachment)
     (metadata/public-attachment? attachment)))
 
 (defn can-access-attachment-file? [user file-id {attachments :attachments}]
