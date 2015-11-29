@@ -22,7 +22,7 @@ var locationSearch = (function() {
   };
 
   var searchPropertyId = function(requestContext, x, y, onSuccess, onFail, processing) {
-    if( x > 0 && y > 0 ) {
+    if (x > 0 && y > 0 ) {
       ajax
       .get ("/proxy/property-id-by-point")
       .param ("x", x)
@@ -35,15 +35,16 @@ var locationSearch = (function() {
   };
 
   var searchAddress = function(requestContext, x, y, onSuccess, onFail, processing) {
-    if( x > 0 && y > 0 ) {
-    ajax
-      .get("/proxy/address-by-point")
-      .param("x", x)
-      .param("y", y)
-      .processing(processing || _.noop)
-      .success(requestContext.onResponse(onSuccess))
-      .fail(requestContext.onResponse(onFail))
-      .call();
+    if (x > 0 && y > 0) {
+      ajax
+        .get("/proxy/address-by-point")
+        .param("x", x)
+        .param("y", y)
+        .param("lang", loc.getCurrentLanguage())
+        .processing(processing || _.noop)
+        .success(requestContext.onResponse(onSuccess))
+        .fail(requestContext.onResponse(onFail))
+        .call();
     }
   };
 
