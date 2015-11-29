@@ -4,6 +4,7 @@
             [midje.sweet :refer :all]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as org]
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.coordinate :as coord]
@@ -123,6 +124,7 @@
   (property-info-for-75341600380021 {:wkt "POLYGON((404270 6693890,404270 6693895,404275 6693890,404270 6693890))"}))
 
 (facts "address-by-point - street number not null"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (let [x 333168
         y 6822000
         request {:params {:x x :y y}}
@@ -134,6 +136,7 @@
       (fact (:fi (:name body)) => "Tampere"))))
 
 (facts "address-by-point - street number null"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (let [x 403827.289
         y 6694204.426
         request {:params {:x x :y y}}
