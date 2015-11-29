@@ -66,6 +66,12 @@
               _           (upload-attachment-to-all-placeholders pena application)
               application (query-application pena application-id)]
 
+          (facts "Each attachment has Pena's auth"
+            (let [p-id pena-id]
+              (doseq [{auth :auth} (:attachments application)]
+                (fact "Pena as uploader"
+                  (some #(when (#{p-id} (:id %)) (:role %)) auth) => "uploader"))))
+
           (fact "download all"
             (let [resp (raw pena "download-all-attachments" :id application-id)]
               resp => http200?
@@ -162,11 +168,14 @@
           (get-in versioned-attachment [:latestVersion :version :major]) => 1
           (get-in versioned-attachment [:latestVersion :version :minor]) => 0)
 
-        (fact "Veikko upload a new version"
+        (fact "Veikko uploads a new version"
           (upload-attachment veikko application-id versioned-attachment true)
           (let [updated-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
             (get-in updated-attachment [:latestVersion :version :major]) => 1
             (get-in updated-attachment [:latestVersion :version :minor]) => 1
+
+           (fact "upload has Veikko's auth"
+             (get-in updated-attachment [:auth 1 :id]) => veikko-id)
 
             (fact "Pena receives email pointing to comment page"
               (let [emails (sent-emails)
@@ -285,6 +294,10 @@
         (get-in attachment [:latestVersion :stamped]) => true
         comments-after => comments)
 
+       (fact "Attachment has Sonja's stamper auth"
+         (get-in attachment [:auth 1 :id]) => sonja-id
+         (get-in attachment [:auth 1 :role]) => "stamper")
+
       (fact "Attachment state is ok"
         (:state attachment) => "ok")
 
@@ -324,6 +337,8 @@
 
             (fact "Can't set unknown visibility value"
               (command pena :set-attachment-visibility :id application-id :attachmentId aid1 :value "testi") => (partial expected-failure? :error.invalid-nakyvyys-value))
+            (fact "Set attachment as public"
+              (command pena :set-attachment-visibility :id application-id :attachmentId aid1 :value "julkinen") => ok?)
 
             #_(fact "Pena submits the application"
               (command pena :submit-application :id application-id) => ok?

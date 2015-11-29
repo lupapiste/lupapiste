@@ -261,6 +261,7 @@
     (if (pos? retry-limit)
       (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
             next-version (next-attachment-version latest-version user)
+            user-role (if stamped :stamper :uploader)
             version-model {:version  next-version
                            :fileId   file-id
                            :created  now
@@ -294,7 +295,8 @@
                                     :attachments.$.modified now
                                     :attachments.$.state  state
                                     :attachments.$.latestVersion version-model}
-                              $push {:attachments.$.versions version-model}})
+                              $push {:attachments.$.versions version-model
+                                     :attachments.$.auth (user/user-in-role user user-role :created now)}})
                            true)]
         ; Check return value and try again with new version number
         (if (pos? result-count)
@@ -317,7 +319,9 @@
               (when set-app-modified? {:modified now})
               (when set-attachment-modified? {:attachments.$.modified now}))})))
 
-(defn update-latest-version-content [user application attachment-id file-id size now]
+(defn update-latest-version-content
+  "Updates latest version when version is stamped"
+  [user application attachment-id file-id size now]
   (let [attachment (get-attachment-info application attachment-id)
         latest-version-index (-> attachment :versions count dec)
         latest-version-path (str "attachments.$.versions." latest-version-index ".")
