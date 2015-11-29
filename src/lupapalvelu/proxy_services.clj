@@ -113,21 +113,15 @@
           x_d (util/->double x)
           y_d (util/->double y)]
       (if-let [endpoint (municipality-address-endpoint municipality)]
-        (let [address-from-muni (->> (wfs/address-by-point-from-municipality x y endpoint)
-                                  (map (partial wfs/krysp-to-address-details (or lang "fi")))
-                                  (map (fn [{x2 :x y2 :y :as f}] (assoc f :distance (distance x_d y_d x2 y2))))
-                                  (sort-by :distance)
-                                  first)]
-          (debug "Address from municipality:" address-from-muni)
-          (debug "Distance to point:" (:distance address-from-muni))
-          #_(let [{x2 :x y2 :y :as nls} (wfs/feature-to-address-details lang (first @nls-address-query))]
-             (debug "NLS:" nls)
-             (debug (distance x_d y_d x2 y2)))
-          (if address-from-muni
-            (do
-              (future-cancel nls-address-query)
-              (resp/json address-from-muni))
-            (respond-nls-address lang @nls-address-query)))
+        (if-let [address-from-muni (->> (wfs/address-by-point-from-municipality x y endpoint)
+                                     (map (partial wfs/krysp-to-address-details (or lang "fi")))
+                                     (map (fn [{x2 :x y2 :y :as f}] (assoc f :distance (distance x_d y_d x2 y2))))
+                                     (sort-by :distance)
+                                     first)]
+          (do
+            (future-cancel nls-address-query)
+            (resp/json address-from-muni))
+          (respond-nls-address lang @nls-address-query))
         (respond-nls-address lang @nls-address-query)))
     (resp/status 400 "Bad Request")))
 
