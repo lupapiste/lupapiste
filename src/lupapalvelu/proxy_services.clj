@@ -12,7 +12,7 @@
             [sade.http :as http]
             [sade.property :as p]
             [sade.strings :as ss]
-            [sade.util :refer [dissoc-in select ->double]]
+            [sade.util :as util]
             [lupapalvelu.find-address :as find-address]
             [lupapalvelu.wfs :as wfs]))
 
@@ -61,14 +61,14 @@
 
 (defn point-by-property-id-proxy [request]
   (let [property-id (get (:params request) :property-id)
-        features (wfs/point-by-property-id property-id)]
+        features (wfs/location-info-by-property-id property-id)]
     (if features
       (resp/json {:data (map wfs/feature-to-position features)})
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn area-by-property-id-proxy [{{property-id :property-id} :params :as request}]
   (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id) )
-    (let [features (wfs/area-by-property-id property-id)]
+    (let [features (wfs/location-info-by-property-id property-id)]
       (if features
         (resp/json {:data (map wfs/feature-to-area features)})
         (resp/status 503 "Service temporarily unavailable")))
@@ -82,11 +82,47 @@
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
-(defn address-by-point-proxy [{{x :x y :y} :params}]
+(defn municipality-address-endpoint [municipality]
+  (when (and (not (ss/blank? municipality)) (re-matches #"\d{3}" municipality) )
+    (org/get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)))
+
+(defn municipality-by-point [x y]
+  (let [url (str (env/value :geoserver :host) (env/value :geoserver :kunta))
+        query {:query-params {:x x, :y y}
+               :conn-timeout 10000, :socket-timeout 10000
+               :as :json}]
+    (try
+      (when-let [municipality (get-in (http/get url query) [:body :kuntanumero])]
+        (ss/zero-pad 3 municipality))
+      (catch Exception e
+        (error e (str "Unable to resolve municipality by " x \/ y))))))
+
+(defn- respond-nls-address [lang features]
+  (if (seq features)
+    (resp/json (wfs/feature-to-address-details (or lang "fi") (first features)))
+    (resp/status 503 "Service temporarily unavailable")))
+
+(defn- distance [^double x1 ^double y1 ^double x2 ^double y2]
+  {:pre [(and x1 x2 y1 y2)]}
+  (Math/sqrt (+ (Math/pow (- x2 x1) 2) (Math/pow (- y2 y1) 2))))
+
+(defn address-by-point-proxy [{{:keys [x y lang]} :params}]
   (if (and (coord/valid-x? x) (coord/valid-y? y))
-    (if-let [features (wfs/address-by-point x y)]
-      (resp/json (wfs/feature-to-address-details (first features)))
-      (resp/status 503 "Service temporarily unavailable"))
+    (let [nls-address-query  (future (wfs/address-by-point x y))
+          municipality (municipality-by-point x y)
+          x_d (util/->double x)
+          y_d (util/->double y)]
+      (if-let [endpoint (municipality-address-endpoint municipality)]
+        (if-let [address-from-muni (->> (wfs/address-by-point-from-municipality x y endpoint)
+                                     (map (partial wfs/krysp-to-address-details (or lang "fi")))
+                                     (map (fn [{x2 :x y2 :y :as f}] (assoc f :distance (distance x_d y_d x2 y2))))
+                                     (sort-by :distance)
+                                     first)]
+          (do
+            (future-cancel nls-address-query)
+            (resp/json address-from-muni))
+          (respond-nls-address lang @nls-address-query))
+        (respond-nls-address lang @nls-address-query)))
     (resp/status 400 "Bad Request")))
 
 (def wdk-type-pattern #"^POINT|^LINESTRING|^POLYGON")

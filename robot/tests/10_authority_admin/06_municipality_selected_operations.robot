@@ -73,7 +73,7 @@ Go to operation tree
   Click enabled by test id  create-search-button
   Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
   Textfield Value Should Be  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']  ${propertyId}
-  Wait Until  List Selection Should Be  xpath=//div[@id='popup-id']//select[@data-test-id='create-municipality-select']  ${municipality}
+  Wait Until  Selected Municipality Is  ${municipality}
   Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
   Set animations off
   Click by test id  create-continue
