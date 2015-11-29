@@ -6,6 +6,7 @@
             [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
+            [lupapalvelu.attachment-metadata :refer :all]
             [lupapalvelu.i18n :as i18n]))
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
