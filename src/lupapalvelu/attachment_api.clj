@@ -610,6 +610,7 @@
    :input-validators [(fn [{{nakyvyys-value :value} :data :as c}]
                         (when-not (some (hash-set (keyword nakyvyys-value)) attachment-meta/visibilities)
                           (fail :error.invalid-nakyvyys-value :value nakyvyys-value)))]
+   :pre-checks [a/validate-authority-in-drafts]
    :states     states/pre-verdict-states}
   [command]
   (update-application command
