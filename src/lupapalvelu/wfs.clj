@@ -6,7 +6,7 @@
             [clojure.string :as s]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [clojure.data.zip.xml :refer [xml-> text attr=]]
+            [clojure.data.zip.xml :refer [xml-> xml1-> text text= attr=]]
             [sade.env :as env]
             [sade.xml :as sxml]
             [sade.strings :as ss]
@@ -232,19 +232,24 @@
     {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))}))
 
 ;; http://www.maanmittauslaitos.fi/node/7365, i.e. "oso:katunumero" and "oso:jarjestysnumero" explained
-(defn feature-to-address-details [feature]
+(defn feature-to-address-details [lang feature]
   (when (seq feature)
-    (let [katunumero (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
-          xy (ss/split (first (xml-> feature :oso:Osoitepiste :oso:sijainti :gml:Point :gml:pos text)) #"\s")]
-      {:street (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
+    (let [lang3 (get {"fi" "fin", "sv" "swe"} lang "fin")
+          osoitteet (clojure.data.zip.xml/xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite)
+          osoite (first (or
+                         (seq (filter #(xml1-> % :oso:kieli (text= lang3)) osoitteet))
+                         osoitteet))
+          katunumero (xml1-> osoite :oso:katunumero text)
+          xy (ss/split (xml1-> feature :oso:Osoitepiste :oso:sijainti :gml:Point :gml:pos text) #"\s")]
+      {:street (xml1-> osoite :oso:katunimi text)
        :number (if (or (nil? katunumero) (= "0" katunumero))
-                 (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:jarjestysnumero text))
+                 (xml1-> osoite :oso:jarjestysnumero text)
                  katunumero)
-       :municipality (first (xml-> feature :oso:Osoitepiste :oso:kuntatunnus text))
+       :municipality (xml1-> feature :oso:Osoitepiste :oso:kuntatunnus text)
        :x (util/->double (first xy))
        :y (util/->double (second xy))
-       :name {:fi (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
-              :sv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))}})))
+       :name {:fi (xml1-> feature :oso:Osoitepiste :oso:kuntanimiFin text)
+              :sv (xml1-> feature :oso:Osoitepiste :oso:kuntanimiSwe text)}})))
 
 (defn krysp-to-address-details [lang feature]
   (when (seq feature)
