@@ -25,6 +25,7 @@
   (:import [java.net URL]))
 
 (defn- get-poytakirja [application user timestamp verdict-id pk]
+  (>pprint {:get-poytakirja pk})
   (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
     (do
       (debug "Download" url)

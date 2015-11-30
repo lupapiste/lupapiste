@@ -39,7 +39,8 @@
         (validator-fn app-xml organization))
       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
         (when updates
-          (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
+          (let [_ (>pprint updates)
+                doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
             (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
             (t/change-app-and-attachments-metadata-state! command :luonnos :valmis)))
         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
