@@ -273,26 +273,42 @@
     (ok :comments comments :totalComments total-comments :commentsLeft comments-left)))
 
 (defn- bulletin-can-be-saved
-  ([{{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId} :data}]
+  ([state {{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId} :data}]
    (let [bulletin (get-bulletin bulletin-id)]
+     (prn "state" state)
      (if-not bulletin
        (fail :error.invalid-bulletin-id)
-       (if-not (= (:bulletinState bulletin) "proclaimed")
+       (if-not (= (:bulletinState bulletin) state)
          (fail :error.invalid-bulletin-state)
          (bulletin-version-is-latest bulletin bulletin-version-id)))))
-  ([command _]
-   (bulletin-can-be-saved command)))
+  ([state command _]
+   (bulletin-can-be-saved state command)))
 
 (defcommand save-proclaimed-bulletin
-  "updates proclaimed versions timestamps and text"
+  "updates proclaimed version timestamps and text"
   {:parameters [bulletinId bulletinVersionId proclamationEndsAt proclamationStartsAt proclamationText]
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}
-   :input-validators [bulletin-can-be-saved]}
+   :input-validators [(partial bulletin-can-be-saved "proclaimed")]}
   [{:keys [application created] :as command}]
   (let [updates {$set {"versions.$.proclamationEndsAt"   proclamationEndsAt
                        "versions.$.proclamationStartsAt" proclamationStartsAt
                        "versions.$.proclamationText"     proclamationText}}]
+    (mongo/update-by-query :application-bulletins {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
+    (ok)))
+
+(defcommand save-verdict-given-bulletin
+  "updates verdict given version timestamps and text"
+  {:parameters [bulletinId bulletinVersionId verdictGivenAt appealPeriodEndsAt appealPeriodStartsAt verdictGivenText]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     #{:verdictGiven}
+   :input-validators [(partial bulletin-can-be-saved "verdictGiven")]}
+  [{:keys [application created] :as command}]
+  (let [updates {$set {"versions.$.verdictGivenAt"       verdictGivenAt
+                       "versions.$.appealPeriodEndsAt"   appealPeriodEndsAt
+                       "versions.$.appealPeriodStartsAt" appealPeriodStartsAt
+                       "versions.$.verdictGivenText"     verdictGivenText}}]
     (mongo/update-by-query :application-bulletins {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
     (ok)))
