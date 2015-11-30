@@ -76,25 +76,30 @@
 ;; DSL to WFS queries:
 ;;
 
-(def xml-namespaces
-  {"xmlns:oso" "http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02"
-   "xmlns:mkos" "http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
-   "xmlns:yht" "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-   "xmlns:ktjkiiwfs" "http://xml.nls.fi/ktjkiiwfs/2010/02"
-   "xmlns:wfs" "http://www.opengis.net/wfs"
+(def common-namespaces
+  {"xmlns:wfs" "http://www.opengis.net/wfs"
    "xmlns:gml" "http://www.opengis.net/gml"
    "xmlns:ogc" "http://www.opengis.net/ogc"
    "xmlns:xsi" "http://www.w3.org/2001/XMLSchema-instance"})
 
+(def nls-namespaces (merge common-namespaces {"xmlns:oso" "http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02"
+                                              "xmlns:ktjkiiwfs" "http://xml.nls.fi/ktjkiiwfs/2010/02"}))
+
+(def krysp-namespaces (merge common-namespaces {"xmlns:mkos" "http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+                                                "xmlns:yht" "http://www.paikkatietopalvelu.fi/gml/yhteiset"}))
+
 (defn query [attrs & e]
-  (sxml/element-to-string
-   {:tag :wfs:GetFeature
-    :attrs (merge {:version "1.1.0"}
-             xml-namespaces
-             {:xsi:schemaLocation "http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"})
-    :content [{:tag :wfs:Query
-               :attrs attrs
-               :content (if (string? e) [e] e)}]}))
+  (let [type-name (or (:typeName attrs) (get attrs "typeName"))
+        ns-prefix (first (ss/split (name type-name) #":"))
+        xml-namespaces (if (some #(ss/ends-with % ns-prefix) (keys krysp-namespaces)) krysp-namespaces nls-namespaces)]
+    (sxml/element-to-string
+      {:tag :wfs:GetFeature
+       :attrs (merge {:version "1.1.0"}
+                xml-namespaces
+                {:xsi:schemaLocation "http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"})
+       :content [{:tag :wfs:Query
+                  :attrs attrs
+                  :content (if (string? e) [e] e)}]})))
 
 (defn ogc-sort-by
   ([property-names]
@@ -154,23 +159,21 @@
      :content [(property-name prop-name)
                {:tag :ogc:Literal :content [value]}]}))
 
-(defn property-is-like [prop-name value & [declare-xml-namespaces?]]
+(defn property-is-like [prop-name value]
   (property-filter "PropertyIsLike" prop-name value
-    (merge {"wildCard" "*", "singleChar" "?", "escape" "\\", "matchCase" "false"}
-      (when declare-xml-namespaces? xml-namespaces))))
+    (merge {"wildCard" "*", "singleChar" "?", "escape" "\\", "matchCase" "false"})))
 
-(defn property-is-equal [prop-name value & [declare-xml-namespaces?]]
-  (property-filter "PropertyIsEqualTo" prop-name value (when declare-xml-namespaces? xml-namespaces)))
+(defn property-is-equal [prop-name value]
+  (property-filter "PropertyIsEqualTo" prop-name value))
 
-(defn property-is-less [prop-name value & [declare-xml-namespaces?]]
-  (property-filter "PropertyIsLessThan" prop-name value (when declare-xml-namespaces? xml-namespaces)))
+(defn property-is-less [prop-name value]
+  (property-filter "PropertyIsLessThan" prop-name value))
 
-(defn property-is-greater [prop-name value & [declare-xml-namespaces?]]
-  (property-filter "PropertyIsGreaterThan" prop-name value (when declare-xml-namespaces? xml-namespaces)))
+(defn property-is-greater [prop-name value]
+  (property-filter "PropertyIsGreaterThan" prop-name value))
 
-(defn property-is-between [name lower-value upper-value & [declare-xml-namespaces?]]
+(defn property-is-between [name lower-value upper-value]
   {:tag :ogc:PropertyIsBetween
-   :attrs (when declare-xml-namespaces? xml-namespaces)
    :content [(property-name name)
              {:tag :ogc:LowerBoundary :content [lower-value]}
              {:tag :ogc:UpperBoundary :content [upper-value]}]})
@@ -303,7 +306,7 @@
 (defn parse-features-as-latin1 [s]
   (-> s (s/replace-first "UTF-8" "ISO-8859-1") (->features sxml/startparse-sax-no-doctype "ISO-8859-1")))
 
-(defn- exec
+(defn exec
   ([method url q] (exec method url nil q))
   ([method url credentials q]
     (let [[http-fn param-key] (method http-method)
@@ -328,8 +331,9 @@
                                  (->features data sxml/startparse-sax-no-doctype))]
                   (xml-> features :gml:featureMember))))))
 
-(defn post [url q]
-  (exec :post url q))
+(defn post
+  ([url q] (exec :post url q))
+  ([url credentials q] (exec :post url credentials q)))
 
 (defn wms-get
   "WMS query with error handling. Returns response body or nil."
@@ -367,7 +371,7 @@
                      (ogc-bbox
                        (property-name "yht:pistesijainti/gml:Point/gml:pos")
                        (envelope "EPSG:3067" [(- x_d radius) (- y_d 50)] [(+ x_d 50) (+ y_d 50)])))
-        filter-str (sxml/element-to-string (assoc filter-xml :attrs (dissoc xml-namespaces "xmlns:ktjkiiwfs" "xmlns:oso")))]
+        filter-str (sxml/element-to-string (assoc filter-xml :attrs krysp-namespaces))]
 
     (exec :get url
       credentials

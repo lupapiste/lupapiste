@@ -13,12 +13,24 @@
             [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.municipality :as muni]
             [lupapalvelu.find-address :as find-address]
             [lupapalvelu.wfs :as wfs]))
 
-;;
-;; NLS:
-;;
+
+(defn- municipality-index-for [lang]
+  (map (fn [code] [(ss/lower-case (i18n/localize lang :municipality code)) code])
+       muni/municipality-codes))
+
+(def municipality-index
+    (delay (reduce (fn [m lang] (assoc m lang (municipality-index-for lang))) {} i18n/supported-langs)))
+
+(defn municipality-codes [municipality-name-starts lang]
+  (let [index (get @municipality-index (keyword lang))
+        n (ss/lower-case (ss/trim municipality-name-starts))]
+    (when (not (ss/blank? n))
+      (->> (filter #(ss/starts-with (first %) n) index)
+           (map second)))))
 
 (defn- trim [s]
   (when-not (ss/blank? s) (ss/trim s)))
@@ -29,35 +41,36 @@
         city (trim city)]
     [street number city]))
 
-(defn get-addresses [street number city]
-  (wfs/post wfs/maasto
-    (wfs/query {"typeName" "oso:Osoitenimi"}
-      (wfs/ogc-sort-by ["oso:katunumero"])
-      (wfs/ogc-filter
-        (wfs/ogc-and
-          (wfs/property-is-like "oso:katunimi"     street)
-          (wfs/property-is-like "oso:katunumero"   number)
-          (wfs/ogc-or
-            (wfs/property-is-like "oso:kuntanimiFin" city)
-            (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
+(defn- respond-nls-address-suggestions [features]
+  (if features
+    (let [top10-features (take 10 features)]
+      (resp/json {:suggestions (map wfs/feature-to-simple-address-string top10-features)
+                  :data (map wfs/feature-to-address top10-features)}))
+    (resp/status 503 "Service temporarily unavailable")))
 
-(defn get-addresses-proxy [request]
-  (let [query (get (:params request) :query)
-        address (parse-address query)
-        response (apply get-addresses address)]
-    (if response
-      (let [features (take 10 response)]
-        (resp/json {:query query
-                    :suggestions (map wfs/feature-to-simple-address-string features)
-                    :data (map wfs/feature-to-address features)}))
-      (resp/status 503 "Service temporarily unavailable"))))
+(defn get-addresses-proxy [{{:keys [query lang]} :params}]
+  (let [[street number city] (parse-address query)
+        nls-query (future (find-address/get-addresses street number city))
+        muni-codes (municipality-codes city lang)
+        muni-code  (first muni-codes)
+        endpoint (when (= 1 (count muni-codes)) (org/municipality-address-endpoint muni-code))]
+    (if endpoint
+      (if-let [address-from-muni (->> (find-address/get-addresses-from-municipality street number endpoint)
+                                        (map (partial wfs/krysp-to-address-details (or lang "fi"))))]
+        (do
+          (future-call nls-query)
+          (resp/json {:suggestions (map (fn [{:keys [street number]}] (str street \space number ", " (i18n/localize lang :municipality muni-code))) address-from-muni)
+                     :data (map (fn [m] (-> m (assoc :location (select-keys m [:x :y])) (dissoc :x :y))) address-from-muni)}))
+        (do
+          (debug "Fallback to NSL address data - no address found from " (i18n/localize :fi :municipality muni-code))
+          (respond-nls-address-suggestions @nls-query)))
+      (respond-nls-address-suggestions @nls-query))))
 
-(defn find-addresses-proxy [request]
-  (let [term (get (:params request) :term)
-        term (ss/replace term #"\p{Punct}" " ")]
-    (if (string? term)
-      (resp/json (or (find-address/search term) []))
-      (resp/status 400 "Missing query param 'term'"))))
+(defn find-addresses-proxy [{{:keys [term lang]} :params}]
+    (if (and (string? term) (string? lang) (not (ss/blank? term)))
+      (let [normalized-term (ss/replace term #"\p{Punct}" " ")]
+        (resp/json (or (find-address/search normalized-term lang) [])))
+      (resp/status 400 "Missing query parameters")))
 
 (defn point-by-property-id-proxy [request]
   (let [property-id (get (:params request) :property-id)
@@ -81,10 +94,6 @@
         (resp/json (:kiinttunnus (wfs/feature-to-property-id (first features))))
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
-
-(defn municipality-address-endpoint [municipality]
-  (when (and (not (ss/blank? municipality)) (re-matches #"\d{3}" municipality) )
-    (org/get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)))
 
 (defn municipality-by-point [x y]
   (let [url (str (env/value :geoserver :host) (env/value :geoserver :kunta))
@@ -112,7 +121,7 @@
           municipality (municipality-by-point x y)
           x_d (util/->double x)
           y_d (util/->double y)]
-      (if-let [endpoint (municipality-address-endpoint municipality)]
+      (if-let [endpoint (org/municipality-address-endpoint municipality)]
         (if-let [address-from-muni (->> (wfs/address-by-point-from-municipality x y endpoint)
                                      (map (partial wfs/krysp-to-address-details (or lang "fi")))
                                      (map (fn [{x2 :x y2 :y :as f}] (assoc f :distance (distance x_d y_d x2 y2))))

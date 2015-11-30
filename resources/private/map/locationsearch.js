@@ -5,6 +5,7 @@ var locationSearch = (function() {
     ajax
       .get("/proxy/get-address")
       .param("query", address)
+      .param("lang", loc.getCurrentLanguage())
       .processing(processing || _.noop)
       .success(requestContext.onResponse(onSuccess))
       .fail(requestContext.onResponse(onFail))
