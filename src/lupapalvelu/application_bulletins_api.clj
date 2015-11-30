@@ -264,11 +264,11 @@
         limit          (util/->int limit)
         sort           (if (= "false" asc) {:created -1} {:created 1})
         comments       (mongo/with-collection "application-bulletin-comments"
-                         (query/find  {})
+                         (query/find  {:versionId versionId})
                          (query/sort  sort)
                          (query/skip  skip)
                          (query/limit limit))
-        total-comments (mongo/count :application-bulletin-comments {})
+        total-comments (mongo/count :application-bulletin-comments {:versionId versionId})
         comments-left  (max 0 (- total-comments (+ skip (count comments))))]
     (ok :comments comments :totalComments total-comments :commentsLeft comments-left)))
 
