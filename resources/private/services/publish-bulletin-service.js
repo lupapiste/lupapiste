@@ -36,6 +36,14 @@ LUPAPISTE.PublishBulletinService = function() {
                                            proclamationText:     event.proclamationText || ""});
   });
 
+  hub.subscribe("publishBulletinService::saveProclaimedBulletin", function(event) {
+    publishBulletin("save-proclaimed-bulletin", {bulletinId:           event.bulletinId,
+                                                 bulletinVersionId:    event.bulletinVersionId,
+                                                 proclamationEndsAt:   event.proclamationEndsAt,
+                                                 proclamationStartsAt: event.proclamationStartsAt,
+                                                 proclamationText:     event.proclamationText || ""});
+  });
+
   hub.subscribe("publishBulletinService::moveToVerdictGiven", function(event) {
     publishBulletin("move-to-verdict-given", {id: event.id,
                                               verdictGivenAt:       event.verdictGivenAt,

@@ -265,3 +265,27 @@
         total-comments (mongo/count :application-bulletin-comments {})
         comments-left  (max 0 (- total-comments (+ skip (count comments))))]
     (ok :comments comments :totalComments total-comments :commentsLeft comments-left)))
+
+(defn- bulletin-can-be-saved
+  ([{{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId} :data}]
+   (let [bulletin (get-bulletin bulletin-id)]
+     (if-not bulletin
+       (fail :error.invalid-bulletin-id)
+       (if-not (= (:bulletinState bulletin) "proclaimed")
+         (fail :error.invalid-bulletin-state)
+         (bulletin-version-is-latest bulletin bulletin-version-id)))))
+  ([command _]
+   (bulletin-can-be-saved command)))
+
+(defcommand save-proclaimed-bulletin
+  {:parameters [bulletinId bulletinVersionId proclamationEndsAt proclamationStartsAt proclamationText]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     #{:sent :complementNeeded}
+   :input-validators [bulletin-can-be-saved]}
+  [{:keys [application created] :as command}]
+  (let [updates {$set {"versions.$.proclamationEndsAt"   proclamationEndsAt
+                       "versions.$.proclamationStartsAt" proclamationStartsAt
+                       "versions.$.proclamationText"     proclamationText}}]
+    (mongo/update-by-query :application-bulletins {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
+    (ok)))
