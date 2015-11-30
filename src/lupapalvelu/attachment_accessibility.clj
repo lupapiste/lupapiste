@@ -16,8 +16,10 @@
   [user app-auth {:keys [latestVersion metadata auth] :as attachment}]
   (or
     (nil? latestVersion)
-    (visibility-check user app-auth attachment)
-    (metadata/public-attachment? attachment)))
+    (metadata/public-attachment? attachment)
+    (if auth                                                ; TODO remove when auth migration is final
+      (visibility-check user app-auth attachment)
+      true)))
 
 (defn can-access-attachment-file? [user file-id {attachments :attachments auth :auth}]
   (boolean
