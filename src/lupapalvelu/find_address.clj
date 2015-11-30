@@ -1,13 +1,30 @@
 (ns lupapalvelu.find-address
   (:require [clojure.string :as s]
-            [monger.operators :refer :all]
             [clojure.data.zip.xml :refer [xml-> text]]
-            [lupapalvelu.i18n :as i18n]
+            [monger.operators :refer :all]
             [monger.query :as q]
             [sade.strings :as ss]
             [sade.property :as p]
+            [sade.util :as util]
+            [sade.municipality :as muni]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.wfs :as wfs]))
+
+
+(defn- municipality-index-for [lang]
+  (map (fn [code] [(ss/lower-case (i18n/localize lang :municipality code)) code])
+       muni/municipality-codes))
+
+(def municipality-index
+    (delay (reduce (fn [m lang] (assoc m lang (municipality-index-for lang))) {} i18n/supported-langs)))
+
+(defn municipality-code [municipality-name lang]
+  (let [index (get @municipality-index (keyword lang))
+        n (ss/lower-case (ss/trim municipality-name))]
+    (when (not (ss/blank? n))
+      (->> (filter #(ss/starts-with (first %) n) index)
+           (map second)))))
 
 ;; Should be in util or sumthin...
 

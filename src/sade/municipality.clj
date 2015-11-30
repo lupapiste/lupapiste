@@ -327,3 +327,7 @@
        "981"
        "989"
        "992"})
+
+(def municipality-codes
+     "Ajantasaiset kuntanumerot"
+     municipality-codes-2015)
