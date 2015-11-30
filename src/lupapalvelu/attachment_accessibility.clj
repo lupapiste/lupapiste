@@ -12,14 +12,22 @@
     :julkinen true
     nil))
 
+(defn publicity-check [user app-auth {:keys [metadata auth] :as attachment}]
+  (case (keyword (metadata/get-publicity-class attachment)) ; TODO check cases
+    :osittain-salassapidettava (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (user/authority?))
+    :salainen (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (user/authority?))
+    :julkinen true
+    nil))
+
 (defn can-access-attachment?
   [user app-auth {:keys [latestVersion metadata auth] :as attachment}]
-  (or
-    (nil? latestVersion)
-    (metadata/public-attachment? attachment)
-    (if auth                                                ; TODO remove when auth migration is final
-      (visibility-check user app-auth attachment)
-      true)))
+  (boolean
+    (or
+      (nil? latestVersion)
+      (metadata/public-attachment? attachment)
+      (if auth                                                ; TODO remove when auth migration is final
+        (and (publicity-check user app-auth attachment) (visibility-check user app-auth attachment))
+        true))))
 
 (defn can-access-attachment-file? [user file-id {attachments :attachments auth :auth}]
   (boolean
