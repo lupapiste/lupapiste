@@ -1,3 +1,0 @@
-jatetyyppi: Aines
-vaarallisetAineet: Vaaralliset aineet
-rakennusJaPurkujate: Rakennus- ja purkujäte
