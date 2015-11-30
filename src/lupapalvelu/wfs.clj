@@ -92,13 +92,13 @@
   (let [type-name (or (:typeName attrs) (get attrs "typeName"))
         ns-prefix (first (ss/split (name type-name) #":"))
         xml-namespaces (if (some #(ss/ends-with % ns-prefix) (keys krysp-namespaces)) krysp-namespaces nls-namespaces)]
-  (sxml/element-to-string
-   {:tag :wfs:GetFeature
-    :attrs (merge {:version "1.1.0"}
-             xml-namespaces
-             {:xsi:schemaLocation "http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"})
-    :content [{:tag :wfs:Query
-               :attrs attrs
+    (sxml/element-to-string
+      {:tag :wfs:GetFeature
+       :attrs (merge {:version "1.1.0"}
+                xml-namespaces
+                {:xsi:schemaLocation "http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"})
+       :content [{:tag :wfs:Query
+                  :attrs attrs
                   :content (if (string? e) [e] e)}]})))
 
 (defn ogc-sort-by
@@ -308,7 +308,7 @@
 (defn parse-features-as-latin1 [s]
   (-> s (s/replace-first "UTF-8" "ISO-8859-1") (->features sxml/startparse-sax-no-doctype "ISO-8859-1")))
 
-(defn- exec
+(defn exec
   ([method url q] (exec method url nil q))
   ([method url credentials q]
     (let [[http-fn param-key] (method http-method)
@@ -333,8 +333,9 @@
                                  (->features data sxml/startparse-sax-no-doctype))]
                   (xml-> features :gml:featureMember))))))
 
-(defn post [url q]
-  (exec :post url q))
+(defn post
+  ([url q] (exec :post url q))
+  ([url credentials q] (exec :post url credentials q)))
 
 (defn wms-get
   "WMS query with error handling. Returns response body or nil."
