@@ -363,7 +363,7 @@
     $(id)
       .keypress(function(e) { if (e.which === 13) { model.searchNow(); }}) // enter
       .autocomplete({
-        source:     "/proxy/find-address",
+        source:     "/proxy/find-address?lang=" + loc.getCurrentLanguage(),
         delay:      500,
         minLength:  3,
         select:     model.autocompleteSelect

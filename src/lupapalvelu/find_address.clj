@@ -53,7 +53,7 @@
 ;;;   :location   Map with :x and :y
 ;;;
 
-(defn search-property-id [property-id]
+(defn search-property-id [lang property-id]
   (map (fn [f] {:location (wfs/feature-to-position f)
                 :property-id (:kiinttunnus (wfs/feature-to-property-id f))
                 :kind :property-id})
@@ -71,7 +71,7 @@
 
 (defn municipality-prop [] (if (= i18n/*lang* "sv") "oso:kuntanimiSwe" "oso:kuntanimiFin"))
 
-(defn search-street [street]
+(defn search-street [lang street]
   (map
     (comp (set-kind :address :street) wfs/feature-to-address)
     (wfs/post wfs/maasto
@@ -82,10 +82,10 @@
             (wfs/property-is-like "oso:katunimi" (str street "*"))
             (wfs/property-is-less "oso:jarjestysnumero" "10")))))))
 
-(defn search-poi-or-street [v]
-  (take max-entries (concat (take (- max-entries 10) (search-street v)) (search-poi v))))
+(defn search-poi-or-street [lang v]
+  (take max-entries (concat (take (- max-entries 10) (search-street lang  v)) (search-poi v))))
 
-(defn search-street-with-number [street number]
+(defn search-street-with-number [lang street number]
   (map
     (comp (set-kind :address :street-number) wfs/feature-to-address)
     (wfs/post wfs/maasto
@@ -97,7 +97,7 @@
             (wfs/property-is-like "oso:katunumero" (str number "*"))
             (wfs/property-is-less "oso:jarjestysnumero" "10")))))))
 
-(defn search-street-with-city [street city]
+(defn search-street-with-city [lang street city]
   (map
     (comp (set-kind :address :street-city) wfs/feature-to-address)
     (wfs/post wfs/maasto
@@ -109,7 +109,7 @@
             (wfs/property-is-like (municipality-prop) (str city "*"))
             (wfs/property-is-less "oso:jarjestysnumero" "10")))))))
 
-(defn search-address [street number city]
+(defn search-address [lang street number city]
   (map
     (comp (set-kind :address :street-number-city) wfs/feature-to-address)
     (wfs/post wfs/maasto
@@ -130,8 +130,8 @@
    The returned function accepts the list as returned from clojure.core/re-find.
    It strips the first element (complete match) and applies rest to provided
    function."
-  [f]
-  (fn [m] (apply f (drop 1 m))))
+  [f lang]
+  (fn [m] (apply f (cons lang (drop 1 m)))))
 
 ;;
 ;; Public API:
@@ -149,12 +149,12 @@
             (wfs/property-is-like "oso:kuntanimiFin" city)
             (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
 
-(defn search [term]
+(defn search [term lang]
   (condp re-find (s/trim term)
-    #"^(\d{14})$"                                 :>> (apply-search search-property-id)
-    p/property-id-pattern                         :>> (fn [result] (search-property-id (p/to-property-id (first result))))
-    #"^(\S+)$"                                    :>> (apply-search search-poi-or-street)
-    #"^(\S+)\s+(\d+)\s*,?\s*$"                    :>> (apply-search search-street-with-number)
-    #"^(\S+)\s+(\S+)$"                            :>> (apply-search search-street-with-city)
-    #"^(\S+)\s+(\d+)\s*,?\s*(\S+)$"               :>> (apply-search search-address)
+    #"^(\d{14})$"                                 :>> (apply-search search-property-id lang)
+    p/property-id-pattern                         :>> (fn [result] (search-property-id lang (p/to-property-id (first result))))
+    #"^(\S+)$"                                    :>> (apply-search search-poi-or-street lang)
+    #"^(\S+)\s+(\d+)\s*,?\s*$"                    :>> (apply-search search-street-with-number lang)
+    #"^(\S+)\s+(\S+)$"                            :>> (apply-search search-street-with-city lang)
+    #"^(\S+)\s+(\d+)\s*,?\s*(\S+)$"               :>> (apply-search search-address lang)
     []))

@@ -13,6 +13,7 @@
             [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.municipality :as muni]
             [lupapalvelu.find-address :as find-address]
             [lupapalvelu.wfs :as wfs]))
 
@@ -40,12 +41,11 @@
                     :data (map wfs/feature-to-address features)}))
       (resp/status 503 "Service temporarily unavailable"))))
 
-(defn find-addresses-proxy [request]
-  (let [term (get (:params request) :term)
-        term (ss/replace term #"\p{Punct}" " ")]
-    (if (string? term)
-      (resp/json (or (find-address/search term) []))
-      (resp/status 400 "Missing query param 'term'"))))
+(defn find-addresses-proxy [{{:keys [term lang]} :params}]
+    (if (and (string? term) (string? lang) (not (ss/blank? term)))
+      (let [normalized-term (ss/replace term #"\p{Punct}" " ")]
+        (resp/json (or (find-address/search normalized-term lang) [])))
+      (resp/status 400 "Missing query parameters")))
 
 (defn point-by-property-id-proxy [request]
   (let [property-id (get (:params request) :property-id)
