@@ -1,11 +1,12 @@
 (ns lupapalvelu.find-address
-  (:require [clojure.string :as s]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error]]
             [clojure.data.zip.xml :refer [xml-> text]]
             [monger.operators :refer :all]
             [monger.query :as q]
             [sade.strings :as ss]
             [sade.property :as p]
             [sade.util :as util]
+            [sade.xml :as sxml]
             [sade.municipality :as muni]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
@@ -65,7 +66,7 @@
   (map
     (comp (fn [r] (dissoc r :_id)) (set-kind :poi))
     (mongo/with-collection "poi"
-      (q/find {:name {$regex (str \^ (s/lower-case poi))}})
+      (q/find {:name {$regex (str \^ (ss/lower-case poi))}})
       (q/sort (array-map :name 1 :priority 1))
       (q/limit max-entries))))
 
@@ -149,8 +150,24 @@
             (wfs/property-is-like "oso:kuntanimiFin" city)
             (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
 
+(defn get-addresses-from-municipality [street number {:keys [url credentials]}]
+  (let [filter-xml (wfs/ogc-filter
+                     (wfs/ogc-and
+                       (wfs/property-is-like "mkos:Osoite/yht:osoitenimi/yht:teksti" street)
+                       (wfs/property-is-equal "mkos:Osoite/yht:osoitenumero" number)))
+        filter-str (sxml/element-to-string (assoc filter-xml :attrs wfs/krysp-namespaces))]
+    (wfs/exec :get url
+      credentials
+      {:REQUEST "GetFeature"
+       :SERVICE "WFS"
+       :VERSION "1.1.0"
+       :TYPENAME "mkos:Osoite"
+       :SRSNAME "EPSG:3067"
+       :FILTER filter-str
+       :MAXFEATURES "10"})))
+
 (defn search [term lang]
-  (condp re-find (s/trim term)
+  (condp re-find (ss/trim term)
     #"^(\d{14})$"                                 :>> (apply-search search-property-id lang)
     p/property-id-pattern                         :>> (fn [result] (search-property-id lang (p/to-property-id (first result))))
     #"^(\S+)$"                                    :>> (apply-search search-poi-or-street lang)
