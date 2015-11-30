@@ -295,8 +295,8 @@
                                     :attachments.$.modified now
                                     :attachments.$.state  state
                                     :attachments.$.latestVersion version-model}
-                              $push {:attachments.$.versions version-model
-                                     :attachments.$.auth (user/user-in-role user user-role :created now)}})
+                              $push {:attachments.$.versions version-model}
+                              $addToSet {:attachments.$.auth (user/user-in-role user user-role)}})
                            true)]
         ; Check return value and try again with new version number
         (if (pos? result-count)
