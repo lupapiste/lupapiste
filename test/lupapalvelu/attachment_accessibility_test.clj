@@ -12,19 +12,44 @@
         att1-no-meta {:latestVersion {:fileId "322" :user {:id "1"}}
                       :versions [{:fileId "321" :user {:id "1"}}
                                  {:fileId "322" :user {:id "1"}}]}
-        att2-authority {:metadata {:nakyvyys "viranomainen"}
-                        :latestVersion {:fileId "322" :user {:id "1"}}
-                        :versions [{:fileId "321" :user {:id "1"}}
-                                   {:fileId "322" :user {:id "1"}}]}]
+        att-authority-no-auth {:metadata {:nakyvyys "viranomainen"}
+                               :latestVersion   {:fileId "322" :user {:id "1"}}
+                               :versions        [{:fileId "321" :user {:id "1"}}
+                                                 {:fileId "322" :user {:id "1"}}]}
+        att-authority-auth-u1 {:metadata {:nakyvyys "viranomainen"}
+                               :auth [user1]
+                               :latestVersion   {:fileId "322" :user {:id "1"}}
+                               :versions        [{:fileId "321" :user {:id "1"}}
+                                                 {:fileId "322" :user {:id "1"}}]}
+        att-parties-no-auth {:metadata {:nakyvyys "asiakas-ja-viranomainen"}
+                             :latestVersion   {:fileId "322" :user {:id "1"}}
+                             :versions        [{:fileId "321" :user {:id "1"}}
+                                               {:fileId "322" :user {:id "1"}}]}
+        att-parties-auth-u1 {:metadata {:nakyvyys "viranomainen"}
+                             :auth [user1]
+                             :latestVersion   {:fileId "322" :user {:id "1"}}
+                             :versions        [{:fileId "321" :user {:id "1"}}
+                                               {:fileId "322" :user {:id "1"}}]}]
 
-    (fact "empty attachment can be accessed by anyone, to upload versions"
-      (can-access-attachment? user1 att0-empty) => true
-      (can-access-attachment? user1 att0-empty) => true)
+     (fact "empty attachment can be accessed by anyone, to upload versions"
+           (can-access-attachment? user1 nil att0-empty) => true
+           (can-access-attachment? user-authority nil att0-empty) => true)
+     (fact "if no metadata or auth, attachment is regarded as public"
+           (can-access-attachment? user1 nil att1-no-meta) => true)
 
-    (can-access-attachment? user1 att1-no-meta) => true
-    (can-access-attachment? user1 att1-no-meta) => true
+    (facts "only authority attachment visibility"
+      (facts "regarded as public if no auth array for attachment is set"
+        (can-access-attachment? user1 nil att-authority-no-auth) => true
+        (can-access-attachment? user1 {:auth [{:user {:id "1"}}]} att-authority-no-auth) => true
+        (fact "authority can access"
+          (can-access-attachment? user-authority nil att-authority-no-auth)) => true)
 
-    (fact "can't access only authority attachment unless owner or authority"
-      (can-access-attachment? user1 att2-authority) => true ; owner of latestVersion
-      (can-access-attachment? user2 att2-authority) => false
-      (can-access-attachment? user-authority att2-authority) => true)))
+     (facts "attachment auth for user1"
+       (fact "can access when user is authed to attachment"
+         (can-access-attachment? user1 nil att-authority-auth-u1) => true)
+       (fact "user2 not authed"
+         (can-access-attachment? user2 nil att-authority-auth-u1) => false)
+       (fact "authority can access"
+         (can-access-attachment? user-authority nil att-authority-auth-u1) => true)))
+
+     (facts "authed and authority attachment visibility")))
