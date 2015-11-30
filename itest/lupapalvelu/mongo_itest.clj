@@ -21,9 +21,12 @@
       (let [file-count (count (mongo/select :fs.files))
             filename   "mongo-upload-test-file.txt"
             file (fs/temp-file filename)]
-        (mongo/upload (mongo/create-id) filename "plain/text" file) => truthy
-        (fs/delete file) => true
-        (count (mongo/select :fs.files)) => (inc file-count))))
+        (fact "file gets uploaded"
+          (mongo/upload (mongo/create-id) filename "plain/text" file) => truthy)
+        (fact "file can be deleted"
+          (fs/delete file) => true)
+        (fact "file count is increased"
+          (count (mongo/select :fs.files)) => (inc file-count)))))
 
   (fact "file with content"
     (mongo/with-db upload-test-db-name
@@ -31,6 +34,9 @@
             filename   "mongo-upload-test-file-with-content.txt"
             file (fs/temp-file filename)]
         (spit file (repeat 10000 "Some repeating dummy content"))
-        (mongo/upload (mongo/create-id) filename "plain/text" file) => truthy
-        (fs/delete file) => true
-        (count (mongo/select :fs.files)) => (inc file-count)))))
+        (fact "file gets uploaded"
+          (mongo/upload (mongo/create-id) filename "plain/text" file) => truthy)
+        (fact "file can be deleted"
+          (fs/delete file) => true)
+        (fact "file count is increased"
+          (count (mongo/select :fs.files)) => (inc file-count))))))
