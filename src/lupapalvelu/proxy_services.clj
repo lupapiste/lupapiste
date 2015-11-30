@@ -30,16 +30,22 @@
         city (trim city)]
     [street number city]))
 
-(defn get-addresses-proxy [request]
-  (let [query (get (:params request) :query)
-        address (parse-address query)
-        response (apply find-address/get-addresses address)]
-    (if response
-      (let [features (take 10 response)]
-        (resp/json {:query query
-                    :suggestions (map wfs/feature-to-simple-address-string features)
-                    :data (map wfs/feature-to-address features)}))
-      (resp/status 503 "Service temporarily unavailable"))))
+(defn- respond-nls-address-suggestions [features]
+  (if features
+    (let [top10-features (take 10 features)]
+      (resp/json {:suggestions (map wfs/feature-to-simple-address-string top10-features)
+                  :data (map wfs/feature-to-address top10-features)}))
+    (resp/status 503 "Service temporarily unavailable")))
+
+(defn get-addresses-proxy [{{:keys [query lang]} :params}]
+  (let [[street number city] (parse-address query)
+        nls-query (future (find-address/get-addresses street number city))
+        muni-codes (find-address/municipality-codes city)
+        endpoint (when (= 1 (count muni-codes)) (org/municipality-address-endpoint (first muni-codes)))]
+    (if endpoint
+      (let []
+        nil)
+      (respond-nls-address-suggestions @nls-query))))
 
 (defn find-addresses-proxy [{{:keys [term lang]} :params}]
     (if (and (string? term) (string? lang) (not (ss/blank? term)))

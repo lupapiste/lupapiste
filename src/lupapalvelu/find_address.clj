@@ -19,9 +19,9 @@
 (def municipality-index
     (delay (reduce (fn [m lang] (assoc m lang (municipality-index-for lang))) {} i18n/supported-langs)))
 
-(defn municipality-code [municipality-name lang]
+(defn municipality-codes [municipality-name-starts lang]
   (let [index (get @municipality-index (keyword lang))
-        n (ss/lower-case (ss/trim municipality-name))]
+        n (ss/lower-case (ss/trim municipality-name-starts))]
     (when (not (ss/blank? n))
       (->> (filter #(ss/starts-with (first %) n) index)
            (map second)))))
