@@ -1,6 +1,5 @@
 (ns lupapalvelu.application-meta-fields
   (:require [taoensso.timbre :as timbre :refer [tracef debug debugf info warn error]]
-            [clojure.string :as s]
             [monger.operators :refer :all]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.model :as model]
@@ -18,7 +17,7 @@
 (defn in-post-verdict-state? [_ app] (contains? states/post-verdict-states (keyword (:state app))))
 
 (defn- full-name [first-name last-name]
-  (s/trim (str last-name \space first-name)))
+  (ss/trim (str last-name \space first-name)))
 
 (defn- applicant-name-from-auth [application]
   (let [owner (first (auth/get-auths-by-role application :owner))
@@ -30,10 +29,10 @@
     (if (= (get-in body [:_selected :value]) "yritys")
       (get-in body [:yritys :yritysnimi :value])
       (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-        (s/trim (str (:value last-name) \space (:value first-name)))))))
+        (ss/trim (str (:value last-name) \space (:value first-name)))))))
 
 (defn applicant-index [application]
-  (let [applicants (remove s/blank? (map applicant-name-from-doc (domain/get-applicant-documents (:documents application))))
+  (let [applicants (remove ss/blank? (map applicant-name-from-doc (domain/get-applicant-documents (:documents application))))
         applicant (or (first applicants) (applicant-name-from-auth application))
         index (if (seq applicants) applicants [applicant])]
     (tracef "applicant: '%s', applicant-index: %s" applicant index)
@@ -70,7 +69,7 @@
     (count (filter (fn [comment]
                      (and (> (:created comment) last-seen)
                           (not= (get-in comment [:user :id]) (:id user))
-                          (not (s/blank? (:text comment)))))
+                          (not (ss/blank? (:text comment)))))
                    (:comments app)))))
 
 (defn- count-unseen-statements [user app]

@@ -1,9 +1,7 @@
 (ns lupapalvelu.document.model
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.walk :refer [keywordize-keys]]
-            [clojure.string :refer [join]]
             [clojure.set :refer [union difference]]
-            [clojure.string :as s]
             [clj-time.format :as timeformat]
             [sade.env :as env]
             [sade.util :as util]
@@ -187,10 +185,10 @@
     (:i18nkey element)
     (->
       (str
-        (join "." (concat [(-> info :document :locKey)] (map name path)))
+        (ss/join "." (concat [(-> info :document :locKey)] (map name path)))
         (when (= :select (:type element)) "._group_label"))
-      (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
-      (s/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
+      (ss/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
+      (ss/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
 
 (defn- ->validation-result [info data path element result]
   (when result
