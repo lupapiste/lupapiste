@@ -25,6 +25,4 @@
 
 (defn filter-attachments-for [user attachments]
   {:pre [(map? user) (sequential? attachments)]}
-  (letfn [(filter-fn [a]
-            (metadata/public-attachment? a))]
-    (filter filter-fn attachments)))
+  (filter (partial can-access-attachment? user) attachments))
