@@ -30,7 +30,10 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="proclaimed-row">
   <td data-bind="dateString: modified"></td>
   <td data-bind="ltext: 'bulletin.state.' + bulletinState"></td>
-  <td data-bind="text: $parent.versionCommentsCount"></td>
+  <td>
+    <span data-bind="text: $data.comments"></span>
+    <span data-bind="ltext: 'unit.kpl'"></span>
+  </td>
   <td class="actions">
     <!-- ko if: $data.editable -->
     <a href="#" class="link-btn" data-bind="click: $parent.editPublishedApplication, ltext: 'edit'"></a>

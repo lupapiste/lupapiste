@@ -235,6 +235,10 @@
       (ok :bulletin (merge bulletin {:canComment bulletin-commentable})))
     (fail :error.bulletin.not-found)))
 
+(defn- count-comments [version]
+  (let [comment-count (mongo/count :application-bulletin-comments {:versionId (:id version)})]
+    (assoc version :comments comment-count)))
+
 (defquery bulletin-versions
   "returns all bulletin versions for application bulletin with comments"
   {:parameters [bulletinId]
@@ -245,7 +249,9 @@
                             (merge {:comments 1
                                     :versions.id 1
                                     :bulletinState 1}))
-        bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
+        bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))
+        versions (map count-comments (:versions bulletin))
+        bulletin (assoc bulletin :versions versions)]
     (ok :bulletin bulletin)))
 
 (defquery bulletin-comments

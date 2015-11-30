@@ -24,12 +24,6 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
 
   self.showVersionComments = params.showVersionComments;
 
-  self.versionCommentsCount = ko.pureComputed(function() {
-    // var versionCommentsLength = util.getIn(self, ["bulletin", "comments", version.id, "length"]);
-    // return versionCommentsLength ? versionCommentsLength + " " + loc("unit.kpl") : "";
-    return "TODO";
-  });
-
   self.editPublishedApplication = function(bulletin) {
     bulletin.edit(!bulletin.edit());
   }
