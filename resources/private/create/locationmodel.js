@@ -22,10 +22,10 @@ LUPAPISTE.CreateApplicationLocationModel = function() {
   // Search API
   //
 
-  self.searchPoint = function(value) {
+  self.searchPoint = function(value, searchingListener) {
     if (!_.isEmpty(value)) {
       self.reset();
-      return util.prop.isPropertyId(value) ? self._searchPointByPropertyId(value) : self._searchPointByAddress(value);
+      return util.prop.isPropertyId(value) ? self._searchPointByPropertyId(value, searchingListener) : self._searchPointByAddress(value, searchingListener);
     }
     return self;
   };
@@ -34,7 +34,7 @@ LUPAPISTE.CreateApplicationLocationModel = function() {
   // Private functions
   //
 
-  self._searchPointByAddress = function(address) {
+  self._searchPointByAddress = function(address, searchingListener) {
     locationSearch.pointByAddress(self.requestContext, address, function(result) {
         if (result.data && result.data.length > 0) {
           var data = result.data[0],
@@ -46,11 +46,11 @@ LUPAPISTE.CreateApplicationLocationModel = function() {
             .beginUpdateRequest()
             .searchPropertyId(x, y);
         }
-      }, self.onError, self.processing);
+      }, self.onError, searchingListener);
     return self;
   };
 
-  self._searchPointByPropertyId = function(id) {
+  self._searchPointByPropertyId = function(id, searchingListener) {
     locationSearch.pointByPropertyId(self.requestContext, id, function(result) {
         if (result.data && result.data.length > 0) {
           var data = result.data[0],
@@ -62,7 +62,7 @@ LUPAPISTE.CreateApplicationLocationModel = function() {
             .beginUpdateRequest()
             .searchAddress(x, y);
         }
-      }, self.onError, self.processing);
+      }, self.onError, searchingListener);
     return self;
   };
 
