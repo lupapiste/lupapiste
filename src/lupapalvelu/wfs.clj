@@ -159,23 +159,21 @@
      :content [(property-name prop-name)
                {:tag :ogc:Literal :content [value]}]}))
 
-(defn property-is-like [prop-name value & [declare-xml-namespaces?]]
+(defn property-is-like [prop-name value]
   (property-filter "PropertyIsLike" prop-name value
-    (merge {"wildCard" "*", "singleChar" "?", "escape" "\\", "matchCase" "false"}
-      (when declare-xml-namespaces? xml-namespaces))))
+    (merge {"wildCard" "*", "singleChar" "?", "escape" "\\", "matchCase" "false"})))
 
-(defn property-is-equal [prop-name value & [declare-xml-namespaces?]]
-  (property-filter "PropertyIsEqualTo" prop-name value (when declare-xml-namespaces? xml-namespaces)))
+(defn property-is-equal [prop-name value]
+  (property-filter "PropertyIsEqualTo" prop-name value))
 
-(defn property-is-less [prop-name value & [declare-xml-namespaces?]]
-  (property-filter "PropertyIsLessThan" prop-name value (when declare-xml-namespaces? xml-namespaces)))
+(defn property-is-less [prop-name value]
+  (property-filter "PropertyIsLessThan" prop-name value))
 
-(defn property-is-greater [prop-name value & [declare-xml-namespaces?]]
-  (property-filter "PropertyIsGreaterThan" prop-name value (when declare-xml-namespaces? xml-namespaces)))
+(defn property-is-greater [prop-name value]
+  (property-filter "PropertyIsGreaterThan" prop-name value))
 
-(defn property-is-between [name lower-value upper-value & [declare-xml-namespaces?]]
+(defn property-is-between [name lower-value upper-value]
   {:tag :ogc:PropertyIsBetween
-   :attrs (when declare-xml-namespaces? xml-namespaces)
    :content [(property-name name)
              {:tag :ogc:LowerBoundary :content [lower-value]}
              {:tag :ogc:UpperBoundary :content [upper-value]}]})
