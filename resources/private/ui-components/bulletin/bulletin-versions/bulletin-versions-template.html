@@ -38,7 +38,9 @@
     <!-- ko if: $data.editable -->
     <a href="#" class="link-btn" data-bind="click: $parent.editPublishedApplication, ltext: 'edit'"></a>
     <!-- /ko -->
+    <!-- ko if: $data.comments -->
     <a href="#" class="link-btn" data-bind="click: $parent.showVersionComments.bind($data), ltext: 'bulletin.versions.comments.show'"></a>
+    <!-- /ko -->
     <a href="#" class="link-btn" data-bind="ltext: 'bulletin.versions.version.show'"></a>
   </td>
 </script>
