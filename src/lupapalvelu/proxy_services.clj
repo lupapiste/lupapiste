@@ -29,22 +29,10 @@
         city (trim city)]
     [street number city]))
 
-(defn get-addresses [street number city]
-  (wfs/post wfs/maasto
-    (wfs/query {"typeName" "oso:Osoitenimi"}
-      (wfs/ogc-sort-by ["oso:katunumero"])
-      (wfs/ogc-filter
-        (wfs/ogc-and
-          (wfs/property-is-like "oso:katunimi"     street)
-          (wfs/property-is-like "oso:katunumero"   number)
-          (wfs/ogc-or
-            (wfs/property-is-like "oso:kuntanimiFin" city)
-            (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
-
 (defn get-addresses-proxy [request]
   (let [query (get (:params request) :query)
         address (parse-address query)
-        response (apply get-addresses address)]
+        response (apply find-address/get-addresses address)]
     (if response
       (let [features (take 10 response)]
         (resp/json {:query query

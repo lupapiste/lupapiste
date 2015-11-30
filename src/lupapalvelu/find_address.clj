@@ -120,6 +120,18 @@
 ;; Public API:
 ;;
 
+(defn get-addresses [street number city]
+  (wfs/post wfs/maasto
+    (wfs/query {"typeName" "oso:Osoitenimi"}
+      (wfs/ogc-sort-by ["oso:katunumero"])
+      (wfs/ogc-filter
+        (wfs/ogc-and
+          (wfs/property-is-like "oso:katunimi"     street)
+          (wfs/property-is-like "oso:katunumero"   number)
+          (wfs/ogc-or
+            (wfs/property-is-like "oso:kuntanimiFin" city)
+            (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
+
 (defn search [term]
   (condp re-find (s/trim term)
     #"^(\d{14})$"                                 :>> (apply-search search-property-id)
