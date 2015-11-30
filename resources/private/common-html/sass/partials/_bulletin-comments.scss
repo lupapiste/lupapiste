@@ -46,3 +46,17 @@
   color: $gray221;
   padding: 0 50%;
 }
+
+.bulletin-proclamation-header {
+  overflow: auto;
+  line-height: $grid-min-height;
+  vertical-align: middle;
+  margin-bottom: $grid-margin;
+  .bulletin-proclamation-text {
+    float: left;
+  }
+  .bulletin-proclamation-sort {
+    float: right;
+  }
+}
+

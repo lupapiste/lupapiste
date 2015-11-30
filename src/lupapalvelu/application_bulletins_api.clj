@@ -235,6 +235,10 @@
       (ok :bulletin (merge bulletin {:canComment bulletin-commentable})))
     (fail :error.bulletin.not-found)))
 
+(defn- count-comments [version]
+  (let [comment-count (mongo/count :application-bulletin-comments {:versionId (:id version)})]
+    (assoc version :comments comment-count)))
+
 (defquery bulletin-versions
   "returns all bulletin versions for application bulletin with comments"
   {:parameters [bulletinId]
@@ -245,7 +249,9 @@
                             (merge {:comments 1
                                     :versions.id 1
                                     :bulletinState 1}))
-        bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
+        bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))
+        versions (map count-comments (:versions bulletin))
+        bulletin (assoc bulletin :versions versions)]
     (ok :bulletin bulletin)))
 
 (defquery bulletin-comments
@@ -253,14 +259,56 @@
   {:parameters [bulletinId versionId]
    :feature    :publish-bulletin
    :user-roles #{:authority :applicant}}
-  [{{skip :skip limit :limit} :data}]
+  [{{skip :skip limit :limit asc :asc} :data}]
   (let [skip           (util/->int skip)
         limit          (util/->int limit)
+        sort           (if (= "false" asc) {:created -1} {:created 1})
         comments       (mongo/with-collection "application-bulletin-comments"
-                         (query/find  {})
-                         (query/sort  {:created -1})
+                         (query/find  {:versionId versionId})
+                         (query/sort  sort)
                          (query/skip  skip)
                          (query/limit limit))
-        total-comments (mongo/count :application-bulletin-comments {})
+        total-comments (mongo/count :application-bulletin-comments {:versionId versionId})
         comments-left  (max 0 (- total-comments (+ skip (count comments))))]
     (ok :comments comments :totalComments total-comments :commentsLeft comments-left)))
+
+(defn- bulletin-can-be-saved
+  ([state {{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId} :data}]
+   (let [bulletin (get-bulletin bulletin-id)]
+     (prn "state" state)
+     (if-not bulletin
+       (fail :error.invalid-bulletin-id)
+       (if-not (= (:bulletinState bulletin) state)
+         (fail :error.invalid-bulletin-state)
+         (bulletin-version-is-latest bulletin bulletin-version-id)))))
+  ([state command _]
+   (bulletin-can-be-saved state command)))
+
+(defcommand save-proclaimed-bulletin
+  "updates proclaimed version timestamps and text"
+  {:parameters [bulletinId bulletinVersionId proclamationEndsAt proclamationStartsAt proclamationText]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     #{:sent :complementNeeded}
+   :input-validators [(partial bulletin-can-be-saved "proclaimed")]}
+  [{:keys [application created] :as command}]
+  (let [updates {$set {"versions.$.proclamationEndsAt"   proclamationEndsAt
+                       "versions.$.proclamationStartsAt" proclamationStartsAt
+                       "versions.$.proclamationText"     proclamationText}}]
+    (mongo/update-by-query :application-bulletins {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
+    (ok)))
+
+(defcommand save-verdict-given-bulletin
+  "updates verdict given version timestamps and text"
+  {:parameters [bulletinId bulletinVersionId verdictGivenAt appealPeriodEndsAt appealPeriodStartsAt verdictGivenText]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     #{:verdictGiven}
+   :input-validators [(partial bulletin-can-be-saved "verdictGiven")]}
+  [{:keys [application created] :as command}]
+  (let [updates {$set {"versions.$.verdictGivenAt"       verdictGivenAt
+                       "versions.$.appealPeriodEndsAt"   appealPeriodEndsAt
+                       "versions.$.appealPeriodStartsAt" appealPeriodStartsAt
+                       "versions.$.verdictGivenText"     verdictGivenText}}]
+    (mongo/update-by-query :application-bulletins {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
+    (ok)))

@@ -12,6 +12,22 @@
 (fact "EPSG:3879 to EPSG:3067 works"
   (coordinate/convert "EPSG:3879" "EPSG:3067" 3 [2.5502936E7 6708332.0]) => [393033.614 6707228.994])
 
+(facts "coordinate validator"
+  (coordinate/validate-x {:data {:x nil}}) => nil
+  (coordinate/validate-y {:data {:y nil}}) => nil
+  (coordinate/validate-x {:data {:x ""}}) => {:ok false :text "error.illegal-coordinates"}
+  (coordinate/validate-x {:data {:x "0"}}) => {:ok false :text "error.illegal-coordinates"}
+  (coordinate/validate-x {:data {:x "1000"}}) => {:ok false :text "error.illegal-coordinates"}
+  (coordinate/validate-x {:data {:x "10001"}}) => nil
+  (coordinate/validate-x {:data {:x "799999"}}) => nil
+  (coordinate/validate-x {:data {:x "800000"}}) => {:ok false :text "error.illegal-coordinates"}
+  (coordinate/validate-y {:data {:y ""}}) => {:ok false :text "error.illegal-coordinates"}
+  (coordinate/validate-y {:data {:y "0"}}) => {:ok false :text "error.illegal-coordinates"}
+  (coordinate/validate-y {:data {:y "6609999"}}) => {:ok false :text "error.illegal-coordinates"}
+  (coordinate/validate-y {:data {:y "6610000"}}) => nil
+  (coordinate/validate-y {:data {:y "7780000"}}) => {:ok false :text "error.illegal-coordinates"}
+  (coordinate/validate-y {:data {:y "7779999"}}) => nil)
+
 (facts "coordinate validation"
   (coordinate/valid-x? nil) => false
   (coordinate/valid-y? nil) => false

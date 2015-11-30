@@ -136,7 +136,7 @@
                             :expanded-content :mockjax :open-layers :stickyfill :waypoints]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
-                       "statuses.js" "authorization.js" "vetuma.js"]}
+                       "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
    :common-html  {:depends [:selectm-html]
                   :css ["jquery-ui.css"]
@@ -279,7 +279,7 @@
                   :js ["docmodel.js" "docgen.js"]}
 
    :create       {:depends [:common-html :map]
-                  :js ["municipalities.js" "create.js"]
+                  :js ["locationmodel.js" "municipalities.js" "create.js"]
                   :html ["map-popup.html" "create.html"]}
 
    :iframe       {:depends [:common-html]

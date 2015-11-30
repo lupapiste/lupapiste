@@ -68,9 +68,9 @@
 (defn get-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
   ([{:keys [organization permitType] :as application}]
-    (get-krysp-wfs organization permitType))
-  ([organization-id permit-type]
-   (let [organization (mongo/by-id :organizations organization-id)
+    (get-krysp-wfs {:_id organization} permitType))
+  ([query permit-type]
+   (let [organization (mongo/select-one :organizations query [:krysp])
          krysp-config (get-in organization [:krysp (keyword permit-type)])
          crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
          crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
@@ -78,13 +78,17 @@
          password     (when-let [password (and crypto-iv (:password krysp-config))]
                         (->> password
                              (crypt/str->bytes)
-                            (crypt/base64-decode)
+                             (crypt/base64-decode)
                              (crypt/decrypt crypto-key crypto-iv :aes)
                              (crypt/bytes->str)))
          username     (:username krysp-config)]
      (when-not (s/blank? (:url krysp-config))
        (->> (when username {:credentials [username password]})
             (merge (select-keys krysp-config [:url :version])))))))
+
+(defn municipality-address-endpoint [municipality]
+  (when (and (not (ss/blank? municipality)) (re-matches #"\d{3}" municipality) )
+    (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)))
 
 (defn- encode-credentials
   [username password]

@@ -4,6 +4,7 @@
             [midje.sweet :refer :all]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as org]
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.coordinate :as coord]
@@ -13,26 +14,25 @@
 (http-post (str (server-address) "/api/proxy-ctrl/on") {})
 
 (defn- proxy-request [apikey proxy-name & args]
-  (-> (http-post
-        (str (server-address) "/proxy/" (name proxy-name))
-        {:headers {"authorization" (str "apikey=" apikey)
-                   "content-type" "application/json;charset=utf-8"}
-         :socket-timeout 10000
-         :conn-timeout 10000
-         :body (json/encode (apply hash-map args))})
-    decode-response
-    :body))
+  (:body (http-post
+           (str (server-address) "/proxy/" (name proxy-name))
+           {:headers {"authorization" (str "apikey=" apikey)
+                      "content-type" "application/json;charset=utf-8"}
+            :socket-timeout 10000
+            :conn-timeout 10000
+            :body (json/encode (apply hash-map args))
+            :as :json})))
 
 (facts "find-addresses-proxy"
-  (let [r (proxy-request mikko :find-address :term "piiriniitynkatu 9, tampere")]
-    (fact r =contains=> [{:kind "address"
-                          :type "street-number-city"
-                          :street "Piiriniitynkatu"
-                          :number "9"
-                          :municipality "837"
-                          :name {:fi "Tampere" :sv "Tammerfors"}}])
+  (let [r (proxy-request mikko :find-address :term "piiriniitynkatu 9, tampere" :lang "fi")]
+    (fact r =contains=> {:kind "address"
+                         :type "street-number-city"
+                         :street "Piiriniitynkatu"
+                         :number "9"
+                         :municipality "837"
+                         :name {:fi "Tampere" :sv "Tammerfors"}})
     (fact (-> r first :location keys) => (just #{:x :y})))
-  (let [r (proxy-request mikko :find-address :term "piiriniitynkatu")]
+  (let [r (proxy-request mikko :find-address :term "piiriniitynkatu" :lang "fi")]
     (fact r =contains=> [{:kind "address"
                           :type "street"
                           :street "Piiriniitynkatu"
@@ -40,18 +40,16 @@
                           :name {:fi "Tampere" :sv "Tammerfors"}
                           :municipality "837"}])
     (fact (-> r first :location keys) => (just #{:x :y})))
-  (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 9, tampere"}})
+  (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 9, tampere" :lang "fi"}})
         r (json/decode (:body response) true)]
-    (fact (:query r) => "piiriniitynkatu 9, tampere")
     (fact (:suggestions r) => ["Piiriniitynkatu 9, Tampere"])
     (fact (:data r) =contains=> [{:street "Piiriniitynkatu",
                                   :number "9",
                                   :name {:fi "Tampere" :sv "Tammerfors"}
                                   :municipality "837"}])
     (fact (-> r :data first :location keys) => (just #{:x :y})))
-  (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 19, tampere"}})
+  (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 19, tampere" :lang "fi"}})
         r (json/decode (:body response) true)]
-    (fact (:query r) => "piiriniitynkatu 19, tampere")
     (fact (:suggestions r) => ["Piiriniitynkatu 19, Tampere"])
     (fact (:data r) =contains=> [{:street "Piiriniitynkatu",
                                   :number "19",
@@ -88,15 +86,17 @@
   (let [response (property-info-by-wkt-proxy {:params params})]
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)
-          {:keys [x y rekisteriyksikkolaji kiinttunnus]} (first body)
+          {:keys [x y rekisteriyksikkolaji kiinttunnus kunta wkt]} (first body)
           {:keys [id selite]} rekisteriyksikkolaji]
 
       (fact "collection format"
         (count body) => 1
-        (keys (first body)) => (just #{:x :y :rekisteriyksikkolaji :kiinttunnus}))
+        (keys (first body)) => (just #{:x :y :rekisteriyksikkolaji :kiinttunnus :kunta :wkt}))
       (fact "valid x" x => coord/valid-x?)
       (fact "valid y" y => coord/valid-y?)
       (fact "kiinttunnus" kiinttunnus => "75341600380021")
+      (fact "kunta" kunta => "753")
+      (fact "wkt" wkt => #"^POLYGON")
       (fact "rekisteriyksikkolaji"
         id => "1"
         selite => {:fi "Tila", :sv "L\u00e4genhet"})))
@@ -121,6 +121,7 @@
   (property-info-for-75341600380021 {:wkt "POLYGON((404270 6693890,404270 6693895,404275 6693890,404270 6693890))"}))
 
 (facts "address-by-point - street number not null"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (let [x 333168
         y 6822000
         request {:params {:x x :y y}}
@@ -132,6 +133,7 @@
       (fact (:fi (:name body)) => "Tampere"))))
 
 (facts "address-by-point - street number null"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (let [x 403827.289
         y 6694204.426
         request {:params {:x x :y y}}
