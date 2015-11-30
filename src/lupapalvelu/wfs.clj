@@ -76,17 +76,22 @@
 ;; DSL to WFS queries:
 ;;
 
-(def xml-namespaces
-  {"xmlns:oso" "http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02"
-   "xmlns:mkos" "http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
-   "xmlns:yht" "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-   "xmlns:ktjkiiwfs" "http://xml.nls.fi/ktjkiiwfs/2010/02"
-   "xmlns:wfs" "http://www.opengis.net/wfs"
+(def common-namespaces
+  {"xmlns:wfs" "http://www.opengis.net/wfs"
    "xmlns:gml" "http://www.opengis.net/gml"
    "xmlns:ogc" "http://www.opengis.net/ogc"
    "xmlns:xsi" "http://www.w3.org/2001/XMLSchema-instance"})
 
+(def nls-namespaces (merge common-namespaces {"xmlns:oso" "http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02"
+                                              "xmlns:ktjkiiwfs" "http://xml.nls.fi/ktjkiiwfs/2010/02"}))
+
+(def krysp-namespaces (merge common-namespaces {"xmlns:mkos" "http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+                                                "xmlns:yht" "http://www.paikkatietopalvelu.fi/gml/yhteiset"}))
+
 (defn query [attrs & e]
+  (let [type-name (or (:typeName attrs) (get attrs "typeName"))
+        ns-prefix (first (ss/split (name type-name) #":"))
+        xml-namespaces (if (some #(ss/ends-with % ns-prefix) (keys krysp-namespaces)) krysp-namespaces nls-namespaces)]
   (sxml/element-to-string
    {:tag :wfs:GetFeature
     :attrs (merge {:version "1.1.0"}
@@ -94,7 +99,7 @@
              {:xsi:schemaLocation "http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"})
     :content [{:tag :wfs:Query
                :attrs attrs
-               :content (if (string? e) [e] e)}]}))
+                  :content (if (string? e) [e] e)}]})))
 
 (defn ogc-sort-by
   ([property-names]
@@ -367,7 +372,7 @@
                      (ogc-bbox
                        (property-name "yht:pistesijainti/gml:Point/gml:pos")
                        (envelope "EPSG:3067" [(- x_d radius) (- y_d 50)] [(+ x_d 50) (+ y_d 50)])))
-        filter-str (sxml/element-to-string (assoc filter-xml :attrs (dissoc xml-namespaces "xmlns:ktjkiiwfs" "xmlns:oso")))]
+        filter-str (sxml/element-to-string (assoc filter-xml :attrs krysp-namespaces))]
 
     (exec :get url
       credentials
