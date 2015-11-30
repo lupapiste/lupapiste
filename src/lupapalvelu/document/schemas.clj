@@ -1379,6 +1379,7 @@
            :order 3
            :removable true
            :repeating true
+           :deny-removing-last-document true
            :approvable true
            :type :party
            :subtype "hakija"
@@ -1393,6 +1394,7 @@
            :order 3
            :removable true
            :repeating true
+           :deny-removing-last-document true
            :approvable true
            :type :party
            :subtype "hakija"
@@ -1407,6 +1409,7 @@
            :order 3
            :removable false
            :repeating false
+           :deny-removing-last-document true
            :approvable true
            :type :party
            :subtype "hakija"
@@ -1421,6 +1424,7 @@
            :order 3
            :removable true
            :repeating true
+           :deny-removing-last-document true
            :approvable true
            :type :party
            :subtype "hakija"

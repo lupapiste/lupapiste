@@ -4,6 +4,7 @@
             [midje.sweet :refer :all]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as org]
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.coordinate :as coord]
@@ -88,15 +89,17 @@
   (let [response (property-info-by-wkt-proxy {:params params})]
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)
-          {:keys [x y rekisteriyksikkolaji kiinttunnus]} (first body)
+          {:keys [x y rekisteriyksikkolaji kiinttunnus kunta wkt]} (first body)
           {:keys [id selite]} rekisteriyksikkolaji]
 
       (fact "collection format"
         (count body) => 1
-        (keys (first body)) => (just #{:x :y :rekisteriyksikkolaji :kiinttunnus}))
+        (keys (first body)) => (just #{:x :y :rekisteriyksikkolaji :kiinttunnus :kunta :wkt}))
       (fact "valid x" x => coord/valid-x?)
       (fact "valid y" y => coord/valid-y?)
       (fact "kiinttunnus" kiinttunnus => "75341600380021")
+      (fact "kunta" kunta => "753")
+      (fact "wkt" wkt => #"^POLYGON")
       (fact "rekisteriyksikkolaji"
         id => "1"
         selite => {:fi "Tila", :sv "L\u00e4genhet"})))
@@ -121,6 +124,7 @@
   (property-info-for-75341600380021 {:wkt "POLYGON((404270 6693890,404270 6693895,404275 6693890,404270 6693890))"}))
 
 (facts "address-by-point - street number not null"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (let [x 333168
         y 6822000
         request {:params {:x x :y y}}
@@ -132,6 +136,7 @@
       (fact (:fi (:name body)) => "Tampere"))))
 
 (facts "address-by-point - street number null"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (let [x 403827.289
         y 6694204.426
         request {:params {:x x :y y}}
@@ -170,7 +175,7 @@
                       :linkki "http://img.sito.fi/kaavamaaraykset/91/8755.pdf"
                       :type "sito"}))
 
-  (fact "Mikkeli"
+  #_(fact "Mikkeli"
     (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
           body (json/decode (:body response) true)]
 
@@ -255,23 +260,23 @@
           (wfs/raster-images request "wmts") => http200?)))))
 
 (facts "WMS layers"
-  (let [base-params {"FORMAT" "image/png"
-                     "SERVICE" "WMS"
-                     "VERSION" "1.1.1"
-                     "REQUEST" "GetMap"
-                     "STYLES"  ""
-                     "SRS"     "EPSG:3067"
-                     "BBOX"   "444416,6666496,444672,6666752"
-                     "WIDTH"   "256"
-                     "HEIGHT" "256"}]
-    (doseq [layer [{"LAYERS" "taustakartta_5k"}
-                   {"LAYERS" "taustakartta_10k"}
-                   {"LAYERS" "taustakartta_20k"}
-                   {"LAYERS" "taustakartta_40k"}
-                   {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
-                   {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}
-                   {"LAYERS" "yleiskaava"}
-                   {"LAYERS" "yleiskaava_poikkeavat"}]]
+  (let [base-params {:FORMAT "image/png"
+                     :SERVICE "WMS"
+                     :VERSION "1.1.1"
+                     :REQUEST "GetMap"
+                     :STYLES  ""
+                     :SRS     "EPSG:3067"
+                     :BBOX   "444416,6666496,444672,6666752"
+                     :WIDTH   "256"
+                     :HEIGHT "256"}]
+    (doseq [layer [{:LAYERS "taustakartta_5k"}
+                   {:LAYERS "taustakartta_10k"}
+                   {:LAYERS "taustakartta_20k"}
+                   {:LAYERS "taustakartta_40k"}
+                   {:LAYERS "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
+                   {:LAYERS "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}
+                   {:LAYERS "yleiskaava"}
+                   {:LAYERS "yleiskaava_poikkeavat"}]]
       (fact {:midje/description (get layer "LAYERS")}
         (let [request {:params (merge base-params layer)
                        :headers {"accept-encoding" "gzip, deflate"}}]

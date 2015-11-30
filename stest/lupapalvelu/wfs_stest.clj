@@ -26,5 +26,5 @@
 (fact "local private test krysp wfs url without password is not alive" (wfs/wfs-is-alive? local-private-wfs "pena" nil) => falsey)
 (fact "local private test krysp wfs url with credentials is alive" (wfs/wfs-is-alive? local-private-wfs "pena" "pena") => true)
 
-(fact "Get out capabilities"
-  (wfs/get-our-capabilities) => (contains "WMT_MS_Capabilities"))
+(fact "Get our capabilities"
+  (wfs/get-our-capabilities) => (contains "WMS_Capabilities"))

@@ -8,6 +8,10 @@ LUPAPISTE.PublishBulletinService = function() {
 
   self.comments = ko.observable([]);
 
+  self.commentsLeft = ko.observable(true);
+
+  self.totalComments = ko.observable();
+
   ko.computed(function() {
     var state = self.publishPending() ? "pending" : "finished";
     hub.send("publishBulletinService::publishProcessing", {state: state});
@@ -63,11 +67,12 @@ LUPAPISTE.PublishBulletinService = function() {
 
   // bulletin comment pagination
   var skip = 0;
-  var limit = 1;
+  var limit = 5;
   var versionId = undefined;
+  var asc = false;
 
   hub.subscribe("publishBulletinService::fetchBulletinComments", function(event) {
-    if (event.versionId !== versionId) {
+    if (event.versionId !== versionId || event.asc !== asc) {
       skip = 0;
       versionId = event.versionId;
       self.comments([]);
@@ -75,10 +80,14 @@ LUPAPISTE.PublishBulletinService = function() {
     ajax.query("bulletin-comments", {bulletinId: event.bulletinId,
                                      versionId: event.versionId,
                                      skip: skip,
-                                     limit: limit})
+                                     limit: limit,
+                                     asc: event.asc})
       .success(function(res) {
         self.comments(self.comments().concat(res.comments));
+        self.commentsLeft(res.commentsLeft);
+        self.totalComments(res.totalComments);
         skip += limit;
+        asc = event.asc;
       })
       .call();
   });
