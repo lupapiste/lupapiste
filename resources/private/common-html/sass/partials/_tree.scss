@@ -97,6 +97,13 @@ $tree-height: 320px;
       margin-top: $baseline;
       width: 18em;
     }
+    .operation-description {
+      margin-top: $marginL;
+      margin-bottom: $marginL;
+      p {
+        margin: $marginM 0;
+      }
+    }
     .organization-links li {
       list-style-type: none;
     }
