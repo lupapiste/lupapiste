@@ -4,8 +4,6 @@ LUPAPISTE.EditableBulletinModel = function(data, id) {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  console.log("data", id);
-
   var mapping = {
     copy: ["bulletinState"],
     proclamationStartsAt: {
