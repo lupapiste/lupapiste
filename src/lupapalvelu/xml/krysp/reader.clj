@@ -29,7 +29,7 @@
 (def yl-case-type     "typeName=ymy%3AYmparistolupa")
 (def mal-case-type    "typeName=ymm%3AMaaAineslupaAsia")
 (def vvvl-case-type   "typeName=ymv%3AVapautus")
-(def kt-case-type     "typeName=kiito%3AKiinteistotoimitus")
+(def kt-case-type-prefix  "typeName=kiito%3A")
 
 ;; Object types as enlive selector
 (def case-elem-selector #{[:RakennusvalvontaAsia]
@@ -44,9 +44,18 @@
                           [:MaaAineslupaAsia]
                           [:Vapautus]})
 
-(def outlier-elem-selector #{[:KiinteistolajinMuutos]})
+(def outlier-elem-selector #{[:Lohkominen]
+                             [:Rasitetoimitus]
+                             [:YleisenAlueenLohkominen]
+                             [:KiinteistolajinMuutos]
+                             [:YhtAlueenOsuuksienSiirto]
+                             [:KiinteistojenYhdistaminen]
+                             [:Halkominen]
+                             [:KiinteistonMaaritys]
+                             [:Tilusvaihto]})
 
-(defn- get-tunnus-path [permit-type search-type]
+(defn- get-tunnus-path
+  [permit-type search-type]
   (let [prefix (permit/get-metadata permit-type :wfs-krysp-url-asia-prefix)
         tunnus-location (case search-type
                           :application-id  "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus"
@@ -123,8 +132,10 @@
     (trace "Get application: " server " with post body: " options )
     (cr/get-xml-with-post server options credentials raw?)))
 
-(defn kt-application-xml   [server credentials id search-type raw?]
-  (application-xml kt-case-type   (get-tunnus-path permit/KT search-type) server credentials id raw?))
+(defn kt-application-xml   [krysp-name server credentials id search-type raw?]
+  (let [path "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus"]
+    (println "krysp-name:" krysp-name)
+    (application-xml (str kt-case-type-prefix krysp-name) path server credentials id raw?)))
 
 (permit/register-function permit/R    :xml-from-krysp rakval-application-xml)
 (permit/register-function permit/P    :xml-from-krysp poik-application-xml)
@@ -582,7 +593,7 @@
 (defn- outlier-verdicts-validator [xml organization]
   (simple-verdicts-validator xml organization :paatostieto :Paatos :pvmtieto :Pvm :pvm))
 
-(defn- ->outlier-verdicts
+(defn ->outlier-verdicts
   "For some reason kiinteistotoimitus (at least) defines its own
   verdict schema, which is similar to but not the same as the common
   schema"
@@ -596,12 +607,11 @@
                                          :let [pk (-> elem cr/as-is :poytakirjatieto :Poytakirja)
                                                fields (select-keys pk [:paatoksentekija :pykala])
                                                paatos (:paatos pk)
-                                               liitteet (map #(-> % :Liite ->liite (dissoc :metadata)) [(:liitetieto pk)])
-                                               _ (println "Liitteet:" liitteet)]]
+                                               liitteet (map #(-> % :Liite ->liite (dissoc :metadata)) (:liitetieto pk))]]
                                      (assoc fields
                                             :paatoskoodi paatos
                                             :status (verdict/verdict-id paatos)
-                                            :liite (first liitteet)))]
+                                            :liite liitteet))]
                    {:paivamaarat    {:paatosdokumentinPvm timestamp}
                     :poytakirjat poytakirjat}))))
            (select xml-no-ns [:paatostieto :Paatos])))))

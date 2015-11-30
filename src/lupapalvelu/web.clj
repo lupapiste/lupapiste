@@ -585,14 +585,13 @@
   (defpage "/dev/krysp" {typeName :typeName r :request filter :filter overrides :overrides}
     (if-not (s/blank? typeName)
       (let [filter-type-name (-> filter sade.xml/parse (sade.common-reader/all-of [:PropertyIsEqualTo :PropertyName]))
-            _ (println "Filter-type-name:" filter-type-name)
             xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
                   "rakval:RakennusvalvontaAsia" "krysp/sample/verdict.xml"
                   "ymy:Ymparistolupa"           "krysp/sample/verdict-yl.xml"
                   "ymm:MaaAineslupaAsia"        "krysp/sample/verdict-mal.xml"
                   "ymv:Vapautus"                "krysp/sample/verdict-vvvl.xml"
                   "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/sample/poikkari-verdict-cgi.xml"
-                  "kiito:Kiinteistotoimitus"    "krysp/sample/verdict-kt.xml"}
+                  "kiito:KiinteistolajinMuutos"    "krysp/sample/verdict-kt.xml"}
             overrides (-> (json/decode overrides)
                           (clojure.walk/keywordize-keys))]
         ;; Use different sample xml for rakval query with kuntalupatunnus type of filter.
