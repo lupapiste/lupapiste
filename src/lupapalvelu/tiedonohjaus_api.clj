@@ -9,9 +9,7 @@
             [lupapalvelu.action :as action]
             [lupapiste-commons.tos-metadata-schema :as tms]
             [schema.core :as s]
-            [taoensso.timbre :as timbre]
-            [sade.env :as env])
-  (:import (schema.core EnumSchema)))
+            [taoensso.timbre :as timbre]))
 
 (defquery available-tos-functions
   {:user-roles #{:anonymous}
@@ -30,28 +28,6 @@
       (do (o/update-organization orgId {$set {(str "operations-tos-functions." operation) function-code}})
           (ok))
       (fail "Invalid organization or operation"))))
-
-(defn- get-in-metadata-map [map ks]
-  (let [k (first ks)
-        value (or (get map k)
-                  (second (first (filter (fn [[key-in-map _]] (= k (:k key-in-map))) map))))]
-    (if (and (map? value) (next ks))
-      (get-in-metadata-map value (next ks))
-      value)))
-
-(defn- convert-value-to-schema-type [ks v]
-  (when-let [schema (get-in-metadata-map tms/AsiakirjaMetaDataMap ks)]
-    (if (= EnumSchema (type schema)) (keyword v) v)))
-
-(defn- keywordize-keys-and-some-values [m ks]
-  (->> m
-       (map (fn [[k v]] (let [new-k (if (string? k) (keyword k) k)
-                              new-ks (conj ks new-k)
-                              new-v (if (map? v)
-                                      (keywordize-keys-and-some-values v new-ks)
-                                      (convert-value-to-schema-type new-ks v))]
-                          [new-k new-v])))
-       (into {})))
 
 (defcommand set-tos-function-for-operation
   {:parameters [operation functionCode]
@@ -115,8 +91,8 @@
     (merge new-metadata replacement-metadata)))
 
 (defn- update-document-metadata [document metadata user-roles]
-  (let [old-metadata (keywordize-keys-and-some-values (:metadata document) [])
-        metadata (->> (keywordize-keys-and-some-values metadata [])
+  (let [old-metadata (tms/coerce-metadata-to-schema (:metadata document) [])
+        metadata (->> (tms/coerce-metadata-to-schema metadata [])
                       (revert-unauthorized-modifications user-roles old-metadata)
                       (#(assoc % :tila (or (:tila old-metadata) :luonnos)))
                       (tms/sanitize-metadata))]
