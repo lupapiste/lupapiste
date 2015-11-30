@@ -472,13 +472,14 @@
                    :content-type content-type
                    :size         size
                    :organization org-id
-                   :created      created}]
+                   :created      created}
+        tmpdir (fs/temp-dir "area")]
 
     (try+
       (when-not (= content-type "application/zip")
         (fail! :error.illegal-shapefile))
-
-      (let [target-dir (util/unzip (.getPath tempfile) (fs/temp-dir "area"))
+      
+      (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
             shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
             data-store (FileDataStoreFinder/getDataStore shape-file)
             new-collection (some-> data-store
@@ -499,7 +500,10 @@
         (resp/status 400 text))
       (catch Throwable t
         (error "Failed to parse shapefile" t)
-        (resp/status 400 :error.shapefile-parsing-failed)))))
+        (resp/status 400 :error.shapefile-parsing-failed))
+      (finally 
+        (when tmpdir
+          (fs/delete-dir tmpdir))))))
 
 (defquery get-map-layers-data
   {:description "Organization server and layer details."
