@@ -73,8 +73,8 @@
                               :created timestamp
                               :state :ok})))
 
-(defn process-ah-verdict [path-to-zip ftp-user system-user s]
-  (let [tmp-dir (fs/temp-dir (str "ah" s))]
+(defn process-ah-verdict [path-to-zip ftp-user system-user]
+  (let [tmp-dir (fs/temp-dir (str "ah"))]
     (try
       (let [unzipped-path (unzip-file path-to-zip tmp-dir)
             xmls (fs/find-files unzipped-path #".*xml$")
