@@ -1,19 +1,22 @@
 (ns lupapalvelu.attachment-accessibility
   (:require [lupapalvelu.attachment-metadata :as metadata]
             [lupapalvelu.user :as user]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.authorization :as auth]))
 
 
-(defn owns-latest-version? [user {latest :latestVersion}]
-  (= (-> latest :user :id) (:id user)))
-
+(defn visibility-check [user app-auth {:keys [metadata auth] :as attachment}]
+  (case (keyword (metadata/get-visibility attachment))
+    :asiakas-ja-viranomainen (or (auth/has-auth? {:auth app-auth} (:id user)) (user/authority? user))
+    :viranomainen (or (auth/has-auth? {:auth auth} (:id user)) (user/authority? user)) ; attachment auth
+    :julkinen true
+    nil))
 
 (defn can-access-attachment?
   [user app-auth {:keys [latestVersion metadata auth] :as attachment}]
   (or
     (nil? latestVersion)
-    (user/authority? user)
-    (owns-latest-version? user attachment)
+    (visibility-check user app-auth attachment)
     (metadata/public-attachment? attachment)))
 
 (defn can-access-attachment-file? [user file-id {attachments :attachments auth :auth}]
