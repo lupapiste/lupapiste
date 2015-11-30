@@ -225,7 +225,7 @@
 (defn upload [file-id filename content-type content & metadata]
   {:pre [(string? file-id) (string? filename) (string? content-type)
          (or (instance? java.io.File content) (instance? java.io.InputStream content))
-         (sequential? metadata)
+         (or (nil? metadata) (sequential? metadata))
          (or (even? (clojure.core/count metadata)) (map? (first metadata)))]}
   (let [meta (remove-null-chars (if (map? (first metadata))
                                   (first metadata)
