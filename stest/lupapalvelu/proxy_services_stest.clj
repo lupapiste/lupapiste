@@ -14,26 +14,25 @@
 (http-post (str (server-address) "/api/proxy-ctrl/on") {})
 
 (defn- proxy-request [apikey proxy-name & args]
-  (-> (http-post
-        (str (server-address) "/proxy/" (name proxy-name))
-        {:headers {"authorization" (str "apikey=" apikey)
-                   "content-type" "application/json;charset=utf-8"}
-         :socket-timeout 10000
-         :conn-timeout 10000
-         :body (json/encode (apply hash-map args))})
-    decode-response
-    :body))
+  (:body (http-post
+           (str (server-address) "/proxy/" (name proxy-name))
+           {:headers {"authorization" (str "apikey=" apikey)
+                      "content-type" "application/json;charset=utf-8"}
+            :socket-timeout 10000
+            :conn-timeout 10000
+            :body (json/encode (apply hash-map args))
+            :as :json})))
 
 (facts "find-addresses-proxy"
-  (let [r (proxy-request mikko :find-address :term "piiriniitynkatu 9, tampere")]
-    (fact r =contains=> [{:kind "address"
-                          :type "street-number-city"
-                          :street "Piiriniitynkatu"
-                          :number "9"
-                          :municipality "837"
-                          :name {:fi "Tampere" :sv "Tammerfors"}}])
+  (let [r (proxy-request mikko :find-address :term "piiriniitynkatu 9, tampere" :lang "fi")]
+    (fact r =contains=> {:kind "address"
+                         :type "street-number-city"
+                         :street "Piiriniitynkatu"
+                         :number "9"
+                         :municipality "837"
+                         :name {:fi "Tampere" :sv "Tammerfors"}})
     (fact (-> r first :location keys) => (just #{:x :y})))
-  (let [r (proxy-request mikko :find-address :term "piiriniitynkatu")]
+  (let [r (proxy-request mikko :find-address :term "piiriniitynkatu" :lang "fi")]
     (fact r =contains=> [{:kind "address"
                           :type "street"
                           :street "Piiriniitynkatu"
@@ -41,18 +40,16 @@
                           :name {:fi "Tampere" :sv "Tammerfors"}
                           :municipality "837"}])
     (fact (-> r first :location keys) => (just #{:x :y})))
-  (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 9, tampere"}})
+  (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 9, tampere" :lang "fi"}})
         r (json/decode (:body response) true)]
-    (fact (:query r) => "piiriniitynkatu 9, tampere")
     (fact (:suggestions r) => ["Piiriniitynkatu 9, Tampere"])
     (fact (:data r) =contains=> [{:street "Piiriniitynkatu",
                                   :number "9",
                                   :name {:fi "Tampere" :sv "Tammerfors"}
                                   :municipality "837"}])
     (fact (-> r :data first :location keys) => (just #{:x :y})))
-  (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 19, tampere"}})
+  (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 19, tampere" :lang "fi"}})
         r (json/decode (:body response) true)]
-    (fact (:query r) => "piiriniitynkatu 19, tampere")
     (fact (:suggestions r) => ["Piiriniitynkatu 19, Tampere"])
     (fact (:data r) =contains=> [{:street "Piiriniitynkatu",
                                   :number "19",
