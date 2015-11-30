@@ -10,9 +10,22 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
   self.latestVersion = ko.observable({});
 
   function mapVersions(v) {
-    var model = new LUPAPISTE.EditableBulletinModel(v, self.bulletin().id);
-    if (model.id() === util.getIn(self, ["latestVersion", "id"])) {
-      model.editable(true);
+    var model;
+    switch (v.bulletinState) {
+      case "proclaimed":
+        model = new LUPAPISTE.EditableProclaimedBulletinModel(v, self.bulletin().id);
+        if (ko.unwrap(model.id) === util.getIn(self, ["latestVersion", "id"])) {
+          model.editable(true);
+        }
+        break;
+      case "verdictGiven":
+        model = new LUPAPISTE.EditableVerdictGivenBulletinModel(v, self.bulletin().id);
+        if (ko.unwrap(model.id) === util.getIn(self, ["latestVersion", "id"])) {
+          model.editable(true);
+        }
+        break;
+      default:
+        model = new LUPAPISTE.EditableBulletinModel(v, self.bulletin().id);
     }
     return model;
   }

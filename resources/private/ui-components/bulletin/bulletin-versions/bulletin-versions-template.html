@@ -31,8 +31,10 @@
   <td data-bind="dateString: modified"></td>
   <td data-bind="ltext: 'bulletin.state.' + bulletinState"></td>
   <td>
+    <!-- ko if: $data.comments -->
     <span data-bind="text: $data.comments"></span>
     <span data-bind="ltext: 'unit.kpl'"></span>
+    <!-- /ko -->
   </td>
   <td class="actions">
     <!-- ko if: $data.editable -->
@@ -47,7 +49,12 @@
 
 <script class="ko-template" type="text/x-jquery-tmpl" id="editable-proclaimed-row">
   <td colspan=4>
+    <!-- ko if: $data.bulletinState === 'proclaimed'-->
     <div data-bind="template: 'edit-proclaimed-template'"></div>
+    <!-- /ko -->
+    <!-- ko if: $data.bulletinState === 'verdictGiven'-->
+    <div data-bind="template: 'edit-verdict-given-template'"></div>
+    <!-- /ko -->
     <button data-bind="click:  save,
                        enable: isValid(),
                        css:    {waiting: pending}"
