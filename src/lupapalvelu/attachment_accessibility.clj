@@ -14,8 +14,8 @@
 
 (defn publicity-check [user app-auth {:keys [metadata auth] :as attachment}]
   (case (keyword (metadata/get-publicity-class attachment)) ; TODO check cases
-    :osittain-salassapidettava (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (user/authority?))
-    :salainen (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (user/authority?))
+    :osittain-salassapidettava (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (user/authority? user))
+    :salainen (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (user/authority? user))
     :julkinen true
     nil true))
 
