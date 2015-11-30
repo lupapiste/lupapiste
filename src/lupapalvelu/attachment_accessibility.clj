@@ -7,7 +7,10 @@
 
 (defn visibility-check [user app-auth {:keys [metadata auth] :as attachment}]
   (case (keyword (metadata/get-visibility attachment))
-    :asiakas-ja-viranomainen (or (auth/has-auth? {:auth app-auth} (:id user)) (user/authority? user))
+    :asiakas-ja-viranomainen (or
+                               (or (auth/has-auth? {:auth auth} (:id user)) ; attachment auth
+                                   (auth/has-auth? {:auth app-auth} (:id user))) ; application auth
+                               (user/authority? user))
     :viranomainen (or (auth/has-auth? {:auth auth} (:id user)) (user/authority? user)) ; attachment auth
     :julkinen true
     nil true))

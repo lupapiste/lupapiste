@@ -71,6 +71,7 @@
        (fact "is only available for user authed in application, and authorities"
          (can-access-attachment? user2 [user2] att-parties-auth-u1) => true
          (can-access-attachment? user2 [user1] att-parties-auth-u1) => false
+         (can-access-attachment? user1 [user2] att-parties-auth-u1) => true
          (can-access-attachment? user2 [user1 user2] att-parties-auth-u1) => true
          (can-access-attachment? user-authority nil att-parties-auth-u1) => true))
 
