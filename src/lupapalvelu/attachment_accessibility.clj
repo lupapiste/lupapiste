@@ -1,6 +1,7 @@
 (ns lupapalvelu.attachment-accessibility
   (:require [lupapalvelu.attachment-metadata :as metadata]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.user :as user]
+            [sade.util :as util]))
 
 
 (defn owns-latest-version? [user {latest :latestVersion}]
@@ -17,9 +18,9 @@
 
 (defn can-access-attachment-file? [user file-id {attachments :attachments}]
   (boolean
-    (when-let [attachment (some
+    (when-let [attachment (util/find-first
                             (fn [{versions :versions :as attachment}]
-                              (when (some #{file-id} (map :fileId versions)) attachment))
+                              (util/find-first #{file-id} (map :fileId versions)))
                             attachments)]
       (can-access-attachment? user attachment))))
 
