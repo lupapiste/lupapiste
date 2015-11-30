@@ -104,7 +104,7 @@
    :states     states/all-application-states}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
-    (let [role (or (:role my-invite) (:role (domain/get-auth application (:id user))))
+    (let [role (or (:role my-invite) (:role (auth/get-auth application (:id user))))
           document-id (:documentId my-invite)]
       (update-application command
         {:auth {$elemMatch {:invite.user.id (:id user)}}}

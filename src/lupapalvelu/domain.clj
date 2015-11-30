@@ -112,12 +112,6 @@
 ;; authorization
 ;;
 
-(defn get-auths [{auth :auth} user-id]
-  (filter #(= (:id %) user-id) auth))
-
-(defn get-auth [application user-id]
-  (first (get-auths application user-id)))
-
 (def owner-or-write-roles ["owner" "writer" "foreman"])
 
 (defn owner-or-write-access? [application user-id]

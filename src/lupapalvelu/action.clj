@@ -288,7 +288,7 @@
 
 (defn- user-authz? [command-meta-data application user]
   (let [allowed-roles (get command-meta-data :user-authz-roles #{})
-        roles-in-app  (map (comp keyword :role) (domain/get-auths application (:id user)))]
+        roles-in-app  (map (comp keyword :role) (auth/get-auths application (:id user)))]
     (some allowed-roles roles-in-app)))
 
 (defn- organization-authz? [command-meta-data {organization :organization} user]
