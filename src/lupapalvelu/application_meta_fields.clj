@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [tracef debug debugf info warn error]]
             [clojure.string :as s]
             [monger.operators :refer :all]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as organization]
@@ -20,7 +21,7 @@
   (s/trim (str last-name \space first-name)))
 
 (defn- applicant-name-from-auth [application]
-  (let [owner (first (domain/get-auths-by-role application :owner))
+  (let [owner (first (auth/get-auths-by-role application :owner))
         {first-name :firstName last-name :lastName} owner]
     (full-name first-name last-name)))
 
@@ -43,7 +44,7 @@
   {$set (applicant-index application)})
 
 (defn get-applicant-phone [_ app]
-  (let [owner (first (domain/get-auths-by-role app :owner))
+  (let [owner (first (auth/get-auths-by-role app :owner))
         user (user/get-user-by-id (:id owner))]
     (:phone user)))
 

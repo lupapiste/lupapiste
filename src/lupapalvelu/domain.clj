@@ -112,27 +112,19 @@
 ;; authorization
 ;;
 
-(defn get-auths-by-role
-  "returns vector of all auth-entries in an application with the given role. Role can be a keyword or a string."
-  [{auth :auth} role]
-  (filter #(= (name (get % :role "")) (name role)) auth))
-
 (defn get-auths [{auth :auth} user-id]
   (filter #(= (:id %) user-id) auth))
 
 (defn get-auth [application user-id]
   (first (get-auths application user-id)))
 
-(defn has-auth-role? [{auth :auth} user-id role]
-  (auth/has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
-
 (def owner-or-write-roles ["owner" "writer" "foreman"])
 
 (defn owner-or-write-access? [application user-id]
-  (boolean (some (partial has-auth-role? application user-id) owner-or-write-roles)))
+  (boolean (some (partial auth/has-auth-role? application user-id) owner-or-write-roles)))
 
 (defn company-access? [application company-id]
-  (boolean (has-auth-role? application company-id "writer")))
+  (boolean (auth/has-auth-role? application company-id "writer")))
 
 (defn validate-owner-or-write-access
   "Validator: current user must be owner or have write access.

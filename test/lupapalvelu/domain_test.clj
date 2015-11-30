@@ -50,16 +50,6 @@
     (fact "abba@example.com has one invite" (invite app "abba@example.com") => invite1)
     (fact "jabba@example.com has no invite" (invite app "jabba@example.com") => nil)))
 
-(facts
-  (let [owner   {:id 1 :role "owner"}
-        writer1 {:id 2 :role "writer"}
-        writer2 {:id 3 :role "writer"}
-        app     {:auth [owner writer1 writer2]}]
-    (fact "get owner"   (get-auths-by-role app :owner)  => (just owner))
-    (fact "get writers" (get-auths-by-role app :writer) => (just writer1 writer2))
-    (fact "'1' is owner" (has-auth-role? app 1 :owner) => true)
-    (fact "'2' is not owner" (has-auth-role? app 2 :owner) => false)))
-
 (facts "owner-or-write-access?"
   (let [owner   {:id 1 :role "owner"}
         writer  {:id 2 :role "writer"}

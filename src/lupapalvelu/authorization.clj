@@ -5,8 +5,16 @@
 ;; Auth utils
 ;;
 
+(defn get-auths-by-role
+  "returns vector of all auth-entries in an application with the given role. Role can be a keyword or a string."
+  [{auth :auth} role]
+  (filter #(= (name (get % :role "")) (name role)) auth))
+
 (defn has-auth? [{auth :auth} user-id]
   (or (some (partial = user-id) (map :id auth)) false))
+
+(defn has-auth-role? [{auth :auth} user-id role]
+  (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
 
 (defn create-invite-auth [inviter invited application-id role timestamp & [text document-name document-id path]]
   (let [invite {:application  application-id

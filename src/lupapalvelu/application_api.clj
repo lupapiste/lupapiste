@@ -13,6 +13,7 @@
             [lupapalvelu.action :refer [defraw defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.document.document :as document]
@@ -262,7 +263,7 @@
      :location  {:x (first location) :y (second location)}
      :operation (->> (:primaryOperation app) :name (i18n/localize lang "operations"))
      :authName  (-> app
-                    (domain/get-auths-by-role :owner)
+                    (auth/get-auths-by-role :owner)
                     first
                     (#(str (:firstName %) " " (:lastName %))))
      :comments  (->> (:comments app)
