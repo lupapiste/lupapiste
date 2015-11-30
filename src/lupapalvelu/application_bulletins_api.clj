@@ -284,6 +284,7 @@
    (bulletin-can-be-saved command)))
 
 (defcommand save-proclaimed-bulletin
+  "updates proclaimed versions timestamps and text"
   {:parameters [bulletinId bulletinVersionId proclamationEndsAt proclamationStartsAt proclamationText]
    :feature :publish-bulletin
    :user-roles #{:authority}
