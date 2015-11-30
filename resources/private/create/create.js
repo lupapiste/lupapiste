@@ -42,6 +42,7 @@
     };
 
     self.search = ko.observable("");
+    self.searching = ko.observable(false);
 
     self.operations = ko.observable(null);
     self.organization = ko.observable(null);
@@ -124,7 +125,7 @@
       hub.send("track-click", {category:"Create", label:"map", event:"searchLocation"});
       self.locationModel.clearMap().reset();
       self.locationModel.beginUpdateRequest()
-        .searchPoint(self.search());
+        .searchPoint(self.search(), self.searching);
       return false;
     };
 
