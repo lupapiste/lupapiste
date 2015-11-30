@@ -325,7 +325,7 @@
                           (fail :error.missing-parameters :parameters [:permitType])))]}
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)
-        krysp-config    (o/get-krysp-wfs organization-id permitType)
+        krysp-config    (o/get-krysp-wfs {:_id organization-id} permitType)
         password        (if (s/blank? password) (second (:credentials krysp-config)) password)]
     (if (or (s/blank? url) (wfs/wfs-is-alive? url username password))
       (o/set-krysp-endpoint organization-id url username password permitType version)
@@ -501,3 +501,31 @@
         (error "Failed to parse shapefile" t)
         (resp/status 400 :error.shapefile-parsing-failed)))))
 
+(defquery get-map-layers-data
+  {:description "Organization server and layer details."
+   :user-roles #{:authorityAdmin}
+   :feature :municipality-maps}
+  [{user :user}]
+  (ok (-> (user/authority-admins-organization-id user)
+          o/get-organization
+          :map-layers)))
+
+(defcommand update-map-server-details
+  {:parameters [url username password]
+   :user-roles #{:authorityAdmin}
+   :feature :municipality-maps}
+  [{user :user}]
+  (o/update-organization (user/authority-admins-organization-id user)
+                         {$set {:map-layers.server {:url url
+                                                    :username username
+                                                    :password password}}})
+  (ok))
+
+(defcommand update-user-layers
+  {:parameters [layers]
+   :user-roles #{:authorityAdmin}
+   :feature :municipality-maps}
+  [{user :user}]
+  (o/update-organization (user/authority-admins-organization-id user)
+                         {$set {:map-layers.layers layers}})
+  (ok))

@@ -9,6 +9,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.crypt :as crypt]
+            [sade.http :as http]
             [sade.xml :as sxml]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
@@ -67,9 +68,9 @@
 (defn get-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
   ([{:keys [organization permitType] :as application}]
-    (get-krysp-wfs organization permitType))
-  ([organization-id permit-type]
-   (let [organization (mongo/by-id :organizations organization-id)
+    (get-krysp-wfs {:_id organization} permitType))
+  ([query permit-type]
+   (let [organization (mongo/select-one :organizations query [:krysp])
          krysp-config (get-in organization [:krysp (keyword permit-type)])
          crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
          crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
@@ -77,7 +78,7 @@
          password     (when-let [password (and crypto-iv (:password krysp-config))]
                         (->> password
                              (crypt/str->bytes)
-                            (crypt/base64-decode)
+                             (crypt/base64-decode)
                              (crypt/decrypt crypto-key crypto-iv :aes)
                              (crypt/bytes->str)))
          username     (:username krysp-config)]
@@ -176,3 +177,18 @@
 
 (defn some-organization-has-archive-enabled? [organization-ids]
   (pos? (mongo/count :organizations {:_id {$in organization-ids} :permanent-archive-enabled true})))
+
+
+;;
+;; Organization/municipality provided map support.
+
+(defn query-organization-map-server
+  [org-id params headers]
+  (when-let [m (-> org-id get-organization :map-layers :server)]
+    (let [{:keys [url username password]} m]
+      (http/get url
+                (merge {:query-params params}
+                       (when-not (ss/blank? username)
+                         {:basic-auth [username password]})
+                       {:headers {"accept-encoding" (get headers "accept-encoding")}
+                        :as :stream})))))

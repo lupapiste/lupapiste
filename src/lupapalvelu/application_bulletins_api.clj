@@ -59,11 +59,16 @@
       #(assoc (first (:versions %)) :id (:_id %))
       apps)))
 
+(defn- page-size-validator [{{page :page} :data}]
+  (when (> (* page bulletin-page-size) (Integer/MAX_VALUE))
+    (fail :error.page-is-too-big)))
+
 (defquery application-bulletins
   {:description "Query for Julkipano"
    :feature :publish-bulletin
    :parameters [page searchText municipality state sort]
-   :input-validators [(partial action/number-parameters [:page])]
+   :input-validators [(partial action/number-parameters [:page])
+                      page-size-validator]
    :user-roles #{:anonymous}}
   [_]
   (let [parameters [page searchText municipality state sort]]
@@ -248,11 +253,15 @@
   {:parameters [bulletinId versionId]
    :feature    :publish-bulletin
    :user-roles #{:authority :applicant}}
-  [{{skip :skip limit :limit} :data}]
-  (let [comments (mongo/with-collection "application-bulletin-comments"
-                   (query/find  {})
-                   (query/sort  {:created -1})
-                   (query/skip  (util/->int skip))
-                   (query/limit (util/->int limit)))]
-    (ok :comments comments)))
-
+  [{{skip :skip limit :limit asc :asc} :data}]
+  (let [skip           (util/->int skip)
+        limit          (util/->int limit)
+        sort           (if (= "false" asc) {:created -1} {:created 1})
+        comments       (mongo/with-collection "application-bulletin-comments"
+                         (query/find  {})
+                         (query/sort  sort)
+                         (query/skip  skip)
+                         (query/limit limit))
+        total-comments (mongo/count :application-bulletin-comments {})
+        comments-left  (max 0 (- total-comments (+ skip (count comments))))]
+    (ok :comments comments :totalComments total-comments :commentsLeft comments-left)))

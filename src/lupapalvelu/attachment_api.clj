@@ -31,7 +31,8 @@
             [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdftk :as pdftk]
-            [lupapalvelu.tiff-validation :as tiff-validation])
+            [lupapalvelu.tiff-validation :as tiff-validation]
+            [lupapalvelu.tiedonohjaus :as tiedonohjaus])
   (:import [java.io File]))
 
 ;; Validators
@@ -447,7 +448,8 @@
                                             :archivable is-pdf-a?
                                             :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
                                             :stamped true :make-comment false :state :ok}))
-      (io/delete-file file :silently))
+      (io/delete-file file :silently)
+      (tiedonohjaus/change-attachment-metadata-state! application now attachment-id :luonnos :valmis))
     new-file-id))
 
 (defn- stamp-attachments!

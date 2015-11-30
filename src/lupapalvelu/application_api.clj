@@ -39,14 +39,6 @@
 
 ;; Validators
 
-(defn- validate-x [{{:keys [x]} :data}]
-  (when (and x (not (coord/valid-x? x)))
-    (fail :error.illegal-coordinates)))
-
-(defn- validate-y [{{:keys [y]} :data}]
-  (when (and y (not (coord/valid-y? y)))
-    (fail :error.illegal-coordinates)))
-
 (defn operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
@@ -328,7 +320,7 @@
    :notified         true                                   ; OIR
    :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
                       (partial a/property-id-parameters [:propertyId])
-                      validate-x validate-y
+                      coord/validate-x coord/validate-y
                       operation-validator]}
   [{{:keys [infoRequest]} :data :keys [created] :as command}]
   (let [created-application (a/do-create-application command)]
@@ -417,7 +409,7 @@
    :states           (states/all-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial a/property-id-parameters [:propertyId])
-                      validate-x validate-y]
+                      coord/validate-x coord/validate-y]
    :pre-checks       [authority-if-post-verdict-state
                       a/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]
