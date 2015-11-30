@@ -67,7 +67,7 @@
   {:pre [(valid-role role)]}
   (let [email (user/canonize-email email)
         existing-user (user/get-user-by-email email)]
-    (if (or (domain/invite application email) (domain/has-auth? application (:id existing-user)))
+    (if (or (domain/invite application email) (auth/has-auth? application (:id existing-user)))
       (fail :invite.already-has-auth)
       (let [invited (user/get-or-create-user-by-email email inviter)
             auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)

@@ -41,7 +41,7 @@
                          (auth/create-invite-auth user foreman-user (:id foreman-app) "foreman" created))
         invite-to-original? (and
                               foreman-user
-                              (not (domain/has-auth? application (:id foreman-user))))
+                              (not (auth/has-auth? application (:id foreman-user))))
 
         applicant-invites (foreman/applicant-invites new-application-docs (:auth application))
         auths             (remove nil?

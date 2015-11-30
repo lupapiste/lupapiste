@@ -10,6 +10,7 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [sade.validators :as v]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
@@ -296,7 +297,7 @@
     (and (user/authority? user) required-authz (some required-authz user-org-authz))))
 
 (defn- company-authz? [command-meta-data application user]
-  (domain/has-auth? application (get-in user [:company :id])))
+  (auth/has-auth? application (get-in user [:company :id])))
 
 (defn- user-is-not-allowed-to-access?
   "Current user must have correct role in application.auth, work in the organization or company that has been invited"

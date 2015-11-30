@@ -7,11 +7,6 @@
 (testable-privates lupapalvelu.domain only-authority-sees-drafts filter-targeted-attachment-comments normalize-neighbors)
 
 (facts
-  (let [application {:auth [{:id :user-x} {:id :user-y}]}]
-    (fact (has-auth? application :user-x) => true)
-    (fact (has-auth? application :user-z) => false)))
-
-(facts
   (let [application {:documents [{:id 1 :data "jee"} {:id 2 :data "juu"} {:id 1 :data "hidden"}]}]
     (fact (get-document-by-id application 1) => {:id 1 :data "jee"})
     (fact (get-document-by-id application 2) => {:id 2 :data "juu"})

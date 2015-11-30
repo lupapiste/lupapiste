@@ -10,14 +10,15 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [sade.validators :as v]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.vrk :refer :all]
             [lupapalvelu.document.document-field-validators :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
-            [lupapalvelu.document.subtype :as subtype]))
+            [lupapalvelu.document.subtype :as subtype]
+            [lupapalvelu.mongo :as mongo]))
 
 ;;
 ;; Validation:
@@ -113,7 +114,7 @@
 (defmethod validate-field :personSelector [application elem v]
   (when-not (ss/blank? v)
     (when-not (and
-                (domain/has-auth? application v)
+                (auth/has-auth? application v)
                 (domain/no-pending-invites? application v))
       [:err "application-does-not-have-given-auth"])))
 

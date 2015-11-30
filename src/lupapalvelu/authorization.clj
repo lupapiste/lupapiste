@@ -1,6 +1,13 @@
 (ns lupapalvelu.authorization
   (:require [lupapalvelu.user :as user]))
 
+;;
+;; Auth utils
+;;
+
+(defn has-auth? [{auth :auth} user-id]
+  (or (some (partial = user-id) (map :id auth)) false))
+
 (defn create-invite-auth [inviter invited application-id role timestamp & [text document-name document-id path]]
   (let [invite {:application  application-id
                 :text         text

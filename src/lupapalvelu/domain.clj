@@ -3,6 +3,7 @@
             [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
             [lupapalvelu.attachment-accessibility :as attachment-access]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
@@ -116,9 +117,6 @@
   [{auth :auth} role]
   (filter #(= (name (get % :role "")) (name role)) auth))
 
-(defn has-auth? [{auth :auth} user-id]
-  (or (some (partial = user-id) (map :id auth)) false))
-
 (defn get-auths [{auth :auth} user-id]
   (filter #(= (:id %) user-id) auth))
 
@@ -126,7 +124,7 @@
   (first (get-auths application user-id)))
 
 (defn has-auth-role? [{auth :auth} user-id role]
-  (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
+  (auth/has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
 
 (def owner-or-write-roles ["owner" "writer" "foreman"])
 
