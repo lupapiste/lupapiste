@@ -40,11 +40,19 @@
 (defn get-addresses-proxy [{{:keys [query lang]} :params}]
   (let [[street number city] (parse-address query)
         nls-query (future (find-address/get-addresses street number city))
-        muni-codes (find-address/municipality-codes city)
-        endpoint (when (= 1 (count muni-codes)) (org/municipality-address-endpoint (first muni-codes)))]
+        muni-codes (find-address/municipality-codes city lang)
+        muni-code  (first muni-codes)
+        endpoint (when (= 1 (count muni-codes)) (org/municipality-address-endpoint muni-code))]
     (if endpoint
-      (let []
-        nil)
+      (if-let [address-from-muni (->> (find-address/get-addresses-from-municipality street number endpoint)
+                                        (map (partial wfs/krysp-to-address-details (or lang "fi"))))]
+        (do
+          (future-call nls-query)
+          (resp/json {:suggestions (map (fn [{:keys [street number]}] (str street \space number ", " (i18n/localize lang :municipality muni-code))) address-from-muni)
+                     :data (map (fn [m] (-> m (assoc :location (select-keys m [:x :y])) (dissoc :x :y))) address-from-muni)}))
+        (do
+          (debug "Fallback to NSL address data - no address found from " (i18n/localize :fi :municipality muni-code))
+          (respond-nls-address-suggestions @nls-query)))
       (respond-nls-address-suggestions @nls-query))))
 
 (defn find-addresses-proxy [{{:keys [term lang]} :params}]
