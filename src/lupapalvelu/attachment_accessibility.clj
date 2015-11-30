@@ -25,7 +25,7 @@
   (boolean
     (or
       (nil? latestVersion)
-      (metadata/public-attachment? attachment)
+      (and (metadata/public-attachment? attachment) (not (nil? user)))
       (if auth                                                ; TODO remove when auth migration is done
         (and (publicity-check user app-auth attachment) (visibility-check user app-auth attachment))
         (or (auth/has-auth? {:auth app-auth} (:id user)) (user/authority? user))))))
