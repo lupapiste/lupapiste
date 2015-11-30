@@ -8,7 +8,7 @@
     <h1 data-bind="ltext: 'newRequest.topic'"></h1>
     <div class="create-application-search-box">
       <p data-bind="ltext: 'newRequest.locationInfo'"></p>
-      <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}"
+      <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}, css: {'ui-autocomplete-loading':searching}"
              id="create-search" type="text" class="form-input text address-search" autofocus="autofocus" />
       <button data-bind="click: searchNow" class="positive" data-test-id="create-search-button">
           <i class="lupicon-search"></i>
