@@ -69,14 +69,14 @@
       (q/sort (array-map :name 1 :priority 1))
       (q/limit max-entries))))
 
-(defn municipality-prop [] (if (= i18n/*lang* "sv") "oso:kuntanimiSwe" "oso:kuntanimiFin"))
+(defn- municipality-prop [lang] (if (= lang "sv") "oso:kuntanimiSwe" "oso:kuntanimiFin"))
 
 (defn search-street [lang street]
   (map
     (comp (set-kind :address :street) wfs/feature-to-address)
     (wfs/post wfs/maasto
       (wfs/query {"typeName" "oso:Osoitenimi"}
-        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop)] "asc")
+        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop lang)] "asc")
         (wfs/ogc-filter
           (wfs/ogc-and
             (wfs/property-is-like "oso:katunimi" (str street "*"))
@@ -90,7 +90,7 @@
     (comp (set-kind :address :street-number) wfs/feature-to-address)
     (wfs/post wfs/maasto
       (wfs/query {"typeName" "oso:Osoitenimi"}
-        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop)] "asc")
+        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop lang)] "asc")
         (wfs/ogc-filter
           (wfs/ogc-and
             (wfs/property-is-like "oso:katunimi"   (str street "*"))
@@ -102,11 +102,11 @@
     (comp (set-kind :address :street-city) wfs/feature-to-address)
     (wfs/post wfs/maasto
       (wfs/query {"typeName" "oso:Osoitenimi"}
-        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop)] "asc")
+        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop lang)] "asc")
         (wfs/ogc-filter
           (wfs/ogc-and
             (wfs/property-is-like "oso:katunimi" (str street "*"))
-            (wfs/property-is-like (municipality-prop) (str city "*"))
+            (wfs/property-is-like (municipality-prop lang) (str city "*"))
             (wfs/property-is-less "oso:jarjestysnumero" "10")))))))
 
 (defn search-address [lang street number city]
@@ -114,12 +114,12 @@
     (comp (set-kind :address :street-number-city) wfs/feature-to-address)
     (wfs/post wfs/maasto
       (wfs/query {"typeName" "oso:Osoitenimi"}
-        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop)] "asc")
+        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop lang)] "asc")
         (wfs/ogc-filter
           (wfs/ogc-and
             (wfs/property-is-like "oso:katunimi" (str street "*"))
             (wfs/property-is-like "oso:katunumero" (str number "*"))
-            (wfs/property-is-like (municipality-prop) (str city "*"))))))))
+            (wfs/property-is-like (municipality-prop lang) (str city "*"))))))))
 
 ;;
 ;; Utils:
