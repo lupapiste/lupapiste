@@ -82,10 +82,6 @@
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
-(defn municipality-address-endpoint [municipality]
-  (when (and (not (ss/blank? municipality)) (re-matches #"\d{3}" municipality) )
-    (org/get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)))
-
 (defn municipality-by-point [x y]
   (let [url (str (env/value :geoserver :host) (env/value :geoserver :kunta))
         query {:query-params {:x x, :y y}
@@ -112,7 +108,7 @@
           municipality (municipality-by-point x y)
           x_d (util/->double x)
           y_d (util/->double y)]
-      (if-let [endpoint (municipality-address-endpoint municipality)]
+      (if-let [endpoint (org/municipality-address-endpoint municipality)]
         (if-let [address-from-muni (->> (wfs/address-by-point-from-municipality x y endpoint)
                                      (map (partial wfs/krysp-to-address-details (or lang "fi")))
                                      (map (fn [{x2 :x y2 :y :as f}] (assoc f :distance (distance x_d y_d x2 y2))))
