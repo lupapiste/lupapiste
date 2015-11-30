@@ -10,14 +10,14 @@
     :asiakas-ja-viranomainen (or (auth/has-auth? {:auth app-auth} (:id user)) (user/authority? user))
     :viranomainen (or (auth/has-auth? {:auth auth} (:id user)) (user/authority? user)) ; attachment auth
     :julkinen true
-    nil))
+    nil true))
 
 (defn publicity-check [user app-auth {:keys [metadata auth] :as attachment}]
   (case (keyword (metadata/get-publicity-class attachment)) ; TODO check cases
     :osittain-salassapidettava (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (user/authority?))
     :salainen (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (user/authority?))
     :julkinen true
-    nil))
+    nil true))
 
 (defn can-access-attachment?
   [user app-auth {:keys [latestVersion metadata auth] :as attachment}]
@@ -25,7 +25,7 @@
     (or
       (nil? latestVersion)
       (metadata/public-attachment? attachment)
-      (if auth                                                ; TODO remove when auth migration is final
+      (if auth                                                ; TODO remove when auth migration is done
         (and (publicity-check user app-auth attachment) (visibility-check user app-auth attachment))
         true))))
 
