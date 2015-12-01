@@ -2,6 +2,7 @@
   (:require [lupapalvelu.factlet :refer [facts*]]
             [lupapalvelu.attachment :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [sade.util :as util]
             [midje.sweet :refer :all]))
 
 (defn- get-attachment-by-id [apikey application-id attachment-id]
@@ -328,21 +329,69 @@
              (get-in attachment [:latestVersion :stamped]) => true)))))))
 
 (facts* "Attachments visibility"
-       (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
-             application (query-application pena application-id)
-             _           (upload-attachment-to-all-placeholders pena application)
-             {attachments :attachments :as application} (query-application pena application-id)
-             aid1 (get-in attachments [0 :id])
-             aid2 (get-in attachments [1 :id])]
+  (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
+        {attachments :attachments :as application} (query-application pena application-id)
+        _ (command pena :set-attachment-visibility
+                   :id application-id
+                   :attachmentId (get-in attachments [0 :id])
+                   :value "viranomainen") => (partial expected-failure? :error.attachment.no-versions)
+        _ (upload-attachment-to-all-placeholders pena application)
+        {attachments :attachments :as application} (query-application pena application-id)
+        user-has-auth? (fn [username {auth :auth}]
+                         (= username (:username (first auth))))
+        att1 (first attachments)
+        att2 (second attachments)
+        aid1 (get-in attachments [0 :id])
+        aid2 (get-in attachments [1 :id])]
 
-            (fact "Can't set unknown visibility value"
-              (command pena :set-attachment-visibility :id application-id :attachmentId aid1 :value "testi") => (partial expected-failure? :error.invalid-nakyvyys-value))
-            (fact "Set attachment as public"
-              (command pena :set-attachment-visibility :id application-id :attachmentId aid1 :value "julkinen") => ok?)
+       (fact "each attachment has Pena's auth"
+         (every? (partial user-has-auth? "pena") attachments) => true)
 
-            #_(fact "Pena submits the application"
-              (command pena :submit-application :id application-id) => ok?
-              (:state (query-application veikko application-id)) => "submitted")
+       (fact "Can't set unknown visibility value"
+         (command pena :set-attachment-visibility :id application-id :attachmentId aid1 :value "testi") => (partial expected-failure? :error.invalid-nakyvyys-value))
+       (fact "Set attachment as public"
+         (command pena :set-attachment-visibility :id application-id :attachmentId aid1 :value "julkinen") => ok?)
+
+       ; authorize mikko
+       (command pena :invite-with-role
+                :id application-id
+                :email "mikko@example.com"
+                :text  ""
+                :documentName ""
+                :documentId ""
+                :path ""
+                :role "writer") => ok?
+       (command mikko :approve-invite :id application-id) => ok?
+
+       (facts "Mikko uploads personal CV"
+         (upload-attachment mikko application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => true
+         (let [{attachments :attachments} (query-application mikko application-id)
+               mikko-att (last attachments)]
+           (fact "Mikko has auth"
+             (user-has-auth? "mikko@example.com" mikko-att) => true)
+           (fact "Mikko hides attachment from other parties (visibility: 'viranomainen')"
+             (command mikko :set-attachment-visibility :id application-id :attachmentId (:id mikko-att) :value "viranomainen") => ok?)
+           (fact "Mikko can download, but Pena can't"
+             (raw mikko "download-attachment" :attachment-id (:fileId (:latestVersion mikko-att))) => http200?
+             (raw pena "download-attachment" :attachment-id (:fileId (:latestVersion mikko-att))) => http404?
+             (raw nil "download-attachment" :attachment-id (:fileId (:latestVersion mikko-att))) => http401?)
+           (fact "Mikko can access attachment, Pena's app query doesn't contain attachment"
+             (util/find-by-id (:id mikko-att) (:attachments (query-application pena application-id))) => nil
+             (util/find-by-id (:id mikko-att) (:attachments (query-application mikko application-id))) => map?)))
+
+       (facts "Pena sets attachment visiblity to parties ('asiakas-ja-viranomainen')"
+         (command pena :set-attachment-visibility :id application-id :attachmentId aid2 :value "asiakas-ja-viranomainen") => ok?
+         (fact "Parties can download"
+           (raw mikko "download-attachment" :attachment-id (:fileId (:latestVersion att2))) => http200?
+           (raw pena "download-attachment" :attachment-id (:fileId (:latestVersion att2))) => http200?)
+         (fact "Parties have attachment available in query"
+           (util/find-by-id aid2 (:attachments (query-application mikko application-id))) => (contains {:metadata {:nakyvyys "asiakas-ja-viranomainen"}})
+           (util/find-by-id aid2 (:attachments (query-application pena application-id))) => (contains {:metadata {:nakyvyys "asiakas-ja-viranomainen"}})))
 
 
-            ))
+      #_(fact "Pena submits the application"
+        (command pena :submit-application :id application-id) => ok?
+        (:state (query-application veikko application-id)) => "submitted")
+
+
+      ))
