@@ -58,7 +58,7 @@
       (if-let [address-from-muni (->> (find-address/get-addresses-from-municipality street number endpoint)
                                         (map (partial wfs/krysp-to-address-details (or lang "fi"))))]
         (do
-          (future-call nls-query)
+          (future-cancel nls-query)
           (resp/json {:suggestions (map (fn [{:keys [street number]}] (str street \space number ", " (i18n/localize lang :municipality muni-code))) address-from-muni)
                      :data (map (fn [m] (-> m (assoc :location (select-keys m [:x :y])) (dissoc :x :y))) address-from-muni)}))
         (do
@@ -233,7 +233,7 @@
                    (let [{:keys [base id name org]} layer
                          layer-id (layer-id-fn layer index)]
                      {:wmsName (str "Lupapiste-" org ":" id)
-                      :wmsUrl  "/proxy/wms"
+                      :wmsUrl  "/proxy/kuntawms"
                       :name (names-fn name)
                       :subtitle {:fi "" :sv "" :en ""}
                       :id layer-id
@@ -324,7 +324,8 @@
 ;;
 
 (def services {"nls" (cache (* 3 60 60 24) (secure wfs/raster-images "nls"))
-               "wms" (cache (* 3 60 60 24) (secure #(wfs/raster-images %1 %2 org/query-organization-map-server) "wms" ))
+               "wms" (cache (* 3 60 60 24) (secure wfs/raster-images "wms"))
+               "kuntawms" (cache (* 3 60 60 24) (secure #(wfs/raster-images %1 %2 org/query-organization-map-server) "wms" ))
                "wmts/maasto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "wmts/kiinteisto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "point-by-property-id" point-by-property-id-proxy
