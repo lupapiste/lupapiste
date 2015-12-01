@@ -58,7 +58,7 @@
       (if-let [address-from-muni (->> (find-address/get-addresses-from-municipality street number endpoint)
                                         (map (partial wfs/krysp-to-address-details (or lang "fi"))))]
         (do
-          (future-call nls-query)
+          (future-cancel nls-query)
           (resp/json {:suggestions (map (fn [{:keys [street number]}] (str street \space number ", " (i18n/localize lang :municipality muni-code))) address-from-muni)
                      :data (map (fn [m] (-> m (assoc :location (select-keys m [:x :y])) (dissoc :x :y))) address-from-muni)}))
         (do
