@@ -238,7 +238,7 @@
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
-                       "request-statement-model.js" "add-party.js" "attachments-tab-model.js" "archival-summary.js"
+                       "add-party.js" "attachments-tab-model.js" "archival-summary.js"
                        "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
