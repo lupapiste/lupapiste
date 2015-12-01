@@ -22,7 +22,17 @@
   (when-not (and (valid-x? x) (valid-y? y))
     (fail :error.illegal-coordinates)))
 
+(defn validate-x
+  "X coordinate input validator for actions"
+  [{{:keys [x]} :data}]
+  (when (and x (not (valid-x? x)))
+    (fail :error.illegal-coordinates)))
 
+(defn validate-y
+  "Y coordinate input validator for actions"
+  [{{:keys [y]} :data}]
+  (when (and y (not (valid-y? y)))
+    (fail :error.illegal-coordinates)))
 
 (defn round-to [n acc]
   (.setScale n acc BigDecimal/ROUND_HALF_UP))

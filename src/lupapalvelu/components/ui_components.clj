@@ -110,6 +110,7 @@
                     :css ["openlayers-3.8.2.css" "ol3-popup.css"]}
    :proj4          {:js ["proj4-2.3.3.min.js"]}
    :stickyfill     {:js ["stickyfill.min.js"]}
+   :waypoints      {:js ["jquery.waypoints.min.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
@@ -132,10 +133,10 @@
                        :js ["expanded-content.js"]}
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
-                            :expanded-content :mockjax :open-layers :stickyfill]
+                            :expanded-content :mockjax :open-layers :stickyfill :waypoints]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
-                       "statuses.js" "authorization.js" "vetuma.js"]}
+                       "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
    :common-html  {:depends [:selectm-html]
                   :css ["jquery-ui.css"]
@@ -278,7 +279,7 @@
                   :js ["docmodel.js" "docgen.js"]}
 
    :create       {:depends [:common-html :map]
-                  :js ["municipalities.js" "create.js"]
+                  :js ["locationmodel.js" "municipalities.js" "create.js"]
                   :html ["map-popup.html" "create.html"]}
 
    :iframe       {:depends [:common-html]

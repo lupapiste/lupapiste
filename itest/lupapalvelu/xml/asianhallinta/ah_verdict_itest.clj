@@ -222,13 +222,15 @@
 (facts "unit tests"
   (let [zip-file (.getPath (build-zip! [example-ah-xml-path example-ah-attachment-path]))]
     (fact* "Can unzip passed zipfile"
-           (let [unzip-path (unzip-file zip-file) =not=> (throws Exception)
+           (let [tmp-dir    (fs/temp-dir "ah-unzip-test")
+                 unzip-path (unzip-file zip-file tmp-dir) =not=> (throws Exception)
                  pattern    (->> [example-ah-xml-path example-ah-attachment-path]
                                  (map fs/base-name)
                                  (s/join "|")
                                  re-pattern)]
 
-             (count (fs/find-files unzip-path pattern)) => 2)))
+             (count (fs/find-files unzip-path pattern)) => 2
+             (fs/delete-dir tmp-dir) => truthy)))
 
   (fact "Creates correct verdict model from xml"
     (build-verdict parsed-example-ah-xml 123456) =>

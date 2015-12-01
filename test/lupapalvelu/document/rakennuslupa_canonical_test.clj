@@ -365,7 +365,7 @@
                                    :id "aidan-rakentaminen"
                                    :created 5
                                    :schema-info {:removable true
-                                                 :op {:id  "5177ac76da060e8cd8348e07"
+                                                 :op {:id  "kaupunkikuva-id"
                                                       :name "aita"}
                                                  :name "kaupunkikuvatoimenpide"
                                                  :version 1}})
@@ -1013,8 +1013,11 @@
         (fact "rakennusnro" (-> rakennus :rakennuksenTiedot :rakennustunnus :rakennusnro) => "001")
         (fact "kayttotarkoitus" (-> rakennus :rakennuksenTiedot :kayttotarkoitus) => "012 kahden asunnon talot")))
 
-    (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
-    (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")))
+
+    (facts "Kaupunkikuvatoimenpide"
+           (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
+           (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")
+           (fact "Rakennelman yksilointitieto" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :yksilointitieto) => "kaupunkikuva-id"))))
 
 
 (fl/facts* "Canonical model has correct puolto"

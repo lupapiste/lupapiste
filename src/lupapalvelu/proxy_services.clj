@@ -12,13 +12,25 @@
             [sade.http :as http]
             [sade.property :as p]
             [sade.strings :as ss]
-            [sade.util :refer [dissoc-in select ->double]]
+            [sade.util :as util]
+            [sade.municipality :as muni]
             [lupapalvelu.find-address :as find-address]
             [lupapalvelu.wfs :as wfs]))
 
-;;
-;; NLS:
-;;
+
+(defn- municipality-index-for [lang]
+  (map (fn [code] [(ss/lower-case (i18n/localize lang :municipality code)) code])
+       muni/municipality-codes))
+
+(def municipality-index
+    (delay (reduce (fn [m lang] (assoc m lang (municipality-index-for lang))) {} i18n/supported-langs)))
+
+(defn municipality-codes [municipality-name-starts lang]
+  (let [index (get @municipality-index (keyword lang))
+        n (ss/lower-case (ss/trim municipality-name-starts))]
+    (when (not (ss/blank? n))
+      (->> (filter #(ss/starts-with (first %) n) index)
+           (map second)))))
 
 (defn- trim [s]
   (when-not (ss/blank? s) (ss/trim s)))
@@ -29,46 +41,47 @@
         city (trim city)]
     [street number city]))
 
-(defn get-addresses [street number city]
-  (wfs/post wfs/maasto
-    (wfs/query {"typeName" "oso:Osoitenimi"}
-      (wfs/ogc-sort-by ["oso:katunumero"])
-      (wfs/ogc-filter
-        (wfs/ogc-and
-          (wfs/property-is-like "oso:katunimi"     street)
-          (wfs/property-is-like "oso:katunumero"   number)
-          (wfs/ogc-or
-            (wfs/property-is-like "oso:kuntanimiFin" city)
-            (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
+(defn- respond-nls-address-suggestions [features]
+  (if features
+    (let [top10-features (take 10 features)]
+      (resp/json {:suggestions (map wfs/feature-to-simple-address-string top10-features)
+                  :data (map wfs/feature-to-address top10-features)}))
+    (resp/status 503 "Service temporarily unavailable")))
 
-(defn get-addresses-proxy [request]
-  (let [query (get (:params request) :query)
-        address (parse-address query)
-        response (apply get-addresses address)]
-    (if response
-      (let [features (take 10 response)]
-        (resp/json {:query query
-                    :suggestions (map wfs/feature-to-simple-address-string features)
-                    :data (map wfs/feature-to-address features)}))
-      (resp/status 503 "Service temporarily unavailable"))))
+(defn get-addresses-proxy [{{:keys [query lang]} :params}]
+  (let [[street number city] (parse-address query)
+        nls-query (future (find-address/get-addresses street number city))
+        muni-codes (municipality-codes city lang)
+        muni-code  (first muni-codes)
+        endpoint (when (= 1 (count muni-codes)) (org/municipality-address-endpoint muni-code))]
+    (if endpoint
+      (if-let [address-from-muni (->> (find-address/get-addresses-from-municipality street number endpoint)
+                                        (map (partial wfs/krysp-to-address-details (or lang "fi"))))]
+        (do
+          (future-cancel nls-query)
+          (resp/json {:suggestions (map (fn [{:keys [street number]}] (str street \space number ", " (i18n/localize lang :municipality muni-code))) address-from-muni)
+                     :data (map (fn [m] (-> m (assoc :location (select-keys m [:x :y])) (dissoc :x :y))) address-from-muni)}))
+        (do
+          (debug "Fallback to NSL address data - no address found from " (i18n/localize :fi :municipality muni-code))
+          (respond-nls-address-suggestions @nls-query)))
+      (respond-nls-address-suggestions @nls-query))))
 
-(defn find-addresses-proxy [request]
-  (let [term (get (:params request) :term)
-        term (ss/replace term #"\p{Punct}" " ")]
-    (if (string? term)
-      (resp/json (or (find-address/search term) []))
-      (resp/status 400 "Missing query param 'term'"))))
+(defn find-addresses-proxy [{{:keys [term lang]} :params}]
+    (if (and (string? term) (string? lang) (not (ss/blank? term)))
+      (let [normalized-term (ss/replace term #"\p{Punct}" " ")]
+        (resp/json (or (find-address/search normalized-term lang) [])))
+      (resp/status 400 "Missing query parameters")))
 
 (defn point-by-property-id-proxy [request]
   (let [property-id (get (:params request) :property-id)
-        features (wfs/point-by-property-id property-id)]
+        features (wfs/location-info-by-property-id property-id)]
     (if features
       (resp/json {:data (map wfs/feature-to-position features)})
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn area-by-property-id-proxy [{{property-id :property-id} :params :as request}]
   (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id) )
-    (let [features (wfs/area-by-property-id property-id)]
+    (let [features (wfs/location-info-by-property-id property-id)]
       (if features
         (resp/json {:data (map wfs/feature-to-area features)})
         (resp/status 503 "Service temporarily unavailable")))
@@ -82,11 +95,43 @@
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
-(defn address-by-point-proxy [{{x :x y :y} :params}]
+(defn municipality-by-point [x y]
+  (let [url (str (env/value :geoserver :host) (env/value :geoserver :kunta))
+        query {:query-params {:x x, :y y}
+               :conn-timeout 10000, :socket-timeout 10000
+               :as :json}]
+    (try
+      (when-let [municipality (get-in (http/get url query) [:body :kuntanumero])]
+        (ss/zero-pad 3 municipality))
+      (catch Exception e
+        (error e (str "Unable to resolve municipality by " x \/ y))))))
+
+(defn- respond-nls-address [lang features]
+  (if (seq features)
+    (resp/json (wfs/feature-to-address-details (or lang "fi") (first features)))
+    (resp/status 503 "Service temporarily unavailable")))
+
+(defn- distance [^double x1 ^double y1 ^double x2 ^double y2]
+  {:pre [(and x1 x2 y1 y2)]}
+  (Math/sqrt (+ (Math/pow (- x2 x1) 2) (Math/pow (- y2 y1) 2))))
+
+(defn address-by-point-proxy [{{:keys [x y lang]} :params}]
   (if (and (coord/valid-x? x) (coord/valid-y? y))
-    (if-let [features (wfs/address-by-point x y)]
-      (resp/json (wfs/feature-to-address-details (first features)))
-      (resp/status 503 "Service temporarily unavailable"))
+    (let [nls-address-query  (future (wfs/address-by-point x y))
+          municipality (municipality-by-point x y)
+          x_d (util/->double x)
+          y_d (util/->double y)]
+      (if-let [endpoint (org/municipality-address-endpoint municipality)]
+        (if-let [address-from-muni (->> (wfs/address-by-point-from-municipality x y endpoint)
+                                     (map (partial wfs/krysp-to-address-details (or lang "fi")))
+                                     (map (fn [{x2 :x y2 :y :as f}] (assoc f :distance (distance x_d y_d x2 y2))))
+                                     (sort-by :distance)
+                                     first)]
+          (do
+            (future-cancel nls-address-query)
+            (resp/json address-from-muni))
+          (respond-nls-address lang @nls-address-query))
+        (respond-nls-address lang @nls-address-query)))
     (resp/status 400 "Bad Request")))
 
 (def wdk-type-pattern #"^POINT|^LINESTRING|^POLYGON")
@@ -188,7 +233,7 @@
                    (let [{:keys [base id name org]} layer
                          layer-id (layer-id-fn layer index)]
                      {:wmsName (str "Lupapiste-" org ":" id)
-                      :wmsUrl  "/proxy/wms"
+                      :wmsUrl  "/proxy/kuntawms"
                       :name (names-fn name)
                       :subtitle {:fi "" :sv "" :en ""}
                       :id layer-id
@@ -279,7 +324,8 @@
 ;;
 
 (def services {"nls" (cache (* 3 60 60 24) (secure wfs/raster-images "nls"))
-               "wms" (cache (* 3 60 60 24) (secure #(wfs/raster-images %1 %2 org/query-organization-map-server) "wms" ))
+               "wms" (cache (* 3 60 60 24) (secure wfs/raster-images "wms"))
+               "kuntawms" (cache (* 3 60 60 24) (secure #(wfs/raster-images %1 %2 org/query-organization-map-server) "wms" ))
                "wmts/maasto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "wmts/kiinteisto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "point-by-property-id" point-by-property-id-proxy
