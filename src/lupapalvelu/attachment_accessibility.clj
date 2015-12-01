@@ -46,7 +46,7 @@
   (filter (partial can-access-attachment? user auths) attachments))
 
 (defn has-attachment-auth [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
-  (when attachment-id
+  (when (and attachment-id (not (user/authority? user)))
     (if-let [{auth :auth} (util/find-first #(= (:id %) attachment-id) attachments)]
       (when (and auth (not (auth/has-auth? {:auth auth} (:id user))))
         (fail :error.attachment.no-auth))
