@@ -1,8 +1,6 @@
-LUPAPISTE.EditableVerdictGivenBulletinModel = function(data, id) {
+LUPAPISTE.EditableVerdictGivenBulletinModel = function(data, bulletin, auth) {
   "use strict";
   var self = this;
-
-  ko.utils.extend(self, new LUPAPISTE.EditableBulletinModel());
 
   var mapping = {
     copy: ["bulletinState"],
@@ -28,11 +26,11 @@ LUPAPISTE.EditableVerdictGivenBulletinModel = function(data, id) {
     }
   };
 
-  ko.mapping.fromJS(data, mapping, self);
+  ko.utils.extend(self, new LUPAPISTE.EditableBulletinModel(data, bulletin, auth, mapping));
 
   self.save = function() {
     self.sendEvent("publishBulletinService", "saveVerdictGivenBulletin", {
-      bulletinId: id,
+      bulletinId: bulletin().id,
       bulletinVersionId: data.id,
       verdictGivenAt:       self.verdictGivenAt().getTime(),
       appealPeriodStartsAt: self.appealPeriodStartsAt().getTime(),

@@ -1,10 +1,10 @@
-LUPAPISTE.EditableBulletinModel = function(data, id) {
+LUPAPISTE.EditableBulletinModel = function(data, bulletin, auth, mapping) {
   "use strict";
   var self = this;
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  var mapping = {
+  mapping = !_.isEmpty(mapping) ? mapping : {
     copy: ["bulletinState"],
   };
 
@@ -16,7 +16,10 @@ LUPAPISTE.EditableBulletinModel = function(data, id) {
 
   self.edit = ko.observable(false);
 
-  self.editable = ko.observable(false);
+  self.editable = ko.pureComputed(function() {
+    console.log("editable", self.id(), _.last(bulletin().versions).id, auth);
+    return self.id() === _.last(bulletin().versions).id && auth;
+  });
 
   self.save = _.noop;
 }
