@@ -17,7 +17,6 @@ LUPAPISTE.EditableBulletinModel = function(data, bulletin, auth, mapping) {
   self.edit = ko.observable(false);
 
   self.editable = ko.pureComputed(function() {
-    console.log("editable", self.id(), _.last(bulletin().versions).id, auth);
     return self.id() === _.last(bulletin().versions).id && auth;
   });
 
