@@ -54,16 +54,6 @@
                 </tbody>
             </table>
 
-            <button data-bind="click: addManualData,
-                               attr: {'disabled': addStatementGiversDisabled}"
-                    class="positive modal"
-                    data-test-id="add-manual-statement-giver">
-              <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'application.statement.add-manual-statement-giver'"></span>
-            </button>
-
-            <br /><br />
-
             <label data-bind="ltext: 'application.invite-statement-giver-saateText'" for="invite-statement-giver-saateText" class="form-label form-label-text tip"></label>
             <textarea id="invite-statement-giver-saateText" rows=10 class="form-input textarea really-long high"
                       data-bind="textInput: saateText, attr: {placeholder: loc('application.invite-statement-giver-saateText-placeholder')}"></textarea>

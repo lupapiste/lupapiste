@@ -17,28 +17,17 @@ LUPAPISTE.StatementsTabModel = function(params) {
     return _.isEmpty(self.selectedPersons()) || self.submitting() || _.isEmpty(self.saateText()) || !self.maaraaika();
   });
 
-  self.addStatementGiversDisabled = ko.pureComputed(function() {
-    var someManualDataDisabled = _.some(self.manualData(), function(d) {
-      console.log("*** manual data disabled: ", d.isDisabled());
-      return d.isDisabled(); });
-    return someManualDataDisabled;
-  });
-
-  // *** TODO: Testaa automaattista rivin lisaysta, kun saat manual dataan input-kentat! ***
-  self.manualData.subscribe(function(data) {
-    var someManualDataDisabled = _.some(self.manualData(), function(d) { return d.isDisabled(); });
-    if (!someManualDataDisabled) {
-      addManualData();
-    }
-  });
-
   self.combinedData = ko.computed(function() {
-    var a = self.data().concat(self.manualData());
-    console.log("combinedData, self.data(): ", self.data());
-    console.log("combinedData, self.manualData(): ", self.manualData());
-    console.log("new combinedData: ", a);
-    return a;
+    return self.data().concat(self.manualData());
   });
+
+   var addManualData = function() {
+     var someManualDataDisabled = _.some(self.manualData(), function(d) { return d.isDisabled(); });
+     if (!someManualDataDisabled) {
+       self.manualData.push(new dataTemplate());
+       return self;
+     }
+   };
 
   var dataTemplate = function() {
     var self = this;
@@ -48,23 +37,20 @@ LUPAPISTE.StatementsTabModel = function(params) {
     self.readonly = ko.pureComputed(function() {
       return self.id ? true : false;
     });
-    self.isDisabled = ko.pureComputed(function() {
-      return _.isEmpty(self.name()) || _.isEmpty(self.email()) || _.isEmpty(self.text()) || !util.isValidEmailAddress(self.email());
+    self.isDisabled = ko.computed(function() {
+      var isDisabled = _.isEmpty(self.name()) || _.isEmpty(self.email()) || _.isEmpty(self.text()) || !util.isValidEmailAddress(self.email());
+      return isDisabled;
+    });
+    self.isDisabled.subscribe(function(val) {
+      if (!val) addManualData();
     });
     return self;
   };
-
-  self.addManualData = function() {
-    self.manualData.push(new dataTemplate());
-    console.log("addManualData, set self.manualData to: ", self.manualData());
-  };
-
   self.toggleInviteSection = function() {
     self.submitting(false);
     self.saateText("");
     self.maaraaika(undefined);
     self.manualData([new dataTemplate()]);
-    console.log("toggleInviteSection, set self.manualData to: ", self.manualData());
     self.showInviteSection( !self.showInviteSection() );
   };
 
