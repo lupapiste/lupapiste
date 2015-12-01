@@ -155,6 +155,7 @@
                                               :emailPreferred (= emailPreferred "on")})
         comment (bulletins/create-comment bulletin-id bulletin-version-id comment contact-info files created)]
     (mongo/insert :application-bulletin-comments comment)
+    (bulletins/update-file-metadata bulletin-id (:id comment) files)
     (ok)))
 
 (defn- get-search-fields [fields app]
@@ -312,3 +313,12 @@
                        "versions.$.verdictGivenText"     verdictGivenText}}]
     (mongo/update-by-query :application-bulletins {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
     (ok)))
+
+(defraw "download-bulletin-comment-attachment"
+  {:parameters [attachmentId]
+   :feature    :publish-bulletin
+   :user-roles #{:authority :applicant}
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
+  [{:keys [application user] :as command}]
+  (lupapalvelu.attachment/output-attachment attachmentId true
+                                            (partial bulletins/get-bulletin-comment-attachment-file-as user)))

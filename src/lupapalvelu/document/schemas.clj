@@ -731,13 +731,13 @@
                             :type :group
                             :uicomponent :constructionWasteReport
                             :approvable false
-                            :body [{:name "suunniteltuJate"      
+                            :body [{:name "suunniteltuJate"
                                     :type :table
                                     :repeating true
                                     :repeating-init-empty true
                                     :body (body (assoc jatetyyppi :readonly true) rakennusjateselvitysRow)}
-                                   {:name "suunnittelematonJate" 
-                                    :type :table 
+                                   {:name "suunnittelematonJate"
+                                    :type :table
                                     :repeating true
                                     :body (body jatetyyppi rakennusjateselvitysUusiRow)}]}
                            {:name "vaarallisetAineet"
@@ -745,14 +745,14 @@
                             :type :group
                             :uicomponent :constructionWasteReport
                             :approvable false
-                            :body [{:name "suunniteltuJate"      
-                                    :type :table 
-                                    :repeating true 
+                            :body [{:name "suunniteltuJate"
+                                    :type :table
+                                    :repeating true
                                     :repeating-init-empty true
                                     :body (body (assoc vaarallinenainetyyppi :readonly true) rakennusjateselvitysRow)}
-                                   {:name "suunnittelematonJate" 
-                                    :type :table 
-                                    :repeating true 
+                                   {:name "suunnittelematonJate"
+                                    :type :table
+                                    :repeating true
                                     :body (body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}])
 
 
@@ -1106,7 +1106,10 @@
                              {:name "oikeusvaikutukseton yleiskaava"}
                              {:name "asemakaava"}
                              {:name "ranta-asemakaava"}
-                             {:name "ei kaavaa"}]}])
+                             {:name "ei kaavaa"}]}
+                     {:name "hankkeestaIlmoitettu" :type :group
+                      :group-help "hankkeestaIlmoitettu.groupHelpText"
+                      :body [{:name "hankkeestaIlmoitettuPvm" :type :date :i18nkey "date"}]}])
 
 (def lisakohde-rakennuspaikka [{:name "kiinteisto"
                                 :type :group
@@ -1491,7 +1494,7 @@
            :approvable true
            :order 2
            :type :location}
-    :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
+    :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne" "hankkeestaIlmoitettu")}
 
    {:info {:name "secondary-kiinteistot"
            :i18name "kiinteisto"
@@ -1501,7 +1504,7 @@
            :no-repeat-button true
            :removable true
            :type :location}
-    :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
+    :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne" "hankkeestaIlmoitettu")}
 
    {:info {:name "aloitusoikeus" :removable false :approvable true}
     :body (body kuvaus)}
