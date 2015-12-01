@@ -1,3 +1,0 @@
-rakennuspaikka.hankkeestaIlmoitettu._group_label: Hankkeesta ilmoitettu rakennuspaikalla
-hankkeestaIlmoitettu.groupHelpText: Hakijana vakuutan, että rakennuspaikalla on ilmoitettu hankkeesta kyltillä seuraavasta päivämäärästä alkaen.
-date:  Päivämäärä
