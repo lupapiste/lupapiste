@@ -4,7 +4,20 @@
             [lupapalvelu.vetuma-itest-util :as vetuma-util]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [cheshire.core :as json]))
+
+(defn- send-file [cookie-store & [filename]]
+  (set-anti-csrf! false)
+  (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
+        uploadfile  (io/file filename)
+        uri         (str (server-address) "/api/upload/file")
+        resp        (http-post uri
+                               {:multipart [{:name "files[]" :content uploadfile}]
+                                :throw-exceptions false
+                                :cookie-store cookie-store})]
+    (set-anti-csrf! true)
+    resp))
 
 (when (sade.env/feature? :publish-bulletin)
   (apply-remote-minimal)
@@ -41,9 +54,9 @@
           _ (command sonja :publish-bulletin :id (:id app) :cookie-store cookie-store) => ok?
           old-bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))
           _ (command sonja :publish-bulletin :id (:id app) :cookie-store cookie-store)
-          bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))]
-
-      (vetuma-util/authenticate-to-vetuma! cookie-store)
+          bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))
+          _ (vetuma-util/authenticate-to-vetuma! cookie-store)
+          files (:files (json/decode (:body (send-file cookie-store)) true))]
 
       (fact "unable to add comment for older version"
         (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId old-bulletin) :comment "foobar" :cookie-store cookie-store) => {:ok false :text "error.invalid-version-id"})
@@ -52,7 +65,19 @@
       (fact "unable to add comment for unknown bulletin"
         (command sonja :add-bulletin-comment :bulletinId "not-found" :bulletinVersionId (:versionId bulletin) :comment "foobar" :cookie-store cookie-store) => {:ok false :text "error.invalid-bulletin-id"})
       (fact "approve comment for latest version"
-        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId bulletin) :comment "foobar" :cookie-store cookie-store) => ok?)))
+        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId bulletin) :comment "foobar" :cookie-store cookie-store) => ok?)
+      (fact "approve comment with attachment"
+        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId bulletin) :comment "foobar with file" :files files :cookie-store cookie-store) => ok?)
+      (fact "comment attachment can be downloaded by authorized person"
+        (let [resp (raw sonja :download-bulletin-comment-attachment :attachmentId (:id (first files)))
+              headers (into {}
+                        (for [[k v] (:headers resp)]
+                          [(keyword k) v]))]
+          (:status resp) => 200
+          (:Content-Disposition headers) => "attachment;filename=\"sipoon_alueet.zip\""))
+      (fact "random person cannot load comment attachment"
+        (let [resp (raw pena :download-bulletin-comment-attachment :attachmentId (:id (first files)))]
+          (:status resp) => 404))))
 
   (clear-collection "application-bulletins")
 
