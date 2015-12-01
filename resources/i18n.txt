@@ -1,0 +1,1 @@
+error.duplicate-apartment-data: Huoneistotiedot eivät ole yksilöllisiä

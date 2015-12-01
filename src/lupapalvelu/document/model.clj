@@ -165,6 +165,26 @@
        :document (:document info)
        :result   [:warn "bad-postal-code"]})))
 
+(defmethod validate-element :huoneistot
+  [info data path element]
+  (when (= (last path) "huoneistot")
+    (let [data              (tools/unwrapped data)
+          keys-to-validate  [:porras :huoneistonumero :jakokirjain :muutostapa]
+          select-keyset     (fn [item] (-> item val (select-keys keys-to-validate)))
+          duplicate-keysets (->> (map select-keyset data)
+                                 (frequencies)
+                                 (filter (comp (partial < 1) val))
+                                 ((comp not-empty set keys)))
+          build-row-result  (fn [[ind item]]
+                             (map #(hash-map
+                                    :path     (-> (map keyword path) (concat [ind %]))
+                                    :element  (assoc (find-by-name (:body element) [%]) :locKey (name %))
+                                    :document (:document info)
+                                    :result   [:warn "duplicate-apartment-data"])
+                                  keys-to-validate))]
+      (when duplicate-keysets
+        (->> (filter (comp duplicate-keysets select-keyset) data)
+             (mapcat build-row-result))))))
 
 ;;
 ;; Neue api:
