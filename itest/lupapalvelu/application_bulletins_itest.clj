@@ -67,7 +67,17 @@
       (fact "approve comment for latest version"
         (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId bulletin) :comment "foobar" :cookie-store cookie-store) => ok?)
       (fact "approve comment with attachment"
-        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId bulletin) :comment "foobar with file" :files files :cookie-store cookie-store) => ok?)))
+        (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId bulletin) :comment "foobar with file" :files files :cookie-store cookie-store) => ok?)
+      (fact "comment attachment can be downloaded by authorized person"
+        (let [resp (raw sonja :download-bulletin-comment-attachment :attachmentId (:id (first files)))
+              headers (into {}
+                        (for [[k v] (:headers resp)]
+                          [(keyword k) v]))]
+          (:status resp) => 200
+          (:Content-Disposition headers) => "attachment;filename=\"sipoon_alueet.zip\""))
+      (fact "random person cannot load comment attachment"
+        (let [resp (raw pena :download-bulletin-comment-attachment :attachmentId (:id (first files)))]
+          (:status resp) => 404))))
 
   (clear-collection "application-bulletins")
 
