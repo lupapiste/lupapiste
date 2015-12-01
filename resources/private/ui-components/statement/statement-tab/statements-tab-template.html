@@ -28,8 +28,15 @@
                 <tbody data-bind="foreach: combinedData">
                     <tr class="statement-row">
                         <td>
-                            <input id="add-statement-giver-checkbox"
-                                   class="form-input" type="checkbox"
+<!--  TODO: checkbox komponentti ei tue checkedValue:ta... -->
+<!--                            <div data-bind="component: {name: 'checkbox-field', -->
+<!--                                                        params: {id: 'add-statement-giver-checkbox-' + $index(), -->
+<!--                                                                 checked: $component.selectedPersons, -->
+<!--                                                                 checkedValue: $data, -->
+<!--                                                                 'data-test-id': 'check-statement-giver-' + $index(), -->
+<!--                                                                 'disabled': isDisabled -->
+<!--                                                                 }}"></div> -->
+                            <input class="form-input" type="checkbox"
                                    data-bind="checkedValue: $data,
                                               checked: $component.selectedPersons,
                                               attr: {'data-test-id': 'check-statement-giver-' + $index(),
