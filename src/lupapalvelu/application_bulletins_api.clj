@@ -312,3 +312,20 @@
                        "versions.$.verdictGivenText"     verdictGivenText}}]
     (mongo/update-by-query :application-bulletins {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
     (ok)))
+
+(defraw "download-bulletin-comment-attachment"
+  {:parameters [attachmentId]
+   :feature    :publish-bulletin
+   :user-roles #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
+  [{:keys [application] :as command}]
+  (if-let [attachment (mongo/download attachmentId)]
+    (let [response {:status 200
+                    :body ((:content attachment))
+                    :headers {"Content-Type" (:content-type attachment)
+                              "Content-Length" (str (:content-length attachment))
+                              "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment)))}}]
+      response)
+    {:status 404
+     :headers {"Content-Type" "text/plain"}
+     :body "404"}))
