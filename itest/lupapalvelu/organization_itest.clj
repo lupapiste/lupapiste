@@ -409,7 +409,7 @@
                                                       :baseLayerId (str "Lupapiste-" bar-index)
                                                       :isBaseLayer false
                                                       :wmsName "Lupapiste-753-R:bar-id"
-                                                      :wmsUrl "/proxy/wms"})))
+                                                      :wmsUrl "/proxy/kuntawms"})))
            (facts "New map data with different server to 753-YA"
                   (local-org-api/update-organization
                    "753-YA"
