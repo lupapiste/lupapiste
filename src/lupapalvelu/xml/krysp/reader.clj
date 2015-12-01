@@ -134,7 +134,6 @@
 
 (defn kt-application-xml   [krysp-name server credentials id search-type raw?]
   (let [path "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus"]
-    (println "krysp-name:" krysp-name)
     (application-xml (str kt-case-type-prefix krysp-name) path server credentials id raw?)))
 
 (permit/register-function permit/R    :xml-from-krysp rakval-application-xml)

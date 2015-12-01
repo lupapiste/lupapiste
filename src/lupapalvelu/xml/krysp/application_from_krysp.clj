@@ -17,7 +17,7 @@
         krysp-name (case op-name
                      "rajankaynti"     "KiinteistonMaaritys"
                      "rasitetoimitus"  "Rasitetoimitus"
-                     ;; KRYSP element is deducted from kiinteistonmuodostusTyyppi.
+                     ;; KRYSP element is deduced from kiinteistonmuodostusTyyppi.
                      ;; For example, kiinteistolajin-muutos -> KiinteistolajinMuutos
                      "kiinteistonmuodostus" (let [doc (some #(and (= (-> % :schema-info :op :id)
                                                                      (-> application :primaryOperation :id))

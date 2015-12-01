@@ -585,13 +585,21 @@
   (defpage "/dev/krysp" {typeName :typeName r :request filter :filter overrides :overrides}
     (if-not (s/blank? typeName)
       (let [filter-type-name (-> filter sade.xml/parse (sade.common-reader/all-of [:PropertyIsEqualTo :PropertyName]))
-            xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
-                  "rakval:RakennusvalvontaAsia" "krysp/sample/verdict.xml"
-                  "ymy:Ymparistolupa"           "krysp/sample/verdict-yl.xml"
-                  "ymm:MaaAineslupaAsia"        "krysp/sample/verdict-mal.xml"
-                  "ymv:Vapautus"                "krysp/sample/verdict-vvvl.xml"
+            xmls {"rakval:ValmisRakennus"                         "krysp/sample/building.xml"
+                  "rakval:RakennusvalvontaAsia"                   "krysp/sample/verdict.xml"
+                  "ymy:Ymparistolupa"                             "krysp/sample/verdict-yl.xml"
+                  "ymm:MaaAineslupaAsia"                          "krysp/sample/verdict-mal.xml"
+                  "ymv:Vapautus"                                  "krysp/sample/verdict-vvvl.xml"
                   "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/sample/poikkari-verdict-cgi.xml"
-                  "kiito:KiinteistolajinMuutos"    "krysp/sample/verdict-kt.xml"}
+                  "kiito:KiinteistolajinMuutos"                   "krysp/sample/verdict-kt-kiinteistolajin-muutos.xml"
+                  "kiito:Lohkominen"                              "krysp/sample/verdict-kt-lohkominen.xml"
+                  "kiito:Rasitetoimitus"                          "krysp/sample/verdict-kt-rasitetoimitus.xml"
+                  "kiito:YleisenAlueenLohkominen"                 "krysp/sample/verdict-kt-yleisen-alueen-lohkominen.xml"
+                  "kiito:YhtAlueenOsuuksienSiirto"                "krysp/sample/verdict-kt-yht-alueen-osuuksien-siirto.xml"
+                  "kiito:KiinteistojenYhdistaminen"               "krysp/sample/verdict-kt-kiinteistojen-yhdistaminen.xml"
+                  "kiito:Halkominen"                              "krysp/sample/verdict-kt-halkominen.xml"
+                  "kiito:KiinteistonMaaritys"                     "krysp/sample/verdict-kt-kiinteiston-maaritys.xml"
+                  "kiito:Tilusvaihto"                             "krysp/sample/verdict-kt-tilusvaihto.xml"}
             overrides (-> (json/decode overrides)
                           (clojure.walk/keywordize-keys))]
         ;; Use different sample xml for rakval query with kuntalupatunnus type of filter.
