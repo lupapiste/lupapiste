@@ -43,7 +43,7 @@
     <!-- ko if: $data.comments -->
     <a href="#" class="link-btn" data-bind="click: $parent.showVersionComments.bind($data), ltext: 'bulletin.versions.comments.show'"></a>
     <!-- /ko -->
-    <a href="#" class="link-btn" data-bind="ltext: 'bulletin.versions.version.show'"></a>
+    <a href="#" class="link-btn" data-bind="attr: {href: $parent.bulletinUrl}, ltext: 'bulletin.versions.version.show'"></a>
   </td>
 </script>
 

@@ -13,7 +13,7 @@
 (fact get-db
   (mongo/with-db test-db-name (.getName (mongo/get-db))) => test-db-name)
 
-(def upload-test-db-name (str "upload-" test-db-name))
+(def upload-test-db-name (str "test_mongo-upload-" (now)))
 
 (facts "upload"
   (fact "empty file"
