@@ -4,3 +4,4 @@ attachment.visibility.asiakas-ja-viranomainen:  Hankkeen osapuolet ja viranomais
 attachment.visibility.viranomainen:  Liitteen lataaja ja viranomaiset
 error.attachment.no-auth: Ei oikeutta liitteeseen
 error.unknown-attachment: Tuntematon liite
+error.attachment.no-versions: Liitteellä ei ole versioita

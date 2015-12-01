@@ -614,6 +614,11 @@
                         (when-not (some (hash-set (keyword nakyvyys-value)) attachment-meta/visibilities)
                           (fail :error.invalid-nakyvyys-value :value nakyvyys-value)))]
    :pre-checks       [a/validate-authority-in-drafts
+                      (fn [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
+                        (when attachment-id
+                          (when-let [{versions :versions} (util/find-first #(= (:id %) attachment-id) attachments)]
+                            (when (<= (count versions) 0)
+                              (fail :error.attachment.no-versions)))))
                       access/has-attachment-auth]
    :states           states/pre-verdict-states}
   [command]
