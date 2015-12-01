@@ -1,8 +1,9 @@
 (ns lupapalvelu.attachment-accessibility
   (:require [lupapalvelu.attachment-metadata :as metadata]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.user :as user]
             [sade.util :as util]
-            [lupapalvelu.authorization :as auth]))
+            [sade.core :refer :all]))
 
 
 (defn visibility-check [user app-auth {:keys [metadata auth] :as attachment}]
