@@ -918,6 +918,6 @@
 
 (deffixture "minimal" {}
   (mongo/clear!)
-  (dorun (map (partial mongo/insert :users) users))
-  (dorun (map (partial mongo/insert :companies) companies))
-  (dorun (map (partial mongo/insert :organizations) organizations)))
+  (mongo/insert-batch :users users)
+  (mongo/insert-batch :companies companies)
+  (mongo/insert-batch :organizations organizations))
