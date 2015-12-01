@@ -5,10 +5,14 @@
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.fixture.core :as fixture]
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.coordinate :as coord]
             [cheshire.core :as json]))
+
+(mongo/connect!)
+(mongo/with-db test-db-name (fixture/apply-fixture "minimal"))
 
 ; make sure proxies are enabled:
 (http-post (str (server-address) "/api/proxy-ctrl/on") {})
@@ -40,22 +44,24 @@
                           :name {:fi "Tampere" :sv "Tammerfors"}
                           :municipality "837"}])
     (fact (-> r first :location keys) => (just #{:x :y})))
-  (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 9, tampere" :lang "fi"}})
-        r (json/decode (:body response) true)]
-    (fact (:suggestions r) => ["Piiriniitynkatu 9, Tampere"])
-    (fact (:data r) =contains=> [{:street "Piiriniitynkatu",
-                                  :number "9",
-                                  :name {:fi "Tampere" :sv "Tammerfors"}
-                                  :municipality "837"}])
-    (fact (-> r :data first :location keys) => (just #{:x :y})))
-  (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 19, tampere" :lang "fi"}})
-        r (json/decode (:body response) true)]
-    (fact (:suggestions r) => ["Piiriniitynkatu 19, Tampere"])
-    (fact (:data r) =contains=> [{:street "Piiriniitynkatu",
-                                  :number "19",
-                                  :name {:fi "Tampere" :sv "Tammerfors"}
-                                  :municipality "837"}])
-    (fact (-> r :data first :location keys) => (just #{:x :y}))))
+  (mongo/with-db test-db-name
+    (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 9, tampere" :lang "fi"}})
+          r (json/decode (:body response) true)]
+      (fact (:suggestions r) => ["Piiriniitynkatu 9, Tampere"])
+      (fact (:data r) =contains=> [{:street "Piiriniitynkatu",
+                                    :number "9",
+                                    :name {:fi "Tampere" :sv "Tammerfors"}
+                                    :municipality "837"}])
+      (fact (-> r :data first :location keys) => (just #{:x :y}))))
+  (mongo/with-db test-db-name
+    (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 19, tampere" :lang "fi"}})
+          r (json/decode (:body response) true)]
+      (fact (:suggestions r) => ["Piiriniitynkatu 19, Tampere"])
+      (fact (:data r) =contains=> [{:street "Piiriniitynkatu",
+                                    :number "19",
+                                    :name {:fi "Tampere" :sv "Tammerfors"}
+                                    :municipality "837"}])
+      (fact (-> r :data first :location keys) => (just #{:x :y})))))
 
 (facts "point-by-property-id"
   (let [property-id "09100200990013"
