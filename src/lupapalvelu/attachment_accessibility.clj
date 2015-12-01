@@ -44,3 +44,10 @@
 (defn filter-attachments-for [user auths attachments]
   {:pre [(map? user) (sequential? attachments)]}
   (filter (partial can-access-attachment? user auths) attachments))
+
+(defn has-attachment-auth [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
+  (when attachment-id
+    (if-let [{auth :auth} (util/find-first #(= (:id %) attachment-id) attachments)]
+      (when (and auth (not (auth/has-auth? {:auth auth} (:id user))))
+        (fail :error.attachment.no-auth))
+      (fail :error.unknown-attachment))))

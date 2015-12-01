@@ -2,3 +2,5 @@ error.invalid-nakyvyys-value:  Tuntematon liitteen näkyvyys-arvo
 attachment.visibility.julkinen:  Julkinen
 attachment.visibility.asiakas-ja-viranomainen:  Hankkeen osapuolet ja viranomaiset
 attachment.visibility.viranomainen:  Liitteen lataaja ja viranomaiset
+error.attachment.no-auth: Ei oikeutta liitteeseen
+error.unknown-attachment: Tuntematon liite

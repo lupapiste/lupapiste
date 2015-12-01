@@ -13,6 +13,7 @@
             [lupapalvelu.application :as a]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment-metadata :as attachment-meta]
+            [lupapalvelu.attachment-accessibility :as access]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -606,14 +607,15 @@
     (ok)))
 
 (defcommand set-attachment-visibility
-  {:parameters [id attachmentId value]
-   :user-roles #{:authority :applicant}
-   :feature    :attachment-visibility
+  {:parameters       [id attachmentId value]
+   :user-roles       #{:authority :applicant}
+   :feature          :attachment-visibility
    :input-validators [(fn [{{nakyvyys-value :value} :data :as c}]
                         (when-not (some (hash-set (keyword nakyvyys-value)) attachment-meta/visibilities)
                           (fail :error.invalid-nakyvyys-value :value nakyvyys-value)))]
-   :pre-checks [a/validate-authority-in-drafts]
-   :states     states/pre-verdict-states}
+   :pre-checks       [a/validate-authority-in-drafts
+                      access/has-attachment-auth]
+   :states           states/pre-verdict-states}
   [command]
   (update-application command
                       {:attachments {$elemMatch {:id attachmentId}}}
