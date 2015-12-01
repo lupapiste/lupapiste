@@ -155,6 +155,7 @@
                                               :emailPreferred (= emailPreferred "on")})
         comment (bulletins/create-comment bulletin-id bulletin-version-id comment contact-info files created)]
     (mongo/insert :application-bulletin-comments comment)
+    (bulletins/update-file-metadata bulletin-id (:id comment) files)
     (ok)))
 
 (defn- get-search-fields [fields app]
@@ -316,16 +317,8 @@
 (defraw "download-bulletin-comment-attachment"
   {:parameters [attachmentId]
    :feature    :publish-bulletin
-   :user-roles #{:authority}
+   :user-roles #{:authority :applicant}
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
-  [{:keys [application] :as command}]
-  (if-let [attachment (mongo/download attachmentId)]
-    (let [response {:status 200
-                    :body ((:content attachment))
-                    :headers {"Content-Type" (:content-type attachment)
-                              "Content-Length" (str (:content-length attachment))
-                              "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment)))}}]
-      response)
-    {:status 404
-     :headers {"Content-Type" "text/plain"}
-     :body "404"}))
+  [{:keys [application user] :as command}]
+  (lupapalvelu.attachment/output-attachment attachmentId true
+                                            (partial bulletins/get-bulletin-comment-attachment-file-as user)))

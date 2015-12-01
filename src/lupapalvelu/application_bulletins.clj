@@ -89,3 +89,13 @@
     (when-let [bulletin (get-bulletin (:application attachment-file))]
       (when (seq bulletin) attachment-file))))
 
+(defn get-bulletin-comment-attachment-file-as
+  "Returns the attachment file if user has access to application, otherwise nil."
+  [user file-id]
+  (when-let [attachment-file (mongo/download file-id)]
+    (when-let [application (lupapalvelu.domain/get-application-as (get-in attachment-file [:metadata :bulletinId]) user :include-canceled-apps? true)]
+      (when (seq application) attachment-file))))
+
+(defn update-file-metadata [bulletin-id comment-id files]
+  (mongo/update-by-query :fs.files {:_id {$in (map :id files)}} {$set {:metadata.bulletinId bulletin-id
+                                                                       :metadata.commentId  comment-id}}))
