@@ -1084,7 +1084,8 @@
                                              params: {lhtml: 'help.' + permitType() + '.statementsDesc' }
                                              }"></span>
                             <div data-bind="template: {name: 'statements-template', data: {statements: $data.statements, localisationKeys: {missing: 'application.statement.missing'}}}"></div>
-                            <button data-bind="click: $root.requestForStatementModel.toggleInviteSection, visible: $root.authorization.ok('request-for-statement') && !$root.requestForStatementModel.showInviteSection()"
+                            <button data-bind="click: $root.requestForStatementModel.toggleInviteSection,
+                                               visible: $root.authorization.ok('request-for-statement') && !$root.requestForStatementModel.showInviteSection()"
                                     class="positive modal"
                                     data-test-id="add-statement">
                               <i class="lupicon-circle-plus"></i>
