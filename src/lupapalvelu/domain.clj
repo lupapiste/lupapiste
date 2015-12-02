@@ -87,7 +87,7 @@
         (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (name (:role user)))) %))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
-        (update-in [:attachments] (partial attachment-access/filter-attachments-for user (:auth application)))
+        (update-in [:attachments] (partial attachment-access/filter-attachments-for user application))
         (update-in [:neighbors] (partial normalize-neighbors user))
         filter-targeted-attachment-comments
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))

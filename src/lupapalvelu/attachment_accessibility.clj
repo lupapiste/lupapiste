@@ -25,8 +25,8 @@
     nil true))
 
 (defn can-access-attachment?
-  [user app-auth {:keys [latestVersion metadata auth] :as attachment}]
-  {:pre [(map? attachment)]}
+  [{authz :orgAuthz :as user} {app-auth :auth organization :organization} {:keys [latestVersion metadata auth] :as attachment}]
+  {:pre [(map? attachment) (sequential? app-auth) (string? organization)]}
   (boolean
     (or
       (nil? latestVersion)
@@ -43,10 +43,10 @@
                             attachments)]
       (can-access-attachment? user auth attachment))))
 
-(defn filter-attachments-for [user auths attachments]
+(defn filter-attachments-for [user application attachments]
   {:pre [(map? user) (sequential? attachments)]}
   (if (env/feature? :attachment-visibility)
-    (filter (partial can-access-attachment? user auths) attachments)
+    (filter (partial can-access-attachment? user application) attachments)
     attachments))
 
 (defn has-attachment-auth [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
