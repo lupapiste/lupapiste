@@ -87,7 +87,7 @@
 
 (defquery get-statement-givers
   {:parameters [:id]
-   :user-roles #{:authority}
+   :user-roles #{:authority :applicant}
    :user-authz-roles action/default-authz-writer-roles
    :states states/all-application-states}
   [{application :application}]
@@ -99,7 +99,7 @@
   {:description "Pseudo query for UI authorization logic"
    :parameters [:id]
    :states (states/all-application-states-but [:draft])
-   :user-roles #{:authority}
+   :user-roles #{:authority :applicant}
    :user-authz-roles #{:statementGiver}}
   [_])
 
@@ -179,8 +179,10 @@
 (defcommand delete-statement
   {:parameters [id statementId]
    :states     #{:open :submitted :complementNeeded}
-   :user-roles #{:authority}
-   :pre-checks [statement-not-given]}
+   :user-roles #{:authority :applicant}
+   :user-authz-roles #{:statementGiver}
+   :pre-checks [statement-not-given
+                authority-or-statement-owner-applicant]}
   [command]
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 
@@ -188,7 +190,7 @@
   {:parameters  [:id statementId status text :lang]
    :pre-checks  [statement-exists statement-owner #_statement-not-given]
    :states      #{:open :submitted :complementNeeded}
-   :user-roles #{:authority}
+   :user-roles #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :notified    true
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
