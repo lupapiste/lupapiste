@@ -69,9 +69,7 @@ LUPAPISTE.StatementsTabModel = function(params) {
     ajax.command("request-for-statement", params)
       .success(function() {
         self.selectedPersons([]);
-        self.saateText("");
         self.maaraaika(undefined);
-        self.showInviteSection(false);
         repository.load(self.application.id());
       })
       .pending(self.submitting)
