@@ -22,8 +22,8 @@ LUPAPISTE.StatementsTabModel = function(params) {
   });
 
   var addManualData = function() {
-    var someManualDataDisabled = _.some(self.manualData(), function(d) { return d.isDisabled(); });
-    if (!someManualDataDisabled) {
+    var allManualDatasEnabled = _.every(self.manualData(), function(d) { return d.errors().length == 0; });
+    if (allManualDatasEnabled) {
       self.manualData.push(new dataTemplate());
       return self;
     }
@@ -31,18 +31,16 @@ LUPAPISTE.StatementsTabModel = function(params) {
 
   var dataTemplate = function() {
     var self = this;
-    self.name = ko.observable("");
-    self.email = ko.observable("");
-    self.text = ko.observable("");
+    self.text = ko.observable("").extend({ required: true });
+    self.name = ko.observable("").extend({ required: true });
+    self.email = ko.observable("").extend({ required: true, email: true });
+    // Make the statement givers entered by authority admin (self.data) read-only. Those have an ID, others (dynamically input ones - self.manualData) do not.
     self.readonly = ko.pureComputed(function() {
       return self.id ? true : false;
     });
-    self.isDisabled = ko.computed(function() {
-      var isDisabled = _.isEmpty(self.name()) || _.isEmpty(self.email()) || _.isEmpty(self.text()) || !util.isValidEmailAddress(self.email());
-      return isDisabled;
-    });
-    self.isDisabled.subscribe(function(val) {
-      if (!val) addManualData();
+    self.errors = ko.validation.group(self);
+    self.errors.subscribe(function(errs) {
+      if (errs.length == 0) addManualData();
     });
     return self;
   };
