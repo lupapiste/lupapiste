@@ -18,7 +18,6 @@
 
 ;; Query/Projection fields
 
-
 (def bulletins-fields
   {:versions {$slice -1} :versions.bulletinState 1
    :versions.state 1 :versions.municipality 1
