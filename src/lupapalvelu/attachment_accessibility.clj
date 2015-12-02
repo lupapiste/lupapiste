@@ -35,13 +35,13 @@
         (and (publicity-check user app-auth attachment) (visibility-check user app-auth attachment))
         (or (auth/has-auth? {:auth app-auth} (:id user)) (user/authority? user))))))
 
-(defn can-access-attachment-file? [user file-id {attachments :attachments auth :auth}]
+(defn can-access-attachment-file? [user file-id {attachments :attachments :as application}]
   (boolean
     (when-let [attachment (util/find-first
                             (fn [{versions :versions :as attachment}]
                               (util/find-first #{file-id} (map :fileId versions)))
                             attachments)]
-      (can-access-attachment? user auth attachment))))
+      (can-access-attachment? user application attachment))))
 
 (defn filter-attachments-for [user application attachments]
   {:pre [(map? user) (sequential? attachments)]}
