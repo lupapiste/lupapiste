@@ -289,3 +289,23 @@
   (let [request {:params {:id "0911001"}
                  :headers {"accept-encoding" "gzip, deflate"}}]
     (wfs/raster-images request "plandocument") => http200?))
+
+(facts "get-address-from-turku"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"})
+  (fact "get-addresses-proxy"
+    (let [response (get-addresses-proxy {:params {:query "Linnankatu 80, turku" :lang "fi"}})
+          body (json/decode (:body response) true)]
+      (fact (:suggestions body) =contains=> "Linnankatu 80, Turku")
+      (fact (first (:data body)) => {:street "Linnankatu",
+                                     :number "80",
+                                     :name {:fi "Turku" :sv "\u00c5bo"}
+                                     :municipality "853"
+                                     :location {:x 237551.371,
+                                                :y 6709441.9}})))
+
+  (fact "address-by-point-proxy"
+    (let [response (address-by-point-proxy {:params {:lang "fi" :x "237557" :y "6709410"}})
+          body (json/decode (:body response) true)]
+      (fact (:street body) => "Linnankatu")
+      (fact (:number body) => "80")
+      (fact (:fi (:name body)) => "Turku"))))
