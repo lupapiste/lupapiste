@@ -211,10 +211,11 @@
   ([application schema created] (new-doc application schema created []))
   ([application schema created updates]
    (let [empty-document (model/new-document schema created)
-         document       (model/apply-updates empty-document updates)
+         document       (model/apply-updates empty-document (->model-updates updates))
          post-results   (model/validate application document schema)]
      (when (model/has-errors? post-results) (fail! :document-would-be-in-error-after-update :results post-results))
      document)))
+
 
 (defn do-create-doc! [{created :created {schema-version :schema-version :as application} :application :as command} schema-name & [updates]]
   (let [schema (schemas/get-schema (:schema-version application) schema-name)

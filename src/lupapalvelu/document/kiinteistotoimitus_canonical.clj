@@ -6,7 +6,7 @@
             [sade.strings :as str]
             [sade.util :as util]))
 
-(defn- operation-name
+(defn operation-name
   "Operation name to schema element name.
   Special cases are handled explcitly, others are converted:
   'this-is-operation' -> :ThisIsOperation"

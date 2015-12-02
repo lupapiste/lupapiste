@@ -196,7 +196,7 @@ LUPAPISTE.DocumentDataService = function(params) {
   //
 
   function isRepeating(schema) {
-    return schema.repeating && !_.contains(["document" ,"party"], schema.type);
+    return schema.repeating && !_.contains(["document" ,"party", "location"], schema.type);
   }
 
   function isGroupType(schema) {
