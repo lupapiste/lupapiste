@@ -24,12 +24,16 @@
 ;; Authority Admin operations
 ;;
 
+(defn- fetch-organization-statement-givers [org-id]
+  (let [organization (organization/get-organization org-id)
+        permitPersons (or (:statementGivers organization) [])]
+    (ok :data permitPersons)))
+
 (defquery get-organizations-statement-givers
   {:user-roles #{:authorityAdmin}}
   [{user :user}]
-  (let [organization (organization/get-organization (user/authority-admins-organization-id user))
-        permitPersons (or (:statementGivers organization) [])]
-    (ok :data permitPersons)))
+  (let [org-id (user/authority-admins-organization-id user)]
+    (fetch-organization-statement-givers org-id)))
 
 (defn- statement-giver-model [{{:keys [text organization]} :data} _ __]
   {:text text
@@ -91,9 +95,8 @@
    :user-authz-roles action/default-authz-writer-roles
    :states states/all-application-states}
   [{application :application}]
-  (let [organization (organization/get-organization (:organization application))
-        permitPersons (or (:statementGivers organization) [])]
-    (ok :data permitPersons)))
+  (let [org-id (:organization application)]
+    (fetch-organization-statement-givers org-id)))
 
 (defquery should-see-unsubmitted-statements
   {:description "Pseudo query for UI authorization logic"
