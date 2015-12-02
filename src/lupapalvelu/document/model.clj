@@ -165,6 +165,31 @@
        :document (:document info)
        :result   [:warn "bad-postal-code"]})))
 
+(defn inspect-repeating-for-duplicate-rows [data inspected-fields]
+  (when (every? (comp number? read-string name key) data)
+    (let [select-keyset     (fn [row] (select-keys (val row) inspected-fields))
+          duplicate-keysets (->> (map select-keyset data)
+                                 (frequencies)
+                                 (filter (comp (partial < 1) val))
+                                 (keys)
+                                 (set))]
+      (when-not (empty? duplicate-keysets)
+        (->> (filter (comp duplicate-keysets select-keyset) data)
+             (keys))))))
+
+(defmethod validate-element :huoneistot
+  [info data path element]
+  (let [data               (tools/unwrapped data)
+        fields-to-validate [:porras :huoneistonumero :jakokirjain :muutostapa]
+        build-row-result   (fn [ind]
+                             (map #(hash-map
+                                    :path     (-> (map keyword path) (concat [ind %]))
+                                    :element  (assoc (find-by-name (:body element) [%]) :locKey (name %))
+                                    :document (:document info)
+                                    :result   [:warn "duplicate-apartment-data"])
+                                  fields-to-validate))]
+    (some->> (inspect-repeating-for-duplicate-rows data fields-to-validate)
+             (mapcat build-row-result))))
 
 ;;
 ;; Neue api:

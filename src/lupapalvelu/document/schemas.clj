@@ -660,6 +660,7 @@
 (def huoneistotTable {:name "huoneistot"
                       :i18nkey "huoneistot"
                       :type :table
+                      :validator :huoneistot
                       :group-help "huoneistot.groupHelpText"
                       :repeating true
                       :approvable true
