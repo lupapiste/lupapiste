@@ -53,8 +53,16 @@
   (when (statement-given? application statementId)
     (fail :error.statement-already-given)))
 
-(defn give-statement [statement text status]
-  (assoc statement :modified (now) :state :given :text text :status status :given (now)))
+(defn- update-statement [statement modify-id prev-modify-id & updates]
+  (if (or (= prev-modify-id (:modify-id statement)) (nil? (:modify-id statement)))
+    (apply assoc statement :modified (now) :modify-id modify-id updates)
+    (fail :error.statement-updated-after-last-save :statementId (:id statement))))
+
+(defn update-draft [statement text status modify-id prev-modify-id]
+  (update-statement statement modify-id prev-modify-id :state :draft :text text :status status))
+
+(defn give-statement [statement text status modify-id prev-modify-id]
+  (update-statement statement modify-id prev-modify-id :state :given :text text :status status :given (now)))
 
 ;;
 ;; Statuses
