@@ -1,7 +1,9 @@
 (ns lupapalvelu.verdict-itest
   (:require [midje.sweet :refer :all]
+            [clj-time.coerce :as coerce]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [sade.util :as util]))
 

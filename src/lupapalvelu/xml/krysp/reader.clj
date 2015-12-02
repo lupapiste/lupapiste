@@ -606,7 +606,8 @@
                                          :let [pk (-> elem cr/as-is :poytakirjatieto :Poytakirja)
                                                fields (select-keys pk [:paatoksentekija :pykala])
                                                paatos (:paatos pk)
-                                               liitteet (map #(-> % :Liite ->liite (dissoc :metadata)) (:liitetieto pk))]]
+                                               liitteet (map #(-> % :Liite ->liite (dissoc :metadata))
+                                                             (flatten [(:liitetieto pk)]))]]
                                      (assoc fields
                                             :paatoskoodi paatos
                                             :status (verdict/verdict-id paatos)
