@@ -1,2 +1,0 @@
-verdict.status.43: Kiinteistötoimitus
-verdict.status.44: Kiinteistörekisterin pitäjän päätös
