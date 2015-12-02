@@ -370,11 +370,8 @@ var attachment = (function() {
         attachmentId: model.id(),
         value: data
       })
-      .success(function(res) {
-        console.log(res);
-      })
-      .error(function(e) {
-        error(e.text);
+      .success(function() {
+        hub.send("indicator", {style: "positive"});
       })
       .call();
     }));
