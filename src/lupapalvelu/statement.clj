@@ -1,8 +1,10 @@
 (ns lupapalvelu.statement
   (:require [clojure.set]
+            [schema.core :as sc]
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]
+            [sade.validators :as v]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
@@ -17,13 +19,40 @@
 (def post-given-states #{:given :responded})
 (def pre-given-states (clojure.set/difference statement-states post-given-states))
 
+(def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
+;; Krysp Yhteiset 2.1.5+
+(def- statement-statuses-more-options
+  (vec (concat statement-statuses 
+               ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa" 
+                "lausunto" "kielteinen" "palautettu" "poydalle"])))
+
+(def StatementGiver {:userId                          sc/Str
+                     :id                              sc/Str
+                     :text                            sc/Str
+                     :email                           (sc/both
+                                                       (sc/pred v/valid-email? "Not valid email")
+                                                       (util/max-length-string 255))
+                     :name                            sc/Str})
+
+(def Statement      {:id                              sc/Str
+                     :state                           (apply sc/enum statement-states)
+                     (sc/optional-key :status)        (apply sc/enum statement-statuses-more-options)
+                     (sc/optional-key :text)          sc/Str
+                     (sc/optional-key :requested)     sc/Num
+                     (sc/optional-key :given)         sc/Num
+                     (sc/optional-key :reminder-sent) sc/Num
+                     (sc/optional-key :modified)      sc/Num
+                     (sc/optional-key :modify-id)     sc/Str
+                     :person                          StatementGiver
+                     (sc/optional-key :metadata)      {}})
 
 (defn create-statement [now metadata person]
-  (cond-> {:id        (mongo/create-id)
-           :person    person
-           :requested now
-           :state    :requested}
-    (seq metadata) (assoc :metadata metadata)))
+  (sc/validate Statement
+               (cond-> {:id        (mongo/create-id)
+                        :person    person
+                        :requested now
+                        :state    :requested}
+                 (seq metadata) (assoc :metadata metadata))))
 
 (defn get-statement [{:keys [statements]} id]
   (first (filter #(= id (:id %)) statements)))
@@ -46,7 +75,8 @@
 
 (defn- update-statement [statement modify-id prev-modify-id & updates]
   (if (or (= prev-modify-id (:modify-id statement)) (nil? (:modify-id statement)))
-    (apply assoc statement :modified (now) :modify-id modify-id updates)
+    (->> (apply assoc statement :modified (now) :modify-id modify-id updates)
+         (sc/validate Statement))
     (fail :error.statement-updated-after-last-save :statementId (:id statement))))
 
 (defn update-draft [statement text status modify-id prev-modify-id]
@@ -59,10 +89,6 @@
 ;; Statuses
 ;;
 
-(def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
-;; Krysp Yhteiset 2.1.5+
-(def- statement-statuses-more-options
-  (vec (concat statement-statuses ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa" "lausunto" "kielteinen" "palautettu" "poydalle"])))
 
 (defn possible-statement-statuses [application]
   (let [{permit-type :permitType municipality :municipality} application
