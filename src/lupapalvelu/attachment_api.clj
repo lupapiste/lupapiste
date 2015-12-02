@@ -610,14 +610,14 @@
   {:parameters       [id attachmentId value]
    :user-roles       #{:authority :applicant}
    :feature          :attachment-visibility
-   :input-validators [(fn [{{nakyvyys-value :value} :data :as c}]
+   :input-validators [(fn [{{nakyvyys-value :value} :data}]
                         (when-not (some (hash-set (keyword nakyvyys-value)) attachment-meta/visibilities)
-                          (fail :error.invalid-nakyvyys-value :value nakyvyys-value)))]
+                          (fail :error.invalid-nakyvyys-value)))]
    :pre-checks       [a/validate-authority-in-drafts
                       (fn [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
                         (when attachment-id
                           (when-let [{versions :versions} (util/find-first #(= (:id %) attachment-id) attachments)]
-                            (when (<= (count versions) 0)
+                            (when (empty? versions)
                               (fail :error.attachment.no-versions)))))
                       access/has-attachment-auth]
    :states           states/pre-verdict-states}
