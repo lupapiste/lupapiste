@@ -4,9 +4,10 @@
             [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
+            [lupapalvelu.application :as application]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
-            [lupapalvelu.application :as application]
             [lupapalvelu.user :as user]
             [lupapalvelu.document.document :refer :all]
             [lupapalvelu.document.persistence :as doc-persistence]
@@ -111,8 +112,8 @@
    :user-roles       #{:applicant :authority}
    :states           states/all-states
    :input-validators [doc-persistence/validate-collection]
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles  action/reader-org-authz-roles}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles}
   [{:keys [application]}]
   (debug doc collection)
   (let [document (doc-persistence/by-id application collection doc)]
@@ -122,8 +123,8 @@
 (defquery fetch-validation-errors
   {:parameters       [:id]
    :user-roles       #{:applicant :authority}
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles  action/reader-org-authz-roles
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles
    :states           states/all-states}
   [{app :application}]
   (let [results (for [doc (:documents app)] (model/validate app doc))]

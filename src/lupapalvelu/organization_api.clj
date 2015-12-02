@@ -23,6 +23,8 @@
             [sade.strings :as ss]
             [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.states :as states]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mime :as mime]
@@ -30,7 +32,6 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as o]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.geojson :as geo]))
@@ -413,7 +414,7 @@
 
 (defquery get-organization-tags
   {:user-authz-roles #{:statementGiver}
-   :org-authz-roles action/reader-org-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)
@@ -427,7 +428,7 @@
 
 (defquery get-organization-areas
   {:user-authz-roles #{:statementGiver}
-   :org-authz-roles  action/reader-org-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles
    :user-roles       #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)

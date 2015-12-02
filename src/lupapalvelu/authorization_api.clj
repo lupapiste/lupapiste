@@ -100,7 +100,7 @@
 (defcommand approve-invite
   {:parameters [id]
    :user-roles #{:applicant}
-   :user-authz-roles action/default-authz-reader-roles
+   :user-authz-roles auth/default-authz-reader-roles
    :states     states/all-application-states}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
@@ -143,7 +143,7 @@
 (defcommand decline-invitation
   {:parameters [:id]
    :user-roles #{:applicant :authority}
-   :user-authz-roles action/default-authz-reader-roles
+   :user-authz-roles auth/default-authz-reader-roles
    :states     states/all-application-states}
   [command]
   (do-remove-auth command (get-in command [:user :username])))

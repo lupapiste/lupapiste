@@ -54,8 +54,8 @@
   {:parameters       [:id]
    :states           states/all-states
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles  action/reader-org-authz-roles}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles}
   [{:keys [application user]}]
   (if application
     (let [app (assoc application :allowedAttachmentTypes (attachment/get-attachment-types-for-application application))]

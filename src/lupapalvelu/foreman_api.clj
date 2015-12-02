@@ -120,8 +120,8 @@
 (defquery foreman-history
   {:user-roles #{:authority}
    :states           states/all-states
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles  action/reader-org-authz-roles
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles
    :parameters       [:id]
    :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
@@ -132,8 +132,8 @@
 (defquery reduced-foreman-history
   {:user-roles #{:authority}
    :states           states/all-states
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles  action/reader-org-authz-roles
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles
    :parameters       [:id]
    :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
@@ -144,8 +144,8 @@
 (defquery foreman-applications
   {:user-roles #{:applicant :authority :oirAuthority}
    :states           states/all-states
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles  action/reader-org-authz-roles
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles
    :parameters       [id]}
   [{application :application user :user :as command}]
   (let [app-link-resp (mongo/select :app-links {:link {$in [id]}})

@@ -14,6 +14,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment-metadata :as attachment-meta]
             [lupapalvelu.attachment-accessibility :as access]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -99,7 +100,7 @@
 
 (defquery attachment-types
   {:parameters [:id]
-   :user-authz-roles action/all-authz-roles
+   :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states}
   [{application :application}]
@@ -109,7 +110,7 @@
   {:parameters [id attachmentId attachmentType]
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles action/all-authz-writer-roles
+   :user-authz-roles auth/all-authz-writer-roles
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application user created] :as command}]
@@ -129,7 +130,7 @@
 
 (defquery attachment-operations
   {:parameters [:id]
-   :user-authz-roles action/all-authz-roles
+   :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
   [{application :application}]
@@ -188,7 +189,7 @@
    :parameters  [id attachmentId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles action/all-authz-writer-roles
+   :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
@@ -207,7 +208,7 @@
    :parameters  [:id attachmentId fileId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId :fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles action/all-authz-writer-roles
+   :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
@@ -227,8 +228,8 @@
         {:parameters [:attachment-id]
          :input-validators [(partial action/non-blank-parameters [:attachment-id])]
          :user-roles #{:applicant :authority :oirAuthority}
-         :user-authz-roles action/all-authz-roles
-         :org-authz-roles action/reader-org-authz-roles
+         :user-authz-roles auth/all-authz-roles
+         :org-authz-roles auth/reader-org-authz-roles
          :feature :preview}
         [{{:keys [attachment-id]} :data user :user}]
         (attachment/output-attachment-preview attachment-id (partial attachment/get-attachment-file-as user)))
@@ -237,8 +238,8 @@
         {:parameters [:attachment-id]
          :input-validators [(partial action/non-blank-parameters [:attachment-id])]
          :user-roles #{:applicant :authority :oirAuthority}
-         :user-authz-roles action/all-authz-roles
-         :org-authz-roles action/reader-org-authz-roles}
+         :user-authz-roles auth/all-authz-roles
+         :org-authz-roles auth/reader-org-authz-roles}
         [{{:keys [attachment-id]} :data user :user}]
         (attachment/output-attachment attachment-id false (partial attachment/get-attachment-file-as user)))
 
@@ -246,8 +247,8 @@
   {:parameters [:attachment-id]
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles action/reader-org-authz-roles}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-file-as user)))
 
@@ -262,8 +263,8 @@
   {:parameters [:id]
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles action/reader-org-authz-roles}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles}
   [{:keys [application user lang]}]
   (if application
     (let [attachments (:attachments application)
@@ -338,7 +339,7 @@
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles action/all-authz-writer-roles
+   :user-authz-roles auth/all-authz-writer-roles
    :pre-checks attachment-modification-precheks
    :input-validators [(partial action/non-blank-parameters [:id :attachmentType :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
@@ -377,7 +378,7 @@
 (defcommand rotate-pdf
   {:parameters  [id attachmentId rotation]
    :user-roles  #{:applicant :authority}
-   :user-authz-roles action/all-authz-writer-roles
+   :user-authz-roles auth/all-authz-writer-roles
    :input-validators [(partial action/number-parameters [:rotation])
                       (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
    :pre-checks  attachment-modification-precheks
@@ -515,7 +516,7 @@
   {:parameters [:job-id :version]
    :input-validators [(partial action/non-blank-parameters [:job-id :version])]
    :user-roles #{:authority}
-   :user-authz-roles action/default-authz-writer-roles
+   :user-authz-roles auth/default-authz-writer-roles
    :description "Returns state of stamping job"}
   [{{job-id :job-id version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (assoc (job/status job-id (->long version) (->long timeout)) :ok true))
@@ -562,7 +563,7 @@
 (defcommand set-attachment-meta
   {:parameters [id attachmentId meta]
    :user-roles #{:applicant :authority}
-   :user-authz-roles action/all-authz-writer-roles
+   :user-authz-roles auth/all-authz-writer-roles
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation]

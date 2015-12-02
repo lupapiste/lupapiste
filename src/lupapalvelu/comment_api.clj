@@ -7,6 +7,7 @@
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
@@ -61,7 +62,7 @@
 (defcommand can-target-comment-to-authority
   {:description "Dummy command for UI logic"
    :user-roles #{:authority}
-   :org-authz-roles action/commenter-org-authz-roles
+   :org-authz-roles auth/commenter-org-authz-roles
    :states      (disj commenting-states :draft)})
 
 (defcommand can-mark-answered
@@ -72,8 +73,8 @@
 (defquery comments
   {:parameters [id]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles action/all-authz-writer-roles
-   :org-authz-roles action/commenter-org-authz-roles
+   :user-authz-roles auth/all-authz-writer-roles
+   :org-authz-roles auth/commenter-org-authz-roles
    :states states/all-states}
   [{application :application}]
   (ok (select-keys application [:id :comments])))
@@ -82,8 +83,8 @@
   {:parameters [id text target roles]
    :user-roles #{:applicant :authority :oirAuthority}
    :states     commenting-states
-   :user-authz-roles action/all-authz-writer-roles
-   :org-authz-roles action/commenter-org-authz-roles
+   :user-authz-roles auth/all-authz-writer-roles
+   :org-authz-roles auth/commenter-org-authz-roles
    :pre-checks [applicant-cant-set-to
                 application/validate-authority-in-drafts]
    :input-validators [validate-comment-target

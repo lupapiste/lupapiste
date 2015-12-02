@@ -2,6 +2,28 @@
   (:require [lupapalvelu.user :as user]))
 
 ;;
+;; Roles
+;;
+
+(def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin})
+(def all-user-roles (conj all-authenticated-user-roles :anonymous :rest-api :trusted-etl))
+
+(def default-authz-writer-roles #{:owner :writer :foreman})
+(def default-authz-reader-roles (conj default-authz-writer-roles :reader))
+(def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
+(def all-authz-roles (conj all-authz-writer-roles :reader))
+
+(def default-org-authz-roles #{:authority :approver})
+(def commenter-org-authz-roles (conj default-org-authz-roles :commenter))
+(def reader-org-authz-roles (conj commenter-org-authz-roles :reader))
+(def all-org-authz-roles (conj reader-org-authz-roles :authorityAdmin :tos-editor :tos-publisher :archivist))
+
+(def default-user-authz {:query default-authz-reader-roles
+                         :export default-authz-reader-roles
+                         :command default-authz-writer-roles
+                         :raw default-authz-writer-roles})
+
+;;
 ;; Auth utils
 ;;
 
@@ -34,3 +56,18 @@
                 :user         (user/summary invited)
                 :inviter      (user/summary inviter)}]
     (assoc (user/user-in-role invited :reader) :invite invite)))
+
+;;
+;; Authz checkers
+;;
+
+(defn user-authz? [roles application user]
+  {:pre [(set? roles)]}
+  (let [roles-in-app  (map (comp keyword :role) (get-auths application (:id user)))]
+    (some roles roles-in-app)))
+
+(defn organization-authz? [org-authz-roles {organization :organization} user]
+  {:pre [(set? org-authz-roles)]}
+  (let [user-org-authz (get-in user [:orgAuthz (keyword organization)])]
+    (and (user/authority? user) org-authz-roles (some org-authz-roles user-org-authz))))
+
