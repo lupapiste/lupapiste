@@ -25,15 +25,15 @@
     nil true))
 
 (defn can-access-attachment?
+  "Checks that user has access to attachment from application auth and attachment auth"
   [{authz :orgAuthz :as user} {app-auth :auth organization :organization} {:keys [latestVersion metadata auth] :as attachment}]
   {:pre [(map? attachment) (sequential? app-auth) (string? organization)]}
+  (assert (if latestVersion (seq auth) true))
   (boolean
     (or
       (nil? latestVersion)
-      (and (metadata/public-attachment? attachment) (not (nil? user)))
-      (if auth                                                ; TODO remove when auth migration is done
-        (and (publicity-check user app-auth attachment) (visibility-check user app-auth attachment))
-        (or (auth/has-auth? {:auth app-auth} (:id user)) (user/authority? user))))))
+      (metadata/public-attachment? attachment)
+      (and (seq auth) (publicity-check user app-auth attachment) (visibility-check user app-auth attachment)))))
 
 (defn can-access-attachment-file? [user file-id {attachments :attachments :as application}]
   (boolean
@@ -43,10 +43,21 @@
                             attachments)]
       (can-access-attachment? user application attachment))))
 
+(defn- auth-from-version [{user :user stamped? :stamped}]
+  (assoc user :role (if stamped? :stamper :uploader)))
+
+(defn- populate-auth
+  "If attachment doesn't auth array, assocs auth array on runtime"
+  [{auth :auth versions :versions :as attachment}]
+  (if (or (empty? versions) (seq auth))
+    attachment
+    (assoc attachment :auth (map  versions))))
+
 (defn filter-attachments-for [user application attachments]
   {:pre [(map? user) (sequential? attachments)]}
   (if (env/feature? :attachment-visibility)
-    (filter (partial can-access-attachment? user application) attachments)
+    (let [attachments (map populate-auth attachments)]
+      (filter (partial can-access-attachment? user application) attachments))
     attachments))
 
 (defn has-attachment-auth [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
