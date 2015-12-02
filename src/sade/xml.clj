@@ -76,12 +76,13 @@
 ;;
 
 (defn- append-attribute [builder map-entry]
-  (-> builder
-    (.append \space)
-    (.append (name (key map-entry)))
-    (.append "=\"")
-    (.append (escape-xml (name (val map-entry))))
-    (.append \")))
+  (let [v (-> map-entry val (#(if (keyword? %) (name %) (str %))) escape-xml)]
+    (-> builder
+     (.append \space)
+     (.append (name (key map-entry)))
+     (.append "=\"")
+     (.append v)
+     (.append \"))))
 
 (defn- append-element [e, ^java.lang.StringBuilder b]
   (cond
