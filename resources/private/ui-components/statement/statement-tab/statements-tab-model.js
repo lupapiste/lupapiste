@@ -66,6 +66,7 @@ LUPAPISTE.StatementsTabModel = function(params) {
         };
     ajax.command("request-for-statement", params)
       .success(function() {
+        hub.send("indicator", {style: "positive", message: "application-statement-giver-invite.success"});
         self.selectedPersons([]);
         self.maaraaika(undefined);
         repository.load(self.application.id());
