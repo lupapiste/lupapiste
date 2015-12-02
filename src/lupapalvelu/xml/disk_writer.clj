@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.disk-writer
   (:require [taoensso.timbre :as timbre :refer [info error]]
             [me.raynes.fs :as fs]
-            [clojure.data.xml :refer [emit indent-str]]
+            [clojure.data.xml :as data-xml]
             [clojure.java.io :as io]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -57,25 +57,27 @@
                      (str output-dir "/" (:id application) "_" (now) "_" file-suffix)
                      (str output-dir "/" (:id application) "_" (now)))
         tempfile   (io/file (str file-name ".tmp"))
-        outfile    (io/file (str file-name ".xml"))
-        xml-s      (indent-str xml)]
-
-    (try
-      (validator/validate xml-s (permit/permit-type application) schema-version)
-      (catch org.xml.sax.SAXParseException e
-        (fail! :error.integration.send :details (.getMessage e))))
+        outfile    (io/file (str file-name ".xml"))]
 
     (fs/mkdirs output-dir)
 
-
     (try
       (with-open [out-file-stream (io/writer tempfile)]
-        (emit xml out-file-stream))
+        (data-xml/emit xml out-file-stream))
       (catch java.io.FileNotFoundException e
         (when (fs/exists? tempfile)
           (fs/delete tempfile))
         (error e (.getMessage e))
         (fail! :error.sftp.user.does.not.exist :details (.getMessage e))))
+
+    (try
+      (validator/validate tempfile (permit/permit-type application) schema-version)
+      (catch org.xml.sax.SAXParseException e
+        (fs/delete tempfile)
+        (fail! :error.integration.send :details (.getMessage e)))
+      (catch Throwable t
+        (fs/delete tempfile)
+        (throw t)))
 
     (write-attachments attachments output-dir)
 

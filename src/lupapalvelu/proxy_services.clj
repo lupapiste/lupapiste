@@ -60,7 +60,13 @@
         (do
           (future-cancel nls-query)
           (resp/json {:suggestions (map (fn [{:keys [street number]}] (str street \space number ", " (i18n/localize lang :municipality muni-code))) address-from-muni)
-                     :data (map (fn [m] (-> m (assoc :location (select-keys m [:x :y])) (dissoc :x :y))) address-from-muni)}))
+                      :data (map (fn [m]
+                                   (-> m
+                                     (assoc :location (select-keys m [:x :y])
+                                            :name {:fi (i18n/localize :fi :municipality muni-code)
+                                                   :sv (i18n/localize :sv :municipality muni-code)})
+                                     (dissoc :x :y)))
+                              address-from-muni)}))
         (do
           (debug "Fallback to NSL address data - no address found from " (i18n/localize :fi :municipality muni-code))
           (respond-nls-address-suggestions @nls-query)))
@@ -124,7 +130,10 @@
       (if-let [endpoint (org/municipality-address-endpoint municipality)]
         (if-let [address-from-muni (->> (wfs/address-by-point-from-municipality x y endpoint)
                                      (map (partial wfs/krysp-to-address-details (or lang "fi")))
-                                     (map (fn [{x2 :x y2 :y :as f}] (assoc f :distance (distance x_d y_d x2 y2))))
+                                     (map (fn [{x2 :x y2 :y :as f}]
+                                            (assoc f :distance (distance x_d y_d x2 y2)
+                                                     :name {:fi (i18n/localize :fi :municipality municipality)
+                                                            :sv (i18n/localize :sv :municipality municipality)})))
                                      (sort-by :distance)
                                      first)]
           (do

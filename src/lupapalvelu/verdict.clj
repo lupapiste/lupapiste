@@ -24,42 +24,56 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch])
   (:import [java.net URL]))
 
-(defn- get-poytakirja [application user timestamp verdict-id pk]
-  (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-    (do
-      (debug "Download" url)
-      (let [filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
-            resp            (try
-                              (http/get url :as :stream :throw-exceptions false)
-                              (catch Exception e {:status -1 :body (str e)}))
-            header-filename  (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
-                               (ss/replace content-disposition #"attachment;filename=" ""))
-            content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-            urlhash         (pandect/sha1 url)
-            attachment-id   urlhash
-            attachment-type {:type-group "muut" :type-id "paatosote"}
-            target          {:type "verdict" :id verdict-id :urlHash urlhash}
-            attachment-time (get-in pk [:liite :muokkausHetki] timestamp)
-            ; Reload application from DB, attachments have changed
-            ; if verdict has several attachments.
-            current-application (domain/get-application-as (:id application) user)]
-        ; If the attachment-id, i.e., hash of the URL matches
-        ; any old attachment, a new version will be added
-        (if (= 200 (:status resp))
-          (attachment/attach-file! {:application current-application
-                                    :filename (or header-filename filename)
-                                    :size content-length
-                                    :content (:body resp)
-                                    :attachment-id attachment-id
-                                    :attachment-type attachment-type
-                                    :target target
-                                    :required false
-                                    :locked true
-                                    :user user
-                                    :created attachment-time
-                                    :state :ok})
-          (error (str (:status resp) " - unable to download " url ": " resp)))
-        (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
+(defn- get-poytakirja
+  "At least outlier verdicts (KT) poytakirja can have multiple
+  attachments. On the other hand, traditional (e.g., R) verdict
+  poytakirja can only have one attachment."
+  [application user timestamp verdict-id pk]
+  (if-let [attachments (:liite pk)]
+    (let [;; Attachments without link are ignored
+          attachments (->> [attachments] flatten (filter #(-> % :linkkiliitteeseen ss/blank? false?)))
+          ;; There is only one urlHash property in
+          ;; poytakirja. If there are multiple attachments the
+          ;; hash is verdict-id. This is the same approach as
+          ;; used with manually entered verdicts.
+          pk-urlhash (if (= (count attachments) 1)
+                       (-> attachments first :linkkiliitteeseen pandect/sha1)
+                       verdict-id)]
+      (doall
+       (for [att  attachments
+             :let [{url :linkkiliitteeseen attachment-time :muokkausHetki} att
+                   _ (debug "Download " url)
+                   filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
+                   resp            (try
+                                     (http/get url :as :stream :throw-exceptions false)
+                                     (catch Exception e {:status -1 :body (str e)}))
+                   header-filename  (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
+                                      (ss/replace content-disposition #"attachment;filename=" ""))
+                   content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+                   urlhash         (pandect/sha1 url)
+                   attachment-id      urlhash
+                   attachment-type    {:type-group "muut" :type-id "paatosote"}
+                   target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
+                   ;; Reload application from DB, attachments have changed
+                   ;; if verdict has several attachments.
+                   current-application (domain/get-application-as (:id application) user)]]
+         ;; If the attachment-id, i.e., hash of the URL matches
+         ;; any old attachment, a new version will be added
+         (if (= 200 (:status resp))
+           (attachment/attach-file! {:application current-application
+                                     :filename (or header-filename filename)
+                                     :size content-length
+                                     :content (:body resp)
+                                     :attachment-id attachment-id
+                                     :attachment-type attachment-type
+                                     :target target
+                                     :required false
+                                     :locked true
+                                     :user user
+                                     :created (or attachment-time timestamp)
+                                     :state :ok})
+           (error (str (:status resp) " - unable to download " url ": " resp)))))
+      (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     pk))
 
 (defn- verdict-attachments [application user timestamp verdict]

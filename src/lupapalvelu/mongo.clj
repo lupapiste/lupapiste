@@ -324,6 +324,7 @@
   (if @connection
     (do
       (m/disconnect @connection)
+      (reset! dbs {})
       (reset! connection nil))
     (debug "Not connected")))
 

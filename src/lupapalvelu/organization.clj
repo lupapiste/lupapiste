@@ -29,16 +29,15 @@
 (def authority-roles (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))
 
 (defn- with-scope-defaults [org]
-  (when (seq org)
-    (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))))
+  (if (:scope org)
+    (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))
+    org))
 
 (defn- remove-sensitive-data
   [org]
-  (when (seq org)
-    (->> (:krysp org)
-         (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]))
-         (into {})
-         (assoc org :krysp))))
+  (if (:krysp org)
+    (update org :krysp #(into {} (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]) %)))
+    org))
 
 (defn get-organizations
   ([]
@@ -50,7 +49,7 @@
   ([query projection]
    (->> (mongo/select :organizations query projection)
         (map remove-sensitive-data)
-        (map with-scope-defaults ))))
+        (map with-scope-defaults))))
 
 (defn get-organization [id]
   {:pre [(not (s/blank? id))]}
