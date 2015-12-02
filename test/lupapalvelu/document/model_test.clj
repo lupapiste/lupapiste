@@ -724,3 +724,49 @@
                  :body [{:name "b"
                          :type :group
                          :body schemas/party}]}] [:a :b :henkilo]) => true))
+
+(facts inspect-repeating-for-duplicate-rows
+
+  (fact "do not match non-repeating data"
+    (inspect-repeating-for-duplicate-rows
+     {:porras "A" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"}
+     [:huoneistonumero]) => nil)
+
+  (fact "two equal rows"
+    (inspect-repeating-for-duplicate-rows
+     {:0 {:porras "A" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"}
+      :1 {:porras "A" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"}}
+     [:porras :huoneistonumero :jakokirjain :muutostapa]) => (just #{:0 :1}))
+
+  (fact "two rows not equal"
+    (inspect-repeating-for-duplicate-rows
+     {:0 {:porras "A" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"}
+      :1 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"}}
+     [:porras :huoneistonumero :jakokirjain :muutostapa]) => nil)
+
+  (fact "inspect one field out of four"
+    (inspect-repeating-for-duplicate-rows
+     {:0 {:porras "A" :huoneistonumero "1" :jakokirjain "g" :muutostapa "muutos"}
+      :1 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "lisäys"}}
+     [:huoneistonumero]) => (just #{:0 :1}))
+
+  (fact "two equal pairs"
+    (inspect-repeating-for-duplicate-rows
+     {:0 {:porras "A" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"}
+      :1 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"}
+      :2 {:porras "A" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"}
+      :3 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"}}
+     [:porras :huoneistonumero :jakokirjain :muutostapa]) => (just #{:0 :1 :2 :3}))
+
+  (fact "all together"
+    (inspect-repeating-for-duplicate-rows
+     {:0 {:porras "A" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"} ; equal with :3, :8
+      :1 {:porras "A" :huoneistonumero "2" :jakokirjain "f" :muutostapa "muutos"}
+      :2 {:porras "A" :huoneistonumero "3" :jakokirjain "f" :muutostapa "muutos"}
+      :3 {:porras "A" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"} ; equal with :1, :8
+      :4 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"} ; equal with :6
+      :5 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "lisäys"}
+      :6 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"} ; equal with :4
+      :7 {:porras "B" :huoneistonumero "1" :jakokirjain "g" :muutostapa "muutos"}
+      :8 {:porras "A" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"}} ; equal with :1, :3
+     [:porras :huoneistonumero :jakokirjain :muutostapa]) => (just #{:0 :3 :4 :6 :8})))
