@@ -21,13 +21,13 @@ LUPAPISTE.StatementsTabModel = function(params) {
     return self.data().concat(self.manualData());
   });
 
-   var addManualData = function() {
-     var someManualDataDisabled = _.some(self.manualData(), function(d) { return d.isDisabled(); });
-     if (!someManualDataDisabled) {
-       self.manualData.push(new dataTemplate());
-       return self;
-     }
-   };
+  var addManualData = function() {
+    var someManualDataDisabled = _.some(self.manualData(), function(d) { return d.isDisabled(); });
+    if (!someManualDataDisabled) {
+      self.manualData.push(new dataTemplate());
+      return self;
+    }
+  };
 
   var dataTemplate = function() {
     var self = this;
@@ -46,6 +46,7 @@ LUPAPISTE.StatementsTabModel = function(params) {
     });
     return self;
   };
+
   self.toggleInviteSection = function() {
     self.submitting(false);
     self.saateText("");
