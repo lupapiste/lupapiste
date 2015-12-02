@@ -150,7 +150,7 @@
   (let [address-source (if otherReceiver data (get-in (vetuma/vetuma-session) [:user]))
         delivery-address (select-keys address-source delivery-address-fields)
         contact-info (merge delivery-address {:email          email
-                                              :emailPreferred (= emailPreferred "on")})
+                                              :emailPreferred emailPreferred})
         comment (bulletins/create-comment bulletin-id bulletin-version-id comment contact-info files created)]
     (mongo/insert :application-bulletin-comments comment)
     (bulletins/update-file-metadata bulletin-id (:id comment) files)
