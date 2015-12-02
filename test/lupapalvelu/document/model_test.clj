@@ -747,7 +747,7 @@
   (fact "inspect one field out of four"
     (inspect-repeating-for-duplicate-rows
      {:0 {:porras "A" :huoneistonumero "1" :jakokirjain "g" :muutostapa "muutos"}
-      :1 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "lisäys"}}
+      :1 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "lisays"}}
      [:huoneistonumero]) => (just #{:0 :1}))
 
   (fact "two equal pairs"
@@ -765,7 +765,7 @@
       :2 {:porras "A" :huoneistonumero "3" :jakokirjain "f" :muutostapa "muutos"}
       :3 {:porras "A" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"} ; equal with :1, :8
       :4 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"} ; equal with :6
-      :5 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "lisäys"}
+      :5 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "lisays"}
       :6 {:porras "B" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"} ; equal with :4
       :7 {:porras "B" :huoneistonumero "1" :jakokirjain "g" :muutostapa "muutos"}
       :8 {:porras "A" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"}} ; equal with :1, :3
