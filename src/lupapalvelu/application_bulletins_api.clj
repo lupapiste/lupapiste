@@ -273,7 +273,7 @@
 
 (defn- bulletin-can-be-saved
   ([state {{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId} :data}]
-   (let [bulletin (get-bulletin bulletin-id)]
+   (let [bulletin (bulletins/get-bulletin bulletin-id)]
      (prn "state" state)
      (if-not bulletin
        (fail :error.invalid-bulletin-id)
