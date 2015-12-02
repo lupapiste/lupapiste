@@ -26,6 +26,9 @@
    :versions.primaryOperation 1 :versions.propertyId 1
    :versions.applicant 1 :versions.modified 1
    :versions.proclamationEndsAt 1 :versions.proclamationStartsAt 1
+   :versions.proclamationText 1
+   :versions.verdictGivenAt 1 :versions.appealPeriodStartsAt 1
+   :versions.appealPeriodEndsAt 1 :versions.verdictGivenText 1
    :modified 1})
 
 (def bulletin-fields
@@ -86,3 +89,13 @@
     (when-let [bulletin (get-bulletin (:application attachment-file))]
       (when (seq bulletin) attachment-file))))
 
+(defn get-bulletin-comment-attachment-file-as
+  "Returns the attachment file if user has access to application, otherwise nil."
+  [user file-id]
+  (when-let [attachment-file (mongo/download file-id)]
+    (when-let [application (lupapalvelu.domain/get-application-as (get-in attachment-file [:metadata :bulletinId]) user :include-canceled-apps? true)]
+      (when (seq application) attachment-file))))
+
+(defn update-file-metadata [bulletin-id comment-id files]
+  (mongo/update-by-query :fs.files {:_id {$in (map :id files)}} {$set {:metadata.bulletinId bulletin-id
+                                                                       :metadata.commentId  comment-id}}))

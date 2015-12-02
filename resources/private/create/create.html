@@ -8,7 +8,7 @@
     <h1 data-bind="ltext: 'newRequest.topic'"></h1>
     <div class="create-application-search-box">
       <p data-bind="ltext: 'newRequest.locationInfo'"></p>
-      <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}"
+      <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}, css: {'ui-autocomplete-loading':searching}"
              id="create-search" type="text" class="form-input text address-search" autofocus="autofocus" />
       <button data-bind="click: searchNow" class="positive" data-test-id="create-search-button">
           <i class="lupicon-search"></i>
@@ -81,7 +81,7 @@
     <div class="tree-last">
 
       <div data-bind="text: loc('operations.selected') + ' ' + loc(['operations', operation()])"></div>
-      <div data-bind="html: loc(['operations', operation(), 'desc'])"></div>
+      <div class="operation-description" data-bind="html: loc(['operations', operation(), 'desc'])"></div>
 
       <div class="organization-links" data-bind="visible: organizationLinks() && organizationLinks().length">
         <div data-bind="ltext: 'organization.links'"></div>

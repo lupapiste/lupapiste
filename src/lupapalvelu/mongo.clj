@@ -3,6 +3,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf]]
             [clojure.walk :as walk]
             [clojure.string :as s]
+            [clojure.java.io :as io]
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
@@ -228,16 +229,21 @@
 (defn upload [file-id filename content-type content & metadata]
   {:pre [(string? file-id) (string? filename) (string? content-type)
          (or (instance? java.io.File content) (instance? java.io.InputStream content))
-         (sequential? metadata)
+         (or (nil? metadata) (sequential? metadata))
          (or (even? (clojure.core/count metadata)) (map? (first metadata)))]}
   (let [meta (remove-null-chars (if (map? (first metadata))
                                   (first metadata)
-                                  (apply hash-map metadata)))]
-    (gfs/store-file (gfs/make-input-file (get-gfs) content)
-      (set-file-id file-id)
-      (gfs/filename filename)
-      (gfs/content-type content-type)
-      (gfs/metadata (assoc meta :uploaded (System/currentTimeMillis))))))
+                                  (apply hash-map metadata)))
+        store-content (fn [input-stream]
+                        (gfs/store-file (gfs/make-input-file (get-gfs) input-stream)
+                                        (set-file-id file-id)
+                                        (gfs/filename filename)
+                                        (gfs/content-type content-type)
+                                        (gfs/metadata (assoc meta :uploaded (System/currentTimeMillis)))))]
+    (if (instance? java.io.InputStream content)
+      (store-content content) ; Closing the stream should be handled by the caller
+      (with-open [input-stream (io/input-stream content)]
+        (store-content input-stream)))))
 
 (defn download-find [query]
   (when-let [attachment (gfs/find-one (get-gfs) (with-_id (remove-null-chars query)))]
