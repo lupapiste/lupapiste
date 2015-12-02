@@ -290,7 +290,7 @@
                  :headers {"accept-encoding" "gzip, deflate"}}]
     (wfs/raster-images request "plandocument") => http200?))
 
-(facts "get-address-from-turku"
+(facts "Get address from Turku"
   (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"})
   (fact "get-addresses-proxy"
     (let [response (get-addresses-proxy {:params {:query "Linnankatu 80, turku" :lang "fi"}})
