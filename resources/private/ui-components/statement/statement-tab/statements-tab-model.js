@@ -7,14 +7,14 @@ LUPAPISTE.StatementsTabModel = function(params) {
 
   self.data = ko.observableArray([]);
   self.manualData = ko.observableArray([]);
-  self.selectedPersons = ko.observableArray([]);
+  self.selectedPerson = ko.observable();
   self.submitting = ko.observable();
   self.showInviteSection = ko.observable();
   self.saateText = ko.observable();
   self.maaraaika = ko.observable();
 
   self.disabled = ko.pureComputed(function() {
-    return _.isEmpty(self.selectedPersons()) || self.submitting() || _.isEmpty(self.saateText()) || !self.maaraaika();
+    return !self.selectedPerson() || self.submitting() || _.isEmpty(self.saateText()) || !self.maaraaika();
   });
 
   self.combinedData = ko.computed(function() {
@@ -48,26 +48,27 @@ LUPAPISTE.StatementsTabModel = function(params) {
   self.toggleInviteSection = function() {
     self.submitting(false);
     self.saateText("");
+    self.selectedPerson(undefined);
     self.maaraaika(undefined);
     self.manualData([new dataTemplate()]);
     self.showInviteSection( !self.showInviteSection() );
   };
 
   self.send = function() {
-    var selPersons = _(ko.mapping.toJS(self.selectedPersons()))
-                       .map(function(p) { return _.pick(p, ["id", "email", "name", "text"]); })
-                       .value();
+    var selPerson = _(ko.mapping.toJS(self.selectedPerson()))
+                      .pick(["id", "email", "name", "text"])
+                      .value();
     var params = {
         functionCode: (self.application.tosFunction() || null),
         id: self.application.id(),
-        selectedPersons: selPersons,
+        selectedPersons: [selPerson],
         saateText: self.saateText(),
         dueDate: new Date(self.maaraaika()).getTime()
         };
     ajax.command("request-for-statement", params)
       .success(function() {
         hub.send("indicator", {style: "positive", message: "application-statement-giver-invite.success"});
-        self.selectedPersons([]);
+        self.selectedPerson(undefined);
         self.maaraaika(undefined);
         repository.load(self.application.id());
       })
