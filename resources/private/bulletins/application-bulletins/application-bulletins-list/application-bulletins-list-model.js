@@ -27,7 +27,7 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
         type: "operations." + bulletin.primaryOperation.name,
         applicant: bulletin.applicant,
         date: bulletin.modified,
-        feedbackPeriod: "TODO"
+        proclamationEndsAt: bulletin.proclamationEndsAt
       };
     });
   });

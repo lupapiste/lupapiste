@@ -26,10 +26,31 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
                                                                        asc: self.asc()});
   }, 50);
 
+  self.description = function(comment) {
+    var contactInfo = comment['contact-info'];
+    var name = _.filter([contactInfo.lastName, contactInfo.firstName]).join(" ");
+    var city = _.filter([contactInfo.zip, contactInfo.city]).join(" ");
+    var email = contactInfo.email;
+    var emailPreferred = contactInfo.emailPreferred ? loc("bulletin.emailPreferred") : undefined;
+    return _.filter([name, contactInfo.street, city, email, emailPreferred]).join(", ");
+  }
+
   ko.computed(function() {
     self.asc();
     self.fetchComments();
   })
+
+  self.selectedComment = ko.observable();
+
+  self.selectComment = function(comment) {
+    if (comment._id) {
+      if (self.selectedComment() === comment._id) {
+        self.selectedComment(undefined);
+      } else {
+        self.selectedComment(comment._id);
+      }
+    }
+  }
 
   self.hideComments = function() {
     self.showVersionComments(undefined);
