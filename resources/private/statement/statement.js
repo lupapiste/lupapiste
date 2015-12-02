@@ -164,8 +164,7 @@
         attachmentType: "muut.muu",
         typeSelector: false,
         target: {type: "statement", id: statementId},
-        locked: true,
-        authority: lupapisteApp.models.currentUser.isAuthority()
+        locked: true
       });
       LUPAPISTE.ModalDialog.open("#upload-dialog");
     };
