@@ -113,6 +113,11 @@
     self.disabled = ko.computed(function() {
       return !self.selectedStatus() || !self.text() || self.submitting() || !self.dirty();
     });
+
+    self.canDeleteStatement = function() {
+      return authorizationModel.ok("delete-statement") && authorizationModel.ok("can-operate-on-statement");
+    };
+
   }
 
   function deleteStatementFromServer() {
@@ -139,11 +144,13 @@
     };
 
     self.canDeleteAttachment = function(attachment) {
-      return authorizationModel.ok("delete-attachment") && (!attachment.authority || lupapisteApp.models.currentUser.isAuthority());
+      return authorizationModel.ok("delete-attachment") &&
+             authorizationModel.ok("can-operate-on-statement") &&
+             (!attachment.requestedByAuthority || lupapisteApp.models.currentUser.isAuthority());
     };
 
     self.canAddAttachment = function() {
-      return authorizationModel.ok("upload-attachment") && lupapisteApp.models.currentUser.isAuthority();
+      return authorizationModel.ok("upload-attachment") && authorizationModel.ok("can-operate-on-statement");
     };
 
     self.deleteAttachment = function(attachmentId) {
