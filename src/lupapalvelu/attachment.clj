@@ -416,7 +416,7 @@
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
 (defn get-attachment-file-as
-  "Returns the attachment file if user has access to application, otherwise nil."
+  "Returns the attachment file if user has access to application and the attachment, otherwise nil."
   [user file-id]
   (when-let [attachment-file (mongo/download file-id)]
     (when-let [application (get-application-as (:application attachment-file) user :include-canceled-apps? true)]

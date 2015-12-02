@@ -2,8 +2,9 @@
   (:require [lupapalvelu.attachment-metadata :as metadata]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.user :as user]
-            [sade.util :as util]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.util :as util]))
 
 
 (defn visibility-check [user app-auth {:keys [metadata auth] :as attachment}]
@@ -44,7 +45,9 @@
 
 (defn filter-attachments-for [user auths attachments]
   {:pre [(map? user) (sequential? attachments)]}
-  (filter (partial can-access-attachment? user auths) attachments))
+  (if (env/feature? :attachment-visibility)
+    (filter (partial can-access-attachment? user auths) attachments)
+    attachments))
 
 (defn has-attachment-auth [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
   (when (and attachment-id (not (user/authority? user)))
