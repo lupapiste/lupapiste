@@ -173,7 +173,10 @@
                            data-bind="checked: isVerdictAttachment, enable: $root.authorization.ok('set-attachments-as-verdict-attachment')"/>
                   </div>
                   <!-- ko if: features.enabled('attachment-visibility') -->
-                  <div class="col2 attachment-info-field" data-bind="css: {'feature': features.enabled('attachment-visibility')}">
+                  <div class="clear" data-bind="css: {'feature': features.enabled('attachment-visibility')}">
+                    <h3 class="left" data-bind="ltext: 'attachment.visibility'"></h3>
+                    <span data-bind="component: {name: 'help-toggle',
+                                                 params: {lhtml: 'help.attachment.visibility'}}"></span>
                     <select data-test-id="attachment-visibility" class="form-input"
                             data-bind="options: attachmentVisibilities,
                                        optionsText: function(i) { return loc('attachment.visibility.' + i)},

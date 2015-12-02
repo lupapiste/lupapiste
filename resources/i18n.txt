@@ -2,6 +2,8 @@ error.invalid-nakyvyys-value:  Tuntematon liitteen näkyvyys-arvo
 attachment.visibility.julkinen:  Julkinen
 attachment.visibility.asiakas-ja-viranomainen:  Hankkeen osapuolet ja viranomaiset
 attachment.visibility.viranomainen:  Liitteen lataaja ja viranomaiset
-error.attachment.no-auth: Ei oikeutta liitteeseen
+error.attachment.no-auth: Ei oikeutta muuttaa liittettä
 error.unknown-attachment: Tuntematon liite
 error.attachment.no-versions: Liitteellä ei ole versioita
+attachment.visibility: Liitteen näkyvyys
+help.attachment.visibility: <p>Liitteen näkyvyysvalinta rajaa kuka liitteen voi nähdä ja ladata.</p><p>Arvot ja niiden selitykset:</p><ul><li>Julkinen<ul><li>Näkyy kaikille hankkeen osapuolille ja viranomaisille</li><li>Näkyvissä julkipano.fi palvelussa, jos hakemus/ilmoitus julkipannaan</li></ul></li><li>Hankkeen osapuolet ja viranomaiset<ul><li>Näkyy kaikille hankkeen osapuolille ja viranomaisille</li></ul></li><li>Liitteen lataaja ja viranomaiset<ul><li>Näkyy ainoastaan liitteeseen versioita ladanneille ja viranomaisille</li></ul></li></ul>
