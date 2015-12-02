@@ -17,22 +17,13 @@
 (def post-given-states #{:given :responded})
 (def pre-given-states (clojure.set/difference statement-states post-given-states))
 
-(defn make-details [now persons metadata]
-  (map #(let [user (or (user/get-user-by-email (:email %)) (fail! :error.not-found))
-              statement-id (mongo/create-id)
-              statement-giver (assoc % :userId (:id user))]
-         (cond-> {:statement {:id statement-id
-                              :person statement-giver
-                              :requested now
-                              :given nil
-                              :reminder-sent nil
-                              :metadata metadata
-                              :status nil
-                              :state :requested}
-                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
-                  :recipient user}
-                 (seq metadata) (assoc :metadata metadata)))
-       persons))
+
+(defn create-statement [now metadata person]
+  (cond-> {:id        (mongo/create-id)
+           :person    person
+           :requested now
+           :state    :requested}
+    (seq metadata) (assoc :metadata metadata)))
 
 (defn get-statement [{:keys [statements]} id]
   (first (filter #(= id (:id %)) statements)))

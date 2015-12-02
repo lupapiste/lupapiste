@@ -116,15 +116,17 @@
   (organization/with-organization organization
                                   (fn [{:keys [statementGivers]}]
                                     (let [personIdSet (set personIds)
-                                          persons (filter #(personIdSet (:id %)) statementGivers)
-                                          metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
-                                          details (make-details now persons metadata)
-                                          statements (map :statement details)
-                                          auth (map :auth details)
-                                          recipients (map :recipient details)]
+                                          persons     (filter (comp personIdSet :id) statementGivers)
+                                          users       (map (comp user/get-user-by-email :email) persons)
+                                          metadata    (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
+                                          statements  (->> (map #(assoc %1 :userId (:id %2)) persons users)
+                                                           (map (partial create-statement now metadata)))
+                                          auth        (map #(user/user-in-role %1 :statementGiver :statementId (:id %2)) users statements)]
+                                      (when (some nil? users)
+                                        (fail! :error.not-found))
                                       (update-application command {$push {:statements {$each statements}
-                                                                          :auth {$each auth}}})
-                                      (notifications/notify! :request-statement (assoc command :recipients recipients))))))
+                                                                          :auth       {$each auth}}})
+                                      (notifications/notify! :request-statement (assoc command :recipients users))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]
