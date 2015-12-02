@@ -30,7 +30,8 @@
   poytakirja can only have one attachment."
   [application user timestamp verdict-id pk]
   (if-let [attachments (:liite pk)]
-    (let [attachments (flatten [attachments])
+    (let [;; Attachments without link are ignored
+          attachments (->> [attachments] flatten (filter #(-> % :linkkiliitteeseen ss/blank? false?)))
           ;; There is only one urlHash property in
           ;; poytakirja. If there are multiple attachments the
           ;; hash is verdict-id. This is the same approach as
