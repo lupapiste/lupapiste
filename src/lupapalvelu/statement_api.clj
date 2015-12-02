@@ -123,7 +123,7 @@
                                                            (map (partial create-statement now metadata)))
                                           auth        (map #(user/user-in-role %1 :statementGiver :statementId (:id %2)) users statements)]
                                       (when (some nil? users)
-                                        (fail! :error.not-found))
+                                        (fail! :error.user-not-found))
                                       (update-application command {$push {:statements {$each statements}
                                                                           :auth       {$each auth}}})
                                       (notifications/notify! :request-statement (assoc command :recipients users))))))
