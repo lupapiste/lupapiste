@@ -103,6 +103,16 @@
    :user-authz-roles #{:statementGiver}}
   [_])
 
+(defquery can-operate-on-statement
+  {:description "Pseudo query for UI authorization logic"
+   :parameters [:id]
+   :states (states/all-application-states-but [:draft])
+   :user-roles #{:authority :applicant}
+   :user-authz-roles #{:statementGiver}
+   :pre-checks [statement-exists
+                authority-or-statement-owner-applicant]}
+  [_])
+
 (notifications/defemail :request-statement
   {:recipients-fn  :recipients
    :subject-key    "statement-request"
@@ -111,17 +121,11 @@
 (defn- make-details [inviter now persons metadata saateText dueDate]
   (map
     (fn [person]
-;      (println "\n make-details, person: " person "\n")
       (let [user (if-not (ss/blank? (:id person)) ;; "manually invited" statement givers lack the "id"
                    (or (user/get-user-by-email (:email person)) (fail! :error.user-not-found))
                    (user/get-or-create-user-by-email (:email person) inviter))
             statement-id (mongo/create-id)
             statement-giver (assoc person :userId (:id user))]
-
-        (println "\n make-details, fetched user: ")
-        (>pprint user)
-        (println "\n")
-
         (cond-> {:statement {:id            statement-id
                              :person        statement-giver
                              :requested     now
@@ -137,7 +141,6 @@
     persons))
 
 (defn validate-selected-persons [{{selectedPersons :selectedPersons} :data}]
-;  (println "\n validate-selected-persons, selectedPersons: " selectedPersons "\n")
   (let [non-blank-string-keys (when (some
                                       #(some (fn [k] (or (-> % k string? not) (-> % k ss/blank?))) [:email :name :text])
                                       selectedPersons)
@@ -160,17 +163,10 @@
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
   (let [personIdSet (->> selectedPersons (map :id) (filter identity) set)
         manualPersons (filter #(not (:id %)) selectedPersons)]
-;    (println "\n personIdSet: " personIdSet "\n")
-;    (println "\n manualPersons: " manualPersons "\n")
     (organization/with-organization organization
                                     (fn [{:keys [statementGivers]}]
                                       (let [persons (filter #(personIdSet (:id %)) statementGivers)
                                             persons-combined (concat persons manualPersons)
-                                            _ (do
-                                                (println "\n persons-combined: ")
-                                                (>pprint persons-combined)
-                                                (println "\n")
-                                                )
                                             metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
                                             details (make-details user now persons-combined metadata saateText dueDate)
                                             statements (map :statement details)
