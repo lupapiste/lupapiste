@@ -106,22 +106,6 @@
    :subject-key    "statement-request"
    :show-municipality-in-subject true})
 
-(defn make-details [now persons metadata]
-  (map #(let [user (or (user/get-user-by-email (:email %)) (fail! :error.not-found))
-              statement-id (mongo/create-id)
-              statement-giver (assoc % :userId (:id user))]
-         (cond-> {:statement {:id statement-id
-                              :person statement-giver
-                              :requested now
-                              :given nil
-                              :reminder-sent nil
-                              :metadata metadata
-                              :status nil}
-                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
-                  :recipient user}
-                 (seq metadata) (assoc :metadata metadata)))
-       persons))
-
 (defcommand request-for-statement
   {:parameters [functionCode id personIds]
    :user-roles #{:authority}
@@ -160,21 +144,20 @@
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
    :description "authrority-roled statement owners can give statements - notifies via comment."}
   [{:keys [application user created lang] :as command}]
-  (when-not ((set (possible-statement-statuses application)) status)
+  (when-not ((possible-statement-statuses application) status)
     (fail! :error.unknown-statement-status))
   (let [comment-text   (if (statement-given? application statementId)
                          (i18n/loc "statement.updated")
                          (i18n/loc "statement.given"))
         comment-target {:type :statement :id statementId}
-        comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created)]
-
-    (let [response (update-application command
-                                       {:statements {$elemMatch {:id statementId}}}
-                                       (util/deep-merge
-                                         comment-model
-                                         {$set {:statements.$.status status
-                                                :statements.$.given created
-                                                :statements.$.text text}}))
-          updated-app (assoc application :statements (map  #(if (= statementId (:id %)) (assoc % :status status :given created :text text) % ) (:statements application) ) )]
-                       (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
-                       response)))
+        comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created)
+        statement   (-> (util/find-by-id statementId (:statements application))
+                        (give-statement text status))
+        response (update-application command
+                                     {:statements {$elemMatch {:id statementId}}}
+                                     (util/deep-merge
+                                      comment-model
+                                      {$set {:statements.$ statement}}))
+        updated-app (assoc application :statements (util/update-by-id statement (:statements application)))]
+    (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
+    response))
