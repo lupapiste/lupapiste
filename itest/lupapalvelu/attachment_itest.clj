@@ -203,6 +203,10 @@
         (fact "Pena signs the attachment version"
           (command pena :sign-attachments :id application-id :attachmentIds [(:id versioned-attachment)] :password "pena") => ok?)
         (let [signed-attachment (get-attachment-by-id pena application-id (:id versioned-attachment))]
+
+          (fact "Pena has only one auth entry, although has many versions uploaded"
+            (count (filter #(= (-> % :user :id) (id-for-key pena)) (:versions signed-attachment))) => 2
+            (count (filter #(= (:id %) (id-for-key pena)) (:auth signed-attachment))) => 1)
           
           (fact "Attachment is signed"
             (count (:signatures signed-attachment)) => 1)
