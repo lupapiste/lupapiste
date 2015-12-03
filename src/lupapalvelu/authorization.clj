@@ -66,7 +66,14 @@
   (let [roles-in-app  (map (comp keyword :role) (get-auths application (:id user)))]
     (some roles roles-in-app)))
 
-(defn organization-authz? [org-authz-roles {organization :organization} user]
-  (let [user-org-authz (get-in user [:orgAuthz (keyword organization)])]
-    (and (user/authority? user) org-authz-roles (some org-authz-roles user-org-authz))))
+(defn org-authz
+  "Returns user's org authz in given organization"
+  [organization user]
+  (get-in user [:orgAuthz (keyword organization)]))
+
+(defn has-organization-authz-roles?
+  "Returns true if user has requested roles in organization"
+  [requested-authz-roles {organization :organization} user]
+  (let [user-org-authz (org-authz organization user)]
+    (and (user/authority? user) requested-authz-roles (some requested-authz-roles user-org-authz))))
 

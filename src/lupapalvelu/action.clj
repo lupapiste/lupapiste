@@ -277,7 +277,7 @@
 
 (defn- organization-authz? [command-meta-data application user]
   (let [required-authz (get command-meta-data :org-authz-roles #{})]
-    (auth/organization-authz? required-authz application user)))
+    (auth/has-organization-authz-roles? required-authz application user)))
 
 (defn- company-authz? [command-meta-data application user]
   (auth/has-auth? application (get-in user [:company :id])))
