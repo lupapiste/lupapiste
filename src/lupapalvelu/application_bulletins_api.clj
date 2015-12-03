@@ -168,15 +168,6 @@
         search-updates (get-search-fields search-fields app-snapshot)]
     (bulletins/snapshot-updates app-snapshot search-updates created)))
 
-(defcommand publish-bulletin
-  {:parameters [id]
-   :feature :publish-bulletin
-   :user-roles #{:authority}
-   :states     (states/all-application-states-but :draft :open :submitted)}
-  [{:keys [application created] :as command}]
-  (mongo/update-by-id :application-bulletins id (create-bulletin application created) :upsert true)
-  (ok))
-
 (defcommand move-to-proclaimed
   {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
    :feature :publish-bulletin
