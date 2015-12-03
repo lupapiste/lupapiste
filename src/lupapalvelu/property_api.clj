@@ -2,10 +2,8 @@
   (:require [sade.core :refer :all]
             [sade.property :as p]
             [sade.validators :as v]
-            [monger.operators :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [defquery] :as action]
-            [lupapalvelu.wfs :as wfs]))
+            [lupapalvelu.property-location :as plocation]))
 
 (defquery municipality-by-property-id
   {:parameters [propertyId]
@@ -17,7 +15,7 @@
 
 (defn- get-areas! [property-ids]
   (let [; NLS WFS service does not support or-query, need to fetch areas one by one (in parallel)
-        features (pmap (comp (partial map wfs/feature-to-area) wfs/location-info-by-property-id) property-ids)]
+        features (pmap plocation/property-location-info property-ids)]
     (->> features flatten (remove nil?))))
 
 (defquery property-borders

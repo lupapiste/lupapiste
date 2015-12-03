@@ -8,6 +8,7 @@
             [sade.util :as util]
             [sade.xml :as sxml]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.property-location :as plocation]
             [lupapalvelu.wfs :as wfs]))
 
 ;; Should be in util or sumthin...
@@ -38,10 +39,10 @@
 ;;;
 
 (defn search-property-id [lang property-id]
-  (map (fn [f] {:location (select-keys (wfs/feature-to-location f) [:x :y])
-                :property-id (:kiinttunnus (wfs/feature-to-property-id f))
+  (map (fn [f] {:location (select-keys f [:x :y])
+                :property-id (:kiinttunnus f)
                 :kind :property-id})
-       (wfs/location-info-by-property-id property-id)))
+       (plocation/property-location-info property-id)))
 
 (def max-entries 25)
 
