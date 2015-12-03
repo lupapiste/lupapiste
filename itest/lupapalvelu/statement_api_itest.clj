@@ -17,6 +17,9 @@
           (= "statementGiver" (:role %))
           (= username (:username %))) auth))
 
+(defn- get-statement-by-user-id [{statements :statements} user-id]
+      (some #(when (= user-id (get-in % [:person :userId])) %) statements))
+
 (defn- create-statement-giver [giver-email]
     (let [resp-create-statement-giver (command sipoo :create-statement-giver :email giver-email :text "<b>bold</b>") ;=> ok?
           giver-id (:id resp-create-statement-giver) ;=> truthy
@@ -32,6 +35,7 @@
         statement-giver => truthy
         )
       statement-giver))
+
 
 (facts* "statements"
 
@@ -173,13 +177,11 @@
             application (query-application ronja application-id)]
         (auth-contains-statement-giver application "ronja") => truthy
 
-        (fact "but not after statement has been deleted"
-          (let [statement-id (some #(when (= ronja-id (get-in % [:person :userId])) (:id %)) (:statements application)) => truthy
+        (fact "...but not after statement has been deleted"
+          (let [statement-id (:id (get-statement-by-user-id application ronja-id)) => truthy
                 resp (command sonja :delete-statement :id application-id :statementId statement-id) => ok?
                 application (query-application sonja application-id)]
-
-            (some #(= ronja-id (get-in % [:person :userId])) (:statements application)) => falsey
-
+            (get-statement-by-user-id application ronja-id) => falsey
             (auth-contains-statement-giver application "ronja") => falsey)))))
 
   (let [new-email "kirjaamo@museovirasto.example.com"]
