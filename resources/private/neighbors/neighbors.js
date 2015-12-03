@@ -32,17 +32,22 @@
     }
 
     self.init = function(application) {
-      if (!self.map) {
-        self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
-      }
       var location = application.location,
           x = location.x,
           y = location.y;
+
+      if (!self.map) {
+        self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
+        self.map.updateSize().center(x, y, 13);
+      } else {
+        self.map.updateSize().center(x, y);
+      }
+
       self
         .applicationId(application.id)
         .neighbors(_.map(application.neighbors, ensureNeighbors))
         .neighborId(null)
-        .map.clear().updateSize().center(x, y, 13).add({x: x, y: y});
+        .map.clear().add({x: x, y: y});
     };
 
     function openEditDialog(params) {
@@ -97,10 +102,6 @@
   hub.onPageLoad("neighbors", function(e) {
     applicationId = e.pagePath[0];
     repository.load(applicationId);
-  });
-
-  hub.onPageUnload("neighbors", function() {
-    model.map = null;
   });
 
   repository.loaded(["neighbors"], function(application) {

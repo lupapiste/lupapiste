@@ -2,11 +2,11 @@
 <html>
 <body>
   <section class="page container" id="neighbors">
-    <div id="neighbors-content" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'neighbors'">
+    <div id="neighbors-content">
 
       <div class="map map-large" id="neighbors-map"></div>
 
-      <table class="application-neighbors">
+      <table class="application-neighbors"  data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'neighbors'">
         <thead>
           <tr>
             <th data-bind="ltext: 'neighbors.propertyId'"></th>
