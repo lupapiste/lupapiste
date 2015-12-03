@@ -53,19 +53,19 @@
   (fact "authorityAdmin can't query get-statement-givers"
     (query sipoo :get-statement-givers) => unauthorized?)
 
+  (fact "One statement giver in Sipoo, Sonja (set in minimal fixture)"
     (let [resp (query sipoo :get-organizations-statement-givers) => ok?
           givers (:data resp)]
-      (fact "One statement giver in Sipoo, Sonja (set in minimal fixture)"
-        (count givers) => 1
-        (-> givers first :email) => (contains sonja-email)))
+      (count givers) => 1
+      (-> givers first :email) => (contains sonja-email)))
 
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         statement-giver-ronja (create-statement-giver ronja-email)
         email (last-email) => truthy]
 
-    (let [resp (query sipoo :get-organizations-statement-givers) => ok?
-          givers (:data resp)]
-      (fact "Two statement givers in Sipoo, Sonja & Ronja"
+    (fact "Two statement givers in Sipoo, Sonja & Ronja"
+      (let [resp (query sipoo :get-organizations-statement-givers) => ok?
+            givers (:data resp)]
         (count givers) => 2
         (-> givers first :email) => sonja-email
         (-> givers second :email) => ronja-email))
@@ -125,8 +125,7 @@
             (fact "Pena really has access to application"
               (query pena :application :id application-id) => ok?)
             (fact "Applicant can not see unsubmitted statements"
-              (query pena :should-see-unsubmitted-statements :id application-id) => ok?)))
-        ))
+              (query pena :should-see-unsubmitted-statements :id application-id) => ok?)))))
 
     (fact "Veikko gives a statement"
 
