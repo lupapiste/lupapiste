@@ -2,7 +2,6 @@ LUPAPISTE.BulletinVerdictsTabModel = function(params) {
   "use strict";
   var self = this;
 
-  console.log("params", params);
   self.verdicts = ko.observable();
 
   var verdicts = _.map(_.cloneDeep(params.verdicts || []), function(verdict) {
