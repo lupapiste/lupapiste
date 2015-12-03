@@ -600,7 +600,6 @@
   (let [updates-fn  (fn [ids k v] (mongo/generate-array-updates :attachments (:attachments application) #((set ids) (:id %)) k v))]
     (when (or (seq selectedAttachmentIds) (seq unSelectedAttachmentIds))
       (update-application command {$set (merge
-                                          (updates-fn (concat selectedAttachmentIds unSelectedAttachmentIds) :modified created)
                                           (when (seq selectedAttachmentIds)
                                             (updates-fn selectedAttachmentIds   :forPrinting true))
                                           (when (seq unSelectedAttachmentIds)
