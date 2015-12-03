@@ -2,20 +2,20 @@
   (:require [taoensso.timbre :refer [debug error errorf]]
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
-            [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.neighbors-api :as neighbors]
-            [lupapalvelu.open-inforequest :as inforequest]
             [monger.operators :refer :all]
             [clojure.string :as s]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.action :refer :all]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.logging :as logging]
-            [lupapalvelu.verdict-api :as verdict-api]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.neighbors-api :as neighbors]
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.open-inforequest :as inforequest]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.user :as user]
+            [lupapalvelu.verdict-api :as verdict-api]
             [lupapalvelu.xml.krysp.reader]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
-            [lupapalvelu.action :refer :all]
             [sade.util :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
@@ -25,7 +25,7 @@
 (defn- older-than [timestamp] {$lt timestamp})
 
 (defn- get-app-owner [application]
-  (let [owner (domain/get-auths-by-role application :owner)]
+  (let [owner (auth/get-auths-by-role application :owner)]
     (user/get-user-by-id (-> owner first :id))))
 
 

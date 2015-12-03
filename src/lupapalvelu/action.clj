@@ -10,6 +10,7 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [sade.validators :as v]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
@@ -50,21 +51,6 @@
       (when-not (v/email-and-domain-valid? email)
         (fail :error.email)))))
 
-
-;; Role helpers
-
-(def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin})
-(def all-user-roles (conj all-authenticated-user-roles :anonymous :rest-api :trusted-etl))
-
-(def default-authz-writer-roles #{:owner :writer :foreman})
-(def default-authz-reader-roles (conj default-authz-writer-roles :reader))
-(def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
-(def all-authz-roles (conj all-authz-writer-roles :reader))
-
-(def default-org-authz-roles #{:authority :approver})
-(def commenter-org-authz-roles (conj default-org-authz-roles :commenter))
-(def reader-org-authz-roles (conj commenter-org-authz-roles :reader))
-(def all-org-authz-roles (conj reader-org-authz-roles :authorityAdmin :tos-editor :tos-publisher :archivist))
 
 ;; Notificator
 
@@ -292,17 +278,15 @@
   (and id user (or application (domain/get-application-as id user :include-canceled-apps? true))))
 
 (defn- user-authz? [command-meta-data application user]
-  (let [allowed-roles (get command-meta-data :user-authz-roles #{})
-        roles-in-app  (map (comp keyword :role) (domain/get-auths application (:id user)))]
-    (some allowed-roles roles-in-app)))
+  (let [allowed-roles (get command-meta-data :user-authz-roles #{})]
+    (auth/user-authz? allowed-roles application user)))
 
-(defn- organization-authz? [command-meta-data {organization :organization} user]
-  (let [required-authz (:org-authz-roles command-meta-data)
-        user-org-authz (get-in user [:orgAuthz (keyword organization)])]
-    (and (user/authority? user) required-authz (some required-authz user-org-authz))))
+(defn- organization-authz? [command-meta-data application user]
+  (let [required-authz (get command-meta-data :org-authz-roles #{})]
+    (auth/has-organization-authz-roles? required-authz application user)))
 
 (defn- company-authz? [command-meta-data application user]
-  (domain/has-auth? application (get-in user [:company :id])))
+  (auth/has-auth? application (get-in user [:company :id])))
 
 (defn- user-is-not-allowed-to-access?
   "Current user must have correct role in application.auth, work in the organization or company that has been invited"
@@ -391,11 +375,6 @@
 ;; Register actions
 ;;
 
-(def default-user-authz {:query default-authz-reader-roles
-                         :export default-authz-reader-roles
-                         :command default-authz-writer-roles
-                         :raw default-authz-writer-roles})
-
 (defn- subset-of [reference-set]
   {:pre [(set? reference-set)]}
   (sc/pred (fn [x] (and (set? x) (every? reference-set x)))))
@@ -403,15 +382,15 @@
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
-   :user-roles (subset-of all-user-roles)
+   :user-roles (subset-of auth/all-user-roles)
    ; Parameters can be keywords or symbols. Symbols will be available in the action body.
    ; If a parameter is missing from request, an error will be raised.
    (sc/optional-key :parameters)  [(sc/either sc/Keyword sc/Symbol)]
    (sc/optional-key :optional-parameters)  [(sc/either sc/Keyword sc/Symbol)]
    ; Set of application context role keywords.
-   (sc/optional-key :user-authz-roles)  (subset-of all-authz-roles)
+   (sc/optional-key :user-authz-roles)  (subset-of auth/all-authz-roles)
    ; Set of application organization context role keywords
-   (sc/optional-key :org-authz-roles) (subset-of all-org-authz-roles)
+   (sc/optional-key :org-authz-roles) (subset-of auth/all-org-authz-roles)
    ; Documentation string.
    (sc/optional-key :description) sc/Str
    ; Documents that the action will be sending (email) notifications.
@@ -467,10 +446,10 @@
       (merge
         {:user-authz-roles (if (= #{:authority} user-roles)
                              #{} ; By default, authority gets authorization fron organization role
-                             (default-user-authz action-type))
+                             (auth/default-user-authz action-type))
          :org-authz-roles (cond
-                            (some user-roles [:authority :oirAuthority]) default-org-authz-roles
-                            (user-roles :anonymous) all-org-authz-roles)}
+                            (some user-roles [:authority :oirAuthority]) auth/default-org-authz-roles
+                            (user-roles :anonymous) auth/all-org-authz-roles)}
         meta-data
         {:type action-type
          :ns ns-str

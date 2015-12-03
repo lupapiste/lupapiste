@@ -1,6 +1,8 @@
 (ns lupapalvelu.attachment-itest
-  (:require [lupapalvelu.attachment :refer :all]
+  (:require [lupapalvelu.factlet :refer [facts*]]
+            [lupapalvelu.attachment :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [sade.util :as util]
             [midje.sweet :refer :all]))
 
 (defn- get-attachment-by-id [apikey application-id attachment-id]
@@ -64,6 +66,12 @@
         (let [application (query-application pena application-id)
               _           (upload-attachment-to-all-placeholders pena application)
               application (query-application pena application-id)]
+
+          (facts "Each attachment has Pena's auth"
+            (let [p-id pena-id]
+              (doseq [{auth :auth} (:attachments application)]
+                (fact "Pena as uploader"
+                  (some #(when (#{p-id} (:id %)) (:role %)) auth) => "uploader"))))
 
           (fact "download all"
             (let [resp (raw pena "download-all-attachments" :id application-id)]
@@ -161,11 +169,14 @@
           (get-in versioned-attachment [:latestVersion :version :major]) => 1
           (get-in versioned-attachment [:latestVersion :version :minor]) => 0)
 
-        (fact "Veikko upload a new version"
+        (fact "Veikko uploads a new version"
           (upload-attachment veikko application-id versioned-attachment true)
           (let [updated-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
             (get-in updated-attachment [:latestVersion :version :major]) => 1
             (get-in updated-attachment [:latestVersion :version :minor]) => 1
+
+           (fact "upload has Veikko's auth"
+             (get-in updated-attachment [:auth 1 :id]) => veikko-id)
 
             (fact "Pena receives email pointing to comment page"
               (let [emails (sent-emails)
@@ -192,6 +203,10 @@
         (fact "Pena signs the attachment version"
           (command pena :sign-attachments :id application-id :attachmentIds [(:id versioned-attachment)] :password "pena") => ok?)
         (let [signed-attachment (get-attachment-by-id pena application-id (:id versioned-attachment))]
+
+          (fact "Pena has only one auth entry, although has many versions uploaded"
+            (count (filter #(= (-> % :user :id) (id-for-key pena)) (:versions signed-attachment))) => 2
+            (count (filter #(= (:id %) (id-for-key pena)) (:auth signed-attachment))) => 1)
           
           (fact "Attachment is signed"
             (count (:signatures signed-attachment)) => 1)
@@ -284,6 +299,10 @@
         (get-in attachment [:latestVersion :stamped]) => true
         comments-after => comments)
 
+       (fact "Attachment has Sonja's stamper auth"
+         (get-in attachment [:auth 1 :id]) => sonja-id
+         (get-in attachment [:auth 1 :role]) => "stamper")
+
       (fact "Attachment state is ok"
         (:state attachment) => "ok")
 
@@ -312,3 +331,116 @@
             (let [attachment-after-restamp (get-attachment-by-id sonja application-id (:id attachment))]
              (:latestVersion attachment) =not=> (:latestVersion attachment-after-restamp)
              (get-in attachment [:latestVersion :stamped]) => true)))))))
+
+(facts* "Attachments visibility"
+  (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
+        {attachments :attachments :as application} (query-application pena application-id)
+        _ (command pena :set-attachment-visibility
+                   :id application-id
+                   :attachmentId (get-in attachments [0 :id])
+                   :value "viranomainen") => (partial expected-failure? :error.attachment.no-versions)
+        _ (upload-attachment-to-all-placeholders pena application)
+        {attachments :attachments :as application} (query-application pena application-id)
+        user-has-auth? (fn [username {auth :auth}]
+                         (= username (:username (first auth))))
+        att1 (first attachments)
+        att2 (second attachments)
+        aid1 (get-in attachments [0 :id])
+        aid2 (get-in attachments [1 :id])]
+
+    (fact "each attachment has Pena's auth"
+      (every? (partial user-has-auth? "pena") attachments) => true)
+
+    (fact "Can't set unknown visibility value"
+      (command pena :set-attachment-visibility :id application-id :attachmentId aid1 :value "testi") => (partial expected-failure? :error.invalid-nakyvyys-value))
+    (fact "Set attachment as public"
+      (command pena :set-attachment-visibility :id application-id :attachmentId aid1 :value "julkinen") => ok?)
+
+       ; authorize mikko
+    (command pena :invite-with-role
+             :id application-id
+             :email "mikko@example.com"
+             :text  ""
+             :documentName ""
+             :documentId ""
+             :path ""
+             :role "writer") => ok?
+    (command mikko :approve-invite :id application-id) => ok?
+    (fact "Mikko sees all uploaded attachments, one of them has visibility 'julkinen'"
+      (let [{attachments :attachments} (query-application mikko application-id)]
+        (count attachments) => 4
+        (count (filter #(contains? (:metadata %) :nakyvyys) attachments)) => 1
+        (util/find-by-id aid1 attachments) => (contains {:metadata {:nakyvyys "julkinen"}})))
+
+    (facts "Mikko uploads personal CV"
+      (upload-attachment mikko application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => true
+      (let [{attachments :attachments} (query-application mikko application-id)
+            mikko-att (last attachments)]
+        (fact "Mikko has auth"
+          (user-has-auth? "mikko@example.com" mikko-att) => true)
+        (fact "Mikko hides attachment from other parties (visibility: 'viranomainen')"
+          (command mikko :set-attachment-visibility :id application-id :attachmentId (:id mikko-att) :value "viranomainen") => ok?)
+        (fact "Mikko can download, but Pena can't"
+          (raw mikko "download-attachment" :attachment-id (:fileId (:latestVersion mikko-att))) => http200?
+          (raw pena "download-attachment" :attachment-id (:fileId (:latestVersion mikko-att))) => http404?
+          (raw nil "download-attachment" :attachment-id (:fileId (:latestVersion mikko-att))) => http401?)
+        (fact "Mikko can access attachment, Pena's app query doesn't contain attachment"
+          (util/find-by-id (:id mikko-att) (:attachments (query-application pena application-id))) => nil
+          (util/find-by-id (:id mikko-att) (:attachments (query-application mikko application-id))) => map?)))
+
+    (facts "Pena sets attachment visiblity to parties ('asiakas-ja-viranomainen')"
+     (command pena :set-attachment-visibility :id application-id :attachmentId aid2 :value "asiakas-ja-viranomainen") => ok?
+     (fact "Parties can download"
+       (raw mikko "download-attachment" :attachment-id (:fileId (:latestVersion att2))) => http200?
+       (raw pena "download-attachment" :attachment-id (:fileId (:latestVersion att2))) => http200?)
+     (fact "Parties have attachment available in query"
+       (util/find-by-id aid2 (:attachments (query-application mikko application-id))) => (contains {:metadata {:nakyvyys "asiakas-ja-viranomainen"}})
+       (util/find-by-id aid2 (:attachments (query-application pena application-id))) => (contains {:metadata {:nakyvyys "asiakas-ja-viranomainen"}})))
+
+    (command pena :submit-application :id application-id) => ok?
+
+    (fact "Veikko uploads only-authority attachment"
+      (upload-attachment veikko application-id {:id "" :type {:type-group "ennakkoluvat_ja_lausunnot"
+                                                              :type-id "elyn_tai_kunnan_poikkeamapaatos"}} true) => true)
+    (let [{attachments :attachments} (query-application veikko application-id)
+          veikko-att (last attachments)]
+      (count attachments) => 6
+      (fact "Veikko sets his attachment authority-only"
+        (command veikko :set-attachment-visibility :id application-id :attachmentId (:id veikko-att) :value "viranomainen") => ok?)
+      (fact "Pena sees 4 attachments"                     ; does not see Mikkos CV or Veikkos attachment
+        (let [attachments (:attachments (query-application pena application-id))]
+          (count attachments) => 4
+          (map :id attachments) =not=> (contains (:id veikko-att))))
+      (fact "Mikko sees 5 attachments"                     ; does not see Veikkos attachment
+        (let [attachments (:attachments (query-application mikko application-id))]
+          (count attachments) => 5
+          (map :id attachments) =not=> (contains (:id veikko-att)))))
+
+    (fact "Veikko uploads attachment for parties"
+      (upload-attachment veikko application-id {:id "" :type {:type-group "ennakkoluvat_ja_lausunnot"
+                                                                  :type-id "naapurien_suostumukset"}} true) => true)
+
+    (let [{attachments :attachments} (query-application veikko application-id)
+          veikko-att-id (:id (last attachments))
+          _ (command veikko :set-attachment-visibility :id application-id :attachmentId veikko-att-id :value "asiakas-ja-viranomainen") => ok?
+          _ (upload-attachment pena application-id {:id veikko-att-id :type {:type-group "ennakkoluvat_ja_lausunnot"
+                                                                             :type-id "naapurien_suostumukset"}} true) => true
+          mikko-app (query-application mikko application-id)
+          latest-attachment (last (:attachments mikko-app))]
+      (fact "Mikko sees Veikko's/Pena's attachment"
+        (:id latest-attachment) => veikko-att-id
+        (-> latest-attachment :latestVersion :user :username) => "pena")
+      (fact "Mikko can't change visibility (not authed to attachment)"
+        (command mikko :set-attachment-visibility
+                 :id application-id
+                 :attachmentId veikko-att-id
+                 :value "julkinen") => (partial expected-failure? :error.attachment.no-auth))
+      (fact "Veikko sets visibility to only authority"
+        (command veikko :set-attachment-visibility :id application-id :attachmentId veikko-att-id :value "viranomainen") => ok?)
+      (fact "Mikko can't see attachment anymore"
+        (map :id (get (query-application mikko application-id) :attachments)) =not=> (contains veikko-att-id))
+      (fact "Pena can see attachment, because he is authed"
+        (map :id (get (query-application pena application-id) :attachments)) => (contains veikko-att-id))
+      (fact "Pena can change visibility, as he is authed"
+        (command pena :set-attachment-visibility :id application-id :attachmentId veikko-att-id :value "julkinen") => ok?)
+      )))
