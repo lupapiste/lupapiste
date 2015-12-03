@@ -11,11 +11,16 @@
 (def mikko-email  (email-for-key mikko))
 (def pena-email  (email-for-key pena))
 
-(defn- auth-contains-statement-giver [{auth :auth} username]
+;; Simulating manually added (applicant) statement giver. Those do not have the key :id.
+(def statement-giver-pena {:name "Pena Panaani"
+                           :email pena-email
+                           :text "<b>bold</b>"})
+
+(defn- auth-contains-statement-giver [{auth :auth} user-id]
   (some #(and
           (:statementId %)
           (= "statementGiver" (:role %))
-          (= username (:username %))) auth))
+          (= user-id (:id %))) auth))
 
 (defn- get-statement-by-user-id [{statements :statements} user-id]
       (some #(when (= user-id (get-in % [:person :userId])) %) statements))
@@ -48,7 +53,7 @@
         (count givers) => 1
         (-> givers first :email) => (contains sonja-email)))
 
-  (let [application-id     (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
+  (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         statement-giver-ronja (create-statement-giver ronja-email)
         email (last-email) => truthy]
 
@@ -95,11 +100,7 @@
             (query veikko :application :id application-id) => ok?))
 
         (fact "applicant type person can be requested for statement"
-          (let [;; Simulating manually added (applicant) statement giver. Those do not have the key :id.
-                statement-giver-pena {:name "Pena Panaani"
-                                      :email pena-email
-                                      :text "<b>bold</b>"}
-                application-before (query-application sonja application-id)
+          (let [application-before (query-application sonja application-id)
                 resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-pena] :saateText "saate" :dueDate 1450994400000) => ok?
                 application-after  (query-application sonja application-id)
                 emails (sent-emails)
@@ -175,14 +176,21 @@
     (fact "Statement person has access to application"
       (let [resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-ronja] :saateText "saate" :dueDate 1450994400000) => ok?
             application (query-application ronja application-id)]
-        (auth-contains-statement-giver application "ronja") => truthy
+        (auth-contains-statement-giver application ronja-id) => truthy
 
         (fact "...but not after statement has been deleted"
           (let [statement-id (:id (get-statement-by-user-id application ronja-id)) => truthy
                 resp (command sonja :delete-statement :id application-id :statementId statement-id) => ok?
                 application (query-application sonja application-id)]
             (get-statement-by-user-id application ronja-id) => falsey
-            (auth-contains-statement-giver application "ronja") => falsey)))))
+            (auth-contains-statement-giver application ronja-id) => falsey))))
+
+    (fact "Applicant statement giver cannot delete his already-given statement"
+      (let [application-before (query-application sonja application-id)
+            statement-id (:id (get-statement-by-user-id application-before pena-id)) => truthy]
+        (command pena :delete-statement :id application-id :statementId statement-id) => (partial expected-failure? "error.statement-already-given")))
+    )
+
 
   (let [new-email "kirjaamo@museovirasto.example.com"]
     (fact "User does not exist before so she can not be added as a statement person"
