@@ -168,8 +168,8 @@
                          (re-find #"^\d+_kantakartta$" layer-name) "kantakartta"
                          :else "other")
         layer-id (case layer-category
-                   "asemakaava" "101"
-                   "kantakartta" "102"
+                   "asemakaava"  101
+                   "kantakartta" 102
                    layer-name)]
     {:wmsName layer-name
      :wmsUrl "/proxy/wms"

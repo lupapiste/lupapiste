@@ -7,6 +7,8 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.attachment-accessibility :as access]
+            [lupapalvelu.attachment-metadata :as metadata]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.states :as states]
             [lupapalvelu.comment :as comment]
@@ -36,6 +38,7 @@
           (.setPriority Thread/NORM_PRIORITY))))))
 
 (defonce preview-threadpool (Executors/newFixedThreadPool 1 (thread-factory)))
+
 
 ;;
 ;; Metadata
@@ -258,6 +261,7 @@
     (if (pos? retry-limit)
       (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
             next-version (next-attachment-version latest-version user)
+            user-role (if stamped :stamper :uploader)
             version-model {:version  next-version
                            :fileId   file-id
                            :created  now
@@ -291,7 +295,8 @@
                                     :attachments.$.modified now
                                     :attachments.$.state  state
                                     :attachments.$.latestVersion version-model}
-                              $push {:attachments.$.versions version-model}})
+                              $push {:attachments.$.versions version-model}
+                              $addToSet {:attachments.$.auth (user/user-in-role user user-role)}})
                            true)]
         ; Check return value and try again with new version number
         (if (pos? result-count)
@@ -314,7 +319,9 @@
               (when set-app-modified? {:modified now})
               (when set-attachment-modified? {:attachments.$.modified now}))})))
 
-(defn update-latest-version-content [user application attachment-id file-id size now]
+(defn update-latest-version-content
+  "Updates latest version when version is stamped"
+  [user application attachment-id file-id size now]
   (let [attachment (get-attachment-info application attachment-id)
         latest-version-index (-> attachment :versions count dec)
         latest-version-path (str "attachments.$.versions." latest-version-index ".")
@@ -409,11 +416,11 @@
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
 (defn get-attachment-file-as
-  "Returns the attachment file if user has access to application, otherwise nil."
+  "Returns the attachment file if user has access to application and the attachment, otherwise nil."
   [user file-id]
   (when-let [attachment-file (mongo/download file-id)]
     (when-let [application (get-application-as (:application attachment-file) user :include-canceled-apps? true)]
-      (when (seq application) attachment-file))))
+      (when (and (seq application) (access/can-access-attachment-file? user file-id application)) attachment-file))))
 
 (defn get-attachment-file
   "Returns the attachment file without access checking, otherwise nil."
@@ -526,3 +533,4 @@
         (proxy-super close)
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
+

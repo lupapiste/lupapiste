@@ -67,7 +67,7 @@
   {:pre [(valid-role role)]}
   (let [email (user/canonize-email email)
         existing-user (user/get-user-by-email email)]
-    (if (or (domain/invite application email) (domain/has-auth? application (:id existing-user)))
+    (if (or (domain/invite application email) (auth/has-auth? application (:id existing-user)))
       (fail :invite.already-has-auth)
       (let [invited (user/get-or-create-user-by-email email inviter)
             auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)
@@ -100,11 +100,11 @@
 (defcommand approve-invite
   {:parameters [id]
    :user-roles #{:applicant}
-   :user-authz-roles action/default-authz-reader-roles
+   :user-authz-roles auth/default-authz-reader-roles
    :states     states/all-application-states}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
-    (let [role (or (:role my-invite) (:role (domain/get-auth application (:id user))))
+    (let [role (or (:role my-invite) (:role (auth/get-auth application (:id user))))
           document-id (:documentId my-invite)]
       (update-application command
         {:auth {$elemMatch {:invite.user.id (:id user)}}}
@@ -143,7 +143,7 @@
 (defcommand decline-invitation
   {:parameters [:id]
    :user-roles #{:applicant :authority}
-   :user-authz-roles action/default-authz-reader-roles
+   :user-authz-roles auth/default-authz-reader-roles
    :states     states/all-application-states}
   [command]
   (do-remove-auth command (get-in command [:user :username])))
