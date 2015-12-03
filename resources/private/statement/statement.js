@@ -30,7 +30,7 @@
     self.submitting = ko.observable(false);
     self.dirty = ko.observable(false);
     self.submitLtext = ko.computed(function() {
-      if(self.data() && self.data().status()) {
+      if(self.data() && self.data().status && self.data().status()) {
         return "statement.submit-again";
       } else {
         return "statement.submit";
@@ -38,11 +38,15 @@
     });
 
     self.text.subscribe(function(value) {
-      if(self.data() && self.data().text && self.data().text() !== value) { self.dirty(true); }
+      if(self.data() && (!self.data().text || self.data().text && self.data().text() !== value)) { 
+        self.dirty(true);
+      }
     });
 
     self.selectedStatus.subscribe(function(value) {
-      if(self.data() && self.data().status && self.data().status() !== value) { self.dirty(true); }
+      if(self.data() && (!self.data().status || self.data().status && self.data().status() !== value)) {
+        self.dirty(true)
+      }
     });
 
     self.clear = function() {
