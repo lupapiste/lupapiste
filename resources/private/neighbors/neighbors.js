@@ -1,20 +1,33 @@
 (function() {
   "use strict";
 
-  var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
+  var applicationDrawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
+  var neighbourDrawStyle = {fillColor: "rgb(243,145,41)", // $lp-orange
+                            fillOpacity: 0.35,
+                            strokeColor: "rgb(239, 118, 38)", // $orange-darkest
+                            pointRadius: 6};
   var applicationId;
 
+  var borderCache = {};
 
   function Model() {
     var self = this;
 
-    self.areasLoading = ko.observable(false);
+    self.getApplicationWKT = null;
+    self.applicationAreaLoading = ko.observable(false);
+
+    self.getNeighbourWKT = null;
+    self.neighborAreasLoading = ko.observable(false);
+
+    self.areasLoading = ko.pureComputed(function() {
+      return self.applicationAreaLoading() || self.neighborAreasLoading();
+    });
 
     self.applicationId = ko.observable();
     self.neighbors = ko.observableArray();
     self.neighborId = ko.observable();
     self.map = null;
-    self.getWKT = null;
+
 
     var neighborSkeleton = {propertyId: undefined,
                             owner: {
@@ -36,6 +49,46 @@
       return n;
     }
 
+    self.draw = function(propertyIds, drawingStyle, processing) {
+      var processedIds = [];
+      var found = [];
+      var missing = [];
+
+      _.each(propertyIds, function(p) {
+        if (!_.contains(processedIds, p)) {
+          if (borderCache[p]) {
+            _.each(borderCache[p], function(wkt) {found.push(wkt);});
+          } else {
+            missing.push(p);
+          }
+          processedIds.push(p);
+        }
+      });
+
+      self.map.drawDrawings(found, {}, drawingStyle);
+
+      if (!_.isEmpty(missing)) {
+        ajax.datatables("property-borders", {propertyIds: missing})
+          .success(function(resp) {
+            var results = [];
+            _.each(resp.wkts, function(w) {
+              if (borderCache[w.kiinttunnus]) {
+                if (!_.contains(borderCache[w.kiinttunnus])) {
+                  borderCache[w.kiinttunnus].push(w.wkt);
+                }
+              } else {
+                borderCache[w.kiinttunnus] = [w.wkt];
+              }
+
+              results.push(w.wkt);
+            });
+            self.map.drawDrawings(results, {}, drawingStyle);
+          })
+          .processing(processing)
+          .call();
+      }
+    };
+
     self.init = function(application) {
       var location = application.location,
           x = location.x,
@@ -44,26 +97,15 @@
 
       if (!self.map) {
         self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
-        self.map.updateSize().center(x, y, 12);
+        self.map.updateSize().center(x, y, 13);
       } else {
-        self.map.updateSize().center(x, y);
+        self.map.updateSize().center(x, y).clear();
       }
 
-      self
-        .applicationId(application.id)
-        .neighbors(neighbors)
-        .neighborId(null)
-        .map.clear().add({x: x, y: y});
+      self.applicationId(application.id).neighbors(neighbors).neighborId(null);
 
-      if (!_.isEmpty(self.neighbors())) {
-        self.getWKT = ajax.datatables("property-borders", {propertyIds: _.pluck(self.neighbors(), "propertyId")})
-          .success(function(resp) {
-            self.map.drawDrawings(resp.wkts, {}, drawStyle);
-console.log(resp);
-          })
-          .processing(self.areasLoading)
-          .call();
-      }
+      self.getApplicationWKT = self.draw([application.propertyId], applicationDrawStyle, self.applicationAreaLoading);
+      self.getNeighbourWKT = self.draw(_.pluck(neighbors, "propertyId"), neighbourDrawStyle, self.neighborAreasLoading);
     };
 
     function openEditDialog(params) {
@@ -121,10 +163,19 @@ console.log(resp);
   });
 
   hub.onPageUnload("neighbors", function() {
-    if (model.getWKT) {
-      model.getWKT.abort();
-      model.getWKT = null;
+    if (model.getApplicationWKT) {
+      model.getApplicationWKT.abort();
+      model.getApplicationWKT = null;
     }
+    if (model.getNeighbourWKT) {
+      model.getNeighbourWKT.abort();
+      model.getNeighbourWKT = null;
+    }
+    if (model.map) {
+      model.map.clear();
+    }
+
+    // Could reset borderCache here to save memory?
   });
 
   repository.loaded(["neighbors"], function(application) {
