@@ -2,6 +2,8 @@
   (:require [sade.core :refer :all]
             [sade.property :as p]
             [sade.validators :as v]
+            [monger.operators :refer :all]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [defquery] :as action]
             [lupapalvelu.wfs :as wfs]))
 
@@ -13,18 +15,18 @@
     (ok :municipality municipality)
     (fail :municipalitysearch.notfound)))
 
+(defn- get-areas! [property-ids]
+  (let [; NLS WFS service does not support or-query, need to fetch areas one by one (in parallel)
+        features (pmap (comp (partial map wfs/feature-to-area) wfs/location-info-by-property-id) property-ids)]
+    (->> features flatten (remove nil?))))
+
 (defquery property-borders
   {:parameters [propertyIds]
    :description "Returns property borders as POLYGON WKT strings"
    :user-roles #{:authority} ; At the time of writing the only use case is the neighbour map
    :input-validators [(partial action/vector-parameter-of :propertyIds v/kiinteistotunnus?)]}
   [_]
-  ;(fail! :error.ktj-down)
-  (let [property-ids (set propertyIds)
-        ; NLS WFS service does not support or-query, need to fetch areas one by one (in parallel)
-        features (pmap (comp (partial map wfs/feature-to-area) wfs/location-info-by-property-id) property-ids)
-        areas (->> features flatten (remove nil?))]
-
+  (let [areas (get-areas! (set propertyIds))]
     (if (seq areas)
       (do
         (println "areas" areas)
