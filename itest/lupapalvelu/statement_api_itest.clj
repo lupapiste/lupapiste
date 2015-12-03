@@ -23,23 +23,23 @@
           (= user-id (:id %))) auth))
 
 (defn- get-statement-by-user-id [{statements :statements} user-id]
-      (some #(when (= user-id (get-in % [:person :userId])) %) statements))
+  (some #(when (= user-id (get-in % [:person :userId])) %) statements))
 
 (defn- create-statement-giver [giver-email]
-    (let [resp-create-statement-giver (command sipoo :create-statement-giver :email giver-email :text "<b>bold</b>") ;=> ok?
-          giver-id (:id resp-create-statement-giver) ;=> truthy
-          resp-get-givers (query sipoo :get-organizations-statement-givers) ;=> ok?
-          givers (:data resp-get-givers) ;=> truthy
-          statement-giver (some #(when (= giver-id (:id %)) %) givers)
-          ]
-      (fact {:midje/description (str "create statement-giver with email " giver-email)}
-        resp-create-statement-giver => ok?
-        giver-id => truthy
-        resp-get-givers => ok?
-        givers => truthy
-        statement-giver => truthy
-        )
-      statement-giver))
+  (let [resp-create-statement-giver (command sipoo :create-statement-giver :email giver-email :text "<b>bold</b>") ;=> ok?
+        giver-id (:id resp-create-statement-giver) ;=> truthy
+        resp-get-givers (query sipoo :get-organizations-statement-givers) ;=> ok?
+        givers (:data resp-get-givers) ;=> truthy
+        statement-giver (some #(when (= giver-id (:id %)) %) givers)
+        ]
+    (fact {:midje/description (str "create statement-giver with email " giver-email)}
+      resp-create-statement-giver => ok?
+      giver-id => truthy
+      resp-get-givers => ok?
+      givers => truthy
+      statement-giver => truthy
+      )
+    statement-giver))
 
 
 (facts* "statements"
