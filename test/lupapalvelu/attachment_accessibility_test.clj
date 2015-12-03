@@ -6,7 +6,8 @@
 (facts "facts about accessing attachment(s)"
   (let [user1 {:id "1" :role "applicant"}
         user2 {:id "2" :role "applicant"}
-        user-authority {:id "2" :role "authority" :orgAuthz {:123 #{:authority}}}
+        user-authority {:id "3" :role "authority" :orgAuthz {:123 #{:authority}}}
+        other-authority {:id "4" :role "authority" :orgAuthz {:321 #{:authority}}}
 
         application-skeleton {:auth [] :organization "123"}
         user1-application (assoc application-skeleton :auth [user1])
@@ -56,15 +57,15 @@
       (can-access-attachment? user-authority application-skeleton att0-empty) => true)
     (fact "if no metadata, attachment is regarded as public"
       (can-access-attachment? user1 application-skeleton att1-no-meta-u1) => true
-      (can-access-attachment? user2 application-skeleton att1-no-meta-u1) => true)
+      (can-access-attachment? user2 application-skeleton att1-no-meta-u1) => true
+      (can-access-attachment? nil application-skeleton att1-no-meta-u1) => true)
 
     (facts "only authority attachment visibility ('viranomainen')"
       (fact "authority can access"
         (can-access-attachment? user-authority application-skeleton att-authority) => true
         (can-access-attachment? user-authority application-skeleton att-authority-auth-u1) => true
-        (fact "... but only if in same org as application"))
-      (fact "authority from different organization can not access" ; TODO
-            )
+        (fact "... but only if in same org as application"
+          (can-access-attachment? other-authority application-skeleton att-authority-auth-u1) => false))
       (fact "normal users can't access unless authed to attachment"
         (can-access-attachment? user1 application-skeleton att-authority) => false
         (fact ".. not even when authed to application"
@@ -83,12 +84,14 @@
     (facts "authed and authority attachment visibility ('asiakas-ja-viranomainen')"
       (fact "can't access if user isn't authed to application"
         (can-access-attachment? user2 user1-application att-parties-auth-u1) => false)
-      (fact "is only available for user authed in application, and authorities"
+      (fact "is only available for users authed in application, and authorities"
         (can-access-attachment? user2 user2-application att-parties-auth-u1) => true
         (can-access-attachment? user2 user1-application att-parties-auth-u1) => false
         (can-access-attachment? user1 user2-application att-parties-auth-u1) => true
         (can-access-attachment? user2 both-users-application att-parties-auth-u1) => true
         (can-access-attachment? user-authority application-skeleton att-parties-auth-u1) => true)
+      (fact "not visible for authorities in other organization"
+        (can-access-attachment? other-authority application-skeleton att-parties-auth-u1) => false)
       (fact "can be seen by parties, even if attachment autehd only to authority"
         (can-access-attachment? user2
                                 both-users-application
@@ -98,4 +101,5 @@
       (can-access-attachment? nil application-skeleton att-public) => true
       (can-access-attachment? user1 user2-application att-public) => true
       (can-access-attachment? user1 both-users-application att-public) => true
-      (can-access-attachment? user-authority application-skeleton att-public) => true)))
+      (can-access-attachment? user-authority application-skeleton att-public) => true
+      (can-access-attachment? other-authority application-skeleton att-public) => true)))

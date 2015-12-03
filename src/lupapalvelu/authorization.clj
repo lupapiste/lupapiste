@@ -67,7 +67,7 @@
     (some roles roles-in-app)))
 
 (defn org-authz
-  "Returns user's org authz in given organization"
+  "Returns user's org authz in given organization, nil if not found"
   [organization user]
   (get-in user [:orgAuthz (keyword organization)]))
 

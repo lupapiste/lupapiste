@@ -7,33 +7,33 @@
             [sade.util :as util]))
 
 
-(defn visibility-check [user app-auth {:keys [metadata auth] :as attachment}]
+(defn visibility-check [user {app-auth :auth org :organization} {:keys [metadata auth] :as attachment}]
   (case (keyword (metadata/get-visibility attachment))
     :asiakas-ja-viranomainen (or
                                (or (auth/has-auth? {:auth auth} (:id user)) ; attachment auth
                                    (auth/has-auth? {:auth app-auth} (:id user))) ; application auth
-                               (user/authority? user))
-    :viranomainen (or (auth/has-auth? {:auth auth} (:id user)) (user/authority? user)) ; attachment auth
+                               (auth/org-authz org user))
+    :viranomainen (or (auth/has-auth? {:auth auth} (:id user)) (auth/org-authz org user)) ; attachment auth
     :julkinen true
     nil true))
 
-(defn publicity-check [user app-auth {:keys [metadata auth] :as attachment}]
+(defn publicity-check [user {app-auth :auth org :organization} {:keys [metadata auth] :as attachment}]
   (case (keyword (metadata/get-publicity-class attachment)) ; TODO check cases
-    :osittain-salassapidettava (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (user/authority? user))
-    :salainen (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (user/authority? user))
+    :osittain-salassapidettava (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (auth/org-authz org user))
+    :salainen (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (auth/org-authz org user))
     :julkinen true
     nil true))
 
 (defn can-access-attachment?
-  "Checks that user has access to attachment from application auth and attachment auth"
-  [{authz :orgAuthz :as user} {app-auth :auth organization :organization} {:keys [latestVersion metadata auth] :as attachment}]
-  {:pre [(map? attachment) (sequential? app-auth) (string? organization)]}
+  "Checks user's access right to attachment from application auth and attachment auth"
+  [{authz :orgAuthz :as user} {app-auth :auth :as application} {:keys [latestVersion metadata auth] :as attachment}]
+  {:pre [(map? attachment) (sequential? app-auth)]}
   (assert (if latestVersion (seq auth) true))
   (boolean
     (or
       (nil? latestVersion)
       (metadata/public-attachment? attachment)
-      (and (seq auth) (publicity-check user app-auth attachment) (visibility-check user app-auth attachment)))))
+      (and (seq auth) (publicity-check user application attachment) (visibility-check user application attachment)))))
 
 (defn can-access-attachment-file? [user file-id {attachments :attachments :as application}]
   (boolean
