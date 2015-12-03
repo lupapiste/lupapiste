@@ -1353,6 +1353,17 @@
      :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
                                {"data.katselmus.tila" {$exists true}}]}}}))
 
+(defn update-statement-state-by-status [{status :status state :state :as statement}]
+  (if state
+    statement
+    (assoc statement :state (if status :given :requested))))
+
+(defmigration statement-state
+  {:apply-when (pos? (mongo/count :applications {:statements {$elemMatch {"state" {$exists false}}}}))}
+  (update-applications-array :statements 
+                             update-statement-state-by-status
+                             {:statements {$elemMatch {"state" {$exists false}}}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
