@@ -90,6 +90,10 @@
               <li data-bind="css: {'active': selectedTab() === 'attachments'}">
                   <a data-bind="click: _.partial(openTab, 'attachments')" href="#" data-test-id="bulletin-open-attachments-tab" class="link-btn-julkipano">
                       <span data-bind="ltext: 'application.tabAttachments'"></span></a></li>
+              <li data-bind="css: {'active': selectedTab() === 'verdicts'}">
+                  <a data-bind="click: _.partial(openTab, 'verdicts')" href="#" data-test-id="bulletin-open-verdicts-tab" class="link-btn-julkipano">
+                      <span data-bind="ltext: 'application.tabVerdict'"></span></a></li>
+
             </ul>
           </div>
 
@@ -103,7 +107,7 @@
             <!-- This is where the generated documents will be placed. -->
         </div>
       </div>
-      
+
       <!-- ko if: canCommentCurrentBulletin -->
         <!-- ko if: authenticated -->
         <div data-bind="component: { name: 'bulletin-comment',
