@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error]]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
+            [sade.common-reader :as cr]
             [sade.core :refer :all]
             [sade.http :as http]
             [sade.strings :as ss]
@@ -135,8 +136,15 @@
          %)
       schemas)))
 
+(defn find-special-foreman-designer-verdict-from-xml
+  [{:keys [application user created] :as command} app-xml]
+  {:pre [(every? command [:application :user :created]) app-xml]}
+  (let [xml (cr/strip-xml-namespaces app-xml)
+        ]
+    ))
+
 ;; Trimble writes verdict for tyonjohtaja/suunnittelija applications to their link permits.
-(defn fetch-tj-suunnittelija-verdict [{{:keys [municipality permitType] :as application} :application :as command}]
+#_(defn fetch-tj-suunnittelija-verdict [{{:keys [municipality permitType] :as application} :application :as command}]
   (let [application-op-name (-> application :primaryOperation :name)
         organization (organization/resolve-organization municipality permitType)
         krysp-version (get-in organization [:krysp (keyword permitType) :version])]

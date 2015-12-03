@@ -1,11 +1,15 @@
 (ns lupapalvelu.verdict-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
+  (:require [clojure.walk :as walk]
+            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [pandect.core :as pandect]
             [monger.operators :refer :all]
+            [net.cgrand.enlive-html :as enlive]
+            [sade.common-reader :as cr]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [ok fail fail! ok?]]
+            [sade.xml :as xml]
             [lupapalvelu.application :as application]
             [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
@@ -30,20 +34,72 @@
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
+(defn special-foreman-designer-verdict?
+  "Some verdict providers handle foreman and designer verdicts a bit
+  differently. These 'special' verdicts contain reference permit id in
+  MuuTunnus"
+  [application app-xml]
+  (let [app-id (:id application)
+        op-name (-> application :primaryOperation :name)]
+    (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
+      (let [link-permit-id (-> (mongo/select-one :app-links {:link.0 app-id}) :link second)
+            xml (cr/strip-xml-namespaces app-xml)]
+        (not-empty (enlive/select xml [:MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))]))))))
+
+(defn normalize-special-verdict [application app-xml]
+  (if (special-foreman-designer-verdict? application app-xml)
+    (let [xml          (cr/strip-xml-namespaces app-xml)
+          op-name      (-> application :primaryOperation :name)
+          tag          (if (ss/starts-with op-name "tyonjohtajan-") :Tyonjohtaja :Suunnittelija)
+          [party]      (enlive/select xml [tag])
+          [attachment] (enlive/select party [:liitetieto])
+          date         (xml/get-text party [:paatosPvm])
+          decision     (xml/get-text party [:paatostyyppi])
+          verdict-xml  {:tag :poytakirja
+                        :content [{:tag :paatoskoodi :content [decision]}
+                                  {:tag :paatospvm :content [date]}
+                                  {:tag :liite :content [attachment]}]}
+          verdict-xml  [(walk/postwalk (fn [a] (if (map? a)
+                                                 (assoc a :tag (->> (:tag a) name (str "yht:") keyword))
+                                                 a))
+                                       verdict-xml)]
+          after-verdict #{:rakval:muistiotieto :rakval:lisatiedot :rakval:liitetieto
+                          :rakval:kayttotapaus :rakval:asianTiedot}
+          asia-path [:content 1  ;; :gml:featureMember
+                     :content 0  ;; :gml:boundedBy
+                     :content]   ;; :rakval:RakennusvalvontaAsia
+          ]
+
+      (defn insert-xml [start-xml end-xml]
+        (let [elem (first end-xml)
+              rest-xml (rest end-xml)
+              tag (:tag elem)
+              _ (println "Tag:" tag "Count:" (count end-xml ))]
+          (cond
+            (= tag ":yht:paatostieto") (concat start-xml verdict-xml rest-xml)
+            (contains? after-verdict tag) (concat start-xml verdict-xml end-xml)
+            (empty? rest-xml) (concat [start-xml] verdict-xml)
+            :else (insert-xml (concat start-xml [elem]) rest-xml))))
+      (update-in app-xml
+                 asia-path
+                 (partial insert-xml [])))
+    app-xml))
+
 (defn do-check-for-verdict [{{op :primaryOperation :as application} :application :as command}]
   {:pre [(every? command [:application :user :created])]}
   (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
-    (or
-      (let [organization (organization/get-organization (:organization application))
-            validator-fn (permit/get-verdict-validator (permit/permit-type application))]
-        (validator-fn app-xml organization))
-      (let [updates (verdict/find-verdicts-from-xml command app-xml)]
-        (when updates
-          (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
-            (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
-            (t/change-app-and-attachments-metadata-state! command :luonnos :valmis)))
-        (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
-    (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} (:name op))
+    (let [app-xml (normalize-special-verdict application app-xml)]
+      (or
+       (let [organization (organization/get-organization (:organization application))
+             validator-fn (permit/get-verdict-validator (permit/permit-type application))]
+         (validator-fn app-xml organization))
+       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
+         (when updates
+           (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
+             (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
+             (t/change-app-and-attachments-metadata-state! command :luonnos :valmis)))
+         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])))))
+    #_(when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} (:name op))
       (verdict/fetch-tj-suunnittelija-verdict command))))
 
 (notifications/defemail :application-verdict
