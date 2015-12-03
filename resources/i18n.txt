@@ -1,1 +1,2 @@
 error.user-not-found: Käyttäjää ei löydy
+error.statement-updated-after-last-save: Lausuntoa on muutettu muualla
