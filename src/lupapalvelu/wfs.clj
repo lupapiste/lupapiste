@@ -208,10 +208,6 @@
             municipality-name (if (ss/starts-with-i fi city) fi sv)]
         (str street " " number ", " municipality-name)))))
 
-(defn feature-to-position [feature]
-  (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
-    {:x x :y y}))
-
 (defn extract-coordinates [ring]
   (s/replace (first (xml-> ring :gml:LinearRing :gml:posList text)) #"(\d+\.*\d*)\s+(\d+\.*\d*)\s+" "$1 $2, "))
 
@@ -225,10 +221,13 @@
           interiors (map extract-coordinates (xml-> polygonpatch :gml:interior))]
       (str "POLYGON((" exterior ")" (ss/join (map #(str ",(" % ")") interiors)) ")"))))
 
-(defn feature-to-area [feature]
+(defn feature-to-location [feature]
   (when feature
-    {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))
-     :wkt (property-borders-wkt feature)}))
+    (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
+      {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))
+       :x x
+       :y y
+       :wkt (property-borders-wkt feature)})))
 
 (defn feature-to-property-id [feature]
   (when feature

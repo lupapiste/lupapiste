@@ -82,7 +82,7 @@
   (let [property-id (get (:params request) :property-id)
         features (wfs/location-info-by-property-id property-id)]
     (if features
-      (resp/json {:data (map wfs/feature-to-position features)})
+      (resp/json {:data (map (comp #(select-keys % [:x :y]) wfs/feature-to-location) features)})
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn area-by-property-id-proxy [{{property-id :property-id} :params :as request}]

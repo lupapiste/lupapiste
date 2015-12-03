@@ -38,7 +38,7 @@
 ;;;
 
 (defn search-property-id [lang property-id]
-  (map (fn [f] {:location (wfs/feature-to-position f)
+  (map (fn [f] {:location (select-keys (wfs/feature-to-location f) [:x :y])
                 :property-id (:kiinttunnus (wfs/feature-to-property-id f))
                 :kind :property-id})
        (wfs/location-info-by-property-id property-id)))
