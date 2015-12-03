@@ -1,23 +1,22 @@
 (ns lupapalvelu.document.model
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.walk :refer [keywordize-keys]]
-            [clojure.string :refer [join]]
             [clojure.set :refer [union difference]]
-            [clojure.string :as s]
             [clj-time.format :as timeformat]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
             [sade.validators :as v]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.vrk :refer :all]
             [lupapalvelu.document.document-field-validators :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
-            [lupapalvelu.document.subtype :as subtype]))
+            [lupapalvelu.document.subtype :as subtype]
+            [lupapalvelu.mongo :as mongo]))
 
 ;;
 ;; Validation:
@@ -113,7 +112,7 @@
 (defmethod validate-field :personSelector [application elem v]
   (when-not (ss/blank? v)
     (when-not (and
-                (domain/has-auth? application v)
+                (auth/has-auth? application v)
                 (domain/no-pending-invites? application v))
       [:err "application-does-not-have-given-auth"])))
 
@@ -211,10 +210,10 @@
     (:i18nkey element)
     (->
       (str
-        (join "." (concat [(-> info :document :locKey)] (map name path)))
+        (ss/join "." (concat [(-> info :document :locKey)] (map name path)))
         (when (= :select (:type element)) "._group_label"))
-      (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
-      (s/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
+      (ss/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
+      (ss/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
 
 (defn- ->validation-result [info data path element result]
   (when result

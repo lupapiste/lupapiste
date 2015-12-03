@@ -7,6 +7,7 @@
             [sade.strings :as ss]
             [sade.validators :as v]
             [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
@@ -83,8 +84,8 @@
   {:description "Provides the possible statement statuses according to the krysp version in use."
    :parameters [:id]
    :user-roles #{:authority :applicant}
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles action/reader-org-authz-roles
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :states states/all-application-states}
   [{application :application}]
   (ok :data (possible-statement-statuses application)))
@@ -92,7 +93,7 @@
 (defquery get-statement-givers
   {:parameters [:id]
    :user-roles #{:authority :applicant}
-   :user-authz-roles action/default-authz-writer-roles
+   :user-authz-roles auth/default-authz-writer-roles
    :states states/all-application-states}
   [{application :application}]
   (let [org-id (:organization application)]
@@ -117,21 +118,21 @@
       (let [user (if-not (ss/blank? (:id person)) ;; "manually invited" statement givers lack the "id"
                    (or (user/get-user-by-email (:email person)) (fail! :error.user-not-found))
                    (user/get-or-create-user-by-email (:email person) inviter))
-            statement-id (mongo/create-id)
+              statement-id (mongo/create-id)
             statement-giver (assoc person :userId (:id user))]
-        (cond-> {:statement {:id            statement-id
-                             :person        statement-giver
-                             :requested     now
-                             :given         nil
-                             :reminder-sent nil
-                             :metadata      metadata
+         (cond-> {:statement {:id statement-id
+                              :person statement-giver
+                              :requested now
+                              :given nil
+                              :reminder-sent nil
+                              :metadata metadata
                              :saateText     saateText
                              :dueDate       dueDate
-                             :status        nil}
-                 :auth (user/user-in-role user :statementGiver :statementId statement-id)
-                 :recipient user}
+                              :status nil}
+                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
+                  :recipient user}
           (seq metadata) (assoc :metadata metadata))))
-    persons))
+       persons))
 
 (defn validate-selected-persons [{{selectedPersons :selectedPersons} :data}]
   (let [non-blank-string-keys (when (some
@@ -156,17 +157,17 @@
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
   (let [personIdSet (->> selectedPersons (map :id) (filter identity) set)
         manualPersons (filter #(not (:id %)) selectedPersons)]
-    (organization/with-organization organization
-                                    (fn [{:keys [statementGivers]}]
+  (organization/with-organization organization
+                                  (fn [{:keys [statementGivers]}]
                                       (let [persons (filter #(personIdSet (:id %)) statementGivers)
                                             persons-combined (concat persons manualPersons)
-                                            metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
+                                          metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
                                             details (make-details user now persons-combined metadata saateText dueDate)
-                                            statements (map :statement details)
-                                            auth (map :auth details)
-                                            recipients (map :recipient details)]
-                                        (update-application command {$push {:statements {$each statements}
-                                                                            :auth {$each auth}}})
+                                          statements (map :statement details)
+                                          auth (map :auth details)
+                                          recipients (map :recipient details)]
+                                      (update-application command {$push {:statements {$each statements}
+                                                                          :auth {$each auth}}})
                                         (notifications/notify! :request-statement (assoc command :recipients recipients)))))))
 
 (defcommand delete-statement
@@ -205,5 +206,5 @@
                                                 :statements.$.given created
                                                 :statements.$.text text}}))
           updated-app (assoc application :statements (map  #(if (= statementId (:id %)) (assoc % :status status :given created :text text) % ) (:statements application) ) )]
-      (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
-      response)))
+                       (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
+                       response)))

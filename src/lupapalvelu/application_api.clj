@@ -13,6 +13,7 @@
             [lupapalvelu.action :refer [defraw defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.document.document :as document]
@@ -53,8 +54,8 @@
   {:parameters       [:id]
    :states           states/all-states
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles  action/reader-org-authz-roles}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles}
   [{:keys [application user]}]
   (if application
     (let [app (assoc application :allowedAttachmentTypes (attachment/get-attachment-types-for-application application))]
@@ -262,7 +263,7 @@
      :location  {:x (first location) :y (second location)}
      :operation (->> (:primaryOperation app) :name (i18n/localize lang "operations"))
      :authName  (-> app
-                    (domain/get-auths-by-role :owner)
+                    (auth/get-auths-by-role :owner)
                     first
                     (#(str (:firstName %) " " (:lastName %))))
      :comments  (->> (:comments app)

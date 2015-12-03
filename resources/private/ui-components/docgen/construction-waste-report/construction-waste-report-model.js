@@ -33,6 +33,7 @@ LUPAPISTE.ConstructionWasteReportModel = function(params) {
         i18npath: i18npath,
         applicationId: params.applicationId,
         documentId: params.documentId,
+        authModel: params.authModel,
         label: false
       });
     });
@@ -45,7 +46,7 @@ LUPAPISTE.ConstructionWasteReportModel = function(params) {
     };
   });
   self.columnHeaders.push({
-    name: self.groupsRemovable(unplannedWasteData.schema) ? "remove" : "", 
+    name: self.groupsRemovable(unplannedWasteData.schema) ? "remove" : "",
     required: false
   });
 };

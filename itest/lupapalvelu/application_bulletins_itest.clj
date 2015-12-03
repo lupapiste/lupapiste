@@ -27,20 +27,58 @@
                                                   :propertyId oulu-property-id
                                                   :x 430109.3125 :y 7210461.375
                                                   :address "Oulu 10")
-          app-id (:id app)]
+          app-id (:id app)
+          _ (upload-attachment pena app-id {:id "" :type {:type-group "muut" :type-id "muu"}} true) => true
+          _ (upload-attachment pena app-id {:id "" :type {:type-group "kartat" :type-id "jatteen-sijainti"}} true) => true
+          _ (upload-attachment pena app-id {:id "" :type {:type-group "jatteen_kerays" :type-id "vastaanottopaikan_tiedot"}} true) => true
+          {attachments :attachments} (query-application pena app-id)]
+      (fact "Pena sets CV not public"
+        (command pena :set-attachment-visibility :id app-id :attachmentId (:id (first attachments)) :value "asiakas-ja-viranomainen") => ok?)
+      (fact "Pena sets tutkintotodistus only visible to authorities"
+        (command pena :set-attachment-visibility :id app-id :attachmentId (:id (second attachments)) :value "viranomainen") => ok?)
       (fact "approve application to 'sent' state"
         (command olli :approve-application :id app-id :lang "fi") => ok?)
 
       (fact "publishing with wrong id results in error"
-        (command olli :publish-bulletin :id "123") => (partial expected-failure? :error.application-not-accessible))
+        (command olli :move-to-proclaimed
+                 :id "123"
+                 :proclamationStartsAt "123"
+                 :proclamationEndsAt "124"
+                 :proclamationText "") => (partial expected-failure? :error.application-not-accessible))
 
       (fact "Bulletin not found before publishing"
         (query pena :bulletin :bulletinId app-id) => (partial expected-failure? :error.bulletin.not-found))
 
+      (fact "Authority can't publish to wrong states"
+        (command olli :move-to-verdict-given
+                 :id app-id
+                 :verdictGivenAt 1449153132436
+                 :appealPeriodStartsAt 1449153132436
+                 :appealPeriodEndsAt 1449153132436
+                 :verdictGivenText "foo") => (partial expected-failure? :error.command-illegal-state)
+        (command olli :move-to-final
+                 :id app-id
+                 :officialAt "123") => (partial expected-failure? :error.command-illegal-state))
+
       (fact "Authority can publish bulletin"
-        (command olli :publish-bulletin :id app-id) => ok?)
+        (command olli :move-to-proclaimed
+                 :id app-id
+                 :proclamationStartsAt 1449153132436
+                 :proclamationEndsAt 1449153132436
+                 :proclamationText "") => ok?)
       (fact "Regular user can't publish bulletin"
-        (command pena :publish-bulletin :id app-id) => fail?)))
+        (command pena :move-to-proclaimed
+                 :id app-id
+                 :proclamationStartsAt 1449153132436
+                 :proclamationEndsAt 1449153132436
+                 :proclamationText "") => fail?)
+
+      (fact "Not public attachments aren't included in bulletin"
+        (let [{bulletin-attachments :attachments} (query-bulletin pena app-id)]
+          (count bulletin-attachments) => 1
+          (fact "Only energiatodistus"
+            (:id (first bulletin-attachments)) => (:id (last attachments))
+            (get-in (first bulletin-attachments) [:type :type-id]) => "vastaanottopaikan_tiedot")))))
 
   (facts* "Add comment for published bulletin"
     (let [store (atom {})
@@ -51,9 +89,19 @@
                                              :x 406898.625 :y 6684125.375
                                              :address "Hitantine 108"
                                              :state "sent")
-          _ (command sonja :publish-bulletin :id (:id app) :cookie-store cookie-store) => ok?
+          _ (command sonja :move-to-proclaimed
+                     :id (:id app)
+                     :proclamationStartsAt 1449153132436
+                     :proclamationEndsAt 1449153132436
+                     :proclamationText "testi"
+                     :cookie-store cookie-store) => ok?
           old-bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))
-          _ (command sonja :publish-bulletin :id (:id app) :cookie-store cookie-store)
+          _ (command sonja :move-to-proclaimed
+                     :id (:id app)
+                     :proclamationStartsAt 1449153132436
+                     :proclamationEndsAt 1449153132436
+                     :proclamationText "testi"
+                     :cookie-store cookie-store) => ok?
           bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))
           _ (vetuma-util/authenticate-to-vetuma! cookie-store)
           files (:files (json/decode (:body (send-file cookie-store)) true))]
@@ -92,8 +140,16 @@
                                                   :address "Hitantine 108")
           _ (command olli :approve-application :id (:id oulu-app) :lang "fi") => ok?
           _ (command sonja :approve-application :id (:id sipoo-app) :lang "fi") => ok?
-          _ (command olli :publish-bulletin :id (:id oulu-app)) => ok?
-          _ (command sonja :publish-bulletin :id (:id sipoo-app)) => ok?
+          _ (command olli :move-to-proclaimed
+                     :id (:id oulu-app)
+                     :proclamationStartsAt 1449153132436
+                     :proclamationEndsAt 1449153132436
+                     :proclamationText "testi") => ok?
+          _ (command sonja :move-to-proclaimed
+                     :id (:id sipoo-app)
+                     :proclamationStartsAt 1449153132436
+                     :proclamationEndsAt 1449153132436
+                     :proclamationText "testi") => ok?
           _ (datatables pena :application-bulletins :page "1"
                                                     :searchText ""
                                                     :municipality nil
@@ -107,7 +163,9 @@
         (let [bulletin (query-bulletin pena (:id oulu-app))]
           (keys bulletin) => (just [:id :_applicantIndex :address :applicant :attachments :versionId
                                     :bulletinState :documents :location :modified :municipality
-                                    :primaryOperation :propertyId :state :stateSeq :canComment] :in-any-order)
+                                    :primaryOperation :propertyId :state :stateSeq :canComment
+                                    :verdicts
+                                    :proclamationText :proclamationEndsAt :proclamationStartsAt] :in-any-order)
           (fact "bulletin state is 'proclaimed'"
             (:bulletinState bulletin) => "proclaimed")
           (fact "each documents has schema definition"
@@ -135,34 +193,38 @@
            (:id (first data)) => (:id sipoo-app))))
 
       (facts "Paging"
-       (dotimes [_ 20]
-         (let [{id :id} (create-and-submit-application pena :operation "jatteen-keraystoiminta"
-                                                            :propertyId oulu-property-id
-                                                            :x 430109.3125 :y 7210461.375
-                                                            :address "Oulu 10")]
-           (command olli :approve-application :id id :lang "fi") => ok?
-           (command olli :publish-bulletin :id id)))
-       (let [{p1-data :data p1-left :left} (datatables pena :application-bulletins :page 1
-                                                                                   :searchText ""
-                                                                                   :municipality nil
-                                                                                   :state nil
-                                                                                   :sort nil)
-             {p2-data :data p2-left :left} (datatables pena :application-bulletins :page 2
-                                                                                   :searchText ""
-                                                                                   :municipality nil
-                                                                                   :state nil
-                                                                                   :sort nil)
-             {p3-data :data p3-left :left} (datatables pena :application-bulletins :page 3
-                                                                                   :searchText ""
-                                                                                   :municipality nil
-                                                                                   :state nil
-                                                                                   :sort nil)]
-         (fact "page 1"
-           (count p1-data) => 10
-           p1-left => 12)
-         (fact "page 2"
-           (count p2-data) => 10
-           p2-left => 2)
-         (fact "page 3"
-           (count p3-data) => 2
-           p3-left => -8))))))
+        (dotimes [_ 20]
+          (let [{id :id} (create-and-submit-application pena :operation "jatteen-keraystoiminta"
+                                                        :propertyId oulu-property-id
+                                                        :x 430109.3125 :y 7210461.375
+                                                        :address "Oulu 10")]
+            (command olli :approve-application :id id :lang "fi") => ok?
+            (command olli :move-to-proclaimed
+                     :id id
+                     :proclamationStartsAt 1449153132436
+                     :proclamationEndsAt 1449153132436
+                     :proclamationText "testi")))
+        (let [{p1-data :data p1-left :left} (datatables pena :application-bulletins :page 1
+                                                        :searchText ""
+                                                        :municipality nil
+                                                        :state nil
+                                                        :sort nil)
+              {p2-data :data p2-left :left} (datatables pena :application-bulletins :page 2
+                                                        :searchText ""
+                                                        :municipality nil
+                                                        :state nil
+                                                        :sort nil)
+              {p3-data :data p3-left :left} (datatables pena :application-bulletins :page 3
+                                                        :searchText ""
+                                                        :municipality nil
+                                                        :state nil
+                                                        :sort nil)]
+          (fact "page 1"
+            (count p1-data) => 10
+            p1-left => 12)
+          (fact "page 2"
+            (count p2-data) => 10
+            p2-left => 2)
+          (fact "page 3"
+            (count p3-data) => 2
+            p3-left => -8))))))

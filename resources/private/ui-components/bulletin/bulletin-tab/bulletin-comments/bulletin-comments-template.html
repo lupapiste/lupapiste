@@ -25,7 +25,7 @@
       <!-- /ko -->
       <span class="bulletin-comment__name"  data-bind="fullName: $data['contact-info']"></span>
       <span data-bind="dateTimeString: $data.created"></span>
-      <div class="description-bubble" data-bind="slider: $parent.selectedComment() == $data._id">
+      <div class="description-bubble" data-bind="slider: $parent.selectedComment() === $data._id">
         <span class="bulletin-comment__description" data-bind="text: $parent.description($data)"></span>
       </div>
     </div>
