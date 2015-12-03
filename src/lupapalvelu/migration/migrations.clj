@@ -6,7 +6,7 @@
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [sade.property :as p]
-            [sade.validators :as validators]
+            [sade.validators :as v]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
@@ -1007,7 +1007,7 @@
 (defn- find-national-id [conversion-table application-id property-id building-number]
   (let [lookup (rakennustunnus property-id building-number)
         new-id (mongo/select-one conversion-table {:RAKENNUSTUNNUS lookup})]
-    (if (validators/rakennustunnus? (:VTJ_PRT new-id))
+    (if (v/rakennustunnus? (:VTJ_PRT new-id))
       new-id
       (println application-id lookup new-id))))
 
