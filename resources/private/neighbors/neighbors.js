@@ -4,8 +4,11 @@
   var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
   var applicationId;
 
+
   function Model() {
     var self = this;
+
+    self.areasLoading = ko.observable(false);
 
     self.applicationId = ko.observable();
     self.neighbors = ko.observableArray();
@@ -52,12 +55,13 @@
         .neighborId(null)
         .map.clear().add({x: x, y: y});
 
-      if (!_.isEmpty(neighbors)) {
-        self.getWKT = ajax.datatables("property-borders", {propertyIds: _.pluck(neighbors, "propertyId")})
+      if (!_.isEmpty(self.neighbors())) {
+        self.getWKT = ajax.datatables("property-borders", {propertyIds: _.pluck(self.neighbors(), "propertyId")})
           .success(function(resp) {
             self.map.drawDrawings(resp.wkts, {}, drawStyle);
 console.log(resp);
           })
+          .processing(self.areasLoading)
           .call();
       }
     };
