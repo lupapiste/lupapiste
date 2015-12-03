@@ -164,6 +164,7 @@
           (keys bulletin) => (just [:id :_applicantIndex :address :applicant :attachments :versionId
                                     :bulletinState :documents :location :modified :municipality
                                     :primaryOperation :propertyId :state :stateSeq :canComment
+                                    :verdicts
                                     :proclamationText :proclamationEndsAt :proclamationStartsAt] :in-any-order)
           (fact "bulletin state is 'proclaimed'"
             (:bulletinState bulletin) => "proclaimed")
