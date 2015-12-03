@@ -5,6 +5,7 @@
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.6"]
                  [org.clojure/tools.trace "0.7.8"]
+                 [org.clojure/test.check "0.9.0"]
                  [commons-fileupload "1.3.1"] ; The latest version - ring requires 1.3
                  [ring "1.4.0"]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
@@ -40,7 +41,7 @@
                  [fi.sito/oskari "0.9.53"]
                  [slingshot "0.12.2"]
                  [com.google.zxing/javase "2.2"]
-                 [prismatic/schema "0.4.3"]
+                 [prismatic/schema "1.0.3"]
                  [cljts "0.3.0-20150228.035522-2" :exclusions [xerces/xercesImpl]]
                  ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
                  ; xalan excluded just to avoid bloat, presumably XSLT is not needed
