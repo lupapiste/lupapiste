@@ -86,17 +86,18 @@
 
 (defn- append-element [e, ^java.lang.StringBuilder b]
   (cond
-    (string? e)    (.append b (escape-xml e))
-    (map? e)       (do
-                     (-> b (.append  \<) (.append (name (:tag e))))
-                     (doseq [attr (:attrs e)] (append-attribute b attr) )
-                     (if-not (:content e)
-                       (.append b "/>")
-                       (do
-                         (.append b ">")
-                         (doseq [c (:content e)] (append-element c b))
-                         (-> b (.append "</") (.append (name (:tag e))) (.append ">")))))
-    (not (nil? e)) (.append b e)))
+    (string? e)     (.append b (escape-xml e))
+    (map? e)        (do
+                      (-> b (.append  \<) (.append (name (:tag e))))
+                      (doseq [attr (:attrs e)] (append-attribute b attr) )
+                      (if-not (:content e)
+                        (.append b "/>")
+                        (do
+                          (.append b ">")
+                          (doseq [c (:content e)] (append-element c b))
+                          (-> b (.append "</") (.append (name (:tag e))) (.append ">")))))
+    (sequential? e) (doseq [c e] (append-element c b))
+    (not (nil? e))  (.append b e)))
 
 (defn element-to-string [e]
   (let [^java.lang.StringBuilder builder (java.lang.StringBuilder.)]
