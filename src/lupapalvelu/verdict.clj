@@ -136,13 +136,6 @@
          %)
       schemas)))
 
-(defn find-special-foreman-designer-verdict-from-xml
-  [{:keys [application user created] :as command} app-xml]
-  {:pre [(every? command [:application :user :created]) app-xml]}
-  (let [xml (cr/strip-xml-namespaces app-xml)
-        ]
-    ))
-
 ;; Trimble writes verdict for tyonjohtaja/suunnittelija applications to their link permits.
 #_(defn fetch-tj-suunnittelija-verdict [{{:keys [municipality permitType] :as application} :application :as command}]
   (let [application-op-name (-> application :primaryOperation :name)

@@ -55,37 +55,63 @@
           [attachment] (enlive/select party [:liitetieto])
           date         (xml/get-text party [:paatosPvm])
           decision     (xml/get-text party [:paatostyyppi])
-          verdict-xml  {:tag :poytakirja
-                        :content [{:tag :paatoskoodi :content [decision]}
-                                  {:tag :paatospvm :content [date]}
-                                  {:tag :liite :content [attachment]}]}
-          verdict-xml  [(walk/postwalk (fn [a] (if (map? a)
-                                                 (assoc a :tag (->> (:tag a) name (str "yht:") keyword))
-                                                 a))
-                                       verdict-xml)]
-          after-verdict #{:rakval:muistiotieto :rakval:lisatiedot :rakval:liitetieto
-                          :rakval:kayttotapaus :rakval:asianTiedot}
-          asia-path [:content 1  ;; :gml:featureMember
-                     :content 0  ;; :gml:boundedBy
-                     :content]   ;; :rakval:RakennusvalvontaAsia
+          verdict-xml  [{:tag :Paatos
+                         :content [{:tag :poytakirja
+                                    :content [{:tag :paatoskoodi :content [decision]}
+                                              {:tag :paatoksentekija :content [""]}
+                                              {:tag :paatospvm :content [date]}
+                                              {:tag :liite :content [attachment]}]}]}]
+          paatostieto {:tag "paatostieto" :content verdict-xml}
+          ;; verdict-xml  [(walk/postwalk (fn [a] (if (map? a)
+          ;;                                        (assoc a :tag (->> (:tag a) name (str "yht:") keyword))
+          ;;                                        a))
+          ;;                              verdict-xml)]
+          placeholders #{:paatostieto :muistiotieto :lisatiedot
+                         :liitetieto  :kayttotapaus :asianTiedot}
+          [rakval] (enlive/select xml [:RakennusvalvontaAsia])
+          place (some #(placeholders (:tag %)) (:content rakval))
+          _ (println "Place:" place)
+          ;; asia-path [:content 1  ;; :gml:featureMember
+          ;;            :content 0  ;; :gml:boundedBy
+          ;;            :content]   ;; :RakennusvalvontaAsia
           ]
+      (case place
+        :paatostieto (enlive/at xml [:RakennusvalvontaAsia :paatostieto] (enlive/content verdict-xml))
+        nil          (enlive/at xml [:RakennusvalvontaAsia] (enlive/append paatostieto))
+        :default     (enlive/at xml [:RakennusvalvontaAsia place] (enlive/prepend paatostieto)))
 
-      (defn insert-xml [start-xml end-xml]
-        (let [elem (first end-xml)
-              rest-xml (rest end-xml)
-              tag (:tag elem)
-              _ (println "Tag:" tag "Count:" (count end-xml ))]
-          (cond
-            (= tag ":yht:paatostieto") (concat start-xml verdict-xml rest-xml)
-            (contains? after-verdict tag) (concat start-xml verdict-xml end-xml)
-            (empty? rest-xml) (concat [start-xml] verdict-xml)
-            :else (insert-xml (concat start-xml [elem]) rest-xml))))
-      (update-in app-xml
-                 asia-path
-                 (partial insert-xml [])))
+      ;; (defn insert-xml [start-xml end-xml]
+      ;;   (let [elem (first end-xml)
+      ;;         rest-xml (rest end-xml)
+      ;;         tag (:tag elem)
+      ;;         _ (println "Tag:" tag "Count:" (count end-xml ))]
+      ;;     (cond
+      ;;       (= tag ":paatostieto") (concat start-xml verdict-xml rest-xml)
+      ;;       (contains? after-verdict tag) (concat start-xml verdict-xml end-xml)
+      ;;       (empty? rest-xml) (concat [start-xml] verdict-xml)
+      ;;       :else (insert-xml (concat start-xml [elem]) rest-xml))))
+      ;; (update-in app-xml
+      ;;            asia-path
+      ;;            (partial insert-xml []))
+      )
     app-xml))
 
-(defn do-check-for-verdict [{{op :primaryOperation :as application} :application :as command}]
+(defn special-check-for-verdict [{:keys [application] :as command} app-xml]
+  {:pre [(every? command [:application :user :created])]}
+  (if app-xml
+    (let [app-xml (normalize-special-verdict application app-xml)]
+      (or
+       (let [organization (organization/get-organization (:organization application))
+             validator-fn (permit/get-verdict-validator (permit/permit-type application))]
+         (validator-fn app-xml organization))
+       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
+         (when updates
+           (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
+             (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
+             (t/change-app-and-attachments-metadata-state! command :luonnos :valmis)))
+         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])))))))
+
+(defn do-check-for-verdict [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
   (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
     (let [app-xml (normalize-special-verdict application app-xml)]
@@ -98,9 +124,7 @@
            (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
              (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
              (t/change-app-and-attachments-metadata-state! command :luonnos :valmis)))
-         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])))))
-    #_(when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} (:name op))
-      (verdict/fetch-tj-suunnittelija-verdict command))))
+         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])))))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
