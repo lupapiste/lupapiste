@@ -3,8 +3,8 @@
             [schema.core :as sc]
             [sade.core :refer :all]
             [sade.util :as util]
+            [sade.schemas :as schemas]
             [sade.strings :as ss]
-            [sade.validators :as v]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
@@ -29,9 +29,7 @@
 (def StatementGiver {:userId                          sc/Str
                      :id                              sc/Str
                      :text                            sc/Str
-                     :email                           (sc/both
-                                                       (sc/pred v/valid-email? "Not valid email")
-                                                       (util/max-length-string 255))
+                     :email                           schemas/Email
                      :name                            sc/Str})
 
 (def Statement      {:id                              sc/Str
