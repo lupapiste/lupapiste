@@ -74,6 +74,8 @@
 (defn- update-statement [statement modify-id prev-modify-id & updates]
   (if (or (= prev-modify-id (:modify-id statement)) (nil? (:modify-id statement)))
     (->> (apply assoc statement :modified (now) :modify-id modify-id updates)
+         (remove (comp util/empty-or-nil? val))
+         (into {})
          (sc/validate Statement))
     (fail :error.statement-updated-after-last-save :statementId (:id statement))))
 
