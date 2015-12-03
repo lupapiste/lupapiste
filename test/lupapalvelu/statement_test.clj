@@ -1,10 +1,14 @@
 (ns lupapalvelu.statement-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [sade.schemas :as schemas]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.statement]))
+            [lupapalvelu.statement :refer [Statement]]))
 
-(testable-privates lupapalvelu.statement possible-statement-statuses)
+(testable-privates lupapalvelu.statement 
+                   possible-statement-statuses
+                   give-statement
+                   update-draft)
 
 (let [test-app-R  {:municipality 753 :permitType "R"}
       test-app-P  {:municipality 753 :permitType "P"}
@@ -59,3 +63,37 @@
     (possible-statement-statuses test-app-YM) => (just ["puoltaa" "ei-puolla" "ehdoilla"] :in-any-order)
     (provided
       (organization/resolve-organization anything anything) => {})))
+
+(facts "update-statement"
+  (fact "update-draft"
+    (-> (schemas/generate Statement)
+        (assoc :modify-id "mod1")
+        (update-draft "some text" "puoltaa" "mod2" "mod1"))
+    => (contains #{[:text "some text"] 
+                   [:status "puoltaa"] 
+                   [:modify-id "mod2"] 
+                   [:state :draft]}))
+
+  (fact "update-draft - wrong modify-id"
+    (-> (schemas/generate Statement)
+        (assoc :modify-id "modx")
+        (update-draft "some text" "puoltaa" "mod2" "mod1"))
+    => (contains #{[:ok false] 
+                   [:text "error.statement-updated-after-last-save"]}))
+
+  (fact "update-draft - missing person"
+    (-> (schemas/generate Statement)
+        (dissoc :person)
+        (update-draft "some text" "puoltaa" "mod2" "mod1"))
+    => (throws Exception))
+
+  (fact "give-statement"
+    (-> (schemas/generate Statement)
+        (assoc :modify-id "mod1")
+        (dissoc :given)
+        (give-statement "some text" "puoltaa" "mod2" "mod1"))
+    => (contains #{[:text "some text"] 
+                   [:status "puoltaa"] 
+                   [:modify-id "mod2"] 
+                   [:state :given] 
+                   [:given anything]})))
