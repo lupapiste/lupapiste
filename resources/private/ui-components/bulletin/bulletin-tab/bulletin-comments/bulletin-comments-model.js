@@ -8,6 +8,8 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
 
   self.bulletin = params.bulletin
 
+  self.comments = params.comments;
+
   self.commentsLeft = ko.pureComputed(function() {
     return params.commentsLeft() > 0;
   });
@@ -24,7 +26,8 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
                                                                        asc: self.asc()});
   }, 50);
 
-  function description(contactInfo) {
+  self.description = function(comment) {
+    var contactInfo = comment['contact-info'];
     var name = _.filter([contactInfo.lastName, contactInfo.firstName]).join(" ");
     var city = _.filter([contactInfo.zip, contactInfo.city]).join(" ");
     var email = contactInfo.email;
@@ -32,18 +35,22 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
     return _.filter([name, contactInfo.street, city, email, emailPreferred]).join(", ");
   }
 
-  self.comments = ko.pureComputed(function() {
-    return _.map(params.comments(), function(c) {
-      c.showFullDetails = ko.observable(false);
-      c.description = description(c['contact-info']);
-      return c;
-    });
-  });
-
   ko.computed(function() {
     self.asc();
     self.fetchComments();
   })
+
+  self.selectedComment = ko.observable();
+
+  self.selectComment = function(comment) {
+    if (comment._id) {
+      if (self.selectedComment() === comment._id) {
+        self.selectedComment(undefined);
+      } else {
+        self.selectedComment(comment._id);
+      }
+    }
+  }
 
   self.hideComments = function() {
     self.showVersionComments(undefined);

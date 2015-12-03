@@ -364,7 +364,7 @@
   {:description "Returns an organization id -> name map. (Used by TOJ.)"
    :user-roles #{:anonymous}}
   [_]
-  (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {})]
+  (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {} {:name 1})]
                         [id name]))))
 
 (defquery vendor-backend-redirect-config
