@@ -76,7 +76,7 @@
       (get-in email [:body :plain]) => (contains "<b>bold</b>")
       (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;"))
 
-    (fact "Statement person can be added from another organization"
+    (facts "Statement person can be added from another organization"
       (let [statement-giver-veikko (create-statement-giver veikko-email)]
 
         ; Inbox zero
@@ -127,7 +127,7 @@
             (fact "Applicant can not see unsubmitted statements"
               (query pena :should-see-unsubmitted-statements :id application-id) => ok?)))))
 
-    (fact "Veikko gives a statement"
+    (facts "Veikko gives a statement"
 
       (last-email) ; Inbox zero
 
@@ -165,7 +165,7 @@
             email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")))
         ))
 
-    (fact "Pena gives a statement"
+    (facts "Pena gives a statement"
 
       (last-email) ; Inbox zero
 
