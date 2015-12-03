@@ -386,8 +386,11 @@ var gis = (function() {
     self.drawDrawings = function(drawings, attrs, style) {
       if (drawings) {
         var addFeatureFn = function(memo, drawing) {
-          var newFeature = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(drawing.geometry), attrs, style);
-          memo.push(newFeature);
+          var wkt = _.isString(drawing) ? drawing : drawing.geometry;
+          if (wkt) {
+            var newFeature = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(wkt), attrs, style);
+            memo.push(newFeature);
+          }
           return memo;
         };
         var featureArray = _.reduce(drawings, addFeatureFn, []);
