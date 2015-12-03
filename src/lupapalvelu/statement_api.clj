@@ -115,15 +115,15 @@
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
   (organization/with-organization organization
                                   (fn [{:keys [statementGivers]}]
-                                    (let [personIdSet (set personIds)
-                                          persons     (filter (comp personIdSet :id) statementGivers)
+                                    (let [persons     (filter (comp (set personIds) :id) statementGivers)
                                           users       (map (comp user/get-user-by-email :email) persons)
+                                          persons+uid (map #(assoc %1 :userId (:id %2)) persons users)
                                           metadata    (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
-                                          statements  (->> (map #(assoc %1 :userId (:id %2)) persons users)
-                                                           (map (partial create-statement now metadata)))
+                                          statements  (map (partial create-statement now metadata) persons+uid)
                                           auth        (map #(user/user-in-role %1 :statementGiver :statementId (:id %2)) users statements)]
                                       (when (some nil? users)
-                                        (fail! :error.user-not-found))
+                                        (fail! :error.user-not-found :emails (->> (remove :userId persons+uid)
+                                                                                  (map :email))))
                                       (update-application command {$push {:statements {$each statements}
                                                                           :auth       {$each auth}}})
                                       (notifications/notify! :request-statement (assoc command :recipients users))))))
