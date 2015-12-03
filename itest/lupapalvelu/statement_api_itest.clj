@@ -170,6 +170,8 @@
           (command pena :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.unknown-statement-status"))
         (fact* "Statement is given"
           (command pena :give-statement :id application-id :statementId (:id statement) :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
+        (fact "Applicant statement giver cannot delete his already-given statement"
+          (command pena :delete-statement :id application-id :statementId (:id statement)) => (partial expected-failure? "error.statement-already-given"))
         ))
 
 
@@ -184,11 +186,6 @@
                 application (query-application sonja application-id)]
             (get-statement-by-user-id application ronja-id) => falsey
             (auth-contains-statement-giver application ronja-id) => falsey))))
-
-    (fact "Applicant statement giver cannot delete his already-given statement"
-      (let [application-before (query-application sonja application-id)
-            statement-id (:id (get-statement-by-user-id application-before pena-id)) => truthy]
-        (command pena :delete-statement :id application-id :statementId statement-id) => (partial expected-failure? "error.statement-already-given")))
     )
 
 
