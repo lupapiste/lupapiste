@@ -91,7 +91,7 @@
   (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id))
     (let [features (plocation/property-location-info property-id)]
       (if features
-        (resp/json {:data features})
+        (resp/json {:data (map #(select-keys % [:wkt :kiinttunnus]) features)})
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
