@@ -174,7 +174,6 @@
           (command pena :delete-statement :id application-id :statementId (:id statement)) => (partial expected-failure? "error.statement-already-given"))
         ))
 
-
     (fact "Statement person has access to application"
       (let [resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-ronja] :saateText "saate" :dueDate 1450994400000) => ok?
             application (query-application ronja application-id)]
@@ -186,6 +185,18 @@
                 application (query-application sonja application-id)]
             (get-statement-by-user-id application ronja-id) => falsey
             (auth-contains-statement-giver application ronja-id) => falsey))))
+
+    (fact "Applicant statement giver is able to delete his not-yet-given statement"
+      (let [_ (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-pena] :saateText "saate" :dueDate 1450994400000) => ok?
+            application (query-application ronja application-id)
+            non-given-statement-id (:id (some
+                                          #(when (and (-> % :given not) (= pena-id (get-in % [:person :userId]))) %)
+                                          (:statements application))) => truthy
+            _ (command pena :delete-statement :id application-id :statementId non-given-statement-id) => ok?
+            application (query-application sonja application-id)]
+        (some #(= non-given-statement-id (:id %)) (:statements application)) => falsey
+        (some #(= non-given-statement-id (:statementId %)) (:auth application)) => falsey
+        ))
     )
 
 
