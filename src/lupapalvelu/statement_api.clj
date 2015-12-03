@@ -106,16 +106,6 @@
    :user-authz-roles #{:statementGiver}}
   [_])
 
-(defquery can-operate-on-statement
-  {:description "Pseudo query for UI authorization logic"
-   :parameters [:id]
-   :states (states/all-application-states-but [:draft])
-   :user-roles #{:authority :applicant}
-   :user-authz-roles #{:statementGiver}
-   :pre-checks [statement-exists
-                authority-or-statement-owner-applicant]}
-  [_])
-
 (notifications/defemail :request-statement
   {:recipients-fn  :recipients
    :subject-key    "statement-request"

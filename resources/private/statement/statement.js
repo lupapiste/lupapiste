@@ -115,7 +115,7 @@
     });
 
     self.canDeleteStatement = function() {
-      return authorizationModel.ok("delete-statement") && authorizationModel.ok("can-operate-on-statement");
+      return authorizationModel.ok("delete-statement");
     };
 
   }
@@ -145,12 +145,12 @@
 
     self.canDeleteAttachment = function(attachment) {
       return authorizationModel.ok("delete-attachment") &&
-             authorizationModel.ok("can-operate-on-statement") &&
+             authorizationModel.ok('give-statement') &&
              (!attachment.requestedByAuthority || lupapisteApp.models.currentUser.isAuthority());
     };
 
     self.canAddAttachment = function() {
-      return authorizationModel.ok("upload-attachment") && authorizationModel.ok("can-operate-on-statement");
+      return authorizationModel.ok("upload-attachment") && authorizationModel.ok('give-statement');
     };
 
     self.deleteAttachment = function(attachmentId) {
