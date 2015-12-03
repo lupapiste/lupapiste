@@ -645,12 +645,6 @@
             (resp/status 200 (:id response))))
         (resp/status 400 (str response)))))
 
-  (defpage "/dev/publish-bulletin" {:keys [id]}
-    (let [request (request/ring-request)
-          params (assoc (from-query request) :id id)
-          response (execute-command "publish-bulletin" params request)]
-      (core/ok? response)))
-
   (defn- create-app-and-publish-bulletin []
     (let [request (request/ring-request)
           params (assoc (from-query request) :operation "kerrostalo-rivitalo"

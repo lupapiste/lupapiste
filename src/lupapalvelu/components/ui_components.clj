@@ -15,6 +15,7 @@
             [cheshire.core :as json]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
+            [lupapalvelu.attachment-metadata :as attachment-meta]
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
@@ -54,6 +55,7 @@
                  :degrees               (map :name (:body schemas/koulutusvalinta))
                  :fiseKelpoisuusValues  (map :name schemas/fise-kelpoisuus-lajit)
                  :bulletinStates        bulletins/bulletin-state-seq
+                 :attachmentVisibilities attachment-meta/visibilities
                  :features              (into {} (filter second (env/features)))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -386,6 +388,8 @@
                       "application-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-template.html"
                       "application-bulletin/tabs/info/bulletin-info-tab-template.html"
+                      "application-bulletin/tabs/verdicts/verdicts-template.html"
+                      "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
                       "application-bulletins/application-bulletins-template.html"
                       "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
@@ -402,6 +406,7 @@
                     "application-bulletin/bulletin-comment/bulletin-comment-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
                     "application-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
+                    "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-model.js"
                     "application-bulletins/application-bulletins-model.js"
                     "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
                     "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"
