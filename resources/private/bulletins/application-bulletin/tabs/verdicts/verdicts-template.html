@@ -3,21 +3,13 @@
 <body>
   <section class="page">
     <script type="text/x-jquery-tmpl" id="verdicts-template">
-      <div class="application_section" data-bind="foreach: $root.verdictModel.verdicts">
+      <div class="application_section" data-bind="foreach: verdicts">
 
-          <h2 class="application_section_header">
+          <h3 class="application_section_header">
               <span data-bind="ltext: 'verdict.id'"></span>:
               <span data-bind="text: $data.kuntalupatunnus, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></span>
               <span data-bind="visible: $data.draft" style="text-transform: lowercase;">(<span data-bind="ltext: 'draft'"></span>)</span>
-
-              <i class="primary lupicon-remove is-right"
-                  data-test-id="delete-verdict-from-listing"
-                  data-bind="click: $root.verdictModel.deleteVerdict,
-                  visible: $root.authorization.ok('delete-verdict'),
-                  enable: $root.authorization.ok('delete-verdict'),
-                             attr: {'title': loc('remove')}">
-              </i>
-          </h2>
+          </h3>
 
           <!--  ko if:  $data.paatokset -->
           <div data-bind="foreach: paatokset, attr: {'data-test-id' : 'given-verdict-id-' + $index() + '-content'}">
@@ -32,16 +24,6 @@
                       </span>
                   </button>
                   <div class="accordion_content expanded">
-
-                      <div data-bind="with: $parent" style="overflow: auto;">
-                          <div class="btn-container right-align"  data-bind="if: $data.draft" >
-                              <button data-bind="visible: $root.authorization.ok('save-verdict-draft'), click: function() {$root.verdictModel.openVerdict($root, $data);}, ltext: 'edit'"
-                                      class="btn btn-primary" data-test-id="edit-verdict"></button>
-                              <button data-bind="visible: $root.authorization.ok('publish-verdict'), enable: $data.canBePublished, click: function() {$root.verdictModel.publishVerdict($root, $data);}, ltext: 'verdict.submit'"
-                                      class="btn btn-primary" data-test-id="publish-verdict"></button>
-                          </div>
-                      </div>
-
                       <div class="accordion-fields">
                           <div class="verdict-info-fields">
                               <div class="verdict-signature-fields" data-bind="visible: !$parent.draft && $parent.sopimus">
@@ -52,12 +34,6 @@
                                           <label data-bind="fullName: $data.user"></label>
                                           <span class="value" data-bind="dateString: created"></span>
                                       </div>
-                                  </div>
-
-                                  <div data-bind="if: $root.authorization.ok('sign-verdict') && !$root.verdictModel.verdictSignedByUser($data)" data-test-id="verdict-signature-ui">
-                                      <span data-bind="ltext: 'verdict.signature.description'"></span>
-                                      <br/>
-                                      <button class="btn btn-primary" data-bind="click: $root.verdictModel.openSigningDialog, ltext: 'verdict.sign'" data-test-id="sign-verdict-button"></button>
                                   </div>
                               </div>
 
@@ -98,7 +74,7 @@
                           </div>
 
                           <div>
-                              <h2 data-bind="ltext: 'verdict.lupamaaraukset'"></h2>
+                              <h3 data-bind="ltext: 'verdict.lupamaaraukset'"></h3>
                               <div class="accordion-content-part">
 
                                   <!--  ko if:  $data.lupamaaraykset -->
@@ -179,7 +155,7 @@
 
                               </div>
 
-                              <h2 data-bind="ltext: 'verdict.poytakirjat'"></h2>
+                              <h3 data-bind="ltext: 'verdict.poytakirjat'"></h3>
                               <div class="accordion-content-part">
 
                                   <!--  ko if:  $data.poytakirjat && $data.poytakirjat.length -->
