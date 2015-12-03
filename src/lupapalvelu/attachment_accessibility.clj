@@ -51,7 +51,7 @@
   [{auth :auth versions :versions :as attachment}]
   (if (or (empty? versions) (seq auth))
     attachment
-    (assoc attachment :auth (map  versions))))
+    (assoc attachment :auth (distinct (map auth-from-version versions)))))
 
 (defn filter-attachments-for [user application attachments]
   {:pre [(map? user) (sequential? attachments)]}
