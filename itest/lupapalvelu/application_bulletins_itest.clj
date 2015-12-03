@@ -27,7 +27,15 @@
                                                   :propertyId oulu-property-id
                                                   :x 430109.3125 :y 7210461.375
                                                   :address "Oulu 10")
-          app-id (:id app)]
+          app-id (:id app)
+          _ (upload-attachment pena app-id {:id "" :type {:type-group "muut" :type-id "muu"}} true) => true
+          _ (upload-attachment pena app-id {:id "" :type {:type-group "kartat" :type-id "jatteen-sijainti"}} true) => true
+          _ (upload-attachment pena app-id {:id "" :type {:type-group "jatteen_kerays" :type-id "vastaanottopaikan_tiedot"}} true) => true
+          {attachments :attachments} (query-application pena app-id)]
+      (fact "Pena sets CV not public"
+        (command pena :set-attachment-visibility :id app-id :attachmentId (:id (first attachments)) :value "asiakas-ja-viranomainen") => ok?)
+      (fact "Pena sets tutkintotodistus only visible to authorities"
+        (command pena :set-attachment-visibility :id app-id :attachmentId (:id (second attachments)) :value "viranomainen") => ok?)
       (fact "approve application to 'sent' state"
         (command olli :approve-application :id app-id :lang "fi") => ok?)
 
@@ -40,7 +48,14 @@
       (fact "Authority can publish bulletin"
         (command olli :publish-bulletin :id app-id) => ok?)
       (fact "Regular user can't publish bulletin"
-        (command pena :publish-bulletin :id app-id) => fail?)))
+        (command pena :publish-bulletin :id app-id) => fail?)
+
+      (fact "Not public attachments aren't included in bulletin"
+        (let [{bulletin-attachments :attachments} (query-bulletin pena app-id)]
+          (count bulletin-attachments) => 1
+          (fact "Only energiatodistus"
+            (:id (first bulletin-attachments)) => (:id (last attachments))
+            (get-in (first bulletin-attachments) [:type :type-id]) => "vastaanottopaikan_tiedot")))))
 
   (facts* "Add comment for published bulletin"
     (let [store (atom {})

@@ -1,11 +1,12 @@
 (ns lupapalvelu.application-bulletins
   (:require [monger.operators :refer :all]
             [clojure.set :refer [difference]]
-            [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.states :as states]
-            [sade.util :refer [fn->]]
+            [lupapalvelu.attachment-metadata :as metadata]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.mime :as mime]))
+            [lupapalvelu.states :as states]
+            [lupapalvelu.state-machine :as sm]
+            [sade.util :refer [fn->]]))
 
 (def bulletin-state-seq (sm/state-seq states/bulletin-version-states))
 
@@ -54,7 +55,7 @@
                        [:documents]
                        remove-party-docs-fn)
         attachments (->> (:attachments application)
-                         (filter :latestVersion)
+                         (filter #(and (:latestVersion %) (metadata/public-attachment? %)))
                          (map #(dissoc % :versions)))
         app-snapshot (assoc app-snapshot
                        :id (mongo/create-id)
