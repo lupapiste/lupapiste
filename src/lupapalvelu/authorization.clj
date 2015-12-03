@@ -67,7 +67,6 @@
     (some roles roles-in-app)))
 
 (defn organization-authz? [org-authz-roles {organization :organization} user]
-  {:pre [(set? org-authz-roles)]}
   (let [user-org-authz (get-in user [:orgAuthz (keyword organization)])]
     (and (user/authority? user) org-authz-roles (some org-authz-roles user-org-authz))))
 
