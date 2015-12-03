@@ -27,10 +27,12 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   self.authenticated = params.authenticated;
 
-  self.tabComponentParams = ko.pureComputed(function() {
-    return {bulletin: self.bulletin,
-            attachments: self.bulletin() ? self.bulletin().attachments : [],
-            verdicts: self.bulletin() ? self.bulletin().verdicts: []};
+  self.attachments = ko.pureComputed(function() {
+    return util.getIn(self, ["bulletin", "attachments"], []);
+  });
+
+  self.verdicts = ko.pureComputed(function() {
+    return util.getIn(self, ["bulletin", "verdicts"], []);
   });
 
   self.bulletinStateLoc = ko.pureComputed(function() {
