@@ -36,7 +36,8 @@
          {:versions._applicantIndex 1
           :versions.documents 1
           :versions.id 1
-          :versions.attachments 1}))
+          :versions.attachments 1
+          :versions.verdicts 1}))
 
 ;; Snapshot
 
