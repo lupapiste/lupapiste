@@ -2,6 +2,8 @@
   (:require [clojure.set :refer [difference]]
             [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
+            [lupapalvelu.attachment-accessibility :as attachment-access]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
@@ -85,6 +87,7 @@
         (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (name (:role user)))) %))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
+        (update-in [:attachments] (partial attachment-access/filter-attachments-for user application))
         (update-in [:neighbors] (partial normalize-neighbors user))
         filter-targeted-attachment-comments
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
@@ -109,30 +112,13 @@
 ;; authorization
 ;;
 
-(defn get-auths-by-role
-  "returns vector of all auth-entries in an application with the given role. Role can be a keyword or a string."
-  [{auth :auth} role]
-  (filter #(= (name (get % :role "")) (name role)) auth))
-
-(defn has-auth? [{auth :auth} user-id]
-  (or (some (partial = user-id) (map :id auth)) false))
-
-(defn get-auths [{auth :auth} user-id]
-  (filter #(= (:id %) user-id) auth))
-
-(defn get-auth [application user-id]
-  (first (get-auths application user-id)))
-
-(defn has-auth-role? [{auth :auth} user-id role]
-  (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
-
 (def owner-or-write-roles ["owner" "writer" "foreman"])
 
 (defn owner-or-write-access? [application user-id]
-  (boolean (some (partial has-auth-role? application user-id) owner-or-write-roles)))
+  (boolean (some (partial auth/has-auth-role? application user-id) owner-or-write-roles)))
 
 (defn company-access? [application company-id]
-  (boolean (has-auth-role? application company-id "writer")))
+  (boolean (auth/has-auth-role? application company-id "writer")))
 
 (defn validate-owner-or-write-access
   "Validator: current user must be owner or have write access.

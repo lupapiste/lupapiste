@@ -15,6 +15,7 @@
             [cheshire.core :as json]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
+            [lupapalvelu.attachment-metadata :as attachment-meta]
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
@@ -54,6 +55,7 @@
                  :degrees               (map :name (:body schemas/koulutusvalinta))
                  :fiseKelpoisuusValues  (map :name schemas/fise-kelpoisuus-lajit)
                  :bulletinStates        bulletins/bulletin-state-seq
+                 :attachmentVisibilities attachment-meta/visibilities
                  :features              (into {} (filter second (env/features)))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 

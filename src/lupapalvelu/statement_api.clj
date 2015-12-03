@@ -5,6 +5,7 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
@@ -77,8 +78,8 @@
   {:description "Provides the possible statement statuses according to the krysp version in use."
    :parameters [:id]
    :user-roles #{:authority :applicant}
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles action/reader-org-authz-roles
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :states states/all-application-states}
   [{application :application}]
   (ok :data (possible-statement-statuses application)))
@@ -86,7 +87,7 @@
 (defquery get-statement-givers
   {:parameters [:id]
    :user-roles #{:authority}
-   :user-authz-roles action/default-authz-writer-roles
+   :user-authz-roles auth/default-authz-writer-roles
    :states states/all-application-states}
   [{application :application}]
   (let [organization (organization/get-organization (:organization application))

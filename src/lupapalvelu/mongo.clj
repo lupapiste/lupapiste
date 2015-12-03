@@ -136,6 +136,10 @@
   ([collection data] (insert collection data default-write-concern))
   ([collection data concern] (mc/insert (get-db) collection (with-_id (remove-null-chars data))) nil))
 
+(defn insert-batch
+  ([collection data] (insert-batch collection data default-write-concern))
+  ([collection data concern] (mc/insert-batch (get-db) collection (map (comp with-_id remove-null-chars) data))))
+
 (defn by-id
   ([collection id]
     (with-id (mc/find-one-as-map (get-db) collection {:_id (remove-null-chars id)})))
