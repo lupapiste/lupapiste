@@ -202,7 +202,6 @@
   ; Note there is currently no way to move application to final state so we sent bulletin state manuall
   (let [updates (->> (create-bulletin application created {:officialAt officialAt
                                                            :bulletinState :final}))]
-    (clojure.pprint/pprint updates)
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
