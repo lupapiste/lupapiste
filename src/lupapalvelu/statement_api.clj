@@ -205,5 +205,5 @@
                                                 :statements.$.given created
                                                 :statements.$.text text}}))
           updated-app (assoc application :statements (map  #(if (= statementId (:id %)) (assoc % :status status :given created :text text) % ) (:statements application) ) )]
-                       (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
-                       response)))
+      (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
+      response)))
