@@ -1,7 +1,7 @@
 (ns lupapalvelu.statement-api-itest
-  (:require [lupapalvelu.itest-util :refer :all]
+  (:require [midje.sweet :refer :all]
             [lupapalvelu.factlet :refer [facts* fact*]]
-            [midje.sweet :refer :all]
+            [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.user-api :as user-api]))
 
 (apply-remote-minimal)
