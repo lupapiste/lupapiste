@@ -1,7 +1,7 @@
 (ns sade.schemas
   (:require [sade.util :as util]
-            [sade.validators :as v]
-            [schema.core :as sc]
+            [sade.validators :as validators]
+            [schema.core :as schema]
             [schema.experimental.generators :as generators]
             [clojure.test.check.generators :as check-generators]))
 
@@ -10,9 +10,9 @@
 ;; Schemas
 ;; 
 
-(sc/defschema Email
+(schema/defschema Email
   "A prismatic schema for email"
-  (sc/both (sc/pred v/valid-email? "Not valid email")
+  (schema/both (schema/pred validators/valid-email? "Not valid email")
            (util/max-length-string 255)))
 
 (def schema-generators
