@@ -1,6 +1,7 @@
 (function() {
   "use strict";
 
+  var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
   var applicationId;
 
   function Model() {
@@ -10,6 +11,7 @@
     self.neighbors = ko.observableArray();
     self.neighborId = ko.observable();
     self.map = null;
+    self.getWKT = null;
 
     var neighborSkeleton = {propertyId: undefined,
                             owner: {
@@ -35,19 +37,29 @@
       var location = application.location,
           x = location.x,
           y = location.y;
+      var neighbors = _.map(application.neighbors, ensureNeighbors);
 
       if (!self.map) {
         self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
-        self.map.updateSize().center(x, y, 13);
+        self.map.updateSize().center(x, y, 12);
       } else {
         self.map.updateSize().center(x, y);
       }
 
       self
         .applicationId(application.id)
-        .neighbors(_.map(application.neighbors, ensureNeighbors))
+        .neighbors(neighbors)
         .neighborId(null)
         .map.clear().add({x: x, y: y});
+
+      if (!_.isEmpty(neighbors)) {
+        self.getWKT = ajax.datatables("property-borders", {propertyIds: _.pluck(neighbors, "propertyId")})
+          .success(function(resp) {
+            self.map.drawDrawings(resp.wkts, {}, drawStyle);
+console.log(resp);
+          })
+          .call();
+      }
     };
 
     function openEditDialog(params) {
@@ -102,6 +114,13 @@
   hub.onPageLoad("neighbors", function(e) {
     applicationId = e.pagePath[0];
     repository.load(applicationId);
+  });
+
+  hub.onPageUnload("neighbors", function() {
+    if (model.getWKT) {
+      model.getWKT.abort();
+      model.getWKT = null;
+    }
   });
 
   repository.loaded(["neighbors"], function(application) {
