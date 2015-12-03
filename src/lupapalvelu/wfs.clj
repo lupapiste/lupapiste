@@ -223,7 +223,7 @@
           polygonpatch (first (apply xml-> (cons feature path) ))
           exterior (extract-coordinates (first (xml-> polygonpatch :gml:exterior)))
           interiors (map extract-coordinates (xml-> polygonpatch :gml:interior))]
-      (str "POLYGON ((" exterior ")" (ss/join (map #(str ",(" % ")") interiors)) ")"))))
+      (str "POLYGON((" exterior ")" (ss/join (map #(str ",(" % ")") interiors)) ")"))))
 
 (defn feature-to-area [feature]
   (when feature
