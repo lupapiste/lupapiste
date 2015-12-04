@@ -325,10 +325,15 @@
                     (errorf "wfs status %s: url=%s, response body=%s" data url error-text))
                   nil)
        :failure (do (errorf data "wfs failure: url=%s" url) nil)
-       :ok      (let [features (if (= url nearestfeature)
-                                 (parse-features-as-latin1 data)
-                                 (->features data sxml/startparse-sax-no-doctype))]
-                  (xml-> features :gml:featureMember))))))
+       :ok      (let [xml (if (= url nearestfeature)
+                            (parse-features-as-latin1 data)
+                            (->features data sxml/startparse-sax-no-doctype))
+                      member-list (xml-> xml :gml:featureMember)]
+                  ; Differences in WFS implementations:
+                  ; sometimes gml:featureMember elements are retured (NLS), sometimes gml:featureMembers
+                  (if (seq member-list)
+                    member-list
+                    (xml-> xml :gml:featureMembers)))))))
 
 (defn post
   ([url q] (exec :post url q))
@@ -366,12 +371,7 @@
   (let [x_d (util/->double x)
         y_d (util/->double y)
         radius 50
-        filter-xml (ogc-filter
-                     (ogc-bbox
-                       (property-name "yht:pistesijainti/gml:Point/gml:pos")
-                       (envelope "EPSG:3067" [(- x_d radius) (- y_d 50)] [(+ x_d 50) (+ y_d 50)])))
-        filter-str (sxml/element-to-string (assoc filter-xml :attrs krysp-namespaces))]
-
+        bbox (ss/join "," [(- x_d radius) (- y_d 50) (+ x_d 50) (+ y_d 50) "EPSG:3067"])]
     (exec :get url
       credentials
       {:REQUEST "GetFeature"
@@ -379,7 +379,7 @@
        :VERSION "1.1.0"
        :TYPENAME "mkos:Osoite"
        :SRSNAME "EPSG:3067"
-       :FILTER filter-str
+       :BBOX   bbox
        :MAXFEATURES "20"})))
 
 (defn property-id-by-point [x y]
