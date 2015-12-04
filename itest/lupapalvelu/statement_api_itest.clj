@@ -28,9 +28,6 @@
           (= "statementGiver" (:role %))
           (= user-id (:id %))) auth))
 
-(defn- get-statement-by-user-id [{statements :statements} user-id]
-  (some #(when (= user-id (get-in % [:person :userId])) %) statements))
-
 (defn- create-statement-giver [giver-email]
   (let [resp-create-statement-giver (command sipoo :create-statement-giver :email giver-email :text "<b>bold</b>") ;=> ok?
         giver-id (:id resp-create-statement-giver) ;=> truthy
