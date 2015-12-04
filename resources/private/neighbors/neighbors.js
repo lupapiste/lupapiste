@@ -72,19 +72,10 @@
       if (!_.isEmpty(missing)) {
         ajax.datatables("property-borders", {propertyIds: missing})
           .success(function(resp) {
-            var results = [];
-            _.each(resp.wkts, function(w) {
-              if (borderCache[w.kiinttunnus]) {
-                if (!_.contains(borderCache[w.kiinttunnus])) {
-                  borderCache[w.kiinttunnus].push(w.wkt);
-                }
-              } else {
-                borderCache[w.kiinttunnus] = [w.wkt];
-              }
-
-              results.push(w.wkt);
+            _.each(_.groupBy(resp.wkts, "kiinttunnus"), function(m,k) {
+              borderCache[k] = _.pluck(m, "wkt");
             });
-            self.map.drawDrawings(results, {}, drawingStyle);
+            self.map.drawDrawings(_.pluck(resp.wkts, "wkt"), {}, drawingStyle);
           })
           .processing(processing)
           .call();
