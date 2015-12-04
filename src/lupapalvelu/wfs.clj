@@ -325,10 +325,15 @@
                     (errorf "wfs status %s: url=%s, response body=%s" data url error-text))
                   nil)
        :failure (do (errorf data "wfs failure: url=%s" url) nil)
-       :ok      (let [features (if (= url nearestfeature)
-                                 (parse-features-as-latin1 data)
-                                 (->features data sxml/startparse-sax-no-doctype))]
-                  (xml-> features :gml:featureMember))))))
+       :ok      (let [xml (if (= url nearestfeature)
+                            (parse-features-as-latin1 data)
+                            (->features data sxml/startparse-sax-no-doctype))
+                      member-list (xml-> xml :gml:featureMember)]
+                  ; Differences in WFS implementations:
+                  ; sometimes gml:featureMember elements are retured (NLS), sometimes gml:featureMembers
+                  (if (seq member-list)
+                    member-list
+                    (xml-> xml :gml:featureMembers)))))))
 
 (defn post
   ([url q] (exec :post url q))
@@ -371,7 +376,6 @@
                        (property-name "yht:pistesijainti/gml:Point/gml:pos")
                        (envelope "EPSG:3067" [(- x_d radius) (- y_d 50)] [(+ x_d 50) (+ y_d 50)])))
         filter-str (sxml/element-to-string (assoc filter-xml :attrs krysp-namespaces))]
-
     (exec :get url
       credentials
       {:REQUEST "GetFeature"
