@@ -3,9 +3,11 @@
 
   var applicationDrawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
   var neighbourDrawStyle = {fillColor: "rgb(243,145,41)", // $lp-orange
-                            fillOpacity: 0.35,
-                            strokeColor: "rgb(239, 118, 38)", // $orange-darkest
-                            pointRadius: 6};
+                            fillOpacity: 0.50,
+                            strokeColor: "#000", //"rgb(239, 118, 38)", // $orange-darkest
+                            pointRadius: 6,
+                            strokeWidth: 3
+                            };
   var applicationId;
 
   var borderCache = {};
@@ -97,9 +99,9 @@
 
       if (!self.map) {
         self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
-        self.map.updateSize().center(x, y, 13);
+        self.map.updateSize().center(x, y, 13).add({x: x, y:y});
       } else {
-        self.map.updateSize().center(x, y).clear();
+        self.map.updateSize().center(x, y).clear().add({x: x, y:y});
       }
 
       self.applicationId(application.id).neighbors(neighbors).neighborId(null);
