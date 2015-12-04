@@ -339,7 +339,7 @@ var util = (function($) {
   }
 
   function verdictsWithTasks(application) {
-    return _.map(application.verdicts, function(verdict) {
+    return _.map(application ? application.verdicts : [], function(verdict) {
       var lupamaaraykset = calculateVerdictTasks(verdict, application.tasks);
       if (lupamaaraykset) {
         verdict.paatokset[0].lupamaaraykset = lupamaaraykset;
