@@ -3,54 +3,79 @@
             [sade.validators :as validators]
             [schema.core :as schema]
             [schema.experimental.generators :as generators]
-            [clojure.test.check.generators :as check-generators]))
+            [clojure.test.check.generators :as gen]))
+
 ;;
 ;; Util
 ;;
 
+;; Generator
 
-(def min-length (memoize
-                  (fn [min-len]
-                    (schema/pred
-                      (fn [v]
-                        (>= (count v) min-len))
-                      (str "Shorter than " min-len)))))
+(def custom-generators (atom {}))
 
-(def max-length (memoize
-                  (fn [max-len]
-                    (schema/pred
-                      (fn [v]
-                        (<= (count v) max-len))
-                      (str "Longer than " max-len)))))
+(defn add-generator [schema generator]
+  (swap! custom-generators assoc schema generator))
 
-(defn min-length-string [min-len]
-  (schema/both schema/Str (min-length min-len)))
+(defn generate [schema]
+  (generators/generate schema (generators/default-leaf-generators @custom-generators)))
 
-(defn max-length-string [max-len]
-  (schema/both schema/Str (max-length max-len)))
+;; Predicate / constraint
 
-(defn fixed-length-string [len]
-  (schema/both (min-length-string len) (max-length-string len)))
+(defn min-len-constraint [max-len]
+  (fn [v] (when (>= (count v) max-len) v)))
+
+(defn max-len-constraint [max-len]
+  (fn [v] (when (<= (count v) max-len) v)))
+
+(defn fixed-len-constraint [len]
+  (fn [v] (when (= (count v) len) v)))
 
 ;;
 ;; Schemas
 ;; 
 
+(schema/defschema BlankStr
+  "A schema for empty or nil valued string"
+  (schema/if string? (schema/pred empty?) (schema/pred nil?)))
+
+(add-generator BlankStr (gen/elements ["" nil]))
+
 (schema/defschema Email
   "A prismatic schema for email"
-  (schema/both (schema/pred validators/valid-email? "Not valid email")
-               (max-length-string 255)))
+  (schema/constrained schema/Str (comp validators/valid-email? (max-len-constraint 255))))
 
-;;
-;; Generators
-;;
+(add-generator Email (gen/fmap
+                      (fn [[name domain]]
+                        (str name "@" domain ".com"))
+                      (gen/tuple (gen/not-empty gen/string-alphanumeric)
+                                 (gen/not-empty gen/string-alphanumeric))))
 
-(def schema-generators
-  (generators/default-leaf-generators
-    {Email (check-generators/fmap (fn [[name domain]]
-                       (str name "@" domain ".com"))
-                     (check-generators/tuple (check-generators/not-empty check-generators/string-alphanumeric)
-                                (check-generators/not-empty check-generators/string-alphanumeric)))}))
 
-(defn generate [schema]
-  (generators/generate schema schema-generators))
+;; Dynamic schema constructors
+
+(defn fixed-len-string-generator [len]
+  (gen/bind (gen/not-empty gen/string-alphanumeric)
+            #(gen/return (apply str (take len (cycle %))))))
+
+(defn fixed-length-string [len]
+  (doto (schema/constrained schema/Str (fixed-len-constraint len))
+    (add-generator (fixed-len-string-generator len))))
+
+(defn min-len-string-generator [min-len]
+  (gen/bind (gen/fmap #(+ min-len %) gen/pos-int)
+            fixed-len-string-generator))
+
+(defn min-length-string [min-len]
+  (doto (schema/constrained schema/Str (min-len-constraint min-len))
+    (add-generator (min-len-string-generator min-len))))
+
+(defn max-len-string-generator [max-len]
+  (gen/bind gen/string-alphanumeric 
+            #(gen/return (apply str (take max-len %)))))
+
+(defn max-length-string [max-len]
+  (doto (schema/constrained schema/Str (max-len-constraint max-len))
+    (add-generator (max-len-string-generator max-len))))
+
+
+

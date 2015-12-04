@@ -72,9 +72,7 @@
                                                                      (map :name (:body schemas/koulutusvalinta))
                                                                      "other"))
                                                     (sc/pred ss/blank?))
-           (sc/optional-key :graduatingYear)      (sc/either
-                                                    (ssc/fixed-length-string 4)
-                                                    (sc/pred ss/blank?))
+           (sc/optional-key :graduatingYear)      (sc/if ss/blank? ssc/BlankStr (ssc/fixed-length-string 4))
            (sc/optional-key :fise)                (ssc/max-length-string 255)
            (sc/optional-key :fiseKelpoisuus)      (sc/either
                                                     (apply sc/enum (map :name schemas/fise-kelpoisuus-lajit))
@@ -116,9 +114,7 @@
                                                                         (map :name (:body schemas/koulutusvalinta))
                                                                         "other"))
                                                        (sc/pred ss/blank?))
-                   (sc/optional-key :graduatingYear) (sc/either
-                                                       (ssc/fixed-length-string 4)
-                                                       (sc/pred ss/blank?))
+                   (sc/optional-key :graduatingYear) (sc/if ss/blank? ssc/BlankStr (ssc/fixed-length-string 4))
                    (sc/optional-key :fise)           (ssc/max-length-string 255)
                    (sc/optional-key :fiseKelpoisuus) (sc/either
                                                        (apply sc/enum (map :name schemas/fise-kelpoisuus-lajit))
