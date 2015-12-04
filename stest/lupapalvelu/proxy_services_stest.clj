@@ -299,3 +299,26 @@
       (fact (:street body) => "Linnankatu")
       (fact (:number body) => "80")
       (fact (:fi (:name body)) => "Turku"))))
+
+(facts "Get address from Helsinki test service"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://212.213.116.162/geos_facta/wfs?request"})
+  (fact "get-addresses-proxy"
+    (let [response (get-addresses-proxy {:params {:query "Liljankuja 6, helsinki" :lang "fi"}})
+          body (json/decode (:body response) true)]
+      (fact (:suggestions body) =contains=> "Liljankuja 6, Helsinki")
+      (fact (first (:data body)) => {:street "Liljankuja",
+                                     :number "6",
+                                     :name {:fi "Helsinki" :sv "Helsingfors"}
+                                     :municipality "186"
+                                     :location {:x 395505.5226496456,
+                                                :y 6706123.673429373}})))
+
+  ; address-by-point-proxy not working at the moment.
+  ; The point is in Jarvenpaa althou the address refers to Helsinki
+
+  #_(fact "address-by-point-proxy"
+     (let [response (address-by-point-proxy {:params {:lang "fi" :x "395505" :y "6706123"}})
+           body (json/decode (:body response) true)]
+       (fact (:street body) => "Liljankuja")
+       (fact (:number body) => "6")
+       (fact (:fi (:name body)) => "Helsinki"))))
