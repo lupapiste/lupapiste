@@ -47,6 +47,12 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     return util.getIn(self, ["bulletin", "bulletinState"]) === "verdictGiven";
   });
 
+  ko.computed(function() {
+    if (self.showVerdictsTab()) {
+      self.selectedTab("verdicts");
+    }
+  })
+
   self.showInfoTab = ko.pureComputed(function() {
     return util.getIn(self, ["bulletin", "bulletinState"]) === "proclaimed";
   });
