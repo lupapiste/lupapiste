@@ -73,7 +73,7 @@
                                                                      "other"))
                                                     (sc/pred ss/blank?))
            (sc/optional-key :graduatingYear)      (sc/either
-                                                    (sc/both (ssc/min-length-string 4) (ssc/max-length-string 4))
+                                                    (ssc/fixed-length-string 4)
                                                     (sc/pred ss/blank?))
            (sc/optional-key :fise)                (ssc/max-length-string 255)
            (sc/optional-key :fiseKelpoisuus)      (sc/either
@@ -117,7 +117,7 @@
                                                                         "other"))
                                                        (sc/pred ss/blank?))
                    (sc/optional-key :graduatingYear) (sc/either
-                                                       (sc/both (ssc/min-length-string 4) (ssc/max-length-string 4))
+                                                       (ssc/fixed-length-string 4)
                                                        (sc/pred ss/blank?))
                    (sc/optional-key :fise)           (ssc/max-length-string 255)
                    (sc/optional-key :fiseKelpoisuus) (sc/either

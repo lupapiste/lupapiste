@@ -29,6 +29,9 @@
 (defn max-length-string [max-len]
   (schema/both schema/Str (max-length max-len)))
 
+(defn fixed-length-string [len]
+  (schema/both (min-length-string len) (max-length-string len)))
+
 ;;
 ;; Schemas
 ;; 
