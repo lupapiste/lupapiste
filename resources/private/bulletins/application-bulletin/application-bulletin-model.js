@@ -43,8 +43,16 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     return _.contains(self.bulletin().stateSeq, self.bulletin().bulletinState);
   });
 
-  self.showVerdicts = ko.pureComputed(function() {
+  self.showVerdictsTab = ko.pureComputed(function() {
     return util.getIn(self, ["bulletin", "bulletinState"]) === "verdictGiven";
+  });
+
+  self.showInfoTab = ko.pureComputed(function() {
+    return util.getIn(self, ["bulletin", "bulletinState"]) === "proclaimed";
+  });
+
+  self.showAttachmentsTab = ko.pureComputed(function() {
+    return util.getIn(self, ["bulletin", "bulletinState"]) === "proclaimed";
   });
 
   var id = self.bulletin.subscribe(function(bulletin) {
