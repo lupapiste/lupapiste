@@ -77,7 +77,7 @@
          (remove (comp util/empty-or-nil? val))
          (into {})
          (sc/validate Statement))
-    (fail :error.statement-updated-after-last-save :statementId (:id statement))))
+    (fail! :error.statement-updated-after-last-save :statementId (:id statement))))
 
 (defn update-draft [statement text status modify-id prev-modify-id]
   (update-statement statement modify-id prev-modify-id :state :draft :text text :status status))

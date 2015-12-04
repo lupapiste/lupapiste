@@ -78,8 +78,7 @@
     (-> (schemas/generate Statement)
         (assoc :modify-id "modx")
         (update-draft "some text" "puoltaa" "mod2" "mod1"))
-    => (contains #{[:ok false] 
-                   [:text "error.statement-updated-after-last-save"]}))
+    => (throws Exception))
 
   (fact "update-draft - missing person"
     (-> (schemas/generate Statement)
