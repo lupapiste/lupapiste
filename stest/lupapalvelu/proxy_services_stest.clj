@@ -4,6 +4,7 @@
             [midje.sweet :refer :all]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
             [sade.core :refer [now]]
             [sade.env :as env]
@@ -59,6 +60,9 @@
       (fact (-> r :data first :location keys) => (just #{:x :y}))))
 
 (facts "point-by-property-id"
+  (against-background
+    (mongo/select :propertyCache anything) => nil
+    (mongo/insert-batch :propertyCache anything anything) => nil)
   (let [property-id "09100200990013"
         request {:params {:property-id property-id}}
         response (point-by-property-id-proxy request)]
