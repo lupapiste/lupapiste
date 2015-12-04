@@ -611,7 +611,7 @@
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
   (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))
 
-(defn- get-statement-by-user-id [application user-id]
+(defn get-statement-by-user-id [application user-id]
   (some #(when (= user-id (get-in % [:person :userId])) %) (:statements application)))
 
 ;; This has a side effect which generates a attachement to appliction
