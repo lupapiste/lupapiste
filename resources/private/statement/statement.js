@@ -29,6 +29,7 @@
     self.text = ko.observable();
     self.submitting = ko.observable(false);
     self.dirty = ko.observable(false);
+    self.modifyId = ko.observable(util.randomElementId());
     self.submitLtext = ko.computed(function() {
       if(self.data() && self.data().status && self.data().status()) {
         return "statement.submit-again";
@@ -38,13 +39,13 @@
     });
 
     self.text.subscribe(function(value) {
-      if(self.data() && (!self.data().text || self.data().text && self.data().text() !== value)) { 
+      if(util.getIn(self.data(), ["text"])  !== value) { 
         self.dirty(true);
       }
     });
 
     self.selectedStatus.subscribe(function(value) {
-      if(self.data() && (!self.data().status || self.data().status && self.data().status() !== value)) {
+      if(util.getIn(self.data(), ["status"]) !== value) {
         self.dirty(true)
       }
     });
@@ -63,6 +64,9 @@
       self.application(ko.mapping.fromJS(application));
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
       if(statement) {
+        if (!statement["modify-id"]) {
+          statement["modify-id"] = "";
+        }
         self.data(ko.mapping.fromJS(statement));
 
         if (!self.dirty()) {
@@ -103,8 +107,17 @@
     self.submit = function() {
       self.submitting(true);
       ajax
-        .command("give-statement", {id: applicationId, statementId: statementId, status: self.selectedStatus(), text: self.text(), lang: loc.getCurrentLanguage()})
+        .command("give-statement", {
+          id: applicationId, 
+          "modify-id": self.modifyId(),
+          "prev-modify-id": util.getIn(self.data(), ["modify-id"], ""),
+          statementId: statementId, 
+          status: self.selectedStatus(), 
+          text: self.text(), 
+          lang: loc.getCurrentLanguage()
+        })
         .success(function() {
+          updateModifyId(self);
           pageutil.openApplicationPage({id: applicationId}, "statement");
           repository.load(applicationId);
           return false;
@@ -116,8 +129,39 @@
 
     self.disabled = ko.computed(function() {
       return !self.selectedStatus() || !self.text() || self.submitting() || !self.dirty();
+    });    
+
+    self.dirty.subscribe(function(dirty) {
+      dirty && (_.debounce(_.partial(updateDraft, self), 2000))();
     });
   }
+
+
+  function updateModifyId(self) {
+    self.data()["modify-id"](self.modifyId());
+    self.modifyId(util.randomElementId());
+  }
+
+  function updateDraft(self) {
+    self.submitting(true);
+    self.dirty(false);
+    ajax
+      .command("save-statement-as-draft", {
+        id: applicationId, 
+        "modify-id": self.modifyId(),
+        "prev-modify-id": util.getIn(self.data(), ["modify-id"], ""),
+        statementId: statementId, 
+        status: self.selectedStatus(), 
+        text: self.text(), 
+        lang: loc.getCurrentLanguage()})
+      .success(function() {
+        updateModifyId(self);
+        return false;
+      })
+      .complete(function() { self.submitting(false); })
+      .call();
+    return false;
+  };
 
   function deleteStatementFromServer() {
     ajax
