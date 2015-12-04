@@ -54,7 +54,7 @@
 ;; Dynamic schema constructors
 
 (defn fixed-len-string-generator [len]
-  (gen/bind (gen/not-empty gen/string-alphanumeric)
+  (gen/bind (gen/not-empty gen/string)
             #(gen/return (apply str (take len (cycle %))))))
 
 (defn fixed-length-string [len]
