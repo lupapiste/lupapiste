@@ -72,7 +72,7 @@
                              [lupapiste/lein-hgnotes "0.3.0"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8" "-Dline.separator=\"\n\""]
+                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
                    :eastwood {:continue-on-exception true
                               :source-paths ["src"]
                               :test-paths []}}
