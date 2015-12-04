@@ -30,13 +30,6 @@
     self.submitting = ko.observable(false);
     self.dirty = ko.observable(false);
     self.modifyId = ko.observable(util.randomElementId());
-    self.submitLtext = ko.computed(function() {
-      if(self.data() && self.data().status && self.data().status()) {
-        return "statement.submit-again";
-      } else {
-        return "statement.submit";
-      }
-    });
 
     self.text.subscribe(function(value) {
       if(util.getIn(self.data(), ["text"])  !== value) { 
@@ -143,23 +136,26 @@
   }
 
   function updateDraft(self) {
-    self.submitting(true);
-    self.dirty(false);
-    ajax
-      .command("save-statement-as-draft", {
-        id: applicationId, 
-        "modify-id": self.modifyId(),
-        "prev-modify-id": util.getIn(self.data(), ["modify-id"], ""),
-        statementId: statementId, 
-        status: self.selectedStatus(), 
-        text: self.text(), 
-        lang: loc.getCurrentLanguage()})
-      .success(function() {
-        updateModifyId(self);
-        return false;
-      })
-      .complete(function() { self.submitting(false); })
-      .call();
+    if (self.dirty()) {
+      self.submitting(true);
+      self.dirty(false);
+      ajax
+        .command("save-statement-as-draft", {
+          id: applicationId, 
+          "modify-id": self.modifyId(),
+          "prev-modify-id": util.getIn(self.data(), ["modify-id"], ""),
+          statementId: statementId, 
+          status: self.selectedStatus(), 
+          text: self.text(), 
+          lang: loc.getCurrentLanguage()
+        })
+        .success(function() {
+          updateModifyId(self);
+          return false;
+        })
+        .complete(function() { self.submitting(false); })
+        .call();
+    }
     return false;
   };
 

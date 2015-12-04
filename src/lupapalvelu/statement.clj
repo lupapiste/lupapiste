@@ -65,7 +65,7 @@
       (fail :error.not-statement-owner))))
 
 (defn statement-given? [application statementId]
-  (->> statementId (get-statement application) :state post-given-states))
+  (->> statementId (get-statement application) :state keyword post-given-states))
 
 (defn statement-not-given [{{:keys [statementId]} :data} application]
   (when (statement-given? application statementId)

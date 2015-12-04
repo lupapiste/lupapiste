@@ -155,7 +155,7 @@
 
 (defcommand give-statement
   {:parameters  [:id statementId status text :lang]
-   :pre-checks  [statement-exists statement-owner #_statement-not-given]
+   :pre-checks  [statement-exists statement-owner statement-not-given]
    :states      #{:open :submitted :complementNeeded}
    :user-roles #{:authority}
    :user-authz-roles #{:statementGiver}
