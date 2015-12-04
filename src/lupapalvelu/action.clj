@@ -100,6 +100,12 @@
       :error.vector-parameters-with-items-missing-required-keys
       {:required-keys required-keys})))
 
+(defn vector-parameter-of [param pred command]
+  (or
+    (vector-parameters [param] command)
+    (when-not (every? pred (get-in command [:data param]))
+      (fail :error.unknown-type :parameters param))))
+
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
 
