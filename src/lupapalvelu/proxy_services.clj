@@ -87,14 +87,6 @@
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
-(defn area-by-property-id-proxy [{{property-id :property-id} :params :as request}]
-  (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id))
-    (let [features (plocation/property-location-info property-id)]
-      (if features
-        (resp/json {:data (map #(select-keys % [:wkt :kiinttunnus]) features)})
-        (resp/status 503 "Service temporarily unavailable")))
-    (resp/status 400 "Bad Request")))
-
 (defn property-id-by-point-proxy [{{x :x y :y} :params}]
   (if (and (coord/valid-x? x) (coord/valid-y? y))
     (let [features (wfs/property-id-by-point x y)]
