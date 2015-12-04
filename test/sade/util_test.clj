@@ -213,16 +213,6 @@
   (assoc-when {:a nil :b :b} :a :a, :b nil, :c :c)
   => {:a :a, :b :b, :c :c})
 
-(facts max-length
-  (fact (sc/check (max-length 1) []) => nil)
-  (fact (sc/check (max-length 1) [1]) => nil)
-  (fact (sc/check (max-length 1) [1 2]) =not=> nil))
-
-(facts max-length-string
-  (fact (sc/check (max-length-string 1) "a") => nil)
-  (fact (sc/check (max-length-string 1) "ab") =not=> nil)
-  (fact (sc/check (max-length-string 1) [1]) =not=> nil))
-
 (facts "comparing history item difficulties"
   (let [values (vec (map :name (:body schema/patevyysvaatimusluokka)))]
     (fact "nil and item"          (compare-difficulty :difficulty values nil {:difficulty "A"})                => pos?)
