@@ -1,8 +1,12 @@
 (ns lupapalvelu.property-stest
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.property-location :refer :all]))
+            [lupapalvelu.property-location :refer :all]
+            [lupapalvelu.mongo :as mongo]))
 
 (facts property-location-info
+  (against-background
+    (mongo/select :propertyCache anything) => nil
+    (mongo/insert-batch :propertyCache anything anything) => nil)
 
   (fact "single result"
     (let [results (property-location-info "75341600380021")

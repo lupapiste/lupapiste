@@ -64,6 +64,12 @@
     (when-not (= (user/canonize-email statement-email) (user/canonize-email user-email))
       (fail :error.not-statement-owner))))
 
+(defn authority-or-statement-owner-applicant [{{role :role} :user :as command} application]
+  (when-not (or
+              (= :authority (keyword role))
+              (and (= :applicant (keyword role)) (nil? (statement-owner command application))))
+    (fail :error.not-authority-or-statement-owner-applicant)))
+
 (defn statement-given? [application statementId]
   (->> statementId (get-statement application) :state keyword post-given-states))
 

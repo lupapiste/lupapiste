@@ -570,7 +570,6 @@ var attachment = (function() {
 
   hub.subscribe("upload-done", uploadDone);
 
-  // applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority
   function initFileUpload(options) {
     uploadingApplicationId = options.applicationId;
     var iframeId = "uploadFrame";

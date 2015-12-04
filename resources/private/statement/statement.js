@@ -127,6 +127,11 @@
     self.dirty.subscribe(function(dirty) {
       dirty && (_.debounce(_.partial(updateDraft, self), 2000))();
     });
+
+    self.canDeleteStatement = function() {
+      return authorizationModel.ok("delete-statement");
+    };
+
   }
 
 
@@ -183,11 +188,13 @@
     };
 
     self.canDeleteAttachment = function(attachment) {
-      return authorizationModel.ok("delete-attachment") && (!attachment.authority || lupapisteApp.models.currentUser.isAuthority());
+      return authorizationModel.ok("delete-attachment") &&
+             authorizationModel.ok('give-statement') &&
+             (!attachment.requestedByAuthority || lupapisteApp.models.currentUser.isAuthority());
     };
 
     self.canAddAttachment = function() {
-      return authorizationModel.ok("upload-attachment") && lupapisteApp.models.currentUser.isAuthority();
+      return authorizationModel.ok("upload-attachment") && authorizationModel.ok('give-statement');
     };
 
     self.deleteAttachment = function(attachmentId) {
@@ -208,8 +215,7 @@
         attachmentType: "muut.muu",
         typeSelector: false,
         target: {type: "statement", id: statementId},
-        locked: true,
-        authority: lupapisteApp.models.currentUser.isAuthority()
+        locked: true
       });
       LUPAPISTE.ModalDialog.open("#upload-dialog");
     };

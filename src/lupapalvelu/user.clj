@@ -166,7 +166,7 @@
     (contains? #{:oirAuthority} (keyword role))))
 
 (defn authority? [{role :role}]
-  (boolean (#{:authority :oirAuthority} (keyword role))))
+  (contains? #{:authority :oirAuthority} (keyword role)))
 
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))

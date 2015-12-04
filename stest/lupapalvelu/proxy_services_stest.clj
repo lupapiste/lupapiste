@@ -313,12 +313,13 @@
                                      :location {:x 395505.5226496456,
                                                 :y 6706123.673429373}})))
 
-  ; address-by-point-proxy not working at the moment.
-  ; The point is in Jarvenpaa althou the address refers to Helsinki
 
-  #_(fact "address-by-point-proxy"
-     (let [response (address-by-point-proxy {:params {:lang "fi" :x "395505" :y "6706123"}})
-           body (json/decode (:body response) true)]
-       (fact (:street body) => "Liljankuja")
-       (fact (:number body) => "6")
-       (fact (:fi (:name body)) => "Helsinki"))))
+  ; The point is in Jarvenpaa although the address refers to Helsinki.
+  ; Test data has Liljankuja 77 at the same point location as the first result.
+
+  (fact "address-by-point-proxy"
+    (let [response (address-by-point-proxy {:params {:lang "fi" :x "395505" :y "6706123"}})
+          body (json/decode (:body response) true)]
+      (fact (:street body) => "Liljankuja")
+      (fact (:number body) => "77")
+      (fact (:fi (:name body)) => "J\u00e4rvenp\u00e4\u00e4"))))
