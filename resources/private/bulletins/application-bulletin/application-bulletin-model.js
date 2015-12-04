@@ -44,7 +44,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   });
 
   self.showVerdictsTab = ko.pureComputed(function() {
-    return util.getIn(self, ["bulletin", "bulletinState"]) === "verdictGiven";
+    return _.includes(["verdictGiven", "final"], util.getIn(self, ["bulletin", "bulletinState"]));
   });
 
   ko.computed(function() {
