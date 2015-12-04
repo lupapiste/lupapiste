@@ -109,7 +109,7 @@ Sonja can comment on Ronjas statement
 
 Sonja can give statement to own request
   Open statement  2
-  Wait until  Select From List  statement-type-select  puoltaa
+  Wait until  Select From List By Value  statement-type-select  puoltaa
   Input text  statement-text  salibandy on the rocks.
   Wait and click  statement-submit
 
@@ -118,7 +118,7 @@ Comment is added
   Wait until  Comment count is  1
 
 Sonja can regive statement to own statement
-  Select From List  statement-type-select  puoltaa
+  Select From List By Value  statement-type-select  puoltaa
   Input text  statement-text  salibandy on the rocks.
   Wait and click  statement-submit
 
@@ -143,7 +143,7 @@ Veikko from Tampere can give verdict to own statement
   Open statement  1
   Wait Until  element should be enabled  statement-text
   Input text  statement-text  uittotunnelin vieressa on tilaa.
-  Select From List  statement-type-select  ehdoilla
+  Select From List By Value  statement-type-select  ehdoilla
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//td[@data-test-name='Veikko Viranomainen']  Puoltaa ehdoilla
