@@ -4,6 +4,7 @@
             [lupapalvelu.vetuma-itest-util :as vetuma-util]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [sade.util :as util]
             [clojure.java.io :as io]
             [cheshire.core :as json]))
 
@@ -80,8 +81,10 @@
             (:id (first bulletin-attachments)) => (:id (last attachments))
             (get-in (first bulletin-attachments) [:type :type-id]) => "vastaanottopaikan_tiedot")))))
 
-  (facts* "Add comment for published bulletin"
-    (let [store (atom {})
+  (facts "Add comment for published bulletin"
+    (let [starts  (util/get-timestamp-ago :day 1)
+          ends    (util/get-timestamp-from-now :day 1)
+          store (atom {})
           cookie-store (doto (->cookie-store store)
                          (.addCookie test-db-cookie))
           app (create-and-send-application sonja :operation "lannan-varastointi"
@@ -89,22 +92,25 @@
                                              :x 406898.625 :y 6684125.375
                                              :address "Hitantine 108"
                                              :state "sent")
-          _ (command sonja :move-to-proclaimed
-                     :id (:id app)
-                     :proclamationStartsAt 1449153132436
-                     :proclamationEndsAt 1449153132436
-                     :proclamationText "testi"
-                     :cookie-store cookie-store) => ok?
+          m2p1 (command sonja :move-to-proclaimed
+                        :id (:id app)
+                        :proclamationStartsAt starts
+                        :proclamationEndsAt ends
+                        :proclamationText "testi"
+                        :cookie-store cookie-store)
           old-bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))
-          _ (command sonja :move-to-proclaimed
-                     :id (:id app)
-                     :proclamationStartsAt 1449153132436
-                     :proclamationEndsAt 1449153132436
-                     :proclamationText "testi"
-                     :cookie-store cookie-store) => ok?
+          m2p2 (command sonja :move-to-proclaimed
+                    :id (:id app)
+                    :proclamationStartsAt starts
+                    :proclamationEndsAt ends
+                    :proclamationText "testi"
+                    :cookie-store cookie-store)
           bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))
           _ (vetuma-util/authenticate-to-vetuma! cookie-store)
           files (:files (json/decode (:body (send-file cookie-store)) true))]
+
+      m2p1 => ok?
+      m2p2 => ok?
 
       (fact "unable to add comment for older version"
         (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId old-bulletin) :comment "foobar" :cookie-store cookie-store) => {:ok false :text "error.invalid-version-id"})
