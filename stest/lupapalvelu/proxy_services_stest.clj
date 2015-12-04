@@ -322,4 +322,4 @@
           body (json/decode (:body response) true)]
       (fact (:street body) => "Liljankuja")
       (fact (:number body) => "77")
-      (fact (:fi (:name body)) => "Järvenpää"))))
+      (fact (:fi (:name body)) => "J\u00e4rvenp\u00e4\u00e4"))))
