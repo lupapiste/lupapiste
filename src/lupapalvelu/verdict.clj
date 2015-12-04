@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error]]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
+            [sade.common-reader :as cr]
             [sade.core :refer :all]
             [sade.http :as http]
             [sade.strings :as ss]
