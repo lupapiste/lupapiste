@@ -556,10 +556,10 @@
     (if expect-to-succeed
       (facts "Upload succesfully"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
+             (fact "location"    (get-in resp [:headers "location"]) => "/lp-static/html/upload-ok.html"))
       (facts "Upload should fail"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.111.html") => 0)))))
+             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.111.html") => 0)))))
 
 (defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
@@ -581,10 +581,10 @@
     (if expect-to-succeed
       (facts "Statement upload succesfully"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
+        (fact "location"    (get-in resp [:headers "location"]) => "/lp-static/html/upload-ok.html"))
       (facts "Statement upload should fail"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.111.html") => 0)))))
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.111.html") => 0)))))
 
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 
