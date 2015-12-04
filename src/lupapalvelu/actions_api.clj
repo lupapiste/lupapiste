@@ -1,7 +1,8 @@
 (ns lupapalvelu.actions-api
   (:require [sade.env :as env]
             [sade.core :refer :all]
-            [lupapalvelu.action :refer [defquery] :as action]))
+            [lupapalvelu.action :refer [defquery] :as action]
+            [lupapalvelu.authorization :as auth]))
 
 ;;
 ;; Default actions
@@ -22,9 +23,9 @@
   (ok :actions (action/serializable-actions)))
 
 (defquery allowed-actions
-  {:user-roles #{:anonymous}
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles  action/reader-org-authz-roles}
+  {:user-roles       #{:anonymous}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles}
   [{:keys [data user application]}]
   (let [results  (map validated (foreach-action user data application))
         filtered (if (env/dev-mode?)

@@ -8,6 +8,7 @@
             [sade.property :as p]
             [sade.validators :as validators]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -1193,7 +1194,7 @@
   [user] (= "777777777777777777000020" (:id user)))
 
 (defn init-application-history [{:keys [created opened infoRequest convertedToApplication permitSubtype] :as application}]
-  (let [owner-auth (first (domain/get-auths-by-role application :owner))
+  (let [owner-auth (first (auth/get-auths-by-role application :owner))
         owner-user (user/find-user (select-keys owner-auth [:id]))
         creator (cond
                   (= permitSubtype "muutoslupa") (:user (mongo/by-id :muutoslupa created))

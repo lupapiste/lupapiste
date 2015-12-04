@@ -211,8 +211,9 @@
 (defn validate
   "Throws an exception if the markup is invalid"
   [xml permit-type schema-version]
-  (let [xml-reader (StringReader. xml)
-        xml-source (StreamSource. xml-reader)
+  (let [xml-source (if (string? xml)
+                     (StreamSource. (StringReader. xml))
+                     (StreamSource. xml))
         validator  (get-in schema-validators [(keyword permit-type) (name schema-version)])]
     (when-not validator
       (throw (IllegalArgumentException. (str "Unsupported schema version " schema-version " for permit type " permit-type))))

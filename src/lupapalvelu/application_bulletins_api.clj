@@ -85,16 +85,13 @@
     (ok :municipalities municipalities)))
 
 (defquery application-bulletin-states
-  {:description "List of distinct municipalities of application bulletins"
+  {:description "List of distinct states of application bulletins"
    :feature :publish-bulletin
    :parameters []
    :user-roles #{:anonymous}}
   [_]
   (let [states (mongo/distinct :application-bulletins :versions.bulletinState)]
     (ok :states states)))
-
-(defn- get-bulletin [bulletin-id]
-  (mongo/by-id :application-bulletins bulletin-id))
 
 (defn- bulletin-version-is-latest [bulletin bulletin-version-id]
   (let [latest-version-id (:id (last (:versions bulletin)))]
@@ -105,7 +102,8 @@
   [{{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId comment :comment} :data}]
   (if (ss/blank? comment)
     (fail :error.empty-comment)
-    (let [bulletin (get-bulletin bulletin-id)]
+    (let [projection {:bulletinState 1 :versions {$slice -1} "versions.id" 1}
+          bulletin (bulletins/get-bulletin bulletin-id projection)]
       (if-not bulletin
         (fail :error.invalid-bulletin-id)
         (if-not (= (:bulletinState bulletin) "proclaimed")
@@ -128,7 +126,7 @@
 (defn- bulletin-can-be-commented
   ([{{bulletin-id :bulletinId} :data}]
    (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
-         bulletin   (mongo/select-one :application-bulletins {:_id bulletin-id} projection)] ; TODO: use get-bulletin, add projection
+         bulletin   (bulletins/get-bulletin bulletin-id projection)]
      (if-not (and (= (:bulletinState bulletin) "proclaimed")
                   (in-proclaimed-period (-> bulletin :versions last)))
        (fail :error.bulletin-not-in-commentable-state))))
@@ -152,7 +150,7 @@
   (let [address-source (if otherReceiver data (get-in (vetuma/vetuma-session) [:user]))
         delivery-address (select-keys address-source delivery-address-fields)
         contact-info (merge delivery-address {:email          email
-                                              :emailPreferred (= emailPreferred "on")})
+                                              :emailPreferred emailPreferred})
         comment (bulletins/create-comment bulletin-id bulletin-version-id comment contact-info files created)]
     (mongo/insert :application-bulletin-comments comment)
     (bulletins/update-file-metadata bulletin-id (:id comment) files)
@@ -169,15 +167,6 @@
         search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
         search-updates (get-search-fields search-fields app-snapshot)]
     (bulletins/snapshot-updates app-snapshot search-updates created)))
-
-(defcommand publish-bulletin
-  {:parameters [id]
-   :feature :publish-bulletin
-   :user-roles #{:authority}
-   :states     (states/all-application-states-but :draft :open :submitted)}
-  [{:keys [application created] :as command}]
-  (mongo/update-by-id :application-bulletins id (create-bulletin application created) :upsert true)
-  (ok))
 
 (defcommand move-to-proclaimed
   {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
@@ -213,7 +202,6 @@
   ; Note there is currently no way to move application to final state so we sent bulletin state manuall
   (let [updates (->> (create-bulletin application created {:officialAt officialAt
                                                            :bulletinState :final}))]
-    (clojure.pprint/pprint updates)
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
@@ -275,7 +263,7 @@
 
 (defn- bulletin-can-be-saved
   ([state {{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId} :data}]
-   (let [bulletin (get-bulletin bulletin-id)]
+   (let [bulletin (bulletins/get-bulletin bulletin-id)]
      (prn "state" state)
      (if-not bulletin
        (fail :error.invalid-bulletin-id)

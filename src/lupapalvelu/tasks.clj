@@ -3,8 +3,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [def-]]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.schemas :as schemas]
@@ -133,7 +133,7 @@
     (:paatokset verdict)))
 
 (defn verdicts->tasks [application timestamp]
-  (let [owner (first (domain/get-auths-by-role application :owner))
+  (let [owner (first (auth/get-auths-by-role application :owner))
         meta {:created timestamp
               :assignee (user/get-user-by-id (:id owner))}]
     (flatten (map #(verdict->tasks % meta) (:verdicts application)))))
