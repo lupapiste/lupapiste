@@ -14,6 +14,8 @@
             [sade.core :refer :all]
             [sade.session :as ssess]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.states :as states]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
@@ -27,7 +29,6 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.password-reset :as pw-reset]
             ))
 
@@ -38,7 +39,7 @@
 ;;
 
 (defquery user
-  {:user-roles action/all-authenticated-user-roles}
+  {:user-roles auth/all-authenticated-user-roles}
   [{user :user}]
   (if (user/virtual-user? user)
     (ok :user user)
@@ -450,7 +451,7 @@
         (fail :error.login)))))
 
 (defquery redirect-after-login
-  {:user-roles action/all-authenticated-user-roles}
+  {:user-roles auth/all-authenticated-user-roles}
   [{session :session}]
   (ok :url (get session :redirect-after-login "")))
 
@@ -657,7 +658,7 @@
 
 (defquery enable-foreman-search
   {:user-roles #{:authority}
-   :org-authz-roles (disj action/all-org-authz-roles :tos-editor :tos-publisher)
+   :org-authz-roles (disj auth/all-org-authz-roles :tos-editor :tos-publisher)
    :pre-checks [(fn [command application]
                   (let [org-ids (user/organization-ids (:user command))]
                     (if-not application

@@ -15,6 +15,7 @@
             [sade.util :as util]
             [sade.municipality :as muni]
             [lupapalvelu.find-address :as find-address]
+            [lupapalvelu.property-location :as plocation]
             [lupapalvelu.wfs :as wfs]))
 
 
@@ -78,18 +79,11 @@
         (resp/json (or (find-address/search normalized-term lang) [])))
       (resp/status 400 "Missing query parameters")))
 
-(defn point-by-property-id-proxy [request]
-  (let [property-id (get (:params request) :property-id)
-        features (wfs/location-info-by-property-id property-id)]
-    (if features
-      (resp/json {:data (map wfs/feature-to-position features)})
-      (resp/status 503 "Service temporarily unavailable"))))
-
-(defn area-by-property-id-proxy [{{property-id :property-id} :params :as request}]
-  (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id) )
-    (let [features (wfs/location-info-by-property-id property-id)]
+(defn point-by-property-id-proxy [{{property-id :property-id} :params :as request}]
+  (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id))
+    (let [features (plocation/property-location-info property-id)]
       (if features
-        (resp/json {:data (map wfs/feature-to-area features)})
+        (resp/json {:data (map #(select-keys % [:x :y]) features)})
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
@@ -168,8 +162,8 @@
                          (re-find #"^\d+_kantakartta$" layer-name) "kantakartta"
                          :else "other")
         layer-id (case layer-category
-                   "asemakaava" "101"
-                   "kantakartta" "102"
+                   "asemakaava"  101
+                   "kantakartta" 102
                    layer-name)]
     {:wmsName layer-name
      :wmsUrl "/proxy/wms"
@@ -338,7 +332,6 @@
                "wmts/maasto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "wmts/kiinteisto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "point-by-property-id" point-by-property-id-proxy
-               "area-by-property-id" area-by-property-id-proxy
                "property-id-by-point" property-id-by-point-proxy
                "address-by-point" address-by-point-proxy
                "find-address" find-addresses-proxy

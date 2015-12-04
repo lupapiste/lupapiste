@@ -23,10 +23,6 @@ LUPAPISTE.PublishApplicationModel = function(params) {
     }
   });
 
-  self.canNotPublishForAuthority = ko.pureComputed(function() {
-    return !self.authModel.ok("publish-bulletin") && lupapisteApp.models.currentUser.isAuthority();
-  });
-
   self.notYetPublishedForApplicant = ko.pureComputed(function() {
     return !self.bulletinState() && lupapisteApp.models.currentUser.isApplicant();
   });
@@ -46,5 +42,9 @@ LUPAPISTE.PublishApplicationModel = function(params) {
 
   self.showBulletinState = ko.pureComputed(function() {
     return self.bulletinState() ? "bulletin.state." + self.bulletinState() : undefined;
+  });
+
+  self.canNotPublishForAuthority = ko.pureComputed(function() {
+    return !self.canMoveToProclaimed() && !self.canMoveToVerdictGiven() && !self.canMoveToFinal();
   });
 };

@@ -1,15 +1,35 @@
 (function() {
   "use strict";
 
+  var applicationDrawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
+  var neighbourDrawStyle = {fillColor: "rgb(243,145,41)", // $lp-orange
+                            fillOpacity: 0.50,
+                            strokeColor: "#000", //"rgb(239, 118, 38)", // $orange-darkest
+                            pointRadius: 6,
+                            strokeWidth: 3
+                            };
   var applicationId;
+
+  var borderCache = {};
 
   function Model() {
     var self = this;
+
+    self.getApplicationWKT = null;
+    self.applicationAreaLoading = ko.observable(false);
+
+    self.getNeighbourWKT = null;
+    self.neighborAreasLoading = ko.observable(false);
+
+    self.areasLoading = ko.pureComputed(function() {
+      return self.applicationAreaLoading() || self.neighborAreasLoading();
+    });
 
     self.applicationId = ko.observable();
     self.neighbors = ko.observableArray();
     self.neighborId = ko.observable();
     self.map = null;
+
 
     var neighborSkeleton = {propertyId: undefined,
                             owner: {
@@ -31,18 +51,54 @@
       return n;
     }
 
-    self.init = function(application) {
-      if (!self.map) {
-        self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
+    self.draw = function(propertyIds, drawingStyle, processing) {
+      var processedIds = [];
+      var found = [];
+      var missing = [];
+
+      _.each(propertyIds, function(p) {
+        if (!_.contains(processedIds, p)) {
+          if (borderCache[p]) {
+            _.each(borderCache[p], function(wkt) {found.push(wkt);});
+          } else {
+            missing.push(p);
+          }
+          processedIds.push(p);
+        }
+      });
+
+      self.map.drawDrawings(found, {}, drawingStyle);
+
+      if (!_.isEmpty(missing)) {
+        ajax.datatables("property-borders", {propertyIds: missing})
+          .success(function(resp) {
+            _.each(_.groupBy(resp.wkts, "kiinttunnus"), function(m,k) {
+              borderCache[k] = _.pluck(m, "wkt");
+            });
+            self.map.drawDrawings(_.pluck(resp.wkts, "wkt"), {}, drawingStyle);
+          })
+          .processing(processing)
+          .call();
       }
+    };
+
+    self.init = function(application) {
       var location = application.location,
           x = location.x,
           y = location.y;
-      self
-        .applicationId(application.id)
-        .neighbors(_.map(application.neighbors, ensureNeighbors))
-        .neighborId(null)
-        .map.clear().updateSize().center(x, y, 13).add({x: x, y: y});
+      var neighbors = _.map(application.neighbors, ensureNeighbors);
+
+      if (!self.map) {
+        self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
+        self.map.updateSize().center(x, y, 13).add({x: x, y:y});
+      } else {
+        self.map.updateSize().center(x, y).clear().add({x: x, y:y});
+      }
+
+      self.applicationId(application.id).neighbors(neighbors).neighborId(null);
+
+      self.getApplicationWKT = self.draw([application.propertyId], applicationDrawStyle, self.applicationAreaLoading);
+      self.getNeighbourWKT = self.draw(_.pluck(neighbors, "propertyId"), neighbourDrawStyle, self.neighborAreasLoading);
     };
 
     function openEditDialog(params) {
@@ -100,7 +156,19 @@
   });
 
   hub.onPageUnload("neighbors", function() {
-    model.map = null;
+    if (model.getApplicationWKT) {
+      model.getApplicationWKT.abort();
+      model.getApplicationWKT = null;
+    }
+    if (model.getNeighbourWKT) {
+      model.getNeighbourWKT.abort();
+      model.getNeighbourWKT = null;
+    }
+    if (model.map) {
+      model.map.clear();
+    }
+
+    // Could reset borderCache here to save memory?
   });
 
   repository.loaded(["neighbors"], function(application) {

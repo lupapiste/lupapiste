@@ -4,6 +4,7 @@
             [midje.sweet :refer :all]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
             [sade.core :refer [now]]
             [sade.env :as env]
@@ -59,6 +60,9 @@
       (fact (-> r :data first :location keys) => (just #{:x :y}))))
 
 (facts "point-by-property-id"
+  (against-background
+    (mongo/select :propertyCache anything) => nil
+    (mongo/insert-batch :propertyCache anything anything) => nil)
   (let [property-id "09100200990013"
         request {:params {:property-id property-id}}
         response (point-by-property-id-proxy request)]
@@ -144,20 +148,6 @@
       (fact (:street body) => "Kirkkomaanpolku")
       (fact (:number body) => #"\d")
       (fact (:fi (:name body)) => "Sipoo"))))
-
-(facts "area-by-property-id"
-  (let [response (area-by-property-id-proxy {:params {:property-id "75341600380021"}})]
-    (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
-    (let [body (json/decode (:body response) true)
-          data (:data body)
-          {:keys [kiinttunnus wkt]} (first data)]
-
-      (fact "collection format"
-        (count data) => 1
-        (keys (first data)) => (just #{:kiinttunnus :wkt}))
-
-      (fact "property id is echoed" kiinttunnus => "75341600380021")
-      (fact "wkt" wkt => #"^POLYGON"))))
 
 (facts "plan-urls-by-point-proxy"
 
@@ -309,3 +299,26 @@
       (fact (:street body) => "Linnankatu")
       (fact (:number body) => "80")
       (fact (:fi (:name body)) => "Turku"))))
+
+(facts "Get address from Helsinki test service"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://212.213.116.162/geos_facta/wfs?request"})
+  (fact "get-addresses-proxy"
+    (let [response (get-addresses-proxy {:params {:query "Liljankuja 6, helsinki" :lang "fi"}})
+          body (json/decode (:body response) true)]
+      (fact (:suggestions body) =contains=> "Liljankuja 6, Helsinki")
+      (fact (first (:data body)) => {:street "Liljankuja",
+                                     :number "6",
+                                     :name {:fi "Helsinki" :sv "Helsingfors"}
+                                     :municipality "186"
+                                     :location {:x 395505.5226496456,
+                                                :y 6706123.673429373}})))
+
+  ; address-by-point-proxy not working at the moment.
+  ; The point is in Jarvenpaa althou the address refers to Helsinki
+
+  #_(fact "address-by-point-proxy"
+     (let [response (address-by-point-proxy {:params {:lang "fi" :x "395505" :y "6706123"}})
+           body (json/decode (:body response) true)]
+       (fact (:street body) => "Liljankuja")
+       (fact (:number body) => "6")
+       (fact (:fi (:name body)) => "Helsinki"))))

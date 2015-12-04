@@ -272,8 +272,7 @@
                                             :YL ymparistolupa_to_krysp_221
                                             :MAL maa-aines_to_krysp_221
                                             :VVVL vesihuolto-to-krysp_221)
-                              xml (element-to-xml canonical mapping)
-                              xml-s (indent-str xml)]
+                              xml (element-to-xml canonical mapping)]
                              (fact "xml exists" xml => truthy)))
 
                    (fact "Application is not assigned"

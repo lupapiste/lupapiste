@@ -8,7 +8,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
             [lupapalvelu.action :refer :all]
-            [lupapalvelu.states :as states])
+            [lupapalvelu.states :as states]
+            [lupapalvelu.authorization :as auth])
   (:import [org.apache.commons.io.output NullWriter]))
 
 (defn returns [])
@@ -102,35 +103,35 @@
 
 (facts "Access based on user-authz-roles"
   (against-background
-    (get-actions) => {:test-command-auth {:parameters [:id]
-                                          :user-roles #{:authority}
-                                          :org-authz-roles #{:authority}
-                                          :states states/all-states
-                                          :user-authz-roles #{:someRole}}
-                      :with-default-roles {:parameters [:id]
-                                            :user-roles #{:authority}
-                                            :org-authz-roles #{:authority}
-                                            :states states/all-states
-                                            :user-authz-roles default-authz-writer-roles}}
+    (get-actions) => {:test-command-auth  {:parameters       [:id]
+                                           :user-roles       #{:authority}
+                                           :org-authz-roles  #{:authority}
+                                           :states           states/all-states
+                                           :user-authz-roles #{:someRole}}
+                      :with-default-roles {:parameters       [:id]
+                                           :user-roles       #{:authority}
+                                           :org-authz-roles  #{:authority}
+                                           :states           states/all-states
+                                           :user-authz-roles auth/default-authz-writer-roles}}
     (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :authority} :include-canceled-apps? true) => {:organization "999-R"
                                                                                                                                                                 :state "submitted"
                                                                                                                                                                 :auth [{:id "user123" :role "someRole"}]}
 
     (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :applicant} :include-canceled-apps? true) => {:organization "999-R" :state "submitted" :auth []}
 
-    (domain/get-application-as "123" {:id "user123" :organizations [] :role :authority} :include-canceled-apps? true) =>  {:organization "999-R"
+    (domain/get-application-as "123" {:id "user123" :organizations [] :role :authority} :include-canceled-apps? true) => {:organization "999-R"
                                                                                                                            :state "submitted"
                                                                                                                            :auth [{:id "user123" :role "someRole"}]}
 
-    (domain/get-application-as "123" {:id "user234" :organizations [] :role :authority} :include-canceled-apps? true) =>  {:organization "999-R"
+    (domain/get-application-as "123" {:id "user234" :organizations [] :role :authority} :include-canceled-apps? true) => {:organization "999-R"
                                                                                                                            :state "submitted"
                                                                                                                            :auth [{:id "user234" :role "otherRole"}]}
 
-    (domain/get-application-as "123" {:id "user345" :organizations [] :role :authority} :include-canceled-apps? true) =>  {:organization "999-R"
+    (domain/get-application-as "123" {:id "user345" :organizations [] :role :authority} :include-canceled-apps? true) => {:organization "999-R"
                                                                                                                            :state "submitted"
                                                                                                                            :auth [{:id "user345" :role "writer"}]}
 
-    (domain/get-application-as "123" {:id "user456" :organizations [] :role :authority} :include-canceled-apps? true) =>  {:organization "999-R"
+    (domain/get-application-as "123" {:id "user456" :organizations [] :role :authority} :include-canceled-apps? true) => {:organization "999-R"
                                                                                                                            :state "submitted"
                                                                                                                            :auth [{:id "user456" :role "3rdRole"}]}
     )

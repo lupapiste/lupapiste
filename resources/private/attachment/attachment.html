@@ -172,7 +172,18 @@
                     <input type="checkbox" id="attachment-is-verdict-attachment" class="form-input" data-test-id="is-verdict-attachment"
                            data-bind="checked: isVerdictAttachment, enable: $root.authorization.ok('set-attachments-as-verdict-attachment')"/>
                   </div>
-
+                  <!-- ko if: features.enabled('attachment-visibility') -->
+                  <div class="clear" data-bind="css: {'feature': features.enabled('attachment-visibility')}">
+                    <h3 class="left" data-bind="ltext: 'attachment.visibility'"></h3>
+                    <span data-bind="component: {name: 'help-toggle',
+                                                 params: {lhtml: 'help.attachment.visibility'}}"></span>
+                    <select data-test-id="attachment-visibility"
+                            data-bind="options: attachmentVisibilities,
+                                       optionsText: function(i) { return loc('attachment.visibility.' + i)},
+                                       value: visibility,
+                                       enable: $root.authorization.ok('set-attachment-visibility') && editable"/>
+                  </div>
+                  <!-- /ko -->
                   <div data-bind="if: features.enabled('arkistointi') && latestVersion">
                     <div class="feature archive-valid" data-bind="with: latestVersion">
                       <div>

@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.disk-writer
   (:require [taoensso.timbre :as timbre :refer [info error]]
             [me.raynes.fs :as fs]
-            [clojure.data.xml :refer [emit indent-str]]
+            [clojure.data.xml :as data-xml]
             [clojure.java.io :as io]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -58,7 +58,7 @@
                      (str output-dir "/" (:id application) "_" (now)))
         tempfile   (io/file (str file-name ".tmp"))
         outfile    (io/file (str file-name ".xml"))
-        xml-s      (indent-str xml)]
+        xml-s      (data-xml/emit-str xml)]
 
     (try
       (validator/validate xml-s (permit/permit-type application) schema-version)
@@ -67,10 +67,8 @@
 
     (fs/mkdirs output-dir)
 
-
     (try
-      (with-open [out-file-stream (io/writer tempfile)]
-        (emit xml out-file-stream))
+      (spit tempfile xml-s)
       (catch java.io.FileNotFoundException e
         (when (fs/exists? tempfile)
           (fs/delete tempfile))

@@ -23,6 +23,8 @@
             [sade.strings :as ss]
             [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.states :as states]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mime :as mime]
@@ -30,7 +32,6 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as o]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.geojson :as geo]))
@@ -196,14 +197,6 @@
         :infoRequests (->> scopes (filter :inforequest-enabled) (map :permitType))
         :opening (->> scopes (filter :opening) (map #(select-keys % [:permitType :opening]))))))
 
-(defquery municipality-by-property-id
-  {:parameters [propertyId]
-   :user-roles #{:anonymous}}
-  [_]
-  (if-let [municipality (p/municipality-id-by-property-id propertyId)]
-    (ok :municipality municipality)
-    (fail :municipalitysearch.notfound)))
-
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
    :parameters [organizationId]
@@ -363,7 +356,7 @@
   {:description "Returns an organization id -> name map. (Used by TOJ.)"
    :user-roles #{:anonymous}}
   [_]
-  (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {})]
+  (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {} {:name 1})]
                         [id name]))))
 
 (defquery vendor-backend-redirect-config
@@ -413,7 +406,7 @@
 
 (defquery get-organization-tags
   {:user-authz-roles #{:statementGiver}
-   :org-authz-roles action/reader-org-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)
@@ -427,7 +420,7 @@
 
 (defquery get-organization-areas
   {:user-authz-roles #{:statementGiver}
-   :org-authz-roles  action/reader-org-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles
    :user-roles       #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)
@@ -478,7 +471,7 @@
     (try+
       (when-not (= content-type "application/zip")
         (fail! :error.illegal-shapefile))
-      
+
       (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
             shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
             data-store (FileDataStoreFinder/getDataStore shape-file)
@@ -501,7 +494,7 @@
       (catch Throwable t
         (error "Failed to parse shapefile" t)
         (resp/status 400 :error.shapefile-parsing-failed))
-      (finally 
+      (finally
         (when tmpdir
           (fs/delete-dir tmpdir))))))
 
