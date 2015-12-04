@@ -29,6 +29,7 @@
    :versions.proclamationText 1
    :versions.verdictGivenAt 1 :versions.appealPeriodStartsAt 1
    :versions.appealPeriodEndsAt 1 :versions.verdictGivenText 1
+   :versions.officialAt 1
    :modified 1})
 
 (def bulletin-fields

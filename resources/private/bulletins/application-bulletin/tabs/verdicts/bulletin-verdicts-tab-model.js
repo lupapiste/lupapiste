@@ -4,6 +4,10 @@ LUPAPISTE.BulletinVerdictsTabModel = function(params) {
 
   self.verdicts = ko.observable();
 
+  self.officialAt = ko.pureComputed(function() {
+    return util.getIn(params, ["bulletin", "officialAt"]);
+  });
+
   var verdicts = _.map(_.cloneDeep(params.verdicts() || []), function(verdict) {
     var paatokset = _.map(verdict.paatokset || [], function(paatos) {
       var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
