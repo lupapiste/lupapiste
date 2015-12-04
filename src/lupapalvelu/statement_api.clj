@@ -112,28 +112,6 @@
    :subject-key    "statement-request"
    :show-municipality-in-subject true})
 
-(defn- make-details [inviter now persons metadata saateText dueDate]
-  (map
-    (fn [person]
-      (let [user (if-not (ss/blank? (:id person)) ;; "manually invited" statement givers lack the "id"
-                   (or (user/get-user-by-email (:email person)) (fail! :error.user-not-found))
-                   (user/get-or-create-user-by-email (:email person) inviter))
-              statement-id (mongo/create-id)
-            statement-giver (assoc person :userId (:id user))]
-         (cond-> {:statement {:id statement-id
-                              :person statement-giver
-                              :requested now
-                              :given nil
-                              :reminder-sent nil
-                              :metadata metadata
-                             :saateText     saateText
-                             :dueDate       dueDate
-                              :status nil}
-                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
-                  :recipient user}
-          (seq metadata) (assoc :metadata metadata))))
-       persons))
-
 (defn validate-selected-persons [{{selectedPersons :selectedPersons} :data}]
   (let [non-blank-string-keys (when (some
                                       #(some (fn [k] (or (-> % k string? not) (-> % k ss/blank?))) [:email :name :text])
@@ -155,24 +133,18 @@
    :notified true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
-  (let [personIdSet (->> selectedPersons (map :id) (filter identity) set)
-        manualPersons (filter #(not (:id %)) selectedPersons)]
   (organization/with-organization organization
                                   (fn [{:keys [statementGivers]}]
-                                    (let [persons     (filter (comp personIdSet :id) statementGivers)
-                                          persons-combined (concat persons manualPersons)
-                                          users       (map (comp #(user/get-or-create-user-by-email % user) :email) persons-combined)
-                                          persons+uid (map #(assoc %1 :userId (:id %2)) persons-combined users)
+                                    (let [stm-givers  (filter (comp string? (set (map :id selectedPersons)) :id) statementGivers)
+                                          persons     (concat stm-givers (remove :id selectedPersons))
+                                          users       (map (comp #(user/get-or-create-user-by-email % user) :email) persons)
+                                          persons+uid (map #(assoc %1 :userId (:id %2)) persons users)
                                           metadata    (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
-                                          statements  (map (partial create-statement now metadata) persons+uid)
+                                          statements  (map (partial create-statement now metadata saateText dueDate) persons+uid)
                                           auth        (map #(user/user-in-role %1 :statementGiver :statementId (:id %2)) users statements)]
-                                      (when (some nil? users)
-                                        (fail! :error.user-not-found :emails (->> (remove :userId persons+uid)
-                                                                                  (map :email))))
                                       (update-application command {$push {:statements {$each statements}
                                                                           :auth       {$each auth}}})
-                                      (notifications/notify! :request-statement (assoc command :recipients users)))))))
-
+                                      (notifications/notify! :request-statement (assoc command :recipients users))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]
@@ -188,7 +160,7 @@
   {:parameters       [:id statementId :lang]
    :pre-checks       [statement-exists statement-owner statement-not-given]
    :states           #{:open :submitted :complementNeeded}
-   :user-roles       #{:authority}
+   :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :description "authrority-roled statement owners can save statements as draft before giving final statement."}
   [{application :application {:keys [text status modify-id prev-modify-id]} :data :as command}]

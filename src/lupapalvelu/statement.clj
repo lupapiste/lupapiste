@@ -27,15 +27,17 @@
                 "lausunto" "kielteinen" "palautettu" "poydalle"])))
 
 (def StatementGiver {:userId                          sc/Str
-                     :id                              sc/Str
+                     (sc/optional-key :id)            sc/Str
                      :text                            sc/Str
                      :email                           schemas/Email
                      :name                            sc/Str})
 
 (def Statement      {:id                              sc/Str
                      :state                           (apply sc/enum statement-states)
+                     (sc/optional-key :saateText)     sc/Str
                      (sc/optional-key :status)        (apply sc/enum statement-statuses-more-options)
                      (sc/optional-key :text)          sc/Str
+                     (sc/optional-key :dueDate)       sc/Num
                      (sc/optional-key :requested)     sc/Num
                      (sc/optional-key :given)         sc/Num
                      (sc/optional-key :reminder-sent) sc/Num
@@ -44,12 +46,14 @@
                      :person                          StatementGiver
                      (sc/optional-key :metadata)      {}})
 
-(defn create-statement [now metadata person]
+(defn create-statement [now metadata saate-text due-date person]
   (sc/validate Statement
                (cond-> {:id        (mongo/create-id)
                         :person    person
                         :requested now
-                        :state     :requested}
+                        :state     :requested
+                        :saateText saate-text
+                        :dueDate   due-date}
                  (seq metadata) (assoc :metadata metadata))))
 
 (defn get-statement [{:keys [statements]} id]
