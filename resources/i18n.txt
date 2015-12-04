@@ -1,0 +1,2 @@
+error.ktj-down: Kiinteistötietojen valtakunnallinen kyselypalvelu ei vastaa. Tyypillisesti palvelu on  käytettävissä ma - su klo 00.15 - 23.15.
+neighbors.areas.loading: Ladataan valittuja kiinteistörajoja

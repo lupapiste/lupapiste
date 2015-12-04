@@ -23,6 +23,7 @@
             [lupapalvelu.states :as states]
             [sade.core :refer :all]
             [sade.property :as p]
+            [sade.validators :as v]
             [sade.util :as util]
             [swiss.arrows :refer [-<>>]]))
 
@@ -44,11 +45,8 @@
 ;; Validators
 ;;
 
-(defn- property-id? [^String s]
-  (and s (re-matches #"^[0-9]{14}$" s)))
-
 (defn property-id-parameters [params command]
-  (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
+  (when-let [invalid (seq (filter #(not (v/kiinteistotunnus? (get-in command [:data %]))) params))]
     (info "invalid property id parameters:" (s/join ", " invalid))
     (fail :error.invalid-property-id :parameters (vec invalid))))
 
