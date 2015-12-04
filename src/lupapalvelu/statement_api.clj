@@ -137,14 +137,14 @@
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 
 (defcommand save-statement-as-draft
-  {:parameters       [:id statementId status text :lang]
+  {:parameters       [:id statementId :lang]
    :pre-checks       [statement-exists statement-owner statement-not-given]
    :states           #{:open :submitted :complementNeeded}
    :user-roles       #{:authority}
    :user-authz-roles #{:statementGiver}
    :description "authrority-roled statement owners can save statements as draft before giving final statement."}
-  [{:keys [application user created lang modify-id prev-modify-id] :as command}]
-  (when-not ((possible-statement-statuses application) status)
+  [{application :application {:keys [text status modify-id prev-modify-id]} :data :as command}]
+  (when (and status (not ((possible-statement-statuses application) status)))
     (fail! :error.unknown-statement-status))
   (let [statement (-> (util/find-by-id statementId (:statements application))
                       (update-draft text status modify-id prev-modify-id))]
@@ -161,7 +161,7 @@
    :notified    true
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
    :description "authrority-roled statement owners can give statements - notifies via comment."}
-  [{:keys [application user created lang modify-id prev-modify-id] :as command}]
+  [{:keys [application user created lang] {:keys [modify-id prev-modify-id]} :data :as command}]
   (when-not ((possible-statement-statuses application) status)
     (fail! :error.unknown-statement-status))
   (let [comment-text   (if (statement-given? application statementId)

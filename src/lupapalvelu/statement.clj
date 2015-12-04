@@ -49,7 +49,7 @@
                (cond-> {:id        (mongo/create-id)
                         :person    person
                         :requested now
-                        :state    :requested}
+                        :state     :requested}
                  (seq metadata) (assoc :metadata metadata))))
 
 (defn get-statement [{:keys [statements]} id]
