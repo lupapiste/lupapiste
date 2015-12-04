@@ -18,28 +18,31 @@
 
 ;; crooked way to test generators with generators
 (def fixed-len-generator-prop
-  (prop/for-all [n gen/pos-int]
-    (let [s (gen/sample (fixed-len-string-generator n))]
-      (every? #(and (string? %) 
-                    (= (count %) n)) s))))
+  (prop/for-all [n gen/pos-int
+                 len gen/pos-int]
+    (->> (gen/sample (fixed-len-string-generator len) n)
+         (every? #(and (string? %) 
+                       (= (count %) len))))))
 
 (fact fixed-len-string-generator
   (tc/quick-check 100 fixed-len-generator-prop) => (contains #{[:result true]}))
 
 (def min-len-generator-prop
-  (prop/for-all [n gen/pos-int]
-    (let [s (gen/sample (min-len-string-generator n))]
-      (every? #(and (string? %) 
-                    (>= (count %) n)) s))))
+  (prop/for-all [n gen/pos-int
+                 len gen/pos-int]
+    (->> (gen/sample (min-len-string-generator len) n)
+         (every? #(and (string? %) 
+                       (>= (count %) len))))))
 
 (fact min-len-string-generator
   (tc/quick-check 100 min-len-generator-prop) => (contains #{[:result true]}))
 
 (def max-len-generator-prop
-  (prop/for-all [n gen/pos-int]
-    (let [s (gen/sample (max-len-string-generator n))]
-      (every? #(and (string? %) 
-                    (<= (count %) n)) s))))
+  (prop/for-all [n gen/pos-int
+                 len gen/pos-int]
+    (->> (gen/sample (max-len-string-generator len) n)
+         (every? #(and (string? %) 
+                       (<= (count %) len))))))
 
 (fact max-len-string-generator
   (tc/quick-check 100 max-len-generator-prop) => (contains #{[:result true]}))
