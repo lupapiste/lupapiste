@@ -32,7 +32,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   });
 
   self.verdicts = ko.pureComputed(function() {
-    return util.getIn(self, ["bulletin", "verdicts"], []);
+    return util.verdictsWithTasks(ko.mapping.toJS(self.bulletin));
   });
 
   self.bulletinStateLoc = ko.pureComputed(function() {

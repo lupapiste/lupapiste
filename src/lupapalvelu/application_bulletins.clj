@@ -37,14 +37,15 @@
           :versions.documents 1
           :versions.id 1
           :versions.attachments 1
-          :versions.verdicts 1}))
+          :versions.verdicts 1
+          :versions.tasks 1}))
 
 ;; Snapshot
 
 (def app-snapshot-fields
   [:_applicantIndex :address :applicant :created :documents :location
    :modified :municipality :organization :permitType
-   :primaryOperation :propertyId :state :verdicts])
+   :primaryOperation :propertyId :state :verdicts :tasks])
 
 (def remove-party-docs-fn
   (partial remove (fn-> :schema-info :type keyword (= :party))))
