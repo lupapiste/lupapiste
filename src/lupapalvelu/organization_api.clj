@@ -197,14 +197,6 @@
         :infoRequests (->> scopes (filter :inforequest-enabled) (map :permitType))
         :opening (->> scopes (filter :opening) (map #(select-keys % [:permitType :opening]))))))
 
-(defquery municipality-by-property-id
-  {:parameters [propertyId]
-   :user-roles #{:anonymous}}
-  [_]
-  (if-let [municipality (p/municipality-id-by-property-id propertyId)]
-    (ok :municipality municipality)
-    (fail :municipalitysearch.notfound)))
-
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
    :parameters [organizationId]
@@ -479,7 +471,7 @@
     (try+
       (when-not (= content-type "application/zip")
         (fail! :error.illegal-shapefile))
-      
+
       (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
             shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
             data-store (FileDataStoreFinder/getDataStore shape-file)
@@ -502,7 +494,7 @@
       (catch Throwable t
         (error "Failed to parse shapefile" t)
         (resp/status 400 :error.shapefile-parsing-failed))
-      (finally 
+      (finally
         (when tmpdir
           (fs/delete-dir tmpdir))))))
 

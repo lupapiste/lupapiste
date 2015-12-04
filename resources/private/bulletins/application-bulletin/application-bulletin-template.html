@@ -66,7 +66,7 @@
               </button>
               <!-- /ko -->
 
-              <button class="function julkipano"
+<!--               <button class="function julkipano"
                       data-bind=""
                       data-test-id="print-bulletin">
                   <i class="lupicon-print"></i>
@@ -77,20 +77,24 @@
                       data-test-id="download-bulletin-attachments">
                   <i class="lupicon-print"></i>
                   <span data-bind="ltext: 'bulletin.attachments.download'"></span>
-              </button>
+              </button> -->
             </div>
           </div>
 
           <!-- Tabs: -->
           <div class="tabs-container">
             <ul class="tabs" id="bulletin-tabs">
+              <!-- ko if: showInfoTab -->
               <li data-bind="css: {'active': selectedTab() === 'info'}">
                   <a data-bind="click: _.partial(openTab, 'info')" href="#" class="link-btn-julkipano" data-test-id="bulletin-open-info-tab">
                       <span data-bind="ltext: 'application.tabInfo'"></span> </a></li>
+              <!-- /ko -->
+              <!-- ko if: showAttachmentsTab -->
               <li data-bind="css: {'active': selectedTab() === 'attachments'}">
                   <a data-bind="click: _.partial(openTab, 'attachments')" href="#" data-test-id="bulletin-open-attachments-tab" class="link-btn-julkipano">
                       <span data-bind="ltext: 'application.tabAttachments'"></span></a></li>
-              <!-- ko if: showVerdicts -->
+              <!-- /ko -->
+              <!-- ko if: showVerdictsTab -->
               <li data-bind="css: {'active': selectedTab() === 'verdicts'}">
                   <a data-bind="click: _.partial(openTab, 'verdicts')" href="#" data-test-id="bulletin-open-verdicts-tab" class="link-btn-julkipano">
                       <span data-bind="ltext: 'application.tabVerdict'"></span></a></li>

@@ -32,7 +32,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   });
 
   self.verdicts = ko.pureComputed(function() {
-    return util.getIn(self, ["bulletin", "verdicts"], []);
+    return util.verdictsWithTasks(ko.mapping.toJS(self.bulletin));
   });
 
   self.bulletinStateLoc = ko.pureComputed(function() {
@@ -43,8 +43,22 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     return _.contains(self.bulletin().stateSeq, self.bulletin().bulletinState);
   });
 
-  self.showVerdicts = ko.pureComputed(function() {
-    return util.getIn(self, ["bulletin", "bulletinState"]) === "verdictGiven";
+  self.showVerdictsTab = ko.pureComputed(function() {
+    return _.includes(["verdictGiven", "final"], util.getIn(self, ["bulletin", "bulletinState"]));
+  });
+
+  ko.computed(function() {
+    if (self.showVerdictsTab()) {
+      self.selectedTab("verdicts");
+    }
+  })
+
+  self.showInfoTab = ko.pureComputed(function() {
+    return util.getIn(self, ["bulletin", "bulletinState"]) === "proclaimed";
+  });
+
+  self.showAttachmentsTab = ko.pureComputed(function() {
+    return util.getIn(self, ["bulletin", "bulletinState"]) === "proclaimed";
   });
 
   var id = self.bulletin.subscribe(function(bulletin) {
