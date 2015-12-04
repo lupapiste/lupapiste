@@ -258,3 +258,5 @@
                         (:target logo2) => {:type "verdict"
                                             :id verdict-id
                                             :urlHash (:id logo2)})))))
+
+(facts "Special foreman and designer verdicts")
