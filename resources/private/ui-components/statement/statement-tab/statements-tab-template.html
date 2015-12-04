@@ -26,7 +26,7 @@
 
             <table class="table table-striped" data-test-id="table-application-statements-givers">
                 <tbody data-bind="foreach: combinedData">
-                    <tr class="statement-row">
+                    <tr class="statement-giver-row">
                         <td>
 <!--  TODO: checkbox komponentti ei tue checkedValue:ta... -->
 <!--                            <div data-bind="component: {name: 'checkbox-field', -->
@@ -39,23 +39,24 @@
                             <input class="form-input" type="radio"
                                    data-bind="checkedValue: $data,
                                               checked: $component.selectedPerson,
-                                              attr: {'data-test-id': 'check-statement-giver-' + $index(),
+                                              attr: {'id': 'radio-statement-giver-' + $index(),
+                                                     'data-test-id': 'radio-statement-giver-' + $index(),
                                                      'name': 'statementGiverSelectedPerson',
                                                      'disabled': errors().length != 0}" />
                         </td>
                         <td>
                           <input class="form-input" type="text" data-bind="textInput: text,
-                                                                           attr: {'data-test-id': 'add-statement-giver-text-' + $index(),
+                                                                           attr: {'data-test-id': 'statement-giver-role-text-' + $index(),
                                                                                   'readonly': readonly}"></input>
                         </td>
                         <td>
                           <input class="form-input" type="text" data-bind="textInput: name,
-                                                                           attr: {'data-test-id': 'add-statement-giver-name-' + $index(),
+                                                                           attr: {'data-test-id': 'statement-giver-name-' + $index(),
                                                                                   'readonly': readonly}"></input>
                         </td>
                         <td>
                         <input class="form-input" type="text" data-bind="textInput: email,
-                                                                         attr: {'data-test-id': 'add-statement-giver-email-' + $index(),
+                                                                         attr: {'data-test-id': 'statement-giver-email-' + $index(),
                                                                                 'readonly': readonly}"></input>
                         </td>
                     </tr>

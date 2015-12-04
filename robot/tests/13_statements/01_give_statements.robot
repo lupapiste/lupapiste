@@ -22,7 +22,7 @@ Authorities from own municipality can be added as statement persons
 Auhtorities from diferent municipality can be added as statement
   Create statement person  veikko.viranomainen@tampere.fi  Tampereen luvat
 
-Auhtority can be a statement person multiple times
+Authority can be a statement person multiple times
   Create statement person  sonja.sibbo@sipoo.fi  Rakennuslausunto
   Create statement person  sonja.sibbo@sipoo.fi  Erityslausunto
   Logout
@@ -42,27 +42,59 @@ Sonja sees indicators from pre-filled fields
   # The unseen changes count includes changes in property information + "Rakennuksen kayttotarkoitus" and "Huoneistotiedot" documents.
   Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
 
-Sonja adds four statement persons to application
+Sonja adds five statement persons to application
   Open application  ${appname}  753-416-25-22
   Open tab  statement
   Element should be visible  xpath=//div[@id='application-statement-tab']//*[@data-test-id='application-no-statements']
   Wait and click   xpath=//button[@data-test-id="add-statement"]
   Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
-  Wait until  Page Should Contain Element  xpath=//*[@data-test-id='check-statement-giver-3']
-  Select Checkbox  xpath=//*[@data-test-id='check-statement-giver-0']
-  Select Checkbox  xpath=//*[@data-test-id='check-statement-giver-1']
-  Select Checkbox  xpath=//*[@data-test-id='check-statement-giver-2']
-  Select Checkbox  xpath=//*[@data-test-id='check-statement-giver-3']
-  Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
-  Wait and click  xpath=//*[@data-test-id='add-statement-giver']
-  Statement count is  4
+  # We now have 4 statement givers and one empty row (for adding a new statement giver), so there is 5 rows visible
+  Wait until  Page Should Contain Element  xpath=//*[@data-test-id='radio-statement-giver-4']
+
+  #
+  # Invite a new statement giver that is not on the ready-populated list that authority admin has added in his admin view.
+  #
+
+  # Set Saate text and Maaraaika
+#  Set maaraaika-datepicker field value  add-statement-giver-maaraaika  01.06.2018
+
+
+#  Input text  xpath=//*[@data-test-id='statement-giver-role-text-4']  lausuja
+#  Input text  xpath=//*[@data-test-id='statement-giver-name-4']  Vainamoinen
+#  # Send button comes enabled only when all fields have content and the email field has a valid email address.
+#  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+#  Input text  xpath=//*[@data-test-id='statement-giver-email-4']  vainamoinen@
+#  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+#  Input text  xpath=//*[@data-test-id='statement-giver-email-4']  vainamoinen@example.com
+#  Wait until  Element should be enabled  xpath=//*[@data-test-id='radio-statement-giver-4']
+#  Select Radio Button  statementGiverSelectedPerson  radio-statement-giver-4
+#  Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
+#  Wait and click  xpath=//*[@data-test-id='add-statement-giver']
+#  Element should be visible  xpath=//*[@data-test-id='add-statement-giver']
+#  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+
+  Input text  xpath=//*[@id='invite-statement-giver-saateText']  Tama on saateteksti.
+  Invite read-only statement giver  0  01.06.2018
+
+  # Radio button selection and maaraaika are cleared, the saate text stays filled with value.
+  Wait Until  Radio Button Should Not Be Selected  statementGiverSelectedPerson
+  Wait Until  Textfield Value Should Be  //input[contains(@id,'add-statement-giver-maaraaika')]  ${empty}
+  Wait Until  Textarea Value Should Be  //*[@id='invite-statement-giver-saateText']  Tama on saateteksti.
+
+  Invite read-only statement giver  1  02.06.2018
+  Invite read-only statement giver  2  03.06.2018
+  Invite read-only statement giver  3  04.06.2018
+
+  Invite 'manual' statement giver  4  Erikoislausuja  Vainamoinen  vainamoinen@example.com  05.06.2018
+
+  Statement count is  5
 
 Sonja can delete statement
   Open statement  3
   Wait Until  Title Should Be  ${appname} - Lupapiste
   Wait and click  xpath=//*[@data-test-id='delete-statement']
   Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Statement count is  3
+  Wait until  Statement count is  4
   Wait Until  Title Should Be  ${appname} - Lupapiste
 
 Sonja can't give statement to Ronjas statement
@@ -95,7 +127,7 @@ Another comment is added
   Wait until  Comment count is  2
   [Teardown]  logout
 
-Veikko can see statements as he is beeing requested a statement to the application
+Veikko can see statements as he is being requested a statement to the application
   Veikko logs in
   Open application  ${appname}  753-416-25-22
 
@@ -124,6 +156,40 @@ Sonja can see statement indicator
 # add attachment
 
 *** Keywords ***
+
+Set maaraaika-datepicker field value
+  [Arguments]  ${id}  ${date}
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Input text  ${id}  ${date}
+  Execute JavaScript  $("#${id}").change();
+  Wait Until  Textfield Value Should Be  //input[contains(@id,'${id}')]  ${date}
+
+Invite read-only statement giver
+  [Arguments]  ${index}  ${date}
+  Select Radio Button  statementGiverSelectedPerson  radio-statement-giver-${index}
+  Set maaraaika-datepicker field value  add-statement-giver-maaraaika  ${date}
+  Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
+  Wait and click  xpath=//*[@data-test-id='add-statement-giver']
+  Element should be visible  xpath=//*[@data-test-id='add-statement-giver']
+  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+
+Invite 'manual' statement giver
+  [Arguments]  ${index}  ${roletext}  ${name}  ${email}  ${date}
+  Set maaraaika-datepicker field value  add-statement-giver-maaraaika  ${date}
+  Input text  xpath=//*[@data-test-id='statement-giver-role-text-${index}']  ${roletext}
+  Input text  xpath=//*[@data-test-id='statement-giver-name-${index}']  ${name}
+  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Input text  xpath=//*[@data-test-id='statement-giver-email-${index}']  something@
+  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Input text  xpath=//*[@data-test-id='statement-giver-email-${index}']  ${email}
+  # Statement giver's radio button can be selected only when all his info fields have content and the email field has a valid email address.
+  Wait until  Element should be enabled  xpath=//*[@data-test-id='radio-statement-giver-${index}']
+  Select Radio Button  statementGiverSelectedPerson  radio-statement-giver-${index}
+  # Send button comes enabled only when all fields have content and some user is selected.
+  Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
+  Wait and click  xpath=//*[@data-test-id='add-statement-giver']
+  Element should be visible  xpath=//*[@data-test-id='add-statement-giver']
+  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
 
 Statement count is
   [Arguments]  ${amount}
