@@ -1,5 +1,6 @@
 (ns lupapalvelu.foreman-api
-  (:require [taoensso.timbre :as timbre :refer [error]]
+  (:require [clojure.set :as set]
+            [taoensso.timbre :as timbre :refer [error]]
             [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
@@ -21,7 +22,7 @@
 (defn invites-to-auths [inv app-id inviter timestamp]
   (if (:company-id inv)
     (foreman/create-company-auth (:company-id inv))
-    (when-let [invited (user/get-or-create-user-by-email (:email inv) inviter)]
+    (let [invited (user/get-or-create-user-by-email (:email inv) inviter)]
       (auth/create-invite-auth inviter invited app-id (:role inv) timestamp))))
 
 (defcommand create-foreman-application
@@ -70,7 +71,10 @@
            $set  {:modified created}})
         (notif/notify! :invite {:application application :recipients [foreman-user]}))
 
-      (notif/notify! :invite {:application foreman-app :recipients (map :invite (:other grouped-auths))})
+      (let [recipients (for [auth (:other grouped-auths)
+                             :let [user (get-in auth [:invite :user])]]
+                         (set/rename-keys user {:username :email}))]
+        (notif/notify! :invite {:application foreman-app :recipients recipients}))
       (doseq [auth (:company grouped-auths)
               :let [company-id (-> auth :invite :user :id)
                     token-id (company/company-invitation-token user company-id (:id foreman-app))]]

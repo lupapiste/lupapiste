@@ -59,7 +59,7 @@
                  [org.geotools/gt-referencing "12.4"]
                  [org.geotools/gt-epsg-wkt "12.4"]
                  [org.clojure/data.json "0.2.6"]
-                 [lupapiste/commons "0.5.31"]]
+                 [lupapiste/commons "0.5.32"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
@@ -72,7 +72,7 @@
                              [lupapiste/lein-hgnotes "0.3.0"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G"]
+                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8" "-Dline.separator=\"\n\""]
                    :eastwood {:continue-on-exception true
                               :source-paths ["src"]
                               :test-paths []}}
