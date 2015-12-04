@@ -72,22 +72,6 @@
         :default     (enlive/at xml [:RakennusvalvontaAsia place] (enlive/prepend paatostieto))))
     app-xml))
 
-(defn special-check-for-verdict [{:keys [application] :as command} app-xml]
-  {:pre [(every? command [:application :user :created])]}
-  (if app-xml
-    (let [app-xml (normalize-special-verdict application app-xml)]
-      (or
-       (let [organization (organization/get-organization (:organization application))
-             validator-fn (permit/get-verdict-validator (permit/permit-type application))]
-         (validator-fn app-xml organization))
-       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
-         (println "Updates:" updates)
-         (when updates
-           (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
-             (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
-             (t/change-app-and-attachments-metadata-state! command :luonnos :valmis)))
-         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])))))))
-
 (defn do-check-for-verdict [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
   (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
