@@ -4,7 +4,30 @@
             [schema.core :as schema]
             [schema.experimental.generators :as generators]
             [clojure.test.check.generators :as check-generators]))
+;;
+;; Util
+;;
 
+
+(def min-length (memoize
+                  (fn [min-len]
+                    (schema/pred
+                      (fn [v]
+                        (>= (count v) min-len))
+                      (str "Shorter than " min-len)))))
+
+(def max-length (memoize
+                  (fn [max-len]
+                    (schema/pred
+                      (fn [v]
+                        (<= (count v) max-len))
+                      (str "Longer than " max-len)))))
+
+(defn min-length-string [min-len]
+  (schema/both schema/Str (min-length min-len)))
+
+(defn max-length-string [max-len]
+  (schema/both schema/Str (max-length max-len)))
 
 ;;
 ;; Schemas
@@ -13,7 +36,11 @@
 (schema/defschema Email
   "A prismatic schema for email"
   (schema/both (schema/pred validators/valid-email? "Not valid email")
-           (util/max-length-string 255)))
+               (max-length-string 255)))
+
+;;
+;; Generators
+;;
 
 (def schema-generators
   (generators/default-leaf-generators
