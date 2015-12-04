@@ -525,6 +525,8 @@
 ;; Stuffin' data in
 ;;
 
+;; attachments
+
 (defn sign-attachment [apikey id attachmentId password]
   (let [uri (str (server-address) "/api/command/sign-attachments")
         resp (http-post uri
@@ -584,14 +586,54 @@
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.111.html") => 0)))))
 
-(defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
-  (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))
-
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 
 (defn upload-attachment-to-all-placeholders [apikey application]
   (doseq [attachment (:attachments application)]
     (upload-attachment apikey (:id application) attachment true)))
+
+;; NOTE: For this to work properly,
+;;       the :operations-attachments must be set correctly for organization (in minimal.clj)
+;;       and also the :attachments for operation (in operations.clj).
+(defn generate-attachment [{id :id :as application} apikey password]
+  (when-let [first-attachment (or
+                                (get-in application [:attachments 0])
+                                (case (-> application :primaryOperation :name)
+                                  "aloitusoikeus" {:type {:type-group "paapiirustus"
+                                                          :type-id "asemapiirros"}
+                                                   :id id}
+                                  nil))]
+    (upload-attachment apikey id first-attachment true)
+    (sign-attachment apikey id (:id first-attachment) password)))
+
+;; statements
+
+(defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
+  (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))
+
+(defn get-statement-by-user-id [application user-id]
+  (some #(when (= user-id (get-in % [:person :userId])) %) (:statements application)))
+
+;; This has a side effect which generates a attachement to appliction
+(defn generate-statement [application-id apikey]
+  (let [resp (query sipoo :get-organizations-statement-givers) => ok?
+        statement-giver (->> resp :data (some #(when (= (email-for-key apikey) (:email %)) %))) => truthy
+        create-statement-result (command apikey :request-for-statement
+                                  :functionCode nil
+                                  :id application-id
+                                  :selectedPersons [statement-giver]
+                                  :saateText "saate"
+                                  :dueDate 1450994400000) => ok?
+        updated-application (query-application apikey application-id)
+        statement-id (:id (get-statement-by-user-id updated-application (id-for-key apikey)))
+        upload-statement-attachment-result (upload-attachment-for-statement apikey application-id "" true statement-id)
+        give-statement-result (command apikey :give-statement
+                                :id application-id
+                                :statementId statement-id
+                                :status "puoltaa"
+                                :lang "fi"
+                                :text "Annanpa luvan urakalle.")]
+    (query-application apikey application-id)))
 
 (defn generate-documents [application apikey & [local?]]
   (doseq [document (:documents application)]

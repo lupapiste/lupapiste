@@ -1,0 +1,14 @@
+application-choose-statement-givers: Valitse lausunnonantaja(t)
+application.invite-statement-giver-saateText: Saateteksti
+application.invite-statement-giver-saateText-placeholder: Kirjoita saateteksti lausunnonantajalle lähetettävään viestiin.
+add-statement-giver-maaraaika: Määräaika
+
+application.statement.add-manual-statement-giver: Lisää lausunnonantaja
+application-statement-giver-invite.success: Kutsu lausunnonantajille lähetetty
+
+error.no-statement: Lausuntoa ei löydy
+error.not-statement-owner: Käyttäjä ei ole lausunnon omistaja
+error.not-authority-or-statement-owner-applicant: Käyttäjä ei ole viranomainen tai lausunnon omistaja
+
+
+EMAIL-TEMPLATE-LAUSUNNONANTAJA-KUTSU: Teidät on lisätty lausunnon antajaksi organisaatioon Sipoon rakennusvalvonta nimikkeellä Runonlausujaviranomainen. Teiltä ei odoteta vielä mitään toimenpiteitä. Kun teiltä pyydetään ensimmäisen kerran lausuntoa, teille tulee sähköpostiin kutsu ja linkki rekisteröitymissivulle, joka neuvoo teitä eteenpäin. Jatkossa tuleviin lausuntopyyntöihin pääsette suoraan kirjautumaan käyttäjätunnuksella ja salasanalla sähköpostiinne tulevan linkin kautta.

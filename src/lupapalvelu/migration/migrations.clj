@@ -1354,6 +1354,20 @@
      :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
                                {"data.katselmus.tila" {$exists true}}]}}}))
 
+
+;; BSON type 8 == Boolean (https://docs.mongodb.org/manual/reference/operator/query/type/)
+(defmigration convert-attachments-requestedByAuthority-to-boolean
+  {:apply-when (pos? (mongo/count :applications {:attachments {$elemMatch {$and [{"requestedByAuthority" {$exists true}}
+                                                                                 {"requestedByAuthority" {$not {$type 8}}}]}}}))}
+  (update-applications-array :attachments
+    (fn [attachment]
+      (if-not (util/boolean? (:requestedByAuthority attachment))
+        (update attachment :requestedByAuthority boolean)
+        attachment))
+    {:attachments {$elemMatch {$and [{"requestedByAuthority" {$exists true}}
+                                     {"requestedByAuthority" {$not {$type 8}}}]}}}))
+
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
