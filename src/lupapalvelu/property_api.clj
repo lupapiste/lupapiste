@@ -13,18 +13,13 @@
     (ok :municipality municipality)
     (fail :municipalitysearch.notfound)))
 
-(defn- get-areas! [property-ids]
-  (let [; NLS WFS service does not support or-query, need to fetch areas one by one
-        features (map plocation/property-location-info property-ids)]
-    (->> features flatten (remove nil?))))
-
 (defquery property-borders
   {:parameters [propertyIds]
    :description "Returns property borders as POLYGON WKT strings"
    :user-roles #{:authority} ; At the time of writing the only use case is the neighbour map
    :input-validators [(partial action/vector-parameter-of :propertyIds v/kiinteistotunnus?)]}
   [_]
-  (let [areas (get-areas! (set propertyIds))]
+  (let [areas (plocation/property-location-info propertyIds)]
     (if (seq areas)
       (ok :wkts (map #(select-keys % [:kiinttunnus :wkt]) areas))
       (fail :error.ktj-down))))
