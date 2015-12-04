@@ -1,2 +1,0 @@
-application.tabInstructions.proclaimed:  Kuvaus toiminnasta
-application.tabInstructions.verdictGiven:  Päätöskuulutus
