@@ -4,10 +4,10 @@ LUPAPISTE.BulletinVerdictsTabModel = function(params) {
 
   self.verdicts = ko.observable();
 
-  var verdicts = _.map(_.cloneDeep(params.verdicts || []), function(verdict) {
+  var verdicts = _.map(_.cloneDeep(params.verdicts() || []), function(verdict) {
     var paatokset = _.map(verdict.paatokset || [], function(paatos) {
       var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
-        var myAttachments = _.filter(params.attachments || [], function(attachment) {
+        var myAttachments = _.filter(params.attachments() || [], function(attachment) {
           var target = attachment.target;
           var idMatch = false;
           if (target && target.type === "verdict") {
