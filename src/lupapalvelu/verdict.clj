@@ -137,7 +137,7 @@
       schemas)))
 
 ;; Trimble writes verdict for tyonjohtaja/suunnittelija applications to their link permits.
-#_(defn fetch-tj-suunnittelija-verdict [{{:keys [municipality permitType] :as application} :application :as command}]
+(defn fetch-tj-suunnittelija-verdict [{{:keys [municipality permitType] :as application} :application :as command}]
   (let [application-op-name (-> application :primaryOperation :name)
         organization (organization/resolve-organization municipality permitType)
         krysp-version (get-in organization [:krysp (keyword permitType) :version])]

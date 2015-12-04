@@ -46,7 +46,15 @@
             xml (cr/strip-xml-namespaces app-xml)]
         (not-empty (enlive/select xml [:MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))]))))))
 
-(defn normalize-special-verdict [application app-xml]
+(defn normalize-special-verdict
+  "Normalizes special foreman/designer verdicts (see above) by
+  creating a traditional paatostieto element from the proper special
+  verdict party.
+    application: Application that requests verdict.
+    app-xml:     Verdict xml message
+  Returns either normalized app-xml (without namespaces) or app-xml if
+  the verdict is not special."
+  [application app-xml]
   (if (special-foreman-designer-verdict? application app-xml)
     (let [xml          (cr/strip-xml-namespaces app-xml)
           op-name      (-> application :primaryOperation :name)
