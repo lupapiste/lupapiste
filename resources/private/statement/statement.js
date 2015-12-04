@@ -128,7 +128,7 @@
     };
 
     self.disabled = ko.computed(function() {
-      return !self.selectedStatus() || !self.text() || self.submitting() || !self.dirty();
+      return !self.selectedStatus() || !self.text() || self.submitting();
     });    
 
     self.dirty.subscribe(function(dirty) {
