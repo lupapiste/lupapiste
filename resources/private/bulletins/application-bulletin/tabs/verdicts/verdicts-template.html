@@ -27,7 +27,7 @@
                       <div class="accordion-fields">
                           <div class="verdict-info-fields">
                               <div class="verdict-signature-fields" data-bind="visible: !$parent.draft && $parent.sopimus">
-                                  <h3 data-bind="ltext: 'verdict.signatures'"></h3>
+                                  <h5 data-bind="ltext: 'verdict.signatures'"></h5>
 
                                   <div data-bind="foreach: $data.signatures">
                                       <div data-test-id="verdict-signature-listing">
@@ -74,7 +74,7 @@
                           </div>
 
                           <div>
-                              <h3 data-bind="ltext: 'verdict.lupamaaraukset'"></h3>
+                              <h4 data-bind="ltext: 'verdict.lupamaaraukset'"></h4>
                               <div class="accordion-content-part">
 
                                   <!--  ko if:  $data.lupamaaraykset -->
@@ -98,26 +98,26 @@
                                       <label data-bind="ltext: 'verdict.kokonaisala'"></label><span class="value" data-bind="text: lupamaaraykset.kokonaisala"></span></div>
 
                                   <div data-bind="if: lupamaaraykset.vaaditutTyonjohtajat && lupamaaraykset.vaaditutTyonjohtajat.length" class="key-value-pair">
-                                      <h3 data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></h3>
+                                      <h5 data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></h5>
                                       <span class="value" data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"></span>
                                   </div>
 
                                   <div data-bind="if: lupamaaraykset.vaaditutErityissuunnitelmat && lupamaaraykset.vaaditutErityissuunnitelmat.length" class="key-value-pair">
-                                      <h3 data-bind="ltext: 'verdict.vaaditutErityissuunnitelmat'"></h3>
+                                      <h5 data-bind="ltext: 'verdict.vaaditutErityissuunnitelmat'"></h5>
                                       <ul data-bind="foreach: lupamaaraykset.vaaditutErityissuunnitelmat">
                                           <li data-bind='text: $data'></li>
                                       </ul>
                                   </div>
 
                                   <div data-bind="if: lupamaaraykset.muutMaaraykset && lupamaaraykset.muutMaaraykset.length" class="key-value-pair">
-                                      <h3 data-bind="ltext: 'verdict.muutMaaraykset'"></h3>
+                                      <h5 data-bind="ltext: 'verdict.muutMaaraykset'"></h5>
                                       <ul data-bind="foreach: lupamaaraykset.muutMaaraykset">
                                           <li data-bind='text: $data'></li>
                                       </ul>
                                   </div>
 
                                   <div data-bind='if: lupamaaraykset.vaaditutKatselmukset && lupamaaraykset.vaaditutKatselmukset.length'>
-                                      <h3 data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
+                                      <h5 data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h5>
                                       <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
                                           <li data-bind='if: $data.katselmuksenLaji'>
                                               <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
@@ -129,7 +129,7 @@
                                   </div>
 
                                   <div data-bind='if: lupamaaraykset.maaraykset && lupamaaraykset.maaraykset.length'>
-                                      <h3 data-bind="ltext: 'verdict.maaraykset'"></h3>
+                                      <h5 data-bind="ltext: 'verdict.maaraykset'"></h5>
                                       <table class="table table-striped tablesorter">
                                           <thead>
                                               <tr>
@@ -155,7 +155,7 @@
 
                               </div>
 
-                              <h3 data-bind="ltext: 'verdict.poytakirjat'"></h3>
+                              <h4 data-bind="ltext: 'verdict.poytakirjat'"></h4>
                               <div class="accordion-content-part">
 
                                   <!--  ko if:  $data.poytakirjat && $data.poytakirjat.length -->
