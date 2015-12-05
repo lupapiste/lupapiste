@@ -433,9 +433,12 @@
 
 (defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
   (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id)
-        verdict-id (:verdictId new-verdict-resp)]
-    (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
-    (f apikey :publish-verdict :id application-id :verdictId verdict-id)))
+        verdict-id (or (:verdictId new-verdict-resp))]
+    (if-not (ok? new-verdict-resp)
+      new-verdict-resp
+      (do
+       (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
+       (f apikey :publish-verdict :id application-id :verdictId verdict-id)))))
 
 (defn give-verdict [apikey application-id & args]
   (apply give-verdict-with-fn command apikey application-id args))
