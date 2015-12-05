@@ -37,11 +37,11 @@
                      (sc/optional-key :saateText)     sc/Str
                      (sc/optional-key :status)        (apply sc/enum statement-statuses-more-options)
                      (sc/optional-key :text)          sc/Str
-                     (sc/optional-key :dueDate)       sc/Num
-                     (sc/optional-key :requested)     sc/Num
-                     (sc/optional-key :given)         sc/Num
-                     (sc/optional-key :reminder-sent) sc/Num
-                     (sc/optional-key :modified)      sc/Num
+                     (sc/optional-key :dueDate)       schemas/Timestamp
+                     (sc/optional-key :requested)     schemas/Timestamp
+                     (sc/optional-key :given)         schemas/Timestamp
+                     (sc/optional-key :reminder-sent) schemas/Timestamp
+                     (sc/optional-key :modified)      schemas/Timestamp
                      (sc/optional-key :modify-id)     sc/Str
                      :person                          StatementGiver
                      (sc/optional-key :metadata)      {}})

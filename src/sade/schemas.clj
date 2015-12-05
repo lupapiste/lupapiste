@@ -67,6 +67,12 @@
                       (gen/tuple (gen/not-empty gen/string-alphanumeric)
                                  (gen/not-empty gen/string-alphanumeric))))
 
+(schema/defschema Timestamp
+  "A schema for timestamp"
+  schema/Int)
+
+(add-generator Timestamp (gen/fmap (partial + 1450000000000)
+                                   gen/large-integer))
 
 ;; Dynamic schema constructors
 
