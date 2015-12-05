@@ -304,7 +304,9 @@
         args        (assoc args :permitType permit-type :url new-url :username "" :password "")]
     (command apikey :set-krysp-endpoint args)))
 
-(defn set-anti-csrf! [value] (query pena :set-feature :feature "disable-anti-csrf" :value (not value)))
+(defn set-anti-csrf! [value]
+  (fact (query pena :set-feature :feature "disable-anti-csrf" :value (not value)) => ok?))
+
 (defn feature? [& feature]
   (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name feature)))))
 
