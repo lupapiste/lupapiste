@@ -4,10 +4,9 @@
   var applicationDrawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
   var neighbourDrawStyle = {fillColor: "rgb(243,145,41)", // $lp-orange
                             fillOpacity: 0.50,
-                            strokeColor: "#000", //"rgb(239, 118, 38)", // $orange-darkest
+                            strokeColor: "#000",
                             pointRadius: 6,
-                            strokeWidth: 3
-                            };
+                            strokeWidth: 3};
   var applicationId;
 
   var borderCache = {};
@@ -89,7 +88,7 @@
       var neighbors = _.map(application.neighbors, ensureNeighbors);
 
       if (!self.map) {
-        self.map = gis.makeMap("neighbors-map", {zoomWheelEnabled: false, drawingControls: true}).addClickHandler(self.click);
+        self.map = gis.makeMap("neighbors-map", {zoomWheelEnabled: false, drawingControls: true});
         self.map.updateSize().center(x, y, 13).add({x: x, y:y});
       } else {
         self.map.updateSize().center(x, y).clear().add({x: x, y:y});
@@ -114,14 +113,6 @@
 
     self.add = function() {
       openEditDialog();
-    };
-
-    self.click = function(x, y) {
-      hub.send("show-dialog", { ltitle: "neighbor.owners.title",
-                                size: "large",
-                                component: "neighbors-owners-dialog",
-                                componentParams: {x: x,
-                                                  y: y} });
     };
 
     self.done = function() {
@@ -149,6 +140,15 @@
   }
 
   var model = new Model();
+
+  function openOwnersDialog(params) {
+    hub.send("show-dialog", { ltitle: "neighbor.owners.title",
+                              size: "large",
+                              component: "neighbors-owners-dialog",
+                              componentParams: params });
+  }
+
+  hub.subscribe("LupapisteEditingToolbar::featureAdded", openOwnersDialog);
 
   hub.onPageLoad("neighbors", function(e) {
     applicationId = e.pagePath[0];
