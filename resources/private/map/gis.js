@@ -22,8 +22,9 @@ var gis = (function() {
 
   // Map initialization
 
-  function Map(element, zoomWheelEnabled) {
+  function Map(element, options) {
     var self = this;
+    var zoomWheelEnabled = options && options.zoomWheelEnabled;
 
     self.map = new OpenLayers.Map(element, {
       theme: null,
@@ -447,7 +448,7 @@ var gis = (function() {
   }
 
   return {
-    makeMap: function(element, zoomWheelEnabled) { return new Map(element, zoomWheelEnabled); }
+    makeMap: function(element, options) { return new Map(element, options); }
   };
 
 })();

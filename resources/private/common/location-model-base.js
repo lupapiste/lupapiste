@@ -81,7 +81,7 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   self.map = function() {
     if (!self._map) {
       self._map = gis
-        .makeMap(mapOptions.mapId, mapOptions.zoomWheelEnabled)
+        .makeMap(mapOptions.mapId, {zoomWheelEnabled: mapOptions.zoomWheelEnabled})
         .center(404168, 7205000, mapOptions.initialZoom)
         .addClickHandler(function(x, y) {
           self.reset().setXY(x, y)
