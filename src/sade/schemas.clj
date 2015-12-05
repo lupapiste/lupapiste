@@ -12,7 +12,14 @@
 
 ;; Generator
 
+(def dynamically-created-schemas (atom {}))
 (def custom-generators (atom {}))
+
+(defn dynamic-schema [schema-key predicate]
+  {:pre [(keyword? schema-key)]}
+  (locking dynamically-created-schemas
+    (get @dynamically-created-schemas schema-key 
+         (-> (swap! dynamically-created-schemas assoc schema-key predicate) schema-key))))
 
 (defn add-generator [schema generator]
   (swap! custom-generators assoc schema generator))
@@ -64,7 +71,9 @@
             (gen/vector gen/char len)))
 
 (defn fixed-length-string [len]
-  (doto (schema/constrained schema/Str (fixed-len-constraint len))
+  (doto (dynamic-schema 
+         (keyword (str "fixed-len-string-" len))
+         (schema/constrained schema/Str (fixed-len-constraint len)))
     (add-generator (fixed-len-string-generator len))))
 
 (defn min-len-string-generator [min-len]
@@ -72,7 +81,9 @@
             fixed-len-string-generator))
 
 (defn min-length-string [min-len]
-  (doto (schema/constrained schema/Str (min-len-constraint min-len))
+  (doto (dynamic-schema
+         (keyword (str "min-len-string-" min-len))
+         (schema/constrained schema/Str (min-len-constraint min-len)))
     (add-generator (min-len-string-generator min-len))))
 
 (defn max-len-string-generator [max-len]
@@ -80,7 +91,9 @@
             (gen/vector gen/char 0 max-len)))
 
 (defn max-length-string [max-len]
-  (doto (schema/constrained schema/Str (max-len-constraint max-len))
+  (doto (dynamic-schema
+         (keyword (str "max-len-string-" max-len))
+         (schema/constrained schema/Str (max-len-constraint max-len)))
     (add-generator (max-len-string-generator max-len))))
 
 
