@@ -16,8 +16,13 @@
 (defn add-generator [schema generator]
   (swap! custom-generators assoc schema generator))
 
-(defn generate [schema]
-  (generators/generate schema (generators/default-leaf-generators @custom-generators)))
+(defn generate
+  ([schema]         (generate schema {}))
+  ([schema wrapper] (generators/generate schema @custom-generators wrapper)))
+
+(defn generator
+  ([schema]         (generator schema {}))
+  ([schema wrapper] (generators/generator schema @custom-generators wrapper)))
 
 ;; Predicate / constraint
 
