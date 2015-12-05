@@ -315,6 +315,12 @@ div.olControlZoom a:hover {
 .olControlEditingToolbar .olControlDrawFeaturePolygonItemActive {
     background-position: -26px -24px;
 }
+.olControlEditingToolbar .olControlDrawFeatureEllipseItemInactive{
+    background-position: -128px -1px;
+}
+.olControlEditingToolbar .olControlDrawFeatureEllipseItemActive {
+    background-position: -128px -24px;
+}
 
 
 /**
