@@ -74,6 +74,7 @@
 (env/in-dev
   (defquery user-by-email
     {:parameters [email]
+     :input-validators [(partial action/non-blank-parameters [:email])]
      :user-roles #{:admin}}
     [_]
     (ok :user (user/get-user-by-email email))))
@@ -353,6 +354,7 @@
 
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
+   :input-validators [(partial action/non-blank-parameters [:oldPassword :newPassword])]
    :user-roles #{:applicant :authority :authorityAdmin :admin}}
   [{{user-id :id :as user} :user}]
   (let [user-data (mongo/by-id :users user-id)]
@@ -427,6 +429,7 @@
 
 (defcommand login
   {:parameters [username password]
+   :input-validators [(partial action/non-blank-parameters [:username :password])]
    :user-roles #{:anonymous}}
   [command]
   (if (user/throttle-login? username)
@@ -593,6 +596,7 @@
 
 (defraw download-user-attachment
   {:parameters [attachment-id]
+   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant}}
   [{user :user}]
   (when-not user (throw+ {:status 401 :body "forbidden"}))
@@ -607,6 +611,7 @@
 
 (defcommand remove-user-attachment
   {:parameters [attachment-id]
+   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant}}
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)

@@ -70,6 +70,7 @@
 
 (defcommand delete-statement-giver
   {:parameters [personId]
+   :input-validators [(partial action/non-blank-parameters [:personId])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (organization/update-organization
@@ -172,6 +173,7 @@
 
 (defcommand delete-statement
   {:parameters [id statementId]
+   :input-validators [(partial action/non-blank-parameters [:id :statementId])]
    :states     #{:open :submitted :complementNeeded}
    :user-roles #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
@@ -181,7 +183,8 @@
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 
 (defcommand give-statement
-  {:parameters  [:id statementId status text :lang]
+  {:parameters  [:id statementId status text lang]
+   :input-validators [(partial action/non-blank-parameters [:id :statementId :status :text :lang])]
    :pre-checks  [statement-exists statement-owner #_statement-not-given]
    :states      #{:open :submitted :complementNeeded}
    :user-roles #{:authority :applicant}
@@ -189,7 +192,7 @@
    :notified    true
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
    :description "authrority-roled statement owners can give statements - notifies via comment."}
-  [{:keys [application user created lang] :as command}]
+  [{:keys [application user created] :as command}]
   (when-not ((set (possible-statement-statuses application)) status)
     (fail! :error.unknown-statement-status))
   (let [comment-text   (if (statement-given? application statementId)
