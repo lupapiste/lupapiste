@@ -255,8 +255,7 @@
 (defcommand set-organization-selected-operations
   {:parameters [operations]
    :user-roles #{:authorityAdmin}
-   :input-validators  [(partial non-blank-parameters [:operations])
-                       (partial vector-parameters [:operations])
+   :input-validators  [(partial vector-parameters [:operations])
                        (fn [{{:keys [operations]} :data}]
                          (when-not (every? (->> operations/operations keys (map name) set) operations)
                            (fail :error.unknown-operation)))]}
@@ -303,7 +302,7 @@
 (defcommand set-organization-permanent-archive-enabled
   {:parameters [enabled organizationId]
    :user-roles #{:admin}
-   :input-validators  [(partial non-blank-parameters [:enabled :organizationId])
+   :input-validators  [(partial non-blank-parameters [:organizationId])
                        (partial boolean-parameters [:enabled])]}
   [{user :user}]
   (o/update-organization organizationId {$set {:permanent-archive-enabled enabled}})

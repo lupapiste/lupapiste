@@ -232,7 +232,9 @@
   {:parameters       [title :filter sort filterType]
    :user-roles       #{:authority}
    :input-validators [validate-filter-type
-                      (partial action/non-blank-parameters [:title :filter :sort])
+                      (partial action/non-blank-parameters [:title])
+                      (partial action/map-parameters [:filter])
+                      (partial action/map-parameters-with-required-keys [:sort] [:field :asc])
                       (fn [{{filter-id :filterId} :data}]
                         (when (and filter-id (not (mongo/valid-key? filter-id)))
                           (fail :error.illegal-key)))]

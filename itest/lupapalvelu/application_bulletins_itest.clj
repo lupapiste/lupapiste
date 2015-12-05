@@ -43,8 +43,8 @@
       (fact "publishing with wrong id results in error"
         (command olli :move-to-proclaimed
                  :id "123"
-                 :proclamationStartsAt "123"
-                 :proclamationEndsAt "124"
+                 :proclamationStartsAt 123
+                 :proclamationEndsAt 124
                  :proclamationText "") => (partial expected-failure? :error.application-not-accessible))
 
       (fact "Bulletin not found before publishing"
@@ -59,7 +59,7 @@
                  :verdictGivenText "foo") => (partial expected-failure? :error.command-illegal-state)
         (command olli :move-to-final
                  :id app-id
-                 :officialAt "123") => (partial expected-failure? :error.command-illegal-state))
+                 :officialAt 123) => (partial expected-failure? :error.command-illegal-state))
 
       (fact "Authority can publish bulletin"
         (command olli :move-to-proclaimed

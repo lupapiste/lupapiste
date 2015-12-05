@@ -304,7 +304,9 @@
         args        (assoc args :permitType permit-type :url new-url :username "" :password "")]
     (command apikey :set-krysp-endpoint args)))
 
-(defn set-anti-csrf! [value] (query pena :set-feature :feature "disable-anti-csrf" :value (not value)))
+(defn set-anti-csrf! [value]
+  (fact (command pena :set-feature :feature "disable-anti-csrf" :value (not value)) => ok?))
+
 (defn feature? [& feature]
   (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name feature)))))
 
@@ -431,9 +433,12 @@
 
 (defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
   (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id)
-        verdict-id (:verdictId new-verdict-resp)]
-    (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
-    (f apikey :publish-verdict :id application-id :verdictId verdict-id)))
+        verdict-id (or (:verdictId new-verdict-resp))]
+    (if-not (ok? new-verdict-resp)
+      new-verdict-resp
+      (do
+       (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
+       (f apikey :publish-verdict :id application-id :verdictId verdict-id)))))
 
 (defn give-verdict [apikey application-id & args]
   (apply give-verdict-with-fn command apikey application-id args))
@@ -642,14 +647,14 @@
           updates (map (fn [[p v]] [(butlast p) v]) updates)
           updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)
           user-role (:role (find-user-from-minimal-by-apikey apikey))
-          updates (filter (fn [[path value]]
-                            (try
-                              (let [splitted-path (ss/split path #"\.")]
-                                (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
-                                (doc-persistence/validate-readonly-updates! document [splitted-path]))
-                              true
-                              (catch Exception _
-                                false)))
+          updates (filterv (fn [[path value]]
+                             (try
+                               (let [splitted-path (ss/split path #"\.")]
+                                 (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
+                                 (doc-persistence/validate-readonly-updates! document [splitted-path]))
+                               true
+                               (catch Exception _
+                                 false)))
                           updates)
           f (if local? local-command command)]
       (fact "Document is updated"

@@ -18,7 +18,8 @@
 
 (defcommand save-asianhallinta-config
   {:parameters [permitType municipality enabled version]
-   :input-validators [(partial action/non-blank-parameters [:permitType :municipality :version])
+   :input-validators [(partial action/non-blank-parameters [:permitType :municipality])
+                      (partial action/string-parameters [:version])
                       (partial action/boolean-parameters [:enabled])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]

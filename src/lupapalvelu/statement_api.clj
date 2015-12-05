@@ -150,7 +150,8 @@
   {:parameters [functionCode id selectedPersons saateText dueDate]
    :user-roles #{:authority}
    :states #{:open :submitted :complementNeeded}
-   :input-validators [(partial action/non-blank-parameters [:saateText :dueDate])
+   :input-validators [(partial action/non-blank-parameters [:saateText])
+                      (partial action/number-parameters [:dueDate])
                       (partial action/vector-parameters-with-map-items-with-required-keys [:selectedPersons] [:email :name :text])
                       validate-selected-persons]
    :notified true
@@ -158,18 +159,18 @@
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
   (let [personIdSet (->> selectedPersons (map :id) (filter identity) set)
         manualPersons (filter #(not (:id %)) selectedPersons)]
-  (organization/with-organization organization
-                                  (fn [{:keys [statementGivers]}]
-                                      (let [persons (filter #(personIdSet (:id %)) statementGivers)
-                                            persons-combined (concat persons manualPersons)
-                                          metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
-                                            details (make-details user now persons-combined metadata saateText dueDate)
-                                          statements (map :statement details)
-                                          auth (map :auth details)
-                                          recipients (map :recipient details)]
-                                      (update-application command {$push {:statements {$each statements}
-                                                                          :auth {$each auth}}})
-                                        (notifications/notify! :request-statement (assoc command :recipients recipients)))))))
+    (organization/with-organization organization
+      (fn [{:keys [statementGivers]}]
+        (let [persons (filter #(personIdSet (:id %)) statementGivers)
+              persons-combined (concat persons manualPersons)
+              metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
+              details (make-details user now persons-combined metadata saateText dueDate)
+              statements (map :statement details)
+              auth (map :auth details)
+              recipients (map :recipient details)]
+          (update-application command {$push {:statements {$each statements}
+                                              :auth {$each auth}}})
+          (notifications/notify! :request-statement (assoc command :recipients recipients)))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]

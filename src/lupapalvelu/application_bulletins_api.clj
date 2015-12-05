@@ -170,8 +170,7 @@
 
 (defcommand move-to-proclaimed
   {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
-   :input-validators [(partial action/non-blank-parameters [:id :proclamationText])
-                      (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]
+   :input-validators [(partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}}
@@ -288,7 +287,7 @@
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}
-   :input-validators [(partial action/non-blank-parameters [:bulletinId :bulletinVersionId :proclamationText])
+   :input-validators [(partial action/non-blank-parameters [:bulletinId :bulletinVersionId])
                       (partial bulletin-can-be-saved "proclaimed")
                       (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]}
   [{:keys [application created] :as command}]
