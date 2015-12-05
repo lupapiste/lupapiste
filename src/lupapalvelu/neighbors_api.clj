@@ -61,6 +61,7 @@
 
 (defcommand neighbor-add-owners
   {:parameters [id propertyId owners]
+   :input-validators [(partial action/property-id-parameters [:propertyId])]
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
   [command]
