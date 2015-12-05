@@ -112,6 +112,11 @@
 (defn number-parameters [params command]
   (filter-params-of-command params command (complement number?) :error.illegal-number))
 
+(defn property-id-parameters [params command]
+  (when-let [invalid (seq (filter #(not (v/kiinteistotunnus? (get-in command [:data %]))) params))]
+    (trace "invalid property id parameters:" (s/join ", " invalid))
+    (fail :error.invalid-property-id)))
+
 (defn map-parameters [params command]
   (filter-params-of-command params command (complement map?) :error.unknown-type))
 
