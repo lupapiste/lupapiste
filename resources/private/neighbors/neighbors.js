@@ -89,7 +89,7 @@
       var neighbors = _.map(application.neighbors, ensureNeighbors);
 
       if (!self.map) {
-        self.map = gis.makeMap("neighbors-map", {zoomWheelEnabled: false}).addClickHandler(self.click);
+        self.map = gis.makeMap("neighbors-map", {zoomWheelEnabled: false, drawingControls: true}).addClickHandler(self.click);
         self.map.updateSize().center(x, y, 13).add({x: x, y:y});
       } else {
         self.map.updateSize().center(x, y).clear().add({x: x, y:y});

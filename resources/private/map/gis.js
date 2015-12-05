@@ -24,7 +24,15 @@ var gis = (function() {
 
   function Map(element, options) {
     var self = this;
-    var zoomWheelEnabled = options && options.zoomWheelEnabled;
+    var allLayers;
+
+    var controls = [new OpenLayers.Control.Zoom({zoomInText:"\ue63d", zoomOutText:"\ue63e"}),
+                    new OpenLayers.Control.Navigation({ zoomWheelEnabled: options && options.zoomWheelEnabled })];
+
+    if (options && options.drawingControls) {
+      self.editableLayer = new OpenLayers.Layer.Vector("Editable");
+      controls.push(new OpenLayers.Control.EditingToolbar(self.editableLayer));
+    }
 
     self.map = new OpenLayers.Map(element, {
       theme: null,
@@ -32,8 +40,7 @@ var gis = (function() {
       units: "m",
       maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
       resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
-      controls: [ new OpenLayers.Control.Zoom({zoomInText:"\ue63d", zoomOutText:"\ue63e"}),
-                  new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
+      controls: controls
     });
 
     // Layers
@@ -94,11 +101,14 @@ var gis = (function() {
     self.vectorLayer = new OpenLayers.Layer.Vector("Vector layer");
 
     if (!features.enabled("maps-disabled")) {
-      self.map.addLayers([base, taustakartta, kiinteistorajat, kiinteistotunnukset, self.vectorLayer]);
+      allLayers = [base, taustakartta, kiinteistorajat, kiinteistotunnukset, self.vectorLayer];
     } else {
-      self.map.addLayers([base, self.vectorLayer]);
+      allLayers = [base, self.vectorLayer];
     }
-
+    if (options && options.drawingControls) {
+      allLayers.push(self.editableLayer);
+    }
+    self.map.addLayers(allLayers);
 
     //
     // Hack: Did not manage to adjust the configs of the layers and the map (resolutions and maxExtent)
