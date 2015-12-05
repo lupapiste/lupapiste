@@ -48,13 +48,12 @@ OpenLayers.Control.LupapisteEditingToolbar = OpenLayers.Class(
           var params = {mapId: util.getIn(layer, ["map", "div", "id"], "unknown"), featureType: featureType};
           if (featureType === "circle") {
             var bounds = feature.geometry.getBounds();
-            params.centerX = (bounds.left + bounds.right) / 2;
-            params.centerY = (bounds.bottom + bounds.top) / 2;
+            params.x = (bounds.left + bounds.right) / 2;
+            params.y = (bounds.bottom + bounds.top) / 2;
             params.radius = (bounds.right - bounds.left) / 2;
           } else if (featureType === "point") {
-            params.centerX = feature.geometry.x;
-            params.centerY = feature.geometry.y;
-            params.radius = 0;
+            params.x = feature.geometry.x;
+            params.y = feature.geometry.y;
           } else if (featureType === "polygon") {
             var points = feature.geometry.components[0].components;
             params.points = _.map(points, function(p) {return _.pick(p, ["x", "y"]);});
