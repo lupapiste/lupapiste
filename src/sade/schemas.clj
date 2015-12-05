@@ -3,6 +3,7 @@
             [sade.validators :as validators]
             [schema.core :as schema]
             [schema.experimental.generators :as generators]
+            [clojure.string]
             [clojure.test.check.generators :as gen]))
 
 ;;
@@ -59,8 +60,8 @@
 ;; Dynamic schema constructors
 
 (defn fixed-len-string-generator [len]
-  (gen/bind (gen/not-empty gen/string)
-            #(gen/return (apply str (take len (cycle %))))))
+  (gen/fmap clojure.string/join 
+            (gen/vector gen/char len)))
 
 (defn fixed-length-string [len]
   (doto (schema/constrained schema/Str (fixed-len-constraint len))
@@ -75,8 +76,8 @@
     (add-generator (min-len-string-generator min-len))))
 
 (defn max-len-string-generator [max-len]
-  (gen/bind gen/string-alphanumeric 
-            #(gen/return (apply str (take max-len %)))))
+  (gen/fmap clojure.string/join
+            (gen/vector gen/char 0 max-len)))
 
 (defn max-length-string [max-len]
   (doto (schema/constrained schema/Str (max-len-constraint max-len))
