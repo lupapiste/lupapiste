@@ -647,14 +647,14 @@
           updates (map (fn [[p v]] [(butlast p) v]) updates)
           updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)
           user-role (:role (find-user-from-minimal-by-apikey apikey))
-          updates (filter (fn [[path value]]
-                            (try
-                              (let [splitted-path (ss/split path #"\.")]
-                                (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
-                                (doc-persistence/validate-readonly-updates! document [splitted-path]))
-                              true
-                              (catch Exception _
-                                false)))
+          updates (filterv (fn [[path value]]
+                             (try
+                               (let [splitted-path (ss/split path #"\.")]
+                                 (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
+                                 (doc-persistence/validate-readonly-updates! document [splitted-path]))
+                               true
+                               (catch Exception _
+                                 false)))
                           updates)
           f (if local? local-command command)]
       (fact "Document is updated"
