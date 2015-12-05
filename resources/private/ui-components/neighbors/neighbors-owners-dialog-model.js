@@ -11,7 +11,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   self.statusPropertyIdSearchFailed = 5;
 
   self.owners = ko.observableArray();
-  self.propertyId = ko.observable();
+  self.propertyIds = ko.observable(null);
 
   self.ownersGroup = ko.computed({
     read: function() {
@@ -31,7 +31,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   });
 
   self.init = function() {
-    return self.status(self.statusInit).propertyId(null).owners([]);
+    return self.status(self.statusInit).propertyIds(null).owners([]);
   };
 
   self.isSearching = function() {
@@ -39,7 +39,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   };
 
   self.isPropertyIdAvailable = function() {
-    return self.propertyId() !== null;
+    return self.propertyIds() !== null;
   };
 
   self.search = function(x, y) {
@@ -53,7 +53,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
 
   self.propertyIdFound = function(propertyId) {
     if (propertyId) {
-      return self.propertyId(propertyId).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(propertyId);
+      return self.propertyIds([propertyId]).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(propertyId);
     } else {
       return self.propertyIfNotFound();
     }
@@ -92,7 +92,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     var applicationId = lupapisteApp.models.application.id();
     var parameters = {
       id: applicationId,
-      propertyId: self.propertyId(),
+      propertyId: self.propertyIds()[0], // FIXME
       owners: selected
     };
 
