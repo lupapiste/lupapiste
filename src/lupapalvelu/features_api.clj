@@ -12,8 +12,9 @@
 (when (env/dev-mode?)
   (defquery "set-feature"
     {:description "Sets a feature flag to given value"
-     :parameters [:feature :value]
+     :parameters [feature value]
+     :input-validators [(partial action/non-blank-parameters [:features :value])]
      :user-roles #{:anonymous}}
-    [{{:keys [feature value]} :data}]
+    [_]
     (env/set-feature! (env/read-value value) [feature])
     (ok :feature feature :value value)))

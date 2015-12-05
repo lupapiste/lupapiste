@@ -73,7 +73,7 @@
       extra-error-data)))
 
 (defn non-blank-parameters [params command]
-  (filter-params-of-command params command #(or (nil? %) (and (string? %) (s/blank? %))) :error.missing-parameters))
+  (filter-params-of-command params command #(or (not (string? %)) (s/blank? %)) :error.missing-parameters))
 
 (defn vector-parameters [params command]
   (filter-params-of-command params command (complement vector?) :error.non-vector-parameters))
@@ -82,7 +82,7 @@
   (or
     (vector-parameters params command)
     (filter-params-of-command params command
-      (partial some #(or (nil? %) (and (string? %) (s/blank? %))))
+      (partial some #(or (not (string? %)) (s/blank? %)))
       :error.vector-parameters-with-blank-items )))
 
 (defn vector-parameters-with-at-least-n-non-blank-items [n params command]
@@ -111,6 +111,9 @@
 
 (defn number-parameters [params command]
   (filter-params-of-command params command (complement number?) :error.illegal-number))
+
+(defn string-parameters [params command]
+  (filter-params-of-command params command (complement string?) "error.illegal-value:not-a-string"))
 
 (defn property-id-parameters [params command]
   (when-let [invalid (seq (filter #(not (v/kiinteistotunnus? (get-in command [:data %]))) params))]
@@ -441,6 +444,11 @@
       (or (seq (:states meta-data)) (seq (:pre-checks meta-data)))
       true)
     (str "You must define :states or :pre-checks meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
+
+  (assert (or (seq (:input-validators meta-data))
+              (empty? (:parameters meta-data))
+              (= [:id] (:parameters meta-data)))
+    (str "Input validators must be defined for " action-name))
 
   (let [action-keyword (keyword action-name)
         {:keys [user-roles user-authz-roles org-authz-roles]} meta-data]
