@@ -229,50 +229,38 @@ div.olControlMousePosition {
 
 div.olControlZoom {
     position: absolute;
-    top: 8px;
-    left: 8px;
-    //background: rgba(255,255,255,0.4);
-    //border-radius: 4px;
-    padding: 2px;
+    top: 0;
+    left: 0;
+    background: #fff;
 }
 div.olControlZoom a {
     @include lupicon-font;
-    background: #fff;
 
     display: block;
-    margin: 1px;
-    padding: 0;
-    /*
-    color: white;
-    font-size: 18px;
-    font-family: 'Lucida Grande', Verdana, Geneva, Lucida, Arial, Helvetica, sans-serif;
-    font-weight: bold;
-    text-decoration: none;
+    height: 40px;
+    width: 40px;
+    line-height: 40px;
+
+    color: $orange-link;
     text-align: center;
-    */
-    height: 22px;
-    width:22px;
-    line-height: 19px;
-    //background: #130085; /* fallback for IE - IE6 requires background shorthand*/
-    //background: rgba(0, 60, 136, 0.5);
-    //filter: alpha(opacity=80);
+    text-decoration: none;
+
+    border: 1px solid #ddd;
+    //&.olControlZoomIn {}
+    &.olControlZoomOut {
+      border-top: 0;
+    }
 }
 div.olControlZoom a:hover {
-    background: #130085; /* fallback for IE */
-    background: rgba(0, 60, 136, 0.7);
-    filter: alpha(opacity=100);
+    color: $orange-hover;
 }
+/*
 @media only screen and (max-width: 600px) {
     div.olControlZoom a:hover {
         background: rgba(0, 60, 136, 0.5);
     }
 }
-a.olControlZoomIn {
-    border-radius: 4px 4px 0 0;
-}
-a.olControlZoomOut {
-    border-radius: 0 0 4px 4px;
-}
+*/
 
 
 /**
