@@ -336,7 +336,7 @@
                                                                                "error.integration.asianhallinta-version-wrong-form")))
 
   (fact "Fail when organization has version missing"
-    (let [_ (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version false)
+    (let [_ (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version "") => ok?
           app-id (:id (create-and-submit-application
                         pena
                         :propertyId kuopio-property-id
