@@ -179,15 +179,15 @@
                                     (filter (fn-> :schema-info :type (not= "party")) documents)))))))
 
 (defquery neighbor-application
-          {:parameters [applicationId neighborId token]
+  {:parameters [applicationId neighborId token]
    :input-validators [(partial action/non-blank-parameters [:applicationId :neighborId :token])]
-           :user-roles #{:anonymous}}
-          [{user :user created :created :as command}]
-          (let [application (domain/get-application-no-access-checking applicationId)
-                neighbor (util/find-by-id neighborId (:neighbors application))]
-            (if (valid-token? token (:status neighbor) created)
-              (ok :application (->public application))
-              (fail :error.token-not-found))))
+   :user-roles #{:anonymous}}
+  [{user :user created :created :as command}]
+  (let [application (domain/get-application-no-access-checking applicationId)
+        neighbor (util/find-by-id neighborId (:neighbors application))]
+    (if (valid-token? token (:status neighbor) created)
+      (ok :application (->public application))
+      (fail :error.token-not-found))))
 
 (defcommand neighbor-response
   {:parameters [applicationId neighborId token response message stamp]
