@@ -7,6 +7,7 @@
 
 (defquery municipality-by-property-id
   {:parameters [propertyId]
+   :input-validators [(partial action/property-id-parameters [:propertyId])]
    :user-roles #{:anonymous}}
   [_]
   (if-let [municipality (p/municipality-id-by-property-id propertyId)]
