@@ -305,7 +305,12 @@ var gis = (function() {
       onUnselect: onPopupClosed
     });
 
-    self.map.addControl(self.selectControl);
+    self.addControl = function(ctrl) {
+      self.map.addControl(ctrl);
+      return self;
+    };
+
+    self.addControl(self.selectControl);
 
 
     // Adding markers
