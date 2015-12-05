@@ -266,10 +266,10 @@ div.olControlZoom a:hover {
  * Editing and navigation icons.
  * (using the editing_tool_bar.png sprint image)
  */
-.olControlEditingToolbar {
+.olControlLupapisteEditingToolbar {
     margin: 5px 5px 0 0;
 }
-.olControlEditingToolbar div {
+.olControlLupapisteEditingToolbar div {
     background-image: url("/lp-static/lib/openlayers2-img/editing_tool_bar.png");
     background-repeat: no-repeat;
     margin: 0 0 5px 5px;
@@ -278,7 +278,7 @@ div.olControlZoom a:hover {
     cursor: pointer
 }
 /* positions */
-.olControlEditingToolbar {
+.olControlLupapisteEditingToolbar {
     right: 0;
     top: 0;
 }
@@ -287,39 +287,33 @@ div.olControlZoom a:hover {
    left: 9px;
 }
 /* layouts */
-.olControlEditingToolbar div {
+.olControlLupapisteEditingToolbar div {
     float: right;
 }
 /* individual controls */
-.olControlEditingToolbar .olControlNavigationItemInactive {
+.olControlLupapisteEditingToolbar .olControlNavigationItemInactive {
     background-position: -103px -1px;
 }
-.olControlEditingToolbar .olControlNavigationItemActive  {
+.olControlLupapisteEditingToolbar .olControlNavigationItemActive  {
    background-position: -103px -24px;
 }
-.olControlEditingToolbar .olControlDrawFeaturePointItemInactive {
+.olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemInactive {
     background-position: -77px -1px;
 }
-.olControlEditingToolbar .olControlDrawFeaturePointItemActive {
+.olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemActive {
     background-position: -77px -24px;
 }
-.olControlEditingToolbar .olControlDrawFeaturePathItemInactive {
-    background-position: -51px -1px;
-}
-.olControlEditingToolbar .olControlDrawFeaturePathItemActive {
-    background-position: -51px -24px;
-}
-.olControlEditingToolbar .olControlDrawFeaturePolygonItemInactive{
+.olControlLupapisteEditingToolbar .olControlDrawFeaturePolygonItemInactive{
     background-position: -26px -1px;
 }
-.olControlEditingToolbar .olControlDrawFeaturePolygonItemActive {
+.olControlLupapisteEditingToolbar .olControlDrawFeaturePolygonItemActive {
     background-position: -26px -24px;
 }
-.olControlEditingToolbar .olControlDrawFeatureEllipseItemInactive{
-    background-position: -128px -1px;
+.olControlLupapisteEditingToolbar .olControlDrawFeatureEllipseItemInactive{
+    background-position: -51px -1px;
 }
-.olControlEditingToolbar .olControlDrawFeatureEllipseItemActive {
-    background-position: -128px -24px;
+.olControlLupapisteEditingToolbar .olControlDrawFeatureEllipseItemActive {
+    background-position: -51px -24px;
 }
 
 

@@ -31,7 +31,7 @@ var gis = (function() {
 
     if (options && options.drawingControls) {
       self.editableLayer = new OpenLayers.Layer.Vector("Editable");
-      controls.push(new OpenLayers.Control.EditingToolbar(self.editableLayer));
+      controls.push(new OpenLayers.Control.LupapisteEditingToolbar(self.editableLayer));
     }
 
     self.map = new OpenLayers.Map(element, {
