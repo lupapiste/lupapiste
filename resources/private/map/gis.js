@@ -30,8 +30,8 @@ var gis = (function() {
                     new OpenLayers.Control.Navigation({ zoomWheelEnabled: options && options.zoomWheelEnabled })];
 
     if (options && options.drawingControls) {
-      self.editableLayer = new OpenLayers.Layer.Vector("Editable");
-      controls.push(new OpenLayers.Control.LupapisteEditingToolbar(self.editableLayer));
+      self.manualDrawingLayer = new OpenLayers.Layer.Vector("Editable");
+      controls.push(new OpenLayers.Control.LupapisteEditingToolbar(self.manualDrawingLayer));
     }
 
     self.map = new OpenLayers.Map(element, {
@@ -106,7 +106,7 @@ var gis = (function() {
       allLayers = [base, self.vectorLayer];
     }
     if (options && options.drawingControls) {
-      allLayers.push(self.editableLayer);
+      allLayers.push(self.manualDrawingLayer);
     }
     self.map.addLayers(allLayers);
 
@@ -205,6 +205,10 @@ var gis = (function() {
 
       if (self.selectedFeature) {
         onPopupClosed(self.selectedFeature);
+      }
+
+      if (self.manualDrawingLayer) {
+        self.manualDrawingLayer.removeAllFeatures();
       }
 
       self.vectorLayer.removeAllFeatures();
