@@ -30,11 +30,11 @@
 
 (defn generate
   ([schema]         (generate schema {}))
-  ([schema wrapper] (generators/generate schema @custom-generators wrapper)))
+  ([schema wrappers] (generators/generate schema @custom-generators wrappers)))
 
 (defn generator
   ([schema]         (generator schema {}))
-  ([schema wrapper] (generators/generator schema @custom-generators wrapper)))
+  ([schema wrappers] (generators/generator schema @custom-generators wrappers)))
 
 ;; Predicate / constraint
 
