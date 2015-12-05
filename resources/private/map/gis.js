@@ -31,7 +31,7 @@ var gis = (function() {
       units: "m",
       maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
       resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
-      controls: [ new OpenLayers.Control.Zoom(),
+      controls: [ new OpenLayers.Control.Zoom({zoomInText:"\ue63d", zoomOutText:"\ue63e"}),
                   new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
     });
 

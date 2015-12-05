@@ -231,26 +231,31 @@ div.olControlZoom {
     position: absolute;
     top: 8px;
     left: 8px;
-    background: rgba(255,255,255,0.4);
-    border-radius: 4px;
+    //background: rgba(255,255,255,0.4);
+    //border-radius: 4px;
     padding: 2px;
 }
 div.olControlZoom a {
+    @include lupicon-font;
+    background: #fff;
+
     display: block;
     margin: 1px;
     padding: 0;
+    /*
     color: white;
     font-size: 18px;
     font-family: 'Lucida Grande', Verdana, Geneva, Lucida, Arial, Helvetica, sans-serif;
     font-weight: bold;
     text-decoration: none;
     text-align: center;
+    */
     height: 22px;
     width:22px;
     line-height: 19px;
-    background: #130085; /* fallback for IE - IE6 requires background shorthand*/
-    background: rgba(0, 60, 136, 0.5);
-    filter: alpha(opacity=80);
+    //background: #130085; /* fallback for IE - IE6 requires background shorthand*/
+    //background: rgba(0, 60, 136, 0.5);
+    //filter: alpha(opacity=80);
 }
 div.olControlZoom a:hover {
     background: #130085; /* fallback for IE */
