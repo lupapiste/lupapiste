@@ -61,8 +61,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   };
 
   self.searchOwners = function(propertyIds) {
-    // FIXME
-    locationSearch.ownersByPropertyId(self.requestContext, propertyIds[0], self.ownersFound, self.ownersNotFound);
+    locationSearch.ownersByPropertyIds(self.requestContext, propertyIds, self.ownersFound, self.ownersNotFound);
   };
 
   self.ownersFound = function(data) {

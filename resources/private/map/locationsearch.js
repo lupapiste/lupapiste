@@ -59,10 +59,8 @@ var locationSearch = (function() {
     }
   };
 
-  var searchOwnersByPropertyId = function(requestContext, propertyId, onSuccess, onFail, processing) {
-      ajax
-      .query("owners")
-      .param("propertyId", propertyId)
+  var searchOwnersByPropertyIds = function(requestContext, propertyIds, onSuccess, onFail, processing) {
+    ajax.datatables("owners", {propertyIds: propertyIds})
       .processing(processing || _.noop)
       .success(requestContext.onResponse(onSuccess))
       .error(requestContext.onResponse(onFail))
@@ -75,6 +73,6 @@ var locationSearch = (function() {
     propertyIdByPoint: searchPropertyId,
     propertyIdsByWKT: searchPropertyIdByWKT,
     addressByPoint: searchAddress,
-    ownersByPropertyId: searchOwnersByPropertyId
+    ownersByPropertyIds: searchOwnersByPropertyIds
   };
 })();
