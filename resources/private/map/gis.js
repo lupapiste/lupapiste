@@ -198,6 +198,13 @@ var gis = (function() {
 
     self.markers = [];
 
+
+    self.clearManualDrawings = function() {
+      if (self.manualDrawingLayer) {
+        self.manualDrawingLayer.removeAllFeatures();
+      }
+    };
+
     self.clear = function() {
       if (self.markerMapCloseCallback) {
         self.markerMapCloseCallback();
@@ -207,9 +214,7 @@ var gis = (function() {
         onPopupClosed(self.selectedFeature);
       }
 
-      if (self.manualDrawingLayer) {
-        self.manualDrawingLayer.removeAllFeatures();
-      }
+      self.clearManualDrawings();
 
       self.vectorLayer.removeAllFeatures();
 
@@ -219,7 +224,6 @@ var gis = (function() {
 
       return self;
     };
-
 
     // Select control
 
