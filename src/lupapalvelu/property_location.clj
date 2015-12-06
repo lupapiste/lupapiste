@@ -17,8 +17,9 @@
 (defn- property-location-from-wfs [property-id]
   (when-let [features (wfs/location-info-by-property-id property-id)]
     (let [location-infos (map wfs/feature-to-location features)]
-      ; Return right away, let cache be popupulated by chance
-      (mongo/insert-batch :propertyCache (map with-mongo-meta location-infos) WriteConcern/UNACKNOWLEDGED)
+      (when (seq location-infos)
+        ; Return right away, let cache be popupulated by chance
+        (mongo/insert-batch :propertyCache (map with-mongo-meta location-infos) WriteConcern/UNACKNOWLEDGED))
       location-infos)))
 
 (defn property-location-info
