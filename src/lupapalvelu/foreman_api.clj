@@ -91,6 +91,7 @@
   {:user-roles #{:applicant :authority}
    :states     states/all-states
    :parameters [:id foremanHetu]
+   :input-validators [(partial action/string-parameters [:foremanHetu])]
    :pre-checks [application/validate-authority-in-drafts]}
   [{application :application user :user :as command}]
   (let [foreman-applications (seq (foreman/get-foreman-project-applications application foremanHetu))
@@ -109,6 +110,7 @@
   {:user-roles #{:applicant :authority}
    :states states/all-states
    :parameters [id taskId foremanAppId]
+   :input-validators [(partial action/non-blank-parameters [:id :taskId :foremanAppId])]
    :pre-checks [application/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]
   (let [task (util/find-by-id taskId (:tasks application))]

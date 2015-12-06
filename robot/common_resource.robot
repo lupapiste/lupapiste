@@ -897,23 +897,23 @@ Neighbor application address should be
 #
 
 Enable maps
-  Execute Javascript  ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
+  Execute Javascript  ajax.command("set-feature",{feature:"maps-disabled",value:false}).call();
   Wait for jQuery
 
 Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
   Wait for jQuery
-  Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
+  Execute Javascript  ajax.command("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
   Wait for jQuery
 
 Disable maps
-  Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
+  Execute Javascript  ajax.command("set-feature", {feature: "maps-disabled", value:true}).call();
   Wait for jQuery
 
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
   Wait for jQuery
-  Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:true}).call();
+  Execute Javascript  ajax.command("set-feature", {feature: "disable-ktj-on-create", value:true}).call();
   Wait for jQuery
 
 #

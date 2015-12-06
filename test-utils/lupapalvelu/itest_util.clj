@@ -63,6 +63,7 @@
 (def kosti       (apikey-for "kosti"))
 (def kosti-id    (id-for "kosti"))
 (def sipoo       (apikey-for "sipoo"))
+(def sipoo-ya    (apikey-for "sipoo-ya"))
 (def tampere-ya  (apikey-for "tampere-ya"))
 (def naantali    (apikey-for "admin@naantali.fi"))
 (def dummy       (apikey-for "dummy"))
@@ -304,7 +305,9 @@
         args        (assoc args :permitType permit-type :url new-url :username "" :password "")]
     (command apikey :set-krysp-endpoint args)))
 
-(defn set-anti-csrf! [value] (query pena :set-feature :feature "disable-anti-csrf" :value (not value)))
+(defn set-anti-csrf! [value]
+  (fact (command pena :set-feature :feature "disable-anti-csrf" :value (not value)) => ok?))
+
 (defn feature? [& feature]
   (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name feature)))))
 
@@ -431,9 +434,12 @@
 
 (defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
   (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id)
-        verdict-id (:verdictId new-verdict-resp)]
-    (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
-    (f apikey :publish-verdict :id application-id :verdictId verdict-id)))
+        verdict-id (or (:verdictId new-verdict-resp))]
+    (if-not (ok? new-verdict-resp)
+      new-verdict-resp
+      (do
+       (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
+       (f apikey :publish-verdict :id application-id :verdictId verdict-id)))))
 
 (defn give-verdict [apikey application-id & args]
   (apply give-verdict-with-fn command apikey application-id args))
@@ -556,10 +562,10 @@
     (if expect-to-succeed
       (facts "Upload succesfully"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
+             (fact "location"    (get-in resp [:headers "location"]) => "/lp-static/html/upload-ok.html"))
       (facts "Upload should fail"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.111.html") => 0)))))
+             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.111.html") => 0)))))
 
 (defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
@@ -581,10 +587,10 @@
     (if expect-to-succeed
       (facts "Statement upload succesfully"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
+        (fact "location"    (get-in resp [:headers "location"]) => "/lp-static/html/upload-ok.html"))
       (facts "Statement upload should fail"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.111.html") => 0)))))
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.111.html") => 0)))))
 
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 
@@ -642,14 +648,14 @@
           updates (map (fn [[p v]] [(butlast p) v]) updates)
           updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)
           user-role (:role (find-user-from-minimal-by-apikey apikey))
-          updates (filter (fn [[path value]]
-                            (try
-                              (let [splitted-path (ss/split path #"\.")]
-                                (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
-                                (doc-persistence/validate-readonly-updates! document [splitted-path]))
-                              true
-                              (catch Exception _
-                                false)))
+          updates (filterv (fn [[path value]]
+                             (try
+                               (let [splitted-path (ss/split path #"\.")]
+                                 (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
+                                 (doc-persistence/validate-readonly-updates! document [splitted-path]))
+                               true
+                               (catch Exception _
+                                 false)))
                           updates)
           f (if local? local-command command)]
       (fact "Document is updated"

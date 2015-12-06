@@ -291,10 +291,9 @@
   (if-let [org-id (user/authority-admins-organization-id (user/current-user request))]
     (if-let [m (-> org-id org/get-organization :map-layers :server)]
       (let [{:keys [url username password]} m
-            encoding (get-in request [:headers "accept-encoding"])
             response (http/get url
                                {:query-params (:params request)
-                                :headers {"accept-encoding" encoding}
+                                :headers (:headers (http/secure-headers request))
                                 :basic-auth [username password]
                                 :as :stream})]
         ;; The same precautions as in secure
@@ -312,9 +311,10 @@
   function. Proxy function returns what ever the service function returns, excluding some unsafe
   stuff. At the moment strips the 'Set-Cookie' headers."
   [f service]
+
   (fn [request]
-    (let [response (f request service)]
-      (update-in response [:headers] dissoc "set-cookie" "server"))))
+    (let [response (f (http/secure-headers request) service)]
+      (http/secure-headers response))))
 
 (defn- cache [max-age-in-s f]
   (let [cache-control {"Cache-Control" (str "public, max-age=" max-age-in-s)}]

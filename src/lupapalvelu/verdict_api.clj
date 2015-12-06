@@ -190,6 +190,7 @@
 
 (defcommand publish-verdict
   {:parameters [id verdictId]
+   :input-validators [(partial action/non-blank-parameters [:id :verdictId])]
    :states     give-verdict-states
    :pre-checks [application-has-verdict-given-state]
    :notified   true
@@ -202,7 +203,7 @@
 
 (defcommand delete-verdict
   {:parameters [id verdictId]
-   :input-validators [(partial action/non-blank-parameters [:verdictId])]
+   :input-validators [(partial action/non-blank-parameters [:id :verdictId])]
    :states     give-verdict-states
    :user-roles #{:authority}}
   [{:keys [application created] :as command}]
@@ -226,6 +227,7 @@
 (defcommand sign-verdict
   {:description "Applicant/application owner can sign an application's verdict"
    :parameters [id verdictId password]
+   :input-validators [(partial action/non-blank-parameters [:id :verdictId :password])]
    :states     states/post-verdict-states
    :pre-checks [domain/validate-owner-or-write-access]
    :user-roles #{:applicant :authority}}
