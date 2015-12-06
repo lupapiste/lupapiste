@@ -81,19 +81,6 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     var ownersWithObservables = _.map(data.owners, convertOwner);
     var gropupedOwners = _.groupBy(ownersWithObservables, "propertyId");
     var groupsWithSelectAll = _.mapValues(gropupedOwners, function(n) {
-//      var owners = ko.observable(n);
-//      var ownersGroup = ko.computed({
-//        read: function() {
-//          return _.some(owners(), function(owner) {
-//            return owner.selected();
-//          });
-//        },
-//        write: function(state) {
-//          owners().forEach(function(owner) {
-//            owner.selected(state);
-//          });
-//        }
-//      });
       var ownersGroup = ko.computed({
         read: function() {
           return _.some(n, function(owner) {
@@ -106,8 +93,8 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
           });
         }
       });
-      return {owners: n, ownersGroup: ownersGroup}
-    } );
+      return {owners: n, ownersGroup: ownersGroup};
+    });
     return self.ownersGroups(_.values(groupsWithSelectAll)).status(self.statusSelectOwners);
   };
 
@@ -130,21 +117,12 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   };
 
   self.addSelectedOwners = function() {
+    var selected = _(self.ownersGroups()).pluck("owners").flatten()
+                       .filter(function(o) {return o.selected();}).value();
 
-    return;
-
-    var selected = _.filter(self.owners(), function(owner) {
-      return  owner.selected();
-    });
     var applicationId = lupapisteApp.models.application.id();
-    var parameters = {
-      id: applicationId,
-      //propertyId: self.propertyIds()[0], // FIXME
-      owners: selected
-    };
 
-    ajax
-      .command("neighbor-add-owners", parameters)
+    ajax.command("neighbor-add-owners", {id: applicationId, owners: selected})
       .success(function() {
         repository.load(applicationId);
         hub.send("close-dialog");
