@@ -137,6 +137,11 @@ div.olControlMousePosition {
 .olControlDragFeatureActive.olControlDragFeatureOver.olDragDown {
     cursor: -moz-grabbing;
 }
+.olControlDrawFeaturePolygonActive > div:first-child,
+.olControlDrawFeaturePointActive > div:first-child,
+.olControlDrawFeatureCircleActive > div:first-child {
+    cursor: crosshair;
+}
 
 div.olControlZoom {
     position: absolute;
