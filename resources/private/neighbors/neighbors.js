@@ -30,6 +30,8 @@
     self.neighborId = ko.observable();
     self.map = null;
 
+    self.x = 0;
+    self.y = 0;
 
     var neighborSkeleton = {propertyId: undefined,
                             owner: {
@@ -92,8 +94,14 @@
         self.map = gis.makeMap("neighbors-map", {zoomWheelEnabled: false, drawingControls: true});
         self.map.updateSize().center(x, y, 13).add({x: x, y:y});
       } else {
-        self.map.updateSize().center(x, y).clear().add({x: x, y:y});
+        self.map.updateSize().clear().add({x: x, y:y});
+        if (self.x !== x || self.y !== y) {
+          self.center(x, y);
+        }
       }
+
+      self.x = x;
+      self.y = y;
 
       self.neighbors(neighbors).neighborId(null);
 
