@@ -10,28 +10,41 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   self.statusOwnersSearchFailed     = 4;
   self.statusPropertyIdSearchFailed = 5;
 
-  self.owners = ko.observableArray();
+  self.ownersGroups = ko.observable();
+  //self.owners = ko.pureComputed(function() {return });
+  // _.values(self.ownersByPropertyId());
+
   self.propertyIds = ko.observable(null);
 
-  self.ownersGroup = ko.computed({
-    read: function() {
-      return _.some(self.owners(), function(owner) {
-        return owner.selected();
-      });
-    },
-    write: function(state) {
-      self.owners().forEach(function(owner) {
-        owner.selected(state);
-      });
-    }
-  });
 
   self.isSubmitEnabled = ko.pureComputed(function() {
-    return self.status() === self.statusSelectOwners && self.ownersGroup();
+    return self.status() === self.statusSelectOwners;// && self.ownersGroup();
   });
 
+  function convertOwner(owner) {
+    var type = owner.henkilolaji,
+    nameOfDeceased = null;
+
+    if (owner.yhteyshenkilo) {
+      nameOfDeceased = getPersonName(owner);
+      owner = owner.yhteyshenkilo;
+      type = "kuolinpesan_yhthl";
+    }
+    return {
+      propertyId: owner.propertyId,
+      name: getPersonName(owner),
+      type: type,
+      nameOfDeceased: nameOfDeceased || null,
+      businessID: owner.ytunnus || null,
+      street: owner.jakeluosoite || null,
+      city: owner.paikkakunta || null,
+      zip: owner.postinumero || null,
+      selected: ko.observable(true)
+    };
+  }
+
   self.init = function() {
-    return self.status(self.statusInit).propertyIds(null).owners([]);
+    return self.status(self.statusInit).propertyIds(null).ownersGroups([]);
   };
 
   self.isSearching = function() {
@@ -65,7 +78,37 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   };
 
   self.ownersFound = function(data) {
-    return self.owners(_.map(data.owners, convertOwner)).status(self.statusSelectOwners);
+    var ownersWithObservables = _.map(data.owners, convertOwner);
+    var gropupedOwners = _.groupBy(ownersWithObservables, "propertyId");
+    var groupsWithSelectAll = _.mapValues(gropupedOwners, function(n) {
+//      var owners = ko.observable(n);
+//      var ownersGroup = ko.computed({
+//        read: function() {
+//          return _.some(owners(), function(owner) {
+//            return owner.selected();
+//          });
+//        },
+//        write: function(state) {
+//          owners().forEach(function(owner) {
+//            owner.selected(state);
+//          });
+//        }
+//      });
+      var ownersGroup = ko.computed({
+        read: function() {
+          return _.some(n, function(owner) {
+            return owner.selected();
+          });
+        },
+        write: function(state) {
+          _.forEach(n, function(owner) {
+            owner.selected(state);
+          });
+        }
+      });
+      return {owners: n, ownersGroup: ownersGroup}
+    } );
+    return self.ownersGroups(_.values(groupsWithSelectAll)).status(self.statusSelectOwners);
   };
 
   self.propertyIfNotFound = function() {
@@ -87,13 +130,16 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   };
 
   self.addSelectedOwners = function() {
+
+    return;
+
     var selected = _.filter(self.owners(), function(owner) {
       return  owner.selected();
     });
     var applicationId = lupapisteApp.models.application.id();
     var parameters = {
       id: applicationId,
-      propertyId: self.propertyIds()[0], // FIXME
+      //propertyId: self.propertyIds()[0], // FIXME
       owners: selected
     };
 
@@ -121,26 +167,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
       return person.nimi;
     }
   }
-  function convertOwner(owner) {
-    var type = owner.henkilolaji,
-    nameOfDeceased = null;
 
-    if (owner.yhteyshenkilo) {
-      nameOfDeceased = getPersonName(owner);
-      owner = owner.yhteyshenkilo;
-      type = "kuolinpesan_yhthl";
-    }
-    return {
-      name: getPersonName(owner),
-      type: type,
-      nameOfDeceased: nameOfDeceased || null,
-      businessID: owner.ytunnus || null,
-      street: owner.jakeluosoite || null,
-      city: owner.paikkakunta || null,
-      zip: owner.postinumero || null,
-      selected: ko.observable(true)
-    };
-  }
 
   self.init().search(params.wkt, params.radius);
 };
