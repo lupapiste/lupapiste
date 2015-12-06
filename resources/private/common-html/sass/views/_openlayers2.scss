@@ -188,19 +188,18 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 
 /* layouts */
 .olControlLupapisteEditingToolbar div {
-    float: right;
     line-height: 37px;
-    border-right-width: 0;
+    border-top-width: 0;
 
 }
 /* individual controls */
 .olControlLupapisteEditingToolbar .olControlNavigationItemInactive {
   &:before{content: "\e642";}
-  border-right-width: 1px;
+  border-top-width: 1px;
 }
 .olControlLupapisteEditingToolbar .olControlNavigationItemActive {
   &:before{content: "\e642";}
-  border-right-width: 1px;
+  border-top-width: 1px;
   color:#000;
 }
 .olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemInactive:before {
