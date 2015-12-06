@@ -47,11 +47,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
 
   self.isSearching = function() {
     return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners;
-  };
-
-  self.isPropertyIdAvailable = function() {
-    return self.propertyIds() !== null;
-  };
+  });
 
   self.search = function(wkt, radius) {
     self.status(self.statusSearchPropertyId).beginUpdateRequest();
@@ -70,6 +66,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
 
   self.searchOwners = function(propertyIds) {
     locationSearch.ownersByPropertyIds(self.requestContext, propertyIds, self.ownersFound, self.ownersNotFound);
+    return self;
   };
 
   self.ownersFound = function(data) {
@@ -99,11 +96,6 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
 
   self.ownersNotFound = function() {
     return self.status(self.statusOwnersSearchFailed);
-  };
-
-  self.cancelSearch = function() {
-    self.status(self.statusEdit).requestContext.begin();
-    return self;
   };
 
   self.addSelectedOwners = function() {
