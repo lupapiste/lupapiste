@@ -612,10 +612,8 @@
 ;; Raster images:
 ;;
 (defn raster-images [request service & [query-organization-map-server]]
-  (let [params  (:params request)
-        accept-encoding (:headers request)
-        layer   (or (:LAYER params) (:LAYERS params) (:layer params))
-        headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}]
+  (let [{:keys [params headers]}  request
+        layer   (or (:LAYER params) (:LAYERS params) (:layer params))]
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
                       {:query-params params
@@ -625,7 +623,7 @@
       ;; Municipality map layers are prefixed. For example: Lupapiste-753-R:wms-layer-name
       "wms" (if-let [[_ org-id layer] (re-matches #"(?i)Lupapiste-([\d]+-[\w]+):(.+)" layer)]
               (query-organization-map-server (ss/upper-case org-id)
-                                             (merge params {:layer layer :LAYERS layer})
+                                             (merge params {:LAYERS layer})
                                              headers)
               (http/get wms-url
                         {:query-params params
