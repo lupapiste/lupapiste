@@ -45,7 +45,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     };
   }
 
-  self.isSearching = function() {
+  self.isSearching = ko.pureComputed(function() {
     return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners;
   });
 

@@ -6,7 +6,7 @@
       <div class="content">
         <div>
           <h2 data-bind="text: loc(['neighbors.owners.status', status()])"></h2>
-          <img data-bind="visible: isSearching()" src="/img/ajax-loader-16.gif" alt=""/>
+          <img data-bind="visible: isSearching" src="/img/ajax-loader-16.gif" alt="" width="16" height="16"/>
         </div>
         <div data-bind="foreach: ownersGroups">
           <h3 data-bind="if: $data.owners.length">
