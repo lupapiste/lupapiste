@@ -145,7 +145,7 @@
         coords (ss/replace wkt wdk-type-pattern "")
         features (case type
                    "POINT" (let [[x y] (ss/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
-                             (if (and (ss/numeric? radius) (not (zero? (Long/parseLong radius))))
+                             (if (and (ss/numeric? radius) (> (Long/parseLong radius) 10))
                                (wfs/property-info-by-radius x y radius)
                                (wfs/property-info-by-point x y)))
                    "LINESTRING" (wfs/property-info-by-line (ss/split (ss/replace coords #"[\(\)]" "") #","))
