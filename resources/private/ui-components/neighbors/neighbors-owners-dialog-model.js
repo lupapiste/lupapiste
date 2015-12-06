@@ -1,6 +1,7 @@
 LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   "use strict";
   var self = this;
+  self.searchRequests = [];
 
   self.statusInit                   = 0;
   self.statusSearchPropertyId       = 1;
@@ -51,7 +52,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
 
   self.search = function(wkt, radius) {
     self.status(self.statusSearchPropertyId).beginUpdateRequest();
-    locationSearch.propertyIdsByWKT(self.requestContext, wkt, radius, self.propertyIdFound, self.propertyIfNotFound);
+    self.searchRequests.push(locationSearch.propertyIdsByWKT(self.requestContext, wkt, radius, self.propertyIdFound, self.propertyIfNotFound));
     return self;
   };
 
@@ -65,7 +66,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   };
 
   self.searchOwners = function(propertyIds) {
-    locationSearch.ownersByPropertyIds(self.requestContext, propertyIds, self.ownersFound, self.ownersNotFound);
+    self.searchRequests.push(locationSearch.ownersByPropertyIds(self.requestContext, propertyIds, self.ownersFound, self.ownersNotFound));
     return self;
   };
 
@@ -118,6 +119,13 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     return self;
   };
   self.requestContext = new RequestContext();
+
+  // Abort every search request when the dialog is closed
+  self.dispose = function() {
+    _.each(self.searchRequests, function(r) {
+      r.abort();
+    });
+  };
 
   // Init
   self.search(params.wkt, params.radius);
