@@ -45,11 +45,13 @@ OpenLayers.Control.LupapisteEditingToolbar = OpenLayers.Class(
 
         // Lupapiste extension: send event to hub
         function sendDrawEvent(featureType, feature) {
-          var params = {mapId: util.getIn(layer, ["map", "div", "id"], "unknown"), featureType: featureType};
+          var params = {mapId: util.getIn(layer, ["map", "div", "id"], "unknown"),
+                        featureType: featureType, wkt: feature.geometry.toString()};
           if (featureType === "circle") {
             var bounds = feature.geometry.getBounds();
             params.x = (bounds.left + bounds.right) / 2;
             params.y = (bounds.bottom + bounds.top) / 2;
+            params.wkt = "POINT(" + params.x + " " + params.y + ")";
             params.radius = (bounds.right - bounds.left) / 2;
           } else if (featureType === "point") {
             params.x = feature.geometry.x;
