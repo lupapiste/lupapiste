@@ -2,7 +2,6 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   "use strict";
   var self = this;
 
-  self.status = ko.observable();
   self.statusInit                   = 0;
   self.statusSearchPropertyId       = 1;
   self.statusSearchOwners           = 2;
@@ -10,17 +9,20 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   self.statusOwnersSearchFailed     = 4;
   self.statusPropertyIdSearchFailed = 5;
 
-  self.ownersGroups = ko.observable();
-  //self.owners = ko.pureComputed(function() {return });
-  // _.values(self.ownersByPropertyId());
-
+  self.status = ko.observable(self.statusInit);
+  self.ownersGroups = ko.observable([]);
   self.propertyIds = ko.observable(null);
 
-
   self.isSubmitEnabled = ko.pureComputed(function() {
-    return self.status() === self.statusSelectOwners;// && self.ownersGroup();
+    return self.status() === self.statusSelectOwners
+           && _.some(self.ownersGroups(), function(o) {return o.ownersGroup();} );
   });
 
+  // Helper functions
+  function getPersonName(person) {
+    return person.sukunimi && person.etunimet ?
+        person.sukunimi + ", " + person.etunimet : person.nimi;
+  }
   function convertOwner(owner) {
     var type = owner.henkilolaji,
     nameOfDeceased = null;
@@ -43,10 +45,6 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     };
   }
 
-  self.init = function() {
-    return self.status(self.statusInit).propertyIds(null).ownersGroups([]);
-  };
-
   self.isSearching = function() {
     return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners;
   };
@@ -55,11 +53,8 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     return self.propertyIds() !== null;
   };
 
-  self.search = function(x, y) {
-    return self.status(self.statusSearchPropertyId).beginUpdateRequest().searchPropertyId(x, y);
-  };
-
-  self.searchPropertyId = function(wkt, radius) {
+  self.search = function(wkt, radius) {
+    self.status(self.statusSearchPropertyId).beginUpdateRequest();
     locationSearch.propertyIdsByWKT(self.requestContext, wkt, radius, self.propertyIdFound, self.propertyIfNotFound);
     return self;
   };
@@ -111,11 +106,6 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     return self;
   };
 
-  self.openOwners = function() {
-    LUPAPISTE.ModalDialog.open("#dialog-select-owners");
-    return self;
-  };
-
   self.addSelectedOwners = function() {
     var selected = _(self.ownersGroups()).pluck("owners").flatten()
                        .filter(function(o) {return o.selected();}).value();
@@ -137,15 +127,6 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   };
   self.requestContext = new RequestContext();
 
-  // Helper functions
-  function getPersonName(person) {
-    if (person.sukunimi && person.etunimet) {
-      return person.sukunimi + ", " + person.etunimet;
-    } else {
-      return person.nimi;
-    }
-  }
-
-
-  self.init().search(params.wkt, params.radius);
+  // Init
+  self.search(params.wkt, params.radius);
 };
