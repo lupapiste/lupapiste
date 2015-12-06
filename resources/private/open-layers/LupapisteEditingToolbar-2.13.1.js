@@ -14,7 +14,7 @@
 
 /**
  * Class: OpenLayers.Control.LupapisteEditingToolbar
- * The EditingToolbar is a panel of 4 controls to draw polygons, lines,
+ * The EditingToolbar is a panel of 4 controls to draw circles, polygons,
  * points, or to navigate the map by panning. By default it appears in the
  * upper right corner of the map.
  *
@@ -78,7 +78,7 @@ OpenLayers.Control.LupapisteEditingToolbar = OpenLayers.Class(
                 handlerOptions: {citeCompliant: this.citeCompliant}
             }),
             new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
-              displayClass: "olControlDrawFeatureEllipse",
+              displayClass: "olControlDrawFeatureCircle",
               featureAdded: _.partial(sendDrawEvent, "circle"),
               handlerOptions: {citeCompliant: this.citeCompliant, sides: 40}
           })

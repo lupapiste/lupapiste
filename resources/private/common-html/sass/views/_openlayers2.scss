@@ -96,7 +96,7 @@ div.olControlMousePosition {
 }
 
 .olPopupCloseBox {
-  background: url("/theme/default/img/close.gif") no-repeat;
+  background: url("/lp-static/lib/openlayers2-img/close.gif") no-repeat;
   cursor: pointer;
 }
 
@@ -142,9 +142,8 @@ div.olControlZoom {
     position: absolute;
     top: 0;
     left: 0;
-    background: #fff;
 }
-div.olControlZoom a {
+div.olControlZoom a, .olControlLupapisteEditingToolbar div {
     @include lupicon-font;
 
     display: block;
@@ -157,12 +156,12 @@ div.olControlZoom a {
     text-decoration: none;
 
     border: 1px solid #ddd;
-    //&.olControlZoomIn {}
-    &.olControlZoomOut {
-      border-top: 0;
-    }
+    background-color: #fff;
 }
-div.olControlZoom a:hover {
+div.olControlZoom a.olControlZoomOut {
+    border-top: 0;
+}
+div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
     color: $orange-hover;
 }
 /*
@@ -178,49 +177,48 @@ div.olControlZoom a:hover {
  * (using the editing_tool_bar.png sprint image)
  */
 .olControlLupapisteEditingToolbar {
-    margin: 5px 5px 0 0;
     right: 0;
     top: 0;
-}
-.olControlLupapisteEditingToolbar div {
-    background-image: url("/lp-static/lib/openlayers2-img/editing_tool_bar.png");
-    background-repeat: no-repeat;
-    margin: 0 0 5px 5px;
-    width: 24px;
-    height: 22px;
-    cursor: pointer
 }
 
 /* layouts */
 .olControlLupapisteEditingToolbar div {
     float: right;
+    line-height: 37px;
+    border-right-width: 0;
+
 }
 /* individual controls */
 .olControlLupapisteEditingToolbar .olControlNavigationItemInactive {
-    background-position: -103px -1px;
+  &:before{content: "\e642";}
+  border-right-width: 1px;
 }
-.olControlLupapisteEditingToolbar .olControlNavigationItemActive  {
-   background-position: -103px -24px;
+.olControlLupapisteEditingToolbar .olControlNavigationItemActive {
+  &:before{content: "\e642";}
+  border-right-width: 1px;
+  color:#000;
 }
-.olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemInactive {
-    background-position: -77px -1px;
+.olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemInactive:before {
+  content: "\e641";
 }
-.olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemActive {
-    background-position: -77px -24px;
+.olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemActive:before {
+  content: "\e641";
+  color:#000;
 }
-.olControlLupapisteEditingToolbar .olControlDrawFeaturePolygonItemInactive{
-    background-position: -26px -1px;
+.olControlLupapisteEditingToolbar .olControlDrawFeaturePolygonItemInactive:before {
+  content: "\e63f";
 }
-.olControlLupapisteEditingToolbar .olControlDrawFeaturePolygonItemActive {
-    background-position: -26px -24px;
+.olControlLupapisteEditingToolbar .olControlDrawFeaturePolygonItemActive:before {
+  content: "\e63f";
+  color:#000;
 }
-.olControlLupapisteEditingToolbar .olControlDrawFeatureEllipseItemInactive{
-    background-position: -51px -1px;
+.olControlLupapisteEditingToolbar .olControlDrawFeatureCircleItemInactive:before {
+  content: "\e903";
 }
-.olControlLupapisteEditingToolbar .olControlDrawFeatureEllipseItemActive {
-    background-position: -51px -24px;
+.olControlLupapisteEditingToolbar .olControlDrawFeatureCircleItemActive:before {
+  content: "\e903";
+  color:#000;
 }
-
 
 /**
  * Animations
