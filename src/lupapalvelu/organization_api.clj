@@ -156,7 +156,7 @@
   {:description "Updates organization link."
    :parameters [url nameFi nameSv index]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv :index])
+   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])
                       (partial validate-optional-url :url)
                       (partial number-parameters [:index])]}
   [{user :user}]
