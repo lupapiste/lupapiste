@@ -46,21 +46,23 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     return self.status(self.statusSearchPropertyId).beginUpdateRequest().searchPropertyId(x, y);
   };
 
-  self.searchPropertyId = function(x, y) {
-    locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyIdFound, self.propertyIfNotFound);
+  self.searchPropertyId = function(wkt, radius) {
+    locationSearch.propertyIdsByWKT(self.requestContext, wkt, radius, self.propertyIdFound, self.propertyIfNotFound);
     return self;
   };
 
-  self.propertyIdFound = function(propertyId) {
-    if (propertyId) {
-      return self.propertyIds([propertyId]).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(propertyId);
+  self.propertyIdFound = function(resp) {
+    var propertyIds = _.isArray(resp) && resp.length > 0 ? _.pluck(resp, "kiinttunnus") : null;
+    if (propertyIds) {
+      return self.propertyIds(propertyIds).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(propertyIds);
     } else {
       return self.propertyIfNotFound();
     }
   };
 
-  self.searchOwners = function(propertyId) {
-    locationSearch.ownersByPropertyId(self.requestContext, propertyId, self.ownersFound, self.ownersNotFound);
+  self.searchOwners = function(propertyIds) {
+    // FIXME
+    locationSearch.ownersByPropertyId(self.requestContext, propertyIds[0], self.ownersFound, self.ownersNotFound);
   };
 
   self.ownersFound = function(data) {
@@ -141,5 +143,5 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     };
   }
 
-  self.init().search(params.x, params.y);
+  self.init().search(params.wkt, params.radius);
 };

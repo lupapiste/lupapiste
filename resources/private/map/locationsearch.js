@@ -25,16 +25,26 @@ var locationSearch = (function() {
   var searchPropertyId = function(requestContext, x, y, onSuccess, onFail, processing) {
     if (x > 0 && y > 0 ) {
       ajax
-      .get ("/proxy/property-id-by-point")
-      .param ("x", x)
-      .param ("y", y)
-      .processing(processing || _.noop)
-      .success (requestContext.onResponse(onSuccess))
-      .fail (requestContext.onResponse(onFail))
-      .call ();
+        .get("/proxy/property-id-by-point")
+        .param("x", x).param("y", y)
+        .processing(processing || _.noop)
+        .success(requestContext.onResponse(onSuccess))
+        .fail(requestContext.onResponse(onFail))
+        .call();
     }
   };
-
+  var searchPropertyIdByWKT = function(requestContext, wkt, radius, onSuccess, onFail, processing) {
+    var r = _.isNumber(radius) ? Math.round(radius) : "";
+    if (wkt) {
+      ajax
+        .get("/proxy/property-info-by-wkt")
+        .param("wkt", wkt).param("radius", r)
+        .processing(processing || _.noop)
+        .success(requestContext.onResponse(onSuccess))
+        .fail(requestContext.onResponse(onFail))
+        .call();
+    }
+  };
   var searchAddress = function(requestContext, x, y, onSuccess, onFail, processing) {
     if (x > 0 && y > 0) {
       ajax
@@ -63,6 +73,7 @@ var locationSearch = (function() {
     pointByAddress: searchPointByAddress,
     pointByPropertyId: searchPointByPropertyId,
     propertyIdByPoint: searchPropertyId,
+    propertyIdsByWKT: searchPropertyIdByWKT,
     addressByPoint: searchAddress,
     ownersByPropertyId: searchOwnersByPropertyId
   };
