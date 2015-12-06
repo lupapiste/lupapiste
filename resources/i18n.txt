@@ -1,0 +1,1 @@
+help.neighbors.map: Valitse naapurit piirtämällä kartalle. Monikulmion piirto loppuu kaksoisklikkaamaalla.

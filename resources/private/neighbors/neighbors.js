@@ -24,7 +24,8 @@
       return self.applicationAreaLoading() || self.neighborAreasLoading();
     });
 
-    self.applicationId = ko.observable();
+    self.applicationId = lupapisteApp.models.application.id;
+    self.permitType = lupapisteApp.models.application.permitType;
     self.neighbors = ko.observableArray();
     self.neighborId = ko.observable();
     self.map = null;
@@ -94,7 +95,7 @@
         self.map.updateSize().center(x, y).clear().add({x: x, y:y});
       }
 
-      self.applicationId(application.id).neighbors(neighbors).neighborId(null);
+      self.neighbors(neighbors).neighborId(null);
 
       self.getApplicationWKT = self.draw([application.propertyId], applicationDrawStyle, self.applicationAreaLoading);
       self.getNeighbourWKT = self.draw(_.pluck(neighbors, "propertyId"), neighbourDrawStyle, self.neighborAreasLoading);
