@@ -126,14 +126,14 @@
 
 (facts "Selected operations"
 
-  (fact* "For an organization which has no selected operations, all operations are returned"
-    (let [resp (query sipoo "all-operations-for-organization" :organizationId "753-YA") => ok?
+  (fact "For an organization which has no selected operations, all operations are returned"
+    (let [resp (query sipoo "all-operations-for-organization" :organizationId "753-YA")
           operations (:operations resp)]
       ;; All the YA operations (and only those) are received here.
       (count operations) => 1
       (-> operations first first) => "yleisten-alueiden-luvat"))
 
-  (fact* "Set selected operations"
+  (fact "Set selected operations"
     (command pena "set-organization-selected-operations" :operations ["pientalo" "aita"]) => unauthorized?
     (command sipoo "set-organization-selected-operations" :operations ["pientalo" "aita"]) => ok?)
 

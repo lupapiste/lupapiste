@@ -240,7 +240,7 @@
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
-                       "request-statement-model.js" "add-party.js" "attachments-tab-model.js" "archival-summary.js"
+                       "add-party.js" "attachments-tab-model.js" "archival-summary.js"
                        "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
@@ -390,6 +390,7 @@
                       "application-bulletin/tabs/info/bulletin-info-tab-template.html"
                       "application-bulletin/tabs/verdicts/verdicts-template.html"
                       "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-template.html"
+                      "application-bulletin/tabs/instructions/bulletin-instructions-tab-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
                       "application-bulletins/application-bulletins-template.html"
                       "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
@@ -407,6 +408,7 @@
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
                     "application-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
                     "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-model.js"
+                    "application-bulletin/tabs/instructions/bulletin-instructions-tab-model.js"
                     "application-bulletins/application-bulletins-model.js"
                     "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
                     "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"

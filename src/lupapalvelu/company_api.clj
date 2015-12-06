@@ -51,15 +51,19 @@
     (ok :companies (c/find-companies))))
 
 (defcommand company-update
-  {:user-roles #{:applicant :admin}
-   :pre-checks [validate-user-is-admin-or-company-admin]
-   :parameters [company updates]}
+  {:parameters [company updates]
+   :input-validators [(partial action/non-blank-parameters [:company])
+                      (partial action/map-parameters [:updates])]
+   :user-roles #{:applicant :admin}
+   :pre-checks [validate-user-is-admin-or-company-admin]}
   [{caller :user}]
   (ok :company (c/update-company! company updates caller)))
 
 (defcommand company-user-update
-  {:user-roles #{:applicant :admin}
-   :parameters [user-id op value]}
+  {:parameters [user-id op value]
+   :input-validators [(partial action/non-blank-parameters [:user-id :op])
+                      (partial action/boolean-parameters [:value])]
+   :user-roles #{:applicant :admin}}
   [{caller :user}]
   (let [target-user (u/get-user-by-id! user-id)]
     (if-not (or (= (:role caller) "admin")
@@ -121,6 +125,7 @@
 
 (defcommand company-invite
   {:parameters [id company-id]
+   :input-validators [(partial action/non-blank-parameters [:id :company-id])]
    :states (states/all-application-states-but states/terminal-states)
    :user-roles #{:applicant :authority}
    :pre-checks [application/validate-authority-in-drafts]}
@@ -130,6 +135,7 @@
 
 (defcommand company-cancel-invite
   {:parameters [tokenId]
+   :input-validators [(partial action/non-blank-parameters [:tokenId])]
    :user-roles #{:applicant}
    :pre-checks [validate-user-is-admin-or-company-admin]}
   [{:keys [created user application] :as command}]

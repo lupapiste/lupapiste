@@ -92,6 +92,12 @@
     {}
     (map :permitType scope)))
 
+;; Validators
+(defn validate-optional-url [param command]
+  (let [url (get-in command [:data param])]
+    (when-not (ss/blank? url)
+      (util/validate-url url))))
+
 ;;
 ;; Actions
 ;;
@@ -140,7 +146,8 @@
   {:description "Adds link to organization."
    :parameters [url nameFi nameSv]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]}
+   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])
+                      (partial validate-optional-url :url)]}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
@@ -149,7 +156,8 @@
   {:description "Updates organization link."
    :parameters [url nameFi nameSv index]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv :index])
+   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])
+                      (partial validate-optional-url :url)
                       (partial number-parameters [:index])]}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
@@ -158,6 +166,7 @@
 (defcommand remove-organization-link
   {:description "Removes organization link."
    :parameters [url nameFi nameSv]
+   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
@@ -170,6 +179,7 @@
 
 (defquery organization-by-id
   {:parameters [organizationId]
+   :input-validators [(partial non-blank-parameters [:organizationId])]
    :user-roles #{:admin}}
   [_]
   (o/get-organization organizationId))
@@ -185,6 +195,7 @@
 
 (defquery municipality-active
   {:parameters [municipality]
+   :input-validators [(partial non-blank-parameters [:municipality])]
    :user-roles #{:anonymous}}
   [_]
   (let [organizations (o/get-organizations {:scope.municipality municipality})
@@ -196,14 +207,6 @@
         :applications (->> scopes (filter :new-application-enabled) (map :permitType))
         :infoRequests (->> scopes (filter :inforequest-enabled) (map :permitType))
         :opening (->> scopes (filter :opening) (map #(select-keys % [:permitType :opening]))))))
-
-(defquery municipality-by-property-id
-  {:parameters [propertyId]
-   :user-roles #{:anonymous}}
-  [_]
-  (if-let [municipality (p/municipality-id-by-property-id propertyId)]
-    (ok :municipality municipality)
-    (fail :municipalitysearch.notfound)))
 
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
@@ -236,6 +239,7 @@
 (defquery organization-details
   {:description "Resolves organization based on municipality and selected operation."
    :parameters [municipality operation]
+   :input-validators [(partial non-blank-parameters [:municipality :operation])]
    :user-roles #{:applicant :authority}}
   [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
@@ -251,8 +255,7 @@
 (defcommand set-organization-selected-operations
   {:parameters [operations]
    :user-roles #{:authorityAdmin}
-   :input-validators  [(partial non-blank-parameters [:operations])
-                       (partial vector-parameters [:operations])
+   :input-validators  [(partial vector-parameters [:operations])
                        (fn [{{:keys [operations]} :data}]
                          (when-not (every? (->> operations/operations keys (map name) set) operations)
                            (fail :error.unknown-operation)))]}
@@ -299,7 +302,7 @@
 (defcommand set-organization-permanent-archive-enabled
   {:parameters [enabled organizationId]
    :user-roles #{:admin}
-   :input-validators  [(partial non-blank-parameters [:enabled :organizationId])
+   :input-validators  [(partial non-blank-parameters [:organizationId])
                        (partial boolean-parameters [:enabled])]}
   [{user :user}]
   (o/update-organization organizationId {$set {:permanent-archive-enabled enabled}})
@@ -323,7 +326,8 @@
                         (when-not (or
                                     (and (env/feature? :kunnan-osoiteaineisto) (= "osoitteet" permit-type))
                                     (permit/valid-permit-type? permit-type))
-                          (fail :error.missing-parameters :parameters [:permitType])))]}
+                          (fail :error.missing-parameters :parameters [:permitType])))
+                      (partial validate-optional-url :url)]}
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)
         krysp-config    (o/get-krysp-wfs {:_id organization-id} permitType)
@@ -381,9 +385,7 @@
    :input-validators [(fn [{{key :key} :data}]
                         (when-not (contains? #{:vendorBackendUrlForBackendId :vendorBackendUrlForLpId} (keyword key))
                           (fail :error.illegal-key)))
-                      (fn [{{url :val} :data}]
-                        (when-not (ss/blank? url)
-                          (util/validate-url url)))]}
+                      (partial validate-optional-url :val)]}
   [{user :user}]
   (let [key    (csk/->kebab-case key)
         org-id (user/authority-admins-organization-id user)]
@@ -391,6 +393,7 @@
 
 (defcommand save-organization-tags
   {:parameters [tags]
+   :input-validators [(partial action/vector-parameter-of :tags map?)] ; FIXME deep validation
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [org-id (user/authority-admins-organization-id user)
@@ -403,6 +406,7 @@
 
 (defquery remove-tag-ok
   {:parameters [tagId]
+   :input-validators [(partial non-blank-parameters [:tagId])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [org-id (user/authority-admins-organization-id user)]
@@ -479,7 +483,7 @@
     (try+
       (when-not (= content-type "application/zip")
         (fail! :error.illegal-shapefile))
-      
+
       (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
             shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
             data-store (FileDataStoreFinder/getDataStore shape-file)
@@ -502,7 +506,7 @@
       (catch Throwable t
         (error "Failed to parse shapefile" t)
         (resp/status 400 :error.shapefile-parsing-failed))
-      (finally 
+      (finally
         (when tmpdir
           (fs/delete-dir tmpdir))))))
 
@@ -517,6 +521,7 @@
 
 (defcommand update-map-server-details
   {:parameters [url username password]
+   :input-validators [(partial validate-optional-url :url)]
    :user-roles #{:authorityAdmin}
    :feature :municipality-maps}
   [{user :user}]
@@ -528,6 +533,7 @@
 
 (defcommand update-user-layers
   {:parameters [layers]
+   :input-validators [(partial action/vector-parameter-of :layers map?)] ; FIXME deep validation
    :user-roles #{:authorityAdmin}
    :feature :municipality-maps}
   [{user :user}]

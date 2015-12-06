@@ -9,7 +9,7 @@
             [sade.core :refer [ok fail fail! now]]
             [sade.session :as ssess]
             [sade.strings :as ss]
-            [lupapalvelu.action :refer [defquery defcommand]]
+            [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.onnistuu.process :as p]
             [lupapalvelu.company :as c]
             [lupapalvelu.user :as u]
@@ -69,6 +69,7 @@
 
 (defcommand cancel-sign
   {:parameters [processId]
+   :input-validators [(partial action/non-blank-parameters [:processId])]
    :user-roles #{:anonymous}}
   [{:keys [created]}]
   (p/cancel-sign-process! processId created)
@@ -135,6 +136,7 @@
 
   (defquery find-sign-process
     {:parameters [processId]
+     :input-validators [(partial action/non-blank-parameters [:processId])]
      :user-roles #{:anonymous}}
     [_]
     (ok :process (p/find-sign-process! processId)))

@@ -26,7 +26,7 @@ var gis = (function() {
     var self = this;
 
     self.map = new OpenLayers.Map(element, {
-      theme: "/theme/default/style.css?build=" + LUPAPISTE.config.build,
+      theme: null,
       projection: new OpenLayers.Projection("EPSG:3067"),
       units: "m",
       maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
@@ -386,8 +386,11 @@ var gis = (function() {
     self.drawDrawings = function(drawings, attrs, style) {
       if (drawings) {
         var addFeatureFn = function(memo, drawing) {
-          var newFeature = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(drawing.geometry), attrs, style);
-          memo.push(newFeature);
+          var wkt = _.isString(drawing) ? drawing : drawing.geometry;
+          if (wkt) {
+            var newFeature = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(wkt), attrs, style);
+            memo.push(newFeature);
+          }
           return memo;
         };
         var featureArray = _.reduce(drawings, addFeatureFn, []);

@@ -305,7 +305,9 @@
         args        (assoc args :permitType permit-type :url new-url :username "" :password "")]
     (command apikey :set-krysp-endpoint args)))
 
-(defn set-anti-csrf! [value] (query pena :set-feature :feature "disable-anti-csrf" :value (not value)))
+(defn set-anti-csrf! [value]
+  (fact (command pena :set-feature :feature "disable-anti-csrf" :value (not value)) => ok?))
+
 (defn feature? [& feature]
   (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name feature)))))
 
@@ -432,9 +434,12 @@
 
 (defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
   (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id)
-        verdict-id (:verdictId new-verdict-resp)]
-    (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
-    (f apikey :publish-verdict :id application-id :verdictId verdict-id)))
+        verdict-id (or (:verdictId new-verdict-resp))]
+    (if-not (ok? new-verdict-resp)
+      new-verdict-resp
+      (do
+       (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
+       (f apikey :publish-verdict :id application-id :verdictId verdict-id)))))
 
 (defn give-verdict [apikey application-id & args]
   (apply give-verdict-with-fn command apikey application-id args))
@@ -526,6 +531,8 @@
 ;; Stuffin' data in
 ;;
 
+;; attachments
+
 (defn sign-attachment [apikey id attachmentId password]
   (let [uri (str (server-address) "/api/command/sign-attachments")
         resp (http-post uri
@@ -555,10 +562,10 @@
     (if expect-to-succeed
       (facts "Upload succesfully"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
+             (fact "location"    (get-in resp [:headers "location"]) => "/lp-static/html/upload-ok.html"))
       (facts "Upload should fail"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.111.html") => 0)))))
+             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.111.html") => 0)))))
 
 (defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
@@ -580,19 +587,59 @@
     (if expect-to-succeed
       (facts "Statement upload succesfully"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
+        (fact "location"    (get-in resp [:headers "location"]) => "/lp-static/html/upload-ok.html"))
       (facts "Statement upload should fail"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.111.html") => 0)))))
-
-(defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
-  (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.111.html") => 0)))))
 
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 
 (defn upload-attachment-to-all-placeholders [apikey application]
   (doseq [attachment (:attachments application)]
     (upload-attachment apikey (:id application) attachment true)))
+
+;; NOTE: For this to work properly,
+;;       the :operations-attachments must be set correctly for organization (in minimal.clj)
+;;       and also the :attachments for operation (in operations.clj).
+(defn generate-attachment [{id :id :as application} apikey password]
+  (when-let [first-attachment (or
+                                (get-in application [:attachments 0])
+                                (case (-> application :primaryOperation :name)
+                                  "aloitusoikeus" {:type {:type-group "paapiirustus"
+                                                          :type-id "asemapiirros"}
+                                                   :id id}
+                                  nil))]
+    (upload-attachment apikey id first-attachment true)
+    (sign-attachment apikey id (:id first-attachment) password)))
+
+;; statements
+
+(defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
+  (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))
+
+(defn get-statement-by-user-id [application user-id]
+  (some #(when (= user-id (get-in % [:person :userId])) %) (:statements application)))
+
+;; This has a side effect which generates a attachement to appliction
+(defn generate-statement [application-id apikey]
+  (let [resp (query sipoo :get-organizations-statement-givers) => ok?
+        statement-giver (->> resp :data (some #(when (= (email-for-key apikey) (:email %)) %))) => truthy
+        create-statement-result (command apikey :request-for-statement
+                                  :functionCode nil
+                                  :id application-id
+                                  :selectedPersons [statement-giver]
+                                  :saateText "saate"
+                                  :dueDate 1450994400000) => ok?
+        updated-application (query-application apikey application-id)
+        statement-id (:id (get-statement-by-user-id updated-application (id-for-key apikey)))
+        upload-statement-attachment-result (upload-attachment-for-statement apikey application-id "" true statement-id)
+        give-statement-result (command apikey :give-statement
+                                :id application-id
+                                :statementId statement-id
+                                :status "puoltaa"
+                                :lang "fi"
+                                :text "Annanpa luvan urakalle.")]
+    (query-application apikey application-id)))
 
 (defn generate-documents [application apikey & [local?]]
   (doseq [document (:documents application)]
@@ -601,14 +648,14 @@
           updates (map (fn [[p v]] [(butlast p) v]) updates)
           updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)
           user-role (:role (find-user-from-minimal-by-apikey apikey))
-          updates (filter (fn [[path value]]
-                            (try
-                              (let [splitted-path (ss/split path #"\.")]
-                                (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
-                                (doc-persistence/validate-readonly-updates! document [splitted-path]))
-                              true
-                              (catch Exception _
-                                false)))
+          updates (filterv (fn [[path value]]
+                             (try
+                               (let [splitted-path (ss/split path #"\.")]
+                                 (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
+                                 (doc-persistence/validate-readonly-updates! document [splitted-path]))
+                               true
+                               (catch Exception _
+                                 false)))
                           updates)
           f (if local? local-command command)]
       (fact "Document is updated"
