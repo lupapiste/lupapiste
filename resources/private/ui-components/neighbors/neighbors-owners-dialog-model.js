@@ -57,9 +57,11 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   };
 
   self.propertyIdFound = function(resp) {
+    var applicationPropertyId = lupapisteApp.models.application.propertyId();
     var propertyIds = _.isArray(resp) && resp.length > 0 ? _.pluck(resp, "kiinttunnus") : null;
     if (propertyIds) {
-      return self.propertyIds(propertyIds).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(propertyIds);
+      var filteredPropertyIds = _.filter(propertyIds, function(p) {return p !== applicationPropertyId;});
+      return self.propertyIds(filteredPropertyIds).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(filteredPropertyIds);
     } else {
       return self.propertyIfNotFound();
     }
