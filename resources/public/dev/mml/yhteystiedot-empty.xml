@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kyyh:Yhteystiedot xmlns:y="http://xml.nls.fi/ktjkir/yhteinen/2013/03/01"
+                  xmlns:kyyh="http://xml.nls.fi/ktjkir/kysely/yhteystiedot/2013/11/01"
+                  xmlns:tryh="http://xml.nls.fi/ktjkir/yhteystiedot/2013/11/01"
+                  xmlns:trpt="http://xml.nls.fi/ktjkir/perustiedot/2013/03/01"
+                  xmlns:muti="http://xml.nls.fi/ktjkir/yhteystiedot_muti/2013/03/01">
+  <tryh:Rekisteriyksikko>
+      <tryh:kohteenHenkilot>
+      </tryh:kohteenHenkilot>
+  </tryh:Rekisteriyksikko>
+  
+</kyyh:Yhteystiedot>

@@ -193,5 +193,5 @@
                 (merge {:query-params params}
                        (when-not (ss/blank? username)
                          {:basic-auth [username password]})
-                       {:headers {"accept-encoding" (get headers "accept-encoding")}
+                       {:headers (assoc  {} :accept "image/png")
                         :as :stream})))))

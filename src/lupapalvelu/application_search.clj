@@ -63,7 +63,7 @@
 
 (defn- make-area-query [areas user]
   {:pre [(sequential? areas)]}
-  (let [orgs (user/organization-ids-by-roles user #{:authority})
+  (let [orgs (user/organization-ids-by-roles user #{:authority :commenter :reader})
         orgs-with-areas (mongo/select :organizations {:_id {$in orgs} :areas.features.id {$in areas}} [:areas])
         features (flatten (map (comp :features :areas) orgs-with-areas))
         selected-areas (set areas)

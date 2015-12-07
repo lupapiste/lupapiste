@@ -13,7 +13,9 @@
   [name]
   (when name
     (let [specials {"lohkominen-tonttijako" :Lohkominen
-                    "lohkominen-ohjeellinen" :Lohkominen}
+                    "lohkominen-ohjeellinen" :Lohkominen
+                    "kiinteistolajin-muutos" :KiinteistolajinMuutos
+                    "kiinteiston-tunnusmuutos" :KiinteistolajinMuutos}
           name->xml (fn [n]
                       (let [parts (str/split n #"-")]
                         (->> parts (map str/capitalize) str/join keyword)))]

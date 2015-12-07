@@ -168,17 +168,10 @@
         search-updates (get-search-fields search-fields app-snapshot)]
     (bulletins/snapshot-updates app-snapshot search-updates created)))
 
-(defcommand publish-bulletin
-  {:parameters [id]
-   :feature :publish-bulletin
-   :user-roles #{:authority}
-   :states     (states/all-application-states-but :draft :open :submitted)}
-  [{:keys [application created] :as command}]
-  (mongo/update-by-id :application-bulletins id (create-bulletin application created) :upsert true)
-  (ok))
-
 (defcommand move-to-proclaimed
   {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
+   :input-validators [(partial action/non-blank-parameters [:id :proclamationText])
+                      (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}}
@@ -191,6 +184,8 @@
 
 (defcommand move-to-verdict-given
   {:parameters [id verdictGivenAt appealPeriodStartsAt appealPeriodEndsAt verdictGivenText]
+   :input-validators [(partial action/non-blank-parameters [:id :verdictGivenText])
+                      (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:verdictGiven}}
@@ -204,6 +199,8 @@
 
 (defcommand move-to-final
   {:parameters [id officialAt]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      (partial action/number-parameters [:officialAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:verdictGiven}}
@@ -211,13 +208,13 @@
   ; Note there is currently no way to move application to final state so we sent bulletin state manuall
   (let [updates (->> (create-bulletin application created {:officialAt officialAt
                                                            :bulletinState :final}))]
-    (clojure.pprint/pprint updates)
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
 (defquery bulletin
   "return only latest version for application bulletin"
   {:parameters [bulletinId]
+   :input-validators [(partial action/non-blank-parameters [:bulletinId])]
    :feature    :publish-bulletin
    :user-roles #{:anonymous}}
   [command]
@@ -241,6 +238,7 @@
 (defquery bulletin-versions
   "returns all bulletin versions for application bulletin with comments"
   {:parameters [bulletinId]
+   :input-validators [(partial action/non-blank-parameters [:bulletinId])]
    :feature    :publish-bulletin
    :user-roles #{:authority :applicant}}
   (let [bulletin-fields (-> bulletins/bulletins-fields
@@ -256,6 +254,7 @@
 (defquery bulletin-comments
   "returns paginated comments related to given version id"
   {:parameters [bulletinId versionId]
+   :input-validators [(partial action/non-blank-parameters [:bulletinId :versionId])]
    :feature    :publish-bulletin
    :user-roles #{:authority :applicant}}
   [{{skip :skip limit :limit asc :asc} :data}]
@@ -289,7 +288,9 @@
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}
-   :input-validators [(partial bulletin-can-be-saved "proclaimed")]}
+   :input-validators [(partial action/non-blank-parameters [:bulletinId :bulletinVersionId])
+                      (partial bulletin-can-be-saved "proclaimed")
+                      (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]}
   [{:keys [application created] :as command}]
   (let [updates {$set {"versions.$.proclamationEndsAt"   proclamationEndsAt
                        "versions.$.proclamationStartsAt" proclamationStartsAt
@@ -303,7 +304,9 @@
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:verdictGiven}
-   :input-validators [(partial bulletin-can-be-saved "verdictGiven")]}
+   :input-validators [(partial action/non-blank-parameters [:bulletinId :bulletinVersionId :verdictGivenText])
+                      (partial bulletin-can-be-saved "verdictGiven")
+                      (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])]}
   [{:keys [application created] :as command}]
   (let [updates {$set {"versions.$.verdictGivenAt"       verdictGivenAt
                        "versions.$.appealPeriodEndsAt"   appealPeriodEndsAt

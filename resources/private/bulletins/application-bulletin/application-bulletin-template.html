@@ -49,24 +49,25 @@
 
               <!-- Actions: -->
             <div class="application_actions stacked" data-test-id="bulletin-actions">
-              <!-- ko if: authenticated-->
-              <button class="function julkipano"
-                      data-bind="click: scrollToCommenting"
-                      data-test-id="comment-bulletin">
-                  <i class="lupicon-comment"></i>
-                  <span data-bind="ltext: 'bulletin.actions.comment'"></span>
-              </button>
+              <!-- ko if: showCommenting -->
+                <!-- ko if: authenticated-->
+                <button class="function julkipano"
+                        data-bind="click: scrollToCommenting"
+                        data-test-id="comment-bulletin">
+                    <i class="lupicon-comment"></i>
+                    <span data-bind="ltext: 'bulletin.actions.comment'"></span>
+                </button>
+                <!-- /ko -->
+                <!-- ko if: !authenticated() -->
+                <button class="function julkipano"
+                        data-bind="click: clickAuthenticationButton"
+                        data-test-id="comment-bulletin">
+                    <i class="lupicon-comment"></i>
+                    <span data-bind="ltext: 'bulletin.actions.comment'"></span>
+                </button>
+                <!-- /ko -->
               <!-- /ko -->
-              <!-- ko if: !authenticated() -->
-              <button class="function julkipano"
-                      data-bind="click: clickAuthenticationButton"
-                      data-test-id="comment-bulletin">
-                  <i class="lupicon-comment"></i>
-                  <span data-bind="ltext: 'bulletin.actions.comment'"></span>
-              </button>
-              <!-- /ko -->
-
-              <button class="function julkipano"
+<!--               <button class="function julkipano"
                       data-bind=""
                       data-test-id="print-bulletin">
                   <i class="lupicon-print"></i>
@@ -77,19 +78,37 @@
                       data-test-id="download-bulletin-attachments">
                   <i class="lupicon-print"></i>
                   <span data-bind="ltext: 'bulletin.attachments.download'"></span>
-              </button>
+              </button> -->
             </div>
           </div>
 
           <!-- Tabs: -->
           <div class="tabs-container">
             <ul class="tabs" id="bulletin-tabs">
+              <!-- ko if: showInstructionsTab -->
+              <li data-bind="css: {'active': selectedTab() === 'instructions'}">
+                <a data-bind="click: _.partial(openTab, 'instructions')" href="#" class="link-btn-julkipano" data-test-id="bulletin-open-instructions-tab">
+                  <span data-bind="visible: inProclaimedState, ltext: 'application.tabInstructions.proclaimed'"></span>
+                  <span data-bind="visible: inVerdictGivenState() || inFinalState() , ltext: 'application.tabInstructions.verdictGiven'"></span>
+                </a>
+              </li>
+              <!-- /ko -->
+              <!-- ko if: showInfoTab -->
               <li data-bind="css: {'active': selectedTab() === 'info'}">
                   <a data-bind="click: _.partial(openTab, 'info')" href="#" class="link-btn-julkipano" data-test-id="bulletin-open-info-tab">
                       <span data-bind="ltext: 'application.tabInfo'"></span> </a></li>
+              <!-- /ko -->
+              <!-- ko if: showAttachmentsTab -->
               <li data-bind="css: {'active': selectedTab() === 'attachments'}">
                   <a data-bind="click: _.partial(openTab, 'attachments')" href="#" data-test-id="bulletin-open-attachments-tab" class="link-btn-julkipano">
                       <span data-bind="ltext: 'application.tabAttachments'"></span></a></li>
+              <!-- /ko -->
+              <!-- ko if: showVerdictsTab -->
+              <li data-bind="css: {'active': selectedTab() === 'verdicts'}">
+                  <a data-bind="click: _.partial(openTab, 'verdicts')" href="#" data-test-id="bulletin-open-verdicts-tab" class="link-btn-julkipano">
+                      <span data-bind="ltext: 'application.tabVerdict'"></span></a></li>
+              <!-- /ko -->
+
             </ul>
           </div>
 
@@ -97,14 +116,17 @@
       </div>
 
       <div class="container">
-        <div class="bulletin-tab-content" data-bind="component: { name: 'bulletin-' + selectedTab() + '-tab', params: tabComponentParams}, attr: {'id': 'bulletin-' + selectedTab() + '-tab-component'}"></div>
+        <div class="bulletin-tab-content" data-bind="component: { name: 'bulletin-' + selectedTab() + '-tab', params: { bulletin: bulletin,
+                                                                                                                        attachments: attachments,
+                                                                                                                        verdicts: verdicts }},
+                                                     attr: {'id': 'bulletin-' + selectedTab() + '-tab-component'}"></div>
 
         <div data-bind="visible: selectedTab() === 'info'" id="bulletinDocgen" class="docgen-content">
             <!-- This is where the generated documents will be placed. -->
         </div>
       </div>
-      
-      <!-- ko if: canCommentCurrentBulletin -->
+
+      <!-- ko if: showCommenting -->
         <!-- ko if: authenticated -->
         <div data-bind="component: { name: 'bulletin-comment',
                                      params: { bulletin: $data,
@@ -119,7 +141,6 @@
         </div>
         <!-- /ko -->
       <!-- /ko -->
-
     </script>
   </section>
 </body>

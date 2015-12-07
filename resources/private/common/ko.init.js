@@ -181,7 +181,7 @@
 
   ko.bindingHandlers.fullName = {
     update: function(element, valueAccessor) {
-      var value = ko.toJS(valueAccessor());
+      var value = ko.toJS(valueAccessor()) || {};
       $(element).text(_.filter([value.lastName, value.firstName]).join("\u00a0"));
     }
   };

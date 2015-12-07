@@ -155,7 +155,7 @@
           (:paatospvm pk1) => (to-timestamp "2013-08-01")
           (:pykala pk1) => 1
           (:kuvaus liite) => "kuvaus 1"
-          (:linkkiliitteeseen liite) => "http://localhost:8000/img/under-construction.gif"
+          (:linkkiliitteeseen liite) => "http://localhost:8000/dev/sample-attachment.txt"
           (:muokkausHetki liite) => (to-timestamp "2013-09-01T12:00:00")
           (:versionumero liite) => "1"
           (get-in liite [:tekija :henkilo :nimi :sukunimi]) => "Tarkkanen"
@@ -491,7 +491,7 @@
         (let [pk1   (first poytakirjat)
               liite (:liite pk1)]
           (:kuvaus liite) => "paatoksenTiedot"
-          (:linkkiliitteeseen liite) => "http://localhost:8000/img/under-construction.gif"
+          (:linkkiliitteeseen liite) => "http://localhost:8000/dev/sample-attachment.txt"
           (:muokkausHetki liite) => (to-timestamp "2014-03-29T13:58:15")
           (:tyyppi liite) => "Muu liite"))))))
 

@@ -31,7 +31,6 @@ LUPAPISTE.Upload.setModel = function(options) {
   LUPAPISTE.Upload.targetType(options.target ? options.target.type : null);
   LUPAPISTE.Upload.targetId(options.target ? options.target.id : null);
   LUPAPISTE.Upload.locked(options.locked || false);
-  LUPAPISTE.Upload.authority(options.authority || false);
 };
 
 LUPAPISTE.Upload.loadTypes = function(applicationId) {

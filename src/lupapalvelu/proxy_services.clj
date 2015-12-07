@@ -15,6 +15,7 @@
             [sade.util :as util]
             [sade.municipality :as muni]
             [lupapalvelu.find-address :as find-address]
+            [lupapalvelu.property-location :as plocation]
             [lupapalvelu.wfs :as wfs]))
 
 
@@ -78,18 +79,11 @@
         (resp/json (or (find-address/search normalized-term lang) [])))
       (resp/status 400 "Missing query parameters")))
 
-(defn point-by-property-id-proxy [request]
-  (let [property-id (get (:params request) :property-id)
-        features (wfs/location-info-by-property-id property-id)]
-    (if features
-      (resp/json {:data (map wfs/feature-to-position features)})
-      (resp/status 503 "Service temporarily unavailable"))))
-
-(defn area-by-property-id-proxy [{{property-id :property-id} :params :as request}]
-  (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id) )
-    (let [features (wfs/location-info-by-property-id property-id)]
+(defn point-by-property-id-proxy [{{property-id :property-id} :params :as request}]
+  (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id))
+    (let [features (plocation/property-location-info property-id)]
       (if features
-        (resp/json {:data (map wfs/feature-to-area features)})
+        (resp/json {:data (map #(select-keys % [:x :y]) features)})
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
@@ -151,9 +145,9 @@
         coords (ss/replace wkt wdk-type-pattern "")
         features (case type
                    "POINT" (let [[x y] (ss/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
-                             (if-not (ss/numeric? radius)
-                               (wfs/property-info-by-point x y)
-                               (wfs/property-info-by-radius x y radius)))
+                             (if (and (ss/numeric? radius) (> (Long/parseLong radius) 10))
+                               (wfs/property-info-by-radius x y radius)
+                               (wfs/property-info-by-point x y)))
                    "LINESTRING" (wfs/property-info-by-line (ss/split (ss/replace coords #"[\(\)]" "") #","))
                    "POLYGON" (let [outterring (first (ss/split coords #"\)" 1))] ;;; pudotetaan reiat pois
                                (wfs/property-info-by-polygon (ss/split (ss/replace outterring #"[\(\)]" "") #",")))
@@ -168,8 +162,8 @@
                          (re-find #"^\d+_kantakartta$" layer-name) "kantakartta"
                          :else "other")
         layer-id (case layer-category
-                   "asemakaava" "101"
-                   "kantakartta" "102"
+                   "asemakaava"  101
+                   "kantakartta" 102
                    layer-name)]
     {:wmsName layer-name
      :wmsUrl "/proxy/wms"
@@ -246,6 +240,9 @@
                       :name (names-fn name)
                       :subtitle {:fi "" :sv "" :en ""}
                       :id layer-id
+                      ;; User layers should be visible even when zoomed out.
+                      ;; The default Oskary value (159999) is quite small.
+                      :minScale 400000
                       :baseLayerId layer-id
                       :isBaseLayer base})) layers)))
 
@@ -297,10 +294,9 @@
   (if-let [org-id (user/authority-admins-organization-id (user/current-user request))]
     (if-let [m (-> org-id org/get-organization :map-layers :server)]
       (let [{:keys [url username password]} m
-            encoding (get-in request [:headers "accept-encoding"])
             response (http/get url
                                {:query-params (:params request)
-                                :headers {"accept-encoding" encoding}
+                                :headers (:headers (http/secure-headers request))
                                 :basic-auth [username password]
                                 :as :stream})]
         ;; The same precautions as in secure
@@ -318,9 +314,10 @@
   function. Proxy function returns what ever the service function returns, excluding some unsafe
   stuff. At the moment strips the 'Set-Cookie' headers."
   [f service]
+
   (fn [request]
-    (let [response (f request service)]
-      (update-in response [:headers] dissoc "set-cookie" "server"))))
+    (let [response (f (http/secure-headers request) service)]
+      (http/secure-headers response))))
 
 (defn- cache [max-age-in-s f]
   (let [cache-control {"Cache-Control" (str "public, max-age=" max-age-in-s)}]
@@ -338,7 +335,6 @@
                "wmts/maasto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "wmts/kiinteisto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "point-by-property-id" point-by-property-id-proxy
-               "area-by-property-id" area-by-property-id-proxy
                "property-id-by-point" property-id-by-point-proxy
                "address-by-point" address-by-point-proxy
                "find-address" find-addresses-proxy

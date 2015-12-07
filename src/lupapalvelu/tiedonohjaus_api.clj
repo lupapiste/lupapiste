@@ -1,5 +1,5 @@
 (ns lupapalvelu.tiedonohjaus-api
-  (:require [lupapalvelu.action :refer [defquery defcommand non-blank-parameters]]
+  (:require [lupapalvelu.action :refer [defquery defcommand non-blank-parameters] :as action]
             [sade.core :refer [ok fail]]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as o]
@@ -39,6 +39,7 @@
 
 (defcommand set-tos-function-for-application
   {:parameters [:id functionCode]
+   :input-validators [(partial non-blank-parameters [:id :functionCode])]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal
    :feature :tiedonohjaus}
@@ -106,12 +107,14 @@
             updated-children (-> (remove #(= % child) (type application)) (conj updated-child))]
         (action/update-application command {$set {:modified created type updated-children}}))
       (fail "error.child.id"))
-    (catch RuntimeException e
+    (catch RuntimeException e ; FIXME use (fail! :error.invalid.metadata) where the validation takes place
       (timbre/error e)
       (fail "error.invalid.metadata"))))
 
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
+   :input-validators [(partial non-blank-parameters [:id :attachmentId])
+                      (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal
    :feature :tiedonohjaus}
@@ -120,6 +123,8 @@
 
 (defcommand store-tos-metadata-for-application
   {:parameters [:id metadata]
+   :input-validators [(partial non-blank-parameters [:id])
+                      (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal
    :feature :tiedonohjaus}
@@ -130,7 +135,7 @@
                                   (:metadata))]
       (action/update-application command {$set {:modified created
                                                 :metadata processed-metadata}}))
-    (catch RuntimeException e
+    (catch RuntimeException e ; FIXME use (fail! :error.invalid.metadata) where the validation takes place
       (timbre/error e)
       (fail "error.invalid.metadata"))))
 
