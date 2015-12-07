@@ -1,7 +1,7 @@
 (ns lupapalvelu.statement-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [sade.schemas :as schemas]
+            [sade.schema-generators :as ssg]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.statement :refer [Statement]]))
 
@@ -66,7 +66,7 @@
 
 (facts "update-statement"
   (fact "update-draft"
-    (-> (schemas/generate Statement)
+    (-> (ssg/generate Statement)
         (assoc :modify-id "mod1")
         (update-draft "some text" "puoltaa" "mod2" "mod1"))
     => (contains #{[:text "some text"] 
@@ -75,19 +75,19 @@
                    [:state :draft]}))
 
   (fact "update-draft - wrong modify-id"
-    (-> (schemas/generate Statement)
+    (-> (ssg/generate Statement)
         (assoc :modify-id "modx")
         (update-draft "some text" "puoltaa" "mod2" "mod1"))
     => (throws Exception))
 
   (fact "update-draft - missing person"
-    (-> (schemas/generate Statement)
+    (-> (ssg/generate Statement)
         (dissoc :person)
         (update-draft "some text" "puoltaa" "mod2" "mod1"))
     => (throws Exception))
 
   (fact "give-statement"
-    (-> (schemas/generate Statement)
+    (-> (ssg/generate Statement)
         (assoc :modify-id "mod1")
         (dissoc :given)
         (give-statement "some text" "puoltaa" "mod2" "mod1"))
