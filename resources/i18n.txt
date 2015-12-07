@@ -1,9 +1,0 @@
-kiinteistonmuodostus.kiinteistonmuodostus.kiinteistonmuodostusTyyppi.kiinteiston-tunnusmuutos: Kiinteistön tunnusmuutos
-kiinteistonmuodostus.kiinteistonmuodostus.kiinteistonmuodostusTyyppi.kiinteistolajin-muutos: Kiinteistön laadunmuutos
-hakija-kt._group_label: Hakija (hakijan pitää olla myös omistaja)
-hakija-kt._append_label: Lisää hakija
-operations.rajankaynti: Rajankäynti ja muut kiinteistömääritykset
-operations.tree.rajankaynti: Rajankäynti ja muut kiinteistömääritykset
-rajankaynti._group_label: Rajankäynti ja muut kiinteistömääritykset
-secondary-kiinteistot._append_label: Lisää kohdekiinteistö
-help.KT.AddOperations: lisäkohdekiinteistö pois
