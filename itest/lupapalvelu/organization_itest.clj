@@ -7,7 +7,9 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]))
+            [lupapalvelu.fixture.core :as fixture]
+            [monger.operators :refer :all]
+            [sade.core :as sade]))
 
 (apply-remote-minimal)
 
@@ -345,8 +347,13 @@
       resp => http200?
       body => ok?)))
 
+(def local-db-name (str "organization_itest_" (sade/now)))
+
+(mongo/connect!)
+(mongo/with-db local-db-name (fixture/apply-fixture "minimal"))
+
 (facts "Municipality (753) maps"
-       (mongo/with-db test-db-name
+       (mongo/with-db local-db-name
          (let [url "http://mapserver"]
            (local-org-api/update-organization
             "753-R"

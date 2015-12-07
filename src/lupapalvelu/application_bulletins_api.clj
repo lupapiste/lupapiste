@@ -170,7 +170,8 @@
 
 (defcommand move-to-proclaimed
   {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
-   :input-validators [(partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]
+   :input-validators [(partial action/non-blank-parameters [:id :proclamationText])
+                      (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}}

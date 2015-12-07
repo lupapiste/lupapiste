@@ -14,11 +14,13 @@ User can authenticate via Vetuma
   Go to bulletins page
   Open bulletin by index  1
 
+  Open bulletin tab  info
   Element should be visible by test id  vetuma-init
   Element should not be visible by test id  bulletin-comment-box-form
 
   Authenticate via Nordea via Vetuma
 
+  Open bulletin tab  info
   Element should not be visible by test id  vetuma-init
   Element should be visible by test id  bulletin-comment-box-form
 
@@ -31,6 +33,7 @@ User is shown error when authentication via Vetuma canceled
   Go to bulletins page
   Open bulletin by index  1
 
+  Open bulletin tab  info
   Start Vetuma authentication but cancel via Nordea
   Wait Until  Element should be visible by test id  indicator-negative
   Page should contain  Vetuma-tunnistautuminen peruutettiin
