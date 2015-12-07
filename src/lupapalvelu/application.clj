@@ -100,13 +100,15 @@
   {:pre [(every? (partial contains? application)  (keys domain/application-skeleton))]}
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
 
-(defn filter-repeating-party-docs [schema-version schema-names]
-  (let [schemas (schemas/get-schemas schema-version)]
-    (filter
-      (fn [schema-name]
-        (let [schema-info (get-in schemas [schema-name :info])]
-          (and (:repeating schema-info) (= (:type schema-info) :party))))
-      schema-names)))
+(defn filter-party-docs [schema-version schema-names repeating-only?]
+  (filter (fn [schema-name]
+            (let [schema-info (:info (schemas/get-schema schema-version schema-name))]
+              (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
+          schema-names))
+
+(defn party-document? [doc]
+  (let [schema-info (:info (schemas/get-schema (:schema-info doc)))]
+    (= (:type schema-info) :party)))
 
 ; Seen updates
 (def collections-to-be-seen #{"comments" "statements" "verdicts"})

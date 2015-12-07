@@ -76,9 +76,9 @@
       (when-not document (fail! :unknown-document))
       (when (model/has-errors? pre-results) (fail! :document-in-error-before-update :results pre-results))
       (when (model/has-errors? post-results) (fail! :document-would-be-in-error-after-update :results post-results))
-      
+
       {:mongo-query   {collection {$elemMatch {:id (:id document)}}}
-       :mongo-updates (util/deep-merge 
+       :mongo-updates (util/deep-merge
                        {$set (assoc
                               (->mongo-updates (str (name collection) ".$.data") model-updates (apply hash-map meta-data))
                               :modified timestamp)}
@@ -126,7 +126,7 @@
         schema-paths          (map path->schema-path update-paths)]
     (doseq [path schema-paths]
       (let [[_ readonly] (seek-field-from-schema-path :readonly doc-schema path)]
-        (when readonly 
+        (when readonly
           (fail! :error-trying-to-update-readonly-field))))))
 
 (defn validate-readonly-removes! [document remove-paths]
@@ -193,7 +193,7 @@
                                          (partial str (name collection) ".$.meta.")))))]
     (if-let [paths (not-empty (remove empty? paths))]
       {:mongo-query   {(keyword collection) {$elemMatch {:id doc-id}}}
-       :mongo-updates {$unset (-> (mapcat build-path paths) 
+       :mongo-updates {$unset (-> (mapcat build-path paths)
                                   (zipmap (repeat "")))}}
       {})))
 
@@ -207,7 +207,7 @@
          ((juxt :mongo-query :mongo-updates))
          (apply update-application command))))
 
-(defn new-doc 
+(defn new-doc
   ([application schema created] (new-doc application schema created []))
   ([application schema created updates]
    (let [empty-document (model/new-document schema created)
@@ -219,8 +219,9 @@
 
 (defn do-create-doc! [{created :created {schema-version :schema-version :as application} :application :as command} schema-name & [updates]]
   (let [schema (schemas/get-schema (:schema-version application) schema-name)
-        document (new-doc application schema created updates)]
-    (when-not (:repeating (:info schema)) (fail! :illegal-schema))
+        document (new-doc application schema created updates)
+        has-same-domument (seq (filter (util/fn-> :schema-info :name (= schema-name)) (:documents application)))]
+    (when (and has-same-domument (not (:repeating (:info schema)))) (fail! :illegal-schema))
     (update-application command {$push {:documents document}
                                  $set  {:modified created}})
     document))
