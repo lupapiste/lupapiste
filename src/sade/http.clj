@@ -25,4 +25,4 @@
   (logged-call http/post uri (apply merge-to-defaults options)))
 
 (defn secure-headers [request-or-response]
-  (update-in request-or-response [:headers] dissoc "cookie" "set-cookie" "server"))
+  (update-in request-or-response [:headers] dissoc "cookie" "set-cookie" "server" "host"))

@@ -17,7 +17,7 @@ LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
   function findLayerExtent( layerId ) {
     var caps = findLayerCapabilities( layerId );
     if( caps ) {
-      var box = _.find( caps.BoundingBox, {crs: PROJECTION });
+      var box = _.find( caps.BoundingBox, {crs: PROJECTION});
       return box ? box.extent : null;
     }
   }
@@ -65,7 +65,9 @@ LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
         mapFitted(true);
         map.getView().fit( extent, map.getSize());
       }
+      if( !extent ) {
+        mapFitted( false );
+      }
     }
   });
-
 };
