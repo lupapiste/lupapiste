@@ -85,7 +85,7 @@
                                                     disable: $data.notNeededFieldDisabled() || !$root.authorization.ok('set-attachment-not-needed'),
                                                     attr: {'data-test-id': ['attachment-not-needed', type['type-group'], type['type-id']].join('-'),
                                                            'notneeded': notNeeded},
-                                                    click: _.partial( $root.attachmentsTab.toggleNeeded, $data ),
+                                                    click: $root.attachmentsTab.toggleNeeded,
                                                     clickBubble: false"/>
               </td>
               <td class="attachment-file-info">
