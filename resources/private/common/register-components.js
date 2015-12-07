@@ -66,6 +66,7 @@ jQuery(document).ready(function() {
     {name: "add-property-dialog"},
     {name: "autocomplete-saved-filters"},
     {name: "indicator"},
+    {name: "indicator-icon"},
     {name: "accordion"},
     {name: "date-field", model: "input-field-model"},
     {name: "text-field", model: "input-field-model"},

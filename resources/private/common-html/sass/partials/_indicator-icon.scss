@@ -1,9 +1,12 @@
-#indicator {
-  .indicator-bar {
+#indicator-icon {
+  .indicator-icon {
     display: none;
     position: fixed;
-    height: 50px;
-    width: 100%;
+    bottom: 70px;
+    right: 70px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 24px;
     z-index: 2001;
     color: #fff;
     font-size: 18px;
@@ -12,18 +15,17 @@
 
   .indicator-box {
     max-width: $application-max-width;
-    min-width: $application-min-width;
     margin: 0 auto;
-    padding-left: $marginS;
-    padding-top: $marginM;
+    padding: $marginM;
   }
 
-  .indicator-bar.positive {
+  .indicator-icon.positive {
     background-color: $positive;
   }
 
-  .indicator-bar.negative {
+  .indicator-icon.negative {
     background-color: $negative;
+    
   }
 
   .indicator-info {
@@ -35,7 +37,4 @@
     float: left;
   }
 
-  .indicator-close {
-    float: right;
-  }
 }
