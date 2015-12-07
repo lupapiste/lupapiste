@@ -16,9 +16,8 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.statement :refer :all]
             [lupapalvelu.states :as states]
-            [lupapalvelu.tiedonohjaus :as t]
-            [lupapalvelu.user :refer [with-user-by-email] :as user]
-            [lupapalvelu.user-api :as user-api]
+            [lupapalvelu.tiedonohjaus :as tos]
+            [lupapalvelu.user :as user]
             [lupapalvelu.child-to-attachment :as child-to-attachment]))
 
 ;;
@@ -163,7 +162,7 @@
       (fn [{:keys [statementGivers]}]
         (let [persons (filter #(personIdSet (:id %)) statementGivers)
               persons-combined (concat persons manualPersons)
-              metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
+              metadata (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
               details (make-details user now persons-combined metadata saateText dueDate)
               statements (map :statement details)
               auth (map :auth details)

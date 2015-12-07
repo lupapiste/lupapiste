@@ -55,10 +55,8 @@
 
 (defn filter-attachments-for [user application attachments]
   {:pre [(map? user) (sequential? attachments)]}
-  (if (env/feature? :attachment-visibility)
-    (let [attachments (map populate-auth attachments)]
-      (filter (partial can-access-attachment? user application) attachments))
-    attachments))
+  (let [attachments-with-auth (map populate-auth attachments)]
+    (filter (partial can-access-attachment? user application) attachments-with-auth)))
 
 (defn has-attachment-auth [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
   (when (and attachment-id (not (user/authority? user)))
