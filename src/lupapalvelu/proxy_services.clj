@@ -240,6 +240,9 @@
                       :name (names-fn name)
                       :subtitle {:fi "" :sv "" :en ""}
                       :id layer-id
+                      ;; User layers should be visible even when zoomed out.
+                      ;; The default Oskary value (159999) is quite small.
+                      :minScale 400000
                       :baseLayerId layer-id
                       :isBaseLayer base})) layers)))
 

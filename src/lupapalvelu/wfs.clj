@@ -613,7 +613,8 @@
 ;;
 (defn raster-images [request service & [query-organization-map-server]]
   (let [{:keys [params headers]}  request
-        layer   (or (:LAYER params) (:LAYERS params) (:layer params))]
+        layer   (or (:LAYER params) (:LAYERS params) (:layer params))
+        headers (select-keys headers ["accept" "accept-encoding"])]
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
                       {:query-params params
