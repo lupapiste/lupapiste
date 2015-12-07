@@ -25,23 +25,25 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
         person.sukunimi + ", " + person.etunimet : person.nimi;
   }
   function convertOwner(owner) {
-    var type = owner.henkilolaji,
-    nameOfDeceased = null;
+    var person = owner;
+    var type = owner.henkilolaji;
+    var nameOfDeceased = null;
 
     if (owner.yhteyshenkilo) {
+      person = owner.yhteyshenkilo;
       nameOfDeceased = getPersonName(owner);
-      owner = owner.yhteyshenkilo;
       type = "kuolinpesan_yhthl";
     }
+
     return {
       propertyId: owner.propertyId,
-      name: getPersonName(owner),
+      name: getPersonName(person),
       type: type,
-      nameOfDeceased: nameOfDeceased || null,
-      businessID: owner.ytunnus || null,
-      street: owner.jakeluosoite || null,
-      city: owner.paikkakunta || null,
-      zip: owner.postinumero || null,
+      nameOfDeceased: nameOfDeceased,
+      businessID: person.ytunnus || null,
+      street: person.jakeluosoite || null,
+      city: person.paikkakunta || null,
+      zip: person.postinumero || null,
       selected: ko.observable(true)
     };
   }
