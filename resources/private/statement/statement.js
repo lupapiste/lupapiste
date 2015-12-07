@@ -156,9 +156,16 @@
         })
         .success(function() {
           updateModifyId(self);
+          hub.send("indicator-icon", {style: "positive"});
           return false;
         })
         .complete(function() { self.submitting(false); })
+        .error(function() {
+          hub.send("indicator-icon", {style: "negative"});
+        })
+        .fail(function() {
+          hub.send("indicator-icon", {style: "negative"});
+        })
         .call();
     }
     return false;
