@@ -39,9 +39,9 @@ LUPAPISTE.StatementsTabModel = function(params) {
       return self.id ? true : false;
     });
     self.errors = ko.validation.group(self);
-    self.errors.subscribe(function(errs) {
-      if (errs.length == 0) addManualData();
-    });
+//    self.errors.subscribe(function(errs) {
+//      if (errs.length == 0) addManualData();  // TODO: This is temporarily commented out, until the specs for multiple addition of statement givers will be defined
+//    });
     return self;
   };
 

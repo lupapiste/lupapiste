@@ -45,11 +45,6 @@
 ;; Validators
 ;;
 
-(defn property-id-parameters [params command]
-  (when-let [invalid (seq (filter #(not (v/kiinteistotunnus? (get-in command [:data %]))) params))]
-    (info "invalid property id parameters:" (s/join ", " invalid))
-    (fail :error.invalid-property-id :parameters (vec invalid))))
-
 (defn- is-link-permit-required [application]
   (or (= :muutoslupa (keyword (:permitSubtype application)))
       (some #(operations/link-permit-required-operations (keyword (:name %))) (get-operations application))))

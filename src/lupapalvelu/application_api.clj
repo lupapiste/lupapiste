@@ -323,7 +323,7 @@
    :user-roles       #{:applicant :authority}
    :notified         true                                   ; OIR
    :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
-                      (partial a/property-id-parameters [:propertyId])
+                      (partial action/property-id-parameters [:propertyId])
                       coord/validate-x coord/validate-y
                       operation-validator]}
   [{{:keys [infoRequest]} :data :keys [created] :as command}]
@@ -414,7 +414,7 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :states           (states/all-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:address])
-                      (partial a/property-id-parameters [:propertyId])
+                      (partial action/property-id-parameters [:propertyId])
                       coord/validate-x coord/validate-y]
    :pre-checks       [authority-if-post-verdict-state
                       a/validate-authority-in-drafts]}
