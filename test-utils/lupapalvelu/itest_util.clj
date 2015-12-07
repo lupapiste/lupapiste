@@ -63,6 +63,7 @@
 (def kosti       (apikey-for "kosti"))
 (def kosti-id    (id-for "kosti"))
 (def sipoo       (apikey-for "sipoo"))
+(def sipoo-ya    (apikey-for "sipoo-ya"))
 (def tampere-ya  (apikey-for "tampere-ya"))
 (def naantali    (apikey-for "admin@naantali.fi"))
 (def dummy       (apikey-for "dummy"))

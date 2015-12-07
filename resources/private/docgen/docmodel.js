@@ -424,7 +424,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       input.value = value || "";
       sourceValueChanged(input, value, sourceValue, source);
 
-      if (subSchema.placeholder && _.includes(["text", "email", "search", "url", "tel", "password"], type)) {
+      if (subSchema.placeholder && _.includes(["text", "email", "search", "url", "tel", "password"], type) && !self.isDisabled) {
         input.setAttribute("placeholder", loc(subSchema.placeholder));
       }
     }
@@ -607,7 +607,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var value = getModelValue(model, subSchema.name);
     input.value = value;
 
-    if (subSchema.placeholder) {
+    if (subSchema.placeholder && !self.isDisabled) {
       input.setAttribute("placeholder", loc(subSchema.placeholder));
     }
 

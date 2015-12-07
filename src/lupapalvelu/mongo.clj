@@ -374,7 +374,7 @@
   (ensure-index :companies {:y 1} {:name "company-y"})
   (ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
   (ensure-index :propertyCache {:created 1} {:expireAfterSeconds (* 60 60 24)}) ; 24 h
-  (ensure-index :propertyCache {:kiinttunnus 1 :x 1 :y 1} {:unique true, :name "kiinttunnus_x_y"})
+  (ensure-index :propertyCache (array-map :kiinttunnus 1 :x 1 :y 1) {:unique true, :name "kiinttunnus_x_y"})
   (ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32}))
 
 (defn clear! []
