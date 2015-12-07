@@ -55,17 +55,17 @@
   (gen/fmap clojure.string/join 
             (gen/vector gen/char len)))
 
-(register-generator :fixed-length-string fixed-length-string)
+(register-generator ssc/fixed-length-string fixed-length-string)
 
 (defn min-length-string [min-len]
   (gen/bind (gen/fmap #(+ min-len %) gen/pos-int)
             fixed-length-string))
 
-(register-generator :min-length-string min-length-string)
+(register-generator ssc/min-length-string min-length-string)
 
 (defn max-length-string [max-len]
   (gen/fmap clojure.string/join
             (gen/vector gen/char 0 max-len)))
 
-(register-generator :max-length-string max-length-string)
+(register-generator ssc/max-length-string max-length-string)
 

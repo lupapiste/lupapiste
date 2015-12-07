@@ -9,11 +9,13 @@
 
 (def dynamically-created-schemas (atom {}))
 
-(defn dynamic-schema 
-  ([schema-key predicate]
-   (locking dynamically-created-schemas
-     (get @dynamically-created-schemas schema-key 
-          ((swap! dynamically-created-schemas assoc schema-key predicate) schema-key)))))
+(defmacro defdynamicschema [name params form]
+  {:pre [(vector? params)]}
+  (let [schema-key (apply vector name params)]
+    `(defn ~name ~params 
+       (locking dynamically-created-schemas 
+         (get @dynamically-created-schemas ~schema-key
+              ((swap! dynamically-created-schemas assoc ~schema-key ~form) ~schema-key))))))
 
 ;; Predicate / constraint
 
@@ -44,15 +46,12 @@
 
 ;; Dynamic schema constructors
 
-(defn fixed-length-string [len]
-  (dynamic-schema [:fixed-length-string len]
-                  (sc/constrained sc/Str (fixed-length-constraint len))))
+(defdynamicschema fixed-length-string [len]
+  (sc/constrained sc/Str (fixed-length-constraint len)))
 
-(defn min-length-string [min-len]
-  (dynamic-schema [:min-length-string min-len]
-                  (sc/constrained sc/Str (min-length-constraint min-len))))
+(defdynamicschema min-length-string [min-len]
+  (sc/constrained sc/Str (min-length-constraint min-len)))
 
-(defn max-length-string [max-len]
-  (dynamic-schema [:max-len-string max-len]
-                  (sc/constrained sc/Str (max-length-constraint max-len))))
+(defdynamicschema max-length-string [max-len]
+  (sc/constrained sc/Str (max-length-constraint max-len)))
 
