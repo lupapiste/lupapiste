@@ -52,11 +52,10 @@ Sonja corrects the email address of neighbor c
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-c@example.com']//a[@data-test-id='manage-neighbors-remove']
 
 Sonja adds owners - luonnollinen henkilo
-#  Set selenium speed  ${SLOW_SPEED}
   Mock proxy  property-info-by-wkt  [{"kiinttunnus": "75341600380013"}]
+  Mock datatables  owners  '{"ok":true,"owners":[{"propertyId": "75341600380013","postinumero":"04130","sukunimi":"Lönnroth","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Tage","syntymapvm":-454204800000,"paikkakunta":"SIBBO","jakeluosoite":"Präståkersvägen 1"}]}'
   Start drawing a point
   Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
-  Mock datatables  owners  '{"ok":true,"owners":[{"propertyId": "75341600380013","postinumero":"04130","sukunimi":"Lönnroth","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Tage","syntymapvm":-454204800000,"paikkakunta":"SIBBO","jakeluosoite":"Präståkersvägen 1"}]}'
   Wait until  Element Should Contain  xpath=//span[@class='owner-name']  Lönnroth, Tage
   Wait until  Element Should Contain  xpath=//span[@class='owner-street']  Präståkersvägen 1
   Wait until  Element Should Contain  xpath=//span[@class='owner-zip']  04130
@@ -67,8 +66,12 @@ Sonja adds owners - luonnollinen henkilo
 Sonja adds owners - kuolinpesä
   Mock proxy  property-info-by-wkt  [{"kiinttunnus": "75341600380013"}]
   Mock datatables  owners  '{"ok":true,"owners":[{"kuolinpvm":799372800000,"propertyId":"75341600380013","sukunimi":"Palm","ulkomaalainen":false,"henkilolaji":"kuolinpesa","etunimet":"Paul Olavi","syntymapvm":-1642982400000,"yhteyshenkilo":{"postinumero":"70620","sukunimi":"Ruhtinas","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Birgitta","syntymapvm":-599097600000,"paikkakunta":"KUOPIO","jakeluosoite":"Saastamoisenkatu 17"}}]}'
-  Start drawing a point
-  Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
+  Start drawing a polygon
+  Click Element At Coordinates  xpath=//div[@id='neighbors-map']/div   50   50
+  Click Element At Coordinates  xpath=//div[@id='neighbors-map']/div   50  -50
+  Click Element At Coordinates  xpath=//div[@id='neighbors-map']/div  -50  -50
+  Click Element At Coordinates  xpath=//div[@id='neighbors-map']/div  -50   50
+  Double Click Element  xpath=//div[@id='neighbors-map']/div
   Wait until  Element Should Contain  xpath=//span[@class='owner-nameOfDeceased']  Palm, Paul Olavi
   Wait until  Element Should Contain  xpath=//span[@class='owner-name']  Ruhtinas, Birgitta
   Wait until  Element Should Contain  xpath=//span[@class='owner-street']  Saastamoisenkatu 17
@@ -176,3 +179,9 @@ Start drawing a point
   # Ignore error, navigation might already be active
   Run Keyword And Ignore Error  Click element  css=.olControlLupapisteEditingToolbar .olControlNavigationItemInactive
   Click element  css=.olControlDrawFeaturePointItemInactive
+
+Start drawing a polygon
+  Wait until  Element should be visible  neighbors-map
+  # Ignore error, navigation might already be active
+  Run Keyword And Ignore Error  Click element  css=.olControlLupapisteEditingToolbar .olControlNavigationItemInactive
+  Click element  css=.olControlDrawFeaturePolygonItemInactive
