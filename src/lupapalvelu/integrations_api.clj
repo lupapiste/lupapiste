@@ -75,6 +75,7 @@
 
 (defcommand approve-application
   {:parameters       [id lang]
+   :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
@@ -125,6 +126,8 @@
 
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang attachmentIds]
+   :input-validators [(partial action/non-blank-parameters [:id :lang])
+                      (partial action/vector-parameter-of :attachmentIds string?)]
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)
                 (application-already-exported :exported-to-backing-system)]
@@ -251,6 +254,7 @@
 
 (defcommand application-to-asianhallinta
   {:parameters [id lang]
+   :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-state-change)
@@ -294,6 +298,8 @@
 
 (defcommand attachments-to-asianhallinta
   {:parameters [id lang attachmentIds]
+   :input-validators [(partial action/non-blank-parameters [:id :lang])
+                      (partial action/vector-parameter-of :attachmentIds string?)]
    :user-roles #{:authority}
    :pre-checks [has-asianhallinta-operation (application-already-exported :exported-to-asianhallinta)]
    :states     (conj states/post-verdict-states :sent)

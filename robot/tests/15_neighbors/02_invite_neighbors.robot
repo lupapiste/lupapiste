@@ -10,8 +10,7 @@ Mikko wants to build a water slide
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  FOO_${secs}
-  Create application the fast way  ${appname}  753-416-25-22  kerrostalo-rivitalo
-  Open to authorities  Lapsille vesiliuku
+  Create application with state  ${appname}  753-416-25-22  kerrostalo-rivitalo  open
 
 Mikko sets turvakielto for himself
   Open tab  parties
@@ -25,12 +24,12 @@ Sonja adds some neighbors
   Open application  ${appname}  753-416-25-22
   Open tab  statement
   Click by test id  manage-neighbors
-  Add neighbor  1-2-3-4  a  a@example.com
-  Add neighbor  1-2-3-4  b  b@example.com
+  Add neighbor  753-416-25-22  a  a@example.com
+  Add neighbor  753-416-25-22  b  b@example.com
   # Add neighbor "c" with wrong email, ups. Sonja must correct that later.
-  Add neighbor  1-2-3-4  c  x@example.com
+  Add neighbor  753-416-25-22  c  x@example.com
   # Add neighbor "d". This is a mistake that Sonja must fix later.
-  Add neighbor  1-2-3-4  d  d@example.com
+  Add neighbor  753-416-25-22  d  d@example.com
   # Check that they are all listed
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-a@example.com']
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-b@example.com']
@@ -54,7 +53,7 @@ Sonja corrects the email address of neighbor c
 
 Sonja adds owners - luonnollinen henkilo
 #  Set selenium speed  ${SLOW_SPEED}
-  Mock proxy  property-id-by-point  "75341600380013"
+  Mock proxy  property-id-by-point  '"75341600380013"'
   Mock query  owners  {"ok":true,"owners":[{"postinumero":"04130","sukunimi":"Lönnroth","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Tage","syntymapvm":-454204800000,"paikkakunta":"SIBBO","jakeluosoite":"Präståkersvägen 1"}]}
   Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
   Wait until  Element Should Contain  xpath=//span[@class='owner-name']  Lönnroth, Tage
@@ -62,10 +61,10 @@ Sonja adds owners - luonnollinen henkilo
   Wait until  Element Should Contain  xpath=//span[@class='owner-zip']  04130
   Wait until  Element Should Contain  xpath=//span[@class='owner-city']  SIBBO
   Click by test id  modal-dialog-submit-button
-  Clear mocks
+  [Teardown]  Clear mocks
 
 Sonja adds owners - kuolinpesä
-  Mock proxy  property-id-by-point  "75341600380013"
+  Mock proxy  property-id-by-point  '"75341600380013"'
   Mock query  owners  {"ok":true,"owners":[{"kuolinpvm":799372800000,"sukunimi":"Palm","ulkomaalainen":false,"henkilolaji":"kuolinpesa","etunimet":"Paul Olavi","syntymapvm":-1642982400000,"yhteyshenkilo":{"postinumero":"70620","sukunimi":"Ruhtinas","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Birgitta","syntymapvm":-599097600000,"paikkakunta":"KUOPIO","jakeluosoite":"Saastamoisenkatu 17"}}]}
   Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
   Wait until  Element Should Contain  xpath=//span[@class='owner-nameOfDeceased']  Palm, Paul Olavi
@@ -75,23 +74,23 @@ Sonja adds owners - kuolinpesä
   Wait until  Element Should Contain  xpath=//span[@class='owner-city']  KUOPIO
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='modal-dialog-submit-button']
   Click by test id  modal-dialog-submit-button
-  Clear mocks
+  [Teardown]  Clear mocks
 
 Property-id-by-point error
   Mock proxy error  property-id-by-point
   Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
   Wait until  Page Should Contain  Kiinteistötunnuksen haku ei onnistunut.
   Click by test id  modal-dialog-cancel-button
-  Clear mocks
+  [Teardown]  Clear mocks
 
 Find owners error
-  Mock proxy  property-id-by-point  "75341600380013"
+  Mock proxy  property-id-by-point  '"75341600380013"'
   Mock query error  owners
   Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
   Wait until  Page Should Contain  Omistajien haku ei onnistunut.
   Page Should Contain  753-416-38-13
   Click by test id  modal-dialog-cancel-button
-  Clear mocks
+  [Teardown]  Clear mocks
 
 Sonja checks that everything is ok
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-a@example.com']

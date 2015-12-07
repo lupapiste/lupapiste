@@ -61,6 +61,7 @@
 
 (defcommand neighbor-add-owners
   {:parameters [id propertyId owners]
+   :input-validators [(partial action/property-id-parameters [:propertyId])]
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
   [command]
@@ -70,6 +71,7 @@
 
 (defcommand neighbor-update
   {:parameters [id neighborId]
+   :input-validators [(partial action/non-blank-parameters [:id :neighborId])]
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
   [command]
@@ -81,6 +83,7 @@
 
 (defcommand neighbor-remove
   {:parameters [id neighborId]
+   :input-validators [(partial action/non-blank-parameters [:id :neighborId])]
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
   [command]
@@ -123,6 +126,7 @@
 
 (defcommand neighbor-mark-done
   {:parameters [id neighborId]
+   :input-validators [(partial action/non-blank-parameters [:id :neighborId])]
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
   [{:keys [application user created lang] :as command}]
@@ -175,18 +179,20 @@
                                     (filter (fn-> :schema-info :type (not= "party")) documents)))))))
 
 (defquery neighbor-application
-          {:parameters [applicationId neighborId token]
-           :user-roles #{:anonymous}}
-          [{user :user created :created :as command}]
-          (let [application (domain/get-application-no-access-checking applicationId)
-                neighbor (util/find-by-id neighborId (:neighbors application))]
-            (if (valid-token? token (:status neighbor) created)
-              (ok :application (->public application))
-              (fail :error.token-not-found))))
+  {:parameters [applicationId neighborId token]
+   :input-validators [(partial action/non-blank-parameters [:applicationId :neighborId :token])]
+   :user-roles #{:anonymous}}
+  [{user :user created :created :as command}]
+  (let [application (domain/get-application-no-access-checking applicationId)
+        neighbor (util/find-by-id neighborId (:neighbors application))]
+    (if (valid-token? token (:status neighbor) created)
+      (ok :application (->public application))
+      (fail :error.token-not-found))))
 
 (defcommand neighbor-response
   {:parameters [applicationId neighborId token response message stamp]
-   :input-validators [(fn [command]
+   :input-validators [(partial action/non-blank-parameters [:applicationId :neighborId :token :stamp])
+                      (fn [command]
                         (when-not (#{"ok" "comments"} (get-in command [:data :response]))
                           (fail :error.invalid-response)))]
    :user-roles #{:anonymous}}
@@ -218,6 +224,7 @@
 ; http://localhost:8000/api/raw/neighbor/download-attachment?neighbor-id=51b1b6bfaa24d5fcab8a3239&token=G7s1enGjJrHcwHYOzpJ60wDw3JoIfqGhCW74ZLQhKUSiD7wZ&file-id=51b1b86daa24d5fcab8a32d7
 (defraw neighbor-download-attachment
         {:parameters [neighborId token fileId]
+   :input-validators [(partial action/non-blank-parameters [:neighborId :token :fileId])]
          :user-roles #{:anonymous}}
         [{created :created}]
         (let [att-info (attachment/get-attachment-file fileId)

@@ -26,7 +26,7 @@ var gis = (function() {
     var self = this;
 
     self.map = new OpenLayers.Map(element, {
-      theme: "/theme/default/style.css?build=" + LUPAPISTE.config.build,
+      theme: null,
       projection: new OpenLayers.Projection("EPSG:3067"),
       units: "m",
       maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),

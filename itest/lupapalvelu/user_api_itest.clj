@@ -335,7 +335,7 @@
        (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))
 
    (fact "still can not query property owners"
-     (-> (http-get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)))
+     (-> (http-get (str (server-address) "/api/query/owners?propertyId=12312312341234") params) decode-response :body) => unauthorized?)))
 
 (facts* "reset password email"
   (last-email) ; Inbox zero

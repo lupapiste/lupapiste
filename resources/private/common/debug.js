@@ -77,7 +77,7 @@ jQuery(function($) {
                   .append($("<label for='debugProxy'>").text("Proxy enabled"))
                   .append($("<br>"))
                   .append($("<input type='checkbox' data-id='maps' id='debugMaps'>")
-                          .click(function(e) { ajax.query("set-feature", {feature: "maps-disabled", value: $(e.target).prop("checked")}).call(); })
+                          .click(function(e) { ajax.command("set-feature", {feature: "maps-disabled", value: $(e.target).prop("checked")}).call(); })
                           .prop("checked", features.enabled("maps-disabled")))
                   .append($("<label for='debugMaps'>").text("Disable maps"))
                   .append($("<br>"))

@@ -117,6 +117,9 @@
 
 (defcommand assign-application
   {:parameters [:id assigneeId]
+   :input-validators [(fn [{{assignee :assigneeId} :data}]
+                        (when-not (or (ss/blank? assignee) (mongo/valid-key? assignee))
+                          (fail "error.user.not.found")))]
    :user-roles #{:authority}
    :states     (states/all-states-but :draft :canceled)}
   [{:keys [user created application] :as command}]
@@ -359,6 +362,7 @@
 
 (defcommand update-op-description
   {:parameters [id op-id desc]
+   :input-validators [(partial action/non-blank-parameters [:id :op-id])]
    :user-roles #{:applicant :authority}
    :states     states/pre-sent-application-states
    :pre-checks [a/validate-authority-in-drafts]}
@@ -369,6 +373,7 @@
 
 (defcommand change-primary-operation
   {:parameters [id secondaryOperationId]
+   :input-validators [(partial action/non-blank-parameters [:id :secondaryOperationId])]
    :user-roles #{:applicant :authority}
    :states states/pre-sent-application-states
    :pre-checks [a/validate-authority-in-drafts]}
@@ -498,6 +503,7 @@
 
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
+   :input-validators [(partial action/non-blank-parameters [:id :linkPermitId])]
    :user-roles #{:applicant :authority}
    :states     (states/all-application-states-but (conj states/terminal-states :sent))
    :pre-checks [a/validate-authority-in-drafts]} ;; Pitaako olla myos 'sent'-tila?
