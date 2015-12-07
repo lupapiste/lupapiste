@@ -1,6 +1,28 @@
-operations.tree.ymparistonsuojelulain-mukaiset-ilmoitukset: Ympäristösuojelulain (YSL 527/2014) mukaiset ilmotukset
+operations.tree.ymparistonsuojelulain-mukaiset-ilmoitukset: Ympäristösuojelulain (YSL 527/2014) mukaiset ilmoitukset
 operations.tree.maatalouden-ilmoitukset: Maatalouden ilmoitukset (Vna 1250/2014)
 operations.tree.kunnan-ympmaarayksista-poikkeaminen: Kunnan ympäristösuojelumääräyksistä poikkeaminen
 operations.tree.maa-ainekset: Maa-ainesten ottaminen (MAL 555/1981)
 operations.tree.jatelain-mukaiset-ilmoitukset: Jätelain (JL 646/2011) mukaiset ilmoitukset
 operations.tree.luonnonsuojelulain-mukaiset-ilmoitukset: Luonnonsuojelulain (LSL 1096/1996) mukaiset ilmoitukset
+operations.koeluontoinen-toiminta.desc: 
+operations.ilmoitus-poikkeuksellisesta-tilanteesta.desc: 
+operations.kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan.desc: 
+operations.maa-aineslupa.desc: Maa-ainesten ottamiseen on oltava lupa, poikkeuksena on ns. kotitarvekäyttö (Maa-aineslaki 555/1981).<br /><br />Lupahakemuksessa tulee olla seuraavat liitteet:<ul><li>selvitys alueen omistus- tai hallintaoikeudesta</li><li>ottamissuunnitelma (alueen nykytilan ja ainesten ottamistoiminnan kuvaus, ympäristövaikutukset ja ympäristönsuojelutoimenpiteet, alueen maisemointi ja jälkihoito sekä karttaosa)</li><li>karttapiirrokset</li><li>selvitys naapurien kuulemisesta (lomake)</li><li>selvitys tieyhteyksistä ja oikeuksista</li><li>pohjavesitiedot</li></ul><br />Maa-ainesten ottoon tarvitaan myös ympäristölupa seuraavissa tapauksissa (ympäristölupaa voi hakea myös Lupapisteen kautta)<ul><li>kivenlouhimo tai sellainen muu kuin maanrakennustoimintaan liittyvä kivenlouhinta, jossa kiviainesta käsitellään vähintään 50 päivää</li><li>kiinteä murskaamo tai sellainen tietylle alueelle sijoitettava siirrettävä murskaamo, jonka toiminta-aika on yhteensä vähintään 50 päivää vuodessa</li></ul><br />Vähäisempään toimintaankin on haettava ympäristölupaa, jos toiminta sijoitetaan tärkeälle tai muulle vedenhankintakäyttöön soveltuvalle pohjavesialueelle ja toiminnasta voi aiheutua pohjaveden pilaantumisen vaaraa.<br /><br /><h2>Luvan myöntäminen</h2>Lupaviranomainen tiedottaa vireillä olevasta lupahakemuksesta kuuluttamalla siitä ilmoitustaululla (30 vrk). Hakemuksesta ilmoitetaan yleensä myös paikallisessa sanomalehdessä sekä Julkipano-sivustolla. Niille, joita asia erityisesti koskee, ilmoitetaan lupahakemuksesta erikseen. Asianosaisille varataan tilaisuus muistutusten tekemiseen ennen lupa-asian ratkaisua.<br /><br />Lupa myönnetään, jos toiminta täyttää maa-aineslain vaatimukset. Lupa voidaan myöntää pääsääntöisesti enintään 10 vuodeksi, mutta erityisistä syistä lupa voidaan myöntää pitemmäksi ajaksi, korkeintaan kuitenkin 20 vuodeksi.<br /><br />Lupapäätöksestä tiedotetaan toiminnan sijaintikunnan sekä vaikutusalueen kuntien ilmoitustauluilla, Julkipano-sivustolla ja tarvittaessa sanomalehdissä. Lupaviranomaisen päätökseen voi hakea muutosta Helsingin hallinto-oikeudelta ja edelleen korkeimmalta hallinto-oikeudelta.<br /><br />Luvan käsittelystä peritään maksu viranomaisen taksan mukaisesti.<br /><br />Asiaan liittyviä linkkejä<ul class="no-bullets"><li><a href="http://www.finlex.fi/fi/laki/ajantasa/1981/19810555" target="_blank">Maa-aineslaki (555/1981)</a></li></ul><br />
+operations.maa-ainesten-kotitarveotto.desc: 
+operations.jatteen-keraystoiminta.desc: 
+operations.muistomerkin-rauhoittaminen.desc: 
+operations.tree.Meluilmoitus: Ilmoitus melua ja tärinää aiheuttavasta tilapäisestä toiminnasta (YSL 118 §)
+operations.tree.koeluontoinen-toiminta: Ilmoitus koeluontoisesta toiminnasta (YSL 119 §)
+operations.tree.ilmoitus-poikkeuksellisesta-tilanteesta: Ilmoitus poikkeuksellisesta tilanteesta ei luvanvarainen tai rekisteröitävä toiminta (YSL 120 §)
+operations.tree.lannan-varastointi: Ilmoitus lannan varastointitilavuudesta poikkeamisesta (ns. patterointi-ilmoitus)
+operations.tree.Pima: Pilaantuneen maaperän puhdistaminen (YSL 133-138 §)
+operations.tree.maa-ainesten_ottaminen: Maa-ainesten ottaminen (Maa-aineslupa, MAL 4 §)
+operations.tree.maa-ainesten-kotitarveotto: Ilmoitus maa-ainesten kotitarveotosta (MAL 23a §)
+operations.tree.ympariston-pilaantumisen-vaara: Ympäristön pilaantumisen vaaraa aiheuttava toiminta (Ympäristölupa)
+operations.tree.uusi-toiminta: Uusi ympäristöluvanvarainen toiminta (YSL 27 §)
+operations.tree.vesijohdosta: Vapautus vesijohtoon liittymisestä (VHL 11 §)
+operations.tree.viemarista: Vapautus jätevesiviemäriin liittymisestä (VHL 11 §)
+operations.tree.hulevesiviemarista: Vapautus hulevesiviemäriin liittymisestä (VHL 17c §)
+operations.tree.jatteen-keraystoiminta: Ilmoitus jätteen ammattimaisesta keräystoiminnasta (JL 100 §)
+operations.tree.muistomerkin-rauhoittaminen: Luonnonmuistomerkin rauhoittaminen (LSL 26 §)
+operations.tree.maastoliikennelaki-kilpailut-ja-harjoitukset: Maastoliikennelain (1710/1995) 30 §:n mukainen lupa kilpailuihin ja harjoituksiin
