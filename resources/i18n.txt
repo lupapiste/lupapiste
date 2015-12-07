@@ -1,5 +1,6 @@
 error.user-not-found: Käyttäjää ei löydy
 error.statement-updated-after-last-save: Lausuntoa on muutettu muualla
+error.statement-already-given: Annettua lausuntoa ei voi muokata
 application-choose-statement-givers: Valitse lausunnonantaja(t)
 application.invite-statement-giver-saateText: Saateteksti
 application.invite-statement-giver-saateText-placeholder: Kirjoita saateteksti lausunnonantajalle lähetettävään viestiin.
