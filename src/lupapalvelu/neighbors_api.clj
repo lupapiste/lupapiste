@@ -35,11 +35,12 @@
 
 (defn- params->neighbor [{:keys [propertyId email] :as params}]
   {:pre [(every? #(or (string? %) (nil? %)) (vals params))]}
-  {:propertyId propertyId
-   :owner      (merge
-                 (select-keys params [:type :name :businessID :nameOfDeceased])
-                 {:email (user/canonize-email email)
-                  :address (select-keys params [:street :city :zip])})})
+  (util/deep-merge domain/neighbor-skeleton
+    {:propertyId propertyId
+     :owner      (merge
+                   (select-keys params [:type :name :businessID :nameOfDeceased])
+                   {:email (user/canonize-email email)
+                    :address (select-keys params [:street :city :zip])})}))
 
 (defn- params->new-neighbor [params]
   (merge
