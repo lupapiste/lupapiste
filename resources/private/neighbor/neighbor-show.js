@@ -171,7 +171,7 @@
 
   $(function() {
     model.map = gis
-      .makeMap("neighbor-map", false)
+      .makeMap("neighbor-map", {zoomWheelEnabled: false})
       .updateSize()
       .center(404168, 6693765, 14);
     $("#neighbor-show").applyBindings(model);
