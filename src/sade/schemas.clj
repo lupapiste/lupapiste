@@ -1,17 +1,13 @@
 (ns sade.schemas
   (:require [sade.util :as util]
             [sade.validators :as validators]
-            [schema.core :as schema]
-            [schema.experimental.generators :as generators]
-            [clojure.string]
-            [clojure.test.check.generators :as gen]))
+            [schema.core :as schema]))
 
 ;;
 ;; Util
 ;;
 
 (def dynamically-created-schemas (atom {}))
-(def custom-generators (atom {}))
 
 (defn dynamic-schema 
   ([schema-key predicate]
@@ -40,7 +36,7 @@
 
 (schema/defschema Email
   "A simple schema for email"
-  (schema/constrained schema/Str (every-pred validators/valid-email? (max-len-constraint 255))))
+  (schema/constrained schema/Str (every-pred validators/valid-email? (max-length-constraint 255))))
 
 (schema/defschema Timestamp
   "A schema for timestamp"
