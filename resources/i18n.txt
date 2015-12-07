@@ -1,3 +1,0 @@
-rakennuspaikka-ilman-ilmoitusta._group_label: sama ku "rakennuspaikka._group_label"
-schemas.paasuunnittelija: Pääsuunnittelija
-:error.non-repeating-schema: Lomake voi olla hakemuksella vain kertaalleen
