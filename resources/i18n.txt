@@ -1,0 +1,1 @@
+rakennuspaikka-ilman-ilmoitusta._group_label: sama ku "rakennuspaikka._group_label"
