@@ -45,7 +45,7 @@
                  :id "123"
                  :proclamationStartsAt 123
                  :proclamationEndsAt 124
-                 :proclamationText "") => (partial expected-failure? :error.application-not-accessible))
+                 :proclamationText "foo") => (partial expected-failure? :error.application-not-accessible))
 
       (fact "Bulletin not found before publishing"
         (query pena :bulletin :bulletinId app-id) => (partial expected-failure? :error.bulletin.not-found))
@@ -66,13 +66,13 @@
                  :id app-id
                  :proclamationStartsAt 1449153132436
                  :proclamationEndsAt 1449153132436
-                 :proclamationText "") => ok?)
+                 :proclamationText "foo") => ok?)
       (fact "Regular user can't publish bulletin"
         (command pena :move-to-proclaimed
                  :id app-id
                  :proclamationStartsAt 1449153132436
                  :proclamationEndsAt 1449153132436
-                 :proclamationText "") => fail?)
+                 :proclamationText "foo") => fail?)
 
       (fact "Not public attachments aren't included in bulletin"
         (let [{bulletin-attachments :attachments} (query-bulletin pena app-id)]

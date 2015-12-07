@@ -3,7 +3,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   var self = this;
   var bulletinService = params.bulletinService;
   var map = gis
-      .makeMap("bulletin-map", false)
+      .makeMap("bulletin-map", {zoomWheelEnabled: false})
       .updateSize()
       .center(404168, 6693765, 14);
 

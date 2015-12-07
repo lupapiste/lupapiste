@@ -4,10 +4,9 @@
   var applicationDrawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
   var neighbourDrawStyle = {fillColor: "rgb(243,145,41)", // $lp-orange
                             fillOpacity: 0.50,
-                            strokeColor: "#000", //"rgb(239, 118, 38)", // $orange-darkest
+                            strokeColor: "#000",
                             pointRadius: 6,
-                            strokeWidth: 3
-                            };
+                            strokeWidth: 3};
   var applicationId;
 
   var borderCache = {};
@@ -25,11 +24,14 @@
       return self.applicationAreaLoading() || self.neighborAreasLoading();
     });
 
-    self.applicationId = ko.observable();
+    self.applicationId = lupapisteApp.models.application.id;
+    self.permitType = lupapisteApp.models.application.permitType;
     self.neighbors = ko.observableArray();
     self.neighborId = ko.observable();
     self.map = null;
 
+    self.x = 0;
+    self.y = 0;
 
     var neighborSkeleton = {propertyId: undefined,
                             owner: {
@@ -89,13 +91,19 @@
       var neighbors = _.map(application.neighbors, ensureNeighbors);
 
       if (!self.map) {
-        self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
+        self.map = gis.makeMap("neighbors-map", {zoomWheelEnabled: false, drawingControls: true});
         self.map.updateSize().center(x, y, 13).add({x: x, y:y});
       } else {
-        self.map.updateSize().center(x, y).clear().add({x: x, y:y});
+        self.map.updateSize().clear().add({x: x, y:y});
+        if (self.x !== x || self.y !== y) {
+          self.center(x, y);
+        }
       }
 
-      self.applicationId(application.id).neighbors(neighbors).neighborId(null);
+      self.x = x;
+      self.y = y;
+
+      self.neighbors(neighbors).neighborId(null);
 
       self.getApplicationWKT = self.draw([application.propertyId], applicationDrawStyle, self.applicationAreaLoading);
       self.getNeighbourWKT = self.draw(_.pluck(neighbors, "propertyId"), neighbourDrawStyle, self.neighborAreasLoading);
@@ -114,14 +122,6 @@
 
     self.add = function() {
       openEditDialog();
-    };
-
-    self.click = function(x, y) {
-      hub.send("show-dialog", { ltitle: "neighbor.owners.title",
-                                size: "large",
-                                component: "neighbors-owners-dialog",
-                                componentParams: {x: x,
-                                                  y: y} });
     };
 
     self.done = function() {
@@ -149,6 +149,20 @@
   }
 
   var model = new Model();
+
+  function openOwnersDialog(params) {
+    hub.send("show-dialog", { ltitle: "neighbor.owners.title",
+                              size: "large",
+                              component: "neighbors-owners-dialog",
+                              componentParams: params });
+  }
+
+  hub.subscribe("LupapisteEditingToolbar::featureAdded", openOwnersDialog);
+  hub.subscribe({type:"dialog-close", id:"neighbors-owners-dialog"}, function() {
+    if (model.map) {
+      model.map.clearManualDrawings();
+    }
+  });
 
   hub.onPageLoad("neighbors", function(e) {
     applicationId = e.pagePath[0];

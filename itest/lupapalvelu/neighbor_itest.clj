@@ -20,26 +20,27 @@
 (facts "add neigbor with missing optional data"
   (let [application-id (create-app-id pena :propertyId sipoo-property-id)]
     (comment-application pena application-id true) => ok?
-    (fact "no name"   (command sonja "neighbor-add" :id application-id :propertyId "p"           :street "s" :city "c" :zip "z" :email "e") => ok?)
-    (fact "no street" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n"             :city "c" :zip "z" :email "e") => ok?)
-    (fact "no city"   (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s"           :zip "z" :email "e") => ok?)
-    (fact "no zip"    (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c"          :email "e") => ok?)
-    (fact "no email"  (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z") => ok?)))
+    (fact "no name"   (command sonja "neighbor-add" :id application-id :propertyId "12312312341234"           :street "s" :city "c" :zip "z" :email "e") => ok?)
+    (fact "no street" (command sonja "neighbor-add" :id application-id :propertyId "12312312341234" :name "n"             :city "c" :zip "z" :email "e") => ok?)
+    (fact "no city"   (command sonja "neighbor-add" :id application-id :propertyId "12312312341234" :name "n" :street "s"           :zip "z" :email "e") => ok?)
+    (fact "no zip"    (command sonja "neighbor-add" :id application-id :propertyId "12312312341234" :name "n" :street "s" :city "c"          :email "e") => ok?)
+    (fact "no email"  (command sonja "neighbor-add" :id application-id :propertyId "12312312341234" :name "n" :street "s" :city "c" :zip "z") => ok?)))
 
 
 (defn- create-app-with-neighbor [& args]
   (let [application-id (apply create-app-id pena args)
         resp (comment-application pena application-id true)
-        resp (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z" :email "e")
+        resp (command sonja "neighbor-add" :id application-id :propertyId "12312312341234" :name "n" :street "s" :city "c" :zip "z" :email "e")
         neighborId (:neighborId resp)
         application (query-application pena application-id)
         neighbors (:neighbors application)]
+    (fact resp => ok?)
     [application neighborId neighbors]))
 
 (facts "create app, add neighbor"
   (let [[application neighborId neighbors] (create-app-with-neighbor)
         neighbor (util/find-by-id neighborId neighbors)]
-    (fact neighbor => (contains {:propertyId "p"
+    (fact neighbor => (contains {:propertyId "12312312341234"
                                  :owner {:name "n"
                                          :businessID nil
                                          :nameOfDeceased nil
@@ -52,12 +53,12 @@
 (facts "create app, update neighbor"
   (let [[application neighborId] (create-app-with-neighbor)
         application-id (:id application)
-        _ (command sonja "neighbor-update" :id application-id :neighborId neighborId :propertyId "p2" :name "n2" :street "s2" :city "c2" :zip "z2" :email "e2")
+        _ (command sonja "neighbor-update" :id application-id :neighborId neighborId :propertyId "12312312341200" :name "n2" :street "s2" :city "c2" :zip "z2" :email "e2")
         application (query-application pena application-id)
         neighbors (:neighbors application)
         neighbor (util/find-by-id neighborId neighbors)]
     (fact (count neighbors) => 1)
-    (fact neighbor => (contains {:propertyId "p2"
+    (fact neighbor => (contains {:propertyId "12312312341200"
                                  :owner {:name "n2"
                                          :businessID nil
                                          :nameOfDeceased nil

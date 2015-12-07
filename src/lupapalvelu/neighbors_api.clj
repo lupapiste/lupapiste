@@ -6,6 +6,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn-> fn->> dissoc-in] :as util]
             [sade.core :refer [ok fail now]]
+            [sade.validators :as v]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.action :refer [defcommand defquery defraw update-application] :as action]
             [lupapalvelu.application-utils :refer [location->object]]
@@ -32,16 +33,14 @@
       (= "email-sent" (->> statuses  (remove #(= "reminder-sent" (:state %))) last :state)))
     false))
 
-(defn- params->neighbor [{:keys [propertyId name street city zip email type nameOfDeceased businessID]}]
-  {:propertyId propertyId
-   :owner      {:type type
-                :name  name
-                :email (user/canonize-email email)
-                :businessID businessID
-                :nameOfDeceased nameOfDeceased
-                :address {:street street
-                          :city   city
-                          :zip    zip}}})
+(defn- params->neighbor [{:keys [propertyId email] :as params}]
+  {:pre [(every? #(or (string? %) (nil? %)) (vals params))]}
+  (util/deep-merge domain/neighbor-skeleton
+    {:propertyId propertyId
+     :owner      (merge
+                   (select-keys params [:type :name :businessID :nameOfDeceased])
+                   {:email (user/canonize-email email)
+                    :address (select-keys params [:street :city :zip])})}))
 
 (defn- params->new-neighbor [params]
   (merge
@@ -50,9 +49,15 @@
      :status [{:state :open
                :created (now)}]}))
 
+(defn- valid-neighbor? [m]
+  (and (map? m) (every? #(or (string? %) (nil? %)) (vals m)) (v/kiinteistotunnus? (:propertyId m))))
+
 (defcommand neighbor-add
   {:parameters [id]
    :user-roles #{:authority}
+   :input-validators [(fn [command]
+                        (when-not (valid-neighbor? (:data command))
+                          (fail :error.invalid-type)))]
    :states states/all-application-states-but-draft-or-terminal}
   [command]
   (let [new-neighbor (params->new-neighbor (:data command))]
@@ -60,12 +65,12 @@
     (ok :neighborId (:id new-neighbor))))
 
 (defcommand neighbor-add-owners
-  {:parameters [id propertyId owners]
-   :input-validators [(partial action/property-id-parameters [:propertyId])]
+  {:parameters [id owners]
+   :input-validators [(partial action/vector-parameter-of :owners valid-neighbor?)]
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
   [command]
-  (let [new-neighbors (mapv #(params->new-neighbor (assoc % :propertyId propertyId)) owners)]
+  (let [new-neighbors (map params->new-neighbor owners)]
     (update-application command {$push {:neighbors {$each new-neighbors}}})
     (ok)))
 

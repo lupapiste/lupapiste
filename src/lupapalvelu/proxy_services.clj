@@ -145,9 +145,9 @@
         coords (ss/replace wkt wdk-type-pattern "")
         features (case type
                    "POINT" (let [[x y] (ss/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
-                             (if-not (ss/numeric? radius)
-                               (wfs/property-info-by-point x y)
-                               (wfs/property-info-by-radius x y radius)))
+                             (if (and (ss/numeric? radius) (> (Long/parseLong radius) 10))
+                               (wfs/property-info-by-radius x y radius)
+                               (wfs/property-info-by-point x y)))
                    "LINESTRING" (wfs/property-info-by-line (ss/split (ss/replace coords #"[\(\)]" "") #","))
                    "POLYGON" (let [outterring (first (ss/split coords #"\)" 1))] ;;; pudotetaan reiat pois
                                (wfs/property-info-by-polygon (ss/split (ss/replace outterring #"[\(\)]" "") #",")))
