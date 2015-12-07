@@ -682,10 +682,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildSelect(subSchema, model, path) {
     var myPath = path.join(".");
     var select = document.createElement("select");
-    // Set default value of "muutostapa" field to "Lisays" when adding a new huoneisto.
-    if (subSchema.name === "muutostapa" && _.isEmpty(_.keys(model))) {
-      model[subSchema.name] = {value: "lis\u00e4ys"};
-    }
 
     $(select).prop("disabled", getModelDisabled(model, subSchema.name));
 
