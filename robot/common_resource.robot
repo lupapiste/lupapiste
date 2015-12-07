@@ -1037,6 +1037,22 @@ Mock query error
   [Arguments]  ${name}
   Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', responseText: {"ok":false, "text":"error.unknown"}});
 
+Mock command
+  [Arguments]  ${name}  ${jsonResponse}
+  Execute Javascript  $.mockjax({url:'/api/command/${name}', type: 'POST', dataType:'json', responseText: ${jsonResponse}});
+
+Mock datatcommandables error
+  [Arguments]  ${name}
+  Execute Javascript  $.mockjax({url:'/api/command/${name}', type: 'POST', dataType:'json', responseText: {"ok":false, "text":"error.unknown"}});
+
+Mock datatables
+  [Arguments]  ${name}  ${jsonResponse}
+  Execute Javascript  $.mockjax({url:'/api/datatables/${name}', type: 'POST', dataType:'json', responseText: ${jsonResponse}});
+
+Mock datatables error
+  [Arguments]  ${name}
+  Execute Javascript  $.mockjax({url:'/api/datatables/${name}', type: 'POST', dataType:'json', responseText: {"ok":false, "text":"error.unknown"}});
+
 Mock proxy
   [Arguments]  ${name}  ${jsonResponse}
   Execute Javascript  $.mockjax({url:'/proxy/${name}', dataType:'json', responseText: ${jsonResponse}});
