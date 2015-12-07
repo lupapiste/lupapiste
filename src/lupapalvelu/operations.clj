@@ -204,6 +204,7 @@
 (def- applicant-doc-schema-name-R          "hakija-r")
 (def- applicant-doc-schema-name-YA         "hakija-ya")
 (def- applicant-doc-schema-name-ilmoittaja "ilmoittaja")
+(def- applicant-doc-schema-name-hakija-KT  "hakija-kt")
 
 
 (def- uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
@@ -920,30 +921,33 @@
 (def- kt-operations
   {:kiinteistonmuodostus         {:schema "kiinteistonmuodostus"
                                   :permit-type permit/KT
-                                  :applicant-doc-schema applicant-doc-schema-name-hakija
+                                  :applicant-doc-schema applicant-doc-schema-name-hakija-KT
                                   :optional #{"secondary-kiinteistot"}
                                   :required common-maanmittaus-schemas
                                   :attachments []
                                   :add-operation-allowed true
                                   :min-outgoing-link-permits 0
+                                  :max-outgoing-link-permits 0
                                   :asianhallinta true}
    :rasitetoimitus                {:schema "rasitetoimitus"
                                    :permit-type permit/KT
-                                   :applicant-doc-schema applicant-doc-schema-name-hakija
+                                   :applicant-doc-schema applicant-doc-schema-name-hakija-KT
                                    :optional #{"secondary-kiinteistot"}
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed true
                                    :min-outgoing-link-permits 0
+                                   :max-outgoing-link-permits 0
                                    :asianhallinta true}
    :rajankaynti                  {:schema "rajankaynti"
                                   :permit-type permit/KT
-                                  :applicant-doc-schema applicant-doc-schema-name-hakija
+                                  :applicant-doc-schema applicant-doc-schema-name-hakija-KT
                                   :optional #{"secondary-kiinteistot"}
                                   :required common-maanmittaus-schemas
                                   :attachments []
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0
+                                  :max-outgoing-link-permits 0
                                   :asianhallinta true}
    })
 
