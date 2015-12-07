@@ -1,2 +1,0 @@
-help.neighbors.map.p1: Valitse naapurit piirtämällä kartalle. Monikulmion piirto loppuu kaksoisklikkaamaalla.
-help.neighbors.map.p2: Maanmittauslaitos asettaa rajoituksia haettavan alueen koolle. Jos haku ei onnistu, kokeile eri kokoista tai muotoista aluetta, tai valitse kiinteistöt piste kerrallaan.
