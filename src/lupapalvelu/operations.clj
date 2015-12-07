@@ -183,6 +183,8 @@
 ; Mappings to schemas and attachments are currently random.
 
 (def- common-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"])
+(def- mini-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka-ilman-ilmoitusta" "suunnittelija"])
+
 (def- common-rakval-schemas-with-rakennusjate
   (if (env/feature? :rakennusjateilmoitus)
     (conj common-rakval-schemas "rakennusjatesuunnitelma")
@@ -439,7 +441,7 @@
                                  :schema-data [[["kaytto" "kayttotarkoitus"] usages/yhden-asunnon-talot]
                                                [["huoneistot" "0" "huoneistonumero"] "000"]
                                                [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
-                                 :required common-rakval-schemas-with-rakennusjate 
+                                 :required common-rakval-schemas-with-rakennusjate
                                  :attachments uuden_rakennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -726,7 +728,8 @@
    :kaivuu                      {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
+                                 :required mini-rakval-schemas
+                                 :optional #{"paasuunnittelija"}
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -734,7 +737,8 @@
    :puun-kaataminen             {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
+                                 :required mini-rakval-schemas
+                                 :optional #{"paasuunnittelija"}
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -742,7 +746,8 @@
    :tontin-jarjestelymuutos     {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required  common-rakval-schemas
+                                 :required mini-rakval-schemas
+                                 :optional #{"paasuunnittelija"}
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -750,7 +755,8 @@
    :muu-maisema-toimenpide      {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required  common-rakval-schemas
+                                 :required mini-rakval-schemas
+                                 :optional #{"paasuunnittelija"}
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -758,7 +764,8 @@
    :tontin-ajoliittyman-muutos  {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required  common-rakval-schemas
+                                 :required mini-rakval-schemas
+                                 :optional #{"paasuunnittelija"}
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -766,7 +773,8 @@
    :paikoutysjarjestus-muutos   {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required  common-rakval-schemas
+                                 :required mini-rakval-schemas
+                                 :optional #{"paasuunnittelija"}
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -774,7 +782,8 @@
    :kortteli-yht-alue-muutos    {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required  common-rakval-schemas
+                                 :required mini-rakval-schemas
+                                 :optional #{"paasuunnittelija"}
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -782,7 +791,8 @@
    :muu-tontti-tai-kort-muutos  {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required  common-rakval-schemas
+                                 :required mini-rakval-schemas
+                                 :optional #{"paasuunnittelija"}
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -839,7 +849,8 @@
    :rak-valm-tyo                {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
+                                 :required mini-rakval-schemas
+                                 :optional #{"paasuunnittelija"}
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0

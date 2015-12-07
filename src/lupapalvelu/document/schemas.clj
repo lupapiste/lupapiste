@@ -1508,6 +1508,13 @@
            :type :location}
     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
 
+   {:info {:name "rakennuspaikka-ilman-ilmoitusta"
+           :approvable true
+           :i18name "rakennuspaikka"
+           :order 2
+           :type :location}
+    :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hankkeestaIlmoitettu")}
+
    {:info {:name "kiinteisto"
            :approvable true
            :order 2
