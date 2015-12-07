@@ -221,7 +221,7 @@
   (let [schema (schemas/get-schema (:schema-version application) schema-name)
         document (new-doc application schema created updates)
         has-same-domument (seq (filter (util/fn-> :schema-info :name (= schema-name)) (:documents application)))]
-    (when (and has-same-domument (not (:repeating (:info schema)))) (fail! :illegal-schema))
+    (when (and has-same-domument (not (:repeating (:info schema)))) (fail! :error.non-repeating-schema))
     (update-application command {$push {:documents document}
                                  $set  {:modified created}})
     document))
