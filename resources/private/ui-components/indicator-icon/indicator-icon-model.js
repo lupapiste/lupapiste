@@ -5,7 +5,8 @@ LUPAPISTE.IndicatorIconModel = function() {
   self.showIndicator = ko.observable().extend({notify: "always"});
   self.indicatorStyle = ko.observable("neutral");
   var message = ko.observable("");
-  var timerId;
+  var waitTimerId;
+  var showTimerId;
 
   self.iconStyle = ko.pureComputed(function() {
     if (self.indicatorStyle() === "positive") {
@@ -29,24 +30,30 @@ LUPAPISTE.IndicatorIconModel = function() {
   });
 
   self.showIndicator.subscribe(function(val) {
-    if (self.indicatorStyle() === "negative" && timerId) {
+    if (self.indicatorStyle() === "negative" && showTimerId) {
       // stop timer if indicator was set negative during positive indicator hide was delayed
-      clearTimeout(timerId);
-      timerId = undefined;
+      clearTimeout(showTimerId);
+      showTimerId = undefined;
     } else if (val) {
       // automatically hide indicator
-      timerId = _.delay(function() {
+      showTimerId = _.delay(function() {
         self.showIndicator(false);
-        timerId = undefined;
+        showTimerId = undefined;
       }, 2000);
     }
   });
 
-  hub.subscribe("indicator-icon", 
-    _.throttle( function(e) {
-      message(e.message);
-      self.indicatorStyle(e.style);
-      self.showIndicator(true);
-    }, 10000)
-  );
+  hub.subscribe("indicator-icon", function(e) {
+    if (e.clear) {
+      clearTimeout(waitTimerId);
+      waitTimerId = undefined;
+    } else if(!waitTimerId) {
+      waitTimerId = _.delay( function(e) {
+        message(e.message);
+        self.indicatorStyle(e.style);
+        self.showIndicator(true);
+        waitTimerId = undefined;
+      }, 7500, e);
+    }
+  });
 };

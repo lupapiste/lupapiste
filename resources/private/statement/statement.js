@@ -126,6 +126,7 @@
             updateModifyId(self);
             pageutil.openApplicationPage({id: applicationId}, "statement");
             repository.load(applicationId);
+            hub.send("indicator-icon", {clear: true});
             hub.send("indicator", {style: "positive"});
             return false;
           })
