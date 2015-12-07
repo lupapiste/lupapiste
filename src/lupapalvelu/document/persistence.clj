@@ -8,6 +8,7 @@
             [sade.strings :as ss]
             [lupapalvelu.action :refer [update-application application->command] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.company :as company]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.model :as model]
@@ -216,15 +217,31 @@
      (when (model/has-errors? post-results) (fail! :document-would-be-in-error-after-update :results post-results))
      document)))
 
+(defn can-add-schema? [{info :info :as schema} application]
+  (let [schema-name         (:name info)
+        applicant-schema    (operations/get-applicant-doc-schema-name application)
+
+        all-operation-names (->> (conj (:secondaryOperations application) (:primaryOperation application)) (map :name) set)
+        all-meta            (map operations/get-operation-metadata all-operation-names)
+        allowed-schemas     (-> (map (fn [m] (concat (:required m) (:optional m))) all-meta) flatten set (conj applicant-schema))
+
+        has-same-document (seq (filter (util/fn-> :schema-info :name (= schema-name)) (:documents application)))]
+    (and
+      (allowed-schemas schema-name) ; Must be defined in required or optional documents for some of the operations
+      (or
+        (= applicant-schema schema-name) ; Can always add more applicants
+        (:repeating info) ; Can add more repeating docs
+        (not has-same-document))))) ; Schema not repeating but document is valid and missing from the application
 
 (defn do-create-doc! [{created :created {schema-version :schema-version :as application} :application :as command} schema-name & [updates]]
-  (let [schema (schemas/get-schema (:schema-version application) schema-name)
-        document (new-doc application schema created updates)
-        has-same-domument (seq (filter (util/fn-> :schema-info :name (= schema-name)) (:documents application)))]
-    (when (and has-same-domument (not (:repeating (:info schema)))) (fail! :error.non-repeating-schema))
-    (update-application command {$push {:documents document}
-                                 $set  {:modified created}})
-    document))
+  (let [schema (schemas/get-schema (:schema-version application) schema-name)]
+
+    (when-not (can-add-schema? schema application) (fail! :error.non-repeating-schema))
+
+    (let [document (new-doc application schema created updates)]
+      (update-application command {$push {:documents document}
+                                  $set  {:modified created}})
+      document)))
 
 (defn- update-key-in-schema? [schema [update-key _]]
   (model/find-by-name schema update-key))
