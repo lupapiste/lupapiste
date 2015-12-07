@@ -1,7 +1,7 @@
 (ns sade.schemas
   (:require [sade.util :as util]
             [sade.validators :as validators]
-            [schema.core :as schema]))
+            [schema.core :as sc]))
 
 ;;
 ;; Util
@@ -30,29 +30,29 @@
 ;; Schemas
 ;; 
 
-(schema/defschema BlankStr
+(sc/defschema BlankStr
   "A schema for empty or nil valued string"
-  (schema/if string? (schema/pred empty?) (schema/pred nil?)))
+  (sc/if string? (sc/pred empty?) (sc/pred nil?)))
 
-(schema/defschema Email
+(sc/defschema Email
   "A simple schema for email"
-  (schema/constrained schema/Str (every-pred validators/valid-email? (max-length-constraint 255))))
+  (sc/constrained sc/Str (every-pred validators/valid-email? (max-length-constraint 255))))
 
-(schema/defschema Timestamp
+(sc/defschema Timestamp
   "A schema for timestamp"
-  schema/Int)
+  sc/Int)
 
 ;; Dynamic schema constructors
 
 (defn fixed-length-string [len]
   (dynamic-schema [:fixed-length-string len]
-                  (schema/constrained schema/Str (fixed-length-constraint len))))
+                  (sc/constrained sc/Str (fixed-length-constraint len))))
 
 (defn min-length-string [min-len]
   (dynamic-schema [:min-length-string min-len]
-                  (schema/constrained schema/Str (min-length-constraint min-len))))
+                  (sc/constrained sc/Str (min-length-constraint min-len))))
 
 (defn max-length-string [max-len]
   (dynamic-schema [:max-len-string max-len]
-                  (schema/constrained schema/Str (max-length-constraint max-len))))
+                  (sc/constrained sc/Str (max-length-constraint max-len))))
 
