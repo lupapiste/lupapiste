@@ -37,7 +37,7 @@
 
 (register-generator ssc/BlankStr blank-string)
 
-(def email (gen/such-that #(ssc/max-len-constraint 255)
+(def email (gen/such-that #((ssc/max-length-constraint 255) %)
                           (gen/fmap (fn [[name domain]] (str name "@" domain ".com"))
                                     (gen/tuple (gen/not-empty gen/string-alphanumeric)
                                                (gen/not-empty gen/string-alphanumeric)))))
