@@ -101,8 +101,8 @@
     };
 
     self.submit = function() {
-      self.submitting(true);
       clearTimeout(draftTimerId);
+      self.submitting(true);
     };
 
     self.doSubmit = ko.computed(function() {
@@ -126,7 +126,14 @@
             updateModifyId(self);
             pageutil.openApplicationPage({id: applicationId}, "statement");
             repository.load(applicationId);
+            hub.send("indicator", {style: "positive"});
             return false;
+          })
+          .error(function() {
+            hub.send("indicator", {style: "negative"});
+          })
+          .fail(function() {
+            hub.send("indicator", {style: "negative"});
           })
           .complete(function() {
             self.submitting(false);
