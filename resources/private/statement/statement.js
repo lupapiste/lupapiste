@@ -28,8 +28,11 @@
     self.selectedStatus = ko.observable();
     self.text = ko.observable();
     self.submitting = ko.observable(false);
+    self.saving = ko.observable(false);
     self.dirty = ko.observable(false);
     self.modifyId = ko.observable(util.randomElementId());
+
+    var draftTimerId = undefined;
 
     self.text.subscribe(function(value) {
       if(util.getIn(self.data(), ["text"])  !== value) { 
@@ -99,33 +102,50 @@
 
     self.submit = function() {
       self.submitting(true);
-      ajax
-        .command("give-statement", {
-          id: applicationId, 
-          "modify-id": self.modifyId(),
-          "prev-modify-id": util.getIn(self.data(), ["modify-id"], ""),
-          statementId: statementId, 
-          status: self.selectedStatus(), 
-          text: self.text(), 
-          lang: loc.getCurrentLanguage()
-        })
-        .success(function() {
-          updateModifyId(self);
-          pageutil.openApplicationPage({id: applicationId}, "statement");
-          repository.load(applicationId);
-          return false;
-        })
-        .complete(function() { self.submitting(false); })
-        .call();
-      return false;
+      clearTimeout(draftTimerId);
     };
+
+    self.doSubmit = ko.computed(function() {
+      return !self.saving() && self.submitting();
+    });
+
+    self.doSubmit.subscribe(function(doSubmit) {
+      if (doSubmit) {
+        self.saving(true);
+        ajax
+          .command("give-statement", {
+            id: applicationId, 
+            "modify-id": self.modifyId(),
+            "prev-modify-id": util.getIn(self.data(), ["modify-id"], ""),
+            statementId: statementId, 
+            status: self.selectedStatus(), 
+            text: self.text(), 
+            lang: loc.getCurrentLanguage()
+          })
+          .success(function() {
+            updateModifyId(self);
+            pageutil.openApplicationPage({id: applicationId}, "statement");
+            repository.load(applicationId);
+            return false;
+          })
+          .complete(function() {
+            self.submitting(false);
+            self.saving(false);
+          })
+          .call();
+      }
+    });
 
     self.disabled = ko.computed(function() {
       return !self.selectedStatus() || !self.text() || self.submitting();
+      return !self.selectedStatus() || !self.text();
     });    
 
     self.dirty.subscribe(function(dirty) {
-      dirty && (_.debounce(_.partial(updateDraft, self), 2000))();
+      clearTimeout(draftTimerId);
+      if (dirty) {
+        draftTimerId = _.delay(_.partial(updateDraft, self), 2000);
+      }
     });
 
     self.canDeleteStatement = function() {
@@ -142,7 +162,7 @@
 
   function updateDraft(self) {
     if (self.dirty()) {
-      self.submitting(true);
+      self.saving(true);
       self.dirty(false);
       ajax
         .command("save-statement-as-draft", {
@@ -159,13 +179,13 @@
           hub.send("indicator-icon", {style: "positive"});
           return false;
         })
-        .complete(function() { self.submitting(false); })
         .error(function() {
           hub.send("indicator-icon", {style: "negative"});
         })
         .fail(function() {
           hub.send("indicator-icon", {style: "negative"});
         })
+        .complete(function() { self.saving(false); })
         .call();
     }
     return false;
