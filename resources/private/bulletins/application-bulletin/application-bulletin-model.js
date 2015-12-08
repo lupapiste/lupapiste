@@ -72,7 +72,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   });
 
   self.showCommenting = ko.pureComputed(function() {
-    return self.canCommentCurrentBulletin() && self.selectedTab() !== "instructions";
+    return self.canCommentCurrentBulletin();
   });
 
   var id = self.bulletin.subscribe(function(bulletin) {
