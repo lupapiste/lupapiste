@@ -119,6 +119,7 @@
                           <th data-bind="ltext: 'application.statement.desc'"></th>
                           <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
                           <th data-bind="ltext: 'application.statement.requested'"></th>
+                          <th data-bind="ltext: 'application.statement.maaraaika'"></th>
                           <th data-bind="ltext: 'application.statement.given'"></th>
                           <th data-bind="ltext: 'application.statement.status'"></th>
                       </tr>
@@ -135,6 +136,7 @@
                           </td>
                           <td data-bind="text: person.name"></td>
                           <td data-bind="dateString: requested"></td>
+                          <td data-bind="dateString: $data.dueDate"></td>
                           <td data-bind="dateString: given"></td>
                           <td data-bind="text: status() && loc(['statement', status()]), attr: {'data-test-name' : person.name}"></td>
                       </tr>
