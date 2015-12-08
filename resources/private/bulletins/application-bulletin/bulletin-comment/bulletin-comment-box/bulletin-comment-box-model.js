@@ -9,7 +9,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   self.attachments = ko.observableArray([]);
   self.pending = ko.observable(false);
   self.filePending = ko.observable(false);
-  
+
   self.basicCommentFields = {
     comment: ko.observable(),
     email: ko.observable().extend({email: true}),
@@ -90,7 +90,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     if (event.status === "success") {
       self.basicCommentFields.comment("");
       self.attachments([]);
-      hub.send("indicator", {style: "positive", message: "bulletin.comment.save.success"});
+      hub.send("indicator", {style: "positive", message: "bulletin.comment.save.success", sticky: true});
     } else {
       hub.send("indicator", {style: "negative", message: "bulletin.comment.save.failed"});
     }
