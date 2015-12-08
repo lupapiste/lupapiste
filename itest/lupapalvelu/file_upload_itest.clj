@@ -6,8 +6,10 @@
 (facts "Upload and remove attachment for a bulletin comment"
   (let [store        (atom {})
         cookie-store (doto (->cookie-store store)
-                       (.addCookie test-db-cookie))]
+                       (.addCookie test-db-cookie))
+        upload-resp  (-> (send-file cookie-store)
+                         :body
+                         (json/decode keyword))]
 
-    (fact "Upload file"
-      (let [upload-resp (send-file cookie-store)]
-        (json/decode (:body upload-resp) keyword) => ok?))))
+    (fact "Uploaded file is ok"
+      upload-resp => ok?)))
