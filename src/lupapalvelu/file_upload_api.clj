@@ -1,6 +1,7 @@
 (ns lupapalvelu.file-upload-api
   (:require [noir.core :refer [defpage]]
             [noir.response :as resp]
+            [lupapalvelu.action :refer [defcommand]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.vetuma :as vetuma]))
@@ -20,3 +21,15 @@
       (resp/json)
       (resp/content-type "text/plain")
       (resp/status 200))))
+
+(defn- validate-attachment-id
+  [_]
+  )
+
+(defcommand remove-uploaded-file
+  {:parameters [attachmentId]
+   :input-validators [validate-attachment-id]
+   :user-roles #{:anonymous}}
+  [_]
+  (println "REMOVING FILE" attachmentId)
+  )
