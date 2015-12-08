@@ -20,16 +20,21 @@
      (map #(apply (constructors (first %)) (rest %)))
      (zipmap (vals schemas)))))
 
-(defn generators []
-  (merge (create-dynamic-schema-generators) @static-schema-generators))
+(defn generators
+  ([] (generators {}))
+  ([custom-generators] (merge (create-dynamic-schema-generators) 
+                              @static-schema-generators
+                              custom-generators)))
 
 (defn generate
-  ([schema]          (generate schema {}))
-  ([schema wrappers] (sg/generate schema (generators) wrappers)))
+  ([schema]                          (generate schema {}))
+  ([schema leaf-generators]          (generate schema leaf-generators {}))
+  ([schema leaf-generators wrappers] (sg/generate schema (generators leaf-generators) wrappers)))
 
 (defn generator
-  ([schema]          (generator schema {}))
-  ([schema wrappers] (sg/generator schema (generators) wrappers)))
+  ([schema]                          (generator schema {}))
+  ([schema leaf-generators]          (generator schema leaf-generators {}))
+  ([schema leaf-generators wrappers] (sg/generator schema (generators leaf-generators) wrappers)))
 
 ;; Custom static schema generators
 
