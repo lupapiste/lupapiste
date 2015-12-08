@@ -102,8 +102,10 @@
    :user-authz-roles #{:statementGiver}}
   [_])
 
-(defn- request-statement-model [{{:keys [saateText dueDate]} :data} _ __]
-  {:saateText saateText
+(defn- request-statement-model [{{:keys [saateText dueDate]} :data app :application} _ recipient]
+  {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
+   :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
+   :saateText saateText
    :dueDate (util/to-local-date dueDate)})
 
 (notifications/defemail :request-statement
