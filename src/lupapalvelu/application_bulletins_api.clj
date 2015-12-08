@@ -15,7 +15,8 @@
             [monger.operators :refer :all]
             [lupapalvelu.states :as states]
             [lupapalvelu.application-search :refer [make-text-query dir]]
-            [lupapalvelu.vetuma :as vetuma]))
+            [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.permit :as permit]))
 
 (def bulletin-page-size 10)
 
@@ -323,3 +324,9 @@
   [{:keys [application user] :as command}]
   (lupapalvelu.attachment/output-attachment attachmentId true
                                             (partial bulletins/get-bulletin-comment-attachment-file-as user)))
+
+(defquery "publish-bulletin-enabled"
+  {:parameters [id]
+   :feature    :publish-bulletin
+   :user-roles #{:authority :applicant}
+   :pre-checks [(permit/validate-permit-type-is permit/YL permit/YM permit/VVVL)]})
