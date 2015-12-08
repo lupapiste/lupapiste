@@ -1,6 +1,7 @@
 (ns lupapalvelu.file-upload-api
   (:require [noir.core :refer [defpage]]
             [noir.response :as resp]
+            [sade.core :refer :all]
             [lupapalvelu.action :refer [defcommand]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime]
@@ -23,8 +24,10 @@
       (resp/status 200))))
 
 (defn- validate-attachment-id
-  [_]
-  )
+  [{{attachment-id :attachmentId} :data}]
+  (let [file-found? (mongo/any? :fs.files {:_id attachment-id "metadata.sessionId" (vetuma/session-id)})]
+    (when-not file-found?
+      (fail :error.attachment.not-found))))
 
 (defcommand remove-uploaded-file
   {:parameters [attachmentId]
