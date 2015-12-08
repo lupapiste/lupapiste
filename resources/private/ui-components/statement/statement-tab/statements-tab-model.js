@@ -95,10 +95,35 @@ LUPAPISTE.StatementsTabModel = function(params) {
     }
   })();
 
-  self.openStatement = function(model) {
-    pageutil.openPage("statement", self.application.id() + "/" + model.id());
+
+  // TODO: This is a copy from statement.js, will remove this duplication when moving this to a separate knockout component.
+  var deleteStatementFromServer = function(statementId) {
+    ajax
+      .command("delete-statement", {id: self.application.id(), statementId: statementId})
+      .success(function() {
+        repository.load(self.application.id());
+//        pageutil.openApplicationPage({id: applicationId}, "statement");
+        return false;
+      })
+      .call();
     return false;
+  }
+
+  self.statementActions = {
+    openStatement: function(model) {
+      pageutil.openPage("statement", self.application.id() + "/" + model.id());
+      return false;
+    },
+    openDeleteDialog: function(model) {
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+          loc("statement.delete.header"),
+          loc("statement.delete.message"),
+          {title: loc("yes"), fn: _.partial(deleteStatementFromServer, model.id())},
+          {title: loc("no")}
+      );
+    }
   };
+
 
   // TODO: Kopio applications.js:sta. -> Tee neighborsista uusi oma komponentti, ja siirra tama sinne.
   self.neighborActions = {
