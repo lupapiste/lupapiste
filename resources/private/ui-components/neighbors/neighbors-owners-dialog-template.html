@@ -4,7 +4,7 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="neighbors-owners-dialog-template">
       <div class="content">
-        <div>
+        <div data-bind="if: !readonly || status() !== 3">
           <h2 data-bind="text: loc(['neighbors.owners.status', status()])"></h2>
           <img data-bind="visible: isSearching" src="/img/ajax-loader-16.gif" alt="" width="16" height="16"/>
         </div>
@@ -16,7 +16,9 @@
           <table class="application-neighbors property-owners" data-bind="if: $data.owners.length">
             <thead>
               <tr>
+                <!-- ko ifnot: $component.readonly -->
                 <th><input class="form-input" type="checkbox" data-test-id="select-all-owners" data-bind="checked: $data.ownersGroup" /></th>
+                <!-- /ko -->
                 <th data-bind="ltext: 'neighbors.owner'"></th>
                 <th data-bind="ltext: 'neighbors.owner.address'"></th>
                 <th data-bind="ltext: 'neighbors.owner.type'"></th>
@@ -24,9 +26,11 @@
             </thead>
             <tbody data-bind="foreach: {data: $data.owners, afterRender: function() {$(window).trigger('resize');}}">
               <tr>
+                <!-- ko ifnot: $component.readonly -->
                 <td>
                   <input class="form-input" type="checkbox" data-bind="value: $index, checked: selected, attr: {'data-test-id' : 'select-owner-' + $index()}" />
                 </td>
+                <!-- /ko -->
                 <td>
                   <!-- ko if: nameOfDeceased -->
                   <span data-bind="text: nameOfDeceased" class="owner-nameOfDeceased"></span>
