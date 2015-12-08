@@ -4,9 +4,9 @@
             [schema.core :as sc]))
 
 (facts max-length-constraint
-  (fact (sc/check (sc/pred (max-len-constraint 1)) []) => nil)
-  (fact (sc/check (sc/pred (max-len-constraint 1)) [1]) => nil)
-  (fact (sc/check (sc/pred (max-len-constraint 1)) [1 2]) =not=> nil))
+  (fact (sc/check (sc/pred (max-length-constraint 1)) []) => nil)
+  (fact (sc/check (sc/pred (max-length-constraint 1)) [1]) => nil)
+  (fact (sc/check (sc/pred (max-length-constraint 1)) [1 2]) =not=> nil))
 
 (facts max-length-string
   (fact (sc/check (max-length-string 1) "a") => nil)
