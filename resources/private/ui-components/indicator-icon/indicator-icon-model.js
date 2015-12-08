@@ -34,12 +34,13 @@ LUPAPISTE.IndicatorIconModel = function() {
       // stop timer if indicator was set negative during positive indicator hide was delayed
       clearTimeout(showTimerId);
       showTimerId = undefined;
-    } else if (val) {
-      // automatically hide indicator
+    } 
+    if (val) {
+      // automatically hide indicator, negative after 10 sec else 2 sec.
       showTimerId = _.delay(function() {
         self.showIndicator(false);
         showTimerId = undefined;
-      }, 2000);
+      }, self.indicatorStyle() === "negative" ? 10000 : 2000);
     }
   });
 
@@ -47,6 +48,12 @@ LUPAPISTE.IndicatorIconModel = function() {
     if (e.clear) {
       clearTimeout(waitTimerId);
       waitTimerId = undefined;
+    } else if(e.style === "negative") {
+      clearTimeout(waitTimerId);
+      waitTimerId = undefined;
+      message(e.message);
+      self.indicatorStyle(e.style);
+      self.showIndicator(true);
     } else if(!waitTimerId) {
       waitTimerId = _.delay( function(e) {
         message(e.message);
