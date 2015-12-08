@@ -15,8 +15,8 @@
       <button class="attachment-delete inline-block"
               data-bind="ltext: 'statement.delete',
                          click: $root.statementModel.openDeleteDialog,
-                         visible: canDeleteStatement(),
-                         enable: canDeleteStatement()"
+                         visible: $root.authorization.ok('delete-statement'),
+                         enable: $root.authorization.ok('delete-statement')"
               data-test-id="delete-statement">Poista lausunto</button>
       <div data-bind="with: application">
         <a class="btn secondary inline-block"
