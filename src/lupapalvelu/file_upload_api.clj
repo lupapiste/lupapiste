@@ -41,5 +41,5 @@
    :user-roles #{:anonymous}}
   [_]
   (if (mongo/remove-many :fs.files {:_id attachmentId "metadata.sessionId" (vetuma/session-id)})
-    (ok)
+    (ok :attachmentId attachmentId)
     (fail :error.file-upload.removing-file-failed)))
