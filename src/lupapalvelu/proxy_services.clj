@@ -131,20 +131,31 @@
   (let [{municipality :municipality} (:params request)
         capabilities (wfs/getcapabilities request)
         layers (wfs/capabilities-to-layers capabilities)
-        ]
+		k (keyword municipality)
+	    ]
+	(let [trimble (env/value :trimble-kaavamaaraykset k :url)]
     (if layers
       (resp/json
         (if (nil? municipality)
           (map create-layer-object (map wfs/layer-to-name layers))
+		  (if (nil? trimble)
+		  
           (filter
             #(= (re-find #"^\d+" (:wmsName %)) municipality)
             (map create-layer-object (map wfs/layer-to-name layers)))
+			
+		   (conj 
+          (filter
+            #(= (re-find #"^\d+" (:wmsName %)) municipality)
+            (map create-layer-object (map wfs/layer-to-name layers)))
+			{"wmsName" (format "%s_asemakaavaindeksiTrimble" municipality)})
+			)
           )
         )
-      (resp/status 503 "Service temporarily unavailable"))))
+      (resp/status 503 "Service temporarily unavailable")))))
 
 (defn plan-urls-by-point-proxy [{{:keys [x y municipality]} :params}]
-  (if (and (coord/valid-x? x) (coord/valid-y? y) (ss/numeric? municipality))
+  (if (and (coord/valid-x? x) (coord/valid-y? y) )
     (let [response (wfs/plan-info-by-point x y municipality)
           k (keyword municipality)
           gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]

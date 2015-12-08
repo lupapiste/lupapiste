@@ -94,7 +94,7 @@
 (str "" (apply str x) "," (apply str y) " " (apply str (str (+ (util/->double (str x)) 0.01))) "," (apply str (str (+ (util/->double y) 0.01))) ) )
 
 
-; tm35fin to trimble wfs coordifate system using params from properties file
+; tm35fin to trimble wfs coordinate system using params from properties file
 
 (defn trimble-kaavamaaraykset-muunnax [x y municipality]
 (let [k (keyword municipality)]
@@ -332,13 +332,30 @@
       :failure (do (errorf data "wfs failure: url=%s" url) nil)
       :ok      (let [features (-> data
                                 (->features sxml/startparse-sax-no-doctype "UTF-8"))]
-				 (let [muukaavatunnus (first(xml-> features :gml:featureMember :akaava:Kaava :akaava:muuKaavatunnus text))]
+				 (let [muukaavatunnus (first(xml-> features :gml:featureMember :akaava:Kaava :akaava:muuKaavatunnus text))
+				 kaavatunnus (first(xml-> features :gml:featureMember :akaava:Kaava :akaava:kaavatunnus text))
+				 arkistotunnus (first(xml-> features :gml:featureMember :akaava:Kaava :akaava:arkistotunnus text))
+				 kaavanimi1 (first(xml-> features :gml:featureMember :akaava:Kaava :akaava:kaavanimi1 text))
+				 hyvaksyja (first(xml-> features :gml:featureMember :akaava:Kaava :akaava:hyvaksyja text))
+				 hyvaksymispvm (first(xml-> features :gml:featureMember :akaava:Kaava :akaava:hyvaksymispvm text))
+				 kaavanvaihe (first(xml-> features :gml:featureMember :akaava:Kaava :akaava:kaavanvaihe text))
+				 kaavatyyppi (first(xml-> features :gml:featureMember :akaava:Kaava :akaava:kaavatyyppi text))
+				 ]
+				 [
+				 {"Kaavatunnus" (str kaavatunnus)
+				 "Arkistotunnus" (str arkistotunnus)
+				 "Nimi" (str kaavanimi1)
+				 "Hyv." (str hyvaksyja)
+				 "Pvm." (str hyvaksymispvm)
+				 "Vaihe" (str kaavanvaihe)
+				 "Tyyppi" (str kaavatyyppi)
+				 },
 				 (for [maarays (xml-> features :gml:featureMember :akaava:Kaava :akaava:yhteisetkaavamaaraykset :akaava:Kaavamaarays)] 
 				 { 
 				 :pic (format picurltemplate muukaavatunnus (first(xml-> maarays :akaava:tunnus text)))
 				 :desc (first(xml-> maarays :akaava:maaraysteksti_primaari text))
 				 }
-				 ))))))
+				 )])))))
 
 ;;
 
