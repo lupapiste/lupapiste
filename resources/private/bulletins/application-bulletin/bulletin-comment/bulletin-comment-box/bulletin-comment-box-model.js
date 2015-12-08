@@ -65,7 +65,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
 
   self.removeAttachment = function(attachment) {
     //self.attachments.remove(attachment);
-    hub.send("fileuploadService::removeFile");
+    hub.send("fileuploadService::removeFile", {attachmentId: attachment.id});
   };
 
   self.sendComment = function() {
