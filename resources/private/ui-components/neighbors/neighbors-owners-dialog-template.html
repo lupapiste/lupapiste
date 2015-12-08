@@ -56,11 +56,16 @@
           </table>
         </div>
       </div>
+      <!-- ko ifnot: $component.readonly -->
       <div data-bind="component: {name: 'submit-button-group',
                                   params: { isSubmitVisible: true,
                                             isSubmitEnabled: isSubmitEnabled,
                                             submit: addSelectedOwners,
                                             lSubmitTitle: 'save'}}"></div>
+      <!-- /ko -->
+      <!-- ko if: $component.readonly -->
+      <div data-bind="component: {name: 'ok-button-group'}"></div>
+      <!-- /ko -->
     </script>
   </section>
 </body>
