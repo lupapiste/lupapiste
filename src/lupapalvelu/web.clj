@@ -427,8 +427,8 @@
 ;;
 
 (defpage [:post "/api/upload/attachment"]
-  {:keys [applicationId attachmentId attachmentType operationId text upload typeSelector targetId targetType locked authority] :as data}
-  (infof "upload: %s: %s type=[%s] op=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType operationId typeSelector locked authority)
+  {:keys [applicationId attachmentId attachmentType operationId text upload typeSelector targetId targetType locked] :as data}
+  (infof "upload: %s: %s type=[%s] op=[%s] selector=[%s], locked=%s" data upload attachmentType operationId typeSelector locked)
   (let [request (request/ring-request)
         target (when-not (every? s/blank? [targetId targetType])
                  (if (s/blank? targetId)
@@ -442,7 +442,6 @@
                       :attachmentId attachmentId
                       :target target
                       :locked (java.lang.Boolean/parseBoolean locked)
-                      :authority (java.lang.Boolean/parseBoolean authority)
                       :text text
                       :op operation)
         attachment-type (attachment/parse-attachment-type attachmentType)
