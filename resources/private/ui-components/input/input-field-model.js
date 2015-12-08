@@ -11,6 +11,7 @@ LUPAPISTE.InputFieldModel = function(params) {
   self.value = params.value;
   self.placeholder = params.lPlaceholder ? loc(params.lPlaceholder) : params.placeholder;
   self.isSelected = params.hasFocus || ko.observable();
+  self.maxlength = params.maxlength || 5000;
 
   self.required = params.required || false;
   if (self.required) {
