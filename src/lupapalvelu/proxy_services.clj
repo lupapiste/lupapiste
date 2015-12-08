@@ -251,29 +251,25 @@
         muni-layers (municipality-layer-objects municipality)
         muni-bases (->> muni-layers (map :id) (filter number?) set)
         capabilities (wfs/get-our-capabilities)
-		trimble (env/value :trimble-kaavamaaraykset (keyword municipality) :url)
+        trimble (env/value :trimble-kaavamaaraykset (keyword municipality) :url)
         layers (or (wfs/capabilities-to-layers capabilities) [])
         layers (if (nil? municipality)
-          (map create-layer-object (map wfs/layer-to-name layers))
-		  (if (nil? trimble)
-		  
-          (filter
-            #(= (re-find #"^\d+" (:wmsName %)) municipality)
-            (map create-layer-object (map wfs/layer-to-name layers)))
-			
-		   (conj 
-          (filter
-            #(= (re-find #"^\d+" (:wmsName %)) municipality)
-            (map create-layer-object (map wfs/layer-to-name layers)))
-			{"wmsName" (format "%s_asemakaavaindeksiTrimble" municipality)})
-			)
-			)
+                 (map create-layer-object (map wfs/layer-to-name layers))
+                 (if (nil? trimble)
+                   (filter
+                     #(= (re-find #"^\d+" (:wmsName %)) municipality)
+                     (map create-layer-object (map wfs/layer-to-name layers)))
+                   (conj
+                     (filter
+                       #(= (re-find #"^\d+" (:wmsName %)) municipality)
+                       (map create-layer-object (map wfs/layer-to-name layers)))
+                     {"wmsName" (format "%s_asemakaavaindeksiTrimble" municipality)})))
         layers (filter (fn [{id :id}]
                          (not-any? #(= id %) muni-bases)) layers)
         result (concat layers muni-layers)]
     (if (not-empty result)
-      (resp/json result)
-)))
+      (resp/json result))))
+
 ;; The value of "municipality" is "liiteri" when searching from Liiteri and municipality code when searching from municipalities.
 (defn plan-urls-by-point-proxy [{{:keys [x y municipality]} :params}]
   (let [municipality (trim municipality)]
